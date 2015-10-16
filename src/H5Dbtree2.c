@@ -25,7 +25,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -1293,9 +1293,9 @@ H5D_bt2_idx_iterate_cb(const void *_record, void *_udata)
 {
     H5D_bt2_it_ud_t *udata = (H5D_bt2_it_ud_t *)_udata; /* User data */
     unsigned u;		        /* Local index variable */
-    int ret_value;              /* Return value */
+    int ret_value =-1;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Compose generic chunk record for callback */
     if(udata->filtered) { /* filtered record */
@@ -1319,8 +1319,9 @@ H5D_bt2_idx_iterate_cb(const void *_record, void *_udata)
 
     /* Make "generic chunk" callback */
     if((ret_value = (udata->cb)(&udata->chunk_rec, udata->udata)) < 0)
-        HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
+        HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, (-1), "failure in generic chunk iterator callback");
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_bt2_idx_iterate_cb() */
 
@@ -1380,7 +1381,7 @@ H5D_bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 
     /* Iterate over the records in the v2 B-tree */
     if((ret_value = H5B2_iterate(bt2, idx_info->dxpl_id, H5D_bt2_idx_iterate_cb, &udata)) < 0)
-	HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over v2 B-tree for dataset chunks");
+        HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over v2 B-tree for dataset chunks");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1743,7 +1744,7 @@ H5D_bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     H5B2_t *bt2_cdset = NULL;		/* Pointer to v2 B-tree structure */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(idx_info);

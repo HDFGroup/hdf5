@@ -23,7 +23,7 @@
 *
 *************************************************************/
 
-#define H5D_PACKAGE    /*suppress error about including H5Dpkg    */
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
 
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5D_TESTING

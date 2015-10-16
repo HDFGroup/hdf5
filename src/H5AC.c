@@ -31,12 +31,10 @@
 /* Module Setup */
 /****************/
 
-#define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
-#define H5C_PACKAGE            /*suppress error about including H5Cpkg  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#include "H5ACmodule.h"         /* This source code file is part of the H5AC module */
+#define H5C_FRIEND		        /* Suppress error about including H5Cpkg	        */
+#define H5F_FRIEND		        /* Suppress error about including H5Fpkg	        */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5AC_init_interface
 
 /***********/
 /* Headers */
@@ -74,6 +72,9 @@ static herr_t H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr,
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 
 /*****************************/
@@ -140,7 +141,6 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
  * Purpose:	Initialize the interface from some other layer.
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
@@ -151,7 +151,7 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
 herr_t
 H5AC_init(void)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
     /* FUNC_ENTER() does all the work */
@@ -162,7 +162,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5AC_init_interface
+ * Function:	H5AC__init_package
  *
  * Purpose:	Initialize interface-specific information
  *
@@ -173,8 +173,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5AC_init_interface(void)
+herr_t
+H5AC__init_package(void)
 {
 #ifdef H5_HAVE_PARALLEL
     H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
@@ -182,7 +182,7 @@ H5AC_init_interface(void)
 #endif /* H5_HAVE_PARALLEL */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
 #ifdef H5_HAVE_PARALLEL
     /* Sanity check */
@@ -229,17 +229,16 @@ H5AC_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5AC_init_interface() */
+} /* end H5AC__init_package() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5AC_term_interface
+ * Function:	H5AC_term_package
  *
  * Purpose:	Terminate this interface.
  *
  * Return:	Success:	Positive if anything was done that might
  *				affect other interfaces; zero otherwise.
- *
  * 		Failure:	Negative.
  *
  * Programmer:	Quincey Koziol
@@ -248,13 +247,13 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5AC_term_interface(void)
+H5AC_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5_PKG_INIT_VAR) {
 #ifdef H5_HAVE_PARALLEL
         if(H5AC_dxpl_id > 0 || H5AC_ind_dxpl_id > 0) {
             /* Indicate more work to do */
@@ -263,30 +262,20 @@ H5AC_term_interface(void)
             /* Close H5AC dxpl */
             if(H5I_dec_ref(H5AC_dxpl_id) < 0 || H5I_dec_ref(H5AC_ind_dxpl_id) < 0)
                 H5E_clear_stack(NULL); /*ignore error*/
-            else {
-                /* Reset static IDs */
-                H5AC_dxpl_id = (-1);
-                H5AC_ind_dxpl_id = (-1);
-
-                /* Reset interface initialization flag */
-                H5_interface_initialize_g = 0;
-            } /* end else */
         } /* end if */
-        else {
 #endif /* H5_HAVE_PARALLEL */
-            /* Reset static IDs */
-            H5AC_dxpl_id = (-1);
-            H5AC_ind_dxpl_id = (-1);
-#ifdef H5_HAVE_PARALLEL
-        } /* end else */
-#endif /* H5_HAVE_PARALLEL */
+            
+        /* Reset static IDs */
+        H5AC_dxpl_id = (-1);
+        H5AC_ind_dxpl_id = (-1);
 
         /* Reset interface initialization flag */
-        H5_interface_initialize_g = 0;
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5AC_term_interface() */
+} /* end H5AC_term_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -1251,7 +1240,7 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     void *		thing;          /* Pointer to native data structure for entry */
     hbool_t log_enabled;                /* TRUE if logging was set up */
     hbool_t curr_logging;               /* TRUE if currently logging */
-    void *		ret_value;      /* Return value */
+    void *		ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

@@ -27,7 +27,7 @@
 /* Module Setup */
 /****************/
 
-#define H5FD_PACKAGE        /* Suppress error about including H5FDpkg       */
+#include "H5FDmodule.h"         /* This source code file is part of the H5FD module */
 #define H5FD_TESTING		/* Suppress warning about H5FD testing funcs    */
 
 

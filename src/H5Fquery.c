@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
 
 
 /***********/
@@ -991,7 +991,7 @@ done:
 haddr_t
 H5F_get_eoa(const H5F_t *f, H5FD_mem_t type)
 {
-    haddr_t	ret_value;
+    haddr_t	ret_value = HADDR_UNDEF;        /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 

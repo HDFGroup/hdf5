@@ -20,7 +20,7 @@
  *        the H5FA package.  Source files outside the H5FA package should
  *        include H5FAprivate.h instead.
  */
-#if !(defined(H5FA_PACKAGE) | defined(H5FA_MODULE))
+#if !(defined(H5FA_FRIEND) | defined(H5FA_MODULE))
 #error "Do not include this file outside the H5FA package!"
 #endif
 
@@ -42,16 +42,6 @@
 /* Define this to display debugging information for the Fixed Array layer */
 /* #define H5FA_DEBUG */
 
-
-/* If this package header is being included in one of the H5FA modules, define
- *      the proper control macros for the generic FUNC_ENTER/LEAVE and error
- *      reporting macros.
- */
-#ifdef H5FA_MODULE
-#define H5_MY_PKG       H5FA
-#define H5_MY_PKG_ERR   H5E_FARRAY
-#define H5_MY_PKG_INIT  NO
-#endif /* H5FA_MODULE */
 
 /* Fill value for fixed array test class */
 #ifdef H5FA_TESTING

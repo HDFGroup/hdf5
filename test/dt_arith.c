@@ -45,7 +45,7 @@
 
 /* Alignment test stuff */
 #ifdef TEST_ALIGNMENT
-#define H5T_PACKAGE
+#define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
 #include "H5Tpkg.h"
 #endif
 #define SET_ALIGNMENT(TYPE,VAL) \
@@ -645,11 +645,18 @@ test_hard_query(void)
     }
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
 
     return 0;
 
- error:
+error:
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
     return 1;
 }
@@ -871,7 +878,11 @@ error:
     if(saved_buf2)
         HDfree(saved_buf2);
 
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5(); /*print statistics*/
+
     return MAX((int)fails_this_test, 1);
 }
 
@@ -1290,6 +1301,10 @@ test_derived_flt(void)
     } /* end if */
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
 
     return 0;
@@ -1305,7 +1320,12 @@ test_derived_flt(void)
         H5Pclose (dxpl_id);
         H5Fclose (file);
     } H5E_END_TRY;
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5(); /*print statistics*/
+
     return MAX((int)fails_this_test, 1);
 }
 
@@ -1592,6 +1612,10 @@ test_derived_integer(void)
     HDfree(saved_buf);
 
     PASSED();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
 
     return 0;
@@ -1606,7 +1630,12 @@ test_derived_integer(void)
         H5Pclose (dxpl_id);
         H5Fclose (file);
     } H5E_END_TRY;
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5(); /*print statistics*/
+
     return MAX((int)fails_this_test, 1);
 }
 
@@ -2601,7 +2630,12 @@ done:
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
     HDfflush(stdout);
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
+
     return (int)fails_all_tests;
 
 error:
@@ -2609,7 +2643,12 @@ error:
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
     HDfflush(stdout);
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
+
     return MAX((int)fails_all_tests, 1);
 }
 
@@ -3307,6 +3346,9 @@ done:
     HDassert(0 && "Should not reach this point!");
     return 1;
 #else
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
 
     /* If the source is normalized values, treat the failures as error;
@@ -3330,7 +3372,11 @@ error:
     HDassert(0 && "Should not reach this point!");
     return 1;
 #else
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
     if(run_test==TEST_NOOP || run_test==TEST_NORMAL)
         return MAX((int)fails_all_tests, 1);
     else if(run_test==TEST_DENORM || run_test==TEST_SPECIAL)
@@ -4504,6 +4550,9 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
     HDfflush(stdout);
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
 
     /* If the source is normalized floating values, treat the failures as error;
@@ -4518,6 +4567,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     if (saved) aligned_free(saved);
     if (aligned) HDfree(aligned);
     HDfflush(stdout);
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();	/*print statistics*/
 
     if(run_test==TEST_NORMAL)
@@ -5164,6 +5217,10 @@ main(void)
      *----------------------------------------------------------------------
      */
     without_hardware_g = TRUE;
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
 
     /* Test software floating-point conversion functions */
@@ -5179,7 +5236,13 @@ main(void)
     /* Test software integer-float conversion functions */
     nerrors += run_int_fp_conv("soft");
 
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
+
     reset_hdf5();
+
+    /* Restore the default error handler (set in h5_reset()) */
+    h5_restore_err();
 
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
@@ -5189,3 +5252,4 @@ main(void)
     printf("All data type tests passed.\n");
     return 0;
 }
+

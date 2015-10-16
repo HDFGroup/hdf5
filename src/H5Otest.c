@@ -23,8 +23,8 @@
 /* Module Setup */
 /****************/
 
-#define H5A_PACKAGE		/*suppress error about including H5Apkg	  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5A_FRIEND		/*suppress error about including H5Apkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
 #define H5O_TESTING		/*suppress warning about H5O testing funcs*/
 
 
@@ -99,7 +99,7 @@ H5O_is_attr_dense_test(hid_t oid)
     H5O_t *oh = NULL;           /* Object header */
     H5O_ainfo_t ainfo;          /* Attribute information for object */
     H5O_loc_t *loc;             /* Pointer to object's location */
-    htri_t ret_value;           /* Return value */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -163,9 +163,9 @@ H5O_is_attr_empty_test(hid_t oid)
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     H5O_ainfo_t ainfo;          /* Attribute information for object */
     htri_t ainfo_exists = FALSE;        /* Whether the attribute info exists in the file */
-    H5O_loc_t *loc;            /* Pointer to object's location */
+    H5O_loc_t *loc;             /* Pointer to object's location */
     hsize_t nattrs;             /* Number of attributes */
-    htri_t ret_value;           /* Return value */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

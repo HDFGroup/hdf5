@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HL_PACKAGE        /* Suppress error about including H5HLpkg */
+#include "H5HLmodule.h"         /* This source code file is part of the H5HL module */
 
 
 /***********/
@@ -231,10 +231,12 @@ END_FUNC(STATIC) /* end H5HL__fl_deserialize() */
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC_VOID(STATIC, NOERR,
-H5HL__fl_serialize(const H5HL_t *heap))
-
+static void
+H5HL__fl_serialize(const H5HL_t *heap)
+{
     H5HL_free_t *fl;                    /* Pointer to heap free list node */
+
+    FUNC_ENTER_STATIC_NOERR
 
     /* check arguments */
     HDassert(heap);
@@ -254,7 +256,9 @@ H5HL__fl_serialize(const H5HL_t *heap))
         H5F_ENCODE_LENGTH_LEN(image, fl->size, heap->sizeof_size)
     } /* end for */
 
-END_FUNC_VOID(STATIC) /* end H5HL__fl_serialize() */
+    FUNC_LEAVE_NOAPI_VOID
+
+} /* end H5HL__fl_serialize() */
 
 
 /*-------------------------------------------------------------------------
@@ -367,7 +371,7 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata,
     H5HL_prfx_t          *prfx = NULL;  /* Heap prefix deserialized */
     const uint8_t        *image = (const uint8_t *)_image;      /* Pointer into decoding buffer */
     H5HL_cache_prfx_ud_t *udata = (H5HL_cache_prfx_ud_t *)_udata;       /* User data for callback */
-    void                 *ret_value;    /* Return value */
+    void                 *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -744,7 +748,7 @@ H5HL__cache_datablock_deserialize(const void *image, size_t len, void *_udata,
 {
     H5HL_dblk_t          *dblk = NULL;  /* Local heap data block deserialized */
     H5HL_cache_dblk_ud_t *udata = (H5HL_cache_dblk_ud_t *)_udata; /* User data for callback */
-    void *                ret_value;    /* Return value */
+    void                 *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_STATIC
 

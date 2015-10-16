@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 /***********/
 /* Headers */
@@ -153,7 +154,7 @@ H5O_chunk_proxy_t *
 H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;        /* Proxy for protected chunk */
-    H5O_chunk_proxy_t *ret_value;               /* Return value */
+    H5O_chunk_proxy_t *ret_value = NULL;        /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, oh->cache_info.addr, NULL)
 

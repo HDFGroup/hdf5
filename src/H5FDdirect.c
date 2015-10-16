@@ -22,12 +22,8 @@
  *    buffer.  The main system support this feature is Linux.
  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC  H5FD_direct_init_interface
+#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
 
-/* For system function posix_memalign - Commented it out because copper isn't able to compile
- * this file. */
-/* #define _XOPEN_SOURCE 600 */
 
 #include "H5private.h"    /* Generic Functions      */
 #include "H5Eprivate.h"    /* Error handling        */
@@ -186,10 +182,9 @@ H5FL_DEFINE_STATIC(H5FD_direct_t);
 
 /*--------------------------------------------------------------------------
 NAME
-   H5FD_direct_init_interface -- Initialize interface-specific information
+   H5FD__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5FD_direct_init_interface()
-
+    herr_t H5FD__init_package()
 RETURNS
     Non-negative on success/Negative on failure
 DESCRIPTION
@@ -198,18 +193,18 @@ DESCRIPTION
 
 --------------------------------------------------------------------------*/
 static herr_t
-H5FD_direct_init_interface(void)
+H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(H5FD_direct_init() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize direct VFD")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_direct_init_interface() */
+} /* H5FD__init_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -240,7 +235,7 @@ H5FD_direct_init(void)
         H5FD_DIRECT_g = H5FD_register(&H5FD_direct_g,sizeof(H5FD_class_t),FALSE);
 
     /* Set return value */
-    ret_value=H5FD_DIRECT_g;
+    ret_value = H5FD_DIRECT_g;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

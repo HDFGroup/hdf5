@@ -14,11 +14,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu<slu@ncsa.uiuc.edu>
+ * Programmer:  Raymond Lu <slu@ncsa.uiuc.edu>
  *              Jan 3, 2003
  */
 
-#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+#include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -81,7 +81,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts, const un
     uint32_t reversed_fletcher; /* Possible wrong checksum value */
     uint8_t  c[4];
     uint8_t  tmp;
-    size_t   ret_value;         /* Return value */
+    size_t   ret_value = 0;     /* Return value */
 
     FUNC_ENTER_NOAPI(0)
 

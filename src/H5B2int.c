@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
+#include "H5B2module.h"         /* This source code file is part of the H5B2 module */
+
 
 /***********/
 /* Headers */
@@ -2603,7 +2604,7 @@ H5B2__protect_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, haddr_t addr, void *parent,
     uint16_t nrec, unsigned flags)
 {
     H5B2_leaf_cache_ud_t udata;         /* User-data for callback */
-    H5B2_leaf_t *ret_value;             /* Return value */
+    H5B2_leaf_t *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2733,7 +2734,7 @@ H5B2__protect_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, haddr_t addr,
     void *parent, uint16_t nrec, uint16_t depth, unsigned flags)
 {
     H5B2_internal_cache_ud_t udata;     /* User data to pass through to cache 'deserialize' callback */
-    H5B2_internal_t *ret_value;         /* Return value */
+    H5B2_internal_t *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 

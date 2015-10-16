@@ -22,7 +22,7 @@
  * This file needs to access private datatypes from the H5MP package.
  * This file also needs to access the memory pool testing code.
  */
-#define H5MP_PACKAGE
+#define H5MP_FRIEND		/*suppress error about including H5MPpkg	  */
 #define H5MP_TESTING
 #include "H5MPpkg.h"		/* Memory Pools				*/
 

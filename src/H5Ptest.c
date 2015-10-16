@@ -19,7 +19,7 @@
  * Purpose:	Generic Property Testing Functions
  */
 
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 #define H5P_TESTING		/*suppress warning about H5P testing funcs*/
 
 
@@ -60,8 +60,8 @@
 char *
 H5P_get_class_path_test(hid_t pclass_id)
 {
-    H5P_genclass_t	*pclass;    /* Property class to query */
-    char *ret_value;       /* return value */
+    H5P_genclass_t	*pclass;        /* Property class to query */
+    char *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -101,8 +101,8 @@ done:
 hid_t
 H5P_open_class_path_test(const char *path)
 {
-    H5P_genclass_t *pclass=NULL;/* Property class to query */
-    hid_t ret_value;            /* Return value */
+    H5P_genclass_t *pclass = NULL;      /* Property class to query */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

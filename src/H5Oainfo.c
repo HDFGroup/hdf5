@@ -24,8 +24,9 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5A_PACKAGE		/*suppress error about including H5Apkg	  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5A_FRIEND		/*suppress error about including H5Apkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"             /* Attributes				*/
@@ -110,7 +111,7 @@ H5O_ainfo_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *o
 {
     H5O_ainfo_t	*ainfo = NULL;  /* Attribute info */
     unsigned char flags;        /* Flags for encoding attribute info */
-    void        *ret_value;     /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -239,7 +240,7 @@ H5O_ainfo_copy(const void *_mesg, void *_dest)
 {
     const H5O_ainfo_t   *ainfo = (const H5O_ainfo_t *)_mesg;
     H5O_ainfo_t         *dest = (H5O_ainfo_t *) _dest;
-    void                *ret_value;     /* Return value */
+    void                *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -279,7 +280,7 @@ static size_t
 H5O_ainfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_ainfo_t   *ainfo = (const H5O_ainfo_t *)_mesg;
-    size_t ret_value;   /* Return value */
+    size_t ret_value = 0;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -424,7 +425,7 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 {
     H5O_ainfo_t *ainfo_src = (H5O_ainfo_t *)mesg_src;
     H5O_ainfo_t *ainfo_dst = NULL;
-    void        *ret_value;             /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

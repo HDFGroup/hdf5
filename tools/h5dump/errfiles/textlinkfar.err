@@ -1,9 +1,9 @@
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Oopen(): unable to open object
-    major: Symbol table
+    major: Object header
     minor: Can't open object
   #001: (file name) line (number) in H5O_open_name(): object not found
-    major: Symbol table
+    major: Object header
     minor: Object not found
   #002: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
@@ -24,7 +24,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Symbol table
     minor: Can't open object
   #008: (file name) line (number) in H5O_open_name(): object not found
-    major: Symbol table
+    major: Object header
     minor: Object not found
   #009: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
@@ -67,7 +67,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Symbol table
     minor: Can't open object
   #006: (file name) line (number) in H5O_open_name(): object not found
-    major: Symbol table
+    major: Object header
     minor: Object not found
   #007: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
@@ -88,7 +88,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Symbol table
     minor: Can't open object
   #013: (file name) line (number) in H5O_open_name(): object not found
-    major: Symbol table
+    major: Object header
     minor: Object not found
   #014: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
@@ -109,7 +109,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Symbol table
     minor: Can't open object
   #020: (file name) line (number) in H5O_open_name(): object not found
-    major: Symbol table
+    major: Object header
     minor: Object not found
   #021: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
@@ -130,7 +130,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Symbol table
     minor: Can't open object
   #027: (file name) line (number) in H5O_open_name(): object not found
-    major: Symbol table
+    major: Object header
     minor: Object not found
   #028: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
@@ -164,7 +164,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Symbol table
     minor: Can't open object
   #006: (file name) line (number) in H5O_open_name(): object not found
-    major: Symbol table
+    major: Object header
     minor: Object not found
   #007: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
@@ -185,7 +185,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Symbol table
     minor: Can't open object
   #013: (file name) line (number) in H5O_open_name(): object not found
-    major: Symbol table
+    major: Object header
     minor: Object not found
   #014: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
@@ -206,7 +206,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Symbol table
     minor: Can't open object
   #020: (file name) line (number) in H5O_open_name(): object not found
-    major: Symbol table
+    major: Object header
     minor: Object not found
   #021: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table
@@ -227,7 +227,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
     major: Symbol table
     minor: Can't open object
   #027: (file name) line (number) in H5O_open_name(): object not found
-    major: Symbol table
+    major: Object header
     minor: Object not found
   #028: (file name) line (number) in H5G_loc_find(): can't find object
     major: Symbol table

@@ -22,8 +22,7 @@
  *              access to small, temporary hdf5 files.
  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5FD_core_init_interface
+#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
 
 #include "H5private.h"      /* Generic Functions            */
 #include "H5Eprivate.h"     /* Error handling               */
@@ -123,26 +122,26 @@ typedef struct H5FD_core_fapl_t {
                                 (size_t)((A)+(Z))<(size_t)(A))
 
 /* Prototypes */
-static herr_t H5FD_core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end);
-static herr_t H5FD_core_destroy_dirty_list(H5FD_core_t *file);
-static herr_t H5FD_core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size);
-static herr_t H5FD_core_term(void);
-static void *H5FD_core_fapl_get(H5FD_t *_file);
-static H5FD_t *H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
+static herr_t H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end);
+static herr_t H5FD__core_destroy_dirty_list(H5FD_core_t *file);
+static herr_t H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size);
+static herr_t H5FD__core_term(void);
+static void *H5FD__core_fapl_get(H5FD_t *_file);
+static H5FD_t *H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id,
             haddr_t maxaddr);
-static herr_t H5FD_core_close(H5FD_t *_file);
-static int H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
-static herr_t H5FD_core_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t H5FD_core_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-static haddr_t H5FD_core_get_eof(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t  H5FD_core_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
-static herr_t H5FD_core_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
+static herr_t H5FD__core_close(H5FD_t *_file);
+static int H5FD__core_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
+static herr_t H5FD__core_query(const H5FD_t *_f1, unsigned long *flags);
+static haddr_t H5FD__core_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t H5FD__core_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
+static haddr_t H5FD__core_get_eof(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t  H5FD__core_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
+static herr_t H5FD__core_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
             size_t size, void *buf);
-static herr_t H5FD_core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
+static herr_t H5FD__core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
             size_t size, const void *buf);
-static herr_t H5FD_core_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
-static herr_t H5FD_core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD__core_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD__core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD_core_lock(H5FD_t *_file, hbool_t rw);
 static herr_t H5FD_core_unlock(H5FD_t *_file);
 
@@ -150,32 +149,32 @@ static const H5FD_class_t H5FD_core_g = {
     "core",                     /* name                 */
     MAXADDR,                    /* maxaddr              */
     H5F_CLOSE_WEAK,             /* fc_degree            */
-    H5FD_core_term,             /* terminate            */
+    H5FD__core_term,            /* terminate            */
     NULL,                       /* sb_size              */
     NULL,                       /* sb_encode            */
     NULL,                       /* sb_decode            */
     sizeof(H5FD_core_fapl_t),   /* fapl_size            */
-    H5FD_core_fapl_get,         /* fapl_get             */
+    H5FD__core_fapl_get,        /* fapl_get             */
     NULL,                       /* fapl_copy            */
     NULL,                       /* fapl_free            */
     0,                          /* dxpl_size            */
     NULL,                       /* dxpl_copy            */
     NULL,                       /* dxpl_free            */
-    H5FD_core_open,             /* open                 */
-    H5FD_core_close,            /* close                */
-    H5FD_core_cmp,              /* cmp                  */
-    H5FD_core_query,            /* query                */
+    H5FD__core_open,            /* open                 */
+    H5FD__core_close,           /* close                */
+    H5FD__core_cmp,             /* cmp                  */
+    H5FD__core_query,           /* query                */
     NULL,                       /* get_type_map         */
     NULL,                       /* alloc                */
     NULL,                       /* free                 */
-    H5FD_core_get_eoa,          /* get_eoa              */
-    H5FD_core_set_eoa,          /* set_eoa              */
-    H5FD_core_get_eof,          /* get_eof              */
-    H5FD_core_get_handle,       /* get_handle           */
-    H5FD_core_read,             /* read                 */
-    H5FD_core_write,            /* write                */
-    H5FD_core_flush,            /* flush                */
-    H5FD_core_truncate,         /* truncate             */
+    H5FD__core_get_eoa,         /* get_eoa              */
+    H5FD__core_set_eoa,         /* set_eoa              */
+    H5FD__core_get_eof,         /* get_eof              */
+    H5FD__core_get_handle,      /* get_handle           */
+    H5FD__core_read,            /* read                 */
+    H5FD__core_write,           /* write                */
+    H5FD__core_flush,           /* flush                */
+    H5FD__core_truncate,        /* truncate             */
     H5FD_core_lock,             /* lock                 */
     H5FD_core_unlock,           /* unlock               */
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
@@ -186,7 +185,7 @@ H5FL_DEFINE(H5FD_core_region_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_add_dirty_region
+ * Function:    H5FD__core_add_dirty_region
  *
  * Purpose:     Add a new dirty region to the list for later flushing
  *              to the backing store.
@@ -196,7 +195,7 @@ H5FL_DEFINE(H5FD_core_region_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
+H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
 {
     H5FD_core_region_t *b_item  = NULL;
     H5FD_core_region_t *a_item  = NULL;
@@ -209,7 +208,7 @@ H5FD_core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
     hbool_t     was_adjusted    = FALSE;
 #endif
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
     HDassert(file->dirty_list);
@@ -313,11 +312,11 @@ if(was_adjusted)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_add_dirty_region() */
+} /* end H5FD__core_add_dirty_region() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_destroy_dirty_list
+ * Function:    H5FD__core_destroy_dirty_list
  *
  * Purpose:     Completely destroy the dirty list.
  *
@@ -326,11 +325,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_destroy_dirty_list(H5FD_core_t *file)
+H5FD__core_destroy_dirty_list(H5FD_core_t *file)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
 
@@ -355,11 +354,11 @@ if(count != 0)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_destroy_dirty_list() */
+} /* end H5FD__core_destroy_dirty_list() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_write_to_bstore
+ * Function:    H5FD__core_write_to_bstore
  *
  * Purpose:     Write data to the backing store.
  *
@@ -367,7 +366,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t H5FD_core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
+static herr_t
+H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
 {
     unsigned char  *ptr         = file->mem + addr;     /* mutable pointer into the
                                                          * buffer (can't change mem)
@@ -423,12 +423,11 @@ fprintf(stderr, "bytes wrote: %lu\n", bytes_wrote);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5FD_core_write_to_bstore() */
+} /* end H5FD__core_write_to_bstore() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_init_interface
+ * Function:    H5FD__init_package
  *
  * Purpose:     Initializes any interface-specific data or routines.
  *
@@ -437,7 +436,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_init_interface(void)
+H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED;
 
@@ -448,7 +447,7 @@ H5FD_core_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD_core_init_interface() */
+} /* H5FD__init_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -468,23 +467,23 @@ done:
 hid_t
 H5FD_core_init(void)
 {
-    hid_t ret_value = H5FD_CORE_g;  /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     if(H5I_VFL != H5I_get_type(H5FD_CORE_g))
-        H5FD_CORE_g = H5FD_register(&H5FD_core_g,sizeof(H5FD_class_t),FALSE);
+        H5FD_CORE_g = H5FD_register(&H5FD_core_g, sizeof(H5FD_class_t), FALSE);
 
     /* Set return value */
     ret_value = H5FD_CORE_g;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_core_init() */
 
 
 /*---------------------------------------------------------------------------
- * Function:    H5FD_core_term
+ * Function:    H5FD__core_term
  *
  * Purpose:     Shut down the VFD
  *
@@ -496,15 +495,15 @@ done:
  *---------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_term(void)
+H5FD__core_term(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Reset VFL ID */
     H5FD_CORE_g = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD_core_term() */
+} /* end H5FD__core_term() */
 
 
 /*-------------------------------------------------------------------------
@@ -542,7 +541,7 @@ H5Pset_fapl_core(hid_t fapl_id, size_t increment, hbool_t backing_store)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_fapl_core() */
 
 
 /*-------------------------------------------------------------------------
@@ -581,16 +580,15 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment /*out*/, hbool_t *backing_stor
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_fapl_core() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_fapl_get
+ * Function:    H5FD__core_fapl_get
  *
  * Purpose:     Returns a copy of the file access properties.
  *
  * Return:      Success:    Ptr to new file access properties.
- *
  *              Failure:    NULL
  *
  * Programmer:  Robb Matzke
@@ -599,13 +597,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5FD_core_fapl_get(H5FD_t *_file)
+H5FD__core_fapl_get(H5FD_t *_file)
 {
     H5FD_core_t         *file = (H5FD_core_t*)_file;
     H5FD_core_fapl_t    *fa;
-    void                *ret_value;     /* Return value */
+    void                *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(NULL == (fa = (H5FD_core_fapl_t *)H5MM_calloc(sizeof(H5FD_core_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -618,18 +616,17 @@ H5FD_core_fapl_get(H5FD_t *_file)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD__core_fapl_get() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_open
+ * Function:    H5FD___core_open
  *
  * Purpose:     Create memory as an HDF5 file.
  *
  * Return:      Success:    A pointer to a new file data structure. The
  *                          public fields will be initialized by the
  *                          caller, which is always H5FD_open().
- *
  *              Failure:    NULL
  *
  * Programmer:  Robb Matzke
@@ -638,7 +635,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
+H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     int                 o_flags;
     H5FD_core_t         *file = NULL;
@@ -650,9 +647,9 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     h5_stat_t           sb;
     int                 fd = -1;
     H5FD_file_image_info_t  file_image_info;
-    H5FD_t              *ret_value;
+    H5FD_t              *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     if(!name || !*name)
@@ -867,11 +864,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_open() */
+} /* end H5FD__core_open() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_close
+ * Function:    H5FD__core_close
  *
  * Purpose:     Closes the file.
  *
@@ -883,20 +880,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_close(H5FD_t *_file)
+H5FD__core_close(H5FD_t *_file)
 {
     H5FD_core_t     *file = (H5FD_core_t*)_file;
     herr_t          ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Flush any changed buffers */
-    if(H5FD_core_flush(_file, (hid_t)-1, TRUE) < 0)
+    if(H5FD__core_flush(_file, (hid_t)-1, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush core vfd backing store")
 
     /* Destroy the dirty region list */
     if(file->dirty_list)
-        if(H5FD_core_destroy_dirty_list(file) != SUCCEED)
+        if(H5FD__core_destroy_dirty_list(file) != SUCCEED)
             HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free core vfd dirty region list")
 
     /* Release resources */
@@ -918,11 +915,11 @@ H5FD_core_close(H5FD_t *_file)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_close() */
+} /* end H5FD__core_close() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_cmp
+ * Function:    H5FD__core_cmp
  *
  * Purpose:     Compares two files belonging to this driver by name. If one
  *              file doesn't have a name then it is less than the other file.
@@ -930,7 +927,6 @@ done:
  *              address.
  *
  * Return:      Success:    A value like strcmp()
- *
  *              Failure:    never fails (arguments were checked by the
  *                          caller).
  *
@@ -940,13 +936,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
+H5FD__core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
     const H5FD_core_t   *f1 = (const H5FD_core_t*)_f1;
     const H5FD_core_t   *f2 = (const H5FD_core_t*)_f2;
     int                 ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     if(f1->fd >= 0 && f2->fd >= 0) {
         /* Compare low level file information for backing store */
@@ -997,11 +993,11 @@ H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_cmp() */
+} /* end H5FD__core_cmp() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_query
+ * Function:    H5FD__core_query
  *
  * Purpose:     Set the flags that this VFL driver is capable of supporting.
  *              (listed in H5FDpublic.h)
@@ -1014,11 +1010,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
+H5FD__core_query(const H5FD_t * _file, unsigned long *flags /* out */)
 {
     const H5FD_core_t   *file = (const H5FD_core_t*)_file;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
@@ -1036,11 +1032,11 @@ H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FD_core_query() */
+} /* end H5FD__core_query() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_get_eoa
+ * Function:    H5FD__core_get_eoa
  *
  * Purpose:     Gets the end-of-address marker for the file. The EOA marker
  *              is the first address past the last byte allocated in the
@@ -1054,18 +1050,18 @@ H5FD_core_query(const H5FD_t * _file, unsigned long *flags /* out */)
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
+H5FD__core_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_core_t   *file = (const H5FD_core_t*)_file;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(file->eoa)
-}
+} /* end H5FD__core_get_eoa() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_set_eoa
+ * Function:    H5FD__core_set_eoa
  *
  * Purpose:     Set the end-of-address marker for the file. This function is
  *              called shortly after an existing HDF5 file is opened in order
@@ -1079,12 +1075,12 @@ H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
+H5FD__core_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;
     herr_t      ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(ADDR_OVERFLOW(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "address overflow")
@@ -1093,11 +1089,11 @@ H5FD_core_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_set_eoa() */
+} /* end H5FD__core_set_eoa() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_get_eof
+ * Function:    H5FD__core_get_eof
  *
  * Purpose:     Returns the end-of-file marker, which is the greater of
  *              either the size of the underlying memory or the HDF5
@@ -1113,18 +1109,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_core_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
+H5FD__core_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_core_t   *file = (const H5FD_core_t*)_file;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     FUNC_LEAVE_NOAPI(file->eof)
-}
+} /* end H5FD__core_get_eof() */
 
 
 /*-------------------------------------------------------------------------
- * Function:       H5FD_core_get_handle
+ * Function:       H5FD__core_get_handle
  *
  * Purpose:        Gets the file handle of CORE file driver.
  *
@@ -1136,12 +1132,12 @@ H5FD_core_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
+H5FD__core_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
 {
     H5FD_core_t *file = (H5FD_core_t *)_file;   /* core VFD info */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     if(!file_handle)
@@ -1180,11 +1176,11 @@ H5FD_core_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_get_handle() */
+} /* end H5FD__core_get_handle() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_read
+ * Function:    H5FD__core_read
  *
  * Purpose:     Reads SIZE bytes of data from FILE beginning at address ADDR
  *              into buffer BUF according to data transfer properties in
@@ -1192,7 +1188,6 @@ done:
  *
  * Return:      Success:    SUCCEED. Result is stored in caller-supplied
  *                          buffer BUF.
- *
  *              Failure:    FAIL, Contents of buffer BUF are undefined.
  *
  * Programmer:  Robb Matzke
@@ -1201,13 +1196,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
+H5FD__core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
         size_t size, void *buf/*out*/)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -1243,11 +1238,11 @@ H5FD_core_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD__core_read() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_write
+ * Function:    H5FD__core_write
  *
  * Purpose:     Writes SIZE bytes of data to FILE beginning at address ADDR
  *              from buffer BUF according to data transfer properties in
@@ -1261,13 +1256,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
+H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
         size_t size, const void *buf)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;
     herr_t      ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -1313,7 +1308,8 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     if(file->dirty_list) {
         haddr_t start = addr;
         haddr_t end = addr + (haddr_t)size - 1;
-        if(H5FD_core_add_dirty_region(file, start, end) != SUCCEED)
+
+        if(H5FD__core_add_dirty_region(file, start, end) != SUCCEED)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINSERT, FAIL, "unable to add core VFD dirty region during write call - addresses: start=%llu end=%llu", start, end)
     }
 
@@ -1325,11 +1321,11 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_write() */
+} /* end H5FD__core_write() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_flush
+ * Function:    H5FD__core_flush
  *
  * Purpose:     Flushes the file to backing store if there is any and if the
  *              dirty flag is set.
@@ -1342,12 +1338,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, unsigned H5_ATTR_UNUSED closing)
+H5FD__core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, unsigned H5_ATTR_UNUSED closing)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;
     herr_t      ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Write to backing store */
     if (file->dirty && file->fd >= 0 && file->backing_store) {
@@ -1374,7 +1370,7 @@ H5FD_core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, unsigned H5_ATTR_UN
 #ifdef DER
 fprintf(stderr, "(%llu, %llu : %lu)\n", item->start, item->end, size);
 #endif
-                    if(H5FD_core_write_to_bstore(file, item->start, size) != SUCCEED)
+                    if(H5FD__core_write_to_bstore(file, item->start, size) != SUCCEED)
                         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
                 } /* end if */
 
@@ -1388,24 +1384,23 @@ if(file->eoa > file->eof)
     fprintf(stderr, "*** EOA BADNESS ***\n");
 fprintf(stderr, "\n");
 #endif
-        }
+        } /* end if */
         /* Otherwise, write the entire file out at once */
         else {
-            if(H5FD_core_write_to_bstore(file, (haddr_t)0, (size_t)file->eof) != SUCCEED)
+            if(H5FD__core_write_to_bstore(file, (haddr_t)0, (size_t)file->eof) != SUCCEED)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
-
-        } /* end while */
+        } /* end else */
 
         file->dirty = FALSE;
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD__core_flush() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_truncate
+ * Function:    H5FD__core_truncate
  *
  * Purpose:     Makes sure that the true file size is the same (or larger)
  *              than the end-of-address.
@@ -1440,13 +1435,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
+H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;
     size_t new_eof;                             /* New size of memory buffer */
     herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
 
@@ -1526,7 +1521,7 @@ fprintf(stderr, "OLD: Truncated to: %llu\n", file->eoa);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_truncate() */
+} /* end H5FD__core_truncate() */
 
 
 /*-------------------------------------------------------------------------

@@ -35,10 +35,7 @@
  *	5/18/04 - Expanded to allow registration of new types at run-time
  */
 
-#define H5I_PACKAGE		/*suppress error about including H5Ipkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5I_init_interface
+#include "H5Imodule.h"          /* This source code file is part of the H5I module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -55,7 +52,7 @@
 #ifndef H5I_DEBUG_OUTPUT
 #include "H5Gprivate.h"		/* Groups				*/
 #else /* H5I_DEBUG_OUTPUT */
-#define H5G_PACKAGE /*suppress error message about including H5Gpkg.h */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 #include "H5Gpkg.h"		/* Groups		  		*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Tprivate.h"		/* Datatypes				*/
@@ -106,6 +103,9 @@ typedef struct {
     hbool_t app_ref;            /* Whether this is an appl. ref. call */
 } H5I_clear_type_ud_t;
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 /*-------------------- Locally scoped variables -----------------------------*/
 
 /* Array of pointers to atomic types */
@@ -141,29 +141,8 @@ static herr_t H5I__debug(H5I_type_t type);
 #endif /* H5I_DEBUG_OUTPUT */
 
 
-/*--------------------------------------------------------------------------
-NAME
-   H5I_init_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5I_init_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
---------------------------------------------------------------------------*/
-static herr_t
-H5I_init_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5I_init_interface() */
-
-
 /*-------------------------------------------------------------------------
- * Function:	H5I_term_interface
+ * Function:	H5I_term_package
  *
  * Purpose:	Terminate the H5I interface: release all memory, reset all
  *		global variables to initial values. This only happens if all
@@ -179,20 +158,20 @@ H5I_init_interface(void)
  *-------------------------------------------------------------------------
  */
 int
-H5I_term_interface(void)
+H5I_term_package(void)
 {
-    H5I_id_type_t	*type_ptr;
-    H5I_type_t		type;
-    int		n = 0;
+    int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5_PKG_INIT_VAR) {
+        H5I_id_type_t *type_ptr;        /* Pointer to ID type */
+        H5I_type_t type;                /* Type of ID */
+
         /* How many types are still being used? */
-        for(type = (H5I_type_t)0; type < H5I_next_type; H5_INC_ENUM(H5I_type_t, type)) {
+        for(type = (H5I_type_t)0; type < H5I_next_type; H5_INC_ENUM(H5I_type_t, type))
             if((type_ptr = H5I_id_type_list_g[type]) && type_ptr->ids)
                 n++;
-        } /* end for */
 
         /* If no types are used then clean up */
         if(0 == n) {
@@ -202,16 +181,18 @@ H5I_term_interface(void)
                     HDassert(NULL == type_ptr->ids);
                     type_ptr = H5FL_FREE(H5I_id_type_t, type_ptr);
                     H5I_id_type_list_g[type] = NULL;
+                    n++;
                 } /* end if */
             } /* end for */
-        } /* end if */
 
-        /* Mark interface closed */
-        H5_interface_initialize_g = 0;
+            /* Mark interface closed */
+            if(0 == n)
+                H5_PKG_INIT_VAR = FALSE;
+        } /* end if */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5I_term_interface() */
+} /* end H5I_term_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -238,9 +219,9 @@ H5I_term_interface(void)
 H5I_type_t
 H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free_t free_func)
 {
-    H5I_class_t *cls = NULL;    /* New ID class */
-    H5I_type_t new_type;        /* New ID type value */
-    H5I_type_t ret_value;       /* Return value */
+    H5I_class_t *cls = NULL;            /* New ID class */
+    H5I_type_t new_type;                /* New ID type value */
+    H5I_type_t ret_value = H5I_BADID;   /* Return value */
 
     FUNC_ENTER_API(H5I_BADID)
     H5TRACE3("It", "zIux", hash_size, reserved, free_func);
@@ -290,10 +271,9 @@ H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free_t free_func)
 
 done:
     /* Clean up on error */
-    if(ret_value < 0) {
+    if(ret_value < 0)
         if(cls)
             cls = H5FL_FREE(H5I_class_t, cls);
-    } /* end if */
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Iregister_type() */
@@ -467,8 +447,8 @@ done:
 int64_t
 H5I_nmembers(H5I_type_t type)
 {
-    H5I_id_type_t	*type_ptr = NULL;
-    int64_t		    ret_value;
+    H5I_id_type_t *type_ptr;            /* Pointer to the ID type */
+    int64_t ret_value = 0;              /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -504,7 +484,7 @@ done:
 herr_t
 H5Iclear_type(H5I_type_t type, hbool_t force)
 {
-    herr_t ret_value;                      /* Return value */
+    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "Itb", type, force);
@@ -625,7 +605,6 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
         } /* end if */
     } /* end if */
 
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I__clear_type_cb() */
 
@@ -649,7 +628,7 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
 herr_t
 H5Idestroy_type(H5I_type_t type)
 {
-    herr_t ret_value;           /* Return value */
+    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "It", type);
@@ -731,7 +710,7 @@ done:
 hid_t
 H5Iregister(H5I_type_t type, const void *object)
 {
-    hid_t ret_value;                      /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "It*x", type, object);
@@ -895,8 +874,8 @@ done:
 void *
 H5I_subst(hid_t id, const void *new_object)
 {
-    H5I_id_info_t	*id_ptr;	/* Ptr to the atom	*/
-    void		*ret_value;	/* Return value		*/
+    H5I_id_info_t *id_ptr;      /* Pointer to the atom */
+    void *ret_value = NULL;	/* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -935,7 +914,7 @@ H5I_object(hid_t id)
     H5I_id_info_t	*id_ptr;		/*ptr to the new atom	*/
     void		*ret_value = NULL;	/*return value		*/
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* General lookup of the ID */
     if(NULL != (id_ptr = H5I__find_id(id))) {
@@ -944,7 +923,6 @@ H5I_object(hid_t id)
         ret_value = (void *)id_ptr->obj_ptr;
     } /* end if */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end if */
 
@@ -969,7 +947,7 @@ done:
 void *
 H5Iobject_verify(hid_t id, H5I_type_t id_type)
 {
-    void * ret_value;                      /* Return value */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_API(NULL)
     H5TRACE2("*x", "iIt", id, id_type);
@@ -1008,7 +986,7 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
     H5I_id_info_t	*id_ptr = NULL;		/*ptr to the new atom	*/
     void		*ret_value = NULL;	/*return value		*/
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(id_type >= 1 && id_type < H5I_next_type);
 
@@ -1019,7 +997,6 @@ H5I_object_verify(hid_t id, H5I_type_t id_type)
         ret_value = (void *)id_ptr->obj_ptr;
     } /* end if */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5I_object_verify() */
 
@@ -1043,16 +1020,15 @@ done:
 H5I_type_t
 H5I_get_type(hid_t id)
 {
-    H5I_type_t		ret_value = H5I_BADID;
+    H5I_type_t ret_value = H5I_BADID;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_BADID)
+    FUNC_ENTER_NOAPI_NOERR
 
     if(id > 0)
         ret_value = H5I_TYPE(id);
 
     HDassert(ret_value >= H5I_BADID && ret_value < H5I_next_type);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_type() */
 
@@ -1075,7 +1051,7 @@ done:
 H5I_type_t
 H5Iget_type(hid_t id)
 {
-    H5I_type_t		ret_value = H5I_BADID;          /* Return value */
+    H5I_type_t ret_value = H5I_BADID;   /* Return value */
 
     FUNC_ENTER_API(H5I_BADID)
     H5TRACE1("It", "i", id);
@@ -1110,7 +1086,7 @@ done:
 void *
 H5Iremove_verify(hid_t id, H5I_type_t id_type)
 {
-    void * ret_value;                      /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_API(NULL)
     H5TRACE2("*x", "iIt", id, id_type);
@@ -1177,8 +1153,8 @@ H5I__remove_verify(hid_t id, H5I_type_t id_type)
 static void *
 H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
 {
-    H5I_id_info_t	*curr_id;	/*ptr to the current atom	*/
-    void *	        ret_value;	/*return value			*/
+    H5I_id_info_t *curr_id;	/* Pointer to the current atom */
+    void *ret_value = NULL;	/* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1218,9 +1194,9 @@ done:
 void *
 H5I_remove(hid_t id)
 {
-    H5I_id_type_t	*type_ptr;	/*ptr to the atomic type	*/
-    H5I_type_t		type;		/*atom's atomic type		*/
-    void *	        ret_value;	/*return value			*/
+    H5I_id_type_t	*type_ptr;	        /* Pointer to the atomic type */
+    H5I_type_t		type;		        /* Atom's atomic type */
+    void *	        ret_value = NULL;	/* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1259,7 +1235,7 @@ done:
 int
 H5Idec_ref(hid_t id)
 {
-    int ret_value;                      /* Return value */
+    int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("Is", "i", id);
@@ -1297,8 +1273,8 @@ done:
 int
 H5I_dec_ref(hid_t id)
 {
-    H5I_id_info_t	*id_ptr;	/*ptr to the new ID	*/
-    int ret_value;                      /* Return value */
+    H5I_id_info_t *id_ptr;      /* Pointer to the new ID */
+    int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1367,8 +1343,8 @@ done:
 int
 H5I_dec_app_ref(hid_t id)
 {
-    H5I_id_info_t	*id_ptr;	/*ptr to the new ID	*/
-    int ret_value;                      /* Return value */
+    H5I_id_info_t *id_ptr;      /* Pointer to the new ID */
+    int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1415,7 +1391,7 @@ done:
 int
 H5I_dec_app_ref_always_close(hid_t id)
 {
-    int ret_value;                      /* Return value */
+    int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1493,8 +1469,8 @@ done:
 int
 H5I_inc_ref(hid_t id, hbool_t app_ref)
 {
-    H5I_id_info_t	*id_ptr;	/*ptr to the ID		*/
-    int ret_value;                      /* Return value */
+    H5I_id_info_t *id_ptr;      /* Pointer to the ID */
+    int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1568,8 +1544,8 @@ done:
 int
 H5I_get_ref(hid_t id, hbool_t app_ref)
 {
-    H5I_id_info_t	*id_ptr;	/*ptr to the ID		*/
-    int ret_value;                      /* Return value */
+    H5I_id_info_t *id_ptr;      /* Pointer to the ID */
+    int ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1643,8 +1619,8 @@ done:
 static int
 H5I__inc_type_ref(H5I_type_t type)
 {
-    H5I_id_type_t	*type_ptr;	/* ptr to the type	*/
-    int ret_value;                      /* Return value */
+    H5I_id_type_t *type_ptr;    /* Pointer to the type */
+    int ret_value = -1;         /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1727,8 +1703,8 @@ done:
 herr_t
 H5I_dec_type_ref(H5I_type_t type)
 {
-    H5I_id_type_t	*type_ptr;      /* Pointer to the ID type */
-    herr_t		ret_value;      /* Return value */
+    H5I_id_type_t *type_ptr;    /* Pointer to the ID type */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1816,7 +1792,7 @@ static int
 H5I__get_type_ref(H5I_type_t type)
 {
     H5I_id_type_t	*type_ptr;	/*ptr to the type	*/
-    int ret_value;                      /* Return value */
+    int ret_value = -1;                 /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1894,7 +1870,7 @@ static int
 H5I__search_cb(void *obj, hid_t id, void *_udata)
 {
     H5I_search_ud_t *udata = (H5I_search_ud_t *)_udata; /* User data for callback */
-    int ret_value;     /* Callback return value */
+    int ret_value = -1;         /* Callback return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2082,7 +2058,7 @@ H5I__find_id(hid_t id)
 {
     H5I_type_t		type;			/*ID's type		*/
     H5I_id_type_t	*type_ptr;		/*ptr to the type	*/
-    H5I_id_info_t	*ret_value;		/*return value		*/
+    H5I_id_info_t	*ret_value = NULL;	/* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2199,7 +2175,7 @@ hid_t
 H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
 {
     H5I_type_t type;            /* ID type */
-    hid_t ret_value;            /* Return value */
+    hid_t ret_value = H5I_INVALID_HID;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

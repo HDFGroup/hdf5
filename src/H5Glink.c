@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#include "H5Gmodule.h"          /* This source code file is part of the H5G module */
 
 
 /***********/
@@ -159,7 +159,7 @@ H5G_link_cmp_name_dec(const void *lnk1, const void *lnk2)
 static int
 H5G_link_cmp_corder_inc(const void *lnk1, const void *lnk2)
 {
-    int ret_value;              /* Return value */
+    int ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -194,7 +194,7 @@ H5G_link_cmp_corder_inc(const void *lnk1, const void *lnk2)
 static int
 H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2)
 {
-    int ret_value;              /* Return value */
+    int ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

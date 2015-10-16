@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
+
 
 /***********/
 /* Headers */
@@ -216,7 +217,7 @@ htri_t
 H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request, H5HF_free_section_t **node)
 {
     htri_t node_found = FALSE;  /* Whether an existing free list node was found */
-    htri_t ret_value;           /* Return value */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

@@ -21,7 +21,7 @@
  *		the H5S package.  Source files outside the H5S package should
  *		include H5Sprivate.h instead.
  */
-#ifndef H5S_PACKAGE
+#if !(defined H5S_FRIEND || defined H5S_MODULE)
 #error "Do not include this file outside the H5S package!"
 #endif
 

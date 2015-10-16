@@ -22,8 +22,8 @@
 #ifndef _CACHE_COMMON_H
 #define _CACHE_COMMON_H
 
-#define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
-#define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
+#define H5C_FRIEND		/*suppress error about including H5Cpkg   */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 
 /* Include library header files */
 #include "H5ACprivate.h"

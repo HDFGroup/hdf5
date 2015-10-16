@@ -97,7 +97,7 @@
 /* Module Setup */
 /****************/
 
-#define H5B_PACKAGE		/*suppress error about including H5Bpkg	  */
+#include "H5Bmodule.h"          /* This source code file is part of the H5B module */
 
 
 /***********/
@@ -164,6 +164,9 @@ static H5B_t * H5B__copy(const H5B_t *old_bt);
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Declare a free list to manage the haddr_t sequence information */
 H5FL_SEQ_DEFINE(haddr_t);
@@ -308,7 +311,7 @@ H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *u
     H5B_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
     unsigned    idx = 0, lt = 0, rt;    /* Final, left & right key indices */
     int	        cmp = 1;                /* Key comparison value */
-    htri_t	ret_value;              /* Return value */
+    htri_t	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1216,7 +1219,7 @@ herr_t
 H5B_iterate(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     H5B_operator_t op, void *udata)
 {
-    herr_t		ret_value;      /* Return value */
+    herr_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -1713,7 +1716,7 @@ H5B_shared_new(const H5F_t *f, const H5B_class_t *type, size_t sizeof_rkey)
 {
     H5B_shared_t *shared = NULL;        /* New shared B-tree struct */
     size_t	u;                      /* Local index variable */
-    H5B_shared_t *ret_value;            /* Return value */
+    H5B_shared_t *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1821,7 +1824,7 @@ H5B__copy(const H5B_t *old_bt)
 {
     H5B_t		*new_node = NULL;
     H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
-    H5B_t		*ret_value;
+    H5B_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_STATIC
 

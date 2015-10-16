@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HL_PACKAGE        /* Suppress error about including H5HLpkg */
+#include "H5HLmodule.h"         /* This source code file is part of the H5HL module */
 
 
 /***********/
@@ -124,7 +124,7 @@ END_FUNC(PKG) /* end H5HL__new() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5HL__inc_rc
+ * Function:	H5HL__inc_rc
  *
  * Purpose:     Increment ref. count on heap
  *
@@ -149,7 +149,11 @@ END_FUNC(PKG) /* end H5HL__inc_rc() */
 
 
 /*-------------------------------------------------------------------------
+<<<<<<< .working
  * Function:    H5HL__dec_rc
+=======
+ * Function:	H5HL__dec_rc
+>>>>>>> .merge-right.r27768
  *
  * Purpose:     Decrement ref. count on heap
  *
@@ -280,3 +284,4 @@ CATCH
     /* No special processing on errors */
 
 END_FUNC(PKG) /* end H5HL__destroy_flush_depend() */
+

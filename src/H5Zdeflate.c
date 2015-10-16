@@ -18,7 +18,7 @@
  *              Friday, August 27, 1999
  */
 
-#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+#include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -77,7 +77,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 {
     void	*outbuf = NULL;         /* Pointer to new buffer */
     int		status;                 /* Status from zlib operation */
-    size_t	ret_value;              /* Return value */
+    size_t	ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI(0)
 

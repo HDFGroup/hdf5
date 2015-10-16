@@ -26,7 +26,7 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
 
 
 /* Packages needed by this file... */
@@ -92,7 +92,7 @@ H5F_efc_t *
 H5F_efc_create(unsigned max_nfiles)
 {
     H5F_efc_t   *efc = NULL;            /* EFC object */
-    H5F_efc_t   *ret_value;             /* Return value */
+    H5F_efc_t   *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

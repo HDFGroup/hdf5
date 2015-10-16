@@ -29,8 +29,8 @@
 /* Module Setup */
 /****************/
 
-#define H5A_PACKAGE		/*suppress error about including H5Apkg  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg  */
+#include "H5Amodule.h"          /* This source code file is part of the H5A module */
+#define H5O_FRIEND		/*suppress error about including H5Opkg  */
 
 
 /***********/
@@ -1180,7 +1180,7 @@ H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
     H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
     H5B2_t *bt2 = NULL;                 /* v2 B-tree handle for index */
     haddr_t bt2_addr;                   /* Address of v2 B-tree to use for lookup */
-    herr_t ret_value;                   /* Return value */
+    herr_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1736,7 +1736,7 @@ H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     htri_t attr_sharable;               /* Flag indicating attributes are sharable */
     htri_t ret_value = TRUE;            /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /*
      * Check arguments.

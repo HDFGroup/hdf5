@@ -19,7 +19,7 @@
  *		the bytes are in little-endian order.
  */
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
+#include "H5Tmodule.h"          /* This source code file is part of the H5T module */
 
 
 #include "H5private.h"		/*generic functions			  */
@@ -261,7 +261,7 @@ H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size)
 {
     uint64_t	val = 0;
     size_t	i, hs;
-    uint64_t	ret_value;      /* Return value */
+    uint64_t	ret_value = 0;  /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 

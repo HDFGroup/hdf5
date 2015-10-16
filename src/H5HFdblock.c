@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
+
 
 /***********/
 /* Headers */
@@ -447,7 +448,7 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
 {
     H5HF_direct_t *dblock;      /* Direct block from cache */
     H5HF_dblock_cache_ud_t udata;	/* parent and other infor for deserializing direct block */
-    H5HF_direct_t *ret_value;   /* Return value */
+    H5HF_direct_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

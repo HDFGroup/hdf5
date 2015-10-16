@@ -29,11 +29,9 @@
 /* Module Setup */
 /****************/
 
-#define H5AC_PACKAGE            /*suppress error about including H5ACpkg  */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#include "H5ACmodule.h"         /* This source code file is part of the H5AC module */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5AC__init_mpio_interface
 
 /***********/
 /* Headers */
@@ -134,33 +132,6 @@ H5FL_DEFINE(H5AC_aux_t);
 /* Declare a free list to manage the H5AC_slist_entry_t struct */
 H5FL_DEFINE_STATIC(H5AC_slist_entry_t);
 
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC__init_mpio_interface
- *
- * Purpose:     Initialize interface-specific information
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Quincey Koziol
- *              6/20/15
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5AC__init_mpio_interface(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Funnel all work to H5AC_init() */
-    if(H5AC_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "interface initialization failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC__init_mpio_interface() */
 
 
 /*-------------------------------------------------------------------------

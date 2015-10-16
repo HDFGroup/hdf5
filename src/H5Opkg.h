@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef H5O_PACKAGE
+#if !(defined H5O_FRIEND || defined H5O_MODULE)
 #error "Do not include this file outside the H5O package!"
 #endif
 

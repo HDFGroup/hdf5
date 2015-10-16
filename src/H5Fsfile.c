@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#include "H5Fmodule.h"          /* This source code file is part of the H5F module */
 
 /* Packages needed by this file... */
 #include "H5private.h"		/* Generic Functions			*/

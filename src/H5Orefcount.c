@@ -24,7 +24,8 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -93,8 +94,8 @@ static void *
 H5O_refcount_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
-    H5O_refcount_t *refcount = NULL;  /* Reference count */
-    void        *ret_value;     /* Return value */
+    H5O_refcount_t *refcount = NULL;    /* Reference count */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -177,9 +178,9 @@ H5O_refcount_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shar
 static void *
 H5O_refcount_copy(const void *_mesg, void *_dest)
 {
-    const H5O_refcount_t   *refcount = (const H5O_refcount_t *)_mesg;
-    H5O_refcount_t         *dest = (H5O_refcount_t *) _dest;
-    void                *ret_value;     /* Return value */
+    const H5O_refcount_t    *refcount = (const H5O_refcount_t *)_mesg;
+    H5O_refcount_t          *dest = (H5O_refcount_t *) _dest;
+    void                    *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

@@ -200,8 +200,8 @@ main(int argc, char* argv[])
 	H5Eset_auto2(H5E_DEFAULT, func, NULL);
 
 
-	h5_cleanup(&FILENAME[0], fapl1);
-	h5_cleanup(&FILENAME[1], fapl2);
+	h5_clean_files(&FILENAME[0], fapl1);
+	h5_clean_files(&FILENAME[1], fapl2);
     }
     else
     {

@@ -27,7 +27,9 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
+
 
 /***********/
 /* Headers */

@@ -26,7 +26,7 @@
 /* Module Declaration */
 /**********************/
 
-#define H5FA_MODULE
+#include "H5FAmodule.h"         /* This source code file is part of the H5FA module */
 
 
 /***********************/

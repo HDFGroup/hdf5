@@ -19,7 +19,7 @@
  * Purpose:	Memory pool testing functions.
  */
 
-#define H5MP_PACKAGE		/*suppress error about including H5MPpkg  */
+#include "H5MPmodule.h"         /* This source code file is part of the H5MP module */
 #define H5MP_TESTING		/*include H5MP testing funcs*/
 
 /* Private headers */

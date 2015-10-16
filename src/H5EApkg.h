@@ -21,7 +21,7 @@
  *        the H5EA package.  Source files outside the H5EA package should
  *        include H5EAprivate.h instead.
  */
-#if !(defined(H5EA_PACKAGE) | defined(H5EA_MODULE))
+#if !(defined(H5EA_FRIEND) | defined(H5EA_MODULE))
 #error "Do not include this file outside the H5EA package!"
 #endif
 
@@ -38,16 +38,6 @@
 /**************************/
 /* Package Private Macros */
 /**************************/
-
-/* If this package header is being included in one of the H5EA modules, define
- *      the proper control macros for the generic FUNC_ENTER/LEAVE and error
- *      reporting macros.
- */
-#ifdef H5EA_MODULE
-#define H5_MY_PKG       H5EA
-#define H5_MY_PKG_ERR   H5E_EARRAY
-#define H5_MY_PKG_INIT  NO
-#endif /* H5EA_MODULE */
 
 /* Fill value for extensible array test class */
 #ifdef H5EA_TESTING

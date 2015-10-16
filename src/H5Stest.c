@@ -19,7 +19,7 @@
  * Purpose:	Dataspace selection testing functions.
  */
 
-#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
+#include "H5Smodule.h"          /* This source code file is part of the H5S module */
 #define H5S_TESTING		/*suppress warning about H5S testing funcs*/
 
 
@@ -54,7 +54,7 @@ H5S_select_shape_same_test(hid_t sid1, hid_t sid2)
 {
     H5S_t	*space1;                /* Pointer to 1st dataspace */
     H5S_t	*space2;                /* Pointer to 2nd dataspace */
-    htri_t      ret_value;              /* Return value */
+    htri_t      ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -95,7 +95,7 @@ htri_t
 H5S_get_rebuild_status_test(hid_t space_id)
 {
     H5S_t *space;               /* Pointer to 1st dataspace */
-    htri_t ret_value;           /* Return value */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

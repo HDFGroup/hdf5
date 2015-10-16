@@ -17,7 +17,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -156,7 +156,7 @@ done:
 size_t
 H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t include_compact_data)
 {
-    size_t                  ret_value;
+    size_t      ret_value = 0;          /* Return value */
 
     FUNC_ENTER_PACKAGE
 

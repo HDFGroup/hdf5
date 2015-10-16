@@ -35,7 +35,7 @@
 /* Module Setup */
 /****************/
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
+#include "H5Tmodule.h"          /* This source code file is part of the H5T module */
 
 
 /***********/

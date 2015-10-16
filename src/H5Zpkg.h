@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef H5Z_PACKAGE
+#if !(defined H5Z_FRIEND || defined H5Z_MODULE)
 #error "Do not include this file outside the H5Z package!"
 #endif
 

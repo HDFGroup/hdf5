@@ -28,8 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5MF_PACKAGE		/*suppress error about including H5MFpkg  */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#include "H5MFmodule.h"         /* This source code file is part of the H5MF module */
 
 
 /***********/
@@ -91,6 +91,9 @@ static herr_t H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 
 /*****************************/
@@ -436,7 +439,7 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, hsize_t size)
     H5P_genplist_t *dxpl = NULL;        /* DXPL for setting ring */
     H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
     H5FD_mem_t  fs_type;                /* Free space type (mapped from allocation type) */
-    haddr_t	ret_value;              /* Return value */
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
@@ -571,7 +574,7 @@ haddr_t
 H5MF_alloc_tmp(H5F_t *f, hsize_t size)
 {
     haddr_t eoa;                /* End of allocated space in the file */
-    haddr_t ret_value;          /* Return value */
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
@@ -796,7 +799,7 @@ H5MF_try_extend(H5F_t *f, hid_t dxpl_id, H5FD_mem_t alloc_type, haddr_t addr,
     H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
     haddr_t     end;            /* End of block to extend */
     H5FD_mem_t  map_type;       /* Mapped type */
-    htri_t	ret_value;      /* Return value */
+    htri_t	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5MF_ALLOC_DEBUG
@@ -1029,7 +1032,7 @@ H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     H5MF_sect_ud_t udata;               /* User data for callback */
     H5P_genplist_t *dxpl = NULL;        /* DXPL for setting ring */
     H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
-    htri_t ret_value;                   /* Return value */
+    htri_t ret_value = FAIL;                   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 #ifdef H5MF_ALLOC_DEBUG
@@ -1411,7 +1414,7 @@ H5MF_get_free_sections(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, size_t nsects, 
     H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
     H5FD_mem_t	start_type, end_type;   /* Memory types to iterate over */
     H5FD_mem_t 	ty;     		/* Memory type for iteration */
-    ssize_t 	ret_value;         	/* Return value */
+    ssize_t 	ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

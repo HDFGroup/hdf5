@@ -22,7 +22,7 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#include "H5Gmodule.h"          /* This source code file is part of the H5G module */
 
 
 /***********/
@@ -533,7 +533,7 @@ H5G__stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
     H5HL_t *heap = NULL;                        /* Local heap for group */
     H5O_stab_t stab;		                /* Info about symbol table */
     H5G_link_table_t ltable = {0, NULL};        /* Link table */
-    herr_t ret_value;                           /* Return value */
+    herr_t ret_value = FAIL;                    /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, oloc->addr, FAIL)
 
@@ -751,7 +751,7 @@ H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t 
     H5O_stab_t	stab;	        /* Info about local heap & B-tree */
     H5G_bt_it_gnbi_t udata;     /* Iteration information */
     hbool_t udata_valid = FALSE;        /* Whether iteration information is valid */
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value = -1;             /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));
@@ -874,7 +874,7 @@ H5G__stab_lookup(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     H5G_bt_lkp_t bt_udata;              /* Data to pass through B-tree	*/
     H5G_stab_fnd_ud_t udata;            /* 'User data' to give to callback */
     H5O_stab_t stab;		        /* Symbol table message		*/
-    htri_t     ret_value;       /* Return value */
+    htri_t     ret_value = FAIL;        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1191,7 +1191,7 @@ H5G__stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
 {
     H5O_stab_t		stab;	        /* Info about local heap & B-tree */
     H5G_bt_it_gtbi_t	udata;          /* User data for B-tree callback */
-    H5G_obj_t		ret_value;      /* Return value */
+    H5G_obj_t		ret_value = H5G_UNKNOWN;        /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, oloc->addr, H5G_UNKNOWN)
 

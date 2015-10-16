@@ -31,10 +31,7 @@
 /* Module Setup */
 /****************/
 
-#define H5E_PACKAGE		/*suppress error about including H5Epkg   */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5E__init_deprec_interface
+#include "H5Emodule.h"          /* This source code file is part of the H5E module */
 
 
 /***********/
@@ -81,51 +78,6 @@
 /* Local Variables */
 /*******************/
 
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5E__init_deprec_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5E__init_deprec_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5E_init() currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5E__init_deprec_interface(void)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    FUNC_LEAVE_NOAPI(H5E_init())
-} /* H5E__init_deprec_interface() */
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5E__term_deprec_interface -- Terminate interface
-USAGE
-    herr_t H5E__term_deprec_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Terminates interface.  (Just resets H5_interface_initialize_g
-    currently).
-
---------------------------------------------------------------------------*/
-herr_t
-H5E__term_deprec_interface(void)
-{
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Mark closed */
-    H5_interface_initialize_g = 0;
-
-    FUNC_LEAVE_NOAPI(0)
-} /* H5E__term_deprec_interface() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 

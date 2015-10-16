@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5B_PACKAGE		/*suppress error about including H5Bpkg	  */
+#include "H5Bmodule.h"          /* This source code file is part of the H5B module */
 
 
 /***********/

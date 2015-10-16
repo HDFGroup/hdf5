@@ -1596,10 +1596,8 @@ int main (void)
     {
         hid_t       fapl;
 
-        /* setup */
-        h5_reset();
         fapl = h5_fileaccess();
-        h5_cleanup(H5REPACK_FILENAMES, fapl);
+        h5_clean_files(H5REPACK_FILENAMES, fapl);
 
     }
 

@@ -563,7 +563,7 @@ int main(int argc, char **argv)
         TestSummary();
 
     /* Clean up test files */
-    h5_cleanup(FILENAME, fapl);
+    h5_clean_files(FILENAME, fapl);
 
     nerrors += GetTestNumErrs();
 

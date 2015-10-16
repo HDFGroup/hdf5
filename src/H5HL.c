@@ -29,7 +29,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HL_PACKAGE		/* Suppress error about including H5HLpkg */
+#include "H5HLmodule.h"         /* This source code file is part of the H5HL module */
 
 
 /***********/
@@ -71,6 +71,9 @@ static herr_t H5HL__dirty(H5HL_t *heap);
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Declare a free list to manage the H5HL_free_t struct */
 H5FL_DEFINE(H5HL_free_t);

@@ -28,11 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5FD_PACKAGE		/*suppress error about including H5FDpkg  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5FD_init_interface
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#include "H5FDmodule.h"         /* This source code file is part of the H5FD module */
 
 
 /***********/
@@ -73,6 +70,9 @@ static int H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags/*o
 /* Package Variables */
 /*********************/
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -108,53 +108,24 @@ static const H5I_class_t H5I_VFL_CLS[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_init
- *
- * Purpose:	Initialize the interface from some other package.
- *
- * Return:	Success:	non-negative
- *		Failure:	negative
- *
- * Programmer:	Quincey Koziol
- *              Thursday, January  3, 2007
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_init(void)
-{
-    herr_t ret_value = SUCCEED;   /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_init() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_init_interface
+ * Function:	H5FD__init_package
  *
  * Purpose:	Initialize the virtual file layer.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Monday, July 26, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5FD_init_interface(void)
+herr_t
+H5FD__init_package(void)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     if(H5I_register_type(H5I_VFL_CLS) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize interface")
@@ -164,11 +135,11 @@ H5FD_init_interface(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_init_interface() */
+} /* end H5FD__init_package() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_term_interface
+ * Function:	H5FD_term_package
  *
  * Purpose:	Terminate this interface: free all memory and reset global
  *		variables to their initial values.  Release all ID groups
@@ -177,40 +148,37 @@ done:
  * Return:	Success:	Positive if anything was done that might
  *				have affected other interfaces; zero
  *				otherwise.
- *
  *		Failure:        Never fails.
  *
  * Programmer:	Robb Matzke
  *              Friday, February 19, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
-H5FD_term_interface(void)
+H5FD_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5_PKG_INIT_VAR) {
 	if(H5I_nmembers(H5I_VFL) > 0) {
 	    (void)H5I_clear_type(H5I_VFL, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
         else {
             /* Destroy the VFL driver id group */
-	    (void)H5I_dec_type_ref(H5I_VFL);
-            n++; /*H5I*/
+	    n += (H5I_dec_type_ref(H5I_VFL) > 0);
 
 	    /* Mark closed */
-	    H5_interface_initialize_g = 0;
+            if(0 == n)
+                H5_PKG_INIT_VAR = FALSE;
 	} /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5FD_term_interface() */
+} /* end H5FD_term_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -218,7 +186,7 @@ H5FD_term_interface(void)
  *
  * Purpose:	Frees a file driver class struct and returns an indication of
  *		success. This function is used as the free callback for the
- *		virtual file layer object identifiers (cf H5FD_init_interface).
+ *		virtual file layer object identifiers (cf H5FD__init_package).
  *
  * Return:	Success:	Non-negative
  *
@@ -345,7 +313,7 @@ H5FD_register(const void *_cls, size_t size, hbool_t app_ref)
     const H5FD_class_t	*cls = (const H5FD_class_t *)_cls;
     H5FD_class_t	*saved = NULL;
     H5FD_mem_t		type;
-    hid_t		ret_value;
+    hid_t		ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -802,7 +770,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5P_genplist_t      *plist;                 /* Property list pointer */
     unsigned long       driver_flags = 0;       /* File-inspecific driver feature flags */
     H5FD_file_image_info_t file_image_info;     /* Initial file image */
-    H5FD_t		*ret_value;             /* Return value */
+    H5FD_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1021,7 +989,7 @@ done:
 int
 H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
-    int	ret_value;
+    int	ret_value = -1;         /* Return value */
 
     FUNC_ENTER_NOAPI(-1) /*return value is arbitrary*/
 
@@ -1434,7 +1402,7 @@ done:
 haddr_t
 H5FD_get_maxaddr(const H5FD_t *file)
 {
-    haddr_t ret_value;          /* Return value */
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
 

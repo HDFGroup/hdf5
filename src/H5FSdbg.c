@@ -28,9 +28,10 @@
 /* Module Setup */
 /****************/
 
-#define H5FS_PACKAGE            /* Suppress error about including H5FSpkg           */
-#define H5HF_DEBUGGING          /* Need access to fractal heap debugging routines   */
-#define H5MF_DEBUGGING          /* Need access to file space debugging routines     */
+#include "H5FSmodule.h"         /* This source code file is part of the H5FS module */
+#define H5HF_DEBUGGING          /* Need access to fractal heap debugging routines */
+#define H5MF_DEBUGGING          /* Need access to file space debugging routines */
+
 
 /***********/
 /* Headers */
@@ -40,6 +41,7 @@
 #include "H5FSpkg.h"        /* File free space                              */
 #include "H5HFprivate.h"    /* Fractal heaps                                */
 #include "H5MFprivate.h"    /* File memory management                       */
+
 
 /****************/
 /* Local Macros */

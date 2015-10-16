@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
+#include "H5B2module.h"         /* This source code file is part of the H5B2 module */
+
 
 /***********/
 /* Headers */
@@ -250,7 +251,7 @@ H5B2_hdr_t *
 H5B2__hdr_alloc(H5F_t *f)
 {
     H5B2_hdr_t *hdr = NULL;             /* v2 B-tree header */
-    H5B2_hdr_t *ret_value;              /* Return value */
+    H5B2_hdr_t *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -296,8 +297,8 @@ haddr_t
 H5B2__hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     void *ctx_udata, void *parent)
 {
-    H5B2_hdr_t *hdr = NULL;     /* The new v2 B-tree header information */
-    haddr_t ret_value;          /* Return value */
+    H5B2_hdr_t *hdr = NULL;             /* The new v2 B-tree header information */
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 

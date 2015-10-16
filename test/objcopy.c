@@ -28,7 +28,7 @@
  * This file needs to access private information from the H5S package.
  * This file also needs to access the dataspace testing code.
  */
-#define H5S_PACKAGE
+#define H5S_FRIEND		/*suppress error about including H5Spkg	  */
 #define H5S_TESTING
 #include "H5Spkg.h"		/* Dataspaces 				*/
 
@@ -36,7 +36,7 @@
  * This file needs to access private information from the H5P package.
  * This file also needs to access the property list testing code.
  */
-#define H5P_PACKAGE
+#define H5P_FRIEND		/*suppress error about including H5Ppkg	  */
 #define H5P_TESTING
 #include "H5Ppkg.h"		/* Property Lists 			*/
 
@@ -44,7 +44,7 @@
  * This file needs to access private information from the H5D package.
  * This file also needs to access the dataset testing code.
  */
-#define H5D_PACKAGE
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
 #define H5D_TESTING
 #include "H5Dpkg.h"		/* Datasets     			*/
 
@@ -12879,7 +12879,6 @@ main(void)
                     H5O_COPY_WITHOUT_ATTR_FLAG | H5O_COPY_PRESERVE_NULL_FLAG,
                     TRUE, "H5Ocopy(): preserve NULL messages");
         nerrors += test_copy_dataset_open(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
-
         /* Tests that do not use attributes and do not need to be tested
          * multiple times for different attribute configurations */
         if(configuration < CONFIG_DENSE) {
@@ -12935,8 +12934,7 @@ main(void)
             nerrors += test_copy_old_layout(fcpl_dst, dst_fapl);
             nerrors += test_copy_null_ref(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_iterate(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
-        }
-
+        } /* end if */
 /* TODO: not implemented
         nerrors += test_copy_mount(src_fapl);
 */

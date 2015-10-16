@@ -24,7 +24,7 @@
 /* Module Declaration */
 /**********************/
 
-#define H5EA_MODULE
+#include "H5EAmodule.h"         /* This source code file is part of the H5EA module */
 #define H5EA_TESTING
 
 

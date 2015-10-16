@@ -19,7 +19,7 @@
  * Purpose:	Tests various aspects of indexed raw data storage.
  */
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 
 #include "h5test.h"
 #include "H5private.h"

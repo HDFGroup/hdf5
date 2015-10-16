@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
 
 
 /***********/
@@ -209,7 +209,7 @@ H5HF_huge_bt2_crt_context(void *_f)
 {
     H5F_t *f = (H5F_t *)_f;     /* User data for building callback context */
     H5HF_huge_bt2_ctx_t *ctx;   /* Callback context structure */
-    void *ret_value;            /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -819,7 +819,7 @@ H5HF_huge_bt2_dir_compare(const void *_rec1, const void *_rec2)
 {
     const H5HF_huge_bt2_dir_rec_t *rec1 = (const H5HF_huge_bt2_dir_rec_t *)_rec1;
     const H5HF_huge_bt2_dir_rec_t *rec2 = (const H5HF_huge_bt2_dir_rec_t *)_rec2;
-    herr_t ret_value;           /* Return value */
+    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1044,7 +1044,7 @@ H5HF_huge_bt2_filt_dir_compare(const void *_rec1, const void *_rec2)
 {
     const H5HF_huge_bt2_filt_dir_rec_t *rec1 = (const H5HF_huge_bt2_filt_dir_rec_t *)_rec1;
     const H5HF_huge_bt2_filt_dir_rec_t *rec2 = (const H5HF_huge_bt2_filt_dir_rec_t *)_rec2;
-    herr_t ret_value;           /* Return value */
+    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

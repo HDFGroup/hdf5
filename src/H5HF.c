@@ -33,7 +33,8 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/* Suppress error about including H5HFpkg.h  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
+
 
 /***********/
 /* Headers */
@@ -67,6 +68,9 @@
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 
 /*****************************/
@@ -153,7 +157,7 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     H5HF_t *fh = NULL;          /* Pointer to new fractal heap */
     H5HF_hdr_t *hdr = NULL;     /* The fractal heap header information */
     haddr_t fh_addr;            /* Heap header address */
-    H5HF_t *ret_value;          /* Return value */
+    H5HF_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -220,7 +224,7 @@ H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
 {
     H5HF_t *fh = NULL;          /* Pointer to new fractal heap */
     H5HF_hdr_t *hdr = NULL;     /* The fractal heap header information */
-    H5HF_t *ret_value;          /* Return value */
+    H5HF_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

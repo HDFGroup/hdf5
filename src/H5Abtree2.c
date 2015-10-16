@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5A_PACKAGE		/*suppress error about including H5Apkg  */
+#include "H5Amodule.h"          /* This source code file is part of the H5A module */
 
 
 /***********/
@@ -253,7 +253,7 @@ H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
 {
     const H5A_bt2_ud_common_t *bt2_udata = (const H5A_bt2_ud_common_t *)_bt2_udata;
     const H5A_dense_bt2_name_rec_t *bt2_rec = (const H5A_dense_bt2_name_rec_t *)_bt2_rec;
-    herr_t ret_value;           /* Return value */
+    herr_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -445,7 +445,7 @@ H5A__dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec)
 {
     const H5A_bt2_ud_common_t *bt2_udata = (const H5A_bt2_ud_common_t *)_bt2_udata;
     const H5A_dense_bt2_corder_rec_t *bt2_rec = (const H5A_dense_bt2_corder_rec_t *)_bt2_rec;
-    herr_t ret_value;           /* Return value */
+    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 

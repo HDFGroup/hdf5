@@ -21,7 +21,8 @@
 /* Module Setup */
 /****************/
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	     */
+#include "H5Tmodule.h"          /* This source code file is part of the H5T module */
+
 
 /***********/
 /* Headers */
@@ -2111,7 +2112,7 @@ done:
 H5T_subset_info_t *
 H5T__conv_struct_subset(const H5T_cdata_t *cdata)
 {
-    H5T_conv_struct_t	*priv;
+    H5T_conv_struct_t	*priv = NULL;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2925,7 +2926,7 @@ H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     /* Use O(log N) lookup */
                     unsigned lt = 0;
                     unsigned rt = src->shared->u.enumer.nmembs;
-                    unsigned md;
+                    unsigned md = 0;
                     int cmp;
 
                     while(lt < rt) {

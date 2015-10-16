@@ -21,7 +21,7 @@
 *
 *************************************************************/
 
-#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
+#define H5S_FRIEND		/*suppress error about including H5Spkg	  */
 
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5S_TESTING

@@ -18,7 +18,7 @@
  *	       Tuesday, November 25, 1997
  */
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -96,8 +96,8 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
     int			version;
     const char		*s = NULL;
     H5HL_t              *heap;
-    size_t		u;      /* Local index variable */
-    void *ret_value;            /* Return value */
+    size_t		u;                      /* Local index variable */
+    void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -445,9 +445,9 @@ H5O_efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_ds
 {
     H5O_efl_t   *efl_src = (H5O_efl_t *) mesg_src;
     H5O_efl_t   *efl_dst = NULL;
-    H5HL_t      *heap = NULL;                           /* Pointer to local heap for EFL file names */
+    H5HL_t      *heap = NULL;                   /* Pointer to local heap for EFL file names */
     size_t      idx, size, name_offset, heap_size;
-    void        *ret_value;          /* Return value */
+    void        *ret_value = NULL;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__COPIED_TAG, NULL)
 

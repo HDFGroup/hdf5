@@ -20,7 +20,8 @@
  *		uninitialized data points of a dataset.
  */
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dprivate.h"		/* Datasets				*/
@@ -188,7 +189,7 @@ H5O_fill_new_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_fill_t	*fill = NULL;
-    void	*ret_value;
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -301,8 +302,8 @@ static void *
 H5O_fill_old_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
-    H5O_fill_t *fill = NULL;		/* Decoded fill value message */
-    void *ret_value;                    /* Return value */
+    H5O_fill_t *fill = NULL;	/* Decoded fill value message */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -494,7 +495,7 @@ H5O_fill_copy(const void *_src, void *_dst)
 {
     const H5O_fill_t	*src = (const H5O_fill_t *)_src;
     H5O_fill_t		*dst = (H5O_fill_t *)_dst;
-    void		*ret_value;
+    void		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -611,7 +612,7 @@ static size_t
 H5O_fill_new_size(const H5F_t H5_ATTR_UNUSED *f, const void *_fill)
 {
     const H5O_fill_t	*fill = (const H5O_fill_t *)_fill;
-    size_t		ret_value;
+    size_t		ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg  */
+#include "H5Gmodule.h"          /* This source code file is part of the H5G module */
 
 
 /***********/
@@ -320,8 +320,8 @@ done:
 htri_t
 H5G__obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
 {
-    H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
-    htri_t ret_value;           /* Return value */
+    H5B2_t *bt2_name = NULL;    /* v2 B-tree handle for name index */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, grp_oloc->addr, FAIL)
 
@@ -666,7 +666,7 @@ H5G__obj_iterate(const H5O_loc_t *grp_oloc,
 {
     H5O_linfo_t	linfo;		/* Link info message */
     htri_t linfo_exists;        /* Whether the link info message exists */
-    herr_t ret_value;           /* Return value */
+    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, grp_oloc->addr, FAIL)
 
@@ -813,7 +813,7 @@ H5G_obj_get_name_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type,
 {
     H5O_linfo_t	linfo;		/* Link info message */
     htri_t linfo_exists;        /* Whether the link info message exists */
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value = -1;     /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, oloc->addr, FAIL)
 

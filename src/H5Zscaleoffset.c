@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+#include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
@@ -746,7 +746,7 @@ static enum H5Z_scaleoffset_t
 H5Z_scaleoffset_get_type(unsigned dtype_class, unsigned dtype_size, unsigned dtype_sign)
 {
     enum H5Z_scaleoffset_t type = t_bad; /* integer type */
-    enum H5Z_scaleoffset_t ret_value;             /* return value */
+    enum H5Z_scaleoffset_t ret_value = t_bad;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

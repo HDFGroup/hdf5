@@ -25,7 +25,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HG_PACKAGE		/*suppress error about including H5HGpkg	  */
+#include "H5HGmodule.h"         /* This source code file is part of the H5HG module */
 
 
 /***********/

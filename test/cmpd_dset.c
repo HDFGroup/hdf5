@@ -21,7 +21,7 @@
 /* See H5private.h for how to include headers */
 #undef NDEBUG
 
-#define H5T_PACKAGE
+#define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
 #include "H5Tpkg.h"		/*to turn off hardware conversions*/
 #include "H5Iprivate.h"
 

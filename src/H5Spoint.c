@@ -20,7 +20,7 @@
  * Purpose:	Point selection data space I/O functions.
  */
 
-#define H5S_PACKAGE		/*suppress error about including H5Spkg	  */
+#include "H5Smodule.h"          /* This source code file is part of the H5S module */
 
 
 #include "H5private.h"		/* Generic Functions			  */
@@ -774,7 +774,7 @@ static hssize_t
 H5S_point_serial_size (const H5S_t *space)
 {
     H5S_pnt_node_t *curr;       /* Point information nodes */
-    hssize_t ret_value;         /* return value */
+    hssize_t ret_value = -1;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1208,7 +1208,7 @@ done:
 static htri_t
 H5S_point_is_contiguous(const H5S_t *space)
 {
-    htri_t ret_value;  /* return value */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1245,7 +1245,7 @@ H5S_point_is_contiguous(const H5S_t *space)
 static htri_t
 H5S_point_is_single(const H5S_t *space)
 {
-    htri_t ret_value;  /* return value */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1285,7 +1285,7 @@ H5S_point_is_single(const H5S_t *space)
 static htri_t
 H5S_point_is_regular(const H5S_t *space)
 {
-    htri_t ret_value;  /* return value */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

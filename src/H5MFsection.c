@@ -25,8 +25,8 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5MF_PACKAGE		/*suppress error about including H5MFpkg  */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#include "H5MFmodule.h"         /* This source code file is part of the H5MF module */
 
 
 /***********/
@@ -132,7 +132,7 @@ H5MF_free_section_t *
 H5MF_sect_simple_new(haddr_t sect_off, hsize_t sect_size)
 {
     H5MF_free_section_t *sect = NULL;   /* 'Simple' free space section to add */
-    H5MF_free_section_t *ret_value;     /* Return value */
+    H5MF_free_section_t *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -178,7 +178,7 @@ H5MF_sect_simple_deserialize(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
     hsize_t sect_size, unsigned H5_ATTR_UNUSED *des_flags)
 {
     H5MF_free_section_t *sect;          /* New section */
-    H5FS_section_info_t *ret_value;     /* Return value */
+    H5FS_section_info_t *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -219,7 +219,7 @@ H5MF_sect_simple_can_merge(const H5FS_section_info_t *_sect1,
 {
     const H5MF_free_section_t *sect1 = (const H5MF_free_section_t *)_sect1;   /* File free section */
     const H5MF_free_section_t *sect2 = (const H5MF_free_section_t *)_sect2;   /* File free section */
-    htri_t ret_value;                   /* Return value */
+    htri_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -300,7 +300,7 @@ H5MF_sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     H5MF_sect_ud_t *udata = (H5MF_sect_ud_t *)_udata;   /* User data for callback */
     haddr_t eoa;                /* End of address space in the file */
     haddr_t end;                /* End of section to extend */
-    htri_t ret_value;           /* Return value */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -519,7 +519,7 @@ H5MF_sect_simple_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
 static H5FS_section_info_t *
 H5MF_sect_simple_split(H5FS_section_info_t *sect, hsize_t frag_size)
 {
-    H5MF_free_section_t *ret_value;     /* Return value */
+    H5MF_free_section_t *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

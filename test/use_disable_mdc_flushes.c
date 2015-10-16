@@ -19,7 +19,7 @@
 
 #include "h5test.h"
 
-#define H5D_PACKAGE
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
 #define H5D_TESTING
 #include "H5Dpkg.h"
 

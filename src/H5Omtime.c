@@ -19,7 +19,8 @@
  * Purpose:	The object modification time message.
  */
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -126,8 +127,8 @@ H5O_mtime_new_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     time_t	*mesg;
-    uint32_t    tmp_time;       /* Temporary copy of the time */
-    void        *ret_value;     /* Return value */
+    uint32_t    tmp_time;               /* Temporary copy of the time */
+    void        *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -184,7 +185,7 @@ H5O_mtime_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
     time_t	*mesg, the_time;
     int	i;
     struct tm	tm;
-    void        *ret_value;     /* Return value */
+    void        *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -352,7 +353,7 @@ H5O_mtime_copy(const void *_mesg, void *_dest)
 {
     const time_t	*mesg = (const time_t *) _mesg;
     time_t		*dest = (time_t *) _dest;
-    void        *ret_value;     /* Return value */
+    void                *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

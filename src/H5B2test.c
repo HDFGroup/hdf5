@@ -25,7 +25,7 @@
 /* Module Setup */
 /****************/
 
-#define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
+#include "H5B2module.h"         /* This source code file is part of the H5B2 module */
 #define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
 
 
@@ -124,7 +124,7 @@ H5B2__test_crt_context(void *_f)
 {
     H5F_t *f = (H5F_t *)_f;     /* User data for building callback context */
     H5B2_test_ctx_t *ctx;       /* Callback context structure */
-    void *ret_value;            /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -543,7 +543,7 @@ int
 H5B2_get_node_depth_test(H5B2_t *bt2, hid_t dxpl_id, void *udata)
 {
     H5B2_node_info_test_t ninfo;        /* Node information */
-    int		ret_value;              /* Return information */
+    int		ret_value = -1;         /* Return information */
 
     FUNC_ENTER_NOAPI(FAIL)
 

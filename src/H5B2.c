@@ -33,7 +33,8 @@
 /* Module Setup */
 /****************/
 
-#define H5B2_PACKAGE            /* suppress error about including H5B2pkg   */
+#include "H5B2module.h"         /* This source code file is part of the H5B2 module */
+
 
 /***********/
 /* Headers */
@@ -66,6 +67,9 @@
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* v2 B-tree client ID to class mapping */
 
@@ -137,7 +141,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     H5B2_hdr_t  *hdr = NULL;            /* Pointer to the B-tree header */
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     haddr_t     hdr_addr;               /* B-tree header address */
-    H5B2_t      *ret_value;             /* Return value */
+    H5B2_t      *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -212,7 +216,7 @@ H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata, void *parent)
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
     H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
-    H5B2_t	*ret_value;             /* Return value */
+    H5B2_t	*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

@@ -33,7 +33,7 @@
 /* Module Declaration */
 /**********************/
 
-#define H5EA_MODULE
+#include "H5EAmodule.h"         /* This source code file is part of the H5EA module */
 
 
 /***********************/
@@ -78,6 +78,9 @@ typedef herr_t (*H5EA__unprotect_func_t)(void *thing, hid_t dxpl_id,
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Extensible array client ID to class mapping */
 

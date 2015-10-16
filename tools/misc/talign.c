@@ -137,6 +137,7 @@ int main(void)
 
     H5Dread(set, fix, spc, H5S_ALL, H5P_DEFAULT, data);
     fptr = (float *)(data + H5Tget_member_offset(fix, 1));
+    H5Dclose(set);
 
 out:
     if(error < 0) {
@@ -194,7 +195,9 @@ out:
     if(data)
         HDfree(data);
     H5Sclose(spc);
+    H5Tclose(cs6);
     H5Tclose(cmp);
+    H5Tclose(fix);
     H5Tclose(cmp1);
     H5Tclose(cmp2);
     H5Tclose(cmp3);

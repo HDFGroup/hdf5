@@ -13,10 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5Z_init_interface
+#include "H5Zmodule.h"          /* This source code file is part of the H5Z module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -57,6 +54,9 @@ typedef enum {
     H5Z_PRELUDE_SET_LOCAL       /* Call "set local" callback */
 } H5Z_prelude_type_t;
 
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
+
 /* Local variables */
 static size_t		H5Z_table_alloc_g = 0;
 static size_t		H5Z_table_used_g = 0;
@@ -73,7 +73,7 @@ static int H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_init_interface
+ * Function:	H5Z__init_package
  *
  * Purpose:	Initializes the data filter layer.
  *
@@ -82,45 +82,43 @@ static int H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5Z_init_interface (void)
+herr_t
+H5Z__init_package(void)
 {
-    herr_t	ret_value=SUCCEED;      /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Internal filters */
-    if (H5Z_register (H5Z_SHUFFLE)<0)
-        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register shuffle filter")
-    if (H5Z_register (H5Z_FLETCHER32)<0)
-        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register fletcher32 filter")
-    if (H5Z_register (H5Z_NBIT)<0)
-        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register nbit filter")
-    if (H5Z_register (H5Z_SCALEOFFSET)<0)
-        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register scaleoffset filter")
+    if(H5Z_register(H5Z_SHUFFLE) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register shuffle filter")
+    if(H5Z_register(H5Z_FLETCHER32) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register fletcher32 filter")
+    if(H5Z_register(H5Z_NBIT) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register nbit filter")
+    if(H5Z_register(H5Z_SCALEOFFSET) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register scaleoffset filter")
 
     /* External filters */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    if (H5Z_register (H5Z_DEFLATE)<0)
+    if(H5Z_register(H5Z_DEFLATE) < 0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register deflate filter")
 #endif /* H5_HAVE_FILTER_DEFLATE */
 #ifdef H5_HAVE_FILTER_SZIP
     H5Z_SZIP->encoder_present = SZ_encoder_enabled();
-    if (H5Z_register (H5Z_SZIP)<0)
+    if(H5Z_register(H5Z_SZIP) < 0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter")
 #endif /* H5_HAVE_FILTER_SZIP */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5Z__init_package() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_term_interface
+ * Function:	H5Z_term_package
  *
  * Purpose:	Terminate the H5Z layer.
  *
@@ -129,44 +127,44 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
-H5Z_term_interface(void)
+H5Z_term_package(void)
 {
-#ifdef H5Z_DEBUG
-    size_t	i;
-    int		dir, nprint=0;
-    char	comment[16], bandwidth[32];
-#endif
+    int	n = 0;
 
-    if(H5_interface_initialize_g) {
-#ifdef H5Z_DEBUG
-	if (H5DEBUG(Z)) {
-	    for (i=0; i<H5Z_table_used_g; i++) {
-		for (dir=0; dir<2; dir++) {
-		    if (0==H5Z_stat_table_g[i].stats[dir].total) continue;
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-		    if (0==nprint++) {
+    if(H5_PKG_INIT_VAR) {
+#ifdef H5Z_DEBUG
+        char comment[16], bandwidth[32];
+        int dir, nprint = 0;
+        size_t i;
+
+	if(H5DEBUG(Z)) {
+	    for(i = 0; i < H5Z_table_used_g; i++) {
+		for(dir = 0; dir<2; dir++) {
+		    if(0 == H5Z_stat_table_g[i].stats[dir].total)
+                        continue;
+
+		    if(0 == nprint++) {
 			/* Print column headers */
-			HDfprintf (H5DEBUG(Z), "H5Z: filter statistics "
+			HDfprintf(H5DEBUG(Z), "H5Z: filter statistics "
 				   "accumulated over life of library:\n");
-			HDfprintf (H5DEBUG(Z),
+			HDfprintf(H5DEBUG(Z),
 				   "   %-16s %10s %10s %8s %8s %8s %10s\n",
 				   "Filter", "Total", "Errors", "User",
 				   "System", "Elapsed", "Bandwidth");
-			HDfprintf (H5DEBUG(Z),
+			HDfprintf(H5DEBUG(Z),
 				   "   %-16s %10s %10s %8s %8s %8s %10s\n",
 				   "------", "-----", "------", "----",
 				   "------", "-------", "---------");
-		    }
+		    } /* end if */
 
 		    /* Truncate the comment to fit in the field */
-		    HDstrncpy(comment, H5Z_table_g[i].name,
-			      sizeof comment);
-		    comment[sizeof(comment)-1] = '\0';
+		    HDstrncpy(comment, H5Z_table_g[i].name, sizeof comment);
+		    comment[sizeof(comment) - 1] = '\0';
 
 		    /*
 		     * Format bandwidth to have four significant digits and
@@ -178,7 +176,7 @@ H5Z_term_interface(void)
 				 H5Z_stat_table_g[i].stats[dir].timer.etime);
 
 		    /* Print the statistics */
-		    HDfprintf (H5DEBUG(Z),
+		    HDfprintf(H5DEBUG(Z),
 			       "   %s%-15s %10Hd %10Hd %8.2f %8.2f %8.2f "
 			       "%10s\n", dir?"<":">", comment,
 			       H5Z_stat_table_g[i].stats[dir].total,
@@ -187,21 +185,28 @@ H5Z_term_interface(void)
 			       H5Z_stat_table_g[i].stats[dir].timer.stime,
 			       H5Z_stat_table_g[i].stats[dir].timer.etime,
 			       bandwidth);
-		}
-	    }
-	}
+		} /* end for */
+	    } /* end for */
+	} /* end if */
 #endif /* H5Z_DEBUG */
 	/* Free the table of filters */
-	H5Z_table_g = (H5Z_class2_t *)H5MM_xfree(H5Z_table_g);
+        if(H5Z_table_g) {
+            H5Z_table_g = (H5Z_class2_t *)H5MM_xfree(H5Z_table_g);
 #ifdef H5Z_DEBUG
-	H5Z_stat_table_g = (H5Z_stats_t *)H5MM_xfree(H5Z_stat_table_g);
+            H5Z_stat_table_g = (H5Z_stats_t *)H5MM_xfree(H5Z_stat_table_g);
 #endif /* H5Z_DEBUG */
-	H5Z_table_used_g = H5Z_table_alloc_g = 0;
-	H5_interface_initialize_g = 0;
+            H5Z_table_used_g = H5Z_table_alloc_g = 0;
+
+            n++;
+        } /* end if */
+
+	/* Mark interface as closed */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
     } /* end if */
 
-    return(0);
-} /* end H5Z_term_interface() */
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5Z_term_package() */
 
 
 /*-------------------------------------------------------------------------
@@ -1445,8 +1450,8 @@ done:
 H5Z_filter_info_t *
 H5Z_filter_info(const H5O_pline_t *pline, H5Z_filter_t filter)
 {
-    size_t	idx;                    /* Index of filter in pipeline */
-    H5Z_filter_info_t *ret_value;       /* Return value */
+    size_t	idx;                            /* Index of filter in pipeline */
+    H5Z_filter_info_t *ret_value = NULL;        /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

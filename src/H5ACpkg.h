@@ -28,7 +28,7 @@
  *
  */
 
-#ifndef H5AC_PACKAGE
+#if !(defined H5AC_FRIEND || defined H5AC_MODULE)
 #error "Do not include this file outside the H5AC package!"
 #endif
 

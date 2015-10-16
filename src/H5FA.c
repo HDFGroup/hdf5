@@ -29,7 +29,7 @@
 /* Module Declaration */
 /**********************/
 
-#define H5FA_MODULE
+#include "H5FAmodule.h"         /* This source code file is part of the H5FA module */
 
 /***********************/
 /* Other Packages Used */
@@ -69,6 +69,9 @@
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Fixed array client ID to class mapping */
 

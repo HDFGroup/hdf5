@@ -27,9 +27,9 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
-#define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
+
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
+#define H5D_FRIEND		        /* Suppress error about including H5Dpkg	       */
 
 
 /***********/
@@ -44,7 +44,7 @@
 #include "H5Ppkg.h"		/* Property lists		  	*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
 #include "H5Tprivate.h"		/* Datatypes 				*/
-#include "H5Zpkg.h"		/* Data filters				*/
+#include "H5Zprivate.h"		/* Data filters				*/
 
 
 /****************/
@@ -2502,7 +2502,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
 	if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
-	/* Set the fill value */
+        /* Set the fill value */
         if(NULL == (fill.type = H5T_copy(type, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy datatype")
         fill.size = (ssize_t)H5T_get_size(type);

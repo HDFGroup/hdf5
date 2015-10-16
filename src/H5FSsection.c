@@ -25,7 +25,7 @@
 /* Module Setup */
 /****************/
 
-#define H5FS_PACKAGE        /* Suppress error about including H5FSpkg   */
+#include "H5FSmodule.h"         /* This source code file is part of the H5FS module */
 
 
 /***********/
@@ -126,8 +126,8 @@ H5FL_DEFINE(H5FS_sinfo_t);
 H5FS_sinfo_t *
 H5FS_sinfo_new(H5F_t *f, H5FS_t *fspace)
 {
-    H5FS_sinfo_t *sinfo = NULL; /* Section information struct created */
-    H5FS_sinfo_t *ret_value;    /* Return value */
+    H5FS_sinfo_t *sinfo = NULL;         /* Section information struct created */
+    H5FS_sinfo_t *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

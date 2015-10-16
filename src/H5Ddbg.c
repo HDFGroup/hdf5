@@ -17,10 +17,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5D__init_dbg_interface
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -61,26 +58,6 @@
 /* Local Variables */
 /*******************/
 
-
-/*--------------------------------------------------------------------------
-NAME
-   H5D__init_dbg_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5D__init_dbg_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5D_init() currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5D__init_dbg_interface(void)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    FUNC_LEAVE_NOAPI(H5D_init())
-} /* H5D__init_dbg_interface() */
 
 
 /*-------------------------------------------------------------------------

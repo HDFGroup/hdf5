@@ -18,7 +18,7 @@
  *              Tuesday, November 24, 1998
  */
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5G_TESTING

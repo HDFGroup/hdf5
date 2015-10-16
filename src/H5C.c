@@ -74,8 +74,8 @@
 /* Module Setup */
 /****************/
 
-#define H5C_PACKAGE		/*suppress error about including H5Cpkg   */
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
+#include "H5Cmodule.h"          /* This source code file is part of the H5C module */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 
 
 /***********/
@@ -83,7 +83,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #ifdef H5_HAVE_PARALLEL
-#define H5AC_PACKAGE	/*suppress error about including H5ACpkg  */
+#define H5AC_FRIEND		/*suppress error about including H5ACpkg	  */
 #include "H5ACpkg.h"        /* Metadata cache                       */
 #endif /* H5_HAVE_PARALLEL */
 #include "H5Cpkg.h"		/* Cache				*/
@@ -107,6 +107,7 @@
 #else /* H5C_DO_MEMORY_SANITY_CHECKS */
 #define H5C_IMAGE_EXTRA_SPACE 0
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
+
 
 /******************/
 /* Local Typedefs */
@@ -218,6 +219,9 @@ herr_t H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn);
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 
 /*****************************/
@@ -3073,7 +3077,7 @@ H5C_protect(H5F_t *		f,
     size_t		empty_space;
     void *		thing;
     H5C_cache_entry_t *	entry_ptr;
-    void *		ret_value;      /* Return value */
+    void *		ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -8721,7 +8725,7 @@ H5C_load_entry(H5F_t *             f,
     void *		thing = NULL;   /* Pointer to thing loaded */
     H5C_cache_entry_t *	entry;          /* Alias for thing loaded, as cache entry */
     size_t              len;            /* Size of image in file */
-    void *		ret_value;      /* Return value */
+    void *		ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -10587,42 +10591,42 @@ H5C_cork(H5C_t * cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
         if(H5C__SET_CORK == action) {
             haddr_t *addr_ptr = NULL;	/* Points to an address */
 
-	    if(ptr != NULL && *ptr == obj_addr)
-		HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't cork an already corked object")
+            if(ptr != NULL && *ptr == obj_addr)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't cork an already corked object")
 
-	    /* Allocate address */
-	    if(NULL == (addr_ptr = H5FL_MALLOC(haddr_t)))
-		HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            /* Allocate address */
+            if(NULL == (addr_ptr = H5FL_MALLOC(haddr_t)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-	    /* Insert into the list */
-	    *addr_ptr = obj_addr;
-	    if(H5SL_insert(cache_ptr->cork_list_ptr, addr_ptr, addr_ptr) < 0) {
+            /* Insert into the list */
+            *addr_ptr = obj_addr;
+            if(H5SL_insert(cache_ptr->cork_list_ptr, addr_ptr, addr_ptr) < 0) {
                 addr_ptr = H5FL_FREE(haddr_t, addr_ptr);
-		HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't insert address into cork list")
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't insert address into cork list")
             } /* end if */
 
-	    /* Set the entry's cork status */
-	    is_corked = TRUE;
+            /* Set the entry's cork status */
+            is_corked = TRUE;
         } /* end if */
         else {
-	    if(ptr == NULL)
-		HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't uncork an object that is not corked ")
+            if(ptr == NULL)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't uncork an object that is not corked ")
 
-	    /* Remove the object address from the list */
-	    ptr = (haddr_t *)H5SL_remove(cache_ptr->cork_list_ptr, &obj_addr);
-	    if(ptr == NULL || *ptr != obj_addr)
-		HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't remove address from list")
+            /* Remove the object address from the list */
+            ptr = (haddr_t *)H5SL_remove(cache_ptr->cork_list_ptr, &obj_addr);
+            if(ptr == NULL || *ptr != obj_addr)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't remove address from list")
 
-	    /* Free address */
-	    ptr = H5FL_FREE(haddr_t, ptr);
+            /* Free address */
+            ptr = H5FL_FREE(haddr_t, ptr);
 
-	    /* Set the entry's cork status */
-	    is_corked = FALSE;
+            /* Set the entry's cork status */
+            is_corked = FALSE;
         } /* end else */
 
-	/* Mark existing cache entries with tag (obj_addr) to the cork status */
-	if(H5C_mark_tagged_entries_cork(cache_ptr, obj_addr, is_corked) < 0)
-	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't mark cork status on entry")
+        /* Mark existing cache entries with tag (obj_addr) to the cork status */
+        if(H5C_mark_tagged_entries_cork(cache_ptr, obj_addr, is_corked) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't mark cork status on entry")
     } /* end else */
 
 done:

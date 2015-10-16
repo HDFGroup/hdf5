@@ -22,7 +22,7 @@
  * This file needs to access private datatypes from the H5EA package.
  * This file also needs to access the extensible array testing code.
  */
-#define H5EA_PACKAGE
+#define H5EA_FRIEND		/*suppress error about including H5EApkg	  */
 #define H5EA_TESTING
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 

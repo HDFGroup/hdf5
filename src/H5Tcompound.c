@@ -22,10 +22,7 @@
 /* Module Setup */
 /****************/
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5T_init_compound_interface
+#include "H5Tmodule.h"          /* This source code file is part of the H5T module */
 
 
 /***********/
@@ -78,26 +75,6 @@ static htri_t H5T_is_packed(const H5T_t *dt);
 /* Local Variables */
 /*******************/
 
-
-
-/*--------------------------------------------------------------------------
-NAME
-   H5T_init_compound_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5T_init_compound_interface()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5T_init() currently).
---------------------------------------------------------------------------*/
-static herr_t
-H5T_init_compound_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5T_init())
-} /* H5T_init_compound_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -282,7 +259,7 @@ done:
 H5T_t *
 H5T_get_member_type(const H5T_t *dt, unsigned membno, H5T_copy_t method)
 {
-    H5T_t	*ret_value;     /* Return value */
+    H5T_t	*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

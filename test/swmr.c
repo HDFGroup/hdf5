@@ -34,12 +34,12 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_PACKAGE
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
 #define H5F_TESTING
 #include "H5Fpkg.h"		/* File access	 			*/
 
 /* This file needs to access the file driver testing code */
-#define H5FD_PACKAGE
+#define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
 #define H5FD_TESTING
 #include "H5FDpkg.h"	/* File drivers	 			*/
 

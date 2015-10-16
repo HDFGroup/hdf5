@@ -17,7 +17,7 @@
 /* Module Setup */
 /****************/
 
-#define H5SM_PACKAGE		/*suppress error about including H5SMpkg	  */
+#include "H5SMmodule.h"         /* This source code file is part of the H5SM module */
 #define H5SM_TESTING		/*suppress warning about H5SM testing funcs*/
 
 

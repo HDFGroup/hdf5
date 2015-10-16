@@ -24,7 +24,8 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -88,7 +89,7 @@ H5O_name_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_name_t          *mesg;
-    void                *ret_value;     /* Return value */
+    void                *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -170,9 +171,9 @@ H5O_name_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, 
 static void *
 H5O_name_copy(const void *_mesg, void *_dest)
 {
-    const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
-    H5O_name_t             *dest = (H5O_name_t *) _dest;
-    void                *ret_value;     /* Return value */
+    const H5O_name_t    *mesg = (const H5O_name_t *) _mesg;
+    H5O_name_t          *dest = (H5O_name_t *) _dest;
+    void                *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -223,7 +224,7 @@ static size_t
 H5O_name_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_name_t       *mesg = (const H5O_name_t *) _mesg;
-    size_t                  ret_value;
+    size_t                  ret_value = 0;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

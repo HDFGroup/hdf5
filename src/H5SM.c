@@ -17,8 +17,9 @@
 /* Module Setup */
 /****************/
 
-#define H5O_PACKAGE		/*suppress error about including H5Opkg 	  */
-#define H5SM_PACKAGE		/*suppress error about including H5SMpkg	  */
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
+#include "H5SMmodule.h"         /* This source code file is part of the H5SM module */
+
 
 /***********/
 /* Headers */
@@ -83,6 +84,9 @@ static herr_t H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 H5FL_DEFINE(H5SM_master_table_t);
 H5FL_ARR_DEFINE(H5SM_index_header_t, H5O_SHMESG_MAX_NINDEXES);
@@ -642,7 +646,7 @@ H5SM_create_list(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
     hsize_t x;                  /* Counter variable */
     size_t num_entries;         /* Number of messages to create in list */
     haddr_t addr = HADDR_UNDEF; /* Address of the list on disk */
-    haddr_t ret_value;
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__SOHM_TAG, HADDR_UNDEF)
 
@@ -885,7 +889,7 @@ done:
 static htri_t
 H5SM_can_share_common(const H5F_t *f, unsigned type_id, const void *mesg)
 {
-    htri_t ret_value;           /* Return value */
+    htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1262,7 +1266,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     /* Encode the message to be written */
     if((buf_size = H5O_msg_raw_size(f, type_id, TRUE, mesg)) == 0)
 	HGOTO_ERROR(H5E_SOHM, H5E_BADSIZE, FAIL, "can't find message size")
-    if(NULL == (encoding_buf = H5MM_malloc(buf_size)))
+    if(NULL == (encoding_buf = H5MM_calloc(buf_size)))
 	HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, FAIL, "can't allocate buffer for encoding")
     if(H5O_msg_encode(f, type_id, TRUE, (unsigned char *)encoding_buf, mesg) < 0)
 	HGOTO_ERROR(H5E_SOHM, H5E_CANTENCODE, FAIL, "can't encode message to be shared")
@@ -1617,8 +1621,8 @@ done:
 static size_t
 H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *empty_pos)
 {
-    size_t               x;
-    size_t               ret_value;
+    size_t x;
+    size_t ret_value = 0;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

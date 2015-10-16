@@ -19,7 +19,7 @@
 #include "hdf5.h"
 
 	/* Include H5Ipkg.h to calculate max number of groups */
-#define H5I_PACKAGE
+#define H5I_FRIEND		/*suppress error about including H5Ipkg	  */
 #include "H5Ipkg.h"
 
 	/* Test basic functionality of registering and deleting types and IDs */

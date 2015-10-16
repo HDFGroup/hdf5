@@ -22,7 +22,7 @@
  * This file needs to access private datatypes from the H5HF package.
  * This file also needs to access the fractal heap testing code.
  */
-#define H5HF_PACKAGE
+#define H5HF_FRIEND		/*suppress error about including H5HFpkg	  */
 #define H5HF_TESTING
 #include "H5HFpkg.h"		/* Fractal heaps			*/
 

@@ -21,7 +21,7 @@
  *		the H5MF package.  Source files outside the H5MF package should
  *		include H5MFprivate.h instead.
  */
-#ifndef H5MF_PACKAGE
+#if !(defined H5MF_FRIEND || defined H5MF_MODULE)
 #error "Do not include this file outside the H5MF package!"
 #endif
 

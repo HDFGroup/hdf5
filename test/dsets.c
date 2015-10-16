@@ -20,13 +20,13 @@
  * Purpose:	Tests the dataset interface (H5D)
  */
 
-#define H5D_PACKAGE
+#define H5D_FRIEND		/*suppress error about including H5FDpkg	  */
 #define H5D_TESTING
 
-#define H5FD_PACKAGE
+#define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
 #define H5FD_TESTING
 
-#define H5Z_PACKAGE
+#define H5Z_FRIEND		/*suppress error about including H5FDpkg	  */
 
 #include <stdlib.h>
 #include <time.h>

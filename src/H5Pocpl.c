@@ -27,8 +27,9 @@
 /****************/
 /* Module Setup */
 /****************/
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
-#define H5P_PACKAGE		/*suppress error about including H5Ppkg	  */
+
+#define H5O_FRIEND		/*suppress error about including H5Opkg	  */
+#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
 
 
 /***********/

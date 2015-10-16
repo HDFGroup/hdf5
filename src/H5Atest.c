@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5A_PACKAGE		/*suppress error about including H5Apkg  */
+#include "H5Amodule.h"          /* This source code file is part of the H5A module */
 #define H5A_TESTING		/*suppress warning about H5A testing funcs*/
 
 
@@ -95,7 +95,7 @@ htri_t
 H5A_is_shared_test(hid_t attr_id)
 {
     H5A_t	*attr;                  /* Attribute object for ID */
-    htri_t	ret_value;              /* Return value */
+    htri_t	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

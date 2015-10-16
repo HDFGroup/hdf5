@@ -140,7 +140,7 @@ typedef struct H5S_sel_iter_op_t {
 } H5S_sel_iter_op_t;
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
-#ifdef H5S_PACKAGE
+#ifdef H5S_MODULE
 #define H5S_GET_EXTENT_TYPE(S)          ((S)->extent.type)
 #define H5S_GET_EXTENT_NDIMS(S)         ((S)->extent.rank)
 #define H5S_GET_EXTENT_NPOINTS(S)       ((S)->extent.nelem)
@@ -166,7 +166,7 @@ typedef struct H5S_sel_iter_op_t {
 #define H5S_SELECT_ITER_NEXT(ITER,NELEM)((*(ITER)->type->iter_next)(ITER,NELEM))
 #define H5S_SELECT_ITER_NEXT_BLOCK(ITER)        ((*(ITER)->type->iter_next_block)(ITER))
 #define H5S_SELECT_ITER_RELEASE(ITER)   ((*(ITER)->type->iter_release)(ITER))
-#else /* H5S_PACKAGE */
+#else /* H5S_MODULE */
 #define H5S_GET_EXTENT_TYPE(S)          (H5S_get_simple_extent_type(S))
 #define H5S_GET_EXTENT_NDIMS(S)         (H5S_get_simple_extent_ndims(S))
 #define H5S_GET_EXTENT_NPOINTS(S)       (H5S_get_simple_extent_npoints(S))
@@ -192,7 +192,7 @@ typedef struct H5S_sel_iter_op_t {
 #define H5S_SELECT_ITER_NEXT(ITER,NELEM)(H5S_select_iter_next(ITER,NELEM))
 #define H5S_SELECT_ITER_NEXT_BLOCK(ITER)        (H5S_select_iter_next_block(ITER))
 #define H5S_SELECT_ITER_RELEASE(ITER)   (H5S_select_iter_release(ITER))
-#endif /* H5S_PACKAGE */
+#endif /* H5S_MODULE */
 /* Handle these two callbacks in a special way, since they have prologs that need to be executed */
 #define H5S_SELECT_COPY(DST,SRC,SHARE)  (H5S_select_copy(DST,SRC,SHARE))
 #define H5S_SELECT_DESERIALIZE(S,BUF)   (H5S_select_deserialize(S,BUF))

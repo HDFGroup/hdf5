@@ -28,8 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5MF_PACKAGE		/*suppress error about including H5MFpkg  */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#include "H5MFmodule.h"         /* This source code file is part of the H5MF module */
 #define H5MF_DEBUGGING          /* Need access to file space debugging routines */
 
 

@@ -28,8 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg  */
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#include "H5Gmodule.h"          /* This source code file is part of the H5G module */
 
 
 /***********/

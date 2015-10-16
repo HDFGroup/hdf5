@@ -24,8 +24,9 @@
  *-------------------------------------------------------------------------
  */
 
-#define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
-#define H5O_PACKAGE		/*suppress error about including H5Opkg	  */
+#define H5G_FRIEND		/*suppress error about including H5Gpkg   */
+#include "H5Omodule.h"          /* This source code file is part of the H5O module */
+
 
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
@@ -101,7 +102,7 @@ H5O_stab_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *op
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_stab_t          *stab = NULL;
-    void                *ret_value;     /* Return value */
+    void                *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -180,9 +181,9 @@ H5O_stab_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, con
 static void *
 H5O_stab_copy(const void *_mesg, void *_dest)
 {
-    const H5O_stab_t       *stab = (const H5O_stab_t *) _mesg;
-    H5O_stab_t             *dest = (H5O_stab_t *) _dest;
-    void                *ret_value;     /* Return value */
+    const H5O_stab_t    *stab = (const H5O_stab_t *) _mesg;
+    H5O_stab_t          *dest = (H5O_stab_t *) _dest;
+    void                *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -222,7 +223,7 @@ done:
 static size_t
 H5O_stab_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void H5_ATTR_UNUSED *_mesg)
 {
-    size_t ret_value;   /* Return value */
+    size_t ret_value = 0;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -314,8 +315,8 @@ H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
     H5O_stab_t          *stab_src = (H5O_stab_t *) native_src;
     H5O_stab_t          *stab_dst = NULL;
     H5G_copy_file_ud_t  *udata = (H5G_copy_file_ud_t *)_udata;
-    size_t              size_hint;              /* Local heap initial size */
-    void                *ret_value;             /* Return value */
+    size_t              size_hint;             /* Local heap initial size */
+    void                *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

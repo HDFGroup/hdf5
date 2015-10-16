@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
+
 
 /***********/
 /* Headers */
@@ -240,7 +241,7 @@ H5HF_dtable_dest(H5HF_dtable_t *dtable)
 unsigned
 H5HF_dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
 {
-    unsigned row;               /* Row where block will fit */
+    unsigned row = 0;   /* Row where block will fit */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -274,7 +275,7 @@ H5HF_dtable_size_to_row(const H5HF_dtable_t *dtable, size_t block_size)
 unsigned
 H5HF_dtable_size_to_rows(const H5HF_dtable_t *dtable, hsize_t size)
 {
-    unsigned rows;              /* # of rows required for indirect block */
+    unsigned rows = 0;          /* # of rows required for indirect block */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -310,7 +311,7 @@ H5HF_dtable_span_size(const H5HF_dtable_t *dtable, unsigned start_row,
     unsigned end_row;           /* Row for last block covered */
     unsigned end_col;           /* Column for last block covered */
     unsigned end_entry;         /* Entry for last block covered */
-    hsize_t acc_span_size;      /* Accumulated span size */
+    hsize_t acc_span_size = 0;  /* Accumulated span size */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

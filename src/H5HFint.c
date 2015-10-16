@@ -28,7 +28,7 @@
 /* Module Declaration */
 /**********************/
 
-#define H5HF_PACKAGE
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
 
 
 /***********************/

@@ -28,7 +28,7 @@
 /* Module Setup */
 /****************/
 
-#define H5HL_PACKAGE        /* Suppress error about including H5HLpkg */
+#include "H5HLmodule.h"         /* This source code file is part of the H5HL module */
 
 
 /***********/

@@ -17,10 +17,7 @@
 /* Module Setup */
 /****************/
 
-#define H5D_PACKAGE		/*suppress error about including H5Dpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5D__init_interface
+#include "H5Dmodule.h"          /* This source code file is part of the H5D module */
 
 
 /***********/
@@ -120,6 +117,9 @@ static const H5I_class_t H5I_DATASET_CLS[1] = {{
     (H5I_free_t)H5D_close       /* Callback routine for closing objects of this class */
 }};
 
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5D_top_package_initialize_s = FALSE;
+
 
 
 /*-------------------------------------------------------------------------
@@ -151,9 +151,9 @@ done:
 
 /*--------------------------------------------------------------------------
 NAME
-   H5D__init_interface -- Initialize interface-specific information
+   H5D__init_package -- Initialize interface-specific information
 USAGE
-    herr_t H5D__init_interface()
+    herr_t H5D__init_package()
 
 RETURNS
     Non-negative on success/Negative on failure
@@ -164,13 +164,13 @@ NOTES
     a deadlock in the library when the library is attempting to terminate -QAK
 
 --------------------------------------------------------------------------*/
-static herr_t
-H5D__init_interface(void)
+herr_t
+H5D__init_package(void)
 {
-    H5P_genplist_t *def_dcpl;               /* Default Dataset Creation Property list */
-    herr_t          ret_value                = SUCCEED;   /* Return value */
+    H5P_genplist_t *def_dcpl;           /* Default Dataset Creation Property list */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Initialize the atom group for the dataset IDs */
     if(H5I_register_type(H5I_DATASET_CLS) < 0)
@@ -204,34 +204,36 @@ H5D__init_interface(void)
     if(H5D__get_dxpl_cache_real(H5P_DATASET_XFER_DEFAULT, &H5D_def_dxpl_cache) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve default DXPL info")
 
+    /* Mark "top" of interface as initialized, too */
+    H5D_top_package_initialize_s = TRUE;
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__init_interface() */
+} /* end H5D__init_package() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_term_interface
+ * Function:	H5D_top_term_package
  *
- * Purpose:	Terminate this interface.
+ * Purpose:	Close the "top" of the interface, releasing IDs, etc.
  *
  * Return:	Success:	Positive if anything was done that might
  *				affect other interfaces; zero otherwise.
- *
  * 		Failure:	Negative.
  *
- * Programmer:	Robb Matzke
- *              Friday, November 20, 1998
+ * Programmer:	Quincey Koziol
+ *              Sunday, September 13, 2015
  *
  *-------------------------------------------------------------------------
  */
 int
-H5D_term_interface(void)
+H5D_top_term_package(void)
 {
     int	n = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(H5_interface_initialize_g) {
+    if(H5D_top_package_initialize_s) {
 	if(H5I_nmembers(H5I_DATASET) > 0) {
             /* The dataset API uses the "force" flag set to true because it
              * is using the "file objects" (H5FO) API functions to track open
@@ -258,24 +260,55 @@ H5D_term_interface(void)
 	    (void)H5I_clear_type(H5I_DATASET, TRUE, FALSE);
             n++; /*H5I*/
 	} /* end if */
-        else {
-            /* Close public interface */
-            n += H5D__term_pub_interface();
 
-            /* Close deprecated interface */
-            n += H5D__term_deprec_interface();
-
-	    /* Destroy the dataset object id group */
-	    (void)H5I_dec_type_ref(H5I_DATASET);
-            n++; /*H5I*/
-
-	    /* Mark closed */
-	    H5_interface_initialize_g = 0;
-	} /* end else */
+        /* Mark closed */
+        if(0 == n)
+            H5D_top_package_initialize_s = FALSE;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
-} /* end H5D_term_interface() */
+} /* end H5D_top_term_package() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_term_package
+ *
+ * Purpose:	Terminate this interface.
+ *
+ * Note:	Finishes shutting down the interface, after
+ *		H5D_top_term_package() is called
+ *
+ * Return:	Success:	Positive if anything was done that might
+ *				affect other interfaces; zero otherwise.
+ * 		Failure:	Negative.
+ *
+ * Programmer:	Robb Matzke
+ *              Friday, November 20, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5D_term_package(void)
+{
+    int	n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        HDassert(0 == H5I_nmembers(H5I_DATASET));
+        HDassert(FALSE == H5D_top_package_initialize_s);
+
+        /* Destroy the dataset object id group */
+        n += (H5I_dec_type_ref(H5I_DATASET) > 0);
+
+        /* Mark closed */
+        if(0 == n)
+            H5_PKG_INIT_VAR = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* end H5D_term_package() */
 
 
 /*--------------------------------------------------------------------------
@@ -429,7 +462,7 @@ H5D__create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
 {
     H5O_obj_create_t ocrt_info;         /* Information for object creation */
     H5D_obj_create_t dcrt_info;         /* Information for dataset creation */
-    H5D_t	   *ret_value;          /* Return value */
+    H5D_t	   *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -554,7 +587,7 @@ H5D__new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
 {
     H5D_shared_t    *new_dset = NULL;   /* New dataset object */
     H5P_genplist_t  *plist;             /* Property list created */
-    H5D_shared_t    *ret_value;         /* Return value */
+    H5D_shared_t    *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1088,7 +1121,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     hbool_t             pline_copied = FALSE;   /* Flag to indicate that pipeline message was copied */
     hbool_t             efl_copied = FALSE;     /* Flag to indicate that external file list message was copied */
     H5G_loc_t           dset_loc;               /* Dataset location */
-    H5D_t		*ret_value;             /* Return value */
+    H5D_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1312,7 +1345,7 @@ H5D__open_name(const H5G_loc_t *loc, const char *name, hid_t dapl_id,
     H5O_loc_t   oloc;                   /* Dataset object location */
     H5O_type_t  obj_type;               /* Type of object at location */
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
-    H5D_t       *ret_value;             /* Return value */
+    H5D_t       *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1372,7 +1405,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
 {
     H5D_shared_t    *shared_fo = NULL;
     H5D_t           *dataset = NULL;
-    H5D_t           *ret_value;              /* Return value */
+    H5D_t           *ret_value = NULL;          /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -2305,7 +2338,7 @@ H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id, void *buf)
     H5S_sel_iter_op_t dset_op;  /* Operator for iteration */
     H5T_vlen_alloc_info_t _vl_alloc_info;       /* VL allocation info buffer */
     H5T_vlen_alloc_info_t *vl_alloc_info = &_vl_alloc_info;   /* VL allocation info */
-    herr_t ret_value;
+    herr_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2353,7 +2386,7 @@ void *
 H5D__vlen_get_buf_size_alloc(size_t size, void *info)
 {
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)info;
-    void *ret_value;    /* Return value */
+    void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2983,7 +3016,7 @@ H5D_get_create_plist(H5D_t *dset)
     H5O_fill_t          copied_fill;            /* Fill value to tweak */
     H5O_efl_t           copied_efl;             /* External file list to tweak */
     hid_t		new_dcpl_id = FAIL;
-    hid_t		ret_value;              /* Return value */
+    hid_t		ret_value = H5I_INVALID_HID;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

@@ -18,10 +18,7 @@
  *      the datatype precision for the H5T interface.
  */
 
-#define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
-
-/* Interface initialization */
-#define H5_INTERFACE_INIT_FUNC	H5T_init_precis_interface
+#include "H5Tmodule.h"          /* This source code file is part of the H5T module */
 
 
 #include "H5private.h"		/* Generic Functions			*/
@@ -32,27 +29,6 @@
 /* Static local functions */
 static herr_t H5T_set_precision(const H5T_t *dt, size_t prec);
 
-
-/*--------------------------------------------------------------------------
-NAME
-   H5T_init_precis_interface -- Initialize interface-specific information
-USAGE
-    herr_t H5T_init_precis_interface()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5T_init_iterface currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5T_init_precis_interface(void)
-{
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    FUNC_LEAVE_NOAPI(H5T_init())
-} /* H5T_init_precis_interface() */
 
 
 /*-------------------------------------------------------------------------
@@ -119,7 +95,7 @@ done:
 size_t
 H5T_get_precision(const H5T_t *dt)
 {
-    size_t	ret_value;
+    size_t	ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI(0)
 

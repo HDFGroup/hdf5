@@ -28,7 +28,8 @@
 /* Module Setup */
 /****************/
 
-#define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
+#include "H5HFmodule.h"         /* This source code file is part of the H5HF module */
+
 
 /***********/
 /* Headers */
@@ -110,7 +111,7 @@ H5HF_hdr_t *
 H5HF_hdr_alloc(H5F_t *f)
 {
     H5HF_hdr_t *hdr = NULL;          /* Shared fractal heap header */
-    H5HF_hdr_t *ret_value;              /* Return value */
+    H5HF_hdr_t *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -343,7 +344,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 {
     H5HF_hdr_t *hdr = NULL;     /* The new fractal heap header information */
     size_t dblock_overhead;     /* Direct block's overhead */
-    haddr_t ret_value;          /* Return value */
+    haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -534,7 +535,7 @@ H5HF_hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, unsigned flags)
 {
     H5HF_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     H5HF_hdr_t *hdr;                    /* Fractal heap header */
-    H5HF_hdr_t *ret_value;              /* Return value */
+    H5HF_hdr_t *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
