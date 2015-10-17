@@ -19,6 +19,23 @@ EXAMPLE1LOG=""
 EXAMPLE2LOG=""
 FAILED_TEST_LOGS=""
 
+# for the 1.8.14 release, binaries built with gcc 4.8.2 need the compiler 
+# directory added to the front of the PATH.
+USING_482=""
+USING_482=`ls | grep 482`
+if [ -n "$USING_482" ] ; then
+  PATH=/opt/gcc/4.8.2/bin:$PATH
+  export PATH
+  check_gfortran=`file /opt/gcc/4.8.2/bin/gfortran | grep 32-bit`
+  RETVAL=$?
+  if [ "$RETVAL" = "0" ]; then
+    LD_LIBRARY_PATH=/opt/gcc/4.8.2/lib
+  else
+    LD_LIBRARY_PATH=/opt/gcc/4.8.2/lib64
+  fi  
+  export LD_LIBRARY_PATH
+fi
+
 # step 0:  Check presence of top-level README file
 STEP0RESULT=0
 README_FILE=""
@@ -305,11 +322,11 @@ for f in $FILE_LIST ; do
     done
     if [ -n "$IS_MAC" ]; then  
       # Currently no shared libraries for Fortran are produced on the mac-intel machines
-      SHARED_LIBFILES="libhdf5_cpp.9.dylib libhdf5_hl_cpp.9.dylib libhdf5_hl.9.dylib libhdf5.9.dylib libsz.a"
+      SHARED_LIBFILES="libhdf5_cpp.11.dylib libhdf5_hl_cpp.10.dylib libhdf5_hl.10.dylib libhdf5.10.dylib libsz.a"
     elif [ -n "$IS_PPC64" ]; then
-      SHARED_LIBFILES="libhdf5_cpp.so.9.0.0 libhdf5_fortran.so.9.0.0 libhdf5_hl_cpp.so.9.0.0 libhdf5hl_fortran.so.9.0.0 libhdf5_hl.so.9.0.0 libhdf5.so.9.0.0"
+      SHARED_LIBFILES="libhdf5_cpp.so.11.0.0 libhdf5_fortran.so.10.0.2 libhdf5_hl_cpp.so.10.0.2 libhdf5hl_fortran.so.10.0.2 libhdf5_hl.so.10.0.2 libhdf5.so.10.1.0"
     else
-      SHARED_LIBFILES="libhdf5_cpp.so.9.0.0 libhdf5_fortran.so.9.0.0 libhdf5_hl_cpp.so.9.0.0 libhdf5hl_fortran.so.9.0.0 libhdf5_hl.so.9.0.0 libhdf5.so.9.0.0 libsz.so.2.0.0 libz.so.1.2.5"
+      SHARED_LIBFILES="libhdf5_cpp.so.11.0.0 libhdf5_fortran.so.10.0.2 libhdf5_hl_cpp.so.10.0.2 libhdf5hl_fortran.so.10.0.2 libhdf5_hl.so.10.0.2 libhdf5.so.10.0.2 libsz.so.2.0.0 libz.so.1.2.5"
     fi
     if [ -n "${SHAREDLIBS}" ]; then
       for s in $SHARED_LIBFILES ; do
@@ -428,6 +445,7 @@ for f in $FILE_LIST ; do
       rm -rf hdf5-examples
     fi
     svn co https://svn.hdfgroup.uiuc.edu/hdf5-examples/trunk/ hdf5-examples > checkout.log
+
     CC=$THIS_DIR/$EXTRACTED/bin/h5cc
     export CC
     FC=$THIS_DIR/$EXTRACTED/bin/h5fc

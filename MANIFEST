@@ -44,7 +44,7 @@
 ./bin/COPYING
 ./bin/bbrelease       _DO_NOT_DISTRIBUTE_
 ./bin/buildhdf5
-./bin/build_and_package_hdf5_binaries.sh  _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/build_and_package_hdf5_binaries.sh  _DO_NOT_DISTRIBUTE_
 ./bin/checkapi        _DO_NOT_DISTRIBUTE_
 ./bin/checkposix      _DO_NOT_DISTRIBUTE_
 ./bin/chkconfigure      _DO_NOT_DISTRIBUTE_
@@ -54,14 +54,14 @@
 ./bin/compile
 ./bin/config.guess
 ./bin/config.sub
-./bin/debug-ohdr      _DO_NOT_DISTRIBUTE_
+./bin/debug-ohdr             _DO_NOT_DISTRIBUTE_
 ./bin/dependencies
 ./bin/depcomp
 ./bin/deploy
 ./bin/distdep
-./bin/errors              _DO_NOT_DISTRIBUTE_
+./bin/errors                 _DO_NOT_DISTRIBUTE_
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
-./bin/genltanalyze      _DO_NOT_DISTRIBUTE_
+./bin/genltanalyze           _DO_NOT_DISTRIBUTE_
 ./bin/h5vers
 ./bin/install-sh
 ./bin/iostats
@@ -71,22 +71,23 @@
 ./bin/make_overflow
 ./bin/make_vers
 ./bin/makehelp
-./bin/make1814TarFiles.pl       _DO_NOT_DISTRIBUTE_
-./bin/makeInternal1814README.pl _DO_NOT_DISTRIBUTE_
-./bin/makeOuter1814README.pl    _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/make1816TarFiles.pl       _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/makeInternal1816README.pl _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/makeOuter1816README.pl    _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/h5rmflags                 _DO_NOT_DISTRIBUTE_
 ./bin/missing
 ./bin/mkdirs
 ./bin/mkinstalldirs
 ./bin/newer
-./bin/reconfigure      _DO_NOT_DISTRIBUTE_
+./bin/reconfigure                   _DO_NOT_DISTRIBUTE_
 ./bin/output_filter.sh
 ./bin/release
-./bin/runtest        _DO_NOT_DISTRIBUTE_
+./bin/runtest                       _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
-./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
+./bin/snapshot_version              _DO_NOT_DISTRIBUTE_
 ./bin/test-driver
-./bin/testh51814binary.sh       _DO_NOT_DISTRIBUTE_
-./bin/timekeeper      _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/testbinaries.sh     _DO_NOT_DISTRIBUTE_
+./bin/timekeeper                    _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
 

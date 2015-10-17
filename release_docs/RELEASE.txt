@@ -431,7 +431,7 @@ They are built with the configure process unless specified otherwise.
     64-bit    			  gfortran GNU Fortran (GCC) 4.9.2
     (wren/quail)                  Intel icc/icpc/ifort version 15.0.3
 
-    Mac OS X Yosemeti 10.10.5     Apple clang/clang++ version 6.0 from Xcode 7.0.0
+    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.0 from Xcode 7.0.0
     64-bit    			  gfortran GNU Fortran (GCC) 4.9.2
     (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
 
@@ -484,7 +484,7 @@ Mac OS X Yosemeti 10.10.5 64-bit           y       n         y         y
 AIX 6.1 32- and 64-bit                     y       n         n         y
 CentOS 6.7 Linux 2.6.32 x86_64 GNU         y       y         y         y
 CentOS 6.7 Linux 2.6.32 x86_64 Intel       y       y         y         y
-CentOS 6.7 Linux 2.6.32 x86_64 PGI         y       y         y         n
+CentOS 6.7 Linux 2.6.32 x86_64 PGI         y       y         y         y
 CentOS 7.1 Linux 3.10.0 x86_64 GNU         y       y         y         y
 CentOS 7.1 Linux 3.10.0 x86_64 Intel       y       y         y         y
 Linux 2.6.32-431.11.2.el6.ppc64            y       y         y         y

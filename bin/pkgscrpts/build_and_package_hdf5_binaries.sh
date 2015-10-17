@@ -40,6 +40,7 @@ while [ $# -gt 0 ]; do
             ;;
         -b*)
             BINARYDIR=`echo $1 | sed -e s/-b//`
+            shift
             ;;
         *)
             echo "Unknown option ($1)"
@@ -134,7 +135,7 @@ if [ -f $LOGFILE ]; then
 fi
 )
 
-#(cd $HOME/snapshots-bin-${sw}${SWVERSTR}; touch $REPOLOG; $CMD -nodiff -norepo -all) > $LOGFILE 2>&1
+(cd $HOME/snapshots-bin-${sw}${SWVERSTR}; touch $REPOLOG; $CMD -nodiff -norepo -all) > $LOGFILE 2>&1
 
 # Verify test script did complete by checking the last lines
 #(tail -4 $LOGFILE | grep -s "^*** finished .* in $HOSTNAME ***" > /dev/null 2>&1) ||
@@ -163,7 +164,7 @@ if [ $errcode -eq 0 ]; then
     DEPLOYDIR=`grep "deploydir \/mnt" ./snaptest.cfg | sed "s/^.*deploydir //"`
     echo "Make binary tar files from deployed files in $DEPLOYDIR in $BINARYDIR" 
     CURRENT_DIR=`pwd`
-    cd current/bin;perl ./make1814TarFiles.pl $DEPLOYDIR $BINARYDIR
+    cd current/bin/pkgscrpts;perl $CURRENT_DIR/current/bin/pkgscrpts/make1816TarFiles.pl $DEPLOYDIR $BINARYDIR
     cd $CURRENT_DIR
 else 
     echo "errcode was $errcode;  no tar files were created."

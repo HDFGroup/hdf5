@@ -125,8 +125,6 @@ elsif ($hostname =~ /freedom/) {
    $platformstring = "\nthat was compiled on: " . $hostnamestring[0]." " . $hostnamestring[2]." " . $hostnamestring[-1] . " ";
 } elsif ($hostname =~ /emu/) {
    $platformstring = "\nthat was compiled on: " . $hostnamestring[0]." " . $hostnamestring[2] . " " . $hostnamestring[-2] . " ";
-} elsif ($hostname =~ /fred/) {
-   $platformstring = "\nthat was compiled on: " . $hostnamestring[0]." " . $hostnamestring[2] . " " . $hostnamestring[-1] . " ";
 } else {
    $_ = $hostnamestring[2];
    my $pos = index $_, '-';
@@ -164,22 +162,28 @@ print OUTFILE "compilers:\n\n";
 # Only the gcc compiler version is in libhdf5.settings, so for now I looked 
 # up the versions and hardcoded them here.  We will put them in libhdf5.settings
 # for the next release.
-if ($indirectory =~ /gnu482/) {
+if ($indirectory =~ /gcc482/) {
    print OUTFILE "\tgcc, g++, and gfortran 4.8.2\n\n";
-} elsif ($hostname =~ /jam/ || $hostname =~ /koala/) {
-   print OUTFILE "\tgcc, g++, and gfortran 4.1.2\n\n";
-} elsif ($hostname =~ /platypus/) {
+   print OUTFILE "\tWarning!\n";
+   print OUTFILE "\tIf the 4.8.2 version is not the system default, the scripts listed below\n";
+   print OUTFILE "\tfor compiling applications will not work unless either the environment\n";
+   print OUTFILE "\tis modified or the full path to the 4.8.2 compiler version is added to\n";
+   print OUTFILE "\tthe scripts in variables CCBASE, CCLINKERBASE for h5cc and corresponding\n";
+   print OUTFILE "\tvariables for other compilers.\n\n";
+} elsif ($hostname =~ /platypus/ || $hostname =~ /ostrich/) {
    print OUTFILE "\tgcc, g++, and gfortran 4.4.7\n\n";
+} elsif ($hostname =~ /moohan/) {
+   print OUTFILE "\tgcc, g++, and gfortran 4.8.3\n\n";
 } elsif ($hostname =~ /emu/) {
    print OUTFILE "\tSun C and C++ 5.12, Sun Fortran 95 8.6\n\n";
 } elsif ($hostname =~ /loyalty/ || $hostname =~ /freedom/) {
    print OUTFILE "\tgcc, g++, and gfortran 4.6.1\n\n";    
-} elsif ($hostname =~ /duck/) {
-   print OUTFILE "\tApple clang/clang++ 3.0 from Xcode 4.6.1 and gfortran 4.8.2\n\n";
 } elsif ($hostname =~ /kite/) {
-   print OUTFILE "\tApple clang/clang++ 5.1 from Xcode 5.0.2 and gfortran 4.8.2\n\n";
+   print OUTFILE "\tApple clang/clang++ 5.1 from Xcode 5.1 and gfortran 4.8.2\n\n";
 } elsif ($hostname =~ /quail/) {
-   print OUTFILE "\tgcc, g++ 5.1 from Xcode 5.1 and gfortran 4.8.2\n\n";
+   print OUTFILE "\tgcc, g++ 6.0 from Xcode 6.2.0 and gfortran 4.9.2\n\n";
+} elsif ($hostname =~ /osx1010test/) {
+   print OUTFILE "\tgcc, g++ 6.0 from Xcode 7.0.0 and gfortran 4.9.2\n\n";
 }
 
 print OUTFILE $section2;
