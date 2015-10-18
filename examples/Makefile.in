@@ -636,8 +636,8 @@ EXTLINK_DIRS = red blue u2w
 
 # Example directory
 # Note: no '/' after DESTDIR.  Explanation in commence.am
-EXAMPLEDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples/c
-EXAMPLETOPDIR = ${DESTDIR}$(exec_prefix)/share/hdf5_examples
+EXAMPLEDIR = ${DESTDIR}$(datarootdir)/hdf5_examples/c
+EXAMPLETOPDIR = ${DESTDIR}$(datarootdir)/hdf5_examples
 @BUILD_SHARED_SZIP_CONDITIONAL_TRUE@LD_LIBRARY_PATH = $(LL_PATH)
 
 # Assume that all tests in this directory are examples, and tell
