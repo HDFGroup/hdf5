@@ -23,14 +23,15 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
-set(CTEST_SOURCE_VERSION 1.9)
+set(CTEST_SOURCE_VERSION 1.8.16)
+set(CTEST_SOURCE_VERSEXT "-pre1")
 
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
-#INSTALLDIR - HDF5-1.9 root folder
+#INSTALLDIR - HDF5-1.8 root folder
 #CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF5-1.9
+#CTEST_SOURCE_NAME - name of source folder; HDF5-1.8
 #STATICLIBRARIES - Default is YES
 #NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
 if(DEFINED CTEST_SCRIPT_ARG)
@@ -50,15 +51,15 @@ if(NOT DEFINED BUILD_GENERATOR)
   message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2013, VS201364, VS2012, or VS201264")
 else()
   if(${BUILD_GENERATOR} STREQUAL "Unix")
-    set(CMAKE_GENERATOR "Unix Makefiles")
+    set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
   elseif(${BUILD_GENERATOR} STREQUAL "VS2013")
-    set(CMAKE_GENERATOR "Visual Studio 12 2013")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 12 2013")
   elseif(${BUILD_GENERATOR} STREQUAL "VS201364")
-    set(CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
   elseif(${BUILD_GENERATOR} STREQUAL "VS2012")
-    set(CMAKE_GENERATOR "Visual Studio 11 2012")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 11 2012")
   elseif(${BUILD_GENERATOR} STREQUAL "VS201264")
-    set(CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
   else()
     message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2013, VS201364, VS2012, or VS201264")
   endif()
@@ -66,9 +67,9 @@ endif()
 
 if(NOT DEFINED INSTALLDIR)
   if(WIN32)
-    set(INSTALLDIR "/usr/local/myhdf5")
-  else()
     set(INSTALLDIR "C:\\Program\ Files\\myhdf5")
+  else()
+    set(INSTALLDIR "/usr/local/myhdf5")
   endif()
 endif()
 if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
@@ -145,9 +146,9 @@ set(MODEL "Experimental")
 #set(LOCAL_NO_PACKAGE "TRUE")
 #####       Following controls source update                  #####
 #set(LOCAL_UPDATE "TRUE")
-set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/trunk")
+set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8_16")
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
-#set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
+#set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
 ###################################################################
 
 ###################################################################
