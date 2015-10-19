@@ -34,7 +34,7 @@ if (BUILD_SHARED_LIBS)
       ${HDF5_LIBSH_TARGET}
   )
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_CPP_LIBSH_TARGET}")
-  H5_SET_LIB_OPTIONS (${HDF5_HL_CPP_LIBSH_TARGET} ${HDF5_HL_CPP_LIB_NAME} SHARED)
+  H5_SET_LIB_OPTIONS (${HDF5_HL_CPP_LIBSH_TARGET} ${HDF5_HL_CPP_LIB_NAME} SHARED ${HDF5_HL_CXX_PACKAGE_SOVERSION})
   set_target_properties (${HDF5_HL_CPP_LIBSH_TARGET} PROPERTIES
       FOLDER libraries/hl
       COMPILE_DEFINITIONS "H5_BUILT_AS_DYNAMIC_LIB"
@@ -45,7 +45,7 @@ if (BUILD_SHARED_LIBS)
 endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
-# Add file(s) to CMake Install 
+# Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
 install (
     FILES
@@ -63,7 +63,7 @@ if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_HL_CPP_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hlcpplibraries)
   endif (BUILD_SHARED_LIBS)
-  
+
   install (
       TARGETS
           ${install_targets}
