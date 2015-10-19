@@ -784,14 +784,17 @@ if (HDF5_GENERATE_HEADERS)
   find_package (Perl)
   if (PERL_FOUND)
     execute_process (
-        COMMAND ${PERL_EXECUTABLE} ${HDF5_SOURCE_DIR}/bin/make_err ${HDF5_SRC_DIR}/H5err.txt
+        COMMAND ${PERL_EXECUTABLE} ${HDF5_SOURCE_DIR}/bin/make_err ${HDF5_SRC_DIR}/H5err.txt OUTPUT_VARIABLE SCRIPT_OUTPUT
     )
+    message(STATUS ${SCRIPT_OUTPUT})
     execute_process (
-        COMMAND ${PERL_EXECUTABLE} ${HDF5_SOURCE_DIR}/bin/make_vers ${HDF5_SRC_DIR}/H5vers.txt
+        COMMAND ${PERL_EXECUTABLE} ${HDF5_SOURCE_DIR}/bin/make_vers ${HDF5_SRC_DIR}/H5vers.txt OUTPUT_VARIABLE SCRIPT_OUTPUT
     )
+    message(STATUS ${SCRIPT_OUTPUT})
     execute_process (
-        COMMAND ${PERL_EXECUTABLE} ${HDF5_SOURCE_DIR}/bin/make_overflow ${HDF5_SRC_DIR}/H5overflow.txt
+        COMMAND ${PERL_EXECUTABLE} ${HDF5_SOURCE_DIR}/bin/make_overflow ${HDF5_SRC_DIR}/H5overflow.txt OUTPUT_VARIABLE SCRIPT_OUTPUT
     )
+    message(STATUS ${SCRIPT_OUTPUT})
   else (PERL_FOUND)
     message (STATUS "Cannot generate headers - perl not found")
   endif (PERL_FOUND)
