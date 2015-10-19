@@ -454,7 +454,6 @@ set (H5O_SRCS
     ${HDF5_SRC_DIR}/H5Oshared.c
     ${HDF5_SRC_DIR}/H5Oshmesg.c
     ${HDF5_SRC_DIR}/H5Ostab.c
-    ${HDF5_SRC_DIR}/H5Ostorage.c
     ${HDF5_SRC_DIR}/H5Otest.c
     ${HDF5_SRC_DIR}/H5Ounknown.c
 )
