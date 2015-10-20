@@ -263,7 +263,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                 unsigned offset_nbytes;         /* Size needed to encode member offsets */
                 size_t max_memb_pos = 0;        /* Maximum member covered, so far */
                 unsigned max_version = 0;       /* Maximum member version */
-                hbool_t upgrade_to = 0;         /* Version number we can "soft" upgrade to */
+                unsigned upgrade_to = 0;         /* Version number we can "soft" upgrade to */
                 unsigned j;
 
                 /* Compute the # of bytes required to store a member offset */

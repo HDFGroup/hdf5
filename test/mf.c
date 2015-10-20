@@ -6802,7 +6802,7 @@ test_mf_fs_drivers(hid_t fapl)
     hid_t	fcpl = -1;	/* file creation property list */
     hid_t	fapl_new = -1;	/* copy of file access property list */
     hid_t	fapl2 = -1;	/* copy of file access property list */
-    hbool_t	new_format;	/* To use new library format or not */
+    unsigned	new_format;	/* To use new library format or not */
     unsigned 	ret = 0;	/* return value */
 
     H5FD_mem_t	memb_map[H5FD_MEM_NTYPES];	/* Memory usage map */
@@ -7227,7 +7227,7 @@ test_filespace_drivers(hid_t fapl)
 {
     hid_t	fapl_new = -1;		/* copy of file access property list */
     hid_t	fapl2 = -1;		/* copy of file access property list */
-    hbool_t	new_format;		/* Using library new format or not */
+    unsigned	new_format;		/* Using library new format or not */
     unsigned 	ret = 0;		/* return value */
 
     H5FD_mem_t	memb_map[H5FD_MEM_NTYPES];	/* Memory usage map */
