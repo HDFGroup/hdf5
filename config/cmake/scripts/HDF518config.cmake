@@ -11,6 +11,8 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 # where valid options for OPTION are:
 #     BUILD_GENERATOR - The cmake build generator:
 #            Unix    * Unix Makefiles
+#            VS2015    * Visual Studio 14 2015
+#            VS201564 * Visual Studio 14 2015 Win64
 #            VS2013    * Visual Studio 12 2013
 #            VS201364 * Visual Studio 12 2013 Win64
 #            VS2012    * Visual Studio 11 2012
@@ -24,6 +26,7 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 ##############################################################################
 
 set(CTEST_SOURCE_VERSION 1.8.16)
+set(CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
 # handle input parameters to script.
@@ -52,6 +55,10 @@ if(NOT DEFINED BUILD_GENERATOR)
 else()
   if(${BUILD_GENERATOR} STREQUAL "Unix")
     set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS2015")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 14 2015")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS201564")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 14 2015 Win64")
   elseif(${BUILD_GENERATOR} STREQUAL "VS2013")
     set(CTEST_CMAKE_GENERATOR "Visual Studio 12 2013")
   elseif(${BUILD_GENERATOR} STREQUAL "VS201364")
@@ -100,7 +107,15 @@ endif()
 if(WIN32)
   set(SITE_OS_NAME "Windows")
   set(SITE_OS_VERSION "WIN7")
-  if(${BUILD_GENERATOR} STREQUAL "VS201364")
+  if(${BUILD_GENERATOR} STREQUAL "VS201564")
+    set(SITE_OS_BITS "64")
+    set(SITE_COMPILER_NAME "vs2015")
+    set(SITE_COMPILER_VERSION "14")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS2015")
+    set(SITE_OS_BITS "32")
+    set(SITE_COMPILER_NAME "vs2015")
+    set(SITE_COMPILER_VERSION "14")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS201364")
     set(SITE_OS_BITS "64")
     set(SITE_COMPILER_NAME "vs2013")
     set(SITE_COMPILER_VERSION "12")
