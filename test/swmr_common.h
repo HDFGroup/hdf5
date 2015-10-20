@@ -1,13 +1,3 @@
-#ifndef _SWMR_COMMON_H
-#define _SWMR_COMMON_H
-
-/* Headers needed */
-
-#include <limits.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
@@ -23,19 +13,23 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#ifndef _SWMR_COMMON_H
+#define _SWMR_COMMON_H
+
+/* Headers needed */
+
+#include <limits.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+
 #include "hdf5.h"
 #include "h5test.h"
 
 /**********/
 /* Macros */
 /**********/
-
-#ifndef TRUE
-#define TRUE 1
-#endif /* TRUE */
-#ifndef FALSE
-#define FALSE 0
-#endif /* FALSE */
 
 #define NLEVELS         5   /* # of datasets in the SWMR test file */
 
@@ -81,3 +75,4 @@ int shutdown_symbols(void);
 int print_metadata_retries_info(hid_t fid);
 
 #endif /* _SWMR_COMMON_H */
+

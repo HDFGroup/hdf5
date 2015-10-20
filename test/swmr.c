@@ -5238,7 +5238,6 @@ main(void)
 #endif
 
     /* Tests on H5Pget/set_metadata_read_attempts() and H5Fget_metadata_read_retry_info() */
-    /* These two tests are moved from tfile.c */
     nerrors += test_metadata_read_attempts(fapl);
     nerrors += test_metadata_read_retry_info(fapl);
 

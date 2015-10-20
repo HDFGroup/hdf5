@@ -113,9 +113,7 @@ if [ $rc -ne 0 ] ; then
     exit 0
 fi
 
-# Parse option
-#   -p   run ph5diff tests
-#   -h   print help page
+# Parse options (none accepted at this time)
 while [ $# -gt 0 ]; do
     case "$1" in
     *)  # unknown option
