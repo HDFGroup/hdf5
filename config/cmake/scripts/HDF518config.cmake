@@ -19,7 +19,7 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_BUILD_CONFIGURATION  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
-#     STATICLIBRARIES  -  Build/use static libraries
+#     STATIC_LIBRARIES  -  Build/use static libraries
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
