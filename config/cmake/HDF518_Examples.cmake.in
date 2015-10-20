@@ -7,14 +7,14 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 
 set(CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
 set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
-#set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
 
 # handle input parameters to script.
 #INSTALLDIR - HDF5-1.8 root folder
 #CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF4Examples
-#STATICLIBRARIES - Default is YES
-#NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac)
+#STATIC_LIBRARIES - Default is YES
+#FORTRAN_LIBRARIES - Default is NO
+##NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac)
 if(DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
     # script.ctest,var1=value1,var2=value2
@@ -37,6 +37,9 @@ if(NOT DEFINED CTEST_SOURCE_NAME)
 endif()
 if(NOT DEFINED STATIC_LIBRARIES)
     set(STATICLIBRARIES "YES")
+endif()
+if(NOT DEFINED FORTRAN_LIBRARIES)
+    set(FORTRANLIBRARIES "NO")
 endif()
 
 #TAR_SOURCE - name of tarfile
@@ -65,6 +68,12 @@ else(WIN32)
   set(CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_SOURCE_NAME}")
   set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_BINARY_NAME}")
 endif(WIN32)
+if(${FORTRANLIBRARIES})
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
+else()
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
+endif()
+set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PACKAGE@@HDF_PACKAGE_EXT@")
 
 ###############################################################################################################
 # For any comments please contact cdashhelp@hdfgroup.org

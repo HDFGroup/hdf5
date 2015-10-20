@@ -28,10 +28,11 @@ set(CTEST_SOURCE_VERSION 1.8.16)
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
-#INSTALLDIR - HDF5-1.8.16 root folder
+#INSTALLDIR - HDF5-1.8 root folder
 #CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.8.16
-#STATICLIBRARIES - Default is YES
+#STATIC_LIBRARIES - Default is YES
+#FORTRAN_LIBRARIES - Default is NO
 #NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
 if(DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
@@ -77,10 +78,10 @@ endif()
 if(NOT DEFINED CTEST_SOURCE_NAME)
     set(CTEST_SOURCE_NAME "hdf5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
 endif()
-if(NOT DEFINED STATICLIBRARIES)
+if(NOT DEFINED STATIC_LIBRARIES)
     set(STATICLIBRARIES "YES")
 endif()
-if(NOT DEFINED FORTRANLIBRARIES)
+if(NOT DEFINED FORTRAN_LIBRARIES)
     set(FORTRANLIBRARIES "NO")
 endif()
 
@@ -179,9 +180,13 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
 ####      fortran       ####
 if(${FORTRANLIBRARIES})
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
   ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
+else()
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=OFF")
 endif()
 
 ### disable test program builds
