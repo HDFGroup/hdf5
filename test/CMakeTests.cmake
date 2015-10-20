@@ -229,6 +229,8 @@ set (HDF5_REFERENCE_TEST_FILES
     be_data.h5
     be_extlink1.h5
     be_extlink2.h5
+    btree_idx_1_6.h5
+    btree_idx_1_8.h5
     corrupt_stab_msg.h5
     deflate.h5
     family_v16_00000.h5
