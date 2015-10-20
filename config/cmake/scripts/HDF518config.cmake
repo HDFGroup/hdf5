@@ -19,7 +19,7 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_BUILD_CONFIGURATION  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
-#     STATICLIBRARIES  -  Build/use static libraries
+#     STATIC_LIBRARIES  -  Build/use static libraries
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
@@ -50,15 +50,15 @@ if(NOT DEFINED BUILD_GENERATOR)
   message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2013, VS201364, VS2012, or VS201264")
 else()
   if(${BUILD_GENERATOR} STREQUAL "Unix")
-    set(CMAKE_GENERATOR "Unix Makefiles")
+    set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
   elseif(${BUILD_GENERATOR} STREQUAL "VS2013")
-    set(CMAKE_GENERATOR "Visual Studio 12 2013")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 12 2013")
   elseif(${BUILD_GENERATOR} STREQUAL "VS201364")
-    set(CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
   elseif(${BUILD_GENERATOR} STREQUAL "VS2012")
-    set(CMAKE_GENERATOR "Visual Studio 11 2012")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 11 2012")
   elseif(${BUILD_GENERATOR} STREQUAL "VS201264")
-    set(CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
   else()
     message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2013, VS201364, VS2012, or VS201264")
   endif()
@@ -66,9 +66,9 @@ endif()
 
 if(NOT DEFINED INSTALLDIR)
   if(WIN32)
-    set(INSTALLDIR "/usr/local/myhdf5")
-  else()
     set(INSTALLDIR "C:\\Program\ Files\\myhdf5")
+  else()
+    set(INSTALLDIR "/usr/local/myhdf5")
   endif()
 endif()
 if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
@@ -155,12 +155,12 @@ set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8_16")
 ####  format: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")
 
 ###################################################################
-if(STATICLIBRARIES)
+if(${STATICLIBRARIES})
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
   #########       Following describes computer           ############
   ## following is optional to describe build                       ##
   set(SITE_BUILDNAME_SUFFIX "STATIC")
-endif(STATICLIBRARIES)
+endif()
 ###################################################################
 
 ### uncomment/comment and change the following lines for other configuration options
@@ -178,11 +178,11 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
 ####      fortran       ####
-if(FORTRANLIBRARIES)
+if(${FORTRANLIBRARIES})
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
   ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
-endif(FORTRANLIBRARIES)
+endif()
 
 ### disable test program builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_TESTING:BOOL=OFF")

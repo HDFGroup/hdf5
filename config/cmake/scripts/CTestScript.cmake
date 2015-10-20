@@ -56,6 +56,13 @@ if(APPLE)
   set(ENV{CC} "${XCODE_CC}")
   set(ENV{CXX} "${XCODE_CXX}")
 
+  if(NOT NO_MAC_FORTRAN)
+    # Shared fortran is not supported, build static 
+    set(BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
+  else(NOT NO_MAC_FORTRAN)
+    set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+  endif(NOT NO_MAC_FORTRAN)
+
   set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
 endif(APPLE)
 
@@ -66,10 +73,10 @@ if(CTEST_USE_TAR_SOURCE)
   ## Uncompress source if tar file provided
   ## --------------------------
   if(WIN32)
-    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} x ${CTEST_USE_TAR_SOURCE}.zip]")
+    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} x ${CTEST_DASHBOARD_ROOT}\\${CTEST_USE_TAR_SOURCE}.zip]")
     execute_process(COMMAND ${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}\\${CTEST_USE_TAR_SOURCE}.zip RESULT_VARIABLE rv)
   else()
-    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_USE_TAR_SOURCE}.tar]")
+    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}/${CTEST_USE_TAR_SOURCE}.tar]")
     execute_process(COMMAND ${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}/${CTEST_USE_TAR_SOURCE}.tar RESULT_VARIABLE rv)
   endif()
 
