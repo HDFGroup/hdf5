@@ -156,12 +156,12 @@ set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8_16")
 ####  format: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")
 
 ###################################################################
-if(STATICLIBRARIES)
+if(${STATICLIBRARIES})
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
   #########       Following describes computer           ############
   ## following is optional to describe build                       ##
   set(SITE_BUILDNAME_SUFFIX "STATIC")
-endif(STATICLIBRARIES)
+endif()
 ###################################################################
 
 ### uncomment/comment and change the following lines for other configuration options
@@ -179,11 +179,11 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
 ####      fortran       ####
-if(FORTRANLIBRARIES)
+if(${FORTRANLIBRARIES})
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
   ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
-endif(FORTRANLIBRARIES)
+endif()
 
 ### disable test program builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_TESTING:BOOL=OFF")
