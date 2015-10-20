@@ -225,14 +225,12 @@ They are built with the configure process unless specified otherwise.
                                   Sun C++ 5.12 SunOS_sparc
 
     Windows 7                     Visual Studio 2008  (cmake)
-                                  Visual Studio 2010 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
-                                  Cygwin(CYGWIN_NT-6.1 1.7.34(0.285/5/3) gcc(4.9.2) compiler and gfortran)
+                                  Cygwin(CYGWIN_NT-6.1 2.2.1(0.289/5/3) gcc(4.9.3) compiler and gfortran)
                                   (cmake and autotools)
 
     Windows 7 x64                 Visual Studio 2008  (cmake)
-                                  Visual Studio 2010 w/ Intel Fortran 14 (cmake)
                                   Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
 
@@ -344,14 +342,14 @@ The following platforms are not supported but have been tested for this release.
                                   g++ 4.6.1 20110527
                                   gfortran 4.6.1 20110527
 
+    Mac OS X El Capitan 10.11     Apple clang/clang++ version 7.0.0 from Xcode 7.0.1
+    64-bit    			  gfortran GNU Fortran (GCC) 5.2.0
+    (VM)
+
     Debian7.5.0 3.2.0-4-amd64 #1 SMP Debian 3.2.51-1 x86_64 GNU/Linux
                                   gcc (Debian 4.7.2-5) 4.7.2
                                   GNU Fortran (Debian 4.7.2-5) 4.7.2
                                   (cmake and autotools)
-
-    Mac OS X El Capitan 10.11     Apple clang/clang++ version 7.0.0 from Xcode 7.0.1
-    64-bit    			  gfortran GNU Fortran (GCC) 5.2.0
-    (VM)      
 
     Fedora20 3.15.3-200.fc20.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
                                   gcc (GCC) 4.8.3 20140624 (Red Hat 4.8.3-1)
