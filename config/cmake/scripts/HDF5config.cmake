@@ -52,7 +52,7 @@ endif()
 
 # build generator must be defined
 if(NOT DEFINED BUILD_GENERATOR)
-  message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2013, VS201364, VS2012, or VS201264")
+  message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
 else()
   if(${BUILD_GENERATOR} STREQUAL "Unix")
     set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
@@ -69,7 +69,7 @@ else()
   elseif(${BUILD_GENERATOR} STREQUAL "VS201264")
     set(CTEST_CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
   else()
-    message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2013, VS201364, VS2012, or VS201264")
+    message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
   endif()
 endif()
 
