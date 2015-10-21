@@ -1,8 +1,8 @@
-##########################################################################################
-### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                    ###
-### BUILD_GENERATOR required [Unix, VS2013, VS201364, VS2012, VS201264]                ###
-### ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf518.log   ###
-##########################################################################################
+#############################################################################################
+### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
+### BUILD_GENERATOR required [Unix, VS2015, VS201564, VS2013, VS201364, VS2012, VS201264] ###
+### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf519.log        ###
+#############################################################################################
 
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 ############################################################################
@@ -22,6 +22,7 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 #     CTEST_BUILD_CONFIGURATION  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
 #     STATIC_LIBRARIES  -  Build/use static libraries
+#     FORTRAN_LIBRARIES -  Build/use fortran libraries
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
@@ -31,7 +32,7 @@ set(CTEST_SOURCE_VERSEXT "")
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
-#INSTALLDIR - HDF5-1.8 root folder
+#INSTALLDIR - HDF5-1.9 root folder
 #CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.9
 #STATIC_LIBRARIES - Default is YES
@@ -196,12 +197,8 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING
 ####      fortran       ####
 if(${FORTRANLIBRARIES})
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
-  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
 else()
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
-  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=OFF")
 endif()
 
 ### disable test program builds
