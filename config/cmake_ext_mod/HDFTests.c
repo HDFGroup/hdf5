@@ -213,7 +213,7 @@ SIMPLE_TEST(struct stat sb; sb.st_blocks=0);
 
 int main(void)
 {
-  char *llwidthArgs[] = { "l64", "l", "L", "q", "ll", NULL };
+  char *llwidthArgs[] = { "I64", "l64", "l", "L", "q", "ll", NULL };
   char *s = malloc(128);
   char **currentArg = NULL;
   LL_TYPE x = (LL_TYPE)1048576 * (LL_TYPE)1048576;

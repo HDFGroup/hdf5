@@ -1,8 +1,8 @@
-##########################################################################################
-### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                    ###
-### BUILD_GENERATOR required [Unix, VS2013, VS201364, VS2012, VS201264]                ###
-### ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf518.log   ###
-##########################################################################################
+#############################################################################################
+### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
+### BUILD_GENERATOR required [Unix, VS2015, VS201564, VS2013, VS201364, VS2012, VS201264] ###
+### ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf518.log      ###
+#############################################################################################
 
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 ############################################################################
@@ -22,6 +22,7 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 #     CTEST_BUILD_CONFIGURATION  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
 #     STATIC_LIBRARIES  -  Build/use static libraries
+#     FORTRAN_LIBRARIES -  Build/use fortran libraries
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
