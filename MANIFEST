@@ -1043,6 +1043,10 @@
 ./test/gen_filters.c
 ./test/chunk_info.c
 ./test/vds.c
+./test/vds_swmr.h
+./test/vds_swmr_gen.c
+./test/vds_swmr_reader.c
+./test/vds_swmr_writer.c
 
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2
