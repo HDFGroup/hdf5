@@ -228,12 +228,25 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 # This script will build and run the examples from a folder
 # Execute from a command line:
 #     ctest -S HDF5_Examples.cmake,OPTION=VALUE -C Release -V -O test.log
-###############################################################################################################
-
-set(CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
-set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
-
+# where valid options for OPTION are:
+#     BUILD_GENERATOR - The cmake build generator:
+#            Unix    * Unix Makefiles
+#            VS2015    * Visual Studio 14 2015
+#            VS201564 * Visual Studio 14 2015 Win64
+#            VS2013    * Visual Studio 12 2013
+#            VS201364 * Visual Studio 12 2013 Win64
+#            VS2012    * Visual Studio 11 2012
+#            VS201264 * Visual Studio 11 2012 Win64
+#
+#     INSTALLDIR  -  root folder where hdf5 is installed
+#     CTEST_BUILD_CONFIGURATION  - Release, Debug, etc
+#     CTEST_SOURCE_NAME  -  source folder
+#     STATIC_LIBRARIES  -  Build/use static libraries
+#     FORTRAN_LIBRARIES -  Build/use fortran libraries
+#     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
+##############################################################################
 # handle input parameters to script.
+#BUILD_GENERATOR - which CMake generator to use, required
 #INSTALLDIR - HDF5 root folder
 #CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF4Examples
@@ -251,8 +264,38 @@ if(DEFINED CTEST_SCRIPT_ARG)
         endif()
     endforeach()
 endif()
+
+# build generator must be defined
+if(NOT DEFINED BUILD_GENERATOR)
+  message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
+else()
+  if(${BUILD_GENERATOR} STREQUAL "Unix")
+    set(CMAKE_GENERATOR "Unix Makefiles")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS2015")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 14 2015")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS201564")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 14 2015 Win64")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS2013")
+    set(CMAKE_GENERATOR "Visual Studio 12 2013")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS201364")
+    set(CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS2012")
+    set(CMAKE_GENERATOR "Visual Studio 11 2012")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS201264")
+    set(CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
+  else()
+    message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
+  endif()
+endif()
+set(CTEST_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
+set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
+
 if(NOT DEFINED INSTALLDIR)
-    set(INSTALLDIR "@CMAKE_INSTALL_PREFIX@")
+  if(WIN32)
+    set(INSTALLDIR "C:\\Program\ Files\\myhdf5")
+  else()
+    set(INSTALLDIR "/usr/local/myhdf5")
+  endif()
 endif()
 if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
     set(CTEST_BUILD_CONFIGURATION "Release")
