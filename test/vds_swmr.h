@@ -89,7 +89,7 @@
 #define N_MAX_PLANES   H5S_UNLIMITED
 
 /* Number of planes each writer will write */
-#define N_PLANES_TO_WRITE   1000
+#define N_PLANES_TO_WRITE   100
 
 /* Dataset datatypes */
 #define SOURCE_DATATYPE    H5T_STD_I32LE

@@ -19,6 +19,8 @@
 int
 main(int argc, char *argv[])
 {
+    hid_t faplid        = -1;   /* file access property list ID (all files) */
+
     hid_t src_sid       = -1;   /* source dataset's dataspace ID            */
     hid_t src_dcplid    = -1;   /* source dataset property list ID          */
 
@@ -60,6 +62,12 @@ main(int argc, char *argv[])
     start[2] = 0;
     map_start = 0;
 
+    /* All SWMR files need to use the latest file format */
+    if((faplid = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR
+    if(H5Pset_libver_bounds(faplid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR
+
     for(i = 0; i < N_SOURCES; i++) {
 
         /* source dataset dcpl */
@@ -78,7 +86,7 @@ main(int argc, char *argv[])
 
         /* Create source file, dataspace, and dataset */
         if((fid = H5Fcreate(FILE_NAMES[i], H5F_ACC_TRUNC,
-                        H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                        H5P_DEFAULT, faplid)) < 0)
             TEST_ERROR
         if((src_sid = H5Screate_simple(RANK, DIMS[i],
                         MAX_DIMS[i])) < 0)
@@ -123,7 +131,7 @@ main(int argc, char *argv[])
 
     /* file */
     if((fid = H5Fcreate(VDS_FILE_NAME, H5F_ACC_TRUNC,
-                    H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                    H5P_DEFAULT, faplid)) < 0)
         TEST_ERROR
 
     /* dataset */
@@ -132,6 +140,8 @@ main(int argc, char *argv[])
         TEST_ERROR
 
     /* close */
+    if(H5Pclose(faplid) < 0)
+        TEST_ERROR
     if(H5Pclose(vds_dcplid) < 0)
         TEST_ERROR
     if(H5Sclose(vds_sid) < 0)
@@ -146,6 +156,8 @@ main(int argc, char *argv[])
 error:
 
     H5E_BEGIN_TRY {
+        if(faplid >= 0)
+            (void)H5Pclose(faplid);
         if(src_sid >= 0)
             (void)H5Sclose(src_sid);
         if(src_dcplid >= 0)

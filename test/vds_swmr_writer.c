@@ -23,6 +23,7 @@ main(int argc, char *argv[])
     int file_number     = -1;   /* Source file number               */
 
     hid_t fid           = -1;   /* HDF5 file ID                     */
+    hid_t faplid        = -1;   /* file access property list ID                */
     hid_t did           = -1;   /* dataset ID                       */
     hid_t msid          = -1;   /* memory dataspace ID              */
     hid_t fsid          = -1;   /* file dataspace ID                */
@@ -47,7 +48,7 @@ main(int argc, char *argv[])
      * This is an integer index into the FILE_NAMES array. 
      */
     if(argc != 2) {
-        fprintf(stderr, "ERROR: Must pass the source file number on the command line.\n");
+        HDfprintf(stderr, "ERROR: Must pass the source file number on the command line.\n");
         return EXIT_FAILURE;
     }
 
@@ -56,7 +57,12 @@ main(int argc, char *argv[])
         TEST_ERROR
 
     /* Open the source file and dataset */
-    if((fid = H5Fopen(FILE_NAMES[file_number], H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+    /* All SWMR files need to use the latest file format */
+    if((faplid = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR
+    if(H5Pset_libver_bounds(faplid, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR
+    if((fid = H5Fopen(FILE_NAMES[file_number], H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, faplid)) < 0)
         TEST_ERROR
     if((did = H5Dopen2(fid, SOURCE_DSET_PATH, H5P_DEFAULT)) < 0)
         TEST_ERROR
@@ -64,7 +70,7 @@ main(int argc, char *argv[])
 
     /* Create a data buffer that represents a plane */
     n_elements = PLANES[file_number][1] * PLANES[file_number][2];
-    if(NULL == (buffer = (int *)malloc(n_elements * sizeof(int))))
+    if(NULL == (buffer = (int *)HDmalloc(n_elements * sizeof(int))))
         TEST_ERROR
 
     /* Create the memory dataspace */
@@ -73,6 +79,8 @@ main(int argc, char *argv[])
 
     /* Write planes to the dataset */
     for(i = 0; i < N_PLANES_TO_WRITE; i++) {
+
+        unsigned delay;     /* Time interval between plane writes */
 
         /* Set the dataset's extent. This is inefficient but that's ok here. */
         extent[0] = i + 1;
@@ -98,11 +106,22 @@ main(int argc, char *argv[])
             TEST_ERROR
 
         /* Write the plane to the dataset. */
+        printf("Writing plane: %d\n", i);
         if(H5Dwrite(did, H5T_NATIVE_INT, msid, fsid, H5P_DEFAULT, buffer) < 0)
             TEST_ERROR
 
-    } /* end for */
+        /* Wait one second between writing planes */
+        delay = time(0) + 1;
+        while(time(0) < delay)
+            ;
 
+        /* Flush */
+        if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+            TEST_ERROR
+
+    } /* end for */
+    if(H5Pclose(faplid) < 0)
+        TEST_ERROR
     if(H5Sclose(msid) < 0)
         TEST_ERROR
     if(H5Sclose(fsid) < 0)
@@ -111,7 +130,7 @@ main(int argc, char *argv[])
         TEST_ERROR
     if(H5Fclose(fid) < 0)
         TEST_ERROR
-    free(buffer);
+    HDfree(buffer);
 
     return EXIT_SUCCESS;
 
@@ -120,6 +139,8 @@ error:
     H5E_BEGIN_TRY {
         if(fid >= 0)
             (void)H5Fclose(fid);
+        if(faplid >= 0)
+            (void)H5Pclose(faplid);
         if(did >= 0)
             (void)H5Dclose(did);
         if(msid >= 0)
@@ -127,7 +148,7 @@ error:
         if(fsid >= 0)
             (void)H5Sclose(fsid);
         if(buffer != NULL)
-            free(buffer);
+            HDfree(buffer);
     } H5E_END_TRY
 
     return EXIT_FAILURE;
