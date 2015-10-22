@@ -141,10 +141,6 @@ MACRO (HDF_FUNCTION_TEST OTHER_TEST)
       set (OTHER_TEST_ADD_LIBRARIES "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
     endif (CMAKE_REQUIRED_LIBRARIES)
 
-    foreach (def ${HDF_EXTRA_TEST_DEFINITIONS})
-      set (MACRO_CHECK_FUNCTION_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS} -D${def}=${${def}}")
-    endforeach (def)
-
     foreach (def
         HAVE_SYS_TIME_H
         HAVE_UNISTD_H
@@ -570,10 +566,6 @@ MACRO (HDF_CXX_FUNCTION_TEST OTHER_TEST)
       set (OTHER_TEST_ADD_LIBRARIES "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
     endif (CMAKE_REQUIRED_LIBRARIES)
 
-    foreach (def ${HDF_EXTRA_TEST_DEFINITIONS})
-      set (MACRO_CHECK_FUNCTION_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS} -D${def}=${${def}}")
-    endforeach (def)
-
     foreach (def
         HAVE_SYS_TIME_H
         HAVE_UNISTD_H
@@ -696,24 +688,10 @@ endif (WINDOWS)
 #-----------------------------------------------------------------------------
 # Determine how 'inline' is used
 #-----------------------------------------------------------------------------
-set (HDF_EXTRA_TEST_DEFINITIONS INLINE_TEST_INLINE)
 foreach (inline_test inline __inline__ __inline)
-  set (INLINE_TEST_INLINE ${inline_test})
-  HDF_FUNCTION_TEST (INLINE_TEST_${inline_test})
+  string (TOUPPER ${inline_test} INLINE_TEST_MACRO)
+  HDF_FUNCTION_TEST (HAVE_${INLINE_TEST_MACRO})
 endforeach (inline_test)
-
-set (HDF_EXTRA_TEST_DEFINITIONS)
-if (INLINE_TEST___inline__)
-  set (${HDF_PREFIX}_inline __inline__)
-else (INLINE_TEST___inline__)
-  if (INLINE_TEST___inline)
-    set (${HDF_PREFIX}_inline __inline)
-  else (INLINE_TEST___inline)
-    if (INLINE_TEST_inline)
-      set (${HDF_PREFIX}_inline inline)
-    endif (INLINE_TEST_inline)
-  endif (INLINE_TEST___inline)
-endif (INLINE_TEST___inline__)
 
 #-----------------------------------------------------------------------------
 # Check how to print a Long Long integer
