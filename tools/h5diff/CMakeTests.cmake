@@ -4,7 +4,7 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-  
+
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
@@ -253,9 +253,9 @@
 
 
   #
-  # Overwrite system dependent files (Windows)
+  # Overwrite system dependent files (Windows) and not VS2015
   #
-  if (WIN32)
+  if (WIN32 AND MSVC_VERSION LESS 1900)
     add_custom_command (
         TARGET     h5diff
         POST_BUILD
@@ -282,8 +282,8 @@
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104w.txt ${PROJECT_BINARY_DIR}/testfiles/h5diff_104.txt
     )
-  endif (WIN32)
-  
+  endif (WIN32 AND MSVC_VERSION LESS 1900)
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -399,7 +399,7 @@
 ##############################################################################
 
   # --------------------------------------------------------------------
-  # test file names 
+  # test file names
   # --------------------------------------------------------------------
   set (FILE1 h5diff_basic1.h5)
   set (FILE2 h5diff_basic2.h5)
@@ -425,7 +425,7 @@
   set (DANGLE_LINK_FILE2 h5diff_danglelinks2.h5)
   set (GRP_RECURSE_FILE1 h5diff_grp_recurse1.h5)
   set (GRP_RECURSE_FILE2 h5diff_grp_recurse2.h5)
-  # group recursive - same structure via external links through files 
+  # group recursive - same structure via external links through files
   set (GRP_RECURSE1_EXT h5diff_grp_recurse_ext1.h5)
   set (GRP_RECURSE2_EXT1 h5diff_grp_recurse_ext2-1.h5)
   set (GRP_RECURSE2_EXT2 h5diff_grp_recurse_ext2-2.h5)
@@ -453,7 +453,7 @@
     add_test (
       NAME H5DIFF-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
           h5diff_10.out
           h5diff_10.out.err
           h5diff_100.out
@@ -816,13 +816,13 @@
 ADD_H5_TEST (h5diff_10 0 -h)
 
 # 1.1 normal mode
-ADD_H5_TEST (h5diff_11 1  ${FILE1} ${FILE2}) 
+ADD_H5_TEST (h5diff_11 1  ${FILE1} ${FILE2})
 
 # 1.2 normal mode with objects
 ADD_H5_TEST (h5diff_12 1  ${FILE1} ${FILE2}  g1/dset1 g1/dset2)
 
 # 1.3 report mode
-ADD_H5_TEST (h5diff_13 1 -r ${FILE1} ${FILE2}) 
+ADD_H5_TEST (h5diff_13 1 -r ${FILE1} ${FILE2})
 
 # 1.4 report  mode with objects
 ADD_H5_TEST (h5diff_14 1  -r ${FILE1} ${FILE2} g1/dset1 g1/dset2)
@@ -840,7 +840,7 @@ ADD_H5_TEST (h5diff_16_2 1 --verbose --relative=0.02 ${FILE1} ${FILE1} g1/dset7 
 ADD_H5_TEST (h5diff_16_3 1 -v -p 0.02 ${FILE1} ${FILE1} g1/dset9 g1/dset10)
 
 # 1.7 verbose mode
-ADD_H5_TEST (h5diff_17 1 -v ${FILE1} ${FILE2})   
+ADD_H5_TEST (h5diff_17 1 -v ${FILE1} ${FILE2})
 
 # 1.7 test 32-bit INFINITY
 ADD_H5_TEST (h5diff_171 0 -v ${FILE1} ${FILE1} /g1/fp19 /g1/fp19_COPY)
@@ -848,8 +848,8 @@ ADD_H5_TEST (h5diff_171 0 -v ${FILE1} ${FILE1} /g1/fp19 /g1/fp19_COPY)
 # 1.7 test 64-bit INFINITY
 ADD_H5_TEST (h5diff_172 0 -v ${FILE1} ${FILE1} /g1/fp20 /g1/fp20_COPY)
 
-# 1.8 quiet mode 
-ADD_H5_TEST (h5diff_18 1 -q ${FILE1} ${FILE2}) 
+# 1.8 quiet mode
+ADD_H5_TEST (h5diff_18 1 -q ${FILE1} ${FILE2})
 
 # 1.8 -v and -q
 ADD_H5_TEST (h5diff_18_1 2 -v -q ${FILE1} ${FILE2})
@@ -878,7 +878,7 @@ ADD_H5_TEST (h5diff_23 0 -v ${FILE3} ${FILE3} g1 g1)
 ADD_H5_TEST (h5diff_24 0 -v ${FILE3} ${FILE3} t1 t1)
 
 # 2.5
-ADD_H5_TEST (h5diff_25 0 -v ${FILE3} ${FILE3} l1 l1) 
+ADD_H5_TEST (h5diff_25 0 -v ${FILE3} ${FILE3} l1 l1)
 
 # 2.6
 ADD_H5_TEST (h5diff_26 0 -v ${FILE3} ${FILE3} g1 g2)
@@ -920,7 +920,7 @@ ADD_H5_TEST (h5diff_57 0 -v ${FILE4} ${FILE4} dset7a dset7b)
 # 5.8 (region reference)
 ADD_H5_TEST (h5diff_58 1 -v ${FILE7} ${FILE8} refreg)
 
-# test for both dset and attr with same type but with different size 
+# test for both dset and attr with same type but with different size
 # ( HDDFV-7942 )
 ADD_H5_TEST (h5diff_59 0 -v ${FILE4} ${FILE4} dset11a dset11b)
 
@@ -929,13 +929,13 @@ ADD_H5_TEST (h5diff_59 0 -v ${FILE4} ${FILE4} dset11a dset11b)
 # ##############################################################################
 
 # 6.0: Check if the command line number of arguments is less than 3
-ADD_H5_TEST (h5diff_600 1 ${FILE1}) 
+ADD_H5_TEST (h5diff_600 1 ${FILE1})
 
-# 6.1: Check if non-exist object name is specified 
+# 6.1: Check if non-exist object name is specified
 ADD_H5_TEST (h5diff_601 2 ${FILE1} ${FILE1} nono_obj)
 
 # ##############################################################################
-# # -d 
+# # -d
 # ##############################################################################
 
 # 6.3: negative value
@@ -953,7 +953,7 @@ ADD_H5_TEST (h5diff_606 1 -d 0x1 ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 # 6.7: string
 ADD_H5_TEST (h5diff_607 1 -d "1" ${FILE1} ${FILE2} g1/dset3 g1/dset4)
 
-# 6.8: use system epsilon 
+# 6.8: use system epsilon
 ADD_H5_TEST (h5diff_608 1 --use-system-epsilon ${FILE1} ${FILE2}  g1/dset3 g1/dset4)
 
 # 6.9: number larger than biggest difference
@@ -1032,12 +1032,12 @@ ADD_H5_TEST (h5diff_631 0 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp18 g1/f
 # ##############################################################################
 # 7.  attributes
 # ##############################################################################
-ADD_H5_TEST (h5diff_70 1 -v ${FILE5} ${FILE6}) 
+ADD_H5_TEST (h5diff_70 1 -v ${FILE5} ${FILE6})
 
 # ##################################################
 #  attrs with verbose option level
 # ##################################################
-ADD_H5_TEST (h5diff_700 1 -v1 ${FILE5} ${FILE6}) 
+ADD_H5_TEST (h5diff_700 1 -v1 ${FILE5} ${FILE6})
 ADD_H5_TEST (h5diff_701 1 -v2 ${FILE5} ${FILE6})
 ADD_H5_TEST (h5diff_702 1 --verbose=1 ${FILE5} ${FILE6})
 ADD_H5_TEST (h5diff_703 1 --verbose=2 ${FILE5} ${FILE6})
@@ -1054,7 +1054,7 @@ ADD_H5_TEST (h5diff_706 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_F
 # different attr number , same attr name (intersected)
 ADD_H5_TEST (h5diff_707 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g2)
 
-# different attr number , all different attr name 
+# different attr number , all different attr name
 ADD_H5_TEST (h5diff_708 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_FILE2} /g3)
 
 # when no attributes exist in both objects
@@ -1066,31 +1066,31 @@ ADD_H5_TEST (h5diff_710 1 -v2 ${ATTR_VERBOSE_LEVEL_FILE1} ${ATTR_VERBOSE_LEVEL_F
 # ##############################################################################
 # 8.  all dataset datatypes
 # ##############################################################################
-ADD_H5_TEST (h5diff_80 1 -v ${FILE7} ${FILE8}) 
+ADD_H5_TEST (h5diff_80 1 -v ${FILE7} ${FILE8})
 
 # 9. compare a file with itself
 ADD_H5_TEST (h5diff_90 0 -v ${FILE2} ${FILE2})
 
 # 10. read by hyperslab, print indexes
-ADD_H5_TEST (h5diff_100 1 -v ${FILE9} ${FILE10}) 
+ADD_H5_TEST (h5diff_100 1 -v ${FILE9} ${FILE10})
 
 # 11. floating point comparison
-ADD_H5_TEST (h5diff_101 1 -v ${FILE1} ${FILE1} g1/d1  g1/d2) 
+ADD_H5_TEST (h5diff_101 1 -v ${FILE1} ${FILE1} g1/d1  g1/d2)
 
-ADD_H5_TEST (h5diff_102 1 -v ${FILE1} ${FILE1} g1/fp1 g1/fp2) 
+ADD_H5_TEST (h5diff_102 1 -v ${FILE1} ${FILE1} g1/fp1 g1/fp2)
 
-# with --use-system-epsilon for double value. expect less differences  
+# with --use-system-epsilon for double value. expect less differences
 ADD_H5_TEST (h5diff_103 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/d1
-g1/d2) 
+g1/d2)
 
 # with --use-system-epsilon for float value. expect less differences
 ADD_H5_TEST (h5diff_104 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp1
 g1/fp2)
 
 # not comparable -c flag
-ADD_H5_TEST (h5diff_200 0 ${FILE2} ${FILE2} g2/dset1  g2/dset2) 
+ADD_H5_TEST (h5diff_200 0 ${FILE2} ${FILE2} g2/dset1  g2/dset2)
 
-ADD_H5_TEST (h5diff_201 0 -c ${FILE2} ${FILE2} g2/dset1  g2/dset2) 
+ADD_H5_TEST (h5diff_201 0 -c ${FILE2} ${FILE2} g2/dset1  g2/dset2)
 
 ADD_H5_TEST (h5diff_202 0 -c ${FILE2} ${FILE2} g2/dset2  g2/dset3)
 
@@ -1106,9 +1106,9 @@ ADD_H5_TEST (h5diff_206 0 -c ${FILE2} ${FILE2} g2/dset7  g2/dset8)
 ADD_H5_TEST (h5diff_207 0 -c ${FILE2} ${FILE2} g2/dset8  g2/dset9)
 
 # not comparable in dataspace of zero dimension size
-ADD_H5_TEST (h5diff_208 0 -c ${FILE19} ${FILE20}) 
+ADD_H5_TEST (h5diff_208 0 -c ${FILE19} ${FILE20})
 
-# non-comparable dataset with comparable attribute, and other comparable datasets. 
+# non-comparable dataset with comparable attribute, and other comparable datasets.
 # All the rest comparables should display differences.
 ADD_H5_TEST (h5diff_220 1 -c non_comparables1.h5 non_comparables2.h5 /g1)
 
@@ -1221,28 +1221,28 @@ ADD_H5_TEST (h5diff_425 1 --follow-symlinks -v ${FILE17} ${FILE17} /ext_link_to_
 ADD_H5_TEST (h5diff_450 1  --follow-symlinks -v ${DANGLE_LINK_FILE1} ${DANGLE_LINK_FILE2})
 
 # dangling links --follow-symlinks and --no-dangling-links (FILE to FILE)
-ADD_H5_TEST (h5diff_451 2  --follow-symlinks -v --no-dangling-links  ${DANGLE_LINK_FILE1} ${DANGLE_LINK_FILE2}) 
+ADD_H5_TEST (h5diff_451 2  --follow-symlinks -v --no-dangling-links  ${DANGLE_LINK_FILE1} ${DANGLE_LINK_FILE2})
 
 # try --no-dangling-links without --follow-symlinks options
 ADD_H5_TEST (h5diff_452 2  --no-dangling-links  ${FILE13} ${FILE13})
 
 # dangling link found for soft links (FILE to FILE)
-ADD_H5_TEST (h5diff_453 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13})  
+ADD_H5_TEST (h5diff_453 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13})
 
 # dangling link found for soft links (obj to obj)
-ADD_H5_TEST (h5diff_454 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist) 
+ADD_H5_TEST (h5diff_454 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_dset2 /softlink_noexist)
 
 # dangling link found for soft links (obj to obj) Both dangle links
-ADD_H5_TEST (h5diff_455 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_noexist /softlink_noexist) 
+ADD_H5_TEST (h5diff_455 2  --follow-symlinks -v --no-dangling-links  ${FILE13} ${FILE13} /softlink_noexist /softlink_noexist)
 
 # dangling link found for ext links (FILE to FILE)
-ADD_H5_TEST (h5diff_456 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15}) 
+ADD_H5_TEST (h5diff_456 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15})
 
 # dangling link found for ext links (obj to obj). target file exist
-ADD_H5_TEST (h5diff_457 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist1) 
+ADD_H5_TEST (h5diff_457 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist1)
 
 # dangling link found for ext links (obj to obj). target file NOT exist
-ADD_H5_TEST (h5diff_458 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist2)  
+ADD_H5_TEST (h5diff_458 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_dset1 /ext_link_noexist2)
 
 # dangling link found for ext links (obj to obj). Both dangle links
 ADD_H5_TEST (h5diff_459 2  --follow-symlinks -v --no-dangling-links  ${FILE15} ${FILE15} /ext_link_noexist1 /ext_link_noexist2)
@@ -1261,9 +1261,9 @@ ADD_H5_TEST (h5diff_468 0 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_dan
 ADD_H5_TEST (h5diff_469 1 -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link2)
 
 #---------------------------------------------------
-# dangling links without follow symlink 
+# dangling links without follow symlink
 # (HDFFV-7998)
-# test - soft dangle links (same and different paths), 
+# test - soft dangle links (same and different paths),
 #      - external dangle links (same and different paths)
 ADD_H5_TEST (h5diff_471 1 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5)
 ADD_H5_TEST (h5diff_472 0 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /soft_link1)
@@ -1275,7 +1275,7 @@ ADD_H5_TEST (h5diff_475 1 -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_
 # ##############################################################################
 # # test for group diff recursivly
 # ##############################################################################
-# root 
+# root
 ADD_H5_TEST (h5diff_500 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
 ADD_H5_TEST (h5diff_501 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} / /)
 
@@ -1309,7 +1309,7 @@ ADD_H5_TEST (h5diff_513 1 -v ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_gr
 ADD_H5_TEST (h5diff_514 1 -v --follow-symlinks ${GRP_RECURSE_FILE1} ${GRP_RECURSE_FILE2} /slink_grp10 /slink_grp11)
 
 ###############################################################################
-# Test for group recursive diff via multi-linked external links 
+# Test for group recursive diff via multi-linked external links
 # With follow-symlinks, file $GRP_RECURSE1_EXT and $GRP_RECURSE2_EXT1 should
 # be same with the external links.
 ###############################################################################
@@ -1332,7 +1332,7 @@ ADD_H5_TEST (h5diff_480 0 -v --exclude-path /group1/dset3 ${EXCLUDE_FILE1_1} ${E
 ADD_H5_TEST (h5diff_481 1 -v ${EXCLUDE_FILE1_1} ${EXCLUDE_FILE1_2})
 
 #
-# Different structure, different names. 
+# Different structure, different names.
 #
 # Exclude all the different objects. Expect return - same
 ADD_H5_TEST (h5diff_482 0 -v --exclude-path "/group1" --exclude-path "/dset1" ${EXCLUDE_FILE2_1} ${EXCLUDE_FILE2_2})
@@ -1364,10 +1364,10 @@ ADD_H5_TEST (h5diff_530 0 -v  ${COMP_VL_STRS_FILE} ${COMP_VL_STRS_FILE} /group /
 ADD_H5_TEST (h5diff_540 1 -v ${COMPS_ARRAY_VLEN_FILE1} ${COMPS_ARRAY_VLEN_FILE2})
 
 # ##############################################################################
-# # Test mutually exclusive options 
+# # Test mutually exclusive options
 # ##############################################################################
 #
-# Test with -d , -p and --use-system-epsilon. 
+# Test with -d , -p and --use-system-epsilon.
 ADD_H5_TEST (h5diff_640 1 -v -d 5 -p 0.05 --use-system-epsilon ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
 ADD_H5_TEST (h5diff_641 1 -v -d 5 -p 0.05 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
 ADD_H5_TEST (h5diff_642 1 -v -p 0.05 -d 5 ${FILE1} ${FILE2} /g1/dset3 /g1/dset4)
