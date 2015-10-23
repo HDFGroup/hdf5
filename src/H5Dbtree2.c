@@ -155,7 +155,7 @@ static herr_t H5D_bt2_idx_init(const H5D_chk_idx_info_t *idx_info,
 static herr_t H5D_bt2_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D_bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata);
+    H5D_chunk_ud_t *udata, H5D_t *dset);
 static herr_t H5D_bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static int H5D_bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info,
@@ -1047,7 +1047,7 @@ H5D_bt2_mod_filt_cb(void *_record, void *_op_data, hbool_t *changed)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
+H5D_bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata, H5D_t H5_ATTR_UNUSED *dset)
 {
     H5B2_t *bt2;                        /* v2 B-tree handle for indexing chunks */
     H5D_bt2_find_ud_t bt2_udata;        /* User data for v2 B-tree calls */

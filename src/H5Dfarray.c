@@ -129,7 +129,7 @@ static herr_t H5D_farray_idx_init(const H5D_chk_idx_info_t *idx_info,
 static herr_t H5D_farray_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D_farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata);
+    H5D_chunk_ud_t *udata, H5D_t *dset);
 static herr_t H5D_farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static int H5D_farray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
@@ -1033,7 +1033,7 @@ H5D_farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
+H5D_farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata, H5D_t H5_ATTR_UNUSED *dset)
 {
     H5FA_t      *fa;  	/* Pointer to fixed array structure */
     herr_t	ret_value = SUCCEED;		/* Return value */

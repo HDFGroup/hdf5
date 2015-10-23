@@ -126,7 +126,7 @@ static herr_t H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info,
 static herr_t H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D_earray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata);
+    H5D_chunk_ud_t *udata, H5D_t *dset);
 static herr_t H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static herr_t H5D_earray_idx_resize(H5O_layout_chunk_t *layout);
@@ -1078,7 +1078,7 @@ H5D_earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_earray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
+H5D_earray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata, H5D_t H5_ATTR_UNUSED *dset)
 {
     H5EA_t      *ea;                    /* Pointer to extensible array structure */
     herr_t	ret_value = SUCCEED;	/* Return value */

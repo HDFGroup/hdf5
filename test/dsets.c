@@ -61,7 +61,8 @@ const char *FILENAME[] = {
     "partial_chunks",   /* 14 */
     "layout_extend",    /* 15 */
     "swmr_fail",        /* 16 */
-    "zero_chunk",
+    "zero_chunk",	/* 17 */
+    "chunk_single",     /* 18 */
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -134,6 +135,10 @@ const char *FILENAME[] = {
 #define DSET_FIXED_BIG		"DSET_FIXED_BIG"
 #define POINTS 			72
 #define POINTS_BIG 		2500
+
+/* Dataset names for testing Implicit Indexing */
+#define DSET_SINGLE_MAX         "DSET_SINGLE_MAX"
+#define DSET_SINGLE_NOMAX       "DSET_SINGLE_NOMAX"
 
 #define USER_BLOCK              1024
 #define SIXTY_FOUR_KB           65536
@@ -9085,7 +9090,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function: test_fixed_array
  *
- * Purpose: Tests support for Fixed Array and Non-Index Indexing 
+ * Purpose: Tests support for Fixed Array and Implicit Indexing 
  *
  *	Create the following 3 datasets:
  *	1) extendible chunked dataset with fixed max. dims
@@ -9100,10 +9105,10 @@ error:
  *				verify that v1 btree indexing type is used for 
  *				    all 3 datasets with all settings
  *                      For the new format:
- *				Verify that Non-Index type is used for
- *				    all 3 datasets when ALLOC_TIME_EARLY and compression are true
+ *				Verify that Implicit Index type is used for
+ *				    #1, #2, #3 datasets when ALLOC_TIME_EARLY and compression are true
  *				Verify Fixed Array indexing type is used for
- *				    all 3 datasets with the other settings
+ *				    #1, #2, #3 datasets with all other settings
  *
  * Return:      Success: 0
  *              Failure: -1
@@ -9120,7 +9125,7 @@ test_fixed_array(hid_t fapl)
     hid_t       dcpl = -1;      /* Dataset creation property list ID */
 
     hid_t       sid = -1;       /* Dataspace ID for dataset with fixed dimensions */
-    hid_t       sid_big = -1;   /* Dataspace ID for big dataset */
+    hid_t       sid_big = -1;   /* Dataspate ID for big dataset */
     hid_t       sid_max = -1;   /* Dataspace ID for dataset with maximum dimensions set */
 
     hid_t       dsid = -1;      /* Dataset ID for dataset with fixed dimensions */
@@ -9485,6 +9490,245 @@ error:
     } H5E_END_TRY;
     return -1;
 } /* end test_fixed_array() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_single_chunk
+ *
+ * Purpose: Tests support for Single Chunk indexing type
+ *
+ *	Create the following 2 datasets:
+ *	1) chunked dataset with NULL max dims and cur_dims = chunk_dims
+ *	2) chunked dataset with cur_dims = max_dims = chunk_dims
+ *
+ *      Repeat the following test with/without compression filter
+ *              Repeat the following test with H5D_ALLOC_TIME_EARLY/H5D_ALLOC_TIME_LATE/H5D_ALLOC_TIME_INCR
+ *                      For the old format, 
+ *			  verify that v1 btree indexing type is used for 
+ *			    all datasets with all settings
+ *                      For the new format:
+ *			  Verify that Single Chunk indexing type is used for
+ *			    all datasets with all settings
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Vailin Choi; July 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_single_chunk(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];	/* File name */
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list ID */
+    hid_t       t_dcpl = -1;      /* Dataset creation property list ID */
+
+    hid_t       sid = -1, sid_max = -1;       	/* Dataspace ID for dataset with fixed dimensions */
+    hid_t       did = -1, did_max = -1;      	/* Dataset ID for dataset with fixed dimensions */
+    hsize_t     dim2[2] = {DSET_DIM1, DSET_DIM2};   	/* Dataset dimensions */
+    hsize_t     t_dim2[2] = {50, 100};   	/* Dataset dimensions */
+    int         wbuf[DSET_DIM1*DSET_DIM2];           	/* write buffer */
+    int         t_wbuf[50*100];           	/* write buffer */
+    int         rbuf[DSET_DIM1*DSET_DIM2];          	/* read buffer */
+    int         t_rbuf[50*100];          	/* read buffer */
+
+    H5D_chunk_index_t idx_type; 	/* Dataset chunk index type */
+    H5F_libver_t low, high;     	/* File format bounds */
+    H5D_alloc_time_t alloc_time;        /* Storage allocation time */
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+    hbool_t     compress;       	/* Whether chunks should be compressed */
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+    size_t      n, i;           	/* local index variables */
+    herr_t      ret;            	/* Generic return value */
+    h5_stat_size_t       empty_size;    /* Size of an empty file */
+    h5_stat_size_t       file_size;     /* Size of each file created */
+
+    TESTING("datasets w/Single Chunk indexing");
+
+    h5_fixname(FILENAME[18], fapl, filename, sizeof filename);
+
+    /* Check if we are using the latest version of the format */
+    if(H5Pget_libver_bounds(fapl, &low, &high) < 0) FAIL_STACK_ERROR
+
+    /* Create and close the file to get the file size */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        STACK_ERROR
+
+    /* Get the size of the empty file */
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
+        TEST_ERROR
+
+    for(i = n = 0; i < (DSET_DIM1 * DSET_DIM2); i++)
+	wbuf[i] = n++;
+
+    for(i = n = 0; i < (50* 100); i++)
+	t_wbuf[i] = n++;
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+    /* Loop over compressing chunks */
+    for(compress = FALSE; compress <= TRUE; compress++) {
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+        /* Loop over storage allocation time */
+        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+            /* Create file */
+            if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+            /* Create dataset creation property list */
+            if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+            if((t_dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+
+            /* Set chunking */
+	    if((ret = H5Pset_chunk(dcpl, 2, dim2)) < 0)
+		FAIL_PUTS_ERROR("    Problem with setting chunk.")
+
+	    if((ret = H5Pset_chunk(t_dcpl, 2, t_dim2)) < 0)
+		FAIL_PUTS_ERROR("    Problem with setting chunk.")
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+            /* Check if we should compress the chunks */
+            if(compress) {
+                if(H5Pset_deflate(dcpl, 9) < 0) FAIL_STACK_ERROR
+                if(H5Pset_deflate(t_dcpl, 9) < 0) FAIL_STACK_ERROR
+	    }
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+            /* Set fill time */
+            if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) FAIL_STACK_ERROR
+            if(H5Pset_fill_time(t_dcpl, H5D_FILL_TIME_ALLOC) < 0) FAIL_STACK_ERROR
+
+            /* Set allocation time */
+            if(H5Pset_alloc_time(dcpl, alloc_time) < 0) FAIL_STACK_ERROR
+            if(H5Pset_alloc_time(t_dcpl, alloc_time) < 0) FAIL_STACK_ERROR
+
+	    /* Create first dataset with cur and max dimensions */
+	    if((sid_max = H5Screate_simple(2, dim2, dim2)) < 0) FAIL_STACK_ERROR
+	    did_max = H5Dcreate2(fid, DSET_SINGLE_MAX, H5T_NATIVE_INT, sid_max, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+	    if(did_max < 0)
+		FAIL_PUTS_ERROR("    Creating Chunked Dataset with maximum dimensions.")
+
+	    /* Get the chunk index type */
+	    if(H5D__layout_idx_type_test(did_max, &idx_type) < 0) FAIL_STACK_ERROR
+
+	    /* Chunk index type depends on whether we are using the latest version of the format */
+	    if(low == H5F_LIBVER_LATEST) {
+		if(idx_type != H5D_CHUNK_IDX_SINGLE)
+		    FAIL_PUTS_ERROR("should be using Single Chunk indexing");
+	    } /* end if */
+	    else {
+		if(idx_type != H5D_CHUNK_IDX_BTREE)
+		    FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+	    } /* end else */
+
+	    /* Write into dataset */
+	    if(H5Dwrite(did_max, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0) TEST_ERROR;
+
+	    /* Closing */
+	    if(H5Dclose(did_max) < 0) FAIL_STACK_ERROR
+	    if(H5Sclose(sid_max) < 0) FAIL_STACK_ERROR
+
+	    /* Create second dataset with curr dim but NULL max dim */
+	    if((sid = H5Screate_simple(2, t_dim2, NULL)) < 0) FAIL_STACK_ERROR
+	    did = H5Dcreate2(fid, DSET_SINGLE_NOMAX, H5T_NATIVE_INT, sid, H5P_DEFAULT, t_dcpl, H5P_DEFAULT);
+	    if(did < 0)
+		FAIL_PUTS_ERROR("    Creating Chunked Dataset.")
+
+	    /* Get the chunk index type */
+	    if(H5D__layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
+
+	    /* Chunk index type depends on whether we are using the latest version of the format */
+	    if(low == H5F_LIBVER_LATEST) {
+		if(idx_type != H5D_CHUNK_IDX_SINGLE)
+		    FAIL_PUTS_ERROR("should be using Single Chunk indexing");
+	    } else {
+		if(idx_type != H5D_CHUNK_IDX_BTREE)
+		    FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+	    } /* end else */
+
+	    /* Write into dataset */
+	    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, t_wbuf) < 0) TEST_ERROR;
+
+	    /* Closing */
+	    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+	    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+
+	    /* Open the first dataset */
+	    if((did_max = H5Dopen2(fid, DSET_SINGLE_MAX, H5P_DEFAULT)) < 0) TEST_ERROR;
+
+	    /* Read from dataset */
+	    if(H5Dread(did_max, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0) TEST_ERROR;
+
+	    /* Verify that written and read data are the same */
+	    for(i = 0; i < (DSET_DIM1 * DSET_DIM2); i++)
+		if(rbuf[i] != wbuf[i]){
+		    printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n",
+			__LINE__,(unsigned)i,wbuf[i],(unsigned)i,rbuf[i]);
+		    TEST_ERROR;
+		} /* end if */
+
+	    /* Closing */
+	    if(H5Dclose(did_max) < 0) FAIL_STACK_ERROR
+
+	    /* Open the second dataset */
+	    if((did = H5Dopen2(fid, DSET_SINGLE_NOMAX, H5P_DEFAULT)) < 0) TEST_ERROR;
+
+	    HDmemset(rbuf, 0, sizeof(rbuf));
+
+	    /* Read from dataset */
+	    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, t_rbuf) < 0) TEST_ERROR;
+
+	    /* Verify that written and read data are the same */
+	    for(i = 0; i < (50* 100); i++)
+		if(t_rbuf[i] != t_wbuf[i]){
+		    printf("    Line %d: Incorrect value, t_wbuf[%u]=%d, t_rbuf[%u]=%d\n",
+			__LINE__,(unsigned)i,t_wbuf[i],(unsigned)i,t_rbuf[i]);
+		    TEST_ERROR;
+		} /* end if */
+
+	    /* Closing */
+	    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+
+	    /* Delete datasets */
+            if(H5Ldelete(fid, DSET_SINGLE_NOMAX, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+            if(H5Ldelete(fid, DSET_SINGLE_MAX, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+            /* Close everything */
+            if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+             /* Get the size of the file */
+            if((file_size = h5_get_file_size(filename, fapl)) < 0)
+                TEST_ERROR
+
+            /* Verify the file is correct size */
+            if(file_size != empty_size)
+                TEST_ERROR
+
+        } /* end for */
+#ifdef H5_HAVE_FILTER_DEFLATE
+    } /* end for */
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Pclose(t_dcpl);
+        H5Dclose(did);
+        H5Dclose(did_max);
+        H5Sclose(sid);
+        H5Sclose(sid_max);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_single_chunk() */
 
 
 /*-------------------------------------------------------------------------
@@ -11244,6 +11488,7 @@ main(void)
         nerrors += (test_fixed_array(my_fapl) < 0		? 1 : 0);
 	nerrors += (test_idx_compatible() < 0			? 1 : 0);
 	nerrors += (test_unfiltered_edge_chunks(my_fapl) < 0    ? 1 : 0);
+	nerrors += (test_single_chunk(my_fapl) < 0              ? 1 : 0);	
 	nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
 	nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
 

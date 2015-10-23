@@ -66,6 +66,9 @@ SRC_H5FORMCONV_TESTFILES="$SRC_TOOLS/h5format_convert/testfiles"
 TESTDIR=./testfiles
 test -d $TESTDIR || mkdir $TESTDIR
 
+# Copy the testfile to a temporary file for testing as h5format_convert is changing the file in place
+TMPFILE=tmp.h5
+
 ######################################################################
 # test files
 # --------------------------------------------------------------------
@@ -140,6 +143,8 @@ CLEAN_TESTFILES_AND_TESTDIR()
     INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
         $RM $TESTDIR
+    else
+	$RM $TESTDIR/$TMPFILE
     fi
 }
 
@@ -160,27 +165,40 @@ TESTING() {
 # non-zero value.
 #
 # $1: expected output
-# $2 to at most $6 : options to the tool and the input fname 
-# -d dname or --dname=dname 
-# -v or --verbose
-# -n or --noop
-# fname
+# $2: the test file name 
+#	--fname might be empty or fname does not exist
+#	--fname is copied to a temporary file for testing
+# $3 to at most $6--options to the tool such as:
+# 	-d dname or --dname=dname 
+# 	-v or --verbose
+# 	-n or --noop
 TOOLTEST_OUT() {
+    # Prepare expected and actual output
     expect="$TESTDIR/$1"
     actual="$TESTDIR/`basename $1 .ddl`.out"
     actual_err="$TESTDIR/`basename $1 .ddl`.err"
     actual_sav=${actual}-sav
     actual_err_sav=${actual_err}-sav
+
+    # Prepare the test file
+    $RM $TESTDIR/$TMPFILE
+    TFILE=$2
+    if [ ! -z "$2" ] && [ -e $TESTDIR/$2 ] ; then
+	$CP $TESTDIR/$2 $TESTDIR/$TMPFILE
+	TFILE=$TMPFILE
+    fi
+
     # Run test.
-    TESTING $FORMCONV $@
+    TESTING $FORMCONV $3 $4 $5 $6 $2
     (
 	cd $TESTDIR
-	$RUNSERIAL $FORMCONV_BIN $2 $3 $4 $5 $6
+	$RUNSERIAL $FORMCONV_BIN $3 $4 $5 $6 $TFILE
     ) >$actual 2>$actual_err
     cp $actual $actual_sav
     cp $actual_err $actual_err_sav
     cat $actual_err >> $actual
 
+    # Compare output
     if $CMP $expect $actual; then
 	echo " PASSED"
     else
@@ -192,20 +210,24 @@ TOOLTEST_OUT() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual $actual_err
-	rm -f $actual $actual_err $actual_sav $actual_err_sav
+	$RM $actual $actual_err
+	$RM $actual $actual_err $actual_sav $actual_err_sav
     fi
 }
 
 # To check that the tool exits success, no output 
 # Assume all short options
-# Assume $1 is fname
-# $2 to at most $4: options to the tool
-# -d dname or -a
-# -n
+# $1 is the test file name 
+#	--fname exists
+#	--fname is copied to a temporary file for testing
+# $2 to at most $4--options to the tool such as:
+# 	-d dname
+# 	-n
 TOOLTEST() {
-    TESTING $FORMCONV $@
-    $RUNSERIAL $FORMCONV_BIN $2 $3 $4 $TESTDIR/$1
+    TESTING $FORMCONV $2 $3 $4 $1
+    $RM $TESTDIR/$TMPFILE
+    $CP $TESTDIR/$1 $TESTDIR/$TMPFILE
+    $RUNSERIAL $FORMCONV_BIN $2 $3 $4 $TESTDIR/$TMPFILE
     exitcode=$?
     if [ $exitcode -ne 0 ]; then
 	echo "*FAILED*"
@@ -218,14 +240,14 @@ TOOLTEST() {
 
 CHECKING() {
    SPACES="                                                               "
-   echo "Verifing $* $SPACES" | cut -c1-80 | tr -d '\012'
+   echo "Verifying $* $SPACES" | cut -c1-80 | tr -d '\012'
 }
 
-# $1 file name
-# $2 dataset name
+# $1 dataset name
+# Assume $TESTDIR/$TMPFILE is the converted test file
 IDX_CHECK() {
-    CHECKING $1 $2
-    $RUNSERIAL $CHK_IDX_BIN $TESTDIR/$1 $2
+    CHECKING $1
+    $RUNSERIAL $CHK_IDX_BIN $TESTDIR/$TMPFILE $1
     ret=$?
     if [ $ret -eq 0 ]; then
 	echo " PASSED"
@@ -257,8 +279,8 @@ COPY_TESTFILES_TO_TESTDIR
 # h5format_convert --help
 # h5format_convert (no options)
 # h5format_convert nonexist.h5  (no options, file does not exist)
-TOOLTEST_OUT h5fc_help.ddl --help
-TOOLTEST_OUT h5fc_nooption.ddl
+TOOLTEST_OUT h5fc_help.ddl '' --help
+TOOLTEST_OUT h5fc_nooption.ddl ''
 TOOLTEST_OUT h5fc_nonexistfile.ddl nonexist.h5
 #
 #
@@ -266,10 +288,10 @@ TOOLTEST_OUT h5fc_nonexistfile.ddl nonexist.h5
 # h5format_convert --dname h5fc_old.h5 (just --dname option, file exists)
 # h5format_convert --dname (just --dname option)
 # h5format_convert --dname=nonexist h5fc_old.h5 (dataset does not exist, file exists)
-TOOLTEST_OUT h5fc_d_file.ddl -d h5fc_old.h5
-TOOLTEST_OUT h5fc_d_file.ddl --dname h5fc_old.h5
-TOOLTEST_OUT h5fc_dname.ddl --dname
-TOOLTEST_OUT h5fc_nonexistdset_file.ddl --dname=nonexist h5fc_old.h5
+TOOLTEST_OUT h5fc_d_file.ddl h5fc_old.h5 -d
+TOOLTEST_OUT h5fc_d_file.ddl h5fc_old.h5 --dname
+TOOLTEST_OUT h5fc_dname.ddl '' --dname
+TOOLTEST_OUT h5fc_nonexistdset_file.ddl h5fc_old.h5 --dname=nonexist
 #
 #
 #
@@ -277,17 +299,17 @@ TOOLTEST_OUT h5fc_nonexistdset_file.ddl --dname=nonexist h5fc_old.h5
 # h5format_convert -d /GROUP/DSET_BT1 --verbose h5fc_old.h5 (verbose, bt1 dataset)
 # h5format_convert -d /DSET_NDATA_BT1 -v -n h5fc_old.h5 (verbose, noop, bt1+nodata dataset)
 # h5format_convert -v h5fc_old.h5 (verbose, all datasets)
-TOOLTEST_OUT h5fc_v_non_chunked.ddl -d /DSET_NON_CHUNKED -v h5fc_old.h5
-TOOLTEST_OUT h5fc_v_bt1.ddl -d /GROUP/DSET_BT1 --verbose h5fc_old.h5
-TOOLTEST_OUT h5fc_v_ndata_bt1.ddl -d /DSET_NDATA_BT1 -v -n h5fc_old.h5
-TOOLTEST_OUT h5fc_v_all.ddl -v h5fc_old.h5
+TOOLTEST_OUT h5fc_v_non_chunked.ddl h5fc_old.h5 -d /DSET_NON_CHUNKED -v
+TOOLTEST_OUT h5fc_v_bt1.ddl h5fc_old.h5 -d /GROUP/DSET_BT1 --verbose
+TOOLTEST_OUT h5fc_v_ndata_bt1.ddl h5fc_old.h5 -d /DSET_NDATA_BT1 -v -n
+TOOLTEST_OUT h5fc_v_all.ddl h5fc_old.h5 -v
 #
 #
 #
 # h5format_convert -d /DSET_EA -v -n h5fc_new.h5 (verbose, noop, one ea dataset)
 # h5format_convert -v -n h5fc_all.h5 (verbose, noop, all datasets)
-TOOLTEST_OUT h5fc_v_n_1d.ddl -d /DSET_EA -v -n h5fc_new.h5
-TOOLTEST_OUT h5fc_v_n_all.ddl -v -n h5fc_all.h5
+TOOLTEST_OUT h5fc_v_n_1d.ddl h5fc_new.h5 -d /DSET_EA -v -n
+TOOLTEST_OUT h5fc_v_n_all.ddl h5fc_all.h5 -v -n
 #
 #
 #
@@ -303,28 +325,28 @@ TOOLTEST_OUT h5fc_v_n_all.ddl -v -n h5fc_all.h5
 # h5format_convert -d /DSET_NONE h5fc_new.h5
 # h5format_convert -d /GROUP/DSET_NONE h5fc_new.h5
 TOOLTEST h5fc_new.h5 -d /DSET_EA
-IDX_CHECK h5fc_new.h5 /DSET_EA
+IDX_CHECK /DSET_EA
 #
 TOOLTEST h5fc_new.h5 -d /GROUP/DSET_NDATA_EA
-IDX_CHECK h5fc_new.h5 /GROUP/DSET_NDATA_EA
+IDX_CHECK /GROUP/DSET_NDATA_EA
 #
 TOOLTEST h5fc_new.h5 -d /GROUP/DSET_BT2
-IDX_CHECK h5fc_new.h5 /GROUP/DSET_BT2
+IDX_CHECK /GROUP/DSET_BT2
 #
 TOOLTEST h5fc_new.h5 -d /DSET_NDATA_BT2
-IDX_CHECK h5fc_new.h5 /DSET_NDATA_BT2
+IDX_CHECK /DSET_NDATA_BT2
 #
 TOOLTEST h5fc_new.h5 -d /DSET_FA
-IDX_CHECK h5fc_new.h5 /DSET_FA
+IDX_CHECK /DSET_FA
 #
 TOOLTEST h5fc_new.h5 -d /GROUP/DSET_NDATA_FA
-IDX_CHECK h5fc_new.h5 /GROUP/DSET_NDATA_FA
+IDX_CHECK /GROUP/DSET_NDATA_FA
 #
 TOOLTEST h5fc_new.h5 -d /DSET_NONE
-IDX_CHECK h5fc_new.h5 /DSET_NONE
+IDX_CHECK /DSET_NONE
 #
 TOOLTEST h5fc_new.h5 -d /GROUP/DSET_NDATA_NONE
-IDX_CHECK h5fc_new.h5 /GROUP/DSET_NDATA_NONE
+IDX_CHECK /GROUP/DSET_NDATA_NONE
 #
 #
 #
@@ -349,10 +371,10 @@ TOOLTEST h5fc_all.h5 -n
 # 1) convert all datasets 
 # 2) verify indexing types
 TOOLTEST h5fc_all.h5
-IDX_CHECK h5fc_all.h5 /DSET_NDATA_BT1
-IDX_CHECK h5fc_all.h5 /DSET_NDATA_EA
-IDX_CHECK h5fc_all.h5 /GROUP/DSET_BT1
-IDX_CHECK h5fc_all.h5 /GROUP/DSET_BT2
+IDX_CHECK /DSET_NDATA_BT1
+IDX_CHECK /DSET_NDATA_EA
+IDX_CHECK /GROUP/DSET_BT1
+IDX_CHECK /GROUP/DSET_BT2
 #
 #
 #
@@ -361,7 +383,7 @@ IDX_CHECK h5fc_all.h5 /GROUP/DSET_BT2
 # 1) convert the chunked dataset (filter, no-filter-edge-chunk)
 # 2) verify the indexing type
 TOOLTEST h5fc_edge.h5
-IDX_CHECK h5fc_edge.h5 /DSET_EDGE
+IDX_CHECK /DSET_EDGE
 #
 #
 #

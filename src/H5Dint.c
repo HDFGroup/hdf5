@@ -2808,8 +2808,18 @@ H5D__flush_real(H5D_t *dataset, hid_t dxpl_id)
     HDassert(dataset);
     HDassert(dataset->shared);
 
+
     /* Avoid flushing the dataset (again) if it's closing */
     if(!dataset->shared->closing) {
+
+	/* Flush cached raw data for each kind of dataset layout */
+	/* Need to flush first before the "layout" message because the single chunk address
+	   is stored in the message */
+	/* Continue flushing even if it fails */
+        if(dataset->shared->layout.ops->flush &&
+                (dataset->shared->layout.ops->flush)(dataset, dxpl_id) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush raw data")
+
         /* Check for metadata changes that will require updating the object's modification time */
         if(dataset->shared->layout_dirty || dataset->shared->space_dirty) {
             unsigned update_flags = H5O_UPDATE_TIME;        /* Modification time flag */
@@ -2842,10 +2852,6 @@ H5D__flush_real(H5D_t *dataset, hid_t dxpl_id)
             HDassert(update_flags == 0);
         } /* end if */
 
-        /* Flush cached raw data for each kind of dataset layout */
-        if(dataset->shared->layout.ops->flush &&
-                (dataset->shared->layout.ops->flush)(dataset, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush raw data")
     } /* end if */
 
 done:

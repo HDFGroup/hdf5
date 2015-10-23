@@ -497,6 +497,7 @@
 ./src/H5Dpublic.h
 ./src/H5Dscatgath.c
 ./src/H5Dselect.c
+./src/H5Dsingle.c
 ./src/H5Dtest.c
 ./src/H5Dvirtual.c
 ./src/H5E.c

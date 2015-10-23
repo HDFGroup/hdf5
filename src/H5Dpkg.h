@@ -304,7 +304,7 @@ typedef herr_t (*H5D_chunk_init_func_t)(const H5D_chk_idx_info_t *idx_info,
 typedef herr_t (*H5D_chunk_create_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef hbool_t (*H5D_chunk_is_space_alloc_func_t)(const H5O_storage_chunk_t *storage);
 typedef herr_t (*H5D_chunk_insert_func_t)(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata);
+    H5D_chunk_ud_t *udata, H5D_t *dset);
 typedef herr_t (*H5D_chunk_get_addr_func_t)(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 typedef herr_t (*H5D_chunk_resize_func_t)(H5O_layout_chunk_t *layout);
@@ -570,6 +570,7 @@ H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1];
 /* Chunked layout operations */
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_NONE[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_SINGLE[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_EARRAY[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_FARRAY[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BT2[1];

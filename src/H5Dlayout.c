@@ -105,6 +105,10 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_NONE;
                     break;
 
+		case H5D_CHUNK_IDX_SINGLE:
+                    dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_SINGLE;
+                    break;
+
                 case H5D_CHUNK_IDX_FARRAY:
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_FARRAY;
                     break;
@@ -219,6 +223,14 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                 switch(layout->u.chunk.idx_type) {
                     case H5D_CHUNK_IDX_NONE:
 			/* nothing */
+                        break;
+
+		    case H5D_CHUNK_IDX_SINGLE:
+			/* Possible filter information */
+			if(layout->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
+			    ret_value += H5F_SIZEOF_SIZE(f);        /* Size of chunk (in file) */
+			    ret_value += 4;                         /* Filter mask for chunk */
+			}
 			break;
 
                     case H5D_CHUNK_IDX_FARRAY:
@@ -336,20 +348,25 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "invalid dataspace rank")
         ndims = (unsigned)sndims;
 
-        /* Avoid scalar/null dataspace */
-        if(ndims > 0) {
-            hsize_t max_dims[H5O_LAYOUT_NDIMS];     /* Maximum dimension sizes */
-            unsigned unlim_count = 0;           	/* Count of unlimited max. dimensions */
-            unsigned u;                     /* Local index variable */
+	/* Avoid scalar/null dataspace */
+	if(ndims > 0) {
+	    hsize_t max_dims[H5O_LAYOUT_NDIMS];     /* Maximum dimension sizes */
+	    hsize_t cur_dims[H5O_LAYOUT_NDIMS];     /* Current dimension sizes */
+	    unsigned unlim_count = 0;           	/* Count of unlimited max. dimensions */
+	    hbool_t single = TRUE;                  /* Fulfill single chunk indexing */
+	    unsigned u;                     	/* Local index variable */
 
-            /* Query the dataspace's dimensions */
-            if(H5S_get_simple_extent_dims(space, NULL, max_dims) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions")
+	    /* Query the dataspace's dimensions */
+	    if(H5S_get_simple_extent_dims(space, cur_dims, max_dims) < 0)
+		HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions")
 
-            /* Spin through the max. dimensions, looking for unlimited dimensions */
-            for(u = 0; u < ndims; u++)
-                if(max_dims[u] == H5S_UNLIMITED)
-                    unlim_count++;
+	    /* Spin through the max. dimensions, looking for unlimited dimensions */
+	    for(u = 0; u < ndims; u++) {
+		if(max_dims[u] == H5S_UNLIMITED)
+		    unlim_count++;
+		if(cur_dims[u] != max_dims[u] || cur_dims[u] != layout->u.chunk.dim[u])
+		    single = FALSE;
+	    }
 
             /* Chunked datasets with unlimited dimension(s) */
             if(unlim_count) { /* dataset with unlimited dimension(s) must be chunked */
@@ -382,16 +399,19 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
                 } /* end else */
             } /* end if */
             else {      /* Chunked dataset with fixed dimensions */
-                /* Check for correct condition for using "implicit" chunk index */
-                if(!dcpl_cache->pline.nused && 
+		/* Check for correct condition for using "single chunk" chunk index */
+                if(single) {
+                    layout->u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
+                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
+                    layout->storage.u.chunk.ops = H5D_COPS_SINGLE;
+                } else if(!dcpl_cache->pline.nused && 
                         dcpl_cache->fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
 
                     /* Set the chunk index type to Non Index */
                     layout->u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
                     layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
                     layout->storage.u.chunk.ops = H5D_COPS_NONE;
-                } /* end if */
-                else { /* Used Fixed Array */
+                } else { /* Used Fixed Array */
                     /* Set the chunk index type to Fixed Array */
                     layout->u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
                     layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
@@ -519,11 +539,10 @@ H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
     } /* end if */
 
     /* Create layout message */
-    /* (Don't make layout message constant unless allocation time is early, since space may not be allocated) */
+    /* (Don't make layout message constant unless allocation time is early and non-filtered, since space may not be allocated) */
     /* (Note: this is relying on H5D_alloc_storage not calling H5O_msg_write during dataset creation) */
-    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type) ? H5O_MSG_FLAG_CONSTANT : 0), 0, layout) < 0)
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type && !dset->shared->dcpl_cache.pline.nused) ? H5O_MSG_FLAG_CONSTANT : 0), 0, layout) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
-
 done:
     /* Error cleanup */
     if(ret_value < 0)

@@ -369,6 +369,7 @@ typedef struct H5O_efl_t {
 #define H5O_LAYOUT_CHUNK_ABBREVIATE_PARTIAL_BOUND_CHUNKS          0x08
 #endif /* NOT_YET */
 #define H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS         0x10
+#define H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER		  0x20
 #ifdef NOT_YET
 #define H5O_LAYOUT_ALL_CHUNK_FLAGS                    (                             \
     H5O_LAYOUT_CHUNK_STORE_ELEM_PHASE_CHANGE                                        \
@@ -378,8 +379,8 @@ typedef struct H5O_efl_t {
     | H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS                             \
     )
 #else /* NOT_YET */
-#define H5O_LAYOUT_ALL_CHUNK_FLAGS                    (                             \
-    H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS                               \
+#define H5O_LAYOUT_ALL_CHUNK_FLAGS                    (                             		\
+    H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS|H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER \
     )
 #endif /* NOT_YET */
 
@@ -412,7 +413,6 @@ typedef struct H5O_efl_t {
  *      and 'size' callbacks for places to change when updating this. */
 #define H5O_LAYOUT_VERSION_LATEST H5O_LAYOUT_VERSION_4
 
-
 /* Forward declaration of structs used below */
 struct H5D_layout_ops_t;                /* Defined in H5Dpkg.h               */
 struct H5D_chunk_ops_t;                 /* Defined in H5Dpkg.h               */
@@ -443,6 +443,12 @@ typedef struct H5O_storage_chunk_earray_t {
     struct H5EA_t *ea;                  /* Pointer to extensible index array struct */
 } H5O_storage_chunk_earray_t;
 
+/* Filtered info for single chunk index */
+typedef struct H5O_storage_chunk_single_filt_t {
+    uint32_t nbytes;            /* Size of chunk (in file) */
+    uint32_t filter_mask;       /* Excluded filters for chunk */
+} H5O_storage_chunk_single_filt_t;
+
 /* Forward declaration of structs used below */
 struct H5B2_t;                          /* Defined in H5B2pkg.h          */
 
@@ -456,10 +462,11 @@ typedef struct H5O_storage_chunk_t {
     haddr_t	idx_addr;		/* File address of chunk index       */
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
     union {
-        H5O_storage_chunk_btree_t btree; /* Information for v1 B-tree index   */
+        H5O_storage_chunk_btree_t btree;   /* Information for v1 B-tree index   */
         H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
         H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
-	H5O_storage_chunk_bt2_t btree2;  /* Information for v2 B-tree index */	
+	H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */	
+	H5O_storage_chunk_single_filt_t single; /* Information for single chunk w/ filters index */
     } u;
 } H5O_storage_chunk_t;
 

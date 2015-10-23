@@ -48,7 +48,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5C.c \
         H5CS.c \
         H5D.c H5Dbtree.c H5Dbtree2.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
-        H5Ddeprec.c H5Dearray.c H5Defl.c H5Dfarray.c H5Dfill.c H5Dint.c \
+        H5Ddeprec.c H5Dearray.c H5Defl.c H5Dfarray.c H5Dsingle.c H5Dfill.c H5Dint.c \
         H5Dio.c H5Dlayout.c H5Dnone.c H5Doh.c H5Dscatgath.c \
         H5Dselect.c H5Dtest.c H5Dvirtual.c \
         H5E.c H5Edeprec.c H5Eint.c \

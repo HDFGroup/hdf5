@@ -72,6 +72,15 @@
 #define H5D_CHUNK_GET_NODE_INFO(map, node)  (map->use_single ? map->single_chunk_info : (H5D_chunk_info_t *)H5SL_item(node))
 #define H5D_CHUNK_GET_NEXT_NODE(map, node)  (map->use_single ? (H5SL_node_t *)NULL : H5SL_next(node))
 
+/* Sanity check on chunk index types: commonly used by a lot of routines in this file */
+#define H5D_CHUNK_STORAGE_INDEX_CHK(storage)                                                    \
+    HDassert((H5D_CHUNK_IDX_EARRAY == storage->idx_type && H5D_COPS_EARRAY == storage->ops) ||  \
+             (H5D_CHUNK_IDX_FARRAY == storage->idx_type && H5D_COPS_FARRAY == storage->ops) ||  \
+             (H5D_CHUNK_IDX_BT2 == storage->idx_type && H5D_COPS_BT2 == storage->ops) ||        \
+             (H5D_CHUNK_IDX_BTREE == storage->idx_type && H5D_COPS_BTREE == storage->ops) ||    \
+             (H5D_CHUNK_IDX_SINGLE == storage->idx_type && H5D_COPS_SINGLE == storage->ops) ||  \
+             (H5D_CHUNK_IDX_NONE == storage->idx_type && H5D_COPS_NONE == storage->ops));
+
 /*
  * Feature: If this constant is defined then every cache preemption and load
  *	    causes a character to be printed on the standard error stream:
@@ -420,7 +429,7 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters,
         /* Set the chunk's filter mask to the new settings */
         udata.filter_mask = filters;
 
-        if((layout->storage.u.chunk.ops->insert_addr)(&idx_info, &udata) < 0)
+        if((layout->storage.u.chunk.ops->insert_addr)(&idx_info, &udata, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
     } /* end if */
 
@@ -613,6 +622,7 @@ H5D__chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset, hid_t dapl_id)
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     H5D_rdcc_t	*rdcc = &(dset->shared->cache.chunk);   /* Convenience pointer to dataset's chunk cache */
     H5P_genplist_t *dapl;               /* Data access property list object pointer */
+    H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -620,16 +630,7 @@ H5D__chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset, hid_t dapl_id)
     /* Sanity check */
     HDassert(f);
     HDassert(dset);
-    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_NONE == dset->shared->layout.storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
 
     if(NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for fapl ID")
@@ -713,22 +714,14 @@ done:
 hbool_t
 H5D__chunk_is_space_alloc(const H5O_storage_t *storage)
 {
+    const H5O_storage_chunk_t *sc = &(storage->u.chunk);
     hbool_t ret_value = FALSE;          /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(storage);
-    HDassert((H5D_CHUNK_IDX_EARRAY == storage->u.chunk.idx_type && 
-                H5D_COPS_EARRAY == storage->u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == storage->u.chunk.idx_type && 
-                H5D_COPS_FARRAY == storage->u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == storage->u.chunk.idx_type &&
-                H5D_COPS_BT2 == storage->u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == storage->u.chunk.idx_type && 
-                H5D_COPS_BTREE == storage->u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == storage->u.chunk.idx_type && 
-                H5D_COPS_NONE == storage->u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
 
     /* Query index layer */
     ret_value = (storage->u.chunk.ops->is_space_alloc)(&storage->u.chunk);
@@ -2145,7 +2138,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 	} /* end if */
 	else {
             if((need_insert || udata.need_modify) && io_info->dset->shared->layout.storage.u.chunk.ops->insert_addr)
-                if((io_info->dset->shared->layout.storage.u.chunk.ops->insert_addr)(&idx_info, &udata) < 0)
+                if((io_info->dset->shared->layout.storage.u.chunk.ops->insert_addr)(&idx_info, &udata, NULL) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
 	} /* end else */
 
@@ -2277,22 +2270,14 @@ H5D__chunk_dest(H5D_t *dset, hid_t dxpl_id)
     H5D_rdcc_t	*rdcc = &(dset->shared->cache.chunk);   /* Dataset's chunk cache */
     H5D_rdcc_ent_t	*ent = NULL, *next = NULL;      /* Pointer to current & next cache entries */
     int		nerrors = 0;            /* Accumulated count of errors */
+    H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
     /* Sanity checks */
     HDassert(dset);
-    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_NONE == dset->shared->layout.storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
 
     /* Fill the DXPL cache values for later use */
     if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
@@ -2353,16 +2338,7 @@ H5D_chunk_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
     /* Sanity checks */
     HDassert(storage);
     HDassert(storage->ops);
-    HDassert((H5D_CHUNK_IDX_EARRAY == storage->idx_type && 
-                H5D_COPS_EARRAY == storage->ops) ||
-            (H5D_CHUNK_IDX_FARRAY == storage->idx_type && 
-                H5D_COPS_FARRAY == storage->ops) ||
-	    (H5D_CHUNK_IDX_BT2 == storage->idx_type &&
-                H5D_COPS_BT2 == storage->ops) ||
-            (H5D_CHUNK_IDX_BTREE == storage->idx_type && 
-                H5D_COPS_BTREE == storage->ops) ||
-            (H5D_CHUNK_IDX_NONE == storage->idx_type && 
-                H5D_COPS_NONE == storage->ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(storage);
 
     /* Reset index structures */
     if((storage->ops->reset)(storage, reset_addr) < 0)
@@ -2505,6 +2481,7 @@ herr_t
 H5D__chunk_create(const H5D_t *dset /*in,out*/, hid_t dxpl_id)
 {
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
+    H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2513,16 +2490,8 @@ H5D__chunk_create(const H5D_t *dset /*in,out*/, hid_t dxpl_id)
     HDassert(dset);
     HDassert(H5D_CHUNKED == dset->shared->layout.type);
     HDassert(dset->shared->layout.u.chunk.ndims > 0 && dset->shared->layout.u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_NONE == dset->shared->layout.storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
+
 #ifndef NDEBUG
 {
     unsigned u;                         /* Local index variable */
@@ -2616,22 +2585,14 @@ H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *scaled,
     H5D_rdcc_ent_t  *ent = NULL;        /* Cache entry */
     hbool_t         found = FALSE;      /* In cache? */
     unsigned        u;                  /* Counter */
+    H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
     herr_t	ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_PACKAGE
 
     HDassert(dset);
     HDassert(dset->shared->layout.u.chunk.ndims > 0);
-    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_NONE == dset->shared->layout.storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
     HDassert(scaled);
     HDassert(udata);
 
@@ -2679,7 +2640,7 @@ H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *scaled,
             idx_info.dxpl_id = dxpl_id;
             idx_info.pline = &dset->shared->dcpl_cache.pline;
             idx_info.layout = &dset->shared->layout.u.chunk;
-            idx_info.storage = &dset->shared->layout.storage.u.chunk;
+	    idx_info.storage = &dset->shared->layout.storage.u.chunk;
 
             /* Go get the chunk information */
             if((dset->shared->layout.storage.u.chunk.ops->get_addr)(&idx_info, udata) < 0)
@@ -2716,22 +2677,14 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
 {
     void	*buf = NULL;	        /* Temporary buffer		*/
     hbool_t	point_of_no_return = FALSE;
+    H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
     herr_t	ret_value = SUCCEED;	/* Return value			*/
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
     HDassert(dset);
     HDassert(dset->shared);
-    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_NONE == dset->shared->layout.storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
     HDassert(dxpl_cache);
     HDassert(ent);
     HDassert(!ent->locked);
@@ -2845,7 +2798,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
 
         /* Insert the chunk record into the index */
 	if((need_insert || udata.need_modify) && dset->shared->layout.storage.u.chunk.ops->insert_addr)
-            if((dset->shared->layout.storage.u.chunk.ops->insert_addr)(&idx_info, &udata) < 0)
+            if((dset->shared->layout.storage.u.chunk.ops->insert_addr)(&idx_info, &udata, dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
 
         /* Cache the chunk's info, in case it's accessed again shortly */
@@ -3644,22 +3597,14 @@ H5D__chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes)
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     hsize_t chunk_bytes = 0;            /* Number of bytes allocated for chunks */
+    H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     HDassert(dset);
     HDassert(dset->shared);
-    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_NONE == dset->shared->layout.storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
 
     /* Fill the DXPL cache values for later use */
     if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
@@ -3743,6 +3688,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     hbool_t     unfilt_edge_chunk_dim[H5O_LAYOUT_NDIMS]; /* Whether there are unfiltered edge chunks at the edge of each dimension */
     hsize_t     edge_chunk_scaled[H5O_LAYOUT_NDIMS]; /* Offset of the unfiltered edge chunks at the edge of each dimension */
     unsigned    nunfilt_edge_chunk_dims = 0; /* Number of dimensions on an edge */
+    const H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);
     herr_t	ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, dset->oloc.addr, FAIL)
@@ -3750,16 +3696,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
     HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-    HDassert((H5D_CHUNK_IDX_EARRAY == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == layout->storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == layout->storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_NONE == layout->storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
     HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
 
     /* Retrieve the dataset dimensions */
@@ -4072,7 +4009,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
              *  serial operation. -QAK
              */
 	    if((need_insert || udata.need_modify) && ops->insert_addr)
-                if((ops->insert_addr)(&idx_info, &udata) < 0)
+                if((ops->insert_addr)(&idx_info, &udata, dset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
 
             /* Increment indices and adjust the edge chunk state */
@@ -4192,6 +4129,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hid_t dxpl_id, hsize_t old_dim[])
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     void        *chunk;                 /* The file chunk  */
     hbool_t     carry;                  /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
+    const H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -4199,16 +4137,7 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hid_t dxpl_id, hsize_t old_dim[])
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
     HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-    HDassert((H5D_CHUNK_IDX_EARRAY == layout->storage.u.chunk.idx_type &&
-                H5D_COPS_EARRAY == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == layout->storage.u.chunk.idx_type &&
-                H5D_COPS_FARRAY == layout->storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == layout->storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == layout->storage.u.chunk.idx_type &&
-                H5D_COPS_BTREE == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == layout->storage.u.chunk.idx_type &&
-                H5D_COPS_NONE == layout->storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
     HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
     HDassert(pline->nused > 0);
     HDassert(layout->u.chunk.flags
@@ -4750,6 +4679,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     hbool_t                 disable_edge_filters = FALSE; /* Whether to disable filters on partial edge chunks */
     hbool_t                 new_unfilt_chunk = FALSE; /* Whether the chunk is newly unfiltered */
     unsigned                u;	                /* Local index variable */
+    const H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);
     herr_t                  ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -4757,16 +4687,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
     HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-    HDassert((H5D_CHUNK_IDX_EARRAY == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == layout->storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == layout->storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_NONE == layout->storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
     HDassert(dxpl_cache);
 
     /* Fill the DXPL cache values for later use */
@@ -5114,22 +5035,14 @@ H5D__chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[])
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     const H5D_t *dset = io_info->dset;  /* Local pointer to dataset info */
     H5D_chunk_it_ud2_t udata;          	/* User data for iteration callback */
+    H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     HDassert(dset);
     HDassert(dset->shared);
-    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_NONE == dset->shared->layout.storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
     HDassert(chunk_addr);
 
     /* Set up user data for B-tree callback */
@@ -5177,6 +5090,7 @@ H5D__chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_storage_t *storage)
     H5O_pline_t pline;                  /* I/O pipeline message */
     hbool_t pline_read = FALSE;         /* Whether the I/O pipeline message was read from the file */
     htri_t	exists;                 /* Flag if header message of interest exists */
+    H5O_storage_chunk_t *sc = &(storage->u.chunk);
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -5185,16 +5099,7 @@ H5D__chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_storage_t *storage)
     HDassert(f);
     HDassert(oh);
     HDassert(storage);
-    HDassert((H5D_CHUNK_IDX_EARRAY == storage->u.chunk.idx_type && 
-                H5D_COPS_EARRAY == storage->u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == storage->u.chunk.idx_type && 
-                H5D_COPS_FARRAY == storage->u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == storage->u.chunk.idx_type &&
-                H5D_COPS_BT2 == storage->u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == storage->u.chunk.idx_type && 
-                H5D_COPS_BTREE == storage->u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == storage->u.chunk.idx_type && 
-                H5D_COPS_NONE == storage->u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
 
     /* Check for I/O pipeline message */
     if((exists = H5O_msg_exists_oh(oh, H5O_PLINE_ID)) < 0)
@@ -5547,7 +5452,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Insert chunk record into index */
     if((need_insert || udata_dst.need_modify) && udata->idx_info_dst->storage->ops->insert_addr)
-        if((udata->idx_info_dst->storage->ops->insert_addr)(udata->idx_info_dst, &udata_dst) < 0)
+        if((udata->idx_info_dst->storage->ops->insert_addr)(udata->idx_info_dst, &udata_dst, NULL) < 0)
             HGOTO_ERROR_TAG(H5E_DATASET, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert chunk addr into index")
 
     /* Reset metadata tag in dxpl_id */
@@ -5609,29 +5514,11 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
     /* Check args */
     HDassert(f_src);
     HDassert(storage_src);
-    HDassert((H5D_CHUNK_IDX_EARRAY == storage_src->idx_type && 
-                H5D_COPS_EARRAY == storage_src->ops) ||
-            (H5D_CHUNK_IDX_FARRAY == storage_src->idx_type && 
-                H5D_COPS_FARRAY == storage_src->ops) ||
-	    (H5D_CHUNK_IDX_BT2 == storage_src->idx_type &&
-                H5D_COPS_BT2 == storage_src->ops) ||
-            (H5D_CHUNK_IDX_BTREE == storage_src->idx_type && 
-                H5D_COPS_BTREE == storage_src->ops) ||
-            (H5D_CHUNK_IDX_NONE == storage_src->idx_type && 
-                H5D_COPS_NONE == storage_src->ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(storage_src);
     HDassert(layout_src);
     HDassert(f_dst);
     HDassert(storage_dst);
-    HDassert((H5D_CHUNK_IDX_EARRAY == storage_dst->idx_type && 
-                H5D_COPS_EARRAY == storage_dst->ops) ||
-            (H5D_CHUNK_IDX_FARRAY == storage_dst->idx_type && 
-                H5D_COPS_FARRAY == storage_dst->ops) ||
-	    (H5D_CHUNK_IDX_BT2 == storage_dst->idx_type &&
-                H5D_COPS_BT2 == storage_dst->ops) ||
-            (H5D_CHUNK_IDX_BTREE == storage_dst->idx_type && 
-                H5D_COPS_BTREE == storage_dst->ops) ||
-            (H5D_CHUNK_IDX_NONE == storage_dst->idx_type && 
-                H5D_COPS_NONE == storage_dst->ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(storage_dst);
     HDassert(ds_extent_src);
     HDassert(dt_src);
 
@@ -5859,6 +5746,7 @@ H5D__chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     const H5O_pline_t *pline, hsize_t *index_size)
 {
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
+    H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -5866,16 +5754,7 @@ H5D__chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     /* Check args */
     HDassert(f);
     HDassert(layout);
-    HDassert((H5D_CHUNK_IDX_EARRAY == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == layout->storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == layout->storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == layout->storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == layout->storage.u.chunk.idx_type && 
-                H5D_COPS_NONE == layout->storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
     HDassert(pline);
     HDassert(index_size);
 
@@ -5958,22 +5837,14 @@ H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 herr_t
 H5D__chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream)
 {
+    H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dset);
-    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_FARRAY == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_FARRAY == dset->shared->layout.storage.u.chunk.ops) ||
-	    (H5D_CHUNK_IDX_BT2 == dset->shared->layout.storage.u.chunk.idx_type &&
-                H5D_COPS_BT2 == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_BTREE == dset->shared->layout.storage.u.chunk.ops) ||
-            (H5D_CHUNK_IDX_NONE == dset->shared->layout.storage.u.chunk.idx_type && 
-                H5D_COPS_NONE == dset->shared->layout.storage.u.chunk.ops));
+    H5D_CHUNK_STORAGE_INDEX_CHK(sc);
 
     /* Only display info if stream is defined */
     if(stream) {
@@ -6243,7 +6114,6 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(idx_info->storage);
-    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(new_chunk);
     HDassert(need_insert);
     HDassert(need_modify);
@@ -6331,6 +6201,7 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
             case H5D_CHUNK_IDX_FARRAY:
             case H5D_CHUNK_IDX_BT2:
 	    case H5D_CHUNK_IDX_BTREE:
+	    case H5D_CHUNK_IDX_SINGLE:
                 HDassert(new_chunk->length > 0);
 		H5_CHECK_OVERFLOW(new_chunk->length, /*From: */uint32_t, /*To: */hsize_t);
 		new_chunk->offset = H5MF_alloc(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, (hsize_t)new_chunk->length);
@@ -6442,7 +6313,7 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     insert_udata.common.storage = new_idx_info->storage;
 
     /* Insert chunk into the v1 B-tree chunk index */
-    if((new_idx_info->storage->ops->insert_addr)(new_idx_info, &insert_udata) < 0)
+    if((new_idx_info->storage->ops->insert_addr)(new_idx_info, &insert_udata, NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert chunk addr into index")
 
 done:

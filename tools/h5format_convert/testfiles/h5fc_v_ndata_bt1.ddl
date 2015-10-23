@@ -1,6 +1,6 @@
 Process command line options
 It is noop...
-Open the file h5fc_old.h5
+Open the file tmp.h5
 Going to process dataset: /DSET_NDATA_BT1...
 Open the dataset
 Retrieve the dataset's layout

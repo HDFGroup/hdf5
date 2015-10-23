@@ -1,5 +1,5 @@
 Process command line options
-Open the file h5fc_old.h5
+Open the file tmp.h5
 Going to process dataset: /DSET_NON_CHUNKED...
 Open the dataset
 Retrieve the dataset's layout

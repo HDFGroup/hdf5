@@ -1,5 +1,5 @@
 Process command line options
-Open the file h5fc_old.h5
+Open the file tmp.h5
 Processing all datasets in the file...
 Going to process dataset:/DSET_NDATA_BT1...
 Open the dataset
