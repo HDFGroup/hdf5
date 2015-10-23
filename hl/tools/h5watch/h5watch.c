@@ -524,7 +524,6 @@ check_dataset(hid_t fid, char *dsetname)
     hbool_t unlim_max_dims = FALSE;	/* whether dataset has unlimited or max. dimension setting */
     void               *edata;
     H5E_auto2_t         func;
-    H5D_layout_t        layout;
     herr_t ret_value = SUCCEED;	/* Return value */
 
     /* Disable error reporting */
@@ -540,21 +539,16 @@ check_dataset(hid_t fid, char *dsetname)
 
     /* Get dataset's creation property list */
     if((dcp = H5Dget_create_plist(did)) < 0) {
-        error_msg("unable to get dataset's creation property list \"%s\"\n", dsetname);
-        ret_value = FAIL;
-        goto done;
+	error_msg("unable to get dataset's creation property list\"%s\"\n", dsetname);
+	ret_value = FAIL;
+	goto done;
     }
 
-    /* Query dataset's layout; the layout should be chunked or virtual */
-    if((layout = H5Pget_layout(dcp)) < 0) {
-        error_msg("unable to get dataset layout \"%s\"\n", dsetname);
-        ret_value = FAIL;
-        goto done;
-    }
-    if(layout != H5D_CHUNKED && layout != H5D_VIRTUAL) {
-        error_msg("\"%s\" should be a chunked or virtual dataset\n", dsetname);
-        ret_value = FAIL;
-        goto done;
+    /* Query dataset's layout; the layout should be chunked */
+    if(H5Pget_layout(dcp) != H5D_CHUNKED) {
+	error_msg("\"%s\" should be a chunked dataset\n", dsetname);
+	ret_value = FAIL;
+	goto done;
     }
 
     HDmemset(cur_dims, 0, sizeof cur_dims);
