@@ -1,4 +1,4 @@
-HDF5 version 1.8.16-pre1 currently under development
+HDF5 version 1.8.16-pre2 currently under development
 ================================================================================
 
 INTRODUCTION
@@ -386,6 +386,7 @@ They are built with the configure process unless specified otherwise.
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 15.0.3.187 Build 20150407
+                                  MPICH 3.1.4 compiled with GCC 4.9.3
 
     Linux 2.6.32-504.8.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
@@ -400,6 +401,7 @@ They are built with the configure process unless specified otherwise.
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 15.0.3.187 Build 20150407
+                                  MPICH 3.1.4 compiled with GCC 4.9.3
 
     SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
     (emu)                         Sun Fortran 95 8.6 SunOS_sparc
@@ -497,23 +499,9 @@ More Tested Platforms
 =====================
 The following platforms are not supported but have been tested for this release.
 
-    Linux 2.6.18-308.13.1.el5PAE  MPICH mpich 3.1.3 compiled with
-    #1 SMP i686 i686 i386             gcc 4.9.2 and gfortran 4.9.2
-    (jam)                         g95 (GCC 4.0.3 (g95 0.94!)
-
-    Linux 2.6.18-431.11.2.el6     MPICH mpich 3.1.3 compiled with
-    #1 SMP x86_64 GNU/Linux           gcc 4.9.2 and gfortran 4.9.2
-    (platypus)                    g95 (GCC 4.0.3 (g95 0.94!)
-
-    FreeBSD 8.2-STABLE i386       gcc 4.5.4 [FreeBSD] 20110526
-    (loyalty)                     gcc 4.6.1 20110527
-                                  g++ 4.6.1 20110527
-                                  gfortran 4.6.1 20110527
-
-    FreeBSD 8.2-STABLE amd64      gcc 4.5.4 [FreeBSD] 20110526
-    (freedom)                     gcc 4.6.1 20110527
-                                  g++ 4.6.1 20110527
-                                  gfortran 4.6.1 20110527
+    Linux 2.6.18-431.11.2.el6     g95 (GCC 4.0.3 (g95 0.94!)
+    #1 SMP x86_64 GNU/Linux          
+    (platypus)                    
 
     Mac OS X El Capitan 10.11     Apple clang/clang++ version 7.0.0 from Xcode 7.0.1
     64-bit    			  gfortran GNU Fortran (GCC) 5.2.0
