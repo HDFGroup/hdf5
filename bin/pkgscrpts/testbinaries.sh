@@ -326,12 +326,28 @@ for f in $FILE_LIST ; do
     elif [ -n "$IS_PPC64" ]; then
       SHARED_LIBFILES="libhdf5_cpp.so.11.0.0 libhdf5_fortran.so.10.0.2 libhdf5_hl_cpp.so.10.0.2 libhdf5hl_fortran.so.10.0.2 libhdf5_hl.so.10.0.2 libhdf5.so.10.1.0"
     else
-      SHARED_LIBFILES="libhdf5_cpp.so.11.0.0 libhdf5_fortran.so.10.0.2 libhdf5_hl_cpp.so.10.0.2 libhdf5hl_fortran.so.10.0.2 libhdf5_hl.so.10.0.2 libhdf5.so.10.0.2 libsz.so.2.0.0 libz.so.1.2.5"
+      SHARED_LIBFILES="libhdf5_cpp.so.11.0.0 libhdf5_fortran.so.10.0.2 libhdf5_hl_cpp.so.10.0.2 libhdf5hl_fortran.so.10.0.2 libhdf5_hl.so.10.0.2 libhdf5.so.10.1.0 libsz.so.2.0.0 libz.so.1.2.5"
     fi
     if [ -n "${SHAREDLIBS}" ]; then
       for s in $SHARED_LIBFILES ; do
         if test -f $s; then
           echo "found $s" >> $RESULTSLOG
+        # libsz.a may be substituted for the shared sz lib
+        elif [ "$s" = "libsz.so.2.0.0" ]; then
+          if test -f "libsz.a"; then
+            echo "found libsz.a" >> $RESULTSLOG
+          else
+            echo "$s not found." >> $RESULTSLOG
+            RETVAL=1
+          fi
+        # libz.a may be substituted for the shared zlib
+        elif [ "$s" = "libz.so.1.2.5" ]; then
+          if test -f "libz.a"; then
+            echo "found libz.a" >> $RESULTSLOG
+          else
+            echo "$s not found." >> $RESULTSLOG
+            RETVAL=1
+          fi
         else
           echo "$s not found." >> $RESULTSLOG
           RETVAL=1
@@ -435,10 +451,19 @@ for f in $FILE_LIST ; do
     cd $THIS_DIR
     STEP5RESULT=0
    
-    # For the macs, we need DYLD_LIBRARY_PATH set to the lib directory of the hdf5 to be tested.
-    if [ -n "${IS_MAC}" ] && [ "${SHAREDLIBS}" = "yes" ]; then
-        DYLD_LIBRARY_PATH=$THIS_DIR/$EXTRACTED/lib
-        export DYLD_LIBRARY_PATH
+    # for shared lib binaries we remove any local paths to lib files.
+    # The binaries depend on system settings or environment variables
+    # when installed.
+    if [ "${SHAREDLIBS}" = "yes" ]; then
+        # For the macs, we need DYLD_LIBRARY_PATH set to the lib directory of the hdf5 to be tested.
+        if [ -n "${IS_MAC}" ]; then
+            DYLD_LIBRARY_PATH=$THIS_DIR/$EXTRACTED/lib
+            export DYLD_LIBRARY_PATH
+        # for otherwise, LD_LIBRARY_PATH
+        else
+            LD_LIBRARY_PATH=$THIS_DIR/$EXTRACTED/lib
+            export LD_LIBRARY_PATH
+        fi
     fi
 
     if test -d hdf5-examples ; then

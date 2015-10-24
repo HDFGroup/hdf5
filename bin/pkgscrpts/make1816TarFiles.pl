@@ -13,6 +13,7 @@ my %destsubdir = ('emu' => 'sunos-5.11-sparc-32-sunc512',
                   'ostrich' => 'linux-el6-ppc64-gcc447',
                   'ostrichxl' => 'linux-el6-ppc64-xl13.1',
                   'platypus' => 'linux-centos6-x86_64-gcc447',
+                  'platypus32' => 'linux-centos6-x86_64-32-gcc447',
                   'moohan' => 'linux-centos7-x86_64-gcc483',
                   'kite' => 'osx-10.8-x86_64-clang5.1',
                   'quail' => 'osx-10.9-x86_64-clang6.0',
@@ -36,7 +37,9 @@ my %szipdir = ('emu' =>  '/mnt/hdf/packages/szip/shared/encoder/SunOS-5.10',
                'ostrichxl' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-ppc64-gcc-64',
                'ostrichxl-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-ibmppc64-gcc',
                'platypus' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-x86_64-gcc',
+               'platypus32' => '/mnt/hdf/packages/szip-PIC/static/encoder/Linux2.6-x86_64-gcc-m32',
                'platypus-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-x86_64-gcc',
+               'platypus32-static' => '/mnt/hdf/packages/szip-PIC/static/encoder/Linux2.6-x86_64-gcc-m32',
                'moohan' => '/mnt/hdf/packages/szip/shared/encoder/Linux2.6-x86_64-gcc',
                'moohan-static' => '/mnt/hdf/packages/szip/static/encoder/Linux2.6-x86_64-gcc',
                'quail' => '/mnt/hdf/packages/szip/shared/encoder/MacOS-10.8',
@@ -59,7 +62,9 @@ my %zlibdir = ('emu' => '/mnt/hdf/packages/zlib-125/shared/SunOS-5.10',
                'ostrichxl' => '/mnt/hdf/packages/zlib-125/PIC/Linux2.6-ppc64-gcc-64',
                'ostrichxl-static'  => '/mnt/hdf/packages/zlib-125/PIC/Linux2.6-ppc64-gcc-64',
                'platypus' => '/mnt/hdf/packages/zlib-125/shared/Linux2.6-x86_64-gcc',
+               'platypus32' => '/mnt/hdf/packages/zlib-128/Linux2.6-x86_64-gcc-m32',
                'platypus-static' => '/mnt/hdf/packages/zlib-125/static/Linux2.6-x86_64-gcc',
+               'platypus32-static' => '/mnt/hdf/packages/zlib-128/Linux2.6-x86_64-gcc-m32',
                'moohan' => '/mnt/hdf/packages/zlib-125/shared/Linux2.6-x86_64-gcc',
                'moohan-static' => '/mnt/hdf/packages/zlib-125/static/Linux2.6-x86_64-gcc',
                'quail' => ' /mnt/hdf/packages/zlib-125/shared/mac-intel-x86_64',
@@ -106,7 +111,7 @@ sub addzandszlibs {
    if (-d "$indirectory/$dir" ) {
       my $szdir = $szipdir{$dir};
       my $zldir = $zlibdir{$dir};
-      if ($dir =~ /static/ || $dir =~ /ostrich/) {
+      if ($dir =~ /static/ || $dir =~ /ostrich/ || $dir =~ /platypus32/) {
          $cmd = "cp $szdir/lib/libsz.a $indirectory/$dir/lib";
          $output = `$cmd`;
          print $output;
