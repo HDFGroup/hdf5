@@ -213,7 +213,7 @@ SIMPLE_TEST(struct stat sb; sb.st_blocks=0);
 
 int main(void)
 {
-  char *llwidthArgs[] = { "l64", "l", "L", "q", "ll", NULL };
+  char *llwidthArgs[] = { "I64", "l64", "l", "L", "q", "ll", NULL };
   char *s = malloc(128);
   char **currentArg = NULL;
   LL_TYPE x = (LL_TYPE)1048576 * (LL_TYPE)1048576;
@@ -454,13 +454,19 @@ SIMPLE_TEST(struct text_info w; w.screenwidth=0);
 
 #endif /* HAVE_TM_GMTOFF */
 
-
-#if defined( INLINE_TEST_inline ) || defined( INLINE_TEST___inline__ ) || defined( INLINE_TEST___inline )
+#if defined( HAVE_INLINE ) || defined( HAVE___INLINE__ ) || defined( HAVE___INLINE )
 #ifndef __cplusplus
+#if defined( HAVE_INLINE )
+#  define INLINE_KW inline
+#elif defined ( HAVE___INLINE__ )
+#  define INLINE_KW __inline__
+#elif defined ( HAVE___INLINE )
+#  define INLINE_KW __inline
+#endif /* HAVE_INLINE */
 typedef int foo_t;
-static INLINE_TEST_INLINE foo_t static_foo () { return 0; }
-INLINE_TEST_INLINE foo_t foo () {return 0; }
-int main() { return 0; }
-#endif
+static INLINE_KW foo_t static_foo () { return 0; }
+INLINE_KW foo_t foo () {return 0; }
+int main(void) { return 0; }
+#endif /* __cplusplus */
+#endif /* defined( HAVE_INLINE ) || defined( HAVE___INLINE__ ) || defined( HAVE___INLINE ) */
 
-#endif /* INLINE_TEST */

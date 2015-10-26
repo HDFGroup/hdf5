@@ -944,7 +944,7 @@ if (HDF5_TEST_VFD)
 
   set (H5_VFD_TESTS
       testhdf5
-      accum
+#      accum
       lheap
       ohdr
       stab

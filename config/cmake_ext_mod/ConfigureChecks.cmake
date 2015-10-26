@@ -31,13 +31,13 @@ if (APPLE)
 endif (APPLE)
 
 # Check for Darwin (not just Apple - we also want to catch OpenDarwin)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin") 
-    set (${HDF_PREFIX}_HAVE_DARWIN 1) 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set (${HDF_PREFIX}_HAVE_DARWIN 1)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 # Check for Solaris
-if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS") 
-    set (${HDF_PREFIX}_HAVE_SOLARIS 1) 
+if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
+    set (${HDF_PREFIX}_HAVE_SOLARIS 1)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
 
 #-----------------------------------------------------------------------------
@@ -140,10 +140,6 @@ MACRO (HDF_FUNCTION_TEST OTHER_TEST)
     if (CMAKE_REQUIRED_LIBRARIES)
       set (OTHER_TEST_ADD_LIBRARIES "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
     endif (CMAKE_REQUIRED_LIBRARIES)
-
-    foreach (def ${HDF_EXTRA_TEST_DEFINITIONS})
-      set (MACRO_CHECK_FUNCTION_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS} -D${def}=${${def}}")
-    endforeach (def)
 
     foreach (def
         HAVE_SYS_TIME_H
@@ -437,6 +433,7 @@ if (NOT WINDOWS)
   #-----------------------------------------------------------------------------
   # Check a bunch of time functions
   #-----------------------------------------------------------------------------
+  CHECK_FUNCTION_EXISTS (gettimeofday      ${HDF_PREFIX}_HAVE_GETTIMEOFDAY)
   foreach (test
       HAVE_TM_GMTOFF
       HAVE___TM_GMTOFF
@@ -558,10 +555,6 @@ MACRO (HDF_CXX_FUNCTION_TEST OTHER_TEST)
       set (OTHER_TEST_ADD_LIBRARIES "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
     endif (CMAKE_REQUIRED_LIBRARIES)
 
-    foreach (def ${HDF_EXTRA_TEST_DEFINITIONS})
-      set (MACRO_CHECK_FUNCTION_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS} -D${def}=${${def}}")
-    endforeach (def)
-
     foreach (def
         HAVE_SYS_TIME_H
         HAVE_UNISTD_H
@@ -628,7 +621,7 @@ if (WINDOWS)
           "${CURRENT_TEST_DEFINITIONS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE"
       )
     endif (LARGEFILE)
-    set (MACRO_CHECK_FUNCTION_DEFINITIONS 
+    set (MACRO_CHECK_FUNCTION_DEFINITIONS
       "-DHAVE_IOEO ${CMAKE_REQUIRED_FLAGS}")
     if (CMAKE_REQUIRED_LIBRARIES)
       set (CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES
@@ -660,7 +653,7 @@ if (WINDOWS)
     if ("${HAVE_IOEO_EXITCODE}" EQUAL 0)
       set (${HDF_PREFIX}_HAVE_IOEO 1 CACHE INTERNAL "Test InitOnceExecuteOnce")
       message (STATUS "Performing Test InitOnceExecuteOnce - Success")
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log 
+      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing C SOURCE FILE Test InitOnceExecuteOnce succeded with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${HAVE_IOEO}\n")
@@ -672,7 +665,7 @@ if (WINDOWS)
       endif (CMAKE_CROSSCOMPILING AND "${HAVE_IOEO_EXITCODE}" MATCHES  "FAILED_TO_RUN")
 
       message (STATUS "Performing Test InitOnceExecuteOnce - Failed")
-      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log 
+      file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing InitOnceExecuteOnce Test  failed with the following output:\n"
         "${OUTPUT}\n"
         "Return value: ${HAVE_IOEO_EXITCODE}\n")
@@ -684,24 +677,10 @@ endif (WINDOWS)
 #-----------------------------------------------------------------------------
 # Determine how 'inline' is used
 #-----------------------------------------------------------------------------
-set (HDF_EXTRA_TEST_DEFINITIONS INLINE_TEST_INLINE)
 foreach (inline_test inline __inline__ __inline)
-  set (INLINE_TEST_INLINE ${inline_test})
-  HDF_FUNCTION_TEST (INLINE_TEST_${inline_test})
+  string (TOUPPER ${inline_test} INLINE_TEST_MACRO)
+  HDF_FUNCTION_TEST (HAVE_${INLINE_TEST_MACRO})
 endforeach (inline_test)
-
-set (HDF_EXTRA_TEST_DEFINITIONS)
-if (INLINE_TEST___inline__)
-  set (${HDF_PREFIX}_inline __inline__)
-else (INLINE_TEST___inline__)
-  if (INLINE_TEST___inline)
-    set (${HDF_PREFIX}_inline __inline)
-  else (INLINE_TEST___inline)
-    if (INLINE_TEST_inline)
-      set (${HDF_PREFIX}_inline inline)
-    endif (INLINE_TEST_inline)
-  endif (INLINE_TEST___inline)
-endif (INLINE_TEST___inline__)
 
 #-----------------------------------------------------------------------------
 # Check how to print a Long Long integer
@@ -709,35 +688,34 @@ endif (INLINE_TEST___inline__)
 if (NOT ${HDF_PREFIX}_PRINTF_LL_WIDTH OR ${HDF_PREFIX}_PRINTF_LL_WIDTH MATCHES "unknown")
   set (PRINT_LL_FOUND 0)
   message (STATUS "Checking for appropriate format for 64 bit long:")
-  foreach (HDF5_PRINTF_LL l64 l L q I64 ll)
-    set (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH=${HDF5_PRINTF_LL}")
-    if (${HDF_PREFIX}_SIZEOF_LONG_LONG)
-      set (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
-    endif (${HDF_PREFIX}_SIZEOF_LONG_LONG)
-    TRY_RUN (HDF5_PRINTF_LL_TEST_RUN   HDF5_PRINTF_LL_TEST_COMPILE
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
-        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CURRENT_TEST_DEFINITIONS}
-        OUTPUT_VARIABLE OUTPUT
+  set (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH")
+  if (${HDF_PREFIX}_SIZEOF_LONG_LONG)
+    set (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
+  endif (${HDF_PREFIX}_SIZEOF_LONG_LONG)
+  TRY_RUN (${HDF_PREFIX}_PRINTF_LL_TEST_RUN   ${HDF_PREFIX}_PRINTF_LL_TEST_COMPILE
+      ${CMAKE_BINARY_DIR}
+      ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
+      CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CURRENT_TEST_DEFINITIONS}
+      OUTPUT_VARIABLE OUTPUT
+  )
+  if (${HDF_PREFIX}_PRINTF_LL_TEST_COMPILE)
+    if (${HDF_PREFIX}_PRINTF_LL_TEST_RUN MATCHES 0)
+      string(REGEX REPLACE ".*PRINTF_LL_WIDTH=\\[(.*)\\].*" "\\1" ${HDF_PREFIX}_PRINTF_LL "${OUTPUT}")
+      set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"${${HDF_PREFIX}_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
+      set (PRINT_LL_FOUND 1)
+    else (${HDF_PREFIX}_PRINTF_LL_TEST_RUN MATCHES 0)
+      message ("Width test failed with result: ${${HDF_PREFIX}_PRINTF_LL_TEST_RUN}")
+    endif (${HDF_PREFIX}_PRINTF_LL_TEST_RUN MATCHES 0)
+  else (${HDF_PREFIX}_PRINTF_LL_TEST_COMPILE)
+    file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
+        "Test ${HDF_PREFIX}_PRINTF_LL_WIDTH failed with the following output:\n ${OUTPUT}\n"
     )
-    if (HDF5_PRINTF_LL_TEST_COMPILE)
-      if (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-        set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"${HDF5_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
-        set (PRINT_LL_FOUND 1)
-      else (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-        message ("Width with ${HDF5_PRINTF_LL} failed with result: ${HDF5_PRINTF_LL_TEST_RUN}")
-      endif (HDF5_PRINTF_LL_TEST_RUN MATCHES 0)
-    else (HDF5_PRINTF_LL_TEST_COMPILE)
-      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-          "Test ${HDF_PREFIX}_PRINTF_LL_WIDTH for ${HDF5_PRINTF_LL} failed with the following output:\n ${OUTPUT}\n"
-      )
-    endif (HDF5_PRINTF_LL_TEST_COMPILE)
-  endforeach (HDF5_PRINTF_LL)
+  endif (${HDF_PREFIX}_PRINTF_LL_TEST_COMPILE)
 
   if (PRINT_LL_FOUND)
-    message (STATUS "Checking for apropriate format for 64 bit long: found ${${HDF_PREFIX}_PRINTF_LL_WIDTH}")
+    message (STATUS "Checking for appropriate format for 64 bit long: found ${${HDF_PREFIX}_PRINTF_LL_WIDTH}")
   else (PRINT_LL_FOUND)
-    message (STATUS "Checking for apropriate format for 64 bit long: not found")
+    message (STATUS "Checking for appropriate format for 64 bit long: not found")
     set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"unknown\"" CACHE INTERNAL
         "Width for printf for type `long long' or `__int64', us. `ll"
     )
