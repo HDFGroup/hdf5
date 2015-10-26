@@ -84,12 +84,6 @@ struct timezone {
 #define HDgetlogin()        Wgetlogin()
 #define HDsnprintf          c99_snprintf /*varargs*/
 #define HDvsnprintf         c99_vsnprintf
-#if _MSC_VER >= 1900  // VS 2015
-    // In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
-    // variable declared in time.h. That variable was deprecated and in VS 2015
-    // is removed, with _get_timezone replacing it.
-    #define HDget_timezone(V)    _get_timezone(V);
-#endif
 
 #endif /* H5_HAVE_VISUAL_STUDIO */
 
