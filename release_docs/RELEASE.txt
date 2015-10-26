@@ -145,7 +145,7 @@ New Features
       This was for working around bugs in the Cray X1 compiler, which is no
       longer supported.
 
-    (DER - 2015/09/09 HDFFV-9191) 
+    (DER - 2015/09/09 HDFFV-9191)
 
     - Removed the H5_SW_ULONG_TO_FP_BOTTOM_BIT_WORKS and
       H5_FP_TO_ULLONG_BOTTOM_BIT_WORKS symbols and associated code.
@@ -256,8 +256,8 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    -
-    -
+    - Added VS2015 with Intel Fortran 16 to supported Windows 7 platforms
+
 
 Bug Fixes since HDF5-1.8.15
 ===========================
@@ -265,10 +265,23 @@ Bug Fixes since HDF5-1.8.15
     Configuration
     -------------
 
-    - None
+    - CMake test for long long printf format improved
+
+      The CMake configuration test for determining the printf format string
+      for printing a long long integer was fixed. The test would crash
+      when executed with VS2015.
+
+      (ADB - 2015-10-21 HDFFV-9488)
 
     Library
     -------
+    - VS2015 removed global variable timezone
+
+      The usage of the global variable timezone was modified for VS2015 by
+      adding an alias to Windows builds.
+
+      (ADB - 2015-10-23 HDFFV-9550)
+
     - Fix potential error in H5Iclear_type
 
       If the ID type's close callback could close another ID of the same type,
@@ -291,16 +304,16 @@ Bug Fixes since HDF5-1.8.15
     - Truncate file in H5Fflush() if EOA != EOF to avoid file
       corruption in certain scenarios
 
-      In the following scenario, the resulting HDF5 file would be 
+      In the following scenario, the resulting HDF5 file would be
       incorrectly corrupted because the truncate operation
       was at some point wrongly moved out of the flush operation:
-          - Create a new file with a single dataset.  
+          - Create a new file with a single dataset.
           - Write parts of the dataset (make sure that some values at
-            the end of the dataset are not initialized). 
-          - Flush the file. 
-          - Crash the program. 
-          - Try to open the file with h5dump or h5debug, but the 
-            resulting file is corrupted. 
+            the end of the dataset are not initialized).
+          - Flush the file.
+          - Crash the program.
+          - Try to open the file with h5dump or h5debug, but the
+            resulting file is corrupted.
 
       (MSC - 2015-06-15 HDFFV-9418)
 
@@ -316,10 +329,18 @@ Bug Fixes since HDF5-1.8.15
 
     Tools
     -----
+    - VS2015 changed the default format for printing of exponents
+
+      VS2015 default format for exponents changed with the elimination
+      of the leading '0'. CMake now tests for the VS2015 compiler and
+      adjusts which reference files are used by tests.
+
+      (ADB - 2015-10-23 HDFFV-9550)
+
     - Fixed h5repack with user-defined filters
 
       h5repack would throw a buffer overrun exception on Windows when
-      parsing a user-defined filter ID of 5 digits. A local variable in 
+      parsing a user-defined filter ID of 5 digits. A local variable in
       the parse routine was not of sufficient size.
 
       (ADB - 2015/09/01 HDFFV-9515)
@@ -500,12 +521,12 @@ More Tested Platforms
 The following platforms are not supported but have been tested for this release.
 
     Linux 2.6.18-431.11.2.el6     g95 (GCC 4.0.3 (g95 0.94!)
-    #1 SMP x86_64 GNU/Linux          
-    (platypus)                    
+    #1 SMP x86_64 GNU/Linux
+    (platypus)
 
     Mac OS X El Capitan 10.11     Apple clang/clang++ version 7.0.0 from Xcode 7.0.1
     64-bit    			  gfortran GNU Fortran (GCC) 5.2.0
-    (VM)      
+    (VM)
 
     Debian7.5.0 3.2.0-4-amd64 #1 SMP Debian 3.2.51-1 x86_64 GNU/Linux
                                   gcc (Debian 4.7.2-5) 4.7.2
@@ -603,7 +624,7 @@ Known Problems
 
 * Shared Fortran libraries are not quite working on AIX. While they are
   generated when --enable-shared is specified, the Fortran and HL/Fortran
-  tests fail. HL and C++ shared libraries should now be working as intended, 
+  tests fail. HL and C++ shared libraries should now be working as intended,
   however.
   (MAM - 2011/04/20)
 
