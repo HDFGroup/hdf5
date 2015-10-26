@@ -8076,7 +8076,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
     hsize_t     hs_size[EARRAY_MAX_RANK];   /* Hyperslab size */
     hsize_t     chunk_dim[EARRAY_MAX_RANK]; /* Chunk dimensions */
     H5F_libver_t low;           /* File format low bound */
-    hbool_t     swmr;           /* Whether file should be written with SWMR access enabled */
+    unsigned    swmr;           /* Whether file should be written with SWMR access enabled */
 
     TESTING("datasets w/extensible array as chunk index");
 
@@ -9161,7 +9161,7 @@ test_fixed_array(hid_t fapl)
     H5D_alloc_time_t alloc_time;        /* Storage allocation time */
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-    hbool_t     compress;       	/* Whether chunks should be compressed */
+    unsigned    compress;       	/* Whether chunks should be compressed */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     h5_stat_size_t       empty_size;  	/* Size of an empty file */
@@ -9539,7 +9539,7 @@ test_single_chunk(hid_t fapl)
     H5D_alloc_time_t alloc_time;        /* Storage allocation time */
 
 #ifdef H5_HAVE_FILTER_DEFLATE
-    hbool_t     compress;       	/* Whether chunks should be compressed */
+    unsigned    compress;       	/* Whether chunks should be compressed */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     size_t      n, i;           	/* local index variables */
@@ -11372,7 +11372,7 @@ main(void)
 {
     char		filename[FILENAME_BUF_SIZE];
     hid_t		file, grp, fapl, fapl2;
-    hbool_t new_format;
+    unsigned new_format;
     int mdc_nelmts;
     size_t rdcc_nelmts;
     size_t rdcc_nbytes;

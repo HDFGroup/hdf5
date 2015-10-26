@@ -1314,7 +1314,7 @@ main(void)
 {
     int errors = 0;
     hid_t fapl;
-    hbool_t user;
+    unsigned user;
 
     h5_reset();
 

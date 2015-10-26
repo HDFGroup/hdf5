@@ -418,6 +418,19 @@ if (NOT ${HDF_PREFIX}_SIZEOF_OFF64_T)
   set (${HDF_PREFIX}_SIZEOF_OFF64_T 0)
 endif (NOT ${HDF_PREFIX}_SIZEOF_OFF64_T)
 
+#-----------------------------------------------------------------------------
+# Extra C99 types
+#-----------------------------------------------------------------------------
+
+# _Bool type support
+CHECK_INCLUDE_FILE_CONCAT (stdbool.h    ${HDF_PREFIX}_HAVE_STDBOOL_H)
+if (HAVE_STDBOOL_H)
+  set (CMAKE_EXTRA_INCLUDE_FILES stdbool.h)
+  HDF_CHECK_TYPE_SIZE (bool         ${HDF_PREFIX}_SIZEOF_BOOL)
+else (HAVE_STDBOOL_H)
+  HDF_CHECK_TYPE_SIZE (_Bool        ${HDF_PREFIX}_SIZEOF_BOOL)
+endif (HAVE_STDBOOL_H)
+
 if (NOT WINDOWS)
   #-----------------------------------------------------------------------------
   # Check if the dev_t type is a scalar type
