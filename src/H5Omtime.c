@@ -186,12 +186,6 @@ H5O_mtime_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
     int	i;
     struct tm	tm;
     void        *ret_value = NULL;      /* Return value */
-#if _MSC_VER >= 1900  // VS 2015
-// In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
-// variable declared in time.h. That variable was deprecated and in VS 2015
-// is removed, with _get_timezone replacing it.
-    long timezone = 0;
-#endif
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -232,11 +226,7 @@ H5O_mtime_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
     /* BSD-like systems */
     the_time += tm.tm_gmtoff;
 #elif defined(H5_HAVE_TIMEZONE)
-    #if _MSC_VER >= 1900  // VS 2015
-        HDget_timezone(&timezone);
-    #endif
-    /* GNU/Linux systems */
-    the_time -= timezone - (tm.tm_isdst ? 3600 : 0);
+    the_time -= HDget_timezone() - (tm.tm_isdst ? 3600 : 0);
 #else
     /*
      * The catch-all.  If we can't convert a character string universal

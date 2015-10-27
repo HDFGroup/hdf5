@@ -901,6 +901,7 @@ if (BUILD_SHARED_LIBS)
         APPEND PROPERTY COMPILE_DEFINITIONS
             "H5_HAVE_THREADSAFE"
     )
+    target_link_libraries (${HDF5_LIBSH_TARGET} Threads::Threads)
   endif (HDF5_ENABLE_THREADSAFE)
 
   if (HDF5_ENABLE_DEBUG_APIS)
