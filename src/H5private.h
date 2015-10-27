@@ -495,7 +495,7 @@
 #endif
 
 /* Double constant wrapper
- * 
+ *
  * Quiets gcc warnings from -Wunsuffixed-float-constants.
  *
  * This is a really annoying warning since the standard specifies that
@@ -935,6 +935,14 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDgets
     #define HDgets(S)    gets(S)
 #endif /* HDgets */
+#ifndef H5_HAVE_TM_GMTOFF
+#ifdef H5_HAVE_TIMEZONE
+    #ifndef HDgettimezone
+        #define HDgettimezone()   HDget_timezone()
+    #endif /* HDgettimezone */
+    H5_DLL int HDget_timezone(void);
+#endif /* H5_HAVE_TIMEZONE */
+#endif /* H5_HAVE_TM_GMTOFF */
 #ifndef HDgettimeofday
     #define HDgettimeofday(S,P)  gettimeofday(S,P)
 #endif /* HDgettimeofday */
@@ -2065,7 +2073,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     FUNC_ENTER_COMMON_NOERR(!H5_IS_API(FUNC));                                \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-/* Use the following two macros as replacements for the FUNC_ENTER_NOAPI 
+/* Use the following two macros as replacements for the FUNC_ENTER_NOAPI
  * and FUNC_ENTER_NOAPI_NOINIT macros when the function needs to set
  * up a metadata tag. */
 #define FUNC_ENTER_NOAPI_TAG(dxpl_id, tag, err) {                             \
