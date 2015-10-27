@@ -603,10 +603,12 @@ void HDsrand(unsigned int seed)
 
 long HDget_timezone(void)
 {
-#if _MSC_VER >= 1900  // VS 2015
-// In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
-// variable declared in time.h. That variable was deprecated and in VS 2015
-// is removed, with _get_timezone replacing it.
+#if _MSC_VER >= 1900  /* VS 2015 */
+
+    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
+     * variable declared in time.h. That variable was deprecated and in
+     * VS 2015 is removed, with _get_timezone replacing it.
+     */
     long timezone = 0;
 
     #define HDget_timezone(V)    _get_timezone(V);
