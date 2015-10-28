@@ -55,7 +55,7 @@ CONTENTS
 New Features
 ============
 
-    Configuration
+    Configuration and Build
     -------------
     - The thread-safety + high-level library combination has been marked
       as "unsupported" in the Autotools
@@ -192,6 +192,21 @@ New Features
 
       (DER - 2015/09/11 HDFFV-9195)
 
+    - Decoupled shared object version numbers for wrapper libraries from the
+      shared object version number for the HDF5 library.  These will be
+      maintained on an individual basis according to the interface changes
+      specific to these wrapper libraries.
+
+      For HDF5 1.8.16 the shared object version numbers were changed from
+      10.0.1 to 10.1.0 for the HDF5 library due to added APIs. For the C++
+      wrapper library they were changed from 10.0.1 to 11.0.0 due to changes 
+      in existing APIs. For all other wrapper libraries the versions were 
+      changed from 10.0.1 to 10.0.2 because while the APIs had no changes
+      there have been changes in code that did not result in changes to their
+      interfaces.
+
+      (LRK - 2015/10/28)
+
     Library
     -------
 
@@ -214,8 +229,7 @@ New Features
 
     Parallel Library
     ----------------
-    -
-      (XYZ - YYYY/MM/DD HDFFV-####)
+    - None
 
     Tools
     -----
