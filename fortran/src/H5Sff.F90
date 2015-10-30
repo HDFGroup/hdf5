@@ -1508,7 +1508,7 @@ CONTAINS
 !  !$!****s* H5S/
 !  !$!
 !  !$! NAME
-!  !$!		h5sselect_select_f
+!  !$!		h5smodify_select_f
 !  !$!
 !  !$! PURPOSE
 !  !$!	Refine a hyperslab selection with an operation
@@ -1545,7 +1545,7 @@ CONTAINS
 !  !$!
 
 !  ! SOURCE
-!  SUBROUTINE h5sselect_select_f(space1_id, operator, space2_id, &
+!  SUBROUTINE h5smodify_select_f(space1_id, operator, space2_id, &
 !  hdferr)
 !  IMPLICIT NONE
 !  INTEGER(HID_T), INTENT(INOUT) :: space1_id ! Dataspace identifier to
@@ -1565,22 +1565,22 @@ CONTAINS
 !  INTEGER, INTENT(OUT) :: hdferr     ! Error code
 
 !  INTERFACE
-!  INTEGER FUNCTION h5sselect_select_c(space1_id, operator, &
+!  INTEGER FUNCTION h5smodify_select_c(space1_id, operator, &
 !  space2_id)
 !  USE H5GLOBAL
 !  !DEC$IF DEFINED(HDF5F90_WINDOWS)
-!  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5SSELECT_SELECT_C'::h5sselect_select_c
+!  !DEC$ATTRIBUTES C,reference,decorate,alias:'H5SMODIFY_SELECT_C'::h5smodify_select_c
 !  !DEC$ENDIF
 !  INTEGER(HID_T), INTENT(INOUT) :: space1_id
 !  INTEGER(HID_T), INTENT(IN) :: space2_id
 !  INTEGER, INTENT(IN) :: operator
-!  END FUNCTION h5sselect_select_c
+!  END FUNCTION h5smodify_select_c
 !  END INTERFACE
 
-!  hdferr = h5sselect_select_c(space1_id, operator, space2_id)
+!  hdferr = h5smodify_select_c(space1_id, operator, space2_id)
 !  return
 
-!  END SUBROUTINE h5sselect_select_f
+!  END SUBROUTINE h5smodify_select_f
 
 !
 !****s* H5S/h5sget_select_type_f

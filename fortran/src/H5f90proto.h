@@ -125,7 +125,7 @@ H5_FCDLL int_f h5sget_select_type_c( hid_t_f *space_id , int_f *op);
 H5_FCDLL int_f h5sselect_elements_c( hid_t_f *space_id , int_f *op, size_t_f *nelements, hsize_t_f *coord);
 H5_FCDLL int_f h5scombine_hyperslab_c( hid_t_f *space_id , int_f *op, hsize_t_f *start, hsize_t_f *count, hsize_t_f *stride, hsize_t_f *block, hid_t_f *hyper_id);
 H5_FCDLL int_f h5scombine_select_c( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id, hid_t_f *ds_id);
-H5_FCDLL int_f h5sselect_select_c( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id);
+H5_FCDLL int_f h5smodify_select_c( hid_t_f *space1_id , int_f *op, hid_t_f *space2_id);
 H5_FCDLL int_f h5sdecode_c( _fcd buf, hid_t_f *obj_id );
 H5_FCDLL int_f h5sencode_c(_fcd buf, hid_t_f *obj_id, size_t_f *nalloc );
 H5_FCDLL int_f h5sextent_equal_c( hid_t_f * space1_id, hid_t_f *space2_id, hid_t_f *c_equal);

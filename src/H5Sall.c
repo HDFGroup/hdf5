@@ -417,6 +417,8 @@ H5S_all_release(H5S_t *space)
 static herr_t
 H5S_all_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUSED share_selection)
 {
+    unsigned u;      /* Local index variable */
+
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(src);
@@ -424,6 +426,12 @@ H5S_all_copy(H5S_t *dst, const H5S_t H5_ATTR_UNUSED *src, hbool_t H5_ATTR_UNUSED
 
     /* Set number of elements in selection */
     dst->select.num_elem = (hsize_t)H5S_GET_EXTENT_NPOINTS(dst);
+
+    /* Update the bound box */
+    for(u = 0; u < dst->extent.rank; u++) {
+        dst->select.low_bounds[u] = 0;
+        dst->select.high_bounds[u] = dst->extent.size[u] - 1;
+    } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S_all_copy() */
@@ -904,6 +912,7 @@ done:
 herr_t
 H5S_select_all(H5S_t *space, hbool_t rel_prev)
 {
+    unsigned u;                  /* Local index variable */
     herr_t ret_value = SUCCEED;  /* return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -918,6 +927,12 @@ H5S_select_all(H5S_t *space, hbool_t rel_prev)
 
     /* Set number of elements in selection */
     space->select.num_elem = (hsize_t)H5S_GET_EXTENT_NPOINTS(space);
+
+    /* Update the bound box */
+    for(u = 0; u < space->extent.rank; u++) {
+        space->select.low_bounds[u] = 0;
+        space->select.high_bounds[u] = space->extent.size[u] - 1;
+    } /* end for */
 
     /* Set selection type */
     space->select.type = H5S_sel_all;
