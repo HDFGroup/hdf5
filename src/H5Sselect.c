@@ -2460,7 +2460,7 @@ H5S_select_subtract(H5S_t *space, H5S_t *subtract_space)
             HDassert(subtract_space->select.type->type == H5S_SEL_HYPERSLABS);
 
             /* Both spaces are now hyperslabs, perform the operation */
-            if(H5S__hyper_subtract(space, subtract_space) < 0)
+            if(H5S_combine_select(space, H5S_SELECT_NOTB, subtract_space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't subtract hyperslab")
         } /* end else */
     } /* end if */

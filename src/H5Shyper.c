@@ -103,7 +103,6 @@ static herr_t H5S_fill_in_hyperslab(H5S_t *old_space, H5S_seloper_t op,
     const hsize_t *block, H5S_t **new_space);
 static herr_t H5S_fill_in_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2,
     H5S_t **result);
-static H5S_t *H5S_combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
 static herr_t H5S_modify_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2);
 static herr_t H5S_hyper_get_seq_list_gen(const H5S_t *space, H5S_sel_iter_t *iter,
     size_t maxseq, size_t maxelem, size_t *nseq, size_t *nelem, hsize_t *off,
@@ -6577,7 +6576,7 @@ H5S_hyper_rebuild(H5S_t *space)
     unsigned rank;              /* Dataspace rank */
     htri_t ret_value = TRUE;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Check args */
     HDassert(space);
@@ -8017,7 +8016,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5S_t *
+H5S_t *
 H5S_combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
 {
     H5S_t *new_space = NULL;    /* New dataspace generated */
@@ -10030,119 +10029,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_project_intersection() */
-
-
-/*--------------------------------------------------------------------------
- NAME
-    H5S__hyper_subtract
- PURPOSE
-    Subtract one hyperslab selection from another
- USAGE
-    herr_t H5S__hyper_subtract(space,subtract_space)
-        H5S_t *space;           IN/OUT: Selection to be operated on
-        H5S_t *subtract_space;  IN: Selection that will be subtracted from space
- RETURNS
-    Non-negative on success/Negative on failure.
- DESCRIPTION
-    Removes any and all portions of space that are also present in
-    subtract_space.  In essence, performs an A_NOT_B operation with the
-    two selections.
-
-    Note this function basically duplicates a subset of the functionality
-    of H5S_select_select().  It should probably be removed when that
-    function is enabled.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-herr_t
-H5S__hyper_subtract(H5S_t *space, H5S_t *subtract_space)
-{
-    H5S_hyper_span_info_t *a_not_b = NULL;  /* Span tree for hyperslab spans in old span tree and not in new span tree */
-    H5S_hyper_span_info_t *a_and_b = NULL;  /* Span tree for hyperslab spans in both old and new span trees */
-    H5S_hyper_span_info_t *b_not_a = NULL;  /* Span tree for hyperslab spans in new span tree and not in old span tree */
-    herr_t      ret_value = SUCCEED;        /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    /* Check args */
-    HDassert(space);
-    HDassert(subtract_space);
-
-    /* Check that the space selections both have span trees */
-    if(space->select.sel_info.hslab->span_lst == NULL)
-        if(H5S_hyper_generate_spans(space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree")
-    if(subtract_space->select.sel_info.hslab->span_lst == NULL)
-        if(H5S_hyper_generate_spans(subtract_space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL, "dataspace does not have span tree")
-
-    /* Generate lists of spans which overlap and don't overlap */
-    if(H5S_hyper_clip_spans(space->select.sel_info.hslab->span_lst, subtract_space->select.sel_info.hslab->span_lst, &a_not_b, &a_and_b, &b_not_a)<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLIP, FAIL, "can't clip hyperslab information")
-
-    /* Reset the other dataspace selection information */
-    if(H5S_SELECT_RELEASE(space) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't release selection")
-
-    /* Allocate space for the hyperslab selection information */
-    if((space->select.sel_info.hslab = H5FL_CALLOC(H5S_hyper_sel_t)) == NULL)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate hyperslab info")
-
-    /* Set unlim_dim */
-    space->select.sel_info.hslab->unlim_dim = -1;
-
-    /* Check for anything returned in a_not_b */
-    if(a_not_b) {
-        /* Update spans in space */
-        space->select.sel_info.hslab->span_lst = a_not_b;
-        a_not_b = NULL;
-
-        /* Update number of elements */
-        space->select.num_elem = H5S_hyper_spans_nelem(space->select.sel_info.hslab->span_lst);
-
-        /* Attempt to rebuild "optimized" start/stride/count/block information.
-         * from resulting hyperslab span tree */
-        if(H5S_hyper_rebuild(space) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't rebuild hyperslab info")
-    } /* end if */
-    else {
-        H5S_hyper_span_info_t *spans;     /* Empty hyperslab span tree */
-
-        /* Set number of elements */
-        space->select.num_elem = 0;
-
-        /* Allocate a span info node */
-        if(NULL == (spans = H5FL_MALLOC(H5S_hyper_span_info_t)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate hyperslab span")
-
-        /* Set the reference count */
-        spans->count = 1;
-
-        /* Reset the scratch pad space */
-        spans->scratch = 0;
-
-        /* Set to empty tree */
-        spans->head = NULL;
-
-        /* Set pointer to empty span tree */
-        space->select.sel_info.hslab->span_lst = spans;
-    } /* end if */
-
-done:
-    /* Free span trees */
-    if(a_and_b)
-        H5S_hyper_free_span_info(a_and_b);
-    if(b_not_a)
-        H5S_hyper_free_span_info(b_not_a);
-    if(a_not_b) {
-        HDassert(ret_value < 0);
-        H5S_hyper_free_span_info(b_not_a);
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S__hyper_subtract() */
 
 
 /*--------------------------------------------------------------------------
