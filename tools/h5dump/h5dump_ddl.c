@@ -1269,8 +1269,9 @@ dump_fcontents(hid_t fid)
         unsigned u;
 
         for (u = 0; u < type_table->nobjs; u++) {
-            if (!type_table->objs[u].recorded)
+            if (!type_table->objs[u].recorded) {
                 PRINTSTREAM(rawoutstream, " %-10s /#"H5_PRINTF_HADDR_FMT"\n", "datatype", type_table->objs[u].objno);
+            }
         }
     }
 
@@ -1874,8 +1875,9 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
             begin_obj(h5tools_dump_header_format->softlinkbegin, links, h5tools_dump_header_format->softlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");
             indentation(COL);
-            if(H5Lget_val(fid, links, buf, linfo.u.val_size, H5P_DEFAULT) >= 0)
+            if(H5Lget_val(fid, links, buf, linfo.u.val_size, H5P_DEFAULT) >= 0) {
                 PRINTSTREAM(rawoutstream, "LINKTARGET \"%s\"\n", buf);
+            }
             else {
                 error_msg("h5dump error: unable to get link value for \"%s\"\n", links);
                 h5tools_setstatus(EXIT_FAILURE);

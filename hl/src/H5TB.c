@@ -2718,7 +2718,7 @@ herr_t H5TBdelete_field(hid_t loc_id,
             goto out;
 
         /* skip the field to delete */
-        if(!H5TB_find_field(member_name, field_name) > 0) {
+        if(!H5TB_find_field(member_name, field_name)) {
             /* get the member type */
             if((member_type_id = H5Tget_member_type(tid_1, (unsigned)i)) < 0)
                 goto out;

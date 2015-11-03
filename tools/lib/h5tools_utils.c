@@ -482,10 +482,11 @@ dump_table(char* tablename, table_t *table)
     unsigned u;
 
     PRINTSTREAM(rawoutstream,"%s: # of entries = %d\n", tablename,table->nobjs);
-    for (u = 0; u < table->nobjs; u++)
+    for (u = 0; u < table->nobjs; u++) {
         PRINTSTREAM(rawoutstream,"%a %s %d %d\n", table->objs[u].objno,
            table->objs[u].objname,
            table->objs[u].displayed, table->objs[u].recorded);
+    }
 }
 
 
