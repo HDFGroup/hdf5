@@ -974,6 +974,14 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDgets
     #define HDgets(S)    gets(S)
 #endif /* HDgets */
+#ifndef H5_HAVE_TM_GMTOFF
+#ifdef H5_HAVE_TIMEZONE
+    #ifndef HDgettimezone
+        #define HDgettimezone()   HDget_timezone()
+    #endif /* HDgettimezone */
+    H5_DLL long int HDget_timezone(void);
+#endif /* H5_HAVE_TIMEZONE */
+#endif /* H5_HAVE_TM_GMTOFF */
 #ifndef HDgettimeofday
     #define HDgettimeofday(S,P)  gettimeofday(S,P)
 #endif /* HDgettimeofday */

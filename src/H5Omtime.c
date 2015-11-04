@@ -226,7 +226,7 @@ H5O_mtime_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
     /* BSD-like systems */
     the_time += tm.tm_gmtoff;
 #elif defined(H5_HAVE_TIMEZONE)
-    the_time -= HDget_timezone() - (tm.tm_isdst ? 3600 : 0);
+    the_time -= HDgettimezone() - (tm.tm_isdst ? 3600 : 0);
 #else
     /*
      * The catch-all.  If we can't convert a character string universal
