@@ -721,7 +721,7 @@ H5R_dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, H5R_type_t ref_type, 
             HDassert(attr_name_len < H5R_MAX_ATTR_REF_NAME_LEN);
 
             /* Allocate space for the attribute name */
-            if(NULL == (attr_name = (char *)H5MM_malloc(attr_name_len)))
+            if(NULL == (attr_name = (char *)H5MM_malloc(attr_name_len + 1)))
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
             /* Get the attribute name */
