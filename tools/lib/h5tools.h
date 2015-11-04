@@ -37,10 +37,10 @@
 #define H5TOOLS_DUMP_MAX_RANK     H5S_MAX_RANK
 
 /* Stream macros */
-#define FLUSHSTREAM(S)           if(S != NULL) HDfflush(S)
-#define PRINTSTREAM(S, F, ...)   if(S != NULL) HDfprintf(S, F, __VA_ARGS__)
-#define PRINTVALSTREAM(S, V)   if(S != NULL) HDfprintf(S, V)
-#define PUTSTREAM(X,S)          if(S != NULL) HDfputs(X, S);
+#define FLUSHSTREAM(S)           {if(S != NULL) HDfflush(S);}
+#define PRINTSTREAM(S, F, ...)   {if(S != NULL) HDfprintf(S, F, __VA_ARGS__);}
+#define PRINTVALSTREAM(S, V)   {if(S != NULL) HDfprintf(S, V);}
+#define PUTSTREAM(X,S)          {if(S != NULL) HDfputs(X, S);}
 
 /*
  * Strings for output - these were duplicated from the h5dump.h

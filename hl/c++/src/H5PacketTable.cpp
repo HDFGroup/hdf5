@@ -34,7 +34,7 @@
      * Opens an existing packet table, which can contain either fixed-length or
      * variable-length packets.
      */
-    PacketTable::PacketTable(hid_t fileID, char* name)
+    PacketTable::PacketTable(hid_t fileID, const char* name)
     {
         table_id = H5PTopen( fileID, name);
     }
@@ -127,7 +127,7 @@
      * the packet table, the ID of the datatype of the set, and the size
      * of a memory chunk used in chunking.
      */
-    FL_PacketTable::FL_PacketTable(hid_t fileID, char* name, hid_t dtypeID, hsize_t chunkSize, int compression)
+    FL_PacketTable::FL_PacketTable(hid_t fileID, const char* name, hid_t dtypeID, hsize_t chunkSize, int compression)
     {
         table_id = H5PTcreate_fl ( fileID, name, dtypeID, chunkSize, compression);
     }
@@ -136,7 +136,7 @@
      * Opens an existing fixed-length packet table.
      * Fails if the packet table specified is variable-length.
      */
-    FL_PacketTable::FL_PacketTable(hid_t fileID, char* name) : PacketTable(fileID, name)
+    FL_PacketTable::FL_PacketTable(hid_t fileID, const char* name) : PacketTable(fileID, name)
     {
 #ifdef VLPT_REMOVED
         if( H5PTis_varlen(table_id) != 0 )    // If this is not a fixed-length table

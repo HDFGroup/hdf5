@@ -2794,8 +2794,9 @@ main(int argc, const char *argv[])
             file = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, preferred_driver, drivername, sizeof drivername);
 
             if(file >= 0) {
-                if(verbose_g)
+                if(verbose_g) {
                     PRINTSTREAM(rawoutstream, "Opened \"%s\" with %s driver.\n", fname, drivername);
+                }
                 break; /*success*/
             } /* end if */
 
