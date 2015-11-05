@@ -22,7 +22,7 @@
 include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
-  EXAMPLE_PROG_PARA = ph5example
+  EXAMPLE_PROG_PARA = ph5example h5_vds_mpio
 endif
 
 INSTALL_SCRIPT_FILES = run-c-ex.sh
@@ -52,7 +52,7 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_reference.c h5_drivers.c h5_extlink.c h5_elink_unix2win.c   \
           h5_ref2reg.c h5_shared_mesg.c ph5example.c h5_vds.c h5_vds-exc.c \
           h5_vds-exclim.c h5_vds-eiger.c h5_vds-simpleIO.c h5_vds-percival.c \
-          h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c
+          h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c h5_vds_mpio.c
 
 
 
@@ -129,6 +129,7 @@ h5_vds-simpleIO: $(srcdir)/h5_vds-simpleIO.c
 h5_vds-percival: $(srcdir)/h5_vds-percival.c
 h5_vds-percival-unlim: $(srcdir)/h5_vds-percival-unlim.c
 h5_vds-percival-unlim-maxmin: $(srcdir)/h5_vds-percival-unlim-maxmin.c
+h5_vds_mpio: $(srcdir)/h5_vds_mpio.c
 
 if BUILD_SHARED_SZIP_CONDITIONAL
 LD_LIBRARY_PATH=$(LL_PATH)

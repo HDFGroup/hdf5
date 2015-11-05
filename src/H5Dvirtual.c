@@ -85,11 +85,12 @@ static herr_t H5D__virtual_write(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t H5D__virtual_flush(H5D_t *dset, hid_t dxpl_id);
+static herr_t H5D__virtual_dest(H5D_t *dset, hid_t dxpl_id);
 
 /* Other functions */
 static herr_t H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5O_storage_virtual_ent_t *virtual_ent,
-    H5O_storage_virtual_srcdset_t *source_dset, hid_t dxpl_id);
+    H5O_storage_virtual_srcdset_t *source_dset, H5F_t *source_file, hid_t dxpl_id);
 static herr_t H5D__virtual_reset_source_dset(
     H5O_storage_virtual_ent_t *virtual_ent,
     H5O_storage_virtual_srcdset_t *source_dset);
@@ -132,7 +133,8 @@ const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
     NULL,
     NULL,
     H5D__virtual_flush,
-    NULL
+    NULL,
+    H5D__virtual_dest
 }};
 
 
@@ -744,7 +746,7 @@ done:
 static herr_t
 H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5O_storage_virtual_ent_t *virtual_ent,
-    H5O_storage_virtual_srcdset_t *source_dset, hid_t dxpl_id)
+    H5O_storage_virtual_srcdset_t *source_dset, H5F_t *source_file, hid_t dxpl_id)
 {
     H5F_t       *src_file = NULL;       /* Source file */
     hbool_t     src_file_open = FALSE;  /* Whether we have opened and need to close src_file */
@@ -762,11 +764,20 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
 
     /* Check if we need to open the source file */
     if(HDstrcmp(source_dset->file_name, ".")) {
+#ifdef H5_HAVE_PARALLEL
+        if(H5F_HAS_FEATURE(vdset->oloc.file, H5FD_FEAT_HAS_MPI)) {
+            HDassert(source_file);
+            src_file = source_file;
+        }
+        else
+#endif /* H5_HAVE_PARALLEL */
+        {
         /* Open the source file */
         if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & H5F_ACC_RDWR, H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
             H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
         else
             src_file_open = TRUE;
+        }
     } /* end if */
     else
         /* Source file is ".", use the virtual dataset's file */
@@ -800,6 +811,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     } /* end if */
 
 done:
+
     /* Close source file */
     if(src_file_open)
         if(H5F_try_close(src_file) < 0)
@@ -1332,7 +1344,9 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                 /* Non-printf mapping */
                 /* Open source dataset */
                 if(!storage->list[i].source_dset.dset)
-                    if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].source_dset, dxpl_id) < 0)
+                    if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].source_dset, 
+                                                     (storage->source_files ? storage->source_files[i] : NULL), 
+                                                     dxpl_id) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
 
                 /* Check if source dataset is open */
@@ -1470,7 +1484,8 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                             storage->list[i].sub_dset[j].clipped_virtual_select = storage->list[i].sub_dset[j].virtual_select;
 
                         /* Open source dataset */
-                        if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].sub_dset[j], dxpl_id) < 0)
+                        if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].sub_dset[j], 
+                                                         (storage->source_files ? storage->source_files[i] : NULL), dxpl_id) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
 
                         if(storage->list[i].sub_dset[j].dset) {
@@ -1754,7 +1769,8 @@ H5D__virtual_init_all(const H5D_t *dset, hid_t dxpl_id)
                 /* Non-printf mapping */
                 /* Open source dataset */
                 if(!storage->list[i].source_dset.dset)
-                    if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].source_dset, dxpl_id) < 0)
+                    if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].source_dset, 
+                                                     (storage->source_files ? storage->source_files[i] : NULL), dxpl_id) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
 
                 /* Check if source dataset is open */
@@ -1946,7 +1962,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__virtual_init(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5D_t *dset,
+H5D__virtual_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id)
 {
     H5O_storage_virtual_t *storage;     /* Convenience pointer */
@@ -1965,6 +1981,35 @@ H5D__virtual_init(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5D_t *dset,
     /* Check that the dimensions of the VDS are large enough */
     if(H5D_virtual_check_min_dims(dset) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "virtual dataset dimensions not large enough to contain all limited dimensions in all selections")
+
+    /* Retrieve VDS file FAPL to layout */
+    if(storage->source_fapl <= 0)
+        if((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fapl")
+
+#ifdef H5_HAVE_PARALLEL
+    if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
+        if(storage->source_files == NULL) {
+            if(NULL == (storage->source_files = (H5F_t **)H5MM_malloc(sizeof(H5F_t *) * storage->list_nused)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory for source files list");
+            for(i = 0; i < storage->list_nused; i++) {
+                if(HDstrcmp(storage->list[i].source_file_name, ".")) {
+                    fprintf(stderr, "%d: Opening Source File %s\n", i, storage->list[i].source_file_name);
+                    if(NULL == (storage->source_files[i] = H5F_open(storage->list[i].source_file_name, 
+                                                                    H5F_INTENT(f) & H5F_ACC_RDWR, 
+                                                                    H5P_FILE_CREATE_DEFAULT, 
+                                                                    storage->source_fapl, dxpl_id)))
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open source file");
+
+                    if(H5F_get_id(storage->source_files[i], FALSE) < 0)
+                        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
+                }
+                else
+                    storage->source_files[i] = NULL;
+            }
+        }
+    }
+#endif /* H5_HAVE_PARALLEL */
 
     /* Patch the virtual selection dataspaces.  Note we always patch the space
      * status because this layout could be from an old version held in the
@@ -2007,11 +2052,6 @@ H5D__virtual_init(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, const H5D_t *dset,
     } /* end if */
     else
         storage->printf_gap = (hsize_t)0;
-
-    /* Retrieve VDS file FAPL to layout */
-    if(storage->source_fapl <= 0)
-        if((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get fapl")
 
     /* Copy DAPL to layout */
     if(storage->source_dapl <= 0)
@@ -2155,7 +2195,8 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
                      * open the source dataset to patch it */
                     if(storage->list[i].source_space_status != H5O_VIRTUAL_STATUS_CORRECT) {
                         HDassert(!storage->list[i].sub_dset[j].dset);
-                        if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], &storage->list[i].sub_dset[j], io_info->dxpl_id) < 0)
+                        if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], &storage->list[i].sub_dset[j], 
+                                                         (storage->source_files ? storage->source_files[i] : NULL), io_info->dxpl_id) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
                     } /* end if */
 
@@ -2227,7 +2268,8 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
                         /* Open source dataset */
                         if(!storage->list[i].sub_dset[j].dset)
                             /* Try to open dataset */
-                            if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], &storage->list[i].sub_dset[j], io_info->dxpl_id) < 0)
+                            if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], &storage->list[i].sub_dset[j], 
+                                                             (storage->source_files ? storage->source_files[i] : NULL), io_info->dxpl_id) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
 
                         /* If the source dataset is not open, mark the selected
@@ -2264,7 +2306,8 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
                     /* Open source dataset */
                     if(!storage->list[i].source_dset.dset) 
                         /* Try to open dataset */
-                        if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], &storage->list[i].source_dset, io_info->dxpl_id) < 0)
+                        if(H5D__virtual_open_source_dset(io_info->dset, &storage->list[i], &storage->list[i].source_dset, 
+                                                         (storage->source_files ? storage->source_files[i] : NULL), io_info->dxpl_id) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
 
                     /* If the source dataset is not open, mark the selected elements
@@ -2442,11 +2485,13 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     storage = &io_info->dset->shared->layout.storage.u.virt;
     HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
 
+#if 0
 #ifdef H5_HAVE_PARALLEL
     /* Parallel reads are not supported (yet) */
     if(H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_HAS_MPI))
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "parallel reads not supported on virtual datasets")
 #endif /* H5_HAVE_PARALLEL */
+#endif
 
     /* Prepare for I/O operation */
     if(H5D__virtual_pre_io(io_info, storage, file_space, mem_space, &tot_nelmts) < 0)
@@ -2722,3 +2767,57 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_flush() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__virtual_dest
+ *
+ * Purpose:	close the source files if they are open
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              November, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__virtual_dest(H5D_t *dset, hid_t H5_ATTR_UNUSED dxpl_id)
+{
+    herr_t      ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(dset);
+
+#ifdef H5_HAVE_PARALLEL
+    if(H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI)) {
+        H5O_storage_virtual_t *storage;         /* Convenient pointer into layout struct */
+        size_t      i;                       /* Local index variables */
+
+        storage = &dset->shared->layout.storage.u.virt;
+
+        HDassert(storage->source_files);
+
+        /* Flush only open datasets */
+        for(i = 0; i < storage->list_nused; i++) {
+            if(storage->source_files[i]) {
+                hid_t file_id;
+
+                file_id = H5F_get_file_id(storage->source_files[i]);
+                HDassert(file_id >= 0);
+
+                if(H5I_dec_ref(file_id) < 0)
+                    HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+
+                storage->source_files[i] = NULL;
+            }
+        }
+
+        storage->source_files = (H5F_t **)H5MM_xfree(storage->source_files);
+    }
+#endif /* H5_HAVE_PARALLEL */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_dest() */
