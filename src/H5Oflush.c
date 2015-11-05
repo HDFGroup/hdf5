@@ -282,7 +282,6 @@ herr_t
 H5O_refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
     haddr_t tag = 0;
-    H5O_t *oh = NULL;
     H5G_loc_t tmp_loc;
     hbool_t corked;
     herr_t ret_value = SUCCEED;
@@ -319,9 +318,6 @@ H5O_refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc, hid_t 
     }
 
 done:
-    if(oh && H5O_unprotect(&oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
-
     FUNC_LEAVE_NOAPI(ret_value);
 } /* H5O_refresh_metadata_close() */
 
