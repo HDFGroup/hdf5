@@ -100,7 +100,7 @@ static herr_t variable_get_load_size(const void *image_ptr, void *udata_ptr,
 static herr_t notify_get_load_size(const void *image_ptr, void *udata_ptr,
     size_t *image_len_ptr, size_t *actual_len);
 
-static hbool_t variable_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
+static htri_t variable_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 
 static void *pico_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
     hbool_t *dirty_ptr);
@@ -776,7 +776,8 @@ notify_get_load_size(const void *image, void *udata, size_t *image_length, size_
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+
+static htri_t
 verify_chksum(const void H5_ATTR_UNUSED *image, size_t H5_ATTR_UNUSED len, void *udata, int32_t entry_type)
 {
     test_entry_t *entry;
@@ -808,7 +809,7 @@ verify_chksum(const void H5_ATTR_UNUSED *image, size_t H5_ATTR_UNUSED len, void 
 
 } /* verify_chksum() */
 
-static hbool_t
+static htri_t
 variable_verify_chksum(const void *image, size_t len, void *udata)
 {
     return verify_chksum(image, len, udata, VARIABLE_ENTRY_TYPE);
@@ -3914,7 +3915,8 @@ protect_entry(H5F_t * file_ptr,
 	}
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, xfer,
-                &(types[type]), entry_ptr->addr, &entry_ptr->addr, H5C__NO_FLAGS_SET);
+                &(types[type]), entry_ptr->addr, &entry_ptr->addr, 
+                H5C__NO_FLAGS_SET);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
              ( !(entry_ptr->header.is_protected) ) ||
@@ -3943,6 +3945,10 @@ protect_entry(H5F_t * file_ptr,
             HDfprintf(stdout,
                       "entry_ptr->addr = %d, entry_ptr->header.addr = %d\n",
                       (int)(entry_ptr->addr), (int)(entry_ptr->header.addr));
+	    HDfprintf(stdout, 
+                   "entry_ptr->verify_ct = %d, entry_ptr->max_verify_ct = %d\n",
+		   entry_ptr->verify_ct, entry_ptr->max_verify_ct);
+	    H5Eprint2(H5E_DEFAULT, stdout);
 #endif
             pass = FALSE;
             failure_mssg = "error in H5C_protect().";
@@ -3957,6 +3963,7 @@ protect_entry(H5F_t * file_ptr,
             entry_ptr->is_protected = TRUE;
 
         }
+
 	if(entry_ptr->header.is_corked)
 	    entry_ptr->is_corked = TRUE;
 
