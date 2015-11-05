@@ -70,8 +70,6 @@ static const H5I_class_t H5I_VOL_CLS[1] = {{
     (H5I_free_t)H5VL_free_cls   /* Callback routine for closing objects of this class */
 }};
 
-/* Flag indicating "top" of interface has been initialized */
-static hbool_t H5VL_top_package_initialize_s = FALSE;
 
 /*-------------------------------------------------------------------------
  * Function:H5VL_init

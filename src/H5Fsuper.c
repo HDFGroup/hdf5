@@ -934,6 +934,7 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
             HDassert(driver_size <= H5F_MAX_DRVINFOBLOCK_SIZE);
 
             /* Encode driver-specific data */
+            HDmemset(dbuf, 0, sizeof(dbuf));
             if(H5FD_sb_encode(f->shared->lf, info.name, dbuf) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode driver information")
 

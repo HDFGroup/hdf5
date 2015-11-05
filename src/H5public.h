@@ -94,10 +94,10 @@ extern "C" {
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	9	/* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	232	/* For tweaks, bug-fixes, or development     */
+#define H5_VERS_RELEASE	233	/* For tweaks, bug-fixes, or development     */
 #define H5_VERS_SUBRELEASE ""	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.9.232"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.9.233"      /* Full version string */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)
@@ -144,7 +144,20 @@ typedef int herr_t;
  * 	    printf("error determining whether data type is committed\n");
  *	}
  */
-typedef unsigned int hbool_t;
+#ifdef H5_HAVE_STDBOOL_H
+  #include <stdbool.h>
+#else /* H5_HAVE_STDBOOL_H */
+  #ifndef __cplusplus
+    #if defined(H5_SIZEOF_BOOL) && (H5_SIZEOF_BOOL != 0)
+      #define bool    _Bool
+    #else
+      #define bool    unsigned int
+    #endif
+    #define true    1
+    #define false   0
+  #endif /* __cplusplus */
+#endif /* H5_HAVE_STDBOOL_H */
+typedef bool hbool_t;
 typedef int htri_t;
 
 /* Define the ssize_t type if it not is defined */

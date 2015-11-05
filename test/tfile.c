@@ -3084,7 +3084,7 @@ test_filespace_info(void)
     char        filename[FILENAME_LEN];	/* Filename to use */
     H5F_file_space_type_t	strategy, fs_type, def_type;	/* File space handling strategy */
     hsize_t	threshold, fs_size, def_size;			/* Free space section threshold */
-    hbool_t 	new_format;		/* new format or old format */
+    unsigned 	new_format;	/* new format or old format */
     herr_t	ret;			/* return value	*/
 
     /* Output message about test being performed */
@@ -3147,7 +3147,7 @@ test_filespace_info(void)
 
                 /* Create the file with the specified file space info */
                 fid1 = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl1, my_fapl);
-                CHECK(ret, FAIL, "H5Fcreate");
+                CHECK(fid1, FAIL, "H5Fcreate");
 
                 /* Close the file */
                 ret = H5Fclose(fid1);
@@ -3155,7 +3155,7 @@ test_filespace_info(void)
 
                 /* Re-open the file */
                 fid2 = H5Fopen(filename, H5F_ACC_RDWR, my_fapl);
-                CHECK(ret, FAIL, "H5Fopen");
+                CHECK(fid2, FAIL, "H5Fopen");
 
                 /* Get the file's creation property */
                 fcpl2 = H5Fget_create_plist(fid2);

@@ -586,6 +586,43 @@ void HDsrand(unsigned int seed)
 
 
 /*-------------------------------------------------------------------------
+ * Function:  HDget_timezone
+ *
+ * Purpose:  Wrapper function for global variable timezone, if it exists
+ *     on this system, or use the function if VS2015
+ *
+ *     VS2015 removed the deprecated global variable timezone.
+ *
+ * Return:  Success:  The value of timezone
+ *
+ *    Failure:  Cannot fail.
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifndef H5_HAVE_TM_GMTOFF
+#ifdef H5_HAVE_TIMEZONE
+
+long int HDget_timezone(void)
+{
+#ifdef H5_HAVE_VISUAL_STUDIO
+#if _MSC_VER >= 1900  /* VS 2015 */
+
+    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
+     * variable declared in time.h. That variable was deprecated and in
+     * VS 2015 is removed, with _get_timezone replacing it.
+     */
+    long int timezone = 0;
+
+    #define HDget_timezone(V)    _get_timezone(V);
+    HDget_timezone(&timezone);
+#endif
+#endif
+    return timezone;
+}
+#endif /* H5_HAVE_TIMEZONE */
+#endif /* H5_HAVE_TM_GMTOFF */
+
+/*-------------------------------------------------------------------------
  * Function:  Wgettimeofday
  *
  * Purpose:  Wrapper function for gettimeofday on Windows systems

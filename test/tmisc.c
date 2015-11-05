@@ -5176,7 +5176,7 @@ static void
 test_misc30(void)
 {
     hsize_t file_size[] = {0, 0};       /* Sizes of file created */
-    hbool_t get_info;                   /* Whether to perform the get info call */
+    unsigned get_info;                  /* Whether to perform the get info call */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Local heap dropping free block info\n"));

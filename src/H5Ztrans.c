@@ -748,6 +748,7 @@ H5Z_parse_term(H5Z_token *current, H5Z_datval_ptrs* dat_val_pointers)
 
             case H5Z_XFORM_ERROR:
             default:
+                H5Z_xform_destroy_parse_tree(term);
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "bad transform type passed to data transform expression")
 	    } /* end switch */
     } /* end for */

@@ -99,12 +99,12 @@ These steps are described in more detail below.
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
-            * Visual Studio 12
-            * Visual Studio 12 Win64
-            * Visual Studio 11
-            * Visual Studio 11 Win64
-            * Visual Studio 10
-            * Visual Studio 10 Win64
+            * Visual Studio 12 2013
+            * Visual Studio 12 2013 Win64
+            * Visual Studio 11 2012
+            * Visual Studio 11 2012 Win64
+            * Visual Studio 10 2010
+            * Visual Studio 10 2010 Win64
 
         <options> is:
             * BUILD_TESTING:BOOL=ON
@@ -114,7 +114,7 @@ These steps are described in more detail below.
 
       2.1  Visual CMake users, click the Configure button. If this is the first time you are
            running cmake-gui in this directory, you will be prompted for the
-           generator you wish to use (for example on Windows, Visual Studio 10).
+           generator you wish to use (for example on Windows, Visual Studio 12 2013).
            CMake will read in the CMakeLists.txt files from the source directory and
            display options for the HDF5 project. After the first configure you
            can adjust the cache settings and/or specify locations of other programs.
@@ -176,8 +176,8 @@ These steps are described in more detail below.
 III. Minimum C Project Files for CMake
 ========================================================================
 
-Create a CMakeLists.txt file at the source root. Include the
-following text in the file:
+Given the preconditions in section I, create a CMakeLists.txt file at the
+source root. Include the following text in the file:
 
 ##########################################################
 cmake_minimum_required (VERSION 3.1.0)
@@ -206,49 +206,53 @@ add_test (NAME test_example COMMAND ${example})
 IV. APPENDIX
 ========================================================================
 
-Below is an example of the ctest script used by The HDF Group. See the
-Appendix in the INSTALL_CMake.txt file for the CTestScript.cmake file used
-by this script. Adjust the values as necessary. Note that the source folder
-is entered on the command line and the build folder is created as a sub-folder.
-Windows should adjust the forward slash to double backslashes, except for
-the HDF_DIR environment variable.
+Below is an example of a ctest script that can be used to build the examples.
+Adjust the values as necessary. Note that the defaults can be entered on the
+command line and the build folder is created as a sub-folder. Windows should
+adjust the forward slash to double backslashes, except for the HDF_DIR
+environment variable.
 
-NOTE: these files are available at the HDF web site:
+NOTE: this file is available at the HDF web site:
     http://www.hdfgroup.org/HDF5/release/cmakebuild.html
 
-    CTestScript.cmake
-
-    HDF518_Examples.cmake
+    HDF5_Examples.cmake
 
 
 
 ========================================================================
 ctest
 ========================================================================
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 
-############################################################################
-# Product specific script, HDF518_Examples.cmake, that uses the
-# CTestScript.cmake file (see Appendix in the CMake.txt). Usage:
-#     ctest -S HDF518_Examples.cmake,OPTION=VALUE -C Release -VV -O test.log
+cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+###############################################################################################################
+# This script will build and run the examples from a folder
+# Execute from a command line:
+#     ctest -S HDF5_Examples.cmake,OPTION=VALUE -C Release -V -O test.log
 # where valid options for OPTION are:
+#     BUILD_GENERATOR - The cmake build generator:
+#            Unix    * Unix Makefiles
+#            VS2015    * Visual Studio 14 2015
+#            VS201564 * Visual Studio 14 2015 Win64
+#            VS2013    * Visual Studio 12 2013
+#            VS201364 * Visual Studio 12 2013 Win64
+#            VS2012    * Visual Studio 11 2012
+#            VS201264 * Visual Studio 11 2012 Win64
+#
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_BUILD_CONFIGURATION  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
-#     STATICLIBRARIES  -  Build/use static libraries
+#     STATIC_LIBRARIES  -  Build/use static libraries
+#     FORTRAN_LIBRARIES -  Build/use fortran libraries
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
-###############################################################################################################
-
-set(CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
-set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
-#set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
-
+##############################################################################
 # handle input parameters to script.
-#INSTALLDIR - HDF5-1.8 root folder
+#BUILD_GENERATOR - which CMake generator to use, required
+#INSTALLDIR - HDF5 root folder
 #CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF4Examples
-#STATICLIBRARIES - Default is YES
-#NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
+#STATIC_LIBRARIES - Default is YES
+#FORTRAN_LIBRARIES - Default is NO
+##NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac)
 if(DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
     # script.ctest,var1=value1,var2=value2
@@ -260,8 +264,38 @@ if(DEFINED CTEST_SCRIPT_ARG)
         endif()
     endforeach()
 endif()
+
+# build generator must be defined
+if(NOT DEFINED BUILD_GENERATOR)
+  message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
+else()
+  if(${BUILD_GENERATOR} STREQUAL "Unix")
+    set(CMAKE_GENERATOR "Unix Makefiles")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS2015")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 14 2015")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS201564")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 14 2015 Win64")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS2013")
+    set(CMAKE_GENERATOR "Visual Studio 12 2013")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS201364")
+    set(CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS2012")
+    set(CMAKE_GENERATOR "Visual Studio 11 2012")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS201264")
+    set(CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
+  else()
+    message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
+  endif()
+endif()
+set(CTEST_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
+set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
+
 if(NOT DEFINED INSTALLDIR)
+  if(WIN32)
+    set(INSTALLDIR "C:\\Program\ Files\\myhdf5")
+  else()
     set(INSTALLDIR "/usr/local/myhdf5")
+  endif()
 endif()
 if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
     set(CTEST_BUILD_CONFIGURATION "Release")
@@ -269,36 +303,45 @@ endif()
 if(NOT DEFINED CTEST_SOURCE_NAME)
     set(CTEST_SOURCE_NAME "HDF5Examples")
 endif()
-if(NOT DEFINED STATICLIBRARIES)
+if(NOT DEFINED STATIC_LIBRARIES)
     set(STATICLIBRARIES "YES")
+endif()
+if(NOT DEFINED FORTRAN_LIBRARIES)
+    set(FORTRANLIBRARIES "NO")
 endif()
 
 #TAR_SOURCE - name of tarfile
 #if(NOT DEFINED TAR_SOURCE)
-#  set(CTEST_USE_TAR_SOURCE "HDF5Examples-1.2.1-Source")
+#  set(CTEST_USE_TAR_SOURCE "HDF5Examples-1.10.1-Source")
 #endif()
 
 ###############################################################################################################
 #     Adjust the following SET Commands as needed
 ###############################################################################################################
 if(WIN32)
-  if(STATICLIBRARIES)
+  if(${STATICLIBRARIES})
     set(BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
-  endif(STATICLIBRARIES)
+  endif()
   set(ENV{HDF5_DIR} "${INSTALLDIR}/cmake")
   set(CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}\\build)
   set(CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_SOURCE_NAME}")
   set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_BINARY_NAME}")
 else(WIN32)
-  if(STATICLIBRARIES)
+  if(${STATICLIBRARIES})
     set(BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
-  endif(STATICLIBRARIES)
+  endif()
   set(ENV{HDF5_DIR} "${INSTALLDIR}/share/cmake")
   set(ENV{LD_LIBRARY_PATH} "${INSTALLDIR}/lib")
   set(CTEST_BINARY_NAME ${CTEST_SOURCE_NAME}/build)
   set(CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_SOURCE_NAME}")
   set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_BINARY_NAME}")
 endif(WIN32)
+if(${FORTRANLIBRARIES})
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
+else()
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
+endif()
+set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PACKAGE@@HDF_PACKAGE_EXT@")
 
 ###############################################################################################################
 # For any comments please contact cdashhelp@hdfgroup.org
@@ -317,11 +360,11 @@ if(APPLE)
   if(NOT NO_MAC_FORTRAN)
     # Shared fortran is not supported, build static
     set(BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
-  else(NOT NO_MAC_FORTRAN)
+  else()
     set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
-  endif(NOT NO_MAC_FORTRAN)
+  endif()
   set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
-endif(APPLE)
+endif()
 
 #-----------------------------------------------------------------------------
 set(CTEST_CMAKE_COMMAND "\"${CMAKE_COMMAND}\"")
@@ -341,7 +384,7 @@ if(CTEST_USE_TAR_SOURCE)
     message(STATUS "extracting... [error-(${rv}) clean up]")
     file(REMOVE_RECURSE "${CTEST_SOURCE_DIRECTORY}")
     message(FATAL_ERROR "error: extract of ${CTEST_SOURCE_NAME} failed")
-  endif(NOT rv EQUAL 0)
+  endif()
 endif(CTEST_USE_TAR_SOURCE)
 
 #-----------------------------------------------------------------------------
@@ -350,9 +393,9 @@ endif(CTEST_USE_TAR_SOURCE)
 set(CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
 if (EXISTS "${CTEST_BINARY_DIRECTORY}" AND IS_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
   ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
-else (EXISTS "${CTEST_BINARY_DIRECTORY}" AND IS_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
+else ()
   file(MAKE_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
-endif (EXISTS "${CTEST_BINARY_DIRECTORY}" AND IS_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
+endif ()
 
 # Use multiple CPU cores to build
 include(ProcessorCount)
@@ -360,7 +403,7 @@ ProcessorCount(N)
 if(NOT N EQUAL 0)
   if(NOT WIN32)
     set(CTEST_BUILD_FLAGS -j${N})
-  endif(NOT WIN32)
+  endif()
   set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
 endif()
 set (CTEST_CONFIGURE_COMMAND
@@ -382,9 +425,9 @@ ctest_build (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
 ctest_test (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args} RETURN_VALUE res)
 if(res GREATER 0)
   message (FATAL_ERROR "tests FAILED")
-endif(res GREATER 0)
+endif()
 #-----------------------------------------------------------------------------
-#################################################################################
+##############################################################################################################
 
 
 

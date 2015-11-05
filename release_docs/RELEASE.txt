@@ -1,4 +1,4 @@
-HDF5 version 1.9.232 currently under development
+HDF5 version 1.9.233 released on 2015-10-06
 ================================================================================
 
 
@@ -276,6 +276,10 @@ The following platforms are not supported but have been tested for this release.
     (freedom)                     gcc 4.6.1 20110422
                                   g++ 4.6.1 20110422
                                   gfortran 4.6.1 20110422
+
+    Mac OS X El Capitan 10.11     Apple clang/clang++ version 7.0.0 from Xcode 7.0.1
+    64-bit    			  gfortran GNU Fortran (GCC) 5.2.0
+    (VM)      
 
     Debian7.5.0 3.2.0-4-686 #1 SMP Debian 3.2.51-1 i686 GNU/Linux
                                   gcc (Debian 4.7.2-5) 4.7.2

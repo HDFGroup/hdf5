@@ -133,27 +133,25 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
     // create the file.
     if( flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC))
     {
-        hid_t create_plist_id = create_plist.getId();
-        hid_t access_plist_id = access_plist.getId();
-        id = H5Fcreate( name, flags, create_plist_id, access_plist_id );
-        if( id < 0 )  // throw an exception when open/create fail
-        {
-            throw FileIException("H5File constructor", "H5Fcreate failed");
-        }
+	hid_t create_plist_id = create_plist.getId();
+	hid_t access_plist_id = access_plist.getId();
+	id = H5Fcreate( name, flags, create_plist_id, access_plist_id );
+	if( id < 0 )  // throw an exception when open/create fail
+	{
+	    throw FileIException("H5File constructor", "H5Fcreate failed");
+	}
     }
     // Open the file if none of the bits above are set.
     else
     {
-        hid_t access_plist_id = access_plist.getId();
-        id = H5Fopen( name, flags, access_plist_id );
-        if( id < 0 )  // throw an exception when open/create fail
-        {
-            throw FileIException("H5File constructor", "H5Fopen failed");
-        }
+	hid_t access_plist_id = access_plist.getId();
+	id = H5Fopen( name, flags, access_plist_id );
+	if( id < 0 )  // throw an exception when open/create fail
+	{
+	    throw FileIException("H5File constructor", "H5Fopen failed");
+	}
     }
 }
-
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5File overloaded constructor
@@ -173,6 +171,8 @@ H5File::H5File(hid_t existing_id) : H5Location(), CommonFG()
     id = existing_id;
     incRefCount(); // increment number of references to this id
 }
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:	H5File copy constructor
@@ -528,16 +528,16 @@ hsize_t H5File::getFileSize() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    H5File::getId
+// Function:	H5File::getId
 ///\brief	Get the id of this file
 ///\return	File identifier
 // Modification:
-//      May 2008 - BMR
-//              Class hierarchy is revised to address bugzilla 1068.  Class
-//              AbstractDS and Attribute are moved out of H5Object.  In
-//              addition, member IdComponent::id is moved into subclasses, and
-//              IdComponent::getId now becomes pure virtual function.
-// Programmer   Binh-Minh Ribler - May, 2008
+//	May 2008 - BMR
+//		Class hierarchy is revised to address bugzilla 1068.  Class
+//		AbstractDS and Attribute are moved out of H5Object.  In
+//		addition, member IdComponent::id is moved into subclasses, and
+//		IdComponent::getId now becomes pure virtual function.
+// Programmer	Binh-Minh Ribler - May, 2008
 //--------------------------------------------------------------------------
 hid_t H5File::getId() const
 {
@@ -545,19 +545,6 @@ hid_t H5File::getId() const
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-//--------------------------------------------------------------------------
-// Function:	H5File::getLocId
-// Purpose:	Get the id of this file
-// Description
-//		This function is a redefinition of CommonFG::getLocId.  It
-//		is used by CommonFG member functions to get the file id.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-hid_t H5File::getLocId() const
-{
-   return( getId() );
-}
-
 //--------------------------------------------------------------------------
 // Function:	H5File::reopen
 // Purpose:	Reopens this file.
@@ -572,16 +559,29 @@ void H5File::reopen()
 }
 
 //--------------------------------------------------------------------------
-// Function:    H5File::p_setId (protected)
-///\brief       Sets the identifier of this object to a new value.
+// Function:	H5File::getLocId
+// Purpose:	Get the id of this file
+// Description
+//		This function is a redefinition of CommonFG::getLocId.  It
+//		is used by CommonFG member functions to get the file id.
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+hid_t H5File::getLocId() const
+{
+   return( getId() );
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5File::p_setId (protected)
+///\brief	Sets the identifier of this object to a new value.
 ///
-///\exception   H5::IdComponentException when the attempt to close the HDF5
-///             object fails
+///\exception	H5::IdComponentException when the attempt to close the HDF5
+///		object fails
 // Description:
-//              The underlaying reference counting in the C library ensures
-//              that the current valid id of this object is properly closed.
-//              Then the object's id is reset to the new id.
-// Programmer   Binh-Minh Ribler - 2000
+//		The underlaying reference counting in the C library ensures
+//		that the current valid id of this object is properly closed.
+//		Then the object's id is reset to the new id.
+// Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5File::p_setId(const hid_t new_id)
 {

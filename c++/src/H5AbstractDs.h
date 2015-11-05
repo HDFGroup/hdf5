@@ -68,7 +68,7 @@ class H5_DLLCPP AbstractDs {
 	///\brief Returns the amount of storage size required - pure virtual.
 	virtual hsize_t getStorageSize() const = 0;
 
-	///\brief Returns this class name.
+	// Returns this class name - pure virtual.
 	virtual H5std_string fromClass() const = 0;
 
 	// Destructor
@@ -91,7 +91,7 @@ class H5_DLLCPP AbstractDs {
 	// AbstractDs( const AbstractDs& original );
 
    private:
-	// This member function is implemented by DataSet and Attribute.
+	// This member function is implemented by DataSet and Attribute - pure virtual.
 	virtual hid_t p_get_type() const = 0;
 };
 #ifndef H5_NO_NAMESPACE
