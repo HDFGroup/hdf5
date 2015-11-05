@@ -86,8 +86,8 @@ class H5_DLLCPP Exception {
 	virtual ~Exception() throw();
 
    protected:
-        // Default value for detail_message
-        static const char DEFAULT_MSG[];
+	// Default value for detail_message
+	static const char DEFAULT_MSG[];
 
    private:
 	H5std_string detail_message;

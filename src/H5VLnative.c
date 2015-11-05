@@ -2907,7 +2907,7 @@ H5VL_native_link_specific(void *obj, H5VL_loc_params_t loc_params, H5VL_link_spe
             }
         case H5VL_LINK_ITER:
             {
-                hbool_t recursive = va_arg (arguments, hbool_t);
+                hbool_t recursive = va_arg (arguments, int);
                 H5_index_t idx_type = va_arg (arguments, H5_index_t);
                 H5_iter_order_t order = va_arg (arguments, H5_iter_order_t);
                 hsize_t *idx_p = va_arg (arguments, hsize_t *);

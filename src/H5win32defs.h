@@ -84,7 +84,7 @@ struct timezone {
 #define HDgetlogin()        Wgetlogin()
 #define HDsnprintf          c99_snprintf /*varargs*/
 #define HDvsnprintf         c99_vsnprintf
-        
+
 #endif /* H5_HAVE_VISUAL_STUDIO */
 
 /* Non-POSIX functions */

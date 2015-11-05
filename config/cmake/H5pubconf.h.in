@@ -160,6 +160,9 @@
 /* Define to 1 if you have the `gettimeofday' function. */
 #cmakedefine H5_HAVE_GETTIMEOFDAY @H5_HAVE_GETTIMEOFDAY@
 
+/* Define if the compiler understands inline */
+#cmakedefine H5_HAVE_INLINE @H5_HAVE_INLINE@
+
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
@@ -374,6 +377,12 @@
 /* Define to 1 if you have the `_scrsize' function. */
 #cmakedefine H5_HAVE__SCRSIZE @H5_HAVE__SCRSIZE@
 
+/* Define if the compiler understands __inline */
+#cmakedefine H5_HAVE___INLINE @H5_HAVE___INLINE@
+
+/* Define if the compiler understands __inline__ */
+#cmakedefine H5_HAVE___INLINE__ @H5_HAVE___INLINE__@
+
 /* Define if HDF5's high-level library headers should be included in hdf5.h */
 #cmakedefine H5_INCLUDE_HL @H5_INCLUDE_HL@
 
@@ -566,6 +575,12 @@
 /* The size of `__int64', as computed by sizeof. */
 #define H5_SIZEOF___INT64 @H5_SIZEOF___INT64@
 
+/* Define to 1 if you have the <stdbool.h> header file. */
+#cmakedefine H5_HAVE_STDBOOL_H @H5_HAVE_STDBOOL_H@
+
+/* The size of `bool', as computed by sizeof. */
+#cmakedefine H5_SIZEOF_BOOL @H5_SIZEOF_BOOL@
+
 /* Define to 1 if you have the ANSI C header files. */
 #cmakedefine H5_STDC_HEADERS @H5_STDC_HEADERS@
 
@@ -621,12 +636,6 @@
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #cmakedefine H5_const
-
-/* Define to `__inline__' or `__inline' if that's what the C compiler
-   calls it, or to nothing if 'inline' is not supported under any name.  */
-#ifndef __cplusplus
-#cmakedefine H5_inline @H5_inline@
-#endif
 
 /* Define to `long int' if <sys/types.h> does not define. */
 #cmakedefine H5_off_t

@@ -466,7 +466,7 @@ extern "C"
 void test_links()
 {
     hid_t	fapl_id, fapl2_id;    /* File access property lists */
-    hbool_t new_format;     /* Whether to use the new format or not */
+    unsigned new_format;     /* Whether to use the new format or not */
     const char  *envval;
 
     envval = HDgetenv("HDF5_DRIVER");

@@ -1166,7 +1166,7 @@ int
 main(void)
 {
     hid_t	fapl, fapl2;    /* File access property list IDs */
-    hbool_t new_format;     /* Whether to use the new format or not */
+    unsigned new_format;    /* Whether to use the new format or not */
     int	nerrors = 0;
 
     /* Reset library */

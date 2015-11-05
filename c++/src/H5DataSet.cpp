@@ -60,6 +60,12 @@ DataSet::DataSet() : H5Object(), AbstractDs(), id(H5I_INVALID_HID) {}
 ///\brief	Creates an DataSet object using the id of an existing dataset.
 ///\param	existing_id - IN: Id of an existing dataset
 // Programmer	Binh-Minh Ribler - 2000
+// Description
+//		incRefCount() is needed here to prevent the id from being closed
+//		prematurely.  That is, when application uses the id of an
+//		existing DataSet object to create another DataSet object.  So,
+//		when one of those objects is deleted, the id will be closed if
+//		the reference counter is only 1.
 //--------------------------------------------------------------------------
 DataSet::DataSet(const hid_t existing_id) : H5Object(), AbstractDs()
 {
@@ -172,8 +178,10 @@ DSetCreatPropList DataSet::getCreatePlist() const
    {
       throw DataSetIException("DataSet::getCreatePlist", "H5Dget_create_plist failed");
    }
+
    // create and return the DSetCreatPropList object
-   DSetCreatPropList create_plist(create_plist_id); // ok to use existing id const
+   DSetCreatPropList create_plist;
+   f_PropList_setId(&create_plist, create_plist_id);
    return(create_plist);
 }
 
@@ -772,6 +780,22 @@ void DataSet::p_setId(const hid_t new_id)
    // reset object's id to the given id
    id = new_id;
 }
+
+//--------------------------------------------------------------------------
+// Function:    f_PropList_setId - friend
+// Purpose:     This function is friend to class H5::PropList so that it
+//              can set PropList::id in order to work around a problem
+//              described in the JIRA issue HDFFV-7947.
+//              Applications shouldn't need to use it.
+// param        dset   - IN/OUT: DataSet object to be changed
+// param        new_id - IN: New id to set
+// Programmer   Binh-Minh Ribler - 2015
+//--------------------------------------------------------------------------
+void f_PropList_setId(PropList* plist, hid_t new_id)
+{
+    plist->p_setId(new_id);
+}
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
