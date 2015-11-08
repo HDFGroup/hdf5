@@ -1154,6 +1154,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Oenable_mdc_flushes() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5Oare_mdc_flushes_disabled
  *

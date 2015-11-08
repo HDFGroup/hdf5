@@ -861,7 +861,8 @@ H5Gflush(hid_t group_id)
     if(NULL == (grp = (H5G_t *)H5I_object_verify(group_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
-    if(H5O_flush_common(&grp->oloc, group_id) < 0)
+    /* Flush object's metadata to file */
+    if(H5O_flush_common(&grp->oloc, group_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFLUSH, FAIL, "unable to flush group and object flush callback")
 
 done:

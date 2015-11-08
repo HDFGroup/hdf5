@@ -5505,7 +5505,7 @@ H5Tflush(hid_t type_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
     /* To flush metadata and invoke flush callback if there is */
-    if(H5O_flush_common(&dt->oloc, type_id) < 0)
+    if(H5O_flush_common(&dt->oloc, type_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype and object flush callback")
 
 done:

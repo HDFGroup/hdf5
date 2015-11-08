@@ -92,12 +92,12 @@ H5Oflush(hid_t obj_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
     /* Flush the object metadata and invoke flush callback */
-    if(H5O_flush_common(oloc, obj_id) < 0)
+    if(H5O_flush_common(oloc, obj_id, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object and object flush callback")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Oflush */
+} /* end H5Oflush() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_flush_common
@@ -112,26 +112,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id)
+H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id, hid_t dxpl_id)
 {
     haddr_t 	tag = 0;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(H5O_oh_tag(oloc, H5AC_dxpl_id, &tag) < 0)
+    /* Retrieve tag for object */
+    if(H5O_oh_tag(oloc, dxpl_id, &tag) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object metadata")
 
     /* Flush metadata based on tag value of the object */
-    if(H5F_flush_tagged_metadata(oloc->file, tag, H5AC_dxpl_id)<0)
+    if(H5F_flush_tagged_metadata(oloc->file, tag, dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
 
     /* Check to invoke callback */
     if(H5F_object_flush_cb(oloc->file, obj_id) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to do object flush callback")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5O_flush_common() */
 
 
 /*-------------------------------------------------------------------------
@@ -163,15 +165,8 @@ H5O_oh_tag(const H5O_loc_t *oloc, hid_t dxpl_id, haddr_t *tag)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object's object header")
 
     /* Get object header's address (i.e. the tag value for this object) */
-    if (HADDR_UNDEF == (*tag = H5O_OH_GET_ADDR(oh)))
+    if(HADDR_UNDEF == (*tag = H5O_OH_GET_ADDR(oh)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to get address of object header")
-
-    /* Unprotect object header before attempting to flush it */
-    if(oh && H5O_unprotect(oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
-
-    /* Reset object header pointer */
-    oh = NULL;
 
 done:
     /* Unprotect object header on failure */
@@ -207,26 +202,26 @@ H5Orefresh(hid_t oid)
     if((oloc = H5O_get_loc(oid)) == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
 
-     /* Private function */
-     if(H5O_refresh_metadata(oid, *oloc, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
-
+    /* Private function */
+    if(H5O_refresh_metadata(oid, *oloc, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Orefresh */
+} /* end H5Orefresh() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_refresh_metadata
  *
  * Purpose:     Refreshes all buffers associated with an object.
- *		This is based on the original H5O_refresh_metadata() but
- *		is split into 2 routines.  
- *		(This is done so that H5Fstart_swmr_write() can use these
- *		2 routines to refresh opened objects.  This may be 
- *		restored back to the original code when H5Fstart_swmr_write()
- *		uses a different approach to handle issues with opened objects.	
+ *
+ * Note:	This is based on the original H5O_refresh_metadata() but
+ *	        is split into 2 routines.  
+ *	        (This is done so that H5Fstart_swmr_write() can use these
+ *	        2 routines to refresh opened objects.  This may be 
+ *	        restored back to the original code when H5Fstart_swmr_write()
+ *	        uses a different approach to handle issues with opened objects.	
  *
  * Return:    	Non-negative on success, negative on failure
  *
@@ -241,23 +236,36 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
     H5G_loc_t obj_loc;
     H5O_loc_t obj_oloc;
     H5G_name_t obj_path;
-    herr_t ret_value = SUCCEED;
+    hbool_t objs_incr = FALSE;          /* Whether the object count in the file was incremented */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Create empty object location */
     obj_loc.oloc = &obj_oloc;
     obj_loc.path = &obj_path;
     H5G_loc_reset(&obj_loc);
 
+    /* "Fake" another open object in the file, so that it doesn't get closed
+     *  if this object is the only thing holding the file open.
+     */
+    H5F_incr_nopen_objs(oloc.file);
+    objs_incr = TRUE;
+
+    /* Close object & evict its metadata */
     if((H5O_refresh_metadata_close(oid, oloc, &obj_loc, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
+    /* Re-open the object, re-fetching its metadata */
     if((H5O_refresh_metadata_reopen(oid, &obj_loc, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:
+    if(objs_incr)
+        H5F_decr_nopen_objs(oloc.file);
+
     FUNC_LEAVE_NOAPI(ret_value);
-} /* H5O_refresh_metadata() */
+} /* end H5O_refresh_metadata() */
 
 
 /*-------------------------------------------------------------------------
@@ -282,16 +290,20 @@ herr_t
 H5O_refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
     haddr_t tag = 0;
-    H5G_loc_t tmp_loc;
     hbool_t corked;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
     
     /* Make deep local copy of object's location information */
-    H5G_loc(oid, &tmp_loc);
-    H5G_loc_copy(obj_loc, &tmp_loc, H5_COPY_DEEP);
+    if(obj_loc) {
+        H5G_loc_t tmp_loc;
 
+        H5G_loc(oid, &tmp_loc);
+        H5G_loc_copy(obj_loc, &tmp_loc, H5_COPY_DEEP);
+    } /* end if */
+
+    /* Retrieve tag for object */
     if(H5O_oh_tag(&oloc, dxpl_id, &tag) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to get object header address")
 
@@ -304,33 +316,31 @@ H5O_refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc, hid_t 
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to close object")
 
     /* Flush metadata based on tag value of the object */
-    if(H5F_flush_tagged_metadata(oloc.file, tag, dxpl_id)<0)
+    if(H5F_flush_tagged_metadata(oloc.file, tag, dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
 
     /* Evict the object's tagged metadata */
-    if(H5F_evict_tagged_metadata(oloc.file, tag, dxpl_id)<0)
+    if(H5F_evict_tagged_metadata(oloc.file, tag, dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to evict metadata")
 
     /* Re-cork object with tag */
-    if(corked) {
+    if(corked)
 	if(H5AC_cork(oloc.file, tag, H5AC__SET_CORK, &corked) < 0)
 	    HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to cork the object")
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* H5O_refresh_metadata_close() */
+} /* end H5O_refresh_metadata_close() */
 
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_refresh_metadata_reopen
  *
  * Purpose:     This is the second part of the original routine H5O_refresh_metadata().
- *		(1) Re-open object with the saved object location information.
- *		(2) Re-register object ID with the re-opened object.
+ *		        (1) Re-open object with the saved object location information.
+ *		        (2) Re-register object ID with the re-opened object.
  *
- * Return:  Success:    Non-negative
- *          Failure:    Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer: Mike McGreevy/Vailin Choi
  *             July 28, 2010/Feb 2014
@@ -396,5 +406,5 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hid_t dxpl_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5O_refresh_metadata_reopen() */
 
-} /* H5O_refresh_metadata_reopen() */

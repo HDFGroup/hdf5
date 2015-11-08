@@ -1877,9 +1877,9 @@ test_dset_cork(hbool_t newformat)
 
     /* Testing Macro */
     if(newformat) {
-	    TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (new library format)");
+	    TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled on datasets (new library format)");
     } else {
-	    TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (old library format)");
+	    TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled on datasets (old library format)");
     }
 
     /* Create fapl */
@@ -2179,3 +2179,4 @@ main(void)
     return(nerrs > 0);
 
 } /* main */
+

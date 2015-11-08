@@ -132,6 +132,7 @@ const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
     NULL,
     NULL,
     H5D__virtual_flush,
+    NULL,
     NULL
 }};
 
@@ -142,6 +143,9 @@ const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
 
 /* Declare a free list to manage the H5O_storage_virtual_name_seg_t struct */
 H5FL_DEFINE(H5O_storage_virtual_name_seg_t);
+
+/* Declare a static free list to manage H5D_virtual_file_list_t structs */
+H5FL_DEFINE_STATIC(H5D_virtual_held_file_t);
 
 
 
@@ -759,7 +763,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     /* Check if we need to open the source file */
     if(HDstrcmp(source_dset->file_name, ".")) {
         /* Open the source file */
-        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & H5F_ACC_RDWR, H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
+        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ), H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
             H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
         else
             src_file_open = TRUE;
@@ -792,6 +796,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
                 virtual_ent->source_space_status = H5O_VIRTUAL_STATUS_CORRECT;
             } /* end if */
+
         } /* end else */
     } /* end if */
 
@@ -2712,9 +2717,226 @@ H5D__virtual_flush(H5D_t *dset, hid_t dxpl_id)
             if(storage->list[i].source_dset.dset)
                 /* Flush source dataset */
                 if(H5D__flush_real(storage->list[i].source_dset.dset, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to write to source dataset")
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to flush source dataset")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_hold_source_dset_files
+ *
+ * Purpose:     Hold open the source files that are open, during a refresh event
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              November 7, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__virtual_hold_source_dset_files(const H5D_t *dset, H5D_virtual_held_file_t **head)
+{
+    H5O_storage_virtual_t *storage;         /* Convenient pointer into layout struct */
+    H5D_virtual_held_file_t *tmp;           /* Temporary held file node */
+    size_t      i;                          /* Local index variable */
+    herr_t      ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(dset);
+    HDassert(head && NULL == *head);
+
+    /* Set the convenience pointer */
+    storage = &dset->shared->layout.storage.u.virt;
+
+    /* Hold only files for open datasets */
+    for(i = 0; i < storage->list_nused; i++)
+        /* Check for "printf" source dataset resolution */
+        if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
+            size_t      j;              /* Local index variable */
+
+            /* Iterate over sub-source dsets */
+            for(j = 0; j < storage->list[i].sub_dset_nused; j++)
+                if(storage->list[i].sub_dset[j].dset) {
+                    /* Hold open the file */
+                    H5F_INCR_NOPEN_OBJS(storage->list[i].sub_dset[j].dset->oloc.file);
+
+                    /* Allocate a node for this file */
+                    if(NULL == (tmp = H5FL_MALLOC(H5D_virtual_held_file_t)))
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate held file node")
+
+                    /* Set up node & connect to list */
+                    tmp->file = storage->list[i].sub_dset[j].dset->oloc.file;
+                    tmp->next = *head;
+                    *head = tmp;
+                } /* end if */
+        } /* end if */
+        else
+            if(storage->list[i].source_dset.dset) {
+                /* Hold open the file */
+                H5F_INCR_NOPEN_OBJS(storage->list[i].source_dset.dset->oloc.file);
+
+                /* Allocate a node for this file */
+                if(NULL == (tmp = H5FL_MALLOC(H5D_virtual_held_file_t)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate held file node")
+
+                /* Set up node & connect to list */
+                tmp->file = storage->list[i].source_dset.dset->oloc.file;
+                tmp->next = *head;
+                *head = tmp;
+            } /* end if */
+
+done:
+    if(ret_value < 0) {
+        /* Release hold on files and delete list on error */
+        if(*head)
+            if(H5D__virtual_release_source_dset_files(*head) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release source datasets' files held open")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_hold_source_dset_files() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_refresh_source_dset
+ *
+ * Purpose:     Refresh a source dataset
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              November 7, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__virtual_refresh_source_dset(H5D_t **dset, hid_t dxpl_id)
+{
+    hid_t       dset_id;                /* Temporary dataset identifier */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(dset && *dset);
+
+    /* Get a temporary identifier for this source dataset */
+    if((dset_id = H5I_register(H5I_DATASET, *dset, FALSE)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register source dataset ID")
+
+    /* Refresh source dataset */
+    if(H5D__refresh(dset_id, *dset, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh source dataset")
+
+    /* Discard the identifier & replace the dataset */
+    if(NULL == (*dset = (H5D_t *)H5I_remove(dset_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't unregister source dataset ID")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_refresh_source_dsets() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_refresh_source_dsets
+ *
+ * Purpose:     Refresh the source datasets
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Dana Robinson
+ *              November, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__virtual_refresh_source_dsets(H5D_t *dset, hid_t dxpl_id)
+{
+    H5O_storage_virtual_t *storage;         /* Convenient pointer into layout struct */
+    size_t      i;                          /* Local index variable */
+    herr_t      ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(dset);
+
+    /* Set convenience pointer */
+    storage = &dset->shared->layout.storage.u.virt;
+
+    /* Refresh only open datasets */
+    for(i = 0; i < storage->list_nused; i++)
+        /* Check for "printf" source dataset resolution */
+        if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
+            size_t      j;              /* Local index variable */
+
+            /* Iterate over sub-source datasets */
+            for(j = 0; j < storage->list[i].sub_dset_nused; j++)
+                /* Check if sub-source dataset is open */
+                if(storage->list[i].sub_dset[j].dset)
+                    /* Refresh sub-source dataset */
+                    if(H5D__virtual_refresh_source_dset(&storage->list[i].sub_dset[j].dset, dxpl_id) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh source dataset")
+        } /* end if */
+        else
+            /* Check if source dataset is open */
+            if(storage->list[i].source_dset.dset)
+                /* Refresh source dataset */
+                if(H5D__virtual_refresh_source_dset(&storage->list[i].source_dset.dset, dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh source dataset")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_refresh_source_dsets() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_release_source_dset_files
+ *
+ * Purpose:     Release the hold on source files that are open, during a refresh event
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              November 7, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__virtual_release_source_dset_files(H5D_virtual_held_file_t *head)
+{
+    herr_t      ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Release hold on files and delete list */
+    while(head) {
+        H5D_virtual_held_file_t *tmp = head->next;      /* Temporary pointer to next node */
+
+        /* Release hold on file */
+        H5F_DECR_NOPEN_OBJS(head->file);
+
+        /* Attempt to close the file */
+        /* (Should always succeed, since the 'top' source file pointer is
+         *      essentially "private" to the virtual dataset, since it wasn't
+         *      opened through an API routine -QAK)
+         */
+        if(H5F_try_close(head->file) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, FAIL, "problem attempting file close")
+
+        /* Delete node */
+        (void)H5FL_FREE(H5D_virtual_held_file_t, head);
+
+        /* Advance to next node */
+        head = tmp;
+    } /* end while */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_release_source_dset_files() */
 

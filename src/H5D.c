@@ -344,13 +344,9 @@ H5Dclose(hid_t dset_id)
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
      * reaches zero.  
-     *
-     * Pass in TRUE for the 3rd parameter to tell the function to remove
-     * dataset's ID even though the freeing function might fail.  Please
-     * see the comments in H5I_dec_ref for details. (SLU - 2010/9/7)
      */
     if(H5I_dec_app_ref_always_close(dset_id) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -959,7 +955,8 @@ H5Dflush(hid_t dset_id)
     if(H5D__flush_real(dset, H5AC_dxpl_id) < 0)
 	HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
 
-    if(H5O_flush_common(&dset->oloc, dset_id) < 0)
+    /* Flush object's metadata to file */
+    if(H5O_flush_common(&dset->oloc, dset_id, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush dataset and object flush callback")
 
 done:
@@ -982,8 +979,8 @@ done:
 herr_t
 H5Drefresh(hid_t dset_id)
 {
-    H5D_t *dset;                /* Dataset to refresh */
-    herr_t ret_value = SUCCEED; /* return value */
+    H5D_t       *dset;                  /* Dataset to refresh */
+    herr_t      ret_value = SUCCEED;    /* return value */
     
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
@@ -992,13 +989,13 @@ H5Drefresh(hid_t dset_id)
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-    /* Call private function to refresh dataset object */
-    if((H5O_refresh_metadata(dset_id, dset->oloc, H5AC_dxpl_id)) < 0)
+    /* Call private function to refresh the dataset object */
+    if((H5D__refresh(dset_id, dset, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to refresh dataset")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Drefresh */
+} /* end H5Drefresh() */
 
 
 /*-------------------------------------------------------------------------

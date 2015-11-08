@@ -3339,7 +3339,7 @@ hid_t
 H5D_get_space(H5D_t *dset)
 {
     H5S_t	*space = NULL;
-    hid_t       ret_value = FAIL;
+    hid_t       ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -3415,4 +3415,58 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_type() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D__refresh
+ *
+ * Purpose:     Refreshes all buffers associated with a dataset.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:	Dana Robinson
+ *		        November 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__refresh(hid_t dset_id, H5D_t *dset, hid_t dxpl_id)
+{
+    H5D_virtual_held_file_t *head = NULL;       /* Pointer to list of files held open */
+    hbool_t virt_dsets_held = FALSE;            /* Whether virtual datasets' files are held open */
+    herr_t      ret_value   = SUCCEED;          /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(dset);
+
+    /* If the layout is virtual... */
+    if(dset->shared->layout.type == H5D_VIRTUAL) {
+        /* Hold open the source datasets' files */
+        if(H5D__virtual_hold_source_dset_files(dset, &head) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, FAIL, "unable to hold VDS source files open")
+        virt_dsets_held = TRUE;
+
+        /* Refresh source datasets for virtual dataset */
+        if(H5D__virtual_refresh_source_dsets(dset, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh VDS source datasets")
+    } /* end if */
+    
+    /* Refresh dataset object */
+    if((H5O_refresh_metadata(dset_id, dset->oloc, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh dataset")
+
+done:
+    /* Release hold on virtual datasets' files */
+    if(virt_dsets_held) {
+        /* Sanity check */
+        HDassert(dset->shared->layout.type == H5D_VIRTUAL);
+
+        /* Release the hold on source datasets' files */
+        if(H5D__virtual_release_source_dset_files(head) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't release VDS source files held open")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__refresh() */
 

@@ -120,6 +120,7 @@ main(int argc, char *argv[])
             TEST_ERROR
 
     } /* end for */
+
     if(H5Pclose(faplid) < 0)
         TEST_ERROR
     if(H5Sclose(msid) < 0)
