@@ -939,7 +939,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, const char* grp_path, int 
 {
    herr_t ret;
    uint64_t cv;
-   hbool_t exists;
+   htri_t exists;
    char path_to_object[1024];
    hid_t obj_id;
    char name[3];

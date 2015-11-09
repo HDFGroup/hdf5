@@ -2244,7 +2244,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Aexists_ff(hid_t obj_id, const char *attr_name, hbool_t *ret, hid_t rcxt_id, hid_t estack_id)
+H5Aexists_ff(hid_t obj_id, const char *attr_name, htri_t *ret, hid_t rcxt_id, hid_t estack_id)
 {
     H5VL_object_t *obj;
     H5VL_loc_params_t loc_params;
@@ -2313,7 +2313,7 @@ done:
  */
 herr_t
 H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
-                     hid_t lapl_id, hbool_t *ret, hid_t rcxt_id, hid_t estack_id)
+                     hid_t lapl_id, htri_t *ret, hid_t rcxt_id, hid_t estack_id)
 {
     H5VL_object_t *obj;
     H5VL_loc_params_t loc_params;
@@ -2930,7 +2930,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, hbool_t *ret, 
+H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret, 
              hid_t rcxt_id, hid_t estack_id)
 {
     H5VL_object_t *obj = NULL;        /* object token of loc_id */
@@ -3454,7 +3454,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Oexists_by_name_ff(hid_t loc_id, const char *name, hbool_t *ret, hid_t lapl_id,
+H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, hid_t lapl_id,
                      hid_t rcxt_id, hid_t estack_id)
 {
     H5VL_object_t *obj = NULL;        /* object token of loc_id */

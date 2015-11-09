@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     hid_t tid1, tid2, rc_id, rid1, rid2;
     hid_t fapl_id, dxpl_id;
     hid_t e_stack;
-    hbool_t exists = -1;
+    htri_t exists = -1;
 
     const unsigned int nelem=60;
     hsize_t dims[1];

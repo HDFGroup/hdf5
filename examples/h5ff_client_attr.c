@@ -21,8 +21,8 @@ int main(int argc, char **argv) {
     hid_t tid1, tid2, rid1, rid2, rid3;
     hid_t fapl_id, trspl_id;
     hid_t e_stack;
-    hbool_t exists1;
-    hbool_t exists2;
+    htri_t exists1;
+    htri_t exists2;
 
     uint64_t version;
     uint64_t trans_num;
@@ -270,12 +270,12 @@ int main(int argc, char **argv) {
 
     gid1 = H5Gopen_ff(file_id, "G1", H5P_DEFAULT, rid3, e_stack);
     {
-        hbool_t exists3;
+        htri_t exists3;
         ret = H5Aexists_ff(gid1, "RENAMED_GROUP_ATTR", &exists3, rid3, H5_EVENT_STACK_NULL);
-        assert(exists3 == 1);
+        assert(exists3 == true);
     }
     aid2 = H5Aopen_ff(gid1, "RENAMED_GROUP_ATTR", H5P_DEFAULT, rid3, e_stack);
-    assert(aid2);
+    assert(aid2 >= 0);
     ret = H5Aread_ff(aid2, dtid, rdata2, rid3, e_stack);
     assert(ret == 0);
 

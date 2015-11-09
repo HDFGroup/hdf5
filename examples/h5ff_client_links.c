@@ -234,7 +234,7 @@ int main(int argc, char **argv) {
     {
         H5L_ff_info_t linfo;
         char *link_buf;
-        hbool_t exists;
+        htri_t exists;
 
         ret = H5Lexists_ff(file_id, "/G1/G2/G3/D2", H5P_DEFAULT, &exists, 
                            rid3, H5_EVENT_STACK_NULL );

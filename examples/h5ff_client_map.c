@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 
     hsize_t count = -1;
     int key, value;
-    hbool_t exists;
+    htri_t exists;
 
     sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_map.h5");
 

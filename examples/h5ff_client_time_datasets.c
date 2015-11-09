@@ -1136,7 +1136,7 @@ print_container_contents( hid_t file_id, hid_t rc_id, int my_rank )
 {
    herr_t ret;
    uint64_t cv;
-   hbool_t exists;
+   htri_t exists;
    char path_to_object[1024];
    char name[30];
    int i, d;

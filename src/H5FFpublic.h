@@ -65,6 +65,10 @@ typedef enum H5FF_checksum_bitflag_t {
     H5_CHECKSUM_ALL       = 0x07
 } H5FF_checksum_bitflag_t;
 
+#define H5R_OBJ_FF_REF_BUF_SIZE    sizeof(haddr_t)
+/* Object reference structure for user's code */
+typedef haddr_ff_t hobj_ff_ref_t;
+
 /********************/
 /* Public Variables */
 /********************/
@@ -129,8 +133,8 @@ H5_DLL herr_t H5Adelete_ff(hid_t loc_id, const char *name, hid_t trans_id, hid_t
 H5_DLL herr_t H5Adelete_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
                                    hid_t lapl_id, hid_t trans_id, hid_t estack_id);
 H5_DLL herr_t H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
-                                   hid_t lapl_id, hbool_t *ret, hid_t rcxt_id, hid_t estack_id);
-H5_DLL herr_t H5Aexists_ff(hid_t obj_id, const char *attr_name, hbool_t *ret, 
+                                   hid_t lapl_id, htri_t *ret, hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Aexists_ff(hid_t obj_id, const char *attr_name, htri_t *ret, 
                            hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Aclose_ff(hid_t attr_id, hid_t estack_id);
 
@@ -147,7 +151,7 @@ H5_DLL herr_t H5Lcreate_hard_ff(hid_t cur_loc_id, const char *cur_name, hid_t ne
                                 hid_t trans_id, hid_t estack_id);
 H5_DLL herr_t H5Ldelete_ff(hid_t loc_id, const char *name, hid_t lapl_id, 
                            hid_t trans_id, hid_t estack_id);
-H5_DLL herr_t H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, hbool_t *ret, 
+H5_DLL herr_t H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret, 
                            hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Lget_info_ff(hid_t link_loc_id, const char *link_name, H5L_ff_info_t *link_buff,
                              hid_t lapl_id, hid_t rcxt_id, hid_t estack_id);
@@ -160,7 +164,7 @@ H5_DLL herr_t H5Oget_token(hid_t obj_id, void *token, size_t *token_size);
 H5_DLL hid_t H5Oopen_by_token(const void *token, hid_t trans_id, hid_t estack_id);
 H5_DLL herr_t H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
                          hid_t lapl_id, hid_t trans_id, hid_t estack_id);
-H5_DLL herr_t H5Oexists_by_name_ff(hid_t loc_id, const char *name, hbool_t *ret, 
+H5_DLL herr_t H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, 
                                    hid_t lapl_id, hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Oset_comment_ff(hid_t obj_id, const char *comment, hid_t trans_id, hid_t estack_id);
 H5_DLL herr_t H5Oset_comment_by_name_ff(hid_t loc_id, const char *name, const char *comment,
@@ -178,6 +182,23 @@ H5_DLL herr_t H5Oget_info_by_name_ff(hid_t loc_id, const char *object_name,
                                      H5O_ff_info_t *object_info, hid_t lapl_id, 
                                      hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Oclose_ff(hid_t object_id, hid_t estack_id);
+
+
+#if 0
+/* Functions in H5R.c */
+H5_DLL herr_t H5Rcreate_object_ff(href_t *ref, hid_t loc_id, const char *name, hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Rcreate_region_ff(href_t *ref, hid_t loc_id, const char *name, hid_t space_id, hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Rcreate_attr_ff(href_t *ref, hid_t loc_id, const char *name, const char *atrr_name, hid_t rcxt_id, hid_t estack_id);
+//H5_DLL herr_t H5Rcreate_object_ext(href_t *ref, const char *filename, const char *pathname);
+//H5_DLL herr_t H5Rcreate_region_ext(href_t *ref, const char *filename, const char *pathname, hid_t space_id);
+//H5_DLL herr_t H5Rcreate_attr_ext(href_t *ref, const char *filename, const char *pathname, const char *atrr_name);
+H5_DLL herr_t  H5Rdestroy(href_t *ref);
+H5_DLL hid_t   H5Rdereference2(hid_t obj_id, hid_t oapl_id, const href_t *ref);
+H5_DLL hid_t   H5Rget_region(hid_t dataset, const href_t *ref);
+H5_DLL herr_t  H5Rget_obj_type2(const href_t *ref, H5O_type_t *obj_type);
+H5_DLL ssize_t H5Rget_name(const href_t *ref, char *name/*out*/, size_t size);
+H5_DLL ssize_t H5Rget_filename(const href_t *ref, char *name/*out*/, size_t size);
+#endif
 
 H5_DLL herr_t H5Aprefetch_ff(hid_t attr_id, hid_t rcxt_id, hrpl_t *replica_id,
                              hid_t dxpl_id, hid_t estack_id);
