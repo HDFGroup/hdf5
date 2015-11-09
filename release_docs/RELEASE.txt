@@ -1,4 +1,4 @@
-HDF5 version 1.9.233-swmr1 currently under development
+HDF5 version 1.9.233-swmr2 currently under development
 ================================================================================
 
 
