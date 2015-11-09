@@ -132,6 +132,7 @@ const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
     NULL,
     NULL,
     H5D__virtual_flush,
+    NULL,
     NULL
 }};
 
