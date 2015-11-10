@@ -38,7 +38,7 @@
 
 /* The callback function for the object flush property */
 static herr_t
-flush_func(hid_t obj_id, void *_udata)
+flush_func(hid_t H5_ATTR_UNUSED obj_id, void *_udata)
 {
     unsigned *flush_ct = (unsigned*)_udata;
     ++(*flush_ct);
@@ -47,7 +47,7 @@ flush_func(hid_t obj_id, void *_udata)
 
 /* The callback function for the append flush property */
 static herr_t
-append_func(hid_t dset_id, hsize_t *cur_dims, void *_udata)
+append_func(hid_t H5_ATTR_UNUSED dset_id, hsize_t H5_ATTR_UNUSED *cur_dims, void *_udata)
 {
     unsigned *append_ct = (unsigned *)_udata;
     ++(*append_ct);

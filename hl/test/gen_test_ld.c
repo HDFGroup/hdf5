@@ -85,9 +85,9 @@ typedef struct set_t {
 static int
 generate_dset(hid_t fid, const char *dname, int ndims, hsize_t *dims, hsize_t *maxdims, hid_t dtid, void *data)
 {
-    hid_t dcpl;		/* Dataset creation property */
-    hid_t did;		/* Dataset id */
-    hid_t sid;		/* Dataspace id */
+    hid_t dcpl = -1;	/* Dataset creation property */
+    hid_t did = -1;	/* Dataset id */
+    hid_t sid = -1;	/* Dataspace id */
     int i;		/* Local index variable */
     hsize_t chunk_dims[H5S_MAX_RANK];	/* Dimension sizes for chunks */
 
@@ -215,7 +215,7 @@ main(void)
         one_cbuf[i].field2.b.a = 20;
         one_cbuf[i].field2.b.b = 40;
         one_cbuf[i].field2.b.c = 80;
-        one_cbuf[i].field3 = 3.0;
+        one_cbuf[i].field3 = 3.0f;
         one_cbuf[i].field4.a = 4;
         one_cbuf[i].field4.b = 8;
     }
@@ -304,7 +304,7 @@ main(void)
         two_cbuf[i].field2.b.a = 20;
         two_cbuf[i].field2.b.b = 40;
         two_cbuf[i].field2.b.c = 80;
-        two_cbuf[i].field3 = 3.0;
+        two_cbuf[i].field3 = 3.0f;
         two_cbuf[i].field4.a = 4;
         two_cbuf[i].field4.b = 8;
     }

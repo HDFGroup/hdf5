@@ -26,10 +26,10 @@
  *	  This declaration is repeated in tools/lib/h5tools_str.c 
  */
 typedef struct H5LD_memb_t {
-   size_t tot_offset;
-   size_t last_tsize;
-   hid_t last_tid;
-   char **names;
+    size_t tot_offset;
+    size_t last_tsize;
+    hid_t last_tid;
+    char **names;
 } H5LD_memb_t;
 
 /* 
@@ -45,4 +45,5 @@ typedef struct H5LD_memb_t {
 void H5LD_clean_vector(H5LD_memb_t *listv[]);
 int H5LD_construct_vector(char *fields, H5LD_memb_t *listv[], hid_t par_tid);
 
-#endif
+#endif /* end _H5LDprivate_H */
+
