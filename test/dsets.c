@@ -8112,8 +8112,8 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
     H5VM_array_fill(hs_size, &fill, sizeof(fill), EARRAY_MAX_RANK);
 
     /* Loop over using SWMR access to write */
-    for(swmr = FALSE; swmr <= TRUE; swmr++) {
-         hbool_t     compress;       /* Whether chunks should be compressed */
+    for(swmr = 0; swmr <= 1; swmr++) {
+	int     compress;       /* Whether chunks should be compressed */
 
         /* SWMR is only supported on the latest file format */
         if(swmr && H5F_LIBVER_LATEST != low)
@@ -8128,11 +8128,12 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
         /* Loop over compressing chunks */
-        for(compress = FALSE; compress <= TRUE; compress++) {
+        for(compress = 0; compress <= 1; compress++)
 #else
-        for(compress = FALSE; compress <= FALSE; compress++) {
+	/* Loop over without compression */
+        for(compress = 0; compress <= 0; compress++)
 #endif /* H5_HAVE_FILTER_DEFLATE */
-
+	{
             H5D_alloc_time_t alloc_time;        /* Storage allocation time */
 
             /* Loop over storage allocation time */
@@ -11383,7 +11384,7 @@ main(void)
     /* Don't run this test using certain file drivers */
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
-        envval = "nomatch";
+        envval = "sec2";
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
