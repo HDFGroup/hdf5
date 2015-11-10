@@ -322,11 +322,11 @@ for f in $FILE_LIST ; do
     done
     if [ -n "$IS_MAC" ]; then  
       # Currently no shared libraries for Fortran are produced on the mac-intel machines
-      SHARED_LIBFILES="libhdf5_cpp.11.dylib libhdf5_hl_cpp.10.dylib libhdf5_hl.10.dylib libhdf5.10.dylib libsz.a"
+      SHARED_LIBFILES="libhdf5_cpp.11.dylib libhdf5_hl_cpp.11.dylib libhdf5_hl.10.dylib libhdf5.10.dylib libsz.a"
     elif [ -n "$IS_PPC64" ]; then
-      SHARED_LIBFILES="libhdf5_cpp.so.11.0.0 libhdf5_fortran.so.10.0.2 libhdf5_hl_cpp.so.10.0.2 libhdf5hl_fortran.so.10.0.2 libhdf5_hl.so.10.0.2 libhdf5.so.10.1.0"
+      SHARED_LIBFILES="libhdf5_cpp.so.11.0.0 libhdf5_fortran.so.10.0.2 libhdf5_hl_cpp.so.11.0.0 libhdf5hl_fortran.so.10.0.2 libhdf5_hl.so.10.0.2 libhdf5.so.10.1.0"
     else
-      SHARED_LIBFILES="libhdf5_cpp.so.11.0.0 libhdf5_fortran.so.10.0.2 libhdf5_hl_cpp.so.10.0.2 libhdf5hl_fortran.so.10.0.2 libhdf5_hl.so.10.0.2 libhdf5.so.10.1.0 libsz.so.2.0.0 libz.so.1.2.5"
+      SHARED_LIBFILES="libhdf5_cpp.so.11.0.0 libhdf5_fortran.so.10.0.2 libhdf5_hl_cpp.so.11.0.0 libhdf5hl_fortran.so.10.0.2 libhdf5_hl.so.10.0.2 libhdf5.so.10.1.0 libsz.so.2.0.0 libz.so.1.2.5"
     fi
     if [ -n "${SHAREDLIBS}" ]; then
       for s in $SHARED_LIBFILES ; do
