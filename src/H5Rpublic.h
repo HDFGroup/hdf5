@@ -31,6 +31,10 @@ typedef enum {
     H5R_BADTYPE     =   (-1),   /*invalid Reference Type                     */
     H5R_OBJECT,                 /*Object reference                           */
     H5R_DATASET_REGION,         /*Dataset Region Reference                   */
+    H5R_ATTR,                   /*Attribute reference                        */
+    H5R_OBJECT_EXT,             /*External Object reference                  */
+    H5R_DATASET_REGION_EXT,     /*External Dataset Region Reference          */
+    H5R_ATTR_EXT,               /*External Attribute reference               */
     H5R_MAXTYPE                 /*highest type (Invalid as true type)	     */
 } H5R_type_t;
 

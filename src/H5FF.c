@@ -52,7 +52,7 @@
 #include "H5VLiod.h"		/* IOD plugin - tmp      		*/
 #include "H5VLiod_client.h"	/* Client IOD - tmp			*/
 #include "H5VLiod_server.h"	/* Server IOD - tmp			*/
-#include "H5Xprivate.h"       /* Indexing */
+#include "H5Xprivate.h"         /* Indexing */
 
 #ifdef H5_HAVE_EFF
 /****************/
@@ -2255,7 +2255,7 @@ H5Aexists_ff(hid_t obj_id, const char *attr_name, htri_t *ret, hid_t rcxt_id, hi
     herr_t	ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*s*bii", obj_id, attr_name, ret, rcxt_id, estack_id);
+    H5TRACE5("e", "i*s*tii", obj_id, attr_name, ret, rcxt_id, estack_id);
 
     /* check arguments */
     if(H5I_ATTR == H5I_get_type(obj_id))
@@ -2324,7 +2324,7 @@ H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const char *attr_name,
     herr_t	ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*s*si*bii", loc_id, obj_name, attr_name, lapl_id, ret, rcxt_id,
+    H5TRACE7("e", "i*s*si*tii", loc_id, obj_name, attr_name, lapl_id, ret, rcxt_id,
              estack_id);
 
     /* check arguments */
@@ -2942,7 +2942,7 @@ H5Lexists_ff(hid_t loc_id, const char *name, hid_t lapl_id, htri_t *ret,
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*si*bii", loc_id, name, lapl_id, ret, rcxt_id, estack_id);
+    H5TRACE6("e", "i*si*tii", loc_id, name, lapl_id, ret, rcxt_id, estack_id);
 
     /* Check arguments */
     if(!name || !*name)
@@ -3466,7 +3466,7 @@ H5Oexists_by_name_ff(hid_t loc_id, const char *name, htri_t *ret, hid_t lapl_id,
     herr_t  ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*s*biii", loc_id, name, ret, lapl_id, rcxt_id, estack_id);
+    H5TRACE6("e", "i*s*tiii", loc_id, name, ret, lapl_id, rcxt_id, estack_id);
 
     /* Check args */
     if(!name || !*name)

@@ -28,7 +28,7 @@ endif
 if BUILD_EFF_CONDITIONAL
   ##INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test
   ##LDADD = $(LIBH5TEST) $(LIBHDF5)  $(MYAXE_LIBS) $(MYDAOS_POSIX_LIBS) $(MYPLFS_LIBS) $(MYIOD_LIBS)
-  EXAMPLE_PROG_EFF = h5ff_server \
+  EXAMPLE_PROG_EFF = h5ff_server h5ff_client_ref\
                 h5ff_client_map h5ff_client_multiple_cont h5ff_client_obj \
                 h5ff_client_dset h5ff_client_attr h5ff_client_links h5ff_client_view \
                 h5ff_client_vl_data h5ff_python_exec h5ff_client_analysis \

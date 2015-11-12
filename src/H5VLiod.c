@@ -147,7 +147,6 @@ static herr_t H5VL_iod_attribute_close(void *attr, hid_t dxpl_id, void **req);
 static void *H5VL_iod_datatype_commit(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_iod_datatype_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_datatype_get(void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_iod_datatype_close(void *dt, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
 static void *H5VL_iod_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
@@ -159,7 +158,6 @@ static herr_t H5VL_iod_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_sp
 static herr_t H5VL_iod_dataset_specific(void *_dset, H5VL_dataset_specific_t specific_type,
                                         hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_iod_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_iod_dataset_close(void *dset, hid_t dxpl_id, void **req);
 
 /* File callbacks */
 static void *H5VL_iod_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
@@ -171,7 +169,6 @@ static herr_t H5VL_iod_file_close(void *file, hid_t dxpl_id, void **req);
 static void *H5VL_iod_group_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_iod_group_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_iod_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
 static herr_t H5VL_iod_link_create(H5VL_link_create_type_t create_type, void *obj, 
@@ -1959,7 +1956,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5VL_iod_group_close(void *_grp, hid_t H5_ATTR_UNUSED dxpl_id, void **req)
 {
     H5VL_iod_group_t *grp = (H5VL_iod_group_t *)_grp;
@@ -3116,7 +3113,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5VL_iod_dataset_close(void *_dset, hid_t H5_ATTR_UNUSED dxpl_id, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
@@ -3573,7 +3570,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5VL_iod_datatype_close(void *obj, hid_t H5_ATTR_UNUSED dxpl_id, void **req)
 {
     H5VL_iod_dtype_t *dtype = (H5VL_iod_dtype_t *)obj;
@@ -6240,7 +6237,6 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
                 if(H5P__encode(plist, TRUE, NULL, &plist_size) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode plist")
-
                 *token_size += dt_size + plist_size + sizeof(size_t)*2;
 
                 break;

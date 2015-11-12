@@ -430,10 +430,17 @@ H5VL_iod_server_dtype_open_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
     file_desc->frag[0].offset = 0;
     file_desc->frag[0].len = (iod_size_t)buf_size;
 
-    /* read the serialized type value from the BLOB object */
-    ret = iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, &blob_cs, NULL);
-    if(ret < 0)
-        HGOTO_ERROR_FF(ret, "unable to read from BLOB object");
+    if(cs_scope & H5_CHECKSUM_IOD) {
+        /* read the serialized type value from the BLOB object */
+        ret = iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, &blob_cs, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "unable to read from BLOB object");
+    }
+    else {
+        ret = iod_blob_read(dtype_oh.rd_oh, rtid, NULL, mem_desc, file_desc, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "unable to read from BLOB object");
+    }
 
     if(blob_cs && (cs_scope & H5_CHECKSUM_IOD)) {
         /* calculate a checksum for the datatype */

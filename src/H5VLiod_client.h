@@ -512,5 +512,8 @@ H5_DLL herr_t H5VL_iod_dataset_get_index_info(void *dset, size_t *count,
 H5_DLL herr_t H5VL_iod_dataset_remove_index_info(void *dset, hid_t trans_id,
         void **req);
 
+herr_t H5VL_iod_datatype_close(void *dt, hid_t dxpl_id, void **req);
+herr_t H5VL_iod_dataset_close(void *dt, hid_t dxpl_id, void **req);
+herr_t H5VL_iod_group_close(void *dt, hid_t dxpl_id, void **req);
 #endif /* H5_HAVE_EFF */
 #endif /* _H5VLiod_client_H */
