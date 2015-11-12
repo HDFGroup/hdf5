@@ -31,7 +31,7 @@
 #define DNAME_UNLIM	"dataset_unlim"
 #define DNAME_LESS	"dataset_less"
 #define DNAME_VARY	"dataset_vary"
-#define DNAME_LINE	"dataset_line"
+#define DNAME_ROW	"dataset_row"
 #define DNAME_COLUMN	"dataset_column"
 #define DBUGNAME1	"dataset_bug1"
 #define DBUGNAME2	"dataset_bug2"
@@ -55,10 +55,10 @@ append_func(hid_t H5_ATTR_UNUSED dset_id, hsize_t H5_ATTR_UNUSED *cur_dims, void
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_dataset_append_lines_columns
+ * Function:	test_dataset_append_rows_columns
  *
  * Purpose:	Verify that the object flush property and the append flush property
- *		are working properly when appending lines and columns to a dataset
+ *		are working properly when appending rows and columns to a dataset
  *		with 2 extendible dimensions.
  *
  * Return:	Success:	0
@@ -69,7 +69,7 @@ append_func(hid_t H5_ATTR_UNUSED dset_id, hsize_t H5_ATTR_UNUSED *cur_dims, void
  *-------------------------------------------------------------------------
  */
 static int
-test_dataset_append_lines_columns(hid_t fid)
+test_dataset_append_rows_columns(hid_t fid)
 {
     hid_t did = -1;			/* Dataset ID */
     hid_t sid = -1;			/* Dataspace ID */
@@ -82,13 +82,14 @@ test_dataset_append_lines_columns(hid_t fid)
     hsize_t chunk_dims[2] = {2,5};				/* Chunk dimension sizes */
     int lbuf[10], cbuf[6];		/* The data buffers */
     int buf[6][13], rbuf[6][13];	/* The data buffers */
-    int i, j;				/* Local index variables */
 
     hsize_t boundary[2] = {1, 1};	/* Boundary sizes */
     unsigned append_ct = 0;		/* The # of appends */
     unsigned *flush_ptr;		/* Points to the flush counter */
 
-    TESTING("Append flush with H5DOappend()--append lines & columns");
+    int i, j;				/* Local index variables */
+
+    TESTING("Append flush with H5DOappend()--append rows & columns");
 
     /* Get the file's file access property list */
     if((ffapl = H5Fget_access_plist(fid)) < 0)
@@ -112,13 +113,13 @@ test_dataset_append_lines_columns(hid_t fid)
     if((did = H5Dcreate2(fid, DNAME_UNLIM, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0) 
 	TEST_ERROR;
 
-    /* Append 6 lines to the dataset */
+    /* Append 6 rows to the dataset */
     for(i = 0; i < 6; i++) {
 	for(j = 0; j < 10; j++)
-	    lbuf[j] = buf[i][j] = (i*10) + (j+1);
+	    lbuf[j] = buf[i][j] = (i * 10) + (j + 1);
 	if(H5DOappend(did, H5P_DEFAULT, 0, (size_t)1, H5T_NATIVE_INT, lbuf) < 0)
 	    TEST_ERROR;
-    }
+    } /* end for */
 
     /* Verify the # of appends */
     if(append_ct != 6)
@@ -133,10 +134,10 @@ test_dataset_append_lines_columns(hid_t fid)
     /* Append 3 columns to the dataset */
     for(i = 0; i < 3; i++) {
 	for(j = 0; j < 6; j++)
-	    cbuf[j] = buf[j][i+10] = ((i*6) + (j+1)) * -1;
+	    cbuf[j] = buf[j][i + 10] = ((i * 6) + (j + 1)) * -1;
 	if(H5DOappend(did, H5P_DEFAULT, 1, (size_t)1, H5T_NATIVE_INT, cbuf) < 0)
 	    TEST_ERROR;
-    }
+    } /* end for */
 
     /* Verify the # of appends */
     if(append_ct != 9)
@@ -155,8 +156,8 @@ test_dataset_append_lines_columns(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 13; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
     /* Clear the buffer */
     HDmemset(rbuf, 0, sizeof(rbuf));
@@ -176,8 +177,8 @@ test_dataset_append_lines_columns(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 13; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
     /* Closing */
     if(H5Dclose(did) < 0)
@@ -205,14 +206,14 @@ error:
     } H5E_END_TRY;
 
     return 1;
-} /* test_dataset_append_lines_columns() */
+} /* test_dataset_append_rows_columns() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_dataset_append_lines
+ * Function:	test_dataset_append_rows
  *
  * Purpose:	Verify that the object flush property and the append flush property
- *		are working properly when appending lines to a dataset with
- *		one extendible dimension (line).
+ *		are working properly when appending rows to a dataset with
+ *		one extendible dimension (row).
  *
  * Return:	Success:	0
  *		Failure:	1
@@ -222,7 +223,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_dataset_append_lines(hid_t fid)
+test_dataset_append_rows(hid_t fid)
 {
     hid_t did = -1;			/* Dataset ID */
     hid_t sid = -1;			/* Dataspace ID */
@@ -241,7 +242,7 @@ test_dataset_append_lines(hid_t fid)
     unsigned append_ct = 0;		/* The # of appends */
     unsigned *flush_ptr;		/* Points to the flush counter */
 
-    TESTING("Append flush with H5DOappend()--append lines");
+    TESTING("Append flush with H5DOappend()--append rows");
 
     /* Get the file's file access property list */
     if((ffapl = H5Fget_access_plist(fid)) < 0)
@@ -262,16 +263,16 @@ test_dataset_append_lines(hid_t fid)
 	FAIL_STACK_ERROR;
 
     /* Create the dataset */
-    if((did = H5Dcreate2(fid, DNAME_LINE, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0) 
+    if((did = H5Dcreate2(fid, DNAME_ROW, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0) 
 	TEST_ERROR;
 
-    /* Append 6 lines to the dataset */
+    /* Append 6 rows to the dataset */
     for(i = 0; i < 6; i++) {
 	for(j = 0; j < 10; j++)
-	    lbuf[j] = buf[i][j] = (i*10) + (j+1);
+	    lbuf[j] = buf[i][j] = (i * 10) + (j + 1);
 	if(H5DOappend(did, H5P_DEFAULT, 0, (size_t)1, H5T_NATIVE_INT, lbuf) < 0)
 	    TEST_ERROR;
-    }
+    } /* end for */
 
     /* Verify the # of appends */
     if(append_ct != 6)
@@ -289,8 +290,8 @@ test_dataset_append_lines(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 10; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
     /* Clear the buffer */
     HDmemset(rbuf, 0, sizeof(rbuf));
@@ -300,7 +301,7 @@ test_dataset_append_lines(hid_t fid)
 	FAIL_STACK_ERROR;
 
     /* Open the dataset again */
-    if((did = H5Dopen2(fid, DNAME_LINE, H5P_DEFAULT)) < 0)
+    if((did = H5Dopen2(fid, DNAME_ROW, H5P_DEFAULT)) < 0)
 	FAIL_STACK_ERROR;
 
     /* Read the dataset */
@@ -310,8 +311,8 @@ test_dataset_append_lines(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 10; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
     /* Closing */
     if(H5Dclose(did) < 0)
@@ -339,7 +340,7 @@ error:
     } H5E_END_TRY;
 
     return 1;
-} /* test_dataset_append_lines() */
+} /* test_dataset_append_rows() */
 
 /*-------------------------------------------------------------------------
  * Function:	test_dataset_append_columns
@@ -402,10 +403,10 @@ test_dataset_append_columns(hid_t fid)
     /* Append 3 columns to the dataset */
     for(i = 0; i < 3; i++) {
 	for(j = 0; j < 6; j++)
-	    cbuf[j] = buf[j][i] = ((i*6) + (j+1)) * -1;
+	    cbuf[j] = buf[j][i] = ((i * 6) + (j + 1)) * -1;
 	if(H5DOappend(did, H5P_DEFAULT, 1, (size_t)1, H5T_NATIVE_INT, cbuf) < 0)
 	    TEST_ERROR;
-    }
+    } /* end for */
 
     /* Verify the # of appends */
     if(append_ct != 3)
@@ -424,8 +425,8 @@ test_dataset_append_columns(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 3; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
     /* Clear the buffer */
     HDmemset(rbuf, 0, sizeof(rbuf));
@@ -445,8 +446,8 @@ test_dataset_append_columns(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 3; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
     /* Closing */
     if(H5Dclose(did) < 0)
@@ -480,16 +481,16 @@ error:
  * Function:	test_dataset_append_BUG1
  *
  * Purpose:	Verify that the object flush property and the append flush property
- *              are working properly when appending lines and columns to an
+ *              are working properly when appending rows and columns to an
  *              extendible dataset.
  *		A BUG occurs:
  *		 when the extendible dataset is set up as follows:
  *			hsize_t dims[2] = {0, 10};
  *		 	hsize_t maxdims[2] = {H5S_UNLIMITED, 50};
- *		 when append 6 lines and 3 columns to the dataset;
+ *		 when append 6 rows and 3 columns to the dataset;
  *		 The data is correct when the dataset is read at this point;
  *		 The data is incorrect when the dataset is closed, opened again, and read at this point;
- *		 NOTE: the problem does not occur when H5Dflush() is not performed for each line/column.
+ *		 NOTE: the problem does not occur when H5Dflush() is not performed for each row/column.
  *
  * Return:	Success:	0
  *		Failure:	1
@@ -518,7 +519,7 @@ test_dataset_append_BUG1(hid_t fid)
     unsigned append_ct = 0;		/* The # of appends */
     unsigned *flush_ptr;		/* Points to the flush counter */
 
-    TESTING("Append flush with H5DOappend()--append lines & columns--BUG1");
+    TESTING("Append flush with H5DOappend()--append rows & columns--BUG1");
     
     /* Get the file's file access property list */
     if((ffapl = H5Fget_access_plist(fid)) < 0)
@@ -542,13 +543,13 @@ test_dataset_append_BUG1(hid_t fid)
     if((did = H5Dcreate2(fid, DBUGNAME1, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0) 
 	TEST_ERROR;
 
-    /* Append 6 lines to the dataset */
+    /* Append 6 rows to the dataset */
     for(i = 0; i < 6; i++) {
 	for(j = 0; j < 10; j++)
-	    lbuf[j] = buf[i][j] = (i*10) + (j+1);
+	    lbuf[j] = buf[i][j] = (i * 10) + (j + 1);
 	if(H5DOappend(did, H5P_DEFAULT, 0, (size_t)1, H5T_NATIVE_INT, lbuf) < 0)
 	    TEST_ERROR;
-    }
+    } /* end for */
 
     /* Verify the # of appends */
     if(append_ct != 6)
@@ -560,14 +561,13 @@ test_dataset_append_BUG1(hid_t fid)
     if(*flush_ptr != 6)
 	TEST_ERROR;
 
-
     /* Append 3 columns to the dataset */
     for(i = 0; i < 3; i++) {
 	for(j = 0; j < 6; j++)
-	    cbuf[j] = buf[j][i+10] = ((i*6) + (j+1)) * -1;
+	    cbuf[j] = buf[j][i+10] = ((i * 6) + (j + 1)) * -1;
 	if(H5DOappend(did, H5P_DEFAULT, 1, (size_t)1, H5T_NATIVE_INT, cbuf) < 0)
 	    TEST_ERROR;
-    }
+    } /* end for */
 
     /* Verify the # of appends */
     if(append_ct != 9)
@@ -586,8 +586,8 @@ test_dataset_append_BUG1(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 13; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
 #ifdef BUG1
     HDmemset(rbuf, 0, sizeof(rbuf));
@@ -607,8 +607,8 @@ test_dataset_append_BUG1(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 13; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 #endif
 
     /* Closing */
@@ -643,16 +643,16 @@ error:
  * Function:	test_dataset_append_BUG2
  *
  * Purpose:	Verify that the object flush property and the append flush property
- *              are working properly when appending lines and columns to an
+ *              are working properly when appending rows and columns to an
  *              extendible dataset.
  *		A BUG occurs:
  *		 when the extendible dataset is set up as follows:
  *			hsize_t dims[2] = {0, 10};
  *		 	hsize_t maxdims[2] = {50, H5S_UNLIMITED};
- *		 when append 6 lines and 3 columns to the dataset;
+ *		 when append 6 rows and 3 columns to the dataset;
  *		 The data is correct when the dataset is read at this point;
  *		 The data is incorrect when the dataset is closed, opened again, and read at this point;
- *		 NOTE: the problem does not occur when H5Dflush() is not performed for each line/column.
+ *		 NOTE: the problem does not occur when H5Dflush() is not performed for each row/column.
  *
  * Return:	Success:	0
  *		Failure:	1
@@ -681,7 +681,7 @@ test_dataset_append_BUG2(hid_t fid)
     unsigned append_ct = 0;		/* The # of appends */
     unsigned *flush_ptr;		/* Points to the flush counter */
 
-    TESTING("Append flush with H5DOappend()--append lines & columns--BUG2");
+    TESTING("Append flush with H5DOappend()--append rows & columns--BUG2");
     
     /* Get the file's file access property list */
     if((ffapl = H5Fget_access_plist(fid)) < 0)
@@ -705,13 +705,13 @@ test_dataset_append_BUG2(hid_t fid)
     if((did = H5Dcreate2(fid, DBUGNAME2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0) 
 	TEST_ERROR;
 
-    /* Append 6 lines to the dataset */
+    /* Append 6 rows to the dataset */
     for(i = 0; i < 6; i++) {
 	for(j = 0; j < 10; j++)
-	    lbuf[j] = buf[i][j] = (i*10) + (j+1);
+	    lbuf[j] = buf[i][j] = (i * 10) + (j + 1);
 	if(H5DOappend(did, H5P_DEFAULT, 0, (size_t)1, H5T_NATIVE_INT, lbuf) < 0)
 	    TEST_ERROR;
-    }
+    } /* end for */
 
     /* Verify the # of appends */
     if(append_ct != 6)
@@ -727,10 +727,10 @@ test_dataset_append_BUG2(hid_t fid)
     /* Append 3 columns to the dataset */
     for(i = 0; i < 3; i++) {
 	for(j = 0; j < 6; j++)
-	    cbuf[j] = buf[j][i+10] = ((i*6) + (j+1)) * -1;
+	    cbuf[j] = buf[j][i+10] = ((i * 6) + (j + 1)) * -1;
 	if(H5DOappend(did, H5P_DEFAULT, 1, (size_t)1, H5T_NATIVE_INT, cbuf) < 0)
 	    TEST_ERROR;
-    }
+    } /* end for */
 
     /* Verify the # of appends */
     if(append_ct != 9)
@@ -749,8 +749,8 @@ test_dataset_append_BUG2(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 13; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
 #ifdef BUG2
     HDmemset(rbuf, 0, sizeof(rbuf));
@@ -770,8 +770,8 @@ test_dataset_append_BUG2(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 13; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 #endif
 
     /* Closing */
@@ -807,7 +807,7 @@ error:
  * Function:	test_dataset_append_less
  *
  * Purpose:	Verify that the object flush property and the append flush property
- *		are working properly when appending lines and columns to an
+ *		are working properly when appending rows and columns to an
  *		extendible dataset where the append size is less than the boundary
  *		size.
  *
@@ -862,17 +862,17 @@ test_dataset_append_less(hid_t fid)
     if((did = H5Dcreate2(fid, DNAME_LESS, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0) 
 	TEST_ERROR;
 
-    /* Append to the dataset 2 lines at a time for 3 times */
+    /* Append to the dataset 2 rows at a time for 3 times */
     for(i = 0, k = 0; i < 6; i++) {
 	for(j = 0; j < 10; j++, k++)
-	    buf[i][j] = lbuf[k] = (i*10) + (j+1);
+	    buf[i][j] = lbuf[k] = (i * 10) + (j + 1);
 
 	if((i + 1) % 2 == 0) {
 	    if(H5DOappend(did, H5P_DEFAULT, 0, (size_t)2, H5T_NATIVE_INT, lbuf) < 0)
 		TEST_ERROR;
 	    k = 0;
-	} 
-    }
+	} /* end if */
+    } /* end for */
 
     /* Verify the # of appends */
     if(append_ct != 2)
@@ -884,11 +884,10 @@ test_dataset_append_less(hid_t fid)
     if(*flush_ptr != 2)
 	TEST_ERROR;
 
-    /* Append to the dataset 3 columns at a time for 1 time */
-    for(i = 0; i < 3; i++) {
+    /* Append 3 columns to the dataset, once */
+    for(i = 0; i < 3; i++)
 	for(j = 0; j < 6; j++, k++)
-	    cbuf[j][i] = buf[j][i+10] = ((i*6) + (j+1)) * -1;
-    }
+	    cbuf[j][i] = buf[j][i + 10] = ((i * 6) + (j + 1)) * -1;
     if(H5DOappend(did, H5P_DEFAULT, 1, (size_t)3, H5T_NATIVE_INT, cbuf) < 0)
 	TEST_ERROR;
 
@@ -909,8 +908,8 @@ test_dataset_append_less(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 13; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
     /* Clear the buffer */
     HDmemset(rbuf, 0, sizeof(rbuf));
@@ -930,8 +929,8 @@ test_dataset_append_less(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 13; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
     /* Closing */
     if(H5Dclose(did) < 0)
@@ -965,9 +964,9 @@ error:
  * Function:	test_dataset_append_vary
  *
  * Purpose:	Verify that the object flush property and the append flush property
- *		are working properly when appending lines and columns to an
+ *		are working properly when appending rows and columns to an
  *		extendible dataset where 
- *			line: the append size is 3 times of the boundary size
+ *			row: the append size is 3 times of the boundary size
  *			      the append callback/flush is performed on the 1st boundary hit
  *			column: the boundary is greater than the append size
  *				the boundary is not hit at all
@@ -1023,11 +1022,10 @@ test_dataset_append_vary(hid_t fid)
     if((did = H5Dcreate2(fid, DNAME_VARY, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl)) < 0) 
 	TEST_ERROR;
 
-    /* Append to the dataset 6 lines at a time for 1 time */
-    for(i = 0, k = 0; i < 6; i++) {
+    /* Append 6 rows to the dataset, once */
+    for(i = 0, k = 0; i < 6; i++)
 	for(j = 0; j < 10; j++, k++)
-	    buf[i][j] = lbuf[k] = (i*10) + (j+1);
-    }
+	    buf[i][j] = lbuf[k] = (i * 10) + (j + 1);
     if(H5DOappend(did, H5P_DEFAULT, 0, (size_t)6, H5T_NATIVE_INT, lbuf) < 0)
 	TEST_ERROR;
 
@@ -1041,11 +1039,10 @@ test_dataset_append_vary(hid_t fid)
     if(*flush_ptr != 1)
 	TEST_ERROR;
 
-    /* Append to the dataset 3 columns at a time for 1 time */
-    for(i = 0; i < 3; i++) {
+    /* Append 3 columns to the dataset, once */
+    for(i = 0; i < 3; i++)
 	for(j = 0; j < 6; j++, k++)
-	    cbuf[j][i] = buf[j][i+10] = ((i*6) + (j+1)) * -1;
-    }
+	    cbuf[j][i] = buf[j][i + 10] = ((i * 6) + (j + 1)) * -1;
     if(H5DOappend(did, H5P_DEFAULT, 1, (size_t)3, H5T_NATIVE_INT, cbuf) < 0)
 	TEST_ERROR;
 
@@ -1066,8 +1063,8 @@ test_dataset_append_vary(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 13; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
     /* Clear the dataset */
     HDmemset(rbuf, 0, sizeof(rbuf));
@@ -1087,8 +1084,8 @@ test_dataset_append_vary(hid_t fid)
     /* Verify the data */
     for(i = 0; i < 6; i++)
 	for(j = 0; j < 13; j++)
-	if(buf[i][j] != rbuf[i][j])
-	    TEST_ERROR;
+            if(buf[i][j] != rbuf[i][j])
+                TEST_ERROR;
 
     /* Closing */
     if(H5Dclose(did) < 0)
@@ -1154,13 +1151,13 @@ int main(void)
     if((fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	FAIL_STACK_ERROR;
 
-    nerrors += test_dataset_append_lines_columns(fid);
-
-    flush_ct = 0;	/* Reset flush counter */
-    nerrors += test_dataset_append_lines(fid);
+    nerrors += test_dataset_append_rows(fid);
 
     flush_ct = 0;	/* Reset flush counter */
     nerrors += test_dataset_append_columns(fid);
+
+    flush_ct = 0;	/* Reset flush counter */
+    nerrors += test_dataset_append_rows_columns(fid);
 
 #ifdef BUG1_BUG2
 /*
@@ -1196,3 +1193,4 @@ int main(void)
 error:
     return 1;
 }
+

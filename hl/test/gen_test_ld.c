@@ -83,13 +83,13 @@ typedef struct set_t {
  **************************************************************************************
  */
 static int
-generate_dset(hid_t fid, const char *dname, int ndims, hsize_t *dims, hsize_t *maxdims, hid_t dtid, void *data)
+generate_dset(hid_t fid, const char *dname, int ndims, hsize_t *dims,
+    hsize_t *maxdims, hid_t dtid, void *data)
 {
     hid_t dcpl = -1;	/* Dataset creation property */
     hid_t did = -1;	/* Dataset id */
     hid_t sid = -1;	/* Dataspace id */
     int i;		/* Local index variable */
-    hsize_t chunk_dims[H5S_MAX_RANK];	/* Dimension sizes for chunks */
 
     /* Create the dataspace */
     if((sid = H5Screate_simple(ndims, dims, maxdims)) < 0)
@@ -99,21 +99,24 @@ generate_dset(hid_t fid, const char *dname, int ndims, hsize_t *dims, hsize_t *m
     if(!HDstrcmp(dname, DSET_NONE))
 	dcpl = H5P_DEFAULT;
     else {
+        hsize_t chunk_dims[H5S_MAX_RANK];	/* Dimension sizes for chunks */
+
 	if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
 	    goto done;
 	for(i = 0; i < ndims; i++)
 	    chunk_dims[i] = CHUNK_SIZE;
 	if(H5Pset_chunk(dcpl, ndims, chunk_dims) < 0)
 	    goto done;
-    }
+    } /* end else */
 
     if(!HDstrcmp(dname, DSET_ALLOC_LATE)) {
 	if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0)
 	    goto done;
-    } else if(!HDstrcmp(dname, DSET_ALLOC_EARLY)) {
+    } /* end if */
+    else if(!HDstrcmp(dname, DSET_ALLOC_EARLY)) {
 	if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
 	    goto done;
-    }
+    } /* end if */
 
     /* Create the dataset */
     if((did = H5Dcreate2(fid, dname, dtid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -124,9 +127,12 @@ generate_dset(hid_t fid, const char *dname, int ndims, hsize_t *dims, hsize_t *m
 	goto done;
 
     /* Closing */
-    if(H5Pclose(dcpl) < 0) goto done;
-    if(H5Sclose(sid) < 0) goto done;
-    if(H5Dclose(did) < 0) goto done;
+    if(H5Pclose(dcpl) < 0)
+        goto done;
+    if(H5Sclose(sid) < 0)
+        goto done;
+    if(H5Dclose(did) < 0)
+        goto done;
 
     return(SUCCEED);
 
@@ -218,7 +224,7 @@ main(void)
         one_cbuf[i].field3 = 3.0f;
         one_cbuf[i].field4.a = 4;
         one_cbuf[i].field4.b = 8;
-    }
+    } /* end for */
 
     /* Create the compound type */
     if((sub22_tid = H5Tcreate(H5T_COMPOUND, sizeof(sub22_t))) < 0)
@@ -307,7 +313,7 @@ main(void)
         two_cbuf[i].field3 = 3.0f;
         two_cbuf[i].field4.a = 4;
         two_cbuf[i].field4.b = 8;
-    }
+    } /* end for */
 
     /* Generate DSET_CMPD_TWO */
     if(generate_dset(fid, DSET_CMPD_TWO, 2, cur2_dims, max2_dims, set_tid, two_cbuf) < 0)
@@ -370,3 +376,4 @@ done:
 
     exit(EXIT_FAILURE);
 } /* main() */
+
