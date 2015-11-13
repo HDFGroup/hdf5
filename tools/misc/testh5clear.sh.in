@@ -43,55 +43,46 @@ TESTING() {
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
-# Algorithm:
-#	Try to open the test file--should fail
-#	Use "h5clear" to clear the status_flags in the test file
-#	Try to open the test file again--should succeed
-# $1 is the filename to H5Fopen() via h5clear
+# (1) Use "h5clear" to clear the status_flags in the test file
+# (2) Open the test file via "clear_open_chk"
+# $1 is the filename for testing
 TOOLTEST() {
     TESTING $H5CLEAR $1
     fname=$1
-    #
-    # Try to open the test file
-    $OPENCHK_BIN $fname 2>/dev/null		# should fail; ignore error message
-    if test $? -eq $SUCCEED; then
-       echo ".....$OPENCHK: should fail"
-       nerrors=`expr $nerrors + 1`
+    # Use "h5clear" to clear the status_flags in the test file
+    $RUNSERIAL $H5CLEAR_BIN $fname
+    if test $? -ne $SUCCEED; then
+	echo ".....$H5CLEAR: should succeed"
+	nerrors=`expr $nerrors + 1`
     else
-	# Run h5clear to clear the status_flags in the test file
-	$RUNSERIAL $H5CLEAR_BIN $fname
+	# Open the test file via "clear_open_chk"
+	$OPENCHK_BIN $fname
 	if test $? -ne $SUCCEED; then
-	    echo ".....$H5CLEAR: should succeed"
+	    echo "......$OPENCHK: should succeed"
 	    nerrors=`expr $nerrors + 1`
 	else
-	    # Try to open the test file again
-	    $OPENCHK_BIN $fname
-	    if test $? -ne $SUCCEED; then
-		echo "......$OPENCHK: should succeed"
-		nerrors=`expr $nerrors + 1`
-	    else
-		echo "PASSED"
-	    fi
+	    echo "PASSED"
 	fi
     fi
 }
 
-# The input file has an incorrect superblock version #
-# Algorithm:
-#	Use "h5clear" to clear status_flags in the test file--should fail to open the file
-# $1 is the filename to H5Fopen() via h5clear
-TOOLFAIL() {
-    TESTING $H5CLEAR $1
+
+
+# Use "clear_open_chk" to check if the file open succeeds or fails
+# $1 is the filename to open
+# $2 is the expected return from "clear_open_chk"
+OPENCHK() {
     fname=$1
-    # Run h5clear to clear the status_flags in the test file
-    $RUNSERIAL $H5CLEAR_BIN $fname 2>/dev/null	# should fail: ignore error message
-    if test $? -eq $SUCCEED; then
-	echo ".....$H5CLEAR: should fail"
-	nerrors=`expr $nerrors + 1`
-    else
-	echo "PASSED"
+    expected=$2
+    #
+    $OPENCHK_BIN $fname 2>/dev/null
+    actual=$?
+    if test $actual -ne $expected; then
+       echo "Unexpected return from $OPENCHK"
+       nerrors=`expr $nerrors + 1`
     fi
 }
+
 ##############################################################################
 ##############################################################################
 ###			  T H E   T E S T S                                ###
@@ -103,21 +94,27 @@ if test $? -ne 0; then			# Error returned from generating test files
     echo "$GENTEST: .....fail in generating test files"
     nerrors=`expr $nerrors + 1`
 else
-    TOOLTEST h5clear_sec2.h5
-    TOOLTEST h5clear_core.h5 
-    TOOLTEST h5clear_fam_%05d.h5
-    TOOLTEST h5clear_split
-#
-# files created with latest library format
-    TOOLTEST latest_h5clear_sec2.h5
-    TOOLTEST latest_h5clear_core.h5
-    TOOLTEST latest_h5clear_fam_%05d.h5
-    TOOLTEST latest_h5clear_split
-#
-# files created with incorrect superblock version #
-TOOLFAIL h5clear_invalid.h5
-TOOLFAIL latest_h5clear_invalid.h5
+    # Initial file open fails
+    # After "h5clear" the file, the subsequent file open succeeds
+    OPENCHK h5clear_sec2_v3.h5 $FAIL	
+    TOOLTEST h5clear_sec2_v3.h5		
+    #
+    OPENCHK h5clear_log_v3.h5 $FAIL	
+    TOOLTEST h5clear_log_v3.h5 
+    #
+    OPENCHK latest_h5clear_sec2_v3.h5 $FAIL
+    TOOLTEST latest_h5clear_sec2_v3.h5
+    #
+    OPENCHK latest_h5clear_log_v3.h5 $FAIL	
+    TOOLTEST latest_h5clear_log_v3.h5
 fi
+#
+#
+# File open succeeds because the library does not check status_flags for file with < v3 superblock
+OPENCHK h5clear_sec2_v0.h5 $SUCCEED
+TOOLTEST h5clear_sec2_v0.h5
+OPENCHK h5clear_sec2_v2.h5 $SUCCEED
+TOOLTEST h5clear_sec2_v2.h5
 #
 # Clean up test files
 if test -z "$HDF5_NOCLEANUP"; then

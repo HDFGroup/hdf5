@@ -39,7 +39,7 @@
 /* Local Prototypes */
 /********************/
 
-static hid_t open_skeleton(const char *filename, unsigned verbose);
+static hid_t open_skeleton(const char *filename, unsigned verbose, unsigned old);
 static int add_records(hid_t fid, unsigned verbose, unsigned long nrecords,
     unsigned long flush_count);
 static void usage(void);
@@ -64,7 +64,7 @@ static void usage(void);
  *-------------------------------------------------------------------------
  */
 static hid_t
-open_skeleton(const char *filename, unsigned verbose)
+open_skeleton(const char *filename, unsigned verbose, unsigned old)
 {
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fapl;         /* File access property list */
@@ -76,9 +76,11 @@ open_skeleton(const char *filename, unsigned verbose)
     if((fapl = h5_fileaccess()) < 0)
         return -1;
 
-    /* Set to use the latest library format */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        return -1;
+    if(!old) {
+	/* Set to use the latest library format */
+	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+	    return -1;
+    }
 
 #ifdef QAK
     /* Increase the initial size of the metadata cache */
@@ -275,7 +277,7 @@ usage(void)
     printf("\n");
     printf("Usage error!\n");
     printf("\n");
-    printf("Usage: swmr_writer [-q] [-f <# of records to write between flushing\n");
+    printf("Usage: swmr_writer [-q] [-o] [-f <# of records to write between flushing\n");
     printf("    file contents>] [-r <random seed>] <# of records>\n");
     printf("\n");
     printf("<# of records to write between flushing file contents> should be 0\n");
@@ -283,8 +285,8 @@ usage(void)
     printf("\n");
     printf("<# of records> must be specified.\n");
     printf("\n");
-    printf("Defaults to verbose (no '-q' given), flushing every 10000 records\n");
-    printf("('-f 10000'), and will generate a random seed (no -r given).\n");
+    printf("Defaults to verbose (no '-q' given), latest format when opening file (no '-o' given),\n");
+    printf("flushing every 10000 records ('-f 10000'), and will generate a random seed (no -r given).\n");
     printf("\n");
     exit(1);
 }
@@ -295,6 +297,7 @@ int main(int argc, const char *argv[])
     long nrecords = 0;          /* # of records to append */
     long flush_count = 10000;   /* # of records to write between flushing file */
     unsigned verbose = 1;       /* Whether to emit some informational messages */
+    unsigned old = 0;       	/* Whether to use non-latest-format when opening file */
     unsigned use_seed = 0;      /* Set to 1 if a seed was set on the command line */
     unsigned random_seed = 0;   /* Random # seed */
     unsigned u;                 /* Local index variable */
@@ -328,6 +331,12 @@ int main(int argc, const char *argv[])
                         temp = atoi(argv[u + 1]);
                         random_seed = (unsigned)temp;
                         u += 2;
+                        break;
+
+		    /* Use non-latest-format when opening file */
+                    case 'o':
+                        old = 1;
+                        u++;
                         break;
 
                     default:
@@ -380,7 +389,7 @@ int main(int argc, const char *argv[])
         fprintf(stderr, "Opening skeleton file: %s\n", FILENAME);
 
     /* Open file skeleton */
-    if((fid = open_skeleton(FILENAME, verbose)) < 0) {
+    if((fid = open_skeleton(FILENAME, verbose, old)) < 0) {
         fprintf(stderr, "Error opening skeleton file!\n");
         exit(1);
     } /* end if */

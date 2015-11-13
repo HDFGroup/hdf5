@@ -317,6 +317,14 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
     if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, &udata, rw_flags)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
 
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+       	if(sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "invalid superblock version for SWMR_WRITE")
+
+    /* Enable all latest version support when file has v3 superblock */
+    if(sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
+	f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
+
     /* Pin the superblock in the cache */
     if(H5AC_pin_protected_entry(sblock) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTPIN, FAIL, "unable to pin superblock")
@@ -758,8 +766,8 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
     if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, &sblock->btree_k[0]) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get rank for btree internal nodes")
 
-    /* Bump superblock version if we are to use the latest version of the format */
-    if(f->shared->latest_format)
+    /* Bump superblock version if latest superblock version support is enabled */
+    if(H5F_USE_LATEST_FLAGS(f, H5F_LATEST_SUPERBLOCK))
         super_vers = HDF5_SUPERBLOCK_VERSION_LATEST;
     /* Bump superblock version to create superblock extension for SOHM info */
     else if(f->shared->sohm_nindexes > 0)

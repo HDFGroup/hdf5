@@ -73,7 +73,7 @@ static int test_objs_cork(hbool_t newformat);
 static int test_dset_cork(hbool_t newformat);
 static int verify_old_dset_cork(void);
 static int verify_obj_dset_cork(hbool_t swmr);
-static int verify_dset_cork(hbool_t swmr);
+static int verify_dset_cork(hbool_t swmr, hbool_t new);
 static int verify_group_cork(hbool_t swmr);
 static int verify_named_cork(hbool_t swmr);
 static int verify_multiple_cork(hbool_t swmr);
@@ -682,7 +682,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-verify_dset_cork(hbool_t swmr)
+verify_dset_cork(hbool_t swmr, hbool_t new)
 {
     /* Variable Declarations */
     int verbose = FALSE;			/* Verbose file outout */
@@ -700,17 +700,23 @@ verify_dset_cork(hbool_t swmr)
 
     /* Testing Macro */
     if(swmr) {
-	TESTING("cork status for chunked datasets with different indexing types (SWMR)");
+	if(new) {
+	    TESTING("cork status for chunked datasets with different indexing types (SWMR & latest)");
+	} else {
+	    TESTING("cork status for chunked datasets with different indexing types (SWMR & non-latest)");
+	}
     } else {
-	TESTING("cork status for chunked datasets with different indexing types");
+	TESTING("cork status for chunked datasets with different indexing types (non-SWMR)");
     }
 
     /* Create fapl */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0 ) 
 	TEST_ERROR;
-    /* Set to use latest format */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) 
-	TEST_ERROR;
+    if(new) {
+	/* Set to use latest format */
+	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) 
+	    TEST_ERROR;
+    }
 
     /* Create the file */
     flags = H5F_ACC_TRUNC;
@@ -2163,8 +2169,10 @@ main(void)
     /* Tests with/without SWMR access */
     nerrs += verify_obj_dset_cork(TRUE);
     nerrs += verify_obj_dset_cork(FALSE);
-    nerrs += verify_dset_cork(TRUE); 
-    nerrs += verify_dset_cork(FALSE); 
+    nerrs += verify_obj_dset_cork(TRUE);
+    nerrs += verify_dset_cork(TRUE, TRUE); 
+    nerrs += verify_dset_cork(FALSE, TRUE); 
+    nerrs += verify_dset_cork(TRUE, FALSE); 
     nerrs += verify_group_cork(TRUE); 
     nerrs += verify_group_cork(FALSE); 
     nerrs += verify_named_cork(TRUE); 

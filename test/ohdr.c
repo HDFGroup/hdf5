@@ -48,6 +48,8 @@ const char *FILENAME[] = {
 /*  */
 #define FILE_OHDR_SWMR "ohdr_swmr.h5"
 #define DSET_NAME "COMPACT_DSET"
+#define OBJ_VERSION_LATEST 2
+
 /*
  *  Verify that messages are moved forward into a "continuation message":
  *	Create an object header with several continuation chunks
@@ -305,7 +307,7 @@ error:
  *  greater than 512 bytes.  For SWMR access, the read should be done all at one time.
  */
 static herr_t
-test_ohdr_swmr(void)
+test_ohdr_swmr(hbool_t new)
 {
     hid_t fid = -1;			/* File ID */
     hid_t fapl = -1;			/* File access property list */
@@ -318,23 +320,32 @@ test_ohdr_swmr(void)
     unsigned int n = 0, u;		/* Locatl index variable */
     H5O_info_t obj_info;		/* Information for the object */
 
-    TESTING("exercise the coding for the re-read of the object header for SWMR access");
+    if(new) {
+	TESTING("exercise the coding for the re-read of the object header for SWMR access: latest-format");
+    } else {
+	TESTING("exercise the coding for the re-read of the object header for SWMR access: non-latest-format");
+    }
 
     /* File access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
 	FAIL_STACK_ERROR
 
-    /* Set to use latest library format */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+    /* Create the file with/without latest format: ensure version 2 object header for SWMR */
+    if(new)  {
+	/* Set to use latest library format */
+	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+	    FAIL_STACK_ERROR
+
+	if((fid = H5Fcreate(FILE_OHDR_SWMR, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	    TEST_ERROR
+    } else {
+	if((fid = H5Fcreate(FILE_OHDR_SWMR, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+	    TEST_ERROR
+    }
 
     /* Initialize data */
     for(u = 0; u < compact_size; u++)
 	wbuf[u] = n++;
-
-    /* Create the file with the latest format (ensure version 2 object header for SWMR) */
-    if((fid = H5Fcreate(FILE_OHDR_SWMR, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	TEST_ERROR
 
     /* Create a small data space for compact dataset */
     dims[0] = (hsize_t)compact_size;
@@ -365,7 +376,7 @@ test_ohdr_swmr(void)
     if(H5Fclose(fid) < 0)
 	FAIL_STACK_ERROR
 
-    /* Open the file for SWMR write and latest format */
+    /* Open the file for SWMR write with/without latest format */
     if((fid = H5Fopen(FILE_OHDR_SWMR, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
 	FAIL_STACK_ERROR
 
@@ -375,6 +386,9 @@ test_ohdr_swmr(void)
 
     /* Get the object information */
     if(H5Oget_info(did, &obj_info) < 0)
+	FAIL_STACK_ERROR
+
+    if(obj_info.hdr.version != OBJ_VERSION_LATEST)
 	FAIL_STACK_ERROR
 
     /* The size of object header should be greater than the speculative read size of 512 */
@@ -975,7 +989,8 @@ main(void)
     if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
 
     /* A test to exercise the re-read of the object header for SWMR access */
-    if(test_ohdr_swmr() < 0) TEST_ERROR
+    if(test_ohdr_swmr(TRUE) < 0) TEST_ERROR
+    if(test_ohdr_swmr(FALSE) < 0) TEST_ERROR
 
     puts("All object header tests passed.");
     h5_cleanup(FILENAME, fapl);

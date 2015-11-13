@@ -307,6 +307,7 @@
 #define H5F_SIEVE_BUF_SIZE(F)   ((F)->shared->sieve_buf_size)
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
 #define H5F_USE_LATEST_FORMAT(F) ((F)->shared->latest_format)
+#define H5F_USE_LATEST_FLAGS(F,FL)  ((F)->shared->latest_flags & (FL))
 #define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    ((F)->shared->store_msg_crt_idx = (FL))
 #define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
@@ -350,6 +351,7 @@
 #define H5F_SIEVE_BUF_SIZE(F)   (H5F_sieve_buf_size(F))
 #define H5F_GC_REF(F)           (H5F_gc_ref(F))
 #define H5F_USE_LATEST_FORMAT(F) (H5F_use_latest_format(F))
+#define H5F_USE_LATEST_FLAGS(F,FL) (H5F_use_latest_flags(F,FL))
 #define H5F_STORE_MSG_CRT_IDX(F) (H5F_store_msg_crt_idx(F))
 #define H5F_SET_STORE_MSG_CRT_IDX(F, FL)    (H5F_set_store_msg_crt_idx((F), (FL)))
 #define H5F_GRP_BTREE_SHARED(F) (H5F_grp_btree_shared(F))
@@ -481,7 +483,8 @@
 #define HDF5_SUPERBLOCK_VERSION_DEF	0	/* The default super block format	  */
 #define HDF5_SUPERBLOCK_VERSION_1	1	/* Version with non-default B-tree 'K' value */
 #define HDF5_SUPERBLOCK_VERSION_2	2	/* Revised version with superblock extension and checksum */
-#define HDF5_SUPERBLOCK_VERSION_LATEST	HDF5_SUPERBLOCK_VERSION_2	/* The maximum super block format    */
+#define HDF5_SUPERBLOCK_VERSION_3	3	/* With file locking and consistency flags (at least this version for SWMR support) */
+#define HDF5_SUPERBLOCK_VERSION_LATEST	HDF5_SUPERBLOCK_VERSION_3	/* The maximum super block format    */
 #define HDF5_FREESPACE_VERSION	        0	/* of the Free-Space Info	  */
 #define HDF5_OBJECTDIR_VERSION	        0	/* of the Object Directory format */
 #define HDF5_SHAREDHEADER_VERSION       0	/* of the Shared-Header Info	  */
@@ -564,6 +567,22 @@
 #define H5SM_TABLE_MAGIC                "SMTB"          /* Shared Message Table */
 #define H5SM_LIST_MAGIC                 "SMLI"          /* Shared Message List */
 
+
+/* Latest format will activate the following latest version support */
+/* "latest_flags" in H5F_file_t */
+#define H5F_LATEST_DATATYPE             0x0001
+#define H5F_LATEST_DATASPACE            0x0002
+#define H5F_LATEST_ATTRIBUTE            0x0004
+#define H5F_LATEST_FILL_MSG             0x0008
+#define H5F_LATEST_PLINE_MSG            0x0010
+#define H5F_LATEST_LAYOUT_MSG           0x0020
+#define H5F_LATEST_NO_MOD_TIME_MSG	0x0040
+#define H5F_LATEST_STYLE_GROUP          0x0080
+#define H5F_LATEST_OBJ_HEADER		0x0100
+#define H5F_LATEST_SUPERBLOCK           0x0200
+#define H5F_LATEST_ALL_FLAGS            (H5F_LATEST_DATATYPE | H5F_LATEST_DATASPACE | H5F_LATEST_ATTRIBUTE | H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG | H5F_LATEST_NO_MOD_TIME_MSG | H5F_LATEST_STYLE_GROUP | H5F_LATEST_OBJ_HEADER | H5F_LATEST_SUPERBLOCK)
+
+#define H5F_LATEST_DSET_MSG_FLAGS    (H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG)
 
 /****************************/
 /* Library Private Typedefs */
@@ -662,6 +681,7 @@ H5_DLL double H5F_rdcc_w0(const H5F_t *f);
 H5_DLL size_t H5F_sieve_buf_size(const H5F_t *f);
 H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
 H5_DLL hbool_t H5F_use_latest_format(const H5F_t *f);
+H5_DLL unsigned H5F_use_latest_flags(const H5F_t *f, unsigned fl);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
 H5_DLL herr_t H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag);
 H5_DLL struct H5UC_t *H5F_grp_btree_shared(const H5F_t *f);

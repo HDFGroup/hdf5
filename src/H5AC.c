@@ -834,14 +834,6 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
     if(0 == (H5F_INTENT(f) & H5F_ACC_RDWR))
 	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no write intent on file")
 
-    /* FIXME: (temporary)
-     * Check to ensure that version 1 B-tree nodes are not being protected
-     * under SWMR writes.  This will be replaced with a more extensive
-     * SWMR-safe metadata check in the future.
-     */
-    if((H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) && H5AC_BT_ID == type->id)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "can't insert/write version 1 B-tree nodes under SWMR writes")
-
 #if H5AC__TRACE_FILE_ENABLED
     /* For the insert, only the addr, size, type id and flags are really
      * necessary in the trace file.  Write the result to catch occult
@@ -1271,14 +1263,6 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     /* Check for invalid access request */
     if((0 == (H5F_INTENT(f) & H5F_ACC_RDWR)) &&  (0 == (flags & H5C__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "no write intent on file")
-
-    /* FIXME: (temporary)
-     * Check to ensure that version 1 B-tree nodes are not being protected
-     * under SWMR writes.  This will be replaced with a more extensive
-     * SWMR-safe metadata check in the future.
-     */
-    if((H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) && H5AC_BT_ID == type->id)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "can't protect/write version 1 B-tree nodes under SWMR writes")
 
 #if H5AC__TRACE_FILE_ENABLED
     /* For the protect call, only the addr, size, type id, and flags are 

@@ -17,19 +17,13 @@
 
 /* The HDF5 test files */
 const char *FILENAME[] = {
-    "h5clear_sec2.h5",		/* 0 -- sec2 file */
-    "h5clear_core.h5",		/* 1 -- core file */
-    "h5clear_fam_%05d.h5",	/* 2 -- family files */
-    "h5clear_split",		/* 3 -- split files */
-    "h5clear_invalid.h5"	/* 4 -- sec2 file with invalid superblock version */
+    "h5clear_sec2_v3.h5",		/* 0 -- sec2 file with superblock version 3 */
+    "h5clear_log_v3.h5",		/* 1 -- log file with superblock veresion 3 */
+    "h5clear_sec2_v0.h5",		/* 2 -- sec2 file with superblock version 0 */
+    "h5clear_sec2_v2.h5"		/* 3 -- sec2 file with superblock version 2 */
 };
 
-#define FAMILY_SIZE 1024U
-#define CORE_INCREMENT 1024U
-
-#define SUPER_VERS_OFF          8
-#define SUPER_VERS_SIZE         1
-#define SUPER_VERS_LATEST       2
+#define KB 		1024U
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -37,11 +31,15 @@ const char *FILENAME[] = {
  * Purpose:	To create HDF5 files with non-zero status_flags in the superblock
  *		via flushing and exiting without closing the library.
  *
- *		Due to file locking, status_flag in the superblock will be 
+ *		Due to file locking, status_flags in the superblock will be 
  *		nonzero after H5Fcreate.  The library will clear status_flags
  *		on file closing.  This program, after "H5Fcreate" the files,
  *		exits without going through library closing. Thus, status_flags
- *		for these files are not cleared and users cannot open them.
+ *		for these files are not cleared.
+ *		The library will check consistency of status_flags when opening
+ *		a file with superblock >= v3 and will return error accordingly.
+ *		The library will not check status_flags when opening a file 
+ *		with < v3 superblock.
  *
  *		These files are used by "h5clear" to see if the tool clears
  *		status_flags properly so users can open the files afterwards.
@@ -57,6 +55,7 @@ int
 main(void)
 {
     hid_t fid;			/* File ID */
+    hid_t fcpl;			/* File creation property list */
     hid_t fapl, new_fapl;	/* File access property lists */
     char fname[512];		/* File name */
     unsigned new_format;		/* To use latest library format or not */
@@ -75,7 +74,7 @@ main(void)
     if(H5Pset_libver_bounds(new_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
 	goto error;
 
-    /* Create file with/without latest library format */
+    /* Files created within this for loop will have v3 superblock and nonzero status_flags */
     for(new_format = FALSE; new_format <= TRUE; new_format++) {
 	hid_t fapl2, my_fapl;	/* File access property lists */
 
@@ -91,7 +90,7 @@ main(void)
 	    goto error;
 	/* Create the file */
 	sprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[0]);
-	if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) 
+	if((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, my_fapl)) < 0) 
 	    goto error;
 
 	/* Flush the file */
@@ -103,19 +102,19 @@ main(void)
 	    goto error;
 
 	/*
-	 * Create a core file
+	 * Create a log file
 	 */
 	/* Create a copy of file access property list */
 	if((my_fapl = H5Pcopy(fapl2)) < 0)
 	    goto error;
 
-	/* Setup the fapl for the family file driver */
-	if(H5Pset_fapl_core(my_fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
+	/* Setup the fapl for the log driver */
+	if(H5Pset_fapl_log(my_fapl, "append.log", (unsigned long long)H5FD_LOG_ALL, (size_t)(4 * KB)) < 0)
 	    goto error;
 
 	/* Create the file */
 	sprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[1]);
-	if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) 
+	if((fid = H5Fcreate(fname, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, my_fapl)) < 0) 
 	    goto error;
 
 	/* Flush the file */
@@ -125,104 +124,44 @@ main(void)
 	/* Close the property list */
 	if(H5Pclose(my_fapl) < 0)
 	    goto error;
-
-	/*
-	 * Create a family file
-	 */
-	/* Create a copy of file access property list */
-	if((my_fapl = H5Pcopy(fapl2)) < 0)
-	    goto error;
-
-	/* Setup the fapl for the family file driver */
-	if(H5Pset_fapl_family(my_fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
-	    goto error;
-
-	/* Create the file */
-	sprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[2]);
-	if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) 
-	    goto error;
-
-	/* Flush the file */
-	if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-	    goto error;
-
-	/* Close the property list */
-	if(H5Pclose(my_fapl) < 0)
-	    goto error;
-
-	/*
-	 * Create a split file
-	 */
-	 /* Create a copy of file access property list */
-	my_fapl = H5Pcopy(fapl2);
-
-	/* Setup the fapl for the split file driver */
-	H5Pset_fapl_split(my_fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
-
-	/* Create the file */
-	sprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[3]);
-	if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
-	    goto error;
-
-	/* Flush the file */
-	if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-	    goto error;
-
-	/* Close the property list */
-	if(H5Pclose(my_fapl) < 0)
-	    goto error;
-
-	/* 
-	 * Create a sec2 file but change its superblock version # 
-	 */
-	/* Create a copy of file access property list */
-	if((my_fapl = H5Pcopy(fapl2)) < 0)
-	    goto error;
-	/* Create the file */
-	sprintf(fname, "%s%s", new_format? "latest_":"", FILENAME[4]);
-	if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) 
-	    goto error;
-
-	/* Flush the file */
-	if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-	    goto error;
-    
-	/* Close the property list */
-	if(H5Pclose(my_fapl) < 0)
-	    goto error;
-
-	/* Open the test file via system call "open" */
-	if((fd = HDopen(fname, O_RDWR, 0666)) < 0) {
-	    HDfprintf(stdout, "cannot open the file\n");
-	    goto error;
-	}
-
-	/* Position the file to superblock version via system call "lseek" */
-	if(HDlseek(fd, (off_t)SUPER_VERS_OFF, SEEK_SET) < 0) {
-	    HDfprintf(stdout, "cannot lseek the file superblock version\n");
-	    goto error;
-	}
-
-	/* Change to an incorrect superblock version */
-	super_vers = SUPER_VERS_LATEST + 1;
-	/* Write to the file via system call "write" */
-	if((bytes_written = HDwrite(fd, &super_vers, (size_t)SUPER_VERS_SIZE)) < 0) {
-	    HDfprintf(stdout, "cannot write to the file with incorrect superblock version\n");
-	    goto error;
-	}
-
-	/* Close the file via system call "close" */
-	if(HDclose(fd) < 0) {
-	    HDfprintf(stdout, "cannot close the file\n");
-	    goto error;
-	}
 
     } /* end for */
 
+    /* 
+     * Create a sec2 file with v0 superblock but nonzero status_flags
+     */
+    if((fid = H5Fcreate(FILENAME[2], H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) 
+	goto error;
+
+    /* Flush the file */
+    if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+	goto error;
+
+
+    /* 
+     * Create a sec2 file with v2 superblock but nonzero status_flags
+     */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+	goto error;
+    if(H5Pset_shared_mesg_nindexes(fcpl, 1) < 0)
+        goto error;
+    if(H5Pset_shared_mesg_index(fcpl, 0, H5O_SHMESG_DTYPE_FLAG, 50) < 0)
+        goto error;
+
+    if((fid = H5Fcreate(FILENAME[3], H5F_ACC_TRUNC, fcpl, fapl)) < 0) 
+	goto error;
+
+    /* Flush the file */
+    if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
+	goto error;
+
+    
     /* Close the property lists */
     if(H5Pclose(fapl) < 0)
 	goto error;
     if(H5Pclose(new_fapl) < 0)
+	goto error;
+    if(H5Pclose(fcpl) < 0)
 	goto error;
 
     fflush(stdout);

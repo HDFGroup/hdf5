@@ -1579,7 +1579,7 @@ done:
  *		8) Unlock the file
  *
  *		Pre-conditions:
- *		1) The file is opened with latest library format
+ *		1) The file being opened has v3 superblock
  *		2) The file is opened with H5F_ACC_RDWR
  *		3) The file is not already marked for SWMR writing
  *		4) Current implementaion for opened objects:
@@ -1625,9 +1625,9 @@ H5Fstart_swmr_write(hid_t file_id)
     if((H5F_INTENT(file) & H5F_ACC_RDWR) == 0)
 	HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "no write intent on file")
 
-    /* Should be using latest library format */
-    if(!H5F_use_latest_format(file))
-	HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file not opened with latest library format")
+    if(file->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
+	HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file superblock version should be at least 3")
+    HDassert(file->shared->latest_flags == H5F_LATEST_ALL_FLAGS);
 
     /* Should not be marked for SWMR writing mode already */
     if(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)

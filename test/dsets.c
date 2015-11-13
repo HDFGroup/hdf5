@@ -60,9 +60,9 @@ const char *FILENAME[] = {
     "copy_dcpl_newfile",/* 13 */
     "partial_chunks",   /* 14 */
     "layout_extend",    /* 15 */
-    "swmr_fail",        /* 16 */
-    "zero_chunk",	/* 17 */
-    "chunk_single",     /* 18 */
+    "zero_chunk",	/* 16 */
+    "chunk_single",     /* 17 */
+    "swmr_non_latest",  /* 18 */
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -998,7 +998,7 @@ test_layout_extend(hid_t fapl)
     TESTING("extendible dataset with various layout");
 
     /* Create a file */
-    h5_fixname(FILENAME[12], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[15], fapl, filename, sizeof filename);
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
 
@@ -8115,9 +8115,8 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
     for(swmr = 0; swmr <= 1; swmr++) {
 	int     compress;       /* Whether chunks should be compressed */
 
-        /* SWMR is only supported on the latest file format */
-        if(swmr && H5F_LIBVER_LATEST != low)
-            continue;
+        /* SWMR is now supported with/without latest format:  */
+	/* (1) write+latest-format (2) SWMR-write+non-latest-format */
 
         /* Skip this iteration if SWMR I/O is not supported for the VFD specified
          * by the environment variable.
@@ -8202,7 +8201,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
                         if(H5D__layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
 
                         /* Chunk index type expected depends on whether we are using the latest version of the format */
-                        if(low == H5F_LIBVER_LATEST) {
+                        if(low == H5F_LIBVER_LATEST || swmr) {
                             /* Verify index type */
                             if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
                         } /* end if */
@@ -8311,7 +8310,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
                         if(H5D__layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
 
                         /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
-                        if(low == H5F_LIBVER_LATEST) {
+                        if(low == H5F_LIBVER_LATEST || swmr) {
                             /* Verify index type */
                             if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
                         } /* end if */
@@ -9550,7 +9549,7 @@ test_single_chunk(hid_t fapl)
 
     TESTING("datasets w/Single Chunk indexing");
 
-    h5_fixname(FILENAME[18], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[17], fapl, filename, sizeof filename);
 
     /* Check if we are using the latest version of the format */
     if(H5Pget_libver_bounds(fapl, &low, &high) < 0) FAIL_STACK_ERROR
@@ -10061,10 +10060,12 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function: test_swmr_v1_btree_ci_fail
+ * Function: test_swmr_non_latest
  *
- * Purpose: Checks to see if the library will disallow writing to a version
- *          1 B-tree under SWMR semantics.
+ * Purpose: Checks that a file created with either:
+ *		(a) SWMR-write + non-latest-format
+ *		(b) write + latest format
+ *	    will generate datset with latest chunk indexing type.
  *
  * Return:      Success: 0
  *              Failure: -1
@@ -10072,23 +10073,22 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_swmr_v1_btree_ci_fail(const char *env_h5_driver, hid_t fapl)
+test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
 {
     char        filename[FILENAME_BUF_SIZE];
-    hid_t       fid = -1;       /* File ID */
-    hid_t       v1_fapl = -1;   /* fapl that will create v1 B-tree symbol tables and indexes */
-    hid_t       fh_fapl = -1;   /* fapl that will create fractal heap symbol tables */
-    hid_t       dcpl = -1;      /* Dataset creation property list ID */
-    hid_t       sid = -1;       /* Dataspace ID */
-    hid_t       did = -1;       /* Dataset ID */
-    hsize_t     dims[1];        /* Size of dataset */
-    hsize_t     max_dims[1];    /* Maximum size of dataset */
-    hsize_t     chunk_dims[1];  /* Chunk dimensions */
-    herr_t      err = -1;       /* Error return value */
-    H5D_chunk_index_t idx_type; /* Chunk index type */
-    int         data = 42;      /* Data to be written to the dataset */
+    hid_t       fid = -1;       		/* File ID */
+    hid_t       gid = -1;       		/* Group ID */
+    hid_t       dcpl = -1;      		/* Dataset creation property list ID */
+    hid_t       sid = -1;       		/* Dataspace ID */
+    hid_t       did = -1;       		/* Dataset ID */
+    hsize_t     dim[1], dims2[2];        	/* Size of dataset */
+    hsize_t     max_dim[1], max_dims2[2];    	/* Maximum size of dataset */
+    hsize_t     chunk_dim[1], chunk_dims2[2];  	/* Chunk dimensions */
+    H5D_chunk_index_t idx_type; 		/* Chunk index type */
+    int         data;      			/* Data to be written to the dataset */
+    H5F_libver_t low;           		/* File format low bound */
 
-    TESTING("expected SWMR behavior using v-1 B-trees");
+    TESTING("File created with write+latest-format/SWMR-write+non-latest-format: dataset with latest chunk index");
 
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
@@ -10099,146 +10099,191 @@ test_swmr_v1_btree_ci_fail(const char *env_h5_driver, hid_t fapl)
         return 0;
     }
 
-    h5_fixname(FILENAME[16], fapl, filename, sizeof filename);
+    /* Check if we are using the latest version of the format */
+    if(H5Pget_libver_bounds(fapl, &low, NULL) < 0) 
+	FAIL_STACK_ERROR
 
-    /* Copy the file access property list */
-    if((v1_fapl = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
-    if((fh_fapl = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
-    if(H5Pset_libver_bounds(fh_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
+    h5_fixname(FILENAME[18], fapl, filename, sizeof filename);
 
-    /* Create the test file, then close and reopen.
-     *
-     * We'll create the file with the file access property list that
-     * uses the latest file format so that the group is indexed with a
-     * fractal heap.  If we don't do this, there can be issues when
-     * opening the file under SWMR since the root group will use a v1
-     * B-tree for the symbol table.
-     *
-     * The close and re-open is so that new datasets are indexed with
-     * the old v1 B-tree scheme.
-     */
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fh_fapl)) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-    if((fid = H5Fopen(filename, H5F_ACC_RDWR, v1_fapl)) < 0) FAIL_STACK_ERROR
-
-    /* Create a dataset that uses v1 B-tree chunk indexing */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
-    chunk_dims[0] = 64;
-    if(H5Pset_chunk(dcpl, 1, chunk_dims) < 0) FAIL_STACK_ERROR
-    dims[0] = 1;
-    max_dims[0] = H5S_UNLIMITED;
-    if((sid = H5Screate_simple(1, dims, max_dims)) < 0) FAIL_STACK_ERROR
-    if((did = H5Dcreate2(fid, DSET_DEFAULT_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-
-    /* Explicitly check that the dataset is using a v-1 B-tree index */
-    if(H5D__layout_idx_type_test(did, &idx_type) < 0) FAIL_STACK_ERROR
-    if(idx_type != H5D_CHUNK_IDX_BTREE) 
-        FAIL_PUTS_ERROR("created dataset not indexed by version 1 B-tree")
-
-    /* Close the file */
-    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-
-    /* Reopen the file with SWMR write access */
-    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fh_fapl)) < 0) FAIL_STACK_ERROR
-
-    /* 
-     * Attempt to write to a dataset that uses v-1 B-tree chunk indexing with SWMR access.
-     * (dataset is empty)
-     */
-    did = -1;
-    err = -1;
-    H5E_BEGIN_TRY {
-        did = H5Dopen2(fid, DSET_DEFAULT_NAME, H5P_DEFAULT);
-        if(did >= 0) { /* should fail to write */
-            err = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data);
-        }
-    } H5E_END_TRY;
-
-    /* Fail on successful write */
-    if(did >= 0 && err >= 0) {
-        H5_FAILED();
-        puts("    library allowed writing to a version 1 B-tree indexed dataset under SWMR semantics");
-        goto error;
+    if(low == H5F_LIBVER_LATEST) {
+	/* Create file with write+latest-format */
+	if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) 
+	    FAIL_STACK_ERROR
+    } else {
+	/* Create file with SWMR-write+non-latest-format */
+	if((fid = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0) 
+	    FAIL_STACK_ERROR
     }
 
-    /* Close the dataset */
-    if(did >= 0)
-        if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    /* Create a chunked dataset: this will use extensible array chunk indexing */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
+	FAIL_STACK_ERROR
 
-    /* Close the file */
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    chunk_dim[0] = 6;
+    if(H5Pset_chunk(dcpl, 1, chunk_dim) < 0) 
+	FAIL_STACK_ERROR
 
+    dim[0] = 1;
+    max_dim[0] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(1, dim, max_dim)) < 0) 
+	FAIL_STACK_ERROR
 
-    /* Reopen the file with write access */
-    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fh_fapl)) < 0) FAIL_STACK_ERROR
-
-    /* Open the dataset */
-    if((did = H5Dopen2(fid, DSET_DEFAULT_NAME, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate2(fid, DSET_CHUNKED_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
 	FAIL_STACK_ERROR
 
     /* Write to the dataset */
+    data = 100;
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
 	FAIL_STACK_ERROR
 
-    /* Close the dataset */
-    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
-
-    /* Close the file */
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-
-
-    /* Reopen the file with SWMR write access */
-    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fh_fapl)) < 0) FAIL_STACK_ERROR
-
-    /* 
-     * Attempt to write to a dataset that uses v-1 B-tree chunk indexing with SWMR access.
-     * (dataset is non-empty)
-     */
-    did = -1;
-    err = -1;
-    H5E_BEGIN_TRY {
-        did = H5Dopen2(fid, DSET_DEFAULT_NAME, H5P_DEFAULT);
-        if(did >= 0) { /* should fail to write */
-            err = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data);
-        }
-    } H5E_END_TRY;
-
-    /* Fail on successful write */
-    if(did >= 0 && err >= 0) {
-        H5_FAILED();
-        puts("    library allowed writing to a version 1 B-tree indexed dataset under SWMR semantics");
-        goto error;
-    }
-
-    /* Close the dataset */
-    if(did >= 0)
-        if(H5Dclose(did) < 0) FAIL_STACK_ERROR
-
-    /* Close the file */
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-
-    /* Reopen the file with SWMR read access */
-    if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fh_fapl)) < 0) 
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
 	FAIL_STACK_ERROR
-
-    /* Open the dataset */
-    if((did = H5Dopen2(fid, DSET_DEFAULT_NAME, H5P_DEFAULT)) < 0)
-	TEST_ERROR
-
-    /* Should read the correct data from the dataset */
-    data = 0;
-    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
-        TEST_ERROR
-    if(data != 42)
-        TEST_ERROR
+    if(idx_type != H5D_CHUNK_IDX_EARRAY) 
+        FAIL_PUTS_ERROR("created dataset not indexed by extensible array")
 
     /* Closing */
     if(H5Dclose(did) < 0) FAIL_STACK_ERROR
-    if(H5Pclose(v1_fapl) < 0) FAIL_STACK_ERROR
-    if(H5Pclose(fh_fapl) < 0) FAIL_STACK_ERROR
-    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
     if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    /* Open the file again */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) 
+	FAIL_STACK_ERROR
+
+    /* Open the dataset in the file */
+    if((did = H5Dopen2(fid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+	FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_EARRAY) 
+        FAIL_PUTS_ERROR("created dataset not indexed by extensible array")
+
+    /* Read from the dataset and verify data read is correct */
+    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
+	FAIL_STACK_ERROR
+    if(data != 100)
+	FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+
+    /* Create a group in the file */
+    if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Create a chunked dataset in the group: this will use v2 B-tree chunk indexing */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
+	FAIL_STACK_ERROR
+
+    chunk_dims2[0] = chunk_dims2[1] = 10;
+    if(H5Pset_chunk(dcpl, 2, chunk_dims2) < 0) 
+	FAIL_STACK_ERROR
+
+    dims2[0] = dims2[1] = 1;
+    max_dims2[0] = max_dims2[1] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(2, dims2, max_dims2)) < 0) 
+	FAIL_STACK_ERROR
+
+    if((did = H5Dcreate2(gid, DSET_CHUNKED_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
+	FAIL_STACK_ERROR
+
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+	FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_BT2) 
+        FAIL_PUTS_ERROR("created dataset not indexed by v2 B-tree")
+
+    /* Closing */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    /* Open the file again */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Open the group */
+    if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Open the dataset in the group */
+    if((did = H5Dopen2(gid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+	FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_BT2) 
+        FAIL_PUTS_ERROR("created dataset not indexed by v2 B-tree")
+
+    /* Closing */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+
+    /* Reopen the file with SWMR-write */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Open the dataset in the file */
+    if((did = H5Dopen2(fid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+	FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_EARRAY) 
+        FAIL_PUTS_ERROR("created dataset not indexed by extensible array")
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+
+    /* Open the group */
+    if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Open the dataset in the group */
+    if((did = H5Dopen2(gid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+	FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_BT2) 
+        FAIL_PUTS_ERROR("created dataset not indexed by v2 B-tree")
+
+    /* Write to the dataset in the group */
+    data = 99;
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
+	FAIL_STACK_ERROR
+
+    /* Closing */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    /* Open the file again with SWMR read access */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0) 
+	FAIL_STACK_ERROR
+
+    if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Open the dataset */
+    if((did = H5Dopen2(gid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Read from the dataset and verify data read is correct */
+    data = 0;
+    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
+	FAIL_STACK_ERROR
+    if(data != 99) FAIL_STACK_ERROR
+
+    /* Closing */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     PASSED();
@@ -10247,15 +10292,14 @@ test_swmr_v1_btree_ci_fail(const char *env_h5_driver, hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
-        H5Pclose(v1_fapl);
-        H5Pclose(fh_fapl);
         H5Pclose(dcpl);
         H5Dclose(did);
         H5Sclose(sid);
+        H5Gclose(gid);
         H5Fclose(fid);
     } H5E_END_TRY;
     return -1;
-} /* end test_swmr_v1_btree_ci_fail() */
+} /* test_swmr_non_latest() */
 
 
 /*-------------------------------------------------------------------------
@@ -10285,7 +10329,7 @@ test_zero_dim_dset(hid_t fapl)
 
     TESTING("shrinking large chunk");
 
-    h5_fixname(FILENAME[13], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[16], fapl, filename, sizeof filename);
 
     /* Create file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
@@ -11393,9 +11437,6 @@ main(void)
     h5_reset();
     fapl = h5_fileaccess();
 
-    /* Test that SWMR access fails with version 1 B-tree access */
-    nerrors += (test_swmr_v1_btree_ci_fail(envval, fapl) < 0 ? 1 : 0);
-
     /* Turn off the chunk cache, so all the chunks are immediately written to disk */
     if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
         goto error;
@@ -11492,6 +11533,7 @@ main(void)
 	nerrors += (test_single_chunk(my_fapl) < 0              ? 1 : 0);	
 	nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
 	nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
+	nerrors += (test_swmr_non_latest(envval, my_fapl) < 0 ? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;

@@ -57,7 +57,7 @@ unsigned test_read_after(const H5F_io_info_t *fio_info);
 unsigned test_free(const H5F_io_info_t *fio_info);
 unsigned test_big(const H5F_io_info_t *fio_info);
 unsigned test_random_write(const H5F_io_info_t *fio_info);
-unsigned test_swmr_write_big(void);
+unsigned test_swmr_write_big(hbool_t new);
 
 /* Helper Function Prototypes */
 void accum_printf(void);
@@ -133,7 +133,8 @@ main(void)
     HDremove(FILENAME);
 
     /* This test uses a different file */
-    nerrors += test_swmr_write_big();
+    nerrors += test_swmr_write_big(TRUE);
+    nerrors += test_swmr_write_big(FALSE);
 
     if(nerrors)
         goto error;
@@ -1807,7 +1808,7 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned 
-test_swmr_write_big(void)
+test_swmr_write_big(hbool_t new)
 {
     hid_t fid = -1;			    /* File ID */
     hid_t fapl = -1;			/* File access property list */
@@ -1823,7 +1824,11 @@ test_swmr_write_big(void)
     char *new_argv[] = {NULL};
     char *driver = NULL;        /* VFD string (from env variable) */
 
-    TESTING("SWMR write of large metadata");
+    if(new) {
+	TESTING("SWMR write of large metadata: with latest format");
+    } else {
+	TESTING("SWMR write of large metadata: with non-latest-format");
+    } 
 
 #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
@@ -1833,27 +1838,31 @@ test_swmr_write_big(void)
 
 #else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
 
-   /* Skip this test if SWMR I/O is not supported for the VFD specified
-	* by the environment variable.
-	*/
-	driver = HDgetenv("HDF5_DRIVER");
-	if (!H5FD_supports_swmr_test(driver)) {
-		SKIPPED();
-		HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
-		return EXIT_SUCCESS;
-	}
+    /* Skip this test if SWMR I/O is not supported for the VFD specified
+     * by the environment variable.
+     */
+    driver = HDgetenv("HDF5_DRIVER");
+    if (!H5FD_supports_swmr_test(driver)) {
+	SKIPPED();
+	HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+	return EXIT_SUCCESS;
+    }
 
     /* File access property list */
     if((fapl = h5_fileaccess()) < 0)
         FAIL_STACK_ERROR
 
-    /* Set to use latest library format */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        FAIL_STACK_ERROR
+    /* Both cases will result in v3 superblock and version 2 object header for SWMR */
+    if(new) { /* latest format */
+	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+	    FAIL_STACK_ERROR
 
-    /* Create a test file with latest format (ensure version 2 object header for SWMR) */
-    if((fid = H5Fcreate(SWMR_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
+	if((fid = H5Fcreate(SWMR_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	    FAIL_STACK_ERROR
+    } else { /* non-latest-format */
+	if((fid = H5Fcreate(SWMR_FILENAME, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+	    FAIL_STACK_ERROR
+    }
 
     /* Close the file */
     if(H5Fclose(fid) < 0)

@@ -633,6 +633,11 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get sieve buffer size")
         if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
+
+	/* For latest format or SWMR_WRITE, activate all latest version support */
+	if((f->shared->latest_format) || (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE))
+	    f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
+
 	if(H5P_get(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &(f->shared->use_mdc_logging)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'use mdc logging' flag")
         if(H5P_get(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, &(f->shared->start_mdc_log_on_access)) < 0)
@@ -641,8 +646,6 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         /* (Need to revisit this when the 1.10 release is made, and require
          *      1.10 or later -QAK)
          */
-        if(!H5F_USE_LATEST_FORMAT(f) && (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE))
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "must use 'latest format' flag with SWMR write access")
         if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &(f->shared->meta_aggr.alloc_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get metadata cache size")
         f->shared->meta_aggr.feature_flag = H5FD_FEAT_AGGREGATE_METADATA;
@@ -1242,9 +1245,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 
     if(set_flag) {
         if(H5F_INTENT(file) & H5F_ACC_RDWR) { /* Set and check consistency of status_flags */
-            if(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS ||
-               file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write/SWMR write (may use <h5clear file> to clear file consistency flags)")
+	    /* Skip check of status_flags for file with < superblock version 3 */
+            if(file->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3) {
+
+		if(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS ||
+		   file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS)
+		    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write/SWMR write (may use <h5clear file> to clear file consistency flags)")
+	    } /* version 3 superblock */
 
             file->shared->sblock->status_flags |= H5F_SUPER_WRITE_ACCESS;
             if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE)
@@ -1261,14 +1268,23 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                 if(H5FD_unlock(file->shared->lf) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to unlock the file")
             }
-        } else { /* H5F_ACC_RDONLY */
-            if(H5F_INTENT(file) & H5F_ACC_SWMR_READ) { /* Check consistency of status_flags */
-                if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS && !(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
-                || (!(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) && file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is not already open for SWMR writing")
-            } else if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) ||
-               (file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write (may use <h5clear file> to clear file consistency flags)")
+        } else { /* H5F_ACC_RDONLY: check consistency of status_flags */
+	    /* Skip check of status_flags for file with < superblock version 3 */
+            if(file->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3) {
+
+		if(H5F_INTENT(file) & H5F_ACC_SWMR_READ) { 
+		    if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS && 
+		       !(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
+			|| 
+		       (!(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) && 
+			file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
+			HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is not already open for SWMR writing")
+
+		} else if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) ||
+			  (file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
+		    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write (may use <h5clear file> to clear file consistency flags)")
+
+	    } /* version 3 superblock */
         }
     } /* end if set_flag */
 

@@ -59,7 +59,6 @@
 #define H5F_SUPER_SWMR_WRITE_ACCESS     0x04
 #define H5F_SUPER_ALL_FLAGS             (H5F_SUPER_WRITE_ACCESS | H5F_SUPER_FILE_OK | H5F_SUPER_SWMR_WRITE_ACCESS)
 
-
 /* Mask for removing private file access flags */
 #define H5F_ACC_PUBLIC_FLAGS 	        0x007fu
 
@@ -133,7 +132,7 @@
 #define H5F_SUPERBLOCK_VARLEN_SIZE(v, sizeof_addr, sizeof_size) (	\
         (v == 0 ? H5F_SUPERBLOCK_VARLEN_SIZE_V0(sizeof_addr, sizeof_size) : 0) \
         + (v == 1 ? H5F_SUPERBLOCK_VARLEN_SIZE_V1(sizeof_addr, sizeof_size) : 0) \
-        + (v == 2 ? H5F_SUPERBLOCK_VARLEN_SIZE_V2(sizeof_addr) : 0))
+        + (v >= 2 ? H5F_SUPERBLOCK_VARLEN_SIZE_V2(sizeof_addr) : 0))
 
 /* Total size of superblock, depends on superblock version */
 #define H5F_SUPERBLOCK_SIZE(s) ( H5F_SUPERBLOCK_FIXED_SIZE              \
@@ -304,6 +303,7 @@ struct H5F_file_t {
     hsize_t	alignment;	/* Alignment				*/
     unsigned	gc_ref;		/* Garbage-collect references?		*/
     hbool_t	latest_format;	/* Always use the latest format?	*/
+    unsigned	latest_flags;	/* The latest version support */
     hbool_t	store_msg_crt_idx;  /* Store creation index for object header messages?	*/
     unsigned	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/

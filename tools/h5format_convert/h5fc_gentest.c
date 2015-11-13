@@ -26,12 +26,12 @@
 
 #define GROUP			"GROUP"
 
-#define OLD_FILE		"h5fc_old.h5"
+#define OLD_V1_FILE		"h5fc_v1.h5"
 #define DSET_NON_CHUNKED	"DSET_NON_CHUNKED"
 #define DSET_BT1		"DSET_BT1"
 #define DSET_NDATA_BT1		"DSET_NDATA_BT1"
 
-#define NEW_FILE		"h5fc_new.h5"
+#define LATEST_V3_FILE		"h5fc_latest_v3.h5"
 #define DSET_EA			"DSET_EA"
 #define DSET_NDATA_EA		"DSET_NDATA_EA"
 #define DSET_BT2		"DSET_BT2"
@@ -41,9 +41,9 @@
 #define DSET_NONE		"DSET_NONE"
 #define DSET_NDATA_NONE		"DSET_NDATA_NONE"
 
-#define ALL_FILE		"h5fc_all.h5"
+#define NON_V3_FILE		"h5fc_non_v3.h5"
 
-#define EDGE_FILE		"h5fc_edge.h5"
+#define EDGE_V3_FILE		"h5fc_edge_v3.h5"
 #define DSET_EDGE		"DSET_EDGE"
 
 /*
@@ -57,6 +57,7 @@ static void
 gen_old(const char *fname)
 {
     hid_t	fid = -1;	 	/* file id */
+    hid_t	fcpl = -1;	 	
     hid_t	gid = -1;	 	/* group id */
     hid_t   	sid = -1;	 	/* space id */
     hid_t	dcpl = -1;	 	/* dataset creation property id */
@@ -67,8 +68,14 @@ gen_old(const char *fname)
     int		i;		    	/* local index variable */
     int     	buf[24];            	/* data buffer */
 
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        goto error;
+
+    if(H5Pset_istore_k(fcpl, 64) < 0)
+        goto error;
+
     /* Create file */
-    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
 	goto error;
 
     /* Create a group */
@@ -152,16 +159,16 @@ error:
 } /* gen_old() */
 
 /*
- * Function: gen_new() 
+ * Function: gen_latest() 
  *
- * Create a new format file with:
+ * Create a file with write+latest-format--this will result in v3 superblock+latest version support:
  *	1) 2 chunked datasets with extensible array chunk indexing type (with/without data)
  *	2) 2 chunked datasets with version 2 B-tree chunk indexing type (with/without data)
  *	3) 2 chunked datasets with fixed array chunk indexing type (with/without data)
  *	4) 2 chunked datasets with implicit array chunk indexing type (with/without data)
  */
 static void
-gen_new(const char *fname)
+gen_latest(const char *fname)
 {
     hid_t	fid = -1;	 	/* file id */
     hid_t	fapl = -1;	       	/* file access property list */
@@ -341,23 +348,23 @@ error:
         H5Pclose(fapl);
     } H5E_END_TRY;
 
-} /* gen_new() */
+} /* gen_latest() */
 
 /*
- * Function: gen_all() 
+ * Function: gen_non() 
  *
- * Create a new format file with:
+ * Create a file with SWMR write+non-latest-format--this will result in v3 superbock+latest version support:
  *	1) 1 chunked dataset with extensible array chunk indexing type (without data)
  *	2) 1 chunked dataset with version 2 B-tree chunk indexing type (with data)
- * Re-open the file with old format and create:
+ * Re-open the file with write+non-latest-format and create:
+ *	3) 1 chunked dataset with version 2 B-tree chunk indexing type (without data)
+ * 	4) 1 chunked dataset with extensible array indexing type (with data)
  *	5) 1 non-chunked dataset
- * 	6) 2 chunked datasets with version 1 B-tree chunk indexing type (with/without data)
  */
 static void
-gen_all(const char *fname)
+gen_non(const char *fname)
 {
     hid_t	fid = -1;		/* file id */
-    hid_t	fapl = -1;		/* file access property list */
     hid_t	gid = -1;		/* group id */
     hid_t   	sid = -1;       	/* space id */
     hid_t	dcpl = -1;		/* dataset creation property id */
@@ -369,13 +376,8 @@ gen_all(const char *fname)
     int		i;		    	/* local index variable */
     int     	buf[24];            	/* data buffer */
 
-    /* Create a new format file */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-	goto error;
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	goto error;
-
-    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    /* Create a new file with SWMR_WRITE + non-latest-format */
+    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, H5P_DEFAULT)) < 0)
 	goto error;
 
     /* Create a group */
@@ -393,7 +395,7 @@ gen_all(const char *fname)
 	goto error;
 
     /* 
-     * Create 1 chunked dataset with extensible array chunk indexing type  (without data)
+     * Create a chunked dataset with extensible array chunk indexing type  (without data)
      */
 
     /* Create dataspace */
@@ -413,7 +415,7 @@ gen_all(const char *fname)
 	goto error;
 
     /* 
-     * Create 1 chunked dataset with version 2 B-tree chunk indexing type (with data)
+     * Create a chunked dataset with version 2 B-tree chunk indexing type (with data)
      */
 
     /* Create dataspace */
@@ -436,8 +438,6 @@ gen_all(const char *fname)
 	goto error;
     if(H5Dclose(did1) < 0)
 	goto error;
-
-
     if(H5Pclose(dcpl) < 0)
 	goto error;
     if(H5Gclose(gid) < 0)
@@ -454,7 +454,7 @@ gen_all(const char *fname)
 	goto error;
 
     /*
-     * Create 2 datasets with version 1 B-btree chunk indexing type (with/without data)
+     * Create a dataset with version 2 B-btree chunk indexing type (without data)
      */
 
     /* Set chunk */
@@ -464,19 +464,34 @@ gen_all(const char *fname)
 	goto error;
 
     /* Create dataspace */
+    max_dims[0] = H5S_UNLIMITED;
+    max_dims[1] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(2, dims2, max_dims)) < 0)
+	goto error;
+
+    /* Create the dataset */
+    if((did1 = H5Dcreate2(fid, DSET_NDATA_BT2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+	goto error;
+
+    /* Close the dataspace */
+    if(H5Sclose(sid) < 0)
+	goto error;
+
+    /*
+     * Create a dataset with version extensible array chunk indexing type (with data) in the group
+     */
+
+    /* Create dataspace */
     max_dims[0] = 10;
     max_dims[1] = H5S_UNLIMITED;
     if((sid = H5Screate_simple(2, dims2, max_dims)) < 0)
 	goto error;
 
-    /* Create the datasets */
-    if((did1 = H5Dcreate2(fid, DSET_NDATA_BT1, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    /* Create the dataset */
+    if((did2 = H5Dcreate2(gid, DSET_EA, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
 	goto error;
 
-    if((did2 = H5Dcreate2(gid, DSET_BT1, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-	goto error;
-
-    /* Write to one dataset */
+    /* Write to the dataset */
     if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
 	goto error;
 
@@ -489,7 +504,7 @@ gen_all(const char *fname)
 	goto error;
 
     /* 
-     * Create a non-chunked dataset 
+     * Create a non-chunked dataset in the group
      */
 
     /* Create dataspace */
@@ -512,8 +527,6 @@ gen_all(const char *fname)
 	goto error;
     if(H5Pclose(dcpl) < 0)
 	goto error;
-    if(H5Pclose(fapl) < 0)
-	goto error;
 
 error:
     H5E_BEGIN_TRY {
@@ -523,15 +536,14 @@ error:
         H5Dclose(did2);
         H5Gclose(gid);
         H5Fclose(fid);
-        H5Pclose(fapl);
     } H5E_END_TRY;
 
-} /* gen_all() */
+} /* gen_non() */
 
 /*
  * Function: gen_edge() 
  *
- * Create a new format file with:
+ * Create a file with write+latest-format--this will result in v3 superblock+latest version support:
  *	A dataset: chunked, filtered, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS enabled
  *	(i.e. the dataset does not filter partial edge chunks)
  */
@@ -608,16 +620,16 @@ error:
 
 int main(void)
 {
-    /* Generate an old format file with datasets for testing */
-    gen_old(OLD_FILE);
+    /* Generate an old format file with v1 superbock */
+    gen_old(OLD_V1_FILE);
 
-    /* Generate a new format file with datasets for testing */
-    gen_new(NEW_FILE);
+    /* Generate a latest-format file with v3 superblock */
+    gen_latest(LATEST_V3_FILE);
 
-    /* Generate a new format file (+reopen with old format) for testing */
-    gen_all(ALL_FILE);
+    /* Generate a non-latest-format file with v3 superblock */
+    gen_non(NON_V3_FILE);
 
     /* Generate a new format file with a no-filter-edge-chunk dataset for testing */
-    gen_edge(EDGE_FILE);
+    gen_edge(EDGE_V3_FILE);
     return 0;
 }

@@ -79,10 +79,10 @@ TMPFILE=tmp.h5
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
-$SRC_H5FORMCONV_TESTFILES/h5fc_old.h5
-$SRC_H5FORMCONV_TESTFILES/h5fc_new.h5
-$SRC_H5FORMCONV_TESTFILES/h5fc_all.h5
-$SRC_H5FORMCONV_TESTFILES/h5fc_edge.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_v1.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_latest_v3.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_non_v3.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_edge_v3.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -284,105 +284,105 @@ TOOLTEST_OUT h5fc_nooption.ddl ''
 TOOLTEST_OUT h5fc_nonexistfile.ddl nonexist.h5
 #
 #
-# h5format_convert -d h5fc_old.h5 (just -d option, file exists)
-# h5format_convert --dname h5fc_old.h5 (just --dname option, file exists)
+# h5format_convert -d h5fc_v1.h5 (just -d option, file exists)
+# h5format_convert --dname h5fc_v1.h5 (just --dname option, file exists)
 # h5format_convert --dname (just --dname option)
-# h5format_convert --dname=nonexist h5fc_old.h5 (dataset does not exist, file exists)
-TOOLTEST_OUT h5fc_d_file.ddl h5fc_old.h5 -d
-TOOLTEST_OUT h5fc_d_file.ddl h5fc_old.h5 --dname
+# h5format_convert --dname=nonexist h5fc_v1.h5 (dataset does not exist, file exists)
+TOOLTEST_OUT h5fc_d_file.ddl h5fc_v1.h5 -d
+TOOLTEST_OUT h5fc_d_file.ddl h5fc_v1.h5 --dname
 TOOLTEST_OUT h5fc_dname.ddl '' --dname
-TOOLTEST_OUT h5fc_nonexistdset_file.ddl h5fc_old.h5 --dname=nonexist
+TOOLTEST_OUT h5fc_nonexistdset_file.ddl h5fc_v1.h5 --dname=nonexist
 #
 #
 #
-# h5format_convert -d /DSET_NON_CHUNKED -v h5fc_old.h5 (verbose, non-chunked dataset)
-# h5format_convert -d /GROUP/DSET_BT1 --verbose h5fc_old.h5 (verbose, bt1 dataset)
-# h5format_convert -d /DSET_NDATA_BT1 -v -n h5fc_old.h5 (verbose, noop, bt1+nodata dataset)
-# h5format_convert -v h5fc_old.h5 (verbose, all datasets)
-TOOLTEST_OUT h5fc_v_non_chunked.ddl h5fc_old.h5 -d /DSET_NON_CHUNKED -v
-TOOLTEST_OUT h5fc_v_bt1.ddl h5fc_old.h5 -d /GROUP/DSET_BT1 --verbose
-TOOLTEST_OUT h5fc_v_ndata_bt1.ddl h5fc_old.h5 -d /DSET_NDATA_BT1 -v -n
-TOOLTEST_OUT h5fc_v_all.ddl h5fc_old.h5 -v
+# h5format_convert -d /DSET_NON_CHUNKED -v h5fc_v1.h5 (verbose, non-chunked dataset)
+# h5format_convert -d /GROUP/DSET_BT1 --verbose h5fc_v1.h5 (verbose, bt1 dataset)
+# h5format_convert -d /DSET_NDATA_BT1 -v -n h5fc_v1.h5 (verbose, noop, bt1+nodata dataset)
+# h5format_convert -v h5fc_v1.h5 (verbose, all datasets)
+TOOLTEST_OUT h5fc_v_non_chunked.ddl h5fc_v1.h5 -d /DSET_NON_CHUNKED -v
+TOOLTEST_OUT h5fc_v_bt1.ddl h5fc_v1.h5 -d /GROUP/DSET_BT1 --verbose
+TOOLTEST_OUT h5fc_v_ndata_bt1.ddl h5fc_v1.h5 -d /DSET_NDATA_BT1 -v -n
+TOOLTEST_OUT h5fc_v_all.ddl h5fc_v1.h5 -v
 #
 #
 #
-# h5format_convert -d /DSET_EA -v -n h5fc_new.h5 (verbose, noop, one ea dataset)
-# h5format_convert -v -n h5fc_all.h5 (verbose, noop, all datasets)
-TOOLTEST_OUT h5fc_v_n_1d.ddl h5fc_new.h5 -d /DSET_EA -v -n
-TOOLTEST_OUT h5fc_v_n_all.ddl h5fc_all.h5 -v -n
+# h5format_convert -d /DSET_EA -v -n h5fc_latest_v3.h5 (verbose, noop, one ea dataset)
+# h5format_convert -v -n h5fc_non_v3.h5 (verbose, noop, all datasets)
+TOOLTEST_OUT h5fc_v_n_1d.ddl h5fc_latest_v3.h5 -d /DSET_EA -v -n
+TOOLTEST_OUT h5fc_v_n_all.ddl h5fc_non_v3.h5 -v -n
 #
 #
 #
 # No output from tests
 # 1) Use the tool to convert the dataset
 # 2) Verify the chunk indexing type is correct
-# h5format_convert -d /DSET_EA h5fc_new.h5
-# h5format_convert -d /GROUP/DSET_NDATA_EA h5fc_new.h5
-# h5format_convert -d /GROUP/DSET_BT2 h5fc_new.h5
-# h5format_convert -d /DSET_NDATA_BT2 h5fc_new.h5
-# h5format_convert -d /DSET_FA h5fc_new.h5
-# h5format_convert -d /GROUP/DSET_FA h5fc_new.h5
-# h5format_convert -d /DSET_NONE h5fc_new.h5
-# h5format_convert -d /GROUP/DSET_NONE h5fc_new.h5
-TOOLTEST h5fc_new.h5 -d /DSET_EA
+# h5format_convert -d /DSET_EA h5fc_latest_v3.h5
+# h5format_convert -d /GROUP/DSET_NDATA_EA h5fc_latest_v3.h5
+# h5format_convert -d /GROUP/DSET_BT2 h5fc_latest_v3.h5
+# h5format_convert -d /DSET_NDATA_BT2 h5fc_latest_v3.h5
+# h5format_convert -d /DSET_FA h5fc_latest_v3.h5
+# h5format_convert -d /GROUP/DSET_FA h5fc_latest_v3.h5
+# h5format_convert -d /DSET_NONE h5fc_latest_v3.h5
+# h5format_convert -d /GROUP/DSET_NONE h5fc_latest_v3.h5
+TOOLTEST h5fc_latest_v3.h5 -d /DSET_EA
 IDX_CHECK /DSET_EA
 #
-TOOLTEST h5fc_new.h5 -d /GROUP/DSET_NDATA_EA
+TOOLTEST h5fc_latest_v3.h5 -d /GROUP/DSET_NDATA_EA
 IDX_CHECK /GROUP/DSET_NDATA_EA
 #
-TOOLTEST h5fc_new.h5 -d /GROUP/DSET_BT2
+TOOLTEST h5fc_latest_v3.h5 -d /GROUP/DSET_BT2
 IDX_CHECK /GROUP/DSET_BT2
 #
-TOOLTEST h5fc_new.h5 -d /DSET_NDATA_BT2
+TOOLTEST h5fc_latest_v3.h5 -d /DSET_NDATA_BT2
 IDX_CHECK /DSET_NDATA_BT2
 #
-TOOLTEST h5fc_new.h5 -d /DSET_FA
+TOOLTEST h5fc_latest_v3.h5 -d /DSET_FA
 IDX_CHECK /DSET_FA
 #
-TOOLTEST h5fc_new.h5 -d /GROUP/DSET_NDATA_FA
+TOOLTEST h5fc_latest_v3.h5 -d /GROUP/DSET_NDATA_FA
 IDX_CHECK /GROUP/DSET_NDATA_FA
 #
-TOOLTEST h5fc_new.h5 -d /DSET_NONE
+TOOLTEST h5fc_latest_v3.h5 -d /DSET_NONE
 IDX_CHECK /DSET_NONE
 #
-TOOLTEST h5fc_new.h5 -d /GROUP/DSET_NDATA_NONE
+TOOLTEST h5fc_latest_v3.h5 -d /GROUP/DSET_NDATA_NONE
 IDX_CHECK /GROUP/DSET_NDATA_NONE
 #
 #
 #
 # No output from tests: just check exit code
-# h5format_convert -d /DSET_NDATA_BT1 h5fc_old.h5 (v1-btree dataset)
-# h5format_convert -d /GROUP/DSET_NON_CHUNKED h5fc_all.h5 (non-chunked dataset)
-TOOLTEST h5fc_old.h5 -d /DSET_NDATA_BT1
-TOOLTEST h5fc_all.h5 -d /GROUP/DSET_NON_CHUNKED
+# h5format_convert -d /DSET_NDATA_BT1 h5fc_v1.h5 (v1-btree dataset)
+# h5format_convert -d /GROUP/DSET_NON_CHUNKED h5fc_non_v3.h5 (non-chunked dataset)
+TOOLTEST h5fc_v1.h5 -d /DSET_NDATA_BT1
+TOOLTEST h5fc_non_v3.h5 -d /GROUP/DSET_NON_CHUNKED
 #
 #
 #
 # No output from tests: just check exit code
-# h5format_convert -d /GROUP/DSET_BT2 -n h5fc_all.h5 (noop, one dataset)
-# h5format_convert -n h5fc_all.h5 (noop, all datasets)
-TOOLTEST h5fc_all.h5 -d /GROUP/DSET_BT2 -n
-TOOLTEST h5fc_all.h5 -n
+# h5format_convert -d /GROUP/DSET_BT2 -n h5fc_non_v3.h5 (noop, one dataset)
+# h5format_convert -n h5fc_non_v3.h5 (noop, all datasets)
+TOOLTEST h5fc_non_v3.h5 -d /GROUP/DSET_BT2 -n
+TOOLTEST h5fc_non_v3.h5 -n
 #
 #
 #
 # No output from tests: just check exit code
-# h5format_convert h5fc_all.h5
+# h5format_convert h5fc_non_v3.h5
 # 1) convert all datasets 
 # 2) verify indexing types
-TOOLTEST h5fc_all.h5
-IDX_CHECK /DSET_NDATA_BT1
+TOOLTEST h5fc_non_v3.h5
 IDX_CHECK /DSET_NDATA_EA
-IDX_CHECK /GROUP/DSET_BT1
+IDX_CHECK /DSET_NDATA_BT2
 IDX_CHECK /GROUP/DSET_BT2
+IDX_CHECK /GROUP/DSET_EA
 #
 #
 #
 # No output from test: just check exit code
-# h5format_convert h5fc_edge.h5
+# h5format_convert h5fc_edge_v3.h5
 # 1) convert the chunked dataset (filter, no-filter-edge-chunk)
 # 2) verify the indexing type
-TOOLTEST h5fc_edge.h5
+TOOLTEST h5fc_edge_v3.h5
 IDX_CHECK /DSET_EDGE
 #
 #

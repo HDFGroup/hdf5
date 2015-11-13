@@ -208,7 +208,7 @@ H5G__obj_create_real(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
 
     /* Check for using the latest version of the group format */
     /* (add more checks for creating "new format" groups when needed) */
-    if(H5F_USE_LATEST_FORMAT(f) || linfo->track_corder
+    if(H5F_USE_LATEST_FLAGS(f, H5F_LATEST_STYLE_GROUP) || linfo->track_corder
             || (pline && pline->nused))
         use_latest_format = TRUE;
     else

@@ -223,7 +223,7 @@ do
 
         # Launch the Generator
         echo launch the swmr_generator
-        ./swmr_generator $compress $index_type
+        ./swmr_generator -s $compress $index_type
         if test $? -ne 0; then
             echo generator had error
             nerrors=`expr $nerrors + 1`
@@ -234,7 +234,7 @@ do
         # Launch the Writer
         echo launch the swmr_writer
         seed="" # Put -r <random seed> command here
-        ./swmr_writer $Nrecords $seed &
+        ./swmr_writer -o $Nrecords $seed &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 	#
@@ -292,7 +292,7 @@ do
         # Launch the Remove Writer
         echo launch the swmr_remove_writer
         seed="" # Put -r <random seed> command here
-        ./swmr_remove_writer $Nrecs_rem $seed &
+        ./swmr_remove_writer -o $Nrecs_rem $seed &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 	#

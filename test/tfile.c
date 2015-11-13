@@ -3411,7 +3411,7 @@ test_libver_bounds(void)
 
     /* Run the tests */
     test_libver_bounds_real(H5F_LIBVER_EARLIEST, 1, H5F_LIBVER_LATEST, 2);
-    test_libver_bounds_real(H5F_LIBVER_LATEST, 2, H5F_LIBVER_EARLIEST, 1);
+    test_libver_bounds_real(H5F_LIBVER_LATEST, 2, H5F_LIBVER_EARLIEST, 2);
 } /* end test_libver_bounds() */
 
 /****************************************************************

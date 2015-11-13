@@ -102,9 +102,11 @@ gen_skeleton(const char *filename, unsigned verbose, unsigned swmr_write,
     if((fapl = h5_fileaccess()) < 0)
         return -1;
 
-    /* We ALWAYS select the latest file format for SWMR */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        return -1;
+    /* Can create a file for SWMR support with: (a) (write+latest-format) or (b) (SWMR write+non-latest-format) */
+    if(!swmr_write) {
+	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+	    return -1;
+    }
 
     /* There are two chunk indexes tested here.
      * With one unlimited dimension, we get the extensible array index

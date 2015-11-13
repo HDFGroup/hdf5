@@ -1278,10 +1278,10 @@
 ./tools/h5format_convert/testfiles/h5fc_nooption.ddl
 ./tools/h5format_convert/testfiles/h5fc_v_n_1d.ddl
 ./tools/h5format_convert/testfiles/h5fc_nonexistfile.ddl
-./tools/h5format_convert/testfiles/h5fc_old.h5
-./tools/h5format_convert/testfiles/h5fc_new.h5
-./tools/h5format_convert/testfiles/h5fc_all.h5
-./tools/h5format_convert/testfiles/h5fc_edge.h5
+./tools/h5format_convert/testfiles/h5fc_non_v3.h5
+./tools/h5format_convert/testfiles/h5fc_latest_v3.h5
+./tools/h5format_convert/testfiles/h5fc_edge_v3.h5
+./tools/h5format_convert/testfiles/h5fc_v1.h5
 ./tools/h5format_convert/testh5fc.sh.in
 
 # h5repack sources
