@@ -13,6 +13,12 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* NOTE!
+ *
+ * If you make any changes to H5LTanalyze.l, please run bin/genparser to
+ * recreate the output files.
+ */
+
 %{
 #include <stdlib.h>
 #include <string.h>
