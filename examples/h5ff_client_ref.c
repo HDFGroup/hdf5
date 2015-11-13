@@ -32,6 +32,7 @@ int main(int argc, char **argv) {
     char str_data[128];
     const unsigned int nelem=60;
     hsize_t dims[1];
+    hsize_t start[1], count[1];
 
     int my_rank, my_size;
     int provided;
@@ -202,7 +203,6 @@ int main(int argc, char **argv) {
     /* test creating internal references */
     {
         href_ff_t ref1, ref2, ref3, ref4, ref5, ref6;
-        hsize_t start[1], count[1];
         hid_t dspace_region;
         H5O_type_t obj_type;
 
@@ -210,11 +210,27 @@ int main(int argc, char **argv) {
         assert(ret == 0);
         ret = H5Rprint_ref(&ref1);
         assert(ret == 0);
+        {
+            hid_t obj_id;
+
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &ref1, rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            ret = H5Gclose(obj_id);
+            assert(ret == 0);
+        }
 
         ret = H5Rcreate_object_ff(&ref2, map1, ".", H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
         assert(ret == 0);
         ret = H5Rprint_ref(&ref2);
         assert(ret == 0);
+        {
+            hid_t obj_id;
+
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &ref2, rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Mclose_ff(obj_id, H5_EVENT_STACK_NULL);
+            assert(ret == 0);
+        }
 
         start[0] = 10;
         count[0] = 30;
@@ -224,6 +240,15 @@ int main(int argc, char **argv) {
         assert(ret == 0);
         ret = H5Rprint_ref(&ref3);
         assert(ret == 0);
+        assert(ret == 0);
+        {
+            hid_t obj_id;
+
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &ref3, rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Dclose(obj_id);
+            assert(ret == 0);
+        }
 
         ret = H5Rcreate_attr_ff(&ref4, map1, ".", "Temperature", H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
         assert(ret == 0);
@@ -237,6 +262,15 @@ int main(int argc, char **argv) {
         assert(ret == 0);
         ret = H5Rprint_ref(&ref6);
         assert(ret == 0);
+        assert(ret == 0);
+        {
+            hid_t obj_id;
+
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &ref6, rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Tclose(obj_id);
+            assert(ret == 0);
+        }
 
         H5E_BEGIN_TRY {
             dspace_region = H5Rget_region_ff(&ref1);
@@ -293,7 +327,6 @@ int main(int argc, char **argv) {
     {
         href_ff_t ref1, ref2, ref3;
         hid_t dspace_region;
-        hsize_t start[1], count[1];
         H5O_type_t obj_type;
         char fname[1024], pname[1024];
 
@@ -364,14 +397,44 @@ int main(int argc, char **argv) {
         assert(ret == 0);
     }
 
+#if 0
     if(0 == my_rank) {
-        /* release container version 2. This is async. */
-        ret = H5RCrelease(rid2, e_stack);
+        hid_t did_obj, did_ref;
+
+        /* create transaction object */
+        tid2 = H5TRcreate(file_id, rid2, (uint64_t)3);
+        assert(tid2);
+        ret = H5TRstart(tid2, H5P_DEFAULT, e_stack);
+        assert(0 == ret);
+
+        /* create dataset D_OBJ */
+        did_obj = H5Dcreate_ff(file_id, "D_OBJ", H5T_STD_REF_OBJ, sid, H5P_DEFAULT, 
+                               H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
+        assert(did_obj > 0);
+
+        /* create dataset D_REG */
+        did_ref = H5Dcreate_ff(file_id, "D_REG", H5T_STD_REF_DSETREG, sid, H5P_DEFAULT, 
+                               H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
+        assert(did_ref > 0);
+
+        start[0] = 10;
+        count[0] = 30;
+        ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, NULL);
+        assert(ret == 0);
+
+        /* make this synchronous so we know the container version has been acquired */
+        ret = H5TRfinish(tid2, H5P_DEFAULT, &rid3, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
         ret = H5RCclose(rid1);
         assert(0 == ret);
         ret = H5RCclose(rid2);
+        assert(0 == ret);
+    }
+#endif 
+    if(0 == my_rank) {
+        /* release container version 2. This is async. */
+        ret = H5RCrelease(rid2, e_stack);
         assert(0 == ret);
     }
 
@@ -381,6 +444,9 @@ int main(int argc, char **argv) {
     assert(ret == 0);
     ret = H5Pclose(fapl_id);
     assert(ret == 0);
+
+
+
 
     H5Fclose_ff(file_id, 1, H5_EVENT_STACK_NULL);
 

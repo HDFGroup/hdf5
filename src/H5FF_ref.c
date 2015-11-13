@@ -93,7 +93,6 @@ H5Rcreate_object_ff(href_ff_t *ref, hid_t loc_id, const char *name, hid_t lapl_i
 
     /* Need to open the object if a path to it is given */
     if(strcmp(name, ".")) {
-        printf("Object %s not location object, so We need to open it.\n", name);
         loc_params.type = H5VL_OBJECT_BY_NAME;
         loc_params.loc_data.loc_by_name.name = name;
         loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
@@ -114,7 +113,6 @@ H5Rcreate_object_ff(href_ff_t *ref, hid_t loc_id, const char *name, hid_t lapl_i
         obj_opened = TRUE;
     }
     else {
-        printf("path is %s. Location object already open.\n", name);
         opened_obj = (H5VL_object_t *)obj->vol_obj;
     }
 
@@ -222,7 +220,6 @@ herr_t H5Rcreate_region_ff(href_ff_t *ref, hid_t loc_id, const char *name, hid_t
 
     /* Need to open the object if a path to it is given */
     if(strcmp(name, ".")) {
-        printf("Object %s not location object, so We need to open it.\n", name);
         loc_params.type = H5VL_OBJECT_BY_NAME;
         loc_params.loc_data.loc_by_name.name = name;
         loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
@@ -315,7 +312,6 @@ herr_t H5Rcreate_attr_ff(href_ff_t *ref, hid_t loc_id, const char *name, const c
 
     /* Need to open the object if a path to it is given */
     if(strcmp(name, ".")) {
-        printf("Object %s not location object, so We need to open it.\n", name);
         loc_params.type = H5VL_OBJECT_BY_NAME;
         loc_params.loc_data.loc_by_name.name = name;
         loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
@@ -526,7 +522,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Rcreate_attr_ext_ff */
 
-#if 0
 
 /*-------------------------------------------------------------------------
  * Function:	H5Rdereference_ff
@@ -541,16 +536,123 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hid_t  H5Rdereference_ff(hid_t loc_id, hid_t oapl_id, const href_ff_t *ref, 
-                         hid_t rcxt_id, hid_t estack_id)
+hid_t H5Rdereference_ff(hid_t loc_id, hid_t H5_ATTR_UNUSED oapl_id, const href_ff_t *ref, 
+                        hid_t rcxt_id, hid_t estack_id)
 {
-    hid_t    ret_value;              /* Return value */
+    const uint8_t *p;
+    char *pathname = NULL;
+    H5VL_object_t *obj = NULL;
+    hid_t ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(ref == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
+    if(ref->buf == NULL || ref->buf_size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference")
+
+    /* get the object */
+    if(NULL == (obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object/file identifier")
+
+    p = (uint8_t *)ref->buf;
+
+    if(ref->ref_type == H5R_OBJECT || ref->ref_type == H5R_DATASET_REGION || 
+       ref->ref_type == H5R_ATTR) {
+        size_t token_size;
+        H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
+        void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
+        H5I_type_t opened_type;
+        void  *opened_obj = NULL;
+        H5TR_t tr;
+        H5RC_t *rc;
+
+        /* get the RC object */
+        if(NULL == (rc = (H5RC_t *)H5I_object_verify(rcxt_id, H5I_RC)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a READ CONTEXT ID")
+
+        if(estack_id != H5_EVENT_STACK_NULL) {
+            /* create the private request */
+            if(NULL == (request = (H5_priv_request_t *)H5MM_calloc(sizeof(H5_priv_request_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed");
+            req = &request->req;
+            request->vol_cls = rc->vol_cls;
+        }
+
+        UINT64DECODE(p, token_size);
+
+        /* create the dummy TR object */
+        tr.file = rc->file;
+        tr.trans_num = rc->c_version;
+        tr.req_info.request = NULL;
+        tr.req_info.head = NULL;
+        tr.req_info.tail = NULL;
+        tr.req_info.num_req = 0;
+
+        if(NULL == (opened_obj = H5VL_iod_obj_open_token((const void *)p, &tr, &opened_type, req)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to open object");
+
+        if(request && *req)
+            if(H5ES_insert(estack_id, request) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to insert request in event stack")
+
+        /* create hid_t for opened object */
+        if((ret_value = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle");
+
+    }
+    else if(ref->ref_type == H5R_OBJECT_EXT || ref->ref_type == H5R_DATASET_REGION_EXT || 
+            ref->ref_type == H5R_ATTR_EXT) {
+        size_t name_size;
+        hid_t lapl_id = H5P_LINK_ACCESS_DEFAULT;
+        hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT;
+        H5P_genplist_t *plist;
+        H5I_type_t opened_type;
+        H5VL_object_t *opened_obj = NULL;
+        H5VL_loc_params_t loc_params;
+
+        /* retrieve the pathname of the object to dereference */
+        p = (uint8_t *)ref->buf;
+
+        UINT64DECODE(p, name_size);
+        p += name_size;
+        UINT64DECODE(p, name_size);
+        pathname = (char *)HDmalloc(name_size);
+        HDmemcpy(pathname, p, name_size);
+        pathname[name_size] = '\0';
+
+        loc_params.type = H5VL_OBJECT_BY_NAME;
+        loc_params.loc_data.loc_by_name.name = pathname;
+        loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+        loc_params.obj_type = H5I_get_type(loc_id);
+
+        /* store the transaction ID in the dxpl */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
+        /* Open the object through the VOL */
+        if(NULL == (opened_obj = (H5VL_object_t *)H5VL_object_open(obj->vol_obj, loc_params, 
+                                                                   obj->vol_info->vol_cls, &opened_type, 
+                                                                   dxpl_id, H5_REQUEST_NULL)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+        if((ret_value = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
+    }
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type");
 
 done:
+    if(pathname) {
+        HDfree(pathname);
+        pathname = NULL;
+    }
     FUNC_LEAVE_API(ret_value)
 } /* H5Rdereference_ff */
 
-#endif
 
 
 /*-------------------------------------------------------------------------
