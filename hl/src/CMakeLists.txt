@@ -37,11 +37,6 @@ set_target_properties (${HDF5_HL_LIB_TARGET} PROPERTIES
 )
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_LIB_TARGET}")
 set (install_targets ${HDF5_HL_LIB_TARGET})
-if (HDF5_GENERATE_HEADERS)
-  add_dependencies(${HDF5_HL_LIB_TARGET} process_gen_H5LT)
-else (HDF5_GENERATE_HEADERS)
-  add_dependencies(${HDF5_HL_LIB_TARGET} "${HDF5_HL_SRC_SOURCE_DIR}/H5LTanalyze.c;${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.c")
-endif (HDF5_GENERATE_HEADERS)
 
 if (BUILD_SHARED_LIBS)
   add_library (${HDF5_HL_LIBSH_TARGET} SHARED ${HL_SRCS} ${HL_HEADERS})
@@ -56,11 +51,6 @@ if (BUILD_SHARED_LIBS)
   )
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_LIBSH_TARGET}")
   set (install_targets ${install_targets} ${HDF5_HL_LIBSH_TARGET})
-  if (HDF5_GENERATE_HEADERS)
-    add_dependencies(${HDF5_HL_LIBSH_TARGET} process_gen_H5LT)
-  else (HDF5_GENERATE_HEADERS)
-    add_dependencies(${HDF5_HL_LIBSH_TARGET} "${HDF5_HL_SRC_SOURCE_DIR}/H5LTanalyze.c;${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.c")
-  endif (HDF5_GENERATE_HEADERS)
 endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
