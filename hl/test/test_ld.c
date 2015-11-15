@@ -85,34 +85,6 @@ int two_tests[TWO_NTESTS][2] = { {2,2},  {2,-1},  {2,0},
 #define TMP_BUF_SIZE		2048
 char  g_tmp_buf[TMP_BUF_SIZE];
 
-/* Copy srcfile to dstfile */
-#define COPY_FILE(srcfile, dstfile)						\
-{										\
-    int src_fd = (-1); 		/* Descriptor for input file */			\
-    int dst_fd = (-1);		/* Descriptor for output file */		\
-    ssize_t nread;		/* Number of bytes read in */			\
-										\
-    HDmemset(g_tmp_buf, 0, sizeof(g_tmp_buf));					\
-										\
-    /* Open srcfile */								\
-    if((src_fd = HDopen(srcfile, O_RDONLY, 0666)) < 0)				\
-	TEST_ERROR;								\
-										\
-    /* Open dstfile */								\
-    if((dst_fd = HDopen(dstfile, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0) 		\
-	TEST_ERROR;								\
-										\
-    /* Copy data from srcfile to dstfile */					\
-    while((nread = HDread(src_fd, g_tmp_buf, (size_t)TMP_BUF_SIZE)) > 0) {	\
-        if(HDwrite(dst_fd, g_tmp_buf, (size_t)nread) < nread)			\
-	    TEST_ERROR;								\
-    }										\
-										\
-    /* Close files */								\
-    if(HDclose(src_fd) < 0) TEST_ERROR;						\
-    if(HDclose(dst_fd) < 0) TEST_ERROR;						\
-}
-
 /* Macros for verifying compound fields */
 /* Verify all fields */
 #define VERIFY_ELMTS_ALL(ent1, ent2)  {			\
@@ -148,27 +120,27 @@ char  g_tmp_buf[TMP_BUF_SIZE];
 #define TWO_CMPD_VALID1         2       /* DSET_CMPD_TWO with VALID_FIELDS1 or VALID_ESC_FIELDS1 */
 #define TWO_CMPD_VALID2         3       /* DSET_CMPD_TWO with VALID_FIELDS2 or VALID_ESC_FIELDS2 */
 
-#define VERIFY_ELMTS(type, _ldbuf, _buf) {				\
+#define VERIFY_ELMTS(type, k, ind, _ldbuf, _buf) {			\
     if(type == TWO_NONE) {						\
 	int *iib = (int *)_ldbuf;					\
-	int *ib = (int *)_buf;					\
+	int *ib = (int *)_buf;						\
 									\
-	VERIFY_EQUAL(iib[k], ib[ind+n])				\
+	VERIFY_EQUAL(iib[k], ib[ind + n])				\
     } else if(type == TWO_CMPD_NULL) {					\
 	set_t *ccb = (set_t *)_ldbuf;					\
 	set_t *cb = (set_t *)_buf;					\
 									\
-	VERIFY_ELMTS_ALL(ccb[k], cb[ind+n])				\
+	VERIFY_ELMTS_ALL(ccb[k], cb[ind + n])				\
     } else if(type == TWO_CMPD_VALID1) {				\
-	test_valid_fields1 *vb1 = (test_valid_fields1 *)_ldbuf;	\
+	test_valid_fields1 *vb1 = (test_valid_fields1 *)_ldbuf;		\
 	set_t *cb = (set_t *)_buf;					\
 									\
-	VERIFY_ELMTS_VALID1(vb1[k], cb[ind+n])			\
+	VERIFY_ELMTS_VALID1(vb1[k], cb[ind + n])			\
     } else if(type == TWO_CMPD_VALID2) {				\
-	test_valid_fields2 *vb2 = (test_valid_fields2 *)_ldbuf;	\
+	test_valid_fields2 *vb2 = (test_valid_fields2 *)_ldbuf;		\
 	set_t *cb = (set_t *)_buf;					\
 									\
-	VERIFY_ELMTS_VALID2(vb2[k], cb[ind+n])			\
+	VERIFY_ELMTS_VALID2(vb2[k], cb[ind + n])			\
     }									\
 }
 
@@ -249,6 +221,7 @@ set_t *ccbuf;			/* buffer for storing retrieved elemnets (compound) */
 test_valid_fields1 *vbuf1;	/* buffer for storing retrieved elements (FIELDS1) */
 test_valid_fields2 *vbuf2;	/* buffer for storing retrieved elements (FIELDS2) */
 
+
 /* 
  *********************************************************************************
  *
@@ -297,7 +270,8 @@ test_LD_dims_params(const char *file)
 	ret = H5LDget_dset_dims(did, NULL);
     } H5E_END_TRY;
     VERIFY_EQUAL(ret, FAIL)
-    H5Dclose(did);
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR
 
     /* 
      * 3. Verify for nonNULL cur_dims
@@ -307,7 +281,8 @@ test_LD_dims_params(const char *file)
     if(H5LDget_dset_dims(did, one_cur_dims) < 0)
 	FAIL_STACK_ERROR
     VERIFY_EQUAL(one_cur_dims[0], 10)
-    H5Dclose(did);
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR
 
     /* 
      * 4. Verify nonNULL cur_dims for a 2-dimensional dataset
@@ -318,7 +293,8 @@ test_LD_dims_params(const char *file)
 	FAIL_STACK_ERROR
     VERIFY_EQUAL(two_cur_dims[0], TWO_DIM_1)
     VERIFY_EQUAL(two_cur_dims[1], TWO_DIM_2)
-    H5Dclose(did);
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR
 
     /* 
      * 5. Verify nonNULL cur_dims for dataset with H5S_NULL dataspace
@@ -331,7 +307,8 @@ test_LD_dims_params(const char *file)
     if(H5LDget_dset_dims(did, one_cur_dims) < 0)
 	FAIL_STACK_ERROR
     VERIFY_EQUAL(one_cur_dims[0], 0)
-    H5Dclose(did);
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR
 
     /* 
      * 6. Verify nonNULL cur_dims for dataset with H5S_SCALAR dataspace
@@ -344,7 +321,8 @@ test_LD_dims_params(const char *file)
     if(H5LDget_dset_dims(did, one_cur_dims) < 0)
 	FAIL_STACK_ERROR
     VERIFY_EQUAL(one_cur_dims[0], 0)
-    H5Dclose(did);
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
@@ -358,10 +336,11 @@ error:
 	H5Dclose(did);
 	H5Fclose(fid);
     } H5E_END_TRY;
-    return(-1);
 
+    return(-1);
 } /* test_LD_dims_params() */
 
+
 /* 
  *********************************************************************************
  *
@@ -404,20 +383,19 @@ test_LD_dims(const char *file)
 {
     hid_t fid=-1;		/* file identifier */
     hid_t did=-1;		/* dataset identifier */
-    int i;			/* local index variable */
     hsize_t one_prev_dims[1];	/* original dimension sizes for 1-dimensonal dataset */
     hsize_t one_cur_dims[1];	/* current dimension sizes for 1-dimensonal dataset */
     hsize_t one_ext_dims[1];	/* extended dimension sizes for 1-dimensonal dataset */
     hsize_t two_prev_dims[2];	/* original dimension sizes for 2-dimensional dataset */
     hsize_t two_cur_dims[2];	/* current dimension sizes for 2-dimensional dataset */
     hsize_t two_ext_dims[2];	/* extended dimension sizes for 2-dimensional dataset*/
-
-    const char *filename = H5_get_srcdir_filename(file);
+    int i;			/* local index variable */
 
     TESTING("H5LDget_dset_dims with H5Dset_extent");
 
     /* Make a copy of the test file */
-    COPY_FILE(filename, COPY_FILENAME)
+    if(h5_make_local_copy(file, COPY_FILENAME) < 0)
+        TEST_ERROR
 
     /* Open the copied file */
     if((fid = H5Fopen(COPY_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
@@ -506,6 +484,7 @@ error:
 
 } /* test_LD_dims() */
 
+
 /* 
  **********************************************************************************
  *
@@ -612,7 +591,8 @@ test_LD_size(const char *file)
 	FAIL_STACK_ERROR
     if((ck_dsize += H5Tget_size(memb_tid)) == 0)
 	FAIL_STACK_ERROR
-    H5Tclose(memb_tid);
+    if(H5Tclose(memb_tid) < 0)
+	FAIL_STACK_ERROR
 
     /* Add the datatype size for "field3" */
     if((ck_dsize += H5Tget_size(memb2_tid)) == 0)
@@ -636,22 +616,26 @@ test_LD_size(const char *file)
 	FAIL_STACK_ERROR
     if((ck_dsize = H5Tget_size(memb_tid2)) == 0)
 	FAIL_STACK_ERROR
-    H5Tclose(memb_tid);
-    H5Tclose(memb_tid2);
+    if(H5Tclose(memb_tid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Tclose(memb_tid2) < 0)
+	FAIL_STACK_ERROR
 
     /* Add the datatype size for "field2.c" */
     if((memb_tid = H5Tget_member_type(memb1_tid, 2)) < 0)
 	FAIL_STACK_ERROR
     if((ck_dsize += H5Tget_size(memb_tid)) == 0)
 	FAIL_STACK_ERROR
-    H5Tclose(memb_tid);
+    if(H5Tclose(memb_tid) < 0)
+	FAIL_STACK_ERROR
 
     /* Add the datatype size for "field4.b" */
     if((memb_tid = H5Tget_member_type(memb3_tid, 1)) < 0)
 	FAIL_STACK_ERROR
     if((ck_dsize += H5Tget_size(memb_tid)) == 0)
 	FAIL_STACK_ERROR
-    H5Tclose(memb_tid);
+    if(H5Tclose(memb_tid) < 0)
+	FAIL_STACK_ERROR
 
     /* Verify case #3 */
     VERIFY_EQUAL(dsize, ck_dsize)
@@ -675,12 +659,18 @@ test_LD_size(const char *file)
     VERIFY_EQUAL(dsize, 0)
     
     /* Closing */
-    H5Tclose(memb0_tid);
-    H5Tclose(memb1_tid);
-    H5Tclose(memb2_tid);
-    H5Tclose(memb3_tid);
-    H5Tclose(dtid);
-    H5Dclose(did);
+    if(H5Tclose(memb0_tid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Tclose(memb1_tid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Tclose(memb2_tid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Tclose(memb3_tid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Tclose(dtid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR
 
     /* 
      * Testing one-dimensional dataset with compound datatype and
@@ -728,7 +718,8 @@ test_LD_size(const char *file)
 	FAIL_STACK_ERROR
     if((ck_dsize += H5Tget_size(memb_tid)) == 0)
 	FAIL_STACK_ERROR
-    H5Tclose(memb_tid);
+    if(H5Tclose(memb_tid) < 0)
+	FAIL_STACK_ERROR
 
     /* Add the datatype size for "field\\\\3" */
     if((ck_dsize += H5Tget_size(memb2_tid)) == 0)
@@ -753,22 +744,26 @@ test_LD_size(const char *file)
 	FAIL_STACK_ERROR
     if((ck_dsize = H5Tget_size(memb_tid2)) == 0)
 	FAIL_STACK_ERROR
-    H5Tclose(memb_tid);
-    H5Tclose(memb_tid2);
+    if(H5Tclose(memb_tid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Tclose(memb_tid2) < 0)
+	FAIL_STACK_ERROR
 
     /* Add the datatype size for "field2\..\\c" */
     if((memb_tid = H5Tget_member_type(memb1_tid, 2)) < 0)
 	FAIL_STACK_ERROR
     if((ck_dsize += H5Tget_size(memb_tid)) == 0)
 	FAIL_STACK_ERROR
-    H5Tclose(memb_tid);
+    if(H5Tclose(memb_tid) < 0)
+	FAIL_STACK_ERROR
 
     /* Add the datatype size for "field4\,.b\," */
     if((memb_tid = H5Tget_member_type(memb3_tid, 1)) < 0)
 	FAIL_STACK_ERROR
     if((ck_dsize += H5Tget_size(memb_tid)) == 0)
 	FAIL_STACK_ERROR
-    H5Tclose(memb_tid);
+    if(H5Tclose(memb_tid) < 0)
+	FAIL_STACK_ERROR
 
     /* Verify case #3 */
     VERIFY_EQUAL(dsize, ck_dsize)
@@ -792,14 +787,21 @@ test_LD_size(const char *file)
     VERIFY_EQUAL(dsize, 0)
 
     /* Closing */
-    H5Tclose(memb0_tid);
-    H5Tclose(memb1_tid);
-    H5Tclose(memb2_tid);
-    H5Tclose(memb3_tid);
-    H5Tclose(dtid);
-    H5Dclose(did);
+    if(H5Tclose(memb0_tid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Tclose(memb1_tid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Tclose(memb2_tid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Tclose(memb3_tid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Tclose(dtid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR
 
-    H5Fclose(fid);
+    if(H5Fclose(fid) < 0)
+	FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -820,6 +822,7 @@ error:
 
 } /* test_LD_size() */
 
+
 /* 
  **************************************************************************************
  * Testing for the High Level public routine: H5LDget_dset_elmts()
@@ -908,7 +911,8 @@ test_LD_elmts_invalid(const char *file)
     VERIFY_EQUAL(ret, FAIL)
 
     /* Close DSET_TWO */
-    H5Dclose(did);
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR
 
     /* 
      * Testing one-dimensional dataset with compound datatype:
@@ -937,10 +941,12 @@ test_LD_elmts_invalid(const char *file)
     VERIFY_EQUAL(ret, FAIL)
 
     /* Close DSET_CMPD */
-    H5Dclose(did);
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR
 
     /* Close the file */
-    H5Fclose(fid);
+    if(H5Fclose(fid) < 0)
+	FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -955,7 +961,7 @@ error:
 
 } /* test_LD_elmts_invalid() */
 
-
+
 /* 
  **************************************************************************************
  * Testing for the High Level public routine: H5LDget_dset_elmts()
@@ -986,14 +992,13 @@ test_LD_elmts_one(const char *file, const char *dname, const char *fields)
     int i, j;			/* local index variable */
     int ret = 0;		/* return value */
 
-    const char *filename = H5_get_srcdir_filename(file);
-
     TESTING("H5LDget_dset_elmts: one-dimensional dataset");
 
     /* Copy the test file */
-    COPY_FILE(filename, COPY_FILENAME)
+    if(h5_make_local_copy(file, COPY_FILENAME) < 0)
+        TEST_ERROR
 
-    for (i = 0; i < TEST_BUF_SIZE; i++) {
+    for(i = 0; i < TEST_BUF_SIZE; i++) {
 	cbuf[i].field1 = i;
 	cbuf[i].field2.a = i;
 	cbuf[i].field2.b.a = i;
@@ -1004,7 +1009,7 @@ test_LD_elmts_one(const char *file, const char *dname, const char *fields)
 	cbuf[i].field4.a = i;
 	cbuf[i].field4.b = i;
 	ibuf[i] = i;
-    }
+    } /* end for */
 
     /* Open the copied file */
     if((fid = H5Fopen(COPY_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
@@ -1039,64 +1044,63 @@ test_LD_elmts_one(const char *file, const char *dname, const char *fields)
 	if(!HDstrcmp(dname, DSET_CMPD) || !HDstrcmp(dname, DSET_CMPD_ESC)) {
 	    if(H5Dwrite(did, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, cbuf) < 0)
 		FAIL_STACK_ERROR
-
-	} else if(!HDstrcmp(dname, DSET_ONE)) {
+	} /* end if */
+        else if(!HDstrcmp(dname, DSET_ONE)) {
 	    if(H5Dwrite(did, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf) < 0)
 		FAIL_STACK_ERROR
-	}
+	} /* end if */
 
 	/* There are changes in dimension sizes */
 	if(one_tests[i] > 0) {
-
 	    if(!HDstrcmp(dname, DSET_CMPD) || !HDstrcmp(dname, DSET_CMPD_ESC)) {
-
-		if(fields && (!HDstrcmp(fields, VALID_FIELDS1) ||
-			      !HDstrcmp(fields, VALID_ESC_FIELDS1))) {
-
-		    /* Retrieve the elmemts in BUF */
-		    if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, vbuf1) < 0)
+		if(fields) {
+                    if(!HDstrcmp(fields, VALID_FIELDS1) || !HDstrcmp(fields, VALID_ESC_FIELDS1)) {
+                        /* Retrieve the elmemts in BUF */
+                        if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, vbuf1) < 0)
+                            TEST_ERROR
+                        for(j = 0; j < one_tests[i]; j++)
+                            VERIFY_ELMTS_VALID1(vbuf1[j], cbuf[prev_dims[0] + (hsize_t)j])
+                    } /* end if */
+                    else if(!HDstrcmp(fields, VALID_FIELDS2) || !HDstrcmp(fields, VALID_ESC_FIELDS2)) {
+                        /* Retrieve the elmemts in BUF */
+                        if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, vbuf2) < 0)
+                            TEST_ERROR
+                        for(j = 0; j < one_tests[i]; j++)
+                            VERIFY_ELMTS_VALID2(vbuf2[j], cbuf[prev_dims[0] + (hsize_t)j])
+                    } /* end else-if */
+                    else
 			TEST_ERROR
-		    for(j = 0; j < one_tests[i]; j++)
-			VERIFY_ELMTS_VALID1(vbuf1[j], cbuf[prev_dims[0] + (hsize_t)j])
-
-		} else if(fields && (!HDstrcmp(fields, VALID_FIELDS2) ||
-				     !HDstrcmp(fields, VALID_ESC_FIELDS2))) {
-
-		    /* Retrieve the elmemts in BUF */
-		    if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, vbuf2) < 0)
-			TEST_ERROR
-		    for(j = 0; j < one_tests[i]; j++)
-			VERIFY_ELMTS_VALID2(vbuf2[j], cbuf[prev_dims[0] + (hsize_t)j])
-
-		} else if(fields == NULL) {
-
+		} /* end if */
+                else {
 		    /* Retrieve the elmemts in BUF */
 		    if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, ccbuf) < 0)
 			TEST_ERROR
-
 		    for(j = 0; j < one_tests[i]; j++)
 			VERIFY_ELMTS_ALL(ccbuf[j], cbuf[prev_dims[0] + (hsize_t)j])
-		}
-	    } else {
-
+		} /* end else-if */
+	    } /* end if */
+            else {
 		/* Retrieve the elmemts in BUF */
 		if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, iibuf) < 0)
 		    TEST_ERROR
 		for(j = 0; j < one_tests[i]; j++)
 		    VERIFY_EQUAL(iibuf[j], ibuf[prev_dims[0] + (hsize_t)j])
-	    }
-	} else {
+	    } /* end else */
+	} /* end if */
+        else {
             /* Verify failure when changes between prev_dims and ext_dims are same/decrease */
             ret = H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, iibuf);
             VERIFY_EQUAL(ret, FAIL)
-        }
-
+        } /* end else */
     } /* end for */
 
     /* Closing */
-    H5Tclose(dtype);
-    H5Dclose(did);
-    H5Fclose(fid);
+    if(H5Tclose(dtype) < 0)
+        FAIL_STACK_ERROR
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
 
     /* Remove the copied file */
     HDremove(COPY_FILENAME);
@@ -1113,7 +1117,7 @@ error:
     return(-1);
 } /* test_LD_elmts_one() */
 
-
+
 /*
  **************************************************************************************
  *
@@ -1137,29 +1141,34 @@ error:
 static herr_t
 verify_elmts_two(int type, hsize_t *ext_dims, hsize_t *prev_dims,  void *_ldbuf, void *_buf)
 {
-    int k, m, n, ind;	/* Local index variable */
+    int k, m;		/* Local index variable */
 
     k = 0;							
     for(m = 0; m < (int)ext_dims[0]; m++) {
+        int n, ind;	/* Local index variable */
+
 	ind = m * (int)ext_dims[1];	
 	if(m < (int)prev_dims[0]) {
 	    for(n = (int)prev_dims[1]; n < (int)ext_dims[1]; n++) {
-		VERIFY_ELMTS(type, _ldbuf, _buf)
+		VERIFY_ELMTS(type, k, ind, _ldbuf, _buf)
 		++k;
-	    } 
-	} else {					
+	    }  /* end for */
+	} /* end if */
+        else {					
 	    for(n = 0; n < (int)ext_dims[1]; n++) {
-		VERIFY_ELMTS(type, _ldbuf, _buf)
+		VERIFY_ELMTS(type, k, ind, _ldbuf, _buf)
 		++k;
-	    }
-	}
+	    } /* end for */
+	} /* end else */
     } /* end for */
 
     return(0);
+
 error:
     return(-1);
 } /* verify_elmts_two() */
 
+
 /* 
  **************************************************************************************
  * Testing for the High Level public routine: H5LDget_dset_elmts()
@@ -1194,14 +1203,13 @@ test_LD_elmts_two(const char *file, const char *dname, const char *fields)
     int i;			/* local index variable */
     int ret = 0;		/* return value */
 
-    const char *filename = H5_get_srcdir_filename(file);
-
     TESTING("H5LDget_dset_elmts: two-dimensional dataset");
 
     /* Copy the test file */
-    COPY_FILE(filename, COPY_FILENAME)
+    if(h5_make_local_copy(file, COPY_FILENAME) < 0)
+        TEST_ERROR
 
-    for (i = 0; i < TEST_BUF_SIZE; i++) {
+    for(i = 0; i < TEST_BUF_SIZE; i++) {
 	cbuf[i].field1 = i;
 	cbuf[i].field2.a = i;
 	cbuf[i].field2.b.a = i;
@@ -1212,7 +1220,7 @@ test_LD_elmts_two(const char *file, const char *dname, const char *fields)
 	cbuf[i].field4.a = i;
 	cbuf[i].field4.b = i;
 	ibuf[i] = i;
-    }
+    } /* end for */
 
     /* Open the copied file */
     if((fid = H5Fopen(COPY_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
@@ -1248,66 +1256,65 @@ test_LD_elmts_two(const char *file, const char *dname, const char *fields)
 	if(!HDstrcmp(dname, DSET_CMPD_TWO)) {
 	    if(H5Dwrite(did, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, cbuf) < 0)
 		FAIL_STACK_ERROR
-
-	} else if(!HDstrcmp(dname, DSET_TWO)) {
+	} /* end if */
+        else if(!HDstrcmp(dname, DSET_TWO)) {
 	    if(H5Dwrite(did, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf) < 0)
 		FAIL_STACK_ERROR
-	}
+	} /* end else-if */
+        else
+            TEST_ERROR
 
 	/* There are changes in dimension sizes */
 	if(two_tests[i][0] > 0 || two_tests[i][1] > 0) {
-
 	    if(!HDstrcmp(dname, DSET_CMPD_TWO)) {
-
-		if(fields && (!HDstrcmp(fields, VALID_FIELDS1) ||
-			      !HDstrcmp(fields, VALID_ESC_FIELDS1))) {
-
-		    /* Retrieve the elmemts in BUF */
-		    if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, vbuf1) < 0)
-			TEST_ERROR
-
-		    if(verify_elmts_two(TWO_CMPD_VALID1, ext_dims, prev_dims, vbuf1, cbuf) < 0)
-			TEST_ERROR
-
-		} else if(fields && (!HDstrcmp(fields, VALID_FIELDS2) ||
-				     !HDstrcmp(fields, VALID_ESC_FIELDS2))) {
-
-		    /* Retrieve the elmemts in BUF */
-		    if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, vbuf2) < 0)
-			TEST_ERROR
-
-		    if(verify_elmts_two(TWO_CMPD_VALID2, ext_dims, prev_dims, vbuf2, cbuf) < 0)
-			TEST_ERROR
-
-		} else if(fields == NULL) {
-
+		if(fields) {
+                     if(!HDstrcmp(fields, VALID_FIELDS1) || !HDstrcmp(fields, VALID_ESC_FIELDS1)) {
+                        /* Retrieve the elmemts in BUF */
+                        if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, vbuf1) < 0)
+                            TEST_ERROR
+                        if(verify_elmts_two(TWO_CMPD_VALID1, ext_dims, prev_dims, vbuf1, cbuf) < 0)
+                            TEST_ERROR
+                    } /* end if */
+                    else if(!HDstrcmp(fields, VALID_FIELDS2) || !HDstrcmp(fields, VALID_ESC_FIELDS2)) {
+                        /* Retrieve the elmemts in BUF */
+                        if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, vbuf2) < 0)
+                            TEST_ERROR
+                        if(verify_elmts_two(TWO_CMPD_VALID2, ext_dims, prev_dims, vbuf2, cbuf) < 0)
+                            TEST_ERROR
+                    } /* end else-if */
+                    else
+                        TEST_ERROR
+		} /* end if */
+                else {
 		    /* Retrieve the elmemts in BUF */
 		    if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, ccbuf) < 0)
 			TEST_ERROR
-
 		    if(verify_elmts_two(TWO_CMPD_NULL, ext_dims, prev_dims, ccbuf, cbuf) < 0)
 			TEST_ERROR
-		}
-	    } else { /* DSET_TWO */
-
+		} /* end else */
+	    } /* end if */
+            else { /* DSET_TWO */
 		/* Retrieve the elmemts in BUF */
 		if(H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, iibuf) < 0)
 		    TEST_ERROR
-
     		if(verify_elmts_two(TWO_NONE, ext_dims, prev_dims, iibuf, ibuf) < 0)
 		    TEST_ERROR
-	    }
-	} else {
+	    } /* end else */
+	} /* end if */
+        else {
 	    /* Verify failure when changes between prev_dims and ext_dims are same/decrease */
 	    ret = H5LDget_dset_elmts(did, prev_dims, ext_dims, fields, iibuf);
 	    VERIFY_EQUAL(ret, FAIL)
-	}
+	} /* end else */
     } /* end for */
 
     /* Closing */
-    H5Tclose(dtype);
-    H5Dclose(did);
-    H5Fclose(fid);
+    if(H5Tclose(dtype) < 0)
+	FAIL_STACK_ERROR;
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR;
+    if(H5Fclose(fid) < 0)
+	FAIL_STACK_ERROR;
 
     /* Remove the copied file */
     HDremove(COPY_FILENAME);
@@ -1333,19 +1340,19 @@ int main(void)
     int  nerrors = 0;
 
     /* Set up temporary buffers for tests: test_LD_elmts_one() & test_LD_elmts_two() */
-    if((ibuf = (int *)HDmalloc(sizeof(int) * TEST_BUF_SIZE)) == NULL)
+    if(NULL == (ibuf = (int *)HDmalloc(sizeof(int) * TEST_BUF_SIZE)))
 	FAIL_STACK_ERROR;
-    if((iibuf = (int *)HDmalloc(sizeof(int) * TEST_BUF_SIZE)) == NULL)
-	FAIL_STACK_ERROR;
-
-    if((cbuf = (set_t *)HDmalloc(sizeof(set_t) * TEST_BUF_SIZE)) == NULL)
-	FAIL_STACK_ERROR;
-    if((ccbuf = (set_t *)HDmalloc(sizeof(set_t) * TEST_BUF_SIZE)) == NULL)
+    if(NULL == (iibuf = (int *)HDmalloc(sizeof(int) * TEST_BUF_SIZE)))
 	FAIL_STACK_ERROR;
 
-    if((vbuf1 = (test_valid_fields1 *)HDmalloc(sizeof(test_valid_fields1) * TEST_BUF_SIZE)) == NULL)
+    if(NULL == (cbuf = (set_t *)HDmalloc(sizeof(set_t) * TEST_BUF_SIZE)))
 	FAIL_STACK_ERROR;
-    if((vbuf2 = (test_valid_fields2 *)HDmalloc(sizeof(test_valid_fields2) * TEST_BUF_SIZE)) == NULL)
+    if(NULL == (ccbuf = (set_t *)HDmalloc(sizeof(set_t) * TEST_BUF_SIZE)))
+	FAIL_STACK_ERROR;
+
+    if(NULL == (vbuf1 = (test_valid_fields1 *)HDmalloc(sizeof(test_valid_fields1) * TEST_BUF_SIZE)))
+	FAIL_STACK_ERROR;
+    if(NULL == (vbuf2 = (test_valid_fields2 *)HDmalloc(sizeof(test_valid_fields2) * TEST_BUF_SIZE)))
 	FAIL_STACK_ERROR;
 
     /* 
@@ -1396,12 +1403,18 @@ int main(void)
     nerrors += test_LD_elmts_two(FILE, DSET_CMPD_TWO, VALID_FIELDS2);
 
     /* Free temporary buffers */
-    if(ibuf) HDfree(ibuf);
-    if(iibuf) HDfree(iibuf);
-    if(cbuf) HDfree(cbuf);
-    if(ccbuf) HDfree(ccbuf);
-    if(vbuf1) HDfree(vbuf1);
-    if(vbuf2) HDfree(vbuf2);
+    if(ibuf)
+        HDfree(ibuf);
+    if(iibuf)
+        HDfree(iibuf);
+    if(cbuf)
+        HDfree(cbuf);
+    if(ccbuf)
+        HDfree(ccbuf);
+    if(vbuf1)
+        HDfree(vbuf1);
+    if(vbuf2)
+        HDfree(vbuf2);
 
     /* check for errors */
     if(nerrors)
@@ -1414,3 +1427,4 @@ int main(void)
 error:
     return(1);
 } /* main() */
+
