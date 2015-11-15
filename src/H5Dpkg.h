@@ -262,7 +262,7 @@ typedef struct H5D_chk_idx_info_t {
 typedef struct H5D_chunk_rec_t {
     hsize_t	scaled[H5O_LAYOUT_NDIMS];	/* Logical offset to start */
     uint32_t	nbytes;				/* Size of stored data	*/
-    unsigned	filter_mask;			/* Excluded filters	*/
+    uint32_t	filter_mask;			/* Excluded filters	*/
     haddr_t     chunk_addr;                     /* Address of chunk in file */
 } H5D_chunk_rec_t;
 

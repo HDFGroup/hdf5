@@ -237,8 +237,8 @@ H5D_single_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
     HDassert(udata);
 
     /* Set the address for the chunk */
-    idx_info->storage->idx_addr = udata->chunk_block.offset;
     HDassert(H5F_addr_defined(udata->chunk_block.offset));
+    idx_info->storage->idx_addr = udata->chunk_block.offset;
 
     if(idx_info->pline->nused > 0) {
 	idx_info->storage->u.single.nbytes = udata->chunk_block.length;

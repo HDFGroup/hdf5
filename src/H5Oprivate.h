@@ -463,9 +463,9 @@ typedef struct H5O_storage_chunk_t {
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
     union {
         H5O_storage_chunk_btree_t btree;   /* Information for v1 B-tree index   */
-        H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
-        H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
 	H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */	
+        H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
+        H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
 	H5O_storage_chunk_single_filt_t single; /* Information for single chunk w/ filters index */
     } u;
 } H5O_storage_chunk_t;
