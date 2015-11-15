@@ -169,12 +169,12 @@ HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
 
     /* Encode object into ID */
     if(!hdr->tiny_len_extended) {
-        *id++ = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_TINY |
-                (enc_obj_size & H5HF_TINY_MASK_SHORT);
+        *id++ = (uint8_t)(H5HF_ID_VERS_CURR | H5HF_ID_TYPE_TINY |
+                (enc_obj_size & H5HF_TINY_MASK_SHORT));
     } /* end if */
     else {
-        *id++ = H5HF_ID_VERS_CURR | H5HF_ID_TYPE_TINY |
-                ((enc_obj_size & H5HF_TINY_MASK_EXT_1) >> 8);
+        *id++ = (uint8_t)(H5HF_ID_VERS_CURR | H5HF_ID_TYPE_TINY |
+                ((enc_obj_size & H5HF_TINY_MASK_EXT_1) >> 8));
         *id++ = enc_obj_size & H5HF_TINY_MASK_EXT_2;
     } /* end else */
     HDmemcpy(id, obj, obj_size);

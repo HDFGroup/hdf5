@@ -460,7 +460,7 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
     HDassert(dblock_size > 0);
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
-    HDassert((flags & (~H5AC__READ_ONLY_FLAG)) == 0);
+    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up parent info */
     udata.par_info.hdr = hdr;
@@ -543,7 +543,7 @@ H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off,
     HDassert(ret_did_protect);
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
-    HDassert((flags & (~H5AC__READ_ONLY_FLAG)) == 0);
+    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Look up row & column for object */
     if(H5HF_dtable_lookup(&hdr->man_dtable, obj_off, &row, &col) < 0)

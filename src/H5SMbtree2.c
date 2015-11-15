@@ -45,7 +45,7 @@
 /********************/
 
 /* v2 B-tree callbacks */
-static void *H5SM_bt2_crt_context(void *udata);
+static void *H5SM__bt2_crt_context(void *udata);
 static herr_t H5SM_bt2_dst_context(void *ctx);
 static herr_t H5SM_bt2_store(void *native, const void *udata);
 static herr_t H5SM_bt2_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
@@ -61,7 +61,7 @@ const H5B2_class_t H5SM_INDEX[1]={{   /* B-tree class information */
     H5B2_SOHM_INDEX_ID,               /* Type of B-tree */
     "H5B2_SOHM_INDEX_ID",             /* Name of B-tree class */
     sizeof(H5SM_sohm_t),              /* Size of native record */
-    H5SM_bt2_crt_context,             /* Create client callback context */
+    H5SM__bt2_crt_context,            /* Create client callback context */
     H5SM_bt2_dst_context,             /* Destroy client callback context */
     H5SM_bt2_store,                   /* Record storage callback */
     H5SM_message_compare,             /* Record comparison callback */
@@ -83,7 +83,7 @@ H5FL_DEFINE_STATIC(H5SM_bt2_ctx_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_bt2_crt_context
+ * Function:	H5SM__bt2_crt_context
  *
  * Purpose:	Create client callback context
  *
@@ -96,13 +96,13 @@ H5FL_DEFINE_STATIC(H5SM_bt2_ctx_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5SM_bt2_crt_context(void *_f)
+H5SM__bt2_crt_context(void *_f)
 {
     H5F_t *f = (H5F_t *)_f;     /* User data for building callback context */
     H5SM_bt2_ctx_t *ctx;        /* Callback context structure */
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -119,7 +119,7 @@ H5SM_bt2_crt_context(void *_f)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5SM_bt2_crt_context() */
+} /* H5SM__bt2_crt_context() */
 
 
 /*-------------------------------------------------------------------------

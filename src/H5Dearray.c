@@ -94,14 +94,11 @@ typedef struct H5D_earray_filt_elmt_t {
 /* Local Prototypes */
 /********************/
 /* Extensible array iterator callbacks */
-static int H5D_earray_idx_iterate_cb(hsize_t idx, const void *_elmt, void *_udata);
-static int H5D_earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
-
-/* Extensible Array iterator callbacks */
-static int H5D_earray_idx_iterate_cb(hsize_t idx, const void *_elmt, void *_udata);
+static int H5D__earray_idx_iterate_cb(hsize_t idx, const void *_elmt, void *_udata);
+static int H5D__earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /* Extensible array class callbacks for chunks w/o filters */
-static void *H5D_earray_crt_context(void *udata);
+static void *H5D__earray_crt_context(void *udata);
 static herr_t H5D_earray_dst_context(void *ctx);
 static herr_t H5D_earray_fill(void *nat_blk, size_t nelmts);
 static herr_t H5D_earray_encode(void *raw, const void *elmt, size_t nelmts, void *ctx);
@@ -126,7 +123,7 @@ static herr_t H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info,
 static herr_t H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D_earray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5D_t *dset);
+    H5D_chunk_ud_t *udata, const H5D_t *dset);
 static herr_t H5D_earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static herr_t H5D_earray_idx_resize(H5O_layout_chunk_t *layout);
@@ -154,21 +151,21 @@ static herr_t H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info);
 /* Extensible array indexed chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_EARRAY[1] = {{
     TRUE,                               /* Extensible array indices support SWMR access */
-    H5D_earray_idx_init,
-    H5D_earray_idx_create,
-    H5D_earray_idx_is_space_alloc,
-    H5D_earray_idx_insert_addr,
-    H5D_earray_idx_get_addr,
-    H5D_earray_idx_resize,
-    H5D_earray_idx_iterate,
-    H5D_earray_idx_remove,
-    H5D_earray_idx_delete,
-    H5D_earray_idx_copy_setup,
-    H5D_earray_idx_copy_shutdown,
-    H5D_earray_idx_size,
-    H5D_earray_idx_reset,
-    H5D_earray_idx_dump,
-    H5D_earray_idx_dest
+    H5D_earray_idx_init,                /* init */
+    H5D_earray_idx_create,              /* create */
+    H5D_earray_idx_is_space_alloc,      /* is_space_alloc */
+    H5D_earray_idx_insert_addr,         /* insert */
+    H5D_earray_idx_get_addr,            /* get_addr */
+    H5D_earray_idx_resize,              /* resize */
+    H5D_earray_idx_iterate,             /* iterate */
+    H5D_earray_idx_remove,              /* remove */
+    H5D_earray_idx_delete,              /* delete */
+    H5D_earray_idx_copy_setup,          /* copy_setup */
+    H5D_earray_idx_copy_shutdown,       /* copy_shutdown */
+    H5D_earray_idx_size,                /* size */
+    H5D_earray_idx_reset,               /* reset */
+    H5D_earray_idx_dump,                /* dump */
+    H5D_earray_idx_dest                 /* destroy */
 }};
 
 
@@ -181,7 +178,7 @@ const H5EA_class_t H5EA_CLS_CHUNK[1]={{
     H5EA_CLS_CHUNK_ID,          /* Type of extensible array */
     "Chunk w/o filters",        /* Name of extensible array class */
     sizeof(haddr_t),            /* Size of native element */
-    H5D_earray_crt_context,     /* Create context */
+    H5D__earray_crt_context,    /* Create context */
     H5D_earray_dst_context,     /* Destroy context */
     H5D_earray_fill,            /* Fill block of missing elements callback */
     H5D_earray_encode,          /* Element encoding callback */
@@ -196,7 +193,7 @@ const H5EA_class_t H5EA_CLS_FILT_CHUNK[1]={{
     H5EA_CLS_FILT_CHUNK_ID,     /* Type of extensible array */
     "Chunk w/filters",          /* Name of extensible array class */
     sizeof(H5D_earray_filt_elmt_t), /* Size of native element */
-    H5D_earray_crt_context,     /* Create context */
+    H5D__earray_crt_context,    /* Create context */
     H5D_earray_dst_context,     /* Destroy context */
     H5D_earray_filt_fill,       /* Fill block of missing elements callback */
     H5D_earray_filt_encode,     /* Element encoding callback */
@@ -219,7 +216,7 @@ H5FL_DEFINE_STATIC(H5D_earray_ctx_ud_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_earray_crt_context
+ * Function:	H5D__earray_crt_context
  *
  * Purpose:	Create context for callbacks
  *
@@ -232,13 +229,13 @@ H5FL_DEFINE_STATIC(H5D_earray_ctx_ud_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5D_earray_crt_context(void *_udata)
+H5D__earray_crt_context(void *_udata)
 {
     H5D_earray_ctx_t *ctx;      /* Extensible array callback context */
     H5D_earray_ctx_ud_t *udata = (H5D_earray_ctx_ud_t *)_udata; /* User data for extensible array context */
     void *ret_value;            /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(udata);
@@ -264,7 +261,7 @@ H5D_earray_crt_context(void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_earray_crt_context() */
+} /* end H5D__earray_crt_context() */
 
 
 /*-------------------------------------------------------------------------
@@ -1078,7 +1075,8 @@ H5D_earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_earray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata, H5D_t H5_ATTR_UNUSED *dset)
+H5D_earray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
+    const H5D_t H5_ATTR_UNUSED *dset)
 {
     H5EA_t      *ea;                    /* Pointer to extensible array structure */
     herr_t	ret_value = SUCCEED;	/* Return value */
@@ -1269,7 +1267,7 @@ done:
 } /* end H5D_earray_idx_resize() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_earray_idx_iterate_cb
+ * Function:	H5D__earray_idx_iterate_cb
  *
  * Purpose:	Callback routine for extensible array element iteration.
  *
@@ -1280,14 +1278,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D_earray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *_udata)
+H5D__earray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *_udata)
 {
     H5D_earray_it_ud_t   *udata = (H5D_earray_it_ud_t *)_udata; /* User data */
     unsigned ndims;                 /* Rank of chunk */
     int curr_dim;                   /* Current dimension */
     int ret_value = H5_ITER_CONT;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Compose generic chunk record for callback */
     if(udata->filtered) {
@@ -1301,10 +1299,9 @@ H5D_earray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *_
         udata->chunk_rec.chunk_addr = *(const haddr_t *)_elmt;
 
     /* Make "generic chunk" callback */
-    if(H5F_addr_defined(udata->chunk_rec.chunk_addr)) {
+    if(H5F_addr_defined(udata->chunk_rec.chunk_addr))
 	if((ret_value = (udata->cb)(&udata->chunk_rec, udata->udata)) < 0)
 	    HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
-    }
 
     /* Update coordinates of chunk in dataset */
     ndims = udata->common.layout->ndims - 1;
@@ -1313,6 +1310,7 @@ H5D_earray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *_
     while(curr_dim >= 0) {
         /* Increment coordinate in current dimension */
         udata->chunk_rec.scaled[curr_dim]++;
+
         /* Check if we went off the end of the current dimension */
         if(udata->chunk_rec.scaled[curr_dim] >= udata->common.layout->chunks[curr_dim]) {
             /* Reset coordinate & move to next faster dimension */
@@ -1324,7 +1322,7 @@ H5D_earray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *_
     } /* end while */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D_earray_idx_iterate_cb() */
+} /* H5D__earray_idx_iterate_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1378,7 +1376,6 @@ H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics")
 
     if(ea_stat.stored.max_idx_set > 0) {
-
         H5D_earray_it_ud_t udata;   /* User data for iteration callback */
 
 	/* Initialize userdata */
@@ -1396,9 +1393,9 @@ H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 	udata.udata = chunk_udata;
 	
         /* Iterate over the extensible array elements */
-	if((ret_value = H5EA_iterate(ea, idx_info->dxpl_id, H5D_earray_idx_iterate_cb, &udata)) < 0)
+	if((ret_value = H5EA_iterate(ea, idx_info->dxpl_id, H5D__earray_idx_iterate_cb, &udata)) < 0)
 	    HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over fixed array chunk index");
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1514,7 +1511,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_earray_idx_delete_cb
+ * Function:	H5D__earray_idx_delete_cb
  *
  * Purpose:	Delete space for chunk in file
  *
@@ -1527,12 +1524,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5D_earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
+H5D__earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 {
     H5D_earray_ud_t *udata = (H5D_earray_ud_t *)_udata;         /* User data for callback */
     int ret_value = H5_ITER_CONT;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity checks */
     HDassert(chunk_rec);
@@ -1548,7 +1545,7 @@ H5D_earray_idx_delete_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_earray_idx_delete_cb() */
+} /* end H5D__earray_idx_delete_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1593,7 +1590,7 @@ H5D_earray_idx_delete(const H5D_chk_idx_info_t *idx_info)
         udata.dxpl_id = idx_info->dxpl_id;
 
         /* Iterate over the chunk addresses in the extensible array, deleting each chunk */
-        if(H5D_earray_idx_iterate(idx_info, H5D_earray_idx_delete_cb, &udata) < 0)
+        if(H5D_earray_idx_iterate(idx_info, H5D__earray_idx_delete_cb, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk addresses")
 
         /* Close extensible array */

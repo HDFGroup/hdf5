@@ -301,17 +301,23 @@
  */
 #ifdef __cplusplus
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED    /*void*/
-#   define H5_ATTR_NORETURN  /*void*/
+#   define H5_ATTR_UNUSED       /*void*/
+#   define H5_ATTR_NORETURN     /*void*/
+#   define H5_ATTR_CONST        /*void*/
+#   define H5_ATTR_PURE         /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
-#   define H5_ATTR_UNUSED    __attribute__((unused))
-#   define H5_ATTR_NORETURN  __attribute__((noreturn))
+#   define H5_ATTR_UNUSED       __attribute__((unused))
+#   define H5_ATTR_NORETURN     __attribute__((noreturn))
+#   define H5_ATTR_CONST        __attribute__((const))
+#   define H5_ATTR_PURE         __attribute__((pure))
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED    /*void*/
-#   define H5_ATTR_NORETURN  /*void*/
+#   define H5_ATTR_UNUSED       /*void*/
+#   define H5_ATTR_NORETURN     /*void*/
+#   define H5_ATTR_CONST        /*void*/
+#   define H5_ATTR_PURE         /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -800,7 +806,7 @@ typedef struct {
         H5_DLL int Pflock(int fd, int operation);
         #define HDflock(F,L)    Pflock(F,L)
     #else
-        H5_DLL int Nflock(int fd, int operation);
+        H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
         #define HDflock(F,L)    Nflock(F,L)
     #endif /* H5_HAVE_FLOCK */
 #endif /* HDflock */

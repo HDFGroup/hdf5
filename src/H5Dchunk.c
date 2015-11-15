@@ -3901,11 +3901,12 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             /* Make sure the chunk is really in the dataset and outside the
              * original dimensions */
             {
-                unsigned u;             /* Local index variable */
+                unsigned v;             /* Local index variable */
                 hbool_t outside_orig = FALSE;
-                for(u = 0; u < space_ndims; u++) {
-                    HDassert((scaled[u] * chunk_dim[u]) < space_dim[u]);
-                    if((scaled[u] * chunk_dim[u]) >= old_dim[u])
+
+                for(v = 0; v < space_ndims; v++) {
+                    HDassert((scaled[v] * chunk_dim[v]) < space_dim[v]);
+                    if((scaled[v] * chunk_dim[v]) >= old_dim[v])
                         outside_orig = TRUE;
                 } /* end for */
                 HDassert(outside_orig);
@@ -4656,7 +4657,6 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     hbool_t                 fill_dim[H5O_LAYOUT_NDIMS]; /* Whether the plane of edge chunks in this dimension needs to be filled */
     hsize_t                 min_partial_chunk_sc[H5O_LAYOUT_NDIMS]; /* Offset of first partial (or empty) chunk in each dimension */
     hbool_t                 new_unfilt_dim[H5O_LAYOUT_NDIMS]; /* Whether the plane of edge chunks in this dimension are newly unfiltered */
-    hbool_t                 has_fill = FALSE;   /* Whether there are chunks that must be filled */
     H5D_chk_idx_info_t      idx_info;           /* Chunked index info */
     H5D_io_info_t           chk_io_info;        /* Chunked I/O info object */
     H5D_storage_t           chk_store;          /* Chunk storage information */
@@ -4794,7 +4794,6 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
             /* Determine if we need to fill chunks in this dimension */
             if((hssize_t)min_mod_chunk_sc[op_dim] == max_fill_chunk_sc[op_dim]) {
                 fill_dim[op_dim] = TRUE;
-                has_fill = TRUE;
 
                 /* If necessary, check if chunks in this dimension that need to
                  * be filled are new partial edge chunks */

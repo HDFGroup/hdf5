@@ -214,7 +214,7 @@ H5HF_iblock_unpin(H5HF_indirect_t *iblock)
             } /* end if */
 
             /* Indicate that the root indirect block is unpinned */
-            iblock->hdr->root_iblock_flags &= ~(H5HF_ROOT_IBLOCK_PINNED);
+            iblock->hdr->root_iblock_flags &= (unsigned)(~(H5HF_ROOT_IBLOCK_PINNED));
         } /* end if */
     } /* end else */
 
@@ -751,7 +751,7 @@ H5HF_man_iblock_root_halve(H5HF_indirect_t *iblock, hid_t dxpl_id)
     max_child_row = iblock->max_child / hdr->man_dtable.cparam.width;
 
     /* Compute new # of rows in root indirect block */
-    new_nrows = 1 << (1 + H5VM_log2_gen((uint64_t)max_child_row));
+    new_nrows = (unsigned)1 << (1 + H5VM_log2_gen((uint64_t)max_child_row));
 
     /* Check if the indirect block is NOT currently allocated in temp. file space */
     /* (temp. file space does not need to be freed) */
@@ -1323,7 +1323,7 @@ H5HF_man_iblock_unprotect(H5HF_indirect_t *iblock, hid_t dxpl_id,
             } /* end if */
 
             /* Indicate that the root indirect block is unprotected */
-            iblock->hdr->root_iblock_flags &= ~(H5HF_ROOT_IBLOCK_PROTECTED);
+            iblock->hdr->root_iblock_flags &= (unsigned)(~(H5HF_ROOT_IBLOCK_PROTECTED));
         } /* end if */
 
         /* Unprotect the indirect block */

@@ -121,6 +121,7 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_BT2;
                     break;
 
+                case H5D_CHUNK_IDX_NTYPES:
                 default:
                     HDassert(0 && "Unknown chunk index method!");
                     HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unknown chunk index method")
@@ -221,6 +222,9 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                 ret_value++;
 
                 switch(layout->u.chunk.idx_type) {
+                    case H5D_CHUNK_IDX_BTREE:
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, 0, "v1 B-tree index type found for layout message >v3")
+
                     case H5D_CHUNK_IDX_NONE:
 			/* nothing */
                         break;
@@ -230,7 +234,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
 			if(layout->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
 			    ret_value += H5F_SIZEOF_SIZE(f);        /* Size of chunk (in file) */
 			    ret_value += 4;                         /* Filter mask for chunk */
-			}
+			} /* end if */
 			break;
 
                     case H5D_CHUNK_IDX_FARRAY:
@@ -248,6 +252,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                         ret_value += H5D_BT2_CREATE_PARAM_SIZE;
                         break;
 
+                    case H5D_CHUNK_IDX_NTYPES:
                     default:
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid chunk index type")
                 } /* end switch */

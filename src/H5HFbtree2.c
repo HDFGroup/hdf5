@@ -68,7 +68,7 @@ typedef struct H5HF_huge_bt2_ctx_t {
 
 /* v2 B-tree driver callbacks */
 
-static void *H5HF_huge_bt2_crt_context(void *udata);
+static void *H5HF__huge_bt2_crt_context(void *udata);
 static herr_t H5HF_huge_bt2_dst_context(void *ctx);
 static void *H5HF_huge_bt2_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
@@ -116,7 +116,7 @@ const H5B2_class_t H5HF_HUGE_BT2_INDIR[1]={{ /* B-tree class information */
     H5B2_FHEAP_HUGE_INDIR_ID,               /* Type of B-tree */
     "H5B2_FHEAP_HUGE_INDIR_ID",             /* Name of B-tree class */
     sizeof(H5HF_huge_bt2_indir_rec_t),      /* Size of native record */
-    H5HF_huge_bt2_crt_context,              /* Create client callback context */
+    H5HF__huge_bt2_crt_context,             /* Create client callback context */
     H5HF_huge_bt2_dst_context,              /* Destroy client callback context */
     H5HF_huge_bt2_indir_store,              /* Record storage callback */
     H5HF_huge_bt2_indir_compare,            /* Record comparison callback */
@@ -132,7 +132,7 @@ const H5B2_class_t H5HF_HUGE_BT2_FILT_INDIR[1]={{ /* B-tree class information */
     H5B2_FHEAP_HUGE_FILT_INDIR_ID,          /* Type of B-tree */
     "H5B2_FHEAP_HUGE_FILT_INDIR_ID",        /* Name of B-tree class */
     sizeof(H5HF_huge_bt2_filt_indir_rec_t), /* Size of native record */
-    H5HF_huge_bt2_crt_context,              /* Create client callback context */
+    H5HF__huge_bt2_crt_context,             /* Create client callback context */
     H5HF_huge_bt2_dst_context,              /* Destroy client callback context */
     H5HF_huge_bt2_filt_indir_store,         /* Record storage callback */
     H5HF_huge_bt2_filt_indir_compare,       /* Record comparison callback */
@@ -148,7 +148,7 @@ const H5B2_class_t H5HF_HUGE_BT2_DIR[1]={{  /* B-tree class information */
     H5B2_FHEAP_HUGE_DIR_ID,                 /* Type of B-tree */
     "H5B2_FHEAP_HUGE_DIR_ID",               /* Name of B-tree class */
     sizeof(H5HF_huge_bt2_dir_rec_t),        /* Size of native record */
-    H5HF_huge_bt2_crt_context,              /* Create client callback context */
+    H5HF__huge_bt2_crt_context,             /* Create client callback context */
     H5HF_huge_bt2_dst_context,              /* Destroy client callback context */
     H5HF_huge_bt2_dir_store,                /* Record storage callback */
     H5HF_huge_bt2_dir_compare,              /* Record comparison callback */
@@ -164,7 +164,7 @@ const H5B2_class_t H5HF_HUGE_BT2_FILT_DIR[1]={{ /* B-tree class information */
     H5B2_FHEAP_HUGE_FILT_DIR_ID,            /* Type of B-tree */
     "H5B2_FHEAP_HUGE_FILT_DIR_ID",          /* Name of B-tree class */
     sizeof(H5HF_huge_bt2_filt_dir_rec_t),   /* Size of native record */
-    H5HF_huge_bt2_crt_context,              /* Create client callback context */
+    H5HF__huge_bt2_crt_context,             /* Create client callback context */
     H5HF_huge_bt2_dst_context,              /* Destroy client callback context */
     H5HF_huge_bt2_filt_dir_store,           /* Record storage callback */
     H5HF_huge_bt2_filt_dir_compare,         /* Record comparison callback */
@@ -190,7 +190,7 @@ H5FL_DEFINE_STATIC(H5HF_huge_bt2_ctx_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_huge_bt2_crt_context
+ * Function:	H5HF__huge_bt2_crt_context
  *
  * Purpose:	Create client callback context
  *
@@ -205,13 +205,13 @@ H5FL_DEFINE_STATIC(H5HF_huge_bt2_ctx_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5HF_huge_bt2_crt_context(void *_f)
+H5HF__huge_bt2_crt_context(void *_f)
 {
     H5F_t *f = (H5F_t *)_f;     /* User data for building callback context */
     H5HF_huge_bt2_ctx_t *ctx;   /* Callback context structure */
     void *ret_value = NULL;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -229,7 +229,7 @@ H5HF_huge_bt2_crt_context(void *_f)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5HF_huge_bt2_crt_context() */
+} /* H5HF__huge_bt2_crt_context() */
 
 
 /*-------------------------------------------------------------------------

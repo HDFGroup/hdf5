@@ -127,7 +127,7 @@ static herr_t H5D__btree_idx_init(const H5D_chk_idx_info_t *idx_info,
 static herr_t H5D__btree_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D__btree_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5D_t *dset);
+    H5D_chunk_ud_t *udata, const H5D_t *dset);
 static herr_t H5D__btree_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static int H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
@@ -153,22 +153,22 @@ static herr_t H5D__btree_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* v1 B-tree indexed chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_BTREE[1] = {{
-    FALSE,                               /* v1 B-tree indices does not support SWMR access */
-    H5D__btree_idx_init,
-    H5D__btree_idx_create,
-    H5D__btree_idx_is_space_alloc,
-    H5D__btree_idx_insert_addr,
-    H5D__btree_idx_get_addr,
-    NULL,
-    H5D__btree_idx_iterate,
-    H5D__btree_idx_remove,
-    H5D__btree_idx_delete,
-    H5D__btree_idx_copy_setup,
-    H5D__btree_idx_copy_shutdown,
-    H5D__btree_idx_size,
-    H5D__btree_idx_reset,
-    H5D__btree_idx_dump,
-    H5D__btree_idx_dest
+    FALSE,                              /* v1 B-tree indices does not support SWMR access */
+    H5D__btree_idx_init,                /* insert */
+    H5D__btree_idx_create,              /* create */
+    H5D__btree_idx_is_space_alloc,      /* is_space_alloc */
+    H5D__btree_idx_insert_addr,         /* insert */
+    H5D__btree_idx_get_addr,            /* get_addr */
+    NULL,                               /* resize */
+    H5D__btree_idx_iterate,             /* iterate */
+    H5D__btree_idx_remove,              /* remove */
+    H5D__btree_idx_delete,              /* delete */
+    H5D__btree_idx_copy_setup,          /* copy_setup */
+    H5D__btree_idx_copy_shutdown,       /* copy_shutdown */
+    H5D__btree_idx_size,                /* size */
+    H5D__btree_idx_reset,               /* reset */
+    H5D__btree_idx_dump,                /* dump */
+    H5D__btree_idx_dest                 /* destroy */
 }};
 
 
@@ -998,7 +998,8 @@ H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__btree_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata, H5D_t H5_ATTR_UNUSED *dset)
+H5D__btree_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
+    const H5D_t H5_ATTR_UNUSED *dset)
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
 

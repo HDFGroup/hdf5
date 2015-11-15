@@ -55,11 +55,12 @@
 /********************/
 
 /* Single Chunk Index chunking I/O ops */
-static herr_t H5D_single_idx_init(const H5D_chk_idx_info_t *idx_info);
-static herr_t H5D_single_idx_create(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info,
+    const H5S_t *space, haddr_t dset_ohdr_addr);
+static herr_t H5D__single_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_single_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D_single_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
-    H5D_chunk_ud_t *udata, H5D_t *dset);
+    H5D_chunk_ud_t *udata, const H5D_t *dset);
 static herr_t H5D_single_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static int H5D_single_idx_iterate(const H5D_chk_idx_info_t *idx_info,
@@ -80,9 +81,9 @@ static herr_t H5D_single_idx_dump(const H5O_storage_chunk_t *storage, FILE *stre
 
 /* Non Index chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_SINGLE[1] = {{
-    FALSE,                      	/* Single Chunk indexing don't current support SWMR access */
-    H5D_single_idx_init,		/* init */
-    H5D_single_idx_create,		/* create */
+    FALSE,                      	/* Single Chunk indexing doesn't current support SWMR access */
+    H5D__single_idx_init,		/* init */
+    H5D__single_idx_create,		/* create */
     H5D_single_idx_is_space_alloc, 	/* is_space_alloc */
     H5D_single_idx_insert_addr,		/* insert */
     H5D_single_idx_get_addr,		/* get_addr */
@@ -95,7 +96,7 @@ const H5D_chunk_ops_t H5D_COPS_SINGLE[1] = {{
     H5D_single_idx_size,		/* size */
     H5D_single_idx_reset,		/* reset */
     H5D_single_idx_dump,		/* dump */
-    NULL				/* dest */
+    NULL				/* destroy */
 }};
 
 /*****************************/
@@ -107,10 +108,25 @@ const H5D_chunk_ops_t H5D_COPS_SINGLE[1] = {{
 /* Local Variables */
 /*******************/
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__single_idx_init
+ *
+ * Purpose:     Initialize the indexing information for a dataset.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              July, 2011
+ *
+ *-------------------------------------------------------------------------
+ */
 static herr_t
-H5D_single_idx_init(const H5D_chk_idx_info_t *idx_info)
+H5D__single_idx_init(const H5D_chk_idx_info_t *idx_info,
+    const H5S_t H5_ATTR_UNUSED *space, haddr_t H5_ATTR_UNUSED dset_ohdr_addr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(idx_info);
@@ -125,11 +141,11 @@ H5D_single_idx_init(const H5D_chk_idx_info_t *idx_info)
 	idx_info->layout->flags = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D_single_idx_init() */
+} /* end H5D__single_idx_init() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_single_idx_create
+ * Function:	H5D__single_idx_create
  *
  * Purpose:	Set up Single Chunk Index: filtered or non-filtered
  *		
@@ -141,9 +157,9 @@ H5D_single_idx_init(const H5D_chk_idx_info_t *idx_info)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_single_idx_create(const H5D_chk_idx_info_t *idx_info)
+H5D__single_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(idx_info);
@@ -161,7 +177,7 @@ H5D_single_idx_create(const H5D_chk_idx_info_t *idx_info)
 	HDassert(!(idx_info->layout->flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D_single_idx_create() */
+} /* end H5D__single_idx_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -204,7 +220,8 @@ H5D_single_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_single_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata, H5D_t *dset)
+H5D_single_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
+    const H5D_t *dset)
 {
     herr_t	ret_value = SUCCEED;	/* Return value */
 
@@ -226,17 +243,15 @@ H5D_single_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
     if(idx_info->pline->nused > 0) {
 	idx_info->storage->u.single.nbytes = udata->chunk_block.length;
 	idx_info->storage->u.single.filter_mask = udata->filter_mask;
-    }
+    } /* end if */
 
     if(dset) {
-
 	if(dset->shared->dcpl_cache.fill.alloc_time != H5D_ALLOC_TIME_EARLY || idx_info->pline->nused > 0) {
-
 	    /* Mark the layout/storage dirty so that the address of the single chunk will be flushed later */
 	    if(H5D__mark(dset, idx_info->dxpl_id, H5D_MARK_LAYOUT) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark layout as dirty")
-	}
-    }
+	} /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -445,7 +460,7 @@ H5D_single_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     H5_BEGIN_TAG(idx_info_dst->dxpl_id, H5AC__COPIED_TAG, FAIL);
 
     /* Set up information at the destination file */
-    if(H5D_single_idx_create(idx_info_dst) < 0)
+    if(H5D__single_idx_create(idx_info_dst) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
 
     /* Reset metadata tag */

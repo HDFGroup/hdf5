@@ -57,8 +57,8 @@
 /********************/
 
 /* Non Index chunking I/O ops */
-static herr_t H5D_none_idx_create(const H5D_chk_idx_info_t *idx_info);
-static hbool_t H5D_none_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
+static herr_t H5D__none_idx_create(const H5D_chk_idx_info_t *idx_info);
+static hbool_t H5D__none_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
 static herr_t H5D_none_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static int H5D_none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
@@ -81,8 +81,8 @@ static herr_t H5D_none_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream
 const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
     FALSE,                      	/* Non-indexed chunking don't current support SWMR access */
     NULL,				/* init */
-    H5D_none_idx_create,		/* create */
-    H5D_none_idx_is_space_alloc, 	/* is_space_alloc */
+    H5D__none_idx_create,		/* create */
+    H5D__none_idx_is_space_alloc, 	/* is_space_alloc */
     NULL,				/* insert */
     H5D_none_idx_get_addr,		/* get_addr */
     NULL,				/* resize */
@@ -108,7 +108,7 @@ const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_none_idx_create
+ * Function:	H5D__none_idx_create
  *
  * Purpose:	Allocate memory for the maximum # of chunks in the dataset.
  *		
@@ -120,13 +120,13 @@ const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_none_idx_create(const H5D_chk_idx_info_t *idx_info)
+H5D__none_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
     hsize_t 	nbytes;                 /* Total size of dataset chunks */
     haddr_t	addr;			/* The address of dataset chunks */
     herr_t 	ret_value = SUCCEED; 	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(idx_info);
@@ -151,11 +151,11 @@ H5D_none_idx_create(const H5D_chk_idx_info_t *idx_info)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_none_idx_create() */
+} /* end H5D__none_idx_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_none_idx_is_space_alloc
+ * Function:	H5D__none_idx_is_space_alloc
  *
  * Purpose:	Query if space for the dataset chunks is allocated
  *
@@ -166,15 +166,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5D_none_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
+H5D__none_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(storage);
 
     FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
-} /* end H5D_none_idx_is_space_alloc() */
+} /* end H5D__none_idx_is_space_alloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -398,7 +398,7 @@ H5D_none_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     H5_BEGIN_TAG(idx_info_dst->dxpl_id, H5AC__COPIED_TAG, FAIL);
 
     /* Allocate dataset chunks in the dest. file */
-    if(H5D_none_idx_create(idx_info_dst) < 0)
+    if(H5D__none_idx_create(idx_info_dst) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
 
     /* Reset metadata tag */

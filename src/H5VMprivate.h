@@ -436,7 +436,7 @@ static const unsigned MultiplyDeBruijnBitPosition[32] =
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE unsigned H5_ATTR_UNUSED
+static H5_INLINE H5_ATTR_PURE unsigned
 H5VM_log2_of2(uint32_t n)
 {
 #ifndef NDEBUG
@@ -457,7 +457,7 @@ H5VM_log2_of2(uint32_t n)
  *
  *-------------------------------------------------------------------------
  */
-static H5_INLINE hsize_t H5_ATTR_UNUSED
+static H5_INLINE H5_ATTR_CONST hsize_t
 H5VM_power2up(hsize_t n)
 {
     hsize_t     ret_value = 1;  /* Return value */

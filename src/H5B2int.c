@@ -78,9 +78,9 @@ static herr_t H5B2__merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 static herr_t H5B2__swap_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
     H5B2_internal_t *internal, unsigned *internal_flags_ptr, unsigned idx,
     void *swap_loc);
-static herr_t H5B2_shadow_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    unsigned depth, H5B2_node_ptr_t *curr_node_ptr, H5B2_internal_t **internal);
-static herr_t H5B2_shadow_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
+static herr_t H5B2__shadow_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
+    uint16_t depth, H5B2_node_ptr_t *curr_node_ptr, H5B2_internal_t **internal);
+static herr_t H5B2__shadow_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
     H5B2_node_ptr_t *curr_node_ptr, H5B2_leaf_t **leaf);
 static herr_t H5B2__create_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, void *parent,
     H5B2_node_ptr_t *node_ptr, uint16_t depth);
@@ -231,7 +231,7 @@ H5B2__split1(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
         /* Shadow the left node if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_internal(hdr, dxpl_id, (depth - 1), &(internal->node_ptrs[idx]), &left_int) < 0)
+            if(H5B2__shadow_internal(hdr, dxpl_id, (uint16_t)(depth - 1), &(internal->node_ptrs[idx]), &left_int) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
             left_addr = internal->node_ptrs[idx].addr;
         } /* end if */
@@ -267,7 +267,7 @@ H5B2__split1(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
         /* Shadow the left node if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx]), &left_leaf) < 0)
+            if(H5B2__shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx]), &left_leaf) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
             left_addr = internal->node_ptrs[idx].addr;
         } /* end if */
@@ -357,7 +357,7 @@ H5B2__split1(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
                     H5B2_internal_t *grandchild_int = NULL;
 
                     /* Protect grandchild */
-                    if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, right_child, right_node_ptrs[u].node_nrec, (depth - 2), H5AC__NO_FLAGS_SET)))
+                    if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, right_child, right_node_ptrs[u].node_nrec, (uint16_t)(depth - 2), H5AC__NO_FLAGS_SET)))
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                     grandchild_class = H5AC_BT2_INT;
                     grandchild = grandchild_int;
@@ -570,9 +570,9 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
         /* Shadow both nodes if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_internal(hdr, dxpl_id, (depth - 1), &(internal->node_ptrs[idx]), &left_internal) < 0)
+            if(H5B2__shadow_internal(hdr, dxpl_id, (uint16_t)(depth - 1), &(internal->node_ptrs[idx]), &left_internal) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
-            if(H5B2_shadow_internal(hdr, dxpl_id, (depth - 1), &(internal->node_ptrs[idx + 1]), &right_internal) < 0)
+            if(H5B2__shadow_internal(hdr, dxpl_id, (uint16_t)(depth - 1), &(internal->node_ptrs[idx + 1]), &right_internal) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
             left_addr = internal->node_ptrs[idx].addr;
             right_addr = internal->node_ptrs[idx + 1].addr;
@@ -605,9 +605,9 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
         /* Shadow both nodes if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx]), &left_leaf) < 0)
+            if(H5B2__shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx]), &left_leaf) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf node")
-            if(H5B2_shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx + 1]), &right_leaf) < 0)
+            if(H5B2__shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx + 1]), &right_leaf) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf node")
             left_addr = internal->node_ptrs[idx].addr;
             right_addr = internal->node_ptrs[idx + 1].addr;
@@ -685,7 +685,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
                         H5B2_internal_t *grandchild_int = NULL;
 
                         /* Protect grandchild */
-                        if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, left_child, left_node_ptrs[u].node_nrec, (depth - 2), H5AC__NO_FLAGS_SET)))
+                        if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, left_child, left_node_ptrs[u].node_nrec, (uint16_t)(depth - 2), H5AC__NO_FLAGS_SET)))
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                         grandchild_class = H5AC_BT2_INT;
                         grandchild = grandchild_int;
@@ -792,7 +792,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
                         H5B2_internal_t *grandchild_int = NULL;
 
                         /* Protect grandchild */
-                        if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, right_child, right_node_ptrs[u].node_nrec, (depth - 2), H5AC__NO_FLAGS_SET)))
+                        if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, right_child, right_node_ptrs[u].node_nrec, (uint16_t)(depth - 2), H5AC__NO_FLAGS_SET)))
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                         grandchild_class = H5AC_BT2_INT;
                         grandchild = grandchild_int;
@@ -962,11 +962,11 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
         /* Shadow all nodes if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_internal(hdr, dxpl_id, (depth - 1), &(internal->node_ptrs[idx - 1]), &left_internal) < 0)
+            if(H5B2__shadow_internal(hdr, dxpl_id, (uint16_t)(depth - 1), &(internal->node_ptrs[idx - 1]), &left_internal) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
-            if(H5B2_shadow_internal(hdr, dxpl_id, (depth - 1), &(internal->node_ptrs[idx]), &middle_internal) < 0)
+            if(H5B2__shadow_internal(hdr, dxpl_id, (uint16_t)(depth - 1), &(internal->node_ptrs[idx]), &middle_internal) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
-            if(H5B2_shadow_internal(hdr, dxpl_id, (depth - 1), &(internal->node_ptrs[idx + 1]), &right_internal) < 0)
+            if(H5B2__shadow_internal(hdr, dxpl_id, (uint16_t)(depth - 1), &(internal->node_ptrs[idx + 1]), &right_internal) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
             left_addr = internal->node_ptrs[idx - 1].addr;
             middle_addr = internal->node_ptrs[idx].addr;
@@ -1008,11 +1008,11 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
         /* Shadow all nodes if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx - 1]), &left_leaf) < 0)
+            if(H5B2__shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx - 1]), &left_leaf) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf node")
-            if(H5B2_shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx]), &middle_leaf) < 0)
+            if(H5B2__shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx]), &middle_leaf) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf node")
-            if(H5B2_shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx + 1]), &right_leaf) < 0)
+            if(H5B2__shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx + 1]), &right_leaf) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf node")
             left_addr = internal->node_ptrs[idx - 1].addr;
             middle_addr = internal->node_ptrs[idx].addr;
@@ -1097,7 +1097,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
                             H5B2_internal_t *grandchild_int = NULL;
 
                             /* Protect grandchild */
-                            if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, left_child, left_node_ptrs[u].node_nrec, (depth - 2), H5AC__NO_FLAGS_SET)))
+                            if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, left_child, left_node_ptrs[u].node_nrec, (uint16_t)(depth - 2), H5AC__NO_FLAGS_SET)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                             grandchild_class = H5AC_BT2_INT;
                             grandchild = grandchild_int;
@@ -1198,7 +1198,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
                             H5B2_internal_t *grandchild_int = NULL;
 
                             /* Protect grandchild */
-                            if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, right_child, right_node_ptrs[u].node_nrec, (depth - 2), H5AC__NO_FLAGS_SET)))
+                            if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, right_child, right_node_ptrs[u].node_nrec, (uint16_t)(depth - 2), H5AC__NO_FLAGS_SET)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                             grandchild_class = H5AC_BT2_INT;
                             grandchild = grandchild_int;
@@ -1299,7 +1299,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
                             H5B2_internal_t *grandchild_int = NULL;
 
                             /* Protect grandchild */
-                            if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, middle_child, middle_node_ptrs[u].node_nrec, (depth - 2), H5AC__NO_FLAGS_SET)))
+                            if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, middle_child, middle_node_ptrs[u].node_nrec, (uint16_t)(depth - 2), H5AC__NO_FLAGS_SET)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                             grandchild_class = H5AC_BT2_INT;
                             grandchild = grandchild_int;
@@ -1399,7 +1399,7 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
                             H5B2_internal_t *grandchild_int = NULL;
 
                             /* Protect grandchild */
-                            if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, middle_child, middle_node_ptrs[u].node_nrec, (depth - 2), H5AC__NO_FLAGS_SET)))
+                            if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, middle_child, middle_node_ptrs[u].node_nrec, (uint16_t)(depth - 2), H5AC__NO_FLAGS_SET)))
                                 HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                             grandchild_class = H5AC_BT2_INT;
                             grandchild = grandchild_int;
@@ -1609,7 +1609,7 @@ H5B2__merge2(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
         /* Shadow the left node if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_internal(hdr, dxpl_id, (depth - 1), &(internal->node_ptrs[idx]), &left_internal) < 0)
+            if(H5B2__shadow_internal(hdr, dxpl_id, (uint16_t)(depth - 1), &(internal->node_ptrs[idx]), &left_internal) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
             left_addr = internal->node_ptrs[idx].addr;
         } /* end if */
@@ -1641,7 +1641,7 @@ H5B2__merge2(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
         /* Shadow the left node if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx]), &left_leaf) < 0)
+            if(H5B2__shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx]), &left_leaf) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf node")
             left_addr = internal->node_ptrs[idx].addr;
         } /* end if */
@@ -1681,7 +1681,7 @@ H5B2__merge2(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
                         H5B2_internal_t *grandchild_int = NULL;
 
                         /* Protect grandchild */
-                        if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, left_child, left_node_ptrs[u].node_nrec, (depth - 2), H5AC__NO_FLAGS_SET)))
+                        if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, left_child, left_node_ptrs[u].node_nrec, (uint16_t)(depth - 2), H5AC__NO_FLAGS_SET)))
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                         grandchild_class = H5AC_BT2_INT;
                         grandchild = grandchild_int;
@@ -1859,9 +1859,9 @@ H5B2__merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
         /* Shadow left and middle nodes if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_internal(hdr, dxpl_id, (depth - 1), &(internal->node_ptrs[idx - 1]), &left_internal) < 0)
+            if(H5B2__shadow_internal(hdr, dxpl_id, (uint16_t)(depth - 1), &(internal->node_ptrs[idx - 1]), &left_internal) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
-            if(H5B2_shadow_internal(hdr, dxpl_id, (depth - 1), &(internal->node_ptrs[idx]), &middle_internal) < 0)
+            if(H5B2__shadow_internal(hdr, dxpl_id, (uint16_t)(depth - 1), &(internal->node_ptrs[idx]), &middle_internal) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
             left_addr = internal->node_ptrs[idx - 1].addr;
             middle_addr = internal->node_ptrs[idx].addr;
@@ -1902,9 +1902,9 @@ H5B2__merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
         /* Shadow left and middle nodes if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx - 1]), &left_leaf) < 0)
+            if(H5B2__shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx - 1]), &left_leaf) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf node")
-            if(H5B2_shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx]), &middle_leaf) < 0)
+            if(H5B2__shadow_leaf(hdr, dxpl_id, &(internal->node_ptrs[idx]), &middle_leaf) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf node")
             left_addr = internal->node_ptrs[idx - 1].addr;
             middle_addr = internal->node_ptrs[idx].addr;
@@ -1970,7 +1970,7 @@ H5B2__merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
                         H5B2_internal_t *grandchild_int = NULL;
 
                         /* Protect grandchild */
-                        if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, left_child, left_node_ptrs[u].node_nrec, (depth - 2), H5AC__NO_FLAGS_SET)))
+                        if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, left_child, left_node_ptrs[u].node_nrec, (uint16_t)(depth - 2), H5AC__NO_FLAGS_SET)))
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                         grandchild_class = H5AC_BT2_INT;
                         grandchild = grandchild_int;
@@ -2051,7 +2051,7 @@ H5B2__merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
                         H5B2_internal_t *grandchild_int = NULL;
 
                         /* Protect grandchild */
-                        if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, middle_child, middle_node_ptrs[u].node_nrec, (depth - 2), H5AC__NO_FLAGS_SET)))
+                        if(NULL == (grandchild_int = H5B2__protect_internal(hdr, dxpl_id, grandchild_addr, middle_child, middle_node_ptrs[u].node_nrec, (uint16_t)(depth - 2), H5AC__NO_FLAGS_SET)))
                             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                         grandchild_class = H5AC_BT2_INT;
                         grandchild = grandchild_int;
@@ -2293,7 +2293,7 @@ H5B2__insert_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr
 
     /* Shadow the node if doing SWMR writes */
     if(hdr->swmr_write)
-        if(H5B2_shadow_leaf(hdr, dxpl_id, curr_node_ptr, &leaf) < 0)
+        if(H5B2__shadow_leaf(hdr, dxpl_id, curr_node_ptr, &leaf) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf node")
 
     /* Must have a leaf node with enough space to insert a record now */
@@ -2397,7 +2397,7 @@ H5B2__insert_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
     /* Shadow the node if doing SWMR writes */
     if(hdr->swmr_write)
-        if(H5B2_shadow_internal(hdr, dxpl_id, depth, curr_node_ptr, &internal) < 0)
+        if(H5B2__shadow_internal(hdr, dxpl_id, depth, curr_node_ptr, &internal) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
 
     /* Split or redistribute child node pointers, if necessary */
@@ -2959,7 +2959,7 @@ H5B2__remove_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr
     if(leaf->nrec > 0) {
         /* Shadow the node if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_leaf(hdr, dxpl_id, curr_node_ptr, &leaf) < 0)
+            if(H5B2__shadow_leaf(hdr, dxpl_id, curr_node_ptr, &leaf) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf node")
             leaf_addr = curr_node_ptr->addr;
         } /* end if */
@@ -3070,7 +3070,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased,
                 H5B2_internal_t *new_root_int = NULL;
 
                 /* Protect new root */
-                if(NULL == (new_root_int = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr->addr, hdr, curr_node_ptr->node_nrec, (depth - 1), H5AC__NO_FLAGS_SET)))
+                if(NULL == (new_root_int = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr->addr, hdr, curr_node_ptr->node_nrec, (uint16_t)(depth - 1), H5AC__NO_FLAGS_SET)))
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                 new_root_class = H5AC_BT2_INT;
                 new_root = new_root_int;
@@ -3135,7 +3135,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased,
 
         /* Shadow the node if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_internal(hdr, dxpl_id, depth, curr_node_ptr, &internal) < 0)
+            if(H5B2__shadow_internal(hdr, dxpl_id, depth, curr_node_ptr, &internal) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
             internal_addr = curr_node_ptr->addr;
         } /* end if */
@@ -3249,7 +3249,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased,
 
     /* Attempt to remove record from child node */
     if(depth > 1) {
-        if(H5B2__remove_internal(hdr, dxpl_id, depth_decreased, swap_loc, swap_parent, (uint16_t)depth - 1,
+        if(H5B2__remove_internal(hdr, dxpl_id, depth_decreased, swap_loc, swap_parent, (uint16_t)(depth - 1),
                 new_cache_info, new_cache_info_flags_ptr, next_pos, new_node_ptr, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
     } /* end if */
@@ -3359,7 +3359,7 @@ H5B2__remove_leaf_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
     if(leaf->nrec > 0) {
         /* Shadow the node if doing SWMR writes */
         if(hdr->swmr_write) {
-            if(H5B2_shadow_leaf(hdr, dxpl_id, curr_node_ptr, &leaf) < 0)
+            if(H5B2__shadow_leaf(hdr, dxpl_id, curr_node_ptr, &leaf) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow leaf node")
             leaf_addr = curr_node_ptr->addr;
         } /* end if */
@@ -3475,7 +3475,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
                 H5B2_internal_t *new_root_int = NULL;
 
                 /* Protect new root */
-                if(NULL == (new_root_int = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr->addr, hdr, curr_node_ptr->node_nrec, (depth - 1), H5AC__NO_FLAGS_SET)))
+                if(NULL == (new_root_int = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr->addr, hdr, curr_node_ptr->node_nrec, (uint16_t)(depth - 1), H5AC__NO_FLAGS_SET)))
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
                 new_root_class = H5AC_BT2_INT;
                 new_root = new_root_int;
@@ -3541,7 +3541,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
 
         /* Shadow the node if doing SWMR writes */
         if(hdr->swmr_write && !collapsed_root) {
-            if(H5B2_shadow_internal(hdr, dxpl_id, depth, curr_node_ptr, &internal) < 0)
+            if(H5B2__shadow_internal(hdr, dxpl_id, depth, curr_node_ptr, &internal) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTCOPY, FAIL, "unable to shadow internal node")
             internal_addr = curr_node_ptr->addr;
         } /* end if */
@@ -3706,7 +3706,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
 
     /* Attempt to remove record from child node */
     if(depth > 1) {
-        if(H5B2__remove_internal_by_idx(hdr, dxpl_id, depth_decreased, swap_loc, swap_parent, (uint16_t)depth - 1,
+        if(H5B2__remove_internal_by_idx(hdr, dxpl_id, depth_decreased, swap_loc, swap_parent, (uint16_t)(depth - 1),
                 new_cache_info, new_cache_info_flags_ptr, new_node_ptr, next_pos, n, udata, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
     } /* end if */
@@ -4138,7 +4138,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B2_shadow_internal
+ * Function:    H5B2__shadow_internal
  *
  * Purpose:     "Shadow: an internal node - copy it to a new location,
  *              leaving the data in the old location intact (for now).
@@ -4154,7 +4154,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_shadow_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
+H5B2__shadow_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
     H5B2_node_ptr_t *curr_node_ptr, H5B2_internal_t **internal)
 {
     hbool_t node_pinned = FALSE;
@@ -4162,7 +4162,7 @@ H5B2_shadow_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
     haddr_t new_node_addr;              /* Address to move node to */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -4235,11 +4235,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_shadow_internal() */
+} /* end H5B2__shadow_internal() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B2_shadow_leaf
+ * Function:    H5B2__shadow_leaf
  *
  * Purpose:     "Shadow: a leaf node - copy it to a new location, leaving
  *              the data in the old location intact (for now).  This is
@@ -4255,7 +4255,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_shadow_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
+H5B2__shadow_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
     H5B2_node_ptr_t *curr_node_ptr, H5B2_leaf_t **leaf)
 {
     hbool_t node_pinned = FALSE;
@@ -4263,7 +4263,7 @@ H5B2_shadow_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
     haddr_t new_node_addr;              /* Address to move node to */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -4335,7 +4335,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_shadow_leaf() */
+} /* end H5B2__shadow_leaf() */
 
 #ifdef H5B2_DEBUG
 

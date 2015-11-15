@@ -1727,7 +1727,6 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
     H5HF_hdr_t  *hdr;           /* Shared fractal heap information */
     H5HF_parent_t *par_info;   	/* Pointer to parent information */
     uint32_t stored_chksum;     /* Stored metadata checksum value */
-    uint32_t t_chksum;   /* Computed metadata checksum value */
     uint32_t computed_chksum;   /* Computed metadata checksum value */
     size_t chk_size;       	/* The size for validating checksum */
     uint8_t *chk_p;         	/* Pointer to the area for validating checksum */

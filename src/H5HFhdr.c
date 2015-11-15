@@ -463,13 +463,13 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 
         case 1: /* Set the length of heap IDs to just enough to hold the information needed to directly access 'huge' objects in the heap */
             if(hdr->filter_len > 0)
-                hdr->id_len = 1         /* ID flags */
+                hdr->id_len = (unsigned)1 /* ID flags */
                     + hdr->sizeof_addr  /* Address of filtered object */
                     + hdr->sizeof_size  /* Length of filtered object */
                     + 4                 /* Filter mask for filtered object */
                     + hdr->sizeof_size; /* Size of de-filtered object in memory */
             else
-                hdr->id_len = 1         /* ID flags */
+                hdr->id_len = (unsigned)1 /* ID flags */
                     + hdr->sizeof_addr  /* Address of object */
                     + hdr->sizeof_size; /* Length of object */
             break;
