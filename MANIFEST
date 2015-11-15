@@ -584,12 +584,12 @@
 ./src/H5FScache.c
 ./src/H5FSdbg.c
 ./src/H5FSmodule.h
-./src/H5FStest.c
-./src/H5FSstat.c
 ./src/H5FSpkg.h
 ./src/H5FSprivate.h
 ./src/H5FSpublic.h
 ./src/H5FSsection.c
+./src/H5FSstat.c
+./src/H5FStest.c
 ./src/H5G.c
 ./src/H5Gbtree2.c
 ./src/H5Gcache.c
@@ -2252,7 +2252,6 @@
 ./tools/perform/sio_standalone.c
 ./tools/perform/sio_standalone.h
 ./tools/perform/zip_perf.c
-
 
 # high level libraries
 ./hl/COPYING

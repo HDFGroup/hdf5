@@ -165,13 +165,13 @@ IDE_GENERATED_PROPERTIES ("H5EA" "${H5EA_HDRS}" "${H5EA_SRCS}" )
 
 set (H5F_SRCS
     ${HDF5_SRC_DIR}/H5F.c
-    ${HDF5_SRC_DIR}/H5Fint.c
     ${HDF5_SRC_DIR}/H5Faccum.c
     ${HDF5_SRC_DIR}/H5Fcwfs.c
     ${HDF5_SRC_DIR}/H5Fdbg.c
     ${HDF5_SRC_DIR}/H5Fdeprec.c
     ${HDF5_SRC_DIR}/H5Fefc.c
     ${HDF5_SRC_DIR}/H5Ffake.c
+    ${HDF5_SRC_DIR}/H5Fint.c
     ${HDF5_SRC_DIR}/H5Fio.c
     ${HDF5_SRC_DIR}/H5Fmount.c
     ${HDF5_SRC_DIR}/H5Fmpi.c
@@ -193,8 +193,8 @@ set (H5FA_SRCS
     ${HDF5_SRC_DIR}/H5FA.c
     ${HDF5_SRC_DIR}/H5FAcache.c
     ${HDF5_SRC_DIR}/H5FAdbg.c
-    ${HDF5_SRC_DIR}/H5FAdblock.c
     ${HDF5_SRC_DIR}/H5FAdblkpage.c
+    ${HDF5_SRC_DIR}/H5FAdblock.c
     ${HDF5_SRC_DIR}/H5FAhdr.c
     ${HDF5_SRC_DIR}/H5FAstat.c
     ${HDF5_SRC_DIR}/H5FAtest.c
@@ -501,14 +501,6 @@ set (H5R_HDRS
 IDE_GENERATED_PROPERTIES ("H5R" "${H5R_HDRS}" "${H5R_SRCS}" )
 
 
-set (H5UC_SRCS
-    ${HDF5_SRC_DIR}/H5UC.c
-)
-set (H5UC_HDRS
-)
-IDE_GENERATED_PROPERTIES ("H5UC" "${H5UC_HDRS}" "${H5UC_SRCS}" )
-
-
 set (H5RS_SRCS
     ${HDF5_SRC_DIR}/H5RS.c
 )
@@ -605,6 +597,14 @@ set (H5TS_SRCS
 set (H5TS_HDRS
 )
 IDE_GENERATED_PROPERTIES ("H5TS" "${H5TS_HDRS}" "${H5TS_SRCS}" )
+
+
+set (H5UC_SRCS
+    ${HDF5_SRC_DIR}/H5UC.c
+)
+set (H5UC_HDRS
+)
+IDE_GENERATED_PROPERTIES ("H5UC" "${H5UC_HDRS}" "${H5UC_SRCS}" )
 
 
 set (H5VM_SRCS
