@@ -227,7 +227,7 @@ main(void)
         one_cbuf[i].field2.b.a = 20;
         one_cbuf[i].field2.b.b = 40;
         one_cbuf[i].field2.b.c = 80;
-        one_cbuf[i].field3 = 3.0;
+        one_cbuf[i].field3 = 3.0F;
         one_cbuf[i].field4.a = 4;
         one_cbuf[i].field4.b = 8;
     }
@@ -316,7 +316,7 @@ main(void)
         two_cbuf[i].field2.b.a = 20;
         two_cbuf[i].field2.b.b = 40;
         two_cbuf[i].field2.b.c = 80;
-        two_cbuf[i].field3 = 3.0;
+        two_cbuf[i].field3 = 3.0F;
         two_cbuf[i].field4.a = 4;
         two_cbuf[i].field4.b = 8;
     }

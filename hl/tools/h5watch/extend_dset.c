@@ -1,4 +1,20 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
+ * All rights reserved.                                                      *
+ *                                                                           *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the files COPYING and Copyright.html.  COPYING can be found at the root   *
+ * of the source code distribution tree; Copyright.html can be found at the  *
+ * root level of an installed copy of the electronic HDF5 document set and   *
+ * is linked from the top-level documents page.  It can also be found at     *
+ * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+ * access to either file, you may request a copy from help@hdfgroup.org.     *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include "H5HLprivate2.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -154,9 +170,9 @@ extend_dset_two(const char *file, char *dname)
 {
     hid_t fid = -1;		/* file id */
     hid_t fapl = -1;		/* file access property list id */
-    hid_t did; 		/* dataset id */
-    hid_t sid; 		/* dataspace id */
-    hid_t dtid;		/* dataset's datatype id */
+    hid_t did = -1; 		/* dataset id */
+    hid_t sid = -1; 		/* dataspace id */
+    hid_t dtid = -1;		/* dataset's datatype id */
     int ndims;		/* # of dimension sizes */
     unsigned i, j;	/* local index variable */
     hsize_t ext_dims[2];	/* new dimension sizes after extension */
@@ -299,10 +315,10 @@ extend_dset_one(const char *file, char *dname)
 {
     hid_t fid = -1;	/* file id */
     hid_t fapl = -1;	/* file access property list id */
-    hid_t did; 		/* dataset id */
-    hid_t dtid;		/* dataset's datatype id */
-    hid_t sid;		/* dataspace id */
-    hid_t mid;		/* memory space id */
+    hid_t did = -1; 		/* dataset id */
+    hid_t dtid = -1;		/* dataset's datatype id */
+    hid_t sid = -1;		/* dataspace id */
+    hid_t mid = -1;		/* memory space id */
     unsigned i, j;	/* local index variable */
     int ibuf[TEST_BUF_SIZE];   	/* buffer for storing retrieved elements (integer) */
     set_t cbuf[TEST_BUF_SIZE];	/* buffer for storing retrieved elemnets (compound) */
