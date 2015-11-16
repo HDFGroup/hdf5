@@ -23,6 +23,7 @@ makelog="#${progname}_2build.log"
 testlog="#${progname}_3test.log"
 packlog="#${progname}_4pack.log"
 installlog="#${progname}_5install.log"
+vflag=1		# verbose flag default to on.
 config_summary=libhdf5.settings
 exit_code=0
 
@@ -90,6 +91,8 @@ Usage: $progname [<options>]
     Use zlib library for external deflate I/O filter. Default is on.
   --with-szlib | --with-szlib=<libpath> | --without-szlib:
     Use szlib library for external deflate I/O filter. Default is on.
+  --enable-verbose | --disable-verbose:
+    enable or disable verbose output. Default is on.
   --help: shows details help page
 
   <libpath>: the file path to the library, expect <libpath>/lib and <libpath>/include.
@@ -157,7 +160,23 @@ INSTALL_HDF5()
 	    return 1
 	    ;;
     esac
-    return 0
+}
+
+
+# Print logfiles.
+# $*: logfiles
+DUMP_LOGFILE()
+{
+    for x in $*; do
+	if [ -f $x ]; then
+	    echo "=================================="
+	    echo "Dumping $x"
+	    echo "=================================="
+	    cat $x
+	    echo "==== END $x ====="
+	    echo
+	fi
+    done
 }
 
 
@@ -237,6 +256,12 @@ while [ $# -gt 0 ]; do
 	    with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF
 	    szlib_path=""	# reset the path
 	    ;;
+	--enable-verbose)
+	    vflag=1
+	    ;;
+	--disable-verbose)
+	    vflag=0
+	    ;;
 	--help)
 	    # print the detail help page and exit
 	    HELP
@@ -250,6 +275,7 @@ while [ $# -gt 0 ]; do
     esac
     shift
 done
+$DPRINT after option parsing vflag=$vflag
 
 # Always display the brief help page
 HELP_BRIEF
@@ -271,6 +297,12 @@ if [ $? != 0 ]; then
     echo $vers failed. Aborted.
     exit 1
 fi
+
+# setup output of all the log files if verbose is on upon exit
+trap \
+"if [ $vflag -ne 0 ]; then DUMP_LOGFILE \$configlog \$makelog \$testlog \$packlog \$installlog; fi" \
+0
+
 echo Running Cmake for HDF5-${version} ...  
 #      4. Configure the C library, tools and tests with this command:
 #         If successful, append the configure summary to the configure logfile.
@@ -299,7 +331,6 @@ STEP "Test the library and tools..." "ctest . -C Release" $testlog
 STEP "Create an install image..." "cpack -C Release CPackConfig.cmake" $packlog
       
 #      8. Install with this command:
-#STEP "Install..." "./HDF5-${version}-Linux.sh --skip-license" $installlog
 STEP "Install..." "INSTALL_HDF5" $installlog
 # save the last exit code
 exit_code=$?

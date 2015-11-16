@@ -49,6 +49,7 @@
 ./bin/deploy
 ./bin/distdep
 ./bin/errors              _DO_NOT_DISTRIBUTE_
+./bin/genparser
 ./bin/gcov_script            _DO_NOT_DISTRIBUTE_
 ./bin/h5vers
 ./bin/iostats
@@ -2386,7 +2387,10 @@
 ./hl/src/H5LDprivate.h
 ./hl/src/H5LDpublic.h
 ./hl/src/H5LT.c
+./hl/src/H5LTanalyze.c
 ./hl/src/H5LTanalyze.l
+./hl/src/H5LTparse.c
+./hl/src/H5LTparse.h
 ./hl/src/H5LTparse.y
 ./hl/src/H5LTprivate.h
 ./hl/src/H5LTpublic.h
