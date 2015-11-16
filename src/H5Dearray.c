@@ -735,7 +735,7 @@ H5D__earray_dst_dbg_context(void *_dbg_ctx)
 static herr_t
 H5D__earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
 {
-    H5O_loc_t oloc;         /* Temporary object header location for dataset */
+    H5O_loc_t oloc;                     /* Temporary object header location for dataset */
     H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -792,7 +792,7 @@ done:
 static herr_t
 H5D__earray_idx_undepend(const H5D_chk_idx_info_t *idx_info)
 {
-    H5O_loc_t oloc;         /* Temporary object header location for dataset */
+    H5O_loc_t oloc;                     /* Temporary object header location for dataset */
     H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1057,17 +1057,12 @@ done:
 static hbool_t
 H5D__earray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
-    hbool_t ret_value = FALSE;          /* Return value */
-
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(storage);
 
-    /* Set return value */
-    ret_value = (hbool_t)H5F_addr_defined(storage->idx_addr);
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
 } /* end H5D__earray_idx_is_space_alloc() */
 
 
@@ -1114,6 +1109,7 @@ H5D__earray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *
     if(udata->chunk_idx != (udata->chunk_idx & 0xffffffff)) /* negative value */
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk index must be less than 2^32")
 
+    /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
 	H5D_earray_filt_elmt_t elmt;            /* Extensible array element */
 
@@ -1124,11 +1120,12 @@ H5D__earray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *
 	/* Set the info for the chunk */
 	if(H5EA_set(ea, idx_info->dxpl_id, udata->chunk_idx, &elmt) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk info")
-    } else {
+    } /* end if */
+    else {
 	/* Set the address for the chunk */
 	if(H5EA_set(ea, idx_info->dxpl_id, udata->chunk_idx, &udata->chunk_block.offset) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk address")
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1245,13 +1242,12 @@ done:
 static herr_t
 H5D__earray_idx_resize(H5O_layout_chunk_t *layout)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(layout);
-
 
     /* "Swizzle" constant dimensions for this dataset */
     if(layout->u.earray.unlim_dim > 0) {

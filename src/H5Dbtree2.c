@@ -1,5 +1,4 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
@@ -498,7 +497,6 @@ H5D__bt2_unfilt_encode(uint8_t *raw, const void *_record, void *_ctx)
 {
     H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx;	/* Callback context structure */
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record; /* The native record */
-    hsize_t  tmp_offset; 	/* Temporary coordinate offset, from file */
     unsigned u;			/* Local index varible */
 
     FUNC_ENTER_STATIC_NOERR
@@ -509,11 +507,8 @@ H5D__bt2_unfilt_encode(uint8_t *raw, const void *_record, void *_ctx)
     /* Encode the record's fields */
     H5F_addr_encode_len(ctx->sizeof_addr, &raw, record->chunk_addr);
     /* (Don't encode the chunk size & filter mask for non-filtered B-tree records) */
-    for(u = 0; u < ctx->ndims; u++) {
-	/* Compute coordinate offset from scaled offset */
-        tmp_offset = record->scaled[u] * ctx->dim[u];
-        UINT64ENCODE(raw, tmp_offset);
-    } /* end for */
+    for(u = 0; u < ctx->ndims; u++)
+	UINT64ENCODE(raw, record->scaled[u]);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D__bt2_unfilt_encode() */
@@ -537,7 +532,6 @@ H5D__bt2_unfilt_decode(const uint8_t *raw, void *_record, void *_ctx)
 {
     H5D_bt2_ctx_t *ctx = (H5D_bt2_ctx_t *)_ctx;       	/* Callback context structure */
     H5D_chunk_rec_t *record = (H5D_chunk_rec_t *)_record;	/* The native record */
-    hsize_t  tmp_offset; 	/* Temporary coordinate offset, from file */
     unsigned	u;		/* Local index variable */
 
     FUNC_ENTER_STATIC_NOERR
@@ -549,14 +543,8 @@ H5D__bt2_unfilt_decode(const uint8_t *raw, void *_record, void *_ctx)
     H5F_addr_decode_len(ctx->sizeof_addr, &raw, &record->chunk_addr);
     record->nbytes = ctx->chunk_size;
     record->filter_mask = 0;
-    for(u = 0; u < ctx->ndims; u++) {
-	/* Retrieve coordinate offset */
-        UINT64DECODE(raw, tmp_offset);
-        HDassert(0 == (tmp_offset % ctx->dim[u]));
-
-        /* Convert to a scaled offset */
-        record->scaled[u] = tmp_offset / ctx->dim[u];
-    } /* end for */
+    for(u = 0; u < ctx->ndims; u++)
+	UINT64DECODE(raw, record->scaled[u]);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5D__bt2_unfilt_decode() */
@@ -915,17 +903,12 @@ done:
 static hbool_t
 H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
-    hbool_t ret_value = FALSE;          /* Return value */
-
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(storage);
 
-    /* Set return value */
-    ret_value = (hbool_t)H5F_addr_defined(storage->idx_addr);
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
 } /* end H5D__bt2_idx_is_space_alloc() */
 
 
@@ -997,11 +980,10 @@ H5D__bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     HDassert(H5F_addr_defined(udata->chunk_block.offset));
 
     /* Check if the v2 B-tree is open yet */
-    if(NULL == idx_info->storage->u.btree2.bt2) {
+    if(NULL == idx_info->storage->u.btree2.bt2)
 	/* Open existing v2 B-tree */
         if(H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
-    } /* end if */
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1023,7 +1005,7 @@ H5D__bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     if(udata->need_modify) {
 	HDassert(idx_info->pline->nused > 0);
 
-	/* Modify record for filtered object in v2 B-tree */
+	/* Modify record for v2 B-tree */
 	if(H5B2_modify(bt2, idx_info->dxpl_id, &bt2_udata, H5D__bt2_mod_cb, &bt2_udata.rec) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree")
     } /* end if */
@@ -1098,11 +1080,10 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(udata);
 
     /* Check if the v2 B-tree is open yet */
-    if(NULL == idx_info->storage->u.btree2.bt2) {
+    if(NULL == idx_info->storage->u.btree2.bt2)
 	/* Open existing v2 B-tree */
         if(H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
-    } /* end if */
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1175,13 +1156,12 @@ H5D__bt2_idx_iterate_cb(const void *_record, void *_udata)
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record;   /* Native record */
     int ret_value = -1;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Make "generic chunk" callback */
     if((ret_value = (udata->cb)(record, udata->udata)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, (-1), "failure in generic chunk iterator callback");
+        HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__bt2_idx_iterate_cb() */
 
@@ -1219,11 +1199,10 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     HDassert(chunk_udata);
 
     /* Check if the v2 B-tree is open yet */
-    if(NULL == idx_info->storage->u.btree2.bt2) {
+    if(NULL == idx_info->storage->u.btree2.bt2)
 	/* Open existing v2 B-tree */
         if(H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
-    } /* end if */
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1234,7 +1213,7 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 
     /* Iterate over the records in the v2 B-tree */
     if((ret_value = H5B2_iterate(bt2, idx_info->dxpl_id, H5D__bt2_idx_iterate_cb, &udata)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over v2 B-tree for dataset chunks");
+        HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over chunk v2 B-tree");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1311,11 +1290,10 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
     HDassert(udata);
 
     /* Check if the v2 B-tree is open yet */
-    if(NULL == idx_info->storage->u.btree2.bt2) {
+    if(NULL == idx_info->storage->u.btree2.bt2)
 	/* Open existing v2 B-tree */
         if(H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
-    } /* end if */
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1461,10 +1439,9 @@ H5D__bt2_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     HDassert(!H5F_addr_defined(idx_info_dst->storage->idx_addr));
 
     /* Check if the source v2 B-tree is open yet */
-    if(NULL == idx_info_src->storage->u.btree2.bt2) {
+    if(NULL == idx_info_src->storage->u.btree2.bt2)
         if(H5D__bt2_idx_open(idx_info_src) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
-    } /* end if */
 
     /* Set copied metadata tag */
     H5_BEGIN_TAG(idx_info_dst->dxpl_id, H5AC__COPIED_TAG, FAIL);
@@ -1561,6 +1538,7 @@ H5D__bt2_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     /* Get v2 B-tree size for indexing chunked dataset */
     if(H5B2_size(bt2_cdset, idx_info->dxpl_id, index_size) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve v2 B-tree storage info for chunked dataset")
+
 done:
     /* Close v2 B-tree index */
     if(bt2_cdset && H5B2_close(bt2_cdset, idx_info->dxpl_id) < 0)

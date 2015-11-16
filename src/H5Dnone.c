@@ -48,9 +48,11 @@
 /* Local Macros */
 /****************/
 
+
 /******************/
 /* Local Typedefs */
 /******************/
+
 
 /********************/
 /* Local Prototypes */
@@ -59,19 +61,20 @@
 /* Non Index chunking I/O ops */
 static herr_t H5D__none_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D__none_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
-static herr_t H5D_none_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D__none_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
-static int H5D_none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
+static int H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_cb_func_t chunk_cb, void *chunk_udata);
-static herr_t H5D_none_idx_remove(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D__none_idx_remove(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata);
-static herr_t H5D_none_idx_delete(const H5D_chk_idx_info_t *idx_info);
-static herr_t H5D_none_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
+static herr_t H5D__none_idx_delete(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__none_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     const H5D_chk_idx_info_t *idx_info_dst);
-static herr_t H5D_none_idx_size(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D__none_idx_size(const H5D_chk_idx_info_t *idx_info,
     hsize_t *size);
-static herr_t H5D_none_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
-static herr_t H5D_none_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream);
+static herr_t H5D__none_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr);
+static herr_t H5D__none_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream);
+
 
 /*********************/
 /* Package Variables */
@@ -84,18 +87,19 @@ const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
     H5D__none_idx_create,		/* create */
     H5D__none_idx_is_space_alloc, 	/* is_space_alloc */
     NULL,				/* insert */
-    H5D_none_idx_get_addr,		/* get_addr */
+    H5D__none_idx_get_addr,		/* get_addr */
     NULL,				/* resize */
-    H5D_none_idx_iterate,		/* iterate */
-    H5D_none_idx_remove,		/* remove */
-    H5D_none_idx_delete,		/* delete */
-    H5D_none_idx_copy_setup,		/* copy_setup */
+    H5D__none_idx_iterate,		/* iterate */
+    H5D__none_idx_remove,		/* remove */
+    H5D__none_idx_delete,		/* delete */
+    H5D__none_idx_copy_setup,		/* copy_setup */
     NULL,				/* copy_shutdown */
-    H5D_none_idx_size,			/* size */
-    H5D_none_idx_reset,			/* reset */
-    H5D_none_idx_dump,			/* dump */
+    H5D__none_idx_size,			/* size */
+    H5D__none_idx_reset,		/* reset */
+    H5D__none_idx_dump,			/* dump */
     NULL				/* dest */
 }};
+
 
 /*****************************/
 /* Library Private Variables */
@@ -105,6 +109,7 @@ const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
 /*******************/
 /* Local Variables */
 /*******************/
+
 
 
 /*-------------------------------------------------------------------------
@@ -178,7 +183,7 @@ H5D__none_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_none_idx_get_addr
+ * Function:	H5D__none_idx_get_addr
  *
  * Purpose:	Get the file address of a chunk.
  *		Save the retrieved information in the udata supplied.
@@ -190,10 +195,11 @@ H5D__none_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_none_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
+H5D__none_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
+    /* Sanity checks */
     HDassert(idx_info);
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
@@ -214,11 +220,11 @@ H5D_none_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     udata->filter_mask = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5D_none_idx_get_addr() */
+} /* H5D__none_idx_get_addr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_none_idx_iterate
+ * Function:	H5D__none_idx_iterate
  *
  * Purpose:	Iterate over the chunks in an index, making a callback
  *              for each one.
@@ -230,7 +236,7 @@ H5D_none_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
  *-------------------------------------------------------------------------
  */
 static int
-H5D_none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
+H5D__none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_cb_func_t chunk_cb, void *chunk_udata)
 {
     H5D_chunk_rec_t chunk_rec;			/* generic chunk record  */
@@ -238,10 +244,11 @@ H5D_none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     unsigned u;		/* Local index variable */
     int curr_dim;       /* Current rank */
     hsize_t idx;    	/* Array index of chunk */
-    int ret_value;    	/* Return value */
+    int ret_value = -1; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
+    /* Sanity checks */
     HDassert(idx_info);
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
@@ -290,11 +297,11 @@ H5D_none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     } /* end for */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_none_idx_iterate() */
+} /* end H5D__none_idx_iterate() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_none_idx_remove
+ * Function:	H5D__none_idx_remove
  *
  * Purpose:	Remove chunk from index.
  *
@@ -309,18 +316,18 @@ H5D_none_idx_iterate(const H5D_chk_idx_info_t *idx_info,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_none_idx_remove(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, H5D_chunk_common_ud_t H5_ATTR_UNUSED *udata)
+H5D__none_idx_remove(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, H5D_chunk_common_ud_t H5_ATTR_UNUSED *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* NO OP */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5D_none_idx_remove() */
+} /* H5D__none_idx_remove() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_none_idx_delete
+ * Function:	H5D__none_idx_delete
  *
  * Purpose:	Delete raw data storage for entire dataset (i.e. all chunks)
  *
@@ -332,13 +339,14 @@ H5D_none_idx_remove(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, H5D_chunk
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_none_idx_delete(const H5D_chk_idx_info_t *idx_info)
+H5D__none_idx_delete(const H5D_chk_idx_info_t *idx_info)
 {
     hsize_t nbytes;                 /* Size of all chunks */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
+    /* Sanity checks */
     HDassert(idx_info);
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
@@ -356,11 +364,11 @@ H5D_none_idx_delete(const H5D_chk_idx_info_t *idx_info)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_none_idx_delete() */
+} /* end H5D__none_idx_delete() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_none_idx_copy_setup
+ * Function:	H5D__none_idx_copy_setup
  *
  * Purpose:	Set up any necessary information for copying chunks
  *
@@ -371,12 +379,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_none_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
+H5D__none_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     const H5D_chk_idx_info_t *idx_info_dst)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(idx_info_src);
@@ -406,11 +414,11 @@ H5D_none_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_none_idx_copy_setup() */
+} /* end H5D__none_idx_copy_setup() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D_none_idx_size
+ * Function:    H5D__none_idx_size
  *
  * Purpose:     Retrieve the amount of index storage for chunked dataset
  *
@@ -422,9 +430,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_none_idx_size(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, hsize_t *index_size)
+H5D__none_idx_size(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, hsize_t *index_size)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(index_size);
@@ -432,11 +440,11 @@ H5D_none_idx_size(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, hsize_t *in
     *index_size = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D_none_idx_size() */
+} /* end H5D__none_idx_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_none_idx_reset
+ * Function:	H5D__none_idx_reset
  *
  * Purpose:	Reset indexing information.
  *
@@ -447,9 +455,9 @@ H5D_none_idx_size(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info, hsize_t *in
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_none_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
+H5D__none_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(storage);
@@ -459,11 +467,11 @@ H5D_none_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
 	storage->idx_addr = HADDR_UNDEF;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D_none_idx_reset() */
+} /* end H5D__none_idx_reset() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_none_idx_dump
+ * Function:	H5D__none_idx_dump
  *
  * Purpose:	Dump 
  *
@@ -474,9 +482,9 @@ H5D_none_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_addr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_none_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
+H5D__none_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(storage);
@@ -485,5 +493,5 @@ H5D_none_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
     HDfprintf(stream, "    Address: %a\n", storage->idx_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5D_none_idx_dump() */
+} /* end H5D__none_idx_dump() */
 

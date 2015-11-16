@@ -971,17 +971,12 @@ done:
 static hbool_t
 H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
-    hbool_t ret_value = FALSE;          /* Return value */
-
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(storage);
 
-    /* Set return value */
-    ret_value = (hbool_t)H5F_addr_defined(storage->idx_addr);
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
 } /* end H5D__btree_idx_is_space_alloc() */
 
 
@@ -1089,7 +1084,7 @@ H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     H5D_chunk_rec_t chunk_rec;  /* Generic chunk record for callback */
     int ret_value = -1;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check for memcpy() */
     HDcompile_assert(offsetof(H5D_chunk_rec_t, nbytes) == offsetof(H5D_btree_key_t, nbytes));
@@ -1105,9 +1100,8 @@ H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
 
     /* Make "generic chunk" callback */
     if((ret_value = (udata->cb)(&chunk_rec, udata->udata)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CALLBACK, (-1), "failure in generic chunk iterator callback");
+        HERROR(H5E_DATASET, H5E_CALLBACK, "failure in generic chunk iterator callback");
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__btree_idx_iterate_cb() */
 
@@ -1132,7 +1126,7 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_btree_it_ud_t	udata;  /* User data for B-tree iterator callback */
     int ret_value = -1;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -1152,9 +1146,8 @@ H5D__btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 
     /* Iterate over existing chunks */
     if((ret_value = H5B_iterate(idx_info->f, idx_info->dxpl_id, H5B_BTREE, idx_info->storage->idx_addr, H5D__btree_idx_iterate_cb, &udata)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADITER, (-1), "unable to iterate over chunk B-tree");
+        HERROR(H5E_DATASET, H5E_BADITER, "unable to iterate over chunk B-tree");
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__btree_idx_iterate() */
 

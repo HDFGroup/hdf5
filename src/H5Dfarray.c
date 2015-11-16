@@ -736,7 +736,7 @@ H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
 static herr_t
 H5D__farray_idx_depend(const H5D_chk_idx_info_t *idx_info)
 {
-    H5O_loc_t oloc;         /* Temporary object header location for dataset */
+    H5O_loc_t oloc;                     /* Temporary object header location for dataset */
     H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -792,7 +792,7 @@ done:
 static herr_t
 H5D__farray_idx_undepend(const H5D_chk_idx_info_t *idx_info)
 {
-    H5O_loc_t oloc;         /* Temporary object header location for dataset */
+    H5O_loc_t oloc;                     /* Temporary object header location for dataset */
     H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1006,17 +1006,12 @@ done:
 static hbool_t
 H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
-    hbool_t ret_value = FALSE;  /* Return value */
-
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(storage);
 
-    /* Set return value */
-    ret_value = (hbool_t)H5F_addr_defined(storage->idx_addr);
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
 } /* end H5D__farray_idx_is_space_alloc() */
 
 
