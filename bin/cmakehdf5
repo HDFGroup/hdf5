@@ -23,6 +23,7 @@ makelog="#${progname}_2build.log"
 testlog="#${progname}_3test.log"
 packlog="#${progname}_4pack.log"
 installlog="#${progname}_5install.log"
+vflag=1		# verbose flag default to on.
 config_summary=libhdf5.settings
 exit_code=0
 
@@ -51,7 +52,8 @@ build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON	# High Level interface default on
 build_testing=-DBUILD_TESTING:BOOL=ON		# Build tests default on
 build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON		# Build tools default on
 with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT=ON	# enable zlib filter default on
-with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT=OFF	# enables zlib filter default off
+with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT=OFF	# enables szip filter default off
+szlib_path=""					# szip lib path default off
 shared_lib=-DBUILD_SHARED_LIBS:BOOL=ON		# enables shared lib; default on
 
 
@@ -90,6 +92,10 @@ Usage: $progname [<options>]
     enable or disable building tests. Default is on.
   --with-zlib | --without-zlib:
     Use zlib library for external deflate I/O filter. Default is on.
+  --with-szlib | --with-szlib=<libpath> | --without-szlib:
+    Use szlib library for external deflate I/O filter. Default is on.
+  --enable-verbose | --disable-verbose:
+    enable or disable verbose output. Default is on.
   --help: shows details help page
 EOF
 }
@@ -155,7 +161,23 @@ INSTALL_HDF5()
 	    return 1
 	    ;;
     esac
-    return 0
+}
+
+
+# Print logfiles.
+# $*: logfiles
+DUMP_LOGFILE()
+{
+    for x in $*; do
+	if [ -f $x ]; then
+	    echo "=================================="
+	    echo "Dumping $x"
+	    echo "=================================="
+	    cat $x
+	    echo "==== END $x ====="
+	    echo
+	fi
+    done
 }
 
 
@@ -224,6 +246,25 @@ while [ $# -gt 0 ]; do
 	--without-zlib)
 	    with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF
 	    ;;
+	--with-szlib)
+	    with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON
+	    szlib_path=""	# szlib is in default paths
+	    ;;
+	--with-szlib=*)
+	    xarg=`echo $1 | cut -d= -f2-`
+	    with_szlib="-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON"
+	    szlib_path="SZIP_INSTALL=$xarg"
+	    ;;
+	--without-szlib)
+	    with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF
+	    szlib_path=""	# reset the path
+	    ;;
+	--enable-verbose)
+	    vflag=1
+	    ;;
+	--disable-verbose)
+	    vflag=0
+	    ;;
 	--help)
 	    # print the detail help page and exit
 	    HELP
@@ -237,6 +278,7 @@ while [ $# -gt 0 ]; do
     esac
     shift
 done
+$DPRINT after option parsing vflag=$vflag
 
 # Always display the brief help page
 HELP_BRIEF
@@ -258,10 +300,18 @@ if [ $? != 0 ]; then
     echo $vers failed. Aborted.
     exit 1
 fi
+
+# setup output of all the log files if verbose is on upon exit
+trap \
+"if [ $vflag -ne 0 ]; then DUMP_LOGFILE \$configlog \$makelog \$testlog \$packlog \$installlog; fi" \
+0
+
 echo Running Cmake for HDF5-${version} ...  
 #      4. Configure the C library, tools and tests with this command:
 #         If successful, append the configure summary to the configure logfile.
-STEP "Configure..." "cmake \
+STEP "Configure..." \
+   "env ${szlib_path} \
+    cmake \
     -C $cacheinit \
     $build_cpp_lib \
     $build_fortran \
@@ -285,7 +335,6 @@ STEP "Test the library and tools..." "ctest . -C Release" $testlog
 STEP "Create an install image..." "cpack -C Release CPackConfig.cmake" $packlog
       
 #      8. Install with this command:
-#STEP "Install..." "./HDF5-${version}-Linux.sh --skip-license" $installlog
 STEP "Install..." "INSTALL_HDF5" $installlog
 # save the last exit code
 exit_code=$?
