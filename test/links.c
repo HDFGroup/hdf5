@@ -3998,6 +3998,15 @@ external_set_elink_acc_flags(const char H5_ATTR_UNUSED *env_h5_drvr,
     } H5E_END_TRY;
     if(subgroup != FAIL) TEST_ERROR
 
+    /* Attempt to set SWMR flags on gapl.
+     * This is just a smoke check of the flags. The actual external link
+     * functionality is tested in the SWMR tests.
+     */
+    /* Set SWMR reader flags on gapl */
+    if(H5Pset_elink_acc_flags(gapl, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ) < 0) TEST_ERROR
+    /* Set SWMR writer flags on gapl */
+    if(H5Pset_elink_acc_flags(gapl, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE) < 0) TEST_ERROR
+
     /* Attempt to set invalid flags on gapl */
     H5E_BEGIN_TRY {
         ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_TRUNC);
@@ -4009,6 +4018,16 @@ external_set_elink_acc_flags(const char H5_ATTR_UNUSED *env_h5_drvr,
     if(ret != FAIL) TEST_ERROR
     H5E_BEGIN_TRY {
         ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_CREAT);
+    } H5E_END_TRY;
+    if(ret != FAIL) TEST_ERROR
+    /* SWMR reader with write access */
+    H5E_BEGIN_TRY {
+        ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_RDWR | H5F_ACC_SWMR_READ);
+    } H5E_END_TRY;
+    if(ret != FAIL) TEST_ERROR
+    /* SWMR writer with read-only access */
+    H5E_BEGIN_TRY {
+        ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE);
     } H5E_END_TRY;
     if(ret != FAIL) TEST_ERROR
 
