@@ -1001,6 +1001,7 @@
 ./test/test_usecases.sh.in
 ./test/testmeta.c
 ./test/testswmr.sh.in
+./test/testvdsswmr.sh.in
 ./test/tfile.c
 ./test/tgenprop.c
 ./test/th5o.c

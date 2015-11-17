@@ -107,8 +107,6 @@ main(int argc, char *argv[])
         if(H5Sclose(fsid) < 0)
             TEST_ERROR
 
-        HDfprintf(stderr, "read plane: %d\n", dims[0]);
-
     } while (dims[0] < N_PLANES_TO_WRITE);
 
     /* Close file and dataset */
@@ -121,6 +119,7 @@ main(int argc, char *argv[])
 
     HDfree(buffer);
 
+    HDfprintf(stderr, "SWMR reader exited successfully\n");
     return EXIT_SUCCESS;
 
 error:
@@ -138,6 +137,7 @@ error:
             free(buffer);
     } H5E_END_TRY
 
+    HDfprintf(stderr, "ERROR: SWMR reader exited with errors\n");
     return EXIT_FAILURE;
 
 } /* end main */

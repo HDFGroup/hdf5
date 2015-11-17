@@ -106,7 +106,6 @@ main(int argc, char *argv[])
             TEST_ERROR
 
         /* Write the plane to the dataset. */
-        printf("Writing plane: %d\n", i);
         if(H5Dwrite(did, H5T_NATIVE_INT, msid, fsid, H5P_DEFAULT, buffer) < 0)
             TEST_ERROR
 
@@ -133,6 +132,7 @@ main(int argc, char *argv[])
         TEST_ERROR
     HDfree(buffer);
 
+    HDfprintf(stderr, "SWMR writer exited successfully\n");
     return EXIT_SUCCESS;
 
 error:
@@ -152,8 +152,8 @@ error:
             HDfree(buffer);
     } H5E_END_TRY
 
+    HDfprintf(stderr, "ERROR: SWMR writer exited with errors\n");
     return EXIT_FAILURE;
-
 
 } /* end main */
 
