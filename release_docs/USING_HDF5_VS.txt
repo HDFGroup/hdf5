@@ -9,6 +9,9 @@ These suggestions are for Visual Studio users.
 Instructions for building and testing HDF5 applications using CMake can
 be found in the USING_HDF5_CMake.txt file found in this folder.
 
+NOTE: Building applications with the dynamic/shared hdf5 libraries requires
+      that the "H5_BUILT_AS_DYNAMIC_LIB" compile definition be used.
+
 The following two sections are helpful if you choose to not use CMake to build
 your applications. Consult the Microsoft documentation for your product
 for more information.
