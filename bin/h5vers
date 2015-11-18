@@ -377,12 +377,12 @@ sub gen_configure {
   $conf =~ /^(.*?)\/?configure.ac$/;
 
   if ($1) {
-    $rc = system("cd $1 && bin/reconfigure >/dev/null 2>/dev/null && rm -rf autom4te.cache");
+    $rc = system("cd $1 && ./autogen.sh -p >/dev/null 2>/dev/null && rm -rf autom4te.cache");
   } else {
-    $rc = system("bin/reconfigure >/dev/null 2>/dev/null && rm -rf autom4te.cache");
+    $rc = system("./autogen.sh -p >/dev/null 2>/dev/null && rm -rf autom4te.cache");
   }
   if ($rc) {
-    printf("bin/reconfigure failed with exit code %d. Aborted.\n", $rc);
+    printf("./autogen.sh -p failed with exit code %d. Aborted.\n", $rc);
     exit 1;
   }
 }
