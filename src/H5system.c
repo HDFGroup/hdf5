@@ -639,8 +639,8 @@ Pflock(int fd, int operation) {
  *
  *-------------------------------------------------------------------------
  */
-int
-Nflock(int fd, int operation) {
+int H5_ATTR_CONST
+Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
     /* just fail */
     return -1;
 } /* end Nflock() */

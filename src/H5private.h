@@ -794,6 +794,13 @@ typedef struct {
 #ifndef HDfileno
     #define HDfileno(F)    fileno(F)
 #endif /* HDfileno */
+/* Since flock is so prevalent, always build these functions
+ * when possible to avoid them becoming dead code.
+ */
+#ifdef H5_HAVE_FCNTL
+H5_DLL int Pflock(int fd, int operation);
+#endif /* H5_HAVE_FCNTL */
+H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDflock
     /* NOTE: flock(2) is not present on all POSIX systems.
      * If it is not present, we try a flock() equivalent based on
@@ -803,10 +810,8 @@ typedef struct {
     #if defined(H5_HAVE_FLOCK)
         #define HDflock(F,L)    flock(F,L)
     #elif defined(H5_HAVE_FCNTL)
-        H5_DLL int Pflock(int fd, int operation);
         #define HDflock(F,L)    Pflock(F,L)
     #else
-        H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
         #define HDflock(F,L)    Nflock(F,L)
     #endif /* H5_HAVE_FLOCK */
 #endif /* HDflock */
