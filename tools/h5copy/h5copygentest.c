@@ -38,8 +38,6 @@
 #define GROUP_EMPTY             "grp_empty"
 #define GROUP_DATASETS          "grp_dsets"
 #define GROUP_NESTED            "grp_nested"
-#define TRUE			1
-#define FALSE			0
 
 /* Obj reference */
 #define OBJ_REF_DS "Dset1"

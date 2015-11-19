@@ -21,9 +21,6 @@
 /* Name of tool */
 #define PROGRAMNAME "h5jam"
 
-#define TRUE 1
-#define FALSE 0
-
 hsize_t write_pad (int, hsize_t);
 hsize_t compute_user_block_size (hsize_t);
 hsize_t copy_some_to_file (int, int, hsize_t, hsize_t, ssize_t);
