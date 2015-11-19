@@ -335,7 +335,7 @@ int main(int argc, const char *argv[])
     if(0 == use_seed) {
         struct timeval t;
         gettimeofday(&t, NULL);
-        random_seed = (unsigned)((t.tv_sec * 1000) + t.tv_usec);
+        random_seed = (unsigned)(t.tv_usec);
     } /* end if */
     srandom(random_seed);
     /* ALWAYS emit the random seed for possible debugging */
