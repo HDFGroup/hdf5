@@ -9746,8 +9746,8 @@ error:
 static herr_t 
 test_idx_compatible(void)
 {
-    hid_t	fid;		/* File id */
-    hid_t       did;		/* Dataset id */
+    hid_t	fid = -1;		/* File id */
+    hid_t       did = -1;		/* Dataset id */
     const char  *filename = NULL;  /* old test file name */
     unsigned    j;              /* Local index variable */
     H5D_chunk_index_t idx_type; /* Chunked dataset index type */
@@ -9818,10 +9818,10 @@ error:
 static herr_t
 test_unfiltered_edge_chunks(hid_t fapl)
 {
-    hid_t       fid;            /* File id */
-    hid_t       did;            /* Dataset id */
-    hid_t       sid;            /* Dataspace id */
-    hid_t       dcpl;           /* DCPL id */
+    hid_t       fid = -1;            /* File id */
+    hid_t       did = -1;            /* Dataset id */
+    hid_t       sid = -1;            /* Dataspace id */
+    hid_t       dcpl = -1;           /* DCPL id */
     hsize_t     dim[2] = {4, 3}; /* Dataset dimensions */
     hsize_t     cdim[2] = {2, 2}; /* Chunk dimension */
     char        wbuf[4][3];     /* Write buffer */

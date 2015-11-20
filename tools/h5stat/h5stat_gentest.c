@@ -352,11 +352,11 @@ error:
 static void 
 gen_idx_file(const char *fname)
 {
-    hid_t	fapl;		    /* file access property id */
-    hid_t	fid;	            /* file id */
-    hid_t   	sid;	            /* space id */
-    hid_t	dcpl;	    	    /* dataset creation property id */
-    hid_t	did, did2;	    /* dataset id */
+    hid_t	fapl = -1;		    /* file access property id */
+    hid_t	fid = -1;	            /* file id */
+    hid_t   	sid = -1;	            /* space id */
+    hid_t	dcpl = -1;	    	    /* dataset creation property id */
+    hid_t	did = -1, did2 = -1;	    /* dataset id */
     hsize_t 	dims[1] = {10};     /* dataset dimension */
     hsize_t 	c_dims[1] = {2};    /* chunk dimension */
     int		i;		    /* local index variable */

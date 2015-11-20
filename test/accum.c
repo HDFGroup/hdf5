@@ -1813,7 +1813,7 @@ test_swmr_write_big(hbool_t new)
     hid_t fid = -1;			    /* File ID */
     hid_t fapl = -1;			/* File access property list */
     H5F_t *rf = NULL;			/* File pointer */
-    uint8_t *wbuf2, *rbuf;      /* Buffers for reading & writing */
+    uint8_t *wbuf2 = NULL, *rbuf = NULL;      /* Buffers for reading & writing */
     uint8_t wbuf[1024];			/* Buffer for reading & writing */
     unsigned u;                 /* Local index variable */
 #ifdef H5_HAVE_UNISTD_H

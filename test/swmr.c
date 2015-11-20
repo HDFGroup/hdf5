@@ -3767,8 +3767,8 @@ error:
 static int
 test_file_lock_same(hid_t in_fapl)
 {
-    hid_t fid, fid2;    		/* File IDs */
-    hid_t fapl;				/* File access property list */
+    hid_t fid = -1, fid2 = -1;    		/* File IDs */
+    hid_t fapl = -1;				/* File access property list */
     unsigned intent;    		/* File access flags */
     char filename[NAME_BUF_SIZE];       /* file name */
 
@@ -4218,8 +4218,8 @@ error:
 static int
 test_file_lock_concur(hid_t in_fapl)
 {
-    hid_t fid;    			/* File ID */
-    hid_t fapl;                 	/* File access property list */
+    hid_t fid = -1;    			/* File ID */
+    hid_t fapl = -1;                 	/* File access property list */
     char filename[NAME_BUF_SIZE];       /* file name */
     pid_t childpid=0;			/* Child process ID */
     int child_status;			/* Status passed to waitpid */

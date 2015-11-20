@@ -175,7 +175,7 @@ H5O__cache_proxy_deserialize(const void H5_ATTR_UNUSED *_image, size_t H5_ATTR_U
 {
     H5O_proxy_t          *proxy = NULL;				/* Object header proxy */
     H5O_proxy_cache_ud_t *udata = (H5O_proxy_cache_ud_t *)_udata;	/* User data for callback */
-    H5O_proxy_t          *ret_value;  				/* Return value */
+    H5O_proxy_t          *ret_value = NULL;  				/* Return value */
 
     FUNC_ENTER_STATIC
 

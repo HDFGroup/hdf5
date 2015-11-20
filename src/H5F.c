@@ -1602,7 +1602,7 @@ done:
 herr_t
 H5Fstart_swmr_write(hid_t file_id)
 {
-    H5F_t *file;                /* File info */
+    H5F_t *file = NULL;         /* File info */
     size_t grp_dset_count=0; 	/* # of open objects: groups & datasets */
     size_t nt_attr_count=0; 	/* # of opened named datatypes  + opened attributes */
     hid_t *obj_ids=NULL;	/* List of ids */

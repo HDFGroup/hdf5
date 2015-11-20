@@ -191,7 +191,7 @@ H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, uint16_t nclasses,
 {
     H5FS_t *fspace = NULL;              /* New free space structure */
     H5FS_hdr_cache_ud_t cache_udata;    /* User-data for metadata cache callback */
-    H5FS_t *ret_value;                  /* Return value */
+    H5FS_t *ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, NULL)
 #ifdef H5FS_DEBUG

@@ -17160,10 +17160,10 @@ static unsigned
 check_protect_retries(void)
 {
     H5F_t * file_ptr = NULL;
-    H5C_t *cache_ptr;
-    test_entry_t *base_addr;
-    test_entry_t *entry_ptr;
-    H5C_cache_entry_t * cache_entry_ptr;
+    H5C_t *cache_ptr = NULL;
+    test_entry_t *base_addr = NULL;
+    test_entry_t *entry_ptr = NULL;
+    H5C_cache_entry_t * cache_entry_ptr = NULL;
     int32_t type;
     int32_t idx;
 

@@ -1229,10 +1229,10 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
     unsigned		protect_flags = H5C__NO_FLAGS_SET;
-    void *		thing;          /* Pointer to native data structure for entry */
+    void *thing = NULL;                 /* Pointer to native data structure for entry */
     hbool_t log_enabled;                /* TRUE if logging was set up */
     hbool_t curr_logging;               /* TRUE if currently logging */
-    void *		ret_value = NULL;       /* Return value */
+    void *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
