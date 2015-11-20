@@ -948,7 +948,7 @@ H5HF__cache_iblock_get_load_size(const void *_image, void *_udata, size_t *image
     else {
         HDassert(actual_len);
         HDassert(*actual_len == *image_len);
-    }
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF__cache_iblock_get_load_size() */

@@ -43,10 +43,10 @@
 
 /* Size of serialized indirect section information */
 #define H5HF_SECT_INDIRECT_SERIAL_SIZE(h) (                                   \
-    (h)->heap_off_size  /* Indirect block's offset in "heap space" */         \
-        + 2             /* Row */                                             \
-        + 2             /* Column */                                          \
-        + 2             /* # of entries */                                    \
+    (unsigned)(h)->heap_off_size  /* Indirect block's offset in "heap space" */         \
+        + (unsigned)2             /* Row */                                             \
+        + (unsigned)2             /* Column */                                          \
+        + (unsigned)2             /* # of entries */                                    \
     )
 
 

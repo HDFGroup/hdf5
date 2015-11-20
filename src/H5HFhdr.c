@@ -225,7 +225,7 @@ H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize doubling table info")
 
     /* Set the size of heap IDs */
-    hdr->heap_len_size = MIN(hdr->man_dtable.max_dir_blk_off_size,
+    hdr->heap_len_size = (uint8_t)MIN(hdr->man_dtable.max_dir_blk_off_size,
             H5VM_limit_enc_size((uint64_t)hdr->max_man_size));
 
 done:
@@ -434,7 +434,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "can't set latest version of I/O filter pipeline")
 
         /* Compute the I/O filters' encoded size */
-        if(0 == (hdr->filter_len = H5O_msg_raw_size(hdr->f, H5O_PLINE_ID, FALSE, &(hdr->pline))))
+        if(0 == (hdr->filter_len = (unsigned)H5O_msg_raw_size(hdr->f, H5O_PLINE_ID, FALSE, &(hdr->pline))))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGETSIZE, HADDR_UNDEF, "can't get I/O filter pipeline size")
 
         /* Compute size of header on disk */
@@ -765,7 +765,7 @@ H5HF_hdr_adj_free(H5HF_hdr_t *hdr, ssize_t amt)
 
     /* Update heap header */
     HDassert(amt > 0 || hdr->total_man_free >= (hsize_t)-amt);
-    hdr->total_man_free += amt;
+    hdr->total_man_free = (hsize_t)((hssize_t)hdr->total_man_free + amt);
 
     /* Mark heap header as modified */
     if(H5HF_hdr_dirty(hdr) < 0)
@@ -805,7 +805,8 @@ H5HF_hdr_adjust_heap(H5HF_hdr_t *hdr, hsize_t new_size, hssize_t extra_free)
     hdr->man_size = new_size;
 
     /* Adjust the free space in direct blocks */
-    hdr->total_man_free += extra_free;
+    HDassert(extra_free > 0 || hdr->total_man_free >= (hsize_t)-extra_free);
+    hdr->total_man_free = (hsize_t)((hssize_t)hdr->total_man_free + extra_free);
 
     /* Mark heap header as modified */
     if(H5HF_hdr_dirty(hdr) < 0)
@@ -1247,7 +1248,7 @@ H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
 
         /* Walk backwards through entries, until we find one that has a child */
         /* (Skip direct block that will be deleted, if we find it) */
-        tmp_entry = curr_entry;
+        tmp_entry = (int)curr_entry;
         while(tmp_entry >= 0 &&
                 (H5F_addr_eq(iblock->ents[tmp_entry].addr, dblock_addr) ||
                     !H5F_addr_defined(iblock->ents[tmp_entry].addr)))
@@ -1282,7 +1283,7 @@ H5HF_hdr_reverse_iter(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr)
         else {
             unsigned row;           /* Row for entry */
 
-            curr_entry = tmp_entry;
+            curr_entry = (unsigned)tmp_entry;
 
             /* Check if entry is for a direct block */
             row = curr_entry / hdr->man_dtable.cparam.width;

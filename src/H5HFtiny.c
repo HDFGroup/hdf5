@@ -179,7 +179,7 @@ HDfprintf(stderr, "%s: obj_size = %Zu\n", FUNC, obj_size);
     } /* end else */
     HDmemcpy(id, obj, obj_size);
 #ifdef H5_CLEAR_MEMORY
-HDmemset(id + obj_size, 0, (hdr->id_len - (1 + hdr->tiny_len_extended + obj_size)));
+HDmemset(id + obj_size, 0, (hdr->id_len - ((size_t)1 + (size_t)hdr->tiny_len_extended + obj_size)));
 #endif /* H5_CLEAR_MEMORY */
 
     /* Update statistics about heap */
@@ -229,7 +229,7 @@ H5HF_tiny_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id, size_t *obj_len_p)
         /* (performed in this odd way to avoid compiler bug on tg-login3 with
          *  gcc 3.2.2 - QAK)
          */
-        enc_obj_size = *(id + 1) | ((*id & H5HF_TINY_MASK_EXT_1) << 8);
+        enc_obj_size = (size_t)*(id + 1) | ((size_t)(*id & H5HF_TINY_MASK_EXT_1) << 8);
 
     /* Set the object's length */
     *obj_len_p = enc_obj_size + 1;

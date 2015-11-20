@@ -649,7 +649,7 @@ H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
     /* Initialize new direct block entries in rows added */
     acc_dblock_free = 0;
     for(u = (old_nrows * hdr->man_dtable.cparam.width); u < (iblock->nrows * hdr->man_dtable.cparam.width); u++) {
-        unsigned row = u / hdr->man_dtable.cparam.width;        /* Row for current entry */
+        unsigned row = (unsigned)(u / hdr->man_dtable.cparam.width);        /* Row for current entry */
 
         iblock->ents[u].addr = HADDR_UNDEF;
         acc_dblock_free += hdr->man_dtable.row_tot_dblock_free[row];
