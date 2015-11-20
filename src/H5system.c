@@ -32,11 +32,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"    /* Generic Functions      */
-#include "H5Fprivate.h"    /* File access        */
-#include "H5MMprivate.h"  /* Memory management      */
-#include "H5Eprivate.h"
-
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* File access				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -667,6 +666,12 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_make_time() */
 
+#ifdef H5_HAVE_VISUAL_STUDIO
+
+/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
+#define _W32_FT_OFFSET (116444736000000000ULL)
+
+
 /*-------------------------------------------------------------------------
  * Function:  Wgettimeofday
  *
@@ -688,11 +693,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_VISUAL_STUDIO
-
-/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
-#define _W32_FT_OFFSET (116444736000000000ULL)
-
 int
 Wgettimeofday(struct timeval *tv, struct timezone *tz)
  {

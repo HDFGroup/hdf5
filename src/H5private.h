@@ -294,17 +294,23 @@
  */
 #ifdef __cplusplus
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED    /*void*/
-#   define H5_ATTR_NORETURN  /*void*/
+#   define H5_ATTR_UNUSED       /*void*/
+#   define H5_ATTR_NORETURN     /*void*/
+#   define H5_ATTR_CONST        /*void*/
+#   define H5_ATTR_PURE         /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
-#   define H5_ATTR_UNUSED    __attribute__((unused))
-#   define H5_ATTR_NORETURN  __attribute__((noreturn))
+#   define H5_ATTR_UNUSED       __attribute__((unused))
+#   define H5_ATTR_NORETURN     __attribute__((noreturn))
+#   define H5_ATTR_CONST        __attribute__((const))
+#   define H5_ATTR_PURE         __attribute__((pure))
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED    /*void*/
-#   define H5_ATTR_NORETURN  /*void*/
+#   define H5_ATTR_UNUSED       /*void*/
+#   define H5_ATTR_NORETURN     /*void*/
+#   define H5_ATTR_CONST        /*void*/
+#   define H5_ATTR_PURE         /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -2340,18 +2346,21 @@ extern hbool_t H5_api_entered_g;    /* Has library already been entered through 
 #define FUNC_ENT_PUB(pkg, pkg_init)    H5_PUBLIC_ENTER(pkg, pkg_init)
 
 /* Macros for substituting a function prefix */
-#define FUNC_PREFIX_STATIC  static
+#define FUNC_PREFIX_STATIC      static
 #define FUNC_PREFIX_PKGINIT
 #define FUNC_PREFIX_PKG
 #define FUNC_PREFIX_PRIV
 #define FUNC_PREFIX_PUB
 
 /* Macros for declaring error variables */
+/* Function can detect errors and has a specific error return value */
 #define FUNC_ERR_VAR_ERR(ret_typ, err)                                        \
     hbool_t past_catch = FALSE;                                               \
     ret_typ fail_value = err;
+/* Function can detect errors but cannot return an error value (Cleanup only) */
 #define FUNC_ERR_VAR_ERRCATCH(ret_typ, err)                                   \
     hbool_t past_catch = FALSE;
+/* Function has no need to detect or clean up from errors */
 #define FUNC_ERR_VAR_NOERR(ret_typ, err)
 
 /* Use this macro when entering all functions */

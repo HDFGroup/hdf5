@@ -368,7 +368,7 @@ H5HF_man_dblock_new(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t request,
     } /* end else */
 
     /* Adjust the size of block needed to fulfill request, with overhead */
-    if((min_dblock_size - request) < H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr))
+    if(min_dblock_size < H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr) + request)
         min_dblock_size *= 2;
 
     /* Check if this is the first block in the heap */
@@ -460,7 +460,7 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
     HDassert(dblock_size > 0);
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
-    HDassert((flags & (~H5AC__READ_ONLY_FLAG)) == 0);
+    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Set up parent info */
     udata.par_info.hdr = hdr;
@@ -543,7 +543,7 @@ H5HF_man_dblock_locate(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t obj_off,
     HDassert(ret_did_protect);
 
     /* only H5AC__READ_ONLY_FLAG may appear in flags */
-    HDassert((flags & (~H5AC__READ_ONLY_FLAG)) == 0);
+    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Look up row & column for object */
     if(H5HF_dtable_lookup(&hdr->man_dtable, obj_off, &row, &col) < 0)

@@ -48,19 +48,19 @@
 /* "Standard" size of prefix information for fractal heap metadata */
 #define H5HF_METADATA_PREFIX_SIZE(c) (                                        \
     H5_SIZEOF_MAGIC   /* Signature */                                         \
-    + 1 /* Version */                                                         \
-    + ((c) ? H5HF_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
+    + (unsigned)1 /* Version */                                               \
+    + ((c) ? (unsigned)H5HF_SIZEOF_CHKSUM : (unsigned)0) /* Metadata checksum */ \
     )
 
 /* Size of doubling-table information */
 #define H5HF_DTABLE_INFO_SIZE(h) (                                            \
-    2   /* Width of table (i.e. # of columns) */                              \
-    + (h)->sizeof_size /* Starting block size */                              \
-    + (h)->sizeof_size /* Maximum direct block size */                        \
-    + 2 /* Max. size of heap (log2 of actual value - i.e. the # of bits) */   \
-    + 2 /* Starting # of rows in root indirect block */                       \
-    + (h)->sizeof_addr /* File address of table managed */                    \
-    + 2 /* Current # of rows in root indirect block */                        \
+    (unsigned)2   /* Width of table (i.e. # of columns) */                    \
+    + (unsigned)(h)->sizeof_size /* Starting block size */                    \
+    + (unsigned)(h)->sizeof_size /* Maximum direct block size */              \
+    + (unsigned)2 /* Max. size of heap (log2 of actual value - i.e. the # of bits) */   \
+    + (unsigned)2 /* Starting # of rows in root indirect block */             \
+    + (unsigned)(h)->sizeof_addr /* File address of table managed */          \
+    + (unsigned)2 /* Current # of rows in root indirect block */              \
     )
 
 /* Flags for status byte */
@@ -78,28 +78,28 @@
     /* Fractal Heap Header specific fields */                                 \
                                                                               \
     /* General heap information */                                            \
-    + 2 /* Heap ID len */                                                     \
-    + 2 /* I/O filters' encoded len */                                        \
-    + 1 /* Status flags */                                                    \
+    + (unsigned)2 /* Heap ID len */                                           \
+    + (unsigned)2 /* I/O filters' encoded len */                              \
+    + (unsigned)1 /* Status flags */                                          \
                                                                               \
     /* "Huge" object fields */                                                \
-    + 4 /* Max. size of "managed" object */                                   \
-    + (h)->sizeof_size /* Next ID for "huge" object */                        \
-    + (h)->sizeof_addr /* File address of "huge" object tracker B-tree  */    \
+    + (unsigned)4 /* Max. size of "managed" object */                         \
+    + (unsigned)(h)->sizeof_size /* Next ID for "huge" object */              \
+    + (unsigned)(h)->sizeof_addr /* File address of "huge" object tracker B-tree  */    \
                                                                               \
     /* "Managed" object free space fields */                                  \
-    + (h)->sizeof_size /* Total man. free space */                            \
-    + (h)->sizeof_addr /* File address of free section header */              \
+    + (unsigned)(h)->sizeof_size /* Total man. free space */                  \
+    + (unsigned)(h)->sizeof_addr /* File address of free section header */    \
                                                                               \
     /* Statistics fields */                                                   \
-    + (h)->sizeof_size /* Size of man. space in heap */                       \
-    + (h)->sizeof_size /* Size of man. space iterator offset in heap */       \
-    + (h)->sizeof_size /* Size of alloacted man. space in heap */             \
-    + (h)->sizeof_size /* Number of man. objects in heap */                   \
-    + (h)->sizeof_size /* Size of huge space in heap */                       \
-    + (h)->sizeof_size /* Number of huge objects in heap */                   \
-    + (h)->sizeof_size /* Size of tiny space in heap */                       \
-    + (h)->sizeof_size /* Number of tiny objects in heap */                   \
+    + (unsigned)(h)->sizeof_size /* Size of man. space in heap */             \
+    + (unsigned)(h)->sizeof_size /* Size of man. space iterator offset in heap */ \
+    + (unsigned)(h)->sizeof_size /* Size of alloacted man. space in heap */   \
+    + (unsigned)(h)->sizeof_size /* Number of man. objects in heap */         \
+    + (unsigned)(h)->sizeof_size /* Size of huge space in heap */             \
+    + (unsigned)(h)->sizeof_size /* Number of huge objects in heap */         \
+    + (unsigned)(h)->sizeof_size /* Size of tiny space in heap */             \
+    + (unsigned)(h)->sizeof_size /* Number of tiny objects in heap */         \
                                                                               \
     /* "Managed" object doubling table info */                                \
     + H5HF_DTABLE_INFO_SIZE(h) /* Size of managed obj. doubling-table info */ \
@@ -111,15 +111,15 @@
     H5HF_METADATA_PREFIX_SIZE(h->checksum_dblocks)                            \
                                                                               \
     /* Fractal heap managed, absolutely mapped direct block specific fields */ \
-    + (h)->sizeof_addr          /* File address of heap owning the block */   \
-    + (h)->heap_off_size        /* Offset of the block in the heap */         \
+    + (unsigned)(h)->sizeof_addr          /* File address of heap owning the block */ \
+    + (unsigned)(h)->heap_off_size        /* Offset of the block in the heap */ \
     )
 
 /* Size of managed indirect block entry for a child direct block */
 #define H5HF_MAN_INDIRECT_CHILD_DIR_ENTRY_SIZE(h) (                           \
     ((h)->filter_len > 0 ?                                                    \
-        ((h)->sizeof_addr + (h)->sizeof_size + 4) : /* Size of entries for filtered direct blocks */ \
-        (h)->sizeof_addr)             /* Size of entries for un-filtered direct blocks */ \
+        ((unsigned)(h)->sizeof_addr + (unsigned)(h)->sizeof_size + (unsigned)4) : /* Size of entries for filtered direct blocks */ \
+        (unsigned)(h)->sizeof_addr)             /* Size of entries for un-filtered direct blocks */ \
     )
 
 /* Size of managed indirect block */
@@ -128,8 +128,8 @@
     H5HF_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Fractal heap managed, absolutely mapped indirect block specific fields */ \
-    + (h)->sizeof_addr          /* File address of heap owning the block */   \
-    + (h)->heap_off_size        /* Offset of the block in the heap */         \
+    + (unsigned)(h)->sizeof_addr          /* File address of heap owning the block */   \
+    + (unsigned)(h)->heap_off_size        /* Offset of the block in the heap */         \
     + (MIN(r, (h)->man_dtable.max_direct_rows) * (h)->man_dtable.cparam.width * H5HF_MAN_INDIRECT_CHILD_DIR_ENTRY_SIZE(h)) /* Size of entries for direct blocks */ \
     + (((r > (h)->man_dtable.max_direct_rows) ? (r - (h)->man_dtable.max_direct_rows) : 0)  * (h)->man_dtable.cparam.width * (h)->sizeof_addr) /* Size of entries for indirect blocks */ \
     )
@@ -731,13 +731,13 @@ H5_DLL herr_t H5HF_huge_term(H5HF_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5HF_huge_delete(H5HF_hdr_t *hdr, hid_t dxpl_id);
 
 /* 'Huge' object v2 B-tree function callbacks */
-H5_DLL herr_t H5HF_huge_bt2_indir_found(const void *nrecord, void *op_data);
-H5_DLL herr_t H5HF_huge_bt2_indir_remove(const void *nrecord, void *op_data);
-H5_DLL herr_t H5HF_huge_bt2_filt_indir_found(const void *nrecord, void *op_data);
-H5_DLL herr_t H5HF_huge_bt2_filt_indir_remove(const void *nrecord, void *op_data);
-H5_DLL herr_t H5HF_huge_bt2_dir_remove(const void *nrecord, void *op_data);
-H5_DLL herr_t H5HF_huge_bt2_filt_dir_found(const void *nrecord, void *op_data);
-H5_DLL herr_t H5HF_huge_bt2_filt_dir_remove(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF__huge_bt2_indir_found(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF__huge_bt2_indir_remove(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF__huge_bt2_filt_indir_found(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF__huge_bt2_filt_indir_remove(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF__huge_bt2_dir_remove(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF__huge_bt2_filt_dir_found(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF__huge_bt2_filt_dir_remove(const void *nrecord, void *op_data);
 
 /* 'Tiny' object routines */
 H5_DLL herr_t H5HF_tiny_init(H5HF_hdr_t *hdr);
