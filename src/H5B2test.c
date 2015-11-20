@@ -301,7 +301,7 @@ H5B2__test_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUS
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert (record);
+    HDassert(record);
 
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Record:",
         *(const hsize_t *)record);

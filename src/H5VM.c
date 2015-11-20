@@ -1306,8 +1306,8 @@ H5VM_chunk_scaled(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
  *
  * Return:	Chunk index on success (can't fail)
  *
- * Programmer:	Quincey Koziol
- *		Monday, April 21, 2003
+ * Programmer:	Vailin Choi
+ *		Monday, February 9, 2015
  *
  *-------------------------------------------------------------------------
  */

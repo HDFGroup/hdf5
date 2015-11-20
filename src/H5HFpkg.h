@@ -32,11 +32,11 @@
 #include "H5HFprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h"    /* Metadata cache                               */
-#include "H5B2private.h"    /* v2 B-trees                                   */
-#include "H5FLprivate.h"    /* Free Lists                                   */
-#include "H5FSprivate.h"    /* Free space manager                           */
-#include "H5SLprivate.h"    /* Skip lists                                   */
+#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5B2private.h"	/* v2 B-trees				*/
+#include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5FSprivate.h"	/* Free space manager			*/
+#include "H5SLprivate.h"	/* Skip lists				*/
 
 /**************************/
 /* Package Private Macros */
@@ -717,6 +717,8 @@ H5_DLL herr_t H5HF_man_insert(H5HF_hdr_t *fh, hid_t dxpl_id, size_t obj_size,
     const void *obj, void *id);
 H5_DLL herr_t H5HF_man_get_obj_len(H5HF_hdr_t *hdr, const uint8_t *id,
     size_t *obj_len_p);
+H5_DLL void H5HF__man_get_obj_off(const H5HF_hdr_t *hdr, const uint8_t *id,
+    hsize_t *obj_off_p);
 H5_DLL herr_t H5HF_man_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,
     void *obj);
 H5_DLL herr_t H5HF_man_write(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
@@ -731,6 +733,8 @@ H5_DLL herr_t H5HF_huge_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t obj_size,
     void *obj, void *id);
 H5_DLL herr_t H5HF_huge_get_obj_len(H5HF_hdr_t *hdr, hid_t dxpl_id,
     const uint8_t *id, size_t *obj_len_p);
+H5_DLL herr_t H5HF__huge_get_obj_off(H5HF_hdr_t *hdr, hid_t dxpl_id,
+    const uint8_t *id, hsize_t *obj_off_p);
 H5_DLL herr_t H5HF_huge_read(H5HF_hdr_t *fh, hid_t dxpl_id, const uint8_t *id,
     void *obj);
 H5_DLL herr_t H5HF_huge_write(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
@@ -763,7 +767,7 @@ H5_DLL herr_t H5HF_tiny_remove(H5HF_hdr_t *fh, const uint8_t *id);
 
 /* Debugging routines for dumping file structures */
 H5_DLL void H5HF_hdr_print(const H5HF_hdr_t *hdr, hid_t dxpl_id,
-	hbool_t dump_internal, FILE *stream, int indent, int fwidth);
+    hbool_t dump_internal, FILE *stream, int indent, int fwidth);
 H5_DLL herr_t H5HF_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth);
 H5_DLL herr_t H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,

@@ -702,7 +702,7 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
 
     /* Version */
     if(*image++ != H5B2_INT_VERSION)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node version")
+        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "wrong B-tree internal node version")
 
     /* B-tree type */
     if(*image++ != (uint8_t)udata->hdr->cls->id)
@@ -1007,7 +1007,6 @@ H5B2__cache_int_free_icr(void *_thing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__cache_int_free_icr() */
-
 
 
 /*-------------------------------------------------------------------------

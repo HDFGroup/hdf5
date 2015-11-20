@@ -96,14 +96,14 @@ static herr_t H5D__bt2_dst_dbg_context(void *_u_ctx);
 /* v2 B-tree class for indexing non-filtered chunked datasets */
 static herr_t H5D__bt2_unfilt_encode(uint8_t *raw, const void *native, void *ctx);
 static herr_t H5D__bt2_unfilt_decode(const uint8_t *raw, void *native, void *ctx);
-static herr_t H5D__bt2_unfilt_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
-    int indent, int fwidth, const void *record, const void *u_ctx);
+static herr_t H5D__bt2_unfilt_debug(FILE *stream, int indent, int fwidth,
+    const void *record, const void *u_ctx);
 
 /* v2 B-tree class for indexing filtered chunked datasets */
 static herr_t H5D__bt2_filt_encode(uint8_t *raw, const void *native, void *ctx);
 static herr_t H5D__bt2_filt_decode(const uint8_t *raw, void *native, void *ctx);
-static herr_t H5D__bt2_filt_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
-    int indent, int fwidth, const void *record, const void *u_ctx);
+static herr_t H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth,
+    const void *record, const void *u_ctx);
 
 /* Helper routine */
 static herr_t H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info);
@@ -563,8 +563,8 @@ H5D__bt2_unfilt_decode(const uint8_t *raw, void *_record, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__bt2_unfilt_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-    int indent, int fwidth, const void *_record, const void *_u_ctx)
+H5D__bt2_unfilt_debug(FILE *stream, int indent, int fwidth,
+    const void *_record, const void *_u_ctx)
 {
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record; /* The native record */
     const H5D_bt2_ctx_ud_t *u_ctx = (const H5D_bt2_ctx_ud_t *)_u_ctx; 	  /* User data for creating callback context */
@@ -680,8 +680,8 @@ H5D__bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__bt2_filt_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-    int indent, int fwidth, const void *_record, const void *_u_ctx)
+H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth,
+    const void *_record, const void *_u_ctx)
 {
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record;   /* The native record */
     const H5D_bt2_ctx_ud_t *u_ctx = (const H5D_bt2_ctx_ud_t *)_u_ctx; 	/* User data for creating callback context */

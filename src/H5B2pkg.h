@@ -315,7 +315,7 @@ H5_DLL H5B2_hdr_t *H5B2__hdr_alloc(H5F_t *f);
 H5_DLL haddr_t H5B2__hdr_create(H5F_t *f, hid_t dxpl_id,
     const H5B2_create_t *cparam, void *ctx_udata, void *parent);
 H5_DLL herr_t H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam,
-    void *ctx_udata, void *parent, unsigned depth);
+    void *ctx_udata, void *parent, uint16_t depth);
 H5_DLL herr_t H5B2__hdr_incr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2__hdr_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2__hdr_fuse_incr(H5B2_hdr_t *hdr);

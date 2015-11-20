@@ -310,6 +310,10 @@ H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF__dtable_encode() */
 
+/**************************************************/
+/* metadata cache callback definitions for header */
+/**************************************************/
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__cache_hdr_get_load_size()
@@ -497,7 +501,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     if(NULL == (hdr = H5HF_hdr_alloc(udata->f)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-     /* Compute the 'base' size of the fractal heap header on disk */
+    /* Compute the 'base' size of the fractal heap header on disk */
     size = (size_t)H5HF_HEADER_SIZE(hdr);
 
     /* the size we have just calculated presumes that there is no I/O 
@@ -1657,6 +1661,7 @@ H5HF__cache_dblock_get_load_size(const void *_image, void *_udata, size_t *image
     HDassert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
 
+    /* Check for I/O filters on this heap */
     if(hdr->filter_len > 0) {
 
 	/* Check for root direct block */
@@ -1914,7 +1919,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
 	HDassert(!udata->decompressed);
 
 	/* Allocate block buffer */
-	/* XXX: Change to using free-list factories */
+/* XXX: Change to using free-list factories */
 	if(NULL == (dblock->blk = H5FL_BLK_MALLOC(direct_block, (size_t)dblock->size)))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     } 

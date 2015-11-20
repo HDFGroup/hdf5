@@ -141,12 +141,12 @@ H5B2__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
      */
     HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
 	      "Tree type ID:", hdr->cls->name, (unsigned)hdr->cls->id);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Size of node:",
-	      hdr->node_size);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      (unsigned)hdr->node_size);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Size of raw (disk) record:",
-	      hdr->rrec_size);
+	      (unsigned)hdr->rrec_size);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Dirty flag:",
 	      hdr->cache_info.is_dirty ? "True" : "False");
@@ -262,22 +262,19 @@ H5B2__int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
 
     /* Print opening message */
-    if(internal->depth == 1)
-        HDfprintf(stream, "%*sv2 B-tree Internal 'Leaf' Node...\n", indent, "");
-    else
-        HDfprintf(stream, "%*sv2 B-tree Internal 'Branch' Node...\n", indent, "");
+    HDfprintf(stream, "%*sv2 B-tree Internal Node...\n", indent, "");
 
     /*
      * Print the values.
      */
     HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
 	      "Tree type ID:", hdr->cls->name, (unsigned)hdr->cls->id);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Size of node:",
-	      hdr->node_size);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      (unsigned)hdr->node_size);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Size of raw (disk) record:",
-	      hdr->rrec_size);
+	      (unsigned)hdr->rrec_size);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Dirty flag:",
 	      internal->cache_info.is_dirty ? "True" : "False");
@@ -300,8 +297,7 @@ H5B2__int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                   temp_str);
         HDassert(H5B2_INT_NREC(internal, hdr, u));
-        (void)(type->debug)(stream, f, dxpl_id, indent + 6, MAX (0, fwidth-6),
-            H5B2_INT_NREC(internal, hdr, u), dbg_ctx);
+        (void)(type->debug)(stream, indent + 6, MAX (0, fwidth-6), H5B2_INT_NREC(internal, hdr, u), dbg_ctx);
     } /* end for */
 
     /* Print final node pointer */
@@ -404,12 +400,12 @@ H5B2__leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent
      */
     HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
 	      "Tree type ID:", hdr->cls->name, (unsigned)hdr->cls->id);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Size of node:",
-	      hdr->node_size);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      (unsigned)hdr->node_size);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Size of raw (disk) record:",
-	      hdr->rrec_size);
+	      (unsigned)hdr->rrec_size);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Dirty flag:",
 	      leaf->cache_info.is_dirty ? "True" : "False");
@@ -424,8 +420,7 @@ H5B2__leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent
         HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
                   temp_str);
         HDassert(H5B2_LEAF_NREC(leaf, hdr, u));
-        (void)(type->debug)(stream, f, dxpl_id, indent + 6, MAX (0, fwidth-6),
-            H5B2_LEAF_NREC(leaf, hdr, u), dbg_ctx);
+        (void)(type->debug)(stream, indent + 6, MAX (0, fwidth-6), H5B2_LEAF_NREC(leaf, hdr, u), dbg_ctx);
     } /* end for */
 
 done:

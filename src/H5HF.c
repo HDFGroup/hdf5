@@ -15,16 +15,16 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:     H5HF.c
- *              Feb 24 2006
- *              Quincey Koziol <koziol@hdfgroup.org>
+ * Created:		H5HF.c
+ *			Feb 24 2006
+ *			Quincey Koziol <koziol@ncsa.uiuc.edu>
  *
- * Purpose:     Implements a "fractal heap" for storing variable-
- *              length objects in a file.
+ * Purpose:		Implements a "fractal heap" for storing variable-
+ *                      length objects in a file.
  *
- *              Please see the documentation in:
- *              doc/html/TechNotes/FractalHeap.html for a full description
- *              of how they work, etc.
+ *                      Please see the documentation in:
+ *                      doc/html/TechNotes/FractalHeap.html for a full description
+ *                      of how they work, etc.
  *
  *-------------------------------------------------------------------------
  */
@@ -169,7 +169,7 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 
     /* Create shared fractal heap header */
     if(HADDR_UNDEF == (fh_addr = H5HF_hdr_create(f, dxpl_id, cparam)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
 
     /* Allocate fractal heap wrapper */
     if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
@@ -182,11 +182,11 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     /* Point fractal heap wrapper at header and bump it's ref count */
     fh->hdr = hdr;
     if(H5HF_hdr_incr(fh->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
 
     /* Increment # of files using this heap header */
     if(H5HF_hdr_fuse_incr(fh->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
 
     /* Set file pointer for this heap open context */
     fh->f = f;
@@ -253,7 +253,7 @@ H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
 
     /* Increment # of files using this heap header */
     if(H5HF_hdr_fuse_incr(fh->hdr) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
 
     /* Set file pointer for this heap open context */
     fh->f = f;
@@ -455,13 +455,75 @@ H5HF_get_obj_len(H5HF_t *fh, hid_t dxpl_id, const void *_id, size_t *obj_len_p)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'tiny' object's length")
     } /* end if */
     else {
-        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
-        HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_get_obj_len() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_get_obj_off
+ *
+ * Purpose:	Get the offset of an entry in a fractal heap
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug 20 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_get_obj_off(H5HF_t *fh, hid_t dxpl_id, const void *_id, hsize_t *obj_off_p)
+{
+    const uint8_t *id = (const uint8_t *)_id;   /* Object ID */
+    uint8_t id_flags;                   /* Heap ID flag bits */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fh);
+    HDassert(id);
+    HDassert(obj_off_p);
+
+    /* Get the ID flags */
+    id_flags = *id;
+
+    /* Check for correct heap ID version */
+    if((id_flags & H5HF_ID_VERS_MASK) != H5HF_ID_VERS_CURR)
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "incorrect heap ID version")
+
+    /* Set the shared heap header's file context for this operation */
+    fh->hdr->f = fh->f;
+
+    /* Check type of object in heap */
+    if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
+        H5HF__man_get_obj_off(fh->hdr, id, obj_off_p);
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
+        /* Huge objects are located directly in the file */
+        if(H5HF__huge_get_obj_off(fh->hdr, dxpl_id, id, obj_off_p) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'huge' object's offset")
+    } /* end if */
+    else if((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
+        /* Tiny objects are not stored in the heap */
+        *obj_off_p = (hsize_t)0;
+    } /* end if */
+    else {
+HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_get_obj_off() */
 
 
 /*-------------------------------------------------------------------------

@@ -39,9 +39,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"          /* Generic Functions                        */
-#include "H5B2pkg.h"            /* v2 B-trees                               */
-#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5B2pkg.h"		/* v2 B-trees				*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
 
 
 /****************/
@@ -90,18 +90,18 @@ extern const H5B2_class_t H5D_BT2[1];
 extern const H5B2_class_t H5D_BT2_FILT[1];
 
 const H5B2_class_t *const H5B2_client_class_g[] = {
-    H5B2_TEST,                      /* 0 - H5B2_TEST_ID                     */
-    H5HF_HUGE_BT2_INDIR,            /* 1 - H5B2_FHEAP_HUGE_INDIR_ID         */
-    H5HF_HUGE_BT2_FILT_INDIR,       /* 2 - H5B2_FHEAP_HUGE_FILT_INDIR_ID    */
-    H5HF_HUGE_BT2_DIR,              /* 3 - H5B2_FHEAP_HUGE_DIR_ID           */
-    H5HF_HUGE_BT2_FILT_DIR,         /* 4 - H5B2_FHEAP_HUGE_FILT_DIR_ID      */
-    H5G_BT2_NAME,                   /* 5 - H5B2_GRP_DENSE_NAME_ID           */
-    H5G_BT2_CORDER,                 /* 6 - H5B2_GRP_DENSE_CORDER_ID         */
-    H5SM_INDEX,                     /* 7 - H5B2_SOHM_INDEX_ID               */
-    H5A_BT2_NAME,                   /* 8 - H5B2_ATTR_DENSE_NAME_ID          */
-    H5A_BT2_CORDER,                 /* 9 - H5B2_ATTR_DENSE_CORDER_ID        */
-    H5D_BT2,                        /* 10 - H5B2_CDSET_ID                   */
-    H5D_BT2_FILT,                   /* 11 - H5B2_CDSET_FILT_ID              */
+    H5B2_TEST,			/* 0 - H5B2_TEST_ID 			*/
+    H5HF_HUGE_BT2_INDIR,	/* 1 - H5B2_FHEAP_HUGE_INDIR_ID 	*/
+    H5HF_HUGE_BT2_FILT_INDIR,	/* 2 - H5B2_FHEAP_HUGE_FILT_INDIR_ID 	*/
+    H5HF_HUGE_BT2_DIR,		/* 3 - H5B2_FHEAP_HUGE_DIR_ID 		*/
+    H5HF_HUGE_BT2_FILT_DIR,	/* 4 - H5B2_FHEAP_HUGE_FILT_DIR_ID 	*/
+    H5G_BT2_NAME,		/* 5 - H5B2_GRP_DENSE_NAME_ID 		*/
+    H5G_BT2_CORDER,		/* 6 - H5B2_GRP_DENSE_CORDER_ID 	*/
+    H5SM_INDEX,			/* 7 - H5B2_SOHM_INDEX_ID 		*/
+    H5A_BT2_NAME,		/* 8 - H5B2_ATTR_DENSE_NAME_ID 		*/
+    H5A_BT2_CORDER,		/* 9 - H5B2_ATTR_DENSE_CORDER_ID 	*/
+    H5D_BT2,			/* 10 - H5B2_CDSET_ID                   */
+    H5D_BT2_FILT,		/* 11 - H5B2_CDSET_FILT_ID              */
 };
 
 
@@ -442,7 +442,7 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
     H5B2_nodepos_t curr_pos;            /* Position of the current node */
     htri_t      ret_value = TRUE;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FALSE)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
     HDassert(bt2);

@@ -48,8 +48,8 @@
 static void *H5SM__bt2_crt_context(void *udata);
 static herr_t H5SM__bt2_dst_context(void *ctx);
 static herr_t H5SM__bt2_store(void *native, const void *udata);
-static herr_t H5SM__bt2_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
-    int indent, int fwidth, const void *record, const void *_udata);
+static herr_t H5SM__bt2_debug(FILE *stream, int indent, int fwidth,
+    const void *record, const void *_udata);
 static void *H5SM__bt2_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 
@@ -195,8 +195,8 @@ H5SM__bt2_store(void *native, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__bt2_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-    int indent, int fwidth, const void *record, const void H5_ATTR_UNUSED *_udata)
+H5SM__bt2_debug(FILE *stream, int indent, int fwidth,
+    const void *record, const void H5_ATTR_UNUSED *_udata)
 {
     const H5SM_sohm_t *sohm = (const H5SM_sohm_t *)record;
 

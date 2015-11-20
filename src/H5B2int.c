@@ -744,6 +744,7 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
         uint16_t new_left_nrec = (uint16_t)(*left_nrec + *right_nrec) / 2;    /* New number of records for left child */
         uint16_t move_nrec = (uint16_t)(*left_nrec - new_left_nrec);        /* Number of records to move from left node to right */
 
+        /* Sanity check */
         HDassert(*left_nrec > *right_nrec);
 
         /* Slide records in right node up */
@@ -3173,8 +3174,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased,
                 } /* end if */
                 else {
                     if(H5B2__merge2(hdr, dxpl_id, depth, curr_node_ptr,
-                           parent_cache_info_flags_ptr, internal,
-                           &internal_flags, idx) < 0)
+                           parent_cache_info_flags_ptr, internal, &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
                 } /* end else */
             } /* end if */
@@ -3185,8 +3185,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased,
                 } /* end if */
                 else {
                     if(H5B2__merge2(hdr, dxpl_id, depth, curr_node_ptr,
-                           parent_cache_info_flags_ptr, internal,
-                           &internal_flags, (idx - 1)) < 0)
+                           parent_cache_info_flags_ptr, internal, &internal_flags, (idx - 1)) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
                 } /* end else */
             } /* end if */
@@ -3198,8 +3197,7 @@ H5B2__remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased,
                 } /* end if */
                 else {
                     if(H5B2__merge3(hdr, dxpl_id, depth, curr_node_ptr,
-                           parent_cache_info_flags_ptr, internal,
-                           &internal_flags, idx) < 0)
+                           parent_cache_info_flags_ptr, internal, &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
                 } /* end else */
             } /* end else */
@@ -3601,8 +3599,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
                 } /* end if */
                 else {
                     if(H5B2__merge2(hdr, dxpl_id, depth, curr_node_ptr,
-                           parent_cache_info_flags_ptr, internal,
-                           &internal_flags, idx) < 0)
+                           parent_cache_info_flags_ptr, internal, &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
                 } /* end else */
             } /* end if */
@@ -3613,8 +3610,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
                 } /* end if */
                 else {
                     if(H5B2__merge2(hdr, dxpl_id, depth, curr_node_ptr,
-                           parent_cache_info_flags_ptr, internal,
-                           &internal_flags, (idx - 1)) < 0)
+                           parent_cache_info_flags_ptr, internal, &internal_flags, (idx - 1)) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
                 } /* end else */
             } /* end if */
@@ -3626,8 +3622,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
                 } /* end if */
                 else {
                     if(H5B2__merge3(hdr, dxpl_id, depth, curr_node_ptr,
-                           parent_cache_info_flags_ptr, internal,
-                           &internal_flags, idx) < 0)
+                           parent_cache_info_flags_ptr, internal, &internal_flags, idx) < 0)
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
                 } /* end else */
             } /* end else */

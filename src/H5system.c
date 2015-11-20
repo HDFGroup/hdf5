@@ -788,9 +788,6 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
 #ifdef H5_HAVE_WINSOCK2_H
 #pragma comment(lib, "advapi32.lib")
 #endif
-#ifdef H5_HAVE_WINSOCK2_H
-#pragma comment(lib, "advapi32.lib")
-#endif
 
 #define WloginBuffer_count 256
 static char Wlogin_buffer[WloginBuffer_count];
