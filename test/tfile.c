@@ -118,9 +118,6 @@
 #define N_GROUPS			2
 #define NDSETS			4
 
-/* Name of message file that is used by test_file_lock_concur() and test_file_lock_swmr_concur() */
-#define DONE_MESSAGE            "DONE_MESSAGE"  /* The message file to create */
-
 const char *OLD_FILENAME[] = {  /* Files created under 1.6 branch and 1.8 branch */
     "filespace_1_6.h5",	/* 1.6 HDF5 file */
     "filespace_1_8.h5"	/* 1.8 HDF5 file */
@@ -3222,8 +3219,10 @@ test_filespace_compatible(void)
 	CHECK(fd_new, FAIL, "HDopen");
 
 	/* Copy data */
-	while((nread = HDread(fd_old, buf, (size_t)READ_OLD_BUFSIZE)) > 0)
-	    HDwrite(fd_new, buf, (size_t)nread);
+	while((nread = HDread(fd_old, buf, (size_t)READ_OLD_BUFSIZE)) > 0) {
+        ssize_t write_err = HDwrite(fd_new, buf, (size_t)nread);
+        CHECK(write_err, -1, "HDwrite");
+    } /* end while */
 
 	/* Close the files */
 	ret = HDclose(fd_old);

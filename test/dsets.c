@@ -487,6 +487,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     int                 f = -1;
     haddr_t             offset;
     int                 rdata[DSET_DIM1][DSET_DIM2];
+    ssize_t     read_err;
 
     TESTING("simple I/O");
 
@@ -556,7 +557,8 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
 
         f = HDopen(filename, O_RDONLY, 0);
         HDlseek(f, (off_t)offset, SEEK_SET);
-        HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2);
+        if(HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2) < 0)
+            goto error;
 
         /* Check that the values read are the same as the values written */
         for(i = 0; i < DSET_DIM1; i++) {

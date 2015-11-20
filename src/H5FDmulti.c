@@ -1817,23 +1817,23 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
     ALL_MEMBERS(mt) {
         out_mt = mt;
         if(file->memb[mt]) {
-	    H5E_BEGIN_TRY {
-		if(H5FDlock(file->memb[mt], rw) < 0) {
-		    nerrors++;
-		    break;
-		}
-	    } H5E_END_TRY;
-        }
+            H5E_BEGIN_TRY {
+                if(H5FDlock(file->memb[mt], rw) < 0) {
+                    nerrors++;
+                    break;
+                } /* end if */
+            } H5E_END_TRY;
+        } /* end if */
     } END_MEMBERS;
 
     /* Try to unlock the member files that are locked before error is encountered */
     if(nerrors) {
-        for(k = H5FD_MEM_DEFAULT; k < out_mt; (H5FD_mem_t)(k + 1)) {
-	    H5E_BEGIN_TRY {
-		if(H5FDunlock(file->memb[k]) < 0)
-		    nerrors++;
-	    } H5E_END_TRY;
-        }
+        for(k = H5FD_MEM_DEFAULT; k < out_mt; k = k + (H5FD_mem_t)1) {
+	        H5E_BEGIN_TRY {
+		        if(H5FDunlock(file->memb[k]) < 0)
+		            nerrors++;
+	        } H5E_END_TRY;
+        } /* end for */
     } /* end if */
 
     if(nerrors)

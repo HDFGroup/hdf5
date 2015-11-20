@@ -675,7 +675,9 @@ H5D__virtual_copy(H5F_t H5_ATTR_UNUSED *f_dst, H5O_layout_t *layout_dst,
         layout_dst->storage.u.virt.serial_list_hobjid.idx = (size_t)0;
     } /* end block/else */
 
+#ifdef NOT_YET
 done:
+#endif /* NOT_YET */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_copy() */
 
