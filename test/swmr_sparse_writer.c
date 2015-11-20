@@ -38,7 +38,9 @@
 /* Local Macros */
 /****************/
 
+#ifdef OUT
 #define BUSY_WAIT 100000
+#endif /* OUT */
 
 /********************/
 /* Local Prototypes */
@@ -295,12 +297,16 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 
 #ifdef OUT
         /* Busy wait, to let readers catch up */
+        /* If this is removed, also remove the BUSY_WAIT symbol
+         * at the top of the file.
+         */
         dummy = 0;
         for(v=0; v<BUSY_WAIT; v++)
             dummy++;
         if((unsigned long)dummy != v)
             return -1;
-#endif
+#endif /* OUT */
+
     } /* end for */
 
     /* Close the memory dataspace */

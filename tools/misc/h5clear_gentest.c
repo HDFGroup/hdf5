@@ -59,9 +59,6 @@ main(void)
     hid_t fapl, new_fapl;	/* File access property lists */
     char fname[512];		/* File name */
     unsigned new_format;		/* To use latest library format or not */
-    int fd;			/* File descriptor */
-    uint8_t super_vers;		/* Superblock version */
-    ssize_t bytes_written;	/* The # of bytes written to the file */
 
     /* Create a copy of the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)

@@ -589,7 +589,7 @@ gen_edge(const char *fname)
     /* Create data */
     for (i = 0; i< 12; i++)
         for (j = 0; j< 6; j++)
-            buf[i][j] = (float)(100.0);
+            buf[i][j] = 100.0F;
 
     /* Write to the dataset */
     if(H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)

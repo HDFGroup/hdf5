@@ -418,109 +418,88 @@ main (int argc, const char *argv[])
  * Return:      Success:    last byte written in the output.
  *              Failure:    Exits program with EXIT_FAILURE value.
  *
- * Programmer:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 hsize_t
-copy_some_to_file (int infid, int outfid, hsize_t startin, hsize_t startout,
+copy_some_to_file(int infid, int outfid, hsize_t startin, hsize_t startout,
        ssize_t limit)
 {
-  char buf[1024];
-  h5_stat_t sbuf;
-  int res;
-  ssize_t tot = 0;
-  ssize_t howmuch = 0;
-  ssize_t nchars = -1;
-/* used in assertion check
-  ssize_t ncw = -1;
-*/
-  ssize_t to;
-  ssize_t from;
-  ssize_t toend;
-  ssize_t fromend;
+    char buf[1024];
+    h5_stat_t sbuf;
+    int res;
+    ssize_t tot = 0;
+    ssize_t howmuch = 0;
+    ssize_t nchars = -1;
+    ssize_t to;
+    ssize_t from;
+    ssize_t toend;
+    ssize_t fromend;
 
-  if(startin > startout) {
-      /* this case is prohibited */
-      error_msg("copy_some_to_file: panic: startin > startout?\n");
-      exit (EXIT_FAILURE);
-    }
+    if(startin > startout) {
+        /* this case is prohibited */
+        error_msg("copy_some_to_file: panic: startin > startout?\n");
+        exit (EXIT_FAILURE);
+    } /* end if */
 
-  if(limit < 0) {
-      res = HDfstat(infid, &sbuf);
-      if(res < 0) {
-    error_msg("Can't stat file \n");
-    exit (EXIT_FAILURE);
-  }
+    if(limit < 0) {
+        res = HDfstat(infid, &sbuf);
+        if(res < 0) {
+            error_msg("Can't stat file \n");
+            HDexit(EXIT_FAILURE);
+        } /* end if */
 
-      howmuch = (ssize_t)sbuf.st_size;
-    }
-  else
-      howmuch = limit;
+        howmuch = (ssize_t)sbuf.st_size;
+    } else {
+        howmuch = limit;
+    } /* end if */
 
-  if(howmuch == 0)
-      return 0;
+    if(0 == howmuch)
+        return 0;
 
-  /* assert (howmuch > 0) */
+    toend = (ssize_t) startout + howmuch;
+    fromend = (ssize_t) startin + howmuch;
 
-  toend = (ssize_t) startout + howmuch;
-  fromend = (ssize_t) startin + howmuch;
+    if (howmuch > 512) {
+        to = toend - 512;
+        from = fromend - 512;
+    } else {
+        to = toend - howmuch;
+        from = fromend - howmuch;
+    } /* end if */
 
-  if (howmuch > 512)
-    {
-      to = toend - 512;
-      from = fromend - 512;
-    }
-  else
-    {
-      to = toend - howmuch;
-      from = fromend - howmuch;
-    }
+    while (howmuch > 0) {
+        HDlseek(outfid, (off_t) to, SEEK_SET);
+        HDlseek(infid, (off_t) from, SEEK_SET);
 
-  while (howmuch > 0)
-    {
-      HDlseek (outfid, (off_t) to, SEEK_SET);
-      HDlseek (infid, (off_t) from, SEEK_SET);
+        if (howmuch > 512) {
+            nchars = HDread(infid, buf, (unsigned) 512);
+        } else {
+            nchars = HDread(infid, buf, (unsigned)howmuch);
+        } /* end if */
 
-      if (howmuch > 512)
-  {
-    nchars = HDread (infid, buf, (unsigned) 512);
-  }
-      else
-  {
-    nchars = HDread (infid, buf, (unsigned)howmuch);
-  }
+        if (nchars <= 0) {
+            error_msg("Read error \n");
+            HDexit(EXIT_FAILURE);
+        } /* end if */
 
-      if (nchars <= 0)
-  {
-    printf ("huh? \n");
-    exit (EXIT_FAILURE);
-  }
-      /*ncw = */ HDwrite (outfid, buf, (unsigned) nchars);
+        if(HDwrite (outfid, buf, (unsigned) nchars) < 0) {
+            error_msg("Write error \n");
+            HDexit(EXIT_FAILURE);
+        }
 
-      /* assert (ncw == nchars) */
+        tot += nchars;
+        howmuch -= nchars;
+        if(howmuch > 512) {
+            to -= nchars;
+            from -= nchars;
+        } else {
+            to -= howmuch;
+            from -= howmuch;
+        } /* end if */
+    } /* end while */
 
-      tot += nchars;
-      howmuch -= nchars;
-      if (howmuch > 512)
-  {
-    to -= nchars;
-    from -= nchars;
-  }
-      else
-  {
-    to -= howmuch;
-    from -= howmuch;
-  }
-    }
-
-  /* assert howmuch == 0 */
-  /* assert tot == limit */
-
-  return ((hsize_t) tot + (hsize_t) startout);
-}
+    return (hsize_t)tot + (hsize_t)startout;
+} /* end copy_some_to_file() */
 
 
 /*-------------------------------------------------------------------------
