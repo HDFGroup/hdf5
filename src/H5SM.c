@@ -1639,7 +1639,7 @@ H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *e
      */
     for(x = 0; x < list->header->list_max; x++) {
         if((list->messages[x].location != H5SM_NO_LOC) &&
-                (0 == H5SM_message_compare(key, &(list->messages[x]))))
+                (0 == H5SM__message_compare(key, &(list->messages[x]))))
             HGOTO_DONE(x)
         else if(empty_pos && list->messages[x].location == H5SM_NO_LOC) {
             /* Note position */
