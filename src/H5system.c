@@ -73,6 +73,9 @@
 /* Local Variables */
 /*******************/
 
+/* Track whether tzset routine was called */
+static hbool_t H5_ntzset = FALSE;
+
 
 /*-------------------------------------------------------------------------
  * Function:  HDfprintf
@@ -584,43 +587,85 @@ void HDsrand(unsigned int seed)
 }
 #endif /* H5_HAVE_RAND_R */
 
-
+
 /*-------------------------------------------------------------------------
- * Function:  HDget_timezone
+ * Function:	H5_make_time
  *
- * Purpose:  Wrapper function for global variable timezone, if it exists
- *     on this system, or use the function if VS2015
+ * Purpose:	Portability routine to abstract converting a 'tm' struct into
+ *		a time_t value.
  *
- *     VS2015 removed the deprecated global variable timezone.
+ * Note:	This is a little problematic because mktime() operates on
+ *		local times.  We convert to local time and then figure out the
+ *		adjustment based on the local time zone and daylight savings
+ *		setting.
  *
- * Return:  Success:  The value of timezone
+ * Return:	Success:  The value of timezone
+ *		Failure:  -1
  *
- *    Failure:  Cannot fail.
+ * Programmer:  Quincey Koziol
+ *              November 18, 2015
  *
  *-------------------------------------------------------------------------
  */
-#ifndef H5_HAVE_TM_GMTOFF
-#ifdef H5_HAVE_TIMEZONE
-
-long int HDget_timezone(void)
+time_t
+H5_make_time(struct tm *tm)
 {
-#ifdef H5_HAVE_VISUAL_STUDIO
-#if _MSC_VER >= 1900  /* VS 2015 */
-
+    time_t the_time;    /* The converted time */
+#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900)  /* VS 2015 */
     /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
      * variable declared in time.h. That variable was deprecated and in
      * VS 2015 is removed, with _get_timezone replacing it.
      */
-    long int timezone = 0;
+    long timezone = 0;
+#endif /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+    time_t ret_value;   /* Return value */
 
-    #define HDget_timezone(V)    _get_timezone(V);
-    HDget_timezone(&timezone);
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    HDassert(tm);
+
+    /* Initialize timezone information */
+    if(!H5_ntzset) {
+        HDtzset();
+        H5_ntzset = TRUE;
+    } /* end if */
+
+    /* Perform base conversion */
+    if((time_t)-1 == (the_time = HDmktime(tm)))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message")
+
+    /* Adjust for timezones */
+#if defined(H5_HAVE_TM_GMTOFF)
+    /* BSD-like systems */
+    the_time += tm->tm_gmtoff;
+#elif defined(H5_HAVE_TIMEZONE)
+#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900)  /* VS 2015 */
+    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
+     * variable declared in time.h. That variable was deprecated and in
+     * VS 2015 is removed, with _get_timezone replacing it.
+     */
+    _get_timezone(&timezone);
+#endif /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+
+    the_time -= timezone - (tm->tm_isdst ? 3600 : 0);
+#else
+    /*
+     * The catch-all.  If we can't convert a character string universal
+     * coordinated time to a time_t value reliably then we can't decode the
+     * modification time message. This really isn't as bad as it sounds -- the
+     * only way a user can get the modification time is from our internal
+     * query routines, which can gracefully recover.
+     */
+    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "unable to obtain local timezone information")
 #endif
-#endif
-    return timezone;
-}
-#endif /* H5_HAVE_TIMEZONE */
-#endif /* H5_HAVE_TM_GMTOFF */
+
+    /* Set return value */
+    ret_value = the_time;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_make_time() */
 
 /*-------------------------------------------------------------------------
  * Function:  Wgettimeofday
