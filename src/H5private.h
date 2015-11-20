@@ -985,14 +985,6 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDgets
     #define HDgets(S)    gets(S)
 #endif /* HDgets */
-#ifndef H5_HAVE_TM_GMTOFF
-#ifdef H5_HAVE_TIMEZONE
-    #ifndef HDgettimezone
-        #define HDgettimezone()   HDget_timezone()
-    #endif /* HDgettimezone */
-    H5_DLL long int HDget_timezone(void);
-#endif /* H5_HAVE_TIMEZONE */
-#endif /* H5_HAVE_TM_GMTOFF */
 #ifndef HDgettimeofday
     #define HDgettimeofday(S,P)  gettimeofday(S,P)
 #endif /* HDgettimeofday */
@@ -2581,6 +2573,9 @@ H5_DLL uint32_t H5_checksum_crc(const void *data, size_t len);
 H5_DLL uint32_t H5_checksum_lookup3(const void *data, size_t len, uint32_t initval);
 H5_DLL uint32_t H5_checksum_metadata(const void *data, size_t len, uint32_t initval);
 H5_DLL uint32_t H5_hash_string(const char *str);
+
+/* Time related routines */
+H5_DLL time_t H5_make_time(struct tm *tm);
 
 /* Functions for building paths, etc. */
 H5_DLL herr_t   H5_build_extpath(const char *, char ** /*out*/ );
