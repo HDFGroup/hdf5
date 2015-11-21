@@ -71,6 +71,7 @@
 ./bin/make_overflow
 ./bin/make_vers
 ./bin/makehelp
+./bin/pkgscrpts/hdf5-1.8.16-1-x86_64-szip.spec
 ./bin/pkgscrpts/make1816TarFiles.pl       _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeInternal1816README.pl _DO_NOT_DISTRIBUTE_
 ./bin/pkgscrpts/makeOuter1816README.pl    _DO_NOT_DISTRIBUTE_
