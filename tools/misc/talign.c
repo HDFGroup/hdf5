@@ -49,7 +49,7 @@ int main(void)
     char string5[5];
     float fok[2] = {1234.0f, 2341.0f};
     float fnok[2] = {5678.0f, 6785.0f};
-    float *fptr;
+    float *fptr = NULL;
 
     char *data = NULL;
 

@@ -310,7 +310,7 @@ static void usage(const char *prog)
  *
  *-------------------------------------------------------------------------
  */
-static unsigned
+H5_ATTR_CONST static unsigned
 ceil_log10(unsigned long x)
 {
     unsigned long pow10 = 1;
@@ -321,7 +321,7 @@ ceil_log10(unsigned long x)
         ret++;
     } /* end while */
 
-    return(ret);
+    return ret;
 } /* ceil_log10() */
 
 

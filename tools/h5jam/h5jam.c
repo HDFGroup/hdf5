@@ -515,28 +515,21 @@ copy_some_to_file(int infid, int outfid, hsize_t startin, hsize_t startout,
  *
  * Return:      Success:    last byte written in the output.
  *              Failure:    Exits program with EXIT_FAILURE value.
- *
- * Programmer:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-hsize_t
-compute_user_block_size (hsize_t ublock_size)
+H5_ATTR_CONST hsize_t
+compute_user_block_size(hsize_t ublock_size)
 {
-  hsize_t where = 512;
+    hsize_t where = 512;
 
-  if (ublock_size == 0)
-    return 0;
+    if(0 == ublock_size)
+        return 0;
 
-  while (where < ublock_size)
-    {
-      where *= 2;
-    }
+    while(where < ublock_size)
+        where *= 2;
 
-  return (where);
-}
+    return where;
+} /* end compute_user_block_size() */
 
 /*
  *  Write zeroes to fill the file from 'where' to 512, 1024, etc. bytes.
