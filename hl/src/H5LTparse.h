@@ -109,13 +109,13 @@ extern int H5LTyydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 74 "hl/src//H5LTparse.y" /* yacc.c:1909  */
+#line 74 "hl/src/H5LTparse.y" /* yacc.c:1909  */
 
     int     ival;         /*for integer token*/
     char    *sval;        /*for name string*/
     hid_t   hid;          /*for hid_t token*/
 
-#line 119 "hl/src//H5LTparse.h" /* yacc.c:1909  */
+#line 119 "hl/src/H5LTparse.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
