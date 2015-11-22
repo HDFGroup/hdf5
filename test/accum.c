@@ -57,7 +57,7 @@ unsigned test_read_after(const H5F_io_info_t *fio_info);
 unsigned test_free(const H5F_io_info_t *fio_info);
 unsigned test_big(const H5F_io_info_t *fio_info);
 unsigned test_random_write(const H5F_io_info_t *fio_info);
-unsigned test_swmr_write_big(hbool_t new);
+unsigned test_swmr_write_big(hbool_t newest_format);
 
 /* Helper Function Prototypes */
 void accum_printf(void);
@@ -1808,7 +1808,7 @@ error:
  *-------------------------------------------------------------------------
  */
 unsigned 
-test_swmr_write_big(hbool_t new)
+test_swmr_write_big(hbool_t newest_format)
 {
     hid_t fid = -1;			    /* File ID */
     hid_t fapl = -1;			/* File access property list */
@@ -1824,11 +1824,11 @@ test_swmr_write_big(hbool_t new)
     char *new_argv[] = {NULL};
     char *driver = NULL;        /* VFD string (from env variable) */
 
-    if(new) {
-	TESTING("SWMR write of large metadata: with latest format");
+    if(newest_format) {
+	    TESTING("SWMR write of large metadata: with latest format");
     } else {
-	TESTING("SWMR write of large metadata: with non-latest-format");
-    } 
+	    TESTING("SWMR write of large metadata: with non-latest-format");
+    } /* end if */
 
 #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
@@ -1843,26 +1843,26 @@ test_swmr_write_big(hbool_t new)
      */
     driver = HDgetenv("HDF5_DRIVER");
     if (!H5FD_supports_swmr_test(driver)) {
-	SKIPPED();
-	HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
-	return EXIT_SUCCESS;
-    }
+        SKIPPED();
+        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        return 0;
+    } /* end if */
 
     /* File access property list */
     if((fapl = h5_fileaccess()) < 0)
         FAIL_STACK_ERROR
 
     /* Both cases will result in v3 superblock and version 2 object header for SWMR */
-    if(new) { /* latest format */
-	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	    FAIL_STACK_ERROR
+    if(newest_format) { /* latest format */
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            FAIL_STACK_ERROR
 
 	if((fid = H5Fcreate(SWMR_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
 	    FAIL_STACK_ERROR
     } else { /* non-latest-format */
-	if((fid = H5Fcreate(SWMR_FILENAME, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
-	    FAIL_STACK_ERROR
-    }
+        if((fid = H5Fcreate(SWMR_FILENAME, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
+    } /* end if */
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
@@ -1877,17 +1877,20 @@ test_swmr_write_big(hbool_t new)
 
     /* Set up I/O info for operation */
     fio_info.f = rf;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(H5P_DATASET_XFER_DEFAULT))) FAIL_STACK_ERROR
+    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(H5P_DATASET_XFER_DEFAULT)))
+        FAIL_STACK_ERROR
 
     /* We'll be writing lots of garbage data, so extend the
         file a ways. 10MB should do. */
-    if(H5FD_set_eoa(rf->shared->lf, H5FD_MEM_DEFAULT, (haddr_t)(1024*1024*10)) < 0) FAIL_STACK_ERROR
+    if(H5FD_set_eoa(rf->shared->lf, H5FD_MEM_DEFAULT, (haddr_t)(1024*1024*10)) < 0)
+        FAIL_STACK_ERROR
 
     if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0)
-	FAIL_STACK_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Reset metadata accumulator for the file */
-    if(accum_reset(&fio_info) < 0) FAIL_STACK_ERROR;
+    if(accum_reset(&fio_info) < 0)
+        FAIL_STACK_ERROR;
 
     /* Allocate space for the write & read buffers */
     if((wbuf2 = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE)) == NULL)
@@ -1950,7 +1953,7 @@ test_swmr_write_big(hbool_t new)
 	    status = HDexecv(SWMR_READER, new_argv);
 	    printf("errno from execv = %s\n", strerror(errno));
         FAIL_STACK_ERROR;
-    }
+    } /* end if */
 
     /* Parent process -- wait for the child process to complete */
     while(pid != HDwaitpid(pid, &status, 0))
@@ -1977,7 +1980,7 @@ test_swmr_write_big(hbool_t new)
             HDfree(rbuf);
         PASSED();
         return 0;
-    }
+    } /* end if */
 
 error:
     /* Closing and remove the file */
