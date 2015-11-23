@@ -153,21 +153,21 @@ static herr_t H5D__btree_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* v1 B-tree indexed chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_BTREE[1] = {{
-    H5D__btree_idx_init,
-    H5D__btree_idx_create,
-    H5D__btree_idx_is_space_alloc,
-    H5D__btree_idx_insert,
-    H5D__btree_idx_get_addr,
-    NULL,
-    H5D__btree_idx_iterate,
-    H5D__btree_idx_remove,
-    H5D__btree_idx_delete,
-    H5D__btree_idx_copy_setup,
-    H5D__btree_idx_copy_shutdown,
-    H5D__btree_idx_size,
-    H5D__btree_idx_reset,
-    H5D__btree_idx_dump,
-    H5D__btree_idx_dest
+    H5D__btree_idx_init,                /* insert */
+    H5D__btree_idx_create,              /* create */
+    H5D__btree_idx_is_space_alloc,      /* is_space_alloc */
+    H5D__btree_idx_insert,              /* insert */
+    H5D__btree_idx_get_addr,            /* get_addr */
+    NULL,                               /* resize */
+    H5D__btree_idx_iterate,             /* iterate */
+    H5D__btree_idx_remove,              /* remove */
+    H5D__btree_idx_delete,              /* delete */
+    H5D__btree_idx_copy_setup,          /* copy_setup */
+    H5D__btree_idx_copy_shutdown,       /* copy_shutdown */
+    H5D__btree_idx_size,                /* size */
+    H5D__btree_idx_reset,               /* reset */
+    H5D__btree_idx_dump,                /* dump */
+    H5D__btree_idx_dest                 /* destroy */
 }};
 
 
@@ -649,7 +649,7 @@ H5D__btree_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key /*in,out 
     /* Remove raw data chunk from file */
     H5_CHECK_OVERFLOW(lt_key->nbytes, uint32_t, hsize_t);
     if(H5MF_xfree(f, H5FD_MEM_DRAW, dxpl_id, addr, (hsize_t)lt_key->nbytes) < 0)
-        HGOTO_ERROR(H5E_STORAGE, H5E_CANTFREE, H5B_INS_ERROR, "unable to free chunk")
+	HGOTO_ERROR(H5E_STORAGE, H5E_CANTFREE, H5B_INS_ERROR, "unable to free chunk")
 
     /* Mark keys as unchanged */
     *lt_key_changed = FALSE;
@@ -969,17 +969,12 @@ done:
 static hbool_t
 H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 {
-    hbool_t ret_value = FALSE;          /* Return value */
-
     FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(storage);
 
-    /* Set return value */
-    ret_value = (hbool_t)H5F_addr_defined(storage->idx_addr);
-
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI((hbool_t)H5F_addr_defined(storage->idx_addr))
 } /* end H5D__btree_idx_is_space_alloc() */
 
 

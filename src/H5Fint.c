@@ -384,8 +384,8 @@ static int
 H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 {
     H5F_olist_t *olist = (H5F_olist_t *)key;    /* Alias for search info */
-    int         ret_value = H5_ITER_CONT;    /* Return value */
     hbool_t     add_obj = FALSE;
+    int         ret_value = H5_ITER_CONT;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -399,7 +399,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
                 ||  (!olist->file_info.local &&
                         ( !olist->file_info.ptr.shared || (olist->file_info.ptr.shared && ((H5F_t*)obj_ptr)->shared == olist->file_info.ptr.shared) ))) {
             add_obj = TRUE;
-	}
+	} /* end if */
     } /* end if */
     else { /* either count opened object IDs or put the IDs on the list */
         H5O_loc_t *oloc;        /* Group entry info for object */
@@ -452,7 +452,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
     	} /* end if */
     } /* end else */
 
-    if(TRUE==add_obj) {
+    if(add_obj) {
         /* Add the object's ID to the ID list, if appropriate */
         if(olist->obj_id_list) {
             olist->obj_id_list[olist->list_index] = obj_id;
@@ -467,9 +467,9 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
          * we have filled up the array. Otherwise return H5_ITER_CONT(RET_VALUE is
          * preset to H5_ITER_CONT) because H5I_iterate needs the return value of 
          * H5_ITER_CONT to continue the iteration. */
-        if(olist->max_nobjs>0 && olist->list_index>=olist->max_nobjs)
+        if(olist->max_nobjs > 0 && olist->list_index >= olist->max_nobjs)
             HGOTO_DONE(H5_ITER_STOP)  /* Indicate that the iterator should stop */
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

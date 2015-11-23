@@ -60,7 +60,7 @@
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5MFprivate.h"        /* File memory management               */
-#include "H5VMprivate.h"		/* Vector and array functions		*/
+#include "H5VMprivate.h"	/* Vector and array functions		*/
 
 
 /****************/
@@ -2226,7 +2226,7 @@ H5D__chunk_dest(H5D_t *dset, hid_t dxpl_id)
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
-    /* Sanity check */
+    /* Sanity checks */
     HDassert(dset);
 
     /* Fill the DXPL cache values for later use */
@@ -2630,7 +2630,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
 	H5D_chk_idx_info_t idx_info;    /* Chunked index info */
         H5D_chunk_ud_t 	udata;		/* pass through B-tree		*/
         hbool_t must_alloc = FALSE;     /* Whether the chunk must be allocated */
-        hbool_t need_insert = FALSE;    /* Whether the chunk needs to be inserted into the index */
+	hbool_t need_insert = FALSE;    /* Whether the chunk needs to be inserted into the index */
 
         /* Set up user data for index callbacks */
         udata.common.layout = &dset->shared->layout.u.chunk;
@@ -4283,7 +4283,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
                 } /* end if */
                 else
                     dims_outside_fill[u] = FALSE;
-        } /* end if */
+	    } /* end if */
 
         carry = FALSE;
         while(!carry) {

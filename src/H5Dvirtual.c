@@ -2717,7 +2717,7 @@ H5D__virtual_flush(H5D_t *dset, hid_t dxpl_id)
             if(storage->list[i].source_dset.dset)
                 /* Flush source dataset */
                 if(H5D__flush_real(storage->list[i].source_dset.dset, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to write to source dataset")
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to flush source dataset")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

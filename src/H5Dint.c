@@ -1548,7 +1548,7 @@ herr_t
 H5D_close(H5D_t *dataset)
 {
     hbool_t free_failed = FALSE;
-    herr_t ret_value = SUCCEED;      /* Return value */
+    herr_t ret_value = SUCCEED;      	/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2990,7 +2990,7 @@ hid_t
 H5D_get_space(H5D_t *dset)
 {
     H5S_t	*space = NULL;
-    hid_t       ret_value = FAIL;
+    hid_t       ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_NOAPI_NOINIT
 

@@ -458,8 +458,8 @@ static herr_t
 H5O__dset_flush(H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
     H5D_t       *dset = NULL;          /* Dataset opened */
-    H5O_type_t 	obj_type;              /* Type of object at location */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5O_type_t obj_type;              	/* Type of object at location */
+    herr_t ret_value = SUCCEED;   	/* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -469,7 +469,6 @@ H5O__dset_flush(H5G_loc_t *obj_loc, hid_t dxpl_id)
     /* Check that the object found is the correct type */
     if(H5O_obj_type(obj_loc->oloc, &obj_type, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object type")
-
     if(obj_type != H5O_TYPE_DATASET)
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
