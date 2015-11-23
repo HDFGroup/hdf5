@@ -421,7 +421,7 @@ H5_DLL herr_t H5AC__set_write_done_callback(H5C_t * cache_ptr,
 #endif /* H5_HAVE_PARALLEL */
 
 /******************************/
-/* Pacakge Private Prototypes */
+/* Package Private Prototypes */
 /******************************/
 
 /* Cache logging routines */

@@ -1446,7 +1446,6 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
 
         /* We're the first dataset to use the the shared info */
         dataset->shared->fo_count = 1;
-
     } /* end if */
     else {
         /* Point to shared info */
@@ -1465,7 +1464,6 @@ H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
         /* Increment object count for the object in the top file */
         if(H5FO_top_incr(dataset->oloc.file, dataset->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment object count")
-
     } /* end else */
 
     /* Set the dataset to return */
@@ -2810,7 +2808,6 @@ H5D__flush_real(H5D_t *dataset, hid_t dxpl_id)
     /* Check args */
     HDassert(dataset);
     HDassert(dataset->shared);
-
 
     /* Avoid flushing the dataset (again) if it's closing */
     if(!dataset->shared->closing) {

@@ -346,7 +346,7 @@ H5Dclose(hid_t dset_id)
      * reaches zero.  
      */
     if(H5I_dec_app_ref_always_close(dset_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
 
 done:
     FUNC_LEAVE_API(ret_value)

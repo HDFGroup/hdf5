@@ -128,7 +128,7 @@ static herr_t H5D__farray_idx_init(const H5D_chk_idx_info_t *idx_info,
     const H5S_t *space, haddr_t dset_ohdr_addr);
 static herr_t H5D__farray_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
-static herr_t H5D__farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D__farray_idx_insert(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata, const H5D_t *dset);
 static herr_t H5D__farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
@@ -162,7 +162,7 @@ const H5D_chunk_ops_t H5D_COPS_FARRAY[1] = {{
     H5D__farray_idx_init,               /* init */
     H5D__farray_idx_create,             /* create */
     H5D__farray_idx_is_space_alloc,     /* is_space_alloc */
-    H5D__farray_idx_insert_addr,        /* insert */
+    H5D__farray_idx_insert,             /* insert */
     H5D__farray_idx_get_addr,           /* get_addr */
     NULL,                               /* resize */
     H5D__farray_idx_iterate,            /* iterate */
@@ -1016,7 +1016,7 @@ H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__farray_idx_insert_addr
+ * Function:	H5D__farray_idx_insert
  *
  * Purpose:	Insert chunk address into the indexing structure.
  *
@@ -1027,7 +1027,7 @@ H5D__farray_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
+H5D__farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     const H5D_t H5_ATTR_UNUSED *dset)
 {
     H5FA_t      *fa;  	/* Pointer to fixed array structure */
@@ -1078,7 +1078,7 @@ H5D__farray_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__farray_idx_insert_addr() */
+} /* H5D__farray_idx_insert() */
 
 
 /*-------------------------------------------------------------------------

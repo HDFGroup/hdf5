@@ -1153,8 +1153,6 @@ typedef enum {
  *
  ***************************************************************************/
 
-
-
 /* Actions that can be reported to 'notify' client callback */
 typedef enum H5C_notify_action_t {
     H5C_NOTIFY_ACTION_AFTER_INSERT,     /* Entry has been added to the cache 
@@ -1701,7 +1699,7 @@ typedef struct H5C_cache_entry_t {
     hbool_t			image_up_to_date;
     const H5C_class_t	      *	type;
     haddr_t		        tag;
-    int	    	    globality;
+    int				globality;
     hbool_t			is_corked;
     hbool_t			is_dirty;
     hbool_t			dirtied;

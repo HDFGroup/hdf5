@@ -36,11 +36,11 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"          /* Generic Functions                    */
-#include "H5ACpkg.h"            /* Metadata cache                       */
-#include "H5Cprivate.h"         /* Cache                                */
-#include "H5Eprivate.h"         /* Error handling                       */
-#include "H5Fpkg.h"             /* Files                                */
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5ACpkg.h"		/* Metadata cache			*/
+#include "H5Cprivate.h"		/* Cache                                */
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fpkg.h"		/* Files				*/
 #include "H5MMprivate.h"        /* Memory management                    */
 
 #ifdef H5_HAVE_PARALLEL

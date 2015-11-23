@@ -441,7 +441,7 @@ extern "C" {
  ****************************************************************************/
 
 #define H5AC__CURR_CACHE_CONFIG_VERSION 	1
-#define H5AC__MAX_TRACE_FILE_NAME_LEN           1024
+#define H5AC__MAX_TRACE_FILE_NAME_LEN		1024
 
 #define H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY    0
 #define H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED       1

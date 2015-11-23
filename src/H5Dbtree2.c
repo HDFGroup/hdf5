@@ -120,7 +120,7 @@ static herr_t H5D__bt2_found_cb(const void *nrecord, void *op_data);
  */
 static herr_t H5D__bt2_remove_cb(const void *nrecord, void *_udata);
 
-/* Callback for H5B2_modify() which is called in H5D__bt2_idx_insert_addr() */
+/* Callback for H5B2_modify() which is called in H5D__bt2_idx_insert() */
 static herr_t H5D__bt2_mod_cb(void *_record, void *_op_data, hbool_t *changed);
 
 /* Chunked layout indexing callbacks for v2 B-tree indexing */
@@ -128,7 +128,7 @@ static herr_t H5D__bt2_idx_init(const H5D_chk_idx_info_t *idx_info,
     const H5S_t *space, haddr_t dset_ohdr_addr);
 static herr_t H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
-static herr_t H5D__bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata, const H5D_t *dset);
 static herr_t H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
@@ -158,7 +158,7 @@ const H5D_chunk_ops_t H5D_COPS_BT2[1] = {{
     H5D__bt2_idx_init,                  /* init */
     H5D__bt2_idx_create,                /* create */
     H5D__bt2_idx_is_space_alloc,        /* is_space_alloc */
-    H5D__bt2_idx_insert_addr,           /* insert */
+    H5D__bt2_idx_insert,                /* insert */
     H5D__bt2_idx_get_addr,              /* get_addr */
     NULL,                               /* resize */
     H5D__bt2_idx_iterate,               /* iterate */
@@ -917,7 +917,7 @@ H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  *
  * Purpose:	Modify record for dataset chunk when it is found in a v2 B-tree.
  * 		This is the callback for H5B2_modify() which is called in 
- *		H5D__bt2_idx_insert_addr().
+ *		H5D__bt2_idx_insert().
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
@@ -941,7 +941,7 @@ H5D__bt2_mod_cb(void *_record, void *_op_data, hbool_t *changed)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__bt2_idx_insert_addr
+ * Function:	H5D__bt2_idx_insert
  *
  * Purpose:	Insert chunk address into the indexing structure.
  *		A non-filtered chunk: 
@@ -959,7 +959,7 @@ H5D__bt2_mod_cb(void *_record, void *_op_data, hbool_t *changed)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
+H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     const H5D_t H5_ATTR_UNUSED *dset)
 {
     H5B2_t *bt2;                        /* v2 B-tree handle for indexing chunks */
@@ -1017,7 +1017,7 @@ H5D__bt2_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__bt2_idx_insert_addr() */
+} /* H5D__bt2_idx_insert() */
 
 
 /*-------------------------------------------------------------------------
@@ -1025,7 +1025,7 @@ done:
  *
  * Purpose:	Retrieve record for dataset chunk when it is found in a v2 B-tree.
  * 		This is the callback for H5B2_find() which is called in 
- *		H5D__bt2_idx_get_addr() and H5D__bt2_idx_insert_addr().
+ *		H5D__bt2_idx_get_addr() and H5D__bt2_idx_insert().
  *
  * Return:	Success:	non-negative
  *		Failure:	negative

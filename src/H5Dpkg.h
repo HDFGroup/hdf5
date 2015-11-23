@@ -330,7 +330,7 @@ typedef struct H5D_chunk_ops_t {
     H5D_chunk_init_func_t init;             /* Routine to initialize indexing information in memory */
     H5D_chunk_create_func_t create;         /* Routine to create chunk index */
     H5D_chunk_is_space_alloc_func_t is_space_alloc;    /* Query routine to determine if storage/index is allocated */
-    H5D_chunk_insert_func_t insert_addr;         /* Routine to insert a chunk into an index */
+    H5D_chunk_insert_func_t insert;         /* Routine to insert a chunk into an index */
     H5D_chunk_get_addr_func_t get_addr;     /* Routine to retrieve address of chunk in file */
     H5D_chunk_resize_func_t resize;         /* Routine to update chunk index info after resizing dataset */
     H5D_chunk_iterate_func_t iterate;       /* Routine to iterate over chunks */
@@ -565,6 +565,7 @@ typedef struct H5D_rdcc_ent_t {
 } H5D_rdcc_ent_t;
 typedef H5D_rdcc_ent_t *H5D_rdcc_ent_ptr_t; /* For free lists */
 
+
 /*****************************/
 /* Package Private Variables */
 /*****************************/
@@ -618,7 +619,6 @@ H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL herr_t H5D__flush_real(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL herr_t H5D__mark(const H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D__refresh(hid_t dset_id, H5D_t *dataset, hid_t dxpl_id);
-
 
 /* To convert a dataset's chunk indexing type to v1 B-tree */
 H5_DLL herr_t H5D__format_convert(H5D_t *dataset, hid_t dxpl_id);
@@ -695,8 +695,6 @@ H5_DLL void *H5D__chunk_lock(const H5D_io_info_t *io_info,
 H5_DLL herr_t H5D__chunk_unlock(const H5D_io_info_t *io_info,
     const H5D_chunk_ud_t *udata, hbool_t dirty, void *chunk,
     uint32_t naccessed);
-H5_DLL herr_t H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id,
-    const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t reset);
 H5_DLL herr_t H5D__chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes);
 H5_DLL herr_t H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id,
     hbool_t full_overwrite, hsize_t old_dim[]);

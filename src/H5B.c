@@ -111,6 +111,7 @@
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Pprivate.h"         /* Property lists                       */
 
+
 /****************/
 /* Local Macros */
 /****************/
@@ -560,7 +561,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void * udata)
+H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *udata)
 {
     /*
      * These are defined this way to satisfy alignment constraints.
@@ -617,7 +618,6 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
         HDassert(!split_bt_ud.bt);
         HGOTO_DONE(SUCCEED)
     } /* end if */
-
     HDassert(H5B_INS_RIGHT == my_ins);
     HDassert(split_bt_ud.bt);
     HDassert(H5F_addr_defined(split_bt_ud.addr));
@@ -678,12 +678,9 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
     HDmemcpy(H5B_NKEY(new_root_bt, shared, 1), md_key, shared->type->sizeof_nkey);
     HDmemcpy(H5B_NKEY(new_root_bt, shared, 2), rt_key, shared->type->sizeof_nkey);
 
+    /* Insert the modified copy of the old root into the file again */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_BT, addr, new_root_bt, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to add new B-tree root node to cache")
-
-    /* Mark new_root_bt as NULL, as it is not pinned or protected and does
-     * not need to be freed as it is now in the cache. */
-    new_root_bt = NULL;
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to add old B-tree root node to cache")
 
 done:
     if(ret_value < 0)
@@ -750,7 +747,7 @@ H5B__insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx,
 
         /* The MD_KEY is the left key of the new node */
         if(H5B_INS_RIGHT == anchor)
-            (idx)++;  /* Don't have to memmove() child addresses down, just add new child */
+            idx++;  /* Don't have to memmove() child addresses down, just add new child */
         else
             /* Make room for the new child address */
             bt->child[idx + 1] = bt->child[idx];
@@ -763,7 +760,7 @@ H5B__insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx,
 
         /* The MD_KEY is the left key of the new node */
         if(H5B_INS_RIGHT == anchor)
-            (idx)++;
+            idx++;
 
         /* Make room for the new child address */
         HDmemmove(bt->child + idx + 1, bt->child + idx,
@@ -777,7 +774,6 @@ H5B__insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx,
     *bt_flags |= H5AC__DIRTIED_FLAG;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-
 } /* end H5B_insert_child() */
 
 
@@ -1062,7 +1058,7 @@ H5B__insert_helper(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud,
      */
     HDassert(!(bt->level == 0) != !(child_bt_ud.bt));
     if(H5B_INS_LEFT == my_ins || H5B_INS_RIGHT == my_ins) {
-        hbool_t *tmp_bt_flags_ptr = NULL;
+        unsigned *tmp_bt_flags_ptr = NULL;
         H5B_t	*tmp_bt;
 
 	/*
@@ -1122,8 +1118,7 @@ H5B__insert_helper(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud,
 
 done:
     if(child_bt_ud.bt)
-        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, child_bt_ud.addr, child_bt_ud.bt,
-                child_bt_ud.cache_flags) < 0)
+        if(H5AC_unprotect(f, dxpl_id, H5AC_BT, child_bt_ud.addr, child_bt_ud.bt, child_bt_ud.cache_flags) < 0)
             HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to unprotect child")
 
     if(new_child_bt_ud.bt)
@@ -1610,8 +1605,7 @@ H5B_remove(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
 
     /* The actual removal */
     if(H5B__remove_helper(f, dxpl_id, addr, type, 0, lt_key, &lt_key_changed,
-			  udata, rt_key, &rt_key_changed)
-			  == H5B_INS_ERROR)
+			  udata, rt_key, &rt_key_changed) == H5B_INS_ERROR)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to remove entry from B-tree")
 
 #ifdef H5B_DEBUG
@@ -2119,5 +2113,4 @@ H5B__node_dest(H5B_t *bt)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B__node_dest() */
-
 

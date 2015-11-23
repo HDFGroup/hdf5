@@ -548,6 +548,7 @@ H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
     /* (Note: this is relying on H5D_alloc_storage not calling H5O_msg_write during dataset creation) */
     if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type && !dset->shared->dcpl_cache.pline.nused) ? H5O_MSG_FLAG_CONSTANT : 0), 0, layout) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
+
 done:
     /* Error cleanup */
     if(ret_value < 0)

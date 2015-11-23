@@ -126,7 +126,7 @@ static herr_t H5D__btree_idx_init(const H5D_chk_idx_info_t *idx_info,
     const H5S_t *space, haddr_t dset_ohdr_addr);
 static herr_t H5D__btree_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage);
-static herr_t H5D__btree_idx_insert_addr(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D__btree_idx_insert(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata, const H5D_t *dset);
 static herr_t H5D__btree_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
@@ -157,7 +157,7 @@ const H5D_chunk_ops_t H5D_COPS_BTREE[1] = {{
     H5D__btree_idx_init,                /* insert */
     H5D__btree_idx_create,              /* create */
     H5D__btree_idx_is_space_alloc,      /* is_space_alloc */
-    H5D__btree_idx_insert_addr,         /* insert */
+    H5D__btree_idx_insert,              /* insert */
     H5D__btree_idx_get_addr,            /* get_addr */
     NULL,                               /* resize */
     H5D__btree_idx_iterate,             /* iterate */
@@ -855,7 +855,7 @@ H5D__btree_shared_create(const H5F_t *f, H5O_storage_chunk_t *store,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk layout")
     HDmemcpy(my_layout, layout, sizeof(H5O_layout_chunk_t));
     shared->udata = my_layout;
-HDassert(!store->u.btree.shared);
+
     /* Make shared B-tree info reference counted */
     if(NULL == (store->u.btree.shared = H5UC_create(shared, H5D__btree_shared_free)))
 	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
@@ -949,7 +949,7 @@ H5D__btree_idx_create(const H5D_chk_idx_info_t *idx_info)
 
     /* Create the v1 B-tree for the chunk index */
     if(H5B_create(idx_info->f, idx_info->dxpl_id, H5B_BTREE, &udata, &(idx_info->storage->idx_addr)/*out*/) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create B-tree")
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create B-tree")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -981,9 +981,9 @@ H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__btree_idx_insert_addr
+ * Function:	H5D__btree_idx_insert
  *
- * Purpose:	Insert chunk address into the indexing structure.
+ * Purpose:	Insert chunk entry into the indexing structure.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -993,7 +993,7 @@ H5D__btree_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__btree_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
+H5D__btree_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     const H5D_t H5_ATTR_UNUSED *dset)
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
@@ -1017,7 +1017,7 @@ H5D__btree_idx_insert_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *u
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__btree_idx_insert_addr() */
+} /* H5D__btree_idx_insert() */
 
 
 /*-------------------------------------------------------------------------
@@ -1074,6 +1074,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/* ARGSUSED */
 static int
 H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     const void *_lt_key, haddr_t addr, const void H5_ATTR_UNUSED *_rt_key,
@@ -1179,7 +1180,6 @@ H5D__btree_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t 
     HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
     HDassert(udata);
 
-
     /* Remove the chunk from the v1 B-tree index and release the space for the
      * chunk (in the B-tree callback).
      */
@@ -1208,7 +1208,7 @@ done:
 static herr_t
 H5D__btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
 {
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1223,7 +1223,6 @@ H5D__btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
     if(H5F_addr_defined(idx_info->storage->idx_addr)) {
         H5O_storage_chunk_t tmp_storage;  /* Local copy of storage info */
         H5D_chunk_common_ud_t udata;            /* User data for B-tree operations */
-
 
         /* Set up temporary chunked storage info */
         tmp_storage = *idx_info->storage;

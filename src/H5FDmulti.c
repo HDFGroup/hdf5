@@ -1808,7 +1808,6 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
     int			nerrors = 0;
     H5FD_mem_t 		out_mt;
-    int k;
     static const char *func="H5FD_multi_unlock";  /* Function Name for error reporting */
 
     /* Clear the error stack */
@@ -1829,11 +1828,13 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
 
     /* Try to unlock the member files that are locked before error is encountered */
     if(nerrors) {
-        for(k = (int)H5FD_MEM_DEFAULT; k < (int)out_mt; k++) {
-	        H5E_BEGIN_TRY {
-		        if(H5FDunlock(file->memb[k]) < 0)
-		            nerrors++;
-	        } H5E_END_TRY;
+        H5FD_mem_t k;
+
+        for(k = H5FD_MEM_DEFAULT; k < out_mt; k = (H5FD_mem_t)(k + 1)) {
+            H5E_BEGIN_TRY {
+                if(H5FDunlock(file->memb[k]) < 0)
+                    nerrors++;
+            } H5E_END_TRY;
         } /* end for */
     } /* end if */
 
@@ -1869,10 +1870,9 @@ H5FD_multi_unlock(H5FD_t *_file)
     H5Eclear2(H5E_DEFAULT);
 
     ALL_MEMBERS(mt) {
-        if(file->memb[mt]) {
+        if(file->memb[mt])
             if(H5FDunlock(file->memb[mt]) < 0)
 		nerrors++;
-        }
     } END_MEMBERS;
 
     if(nerrors)

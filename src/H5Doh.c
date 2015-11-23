@@ -478,6 +478,8 @@ H5O__dset_flush(void *_obj_ptr, hid_t dxpl_id)
 
     if(H5D__flush_real(dset, dxpl_id) < 0)
 	HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dset_flush() */
+

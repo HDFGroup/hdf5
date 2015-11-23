@@ -801,7 +801,6 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
                 virtual_ent->source_space_status = H5O_VIRTUAL_STATUS_CORRECT;
             } /* end if */
-
         } /* end else */
     } /* end if */
 
