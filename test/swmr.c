@@ -1876,6 +1876,7 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     hid_t sid = -1;			/* Dataspace ID */
     hid_t aid = -1;			/* Attribute ID */
     hid_t tid = -1;			/* Datatype ID */
+    hid_t bad_fid = -1;     /* Test fid (should never represent a real ID) */
     herr_t ret;				/* Return value */
     char filename[NAME_BUF_SIZE];	/* File name */
     
@@ -2191,18 +2192,18 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
 
         /* Should fail to open the file with SWMR write + latest format due to superblock version not at least 3 */
         H5E_BEGIN_TRY {
-            ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, new_fapl);
+            bad_fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, new_fapl);
         } H5E_END_TRY;
-        if(ret >= 0)
+        if(bad_fid >= 0)
             TEST_ERROR
 
         /* Case 2 */
 
         /* Should fail to open the file with SWMR write + non-latest-format due to superblock version not at least 3 */
         H5E_BEGIN_TRY {
-            ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
+            bad_fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
         } H5E_END_TRY;
-        if(ret >= 0)
+        if(bad_fid >= 0)
             TEST_ERROR
 
         /* Case 3 */
@@ -2258,6 +2259,10 @@ error:
 	    H5Fclose(fid2);
 	    H5Pclose(fapl);
 	    H5Pclose(new_fapl);
+        /* bad_fid should only represent a read ID in the error case.
+         * It never needs to be closed in the normal case.
+         */
+        H5Fclose(bad_fid);
     } H5E_END_TRY;
 
     return -1;
