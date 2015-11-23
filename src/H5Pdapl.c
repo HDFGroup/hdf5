@@ -829,8 +829,8 @@ H5Pset_append_flush(hid_t plist_id, unsigned ndims, const hsize_t *boundary, H5D
     H5TRACE5("e", "iIu*hx*x", plist_id, ndims, boundary, func, udata);
 
     /* Check arguments */
-    if(ndims <= 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimensionality cannot be negative or zero")
+    if(0 == ndims)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimensionality cannot be zero")
     if(ndims > H5S_MAX_RANK)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimensionality is too large")
     if(!boundary)

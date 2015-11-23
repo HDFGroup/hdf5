@@ -2990,13 +2990,6 @@ test_append_flush_generic(void)
     if(ret >= 0)
 	    TEST_ERROR
 
-    /* Invalid dataset rank: negative value */
-    H5E_BEGIN_TRY {
-	    ret = H5Pset_append_flush(dapl, -1, NULL, NULL, &count);
-    } H5E_END_TRY;
-    if(ret >= 0)
-	    TEST_ERROR
-
     /* Invalid dataset rank: > H5S_MAX_RANK */
     H5E_BEGIN_TRY {
 	    ret = H5Pset_append_flush(dapl, H5S_MAX_RANK+1, NULL, NULL, &count);
