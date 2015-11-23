@@ -65,9 +65,9 @@ static int test_metadata_read_attempts(hid_t in_fapl);
 static int test_metadata_read_retry_info(hid_t in_fapl);
 
 /* Tests for H5Fstart_swmr_write() */
-static int test_start_swmr_write(hid_t in_fapl, hbool_t new);
-static int test_err_start_swmr_write(hid_t in_fapl, hbool_t new);
-static int test_start_swmr_write_concur(hid_t in_fapl, hbool_t new);
+static int test_start_swmr_write(hid_t in_fapl, hbool_t new_format);
+static int test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format);
+static int test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format);
 
 /* Tests for H5Pget/set_object_flush_cb() */
 static herr_t flush_cb(hid_t obj_id, void *_udata);
@@ -1532,7 +1532,7 @@ error:
  *
  */
 static int
-test_start_swmr_write(hid_t in_fapl, hbool_t new)
+test_start_swmr_write(hid_t in_fapl, hbool_t new_format)
 {
     hid_t fid = -1;				/* File ID */
     hid_t fapl = -1;				/* File access property */
@@ -1557,17 +1557,17 @@ test_start_swmr_write(hid_t in_fapl, hbool_t new)
 
     /* Get a copy of the parameter fapl (non-latest-format) */
     if((fapl = H5Pcopy(in_fapl)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
-    if(new) {
-	TESTING("H5Fstart_swmr_write() when creating/opening a file with latest format");
+    if(new_format) {
+	    TESTING("H5Fstart_swmr_write() when creating/opening a file with latest format");
 
 	/* Set to use the latest library format */
 	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
 	    FAIL_STACK_ERROR
     } else {
-	TESTING("H5Fstart_swmr_write() when creating/opening a file without latest format");
-    }
+	    TESTING("H5Fstart_swmr_write() when creating/opening a file without latest format");
+    } /* end if */
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -1577,70 +1577,70 @@ test_start_swmr_write(hid_t in_fapl, hbool_t new)
      */
 
     /* Create the file with SWMR write + non-latest-format */
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (new ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, fapl)) < 0)
+	    FAIL_STACK_ERROR
 
     /* Get the file's access_property list */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts from the file's fapl */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should be 100 */
-    if(attempts != (new ? H5F_METADATA_READ_ATTEMPTS : H5F_SWMR_METADATA_READ_ATTEMPTS))
-	TEST_ERROR;
+    if(attempts != (new_format ? H5F_METADATA_READ_ATTEMPTS : H5F_SWMR_METADATA_READ_ATTEMPTS))
+	    TEST_ERROR;
 
     /* Close the property list */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Create "dataset1" */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(H5Pset_chunk(dcpl, 1, chunk_dim) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if((sid1 = H5Screate_simple(1, dim, max_dim)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((did1 = H5Dcreate2(fid, "dataset1", H5T_NATIVE_INT, sid1, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the chunk index type */
     if(H5D__layout_idx_type_test(did1, &idx_type) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(idx_type != H5D_CHUNK_IDX_EARRAY)
         FAIL_PUTS_ERROR("should be using extensible array as index");
 
     /* Write to the dataset */
     if(H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR for non-latest-format */
     /* Should succeed in enabling SWMR for latest format */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
-    if(new) {
-       if(ret < 0) TEST_ERROR	
+    if(new_format) {
+        if(ret < 0) TEST_ERROR	
     } else if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Read from the dataset */
     if(H5Dread(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Verify the data is correct */
     if(wdata != rdata)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close "dataset1", dataspace, dataset creation property list */
     if(H5Dclose(did1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Sclose(sid1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(dcpl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the file's access_property list */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
@@ -1660,7 +1660,7 @@ test_start_swmr_write(hid_t in_fapl, hbool_t new)
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* 
      * Case B: when opening a file 
@@ -1668,32 +1668,32 @@ test_start_swmr_write(hid_t in_fapl, hbool_t new)
 
     /* Open the file again with write + non-latest-format */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the file's access_property list */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should be 1 */
     if(attempts != H5F_METADATA_READ_ATTEMPTS)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Close the property list */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* open "dataset1", keep it open */
     if((did1 = H5Dopen2(fid, "dataset1", H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Write to "dataset1" */
     wdata = 88;
     if(H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Create a group */
     if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -1701,93 +1701,93 @@ test_start_swmr_write(hid_t in_fapl, hbool_t new)
 
     /* Create "dataset2" in the group, keep it open */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(H5Pset_chunk(dcpl, 2, chunk_dim2) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if((sid2 = H5Screate_simple(2, dim2, max_dim2)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((did2 = H5Dcreate2(gid, "dataset2", H5T_NATIVE_INT, sid2, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the chunk index type for "dataset2" */
     if(H5D__layout_idx_type_test(did2, &idx_type) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(idx_type != H5D_CHUNK_IDX_BT2)
         FAIL_PUTS_ERROR("should be using v2 B-tree chunk indexing");
 
     /* Should succeed in enabling SWMR writing */
     if(H5Fstart_swmr_write(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the file's access_property list */
     if((file_fapl = H5Fget_access_plist(fid)) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Retrieve the # of read attempts */
     if(H5Pget_metadata_read_attempts(file_fapl, &attempts) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Should be 100 */
     if(attempts != H5F_SWMR_METADATA_READ_ATTEMPTS)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Close the property list */
     if(H5Pclose(file_fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Read from "dataset1" */
     if(H5Dread(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(wdata != rdata)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close "dataset1" */
     if(H5Dclose(did1) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close "dataset2", dataspace, dataset creation property list */
     if(H5Dclose(did2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Sclose(sid2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(dcpl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Create "dataset3" */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if(H5Pset_chunk(dcpl, 2, chunk_dim2) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     if((sid3 = H5Screate_simple(2, dim2, max_dim2)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if((did3 = H5Dcreate2(fid, "dataset3", H5T_NATIVE_INT, sid3, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Get the chunk index type for "dataset3" */
     if(H5D__layout_idx_type_test(did3, &idx_type) < 0) 
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(idx_type != H5D_CHUNK_IDX_BT2)
         FAIL_PUTS_ERROR("should be using v2 B-tree as index");
 
     /* Close "dataset3", dataspace, dataset creation property list */
     if(H5Dclose(did3) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Sclose(sid3) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(dcpl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the group */
     if(H5Gclose(gid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the file access property list */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     PASSED();
 
@@ -1853,7 +1853,7 @@ error:
  *	        --fail to enable SWMR for the second opened file
  *		--Close the file
  *
- *	(E) (!new): When opening a file which is created with write + non-latest-format:
+ *	(E) (!new_format): When opening a file which is created with write + non-latest-format:
  *          (1) Open the file with SWMR write+latest format
  *              --fail to open due to superblock version not 3
  *          (2) Open the file with SWMR write+non-latest-format
@@ -1865,7 +1865,7 @@ error:
  *              --fail to enable SWMR due to superblock version not 3
  */
 static int
-test_err_start_swmr_write(hid_t in_fapl, hbool_t new)
+test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
 {
     hid_t fid = -1;			/* File ID */
     hid_t fid2 = -1;			/* File ID */
@@ -1881,21 +1881,21 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new)
     
     /* Create a copy of the input parameter in_fapl */
     if((fapl = H5Pcopy(in_fapl)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     if((new_fapl = H5Pcopy(in_fapl)) < 0) 
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
     /* Set to use the latest library format */
     if(H5Pset_libver_bounds(new_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
-    if(new) {
-	TESTING("H5Fstart_swmr_write() on failure conditions for latest format");
+    if(new_format) {
+	    TESTING("H5Fstart_swmr_write() on failure conditions for latest format");
 
 	if((fapl = H5Pcopy(new_fapl)) < 0) 
 	    FAIL_STACK_ERROR
     } else {
-	TESTING("H5Fstart_swmr_write() on failure conditions for without latest format");
+	    TESTING("H5Fstart_swmr_write() on failure conditions for without latest format");
     }
 
     /* Set the filename to use for this test (dependent on fapl) */
@@ -1916,60 +1916,60 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new)
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Case 2 */
 
-    if(new) {
+    if(new_format) {
 
-	/* Create the file with write + latest format */
-	if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	    FAIL_STACK_ERROR
+        /* Create the file with write + latest format */
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
 
-	/* Create and commit a named datatype */
-	if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
-	    FAIL_STACK_ERROR;
-	if(H5Tcommit2(fid, "TID", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-	    FAIL_STACK_ERROR;
+        /* Create and commit a named datatype */
+        if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
+            FAIL_STACK_ERROR;
+        if(H5Tcommit2(fid, "TID", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+            FAIL_STACK_ERROR;
 
-	/* Should fail to enable SWMR writing when there is an opened named datatype */
-	H5E_BEGIN_TRY {
-	    ret = H5Fstart_swmr_write(fid);
-	} H5E_END_TRY;
-	if(ret >= 0)
-	    TEST_ERROR
+        /* Should fail to enable SWMR writing when there is an opened named datatype */
+        H5E_BEGIN_TRY {
+            ret = H5Fstart_swmr_write(fid);
+        } H5E_END_TRY;
+        if(ret >= 0)
+            TEST_ERROR
 
-	/* Close the datatype */
-	if(H5Tclose(tid) < 0)
-	    FAIL_STACK_ERROR;
+        /* Close the datatype */
+        if(H5Tclose(tid) < 0)
+            FAIL_STACK_ERROR;
 
-	/* Should succeed in enabling SWMR writing */
-	if(H5Fstart_swmr_write(fid) < 0)
-	    TEST_ERROR;
+        /* Should succeed in enabling SWMR writing */
+        if(H5Fstart_swmr_write(fid) < 0)
+            TEST_ERROR;
 
-	/* Close the file */
-	if(H5Fclose(fid) < 0)
-	    FAIL_STACK_ERROR;
+        /* Close the file */
+        if(H5Fclose(fid) < 0)
+            FAIL_STACK_ERROR;
 
     } else {
 
-	/* Create a file with write + non-latest-format */
-	if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	    TEST_ERROR
+        /* Create a file with write + non-latest-format */
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR
 
-	/* Should fail to enable SWMR writing because the file's superblock version is not at least 3 */
-	H5E_BEGIN_TRY {
-	    ret = H5Fstart_swmr_write(fid);
-	} H5E_END_TRY;
-	if(ret >= 0)
-	    TEST_ERROR
+        /* Should fail to enable SWMR writing because the file's superblock version is not at least 3 */
+        H5E_BEGIN_TRY {
+            ret = H5Fstart_swmr_write(fid);
+        } H5E_END_TRY;
+        if(ret >= 0)
+            TEST_ERROR
 
-	if(H5Fclose(fid) < 0)
-	    FAIL_STACK_ERROR;
-    }
+        if(H5Fclose(fid) < 0)
+            FAIL_STACK_ERROR;
+    } /* end if */
 
     /* 
      * (B) When opening a file which is created with the latest format
@@ -1977,114 +1977,114 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new)
 
     /* Create a file with write + latest format */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, new_fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     
     /* Case 1 */
 
     /* Open the file with SWMR write + with/without latest format */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is already in SWMR writing mode */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Case 2 */
 
     /* Open the file with read only access + with/without latest format */
     if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is opened with read only access */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Case 3 */
 
     /* Open the file file with SWMR read access + with/without latest format */
     if((fid = H5Fopen(filename, H5F_ACC_SWMR_READ, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is opened with SWMR read access only */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Case 4 */
 
     /* Open the file with write + with/without latest format */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Create and commit a named datatype */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Tcommit2(fid, "TID", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Create dataspace */
     if((sid = H5Screate(H5S_SCALAR)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Attach an attribute to the named datatype */
     if((aid = H5Acreate2(tid, "attr", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when there are opened named datatype and attribute */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the datatype */
     if(H5Tclose(tid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Still fail to enable SWMR writing when the attribute is still opened */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the attribute */
     if(H5Aclose(aid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should succeed in enabling SWMR writing */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Close the dataspace */
     if(H5Sclose(sid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
 
     /* 
@@ -2094,12 +2094,12 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new)
     /* Case 1 */
 
     /* Create a file with write + with/without latest format */
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (new ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, fapl)) < 0)
-	FAIL_STACK_ERROR;
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (new_format ? 0 : H5F_ACC_SWMR_WRITE), H5P_DEFAULT, fapl)) < 0)
+	    FAIL_STACK_ERROR;
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     
     /* Open the file with write + with/without latest format */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
@@ -2107,18 +2107,18 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new)
 
     /* Should succeed in enabling SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Should fail for a second call to enable SWMR writing mode */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
 
     /* Case 2 */
@@ -2129,24 +2129,24 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new)
 
     /* Should succeed in enabling SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Re-open the same file */
     if((fid2 = H5Freopen(fid)) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing mode for fid2 */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid2);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the files */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid2) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     /* Case 3 */
 
@@ -2160,104 +2160,104 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new)
 
     /* Should succeed in enabling SWMR writing for fid */
     if(H5Fstart_swmr_write(fid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Should fail to enable SWMR writing for fid2 */
     H5E_BEGIN_TRY {
         ret = H5Fstart_swmr_write(fid2);
     } H5E_END_TRY;
     if(ret >= 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Close the files */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Fclose(fid2) < 0)
-	FAIL_STACK_ERROR;
-
-    if(!new) {
-
-	/*
-	 * (D) When opening a file which is created without the latest format:
-	 */
-
-	 /* Create a file with write + without latest format */
-	if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	    FAIL_STACK_ERROR;
-	if(H5Fclose(fid) < 0)
 	    FAIL_STACK_ERROR;
 
-	/* Case 1 */
+    if(!new_format) {
 
-	/* Should fail to open the file with SWMR write + latest format due to superblock version not at least 3 */
-	H5E_BEGIN_TRY {
-	    ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, new_fapl);
-	} H5E_END_TRY;
-	if(ret >= 0)
-	    TEST_ERROR
+        /*
+         * (D) When opening a file which is created without the latest format:
+         */
 
-	/* Case 2 */
+         /* Create a file with write + without latest format */
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR;
+        if(H5Fclose(fid) < 0)
+            FAIL_STACK_ERROR;
 
-	/* Should fail to open the file with SWMR write + non-latest-format due to superblock version not at least 3 */
-	H5E_BEGIN_TRY {
-	    ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
-	} H5E_END_TRY;
-	if(ret >= 0)
-	    TEST_ERROR
+        /* Case 1 */
 
-	/* Case 3 */
+        /* Should fail to open the file with SWMR write + latest format due to superblock version not at least 3 */
+        H5E_BEGIN_TRY {
+            ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, new_fapl);
+        } H5E_END_TRY;
+        if(ret >= 0)
+            TEST_ERROR
 
-	/* Open the file with write + latest format */
-	if((fid = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-	    FAIL_STACK_ERROR;
+        /* Case 2 */
 
-	/* Should fail to enable SWMR writing due to superblock version not at least 3 */
-	H5E_BEGIN_TRY {
-	    ret = H5Fstart_swmr_write(fid);
-	} H5E_END_TRY;
-	if(ret >= 0)
-	    TEST_ERROR
+        /* Should fail to open the file with SWMR write + non-latest-format due to superblock version not at least 3 */
+        H5E_BEGIN_TRY {
+            ret = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
+        } H5E_END_TRY;
+        if(ret >= 0)
+            TEST_ERROR
 
-	if(H5Fclose(fid) < 0)
-	    FAIL_STACK_ERROR;
+        /* Case 3 */
+
+        /* Open the file with write + latest format */
+        if((fid = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
+            FAIL_STACK_ERROR;
+
+        /* Should fail to enable SWMR writing due to superblock version not at least 3 */
+        H5E_BEGIN_TRY {
+            ret = H5Fstart_swmr_write(fid);
+        } H5E_END_TRY;
+        if(ret >= 0)
+            TEST_ERROR
+
+        if(H5Fclose(fid) < 0)
+            FAIL_STACK_ERROR;
 
 
-	/* Case 4 */
+        /* Case 4 */
 
-	/* Open the file with write + non-latest-format */
-	if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-	    FAIL_STACK_ERROR;
+        /* Open the file with write + non-latest-format */
+        if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            FAIL_STACK_ERROR;
 
-	/* Should fail to enable SWMR writing because the file's superblock version is not at least 3 */
-	H5E_BEGIN_TRY {
-	    ret = H5Fstart_swmr_write(fid);
-	} H5E_END_TRY;
-	if(ret >= 0)
-	    TEST_ERROR
+        /* Should fail to enable SWMR writing because the file's superblock version is not at least 3 */
+        H5E_BEGIN_TRY {
+            ret = H5Fstart_swmr_write(fid);
+        } H5E_END_TRY;
+        if(ret >= 0)
+            TEST_ERROR
 
-	if(H5Fclose(fid) < 0)
-	    FAIL_STACK_ERROR;
+        if(H5Fclose(fid) < 0)
+            FAIL_STACK_ERROR;
 
     } /* not new */
 
     /* Close the file access property list */
     if(H5Pclose(fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
     if(H5Pclose(new_fapl) < 0)
-	FAIL_STACK_ERROR;
+	    FAIL_STACK_ERROR;
 
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-	H5Sclose(sid);
-	H5Gclose(gid);
-	H5Dclose(did);
-	H5Fclose(fid);
-	H5Fclose(fid2);
-	H5Pclose(fapl);
-	H5Pclose(new_fapl);
+	    H5Sclose(sid);
+	    H5Gclose(gid);
+	    H5Dclose(did);
+	    H5Fclose(fid);
+	    H5Fclose(fid2);
+	    H5Pclose(fapl);
+	    H5Pclose(new_fapl);
     } H5E_END_TRY;
 
     return -1;
@@ -2266,7 +2266,7 @@ error:
 /*
  * test_start_swmr_write_concur():
  *
- * The "new" parameter indicates whether to create the file with latest format or not.
+ * The "new_format" parameter indicates whether to create the file with latest format or not.
  *	To have SWMR support, can use either one of the following in creating a file:
  *	(a) Create the file with write + latest format:
  *	    --result in v3 superblock with latest chunk indexing types
@@ -2286,7 +2286,7 @@ error:
  *	    Child: concurrent open of the file with write and SWMR write access (fail)
  */
 static int
-test_start_swmr_write_concur(hid_t in_fapl, hbool_t new)
+test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
 {
     hid_t fid;    			/* File ID */
     hid_t fapl;    			/* File access property list */
@@ -2298,11 +2298,11 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new)
     char filename[NAME_BUF_SIZE];	/* File name */
 
     /* Output message about test being performed */
-    if(new) {
-	TESTING("Testing H5Fstart_swmr_write()--concurrent access for latest format");
+    if(new_format) {
+	    TESTING("Testing H5Fstart_swmr_write()--concurrent access for latest format");
     } else {
-	TESTING("Testing H5Fstart_swmr_write()--concurrent access for non-latest-format");
-    }
+	    TESTING("Testing H5Fstart_swmr_write()--concurrent access for non-latest-format");
+    } /* end if */
 
 #if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
 
@@ -2317,23 +2317,23 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new)
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    if(new) {
-	/* Set to use the latest library format */
-	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	    FAIL_STACK_ERROR
+    if(new_format) {
+        /* Set to use the latest library format */
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            FAIL_STACK_ERROR
 
-	/* Create the test file */
-	if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	    FAIL_STACK_ERROR
+        /* Create the test file */
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
     } else {
-	/* Create the test file without latest format but with SWMR write */
-	if((fid = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
-	    FAIL_STACK_ERROR
-    }
+        /* Create the test file without latest format but with SWMR write */
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
+    } /* end if */
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-	FAIL_STACK_ERROR
+	    FAIL_STACK_ERROR
 
     /* Remove the message file to be sure */
     HDremove(DONE_MESSAGE);
@@ -2458,17 +2458,17 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new)
 
 	    /* Wait till parent process completes the open */
 	    if(h5_wait_message(DONE_MESSAGE) < 0)
-	        exit(1);
+	        HDexit(1);
 
 	    /* Should fail in opening the test file */
 	    H5E_BEGIN_TRY {
 	        fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
 	    } H5E_END_TRY;
 	    if(fid >= 0)
-	        exit(1);
+	        HDexit(1);
 
-	    exit(0);
-    }
+	    HDexit(0);
+    } /* end if */
 
     /* Open the test file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
@@ -2513,17 +2513,17 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new)
 
 	    /* Wait till parent process completes the open */
 	    if(h5_wait_message(DONE_MESSAGE) < 0)
-	        exit(1);
+	        HDexit(1);
 
 	    /* Should fail in opening the test file */
 	    H5E_BEGIN_TRY {
 	        fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
 	    } H5E_END_TRY;
 	    if(fid >= 0)
-	        exit(1);
+	        HDexit(1);
 
-	    exit(0);
-    }
+	    HDexit(0);
+    } /* end if */
 
     /* Open the test file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
@@ -2568,16 +2568,16 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new)
 
 	    /* Wait till parent process completes the open */
 	    if(h5_wait_message(DONE_MESSAGE) < 0)
-	        exit(1);
+	        HDexit(1);
 
 	    /* Should fail in opening the test file */
 	    H5E_BEGIN_TRY {
 	        fid = H5Fopen(filename, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl);
 	    } H5E_END_TRY;
 	    if(fid >= 0)
-	        exit(1);
+	        HDexit(1);
 
-	    exit(0);
+	    HDexit(0);
     }
 
     /* Open the test file */

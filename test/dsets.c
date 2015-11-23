@@ -479,15 +479,14 @@ test_create(hid_t file)
 static herr_t
 test_simple_io(const char *env_h5_drvr, hid_t fapl)
 {
-    char                filename[FILENAME_BUF_SIZE];
-    hid_t		file = -1, dataset = -1, space = -1, xfer = -1;
-    int			i, j, n;
-    hsize_t		dims[2];
-    void		*tconv_buf = NULL;
-    int                 f = -1;
-    haddr_t             offset;
-    int                 rdata[DSET_DIM1][DSET_DIM2];
-    ssize_t     read_err;
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       file = -1, dataset = -1, space = -1, xfer = -1;
+    int         i, j, n;
+    hsize_t     dims[2];
+    void        *tconv_buf = NULL;
+    int         f = -1;
+    haddr_t     offset;
+    int         rdata[DSET_DIM1][DSET_DIM2];
 
     TESTING("simple I/O");
 

@@ -834,7 +834,7 @@ H5Pset_append_flush(hid_t plist_id, unsigned ndims, const hsize_t *boundary, H5D
     if(ndims > H5S_MAX_RANK)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimensionality is too large")
     if(!boundary)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no boundary dimensions specified")
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no boundary dimensions specified")
 
     /* Check if the callback function is NULL and the user data is non-NULL.
      * This is almost certainly an error as the user data will not be used. */

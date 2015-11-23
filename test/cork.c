@@ -69,11 +69,11 @@ static int print_index(hid_t fid);
 static int verify_cork_tag(hid_t fid, haddr_t tag, hbool_t status);
 
 /* Tests */
-static int test_objs_cork(hbool_t newformat);
-static int test_dset_cork(hbool_t newformat);
+static int test_objs_cork(hbool_t new_format);
+static int test_dset_cork(hbool_t new_format);
 static int verify_old_dset_cork(void);
 static int verify_obj_dset_cork(hbool_t swmr);
-static int verify_dset_cork(hbool_t swmr, hbool_t new);
+static int verify_dset_cork(hbool_t swmr, hbool_t new_format);
 static int verify_group_cork(hbool_t swmr);
 static int verify_named_cork(hbool_t swmr);
 static int verify_multiple_cork(hbool_t swmr);
@@ -323,7 +323,6 @@ static int
 verify_old_dset_cork(void)
 {
     /* Variable Declarations */
-    int verbose = FALSE;			/* Verbose file outout */
     hid_t fid = -1;          			/* File ID */
     hid_t did = -1, did2 = -1, did3 = -1;	/* Dataset IDs */
     hid_t dcpl = -1, dcpl2 = -1, dcpl3 = -1;     /* Dataset creation property lists */
@@ -501,7 +500,6 @@ static int
 verify_obj_dset_cork(hbool_t swmr)
 {
     /* Variable Declarations */
-    int verbose = FALSE;  	/* Verbose file outout */
     hid_t fid = -1;		/* File ID */
     hid_t fapl = -1;         	/* File access property list */
     hid_t aid = -1;          	/* Attribute ID */
@@ -682,10 +680,9 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-verify_dset_cork(hbool_t swmr, hbool_t new)
+verify_dset_cork(hbool_t swmr, hbool_t new_format)
 {
     /* Variable Declarations */
-    int verbose = FALSE;			/* Verbose file outout */
     hid_t fid = -1;          			/* File ID */
     hid_t fapl = -1;         			/* File access property list */
     hid_t did = -1, did2 = -1, did3 = -1;	/* Dataset IDs */
@@ -700,30 +697,30 @@ verify_dset_cork(hbool_t swmr, hbool_t new)
 
     /* Testing Macro */
     if(swmr) {
-	if(new) {
-	    TESTING("cork status for chunked datasets with different indexing types (SWMR & latest)");
-	} else {
-	    TESTING("cork status for chunked datasets with different indexing types (SWMR & non-latest)");
-	}
+	    if(new_format) {
+	        TESTING("cork status for chunked datasets with different indexing types (SWMR & latest)");
+	    } else {
+	        TESTING("cork status for chunked datasets with different indexing types (SWMR & non-latest)");
+	    } /* end if */
     } else {
-	TESTING("cork status for chunked datasets with different indexing types (non-SWMR)");
-    }
+	    TESTING("cork status for chunked datasets with different indexing types (non-SWMR)");
+    } /* end if */
 
     /* Create fapl */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0 ) 
-	TEST_ERROR;
-    if(new) {
-	/* Set to use latest format */
-	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) 
 	    TEST_ERROR;
-    }
+    if(new_format) {
+	    /* Set to use latest format */
+	    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) 
+	        TEST_ERROR;
+    } /* end if */
 
     /* Create the file */
     flags = H5F_ACC_TRUNC;
     if(swmr)
-	flags |= H5F_ACC_SWMR_WRITE;
+	    flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fcreate(FILENAME, flags, H5P_DEFAULT, fapl)) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Create dcpl */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -734,9 +731,9 @@ verify_dset_cork(hbool_t swmr, hbool_t new)
 
     /* Create chunked dataset with extensive array indexing: DSET_EA */
     if((sid = H5Screate_simple(2, dims, max_dims)) < 0) 
-	TEST_ERROR;
+	    TEST_ERROR;
     if((did = H5Dcreate2(fid, DSET_EA, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
     
     /* Get dataset object header address: DSET_EA */
     if(H5Oget_info(did, &oinfo) < 0 ) TEST_ERROR;
@@ -746,17 +743,17 @@ verify_dset_cork(hbool_t swmr, hbool_t new)
 
     /* Verify cork status */
     if(verify_cork_tag(fid, oinfo.addr, TRUE) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Create chunked dataset with fixed array indexing: DSET_FA */
     if((sid2 = H5Screate_simple(2, dims, NULL)) < 0) 
-	TEST_ERROR;
+	    TEST_ERROR;
     if((did2 = H5Dcreate2(fid, DSET_FA, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Get dataset object header address: DSET_FA */
     if(H5Oget_info(did2, &oinfo2) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
     
     /* Cork the dataset: DSET_FA */
     if(H5Odisable_mdc_flushes(did2) < 0 ) TEST_ERROR;
@@ -766,29 +763,29 @@ verify_dset_cork(hbool_t swmr, hbool_t new)
 
     /* Verify the cork status for DSET_FA */
     if(verify_cork_tag(fid, oinfo2.addr, TRUE) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Verify the cork status for DSET_EA */
     if(verify_cork_tag(fid, oinfo.addr, FALSE) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Create chunked dataset with v2-Btree indexing */
     max_dims[0] = H5S_UNLIMITED;
     if((sid3 = H5Screate_simple(2, dims, max_dims)) < 0) 
-	TEST_ERROR;
+	    TEST_ERROR;
     if((did3 = H5Dcreate2(fid, DSET_BT2, H5T_NATIVE_INT, sid3, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Get dataset object header address: DSET_BT2 */
     if(H5Oget_info(did3, &oinfo3) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Cork the dataset: DSET_BT2 */
     if(H5Odisable_mdc_flushes(did3) < 0 ) TEST_ERROR;
 
     /* Verify the cork status for DSET_BT2 */
     if(verify_cork_tag(fid, oinfo3.addr, TRUE) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Closing */
     if(H5Dclose(did3) < 0 ) TEST_ERROR;
@@ -806,15 +803,15 @@ verify_dset_cork(hbool_t swmr, hbool_t new)
     /* Reopen the file */
     flags = H5F_ACC_RDWR;
     if(swmr)
-	flags |= H5F_ACC_SWMR_WRITE;
+	    flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fopen(FILENAME, flags, fapl)) < 0 ) TEST_ERROR;
 
     /* Initialize data buffer */
     for(i = 0; i < (int)dims[0]; i++) {
         for(j = 0; j < (int)dims[1]; j++) {
             buf[i][j] = (i + 1) * (j + 1);
-        }
-    }
+        } /* end for */
+    } /* end for */
 
     /* Open and write to the dataset: DSET_EA */
     if((did = H5Dopen2(fid, DSET_EA, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -823,7 +820,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new)
 
     /* Verify the cork status for DSET_EA */
     if(verify_cork_tag(fid, oinfo.addr, FALSE) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Open and write to the dataset: DSET_FA */
     if((did2 = H5Dopen2(fid, DSET_FA, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -835,7 +832,7 @@ verify_dset_cork(hbool_t swmr, hbool_t new)
 
     /* Verify the cork status for DSET_FA */
     if(verify_cork_tag(fid, oinfo2.addr, TRUE) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Open and write to the dataset: DSET_BT2 */
     if((did3 = H5Dopen2(fid, DSET_BT2, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -844,14 +841,14 @@ verify_dset_cork(hbool_t swmr, hbool_t new)
 
     /* Verify the cork status for DSET_BT2 */
     if(verify_cork_tag(fid, oinfo3.addr, FALSE) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Cork the dataset: DSET_BT2 */
     if(H5Odisable_mdc_flushes(did3) < 0 ) TEST_ERROR;
 
     /* Verify the cork status for DSET_BT2 */
     if(verify_cork_tag(fid, oinfo3.addr, TRUE) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Closing */
     if(H5Dclose(did) < 0 ) TEST_ERROR;
@@ -897,7 +894,6 @@ static int
 verify_group_cork(hbool_t swmr)
 {
     /* Variable Declarations */
-    int verbose = FALSE;			/* Verbose file outout */
     hid_t fid = -1;          			/* File ID */
     hid_t fapl = -1;         			/* File access property list */
     hid_t gid = -1, gid2 = -1, gid3 = -1; 	/* Group IDs */
@@ -1047,7 +1043,6 @@ static int
 verify_named_cork(hbool_t swmr)
 {
     /* Variable Declarations */
-    int verbose = FALSE;			/* Verbose file outout */
     hid_t fid = -1;          			/* File ID */
     hid_t fapl = -1;         			/* File access property list */
     hid_t tid = -1, tid2 = -1, tid3 = -1; 	/* Datatype IDs */
@@ -1290,7 +1285,6 @@ static int
 verify_multiple_cork(hbool_t swmr)
 {
     /* Variable Declarations */
-    int verbose = FALSE;		/* Verbose file outout */
     hid_t fid1 = -1, fid2 = -1; 	/* File ID */
     hid_t fapl = -1;         		/* File access property list */
     hid_t tid1 = -1, tid2 = -1; 	/* Datatype IDs */
@@ -1612,7 +1606,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_objs_cork(hbool_t newformat)
+test_objs_cork(hbool_t new_format)
 {
     hid_t       fid;                    /* HDF5 File ID */
     hid_t       fapl;                   /* File access property list */
@@ -1624,29 +1618,29 @@ test_objs_cork(hbool_t newformat)
     herr_t      ret;                    /* Return value */
 
     /* Testing Macro */
-    if(newformat) {
-	TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (new library format)");
+    if(new_format) {
+	    TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (new library format)");
     } else {
-	TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (old library format)");
-    }
+	    TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (old library format)");
+    } /* end if */
 
     /* Create fapl */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0 ) 
-	TEST_ERROR;
+	    TEST_ERROR;
 
     /* Set to use latest format */
-    if(newformat) {
-	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) 
-	TEST_ERROR;
-    }
+    if(new_format) {
+	    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) 
+	        TEST_ERROR;
+    } /* end if */
 
     /* Create an HDF5 file */
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Create group */
     if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Check cork status of the group: not corked */
     if(H5Oare_mdc_flushes_disabled(gid, &corked) < 0)
@@ -1655,7 +1649,7 @@ test_objs_cork(hbool_t newformat)
 
     /* Cork the group: an object */
     if(H5Odisable_mdc_flushes(gid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Check cork status of the group: corked */
     if(H5Oare_mdc_flushes_disabled(gid, &corked) < 0)
@@ -1664,22 +1658,22 @@ test_objs_cork(hbool_t newformat)
 
     /* Close the group */
     if(H5Gclose(gid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Create a transient copy of a native type */
     if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Should fail to cork the datatype: not an object */
     H5E_BEGIN_TRY {
-	ret = H5Odisable_mdc_flushes(tid);
+	    ret = H5Odisable_mdc_flushes(tid);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
 
     /* Create a named datatype */
     if(H5Tcommit2(fid, "group/datatype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Check cork status of the named datatype: not corked */
     if(H5Oare_mdc_flushes_disabled(tid, &corked) < 0)
@@ -1688,7 +1682,7 @@ test_objs_cork(hbool_t newformat)
 
     /* Cork the named datatype: an object */
     if(H5Odisable_mdc_flushes(tid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Check cork status of the named datatype: corked */
     if(H5Oare_mdc_flushes_disabled(tid, &corked) < 0)
@@ -1697,17 +1691,17 @@ test_objs_cork(hbool_t newformat)
 
     /* Close the named datatype */
     if(H5Tclose(tid) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Create dataspace */
     dims[0] = DIM0;
     dims[1] = DIM1;
     if((sid = H5Screate_simple(RANK, dims, NULL)) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Should fail to uncork the dataspace: not an object */
     H5E_BEGIN_TRY {
-	ret = H5Oenable_mdc_flushes(sid);
+	    ret = H5Oenable_mdc_flushes(sid);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
@@ -1722,7 +1716,7 @@ test_objs_cork(hbool_t newformat)
 
     /* Should fail to check cork status of the attribute: not an object */
     H5E_BEGIN_TRY {
-	ret = H5Oare_mdc_flushes_disabled(aid, &corked);
+	    ret = H5Oare_mdc_flushes_disabled(aid, &corked);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
@@ -1734,7 +1728,7 @@ test_objs_cork(hbool_t newformat)
 
     /* Cork the dataset: an object */
     if(H5Odisable_mdc_flushes(did) < 0)
-	TEST_ERROR
+	    TEST_ERROR
 
     /* Check cork status of the dataset: corked */
     if(H5Oare_mdc_flushes_disabled(did, &corked) < 0)
@@ -1781,7 +1775,7 @@ test_objs_cork(hbool_t newformat)
 
     /* Should fail to un-cork the named datatype that is not corked yet */
     H5E_BEGIN_TRY {
-	ret = H5Oenable_mdc_flushes(tid);
+	    ret = H5Oenable_mdc_flushes(tid);
     } H5E_END_TRY;
     if(ret >= 0)
         TEST_ERROR
@@ -1862,7 +1856,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-test_dset_cork(hbool_t newformat)
+test_dset_cork(hbool_t new_format)
 {
     hid_t       fid;                        	/* File ID */
     hid_t       fapl;                        	/* File access property list */
@@ -1879,24 +1873,23 @@ test_dset_cork(hbool_t newformat)
     int 	data[DIMS0][DIMS1];		/* Data buffer */
     int 	rbuf[DIMS0][DIMS1];		/* Data buffer */
     hbool_t 	corked;				/* Cork status of an object */
-    herr_t      ret;                        	/* Value returned from API calls */
 
     /* Testing Macro */
-    if(newformat) {
+    if(new_format) {
 	    TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled on datasets (new library format)");
     } else {
 	    TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled on datasets (old library format)");
-    }
+    } /* end if */
 
     /* Create fapl */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) 
 	    TEST_ERROR;
 
     /* Set to use latest format */
-    if(newformat) {
+    if(new_format) {
 	    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) 
             TEST_ERROR;
-    }
+    } /* end if */
 
     /* Create a new HDF5 file */
     if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)

@@ -960,7 +960,6 @@ test_get_file_image_error_rejection(void)
     void * image_ptr = NULL;
     int data[100];
     int i;
-    int result;
     hid_t fapl_id = -1;
     hid_t file_id = -1;
     hid_t dset_id = -1;

@@ -2038,7 +2038,7 @@ H5S_hyper_serialize_helper(const H5S_hyper_span_info_t *spans,
     uint8_t *pp = (*p);         /* Local pointer for decoding */
     hsize_t u;                  /* Index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity checks */
     HDassert(spans);

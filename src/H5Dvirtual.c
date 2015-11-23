@@ -657,7 +657,10 @@ H5D__virtual_copy(H5F_t H5_ATTR_UNUSED *f_dst, H5O_layout_t *layout_dst,
 {
     herr_t          ret_value = SUCCEED;
 
+#ifdef NOT_YET
     FUNC_ENTER_PACKAGE
+#endif /* NOT_YET */
+    FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef NOT_YET
     /* Check for copy to the same file */

@@ -3852,7 +3852,6 @@ external_set_elink_fapl3(hbool_t new_format)
 {
     hid_t       core_fapl = -1, stdio_fapl = -1;
     hid_t	lapl_id = -1, new_lapl_id = -1, l_fapl = -1, out_fapl;
-    int   	ret;
 
     if(new_format)
         TESTING("H5Pset/get_fapl() (w/new group format)")
@@ -3911,11 +3910,11 @@ external_set_elink_fapl3(hbool_t new_format)
 
  error:
     H5E_BEGIN_TRY {
-	H5Pclose(l_fapl);
-	H5Pclose(lapl_id);
-	H5Pclose(new_lapl_id);
-	H5Pclose(core_fapl);
-	H5Pclose(stdio_fapl);
+        H5Pclose(l_fapl);
+        H5Pclose(lapl_id);
+        H5Pclose(new_lapl_id);
+        H5Pclose(core_fapl);
+        H5Pclose(stdio_fapl);
     } H5E_END_TRY;
     return -1;
 } /* end external_set_elink_fapl3() */
