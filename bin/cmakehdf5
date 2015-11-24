@@ -120,12 +120,12 @@ STEP()
 
     echo "$banner" with output saved in $logfile
     (TIMESTAMP; nerror=0 ;
-	echo "eval $command"
-	eval $command || nerror=1 ;
-	TIMESTAMP; exit $nerror) < /dev/null > "$logfile" 2>&1
+  echo "eval $command"
+  eval $command || nerror=1 ;
+  TIMESTAMP; exit $nerror) < /dev/null > "$logfile" 2>&1
     if [ $? -ne 0 ]; then
-	echo "error in '$banner'.  $progname aborted."
-	exit 1
+  echo "error in '$banner'.  $progname aborted."
+  exit 1
     fi
 }
 
@@ -139,26 +139,26 @@ INSTALL_HDF5()
 {
     myos="`uname -s`"
     case "$myos" in
-	Linux)
-	    install_file=./HDF5-${version}-Linux.sh
-	    $install_file  --skip-license $*
-	    ;;
-	Darwin)		# Mac OSX DMG file
-	    install_file=HDF5-${version}-Darwin.dmg
-	    test -d hdf5 || mkdir hdf5
-	    basename=`basename $install_file .dmg`
-	    # mount the DMG file as /Volumes/$basename
-	    # echo 'Y' as yes for license.
-	    echo Y | hdiutil mount $install_file
-	    # copy the contents to the install location
-	    cp -R "/Volumes/$basename/HDF_Group" hdf5
-	    # unmount the DMG file
-	    hdiutil unmount /Volumes/$basename
-	    ;;
-	*) 		# unknown/unsupported OS.
-	    echo "INSTALL_HDF5: Error--unknown/unsupported OS($myos)"
-	    return 1
-	    ;;
+  Linux)
+      install_file=./HDF5-${version}-Linux.sh
+      $install_file  --skip-license $*
+      ;;
+  Darwin)		# Mac OSX DMG file
+      install_file=HDF5-${version}-Darwin.dmg
+      test -d hdf5 || mkdir hdf5
+      basename=`basename $install_file .dmg`
+      # mount the DMG file as /Volumes/$basename
+      # echo 'Y' as yes for license.
+      echo Y | hdiutil mount $install_file
+      # copy the contents to the install location
+      cp -R "/Volumes/$basename/HDF_Group" hdf5
+      # unmount the DMG file
+      hdiutil unmount /Volumes/$basename
+      ;;
+  *) 		# unknown/unsupported OS.
+      echo "INSTALL_HDF5: Error--unknown/unsupported OS($myos)"
+      return 1
+      ;;
     esac
 }
 
@@ -168,14 +168,14 @@ INSTALL_HDF5()
 DUMP_LOGFILE()
 {
     for x in $*; do
-	if [ -f $x ]; then
-	    echo "=================================="
-	    echo "Dumping $x"
-	    echo "=================================="
-	    cat $x
-	    echo "==== END $x ====="
-	    echo
-	fi
+  if [ -f $x ]; then
+      echo "=================================="
+      echo "Dumping $x"
+      echo "=================================="
+      cat $x
+      echo "==== END $x ====="
+      echo
+  fi
     done
 }
 
@@ -197,81 +197,81 @@ TIMESTAMP
 # tools		Build tools
 while [ $# -gt 0 ]; do
     case "$1" in
-	--enable-fortran)
-	    build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=ON
-	    ;;
-	--disable-fortran)
-	    build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=OFF
-	    ;;
-	--enable-cxx)
-	    build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=ON
-	    ;;
-	--disable-cxx)
-	    build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=OFF
-	    ;;
-	--enable-hl)
-	    build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON
-	    ;;
-	--disable-hl)
-	    build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=OFF
-	    ;;
-	--enable-shared)
-	    shared_lib=-DBUILD_SHARED_LIBS:BOOL=ON
-	    ;;
-	--disable-shared)
-	    shared_lib=-DBUILD_SHARED_LIBS:BOOL=OFF
-	    ;;
-	--enable-tools)
-	    build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON
-	    ;;
-	--disable-tools)
-	    build_tools=-DHDF5_BUILD_TOOLS:BOOL=OFF
-	    ;;
-	--enable-testing)
-	    build_testing=-DBUILD_TESTING:BOOL=ON
-	    ;;
-	--disable-testing)
-	    build_testing=-DBUILD_TESTING:BOOL=OFF
-	    ;;
-	--with-zlib)
-	    with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON
-	    ;;
-	--with-zlib=*)
-	    xarg=`echo $1 | cut -d= -f2-`
-	    with_zlib="-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON -DZLIB_ROOT=$xarg"
-	    ;;
-	--without-zlib)
-	    with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF
-	    ;;
-	--with-szlib)
-	    with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON
-	    szlib_path=""	# szlib is in default paths
-	    ;;
-	--with-szlib=*)
-	    xarg=`echo $1 | cut -d= -f2-`
-	    with_szlib="-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON"
-	    szlib_path="SZIP_INSTALL=$xarg"
-	    ;;
-	--without-szlib)
-	    with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF
-	    szlib_path=""	# reset the path
-	    ;;
-	--enable-verbose)
-	    vflag=1
-	    ;;
-	--disable-verbose)
-	    vflag=0
-	    ;;
-	--help)
-	    # print the detail help page and exit
-	    HELP
-	    exit 0
-	    ;;
-	*)
-	    echo "Unknown options: $1"
-	    HELP
-	    exit 1
-	    ;;
+  --enable-fortran)
+      build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=ON
+      ;;
+  --disable-fortran)
+      build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=OFF
+      ;;
+  --enable-cxx)
+      build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=ON
+      ;;
+  --disable-cxx)
+      build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=OFF
+      ;;
+  --enable-hl)
+      build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON
+      ;;
+  --disable-hl)
+      build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=OFF
+      ;;
+  --enable-shared)
+      shared_lib=-DBUILD_SHARED_LIBS:BOOL=ON
+      ;;
+  --disable-shared)
+      shared_lib=-DBUILD_SHARED_LIBS:BOOL=OFF
+      ;;
+  --enable-tools)
+      build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON
+      ;;
+  --disable-tools)
+      build_tools=-DHDF5_BUILD_TOOLS:BOOL=OFF
+      ;;
+  --enable-testing)
+      build_testing=-DBUILD_TESTING:BOOL=ON
+      ;;
+  --disable-testing)
+      build_testing=-DBUILD_TESTING:BOOL=OFF
+      ;;
+  --with-zlib)
+      with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON
+      ;;
+  --with-zlib=*)
+      xarg=`echo $1 | cut -d= -f2-`
+      with_zlib="-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=ON -DZLIB_ROOT=$xarg"
+      ;;
+  --without-zlib)
+      with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF
+      ;;
+  --with-szlib)
+      with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON
+      szlib_path=""	# szlib is in default paths
+      ;;
+  --with-szlib=*)
+      xarg=`echo $1 | cut -d= -f2-`
+      with_szlib="-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=ON"
+      szlib_path="SZIP_INSTALL=$xarg"
+      ;;
+  --without-szlib)
+      with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF
+      szlib_path=""	# reset the path
+      ;;
+  --enable-verbose)
+      vflag=1
+      ;;
+  --disable-verbose)
+      vflag=0
+      ;;
+  --help)
+      # print the detail help page and exit
+      HELP
+      exit 0
+      ;;
+  *)
+      echo "Unknown options: $1"
+      HELP
+      exit 1
+      ;;
     esac
     shift
 done
@@ -303,7 +303,7 @@ trap \
 "if [ $vflag -ne 0 ]; then DUMP_LOGFILE \$configlog \$makelog \$testlog \$packlog \$installlog; fi" \
 0
 
-echo Running Cmake for HDF5-${version} ...  
+echo Running Cmake for HDF5-${version} ...
 #      4. Configure the C library, tools and tests with this command:
 #         If successful, append the configure summary to the configure logfile.
 STEP "Configure..." \
@@ -320,16 +320,16 @@ STEP "Configure..." \
     $with_szlib \
     $srcdir" $configlog &&\
     cat $config_summary >> $configlog
-      
+
 #      5. Build the C library, tools and tests with this command:
 STEP "Build the library, tools and tests, ..." "cmake --build . --config Release" $makelog
-      
+
 #      6. Test the C library and tools with this command:
 STEP "Test the library and tools..." "ctest . -C Release" $testlog
-      
+
 #      7. Create an install image with this command:
 STEP "Create an install image..." "cpack -C Release CPackConfig.cmake" $packlog
-      
+
 #      8. Install with this command:
 STEP "Install..." "INSTALL_HDF5" $installlog
 # save the last exit code
@@ -418,7 +418,7 @@ set (SITE_BUILDNAME_SUFFIX "cmakehdf5")
 # -- URL set for internal check, default is to not update
 set (LOCAL_SKIP_UPDATE TRUE)
 set (REPOSITORY_URL "http://svn.${hdfgroup_url}/hdf5/branches/hdf5_1_8")
-# -- Standard build options  
+# -- Standard build options
 set (ADD_BUILD_OPTIONS "-DCMAKE_INSTALL_PREFIX:PATH=${CTEST_BINARY_DIRECTORY} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=\"SVN\" -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 
 # Use multiple CPU cores to build
@@ -432,9 +432,9 @@ if(NOT N EQUAL 0)
   set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
 endif()
 
-# -----------------------------------------------------------  
+# -----------------------------------------------------------
 # -- Get environment
-# -----------------------------------------------------------  
+# -----------------------------------------------------------
   ## -- set hostname
   ## --------------------------
   find_program (HOSTNAME_CMD NAMES hostname)
@@ -454,10 +454,10 @@ endif()
   else (SITE_BUILDNAME_SUFFIX)
     set (CTEST_BUILD_NAME  "${osname}-${osrel}-${cpu}")
   endif (SITE_BUILDNAME_SUFFIX)
-# -----------------------------------------------------------  
-  
+# -----------------------------------------------------------
+
 set (BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
- 
+
 #-----------------------------------------------------------------------------
 # MAC machines need special option
 #-----------------------------------------------------------------------------
@@ -465,21 +465,25 @@ if (APPLE)
   # Compiler choice
   execute_process(COMMAND xcrun --find cc OUTPUT_VARIABLE XCODE_CC OUTPUT_STRIP_TRAILING_WHITESPACE)
   execute_process(COMMAND xcrun --find c++ OUTPUT_VARIABLE XCODE_CXX OUTPUT_STRIP_TRAILING_WHITESPACE)
-  SET(ENV{CC} "${XCODE_CC}")
-  SET(ENV{CXX} "${XCODE_CXX}")
-  # Shared fortran is not supported, build static 
+  set(ENV{CC} "${XCODE_CC}")
+  set(ENV{CXX} "${XCODE_CXX}")
+  # Shared fortran is not supported, build static
   set (BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
   set (BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
 endif (APPLE)
 
 
-# -----------------------------------------------------------  
+# -----------------------------------------------------------
 find_package (Subversion)
 set (CTEST_UPDATE_COMMAND "${Subversion_SVN_EXECUTABLE}")
-# -- Only clean build folder if LOCAL_CLEAR_BUILD is set  
+# -- Only clean build folder if LOCAL_CLEAR_BUILD is set
 if (LOCAL_CLEAR_BUILD)
   set (CTEST_START_WITH_EMPTY_BINARY_DIRECTORY TRUE)
-  ctest_empty_binary_directory (${CTEST_BINARY_DIRECTORY})
+  if(NOT EXISTS "${CTEST_BINARY_DIRECTORY}")
+    file(MAKE_DIRECTORY "${CTEST_BINARY_DIRECTORY}")
+  else()
+    ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
+  endif()
 endif (LOCAL_CLEAR_BUILD)
 
 #-----------------------------------------------------------------------------
@@ -502,7 +506,7 @@ endforeach (req)
 
 ## -- set output to english
 set($ENV{LC_MESSAGES}  "en_EN")
- 
+
 #-----------------------------------------------------------------------------
 # Initialize the CTEST commands
 #------------------------------
@@ -525,31 +529,32 @@ foreach (v
 endforeach (v)
 message ("Dashboard script configuration:\n${vars}\n")
 
-CTEST_START (${MODEL} TRACK ${MODEL})
+ctest_start (${MODEL} TRACK ${MODEL})
 if (NOT LOCAL_SKIP_UPDATE)
-  CTEST_UPDATE (SOURCE "${CTEST_SOURCE_DIRECTORY}")
+  ctest_update (SOURCE "${CTEST_SOURCE_DIRECTORY}")
 endif (NOT LOCAL_SKIP_UPDATE)
-CTEST_CONFIGURE (BUILD "${CTEST_BINARY_DIRECTORY}" RETURN_VALUE res)
 if(NOT res STREQUAL "0")
   message (FATAL_ERROR "Configure FAILED")
 endif()
 message ("Configure DONE")
-CTEST_READ_CUSTOM_FILES ("${CTEST_BINARY_DIRECTORY}")
+configure_file(${CTEST_SOURCE_DIRECTORY}/config/cmake/CTestCustom.cmake ${CTEST_BINARY_DIRECTORY}/CTestCustom.cmake)
+ctest_read_custom_files ("${CTEST_BINARY_DIRECTORY}")
+ctest_configure (BUILD "${CTEST_BINARY_DIRECTORY}" RETURN_VALUE res)
 if (NOT LOCAL_NO_SUBMIT)
-  CTEST_SUBMIT (PARTS Update Configure Notes)
+  ctest_submit (PARTS Update Configure Notes)
 endif (NOT LOCAL_NO_SUBMIT)
-CTEST_BUILD (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND RETURN_VALUE res)
+ctest_build (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND RETURN_VALUE res)
 if (NOT LOCAL_NO_SUBMIT)
-  CTEST_SUBMIT (PARTS Build)
+  ctest_submit (PARTS Build)
 endif (NOT LOCAL_NO_SUBMIT)
 if(NOT res STREQUAL "0")
   message (FATAL_ERROR "Build FAILED")
 endif()
 message ("build DONE")
 if (NOT LOCAL_SKIP_TEST)
-  CTEST_TEST (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args} RETURN_VALUE res)
+  ctest_build (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args} RETURN_VALUE res)
   if (NOT LOCAL_NO_SUBMIT)
-    CTEST_SUBMIT (PARTS Test)
+    ctest_submit (PARTS Test)
   endif (NOT LOCAL_NO_SUBMIT)
   if(NOT res STREQUAL "0")
     message (FATAL_ERROR "Test FAILED")
