@@ -209,13 +209,9 @@ set (H5_TESTS
     ohdr
     stab
     gheap
-    #cache
-    #cache_api
-    #cache_tagging
     #cache_logging
     #cork
     pool
-    #hyperslab
     istore
     bittests
     dt_arith
@@ -240,7 +236,6 @@ set (H5_TESTS
     enum
     set_extent
     space_overflow
-    #ttsafe
     getname
     vfd
     ntypes
@@ -255,11 +250,8 @@ set (H5_TESTS
     earray
     btree2
     fheap
-    #error_test
-    #err_compat
     tcheck_version
     testmeta
-    #links_env
     file_image
     enc_dec_plist
     enc_dec_plist_cross_platform
