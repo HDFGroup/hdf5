@@ -132,6 +132,8 @@ H5EA__hdr_alloc(H5F_t *f))
 
     /* Set non-zero internal fields */
     hdr->addr = HADDR_UNDEF;
+    hdr->fd_parent_addr = HADDR_UNDEF;
+    hdr->fd_parent_ptr = NULL;
 
     /* Set the internal parameters for the array */
     hdr->f = f;

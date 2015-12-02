@@ -207,6 +207,33 @@ typedef struct H5EA_hdr_t {
 
     /* Client information (not stored) */
     void *cb_ctx;                       /* Callback context */
+
+    /* Flush depencency parent information (not stored) */
+    haddr_t fd_parent_addr;		/* Address of flush dependency parent
+                                         * if any.  This field is initialized
+					 * to HADDR_UNDEF.  If the extensible
+					 * array is being used to index a 
+					 * chunked data set and the data set
+					 * metadata is modified by a SWMR 
+					 * writer, this field will be set equal
+					 * to the object header proxy that is 
+					 * the flush dependency parent of the
+					 * extensible array header.
+ 					 *
+ 					 * The field is used to avoid duplicate
+					 * setups of the flush dependency 
+					 * relationship, and to allow the 
+					 * extensible array header to destroy
+					 * the flush dependency on receipt of 
+					 * an eviction notification from the
+					 * metadata cache.
+					 */
+    H5AC_info_t * fd_parent_ptr;	/* pointer to flush dependency parent
+					 * it it exists.  NULL otherwise.  See
+					 * comment for fd_parent_addr above for
+					 * further details.
+                                         */
+
 } H5EA_hdr_t;
 
 /* The extensible array index block information */
