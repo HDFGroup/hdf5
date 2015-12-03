@@ -83,8 +83,7 @@ static herr_t H5EA__cache_hdr_image_len(const void *thing, size_t *image_len,
     hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
 static herr_t H5EA__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5EA__cache_hdr_notify(H5AC_notify_action_t action, 
-    void *_thing);
+static herr_t H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5EA__cache_hdr_free_icr(void *thing);
 
 static herr_t H5EA__cache_iblock_get_load_size(const void *image, void *udata, 
@@ -593,18 +592,17 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
                  * destroy the flush dependency before the extensible array
                  * header is evicted.
                  */
-                if ( hdr->fd_parent_addr != HADDR_UNDEF ) {
-
-		    HDassert(hdr->fd_parent_ptr != NULL);
+                if(hdr->fd_parent_addr != HADDR_UNDEF) {
+		    HDassert(hdr->fd_parent_ptr);
                     HDassert(hdr->fd_parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 		    HDassert(hdr->fd_parent_ptr->addr == hdr->fd_parent_addr);
                     HDassert(hdr->fd_parent_ptr->type);
                     HDassert(hdr->fd_parent_ptr->type->id == H5AC_OHDR_PROXY_ID);
 
 		    /* Destroy flush dependency on object header proxy */
-		    if(H5AC_destroy_flush_dependency((void *)hdr->fd_parent_ptr, (void *)hdr) < 0)
+		    if(H5EA__destroy_flush_depend((H5AC_info_t *)hdr->fd_parent_ptr, (H5AC_info_t *)hdr) < 0)
 		        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between ea header and object header proxy, address = %llu", (unsigned long long)hdr->fd_parent_addr)
-		}
+		} /* end if */
 		break;
 
             default:
@@ -614,10 +612,11 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
                 HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
         } /* end switch */
-    } else {
+    } /* end if */
+    else {
         HDassert(hdr->fd_parent_addr == HADDR_UNDEF);
         HDassert(hdr->fd_parent_ptr == NULL);
-    }
+    } /* end else */
 
 CATCH
 

@@ -209,7 +209,7 @@ typedef struct H5EA_hdr_t {
     void *cb_ctx;                       /* Callback context */
 
     /* Flush depencency parent information (not stored) */
-    haddr_t fd_parent_addr;		/* Address of flush dependency parent
+    haddr_t fd_parent_addr;		/* Address of flush dependency parent,
                                          * if any.  This field is initialized
 					 * to HADDR_UNDEF.  If the extensible
 					 * array is being used to index a 
@@ -228,10 +228,10 @@ typedef struct H5EA_hdr_t {
 					 * an eviction notification from the
 					 * metadata cache.
 					 */
-    H5AC_info_t * fd_parent_ptr;	/* pointer to flush dependency parent
-					 * it it exists.  NULL otherwise.  See
+    H5AC_info_t *fd_parent_ptr;		/* Pointer to flush dependency parent,
+					 * if it exists, otherwise NULL.  (See
 					 * comment for fd_parent_addr above for
-					 * further details.
+					 * further details)
                                          */
 
 } H5EA_hdr_t;

@@ -1854,23 +1854,6 @@ H5D__earray_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
     /* Check if the extensible array is open */
     if(idx_info->storage->u.earray.ea) {
-        /* Check for SWMR writes to the file */
-        if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-            /* Sanity check */
-            HDassert(H5F_addr_defined(idx_info->storage->u.earray.dset_ohdr_addr));
-
-#if 0 /* at least in some cases, this removal of the flush dependency
-       * between the extensible array header and the the object header 
-       * proxy results in out of order flush.  
-       *
-       *                                            JRM -- 11/27/11
-       */
-            /* Remove flush dependency between extensible array and dataset' object header */
-            if(H5D__earray_idx_undepend(idx_info) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on object header")
-#endif /* JRM */
-        } /* end if */
-
         /* Close extensible array */
         if(H5EA_close(idx_info->storage->u.earray.ea, idx_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")

@@ -844,8 +844,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
      * and the extensible array header has already been setup.  If it hasn't
      * set it up.
      */
-    if ( hdr->fd_parent_addr == HADDR_UNDEF ) {
-
+    if(!H5F_addr_defined(hdr->fd_parent_addr)) {
         /* Set the shared array header's file context for this operation */
         hdr->f = ea->f;
 
@@ -857,7 +856,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
 	hdr->fd_parent_addr = parent_entry->addr;
         hdr->fd_parent_ptr = parent_entry;
-    }
+    } /* end if */
 
 CATCH
 
