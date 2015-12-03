@@ -556,15 +556,8 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst
         if(f_src != f_dst) {
             /* Check for expanding references */
             if(cpy_info->expand_ref) {
-                size_t ref_count;
-
-                /* Determine # of reference elements to copy */
-                ref_count = storage_src->size / H5T_get_size(dt_src);
-
-                /* Copy objects referenced in source buffer to destination file and set destination elements */
-                if(H5O_copy_expand_ref(f_src, storage_src->buf, dxpl_id, f_dst,
-                        storage_dst->buf, ref_count, H5T_get_ref_type(dt_src), cpy_info) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
+                /* TODO needs to be implemented (should use H5Tconvert) */
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
             } /* end if */
             else
                 /* Reset value to zero */

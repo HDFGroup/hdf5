@@ -124,7 +124,6 @@ done:
 H5T_t *
 H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_align, size_t *offset, size_t *comp_size)
 {
-    H5T_t       *dt;                /* Datatype to make native */
     H5T_t       *super_type;        /* Super type of VL, array and enum datatypes */
     H5T_t       *nat_super_type;    /* Native form of VL, array & enum super datatype */
     H5T_t       *new_type = NULL;   /* New native datatype */
@@ -216,53 +215,11 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
 
         case H5T_REFERENCE:
             {
-                size_t align;
-                size_t ref_size;
-                int    not_equal;
-
                 if(NULL == (ret_value = H5T_copy(dtype, H5T_COPY_TRANSIENT)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type")
-
-                /* Decide if the datatype is an object reference. */
-                if(NULL == (dt = (H5T_t *)H5I_object(H5T_STD_REF_OBJ_g)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
-                not_equal = H5T_cmp(ret_value, dt, FALSE);
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot copy reference type")
 
                 /* Update size, offset and compound alignment for parent. */
-                if(!not_equal) {
-                    align = H5T_HOBJREF_COMP_ALIGN_g;
-                    ref_size = sizeof(hobj_ref_t);
-                } /* end if */
-                else {
-                    /* Decide if the datatype is a dataset region reference. */
-                    if(NULL == (dt = (H5T_t *)H5I_object(H5T_STD_REF_DSETREG_g)))
-                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
-                    not_equal = H5T_cmp(ret_value, dt, FALSE);
-
-                    /* Update size, offset and compound alignment for parent. */
-                    if(!not_equal) {
-                        align = H5T_HDSETREGREF_COMP_ALIGN_g;
-                        ref_size = sizeof(hdset_reg_ref_t);
-                    } /* end if */
-                    else {
-                        /* Decide if the datatype is a dataset region reference. */
-                        if(NULL == (dt = (H5T_t *)H5I_object(H5T_STD_REF_REG_g)))
-                            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a datatype")
-                        not_equal = H5T_cmp(ret_value, dt, FALSE);
-
-                        /* Update size, offset and compound alignment for parent. */
-                        if(!not_equal) {
-                            align = H5T_HREGREF_COMP_ALIGN_g;
-                            ref_size = sizeof(hreg_ref_t);
-                        } /* end if */
-                        else {
-                            align = H5T_HATTRREF_COMP_ALIGN_g;
-                            ref_size = sizeof(hattr_ref_t);
-                        } /* end else */
-                    } /* end else */
-                } /* end else */
-
-                if(H5T_cmp_offset(comp_size, offset, ref_size, (size_t)1, align, struct_align) < 0)
+                if(H5T_cmp_offset(comp_size, offset, sizeof(href_t), (size_t)1, H5T_HREF_COMP_ALIGN_g, struct_align) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
             } /* end case */
             break;

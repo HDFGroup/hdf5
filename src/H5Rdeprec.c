@@ -125,7 +125,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5G_UNKNOWN, "invalid reference pointer")
 
     /* Get the object information */
-    if(H5R_get_obj_type(loc.oloc->file, H5AC_ind_dxpl_id, ref_type, ref, &obj_type) < 0)
+    if(H5R__get_obj_type(loc.oloc->file, H5AC_ind_dxpl_id, ref, &obj_type) < 0)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5G_UNKNOWN, "unable to determine object type")
 
     /* Set return value */
@@ -133,7 +133,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *ref)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* end H5Rget_obj_type1() */
+} /* end H5Rget_obj_type1() */
 
 
 /*--------------------------------------------------------------------------
@@ -159,7 +159,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
+H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref)
 {
     H5G_loc_t loc;      /* Group location */
     H5F_t *file = NULL; /* File object */
@@ -173,19 +173,19 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(ref_type <= H5R_BADTYPE || ref_type >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
-    if(_ref == NULL)
+    if(ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
     /* Get the file pointer from the entry */
     file = loc.oloc->file;
 
     /* Create reference */
-    if((ret_value = H5R_dereference(file, H5P_DATASET_ACCESS_DEFAULT, H5AC_ind_dxpl_id, ref_type, _ref, TRUE)) < 0)
+    if((ret_value = H5R__dereference(file, H5P_DATASET_ACCESS_DEFAULT, H5AC_ind_dxpl_id, ref, TRUE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable dereference object")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}   /* end H5Rdereference1() */
+} /* end H5Rdereference1() */
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

@@ -54,10 +54,10 @@
 /******************************/
 
 /* General functions */
-H5_DLL herr_t H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type,
-    const void *_ref, H5O_type_t *obj_type);
-H5_DLL hid_t H5R_dereference(H5F_t *file, hid_t dapl_id, hid_t dxpl_id, H5R_type_t ref_type,
-    const void *_ref, hbool_t app_ref);
+H5_DLL herr_t H5R__get_obj_type(H5F_t *file, hid_t dxpl_id, const href_t *ref,
+    H5O_type_t *obj_type);
+H5_DLL hid_t H5R__dereference(H5F_t *file, hid_t dapl_id, hid_t dxpl_id,
+    const href_t *ref, hbool_t app_ref);
 
 
 #endif /* _H5Rpkg_H */

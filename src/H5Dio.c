@@ -720,9 +720,8 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         /* We should really use H5T_detect_class() here, but it will be difficult
          * to detect the type of the reference if it is nested... -QAK
          */
-        if(H5T_get_class(type_info.mem_type, TRUE) == H5T_REFERENCE &&
-                H5T_get_ref_type(type_info.mem_type) == H5R_DATASET_REGION)
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing region reference datatypes yet")
+        if(H5T_get_class(type_info.mem_type, TRUE) == H5T_REFERENCE)
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Parallel IO does not support writing reference datatypes yet")
 
         /* Can't write to chunked datasets with filters, in parallel */
         if(dataset->shared->layout.type == H5D_CHUNKED &&

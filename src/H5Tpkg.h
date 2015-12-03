@@ -169,7 +169,7 @@ typedef size_t (*H5T_ref_getsizefunc_t)(const void *_ref);
 typedef herr_t (*H5T_ref_readfunc_t)(H5F_t *f, hid_t dxpl_id, void *_ref,
         void *buf, size_t buf_size);
 typedef herr_t (*H5T_ref_writefunc_t)(H5F_t *f, hid_t dxpl_id, void *_ref,
-        void *buf, void *_bg, size_t buf_size);
+        void *buf, void *_bg, size_t buf_size, H5R_type_t ref_type);
 
 typedef struct H5T_atomic_t {
     H5T_order_t		order;	/*byte order				     */
@@ -365,10 +365,7 @@ H5_DLLVAR size_t	H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
 
 H5_DLLVAR size_t H5T_POINTER_COMP_ALIGN_g;
 H5_DLLVAR size_t H5T_HVL_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_HOBJREF_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_HDSETREGREF_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_HREGREF_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_HATTRREF_COMP_ALIGN_g;
+H5_DLLVAR size_t H5T_HREF_COMP_ALIGN_g;
 
 /*
  * Alignment information for native types. A value of N indicates that the
