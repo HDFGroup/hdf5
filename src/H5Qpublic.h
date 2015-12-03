@@ -89,6 +89,8 @@ H5_DLL hid_t H5Qdecode(const void *buf);
 /* Apply query */
 H5_DLL herr_t H5Qapply_atom(hid_t query_id, hbool_t *result, ...);
 H5_DLL hid_t H5Qapply(hid_t loc_id, hid_t query_id, unsigned *result, hid_t vcpl_id);
+H5_DLL hid_t H5Qapply_multi(size_t loc_count, hid_t *loc_ids, hid_t query_id,
+    unsigned *result, hid_t vcpl_id);
 
 #ifdef __cplusplus
 }

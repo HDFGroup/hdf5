@@ -197,12 +197,7 @@ typedef enum H5Q_match_type_t { /* The different kinds of native types we can ma
 typedef struct H5Q_ref_entry_t H5Q_ref_entry_t;
 
 struct H5Q_ref_entry_t {
-    H5R_type_t ref_type;
-    union {
-        hreg_ref_t reg;
-        hobj_ref_t obj;
-        hattr_ref_t attr;
-    } ref;
+    href_t *ref;
     H5Q_QUEUE_ENTRY(H5Q_ref_entry_t) entry;
 };
 
@@ -2117,7 +2112,7 @@ static herr_t
 H5Q__apply_object_link(H5G_loc_t *loc, const char *name, const H5O_info_t *oinfo,
         void *udata)
 {
-    hobj_ref_t ref_buf;
+    href_t *ref;
     hbool_t result;
     H5Q_apply_arg_t *args = (H5Q_apply_arg_t *) udata;
     const char *link_name = NULL;
@@ -2147,9 +2142,9 @@ H5Q__apply_object_link(H5G_loc_t *loc, const char *name, const H5O_info_t *oinfo
     H5Q_LOG_DEBUG("Match link name: %s (%s)\n", link_name, name);
 
     /* Keep object reference */
-    if (FAIL == H5R_create(&ref_buf, H5R_OBJECT, loc, name, H5AC_dxpl_id))
+    if (NULL == (ref = H5R_create_ext_object(loc, name, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create object reference");
-    if (FAIL == H5Q__view_append(args->view, H5R_OBJECT, &ref_buf))
+    if (FAIL == H5Q__view_append(args->view, H5R_EXT_OBJECT, ref))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append object reference to view");
 
 done:
@@ -2169,7 +2164,7 @@ static herr_t
 H5Q__apply_object_data(H5G_loc_t *loc, const char *name, const H5O_info_t *oinfo,
         void *udata)
 {
-    hreg_ref_t ref_buf = H5R_REG_REF_INITIALIZER;
+    href_t *ref;
     H5Q_apply_arg_t *args = (H5Q_apply_arg_t *) udata;
     hid_t obj_id = FAIL;
     H5S_t *dataspace = NULL;
@@ -2208,16 +2203,9 @@ H5Q__apply_object_data(H5G_loc_t *loc, const char *name, const H5O_info_t *oinfo
     *(args->result) = H5Q_REF_REG;
 
     /* Keep dataset region reference */
-    if (FAIL == H5R_create(&ref_buf, H5R_REGION, loc, name, H5AC_dxpl_id, dataspace))
+    if (NULL == (ref = H5R_create_ext_region(loc, name, H5AC_dxpl_id, dataspace)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get buffer size for region reference");
-
-    H5Q_LOG_DEBUG("Region reference size: %zu\n", ref_buf.buf_size);
-    if (NULL == (ref_buf.buf = H5MM_malloc(ref_buf.buf_size)))
-        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, FAIL, "can't allocate region reference buffer");
-
-    if (FAIL == H5R_create(&ref_buf, H5R_REGION, loc, name, H5AC_dxpl_id, dataspace))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create region reference");
-    if (FAIL == H5Q__view_append(args->view, H5R_REGION, &ref_buf))
+    if (FAIL == H5Q__view_append(args->view, H5R_EXT_REGION, ref))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append region reference to view");
 
 done:
@@ -2341,7 +2329,7 @@ H5Q__apply_object_attr_name(H5A_t *attr, void *udata)
     H5Q_apply_attr_arg_t *args = (H5Q_apply_attr_arg_t *) udata;
     char *name = NULL;
     size_t name_len;
-    hattr_ref_t ref_buf = H5R_ATTR_REF_INITIALIZER;
+    href_t *ref;
     hbool_t result = FALSE;
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2368,16 +2356,9 @@ H5Q__apply_object_attr_name(H5A_t *attr, void *udata)
     H5Q_LOG_DEBUG("Match attribute name: %s\n", (const char *) name);
 
     /* Keep attribute reference */
-    if (FAIL == H5R_create(&ref_buf, H5R_ATTR, args->loc, args->loc_name, H5AC_dxpl_id, (const char *) name))
+    if (NULL == (ref = H5R_create_ext_attr(args->loc, args->loc_name, H5AC_dxpl_id, (const char *) name)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get buffer size for attribute reference");
-
-    H5Q_LOG_DEBUG("Attribute reference size: %zu\n", ref_buf.buf_size);
-    if (NULL == (ref_buf.buf = H5MM_malloc(ref_buf.buf_size)))
-        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, FAIL, "can't allocate attribute reference buffer");
-
-    if (FAIL == H5R_create(&ref_buf, H5R_ATTR, args->loc, args->loc_name, H5AC_dxpl_id, (const char *) name))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create attribute reference");
-    if (FAIL == H5Q__view_append(args->apply_args->view, H5R_ATTR, &ref_buf))
+    if (FAIL == H5Q__view_append(args->apply_args->view, H5R_EXT_ATTR, ref))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append attribute reference to view");
 
 done:
@@ -2409,7 +2390,7 @@ H5Q__apply_object_attr_value(H5A_t *iter_attr, void *udata)
     size_t nelmts, elmt_size;
     H5S_sel_iter_op_t iter_op;  /* Operator for iteration */
     H5Q_apply_attr_elem_arg_t iter_args;
-    hattr_ref_t ref_buf = H5R_ATTR_REF_INITIALIZER;
+    href_t *ref;
     hbool_t result = FALSE;
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2470,16 +2451,9 @@ H5Q__apply_object_attr_value(H5A_t *iter_attr, void *udata)
     H5Q_LOG_DEBUG("Match value of attribute name: %s\n", (const char *) name);
 
     /* Keep attribute reference */
-    if (FAIL == H5R_create(&ref_buf, H5R_ATTR, args->loc, args->loc_name, H5AC_dxpl_id, (const char *) name))
+    if (NULL == (ref = H5R_create_ext_attr(args->loc, args->loc_name, H5AC_dxpl_id, (const char *) name)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get buffer size for attribute reference");
-
-    H5Q_LOG_DEBUG("Attribute reference size: %zu\n", ref_buf.buf_size);
-    if (NULL == (ref_buf.buf = H5MM_malloc(ref_buf.buf_size)))
-        HGOTO_ERROR(H5E_QUERY, H5E_NOSPACE, FAIL, "can't allocate attribute reference buffer");
-
-    if (FAIL == H5R_create(&ref_buf, H5R_ATTR, args->loc, args->loc_name, H5AC_dxpl_id, (const char *) name))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create attribute reference");
-    if (FAIL == H5Q__view_append(args->apply_args->view, H5R_ATTR, &ref_buf))
+    if (FAIL == H5Q__view_append(args->apply_args->view, H5R_EXT_ATTR, ref))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append attribute reference to view");
 
 done:
@@ -2545,24 +2519,20 @@ H5Q__view_append(H5Q_view_t *view, H5R_type_t ref_type, void *ref)
     HDassert(view);
     HDassert(ref);
 
-    if (NULL == (ref_entry = (H5Q_ref_entry_t *) H5MM_calloc(sizeof(H5Q_ref_entry_t))))
+    if (NULL == (ref_entry = (H5Q_ref_entry_t *) H5MM_malloc(sizeof(H5Q_ref_entry_t))))
         HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate ref entry");
-    ref_entry->ref_type = ref_type;
+    ref_entry->ref = ref;
 
     switch (ref_type) {
-        case H5R_REGION:
-            HDmemcpy(&ref_entry->ref.reg, ref, sizeof(hreg_ref_t));
+        case H5R_EXT_REGION:
             H5Q_QUEUE_INSERT_TAIL(&view->reg_refs, ref_entry, entry);
             break;
-        case H5R_OBJECT:
-            HDmemcpy(&ref_entry->ref.obj, ref, sizeof(hobj_ref_t));
+        case H5R_EXT_OBJECT:
             H5Q_QUEUE_INSERT_TAIL(&view->obj_refs, ref_entry, entry);
             break;
-        case H5R_ATTR:
-            HDmemcpy(&ref_entry->ref.attr, ref, sizeof(hattr_ref_t));
+        case H5R_EXT_ATTR:
             H5Q_QUEUE_INSERT_TAIL(&view->attr_refs, ref_entry, entry);
             break;
-        case H5R_DATASET_REGION:
         case H5R_BADTYPE:
         case H5R_MAXTYPE:
         default:
@@ -2672,8 +2642,8 @@ H5Q__view_write(H5G_t *grp, H5Q_view_t *view)
             &view->attr_refs };
     const char *dset_name[H5Q_VIEW_REF_NTYPES] = { H5Q_VIEW_REF_REG_NAME,
             H5Q_VIEW_REF_OBJ_NAME, H5Q_VIEW_REF_ATTR_NAME };
-    hid_t ref_types[H5Q_VIEW_REF_NTYPES] = { H5T_STD_REF_REG,
-            H5T_STD_REF_OBJ, H5T_STD_REF_ATTR };
+    hid_t ref_types[H5Q_VIEW_REF_NTYPES] = { H5T_STD_REF_EXT_REG,
+            H5T_STD_REF_EXT_OBJ, H5T_STD_REF_EXT_ATTR };
     herr_t ret_value = SUCCEED; /* Return value */
     int i;
 
@@ -2714,7 +2684,7 @@ H5Q__view_write(H5G_t *grp, H5Q_view_t *view)
             if (FAIL == H5S_select_hyperslab(space, H5S_SELECT_SET, &start, NULL, &count, NULL))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection")
             if (FAIL == H5D_write(dset, FALSE, ref_types[i], mem_space, space,
-                    H5P_DATASET_XFER_DEFAULT, &ref_entry->ref))
+                    H5P_DATASET_XFER_DEFAULT, ref_entry->ref))
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write dataset");
             if (FAIL == H5S_close(mem_space))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCLOSEOBJ, FAIL, "unable to close dataspace");
@@ -2763,13 +2733,197 @@ H5Q__view_free(H5Q_view_t *view)
         while (!H5Q_QUEUE_EMPTY(refs[i])) {
             H5Q_ref_entry_t *ref_entry = H5Q_QUEUE_FIRST(refs[i]);
             H5Q_QUEUE_REMOVE_HEAD(refs[i], entry);
-            if (ref_entry->ref_type == H5R_REGION)
-                H5MM_free(ref_entry->ref.reg.buf);
-            if (ref_entry->ref_type == H5R_ATTR)
-                H5MM_free(ref_entry->ref.attr.buf);
+            /* TODO call H5Rdestroy */
+            H5R_destroy(ref_entry->ref);
             H5MM_free(ref_entry);
         }
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q__view_free */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Qapply_multi
+ *
+ * Purpose: Apply a query on multiple locations and return the result.
+ * Parameters, which the query applies to, are determined by the type of the
+ * query.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Qapply_multi(size_t loc_count, hid_t *loc_ids, hid_t query_id,
+        unsigned *result, hid_t vcpl_id)
+{
+    H5Q_t *query = NULL;
+    H5G_loc_t *locs = NULL;
+    H5G_t *ret_grp;
+    hid_t ret_value;
+    int i;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args and get the query objects */
+    if (!loc_count)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "loc_count cannot be NULL");
+    if (NULL == (locs = (H5G_loc_t *) H5MM_malloc(loc_count * sizeof(H5G_loc_t))))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate locs buffer");
+    for (i = 0; i < loc_count; i++) {
+        if (FAIL == H5G_loc(loc_ids[i], &locs[i]))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location");
+    }
+    if (NULL == (query = (H5Q_t *) H5I_object_verify(query_id, H5I_QUERY)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a query ID");
+    if (!result)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for result");
+
+    /* Get the default view creation property list if the user didn't provide one */
+    /* TODO fix that */
+    if (H5P_DEFAULT == vcpl_id)
+        vcpl_id = H5P_INDEX_ACCESS_DEFAULT;
+    else
+        if (TRUE != H5P_isa_class(vcpl_id, H5P_INDEX_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not index access parms");
+
+    /* Apply query */
+    if (NULL == (ret_grp = H5Q_apply_multi(loc_count, locs, loc_ids, query, result, vcpl_id)))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+
+    if (FAIL == (ret_value = H5I_register(H5I_GROUP, ret_grp, TRUE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group");
+
+done:
+    H5MM_free(locs);
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Qapply_multi() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q_apply_multi
+ *
+ * Purpose: Private function for H5Qapply_multi.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+H5G_t *
+H5Q_apply_multi(size_t loc_count, const H5G_loc_t *locs, hid_t *loc_ids,
+        const H5Q_t *query, unsigned *result, hid_t H5_ATTR_UNUSED vcpl_id)
+{
+    H5Q_view_t view = H5Q_VIEW_INITIALIZER(view); /* Resulting view */
+    H5Q_ref_head_t *refs[H5Q_VIEW_REF_NTYPES] = { &view.reg_refs, &view.obj_refs, &view.attr_refs };
+    unsigned multi_result = 0;
+    H5G_t *ret_grp = NULL; /* New group created */
+    H5G_t *ret_value = NULL; /* Return value */
+    H5P_genclass_t *pclass = NULL;
+    unsigned flags;
+    hid_t fapl_id = FAIL;
+    H5F_t *new_file = NULL;
+    H5G_loc_t file_loc;
+    size_t i;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(loc_count);
+    HDassert(locs);
+    HDassert(loc_ids);
+    HDassert(query);
+    HDassert(result);
+
+    /* TODO Serial iteration for now */
+    for (i = 0; i < loc_count; i++) {
+        H5Q_view_t loc_view = H5Q_VIEW_INITIALIZER(loc_view); /* Resulting view */
+        H5Q_ref_head_t *loc_refs[H5Q_VIEW_REF_NTYPES] = { &loc_view.reg_refs, &loc_view.obj_refs, &loc_view.attr_refs };
+        unsigned loc_result;
+        H5Q_apply_arg_t args;
+        int j;
+
+        /* Create new view and init args */
+        args.query = query;
+        args.result = &loc_result;
+        args.view = &loc_view;
+
+        if (FAIL == H5O_visit(loc_ids[i], ".", H5_INDEX_NAME, H5_ITER_NATIVE, H5Q__apply_iterate,
+                &args, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id))
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, NULL, "object visitation failed");
+
+        multi_result |= loc_result;
+        /* Simply concatenate results from sub-view */
+        for (j = 0; j < H5Q_VIEW_REF_NTYPES; j++) {
+            H5Q_QUEUE_CONCAT(refs[j], loc_refs[j]);
+        }
+    }
+
+    if (!H5Q_QUEUE_EMPTY(&view.reg_refs))
+        H5Q_LOG_DEBUG("Number of reg refs: %zu\n", view.reg_refs.n_elem);
+    if (!H5Q_QUEUE_EMPTY(&view.obj_refs))
+        H5Q_LOG_DEBUG("Number of obj refs: %zu\n", view.obj_refs.n_elem);
+    if (!H5Q_QUEUE_EMPTY(&view.attr_refs))
+        H5Q_LOG_DEBUG("Number of attr refs: %zu\n", view.attr_refs.n_elem);
+
+    /* Get property list class */
+    if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(H5P_FILE_ACCESS, H5I_GENPROP_CLS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list class");
+
+    /* Create the new property list */
+    if (FAIL == (fapl_id = H5P_create_id(pclass, TRUE)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, NULL, "unable to create property list");
+
+    /* Use the core VFD to store the view */
+    if (FAIL == H5Pset_fapl_core(fapl_id, H5Q_VIEW_CORE_INCREMENT, FALSE))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "unable to set property list to core VFD");
+
+    /* Create a new file or truncate an existing file. */
+    flags = H5F_ACC_EXCL | H5F_ACC_RDWR | H5F_ACC_CREAT;
+    if (NULL == (new_file = H5F_open("view", flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file");
+
+    /* Construct a group location for root group of the file */
+    if (FAIL == H5G_root_loc(new_file, &file_loc))
+        HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, NULL, "unable to create location for file")
+
+    /* Create the new group & get its ID */
+    if (NULL == (ret_grp = H5G_create_anon(&file_loc, H5P_GROUP_CREATE_DEFAULT, H5P_GROUP_ACCESS_DEFAULT)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "unable to create group");
+
+    /* Write view */
+    if (FAIL == H5Q__view_write(ret_grp, &view))
+        HGOTO_ERROR(H5E_QUERY, H5E_WRITEERROR, NULL, "can't write view");
+
+    *result = multi_result;
+    ret_value = ret_grp;
+
+done:
+    /* Release the group's object header, if it was created */
+    if (ret_grp) {
+        H5O_loc_t *grp_oloc;         /* Object location for group */
+
+        /* Get the new group's object location */
+        if (NULL == (grp_oloc = H5G_oloc(ret_grp)))
+            HDONE_ERROR(H5E_SYM, H5E_CANTGET, NULL, "unable to get object location of group");
+
+        /* Decrement refcount on group's object header in memory */
+        if (FAIL == H5O_dec_rc_by_loc(grp_oloc, H5AC_dxpl_id))
+            HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "unable to decrement refcount on newly created object");
+    } /* end if */
+
+    /* Cleanup on failure */
+    if (NULL == ret_value)
+        if (ret_grp && (FAIL == H5G_close(ret_grp)))
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release group");
+
+    /* Close the property list */
+    if ((fapl_id != FAIL) && (H5I_dec_app_ref(fapl_id) < 0))
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, NULL, "can't close");
+
+    /* Attempt to close the file/mount hierarchy */
+    if (new_file && (FAIL == H5F_try_close(new_file)))
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close file")
+
+    /* Free the view */
+    H5Q__view_free(&view);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5Q_apply_multi() */
