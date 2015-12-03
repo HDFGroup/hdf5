@@ -879,7 +879,7 @@ if (BUILD_SHARED_LIBS)
       COMMAND ${CMD}
       ARGS > ${HDF5_BINARY_DIR}/shared/H5lib_settings.c
       DEPENDS H5make_libsettings
-      WORKING_DIRECTORY ${HDF5_BINARY_DIR}/shared
+      WORKING_DIRECTORY ${HDF5_BINARY_DIR}
   )
   set (shared_gen_SRCS ${HDF5_BINARY_DIR}/shared/H5Tinit.c ${HDF5_BINARY_DIR}/shared/H5lib_settings.c)
   add_library (${HDF5_LIBSH_TARGET} SHARED ${common_SRCS} ${shared_gen_SRCS} ${H5_PUBLIC_HEADERS} ${H5_PRIVATE_HEADERS} ${H5_GENERATED_HEADERS})
