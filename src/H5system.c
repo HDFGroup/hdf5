@@ -841,6 +841,11 @@ int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
  *-------------------------------------------------------------------------
  */
 int
+Wflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
+
+/* This is a no-op while we implement a Win32 VFD */
+#if 0
+int
 Wflock(int fd, int operation) {
 
     HANDLE          hFile;
@@ -868,7 +873,7 @@ Wflock(int fd, int operation) {
         if(0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow,
                             nNumberOfBytesToLockHigh, &overlapped))
             return -1;
-
+#endif /* 0 */
     return 0;
 } /* end Wflock() */
 
