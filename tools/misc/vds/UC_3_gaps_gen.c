@@ -28,7 +28,7 @@
 #include "UC_3.h"
 
 /* Create the VDS that uses use case 1 files */
-herr_t
+static herr_t
 create_3_1_vds(void)
 {
     hid_t src_sid       = -1;   /* source dataset's dataspace ID            */
@@ -135,7 +135,7 @@ error:
 } /* end create_3_1_vds() */
 
 /* Create the VDS that uses use case 2 files */
-herr_t
+static herr_t
 create_3_2_vds(void)
 {
     hid_t src_sid       = -1;   /* source dataset's dataspace ID            */
@@ -236,7 +236,7 @@ error:
 } /* end create_3_2_vds() */
 
 int
-main(int argc, char *argv[])
+main(void)
 {
 
     if(create_3_1_vds() < 0)
