@@ -415,26 +415,6 @@ TARGET_NAMING (accum_swmr_reader STATIC)
 TARGET_C_PROPERTIES (accum_swmr_reader STATIC " " " ")
 target_link_libraries (accum_swmr_reader ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
 set_target_properties (accum_swmr_reader PROPERTIES FOLDER test)
-add_custom_command (
-    TARGET     accum_swmr_reader
-    POST_BUILD
-    COMMAND    ${CMAKE_COMMAND}
-    ARGS       -E copy_if_different "${CMAKE_BINARY_DIR}/bin/accum_swmr_reader" "${PROJECT_BINARY_DIR}/H5TEST/accum_swmr_reader" 
-)
-if (BUILD_SHARED_LIBS)
-  add_executable (accum_swmr_reader-shared ${HDF5_TEST_SOURCE_DIR}/accum_swmr_reader.c)
-  TARGET_NAMING (accum_swmr_reader-shared SHARED)
-  TARGET_C_PROPERTIES (accum_swmr_reader-shared SHARED " " " ")
-  target_link_libraries (accum_swmr_reader-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-  set_target_properties (accum_swmr_reader-shared PROPERTIES FOLDER test)
-  # NOTE: Revert name to name without "-shared" on copy
-  add_custom_command (
-      TARGET     accum_swmr_reader-shared
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different "${CMAKE_BINARY_DIR}/bin/accum_swmr_reader-shared" "${PROJECT_BINARY_DIR}/H5TEST-shared/accum_swmr_reader" 
-  )
-endif (BUILD_SHARED_LIBS)
 
 #-- Set accum dependencies
 set_target_properties (accum PROPERTIES DEPENDS accum_swmr_reader)
