@@ -210,7 +210,7 @@ set (H5_TESTS
     stab
     gheap
     #cache_logging
-    #cork
+    cork
     pool
     istore
     bittests
@@ -256,7 +256,7 @@ set (H5_TESTS
     enc_dec_plist
     enc_dec_plist_cross_platform
     unregister
-    #swmr
+    swmr
 )
 
 foreach (test ${H5_TESTS})
