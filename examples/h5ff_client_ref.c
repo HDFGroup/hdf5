@@ -397,9 +397,15 @@ int main(int argc, char **argv) {
         assert(ret == 0);
     }
 
-#if 0
     if(0 == my_rank) {
         hid_t did_obj, did_ref;
+        hid_t mem_space, reg_id;
+        hsize_t num_refs = 5;
+        href_ff_t obj_ref[5];
+        href_ff_t reg_ref[5];
+
+        href_ff_t obj_ref_r[5];
+        href_ff_t reg_ref_r[5];
 
         /* create transaction object */
         tid2 = H5TRcreate(file_id, rid2, (uint64_t)3);
@@ -417,24 +423,198 @@ int main(int argc, char **argv) {
                                H5P_DEFAULT, H5P_DEFAULT, tid2, e_stack);
         assert(did_ref > 0);
 
+        reg_id = H5Scopy(sid);
+        assert(reg_id > 0);
+
+        mem_space = H5Screate_simple(1, &num_refs, NULL);
+
         start[0] = 10;
-        count[0] = 30;
+        count[0] = 5;
         ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, NULL, count, NULL);
         assert(ret == 0);
+
+        /* write 5 object references to dataset */
+        ret = H5Rcreate_object_ff(&obj_ref[0], file_id, "/G1", H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        ret = H5Rcreate_object_ff(&obj_ref[1], file_id, "/MAP1", H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        ret = H5Rcreate_object_ff(&obj_ref[2], file_id, "/G1/D1", H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        ret = H5Rcreate_object_ff(&obj_ref[3], file_id, "/DT1", H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        ret = H5Rcreate_object_ff(&obj_ref[4], file_id, "/G1", H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+
+        ret = H5Dwrite_ff(did_obj, H5T_STD_REF_OBJ, mem_space, sid, H5P_DEFAULT, obj_ref, 
+                          tid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        for(i=0 ; i<5 ; i++) {
+            ret = H5Rdestroy_ff(&obj_ref[i]);
+            assert(0 == ret);
+        }
+
+        /* write 5 region references to dataset */
+        start[0] = 0;
+        count[0] = 3;
+        ret = H5Sselect_hyperslab(reg_id, H5S_SELECT_SET, start, NULL, count, NULL);
+        assert(ret == 0);
+        ret = H5Rcreate_region_ff(&reg_ref[0], file_id, "/G1/D1", reg_id, H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+
+        start[0] = 5;
+        count[0] = 2;
+        ret = H5Sselect_hyperslab(reg_id, H5S_SELECT_SET, start, NULL, count, NULL);
+        assert(ret == 0);
+        ret = H5Rcreate_region_ff(&reg_ref[1], file_id, "/G1/D1", reg_id, H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+
+        start[0] = 10;
+        count[0] = 15;
+        ret = H5Sselect_hyperslab(reg_id, H5S_SELECT_SET, start, NULL, count, NULL);
+        assert(ret == 0);
+        ret = H5Rcreate_region_ff(&reg_ref[2], file_id, "/G1/D1", reg_id, H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+
+        start[0] = 30;
+        count[0] = 7;
+        ret = H5Sselect_hyperslab(reg_id, H5S_SELECT_SET, start, NULL, count, NULL);
+        assert(ret == 0);
+        ret = H5Rcreate_region_ff(&reg_ref[3], file_id, "/G1/D1", reg_id, H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+
+        start[0] = 55;
+        count[0] = 2;
+        ret = H5Sselect_hyperslab(reg_id, H5S_SELECT_SET, start, NULL, count, NULL);
+        assert(ret == 0);
+        ret = H5Rcreate_region_ff(&reg_ref[4], file_id, "/G1/D1", reg_id, H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+
+        ret = H5Dwrite_ff(did_ref, H5T_STD_REF_DSETREG, mem_space, sid, H5P_DEFAULT, reg_ref, 
+                          tid2, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        for(i=0 ; i<5 ; i++) {
+            ret = H5Rdestroy_ff(&reg_ref[i]);
+            assert(0 == ret);
+        }
 
         /* make this synchronous so we know the container version has been acquired */
         ret = H5TRfinish(tid2, H5P_DEFAULT, &rid3, H5_EVENT_STACK_NULL);
         assert(0 == ret);
 
+        /* release container version 2. This is async. */
+        ret = H5RCrelease(rid2, e_stack);
+        assert(0 == ret);
+
+        H5ESget_count(e_stack, &num_events);
+        H5ESwait_all(e_stack, &status);
+        H5ESclear(e_stack);
+        printf("%d events in event stack. Completion status = %d\n", num_events, status);
+        if(0 != num_events) assert(status == H5ES_STATUS_SUCCEED);
+
+        ret = H5Dread_ff(did_obj, H5T_STD_REF_OBJ, mem_space, sid, H5P_DEFAULT, obj_ref_r, 
+                         rid3, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        {
+            hid_t obj_id;
+
+            ret = H5Rprint_ref(&obj_ref_r[0]);
+            assert(ret == 0);
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &obj_ref_r[0], rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Gclose(obj_id);
+            assert(ret == 0);
+
+            ret = H5Rprint_ref(&obj_ref_r[1]);
+            assert(ret == 0);
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &obj_ref_r[1], rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Mclose_ff(obj_id, H5_EVENT_STACK_NULL);
+            assert(ret == 0);
+
+            ret = H5Rprint_ref(&obj_ref_r[2]);
+            assert(ret == 0);
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &obj_ref_r[2], rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Dclose(obj_id);
+            assert(ret == 0);
+
+            ret = H5Rprint_ref(&obj_ref_r[3]);
+            assert(ret == 0);
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &obj_ref_r[3], rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Tclose(obj_id);
+            assert(ret == 0);
+
+            ret = H5Rprint_ref(&obj_ref_r[4]);
+            assert(ret == 0);
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &obj_ref_r[4], rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Gclose(obj_id);
+            assert(ret == 0);
+        }
+
+        ret = H5Dread_ff(did_ref, H5T_STD_REF_DSETREG, mem_space, sid, H5P_DEFAULT, reg_ref_r, 
+                         rid3, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        {
+            hid_t obj_id;
+
+            ret = H5Rprint_ref(&reg_ref_r[0]);
+            assert(ret == 0);
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &reg_ref_r[0], rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Dclose(obj_id);
+            assert(ret == 0);
+
+            ret = H5Rprint_ref(&reg_ref_r[1]);
+            assert(ret == 0);
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &reg_ref_r[1], rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Dclose_ff(obj_id, H5_EVENT_STACK_NULL);
+            assert(ret == 0);
+
+            ret = H5Rprint_ref(&reg_ref_r[2]);
+            assert(ret == 0);
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &reg_ref_r[2], rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Dclose(obj_id);
+            assert(ret == 0);
+
+            ret = H5Rprint_ref(&reg_ref_r[3]);
+            assert(ret == 0);
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &reg_ref_r[3], rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Dclose(obj_id);
+            assert(ret == 0);
+
+            ret = H5Rprint_ref(&reg_ref_r[4]);
+            assert(ret == 0);
+            obj_id = H5Rdereference_ff(file_id, H5P_DEFAULT, &reg_ref_r[4], rid2, H5_EVENT_STACK_NULL);
+            assert(obj_id >= 0);
+            H5Dclose(obj_id);
+            assert(ret == 0);
+        }
+
+        /* release container version 2. This is async. */
+        ret = H5RCrelease(rid3, e_stack);
+        assert(0 == ret);
+
+        ret = H5Dclose_ff(did_obj, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+        ret = H5Dclose_ff(did_ref, H5_EVENT_STACK_NULL);
+        assert(ret == 0);
+
+        ret = H5TRclose(tid2);
+        assert(0 == ret);
         ret = H5RCclose(rid1);
         assert(0 == ret);
         ret = H5RCclose(rid2);
         assert(0 == ret);
-    }
-#endif 
-    if(0 == my_rank) {
-        /* release container version 2. This is async. */
-        ret = H5RCrelease(rid2, e_stack);
+        ret = H5RCclose(rid3);
+        assert(0 == ret);
+        ret = H5Sclose(mem_space);
+        assert(0 == ret);
+        ret = H5Sclose(reg_id);
         assert(0 == ret);
     }
 

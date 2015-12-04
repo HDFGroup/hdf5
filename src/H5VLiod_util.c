@@ -1245,11 +1245,11 @@ H5VL__iod_server_type_is_vl(hid_t type_id, hbool_t *is_vl_data)
         case H5T_ENUM:
         case H5T_ARRAY:
         case H5T_NO_CLASS:
-        case H5T_REFERENCE:
         case H5T_NCLASSES:
         case H5T_COMPOUND:
             *is_vl_data = FALSE;
             break;
+        case H5T_REFERENCE:
         case H5T_VLEN:
             *is_vl_data = TRUE;
             break;

@@ -124,6 +124,8 @@ typedef struct H5VL_iod_type_info_t {
     size_t num_vls;         /* Size of vls array */
     H5VL_iod_vl_info_t *vls; /* Array of variable-length types in type */
     size_t rc;              /* Number of references to this struct */
+    H5T_class_t type_class; /* Class of dataype */
+    H5R_type_t ref_type;    /* Reference type if this a is a reference datatype */
 } H5VL_iod_type_info_t;
 
 typedef enum H5VL_iod_state_t {

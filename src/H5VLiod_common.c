@@ -156,18 +156,17 @@ H5VL_iod_get_type_info_helper(hid_t type_id, H5VL_iod_type_info_t *type_info,
     hsize_t *dims = NULL;
     size_t num_cmpd_membs = 0;
     H5VL_iod_cmpd_info_t *cmpd_membs = NULL;
-    H5T_class_t type_class;
     int i;
 
     assert(type_info);
     assert(vls_nalloc);
 
     /* Get type class */
-    if(H5T_NO_CLASS == (type_class = H5Tget_class(type_id)))
+    if(H5T_NO_CLASS == (type_info->type_class = H5Tget_class(type_id)))
         ERROR("failed to get datatype class");
 
     /* Take different actions depending on class */
-    switch(type_class) {
+    switch(type_info->type_class) {
         case H5T_COMPOUND:
             {
                 int nmemb;
@@ -306,6 +305,22 @@ H5VL_iod_get_type_info_helper(hid_t type_id, H5VL_iod_type_info_t *type_info,
 
             break;
 
+        case H5T_REFERENCE:
+            H5VL_IOD_ARR_ADD(H5VL_iod_vl_info_t, type_info->vls, type_info->num_vls, *vls_nalloc, 8);
+
+            type_info->vls[type_info->num_vls].offset = offset;
+            type_info->vls[type_info->num_vls].base_type = NULL;
+            type_info->num_vls++;
+
+            if(H5Tequal(type_id, H5T_STD_REF_OBJ))
+                type_info->ref_type = H5R_OBJECT;
+            else if(H5Tequal(type_id, H5T_STD_REF_DSETREG))
+                type_info->ref_type = H5R_DATASET_REGION;
+            else
+                assert("Ref Type not Supported for I/O" && 0);
+
+            break;
+
         case H5T_STRING:
             {
                 htri_t is_variable_str;
@@ -380,6 +395,8 @@ H5VL_iod_get_type_info(hid_t type_id, H5VL_iod_type_info_t *type_info)
     type_info->rc = 1;
     if(0 == (type_info->size = H5Tget_size(type_id)))
         ERROR("H5Tget_size failed");
+    if(H5T_REFERENCE == H5Tget_class(type_id))
+        type_info->size = sizeof(href_ff_t);
 
     /* Check for a vl or string type */
     if((found_class = H5Tdetect_class(type_id, H5T_VLEN)) < 0)
@@ -387,8 +404,12 @@ H5VL_iod_get_type_info(hid_t type_id, H5VL_iod_type_info_t *type_info)
     if(!found_class)
         if((found_class = H5Tdetect_class(type_id, H5T_STRING)) < 0)
             ERROR("failed to search for string type class");
+    if(!found_class)
+        if((found_class = H5Tdetect_class(type_id, H5T_REFERENCE)) < 0)
+            ERROR("failed to search for reference type class");
 
-    /* Only need to investigate further if the type contains a vlen or string */
+
+    /* Only need to investigate further if the type contains a vlen, string, or reference */
     if(found_class) {
         size_t vls_nalloc = 0;
 
@@ -408,7 +429,8 @@ H5VL_iod_get_type_info(hid_t type_id, H5VL_iod_type_info_t *type_info)
             assert(type_info->vls[i].offset >= cur_fl_offset);
             if(type_info->vls[i].offset > cur_fl_offset) {
                 /* Create fixed-length span before vl */
-                H5VL_IOD_ARR_ADD(H5VL_iod_fl_span_t, type_info->fl_spans, type_info->num_fl_spans, fl_spans_nalloc, 2);
+                H5VL_IOD_ARR_ADD(H5VL_iod_fl_span_t, type_info->fl_spans, type_info->num_fl_spans, 
+                                 fl_spans_nalloc, 2);
 
                 type_info->fl_spans[type_info->num_fl_spans].offset = cur_fl_offset;
                 type_info->fl_spans[type_info->num_fl_spans].size = type_info->vls[i].offset - cur_fl_offset;
@@ -416,11 +438,15 @@ H5VL_iod_get_type_info(hid_t type_id, H5VL_iod_type_info_t *type_info)
             } /* end if */
 
             /* Update cur_fl_offset */
-            cur_fl_offset = type_info->vls[i].offset + (type_info->vls[i].base_type ? sizeof(hvl_t) : sizeof(char *));
+            if(H5T_REFERENCE == type_info->type_class)
+                cur_fl_offset = type_info->vls[i].offset + sizeof(href_ff_t);
+            else
+                cur_fl_offset = type_info->vls[i].offset + 
+                    (type_info->vls[i].base_type ? sizeof(hvl_t) : sizeof(char *));
         } /* end for */
 
         /* Add span at end */
-        assert(type_info->size >= cur_fl_offset);
+        //assert(type_info->size >= cur_fl_offset);
         if(type_info->size > cur_fl_offset) {
             H5VL_IOD_ARR_ADD(H5VL_iod_fl_span_t, type_info->fl_spans, type_info->num_fl_spans, fl_spans_nalloc, 2);
 
@@ -600,6 +626,38 @@ H5VL_iod_cs_send_helper(char *buf, H5VL_iod_type_info_t *type_info,
                             ERROR("failed to build segments");
                     } /* end if */
                 } /* end if */
+                else if(H5T_REFERENCE == type_info->type_class){
+                    href_ff_t ref = *(href_ff_t *)(buf + (i * type_info->size) + type_info->vls[j].offset);
+
+                    //printf("Send Helper - ref: (%p, %zu) type = %d\n", ref.buf, ref.buf_size, ref.ref_type);
+                    /* Add ref buffer size */
+                    H5VL_IOD_ARR_ADD(char, *vl_lengths, *vl_lengths_nused, *vl_lengths_nalloc, 256);
+                    assert(*vl_lengths_nused + 8 <= *vl_lengths_nalloc);
+                    UINT64ENCODE(&(*vl_lengths)[*vl_lengths_nused], (uint64_t)ref.buf_size);
+                    *vl_lengths_nused += 8;
+
+                    /* Add segment to segments array */
+                    if(*segments_nalloc == *num_segments) {
+                        size_t tmp_nalloc;
+
+                        tmp_nalloc = (*num_segments) ? (*num_segments) * 2 : (256);
+
+                        if(NULL == (*addrs = (void **)realloc
+                                    (*addrs, tmp_nalloc * sizeof(void *))))
+                            ERROR("failed to reallocate array");
+
+                        if(NULL == (*sizes = (size_t *)realloc
+                                    (*sizes, tmp_nalloc * sizeof(size_t))))
+                            ERROR("failed to reallocate array");
+
+                        *segments_nalloc = tmp_nalloc;
+                    } /* end if */
+
+                    /* Add segment */
+                    (*addrs)[*num_segments] = ref.buf;
+                    (*sizes)[*num_segments] = ref.buf_size;
+                    (*num_segments)++;
+                }
                 else {
                     /* Vlen string */
                     char *vl_s = *(char **)(buf + (i * type_info->size) + type_info->vls[j].offset);
@@ -864,6 +922,53 @@ H5VL_iod_cs_recv_helper(char *buf, H5VL_iod_type_info_t *type_info,
                             ERROR("failed to build segments");
                     } /* end if */
                 } /* end if */
+                else if(H5T_REFERENCE == type_info->type_class) {
+                    href_ff_t *ref = (href_ff_t *)(buf + (i * type_info->size) + type_info->vls[j].offset);
+                    uint64_t vl_length;
+
+                    /* Retrieve buf size */
+                    if(*vl_lengths_loc + 8 > vl_lengths_size)
+                        ERROR("vl_lengths array is too short");
+                    UINT64DECODE(&vl_lengths[*vl_lengths_loc], vl_length);
+                    *vl_lengths_loc += 8;
+                    ref->buf_size = (size_t)vl_length;
+
+                    ref->ref_type = type_info->ref_type;
+
+                    /* Allocate buffer for ref buffer */
+                    if(NULL == (ref->buf = malloc(ref->buf_size)))
+                        ERROR("failed to allocate ref buffer");
+
+                    /* Add malloc'ed buffer to free list, if present */
+                    if(free_list) {
+                        H5VL_IOD_ARR_ADD(void *, *free_list, *free_list_len, *free_list_nalloc, 64);
+                        (*free_list)[*free_list_len] = ref->buf;
+                        (*free_list_len)++;
+                    } /* end if */
+
+                    /* Add segment to segments array */
+                    if(*segments_nalloc == *num_segments) {
+                        size_t tmp_nalloc;
+
+                        tmp_nalloc = (*num_segments) ? (*num_segments) * 2 : (256);
+
+                        if(NULL == (*addrs = (void **)realloc
+                                    (*addrs, tmp_nalloc * sizeof(void *))))
+                            ERROR("failed to reallocate array");
+
+                        if(NULL == (*sizes = (size_t *)realloc
+                                    (*sizes, tmp_nalloc * sizeof(size_t))))
+                            ERROR("failed to reallocate array");
+
+                        *segments_nalloc = tmp_nalloc;
+                    } /* end if */
+
+                    /* Add segment */
+                    (*addrs)[*num_segments] = ref->buf;
+                    (*sizes)[*num_segments] = ref->buf_size;
+                    (*num_segments)++;
+                    //printf("Recv Helper - ref: (%p, %zu) type = %d\n", ref->buf, ref->buf_size, ref->ref_type);
+                }
                 else {
                     /* Vlen string */
                     char **vl_s = (char **)(buf + (i * type_info->size) + type_info->vls[j].offset);

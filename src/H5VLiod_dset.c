@@ -43,6 +43,8 @@ typedef struct {
     hid_t space_id;
     uint8_t *buf_ptr;
     size_t buf_size;
+    void *type_buf;
+    H5VL_iod_type_info_t type_info;
     size_t nelmts;
     size_t cur_seg;
     void **addrs;
@@ -54,7 +56,7 @@ typedef struct {
 static herr_t 
 H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handles_t iod_oh, 
                                hid_t space_id, hid_t mem_type_id, hid_t dset_type_id, 
-                               H5VL_iod_type_info_t type_info, size_t nelmts,
+                               H5VL_iod_type_info_t type_info, void *type_buf, size_t nelmts,
                                size_t num_segments, void **addrs, size_t *sizes,
                                hid_t dxpl_id, iod_trans_id_t wtid, iod_trans_id_t rtid,
                                na_addr_t source, hg_bulk_t bulk_handle, uint32_t cs_scope,
@@ -207,7 +209,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
 
     dt_class = H5Tget_class(input->type_id);
     /* Set the IOD array creation parameters */
-    if(dt_class == H5T_VLEN || 
+    if(dt_class == H5T_VLEN || dt_class == H5T_REFERENCE ||
        (dt_class == H5T_STRING && H5Tis_variable_str(input->type_id)) )
         array.cell_size = sizeof(iod_obj_id_t) + sizeof(iod_size_t);
     else
@@ -937,6 +939,9 @@ H5VL_iod_server_dset_get_vl_size_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
                 /* Standard vlen */
                 temp_size = temp_size / type_info.vls[0].base_type->size;
             }
+            else if (H5T_REFERENCE == type_info.type_class) {
+                /* do nothing */;
+            }
             else {
                 /* VL string; add space for NULL termination */
                 temp_size ++;
@@ -1133,11 +1138,8 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
         assert(addrs);
         assert(sizes);
 
-        free(buf);
-        buf = NULL;
-
         ret = H5VL__iod_server_vl_data_write(coh, iod_id, iod_oh, space_id, src_id, dst_id, type_info, 
-                                             nelmts, num_segments, addrs, sizes, dxpl_id, wtid, rtid,
+                                             buf, nelmts, num_segments, addrs, sizes, dxpl_id, wtid, rtid,
                                              source, bulk_handle, raw_cs_scope, is_coresident);
         if(ret != SUCCEED)
             HGOTO_ERROR_FF(ret, "can't write VL data to array object");
@@ -1153,6 +1155,11 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
                 vl_lengths = NULL;
                 vl_lengths_size = 0;
             }
+        }
+
+        if(buf) {
+            free(buf);
+            buf = NULL;
         }
 
         /* Free segments */
@@ -1842,7 +1849,7 @@ done:
 static herr_t 
 H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handles_t iod_oh, 
                                hid_t space_id, hid_t mem_type_id, hid_t H5_ATTR_UNUSED dset_type_id, 
-                               H5VL_iod_type_info_t type_info, size_t nelmts,
+                               H5VL_iod_type_info_t type_info, void *type_buf, size_t nelmts,
                                size_t num_segments, void **addrs, size_t *sizes,
                                hid_t H5_ATTR_UNUSED dxpl_id, iod_trans_id_t wtid, iod_trans_id_t rtid,
                                na_addr_t source, hg_bulk_t bulk_handle, uint32_t cs_scope,
@@ -1900,6 +1907,8 @@ H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handle
     udata.coh = coh;
     udata.iod_oh = iod_oh;
     udata.nelmts = nelmts;
+    udata.type_buf = type_buf;
+    udata.type_info = type_info;
     udata.buf_ptr = (uint8_t *)buf;
     udata.buf_size = buf_size;
     udata.wtid = wtid;
@@ -1912,7 +1921,7 @@ H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handle
 
     /* iterate over every element and read/write it as a BLOB object */
     if(H5Diterate(&bogus, mem_type_id, space_id, H5VL__iod_server_vl_data_write_cb, &udata) < 0)
-        HGOTO_ERROR_FF(FAIL, "failed to compute buffer size");
+        HGOTO_ERROR_FF(FAIL, "failed to write to Dataset");
 
     /* Free the bulk handle */
     if(HG_SUCCESS != HG_Bulk_handle_free(vl_data_handle))
@@ -1953,11 +1962,12 @@ H5VL__iod_server_vl_data_write_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsi
     //iod_trans_id_t rtid = udata->rtid;
     iod_handles_t iod_oh = udata->iod_oh;
     iod_obj_id_t iod_id = udata->iod_id;
+    H5VL_iod_type_info_t type_info = udata->type_info;
     iod_obj_id_t blob_id = 0;
     iod_handle_t blob_oh;
     iod_hyperslab_t hslab;
     iod_mem_desc_t *mem_desc; /* memory descriptor used for reading array */
-    iod_array_iodesc_t file_desc; /* file descriptor used to read array */
+    iod_array_iodesc_t file_desc; /* file descriptor used to write to the array */
     iod_blob_iodesc_t *blob_desc; /* blob descriptor */
     size_t buf_size;
     unsigned u;
@@ -1965,7 +1975,6 @@ H5VL__iod_server_vl_data_write_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsi
     iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
-    /* read in the point from the array object */
     hslab.start = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
     hslab.stride = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
     hslab.block = (iod_size_t *)malloc(sizeof(iod_size_t) * ndims);
@@ -2068,7 +2077,7 @@ H5VL__iod_server_vl_data_write_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsi
         ret = iod_array_write(iod_oh.wr_oh, wtid, NULL, 
                               mem_desc, &file_desc, NULL, NULL);
         if(ret < 0)
-            HGOTO_ERROR_FF(ret, "can't read from array object");
+            HGOTO_ERROR_FF(ret, "can't write to array object");
 
         free(mem_desc);
         mem_desc = NULL;
