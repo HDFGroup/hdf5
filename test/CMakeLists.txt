@@ -209,7 +209,7 @@ set (H5_TESTS
     ohdr
     stab
     gheap
-    #cache_logging
+    cache_logging
     cork
     pool
     istore

@@ -134,7 +134,7 @@ test_logging_api(void)
     /* Clean up */
     if(H5Fclose(fid) < 0)
         TEST_ERROR;
-    if(HDremove(FILE_NAME) != 0)
+    if(HDremove(filename) != 0)
         TEST_ERROR;
 
     PASSED();
