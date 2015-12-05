@@ -210,7 +210,7 @@ set (H5_TESTS
     stab
     gheap
     #cache_logging
-    #cork
+    cork
     pool
     istore
     bittests
