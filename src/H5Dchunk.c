@@ -5739,34 +5739,69 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
-    const H5O_pline_t *pline, hsize_t *index_size)
+H5D__chunk_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh, H5O_layout_t *layout,
+    hsize_t *index_size)
 {
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
+    H5S_t *space = NULL;                /* Dataset's dataspace */
+    H5O_pline_t pline;                  /* I/O pipeline message */
     H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);
+    htri_t exists;                      /* Flag if header message of interest exists */
+    hbool_t idx_info_init = FALSE;      /* Whether the chunk index info has been initialized */
+    hbool_t pline_read = FALSE;         /* Whether the I/O pipeline message was read */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(f);
+    HDassert(loc);
+    HDassert(loc->file);
+    HDassert(H5F_addr_defined(loc->addr));
     HDassert(layout);
     H5D_CHUNK_STORAGE_INDEX_CHK(sc);
-    HDassert(pline);
     HDassert(index_size);
 
+    /* Check for I/O pipeline message */
+    if((exists = H5O_msg_exists_oh(oh, H5O_PLINE_ID)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+    else if(exists) {
+        if(NULL == H5O_msg_read_oh(loc->file, dxpl_id, oh, H5O_PLINE_ID, &pline))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't find I/O pipeline message")
+        pline_read = TRUE;
+    } /* end else if */
+    else
+        HDmemset(&pline, 0, sizeof(pline));
+
     /* Compose chunked index info struct */
-    idx_info.f = f;
+    idx_info.f = loc->file;
     idx_info.dxpl_id = dxpl_id;
-    idx_info.pline = pline;
+    idx_info.pline = &pline;
     idx_info.layout = &layout->u.chunk;
     idx_info.storage = &layout->storage.u.chunk;
 
+    /* Get the dataspace for the dataset */
+    if(NULL == (space = H5S_read(loc, dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load dataspace info from dataset header")
+
+    /* Allocate any indexing structures */
+    if(layout->storage.u.chunk.ops->init && (layout->storage.u.chunk.ops->init)(&idx_info, space, loc->addr) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information")
+    idx_info_init = TRUE;
+
     /* Get size of index structure */
-    if((layout->storage.u.chunk.ops->size)(&idx_info, index_size) < 0)
+    if(layout->storage.u.chunk.ops->size && (layout->storage.u.chunk.ops->size)(&idx_info, index_size) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve chunk index info")
 
 done:
+    /* Free resources, if they've been initialized */
+    if(idx_info_init && layout->storage.u.chunk.ops->dest &&
+            (layout->storage.u.chunk.ops->dest)(&idx_info) < 0)
+	HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
+    if(pline_read && H5O_msg_reset(H5O_PLINE_ID, &pline) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTRESET, FAIL, "unable to reset I/O pipeline message")
+    if(space && H5S_close(space) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_bh_info() */
 

@@ -53,7 +53,7 @@ static hid_t H5O_group_open(const H5G_loc_t *obj_loc, hid_t lapl_id,
 static void *H5O_group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
     hid_t dxpl_id);
 static H5O_loc_t *H5O_group_get_oloc(hid_t obj_id);
-static herr_t H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+static herr_t H5O_group_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh,
     H5_ih_info_t *bh_info);
 
 
@@ -333,7 +333,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
+H5O_group_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 {
     htri_t	exists;                 /* Flag if header message of interest exists */
     H5HF_t      *fheap = NULL;          /* Fractal heap handle */
@@ -344,7 +344,9 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, oh->cache_info.addr, FAIL)
 
     /* Sanity check */
-    HDassert(f);
+    HDassert(loc);
+    HDassert(loc->file);
+    HDassert(H5F_addr_defined(loc->addr));
     HDassert(oh);
     HDassert(bh_info);
 
@@ -355,13 +357,13 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         H5O_linfo_t linfo;          	/* Link info message */
 
         /* Get "new style" group info */
-        if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_LINFO_ID, &linfo))
+        if(NULL == H5O_msg_read_oh(loc->file, dxpl_id, oh, H5O_LINFO_ID, &linfo))
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't read LINFO message")
 
         /* Check if name index available */
         if(H5F_addr_defined(linfo.name_bt2_addr)) {
             /* Open the name index v2 B-tree */
-            if(NULL == (bt2_name = H5B2_open(f, dxpl_id, linfo.name_bt2_addr, NULL, NULL)))
+            if(NULL == (bt2_name = H5B2_open(loc->file, dxpl_id, linfo.name_bt2_addr, NULL, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
             /* Get name index B-tree size */
@@ -372,7 +374,7 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         /* Check if creation order index available */
 	if(H5F_addr_defined(linfo.corder_bt2_addr)) {
             /* Open the creation order index v2 B-tree */
-            if(NULL == (bt2_corder = H5B2_open(f, dxpl_id, linfo.corder_bt2_addr, NULL, NULL)))
+            if(NULL == (bt2_corder = H5B2_open(loc->file, dxpl_id, linfo.corder_bt2_addr, NULL, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
             /* Get creation order index B-tree size */
@@ -383,7 +385,7 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         /* Get fractal heap size, if available */
         if(H5F_addr_defined(linfo.fheap_addr)) {
             /* Open the fractal heap for links */
-            if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo.fheap_addr)))
+            if(NULL == (fheap = H5HF_open(loc->file, dxpl_id, linfo.fheap_addr)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open fractal heap")
 
             /* Get heap storage size */
@@ -395,11 +397,11 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         H5O_stab_t          stab;       	/* Info about symbol table */
 
         /* Must be "old style" group, get symbol table message */
-        if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_STAB_ID, &stab))
+        if(NULL == H5O_msg_read_oh(loc->file, dxpl_id, oh, H5O_STAB_ID, &stab))
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't find LINFO nor STAB messages")
 
         /* Get symbol table size info */
-        if(H5G__stab_bh_size(f, dxpl_id, &stab, bh_info) < 0)
+        if(H5G__stab_bh_size(loc->file, dxpl_id, &stab, bh_info) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve symbol table size info")
     } /* end else */
 

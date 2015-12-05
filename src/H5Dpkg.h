@@ -710,8 +710,8 @@ H5_DLL herr_t H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
     H5O_layout_chunk_t *layout_src, H5F_t *f_dst, H5O_storage_chunk_t *storage_dst,
     const H5S_extent_t *ds_extent_src, const H5T_t *dt_src,
     const H5O_pline_t *pline_src, H5O_copy_t *cpy_info, hid_t dxpl_id);
-H5_DLL herr_t H5D__chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
-    const H5O_pline_t *pline, hsize_t *btree_size);
+H5_DLL herr_t H5D__chunk_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh,
+    H5O_layout_t *layout, hsize_t *btree_size);
 H5_DLL herr_t H5D__chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream);
 H5_DLL herr_t H5D__chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5O_storage_t *store);
