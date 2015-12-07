@@ -63,6 +63,7 @@ const char *FILENAME[] = {
     "zero_chunk",	/* 16 */
     "chunk_single",     /* 17 */
     "swmr_non_latest",  /* 18 */
+    "earray_hdr_fd",    /* 19 */
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -135,6 +136,9 @@ const char *FILENAME[] = {
 #define DSET_FIXED_BIG		"DSET_FIXED_BIG"
 #define POINTS 			72
 #define POINTS_BIG 		2500
+
+/* Dataset names used for testing header flush dependencies */
+#define DSET_EARRAY_HDR_FD  "earray_hdr_fd"
 
 /* Dataset names for testing Implicit Indexing */
 #define DSET_SINGLE_MAX         "DSET_SINGLE_MAX"
@@ -10304,6 +10308,117 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function: test_earray_hdr_fd
+ *
+ * Purpose: Tests that extensible array header flush dependencies
+ *          are created and torn down correctly when used as a
+ *          chunk index.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t fid = -1;
+    hid_t sid = -1;
+    hid_t did = -1;
+    hid_t tid = -1;
+    hid_t dcpl = -1;
+    hid_t msid = -1;
+    const hsize_t shape[1] = { 8 };
+    const hsize_t maxshape[1] = { H5S_UNLIMITED };
+    const hsize_t chunk[1] = { 8 };
+    const int buffer[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+    H5O_info_t info;
+
+    TESTING("Extensible array chunk index header flush dependencies handled correctly");
+
+    /* Skip this test if SWMR I/O is not supported for the VFD specified
+     * by the environment variable.
+     */
+    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+        SKIPPED();
+        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        return 0;
+    } /* end if */
+
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+
+    h5_fixname(FILENAME[19], fapl, filename, sizeof(filename));
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create a dataset with one unlimited dimension */
+    if((sid = H5Screate_simple(1, shape, maxshape)) < 0)
+        TEST_ERROR;
+    if((tid = H5Tcopy(H5T_NATIVE_INT32)) < 0)
+        TEST_ERROR;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if(H5Pset_chunk(dcpl, 1, chunk) < 0)
+        TEST_ERROR;
+    if((did = H5Dcreate2(fid, DSET_EARRAY_HDR_FD, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT )) < 0)
+        TEST_ERROR;
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if(H5Tclose(tid) < 0)
+        TEST_ERROR;
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    H5Fstart_swmr_write(fid);
+
+    /* Write data to the dataset */
+    if((did = H5Dopen2(fid, DSET_EARRAY_HDR_FD, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if((tid = H5Dget_type(did)) < 0)
+        TEST_ERROR;
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
+        TEST_ERROR;
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Tclose(tid) < 0)
+        TEST_ERROR;
+
+    /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
+    if(H5Oget_info_by_name(fid, DSET_EARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+    if(H5Oget_info_by_name(fid, DSET_EARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR;
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Fclose(fid);
+        H5Dclose(did);
+        H5Pclose(dcpl);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Sclose(msid);
+    } H5E_END_TRY;
+    return -1;
+} /* test_earray_hdr_fd() */
+
+
+/*-------------------------------------------------------------------------
  * Function: test_zero_dim_dset
  *
  * Purpose:     Tests support for reading a 1D chunled dataset with 
@@ -11527,14 +11642,15 @@ main(void)
         nerrors += (test_reopen_chunk_fast(my_fapl) < 0		? 1 : 0);
         nerrors += (test_chunk_fast_bug1(my_fapl) < 0           ? 1 : 0);
         nerrors += (test_chunk_expand(my_fapl) < 0		? 1 : 0);
-	nerrors += (test_layout_extend(my_fapl) < 0		? 1 : 0);
+        nerrors += (test_layout_extend(my_fapl) < 0		? 1 : 0);
         nerrors += (test_fixed_array(my_fapl) < 0		? 1 : 0);
-	nerrors += (test_idx_compatible() < 0			? 1 : 0);
-	nerrors += (test_unfiltered_edge_chunks(my_fapl) < 0    ? 1 : 0);
-	nerrors += (test_single_chunk(my_fapl) < 0              ? 1 : 0);	
-	nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
-	nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
-	nerrors += (test_swmr_non_latest(envval, my_fapl) < 0 ? 1 : 0);
+        nerrors += (test_idx_compatible() < 0			? 1 : 0);
+        nerrors += (test_unfiltered_edge_chunks(my_fapl) < 0    ? 1 : 0);
+        nerrors += (test_single_chunk(my_fapl) < 0              ? 1 : 0);	
+        nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
+        nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
+        nerrors += (test_swmr_non_latest(envval, my_fapl) < 0 ? 1 : 0);
+        nerrors += (test_earray_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;
