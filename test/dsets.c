@@ -10347,56 +10347,57 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     } /* end if */
 
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     h5_fixname(FILENAME[19], fapl, filename, sizeof(filename));
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create a dataset with one unlimited dimension */
     if((sid = H5Screate_simple(1, shape, maxshape)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if((tid = H5Tcopy(H5T_NATIVE_INT32)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Pset_chunk(dcpl, 1, chunk) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if((did = H5Dcreate2(fid, DSET_EARRAY_HDR_FD, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT )) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Dclose(did) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Pclose(dcpl) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Tclose(tid) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Sclose(sid) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
-    H5Fstart_swmr_write(fid);
+    if(H5Fstart_swmr_write(fid) < 0)
+        FAIL_STACK_ERROR;
 
     /* Write data to the dataset */
     if((did = H5Dopen2(fid, DSET_EARRAY_HDR_FD, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if((tid = H5Dget_type(did)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Dclose(did) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Tclose(tid) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
     if(H5Oget_info_by_name(fid, DSET_EARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Oget_info_by_name(fid, DSET_EARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if(H5Pclose(fapl) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if(H5Fclose(fid) < 0)
         TEST_ERROR;
 
