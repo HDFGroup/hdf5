@@ -1325,7 +1325,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
         new_dims[i] = HSIZE_UNDEF;
 
     /* Iterate over mappings */
-    for(i = 0; i < storage->list_nalloc; i++)
+    for(i = 0; i < storage->list_nused; i++)
         /* Check for unlimited dimension */
         if(storage->list[i].unlim_dim_virtual >= 0) {
             /* Check for "printf" source dataset resolution */
@@ -1567,7 +1567,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
     if(changed || (!storage->init && (storage->view == H5D_VDS_FIRST_MISSING))) {
         /* Iterate over mappings again to update source selections and virtual
          * mapping extents */
-        for(i = 0; i < storage->list_nalloc; i++) {
+        for(i = 0; i < storage->list_nused; i++) {
             /* If there is an unlimited dimension, we are setting extent by the
              * minimum of mappings, and the virtual extent in the unlimited
              * dimension has changed since the last time the VDS extent/mapping
@@ -1747,7 +1747,7 @@ H5D__virtual_init_all(const H5D_t *dset, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get VDS dimensions")
 
     /* Iterate over mappings */
-    for(i = 0; i < storage->list_nalloc; i++)
+    for(i = 0; i < storage->list_nused; i++)
         /* Check for unlimited dimension */
         if(storage->list[i].unlim_dim_virtual >= 0) {
             /* Check for "printf" source dataset resolution */
