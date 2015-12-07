@@ -1745,16 +1745,7 @@ H5D__farray_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
     /* Check if the fixed array is open */
     if(idx_info->storage->u.farray.fa) {
-	 /* Check for SWMR writes to the file */
-        if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-            /* Sanity check */
-            HDassert(H5F_addr_defined(idx_info->storage->u.farray.dset_ohdr_addr));
-
-            /* Remove flush dependency between extensible array and dataset' object header */
-            if(H5D__farray_idx_undepend(idx_info) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on object header")
-        } /* end if */
-
+        /* Close fixed array */
         if(H5FA_close(idx_info->storage->u.farray.fa, idx_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close fixed array")
         idx_info->storage->u.farray.fa = NULL;

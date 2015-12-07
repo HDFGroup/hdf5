@@ -109,10 +109,12 @@ H5FA__hdr_alloc(H5F_t *f))
 
     /* Set non-zero internal fields */
     hdr->addr = HADDR_UNDEF;
-    hdr->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
+    hdr->fd_parent_addr = HADDR_UNDEF;
+    hdr->fd_parent_ptr = NULL;
 
     /* Set the internal parameters for the array */
     hdr->f = f;
+    hdr->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
     hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
     hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
 

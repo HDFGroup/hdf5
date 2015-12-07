@@ -64,6 +64,7 @@ const char *FILENAME[] = {
     "chunk_single",     /* 17 */
     "swmr_non_latest",  /* 18 */
     "earray_hdr_fd",    /* 19 */
+    "farray_hdr_fd",    /* 20 */
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -139,6 +140,7 @@ const char *FILENAME[] = {
 
 /* Dataset names used for testing header flush dependencies */
 #define DSET_EARRAY_HDR_FD  "earray_hdr_fd"
+#define DSET_FARRAY_HDR_FD  "farray_hdr_fd"
 
 /* Dataset names for testing Implicit Indexing */
 #define DSET_SINGLE_MAX         "DSET_SINGLE_MAX"
@@ -10329,6 +10331,7 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
     hid_t tid = -1;
     hid_t dcpl = -1;
     hid_t msid = -1;
+    H5D_chunk_index_t idx_type;
     const hsize_t shape[1] = { 8 };
     const hsize_t maxshape[1] = { H5S_UNLIMITED };
     const hsize_t chunk[1] = { 8 };
@@ -10366,6 +10369,13 @@ test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
         FAIL_STACK_ERROR;
     if((did = H5Dcreate2(fid, DSET_EARRAY_HDR_FD, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT )) < 0)
         FAIL_STACK_ERROR;
+
+    /* Verify the chunk index type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+        FAIL_STACK_ERROR;
+    if(idx_type != H5D_CHUNK_IDX_EARRAY)
+        FAIL_PUTS_ERROR("should be using extensible array as index");
+
     if(H5Dclose(did) < 0)
         FAIL_STACK_ERROR;
     if(H5Pclose(dcpl) < 0)
@@ -10417,6 +10427,126 @@ error:
     } H5E_END_TRY;
     return -1;
 } /* test_earray_hdr_fd() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_farray_hdr_fd
+ *
+ * Purpose: Tests that fixed array header flush dependencies
+ *          are created and torn down correctly when used as a
+ *          chunk index.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t fid = -1;
+    hid_t sid = -1;
+    hid_t did = -1;
+    hid_t tid = -1;
+    hid_t dcpl = -1;
+    hid_t msid = -1;
+    H5D_chunk_index_t idx_type;
+    const hsize_t shape[1] = { 8 };
+    const hsize_t maxshape[1] = { 64 };
+    const hsize_t chunk[1] = { 8 };
+    const int buffer[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+    H5O_info_t info;
+
+    TESTING("Fixed array chunk index header flush dependencies handled correctly");
+
+    /* Skip this test if SWMR I/O is not supported for the VFD specified
+     * by the environment variable.
+     */
+    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+        SKIPPED();
+        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        return 0;
+    } /* end if */
+
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR;
+
+    h5_fixname(FILENAME[20], fapl, filename, sizeof(filename));
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create a chunked dataset with fixed dimensions */
+    if((sid = H5Screate_simple(1, shape, maxshape)) < 0)
+        FAIL_STACK_ERROR;
+    if((tid = H5Tcopy(H5T_NATIVE_INT32)) < 0)
+        FAIL_STACK_ERROR;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_chunk(dcpl, 1, chunk) < 0)
+        FAIL_STACK_ERROR;
+    if((did = H5Dcreate2(fid, DSET_FARRAY_HDR_FD, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT )) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Verify the chunk index type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+        FAIL_STACK_ERROR;
+    if(idx_type != H5D_CHUNK_IDX_FARRAY)
+        FAIL_PUTS_ERROR("should be using fixed array as index");
+
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR;
+
+    if(H5Fstart_swmr_write(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Write data to the dataset */
+    if((did = H5Dopen2(fid, DSET_FARRAY_HDR_FD, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if((tid = H5Dget_type(did)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
+    if(H5Oget_info_by_name(fid, DSET_FARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Oget_info_by_name(fid, DSET_FARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
+
+    if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Fclose(fid);
+        H5Dclose(did);
+        H5Pclose(dcpl);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Sclose(msid);
+    } H5E_END_TRY;
+    return -1;
+} /* test_farray_hdr_fd() */
 
 
 /*-------------------------------------------------------------------------
@@ -11652,6 +11782,7 @@ main(void)
         nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
         nerrors += (test_swmr_non_latest(envval, my_fapl) < 0 ? 1 : 0);
         nerrors += (test_earray_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
+        nerrors += (test_farray_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;

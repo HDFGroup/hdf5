@@ -81,6 +81,7 @@ static herr_t H5FA__cache_hdr_image_len(const void *thing, size_t *image_len,
     hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
 static herr_t H5FA__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5FA__cache_hdr_free_icr(void *thing);
 
 static herr_t H5FA__cache_dblock_get_load_size(const void *image_ptr, void *udata, 
@@ -128,7 +129,7 @@ const H5AC_class_t H5AC_FARRAY_HDR[1] = {{
     H5FA__cache_hdr_image_len,          /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5FA__cache_hdr_serialize,          /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5FA__cache_hdr_notify,             /* 'notify' callback */
     H5FA__cache_hdr_free_icr,           /* 'free_icr' callback */
     NULL,				/* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
@@ -458,6 +459,82 @@ H5FA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     HDassert((size_t)(image - (uint8_t *)_image) == len);
 
 END_FUNC(STATIC)   /* end H5FA__cache_hdr_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_hdr_notify
+ *
+ * Purpose:	Handle cache action notifications
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Dana Robinson
+ *              December 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
+
+    /* Local variables */
+    H5FA_hdr_t *hdr = (H5FA_hdr_t *)_thing;      /* Pointer to the object */
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	        case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+	        case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+                /* do nothing */
+                break;
+
+	        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* If hdr->fd_parent_addr != HADDR_UNDEF, the fixed 
+                 * array header must be employed as the index for a chunked
+                 * data set which has been modified by the SWMR writer.
+                 * 
+                 * In this case, hdr->fd_parent_addr must contain the 
+                 * address of object header proxy which is the flush 
+                 * dependency parent of the fixed array header.
+                 *
+                 * hdr->fd_parent_addr (and hdr->fd_parent_ptr) are used to
+                 * destroy the flush dependency before the fixed array
+                 * header is evicted.
+                 */
+                if(hdr->fd_parent_addr != HADDR_UNDEF) {
+                    HDassert(hdr->fd_parent_ptr);
+                    HDassert(hdr->fd_parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                    HDassert(hdr->fd_parent_ptr->addr == hdr->fd_parent_addr);
+                    HDassert(hdr->fd_parent_ptr->type);
+                    HDassert(hdr->fd_parent_ptr->type->id == H5AC_OHDR_PROXY_ID);
+
+                    /* Destroy flush dependency on object header proxy */
+                    if(H5FA__destroy_flush_depend((H5AC_info_t *)hdr->fd_parent_ptr, (H5AC_info_t *)hdr) < 0)
+                        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between fa header and object header proxy, address = %llu", (unsigned long long)hdr->fd_parent_addr)
+                } /* end if */
+                break;
+
+            default:
+#ifdef NDEBUG
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+    else {
+        HDassert(hdr->fd_parent_addr == HADDR_UNDEF);
+        HDassert(hdr->fd_parent_ptr == NULL);
+    } /* end else */
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5FA__cache_hdr_notify() */
 
 
 /*-------------------------------------------------------------------------

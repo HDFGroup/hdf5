@@ -620,7 +620,7 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
 
 CATCH
 
-END_FUNC(STATIC)   /* end H5EA__cache_iblock_notify() */
+END_FUNC(STATIC)   /* end H5EA__cache_hdr_notify() */
 
 
 /*-------------------------------------------------------------------------

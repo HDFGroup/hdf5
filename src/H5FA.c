@@ -768,16 +768,42 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /*
      * Check arguments.
+     *
+     * At present, this function is only used to setup a flush dependency
+     * between an object header proxy and the extensible array header when
+     * the extensible array is being used to index a chunked data set.
+     *
+     * Make sure that the parameters are congruent with this.
      */
     HDassert(fa);
     HDassert(hdr);
+    HDassert(parent_entry);
+    HDassert(parent_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(parent_entry->type);
+    HDassert(parent_entry->type->id == H5AC_OHDR_PROXY_ID);
+    HDassert((hdr->fd_parent_addr == HADDR_UNDEF) ||
+             (hdr->fd_parent_addr == parent_entry->addr));
+    HDassert((hdr->fd_parent_ptr == NULL) ||
+             (hdr->fd_parent_ptr == parent_entry));
 
-    /* Set the shared array header's file context for this operation */
-    hdr->f = fa->f;
+    /*
+     * Check to see if the flush dependency between the object header proxy
+     * and the fixed array header has already been setup.  If it hasn't
+     * set it up.
+     */
+    if(!H5F_addr_defined(hdr->fd_parent_addr)) {
+        /* Set the shared array header's file context for this operation */
+        hdr->f = fa->f;
 
-    /* Set up flush dependency between parent entry and fixed array header */
-    if(H5FA__create_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
-        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on file metadata")
+        /* Set up flush dependency between parent entry and fixed
+         * array header 
+         */
+        if(H5FA__create_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
+            H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on file metadata")
+
+        hdr->fd_parent_addr = parent_entry->addr;
+        hdr->fd_parent_ptr = parent_entry;
+    } /* end if */
 
 CATCH
 
