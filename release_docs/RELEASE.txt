@@ -115,7 +115,23 @@ Bug Fixes since HDF5-1.8.16
 
     Configuration
     -------------
-    - None
+    - Updated Linux language level flags to match the Autotools and these
+      flags are no longer used on OS X.
+
+      An addition to the flags simply being out of sync with the Autotools,
+      the Linux flags were used on OS X builds which led to symbols not being
+      found. Although this was non-fatal and compilation continued (implicit
+      definitions were used by the compiler and the symbols resolved at link
+      time), a large number of warnings were raised.
+
+      Linux changes:
+
+      * CHANGED:    _POSIX_C_SOURCE (from 199605 to 200112L)
+      * ADDED:      _GNU_SOURCE
+      * REMOVED:    _BSD_SOURCE
+      * REMOVED:    _DEFAULT_SOURCE
+
+      (DER, 2015/12/08, HDFFV-9627)
 
     Library
     -------
