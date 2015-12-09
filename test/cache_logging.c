@@ -114,7 +114,7 @@ test_logging_api(void)
     /* Perform some manipulations */
     for(i = 0; i < N_GROUPS; i++) {
         HDmemset(group_name, 0, 8);
-        snprintf(group_name, 8, "%d", i);
+        HDsnprintf(group_name, 8, "%d", i);
         if((gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if(H5Gclose(gid) < 0)
