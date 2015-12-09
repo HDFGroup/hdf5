@@ -249,6 +249,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
     unsigned            sblock_flags = H5AC__NO_FLAGS_SET;       /* flags used in superblock unprotect call      */
     haddr_t             super_addr;         /* Absolute address of superblock */
     haddr_t             eof;                /* End of file address */
+    hbool_t 		skip_eof_check = FALSE;
     unsigned      	rw_flags;           /* Read/write permissions for file */
     herr_t              ret_value = SUCCEED; /* Return value */
 
@@ -408,10 +409,6 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
      * possible is if the first file of a family of files was opened
      * individually.
      */
-    /* (This check can be skipped when the file is opened for SWMR read,
-     * as the file can appear truncated if only part of it has been
-     * been flushed to disk by the single writer process.)
-     */
     /* Can skip this test when it is not the initial file open--
      * H5F_super_read() call from H5F_evict_tagged_metadata() for
      * refreshing object.
@@ -422,7 +419,24 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
      * Note: the aggregator is changed again after being reset
      * earlier before H5AC_flush due to allocation of tmp addresses.
      */
-    if (!(H5F_INTENT(f) & H5F_ACC_SWMR_READ) && initial_read) {
+
+    /* (This check can be skipped when the file is opened for SWMR read,
+     * as the file can appear truncated if only part of it has been
+     * been flushed to disk by the single writer process.)
+     */
+    if((H5F_INTENT(f) & H5F_ACC_SWMR_READ)) {
+	/* 
+	 * When the file is opened for SWMR read access, skip the check if:
+	 * --the file is already marked for SWMR writing and
+	 * --the file has version 3 superblock for SWMR support
+	 */
+	if((sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS) &&
+	   (sblock->status_flags & H5F_SUPER_WRITE_ACCESS) &&
+	    sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
+	    skip_eof_check = TRUE;
+    }
+
+    if (!skip_eof_check && initial_read) {
         if(HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to determine file size")
 
