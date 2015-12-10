@@ -80,7 +80,7 @@ extern hg_id_t H5VL_LINK_REMOVE_ID;
 extern hg_id_t H5VL_OBJECT_OPEN_BY_TOKEN_ID;
 extern hg_id_t H5VL_OBJECT_OPEN_ID;
 //extern hg_id_t H5VL_OBJECT_COPY_ID;
-//extern hg_id_t H5VL_OBJECT_VISIT_ID;
+extern hg_id_t H5VL_OBJECT_VISIT_ID;
 extern hg_id_t H5VL_OBJECT_EXISTS_ID;
 extern hg_id_t H5VL_OBJECT_SET_COMMENT_ID;
 extern hg_id_t H5VL_OBJECT_GET_COMMENT_ID;
@@ -161,6 +161,11 @@ typedef struct value_t {
     void *val;
 } value_t;
 
+typedef struct path_t {
+    size_t path_size;
+    char *path;
+} path_t;
+
 typedef struct axe_t {
     AXE_task_t axe_id;
     AXE_task_t start_range;
@@ -189,6 +194,13 @@ typedef struct obj_info_t {
     size_t count;
     binary_buf_t *tokens;
 } obj_info_t;
+
+typedef struct obj_iterate_t {
+    int32_t ret;
+    uint32_t num_objs;
+    const char **paths;
+    H5O_ff_info_t *oinfos;
+} obj_iterate_t;
 
 typedef binary_buf_t loc_info_t;
 
@@ -263,7 +275,7 @@ H5_DLL int H5VL_iod_server_link_remove(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_open_by_token(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_open(hg_handle_t handle);
 //H5_DLL int H5VL_iod_server_object_copy(hg_handle_t handle);
-//H5_DLL int H5VL_iod_server_object_visit(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_object_visit(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_exists(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_set_comment(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_get_comment(hg_handle_t handle);
@@ -307,6 +319,7 @@ H5_DLL int hg_proc_hrpl_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_region_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_obj_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_attr_info_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_obj_iterate_t(hg_proc_t proc, void *data);
 
 MERCURY_GEN_PROC(analysis_invoke_in_t, 
                  ((axe_t)(axe_info))

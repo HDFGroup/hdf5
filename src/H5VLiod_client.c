@@ -1580,6 +1580,35 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             HGOTO_DONE(ret_value);
             //break;
         }
+    case HG_OBJECT_VISIT:
+        {
+            H5VL_iod_obj_visit_info_t *info = (H5VL_iod_obj_visit_info_t *)req->data;
+            obj_iterate_t *output = info->output;
+            unsigned u;
+
+            if(SUCCEED != output->ret) {
+                HERROR(H5E_FUNC, H5E_CANTINIT, "visit failed\n");
+                req->status = H5ES_STATUS_FAIL;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            for(u=0 ; u<output->num_objs; u++) {
+                herr_t ret;
+
+                ret = info->op(info->loc_id, output->paths[u], &output->oinfos[u], 
+                               info->op_data, info->rcxt_id);
+                if(ret > 0)
+                    break;
+                else if(ret < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "iterator cb failure")
+                else
+                    continue;
+            }
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+            break;
+        }
+
     case HG_RC_ACQUIRE:
         {
             H5VL_iod_rc_info_t *rc_info = (H5VL_iod_rc_info_t *)req->data;
@@ -1784,7 +1813,6 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         }
 #endif /* H5_HAVE_INDEXING */
         //case HG_LINK_ITERATE:
-        //case HG_OBJECT_VISIT:
         //case HG_MAP_ITERATE:
     default:
         req->status = H5ES_STATUS_FAIL;
@@ -2225,8 +2253,12 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         req->data = NULL;
         H5VL_iod_request_delete(file, req);
         break;
+        case HG_OBJECT_VISIT:
+            {
+                printf("HERE\n");
+                assert(0);
+            }
         //case HG_LINK_ITERATE:
-        //case HG_OBJECT_VISIT:
         //case HG_MAP_ITERATE:
     default:
         H5VL_iod_request_delete(file, req);

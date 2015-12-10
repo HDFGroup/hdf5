@@ -82,6 +82,10 @@ typedef struct href_ff_t {
 /* Public Prototypes */
 /*********************/
 
+/* Prototype for H5Ovisit_ff/H5Ovisit_by_name_ff() operator */
+typedef herr_t (*H5O_iterate_ff_t)(hid_t obj, const char *name, const H5O_ff_info_t *info,
+                                   void *op_data, hid_t rcxt_id);
+
 /* API wrappers */
 H5_DLL hid_t H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl,
                           hid_t fapl, hid_t estack_id);
@@ -186,6 +190,11 @@ H5_DLL herr_t H5Oget_info_ff(hid_t object_id, H5O_ff_info_t *object_info,
 H5_DLL herr_t H5Oget_info_by_name_ff(hid_t loc_id, const char *object_name, 
                                      H5O_ff_info_t *object_info, hid_t lapl_id, 
                                      hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Ovisit_ff(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
+                          H5O_iterate_ff_t op, void *op_data, hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Ovisit_by_name_ff(hid_t loc_id, const char *obj_name,
+                                  H5_index_t idx_type, H5_iter_order_t order, H5O_iterate_ff_t op,
+                                  void *op_data, hid_t lapl_id, hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Oclose_ff(hid_t object_id, hid_t estack_id);
 
 

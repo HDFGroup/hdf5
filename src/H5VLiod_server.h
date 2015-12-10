@@ -111,10 +111,14 @@ extern na_addr_t PEER;
 typedef herr_t (*H5VL_operator_t)(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
                                   H5I_type_t obj_type, uint32_t cs_scope, void *operator_data);
 
-/* Define the operator function pointer for H5Diterate() */
+/* Define the operator function pointer for server_iterate() */
 typedef herr_t (*H5VL_iterate_op_t)(iod_handle_t coh, iod_obj_id_t obj_id, iod_trans_id_t rtid,
                                     H5I_type_t obj_type,  const char *link_name, const char *attr_name,
                                     uint32_t cs_scope, void *operator_data);
+
+/* Define the operator function pointer for server_visit() */
+typedef herr_t (*H5VL_visit_op_t)(iod_handle_t coh, iod_obj_id_t obj_id, iod_handle_t obj_oh,
+                                  const char *path, uint32_t cs_scope, iod_trans_id_t rtid, void *op_data);
 
 H5_DLL int H5VL_iod_server_analysis_farm(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_analysis_transfer(hg_handle_t handle);
@@ -318,6 +322,10 @@ H5_DLL void H5VL_iod_server_object_exists_cb(AXE_engine_t axe_engine,
                                              size_t num_n_parents, AXE_task_t n_parents[], 
                                              size_t num_s_parents, AXE_task_t s_parents[], 
                                              void *op_data);
+H5_DLL void H5VL_iod_server_object_visit_cb(AXE_engine_t axe_engine, 
+                                            size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
+                                            void *op_data);
 H5_DLL void H5VL_iod_server_object_set_comment_cb(AXE_engine_t axe_engine, 
                                                   size_t num_n_parents, AXE_task_t n_parents[], 
                                                   size_t num_s_parents, AXE_task_t s_parents[], 
@@ -425,6 +433,10 @@ H5_DLL herr_t H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod
                                        H5I_type_t obj_type, 
                                        const char *link_name, const char *attr_name, 
                                        uint32_t cs_scope, H5VL_iterate_op_t op, void *op_data);
+
+H5_DLL herr_t H5VL_iod_server_visit(iod_handle_t coh, iod_obj_id_t obj_id, iod_handle_t obj_oh, 
+                                    const char *path, uint32_t cs_scope, iod_trans_id_t rtid, 
+                                    H5VL_visit_op_t op, void *op_data);
 
 H5_DLL herr_t H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim, 
                                           const hsize_t *point, void *_udata);

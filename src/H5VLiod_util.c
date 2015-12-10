@@ -1481,6 +1481,107 @@ done:
     return ret_value;
 } /* H5VL_iod_server_iterate */
 
+herr_t 
+H5VL_iod_server_visit(iod_handle_t coh, iod_obj_id_t obj_id, iod_handle_t obj_oh, const char *path,
+                      uint32_t cs_scope, iod_trans_id_t rtid, H5VL_visit_op_t op, void *udata)
+{
+    H5I_type_t obj_type;
+    iod_ret_t ret = 0;
+    herr_t ret_value = SUCCEED;
+
+    /* callback on current object */
+    ret_value = op(coh, obj_id, obj_oh, path, cs_scope, rtid, udata);
+    if(ret_value != 0)
+        HGOTO_ERROR_FF(FAIL, "visit CB failed");
+
+    /* Get the object type. */
+    if((obj_type = H5VL__iod_get_h5_obj_type(obj_id, coh, rtid, cs_scope)) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get object type");
+
+    /* if this is a group, iterate through objects in that group */
+    if(H5I_GROUP == obj_type || H5I_FILE == obj_type) {
+        int num_entries = 0;
+
+        ret = iod_kv_get_num(obj_oh, rtid, &num_entries, NULL);
+        if(ret != 0)
+            HGOTO_ERROR_FF(FAIL, "can't get number of KV entries");
+
+        if(0 != num_entries) {
+            int i;
+            iod_kv_params_t *kvs = NULL;
+            iod_kv_t *kv = NULL;
+            iod_checksum_t *oid_cs = NULL;
+            iod_ret_t *oid_ret = NULL;
+
+            kvs = (iod_kv_params_t *)malloc(sizeof(iod_kv_params_t) * (size_t)num_entries);
+            kv = (iod_kv_t *)malloc(sizeof(iod_kv_t) * (size_t)num_entries);
+            oid_cs = (iod_checksum_t *)malloc(sizeof(iod_checksum_t) * (size_t)num_entries);
+            oid_ret = (iod_ret_t *)malloc(sizeof(iod_ret_t) * (size_t)num_entries);
+
+            for(i=0 ; i<num_entries ; i++) {
+                kv[i].key = malloc(IOD_KV_KEY_MAXLEN);
+                kv[i].key_len = IOD_KV_KEY_MAXLEN;
+                kvs[i].kv = &kv[i];
+                kvs[i].cs = &oid_cs[i];
+                kvs[i].ret = &oid_ret[i];
+            }
+
+            ret = iod_kv_list_key(obj_oh, rtid, NULL, 0, &num_entries, kvs, NULL);
+            if(ret != 0)
+                HGOTO_ERROR_FF(FAIL, "can't get list of keys");
+
+            for(i=0 ; i<num_entries ; i++) {
+                iod_obj_id_t oid;
+                H5VL_iod_link_t value;
+                iod_handle_t oh;
+                char cur_path[IOD_KV_KEY_MAXLEN];
+
+                /* lookup object in the current group */
+                ret = H5VL_iod_get_metadata(obj_oh, rtid, H5VL_IOD_LINK, 
+                                            (char *)(kv[i].key), cs_scope, NULL, &value);
+                if(SUCCEED != ret)
+                    HGOTO_ERROR_FF(ret, "failed to retrieve link value");
+
+                if(H5L_TYPE_SOFT == value.link_type) {
+                    continue;
+                }
+                else
+                    oid = value.u.iod_id;
+
+                ret = iod_obj_open_read(coh, oid, rtid, NULL, &oh, NULL);
+                if(ret < 0)
+                    HGOTO_ERROR_FF(ret, "can't open object for read");
+
+                if(strcmp(path, "."))
+                    sprintf(cur_path, "%s/%s", path, ((char *)kv[i].key));
+                else
+                    sprintf(cur_path, "%s", ((char *)kv[i].key));
+
+                ret = H5VL_iod_server_visit(coh, oid, oh, cur_path, cs_scope, rtid, op, udata);
+                if(ret != SUCCEED)
+                    HGOTO_ERROR_FF(ret, "visit objects failed");
+
+                if(iod_obj_close(oh, NULL, NULL) < 0)
+                    HGOTO_ERROR_FF(FAIL, "can't close object");
+            }
+
+            for(i=0 ; i<num_entries ; i++) {
+                free(kv[i].key);
+            }
+
+            free(kv);
+            free(oid_cs);
+            free(oid_ret);
+            free(kvs);
+        }
+    }
+
+    ret_value = ret;
+
+done:
+    return ret_value;
+} /* H5VL_iod_server_visit */
+
 void
 print_iod_obj_map(iod_obj_map_t *obj_map)
 {

@@ -9,6 +9,20 @@
 #include "mpi.h"
 #include "hdf5.h"
 
+static herr_t
+visit_cb(hid_t oid, const char *name,
+         const H5O_ff_info_t *oinfo, void *udata, hid_t rcxt_id)
+{
+    printf("----------------------------------------\n");
+    printf("Visiting Object %s\n", name);
+    printf("IOD ID = %"PRIx64"\n", oinfo->addr);
+    printf("Object type = %d\n", oinfo->type);
+    printf("Number of attributes = %d\n", (int)oinfo->num_attrs);
+    printf("----------------------------------------\n");
+
+    return 0;
+}
+
 int main(int argc, char **argv) {
     char file_name[50];
     hid_t file_id;
@@ -89,7 +103,7 @@ int main(int argc, char **argv) {
     if(0 == my_rank) {
         hid_t rid_temp;
         hid_t anon_did;
-
+        hid_t gid2,gid3,gid11,did11,did21,did31,map111;
         version = 1;
         rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(1 == version);
@@ -104,6 +118,30 @@ int main(int argc, char **argv) {
         gid = H5Gcreate_ff(file_id, "G1", H5P_DEFAULT, H5P_DEFAULT, 
                            H5P_DEFAULT, tid1, e_stack);
         assert(gid >= 0);
+
+
+        gid2 = H5Gcreate_ff(file_id, "G2", H5P_DEFAULT, H5P_DEFAULT, 
+                           H5P_DEFAULT, tid1, e_stack);
+        assert(gid2 >= 0);
+        gid3 = H5Gcreate_ff(file_id, "G3", H5P_DEFAULT, H5P_DEFAULT, 
+                           H5P_DEFAULT, tid1, e_stack);
+        assert(gid3 >= 0);
+        gid11 = H5Gcreate_ff(gid, "G1", H5P_DEFAULT, H5P_DEFAULT, 
+                           H5P_DEFAULT, tid1, e_stack);
+        assert(gid11 >= 0);
+        did11 = H5Dcreate_ff(gid, "D2", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, 
+                           H5P_DEFAULT, tid1, e_stack);
+        assert(did11 >= 0);
+        did21 = H5Dcreate_ff(gid2, "D2", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, 
+                           H5P_DEFAULT, tid1, e_stack);
+        assert(did21 >= 0);
+        did31 = H5Dcreate_ff(gid3, "D3", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, 
+                           H5P_DEFAULT, tid1, e_stack);
+        assert(did31 >= 0);
+        map111 = H5Mcreate_ff(gid11, "MAP1", H5T_STD_I32LE, H5T_STD_I32LE, 
+                           H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
+        assert(map111 >= 0);
+
 
         did = H5Dcreate_ff(gid, "D1", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, 
                            H5P_DEFAULT, tid1, e_stack);
@@ -154,6 +192,14 @@ int main(int argc, char **argv) {
         assert(H5Mclose_ff(map, e_stack) == 0);
         assert(H5Tclose_ff(dtid, e_stack) == 0);
         assert(H5Dclose_ff(did, e_stack) == 0);
+
+        assert(H5Gclose_ff(gid2, e_stack) == 0);
+        assert(H5Gclose_ff(gid3, e_stack) == 0);
+        assert(H5Gclose_ff(gid11, e_stack) == 0);
+        assert(H5Dclose_ff(did11, e_stack) == 0);
+        assert(H5Dclose_ff(did21, e_stack) == 0);
+        assert(H5Dclose_ff(did31, e_stack) == 0);
+        assert(H5Mclose_ff(map111, e_stack) == 0);
 
         /* release container version 2. This is async. */
         ret = H5RCrelease(rid_temp, e_stack);
@@ -265,6 +311,19 @@ int main(int argc, char **argv) {
     /* check if an object exists. This is asynchronous, so checking
        the value should be done after the wait */
     ret = H5Oexists_by_name_ff(file_id, "G1", &exists, H5P_DEFAULT, rid2, e_stack);
+    assert(ret == 0);
+
+    printf("Ovisit on /G1: \n");
+    ret = H5Ovisit_ff(gid, 0, H5_ITER_NATIVE, visit_cb, NULL, rid2, H5_EVENT_STACK_NULL);
+    assert(ret == 0);
+
+    printf("Ovisit on /DT1: \n");
+    ret = H5Ovisit_ff(dtid, 0, H5_ITER_NATIVE, visit_cb, NULL, rid2, H5_EVENT_STACK_NULL);
+    assert(ret == 0);
+
+    printf("Ovisit_by_name  on /G2: \n");
+    ret = H5Ovisit_by_name_ff(file_id, "G2", 0, H5_ITER_NATIVE, visit_cb, NULL, H5P_DEFAULT, 
+                              rid2, H5_EVENT_STACK_NULL);
     assert(ret == 0);
 
     if(my_rank == 0) {

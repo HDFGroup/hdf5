@@ -145,4 +145,6 @@ H5_DLL herr_t H5T_close_datatype(void *dt);
 
 H5_DLL hid_t H5VL_native_register(H5I_type_t type, void *obj, hbool_t app_ref);
 H5_DLL herr_t H5VL_native_unregister(hid_t obj_id);
+H5_DLL hid_t H5VL_iod_register(H5I_type_t type, void *obj, hbool_t app_ref);
+H5_DLL herr_t H5VL_iod_unregister(hid_t obj_id);
 #endif /* _H5VLprivate_H */

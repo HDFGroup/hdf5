@@ -1060,6 +1060,182 @@ done:
 
 } /* end H5VL_iod_server_object_get_comment_cb() */
 
+static herr_t H5VL__visit_cb(iod_handle_t coh, iod_obj_id_t obj_id, iod_handle_t obj_oh,
+                             const char *path, uint32_t cs_scope, iod_trans_id_t rtid, void *_op_data)
+{
+    obj_iterate_t *out = (obj_iterate_t *)_op_data;
+    iod_handle_t mdkv_oh, attrkv_oh;
+    H5I_type_t obj_type;
+    int num_attrs = 0;
+    uint64_t link_count = 0;
+    unsigned u;
+    scratch_pad sp;
+    iod_checksum_t sp_cs = 0;
+    iod_ret_t ret;
+    herr_t ret_value = SUCCEED;
+
+    /* add the current object to the output */
+    u = out->num_objs;
+    out->num_objs ++;
+
+    out->paths = (const char **)realloc(out->paths, sizeof(char *) * out->num_objs);
+    out->oinfos = (H5O_ff_info_t *)realloc(out->oinfos, sizeof(H5O_ff_info_t) * out->num_objs);
+
+    out->paths[u] = strdup(path);
+    
+    /* get scratch pad of the object */
+    ret = iod_obj_get_scratch(obj_oh, rtid, &sp, &sp_cs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't get scratch pad for object");
+
+    if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+        /* verify scratch pad integrity */
+        if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
+            HGOTO_ERROR_FF(FAIL, "Scratch Pad failed integrity check");
+    }
+
+    /* open the metadata KV */
+    ret = iod_obj_open_read(coh, sp[0], rtid, NULL, &mdkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open MDKV");
+    /* open the attribute KV */
+    ret = iod_obj_open_read(coh, sp[1], rtid, NULL, &attrkv_oh, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't open ATTRKV");
+
+    out->oinfos[u].addr = obj_id;
+
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_OBJECT_TYPE, 
+                                H5VL_IOD_KEY_OBJ_TYPE,
+                                cs_scope, NULL, &obj_type);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "failed to retrieve object type");
+
+    switch(obj_type) {
+    case H5I_GROUP:
+        out->oinfos[u].type = H5O_TYPE_GROUP;
+        break;
+    case H5I_DATASET:
+        out->oinfos[u].type = H5O_TYPE_DATASET;
+        break;
+    case H5I_DATATYPE:
+        out->oinfos[u].type = H5O_TYPE_NAMED_DATATYPE;
+        break;
+    case H5I_MAP:
+        out->oinfos[u].type = H5O_TYPE_MAP;
+        break;
+    default:
+        HGOTO_ERROR_FF(FAIL, 
+                     "unsupported object type for H5Oget_info");
+    }
+
+    ret = H5VL_iod_get_metadata(mdkv_oh, rtid, H5VL_IOD_LINK_COUNT, 
+                                H5VL_IOD_KEY_OBJ_LINK_COUNT,
+                                cs_scope, NULL, &link_count);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "failed to retrieve link count");
+
+    out->oinfos[u].rc = (unsigned) link_count;
+
+    ret = iod_kv_get_num(attrkv_oh, rtid, &num_attrs, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "failed to retrieve attribute count");
+
+    out->oinfos[u].num_attrs = (hsize_t)num_attrs;
+
+    /* close the metadata KV */
+    ret = iod_obj_close(mdkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
+    /* close the  attribute KV */
+    ret = iod_obj_close(attrkv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close object");
+
+    ret_value = ret;
+
+done:
+    return ret_value;
+} /* H5VL__visit_cb */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_object_visit_cb
+ *
+ * Purpose:     iterates through all the objects under a group and 
+ *              gathers their paths and info.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              December, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_object_visit_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                                 size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                                 size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
+                                 void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    object_op_in_t *input = (object_op_in_t *)op_data->input;
+    obj_iterate_t output;
+    iod_handle_t coh = input->coh;
+    iod_handles_t loc_oh = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
+    iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
+    iod_handles_t obj_oh;
+    iod_obj_id_t obj_id;
+    const char *loc_name = input->loc_name;
+    htri_t ret = -1;
+    herr_t ret_value = SUCCEED;
+
+#if H5_EFF_DEBUG
+    fprintf(stderr, "Start Object Visit on %s (OH %"PRIu64" ID %"PRIx64")\n", 
+            input->loc_name, input->loc_oh.rd_oh.cookie, input->loc_id);
+#endif
+
+    /* Traverse Path and open object */
+    ret = H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, 
+                                    cs_scope, &obj_id, &obj_oh);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't open object");
+
+    output.num_objs = 0;
+    output.paths = NULL;
+    output.oinfos = NULL;
+
+    ret = H5VL_iod_server_visit(coh, obj_id, obj_oh.rd_oh, ".", cs_scope, rtid, H5VL__visit_cb, &output);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "visit objects failed");
+
+    if(loc_oh.rd_oh.cookie != obj_oh.rd_oh.cookie && 
+       iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't close object");
+
+done:
+    output.ret = ret_value;
+
+#if H5_EFF_DEBUG
+    fprintf(stderr, "Done with Object visit, sending response to client\n");
+#endif
+
+    HG_Handler_start_output(op_data->hg_handle, &output);
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
+
+    free(output.paths);
+    free(output.oinfos);
+
+    input = (object_op_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+} /* end H5VL_iod_server_object_visit_cb() */
+
 #if 0
 
 /*-------------------------------------------------------------------------
