@@ -227,14 +227,16 @@ do
     echo '#pragma GCC diagnostic ignored "-Wmissing-prototypes"             ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wnested-externs"                 ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wold-style-definition"           ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wredundant-decls"                ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wsign-compare"                   ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wsign-conversion"                ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wstrict-overflow"                ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wstrict-prototypes"              ' >> tmp.out
+    echo '#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"         ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wswitch-default"                 ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wunused-function"                ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wunused-macros"                  ' >> tmp.out
     echo '#pragma GCC diagnostic ignored "-Wunused-parameter"               ' >> tmp.out
-    echo '#pragma GCC diagnostic ignored "-Wredundant-decls"                ' >> tmp.out
     echo '#elif defined __SUNPRO_CC                                         ' >> tmp.out
     echo '#pragma disable_warn                                              ' >> tmp.out
     echo '#elif defined _MSC_VER                                            ' >> tmp.out

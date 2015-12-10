@@ -25,6 +25,11 @@
 #include <hdf5.h>
 #include "H5LTparse.h"
 
+/* Turn off suggest const attribute warning in gcc */
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2 
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
+#endif 
+
 int my_yyinput(char *, int);
 #undef YY_INPUT
 #define YY_INPUT(b, r, ms) (r=my_yyinput(b, ms))
