@@ -54,7 +54,10 @@ with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT=ON	# enable zlib filter default on
 with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT=OFF	# enables szip filter default off
 szlib_path=""					# szip lib path default off
 shared_lib=-DBUILD_SHARED_LIBS:BOOL=ON		# enables shared lib; default on
-
+njobs=""					# number of jobs (commands) to
+						# run simultaneously; default is
+						# value from $MAKE if defined,
+						# otherwise none (1)
 
 #=============
 # Function definitions
@@ -91,6 +94,9 @@ Usage: $progname [<options>]
     Use zlib library for external deflate I/O filter. Default is on.
   --with-szlib | --with-szlib=<libpath> | --without-szlib:
     Use szlib library for external deflate I/O filter. Default is on.
+  --njobs=<-j N>:
+    number of jobs (commands) to run simultaneously; default is value from
+    $MAKE if defined, otherwise none
   --enable-verbose | --disable-verbose:
     enable or disable verbose output. Default is on.
   --help: shows details help page
@@ -187,6 +193,12 @@ DUMP_LOGFILE()
 # Show a start time stamp
 TIMESTAMP
 
+# Initialize njobs if $AMKE is defined
+if [ -n "$MAKE" ]; then
+    # assume all arguments are for --jobs
+    njobs=`echo $MAKE | cut -s -d' ' -f2-`
+fi
+
 # Parse Cmake configure options
 # --enable-XXX or --disable-XXX will enable or disable feature XXX.
 # XXX can be:
@@ -256,6 +268,9 @@ while [ $# -gt 0 ]; do
       with_szlib=-DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF
       szlib_path=""	# reset the path
       ;;
+  --njobs=*)
+      njobs=`echo $1 | cut -d= -f2-`
+      ;;
   --enable-verbose)
       vflag=1
       ;;
@@ -322,10 +337,10 @@ STEP "Configure..." \
     cat $config_summary >> $configlog
 
 #      5. Build the C library, tools and tests with this command:
-STEP "Build the library, tools and tests, ..." "cmake --build . --config Release" $makelog
+STEP "Build the library, tools and tests, ..." "cmake --build . --config Release -- $njobs" $makelog
 
 #      6. Test the C library and tools with this command:
-STEP "Test the library and tools..." "ctest . -C Release" $testlog
+STEP "Test the library and tools..." "ctest . -C Release $njobs" $testlog
 
 #      7. Create an install image with this command:
 STEP "Create an install image..." "cpack -C Release CPackConfig.cmake" $packlog
