@@ -27,7 +27,7 @@
 #include "UC_4.h"
 
 int
-main(int argc, char *argv[])
+main(void)
 {
     hid_t src_sid       = -1;   /* source dataset's dataspace ID            */
     hid_t src_dcplid    = -1;   /* source dataset property list ID          */

@@ -200,21 +200,21 @@ main (int argc, char *argv[])
 
     int		verbose=FALSE;		/*display file names?		*/
 
-    const char	*src_gen_name;		/*general source name		*/
-    char	src_name[NAMELEN];	/*source member name		*/
+    const char	*src_gen_name;  /*general source name		*/
+    char	*src_name=NULL;	    /*source member name		*/
 
     int		src_is_family;		/*is source name a family name?	*/
     int		src_membno=0;		/*source member number		*/
 
-    const char	*dst_gen_name;		/*general destination name	*/
-    char	dst_name[NAMELEN];	/*destination member name	*/
+    const char	*dst_gen_name;	/*general destination name	*/
+    char	*dst_name=NULL;	    /*destination member name	*/
     int		dst_is_family;		/*is dst name a family name?	*/
     int		dst_membno=0;		/*destination member number	*/
 
     off_t	left_overs=0;		/*amount of zeros left over	*/
     off_t	src_offset=0;		/*offset in source member	*/
     off_t	dst_offset=0;		/*offset in destination member	*/
-    off_t	src_size;		/*source logical member size	*/
+    off_t	src_size;           /*source logical member size	*/
     off_t	src_act_size;		/*source actual member size	*/
     off_t	dst_size=1 GB;		/*destination logical memb size	*/
     hid_t       fapl;                   /*file access property list     */
@@ -232,24 +232,30 @@ main (int argc, char *argv[])
      * Parse switches.
      */
     while (argno<argc && '-'==argv[argno][0]) {
-	if (!strcmp (argv[argno], "-v")) {
-	    verbose = TRUE;
-	    argno++;
-	} else if (!strcmp(argv[argno], "-V")) {
-	    printf("This is %s version %u.%u release %u\n",
-		   prog_name, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
-	    exit(EXIT_SUCCESS);
+        if (!strcmp (argv[argno], "-v")) {
+            verbose = TRUE;
+            argno++;
+        } else if (!strcmp(argv[argno], "-V")) {
+            printf("This is %s version %u.%u release %u\n",
+                prog_name, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+            exit(EXIT_SUCCESS);
         } else if (!strcmp (argv[argno], "-family_to_sec2")) {
-	    family_to_sec2 = TRUE;
-	    argno++;
-	} else if ('b'==argv[argno][1]) {
-	    blk_size = get_size (prog_name, &argno, argc, argv);
-	} else if ('m'==argv[argno][1]) {
-	    dst_size = get_size (prog_name, &argno, argc, argv);
-	} else {
-	    usage (prog_name);
-	}
-    }
+            family_to_sec2 = TRUE;
+            argno++;
+        } else if ('b'==argv[argno][1]) {
+            blk_size = get_size (prog_name, &argno, argc, argv);
+        } else if ('m'==argv[argno][1]) {
+            dst_size = get_size (prog_name, &argno, argc, argv);
+        } else {
+            usage (prog_name);
+        } /* end if */
+    } /* end while */
+
+    /* allocate names */
+    if(NULL == (src_name = HDcalloc((size_t)NAMELEN, sizeof(char))))
+        exit(EXIT_FAILURE);
+    if(NULL == (dst_name = HDcalloc((size_t)NAMELEN, sizeof(char))))
+        exit(EXIT_FAILURE);
 
     /*
      * Get the name for the source file and open the first member.  The size
@@ -485,19 +491,22 @@ main (int argc, char *argv[])
     H5E_BEGIN_TRY {
         file=H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl);
     } H5E_END_TRY;
+
     if(file>=0) {
         if(H5Fclose(file)<0) {
             perror ("H5Fclose");
             exit (EXIT_FAILURE);
-        }
-    }
+        } /* end if */
+    } /* end if */
 
     if(H5Pclose(fapl)<0) {
         perror ("H5Pclose");
         exit (EXIT_FAILURE);
-    }
+    } /* end if */
 
     /* Free resources and return */
-    HDfree (buf);
+    HDfree(src_name);
+    HDfree(dst_name);
+    HDfree(buf);
     return EXIT_SUCCESS;
-}
+} /* end main */
