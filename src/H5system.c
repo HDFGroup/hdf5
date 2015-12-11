@@ -587,6 +587,68 @@ void HDsrand(unsigned int seed)
 #endif /* H5_HAVE_RAND_R */
 
 
+
+/*-------------------------------------------------------------------------
+ * Function:    Pflock
+ *
+ * Purpose:     Wrapper function for POSIX systems where flock(2) is not
+ *              available.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+/* NOTE: Compile this all the time on POSIX systems, even when flock(2) is
+ *       present so that it's less likely to become dead code.
+ */
+#ifdef H5_HAVE_FCNTL
+int
+Pflock(int fd, int operation) {
+    
+    struct flock    flk;
+
+    /* Set the lock type */
+    if(operation & LOCK_UN)
+        flk.l_type = F_UNLCK;
+    else if(operation & LOCK_SH)
+        flk.l_type = F_RDLCK;
+    else
+        flk.l_type = F_WRLCK;
+
+    /* Set the other flock struct values */
+    flk.l_whence = SEEK_SET;
+    flk.l_start = 0;
+    flk.l_len = 0;              /* to EOF */
+    flk.l_pid = 0;              /* not used with set */
+
+    /* Lock or unlock */
+    if(HDfcntl(fd, F_SETLK, flk) < 0)
+        return -1;
+
+    return 0;
+
+} /* end Pflock() */
+#endif /* H5_HAVE_FCNTL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    Nflock
+ *
+ * Purpose:     Wrapper function for systems where no file locking is
+ *              available.
+ *
+ * Return:      Failure:    -1 (always fails)
+ *
+ *-------------------------------------------------------------------------
+ */
+int H5_ATTR_CONST
+Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
+    /* just fail */
+    return -1;
+} /* end Nflock() */
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5_make_time
  *
@@ -767,7 +829,55 @@ int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
     return count;
 }
 
-#endif
+
+/*-------------------------------------------------------------------------
+ * Function:    Wflock
+ *
+ * Purpose:     Wrapper function for flock on Windows systems
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Wflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
+
+/* This is a no-op while we implement a Win32 VFD */
+#if 0
+int
+Wflock(int fd, int operation) {
+
+    HANDLE          hFile;
+    DWORD           dwFlags = LOCKFILE_FAIL_IMMEDIATELY;
+    DWORD           dwReserved = 0;
+                    /* MAXDWORD for entire file */
+    DWORD           nNumberOfBytesToLockLow = MAXDWORD;
+    DWORD           nNumberOfBytesToLockHigh = MAXDWORD;
+                    /* Must initialize OVERLAPPED struct */
+    OVERLAPPED      overlapped = {0};
+
+    /* Get Windows HANDLE */
+    hFile = _get_osfhandle(fd);
+
+    /* Convert to Windows flags */
+    if(operation & LOCK_EX)
+        dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;
+
+    /* Lock or unlock */
+    if(operation & LOCK_UN)
+        if(0 == UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow,
+                            nNumberOfBytesToLockHigh, &overlapped))
+            return -1;
+    else
+        if(0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow,
+                            nNumberOfBytesToLockHigh, &overlapped))
+            return -1;
+#endif /* 0 */
+    return 0;
+} /* end Wflock() */
+
+#endif /* H5_HAVE_VISUAL_STUDIO */
 
 
 /*-------------------------------------------------------------------------

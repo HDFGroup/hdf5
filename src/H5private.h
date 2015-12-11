@@ -119,6 +119,13 @@
 #endif
 
 /*
+ * flock() in sys/file.h is used for the implemention of file locking.
+ */
+#if defined(H5_HAVE_FLOCK) && defined(H5_HAVE_SYS_FILE_H)
+#   include <sys/file.h>
+#endif
+
+/*
  * Resource usage is not Posix.1 but HDF5 uses it anyway for some performance
  * and debugging code if available.
  */
@@ -291,6 +298,10 @@
  *
  * Note that Solaris Studio supports attribute, but does not support the
  * attributes we use.
+ *
+ * H5_ATTR_CONST is redefined in tools/h5repack/dynlib_rpk.c to quiet
+ * gcc warnings (it has to use the public API and can't include this
+ * file). Be sure to update that file if the #ifdefs change here.
  */
 #ifdef __cplusplus
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
@@ -542,6 +553,18 @@
 #define H5_TB (1024.0F * 1024.0F * 1024.0F * 1024.0F)
 #define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
 
+#ifndef H5_HAVE_FLOCK
+/* flock() operations. Used in the source so we have to define them when
+ * the call is not available (e.g.: Windows). These should NOT be used
+ * with system-provided flock() calls since the values will come from the
+ * header file.
+ */
+#define LOCK_SH     0x01
+#define LOCK_EX     0x02
+#define LOCK_NB     0x04
+#define LOCK_UN     0x08
+#endif /* H5_HAVE_FLOCK */
+
 /*
  * Data types and functions for timing certain parts of the library.
  */
@@ -746,7 +769,11 @@ typedef struct {
 #ifndef HDfclose
     #define HDfclose(F)    fclose(F)
 #endif /* HDfclose */
-/* fcntl() variable arguments */
+#ifdef H5_HAVE_FCNTL
+    #ifndef HDfcntl
+        #define HDfcntl(F,C,...)    fcntl(F,C,__VA_ARGS__)
+    #endif /* HDfcntl */
+#endif /* H5_HAVE_FCNTL */
 #ifndef HDfdopen
     #define HDfdopen(N,S)    fdopen(N,S)
 #endif /* HDfdopen */
@@ -771,6 +798,27 @@ typedef struct {
 #ifndef HDfileno
     #define HDfileno(F)    fileno(F)
 #endif /* HDfileno */
+/* Since flock is so prevalent, always build these functions
+ * when possible to avoid them becoming dead code.
+ */
+#ifdef H5_HAVE_FCNTL
+H5_DLL int Pflock(int fd, int operation);
+#endif /* H5_HAVE_FCNTL */
+H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
+#ifndef HDflock
+    /* NOTE: flock(2) is not present on all POSIX systems.
+     * If it is not present, we try a flock() equivalent based on
+     * fcntl(2), then fall back to a function that always fails if
+     * it is not present at all.
+     */
+    #if defined(H5_HAVE_FLOCK)
+        #define HDflock(F,L)    flock(F,L)
+    #elif defined(H5_HAVE_FCNTL)
+        #define HDflock(F,L)    Pflock(F,L)
+    #else
+        #define HDflock(F,L)    Nflock(F,L)
+    #endif /* H5_HAVE_FLOCK */
+#endif /* HDflock */
 #ifndef HDfloor
     #define HDfloor(X)    floor(X)
 #endif /* HDfloor */
@@ -1163,6 +1211,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
     #define HDrmdir(S)    rmdir(S)
 #endif /* HDrmdir */
 /* scanf() variable arguments */
+#ifndef HDselect
+    #define HDselect(N,RD,WR,ER,T)    select(N,RD,WR,ER,T)
+#endif /* HDsetbuf */
 #ifndef HDsetbuf
     #define HDsetbuf(F,S)    setbuf(F,S)
 #endif /* HDsetbuf */
@@ -2374,6 +2425,16 @@ func                                                                          \
     H5_GLUE(FUNC_ERR_VAR_, use_err)(ret_typ, err)                             \
     H5_GLUE(FUNC_ENT_, scope)(H5_MY_PKG, H5_MY_PKG_INIT)
 
+/* Use this macro when entering functions that have no return value */
+#define BEGIN_FUNC_VOID(scope, use_err, func)                               \
+H5_GLUE(FUNC_PREFIX_, scope)                                                \
+void                                                                        \
+func                                                                        \
+/* Open function */                                                         \
+{                                                                           \
+    H5_GLUE(FUNC_ERR_VAR_, use_err)(void, -, -)                             \
+    H5_GLUE(FUNC_ENT_, scope)
+
 /* Macros for label when a function initialization can fail */
 #define H5_PRIV_YES_FUNC_INIT_FAILED func_init_failed:
 #define H5_PRIV_NO_FUNC_INIT_FAILED
@@ -2447,6 +2508,17 @@ func_init_failed:                                                             \
     return(ret_value);                                                        \
                                                                               \
     /* Close Function */                                                      \
+}
+
+/* Use this macro when leaving void functions */
+#define END_FUNC_VOID(scope)                                                \
+    /* Scope-specific function conclusion */                                \
+    H5_GLUE(FUNC_LEAVE_, scope)                                             \
+                                                                            \
+    /* Leave routine */                                                     \
+    return;                                                                 \
+                                                                            \
+    /* Close Function */                                                    \
 }
 
 /* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient).
