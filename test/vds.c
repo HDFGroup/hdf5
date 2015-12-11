@@ -37,7 +37,7 @@ const char *FILENAME[] = {
     "vds_virt_1",
     "vds_src_0",
     "vds_src_1",
-    "vds%_src",
+    "vds%%_src",
     NULL
 };
 
@@ -1156,7 +1156,7 @@ test_basic_io(unsigned config, hid_t fapl)
     char        vfilename2[FILENAME_BUF_SIZE];
     char        srcfilenamepct[FILENAME_BUF_SIZE];
     char        srcfilenamepct_map[FILENAME_BUF_SIZE];
-    const char *srcfilenamepct_map_orig = "vds%%_src";
+    const char *srcfilenamepct_map_orig = "vds%%%%_src";
     hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile = -1;     /* File with virtual dset */
     hid_t       vfile2 = -1;    /* File with copied virtual dset */
@@ -6383,7 +6383,7 @@ test_printf(unsigned config, hid_t fapl)
     const char *printf_srcfilename_map_orig = "vds_src_%b";
     char        srcfilenamepct[FILENAME_BUF_SIZE];
     char        srcfilenamepct_map[FILENAME_BUF_SIZE];
-    const char *srcfilenamepct_map_orig = "vds%%_src";
+    const char *srcfilenamepct_map_orig = "vds%%%%_src";
     hid_t       srcfile[4] = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile = -1;     /* File with virtual dset */
     hid_t       dcpl = -1;      /* Dataset creation property list */
