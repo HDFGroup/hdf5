@@ -21,12 +21,12 @@ visit_cb(hid_t oid, const char *name,
     printf("Object type = %d\n", oinfo->type);
     printf("Number of attributes = %d\n", (int)oinfo->num_attrs);
     printf("----------------------------------------\n");
+    if(strcmp(name, ".") != 0) {
+        obj_id = H5Oopen_ff(oid, name, H5P_DEFAULT, rcxt_id);
+        assert(obj_id > 0);
 
-    obj_id = H5Oopen_ff(oid, name, H5P_DEFAULT, rcxt_id);
-    assert(obj_id > 0);
-
-    assert(H5Oclose_ff(obj_id, H5_EVENT_STACK_NULL) == 0);
-
+        assert(H5Oclose_ff(obj_id, H5_EVENT_STACK_NULL) == 0);
+    }
     return 0;
 }
 
@@ -342,8 +342,8 @@ int main(int argc, char **argv) {
         assert(0 == ret);
     }
 
-    assert(H5Oclose_ff(gid, e_stack) == 0);
     assert(H5Oclose_ff(did, e_stack) == 0);
+    assert(H5Oclose_ff(gid, e_stack) == 0);
     assert(H5Oclose_ff(dtid, e_stack) == 0);
     assert(H5Oclose_ff(map, e_stack) == 0);
 
