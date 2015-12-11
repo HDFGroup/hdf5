@@ -864,7 +864,6 @@ H5Ovisit_ff(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIiIox*x", obj_id, idx_type, order, op, op_data);
 
     /* Check args */
     if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -926,8 +925,6 @@ H5Ovisit_by_name_ff(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "i*sIiIox*xi", loc_id, obj_name, idx_type, order, op, op_data,
-             lapl_id);
 
     /* Check args */
     if(!obj_name || !*obj_name)

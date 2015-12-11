@@ -988,6 +988,160 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_attr_iterate_cb
+ *
+ * Purpose:	gather all attribute names on an object before iterating 
+ *              through them at the client.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              December, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_attr_iterate_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                               size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                               size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
+                               void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    attr_op_in_t *input = (attr_op_in_t *)op_data->input;
+    attr_iterate_t output;
+    iod_handle_t coh = input->coh; /* container handle */
+    iod_handles_t loc_handle = input->loc_oh; /* location handle to start lookup */
+    iod_obj_id_t loc_id = input->loc_id; /* The ID of the current location object */
+    iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
+    iod_handles_t obj_oh; /* current object handle accessed */
+    iod_handle_t attr_kv_oh; /* KV handle holding attributes for object */
+    iod_obj_id_t obj_id;
+    const char *loc_name = input->path; /* path to start hierarchy traversal */
+    scratch_pad sp;
+    iod_checksum_t sp_cs = 0;
+    int num_attrs, i;
+    iod_ret_t ret;
+    herr_t ret_value = SUCCEED;
+
+#if H5_EFF_DEBUG
+    fprintf(stderr, "Start attribute Iterate %s/%s on CV %d\n", loc_name, attr_name, (int)rtid);
+#endif
+
+    /* Open the object where the attribute needs to be checked. */
+    ret = H5VL_iod_server_open_path(coh, loc_id, loc_handle, loc_name, 
+                                    rtid, cs_scope, &obj_id, &obj_oh);
+    if(SUCCEED != ret)
+        HGOTO_ERROR_FF(ret, "can't open object");
+
+    if(loc_id != obj_id || IOD_OBJ_INVALID == input->loc_attrkv_id) {
+        /* get scratch pad of the parent */
+        ret = iod_obj_get_scratch(obj_oh.rd_oh, rtid, &sp, &sp_cs, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't get scratch pad for object");
+
+        if(sp_cs && (cs_scope & H5_CHECKSUM_IOD)) {
+            /* verify scratch pad integrity */
+            if(H5VL_iod_verify_scratch_pad(&sp, sp_cs) < 0)
+                HGOTO_ERROR_FF(FAIL, "Scratch Pad failed integrity check");
+        }
+
+        /* if attribute KV does not exist, return error*/
+        if(IOD_OBJ_INVALID == sp[1])
+            HGOTO_ERROR_FF(FAIL, "Object has no attributes");
+
+        /* open the attribute KV in scratch pad */
+        ret = iod_obj_open_read(coh, sp[1], rtid, NULL, &attr_kv_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open iod object");
+    }
+    else {
+        /* open the attribute KV  */
+        ret = iod_obj_open_read(coh, input->loc_attrkv_id, rtid, NULL, &attr_kv_oh, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't open scratch pad");
+    }
+
+    ret = iod_kv_get_num(attr_kv_oh, rtid, &num_attrs, NULL);
+    if(ret != 0)
+        HGOTO_ERROR_FF(FAIL, "can't get number of KV entries");
+ 
+    output.num_attrs = num_attrs;
+    output.attr_names = NULL;
+
+    if(0 != num_attrs) {
+        iod_kv_params_t *kvs = NULL;
+        iod_kv_t *kv = NULL;
+        iod_checksum_t *oid_cs = NULL;
+        iod_ret_t *oid_ret = NULL;
+
+        output.attr_names = (const char **)malloc(sizeof(char *) * num_attrs);
+
+        kvs = (iod_kv_params_t *)malloc(sizeof(iod_kv_params_t) * (size_t)num_attrs);
+        kv = (iod_kv_t *)malloc(sizeof(iod_kv_t) * (size_t)num_attrs);
+        oid_cs = (iod_checksum_t *)malloc(sizeof(iod_checksum_t) * (size_t)num_attrs);
+        oid_ret = (iod_ret_t *)malloc(sizeof(iod_ret_t) * (size_t)num_attrs);
+
+        for(i=0 ; i<num_attrs ; i++) {
+            kv[i].key = malloc(IOD_KV_KEY_MAXLEN);
+            kv[i].key_len = IOD_KV_KEY_MAXLEN;
+            kvs[i].kv = &kv[i];
+            kvs[i].cs = &oid_cs[i];
+            kvs[i].ret = &oid_ret[i];
+        }
+
+        ret = iod_kv_list_key(attr_kv_oh, rtid, NULL, 0, &num_attrs, kvs, NULL);
+        if(ret != 0)
+            HGOTO_ERROR_FF(FAIL, "can't get list of keys");
+
+        for(i=0 ; i<num_attrs ; i++) {
+            output.attr_names[i] = strdup((char *)kv[i].key);
+            free(kv[i].key);
+        }
+
+        free(kv);
+        free(oid_cs);
+        free(oid_ret);
+        free(kvs);
+    }
+
+    /* close parent group if it is not the location we started the
+       traversal into */
+    if(loc_handle.rd_oh.cookie != obj_oh.rd_oh.cookie) {
+        ret = iod_obj_close(obj_oh.rd_oh, NULL, NULL);
+        if(ret < 0)
+            HGOTO_ERROR_FF(ret, "can't close group");
+    }
+
+    ret = iod_obj_close(attr_kv_oh, NULL, NULL);
+    if(ret < 0)
+        HGOTO_ERROR_FF(ret, "can't close group");
+
+done:
+
+    output.ret = ret_value;
+
+#if H5_EFF_DEBUG
+    fprintf(stderr, "Done with attr iterate, sending %d to client\n", ret);
+#endif
+
+    HG_Handler_start_output(op_data->hg_handle, &output);
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
+
+    for(i=0 ; i<num_attrs ; i++)
+        free(output.attr_names[i]);
+    free(output.attr_names);
+
+    input = (attr_op_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+} /* end H5VL_iod_server_attr_iterate_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_attr_rename_cb
  *
  * Purpose:	Renames iod HDF5 attribute.

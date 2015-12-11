@@ -1277,6 +1277,38 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             H5VL_iod_request_delete(file, req);
             break;
         }
+    case HG_ATTR_ITERATE:
+        {
+            H5VL_iod_attr_iter_info_t *info = (H5VL_iod_attr_iter_info_t *)req->data;
+            attr_iterate_t *output = info->output;
+            unsigned u;
+
+            if(SUCCEED != output->ret) {
+                HERROR(H5E_FUNC, H5E_CANTINIT, "attr iterate failed\n");
+                req->status = H5ES_STATUS_FAIL;
+                req->state = H5VL_IOD_COMPLETED;
+            }
+
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+
+            for(u=0 ; u<output->num_attrs; u++) {
+                herr_t ret;
+
+                FUNC_LEAVE_API_THREADSAFE;
+                ret = info->op(info->loc_id, output->attr_names[u], NULL, 
+                               info->op_data, info->rcxt_id);
+                FUNC_ENTER_API_THREADSAFE;
+                if(ret > 0)
+                    break;
+                else if(ret < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "iterator cb failure")
+                else
+                    continue;
+            }
+
+            break;
+        }
     case HG_ATTR_CLOSE:
         {
             int *status = (int *)req->data;
@@ -1592,11 +1624,16 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 req->state = H5VL_IOD_COMPLETED;
             }
 
+            req->data = NULL;
+            H5VL_iod_request_delete(file, req);
+
             for(u=0 ; u<output->num_objs; u++) {
                 herr_t ret;
 
+                FUNC_LEAVE_API_THREADSAFE;
                 ret = info->op(info->loc_id, output->paths[u], &output->oinfos[u], 
                                info->op_data, info->rcxt_id);
+                FUNC_ENTER_API_THREADSAFE;
                 if(ret > 0)
                     break;
                 else if(ret < 0)
@@ -1604,11 +1641,9 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
                 else
                     continue;
             }
-            req->data = NULL;
-            H5VL_iod_request_delete(file, req);
+
             break;
         }
-
     case HG_RC_ACQUIRE:
         {
             H5VL_iod_rc_info_t *rc_info = (H5VL_iod_rc_info_t *)req->data;
@@ -2192,6 +2227,8 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
     case HG_OBJECT_OPEN:
     case HG_LINK_GET_INFO:
     case HG_OBJECT_GET_INFO:
+    case HG_OBJECT_VISIT:
+    case HG_ATTR_ITERATE:
         req->data = NULL;
         H5VL_iod_request_delete(file, req);
         break;
@@ -2253,11 +2290,6 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         req->data = NULL;
         H5VL_iod_request_delete(file, req);
         break;
-        case HG_OBJECT_VISIT:
-            {
-                printf("HERE\n");
-                assert(0);
-            }
         //case HG_LINK_ITERATE:
         //case HG_MAP_ITERATE:
     default:

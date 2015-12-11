@@ -13,12 +13,19 @@ static herr_t
 visit_cb(hid_t oid, const char *name,
          const H5O_ff_info_t *oinfo, void *udata, hid_t rcxt_id)
 {
+    hid_t obj_id;
+
     printf("----------------------------------------\n");
     printf("Visiting Object %s\n", name);
     printf("IOD ID = %"PRIx64"\n", oinfo->addr);
     printf("Object type = %d\n", oinfo->type);
     printf("Number of attributes = %d\n", (int)oinfo->num_attrs);
     printf("----------------------------------------\n");
+
+    obj_id = H5Oopen_ff(oid, name, H5P_DEFAULT, rcxt_id);
+    assert(obj_id > 0);
+
+    assert(H5Oclose_ff(obj_id, H5_EVENT_STACK_NULL) == 0);
 
     return 0;
 }

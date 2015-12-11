@@ -1252,7 +1252,8 @@ EFF__mercury_register_callbacks(void)
                                            H5VL_iod_server_attr_write);
     H5VL_ATTR_EXISTS_ID = MERCURY_REGISTER("attr_exists", attr_op_in_t, htri_t,
                                            H5VL_iod_server_attr_exists);
-    //H5VL_ATTR_ITERATE_ID = MERCURY_REGISTER("attr_iterate", attr_op_in_t, ret_t);
+    H5VL_ATTR_ITERATE_ID = MERCURY_REGISTER("attr_iterate", attr_op_in_t, attr_iterate_t, 
+                                            H5VL_iod_server_attr_iterate);
     H5VL_ATTR_RENAME_ID = MERCURY_REGISTER("attr_rename", attr_rename_in_t, ret_t,
                                            H5VL_iod_server_attr_rename);
     H5VL_ATTR_REMOVE_ID = MERCURY_REGISTER("attr_remove", attr_op_in_t, ret_t,

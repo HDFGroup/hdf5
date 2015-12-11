@@ -44,7 +44,7 @@ extern hg_id_t H5VL_ATTR_OPEN_ID;
 extern hg_id_t H5VL_ATTR_READ_ID;
 extern hg_id_t H5VL_ATTR_WRITE_ID;
 extern hg_id_t H5VL_ATTR_EXISTS_ID;
-//extern hg_id_t H5VL_ATTR_ITERATE_ID;
+extern hg_id_t H5VL_ATTR_ITERATE_ID;
 extern hg_id_t H5VL_ATTR_RENAME_ID;
 extern hg_id_t H5VL_ATTR_REMOVE_ID;
 extern hg_id_t H5VL_ATTR_CLOSE_ID;
@@ -202,6 +202,12 @@ typedef struct obj_iterate_t {
     H5O_ff_info_t *oinfos;
 } obj_iterate_t;
 
+typedef struct attr_iterate_t {
+    int32_t ret;
+    uint32_t num_attrs;
+    const char **attr_names;
+} attr_iterate_t;
+
 typedef binary_buf_t loc_info_t;
 
 #endif /* H5_HAVE_EFF */
@@ -241,6 +247,7 @@ H5_DLL int H5VL_iod_server_attr_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_read(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_write(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_exists(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_attr_iterate(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_rename(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_remove(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_attr_close(hg_handle_t handle);
@@ -320,6 +327,7 @@ H5_DLL int hg_proc_region_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_obj_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_attr_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_obj_iterate_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_attr_iterate_t(hg_proc_t proc, void *data);
 
 MERCURY_GEN_PROC(analysis_invoke_in_t, 
                  ((axe_t)(axe_info))

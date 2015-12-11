@@ -82,6 +82,10 @@ typedef struct href_ff_t {
 /* Public Prototypes */
 /*********************/
 
+/* Typedef for H5Aiterate_ff() callbacks */
+typedef herr_t (*H5A_operator_ff_t)(hid_t location_id, const char *attr_name, const H5A_info_t *ainfo, 
+                                    void *op_data, hid_t rcxt_id);
+
 /* Prototype for H5Ovisit_ff/H5Ovisit_by_name_ff() operator */
 typedef herr_t (*H5O_iterate_ff_t)(hid_t obj, const char *name, const H5O_ff_info_t *info,
                                    void *op_data, hid_t rcxt_id);
@@ -145,6 +149,12 @@ H5_DLL herr_t H5Aexists_by_name_ff(hid_t loc_id, const char *obj_name, const cha
                                    hid_t lapl_id, htri_t *ret, hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Aexists_ff(hid_t obj_id, const char *attr_name, htri_t *ret, 
                            hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Aiterate_ff(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
+                            hsize_t *idx, H5A_operator_ff_t op, void *op_data,
+                            hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Aiterate_by_name_ff(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+                                    H5_iter_order_t order, hsize_t *idx, H5A_operator_ff_t op, void *op_data,
+                                    hid_t lapl_id, hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Aclose_ff(hid_t attr_id, hid_t estack_id);
 
 H5_DLL herr_t H5Lmove_ff(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 

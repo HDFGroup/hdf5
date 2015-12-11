@@ -44,6 +44,7 @@ typedef enum H5RQ_type_t {
     HG_ATTR_READ,
     HG_ATTR_WRITE,
     HG_ATTR_EXISTS,
+    HG_ATTR_ITERATE,
     HG_ATTR_RENAME,
     HG_ATTR_REMOVE,
     HG_ATTR_CLOSE,
@@ -396,7 +397,7 @@ typedef struct H5VL_iod_exists_info_t {
     htri_t server_ret; /* the return value from the server */
 } H5VL_iod_exists_info_t;
 
-typedef struct H5VL_iod_obj_visit_info_t{
+typedef struct H5VL_iod_obj_visit_info_t {
     H5_index_t idx_type;
     H5_iter_order_t order;
     H5O_iterate_ff_t op;
@@ -405,6 +406,17 @@ typedef struct H5VL_iod_obj_visit_info_t{
     hid_t loc_id;
     obj_iterate_t *output;
 } H5VL_iod_obj_visit_info_t;
+
+typedef struct H5VL_iod_attr_iter_info_t {
+    H5_index_t idx_type;
+    H5_iter_order_t order;
+    hsize_t *idx;
+    H5A_operator_ff_t op;
+    void *op_data;
+    hid_t rcxt_id;
+    hid_t loc_id;
+    attr_iterate_t *output;
+} H5VL_iod_attr_iter_info_t;
 
 #ifdef H5_HAVE_INDEXING
 /* information about a dataset write request */

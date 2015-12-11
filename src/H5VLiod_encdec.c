@@ -1207,4 +1207,70 @@ int hg_proc_obj_iterate_t(hg_proc_t proc, void *data)
 
     return ret;
 }
+
+int hg_proc_attr_iterate_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    unsigned i;
+    hg_proc_op_t op;
+    attr_iterate_t *iterate_str = (attr_iterate_t *) data;
+
+    ret = hg_proc_int32_t(proc, &iterate_str->ret);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    ret = hg_proc_uint32_t(proc, &iterate_str->num_attrs);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+    op = hg_proc_get_op(proc);
+
+    switch(op) {
+    case HG_ENCODE:
+        for(i=0 ; i<iterate_str->num_attrs ; i++) {
+            ret = hg_proc_hg_const_string_t(proc, &(iterate_str->attr_names[i]));
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_DECODE:
+        if(iterate_str->num_attrs)
+            iterate_str->attr_names = (const char **)calloc(iterate_str->num_attrs, sizeof(char *));
+        for(i=0 ; i<iterate_str->num_attrs ; i++) {
+            ret = hg_proc_hg_const_string_t(proc, &(iterate_str->attr_names[i]));
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_FREE:
+        for(i=0 ; i<iterate_str->num_attrs ; i++) {
+            ret = hg_proc_hg_const_string_t(proc, &(iterate_str->attr_names[i]));
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        if(iterate_str->num_attrs) {
+            free(iterate_str->attr_names);
+        }
+        break;
+    default:
+        return HG_FAIL;
+    }
+
+    return ret;
+}
+
 #endif /* H5_HAVE_EFF */
