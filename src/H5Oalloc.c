@@ -1599,13 +1599,32 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 
                                 /* Remove flush dependency on old continuation
                                  * message chunk */
+				HDassert(cont_targ_chk_proxy);
+                                HDassert(cont_targ_chk_proxy->fd_parent_addr != HADDR_UNDEF);
+				HDassert(cont_targ_chk_proxy->fd_parent_ptr);
+				HDassert(curr_chk_proxy);
+				HDassert((void *)curr_chk_proxy == cont_targ_chk_proxy->fd_parent_ptr);
+				HDassert(H5F_addr_eq(curr_chk_proxy->cache_info.addr, cont_targ_chk_proxy->fd_parent_addr));
+
                                 if(H5AC_destroy_flush_dependency(curr_chk_proxy, cont_targ_chk_proxy) < 0)
                                     HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+
+				cont_targ_chk_proxy->fd_parent_addr = HADDR_UNDEF;
+				cont_targ_chk_proxy->fd_parent_ptr = NULL;
 
                                 /* Create flush dependency on new continuation
                                  * message chunk */
                                 if(H5AC_create_flush_dependency(null_chk_mdc_obj, cont_targ_chk_proxy) < 0)
                                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+
+				HDassert(null_chk_mdc_obj);
+				HDassert(((H5C_cache_entry_t *)null_chk_mdc_obj)->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+				HDassert(((H5C_cache_entry_t *)null_chk_mdc_obj)->type);
+				HDassert((((H5C_cache_entry_t *)null_chk_mdc_obj)->type->id == H5AC_OHDR_ID) ||
+                                         (((H5C_cache_entry_t *)null_chk_mdc_obj)->type->id == H5AC_OHDR_CHK_ID));
+
+				cont_targ_chk_proxy->fd_parent_addr = ((H5C_cache_entry_t *)null_chk_mdc_obj)->addr;
+				cont_targ_chk_proxy->fd_parent_ptr = null_chk_mdc_obj;
 
                                 /* Unprotect continuation message target chunk
                                  */

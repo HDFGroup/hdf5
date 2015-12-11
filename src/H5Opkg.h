@@ -48,6 +48,17 @@
  *      and 'size' callback for places to change when updating this. */
 #define H5O_VERSION_LATEST	H5O_VERSION_2
 
+/* This is the initial size of the dynamically allocated list of object 
+ * header continuation chunk flush dependency parents maintained by the 
+ * object header proxy.  
+ *
+ * The current value of 1 presumes that the typical number of entries 
+ * on this list is almost always either zero or 1.  Increase this value 
+ * if appropriate.
+ */
+#define H5O_FD_PAR_LIST_BASE	1
+
+
 /*
  * Align messages on 8-byte boundaries because we would like to copy the
  * object header chunks directly into memory and operate on them there, even
@@ -380,6 +391,30 @@ typedef struct H5O_chunk_proxy_t {
     H5O_t       *oh;                    /* Object header for this chunk */
     unsigned    chunkno;                /* Chunk number for this chunk */
     unsigned    cont_chunkno;           /* Chunk number for the chunk containing the continuation message that points to this chunk */
+
+    /* Flush depencency parent information (not stored) 
+     *
+     * The following fields are used to store the base address and a pointer 
+     * to the in core representation of the chunk proxy's flush dependency
+     * parent -- if it exists.  If it does not exist, these fields will
+     * contain HADDR_UNDEF and NULL respectively.
+     *
+     * If the file is opened in SWMR write mode, the flush dependency 
+     * parent of the chunk proxy will be either its object header 
+     * (if cont_chunkno == 0) or the chunk proxy indicated by the 
+     * cont_chunkno field (if cont_chunkno > 0).
+     *
+     * Note that the flush dependency parent address is maintained purely
+     * for sanity checking.  Once we are reasonably confident of the code,
+     * it can be deleted or be maintained only in debug mode.
+     */
+    haddr_t fd_parent_addr;             /* Address of flush dependency parent
+                                         * if any.  This field is initialized
+                                         * to HADDR_UNDEF.  
+                                         */
+    void * fd_parent_ptr;               /* pointer to flush dependency parent
+                                         * it it exists.  NULL otherwise.
+                                         */
 } H5O_chunk_proxy_t;
 
 /* Callback information for loading object header chunk from disk */
@@ -397,6 +432,52 @@ struct H5O_proxy_t {
                                         /* first field in structure */
     H5F_t *f;                           /* Pointer to file for object header/chunk */
     H5O_t *oh;                          /* Object header */
+
+    /* Flush depencency parent information (not stored) 
+     *
+     * The following fields are used to store base addresses and pointers
+     * to the in core representations of the object header proxy's flush 
+     * dependency parents -- if they exist.
+     *
+     * At present, object header proxies may have two types of parents:
+     *
+     * 1) Exactly one object header.
+     *
+     * 2) Zero or more object header continuation chunks.
+     *
+     * The base address and pointer to the object header flush dependency 
+     * parent are stored in the oh_fd_parent_addr and oh_fd_parent_ptr fields.
+     * These fields are set to HADDR_UNDEF and NULL if there is no object 
+     * header flush dependency parent.  Note that when defined, 
+     * oh_fd_parent_ptr should point to the same object as oh.
+     *
+     * The number of object header continuation chunks (H5O_chunk_proxy_t) 
+     * that are flush dependency parents of the object header proxy is stored
+     * in chk_fd_parent_count.  
+     *
+     * If this field is greater than zero, chk_fd_parent_addrs must point to 
+     * a dynamically allocated array of haddr_t of length chk_fd_parent_alloc, 
+     * and chk_fd_parent_ptrs must point to a dynamically allocated array of 
+     * void * of the same length.  These arrays are used to store the base 
+     * addresses and pointers to the object header continuation chunk flush 
+     * dependency parents of the object header proxy.  chk_fd_parent_alloc
+     * must always be greater than or equal to chk_fd_parent_count.
+     *
+     * If chk_fd_parent_count is zero, chk_fd_parent_addrs and 
+     * chk_fd_parent_ptrs must be NULL.
+     *
+     * Note that the flush dependency parent addresses are maintined 
+     * purely for sanity checking.  Once we are confident of the code,
+     * these fields and their supporting code can be either deleted 
+     * on maintained only in debug builds.
+     */
+    haddr_t oh_fd_parent_addr;
+    void * oh_fd_parent_ptr;
+
+    unsigned chk_fd_parent_count;
+    unsigned chk_fd_parent_alloc;
+    haddr_t *chk_fd_parent_addrs;
+    void **chk_fd_parent_ptrs;
 };
 
 /* Callback information for loading object header proxy */

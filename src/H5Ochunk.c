@@ -117,6 +117,9 @@ H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     chk_proxy->chunkno = idx;
     chk_proxy->cont_chunkno = cont_chunkno;
 
+    chk_proxy->fd_parent_addr = HADDR_UNDEF;
+    chk_proxy->fd_parent_ptr = NULL;
+
     /* Increment reference count on object header */
     if(H5O_inc_rc(oh) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, FAIL, "can't increment reference count on object header")

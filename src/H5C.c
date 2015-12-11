@@ -8423,25 +8423,32 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
 
         H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, FAIL)
 
-	/* Destroy parent flush dependencies and free flush dependency parent
-	 * array, if necessary */
-	HDassert(entry_ptr->flush_dep_nchildren == 0);
-	if(entry_ptr->flush_dep_parent_nalloc > 0) {
-	    while(entry_ptr->flush_dep_nparents > 0) {
-		/* Since the flush_dep_parent array willbe resized every
-		 * a flush dependency is destroyed, we do not have to
-                 * iterate over all indices.  Instead, always destroy the
-                 * last dependency so we can skip the memmove() in
-                 * H5C_destroy_flush_dependency(). */
-		if(H5C_destroy_flush_dependency(entry_ptr->flush_dep_parent[entry_ptr->flush_dep_nparents - 1], entry_ptr) < 0)
-		    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Can't remove flush dependency")
-            }  /* end while */
+#if 0 /* this is useful debugging code -- leave it in for now.  -- JRM */
+	if ( ( entry_ptr->flush_dep_nparents > 0 ) ||
+             ( entry_ptr->flush_dep_nchildren > 0 ) ) {
 
-            /* H5C_destroy_flush_dependency should have freed the parent
-             * array when it became empty */
-            HDassert(!(entry_ptr->flush_dep_parent));
-            HDassert(entry_ptr->flush_dep_parent_nalloc == 0);
-	} /* end if */
+	    int i;
+
+	    HDfprintf(stdout, 
+                    "\n\nattempting to evict entry of type \"%s\" at 0X%llx:\n",
+                    entry_ptr->type->name, (long long)(entry_ptr->addr));
+
+	    for ( i = 0; i < entry_ptr->flush_dep_nparents; i++ ) {
+
+		HDfprintf(stdout, 
+                          "	with FD parent of type \"%s\" at 0X%llx.\n",
+			  entry_ptr->flush_dep_parent[i]->type->name,
+			  (long long)(entry_ptr->flush_dep_parent[i]->addr));
+	    }
+
+	    HDfprintf(stdout, "	with %d FD children.\n\n", 
+                      entry_ptr->flush_dep_nchildren);
+        }
+#endif /* this is useful debugging code -- leave it in for now.  -- JRM */
+
+	/* verify that the entry is no longer part of any flush dependencies */
+        HDassert(entry_ptr->flush_dep_nparents == 0);
+	HDassert(entry_ptr->flush_dep_nchildren == 0);
     }
     else {
         HDassert(clear_only || write_entry);

@@ -924,6 +924,12 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata,
     if(NULL == (chk_proxy = H5FL_CALLOC(H5O_chunk_proxy_t))) 
         HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed")
 
+    /* initialize the flush dependency parent fields.  If needed, they
+     * will be set in the notify routine.
+     */
+    chk_proxy->fd_parent_addr = HADDR_UNDEF;
+    chk_proxy->fd_parent_ptr = NULL;
+
     /* Check if we are still decoding the object header */
     /* (as opposed to bringing a piece of it back from the file) */
     if(udata->decoding) {
@@ -1097,6 +1103,23 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 if(H5AC_create_flush_dependency(parent, chk_proxy) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
 
+                /* make note of the address and pointer of the flush 
+                 * dependency parent so we can take the dependency down
+                 * on eviction.
+                 */
+		HDassert(parent);
+                HDassert(((H5C_cache_entry_t *)parent)->magic == 
+                         H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                HDassert(((H5C_cache_entry_t *)parent)->type);
+                HDassert((((H5C_cache_entry_t *)(parent))->type->id
+                          == H5AC_OHDR_ID) ||
+                         (((H5C_cache_entry_t *)(parent))->type->id
+                          == H5AC_OHDR_CHK_ID));
+
+                chk_proxy->fd_parent_addr = ((H5C_cache_entry_t *)parent)->addr;
+                chk_proxy->fd_parent_ptr = parent;
+
+
                 /* Add flush dependency on object header proxy, if proxy exists */
                 if(chk_proxy->oh->proxy_present)
                     if(H5O_proxy_depend(chk_proxy->f, H5AC_ind_dxpl_id, chk_proxy->oh, chk_proxy) < 0)
@@ -1107,7 +1130,14 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 break;
 
             case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-		/* Nothing to do */
+                HDassert(chk_proxy->fd_parent_addr != HADDR_UNDEF);
+                HDassert(chk_proxy->fd_parent_ptr != NULL);
+                HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent_ptr))->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                HDassert(((H5C_cache_entry_t *)(chk_proxy->fd_parent_ptr))->type);
+                HDassert((((H5C_cache_entry_t *)(chk_proxy->fd_parent_ptr))->type->id == H5AC_OHDR_ID) || (((H5C_cache_entry_t *)(chk_proxy->fd_parent_ptr))->type->id == H5AC_OHDR_CHK_ID));
+
+                if(H5AC_destroy_flush_dependency(chk_proxy->fd_parent_ptr, chk_proxy) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
                 break;
 
             default:
