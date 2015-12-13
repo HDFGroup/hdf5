@@ -609,10 +609,7 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_REFCOUNT[1];
 /* Free-space Manager Info message. (0x0017) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_FSINFO[1];
 
-/* Data Storage Message. (0x0018) */
-H5_DLLVAR const H5O_msg_class_t H5O_MSG_STORAGE[1];
-
-/* Placeholder for unknown message. (0x0019) */
+/* Placeholder for unknown message. (0x0018) */
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_UNKNOWN[1];
 
 
@@ -714,17 +711,10 @@ H5_DLL herr_t H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 
 /* Object header proxy operators */
 H5_DLL herr_t H5O_proxy_create(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
-H5_DLL H5O_proxy_t *H5O_proxy_pin(H5F_t *f, hid_t dxpl_id,
-    H5O_t *oh);
+H5_DLL H5O_proxy_t *H5O_proxy_pin(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
 H5_DLL herr_t H5O_proxy_unpin(H5O_proxy_t *proxy);
-H5_DLL herr_t H5O_proxy_depend(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    void *parent);
-H5_DLL herr_t H5O_proxy_undepend(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    void *parent);
-
-
-/* These functions operate on object locations */
-/* H5_DLL H5O_loc_t *H5O_get_loc(hid_t id); */
+H5_DLL herr_t H5O_proxy_depend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent);
+H5_DLL herr_t H5O_proxy_undepend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent);
 
 /* Testing functions */
 #ifdef H5O_TESTING

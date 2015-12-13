@@ -1649,8 +1649,8 @@ H5Fstart_swmr_write(hid_t file_id)
     if(H5F_get_obj_count(file, H5F_OBJ_LOCAL|H5F_OBJ_GROUP|H5F_OBJ_DATASET, FALSE, &grp_dset_count) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
 
-    /* Allocate space for group and object locations */
     if(grp_dset_count) {
+        /* Allocate space for group and object locations */
 	if((obj_ids = (hid_t *) H5MM_malloc(grp_dset_count * sizeof(hid_t))) == NULL)
 	    HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for hid_t")
 	if((obj_glocs = (H5G_loc_t *) H5MM_malloc(grp_dset_count * sizeof(H5G_loc_t))) == NULL)
@@ -1659,31 +1659,29 @@ H5Fstart_swmr_write(hid_t file_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5O_loc_t")
 	if((obj_paths = (H5G_name_t *) H5MM_malloc(grp_dset_count * sizeof(H5G_name_t))) == NULL)
 	    HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5G_name_t")
-    }
 
-    /* Get the list of opened object ids (groups & datasets) */
-    if(grp_dset_count) {
+        /* Get the list of opened object ids (groups & datasets) */
 	if(H5F_get_obj_ids(file, H5F_OBJ_LOCAL|H5F_OBJ_GROUP|H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE, &grp_dset_count) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed")
-    }
 
-    /* Refresh opened objects (groups, datasets) in the file */
-    for(u = 0; u < grp_dset_count; u++) {
-	H5O_loc_t *oloc;            /* object location */
+        /* Refresh opened objects (groups, datasets) in the file */
+        for(u = 0; u < grp_dset_count; u++) {
+            H5O_loc_t *oloc;            /* object location */
 
-	/* Set up the id's group location */
-	obj_glocs[u].oloc = &obj_olocs[u];
-	obj_glocs[u].path = &obj_paths[u];
-	H5G_loc_reset(&obj_glocs[u]);
+            /* Set up the id's group location */
+            obj_glocs[u].oloc = &obj_olocs[u];
+            obj_glocs[u].path = &obj_paths[u];
+            H5G_loc_reset(&obj_glocs[u]);
 
-	/* get the id's object location */
-	if((oloc = H5O_get_loc(obj_ids[u])) == NULL)
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
+            /* get the id's object location */
+            if((oloc = H5O_get_loc(obj_ids[u])) == NULL)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
 
-	/* Refresh (part 1) */
-	if(H5O_refresh_metadata_close(obj_ids[u], *oloc, &obj_glocs[u], H5AC_dxpl_id) < 0)
-	    HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
-    }
+            /* Refresh (part 1) */
+            if(H5O_refresh_metadata_close(obj_ids[u], *oloc, &obj_glocs[u], H5AC_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
+        } /* end for */
+    } /* end if */
 
     /* Set up I/O info for operation */
     fio_info.f = file;

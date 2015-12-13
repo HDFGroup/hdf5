@@ -76,15 +76,15 @@ H5Oflush(hid_t obj_id)
     H5TRACE1("e", "i", obj_id);
 
     /* Check args */
-    if((oloc = H5O_get_loc(obj_id)) == NULL)
+    if(NULL == (oloc = H5O_get_loc(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
 
     /* Get the object pointer */
-    if((obj_ptr = H5I_object(obj_id)) == NULL)
+    if(NULL == (obj_ptr = H5I_object(obj_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Get the object class */
-    if((obj_class = H5O_obj_class(oloc, H5AC_dxpl_id)) == NULL)
+    if(NULL == (obj_class = H5O_obj_class(oloc, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object class")
 
     /* Flush the object of this class */

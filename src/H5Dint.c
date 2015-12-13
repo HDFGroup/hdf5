@@ -1225,25 +1225,23 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     /* Set the latest version of the layout, pline & fill messages, if requested */
     if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_DSET_MSG_FLAGS)) {
         /* Set the latest version for the I/O pipeline message */
-	if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_PLINE_MSG)) {
+	if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_PLINE_MSG))
 	    if(H5O_pline_set_latest_version(&new_dset->shared->dcpl_cache.pline) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of I/O filter pipeline")
-	}
 
         /* Set the latest version for the fill message */
-	if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_FILL_MSG)) {
+	if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_FILL_MSG))
 	    /* Set the latest version for the fill value message */
 	    if(H5O_fill_set_latest_version(&new_dset->shared->dcpl_cache.fill) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of fill value")
-	}
 
         /* Set the latest version for the layout message */
-	if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_LAYOUT_MSG)) {
+	if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_LAYOUT_MSG))
 	    /* Set the latest version for the layout message */
 	    if(H5D__layout_set_latest_version(&new_dset->shared->layout, new_dset->shared->space, &new_dset->shared->dcpl_cache) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of layout")
-	}
-    } else if(new_dset->shared->layout.version >= H5O_LAYOUT_VERSION_4) {
+    } /* end if */
+    else if(new_dset->shared->layout.version >= H5O_LAYOUT_VERSION_4) {
 	/* Use latest indexing type for layout message version >= 4 */
         if(H5D__layout_set_latest_indexing(&new_dset->shared->layout, new_dset->shared->space, &new_dset->shared->dcpl_cache) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest indexing")
@@ -2073,7 +2071,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
 
             case H5D_CHUNKED:
                 if(!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
-                    /* Create the root of the B-tree that describes chunked storage */
+                    /* Create the root of the index that manages chunked storage */
                     if(H5D__chunk_create(dset /*in,out*/, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
 
@@ -2086,7 +2084,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
 
                 /* If space allocation is set to 'early' and we are extending
 		 * the dataset, indicate that space should be allocated, so the
-                 * B-tree gets expanded. -QAK
+                 * index gets expanded. -QAK
                  */
 		if(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY
                         && time_alloc == H5D_ALLOC_EXTEND)
@@ -2137,7 +2135,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
         /* Check if we need to initialize the space */
         if(must_init_space) {
             if(layout->type == H5D_CHUNKED) {
-                /* If we are doing incremental allocation and the B-tree got
+                /* If we are doing incremental allocation and the index got
                  * created during a H5Dwrite call, don't initialize the storage
                  * now, wait for the actual writes to each block and let the
                  * low-level chunking routines handle initialize the fill-values.
@@ -2160,10 +2158,9 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
                 /* If we are filling the dataset on allocation or "if set" and
                  * the fill value _is_ set, do that now */
                 if(dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC ||
-                        (dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
+                        (dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED))
                     if(H5D__init_storage(dset, full_overwrite, old_dim, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
-                } /* end if */
             } /* end else */
         } /* end if */
 
@@ -2731,7 +2728,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
                     && (dset->shared->dcpl_cache.pline.nused > 0))
                 if(H5D__chunk_update_old_edge_chunks(dset, dxpl_id, curr_dims) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to do update old edge chunks")
-	}
+	} /* end if */
 
         /* Mark the dataspace as dirty, for later writing to the file */
         if(H5D__mark(dset, dxpl_id, H5D_MARK_SPACE) < 0)
@@ -2800,7 +2797,6 @@ done:
 herr_t
 H5D__flush_real(H5D_t *dataset, hid_t dxpl_id)
 {
-    H5O_t *oh = NULL;                   /* Pointer to dataset's object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -2811,55 +2807,13 @@ H5D__flush_real(H5D_t *dataset, hid_t dxpl_id)
 
     /* Avoid flushing the dataset (again) if it's closing */
     if(!dataset->shared->closing) {
-
-	/* Flush cached raw data for each kind of dataset layout */
-	/* Need to flush first before the "layout" message because the single chunk address
-	   is stored in the message */
-	/* Continue flushing even if it fails */
+        /* Flush cached raw data for each kind of dataset layout */
         if(dataset->shared->layout.ops->flush &&
                 (dataset->shared->layout.ops->flush)(dataset, dxpl_id) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush raw data")
-
-        /* Check for metadata changes that will require updating the object's modification time */
-        if(dataset->shared->layout_dirty || dataset->shared->space_dirty) {
-            unsigned update_flags = H5O_UPDATE_TIME;        /* Modification time flag */
-
-            /* Pin the object header */
-            if(NULL == (oh = H5O_pin(&dataset->oloc, dxpl_id)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
-
-            /* Update the layout on disk, if it's been changed */
-            if(dataset->shared->layout_dirty) {
-                if(H5D__layout_oh_write(dataset, dxpl_id, oh, update_flags) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout/pline/efl info")
-                dataset->shared->layout_dirty = FALSE;
-
-                /* Reset the "update the modification time" flag, so we only do it once */
-                update_flags = 0;
-            } /* end if */
-
-            /* Update the dataspace on disk, if it's been changed */
-            if(dataset->shared->space_dirty) {
-                if(H5S_write(dataset->oloc.file, dxpl_id, oh, update_flags, dataset->shared->space) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
-                dataset->shared->space_dirty = FALSE;
-
-                /* Reset the "update the modification time" flag, so we only do it once */
-                update_flags = 0;
-            } /* end if */
-
-            /* _Somebody_ should have update the modification time! */
-            HDassert(update_flags == 0);
-        } /* end if */
-
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush raw data")
     } /* end if */
 
 done:
-    /* Release pointer to object header */
-    if(oh != NULL)
-        if(H5O_unpin(oh) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
-
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D__flush_real() */
 
@@ -2883,7 +2837,6 @@ H5D__format_convert(H5D_t *dataset, hid_t dxpl_id)
     H5D_chk_idx_info_t new_idx_info;    	/* Index info for the new layout */
     H5D_chk_idx_info_t idx_info;        	/* Index info for the current layout */
     H5O_layout_t        newlayout;		/* The new layout */
-    unsigned update_flags = H5O_UPDATE_TIME; 	/* Modification time flag */
     herr_t ret_value = SUCCEED;         	/* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -2917,13 +2870,12 @@ H5D__format_convert(H5D_t *dataset, hid_t dxpl_id)
 
     /* Initialize version 1 B-tree */
     if(newlayout.storage.u.chunk.ops->init && 
-      (newlayout.storage.u.chunk.ops->init)(&new_idx_info, dataset->shared->space, dataset->oloc.addr) < 0)
+            (newlayout.storage.u.chunk.ops->init)(&new_idx_info, dataset->shared->space, dataset->oloc.addr) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information")
     
     /* If the current chunk index exists */
     if(H5F_addr_defined(dataset->shared->layout.storage.u.chunk.idx_addr)) {
-
-	/* Create version 1 B-tree chunk index */
+	/* Create v1 B-tree chunk index */
 	if((newlayout.storage.u.chunk.ops->create)(&new_idx_info) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create chunk index")
 
@@ -2931,11 +2883,11 @@ H5D__format_convert(H5D_t *dataset, hid_t dxpl_id)
 	 * into the version 1 B-tree chunk index */
 	if(H5D__chunk_format_convert(dataset, &idx_info, &new_idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk index to chunk info")
-    }
+    } /* end if */
 
     /* Release the old (i.e. current) chunk index */
     if(dataset->shared->layout.storage.u.chunk.ops->dest &&
-       (dataset->shared->layout.storage.u.chunk.ops->dest)(&idx_info) < 0)
+            (dataset->shared->layout.storage.u.chunk.ops->dest)(&idx_info) < 0)
       HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
 
     /* Delete the "layout" message */
@@ -2952,7 +2904,7 @@ H5D__format_convert(H5D_t *dataset, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update old fill value header message")
 
     /* Update the layout on disk, if it's been changed */
-    if(H5D__layout_oh_write(dataset, dxpl_id, oh, update_flags) < 0)
+    if(H5D__layout_oh_write(dataset, dxpl_id, oh, H5O_UPDATE_TIME) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout/pline/efl info")
 
 done:
@@ -2981,19 +2933,50 @@ done:
 herr_t
 H5D__mark(const H5D_t *dataset, hid_t H5_ATTR_UNUSED dxpl_id, unsigned flags)
 {
+    H5O_t *oh = NULL;                   /* Pointer to dataset's object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dataset);
     HDassert(!(flags & (unsigned)~(H5D_MARK_SPACE | H5D_MARK_LAYOUT)));
 
     /* Mark aspects of the dataset as dirty */
-    if(flags & H5D_MARK_SPACE)
-        dataset->shared->space_dirty = TRUE;
-    if(flags & H5D_MARK_LAYOUT)
-        dataset->shared->layout_dirty = TRUE;
+    if(flags) {
+        unsigned update_flags = H5O_UPDATE_TIME;        /* Modification time flag */
+
+        /* Pin the object header */
+        if(NULL == (oh = H5O_pin(&dataset->oloc, dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+
+        /* Update the layout on disk, if it's been changed */
+        if(flags & H5D_MARK_LAYOUT) {
+            if(H5D__layout_oh_write(dataset, dxpl_id, oh, update_flags) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout info")
+
+            /* Reset the "update the modification time" flag, so we only do it once */
+            update_flags = 0;
+        } /* end if */
+
+        /* Update the dataspace on disk, if it's been changed */
+        if(flags & H5D_MARK_SPACE) {
+            if(H5S_write(dataset->oloc.file, dxpl_id, oh, update_flags, dataset->shared->space) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
+
+            /* Reset the "update the modification time" flag, so we only do it once */
+            update_flags = 0;
+        } /* end if */
+
+        /* _Somebody_ should have update the modification time! */
+        HDassert(update_flags == 0);
+    } /* end if */
+
+done:
+    /* Release pointer to object header */
+    if(oh != NULL)
+        if(H5O_unpin(oh) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mark() */

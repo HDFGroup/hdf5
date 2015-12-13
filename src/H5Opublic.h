@@ -188,9 +188,6 @@ H5_DLL herr_t H5Odisable_mdc_flushes(hid_t object_id);
 H5_DLL herr_t H5Oenable_mdc_flushes(hid_t object_id);
 H5_DLL herr_t H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled);
 
-
-
-
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
  * Use of these symbols is deprecated.

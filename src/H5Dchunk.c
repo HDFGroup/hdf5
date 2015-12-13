@@ -4007,9 +4007,6 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             } /* end if */
 
             /* Insert the chunk record into the index */
-            /* (Note that this isn't safe, from a SWMR perspective, unlike
-             *  serial operation. -QAK
-             */
 	    if((need_insert || udata.need_modify) && ops->insert)
                 if((ops->insert)(&idx_info, &udata, dset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")

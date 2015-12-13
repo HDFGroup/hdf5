@@ -3597,19 +3597,6 @@ done:
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
  *
- * Modifications:
- *      Robb Matzke, 1999-04-27
- *      This function fails if the datatype state is IMMUTABLE.
- *
- *      Robb Matzke, 1999-05-20
- *      Closes opaque types also.
- *
- *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *      Added "ID to name" support
- *
- *      Quincey Koziol, 2003-01-06
- *      Moved "guts" of function to H5T__free()
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3630,17 +3617,18 @@ H5T_close(H5T_t *dt)
 	if(dt->shared->state == H5T_STATE_OPEN && dt->shared->fo_count == 0) {
 	    if(H5AC_cork(dt->oloc.file, dt->oloc.addr, H5AC__GET_CORKED, &corked) < 0)
 		HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to retrieve an object's cork status")
-	    else if(corked) {
+	    if(corked) {
 		if(H5AC_cork(dt->oloc.file, dt->oloc.addr, H5AC__UNCORK, NULL) < 0)
 		    HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to uncork an object")
-	    }
-	}
+	    } /* end if */
+	} /* end if */
 
         if(H5T__free(dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
         dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
-    } else {
+    } /* end if */
+    else {
         /*
          * If a named type is being closed then close the object header and
          * remove from the list of open objects in the file.

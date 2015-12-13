@@ -247,7 +247,7 @@ H5D__single_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
 
     if(dset) {
 	if(dset->shared->dcpl_cache.fill.alloc_time != H5D_ALLOC_TIME_EARLY || idx_info->pline->nused > 0) {
-	    /* Mark the layout/storage dirty so that the address of the single chunk will be flushed later */
+	    /* Mark the layout dirty so that the address of the single chunk will be flushed later */
 	    if(H5D__mark(dset, idx_info->dxpl_id, H5D_MARK_LAYOUT) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark layout as dirty")
 	} /* end if */

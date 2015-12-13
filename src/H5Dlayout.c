@@ -355,10 +355,10 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
 
 	/* Avoid scalar/null dataspace */
 	if(ndims > 0) {
-	    hsize_t max_dims[H5O_LAYOUT_NDIMS];     /* Maximum dimension sizes */
-	    hsize_t cur_dims[H5O_LAYOUT_NDIMS];     /* Current dimension sizes */
-	    unsigned unlim_count = 0;           	/* Count of unlimited max. dimensions */
-	    hbool_t single = TRUE;                  /* Fulfill single chunk indexing */
+	    hsize_t max_dims[H5O_LAYOUT_NDIMS]; /* Maximum dimension sizes */
+	    hsize_t cur_dims[H5O_LAYOUT_NDIMS]; /* Current dimension sizes */
+	    unsigned unlim_count = 0;          	/* Count of unlimited max. dimensions */
+	    hbool_t single = TRUE;              /* Fulfill single chunk indexing */
 	    unsigned u;                     	/* Local index variable */
 
 	    /* Query the dataspace's dimensions */
@@ -371,7 +371,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
 		    unlim_count++;
 		if(cur_dims[u] != max_dims[u] || cur_dims[u] != layout->u.chunk.dim[u])
 		    single = FALSE;
-	    }
+	    } /* end for */
 
             /* Chunked datasets with unlimited dimension(s) */
             if(unlim_count) { /* dataset with unlimited dimension(s) must be chunked */
@@ -398,6 +398,9 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
                     layout->storage.u.chunk.ops = H5D_COPS_BT2;
 
                     /* Set the v2 B-tree creation parameters */
+                    /* (use hard-coded defaults for now, until we give applications
+                     *          control over this with a property list - QAK)
+                     */
                     layout->u.chunk.u.btree2.cparam.node_size = H5D_BT2_NODE_SIZE;
                     layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
                     layout->u.chunk.u.btree2.cparam.merge_percent =  H5D_BT2_MERGE_PERC;
@@ -409,14 +412,16 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
                     layout->u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
                     layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
                     layout->storage.u.chunk.ops = H5D_COPS_SINGLE;
-                } else if(!dcpl_cache->pline.nused && 
+                } /* end if */
+                else if(!dcpl_cache->pline.nused && 
                         dcpl_cache->fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
 
-                    /* Set the chunk index type to Non Index */
+                    /* Set the chunk index type to "none" Index */
                     layout->u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
                     layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
                     layout->storage.u.chunk.ops = H5D_COPS_NONE;
-                } else { /* Used Fixed Array */
+                } /* end else-if */
+                else { /* Used Fixed Array */
                     /* Set the chunk index type to Fixed Array */
                     layout->u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
                     layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
@@ -454,8 +459,9 @@ herr_t
 H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
     hid_t dapl_id)
 {
-    H5O_layout_t        *layout;         /* Dataset's layout information */
+    H5O_layout_t        *layout;        /* Dataset's layout information */
     const H5O_fill_t	*fill_prop;     /* Pointer to dataset's fill value information */
+    unsigned layout_mesg_flags;         /* Flags for inserting layout message */
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -545,8 +551,13 @@ H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
 
     /* Create layout message */
     /* (Don't make layout message constant unless allocation time is early and non-filtered, since space may not be allocated) */
-    /* (Note: this is relying on H5D_alloc_storage not calling H5O_msg_write during dataset creation) */
-    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type && !dset->shared->dcpl_cache.pline.nused) ? H5O_MSG_FLAG_CONSTANT : 0), 0, layout) < 0)
+    /* (Note: this is relying on H5D__alloc_storage not calling H5O_msg_write during dataset creation) */
+    if(fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type
+            && !dset->shared->dcpl_cache.pline.nused)
+        layout_mesg_flags = H5O_MSG_FLAG_CONSTANT;
+    else
+        layout_mesg_flags =  0;
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, layout_mesg_flags, 0, layout) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
 
 done:
@@ -649,7 +660,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5D__layout_oh_write
  *
- * Purpose:	Write layout/pline/efl information for dataset
+ * Purpose:	Write layout information for dataset
  *
  * Return:	Success:    SUCCEED
  *		Failure:    FAIL
@@ -662,6 +673,7 @@ done:
 herr_t
 H5D__layout_oh_write(H5D_t *dataset, hid_t dxpl_id, H5O_t *oh, unsigned update_flags)
 {
+    htri_t msg_exists;                  /* Whether the layout message exists */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -670,9 +682,14 @@ H5D__layout_oh_write(H5D_t *dataset, hid_t dxpl_id, H5O_t *oh, unsigned update_f
     HDassert(dataset);
     HDassert(oh);
 
-    /* Write the layout message to the dataset's header */
-    if(H5O_msg_write_oh(dataset->oloc.file, dxpl_id, oh, H5O_LAYOUT_ID, H5O_MSG_FLAG_CONSTANT, update_flags, &dataset->shared->layout) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout message")
+    /* Check if the layout message has been added to the dataset's header */
+    if((msg_exists = H5O_msg_exists_oh(oh, H5O_LAYOUT_ID)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to check if layout message exists")
+    if(msg_exists) {
+        /* Write the layout message to the dataset's header */
+        if(H5O_msg_write_oh(dataset->oloc.file, dxpl_id, oh, H5O_LAYOUT_ID, 0, update_flags, &dataset->shared->layout) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout message")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

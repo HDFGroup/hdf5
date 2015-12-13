@@ -160,7 +160,7 @@ H5O_is_attr_empty_test(hid_t oid)
 {
     H5O_t *oh = NULL;           /* Object header */
     H5O_proxy_t *oh_proxy = NULL; /* Object header proxy */
-    H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
+    H5B2_t *bt2_name = NULL;    /* v2 B-tree handle for name index */
     H5O_ainfo_t ainfo;          /* Attribute information for object */
     htri_t ainfo_exists = FALSE;        /* Whether the attribute info exists in the file */
     H5O_loc_t *loc;             /* Pointer to object's location */
@@ -263,9 +263,9 @@ H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
 {
     H5O_t *oh = NULL;           /* Object header */
     H5O_proxy_t *oh_proxy = NULL; /* Object header proxy */
-    H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
+    H5B2_t *bt2_name = NULL;    /* v2 B-tree handle for name index */
     H5O_ainfo_t ainfo;          /* Attribute information for object */
-    H5O_loc_t *loc;            /* Pointer to object's location */
+    H5O_loc_t *loc;             /* Pointer to object's location */
     hsize_t obj_nattrs;         /* Number of attributes */
     herr_t ret_value = SUCCEED; /* Return value */
 

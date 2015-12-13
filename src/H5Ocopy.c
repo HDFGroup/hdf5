@@ -357,12 +357,11 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     HDassert(cpy_info);
 
     /* Get pointer to object class for this object */
-    if((obj_class = H5O_obj_class(oloc_src, dxpl_id)) == NULL)
+    if(NULL == (obj_class = H5O_obj_class(oloc_src, dxpl_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
 
     /* Check if the object at the address is already open in the file */
     if(H5FO_opened(oloc_src->file, oloc_src->addr) != NULL) {
-	
 	H5G_loc_t tmp_loc; 	/* Location of object */
 	H5O_loc_t tmp_oloc; 	/* Location of object */
 	H5G_name_t tmp_path;	/* Object's path */
@@ -390,15 +389,14 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 	/* Release the temporary ID */
 	if(tmp_id != -1 && H5I_dec_app_ref(tmp_id))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close temporary ID")
-    }
+    } /* end if */
 
     /* Get source object header */
     if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve user data for particular type of object to copy */
-    if(obj_class->get_copy_file_udata &&
-            (NULL == (cpy_udata = (obj_class->get_copy_file_udata)())))
+    if(obj_class->get_copy_file_udata && (NULL == (cpy_udata = (obj_class->get_copy_file_udata)())))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to retrieve copy user data")
 
     /* If we are merging committed datatypes, check for a match in the destination

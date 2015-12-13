@@ -362,27 +362,12 @@ typedef struct H5O_efl_t {
 #define H5O_LAYOUT_NDIMS	(H5S_MAX_RANK+1)
 
 /* Flags for chunked layout feature encoding */
-#ifdef NOT_YET
-#define H5O_LAYOUT_CHUNK_STORE_ELEM_PHASE_CHANGE                  0x01
-#define H5O_LAYOUT_CHUNK_STORE_CHUNK_PHASE_CHANGE                 0x02
-#define H5O_LAYOUT_CHUNK_STORE_ELEM_CHUNK_TRANS                   0x04
-#define H5O_LAYOUT_CHUNK_ABBREVIATE_PARTIAL_BOUND_CHUNKS          0x08
-#endif /* NOT_YET */
-#define H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS         0x10
-#define H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER		  0x20
-#ifdef NOT_YET
-#define H5O_LAYOUT_ALL_CHUNK_FLAGS                    (                             \
-    H5O_LAYOUT_CHUNK_STORE_ELEM_PHASE_CHANGE                                        \
-    | H5O_LAYOUT_CHUNK_STORE_CHUNK_PHASE_CHANGE                                     \
-    | H5O_LAYOUT_CHUNK_STORE_ELEM_CHUNK_TRANS                                       \
-    | H5O_LAYOUT_CHUNK_ABBREVIATE_PARTIAL_BOUND_CHUNKS                              \
-    | H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS                             \
+#define H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS         0x01
+#define H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER		  0x02
+#define H5O_LAYOUT_ALL_CHUNK_FLAGS                    (                     \
+    H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS                       \
+    | H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER                             \
     )
-#else /* NOT_YET */
-#define H5O_LAYOUT_ALL_CHUNK_FLAGS                    (                             		\
-    H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS|H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER \
-    )
-#endif /* NOT_YET */
 
 /* Initial version of the layout information.  Used when space is allocated */
 #define H5O_LAYOUT_VERSION_1	1
@@ -920,14 +905,11 @@ H5_DLL int H5O_msg_get_chunkno(const H5O_loc_t *loc, unsigned type_id, hid_t dxp
 H5_DLL herr_t H5O_msg_lock(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_unlock(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 
-/* Object metadata flush/evict routines */
+/* Object metadata flush/refresh routines */
 H5_DLL herr_t H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id, hid_t dxpl_id);
-
 H5_DLL herr_t H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id);
 H5_DLL herr_t H5O_refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc, hid_t dxpl_id);
 H5_DLL herr_t H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hid_t dxpl_id);
-
-
 
 /* Object copying routines */
 H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
