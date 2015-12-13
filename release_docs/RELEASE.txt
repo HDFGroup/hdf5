@@ -57,8 +57,15 @@ New Features
 
     Configuration
     -------------
-    - None
+    - Cmakehdf5: added ability to run multiple make commands.
+      Added option --njobs to specific up to homw many jobs to launch during
+      build (cmamke) and testing (ctest).
+      (AKC, 2015/12/13, HDFFV-9612)
 
+    - Cmakehdf5: added --with-szlib to support szip library support; and
+      --enable/disable-verbose to display all cmake process output.
+      (AKC, 2015/11/16, HDFFV-8932 and DAILYTEST-195)
+      
     Library
     -------
     - None
