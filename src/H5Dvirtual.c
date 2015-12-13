@@ -654,11 +654,10 @@ H5D__virtual_copy(H5F_t H5_ATTR_UNUSED *f_dst, H5O_layout_t *layout_dst,
 {
     herr_t          ret_value = SUCCEED;
 
+#ifdef NOT_YET
     FUNC_ENTER_PACKAGE
-
-    /* Copy message in memory */
-    if(H5D__virtual_copy_layout(layout_dst) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy virtual layout")
+#endif /* NOT_YET */
+    FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef NOT_YET
     /* Check for copy to the same file */
@@ -676,7 +675,9 @@ H5D__virtual_copy(H5F_t H5_ATTR_UNUSED *f_dst, H5O_layout_t *layout_dst,
         layout_dst->storage.u.virt.serial_list_hobjid.idx = (size_t)0;
     } /* end block/else */
 
+#ifdef NOT_YET
 done:
+#endif /* NOT_YET */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_copy() */
 

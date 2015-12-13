@@ -769,12 +769,16 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2,
     HDassert(size == sizeof(H5O_layout_t));
 
     /* Check for different layout type */
-    if(layout1->type < layout2->type) HGOTO_DONE(-1)
-    if(layout1->type > layout2->type) HGOTO_DONE(1)
+    if(layout1->type < layout2->type)
+        HGOTO_DONE(-1)
+    if(layout1->type > layout2->type)
+        HGOTO_DONE(1)
 
     /* Check for different layout version */
-    if(layout1->version < layout2->version) HGOTO_DONE(-1)
-    if(layout1->version > layout2->version) HGOTO_DONE(1)
+    if(layout1->version < layout2->version)
+        HGOTO_DONE(-1)
+    if(layout1->version > layout2->version)
+        HGOTO_DONE(1)
 
     /* Compare non-dataset-specific fields in layout info */
     switch(layout1->type) {
@@ -787,13 +791,17 @@ H5P__dcrt_layout_cmp(const void *_layout1, const void *_layout2,
                 unsigned u;     /* Local index variable */
 
                 /* Check the number of dimensions */
-                if(layout1->u.chunk.ndims < layout2->u.chunk.ndims) HGOTO_DONE(-1)
-                if(layout1->u.chunk.ndims > layout2->u.chunk.ndims) HGOTO_DONE(1)
+                if(layout1->u.chunk.ndims < layout2->u.chunk.ndims)
+                    HGOTO_DONE(-1)
+                if(layout1->u.chunk.ndims > layout2->u.chunk.ndims)
+                    HGOTO_DONE(1)
 
                 /* Compare the chunk dims */
                 for(u = 0; u < layout1->u.chunk.ndims - 1; u++) {
-                    if(layout1->u.chunk.dim[u] < layout2->u.chunk.dim[u]) HGOTO_DONE(-1)
-                    if(layout1->u.chunk.dim[u] > layout2->u.chunk.dim[u]) HGOTO_DONE(1)
+                    if(layout1->u.chunk.dim[u] < layout2->u.chunk.dim[u])
+                        HGOTO_DONE(-1)
+                    if(layout1->u.chunk.dim[u] > layout2->u.chunk.dim[u])
+                        HGOTO_DONE(1)
                 } /* end for */
             } /* end case */
             break;
@@ -2133,7 +2141,6 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     H5O_storage_virtual_ent_t *old_list = NULL; /* List pointer previously on property list */
     H5O_storage_virtual_ent_t *ent = NULL; /* Convenience pointer to new VDS entry */
     hbool_t retrieved_layout = FALSE;   /* Whether the layout has been retrieved */
-    hbool_t adding_entry = FALSE;   /* Whether we are in the middle of adding an entry */
     hbool_t free_list = FALSE;      /* Whether to free the list of virtual entries */
     herr_t ret_value = SUCCEED;     /* Return value */
 
@@ -2207,7 +2214,6 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     HDmemset(ent, 0, sizeof(H5O_storage_virtual_ent_t));        /* Clear before starting to set up */
     if(NULL == (ent->source_dset.virtual_select = H5S_copy(vspace, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
-    adding_entry = TRUE;
     if(NULL == (ent->source_file_name = HDstrdup(src_file_name)))
         HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source file name")
     if(NULL == (ent->source_dset_name = HDstrdup(src_dset_name)))

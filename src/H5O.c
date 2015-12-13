@@ -2874,7 +2874,7 @@ H5O_get_info(const H5O_loc_t *loc, hid_t dxpl_id, hbool_t want_ih_info,
         /* Check for 'bh_info' callback for this type of object */
         if(obj_class->bh_info) {
             /* Call the object's class 'bh_info' routine */
-            if((obj_class->bh_info)(loc->file, dxpl_id, oh, &oinfo->meta_size.obj) < 0)
+            if((obj_class->bh_info)(loc, dxpl_id, oh, &oinfo->meta_size.obj) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object's btree & heap info")
         } /* end if */
 

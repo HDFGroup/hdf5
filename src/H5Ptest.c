@@ -165,7 +165,7 @@ H5P_reset_external_file_test(hid_t dcpl_id)
 
     /* set external file list */
     if(H5P_poke(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set external file list")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

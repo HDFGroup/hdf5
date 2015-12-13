@@ -2566,7 +2566,6 @@ done:
 herr_t
 H5D__flush_real(H5D_t *dataset, hid_t dxpl_id)
 {
-    H5O_t *oh = NULL;                   /* Pointer to dataset's object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -2577,38 +2576,6 @@ H5D__flush_real(H5D_t *dataset, hid_t dxpl_id)
 
     /* Avoid flushing the dataset (again) if it's closing */
     if(!dataset->shared->closing) {
-        /* Check for metadata changes that will require updating the object's modification time */
-        if(dataset->shared->layout_dirty || dataset->shared->space_dirty) {
-            unsigned update_flags = H5O_UPDATE_TIME;        /* Modification time flag */
-
-            /* Pin the object header */
-            if(NULL == (oh = H5O_pin(&dataset->oloc, dxpl_id)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
-
-            /* Update the layout on disk, if it's been changed */
-            if(dataset->shared->layout_dirty) {
-                if(H5D__layout_oh_write(dataset, dxpl_id, oh, update_flags) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout/pline/efl info")
-                dataset->shared->layout_dirty = FALSE;
-
-                /* Reset the "update the modification time" flag, so we only do it once */
-                update_flags = 0;
-            } /* end if */
-
-            /* Update the dataspace on disk, if it's been changed */
-            if(dataset->shared->space_dirty) {
-                if(H5S_write(dataset->oloc.file, dxpl_id, oh, update_flags, dataset->shared->space) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
-                dataset->shared->space_dirty = FALSE;
-
-                /* Reset the "update the modification time" flag, so we only do it once */
-                update_flags = 0;
-            } /* end if */
-
-            /* _Somebody_ should have update the modification time! */
-            HDassert(update_flags == 0);
-        } /* end if */
-
         /* Flush cached raw data for each kind of dataset layout */
         if(dataset->shared->layout.ops->flush &&
                 (dataset->shared->layout.ops->flush)(dataset, dxpl_id) < 0)
@@ -2616,11 +2583,6 @@ H5D__flush_real(H5D_t *dataset, hid_t dxpl_id)
     } /* end if */
 
 done:
-    /* Release pointer to object header */
-    if(oh != NULL)
-        if(H5O_unpin(oh) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
-
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D__flush_real() */
 
@@ -2641,19 +2603,50 @@ done:
 herr_t
 H5D__mark(const H5D_t *dataset, hid_t H5_ATTR_UNUSED dxpl_id, unsigned flags)
 {
+    H5O_t *oh = NULL;                   /* Pointer to dataset's object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dataset);
     HDassert(!(flags & (unsigned)~(H5D_MARK_SPACE | H5D_MARK_LAYOUT)));
 
     /* Mark aspects of the dataset as dirty */
-    if(flags & H5D_MARK_SPACE)
-        dataset->shared->space_dirty = TRUE;
-    if(flags & H5D_MARK_LAYOUT)
-        dataset->shared->layout_dirty = TRUE;
+    if(flags) {
+        unsigned update_flags = H5O_UPDATE_TIME;        /* Modification time flag */
+
+        /* Pin the object header */
+        if(NULL == (oh = H5O_pin(&dataset->oloc, dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+
+        /* Update the layout on disk, if it's been changed */
+        if(flags & H5D_MARK_LAYOUT) {
+            if(H5D__layout_oh_write(dataset, dxpl_id, oh, update_flags) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout/pline/efl info")
+
+            /* Reset the "update the modification time" flag, so we only do it once */
+            update_flags = 0;
+        } /* end if */
+
+        /* Update the dataspace on disk, if it's been changed */
+        if(flags & H5D_MARK_SPACE) {
+            if(H5S_write(dataset->oloc.file, dxpl_id, oh, update_flags, dataset->shared->space) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
+
+            /* Reset the "update the modification time" flag, so we only do it once */
+            update_flags = 0;
+        } /* end if */
+
+        /* _Somebody_ should have update the modification time! */
+        HDassert(update_flags == 0);
+    } /* end if */
+
+done:
+    /* Release pointer to object header */
+    if(oh != NULL)
+        if(H5O_unpin(oh) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mark() */
