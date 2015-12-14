@@ -290,7 +290,6 @@ END_FUNC(PKG)   /* end H5EA__dblk_page_unprotect() */
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
 H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page))

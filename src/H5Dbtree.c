@@ -219,7 +219,6 @@ H5FL_DEFINE_STATIC(H5O_layout_chunk_t);
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static H5UC_t *
 H5D__btree_get_shared(const H5F_t H5_ATTR_UNUSED *f, const void *_udata)
 {
@@ -440,7 +439,6 @@ H5D__btree_cmp3(void *_lt_key, void *_udata, void *_rt_key)
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static htri_t
 H5D__btree_found(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, const void *_lt_key,
 		 void *_udata)
@@ -540,7 +538,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static H5B_ins_t
 H5D__btree_insert(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, void *_lt_key,
 		  hbool_t *lt_key_changed,
@@ -634,7 +631,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static H5B_ins_t
 H5D__btree_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key /*in,out */ ,
 	hbool_t *lt_key_changed /*out */ ,
@@ -762,7 +758,6 @@ H5D__btree_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5D__btree_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
     const void *_udata)
@@ -1074,7 +1069,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static int
 H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     const void *_lt_key, haddr_t addr, const void H5_ATTR_UNUSED *_rt_key,

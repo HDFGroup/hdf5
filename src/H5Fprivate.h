@@ -553,9 +553,6 @@
 /* Global heap signature */
 #define H5HG_MAGIC	                "GCOL"
 
-/* Global heap signature */
-#define H5HG_MAGIC	                "GCOL"
-
 /* Local heap signature */
 #define H5HL_MAGIC                      "HEAP"
 

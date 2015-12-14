@@ -2476,7 +2476,6 @@ H5D__vlen_get_buf_size_alloc(size_t size, void *info)
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
 H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_ATTR_UNUSED ndim, const hsize_t *point, void *op_data)
 {
