@@ -14,12 +14,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		Tuesday, May  2, 2006
+ * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ *              Tuesday, May  2, 2006
  *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5FS package.  Source files outside the H5FS package should
- *		include H5FSprivate.h instead.
+ * Purpose:     This file contains declarations which are visible only within
+ *              the H5FS package.  Source files outside the H5FS package should
+ *              include H5FSprivate.h instead.
  */
 #if !(defined H5FS_FRIEND || defined H5FS_MODULE)
 #error "Do not include this file outside the H5FS package!"
@@ -38,11 +38,11 @@
 /* #define H5FS_DEBUG_ASSERT */
 
 /* Get package's private header */
-#include "H5FSprivate.h"	/* File free space                      */
+#include "H5FSprivate.h"    /* File free space                      */
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h"	/* Metadata cache			*/
-#include "H5SLprivate.h"	/* Skip lists				*/
+#include "H5ACprivate.h"    /* Metadata cache                       */
+#include "H5SLprivate.h"    /* Skip lists                           */
 
 /**************************/
 /* Package Private Macros */
