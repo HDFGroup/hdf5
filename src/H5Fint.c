@@ -130,7 +130,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
     hbool_t driver_prop_copied = FALSE;     /* Whether the driver property has been set up */
     unsigned    efc_size = 0;
-    hid_t	ret_value = SUCCEED;
+    hid_t	ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1052,6 +1052,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         if(H5G_mkroot(file, dxpl_id, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
     } else if (1 == shared->nrefs) {
+
 	/* Read the superblock if it hasn't been read before. */
         if(H5F__super_read(file, dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
@@ -1099,8 +1100,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 
 done:
     if(!ret_value && file)
-        if(H5F_dest(file, dxpl_id, FALSE) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+	if(H5F_dest(file, dxpl_id, FALSE) < 0)
+	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */

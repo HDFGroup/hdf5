@@ -244,7 +244,6 @@ H5A_term_package(void)
     develop.
 
 --------------------------------------------------------------------------*/
-/* ARGSUSED */
 hid_t
 H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     hid_t acpl_id, hid_t H5_ATTR_UNUSED aapl_id)
@@ -319,7 +318,6 @@ done:
     develop.
 
 --------------------------------------------------------------------------*/
-/* ARGSUSED */
 hid_t
 H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t H5_ATTR_UNUSED aapl_id,

@@ -1648,7 +1648,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5D__chunk_mem_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, unsigned ndims, const hsize_t *coords, void *_fm)
 {
@@ -3309,7 +3308,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static int
 H5D__chunk_allocated_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 {
@@ -5184,7 +5182,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static int
 H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 {

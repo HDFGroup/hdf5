@@ -432,7 +432,6 @@ END_FUNC(PKG)   /* end H5EA__iblock_delete() */
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
 H5EA__iblock_dest(H5EA_iblock_t *iblock))
