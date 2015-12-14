@@ -16,8 +16,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:     H5FAcache.c
- *			Jul  2 2009
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *		Jul  2 2009
+ *		Quincey Koziol <koziol@hdfgroup.org>
  *
  * Purpose:     Implement fixed array metadata cache methods.
  *
@@ -551,7 +551,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_notify() */
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5FA__cache_hdr_free_icr(void *thing))
@@ -758,6 +757,7 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t len,
 
 CATCH
 
+    /* Release resources */
     if(!ret_value)
         if(dblock && H5FA__dblock_dest(dblock) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array data block")
@@ -947,7 +947,6 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_notify() */
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5FA__cache_dblock_free_icr(void *_thing))
@@ -1195,13 +1194,14 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_image_len() */
  *
  * Purpose:	Flushes a dirty object to disk.
  *
+ * Return:	SUCCEED/FAIL
+ *
  * Programmer:	Quincey Koziol
  *              koziol@hdfgroup.org
  *              August 14, 2013
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
 H5FA__cache_dblk_page_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,

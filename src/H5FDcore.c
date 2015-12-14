@@ -88,7 +88,6 @@ typedef struct H5FD_core_t {
 #endif /* H5_HAVE_WIN32_API */
     hbool_t dirty;                              /* changes not saved?       */
     H5FD_file_image_callbacks_t fi_callbacks;   /* file image callbacks     */
-
     H5SL_t *dirty_list;                         /* dirty parts of the file  */
 } H5FD_core_t;
 

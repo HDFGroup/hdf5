@@ -31,7 +31,7 @@
 #include "H5FAprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h"    /* Metadata cache            */
+#include "H5ACprivate.h"    /* Metadata cache                       */
 #include "H5FLprivate.h"    /* Free Lists                           */
 
 
@@ -233,8 +233,8 @@ typedef struct H5FA_hdr_cache_ud_t {
 
 /* Info needed for loading data block */
 typedef struct H5FA_dblock_cache_ud_t {
-    H5FA_hdr_t *hdr;            /* Shared fixed array information   */
-    haddr_t     dblk_addr;      /* Address of data block on disk */
+    H5FA_hdr_t *hdr;            /* Shared fixed array information       */
+    haddr_t     dblk_addr;      /* Address of data block on disk        */
 } H5FA_dblock_cache_ud_t;
 
 /* Info needed for loading data block page */
