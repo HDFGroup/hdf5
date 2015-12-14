@@ -257,9 +257,11 @@ H5C_apply_candidate_list(H5F_t * f,
     HDfprintf(stdout, "%s", tbl_buf);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
-    /* Create skip list of entries for collective write */
-    if(NULL == (collective_write_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for entries")
+    if(f->coll_md_write) {
+        /* Create skip list of entries for collective write */
+        if(NULL == (collective_write_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for entries")
+    }
 
     n = num_candidates / mpi_size;
     m = num_candidates % mpi_size;
@@ -711,30 +713,34 @@ H5C_apply_candidate_list(H5F_t * f,
     if (delayed_ptr) {
 
         if (delayed_ptr->clear_on_unprotect) {
-            if(H5C__flush_single_entry(f, dxpl_id, delayed_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, 
+            if(H5C__flush_single_entry(f, dxpl_id, delayed_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG, 
                                        NULL, NULL) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't flush entry collectively.")
+
             entry_ptr->clear_on_unprotect = FALSE;
             entries_cleared++;
         } else if (delayed_ptr->flush_immediately) {
             if(H5C__flush_single_entry(f, dxpl_id, delayed_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, 
                                        NULL, collective_write_list) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't flush entry collectively.")
+
             entry_ptr->flush_immediately = FALSE;
             entries_flushed++;
         } /* end if */
-
 
         entries_flushed_collectively++;
         entries_flushed_or_cleared_last++;
     } /* end if */
 
-    /* Write collective list */
-    if(H5C_collective_write(f,
-                            dxpl_id,
-                            collective_write_list) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't write metadata collectively")
+    if(f->coll_md_write) {
+        HDassert(collective_write_list);
 
+        /* Write collective list */
+        if(H5C_collective_write(f,
+                                dxpl_id,
+                                collective_write_list) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't write metadata collectively")
+    }
     /* ====================================================================== *
      * Finished flushing everything.                                          *
      * ====================================================================== */

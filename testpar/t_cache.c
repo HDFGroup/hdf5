@@ -7508,15 +7508,6 @@ main(int argc, char **argv)
         }
     }
 
-    if ( H5Pset_coll_metadata_read(fapl, 1) < 0 ) {
-
-        nerrors++;
-        if ( verbose ) {
-            HDfprintf(stdout, "%d:%s: H5Pset_coll_metadata_read() failed 1.\n",
-                      world_mpi_rank, FUNC);
-        }
-    }
-
     /* fix the file names */
     for ( u = 0; u < sizeof(FILENAME) / sizeof(FILENAME[0]) - 1; ++u )
     {
@@ -7561,6 +7552,7 @@ main(int argc, char **argv)
                           world_mpi_rank, FUNC);
             }
         }
+
     }
 
     setup_rand();
@@ -7599,6 +7591,10 @@ main(int argc, char **argv)
     smoke_check_4(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
     smoke_check_4(H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
 #endif
+#if 1
+    smoke_check_5(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
+    smoke_check_5(H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
+#endif
     /* enable the collective metadata read property */
     if ( world_mpi_rank != world_server_mpi_rank ) {
         if ( H5Pset_coll_metadata_read(fapl, 1) < 0 ) {
@@ -7610,11 +7606,6 @@ main(int argc, char **argv)
             }
         }
     }
-#if 1
-    smoke_check_5(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
-    smoke_check_5(H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
-#endif
-
 #if 1
     smoke_check_6(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
     smoke_check_6(H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
