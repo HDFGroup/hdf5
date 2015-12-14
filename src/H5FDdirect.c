@@ -93,6 +93,7 @@ typedef struct H5FD_direct_t {
     DWORD fileindexlo;
     DWORD fileindexhi;
 #endif
+
 } H5FD_direct_t;
 
 /*
@@ -136,6 +137,9 @@ static herr_t H5FD_direct_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, ha
 static herr_t H5FD_direct_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
             size_t size, const void *buf);
 static herr_t H5FD_direct_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD_direct_lock(H5FD_t *_file, hbool_t rw);
+static herr_t H5FD_direct_unlock(H5FD_t *_file);
+
 
 static const H5FD_class_t H5FD_direct_g = {
     "direct",          /*name      */
@@ -166,10 +170,10 @@ static const H5FD_class_t H5FD_direct_g = {
     H5FD_direct_read,        /*read      */
     H5FD_direct_write,        /*write      */
     NULL,          /*flush      */
-    H5FD_direct_truncate,      /*truncate    */
-    NULL,                                       /*lock                  */
-    NULL,                                       /*unlock                */
-    H5FD_FLMAP_DICHOTOMY                        /*fl_map                */
+    H5FD_direct_truncate,      	/*truncate    */
+    H5FD_direct_lock,          	/*lock                  */
+    H5FD_direct_unlock,        	/*unlock                */
+    H5FD_FLMAP_DICHOTOMY       	/*fl_map                */
 };
 
 /* Declare a free list to manage the H5FD_direct_t struct */
@@ -689,10 +693,10 @@ H5FD_direct_query(const H5FD_t H5_ATTR_UNUSED * _f, unsigned long *flags /* out 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags = 0;
-        *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
-        *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
-        *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-        *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA;     /* OK to aggregate metadata allocations                             */
+        *flags |= H5FD_FEAT_ACCUMULATE_METADATA;    /* OK to accumulate metadata for faster writes                      */
+        *flags |= H5FD_FEAT_DATA_SIEVE;             /* OK to perform data sieving for faster raw data reads & writes    */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations                     */
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1307,5 +1311,72 @@ H5FD_direct_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATT
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_direct_truncate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_direct_lock
+ *
+ * Purpose:     To place an advisory lock on a file.
+ *		The lock type to apply depends on the parameter "rw":
+ *			TRUE--opens for write: an exclusive lock
+ *			FALSE--opens for read: a shared lock
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Vailin Choi; May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_direct_lock(H5FD_t *_file, hbool_t rw)
+{
+    H5FD_direct_t  *file = (H5FD_direct_t*)_file;	/* VFD file struct */
+    int lock;						/* The type of lock */
+    herr_t ret_value = SUCCEED;                 	/* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+    /* Determine the type of lock */
+    int lock = rw ? LOCK_EX : LOCK_SH;
+    
+    /* Place the lock with non-blocking */
+    if(HDflock(file->fd, lock | LOCK_NB) < 0)
+        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_direct_lock() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_direct_unlock
+ *
+ * Purpose:     To remove the existing lock on the file
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Vailin Choi; May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_direct_unlock(H5FD_t *_file)
+{
+    H5FD_direct_t  *file = (H5FD_direct_t*)_file;	/* VFD file struct */
+    herr_t ret_value = SUCCEED;                 	/* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+    if(HDflock(file->fd, LOCK_UN) < 0)
+        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock (unlock) file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_direct_unlock() */
+
 #endif /* H5_HAVE_DIRECT */
 
