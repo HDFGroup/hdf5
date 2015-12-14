@@ -408,7 +408,7 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters,
         /* Set the chunk's filter mask to the new settings */
         udata.filter_mask = filters;
 
-        if((layout->storage.u.chunk.ops->insert)(&idx_info, &udata) < 0)
+        if((layout->storage.u.chunk.ops->insert)(&idx_info, &udata, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
     } /* end if */
 
@@ -2090,7 +2090,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 	} /* end if */
 	else {
             if(need_insert && io_info->dset->shared->layout.storage.u.chunk.ops->insert)
-                if((io_info->dset->shared->layout.storage.u.chunk.ops->insert)(&idx_info, &udata) < 0)
+                if((io_info->dset->shared->layout.storage.u.chunk.ops->insert)(&idx_info, &udata, NULL) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
 	} /* end else */
 
@@ -2714,7 +2714,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
 
         /* Insert the chunk record into the index */
 	if(need_insert && dset->shared->layout.storage.u.chunk.ops->insert)
-            if((dset->shared->layout.storage.u.chunk.ops->insert)(&idx_info, &udata) < 0)
+            if((dset->shared->layout.storage.u.chunk.ops->insert)(&idx_info, &udata, dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
 
         /* Cache the chunk's info, in case it's accessed again shortly */
@@ -3690,7 +3690,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
              *  serial operation. -QAK
              */
 	    if(need_insert && ops->insert)
-                if((ops->insert)(&idx_info, &udata) < 0)
+                if((ops->insert)(&idx_info, &udata, dset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
 
             /* Increment indices and adjust the edge chunk state */
@@ -4822,7 +4822,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Insert chunk record into index */
     if(need_insert && udata->idx_info_dst->storage->ops->insert)
-        if((udata->idx_info_dst->storage->ops->insert)(udata->idx_info_dst, &udata_dst) < 0)
+        if((udata->idx_info_dst->storage->ops->insert)(udata->idx_info_dst, &udata_dst, NULL) < 0)
             HGOTO_ERROR_TAG(H5E_DATASET, H5E_CANTINSERT, H5_ITER_ERROR, "unable to insert chunk addr into index")
 
     /* Reset metadata tag in dxpl_id */
