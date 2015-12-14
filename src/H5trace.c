@@ -268,8 +268,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                     } /* end if */
                 else {
-                    hbool_t bool_var = va_arg(ap, hbool_t); /*lint !e732 Loss of sign not really occuring */
-
+                    /* Can't pass hbool_t to va_arg() */
+                    hbool_t bool_var = (hbool_t)va_arg(ap, int);
                     if(TRUE == bool_var)
                         fprintf(out, "TRUE");
                     else if(!bool_var)
