@@ -36,7 +36,7 @@
 
 /*
  * Feature: Define H5HL_DEBUG on the compiler command line if you want to
- *  enable diagnostic messages from this layer.
+ *          enable diagnostic messages from this layer.
  */
 #ifdef NDEBUG
 #  undef H5HL_DEBUG

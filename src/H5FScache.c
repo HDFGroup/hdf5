@@ -1377,7 +1377,7 @@ done:
  * Purpose:	Skip list iterator callback to serialize free space sections
  *              of a particular size
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Monday, May  8, 2006
@@ -1433,7 +1433,7 @@ done:
  * Purpose:	Skip list iterator callback to serialize free space sections
  *              in a bin
  *
- * Return:      Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Monday, May  8, 2006

@@ -164,11 +164,14 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(STATIC, ERR,
-herr_t, SUCCEED, FAIL,
-H5HL__fl_deserialize(H5HL_t *heap))
-    H5HL_free_t *fl = NULL, *tail = NULL;   /* Heap free block nodes */
-    hsize_t free_block;                     /* Offset of free block */
+static herr_t
+H5HL__fl_deserialize(H5HL_t *heap)
+{
+    H5HL_free_t *fl = NULL, *tail = NULL;      /* Heap free block nodes */
+    hsize_t free_block;                 /* Offset of free block */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(heap);
@@ -181,11 +184,11 @@ H5HL__fl_deserialize(H5HL_t *heap))
 
         /* Sanity check */
         if(free_block >= heap->dblk_size)
-            H5E_THROW(H5E_BADRANGE, "bad heap free list");
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list")
 
         /* Allocate & initialize free list node */
         if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
-            H5E_THROW(H5E_CANTALLOC, "memory allocation failed");
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "memory allocation failed")
         fl->offset = (size_t)free_block;
         fl->prev = tail;
         fl->next = NULL;
@@ -194,12 +197,12 @@ H5HL__fl_deserialize(H5HL_t *heap))
         image = heap->dblk_image + free_block;
         H5F_DECODE_LENGTH_LEN(image, free_block, heap->sizeof_size);
         if(0 == free_block)
-            H5E_THROW(H5E_BADVALUE, "free block size is zero?");
+            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "free block size is zero?")
 
         /* Decode length of this free block */
         H5F_DECODE_LENGTH_LEN(image, fl->size, heap->sizeof_size);
         if((fl->offset + fl->size) > heap->dblk_size)
-            H5E_THROW(H5E_BADRANGE, "bad heap free list");
+            HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "bad heap free list")
 
         /* Append node onto list */
         if(tail)
@@ -210,13 +213,14 @@ H5HL__fl_deserialize(H5HL_t *heap))
         fl = NULL;
     } /* end while */
 
-CATCH
+done:
     if(ret_value < 0)
         if(fl)
             /* H5FL_FREE always returns NULL so we can't check for errors */
-            fl = (H5HL_free_t *)H5FL_FREE(H5HL_free_t, fl);
+            fl = H5FL_FREE(H5HL_free_t, fl);
 
-END_FUNC(STATIC) /* end H5HL__fl_deserialize() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HL__fl_deserialize() */
 
 
 /*-------------------------------------------------------------------------
@@ -414,8 +418,9 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata,
 
     /* Free list head */
     H5F_DECODE_LENGTH_LEN(image, heap->free_block, udata->sizeof_size);
-    if(heap->free_block != H5HL_FREE_NULL && heap->free_block >= heap->dblk_size)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad heap free list");
+
+    if((heap->free_block != H5HL_FREE_NULL) && (heap->free_block >= heap->dblk_size))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad heap free list")
 
     /* Heap data address */
     H5F_addr_decode_len(udata->sizeof_addr, &image, &(heap->dblk_addr));

@@ -149,11 +149,7 @@ END_FUNC(PKG) /* end H5HL__inc_rc() */
 
 
 /*-------------------------------------------------------------------------
-<<<<<<< .working
- * Function:    H5HL__dec_rc
-=======
  * Function:	H5HL__dec_rc
->>>>>>> .merge-right.r27768
  *
  * Purpose:     Decrement ref. count on heap
  *

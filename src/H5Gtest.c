@@ -802,8 +802,7 @@ H5G__verify_cached_stabs_test(hid_t gid)
 
     /* Iterate over the b-tree, checking validity of cached information */
     if((ret_value = H5B_iterate(grp->oloc.file, dxpl_id, H5B_SNODE,
-            stab.btree_addr, H5G_verify_cached_stabs_test_cb, &udata))
-            < 0)
+            stab.btree_addr, H5G_verify_cached_stabs_test_cb, &udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "iteration operator failed");
 
     /* Reset metadata tagging */
