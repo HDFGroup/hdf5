@@ -140,7 +140,6 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/))
     heap->single_cache_obj = TRUE;
     heap->dblk_addr = heap->prfx_addr + (hsize_t)heap->prfx_size;
     heap->dblk_size = size_hint;
-    heap->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
     if(size_hint)
         if(NULL == (heap->dblk_image = H5FL_BLK_CALLOC(lheap_chunk, size_hint)))
             H5E_THROW(H5E_CANTALLOC, "memory allocation failed");
@@ -1080,60 +1079,3 @@ CATCH
 
 END_FUNC(PRIV) /* end H5HL_heapsize() */
 
-
-/*-------------------------------------------------------------------------
- * Function:    H5HL_depend
- *
- * Purpose:     Create a child flush dependency between the local heap
- *              and another piece of metadata in the file.
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2011
- *
- *-------------------------------------------------------------------------
- */
-BEGIN_FUNC(PRIV, ERR,
-herr_t, SUCCEED, FAIL,
-H5HL_depend(H5AC_info_t *parent_entry, H5HL_t *heap))
-
-    /* Check arguments */
-    HDassert(heap);
-
-    /* Set up a flush dependency between the parent entry and the local heap */
-    if(FAIL == H5HL__create_flush_depend(parent_entry, (H5AC_info_t *)heap))
-        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on file metadata");
-
-CATCH
-    /* No special processing on errors */
-END_FUNC(PRIV) /* end H5HL_depend() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5HL_undepend
- *
- * Purpose:     Remove a child flush dependency between the local heap and
- *              another piece of metadata in the file.
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2011
- *
- *-------------------------------------------------------------------------
- */
-BEGIN_FUNC(PRIV, ERR,
-herr_t, SUCCEED, FAIL,
-H5HL_undepend(H5AC_info_t *parent_entry, H5HL_t *heap))
-
-    /* Check arguments */
-    HDassert(heap);
-
-    /* Remove a flush dependency between the parent entry and the local heap */
-    if(FAIL == H5HL__destroy_flush_depend(parent_entry, (H5AC_info_t *)heap))
-        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency on file metadata");
-
-CATCH
-    /* No special processing on errors */
-END_FUNC(PRIV) /* end H5HL_undepend() */

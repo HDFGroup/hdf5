@@ -94,7 +94,6 @@ static herr_t H5HL__cache_datablock_image_len(const void *thing,
     size_t *compressed_image_len_ptr);
 static herr_t H5HL__cache_datablock_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
-static herr_t H5HL__cache_datablock_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5HL__cache_datablock_free_icr(void *thing);
 
 /* Free list de/serialization */
@@ -134,7 +133,7 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
     H5HL__cache_datablock_image_len,    /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5HL__cache_datablock_serialize,    /* 'serialize' callback */
-    H5HL__cache_datablock_notify,	/* 'notify' callback */
+    NULL,                               /* 'notify' callback */
     H5HL__cache_datablock_free_icr,     /* 'free_icr' callback */
     NULL,                               /* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
@@ -886,63 +885,9 @@ H5HL__cache_datablock_serialize(const H5F_t *f, void *image, size_t len,
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HL__cache_datablock_serialize() */
 
-
-/*-------------------------------------------------------------------------
- * Function:    H5HL__cache_datablock_notify
- *
- * Purpose:     Handle cache action notifications
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2011
- *
- *-------------------------------------------------------------------------
- */
-BEGIN_FUNC(STATIC, ERR,
-herr_t, SUCCEED, FAIL,
-H5HL__cache_datablock_notify(H5AC_notify_action_t action, void *_thing))
-    
-    /* Local variables */
-    H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing;
-
-    /* Sanity check */
-    HDassert(dblk);
-
-    /* Check if the file was opened with SWMR-write access */
-    if(dblk->heap->swmr_write) {
-        /* Determine which action to take */
-        switch(action) {
-            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
-	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
-                /* Create flush dependency on parent */
-                if(FAIL == H5HL__create_flush_depend((H5AC_info_t *)dblk->heap->prfx, (H5AC_info_t *)dblk))
-                    H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block and parent, address = %llu", (unsigned long long)dblk->heap->dblk_addr);
-                break;
-
-	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
-                /* do nothing */
-                break;
-
-            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-		/* Destroy flush dependency on parent */
-                if(H5HL__destroy_flush_depend((H5AC_info_t *)dblk->heap->prfx, (H5AC_info_t *)dblk) < 0)
-                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency")
-                break;
-
-            default:
-#ifdef NDEBUG
-                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache");
-#else /* NDEBUG */
-                HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
-        } /* end switch */
-    } /* end if */
-
-CATCH
-    /* No special processing on errors */
-
-END_FUNC(STATIC) /* end H5HL__cache_datablock_notify() */
+/*********************************************/
+/* no H5HL_cache_datablock_notify() function */
+/*********************************************/
 
 
 /*-------------------------------------------------------------------------
