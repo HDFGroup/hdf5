@@ -3248,7 +3248,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-H5_ATTR_PURE static
+static
 hbool_t H5TB_find_field(const char *field, const char *field_list)
 {
     const char *start = field_list;

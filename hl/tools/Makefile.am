@@ -21,9 +21,7 @@
 
 include $(top_srcdir)/config/commence.am
 
-CONFIG=ordered
-
 # All subdirectories
-SUBDIRS=gif2h5 h5watch
+SUBDIRS=gif2h5
 
 include $(top_srcdir)/config/conclude.am

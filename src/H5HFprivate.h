@@ -127,8 +127,6 @@ H5_DLL herr_t H5HF_op(H5HF_t *fh, hid_t dxpl_id, const void *id,
 H5_DLL herr_t H5HF_remove(H5HF_t *fh, hid_t dxpl_id, const void *id);
 H5_DLL herr_t H5HF_close(H5HF_t *fh, hid_t dxpl_id);
 H5_DLL herr_t H5HF_delete(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr);
-H5_DLL herr_t H5HF_depend(H5AC_info_t *parent_entry, H5HF_t *fh);
-H5_DLL herr_t H5HF_undepend(H5AC_info_t *parent_entry, H5HF_t *fh);
 
 /* Statistics routines */
 H5_DLL herr_t H5HF_stat_info(const H5HF_t *fh, H5HF_stat_t *stats);

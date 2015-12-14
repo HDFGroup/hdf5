@@ -31,7 +31,6 @@
 #include "H5FSpublic.h"
 
 /* Private headers needed by this file */
-#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 
@@ -184,8 +183,6 @@ H5_DLL herr_t H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace);
 H5_DLL herr_t H5FS_alloc_hdr(H5F_t *f, H5FS_t *fspace, haddr_t *fs_addr, hid_t dxpl_id);
 H5_DLL herr_t H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id);
 H5_DLL herr_t H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id);
-H5_DLL herr_t H5FS_depend(H5AC_info_t *parent_entry, H5FS_t *fs);
-H5_DLL herr_t H5FS_undepend(H5AC_info_t *parent_entry, H5FS_t *fs);
 
 /* Free space section routines */
 H5_DLL herr_t H5FS_sect_add(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
