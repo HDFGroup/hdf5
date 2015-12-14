@@ -776,7 +776,7 @@ test_h5o_link(void)
     hid_t lcpl_id=-1;
     hsize_t dims[2] = {TEST6_DIM1, TEST6_DIM2};
     htri_t committed;           /* Whether the named datatype is committed */
-    hbool_t new_format;         /* Whether to use the new format or not */
+    unsigned new_format;        /* Whether to use the new format or not */
     int wdata[TEST6_DIM1][TEST6_DIM2];
     int rdata[TEST6_DIM1][TEST6_DIM2];
     int i, n, j;
@@ -1334,6 +1334,7 @@ test_h5o_getinfo_same_file(void)
     CHECK(ret, FAIL, "H5Fclose");
 
 } /* test_h5o_getinfo_same_file() */
+
 
 
 /****************************************************************

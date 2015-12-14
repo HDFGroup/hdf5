@@ -1639,7 +1639,7 @@ H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *e
      */
     for(x = 0; x < list->header->list_max; x++) {
         if((list->messages[x].location != H5SM_NO_LOC) &&
-                (0 == H5SM_message_compare(key, &(list->messages[x]))))
+                (0 == H5SM__message_compare(key, &(list->messages[x]))))
             HGOTO_DONE(x)
         else if(empty_pos && list->messages[x].location == H5SM_NO_LOC) {
             /* Note position */
@@ -2672,8 +2672,6 @@ H5SM_list_debug(H5F_t *f, hid_t dxpl_id, haddr_t list_addr, FILE *stream,
                     "Location:", "in heap");
             HDfprintf(stream, "%*s%-*s 0x%Zx\n", indent + 3, "", fwidth,
                     "Heap ID:", list->messages[x].u.heap_loc.fheap_id);
-H5HF_id_print(fh, dxpl_id, 
-    &(list->messages[x].u.heap_loc.fheap_id), stream, indent + 6, (fwidth - 3));
             HDfprintf(stream, "%*s%-*s %u\n", indent + 3, "", fwidth,
                     "Reference count:", list->messages[x].u.heap_loc.ref_count);
         } /* end if */

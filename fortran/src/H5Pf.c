@@ -4843,6 +4843,10 @@ h5pset_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_dens
  *
  * SOURCE
 */
+#ifndef H5_HAVE_DIRECT
+/* Only gets gcc const attribute when the direct VFD is not built. */
+H5_ATTR_CONST
+#endif
 int_f
 h5pset_fapl_direct_c(hid_t_f H5_ATTR_UNUSED *fapl_id, size_t_f H5_ATTR_UNUSED *alignment, size_t_f H5_ATTR_UNUSED *block_size, size_t_f H5_ATTR_UNUSED *cbuf_size)
 /******/
@@ -4886,6 +4890,10 @@ h5pset_fapl_direct_c(hid_t_f H5_ATTR_UNUSED *fapl_id, size_t_f H5_ATTR_UNUSED *a
  *
  * SOURCE
 */
+#ifndef H5_HAVE_DIRECT
+/* Only gets gcc const attribute when the direct VFD is not built. */
+H5_ATTR_CONST
+#endif
 int_f
 h5pget_fapl_direct_c(hid_t_f H5_ATTR_UNUSED *fapl_id, size_t_f H5_ATTR_UNUSED *alignment, size_t_f H5_ATTR_UNUSED *block_size, size_t_f H5_ATTR_UNUSED *cbuf_size)
 /******/

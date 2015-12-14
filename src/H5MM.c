@@ -15,13 +15,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5MM.c
- *			Jul 10 1997
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:     H5MM.c
+ *              Jul 10 1997
+ *              Robb Matzke <matzke@llnl.gov>
  *
- * Purpose:		Memory management functions.
- *
- * Modifications:
+ * Purpose:     Memory management functions
  *
  *-------------------------------------------------------------------------
  */
@@ -168,7 +166,6 @@ H5MM_realloc(void *mem, size_t size)
  *              NULL is an acceptable value for the input string.
  *
  * Return:      Success:    Pointer to a new string (NULL if s is NULL).
- *
  *              Failure:    abort()
  *
  * Programmer:  Robb Matzke
@@ -179,7 +176,7 @@ H5MM_realloc(void *mem, size_t size)
 char *
 H5MM_xstrdup(const char *s)
 {
-    char	*ret_value = NULL;
+    char    *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -204,7 +201,6 @@ done:
  *              an error will be raised.
  *
  * Return:      Success:    Pointer to a new string
- *
  *              Failure:    abort()
  *
  * Programmer:  Robb Matzke
@@ -231,21 +227,20 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MM_xfree
+ * Function:    H5MM_xfree
  *
- * Purpose:	Just like free(3) except null pointers are allowed as
- *		arguments, and the return value (always NULL) can be
- *		assigned to the pointer whose memory was just freed:
+ * Purpose:     Just like free(3) except null pointers are allowed as
+ *              arguments, and the return value (always NULL) can be
+ *              assigned to the pointer whose memory was just freed:
  *
- *			thing = H5MM_xfree (thing);
+ *              thing = H5MM_xfree (thing);
  *
- * Return:	Success:	NULL
+ * Return:      Success:    NULL
+ *              Failure:    never fails
  *
- *		Failure:	never fails
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
+ * Programmer:  Robb Matzke
+ *              matzke@llnl.gov
+ *              Jul 10 1997
  *
  *-------------------------------------------------------------------------
  */

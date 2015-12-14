@@ -1244,7 +1244,7 @@ H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
     /* Get value */
     if(offset) {
         if(H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, offset) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set offset for family file")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set offset for family file")
     } /* end if */
 
 done:
@@ -1324,7 +1324,7 @@ H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
     /* Get value */
     if(type) {
         if(H5P_get(plist, H5F_ACS_MULTI_TYPE_NAME, type) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get type for multi driver")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get type for multi driver")
     } /* end if */
 
 done:
@@ -3030,7 +3030,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
         H5_ENCODE_UNSIGNED(*pp, config->close_trace_file);
 
-        HDmemcpy(*pp, (const uint8_t *)(config->trace_file_name), H5AC__MAX_TRACE_FILE_NAME_LEN + 1);
+        HDmemcpy(*pp, (const uint8_t *)(config->trace_file_name), (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + 1));
         *pp += H5AC__MAX_TRACE_FILE_NAME_LEN + 1;
 
         H5_ENCODE_UNSIGNED(*pp, config->evictions_enabled);

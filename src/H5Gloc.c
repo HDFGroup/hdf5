@@ -259,7 +259,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5G__loc_copy
+ * Function:	H5G_loc_copy
  *
  * Purpose:	Copy over information for a location
  *
@@ -271,11 +271,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth)
+H5G_loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args. */
     HDassert(dst);
@@ -289,7 +289,7 @@ H5G__loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G__loc_copy() */
+} /* end H5G_loc_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -388,7 +388,7 @@ H5G_loc_find_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char *name,
     /* (Group traversal callbacks are responsible for either taking ownership
      *  of the group location for the object, or freeing it. - QAK)
      */
-    H5G__loc_copy(udata->loc, obj_loc, H5_COPY_SHALLOW);
+    H5G_loc_copy(udata->loc, obj_loc, H5_COPY_SHALLOW);
     *own_loc = H5G_OWN_OBJ_LOC;
 
 done:

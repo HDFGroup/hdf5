@@ -626,7 +626,7 @@ Test Whether the Displacement of MPI derived datatype
 and this platform.
 
 1. Details for the test:
-1) Create two derived datatypes with MPI_Type_hindexed:
+1) Create two derived datatypes with MPI_Type_create_hindexed:
         datatype1:
 	count = 1, blocklens = 1, offsets = 0,
 	base type = MPI_BYTE(essentially a char)
@@ -635,7 +635,7 @@ and this platform.
 	base type = MPI_BYTE
 
 2) Using these two derived datatypes,
-   Build another derived datatype with MPI_Type_struct:
+   Build another derived datatype with MPI_Type_create_struct:
         advtype: derived from datatype1 and datatype2
         advtype:
 	count = 2, blocklens[0] = 1, blocklens[1]=1,
@@ -716,7 +716,7 @@ static int test_mpio_derived_dtype(char *filename) {
     blocklens[0] = 1;
     offsets[0]   = 0;
 
-    if((mpi_err= MPI_Type_hindexed(count,blocklens,offsets,MPI_BYTE,&filetype))
+    if((mpi_err= MPI_Type_create_hindexed(count,blocklens,offsets,MPI_BYTE,&filetype))
        != MPI_SUCCESS){
       	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
 	printf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
@@ -732,7 +732,7 @@ static int test_mpio_derived_dtype(char *filename) {
     count = 1;
     blocklens[0]=1;
     offsets[0] = 1;
-    if((mpi_err= MPI_Type_hindexed(count,blocklens,offsets,MPI_BYTE,&filetypenew))
+    if((mpi_err= MPI_Type_create_hindexed(count,blocklens,offsets,MPI_BYTE,&filetypenew))
        != MPI_SUCCESS){
       	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
 	printf("MPI_Type_contiguous failed (%s)\n", mpi_err_str);
@@ -753,10 +753,10 @@ static int test_mpio_derived_dtype(char *filename) {
     bas_filetype[0]  = filetype;
     bas_filetype[1]  = filetypenew;
 
-    if((mpi_err= MPI_Type_struct(outcount,adv_blocklens,adv_disp,bas_filetype,&adv_filetype))
+    if((mpi_err= MPI_Type_create_struct(outcount,adv_blocklens,adv_disp,bas_filetype,&adv_filetype))
        != MPI_SUCCESS){
       	MPI_Error_string(mpi_err, mpi_err_str, &mpi_err_strlen);
-	printf("MPI_Type_struct failed (%s)\n", mpi_err_str);
+	printf("MPI_Type_create_struct failed (%s)\n", mpi_err_str);
 	return 1;
     }
     if((mpi_err=MPI_Type_commit(&adv_filetype))!=MPI_SUCCESS){
@@ -843,7 +843,7 @@ has no contribution to IO. To properly test this case, at least FOUR
 processes are needed.
 
 1. Details for the test:
-1) Create one derived datatype with MPI_Type_hindexed:
+1) Create one derived datatype with MPI_Type_create_hindexed:
 
 2) Choosing at least two processes to contribute none for IO with
    the buf size inside MPI_Write_at_all to 0.
@@ -899,7 +899,7 @@ test_mpio_special_collective(char *filename)
     offsets[1] = (mpi_size+mpi_rank)*count;
 
     if(count !=0) {
-        if((mpi_err = MPI_Type_hindexed(2,
+        if((mpi_err = MPI_Type_create_hindexed(2,
                                         blocklens,
                                         offsets,
                                         etype,
@@ -915,7 +915,7 @@ test_mpio_special_collective(char *filename)
             return 1;
         } /* end if */
 
-        if((mpi_err = MPI_Type_hindexed(2,
+        if((mpi_err = MPI_Type_create_hindexed(2,
                                         blocklens,
                                         offsets,
                                         etype,

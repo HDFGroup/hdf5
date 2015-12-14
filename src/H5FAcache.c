@@ -15,11 +15,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FAcache.c
- *			Jul  2 2009
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:     H5FAcache.c
+ *		Jul  2 2009
+ *		Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		Implement fixed array metadata cache methods.
+ * Purpose:     Implement fixed array metadata cache methods.
  *
  *-------------------------------------------------------------------------
  */
@@ -205,7 +205,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_get_load_size() */
  *
  * Purpose:	Loads a data structure from the disk.
  *
- * Return:	Success:	Pointer to a new B-tree.
+ * Return:	Success:	Pointer to a new Fixed array
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -234,24 +234,24 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t len,
 
     /* Allocate space for the fixed array data structure */
     if(NULL == (hdr = H5FA__hdr_alloc(udata->f)))
-	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array shared header")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array shared header")
 
     /* Set the fixed array header's address */
     hdr->addr = udata->addr;
 
     /* Magic number */
     if(HDmemcmp(image, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-	H5E_THROW(H5E_BADVALUE, "wrong fixed array header signature")
+        H5E_THROW(H5E_BADVALUE, "wrong fixed array header signature")
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*image++ != H5FA_HDR_VERSION)
-	H5E_THROW(H5E_VERSION, "wrong fixed array header version")
+        H5E_THROW(H5E_VERSION, "wrong fixed array header version")
 
     /* Fixed array class */
     id = (H5FA_cls_id_t)*image++;
     if(id >= H5FA_NUM_CLS_ID)
-	H5E_THROW(H5E_BADTYPE, "incorrect fixed array class")
+        H5E_THROW(H5E_BADTYPE, "incorrect fixed array class")
     hdr->cparam.cls = H5FA_client_class_g[id];
 
     /* General array creation/configuration information */
@@ -418,7 +418,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_serialize() */
  * Purpose:	Destroy/release an "in core representation" of a data
  *              structure
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              koziol@hdfgroup.org
@@ -529,7 +529,7 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t len,
 
     /* Allocate the fixed array data block */
     if(NULL == (dblock = H5FA__dblock_alloc(udata->hdr)))
-	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block")
 
     HDassert(((!dblock->npages) && (len == (size_t)H5FA_DBLOCK_SIZE(dblock))) 
              || (len == (size_t)H5FA_DBLOCK_PREFIX_SIZE(dblock)));
@@ -539,21 +539,21 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t len,
 
     /* Magic number */
     if(HDmemcmp(image, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-	H5E_THROW(H5E_BADVALUE, "wrong fixed array data block signature")
+        H5E_THROW(H5E_BADVALUE, "wrong fixed array data block signature")
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*image++ != H5FA_DBLOCK_VERSION)
-	H5E_THROW(H5E_VERSION, "wrong fixed array data block version")
+        H5E_THROW(H5E_VERSION, "wrong fixed array data block version")
 
     /* Fixed array type */
     if(*image++ != (uint8_t)udata->hdr->cparam.cls->id)
-	H5E_THROW(H5E_BADTYPE, "incorrect fixed array class")
+        H5E_THROW(H5E_BADTYPE, "incorrect fixed array class")
 
     /* Address of header for array that owns this block (just for file integrity checks) */
     H5F_addr_decode(udata->hdr->f, &image, &arr_addr);
     if(H5F_addr_ne(arr_addr, udata->hdr->addr))
-	H5E_THROW(H5E_BADVALUE, "wrong fixed array header address")
+        H5E_THROW(H5E_BADVALUE, "wrong fixed array header address")
 
     /* Page initialization flags */
     if(dblock->npages > 0) {
@@ -717,7 +717,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_serialize() */
  * Purpose:	Destroy/release an "in core representation" of a data
  *              structure
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              koziol@hdfgroup.org
@@ -936,7 +936,7 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_image_len() */
  *
  * Purpose:	Flushes a dirty object to disk.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              koziol@hdfgroup.org

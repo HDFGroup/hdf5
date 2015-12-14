@@ -201,7 +201,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     grp_loc_copy.path = &grp_path_copy;
     grp_loc_copy.oloc = &grp_oloc_copy;
     H5G_loc_reset(&grp_loc_copy);
-    if(H5G__loc_copy(&grp_loc_copy, grp_loc, H5_COPY_DEEP) < 0)
+    if(H5G_loc_copy(&grp_loc_copy, grp_loc, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "unable to copy object location")
 
     /* Create a group ID to pass to the user-defined callback */
@@ -263,7 +263,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     H5G_loc_free(obj_loc);
 
     /* Copy new object's location information */
-    H5G__loc_copy(obj_loc, &new_loc, H5_COPY_DEEP);
+    H5G_loc_copy(obj_loc, &new_loc, H5_COPY_DEEP);
 
     /* Hold the file open until we free this object header (otherwise the
      * object location will be invalidated when the file closes).
@@ -344,7 +344,7 @@ H5G_traverse_slink(const H5G_loc_t *grp_loc, const H5O_link_t *lnk,
     /* ("tracking the names properly" means to ignore the effects of the
      *  link traversal on the object's & group's paths - QAK)
      */
-    H5G__loc_copy(&tmp_grp_loc, grp_loc, H5_COPY_DEEP);
+    H5G_loc_copy(&tmp_grp_loc, grp_loc, H5_COPY_DEEP);
     tmp_grp_loc_set = TRUE;
 
     /* Hold the object's group hier. path to restore later */
@@ -544,7 +544,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 #endif /* H5_USING_MEMCHECKER */
 
     /* Deep copy of the starting location to group location */
-    if(H5G__loc_copy(&grp_loc, &loc, H5_COPY_DEEP) < 0)
+    if(H5G_loc_copy(&grp_loc, &loc, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to copy location")
     group_copy = TRUE;
 
@@ -761,7 +761,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
 
         /* Transfer "ownership" of the object's information to the group object */
         H5G_loc_free(&grp_loc);
-        H5G__loc_copy(&grp_loc, &obj_loc, H5_COPY_SHALLOW);
+        H5G_loc_copy(&grp_loc, &obj_loc, H5_COPY_SHALLOW);
         H5G_loc_reset(&obj_loc);
         obj_loc_valid = FALSE;
 

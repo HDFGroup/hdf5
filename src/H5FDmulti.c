@@ -46,14 +46,14 @@
 /* Loop through all mapped files */
 #define UNIQUE_MEMBERS(MAP,LOOPVAR) {					      \
     H5FD_mem_t _unmapped, LOOPVAR;					      \
-    hbool_t _seen[H5FD_MEM_NTYPES];					      \
+    unsigned _seen[H5FD_MEM_NTYPES];					      \
 									      \
-    memset(_seen, 0, sizeof _seen);					      \
+    memset(_seen, 0, sizeof _seen);	      				      \
     for (_unmapped=H5FD_MEM_SUPER; _unmapped<H5FD_MEM_NTYPES; _unmapped=(H5FD_mem_t)(_unmapped+1)) {  \
 	LOOPVAR = MAP[_unmapped];					      \
 	if (H5FD_MEM_DEFAULT==LOOPVAR) LOOPVAR=_unmapped;		      \
 	assert(LOOPVAR>0 && LOOPVAR<H5FD_MEM_NTYPES);			      \
-	if (_seen[LOOPVAR]++) continue;
+	if (_seen[LOOPVAR]++) continue;					      \
 
 #define ALL_MEMBERS(LOOPVAR) {						      \
     H5FD_mem_t LOOPVAR;							      \
@@ -135,6 +135,8 @@ static herr_t H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, ha
 			       size_t size, const void *_buf);
 static herr_t H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD_multi_lock(H5FD_t *_file, hbool_t rw);
+static herr_t H5FD_multi_unlock(H5FD_t *_file);
 
 /* The class struct */
 static const H5FD_class_t H5FD_multi_g = {
@@ -167,8 +169,8 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_write,				/*write			*/
     H5FD_multi_flush,				/*flush			*/
     H5FD_multi_truncate,			/*truncate		*/
-    NULL,                                       /*lock                  */
-    NULL,                                       /*unlock                */
+    H5FD_multi_lock,                            /*lock                  */
+    H5FD_multi_unlock,                          /*unlock                */
     H5FD_FLMAP_DEFAULT 				/*fl_map		*/
 };
 
@@ -1783,6 +1785,101 @@ H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 
     return 0;
 } /* end H5FD_multi_truncate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_lock
+ *
+ * Purpose:	Place a lock on all multi members.
+ *		When there is error in locking a member file, it will not
+ *		proceed further and will try to remove the locks  of those
+ *		member files that are locked before error is encountered.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Vailin Choi; March 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
+{
+    H5FD_multi_t	*file = (H5FD_multi_t*)_file;
+    int			nerrors = 0;
+    H5FD_mem_t 		out_mt;
+    static const char *func="H5FD_multi_unlock";  /* Function Name for error reporting */
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    /* Lock all member files */
+    ALL_MEMBERS(mt) {
+        out_mt = mt;
+        if(file->memb[mt]) {
+            H5E_BEGIN_TRY {
+                if(H5FDlock(file->memb[mt], rw) < 0) {
+                    nerrors++;
+                    break;
+                } /* end if */
+            } H5E_END_TRY;
+        } /* end if */
+    } END_MEMBERS;
+
+    /* Try to unlock the member files that are locked before error is encountered */
+    if(nerrors) {
+        H5FD_mem_t k;
+
+        for(k = H5FD_MEM_DEFAULT; k < out_mt; k = (H5FD_mem_t)(k + 1)) {
+            H5E_BEGIN_TRY {
+                if(H5FDunlock(file->memb[k]) < 0)
+                    nerrors++;
+            } H5E_END_TRY;
+        } /* end for */
+    } /* end if */
+
+    if(nerrors)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error locking member files", -1)
+    return 0;
+
+} /* H5FD_multi_lock() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_unlock
+ *
+ * Purpose:	Remove the lock on all multi members.
+ *		It will try to unlock all member files but will record error
+ *		encountered.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Vailin Choi; March 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_multi_unlock(H5FD_t *_file)
+{
+    H5FD_multi_t	*file = (H5FD_multi_t*)_file;
+    int			nerrors=0;
+    static const char *func="H5FD_multi_unlock";  /* Function Name for error reporting */
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    ALL_MEMBERS(mt) {
+        if(file->memb[mt])
+            if(H5FDunlock(file->memb[mt]) < 0)
+		nerrors++;
+    } END_MEMBERS;
+
+    if(nerrors)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error unlocking member files", -1)
+
+    return 0;
+} /* H5FD_multi_unlock() */
 
 
 /*-------------------------------------------------------------------------

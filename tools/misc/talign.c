@@ -49,7 +49,7 @@ int main(void)
     char string5[5];
     float fok[2] = {1234.0f, 2341.0f};
     float fnok[2] = {5678.0f, 6785.0f};
-    float *fptr;
+    float *fptr = NULL;
 
     char *data = NULL;
 
@@ -143,8 +143,10 @@ out:
     if(error < 0) {
         result = 1;
         puts("*FAILED - HDF5 library error*");
-    } else if(fok[0] != fptr[0] || fok[1] != fptr[1]
-                    || fnok[0] != fptr[2] || fnok[1] != fptr[3]) {
+    } else if(!(H5_FLT_ABS_EQUAL(fok[0],  fptr[0]))
+           || !(H5_FLT_ABS_EQUAL(fok[1],  fptr[1]))
+           || !(H5_FLT_ABS_EQUAL(fnok[0], fptr[2]))
+           || !(H5_FLT_ABS_EQUAL(fnok[1], fptr[3]))) {
         char *mname;
 
         result = 1;

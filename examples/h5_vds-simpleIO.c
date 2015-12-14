@@ -3,7 +3,7 @@
   This example illustrates the concept of virtual dataset I/O
   The program  creates 2-dim source dataset and writes
   data to it. Then it creates 2-dim virtual dataset that has
-  the same dimesnion sizes and maps the all elements of the 
+  the same dimension sizes and maps the all elements of the 
   virtual dataset to all elements of the source dataset.
   Then VDS is read back.
 

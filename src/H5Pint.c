@@ -584,12 +584,12 @@ H5P_term_package(void)
 
 /*--------------------------------------------------------------------------
  NAME
-    H5P_do_prop_cb1
+    H5P__do_prop_cb1
  PURPOSE
     Internal routine to call a property list callback routine and update
     the property list accordingly.
  USAGE
-    herr_t H5P_do_prop_cb1(slist,prop,cb)
+    herr_t H5P__do_prop_cb1(slist,prop,cb)
         H5SL_t *slist;          IN/OUT: Skip list to hold changed properties
         H5P_genprop_t *prop;    IN: Property to call callback for
         H5P_prp_cb1_t *cb;      IN: Callback routine to call
@@ -605,13 +605,13 @@ H5P_term_package(void)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5P_do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
+H5P__do_prop_cb1(H5SL_t *slist, H5P_genprop_t *prop, H5P_prp_cb1_t cb)
 {
     void *tmp_value = NULL;         /* Temporary value buffer */
     H5P_genprop_t *pcopy = NULL;    /* Copy of property to insert into skip list */
     herr_t ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(slist);
@@ -650,7 +650,7 @@ done:
             H5P_free_prop(pcopy);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_do_prop_cb1() */
+} /* end H5P__do_prop_cb1() */
 
 
 /*--------------------------------------------------------------------------
@@ -876,7 +876,7 @@ H5P_copy_plist(const H5P_genplist_t *old_plist, hbool_t app_ref)
                     /* Call property copy callback, if it exists */
                     if(tmp->copy) {
                         /* Call the callback & insert changed value into skip list (if necessary) */
-                        if(H5P_do_prop_cb1(new_plist->props,tmp,tmp->copy) < 0)
+                        if(H5P__do_prop_cb1(new_plist->props, tmp, tmp->copy) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't create property")
                     } /* end if */
 
@@ -1729,7 +1729,7 @@ H5P_create(H5P_genclass_t *pclass)
                     /* Call property creation callback, if it exists */
                     if(tmp->create) {
                         /* Call the callback & insert changed value into skip list (if necessary) */
-                        if(H5P_do_prop_cb1(plist->props,tmp,tmp->create) < 0)
+                        if(H5P__do_prop_cb1(plist->props, tmp, tmp->create) < 0)
                             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, NULL,"Can't create property")
                     } /* end if */
 

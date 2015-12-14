@@ -32,11 +32,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"    /* Generic Functions      */
-#include "H5Fprivate.h"    /* File access        */
-#include "H5MMprivate.h"  /* Memory management      */
-#include "H5Eprivate.h"
-
+#include "H5private.h"		/* Generic Functions			*/
+#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* File access				*/
+#include "H5MMprivate.h"	/* Memory management			*/
 
 
 /****************/
@@ -72,6 +71,9 @@
 /*******************/
 /* Local Variables */
 /*******************/
+
+/* Track whether tzset routine was called */
+static hbool_t H5_ntzset = FALSE;
 
 
 /*-------------------------------------------------------------------------
@@ -584,7 +586,154 @@ void HDsrand(unsigned int seed)
 }
 #endif /* H5_HAVE_RAND_R */
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    Pflock
+ *
+ * Purpose:     Wrapper function for POSIX systems where flock(2) is not
+ *              available.
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+/* NOTE: Compile this all the time on POSIX systems, even when flock(2) is
+ *       present so that it's less likely to become dead code.
+ */
+#ifdef H5_HAVE_FCNTL
+int
+Pflock(int fd, int operation) {
+    
+    struct flock    flk;
 
+    /* Set the lock type */
+    if(operation & LOCK_UN)
+        flk.l_type = F_UNLCK;
+    else if(operation & LOCK_SH)
+        flk.l_type = F_RDLCK;
+    else
+        flk.l_type = F_WRLCK;
+
+    /* Set the other flock struct values */
+    flk.l_whence = SEEK_SET;
+    flk.l_start = 0;
+    flk.l_len = 0;              /* to EOF */
+    flk.l_pid = 0;              /* not used with set */
+
+    /* Lock or unlock */
+    if(HDfcntl(fd, F_SETLK, flk) < 0)
+        return -1;
+
+    return 0;
+
+} /* end Pflock() */
+#endif /* H5_HAVE_FCNTL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    Nflock
+ *
+ * Purpose:     Wrapper function for systems where no file locking is
+ *              available.
+ *
+ * Return:      Failure:    -1 (always fails)
+ *
+ *-------------------------------------------------------------------------
+ */
+int H5_ATTR_CONST
+Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
+    /* just fail */
+    return -1;
+} /* end Nflock() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_make_time
+ *
+ * Purpose:	Portability routine to abstract converting a 'tm' struct into
+ *		a time_t value.
+ *
+ * Note:	This is a little problematic because mktime() operates on
+ *		local times.  We convert to local time and then figure out the
+ *		adjustment based on the local time zone and daylight savings
+ *		setting.
+ *
+ * Return:	Success:  The value of timezone
+ *		Failure:  -1
+ *
+ * Programmer:  Quincey Koziol
+ *              November 18, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+time_t
+H5_make_time(struct tm *tm)
+{
+    time_t the_time;    /* The converted time */
+#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900)  /* VS 2015 */
+    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
+     * variable declared in time.h. That variable was deprecated and in
+     * VS 2015 is removed, with _get_timezone replacing it.
+     */
+    long timezone = 0;
+#endif /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+    time_t ret_value;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    HDassert(tm);
+
+    /* Initialize timezone information */
+    if(!H5_ntzset) {
+        HDtzset();
+        H5_ntzset = TRUE;
+    } /* end if */
+
+    /* Perform base conversion */
+    if((time_t)-1 == (the_time = HDmktime(tm)))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCONVERT, FAIL, "badly formatted modification time message")
+
+    /* Adjust for timezones */
+#if defined(H5_HAVE_TM_GMTOFF)
+    /* BSD-like systems */
+    the_time += tm->tm_gmtoff;
+#elif defined(H5_HAVE_TIMEZONE)
+#if defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900)  /* VS 2015 */
+    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
+     * variable declared in time.h. That variable was deprecated and in
+     * VS 2015 is removed, with _get_timezone replacing it.
+     */
+    _get_timezone(&timezone);
+#endif /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+
+    the_time -= timezone - (tm->tm_isdst ? 3600 : 0);
+#else
+    /*
+     * The catch-all.  If we can't convert a character string universal
+     * coordinated time to a time_t value reliably then we can't decode the
+     * modification time message. This really isn't as bad as it sounds -- the
+     * only way a user can get the modification time is from our internal
+     * query routines, which can gracefully recover.
+     */
+    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "unable to obtain local timezone information")
+#endif
+
+    /* Set return value */
+    ret_value = the_time;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_make_time() */
+
+#ifdef H5_HAVE_VISUAL_STUDIO
+
+/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
+#define _W32_FT_OFFSET (116444736000000000ULL)
+
+
 /*-------------------------------------------------------------------------
  * Function:  Wgettimeofday
  *
@@ -606,11 +755,6 @@ void HDsrand(unsigned int seed)
  *
  *-------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_VISUAL_STUDIO
-
-/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
-#define _W32_FT_OFFSET (116444736000000000ULL)
-
 int
 Wgettimeofday(struct timeval *tv, struct timezone *tz)
  {
@@ -685,7 +829,55 @@ int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap)
     return count;
 }
 
-#endif
+
+/*-------------------------------------------------------------------------
+ * Function:    Wflock
+ *
+ * Purpose:     Wrapper function for flock on Windows systems
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+Wflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
+
+/* This is a no-op while we implement a Win32 VFD */
+#if 0
+int
+Wflock(int fd, int operation) {
+
+    HANDLE          hFile;
+    DWORD           dwFlags = LOCKFILE_FAIL_IMMEDIATELY;
+    DWORD           dwReserved = 0;
+                    /* MAXDWORD for entire file */
+    DWORD           nNumberOfBytesToLockLow = MAXDWORD;
+    DWORD           nNumberOfBytesToLockHigh = MAXDWORD;
+                    /* Must initialize OVERLAPPED struct */
+    OVERLAPPED      overlapped = {0};
+
+    /* Get Windows HANDLE */
+    hFile = _get_osfhandle(fd);
+
+    /* Convert to Windows flags */
+    if(operation & LOCK_EX)
+        dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;
+
+    /* Lock or unlock */
+    if(operation & LOCK_UN)
+        if(0 == UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow,
+                            nNumberOfBytesToLockHigh, &overlapped))
+            return -1;
+    else
+        if(0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow,
+                            nNumberOfBytesToLockHigh, &overlapped))
+            return -1;
+#endif /* 0 */
+    return 0;
+} /* end Wflock() */
+
+#endif /* H5_HAVE_VISUAL_STUDIO */
 
 
 /*-------------------------------------------------------------------------

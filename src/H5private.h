@@ -119,6 +119,13 @@
 #endif
 
 /*
+ * flock() in sys/file.h is used for the implemention of file locking.
+ */
+#if defined(H5_HAVE_FLOCK) && defined(H5_HAVE_SYS_FILE_H)
+#   include <sys/file.h>
+#endif
+
+/*
  * Resource usage is not Posix.1 but HDF5 uses it anyway for some performance
  * and debugging code if available.
  */
@@ -291,20 +298,30 @@
  *
  * Note that Solaris Studio supports attribute, but does not support the
  * attributes we use.
+ *
+ * H5_ATTR_CONST is redefined in tools/h5repack/dynlib_rpk.c to quiet
+ * gcc warnings (it has to use the public API and can't include this
+ * file). Be sure to update that file if the #ifdefs change here.
  */
 #ifdef __cplusplus
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED    /*void*/
-#   define H5_ATTR_NORETURN  /*void*/
+#   define H5_ATTR_UNUSED       /*void*/
+#   define H5_ATTR_NORETURN     /*void*/
+#   define H5_ATTR_CONST        /*void*/
+#   define H5_ATTR_PURE         /*void*/
 #else /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #   define H5_ATTR_FORMAT(X,Y,Z)  __attribute__((format(X, Y, Z)))
-#   define H5_ATTR_UNUSED    __attribute__((unused))
-#   define H5_ATTR_NORETURN  __attribute__((noreturn))
+#   define H5_ATTR_UNUSED       __attribute__((unused))
+#   define H5_ATTR_NORETURN     __attribute__((noreturn))
+#   define H5_ATTR_CONST        __attribute__((const))
+#   define H5_ATTR_PURE         __attribute__((pure))
 #else
 #   define H5_ATTR_FORMAT(X,Y,Z)  /*void*/
-#   define H5_ATTR_UNUSED    /*void*/
-#   define H5_ATTR_NORETURN  /*void*/
+#   define H5_ATTR_UNUSED       /*void*/
+#   define H5_ATTR_NORETURN     /*void*/
+#   define H5_ATTR_CONST        /*void*/
+#   define H5_ATTR_PURE         /*void*/
 #endif
 #endif /* __cplusplus */
 
@@ -364,10 +381,10 @@
  * HDF Boolean type.
  */
 #ifndef FALSE
-#   define FALSE 0
+  #define FALSE false
 #endif
 #ifndef TRUE
-#   define TRUE 1
+  #define TRUE true
 #endif
 
 /*
@@ -495,7 +512,7 @@
 #endif
 
 /* Double constant wrapper
- * 
+ *
  * Quiets gcc warnings from -Wunsuffixed-float-constants.
  *
  * This is a really annoying warning since the standard specifies that
@@ -535,6 +552,18 @@
 #define H5_GB (1024.0F * 1024.0F * 1024.0F)
 #define H5_TB (1024.0F * 1024.0F * 1024.0F * 1024.0F)
 #define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
+
+#ifndef H5_HAVE_FLOCK
+/* flock() operations. Used in the source so we have to define them when
+ * the call is not available (e.g.: Windows). These should NOT be used
+ * with system-provided flock() calls since the values will come from the
+ * header file.
+ */
+#define LOCK_SH     0x01
+#define LOCK_EX     0x02
+#define LOCK_NB     0x04
+#define LOCK_UN     0x08
+#endif /* H5_HAVE_FLOCK */
 
 /*
  * Data types and functions for timing certain parts of the library.
@@ -740,7 +769,11 @@ typedef struct {
 #ifndef HDfclose
     #define HDfclose(F)    fclose(F)
 #endif /* HDfclose */
-/* fcntl() variable arguments */
+#ifdef H5_HAVE_FCNTL
+    #ifndef HDfcntl
+        #define HDfcntl(F,C,...)    fcntl(F,C,__VA_ARGS__)
+    #endif /* HDfcntl */
+#endif /* H5_HAVE_FCNTL */
 #ifndef HDfdopen
     #define HDfdopen(N,S)    fdopen(N,S)
 #endif /* HDfdopen */
@@ -765,6 +798,27 @@ typedef struct {
 #ifndef HDfileno
     #define HDfileno(F)    fileno(F)
 #endif /* HDfileno */
+/* Since flock is so prevalent, always build these functions
+ * when possible to avoid them becoming dead code.
+ */
+#ifdef H5_HAVE_FCNTL
+H5_DLL int Pflock(int fd, int operation);
+#endif /* H5_HAVE_FCNTL */
+H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
+#ifndef HDflock
+    /* NOTE: flock(2) is not present on all POSIX systems.
+     * If it is not present, we try a flock() equivalent based on
+     * fcntl(2), then fall back to a function that always fails if
+     * it is not present at all.
+     */
+    #if defined(H5_HAVE_FLOCK)
+        #define HDflock(F,L)    flock(F,L)
+    #elif defined(H5_HAVE_FCNTL)
+        #define HDflock(F,L)    Pflock(F,L)
+    #else
+        #define HDflock(F,L)    Nflock(F,L)
+    #endif /* H5_HAVE_FLOCK */
+#endif /* HDflock */
 #ifndef HDfloor
     #define HDfloor(X)    floor(X)
 #endif /* HDfloor */
@@ -1157,6 +1211,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
     #define HDrmdir(S)    rmdir(S)
 #endif /* HDrmdir */
 /* scanf() variable arguments */
+#ifndef HDselect
+    #define HDselect(N,RD,WR,ER,T)    select(N,RD,WR,ER,T)
+#endif /* HDsetbuf */
 #ifndef HDsetbuf
     #define HDsetbuf(F,S)    setbuf(F,S)
 #endif /* HDsetbuf */
@@ -2065,7 +2122,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
     FUNC_ENTER_COMMON_NOERR(!H5_IS_API(FUNC));                                \
     if(H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
 
-/* Use the following two macros as replacements for the FUNC_ENTER_NOAPI 
+/* Use the following two macros as replacements for the FUNC_ENTER_NOAPI
  * and FUNC_ENTER_NOAPI_NOINIT macros when the function needs to set
  * up a metadata tag. */
 #define FUNC_ENTER_NOAPI_TAG(dxpl_id, tag, err) {                             \
@@ -2340,18 +2397,21 @@ extern hbool_t H5_api_entered_g;    /* Has library already been entered through 
 #define FUNC_ENT_PUB(pkg, pkg_init)    H5_PUBLIC_ENTER(pkg, pkg_init)
 
 /* Macros for substituting a function prefix */
-#define FUNC_PREFIX_STATIC  static
+#define FUNC_PREFIX_STATIC      static
 #define FUNC_PREFIX_PKGINIT
 #define FUNC_PREFIX_PKG
 #define FUNC_PREFIX_PRIV
 #define FUNC_PREFIX_PUB
 
 /* Macros for declaring error variables */
+/* Function can detect errors and has a specific error return value */
 #define FUNC_ERR_VAR_ERR(ret_typ, err)                                        \
     hbool_t past_catch = FALSE;                                               \
     ret_typ fail_value = err;
+/* Function can detect errors but cannot return an error value (Cleanup only) */
 #define FUNC_ERR_VAR_ERRCATCH(ret_typ, err)                                   \
     hbool_t past_catch = FALSE;
+/* Function has no need to detect or clean up from errors */
 #define FUNC_ERR_VAR_NOERR(ret_typ, err)
 
 /* Use this macro when entering all functions */
@@ -2364,6 +2424,16 @@ func                                                                          \
     ret_typ ret_value = ret_init;                                             \
     H5_GLUE(FUNC_ERR_VAR_, use_err)(ret_typ, err)                             \
     H5_GLUE(FUNC_ENT_, scope)(H5_MY_PKG, H5_MY_PKG_INIT)
+
+/* Use this macro when entering functions that have no return value */
+#define BEGIN_FUNC_VOID(scope, use_err, func)                               \
+H5_GLUE(FUNC_PREFIX_, scope)                                                \
+void                                                                        \
+func                                                                        \
+/* Open function */                                                         \
+{                                                                           \
+    H5_GLUE(FUNC_ERR_VAR_, use_err)(void, -, -)                             \
+    H5_GLUE(FUNC_ENT_, scope)
 
 /* Macros for label when a function initialization can fail */
 #define H5_PRIV_YES_FUNC_INIT_FAILED func_init_failed:
@@ -2440,6 +2510,17 @@ func_init_failed:                                                             \
     /* Close Function */                                                      \
 }
 
+/* Use this macro when leaving void functions */
+#define END_FUNC_VOID(scope)                                                \
+    /* Scope-specific function conclusion */                                \
+    H5_GLUE(FUNC_LEAVE_, scope)                                             \
+                                                                            \
+    /* Leave routine */                                                     \
+    return;                                                                 \
+                                                                            \
+    /* Close Function */                                                    \
+}
+
 /* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient).
  * Make sure to use HGOTO_ERROR_TAG and HGOTO_DONE_TAG between these macros! */
 #define H5_BEGIN_TAG(dxpl, tag, err) {                                           \
@@ -2496,6 +2577,9 @@ H5_DLL uint32_t H5_checksum_crc(const void *data, size_t len);
 H5_DLL uint32_t H5_checksum_lookup3(const void *data, size_t len, uint32_t initval);
 H5_DLL uint32_t H5_checksum_metadata(const void *data, size_t len, uint32_t initval);
 H5_DLL uint32_t H5_hash_string(const char *str);
+
+/* Time related routines */
+H5_DLL time_t H5_make_time(struct tm *tm);
 
 /* Functions for building paths, etc. */
 H5_DLL herr_t   H5_build_extpath(const char *, char ** /*out*/ );

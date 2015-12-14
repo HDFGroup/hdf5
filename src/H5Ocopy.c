@@ -337,7 +337,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     size_t                 null_msgs;               /* Number of NULL messages found in each loop */
     size_t                 orig_dst_msgs;           /* Original # of messages in dest. object */
     H5O_mesg_t             *mesg_src;               /* Message in source object header */
-    H5O_mesg_t             *mesg_dst;               /* Message in source object header */
+    H5O_mesg_t             *mesg_dst;               /* Message in destination object header */
     const H5O_msg_class_t  *copy_type;              /* Type of message to use for copying */
     const H5O_obj_class_t  *obj_class = NULL;       /* Type of object we are copying */
     void                   *cpy_udata = NULL;       /* User data for passing to message callbacks */
@@ -357,12 +357,11 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     HDassert(cpy_info);
 
     /* Get pointer to object class for this object */
-    if((obj_class = H5O_obj_class(oloc_src, dxpl_id)) == NULL)
+    if(NULL == (obj_class = H5O_obj_class(oloc_src, dxpl_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object type")
 
     /* Check if the object at the address is already open in the file */
     if(H5FO_opened(oloc_src->file, oloc_src->addr) != NULL) {
-	
 	H5G_loc_t   tmp_loc; 	/* Location of object */
 	H5O_loc_t   tmp_oloc; 	/* Location of object */
 	H5G_name_t  tmp_path;	/* Object's path */
@@ -377,15 +376,14 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 	/* Flush the object of this class */
         if(obj_class->flush && obj_class->flush(&tmp_loc, dxpl_id) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
-    }
+    } /* end if */
 
     /* Get source object header */
     if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve user data for particular type of object to copy */
-    if(obj_class->get_copy_file_udata &&
-            (NULL == (cpy_udata = (obj_class->get_copy_file_udata)())))
+    if(obj_class->get_copy_file_udata && (NULL == (cpy_udata = (obj_class->get_copy_file_udata)())))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to retrieve copy user data")
 
     /* If we are merging committed datatypes, check for a match in the destination
@@ -468,7 +466,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     oh_dst->alloc_nchunks = oh_dst->nchunks = 0;
 
     /* Allocate memory for the chunk array - always start with 1 chunk */
-    if(NULL == (oh_dst->chunk = H5FL_SEQ_MALLOC(H5O_chunk_t, 1)))
+    if(NULL == (oh_dst->chunk = H5FL_SEQ_MALLOC(H5O_chunk_t, (size_t)1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Update number of allocated chunks.  There are still no chunks used. */

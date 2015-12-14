@@ -322,8 +322,9 @@ HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
     HDmemset(&bt2_cparam, 0, sizeof(bt2_cparam));
     bt2_cparam.cls = H5G_BT2_NAME;
     bt2_cparam.node_size = (size_t)H5G_NAME_BT2_NODE_SIZE;
+    H5_CHECK_OVERFLOW(fheap_id_len, /* From: */ hsize_t, /* To: */ uint32_t);
     bt2_cparam.rrec_size = 4 +          /* Name's hash value */
-            fheap_id_len;               /* Fractal heap ID */
+            (uint32_t)fheap_id_len;     /* Fractal heap ID */
     bt2_cparam.split_percent = H5G_NAME_BT2_SPLIT_PERC;
     bt2_cparam.merge_percent = H5G_NAME_BT2_MERGE_PERC;
     if(NULL == (bt2_name = H5B2_create(f, dxpl_id, &bt2_cparam, NULL)))
@@ -342,8 +343,9 @@ HDfprintf(stderr, "%s: linfo->name_bt2_addr = %a\n", FUNC, linfo->name_bt2_addr)
         HDmemset(&bt2_cparam, 0, sizeof(bt2_cparam));
         bt2_cparam.cls = H5G_BT2_CORDER;
         bt2_cparam.node_size = (size_t)H5G_CORDER_BT2_NODE_SIZE;
-        bt2_cparam.rrec_size = 8 +      /* Creation order value */
-                fheap_id_len;           /* Fractal heap ID */
+        H5_CHECK_OVERFLOW(fheap_id_len, /* From: */ hsize_t, /* To: */ uint32_t);
+        bt2_cparam.rrec_size = 8 +              /* Creation order value */
+                (uint32_t)fheap_id_len;         /* Fractal heap ID */
         bt2_cparam.split_percent = H5G_CORDER_BT2_SPLIT_PERC;
         bt2_cparam.merge_percent = H5G_CORDER_BT2_MERGE_PERC;
         if(NULL == (bt2_corder = H5B2_create(f, dxpl_id, &bt2_cparam, NULL)))

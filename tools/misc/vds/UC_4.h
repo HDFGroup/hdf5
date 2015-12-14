@@ -74,7 +74,7 @@ static char UC_4_SOURCE_DSET_PATH[NAME_LEN] = "/source_dset";
 static char UC_4_VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
 
 /* Fill values */
-static hsize_t UC_4_FILL_VALUES[UC_4_N_SOURCES] = {
+static int UC_4_FILL_VALUES[UC_4_N_SOURCES] = {
     -1,
     -2,
     -3
