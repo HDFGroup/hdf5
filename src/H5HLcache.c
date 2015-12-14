@@ -93,6 +93,9 @@ static herr_t H5HL__cache_datablock_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
 static herr_t H5HL__cache_datablock_free_icr(void *thing);
 
+/* Free list de/serialization */
+static herr_t H5HL__fl_deserialize(H5HL_t *heap);
+static void H5HL__fl_serialize(const H5HL_t *heap);
 
 /*********************/
 /* Package Variables */

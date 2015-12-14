@@ -96,12 +96,10 @@ H5FL_BLK_DEFINE(lheap_chunk);
 /*-------------------------------------------------------------------------
  * Function:    H5HL_create
  *
- * Purpose:	Creates a new heap data structure on disk and caches it
- *		in memory.  SIZE_HINT is a hint for the initial size of the
- *		data area of the heap.	If size hint is invalid then a
- *		reasonable (but probably not optimal) size will be chosen.
- *		If the heap ever has to grow, then REALLOC_HINT is the
- *		minimum amount by which the heap will grow.
+ * Purpose:     Creates a new heap data structure on disk and caches it
+ *              in memory.  SIZE_HINT is a hint for the initial size of the
+ *              data area of the heap.  If size hint is invalid then a
+ *              reasonable (but probably not optimal) size will be chosen.
  *
  * Return:      Success:    SUCCEED. The file address of new heap is
  *                          returned through the ADDR argument.
