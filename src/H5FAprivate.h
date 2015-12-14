@@ -15,9 +15,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FAprivate.h
+ * Created:        H5FAprivate.h
  *
- * Purpose:		Private header for library accessible Fixed
+ * Purpose:        Private header for library accessible Fixed
  *                      Array routines.
  *
  *-------------------------------------------------------------------------
@@ -48,8 +48,8 @@
 typedef enum H5FA_cls_id_t {
     /* Start real class IDs at 0 -QAK */
     /* (keep these last) */
-    H5FA_CLS_TEST_ID,	        /* Fixed array is for testing (do not use for actual data) */
-    H5FA_NUM_CLS_ID             /* Number of Fixed Array class IDs (must be last) */
+    H5FA_CLS_TEST_ID,           /* Fixed array is for testing (do not use for actual data)  */
+    H5FA_NUM_CLS_ID             /* Number of Fixed Array class IDs (must be last)           */
 } H5FA_cls_id_t;
 
 /*
@@ -57,9 +57,9 @@ typedef enum H5FA_cls_id_t {
  * variable of this type that contains class variables and methods.
  */
 typedef struct H5FA_class_t {
-    H5FA_cls_id_t id;           /* ID of Fixed Array class, as found in file */
-    const char *name;           /* Name of class (for debugging) */
-    size_t nat_elmt_size;       /* Size of native (memory) element */
+    H5FA_cls_id_t id;           /* ID of Fixed Array class, as found in file    */
+    const char *name;           /* Name of class (for debugging)                */
+    size_t nat_elmt_size;       /* Size of native (memory) element              */
 
     /* Fixed array client callback methods */
     void *(*crt_context)(void *udata);          /* Create context for other callbacks */
@@ -74,22 +74,23 @@ typedef struct H5FA_class_t {
 
 /* Fixed array creation parameters */
 typedef struct H5FA_create_t {
-    const H5FA_class_t *cls;            /* Class of Fixed Array to create */
-    uint8_t raw_elmt_size;              /* Element size in file (in bytes) */
+    const H5FA_class_t *cls;            /* Class of Fixed Array to create   */
+    uint8_t raw_elmt_size;              /* Element size in file (in bytes)  */
     uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) -
-					   i.e. # of bits needed to store max. # of elements
-					   in a data block page */
-    hsize_t nelmts; 			/* # of elements in array */
+                                         * i.e. # of bits needed to store max. # of elements
+                                         * in a data block page
+                                         */
+    hsize_t nelmts;                     /* # of elements in array */
 } H5FA_create_t;
 
 /* Fixed array metadata statistics info */
 typedef struct H5FA_stat_t {
     /* Non-stored (i.e. computed) fields */
-    hsize_t hdr_size;           /* Size of header */
-    hsize_t dblk_size;          /* Size of data block */
+    hsize_t hdr_size;           /* Size of header       */
+    hsize_t dblk_size;          /* Size of data block   */
 
     /* Stored fields */
-    hsize_t nelmts;             /* # of elements */
+    hsize_t nelmts;             /* # of elements        */
 } H5FA_stat_t;
 
 /* Fixed Array info (forward decl - defined in H5FApkg.h) */
@@ -111,14 +112,14 @@ typedef int (*H5FA_operator_t)(hsize_t idx, const void *_elmt, void *_udata);
 /* General routines */
 H5_DLL H5FA_t *H5FA_create(H5F_t *f, hid_t dxpl_id, const H5FA_create_t *cparam,
     void *ctx_udata);
-H5_DLL H5FA_t *H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata);
-H5_DLL herr_t H5FA_get_nelmts(const H5FA_t *ea, hsize_t *nelmts);
-H5_DLL herr_t H5FA_get_addr(const H5FA_t *ea, haddr_t *addr);
-H5_DLL herr_t H5FA_set(const H5FA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt);
-H5_DLL herr_t H5FA_get(const H5FA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt);
+H5_DLL H5FA_t *H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata);
+H5_DLL herr_t H5FA_get_nelmts(const H5FA_t *fa, hsize_t *nelmts);
+H5_DLL herr_t H5FA_get_addr(const H5FA_t *fa, haddr_t *addr);
+H5_DLL herr_t H5FA_set(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, const void *elmt);
+H5_DLL herr_t H5FA_get(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, void *elmt);
 H5_DLL herr_t H5FA_iterate(H5FA_t *fa, hid_t dxpl_id, H5FA_operator_t op, void *udata);
-H5_DLL herr_t H5FA_close(H5FA_t *ea, hid_t dxpl_id);
-H5_DLL herr_t H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata);
+H5_DLL herr_t H5FA_close(H5FA_t *fa, hid_t dxpl_id);
+H5_DLL herr_t H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata);
 
 /* Statistics routines */
 H5_DLL herr_t H5FA_get_stats(const H5FA_t *ea, H5FA_stat_t *stats);
