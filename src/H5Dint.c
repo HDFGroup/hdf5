@@ -2900,12 +2900,8 @@ H5D__format_convert(H5D_t *dataset, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
     /* Append the new layout message to the object header */
-    if(H5O_msg_append_oh(dataset->oloc.file, dxpl_id, oh, H5O_LAYOUT_ID, 0, 0, &newlayout) < 0)
+    if(H5O_msg_append_oh(dataset->oloc.file, dxpl_id, oh, H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &newlayout) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update old fill value header message")
-
-    /* Update the layout on disk, if it's been changed */
-    if(H5D__layout_oh_write(dataset, dxpl_id, oh, H5O_UPDATE_TIME) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout/pline/efl info")
 
 done:
     /* Release pointer to object header */

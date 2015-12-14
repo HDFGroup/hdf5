@@ -4026,10 +4026,8 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                             && edge_chunk_scaled[i] == max_unalloc[i]
                             && scaled[i] < edge_chunk_scaled[i]) {
                         nunfilt_edge_chunk_dims--;
-                        if(should_fill && nunfilt_edge_chunk_dims == 0
-                                && !fb_info.has_vlen_fill_type) {
-                            HDassert(!H5D__chunk_is_partial_edge_chunk(scaled, space_ndims,
-                                    space_dim, chunk_dim));
+                        if(should_fill && nunfilt_edge_chunk_dims == 0 && !fb_info.has_vlen_fill_type) {
+                            HDassert(!H5D__chunk_is_partial_edge_chunk(scaled, space_ndims, space_dim, chunk_dim));
                             fill_buf = &fb_info.fill_buf;
                             chunk_size = orig_chunk_size;
                         } /* end if */
@@ -4037,14 +4035,11 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                 } /* end if */
                 else {
                     /* Check if we just entered the edge in this dimension */
-                    if(unfilt_edge_chunk_dim[i] && scaled[i]
-                            == edge_chunk_scaled[i]) {
+                    if(unfilt_edge_chunk_dim[i] && scaled[i] == edge_chunk_scaled[i]) {
                         HDassert(edge_chunk_scaled[i] == max_unalloc[i]);
                         nunfilt_edge_chunk_dims++;
-                        if(should_fill && nunfilt_edge_chunk_dims == 1
-                                && !fb_info.has_vlen_fill_type) {
-                            HDassert(H5D__chunk_is_partial_edge_chunk(scaled, space_ndims,
-                                    space_dim, chunk_dim));
+                        if(should_fill && nunfilt_edge_chunk_dims == 1 && !fb_info.has_vlen_fill_type) {
+                            HDassert(H5D__chunk_is_partial_edge_chunk(scaled, space_ndims, space_dim, chunk_dim));
                             fill_buf = &unfilt_fill_buf;
                             chunk_size = layout->u.chunk.size;
                         } /* end if */

@@ -641,7 +641,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
 			if(mesg->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
 			    H5F_ENCODE_LENGTH(f, p, mesg->storage.u.chunk.u.single.nbytes);
 			    UINT32ENCODE(p, mesg->storage.u.chunk.u.single.filter_mask);
-			}
+			} /* end if */
                         break;
 
                     case H5D_CHUNK_IDX_FARRAY:
