@@ -656,7 +656,8 @@ H5_DLL herr_t H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src
 /* Functions that operate on virtual dataset storage */
 H5_DLL herr_t H5D__virtual_copy_layout(H5O_layout_t *layout);
 H5_DLL herr_t H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id);
-H5_DLL herr_t H5D__virtual_reset_layout(H5O_layout_t *layout);
+H5_DLL herr_t H5D__virtual_reset_storage(H5O_storage_virtual_t *storage,
+    hbool_t close_dset);
 H5_DLL herr_t H5D__virtual_delete(H5F_t *f, hid_t dxpl_id, H5O_storage_t *storage);
 H5_DLL herr_t H5D__virtual_copy(H5F_t *f_src, H5O_layout_t *layout_dst,
     hid_t dxpl_id);

@@ -1292,10 +1292,14 @@ EFF__mercury_register_callbacks(void)
                                            H5VL_iod_server_dset_open);
     H5VL_DSET_READ_ID   = MERCURY_REGISTER("dset_read", dset_io_in_t, dset_read_out_t,
                                            H5VL_iod_server_dset_read);
+    H5VL_DSET_MULTI_READ_ID   = MERCURY_REGISTER("dset_multi_read", dset_multi_io_in_t, ret_t,
+                                           H5VL_iod_server_dset_multi_read);
     H5VL_DSET_GET_VL_SIZE_ID = MERCURY_REGISTER("dset_get_vl_size", dset_io_in_t, dset_read_out_t,
                                                 H5VL_iod_server_dset_get_vl_size);
     H5VL_DSET_WRITE_ID  = MERCURY_REGISTER("dset_write", dset_io_in_t, ret_t,
                                            H5VL_iod_server_dset_write);
+    H5VL_DSET_MULTI_WRITE_ID  = MERCURY_REGISTER("dset_multi_write", dset_multi_io_in_t, ret_t,
+                                           H5VL_iod_server_dset_multi_write);
     H5VL_DSET_SET_EXTENT_ID = MERCURY_REGISTER("dset_set_extent", 
                                                dset_set_extent_in_t, ret_t,
                                                H5VL_iod_server_dset_set_extent);

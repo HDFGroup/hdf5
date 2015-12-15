@@ -92,7 +92,7 @@ static herr_t H5D__virtual_open_source_dset(const H5D_t *vdset,
     H5O_storage_virtual_srcdset_t *source_dset, hid_t dxpl_id);
 static herr_t H5D__virtual_reset_source_dset(
     H5O_storage_virtual_ent_t *virtual_ent,
-    H5O_storage_virtual_srcdset_t *source_dset);
+    H5O_storage_virtual_srcdset_t *source_dset, hbool_t close_dset);
 static herr_t H5D__virtual_str_append(const char *src, size_t src_len, char **p,
     char **buf, size_t *buf_size);
 static herr_t H5D__virtual_copy_parsed_name(
@@ -544,7 +544,7 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
 done:
     /* Release allocated resources on failure */
     if(ret_value < 0)
-        if(H5D__virtual_reset_layout(layout) < 0)
+        if(H5D__virtual_reset_storage(&layout->storage.u.virt, TRUE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset virtual layout")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -552,7 +552,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__virtual_reset_layout
+ * Function:    H5D__virtual_reset_storage
  *
  * Purpose:     Frees internal structures in a virtual storage layout
  *              message in memory.  This function is safe to use on
@@ -568,71 +568,70 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__virtual_reset_layout(H5O_layout_t *layout)
+H5D__virtual_reset_storage(H5O_storage_virtual_t *storage, hbool_t close_dset)
 {
     size_t          i, j;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-    HDassert(layout);
-    HDassert(layout->type == H5D_VIRTUAL);
+    HDassert(storage);
 
     /* Free the list entries.  Note we always attempt to free everything even in
      * the case of a failure.  Because of this, and because we free the list
      * afterwards, we do not need to zero out the memory in the list. */
-    for(i = 0; i < layout->storage.u.virt.list_nused; i++) {
+    for(i = 0; i < storage->list_nused; i++) {
         /* Free source_dset */
-        if(H5D__virtual_reset_source_dset(&layout->storage.u.virt.list[i], &layout->storage.u.virt.list[i].source_dset) < 0)
+        if(H5D__virtual_reset_source_dset(&storage->list[i], &storage->list[i].source_dset, close_dset) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset source dataset")
 
         /* Free original source names */
-        (void)H5MM_xfree(layout->storage.u.virt.list[i].source_file_name);
-        (void)H5MM_xfree(layout->storage.u.virt.list[i].source_dset_name);
+        (void)H5MM_xfree(storage->list[i].source_file_name);
+        (void)H5MM_xfree(storage->list[i].source_dset_name);
 
         /* Free sub_dset */
-        for(j = 0; j < layout->storage.u.virt.list[i].sub_dset_nalloc; j++)
-            if(H5D__virtual_reset_source_dset(&layout->storage.u.virt.list[i], &layout->storage.u.virt.list[i].sub_dset[j]) < 0)
+        for(j = 0; j < storage->list[i].sub_dset_nalloc; j++)
+            if(H5D__virtual_reset_source_dset(&storage->list[i], &storage->list[i].sub_dset[j], close_dset) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset source dataset")
-        layout->storage.u.virt.list[i].sub_dset = (H5O_storage_virtual_srcdset_t *)H5MM_xfree(layout->storage.u.virt.list[i].sub_dset);
+        storage->list[i].sub_dset = (H5O_storage_virtual_srcdset_t *)H5MM_xfree(storage->list[i].sub_dset);
 
         /* Free source_select */
-        if(layout->storage.u.virt.list[i].source_select)
-            if(H5S_close(layout->storage.u.virt.list[i].source_select) < 0)
+        if(storage->list[i].source_select)
+            if(H5S_close(storage->list[i].source_select) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release source selection")
 
         /* Free parsed_source_file_name */
-        H5D_virtual_free_parsed_name(layout->storage.u.virt.list[i].parsed_source_file_name);
+        H5D_virtual_free_parsed_name(storage->list[i].parsed_source_file_name);
 
         /* Free parsed_source_dset_name */
-        H5D_virtual_free_parsed_name(layout->storage.u.virt.list[i].parsed_source_dset_name);
+        H5D_virtual_free_parsed_name(storage->list[i].parsed_source_dset_name);
     } /* end for */
 
     /* Free the list */
-    layout->storage.u.virt.list = (H5O_storage_virtual_ent_t *)H5MM_xfree(layout->storage.u.virt.list);
-    layout->storage.u.virt.list_nalloc = (size_t)0;
-    layout->storage.u.virt.list_nused = (size_t)0;
-    (void)HDmemset(layout->storage.u.virt.min_dims, 0, sizeof(layout->storage.u.virt.min_dims));
+    storage->list = (H5O_storage_virtual_ent_t *)H5MM_xfree(storage->list);
+    storage->list_nalloc = (size_t)0;
+    storage->list_nused = (size_t)0;
+    (void)HDmemset(storage->min_dims, 0, sizeof(storage->min_dims));
 
     /* Close access property lists */
-    if(layout->storage.u.virt.source_fapl >= 0) {
-        if(H5I_dec_ref(layout->storage.u.virt.source_fapl) < 0)
+    if(storage->source_fapl >= 0) {
+        if(H5I_dec_ref(storage->source_fapl) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close source fapl")
-        layout->storage.u.virt.source_fapl = -1;
+        storage->source_fapl = -1;
     } /* end if */
-    if(layout->storage.u.virt.source_dapl >= 0) {
-        if(H5I_dec_ref(layout->storage.u.virt.source_dapl) < 0)
+    if(storage->source_dapl >= 0) {
+        if(H5I_dec_ref(storage->source_dapl) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close source dapl")
-        layout->storage.u.virt.source_dapl = -1;
+        storage->source_dapl = -1;
     } /* end if */
 
     /* The list is no longer initialized */
-    layout->storage.u.virt.init = FALSE;
+    storage->init = FALSE;
 
     /* Note the lack of a done: label.  This is because there are no HGOTO_ERROR
      * calls.  If one is added, a done: label must also be added */
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__virtual_reset_layout() */
+} /* end H5D__virtual_reset_storage() */
 
 
 /*-------------------------------------------------------------------------
@@ -780,7 +779,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to get path for root group")
 
         /* Open the source dataset */
-        if(NULL == (source_dset->dset = H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl, dxpl_id))) {
+        if(NULL == (source_dset->dset = (void *)H5D__open_name(&src_root_loc, source_dset->dset_name, vdset->shared->layout.storage.u.virt.source_dapl, dxpl_id))) {
             H5E_clear_stack(NULL); /* Quick hack until proper support for H5Dopen with missing file is implemented */
 
             /* Dataset does not exist */
@@ -792,7 +791,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
 
             /* Patch the source selection if necessary */
             if(virtual_ent->source_space_status != H5O_VIRTUAL_STATUS_CORRECT) {
-                if(H5S_extent_copy(virtual_ent->source_select, source_dset->dset->shared->space) < 0)
+                if(H5S_extent_copy(virtual_ent->source_select, ((H5D_t *)source_dset->dset)->shared->space) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
                 virtual_ent->source_space_status = H5O_VIRTUAL_STATUS_CORRECT;
             } /* end if */
@@ -823,7 +822,7 @@ done:
  */
 static herr_t
 H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *virtual_ent,
-    H5O_storage_virtual_srcdset_t *source_dset)
+    H5O_storage_virtual_srcdset_t *source_dset, hbool_t close_dset)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -833,8 +832,8 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *virtual_ent,
     HDassert(source_dset);
 
     /* Free dataset */
-    if(source_dset->dset) {
-        if(H5D_close(source_dset->dset) < 0)
+    if(close_dset && source_dset->dset) {
+        if(H5D_close(((H5D_t *)source_dset->dset)) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")
         source_dset->dset = NULL;
     } /* end if */
@@ -1339,7 +1338,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
                 if(storage->list[i].source_dset.dset) {
                     /* Retrieve current source dataset extent and patch mapping
                      */
-                    if(H5S_extent_copy(storage->list[i].source_select, storage->list[i].source_dset.dset->shared->space) < 0)
+                    if(H5S_extent_copy(storage->list[i].source_select, ((H5D_t *)storage->list[i].source_dset.dset)->shared->space) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
 
                     /* Get source space dimenstions */
@@ -1479,7 +1478,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
 
                             /* Close source dataset so we don't have huge
                              * numbers of datasets open */
-                            if(H5D_close(storage->list[i].sub_dset[j].dset) < 0)
+                            if(H5D_close(((H5D_t *)storage->list[i].sub_dset[j].dset)) < 0)
                                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")
                             storage->list[i].sub_dset[j].dset = NULL;
                         } /* end if */
@@ -1761,7 +1760,7 @@ H5D__virtual_init_all(const H5D_t *dset, hid_t dxpl_id)
                 if(storage->list[i].source_dset.dset) {
                     /* Retrieve current source dataset extent and patch mapping
                      */
-                    if(H5S_extent_copy(storage->list[i].source_select, storage->list[i].source_dset.dset->shared->space) < 0)
+                    if(H5S_extent_copy(storage->list[i].source_select, ((H5D_t *)storage->list[i].source_dset.dset)->shared->space) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
 
                     /* Get source space dimenstions */
@@ -2386,7 +2385,7 @@ H5D__virtual_read_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto source space")
 
         /* Perform read on source dataset */
-        if(H5D__read(source_dset->dset, type_info->dst_type_id, source_dset->projected_mem_space, projected_src_space, io_info->dxpl_id, io_info->u.rbuf) < 0)
+        if(H5D__read(((H5D_t *)source_dset->dset), type_info->dst_type_id, source_dset->projected_mem_space, projected_src_space, io_info->dxpl_id, io_info->u.rbuf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read source dataset")
 
         /* Close projected_src_space */
@@ -2577,7 +2576,7 @@ H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto source space")
 
         /* Perform write on source dataset */
-        if(H5D__write(source_dset->dset, type_info->dst_type_id, source_dset->projected_mem_space, projected_src_space, io_info->dxpl_id, io_info->u.wbuf) < 0)
+        if(H5D__write(((H5D_t *)source_dset->dset), type_info->dst_type_id, source_dset->projected_mem_space, projected_src_space, io_info->dxpl_id, io_info->u.wbuf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write to source dataset")
 
         /* Close projected_src_space */
@@ -2709,13 +2708,13 @@ H5D__virtual_flush(H5D_t *dset, hid_t dxpl_id)
             for(j = 0; j < storage->list[i].sub_dset_nused; j++)
                 if(storage->list[i].sub_dset[j].dset)
                     /* Flush source dataset */
-                    if(H5D__flush_real(storage->list[i].sub_dset[j].dset, dxpl_id) < 0)
+                    if(H5D__flush_real(((H5D_t *)storage->list[i].sub_dset[j].dset), dxpl_id) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush source dataset")
         } /* end if */
         else
             if(storage->list[i].source_dset.dset)
                 /* Flush source dataset */
-                if(H5D__flush_real(storage->list[i].source_dset.dset, dxpl_id) < 0)
+                if(H5D__flush_real(((H5D_t *)storage->list[i].source_dset.dset), dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to write to source dataset")
 
 done:

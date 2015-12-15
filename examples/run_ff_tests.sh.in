@@ -68,7 +68,16 @@ mpiexec -np $1 ./h5ff_server &> ff_output/server_vl_data &
 sleep 2 &&
 mpiexec -np $2 ./h5ff_client_vl_data
 RETVAL=$?
-echo "Finished object test-----------------------------------------------"
+echo "Finished VL datatypes test-----------------------------------------------"
+[ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
+sleep 2
+
+echo "Starting virtual dataset (VDS) test-------------------------------------------"
+mpiexec -np $1 ./h5ff_server &> ff_output/server_dset &
+sleep 2 &&
+mpiexec -np $2 ./h5ff_client_vds
+RETVAL=$?
+echo "Finished dataset test-------------------------------------------"
 [ $RETVAL -ne 0 ] && echo "FAILED-----------------------------------------------"
 
 echo "FF tests DONE ---------------------------------------------------"

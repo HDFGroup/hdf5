@@ -1273,4 +1273,49 @@ int hg_proc_attr_iterate_t(hg_proc_t proc, void *data)
     return ret;
 }
 
+int hg_proc_dset_multi_io_list_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    size_t i;
+    hg_proc_op_t op;
+    dset_multi_io_list_t *list = (dset_multi_io_list_t *)data;
+
+        /* Process count */
+    ret = hg_proc_size_t(proc, &list->count);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    /* Get operation type */
+    op = hg_proc_get_op(proc);
+
+    /* Allocate list if decoding */
+    if(op == HG_DECODE)
+        if(NULL == (list->list = (dset_multi_io_list_ent_t *)malloc(list->count * sizeof(dset_multi_io_list_ent_t)))) {
+            HG_ERROR_DEFAULT("Proc error");
+            ret = HG_FAIL;
+            return ret;
+        } /* end if */
+
+    /* Process list elements */
+    for(i = 0 ; i < list->count; i++) {
+        ret = hg_proc_dset_multi_io_list_ent_t(proc, &list->list[i]);
+        if (ret != HG_SUCCESS) {
+            HG_ERROR_DEFAULT("Proc error");
+            ret = HG_FAIL;
+            return ret;
+        } /* end if */
+    } /* end for */
+
+    /* Free list if freeing */
+    if(op == HG_FREE) {
+        free(list->list);
+        list->list = NULL;
+    } /* end if */
+
+    return ret;
+}
+
 #endif /* H5_HAVE_EFF */

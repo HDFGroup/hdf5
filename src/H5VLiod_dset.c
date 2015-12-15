@@ -53,6 +53,19 @@ typedef struct {
     iod_trans_id_t rtid;
 } H5VL_iod_server_vl_write_t;
 
+static herr_t H5VL_iod_server_dset_read_one(AXE_engine_t axe_engine,
+    uint64_t axe_id, iod_handle_t coh, iod_obj_id_t iod_id,
+    iod_handles_t iod_oh, hid_t space_id, hid_t src_id, hid_t dst_id,
+    hid_t dxpl_id, iod_trans_id_t rtid, hg_handle_t hg_handle,
+    hg_bulk_t bulk_handle, iod_checksum_t *cs, uint32_t raw_cs_scope,
+    /*out*/size_t *buf_size);
+
+static herr_t H5VL_iod_server_dset_write_one(iod_handle_t coh,
+    iod_obj_id_t iod_id, iod_handles_t iod_oh, hid_t space_id, hid_t src_id,
+    hid_t dst_id, hid_t dxpl_id, iod_trans_id_t wtid, iod_trans_id_t rtid,
+    hg_handle_t hg_handle, hg_bulk_t bulk_handle, hg_bulk_t vl_len_bulk_handle,
+    uint64_t cs, uint32_t raw_cs_scope);
+
 static herr_t 
 H5VL__iod_server_vl_data_write(iod_handle_t coh, iod_obj_id_t iod_id, iod_handles_t iod_oh, 
                                hid_t space_id, hid_t mem_type_id, hid_t dset_type_id, 
@@ -150,6 +163,7 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
     int step = 0;
     hbool_t enable_checksum = FALSE;
     H5T_class_t dt_class;
+    H5D_layout_t layout_type;
     iod_hint_list_t *obj_create_hint = NULL, *md_obj_create_hint = NULL;
     iod_size_t array_dims[H5S_MAX_RANK], current_dims[H5S_MAX_RANK];
     herr_t ret_value = SUCCEED;
@@ -168,6 +182,10 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
     /* get the scope for data integrity checks for raw data */
     if(H5Pget_ocpl_enable_checksum(dcpl_id, &enable_checksum) < 0)
         HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
+
+    /* Get the layout type */
+    if((layout_type = H5Pget_layout(dcpl_id)) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get dataset layout type");
 
     if(name) {
         /* the traversal will retrieve the location where the dataset needs
@@ -207,40 +225,51 @@ H5VL_iod_server_dset_create_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
         md_obj_create_hint->hint[0].key = "iod_hint_obj_enable_cksum";
     }
 
-    dt_class = H5Tget_class(input->type_id);
-    /* Set the IOD array creation parameters */
-    if(dt_class == H5T_VLEN || dt_class == H5T_REFERENCE ||
-       (dt_class == H5T_STRING && H5Tis_variable_str(input->type_id)) )
-        array.cell_size = sizeof(iod_obj_id_t) + sizeof(iod_size_t);
-    else
-        array.cell_size = (uint32_t)H5Tget_size(input->type_id);
-
-    array.num_dims = (uint32_t)H5Sget_simple_extent_ndims(space_id);
-
-    /* Handle Scalar Dataspaces (set rank and current dims size to 1) */
-    if(0 == array.num_dims) {
+    /* Check for virtual dataset */
+    if(layout_type == H5D_VIRTUAL) {
+        array.cell_size = 1;
         array.num_dims = 1;
         array.firstdim_max = 1;
         current_dims[0] = 1;
         array.current_dims = current_dims;
-    }
+        array.chunk_dims = NULL;
+    } /* end if */
     else {
-        if(H5Sget_simple_extent_dims(space_id, current_dims, array_dims) < 0)
-            HGOTO_ERROR_FF(FAIL, "can't get dimentions' sizes");
+        dt_class = H5Tget_class(input->type_id);
+        /* Set the IOD array creation parameters */
+        if(dt_class == H5T_VLEN || dt_class == H5T_REFERENCE ||
+           (dt_class == H5T_STRING && H5Tis_variable_str(input->type_id)) )
+            array.cell_size = sizeof(iod_obj_id_t) + sizeof(iod_size_t);
+        else
+            array.cell_size = (uint32_t)H5Tget_size(input->type_id);
 
-        if(H5S_UNLIMITED == array_dims[0]) {
-            array_dims[0] = current_dims[0];
-            array.firstdim_max = IOD_DIMLEN_UNLIMITED;
+        array.num_dims = (uint32_t)H5Sget_simple_extent_ndims(space_id);
+
+        /* Handle Scalar Dataspaces (set rank and current dims size to 1) */
+        if(0 == array.num_dims) {
+            array.num_dims = 1;
+            array.firstdim_max = 1;
+            current_dims[0] = 1;
+            array.current_dims = current_dims;
         }
         else {
-            array.firstdim_max = array_dims[0];
+            if(H5Sget_simple_extent_dims(space_id, current_dims, array_dims) < 0)
+                HGOTO_ERROR_FF(FAIL, "can't get dimentions' sizes");
+
+            if(H5S_UNLIMITED == array_dims[0]) {
+                array_dims[0] = current_dims[0];
+                array.firstdim_max = IOD_DIMLEN_UNLIMITED;
+            }
+            else {
+                array.firstdim_max = array_dims[0];
+            }
+
+            array.current_dims = current_dims;
         }
 
-        array.current_dims = current_dims;
-    }
-
-    /* MSC - Add chunking support */
-    array.chunk_dims = NULL;
+        /* MSC - Add chunking support */
+        array.chunk_dims = NULL;
+    } /* end else */
 
 #if H5_EFF_DEBUG 
     fprintf(stderr, "now creating the dataset with cellsize %d num dimensions %d\n",
@@ -596,50 +625,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_dset_read_cb
+ * Function:    H5VL_iod_server_dset_read_one
  *
- * Purpose:	Reads from IOD into the function shipper BDS handle.
+ * Purpose:     Reads from IOD into a single function shipper BDS handle.
  *
- * Return:	Success:	SUCCEED 
- *		Failure:	Negative
+ * Return:      Success:        SUCCEED 
+ *              Failure:        Negative
  *
- * Programmer:  Mohamad Chaarawi
- *              January, 2013
+ * Programmer:  Neil Fortner
+ *              December, 2015
+ *              Mostly extracted from H5VL_iod_server_dset_read_cb by
+ *              Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
-void
-H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine, 
-                             size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
-                             size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
-                             void *_op_data)
+static herr_t
+H5VL_iod_server_dset_read_one(AXE_engine_t axe_engine, uint64_t axe_id,
+    iod_handle_t coh, iod_obj_id_t iod_id, iod_handles_t iod_oh, hid_t space_id,
+    hid_t src_id, hid_t dst_id, hid_t dxpl_id, iod_trans_id_t rtid,
+    hg_handle_t hg_handle, hg_bulk_t bulk_handle, iod_checksum_t *cs,
+    uint32_t raw_cs_scope, /*out*/size_t *buf_size)
 {
-    op_data_t *op_data = (op_data_t *)_op_data;
-    dset_io_in_t *input = (dset_io_in_t *)op_data->input;
-    dset_read_out_t output;
-    iod_handle_t coh = input->coh; /* container handle */
-    iod_handles_t iod_oh = input->iod_oh; /* dset object handle */
-    iod_obj_id_t iod_id = input->iod_id; /* dset ID */
-    hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
-    hid_t space_id = input->space_id; /* file space selection */
-    hid_t dxpl_id;
-    hid_t src_id = input->dset_type_id; /* the datatype of the dataset's element */
-    hid_t dst_id = input->mem_type_id; /* the memory type of the elements */
-    iod_trans_id_t rtid = input->rcxt_num;
-    //uint32_t cs_scope = input->cs_scope;
     hg_bulk_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
-    size_t size, buf_size = 0;
+    size_t size;
     void *buf = NULL; /* buffer to hold outgoing data */
-    iod_checksum_t cs = 0; /* checksum value */
-    uint32_t raw_cs_scope;
     hbool_t is_vl_data;
     size_t nelmts; /* number of elements selected to read */
-    na_addr_t dest = HG_Handler_get_addr(op_data->hg_handle); /* destination address to push data to */
-    na_class_t *na_class = HG_Handler_get_na_class(op_data->hg_handle); /* NA transfer class */
+    na_addr_t dest = HG_Handler_get_addr(hg_handle); /* destination address to push data to */
+    na_class_t *na_class = HG_Handler_get_na_class(hg_handle); /* NA transfer class */
     na_bool_t is_coresident = NA_Addr_is_self(na_class, dest);
-    iod_ret_t ret;
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the dset here or if it was already open */
+    iod_ret_t ret;
     herr_t ret_value = SUCCEED;
 
     /* MSC - for now do memcpy if segment count > 1 */
@@ -657,14 +674,6 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Start dataset Read on OH %"PRIu64" OID %"PRIx64"\n", iod_oh.rd_oh.cookie, iod_id);
 #endif
-
-    if(H5P_DEFAULT == input->dxpl_id)
-        input->dxpl_id = H5Pcopy(H5P_DATASET_XFER_DEFAULT);
-    dxpl_id = input->dxpl_id;
-
-    /* get the scope for data integrity checks for raw data */
-    if(H5Pget_rawdata_integrity_scope(dxpl_id, &raw_cs_scope) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
 
     /* get the number of points selected */
     nelmts = (size_t)H5Sget_select_npoints(space_id);
@@ -692,15 +701,15 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
 
         /* get a bigger buffer if datatype conversion is required */
         if(!is_vl_data) {
-            buf_size = H5Tget_size(src_id) * nelmts;
-            if(size > buf_size)
-                buf_size = size;
+            *buf_size = H5Tget_size(src_id) * nelmts;
+            if(size > *buf_size)
+                *buf_size = size;
         }
         else {
-            buf_size = size;
+            *buf_size = size;
         }
 
-        if(NULL == (buf = malloc(buf_size)))
+        if(NULL == (buf = malloc(*buf_size)))
             HGOTO_ERROR_FF(FAIL, "can't allocate read buffer");
 
         /* Create bulk handle */
@@ -711,7 +720,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
 
     /*
     if(H5VL__iod_server_adjust_buffer(dst_id, src_id, nelmts, dxpl_id, is_coresident,
-                                      size, &buf, &is_vl_data, &buf_size) < 0)
+                                      size, &buf, &is_vl_data, &*buf_size) < 0)
         HGOTO_ERROR_FF(FAIL, "failed to setup read operation");
     */
     if(!is_vl_data) {
@@ -735,7 +744,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
         /* If the data is not VL, we can read the data from the array the normal way */
         elmt_size = H5Tget_size(src_id);
         ret = H5VL__iod_server_final_io(coh, iod_oh.rd_oh, space_id, elmt_size, FALSE, 
-                                        buf, buf_size, (uint64_t)0, raw_cs_scope, read_tid);
+                                        buf, *buf_size, (uint64_t)0, raw_cs_scope, read_tid);
         if(ret != SUCCEED)
             HGOTO_ERROR_FF(FAIL, "failed to read from array object");
 
@@ -748,7 +757,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
 
             if(raw_cs_scope) {
                 /* calculate a checksum for the data to be sent */
-                cs = H5_checksum_crc64(buf, size);
+                *cs = H5_checksum_crc64(buf, size);
             }
 
             /* MSC - check if client requested to corrupt data */
@@ -762,7 +771,7 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
     }
     else {
         /* If the data is of variable length, special access is required */
-        ret = H5VL__iod_server_vl_data_read(coh, axe_engine, input->axe_id, nelmts, 
+        ret = H5VL__iod_server_vl_data_read(coh, axe_engine, axe_id, nelmts, 
                                             buf, dxpl_id, rtid);
         if(ret < 0)
             HGOTO_ERROR_FF(ret, "can't read from array object");
@@ -782,6 +791,64 @@ H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine,
         if(HG_SUCCESS != HG_Bulk_handle_free(bulk_block_handle))
             HGOTO_ERROR_FF(FAIL, "can't free bds block handle");
     }
+
+done:
+    /* close the dataset if we opened it in this routine */
+    if(TRUE == opened_locally) {
+        if(iod_obj_close(iod_oh.rd_oh, NULL, NULL) < 0)
+            HDONE_ERROR_FF(FAIL, "can't close Array object");
+    }
+
+    /* Free the buffer if it was allocated */
+    if(!is_coresident && buf) {
+        free(buf);
+        buf = NULL;
+    }
+
+    return ret_value;
+} /* end H5VL_iod_server_dset_read_one() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_read_cb
+ *
+ * Purpose:	Reads from IOD into the function shipper BDS handle.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_dset_read_cb(AXE_engine_t axe_engine, 
+                             size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                             size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
+                             void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dset_io_in_t *input = (dset_io_in_t *)op_data->input;
+    dset_read_out_t output;
+    hid_t dxpl_id;
+    size_t buf_size = 0;
+    //uint32_t cs_scope = input->cs_scope;
+    iod_checksum_t cs = 0; /* checksum value */
+    uint32_t raw_cs_scope;
+    herr_t ret_value = SUCCEED;
+
+    if(H5P_DEFAULT == input->dxpl_id)
+        input->dxpl_id = H5Pcopy(H5P_DATASET_XFER_DEFAULT);
+    dxpl_id = input->dxpl_id;
+
+    /* get the scope for data integrity checks for raw data */
+    if(H5Pget_rawdata_integrity_scope(dxpl_id, &raw_cs_scope) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
+
+    /* Read the data */
+    if(H5VL_iod_server_dset_read_one(axe_engine, input->axe_id, input->coh, input->iod_id, input->iod_oh, input->space_id, input->dset_type_id, input->mem_type_id, dxpl_id, input->rcxt_num, op_data->hg_handle, input->bulk_handle, &cs, raw_cs_scope, &buf_size) < 0)
+        HGOTO_ERROR_FF(FAIL, "failed to read data");
 
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Done with dset read, checksum %016lX, sending response to client\n", cs);
@@ -803,18 +870,70 @@ done:
     HG_Handler_free(op_data->hg_handle);
     input = (dset_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
-
-    if(!is_coresident && buf) {
-        free(buf);
-        buf = NULL;
-    }
-
-    /* close the dataset if we opened it in this routine */
-    if(TRUE == opened_locally) {
-        if(iod_obj_close(iod_oh.rd_oh, NULL, NULL) < 0)
-            HDONE_ERROR_FF(FAIL, "can't close Array object");
-    }
 } /* end H5VL_iod_server_dset_read_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_server_dset_multi_read_cb
+ *
+ * Purpose:     Reads from IOD into the multiple function shipper BDS
+ *              handles.
+ *
+ * Return:      Success:        SUCCEED 
+ *              Failure:        Negative
+ *
+ * Programmer:  Neil Fortner
+ *              December, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_dset_multi_read_cb(AXE_engine_t axe_engine, 
+                             size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                             size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
+                             void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dset_multi_io_in_t *input = (dset_multi_io_in_t *)op_data->input;
+    hid_t dxpl_id;
+    size_t buf_size = 0;
+    //uint32_t cs_scope = input->cs_scope;
+    iod_checksum_t cs = 0; /* checksum value */
+    uint32_t raw_cs_scope;
+    size_t i;
+    herr_t ret_value = SUCCEED;
+
+    if(H5P_DEFAULT == input->dxpl_id)
+        input->dxpl_id = H5Pcopy(H5P_DATASET_XFER_DEFAULT);
+    dxpl_id = input->dxpl_id;
+
+    /* get the scope for data integrity checks for raw data */
+    if(H5Pget_rawdata_integrity_scope(dxpl_id, &raw_cs_scope) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
+
+    /* Iterate over read operations */
+    for(i = 0; i < input->list.count; i++)
+        /* Read the data */
+        if(H5VL_iod_server_dset_read_one(axe_engine, input->axe_id, input->coh, input->list.list[i].iod_id, input->list.list[i].iod_oh, input->list.list[i].space_id, input->list.list[i].dset_type_id, input->list.list[i].mem_type_id, dxpl_id, input->rcxt_num, op_data->hg_handle, input->list.list[i].bulk_handle, &cs, raw_cs_scope, &buf_size) < 0)
+            HGOTO_ERROR_FF(FAIL, "failed to read data");
+
+#if H5_EFF_DEBUG 
+    fprintf(stderr, "Done with dset read, checksum %016lX, sending response to client\n", cs);
+#endif
+
+done:
+
+    if(ret_value != SUCCEED)
+        fprintf(stderr, "FAILED dset read, checksum %016lX \n", cs);
+
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
+        HDONE_ERROR_FF(FAIL, "can't send result of write to client");
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
+    input = (dset_multi_io_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+} /* end H5VL_iod_server_dset_multi_read_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -1002,51 +1121,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5VL_iod_server_dset_write_cb
+ * Function:    H5VL_iod_server_dset_write_one
  *
- * Purpose:	Writes from IOD into the function shipper BDS handle.
+ * Purpose:     Writes from IOD into a single function shipper BDS handle.
  *
- * Return:	Success:	SUCCEED 
- *		Failure:	Negative
+ * Return:      Success:        SUCCEED 
+ *              Failure:        Negative
  *
- * Programmer:  Mohamad Chaarawi
- *              January, 2013
+ * Programmer:  Neil Fortner
+ *              December, 2015
+ *              Mostly extracted from H5VL_iod_server_dset_write_cb by
+ *              Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
-void
-H5VL_iod_server_dset_write_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
-                              size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
-                              size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
-                              void *_op_data)
+static herr_t
+H5VL_iod_server_dset_write_one(iod_handle_t coh, iod_obj_id_t iod_id,
+    iod_handles_t iod_oh, hid_t space_id, hid_t src_id, hid_t dst_id,
+    hid_t dxpl_id, iod_trans_id_t wtid, iod_trans_id_t rtid,
+    hg_handle_t hg_handle, hg_bulk_t bulk_handle, hg_bulk_t vl_len_bulk_handle,
+    uint64_t cs, uint32_t raw_cs_scope)
 {
-    op_data_t *op_data = (op_data_t *)_op_data;
-    dset_io_in_t *input = (dset_io_in_t *)op_data->input;
-    iod_handle_t coh = input->coh; /* container handle */
-    iod_handles_t iod_oh = input->iod_oh; /* dset object handle */
-    iod_obj_id_t iod_id = input->iod_id; /* dset ID */
-    hg_bulk_t bulk_handle = input->bulk_handle; /* bulk handle for data */
-    hg_bulk_t vl_len_bulk_handle = input->vl_len_bulk_handle; /* bulk handle for vlen length */
-    hid_t space_id = input->space_id; /* file space selection */
-    uint64_t cs = input->checksum; /* checksum recieved for data */
-    hid_t src_id = input->mem_type_id; /* the memory type of the elements */
-    hid_t dst_id = input->dset_type_id; /* the datatype of the dataset's element */
-    iod_trans_id_t wtid = input->trans_num;
-    iod_trans_id_t rtid = input->rcxt_num;
-    //uint32_t cs_scope = input->cs_scope;
-    hid_t dxpl_id;
     hg_bulk_t bulk_block_handle; /* HG block handle */
     hg_bulk_request_t bulk_request; /* HG request */
     size_t size, buf_size;
     hbool_t is_vl_data;
     iod_checksum_t data_cs = 0;
-    uint32_t raw_cs_scope;
     H5VL_iod_type_info_t type_info;
     void *buf = NULL;
     size_t nelmts; /* number of elements selected to read */
     hbool_t flag = FALSE; /* temp flag to indicate whether corruption will be inserted */
-    na_addr_t source = HG_Handler_get_addr(op_data->hg_handle); /* source address to pull data from */
-    na_class_t *na_class = HG_Handler_get_na_class(op_data->hg_handle); /* NA transfer class */
+    na_addr_t source = HG_Handler_get_addr(hg_handle); /* source address to pull data from */
+    na_class_t *na_class = HG_Handler_get_na_class(hg_handle); /* NA transfer class */
     na_bool_t is_coresident = NA_Addr_is_self(na_class, source);
     hbool_t opened_locally = FALSE; /* flag to indicate whether we opened the dset here or if it was already open */
     iod_ret_t ret;
@@ -1067,14 +1173,6 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Start dataset Write on OH %"PRIu64" OID %"PRIx64"\n", iod_oh.wr_oh.cookie, iod_id);
 #endif
-
-    if(H5P_DEFAULT == input->dxpl_id)
-        input->dxpl_id = H5Pcopy(H5P_DATASET_XFER_DEFAULT);
-    dxpl_id = input->dxpl_id;
-
-    /* get the scope for data integrity checks for raw data */
-    if(H5Pget_rawdata_integrity_scope(dxpl_id, &raw_cs_scope) < 0)
-        HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
 
     nelmts = (size_t)H5Sget_select_npoints(space_id);
 
@@ -1266,6 +1364,57 @@ H5VL_iod_server_dset_write_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
             HGOTO_ERROR_FF(ret, "can't write to array object");
     }
 
+done:
+    H5VL_iod_type_info_reset(&type_info);
+
+    /* close the dataset if we opened it in this routine */
+    if(TRUE == opened_locally) {
+        if(iod_obj_close(iod_oh.wr_oh, NULL, NULL) < 0)
+            HDONE_ERROR_FF(FAIL, "can't close Array object");
+    }
+
+    return ret_value;
+} /* end H5VL_iod_server_dset_write_one() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_dset_write_cb
+ *
+ * Purpose:	Writes from IOD into the function shipper BDS handle.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              January, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_dset_write_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                              size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                              size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
+                              void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dset_io_in_t *input = (dset_io_in_t *)op_data->input;
+    //uint32_t cs_scope = input->cs_scope;
+    hid_t dxpl_id;
+    uint32_t raw_cs_scope;
+    herr_t ret_value = SUCCEED;
+
+    if(H5P_DEFAULT == input->dxpl_id)
+        input->dxpl_id = H5Pcopy(H5P_DATASET_XFER_DEFAULT);
+    dxpl_id = input->dxpl_id;
+
+    /* get the scope for data integrity checks for raw data */
+    if(H5Pget_rawdata_integrity_scope(dxpl_id, &raw_cs_scope) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
+
+    /* Write the data */
+    if(H5VL_iod_server_dset_write_one(input->coh, input->iod_id, input->iod_oh, input->space_id, input->mem_type_id, input->dset_type_id, dxpl_id, input->trans_num, input->rcxt_num, op_data->hg_handle, input->bulk_handle, input->vl_len_bulk_handle, input->checksum, raw_cs_scope) < 0)
+        HGOTO_ERROR_FF(FAIL, "failed to write data");
+
 #if H5_EFF_DEBUG 
     fprintf(stderr, "Done with dset write, sending %d response to client \n", ret_value);
 #endif
@@ -1284,15 +1433,70 @@ done:
     HG_Handler_free(op_data->hg_handle);
     input = (dset_io_in_t *)H5MM_xfree(input);
     op_data = (op_data_t *)H5MM_xfree(op_data);
-
-    H5VL_iod_type_info_reset(&type_info);
-
-    /* close the dataset if we opened it in this routine */
-    if(TRUE == opened_locally) {
-        if(iod_obj_close(iod_oh.wr_oh, NULL, NULL) < 0)
-            HDONE_ERROR_FF(FAIL, "can't close Array object");
-    }
 } /* end H5VL_iod_server_dset_write_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_iod_server_dset_multi_write_cb
+ *
+ * Purpose:     Writes from IOD into a multipe function shipper BDS
+ *              handles.
+ *
+ * Return:      Success:        SUCCEED 
+ *              Failure:        Negative
+ *
+ * Programmer:  Neil Fortner
+ *              December, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_dset_multi_write_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                              size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                              size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
+                              void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    dset_multi_io_in_t *input = (dset_multi_io_in_t *)op_data->input;
+    //uint32_t cs_scope = input->cs_scope;
+    hid_t dxpl_id;
+    uint32_t raw_cs_scope;
+    size_t i;
+    herr_t ret_value = SUCCEED;
+
+    if(H5P_DEFAULT == input->dxpl_id)
+        input->dxpl_id = H5Pcopy(H5P_DATASET_XFER_DEFAULT);
+    dxpl_id = input->dxpl_id;
+
+    /* get the scope for data integrity checks for raw data */
+    if(H5Pget_rawdata_integrity_scope(dxpl_id, &raw_cs_scope) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get scope for data integrity checks");
+
+    /* Iterate over write operations */
+    for(i = 0; i < input->list.count; i++)
+        /* Write the data */
+        if(H5VL_iod_server_dset_write_one(input->coh, input->list.list[i].iod_id, input->list.list[i].iod_oh, input->list.list[i].space_id, input->list.list[i].mem_type_id, input->list.list[i].dset_type_id, dxpl_id, input->trans_num, input->rcxt_num, op_data->hg_handle, input->list.list[i].bulk_handle, input->list.list[i].vl_len_bulk_handle, input->list.list[i].checksum, raw_cs_scope) < 0)
+            HGOTO_ERROR_FF(FAIL, "failed to write data");
+
+#if H5_EFF_DEBUG 
+    fprintf(stderr, "Done with dset write, sending %d response to client \n", ret_value);
+#endif
+
+done:
+
+#if H5_EFF_DEBUG 
+    if(ret_value != SUCCEED)
+        fprintf(stderr, "FAILED dset write, sending %d response to client \n", ret_value);
+#endif
+
+    if(HG_SUCCESS != HG_Handler_start_output(op_data->hg_handle, &ret_value))
+        HDONE_ERROR_FF(FAIL, "can't send result of write to client");
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
+    input = (dset_multi_io_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+} /* end H5VL_iod_server_dset_multi_write_cb() */
 
 
 /*-------------------------------------------------------------------------

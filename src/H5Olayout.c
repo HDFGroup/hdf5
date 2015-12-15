@@ -401,7 +401,7 @@ done:
     if(ret_value == NULL)
         if(mesg) {
             if(mesg->type == H5D_VIRTUAL)
-                if(H5D__virtual_reset_layout(mesg) < 0)
+                if(H5D__virtual_reset_storage(&mesg->storage.u.virt, TRUE) < 0)
                     HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to reset virtual layout")
             mesg = H5FL_FREE(H5O_layout_t, mesg);
         } /* end if */
@@ -763,7 +763,7 @@ H5O_layout_reset(void *_mesg)
             mesg->storage.u.compact.buf = H5MM_xfree(mesg->storage.u.compact.buf);
         else if(H5D_VIRTUAL == mesg->type)
             /* Free the virtual entry list */
-            if(H5D__virtual_reset_layout(mesg) < 0)
+            if(H5D__virtual_reset_storage(&mesg->storage.u.virt, TRUE) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to reset virtual layout")
 
         /* Reset the message */

@@ -54,7 +54,9 @@ typedef enum H5RQ_type_t {
     HG_DSET_CREATE,
     HG_DSET_OPEN,
     HG_DSET_READ,
+    HG_DSET_MULTI_READ,
     HG_DSET_WRITE,
+    HG_DSET_MULTI_WRITE,
     HG_DSET_GET_VL_SIZE,
     HG_DSET_SET_EXTENT,
     HG_DSET_CLOSE,
@@ -279,6 +281,8 @@ typedef struct H5VL_iod_dset_t {
     H5VL_iod_object_t common; /* must be first */
     H5VL_iod_remote_dset_t remote_dset;
     hid_t dapl_id;
+    hbool_t is_virtual;
+    H5O_storage_virtual_t virtual_storage;
 #ifdef H5_HAVE_INDEXING
     void *idx_handle;
     unsigned idx_plugin_id;
@@ -324,6 +328,28 @@ typedef struct H5VL_iod_write_info_t {
     hid_t trans_id;
 #endif
 } H5VL_iod_write_info_t;
+
+/* list entry for dataset multi write info */
+typedef struct H5VL_iod_multi_write_info_ent_t {
+    hg_bulk_t *bulk_handle;
+    hg_bulk_t *vl_len_bulk_handle;
+    char *vl_lengths;
+} H5VL_iod_multi_write_info_ent_t;
+
+/* information about a dataset multi write request */
+typedef struct H5VL_iod_multi_write_info_t {
+    void *status;
+    size_t count;
+    H5VL_iod_multi_write_info_ent_t *list;
+#ifdef H5_HAVE_INDEXING
+    H5VL_iod_dset_t *dset;
+    void *idx_handle;
+    unsigned idx_plugin_id;
+    void *buf;
+    hid_t dataspace_id;
+    hid_t trans_id;
+#endif
+} H5VL_iod_multi_write_info_t;
 
 /* status of a read operation after it completes */
 typedef struct H5VL_iod_read_status_t {
@@ -465,6 +491,14 @@ H5_DLL herr_t H5VL_iod_pre_write(hid_t type_id, H5S_t *space, const void *buf,
                                  /*out*/char **_vl_lengths);
 H5_DLL herr_t H5VL_iod_pre_read(hid_t type_id, struct H5S_t *space, const void *buf, 
                                 hssize_t nelmts, /*out*/hg_bulk_t *bulk_handle);
+H5_DLL herr_t H5VL_iod_vds_pre_io(H5VL_iod_dset_t *dset, const H5S_t *mem_space,
+    const H5S_t *file_space, hid_t dxpl_id, /*out*/size_t *virtual_count,
+    /*out*/hsize_t *tot_nelmts);
+H5_DLL herr_t H5VL_iod_vds_post_io(H5VL_iod_dset_t *dset, size_t virtual_count);
+
+/* private VOL callbacks */
+void *H5VL_iod_dataset_open(void *obj, H5VL_loc_params_t loc_params,
+    const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
 
 /* private routines for map objects */
 H5_DLL herr_t H5M_init(void);

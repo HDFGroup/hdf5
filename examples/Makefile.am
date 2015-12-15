@@ -31,8 +31,8 @@ if BUILD_EFF_CONDITIONAL
   EXAMPLE_PROG_EFF = h5ff_server h5ff_client_ref\
                 h5ff_client_map h5ff_client_multiple_cont h5ff_client_obj \
                 h5ff_client_dset h5ff_client_attr h5ff_client_links h5ff_client_view \
-                h5ff_client_vl_data h5ff_python_exec h5ff_client_analysis \
-                h5ff_client_evict_deltas h5ff_client_prefetch \
+                h5ff_client_vds h5ff_client_vl_data h5ff_python_exec \
+                h5ff_client_analysis h5ff_client_evict_deltas h5ff_client_prefetch \
                 h5ff_client_M6.2_demo h5ff_client_M7.2-pep_demo \
                 h5ff_client_timings h5ff_client_time_datasets h5ff_client_adv_analysis
 endif

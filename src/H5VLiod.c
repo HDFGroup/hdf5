@@ -26,6 +26,7 @@
 
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Datasets		  		*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FDprivate.h"        /* file drivers            		*/
 #include "H5FFprivate.h"        /* Fast Forward            		*/
@@ -89,8 +90,10 @@ hg_id_t H5VL_MAP_CLOSE_ID;
 hg_id_t H5VL_DSET_CREATE_ID;
 hg_id_t H5VL_DSET_OPEN_ID;
 hg_id_t H5VL_DSET_READ_ID;
+hg_id_t H5VL_DSET_MULTI_READ_ID;
 hg_id_t H5VL_DSET_GET_VL_SIZE_ID;
 hg_id_t H5VL_DSET_WRITE_ID;
+hg_id_t H5VL_DSET_MULTI_WRITE_ID;
 hg_id_t H5VL_DSET_SET_EXTENT_ID;
 hg_id_t H5VL_DSET_CLOSE_ID;
 hg_id_t H5VL_DTYPE_COMMIT_ID;
@@ -150,7 +153,6 @@ static herr_t H5VL_iod_datatype_get(void *obj, H5VL_datatype_get_t get_type, hid
 
 /* Dataset callbacks */
 static void *H5VL_iod_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
-static void *H5VL_iod_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_iod_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                                     hid_t file_space_id, hid_t plist_id, void *buf, void **req);
 static herr_t H5VL_iod_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
@@ -2105,6 +2107,7 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     hid_t trans_id;
     H5TR_t *tr = NULL;
     hid_t type_id, space_id, lcpl_id;
+    H5O_layout_t layout;
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2120,6 +2123,8 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for space id")
     if(H5P_get(plist, H5VL_PROP_DSET_LCPL_ID, &lcpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for lcpl id")
+    if(H5P_get(plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for layout")
 
     /* Check that no values other than the first dimension in MAX dims
        is H5S_UNLIMITED. */
@@ -2186,6 +2191,15 @@ H5VL_iod_dataset_create(void *_obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params,
     dset->idx_plugin_id = 0;
     dset->idx_handle = NULL;
 #endif
+
+    /* Copy virtual storage if the dataset is virtual */
+    if(layout.type == H5D_VIRTUAL) {
+        dset->is_virtual = TRUE;
+        dset->virtual_storage = layout.storage.u.virt;
+        /* Note we do not have to reset the layout message here because we
+         * shallow copied the storage info and nothing else in the layout struct
+         * is deep copied. */
+    } /* end if */
 
     /* Generate IOD IDs for the dset to be created */
     H5VL_iod_gen_obj_id(obj->file->my_rank, obj->file->num_procs, 
@@ -2310,7 +2324,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static void *
+void *
 H5VL_iod_dataset_open(void *_obj, H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name, 
                       hid_t dapl_id, hid_t dxpl_id, void **req)
 {
@@ -2589,140 +2603,255 @@ H5VL_iod_dataset_read(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         type_size = H5T_GET_SIZE(dt);
     }
 
-    /* get the number of elements selcted in dataspace */
-    nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
+    /* Check for VDS */
+    if(dset->is_virtual) {
+        dset_multi_io_in_t vds_input;
+        H5VL_iod_multi_write_info_t *vds_info; /* Info struct used to manage I/O parameters once the operation completes.  Same as write for now until vlens are supported. */
+        int *vds_status;
+        size_t virtual_count;
+        H5S_t *projected_src_space = NULL;
+        hid_t projected_src_space_id = -1;
+        hsize_t tot_nelmts;
+        size_t i, j;
+        
+        /* Unlimited and printf selections not supported yet */
+        /* Nested VDSs not supported yet */
+        /* Checksums not supported yet */
+        /* Vlens not supported yet */
+        /* SDS names must be full paths */
 
-    /* allocate a bulk data transfer handle */
-    if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
-        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
+        /* Set up selections for source dataset I/O */
+        if(H5VL_iod_vds_pre_io(dset, mem_space, file_space, dxpl_id, &virtual_count, &tot_nelmts) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't set up VDS I/O")
 
-    if(NULL == (type_info = (H5VL_iod_type_info_t *)H5MM_malloc(sizeof(H5VL_iod_type_info_t))))
-        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate type info struct");
+        /* Allocate multi I/O list */
+        if(NULL == (vds_input.list.list = (dset_multi_io_list_ent_t *)H5MM_malloc(virtual_count * sizeof(dset_multi_io_list_ent_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate multi I/O list")
+        vds_input.list.count = virtual_count;
 
-    /* Get type info */
-    if(H5VL_iod_get_type_info(mem_type_id, type_info) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get datatype info");
+        /* Allocate info struct */
+        if(NULL == (vds_info = (H5VL_iod_multi_write_info_t *)H5MM_calloc(sizeof(H5VL_iod_multi_write_info_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate a request")
 
-    /* Check if there are any vlen types.  If so, guess number of vl
-     * lengths, allocate array, and register with bulk buffer.  Otherwise,
-     * register data buffer. */
-    if(type_info->vls) {
-        /* For now, just guess one segment for each vl in top level */
-        vl_lengths_size = 8 * (size_t)nelmts * type_info->num_vls;
+        /* Allocate multi I/O info list */
+        if(NULL == (vds_info->list = (H5VL_iod_multi_write_info_ent_t *)H5MM_malloc(virtual_count * sizeof(H5VL_iod_multi_write_info_ent_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate multi I/O list")
+        vds_info->count = virtual_count;
 
-        /* Allocate vl_lengths */
-        if(NULL == (vl_lengths = (char *)HDmalloc(vl_lengths_size)))
-            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate vlen lengths buffer");
+        /* Iterate over mappings */
+        j = 0;
+        for(i = 0;
+                (i < dset->virtual_storage.list_nused) && (j < virtual_count);
+                i++)
+            /* Check if involved in I/O */
+            if(dset->virtual_storage.list[i].source_dset.projected_mem_space) {
+                /* get the number of elements selcted in projected memory dataspace */
+                nelmts = H5S_GET_SELECT_NPOINTS(dset->virtual_storage.list[i].source_dset.projected_mem_space);
 
-        /* Register vl_lengths buffer */
-        HG_Bulk_handle_create(1, &vl_lengths, &vl_lengths_size, HG_BULK_READWRITE, bulk_handle);
+                /* Project intersection of file space and mapping virtual space onto
+                 * mapping source space */
+                if(H5S_select_project_intersection(dset->virtual_storage.list[i].source_dset.virtual_select, dset->virtual_storage.list[i].source_dset.clipped_source_select, file_space, &projected_src_space) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto source space")
+
+                /* Register ID for projected_src_space */
+                if((projected_src_space_id = H5I_register (H5I_DATASPACE, projected_src_space, FALSE)) < 0)
+                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+
+                /* Allocate bulk data transfer handles */
+                if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate a bulk data transfer handle")
+
+                /* compute checksum and create bulk handle */
+                if(H5VL_iod_pre_read(mem_type_id, dset->virtual_storage.list[i].source_dset.projected_mem_space, buf, nelmts, bulk_handle) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't generate read parameters")
+
+                /* Fill input structure list entry */
+                vds_input.list.list[j].iod_oh = ((H5VL_iod_dset_t *)dset->virtual_storage.list[i].source_dset.dset)->remote_dset.iod_oh;
+                vds_input.list.list[j].iod_id = ((H5VL_iod_dset_t *)dset->virtual_storage.list[i].source_dset.dset)->remote_dset.iod_id;
+                vds_input.list.list[j].mdkv_id = ((H5VL_iod_dset_t *)dset->virtual_storage.list[i].source_dset.dset)->remote_dset.mdkv_id;
+                vds_input.list.list[j].bulk_handle = *bulk_handle;
+                vds_input.list.list[j].vl_len_bulk_handle = HG_BULK_NULL;
+                vds_input.list.list[j].checksum = 0;
+                vds_input.list.list[j].space_id = projected_src_space_id;
+                vds_input.list.list[j].dset_type_id = ((H5VL_iod_dset_t *)dset->virtual_storage.list[i].source_dset.dset)->remote_dset.type_id;
+                vds_input.list.list[j].mem_type_id = mem_type_id;
+
+                /* Fill info structure list entry */
+                vds_info->list[j].bulk_handle = bulk_handle;
+                vds_info->list[j].vl_len_bulk_handle = NULL;
+                vds_info->list[j].vl_lengths = NULL;
+
+                /* Advance entry index */
+                j++;
+            } /* end if */
+
+        /* Free memory allocated by H5VL_iod_vds_pre_io() (no longer needed) */
+        if(H5VL_iod_vds_post_io(dset, virtual_count) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't set up VDS I/O")
+
+        /* Fill in rest of input structure */
+        vds_input.coh = dset->common.file->remote_file.coh;
+        vds_input.dxpl_id = dxpl_id;
+        vds_input.trans_num = 0;
+        vds_input.rcxt_num  = rc->c_version;
+        vds_input.cs_scope = dset->common.file->md_integrity_scope;
+        vds_input.axe_id = g_axe_id;
+
+        if(NULL == (vds_status = (int *)H5MM_malloc(sizeof(int))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate status");
+
+        /* Fill in rest of info structure */
+        vds_info->status = vds_status;
+
+        if(H5VL__iod_create_and_forward(H5VL_DSET_MULTI_READ_ID, HG_DSET_MULTI_READ, 
+                                        (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,
+                                        (H5VL_iod_req_info_t *)rc, &vds_input, vds_status, vds_info, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset multi write");
+
+        /* Clean up projected_src_spaces */
+        for(i = 0; i < virtual_count; i++)
+            if(H5I_dec_ref(vds_input.list.list[i].space_id) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "unable to decrement dataspace atom ref count")
+
+        /* Free I/O list */
+        vds_input.list.list = (dset_multi_io_list_ent_t *)H5MM_xfree(vds_input.list.list);
     } /* end if */
     else {
-        /* for non vlen data, create the bulk handle to recieve the data in */
-        if(H5VL_iod_pre_read(mem_type_id, mem_space, buf, nelmts, bulk_handle) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't generate read parameters");
-    }
+        /* get the number of elements selcted in dataspace */
+        nelmts = H5S_GET_SELECT_NPOINTS(mem_space);
 
-    if(NULL == (parent_reqs = (H5VL_iod_request_t **)
-                H5MM_malloc(sizeof(H5VL_iod_request_t *))))
-        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
+        /* allocate a bulk data transfer handle */
+        if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
 
-    /* retrieve parent requests */
-    if(H5VL_iod_get_parent_requests((H5VL_iod_object_t *)dset, (H5VL_iod_req_info_t *)rc, 
-                                    parent_reqs, &num_parents) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+        if(NULL == (type_info = (H5VL_iod_type_info_t *)H5MM_malloc(sizeof(H5VL_iod_type_info_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate type info struct");
 
-    /* Fill input structure for reading data */
-    input.coh = dset->common.file->remote_file.coh;
-    input.iod_oh = dset->remote_dset.iod_oh;
-    input.iod_id = dset->remote_dset.iod_id;
-    input.mdkv_id = dset->remote_dset.mdkv_id;
-    input.bulk_handle = *bulk_handle;
-    input.vl_len_bulk_handle = HG_BULK_NULL;
-    input.checksum = 0;
-    input.dxpl_id = dxpl_id;
-    if(H5S_ALL == file_space_id)
-        input.space_id = dset->remote_dset.space_id;
-    else
-        input.space_id = file_space_id;
-    input.dset_type_id = dset->remote_dset.type_id;
-    input.mem_type_id = mem_type_id;
-    input.trans_num = 0;
-    input.rcxt_num  = rc->c_version;
-    input.cs_scope = dset->common.file->md_integrity_scope;
-    input.axe_id = g_axe_id;
+        /* Get type info */
+        if(H5VL_iod_get_type_info(mem_type_id, type_info) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to get datatype info");
 
-    /* allocate structure to receive status of read operation
-       (contains return value, checksum, and buffer size) */
-    if(NULL == (status = (H5VL_iod_read_status_t *)H5MM_malloc(sizeof(H5VL_iod_read_status_t))))
-        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate Read status struct");
+        /* Check if there are any vlen types.  If so, guess number of vl
+         * lengths, allocate array, and register with bulk buffer.  Otherwise,
+         * register data buffer. */
+        if(type_info->vls) {
+            /* For now, just guess one segment for each vl in top level */
+            vl_lengths_size = 8 * (size_t)nelmts * type_info->num_vls;
 
-    /* setup info struct for I/O request. 
-       This is to manage the I/O operation once the wait is called. */
-    if(NULL == (info = (H5VL_iod_read_info_t *)H5MM_calloc(sizeof(H5VL_iod_read_info_t))))
-        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
+            /* Allocate vl_lengths */
+            if(NULL == (vl_lengths = (char *)HDmalloc(vl_lengths_size)))
+                HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate vlen lengths buffer");
 
-    info->status = status;
-    info->bulk_handle = bulk_handle;
-    info->type_info = type_info;
-    info->vl_lengths = vl_lengths;
-    info->vl_lengths_size = vl_lengths_size;
-    info->buf_ptr = buf;
-    info->nelmts = nelmts;
-    info->type_size = type_size;
-    info->cs_ptr = NULL;
-    info->axe_id = g_axe_id;
+            /* Register vl_lengths buffer */
+            HG_Bulk_handle_create(1, &vl_lengths, &vl_lengths_size, HG_BULK_READWRITE, bulk_handle);
+        } /* end if */
+        else {
+            /* for non vlen data, create the bulk handle to recieve the data in */
+            if(H5VL_iod_pre_read(mem_type_id, mem_space, buf, nelmts, bulk_handle) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't generate read parameters");
+        }
 
-    /* store a copy of the dataspace selection to be able to calculate the checksum later */
-    if(NULL == (info->space = H5S_copy(mem_space, FALSE, TRUE)))
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
-    /* store the pointer to the buffer where the checksum needs to be placed */
-    if(H5P_get(plist, H5D_XFER_CHECKSUM_PTR_NAME, &info->cs_ptr) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
-    /* store the raw data integrity scope */
-    if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &info->raw_cs_scope) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
+        if(NULL == (parent_reqs = (H5VL_iod_request_t **)
+                    H5MM_malloc(sizeof(H5VL_iod_request_t *))))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
 
-    /* If the read is of VL data, then we need the read parameters to
-       perform the actual read when the wait is called (i.e. when we
-       retrieve the buffer size) */
-    if(type_info->vls) {
-        if((info->file_space_id = H5Scopy(input.space_id)) < 0)
+        /* retrieve parent requests */
+        if(H5VL_iod_get_parent_requests((H5VL_iod_object_t *)dset, (H5VL_iod_req_info_t *)rc, 
+                                        parent_reqs, &num_parents) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
+
+        /* Fill input structure for reading data */
+        input.coh = dset->common.file->remote_file.coh;
+        input.iod_oh = dset->remote_dset.iod_oh;
+        input.iod_id = dset->remote_dset.iod_id;
+        input.mdkv_id = dset->remote_dset.mdkv_id;
+        input.bulk_handle = *bulk_handle;
+        input.vl_len_bulk_handle = HG_BULK_NULL;
+        input.checksum = 0;
+        input.dxpl_id = dxpl_id;
+        if(H5S_ALL == file_space_id)
+            input.space_id = dset->remote_dset.space_id;
+        else
+            input.space_id = file_space_id;
+        input.dset_type_id = dset->remote_dset.type_id;
+        input.mem_type_id = mem_type_id;
+        input.trans_num = 0;
+        input.rcxt_num  = rc->c_version;
+        input.cs_scope = dset->common.file->md_integrity_scope;
+        input.axe_id = g_axe_id;
+
+        /* allocate structure to receive status of read operation
+           (contains return value, checksum, and buffer size) */
+        if(NULL == (status = (H5VL_iod_read_status_t *)H5MM_malloc(sizeof(H5VL_iod_read_status_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate Read status struct");
+
+        /* setup info struct for I/O request. 
+           This is to manage the I/O operation once the wait is called. */
+        if(NULL == (info = (H5VL_iod_read_info_t *)H5MM_calloc(sizeof(H5VL_iod_read_info_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
+
+        info->status = status;
+        info->bulk_handle = bulk_handle;
+        info->type_info = type_info;
+        info->vl_lengths = vl_lengths;
+        info->vl_lengths_size = vl_lengths_size;
+        info->buf_ptr = buf;
+        info->nelmts = nelmts;
+        info->type_size = type_size;
+        info->cs_ptr = NULL;
+        info->axe_id = g_axe_id;
+
+        /* store a copy of the dataspace selection to be able to calculate the checksum later */
+        if(NULL == (info->space = H5S_copy(mem_space, FALSE, TRUE)))
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
-        if((info->mem_type_id = H5Tcopy(mem_type_id)) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype");
-        if((info->dxpl_id = H5P_copy_plist((H5P_genplist_t *)plist, TRUE)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy dxpl");
+        /* store the pointer to the buffer where the checksum needs to be placed */
+        if(H5P_get(plist, H5D_XFER_CHECKSUM_PTR_NAME, &info->cs_ptr) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
+        /* store the raw data integrity scope */
+        if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &info->raw_cs_scope) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum pointer value");
 
-        info->ion_target = PEER;
-        info->read_id = H5VL_DSET_READ_ID;
-    }
+        /* If the read is of VL data, then we need the read parameters to
+           perform the actual read when the wait is called (i.e. when we
+           retrieve the buffer size) */
+        if(type_info->vls) {
+            if((info->file_space_id = H5Scopy(input.space_id)) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace");
+            if((info->mem_type_id = H5Tcopy(mem_type_id)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy datatype");
+            if((info->dxpl_id = H5P_copy_plist((H5P_genplist_t *)plist, TRUE)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy dxpl");
 
-#if H5_EFF_DEBUG
-    if(!type_info->vls)
-        printf("Dataset Read, axe id %"PRIu64"\n", g_axe_id);
-    else
-        printf("Dataset GET size, axe id %"PRIu64"\n", g_axe_id + 1);
-#endif
+            info->ion_target = PEER;
+            info->read_id = H5VL_DSET_READ_ID;
+        }
 
-    /* forward the call to the IONs */
-    if(!type_info->vls) {
-        if(H5VL__iod_create_and_forward(H5VL_DSET_READ_ID, HG_DSET_READ, 
-                                        (H5VL_iod_object_t *)dset, 0,
-                                        num_parents, parent_reqs, (H5VL_iod_req_info_t *)rc, 
-                                        &input, status, info, req) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset read");
-    }
-    else {
-        /* allocate an axe_id for the read operation to follow */
-        g_axe_id ++;
+    #if H5_EFF_DEBUG
+        if(!type_info->vls)
+            printf("Dataset Read, axe id %"PRIu64"\n", g_axe_id);
+        else
+            printf("Dataset GET size, axe id %"PRIu64"\n", g_axe_id + 1);
+    #endif
 
-        if(H5VL__iod_create_and_forward(H5VL_DSET_GET_VL_SIZE_ID, HG_DSET_GET_VL_SIZE, 
-                                        (H5VL_iod_object_t *)dset, 0,
-                                        num_parents, parent_reqs, (H5VL_iod_req_info_t *)rc,
-                                        &input, status, info, req) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset get VL size");
-    }
+        /* forward the call to the IONs */
+        if(!type_info->vls) {
+            if(H5VL__iod_create_and_forward(H5VL_DSET_READ_ID, HG_DSET_READ, 
+                                            (H5VL_iod_object_t *)dset, 0,
+                                            num_parents, parent_reqs, (H5VL_iod_req_info_t *)rc, 
+                                            &input, status, info, req) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset read");
+        }
+        else {
+            /* allocate an axe_id for the read operation to follow */
+            g_axe_id ++;
+
+            if(H5VL__iod_create_and_forward(H5VL_DSET_GET_VL_SIZE_ID, HG_DSET_GET_VL_SIZE, 
+                                            (H5VL_iod_object_t *)dset, 0,
+                                            num_parents, parent_reqs, (H5VL_iod_req_info_t *)rc,
+                                            &input, status, info, req) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset get VL size");
+        }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2747,7 +2876,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
                        hid_t file_space_id, hid_t dxpl_id, const void *buf, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
-    dset_io_in_t input;
     H5P_genplist_t *plist = NULL;
     hg_bulk_t *bulk_handle = NULL;
     hg_bulk_t *vl_len_bulk_handle = NULL;
@@ -2756,7 +2884,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     H5S_t *file_space = NULL;
     char fake_char;
     int *status = NULL;
-    H5VL_iod_write_info_t *info; /* info struct used to manage I/O parameters once the operation completes*/
     uint64_t internal_cs = 0; /* internal checksum calculated in this function */
     H5VL_iod_request_t **parent_reqs = NULL;
     size_t num_parents = 0;
@@ -2780,34 +2907,34 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
 
     /* check arguments */
     if(H5S_ALL != mem_space_id) {
-	if(NULL == (mem_space = (H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        if(NULL == (mem_space = (H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(mem_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+        /* Check for valid selection */
+        if(H5S_SELECT_VALID(mem_space) != TRUE)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
     }
     else {
-	if(NULL == (mem_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
+        if(NULL == (mem_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
                                                            H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
         if(H5S_select_all(mem_space, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
     }
 
     if(H5S_ALL != file_space_id) {
-	if(NULL == (file_space = (H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+        if(NULL == (file_space = (H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
-	/* Check for valid selection */
-	if(H5S_SELECT_VALID(file_space) != TRUE)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
+        /* Check for valid selection */
+        if(H5S_SELECT_VALID(file_space) != TRUE)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection+offset not within extent");
     }
     else {
-	if(NULL == (file_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
+        if(NULL == (file_space = (H5S_t *)H5I_object_verify(dset->remote_dset.space_id, 
                                                             H5I_DATASPACE)))
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
 
         if(H5S_select_all(file_space, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
@@ -2836,7 +2963,7 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
         io_ndims = (int)H5S_GET_EXTENT_NDIMS(file_space);
 
         if(dset_ndims < io_ndims)
-	    HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection not within dataset's dataspace");
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "selection not within dataset's dataspace");
 
         H5S_get_simple_extent_dims(dset_space, dset_dims, NULL);
         H5S_get_simple_extent_dims(file_space, io_dims, NULL);
@@ -2857,44 +2984,6 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
 
-    /* get the data integrity scope */
-    if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &raw_cs_scope) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
-
-    /* allocate a bulk data transfer handle */
-    if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
-        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
-    if(NULL == (vl_len_bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
-        HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a buld data transfer handle");
-
-    if(raw_cs_scope) {
-        /* compute checksum and create bulk handle */
-        if(H5VL_iod_pre_write(mem_type_id, mem_space, buf, &internal_cs, &vl_len_cs, 
-                              bulk_handle, vl_len_bulk_handle, &vl_lengths) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
-    }
-    else {
-#if H5_EFF_DEBUG        
-        printf("NO DATA INTEGRITY CHECKS ON RAW DATA WRITTEN\n");
-#endif
-        /* compute checksum and create bulk handle */
-        if(H5VL_iod_pre_write(mem_type_id, mem_space, buf, NULL, NULL, bulk_handle, 
-                              vl_len_bulk_handle, &vl_lengths) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
-        internal_cs = 0;
-    }
-
-    /* Verify the checksum value if the dxpl contains a user defined checksum */
-    if(H5P_get(plist, H5D_XFER_CHECKSUM_NAME, &user_cs) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum value");
-
-    if((raw_cs_scope & H5_CHECKSUM_MEMORY) && user_cs && 
-       user_cs != internal_cs) {
-        fprintf(stderr, "Errrr.. In memory Data corruption. expecting %016lX, got %016lX\n",
-                user_cs, internal_cs);
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
-    }
-
     if(NULL == (parent_reqs = (H5VL_iod_request_t **)
                 H5MM_malloc(sizeof(H5VL_iod_request_t *) * 2)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate parent req element");
@@ -2904,54 +2993,227 @@ H5VL_iod_dataset_write(void *_dset, hid_t mem_type_id, hid_t mem_space_id,
                                     parent_reqs, &num_parents) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "Failed to retrieve parent requests");
 
-    /* Fill input structure */
-    input.coh = dset->common.file->remote_file.coh;
-    input.iod_oh = dset->remote_dset.iod_oh;
-    input.iod_id = dset->remote_dset.iod_id;
-    input.mdkv_id = dset->remote_dset.mdkv_id;
-    input.bulk_handle = *bulk_handle;
-    input.vl_len_bulk_handle = *vl_len_bulk_handle;
-    input.checksum = internal_cs;
-    input.dxpl_id = dxpl_id;
-    if(H5S_ALL == file_space_id)
-        input.space_id = dset->remote_dset.space_id;
-    else
-        input.space_id = file_space_id;
-    input.dset_type_id = dset->remote_dset.type_id;
-    input.mem_type_id = mem_type_id;
-    input.trans_num = tr->trans_num;
-    input.rcxt_num  = tr->c_version;
-    input.cs_scope = dset->common.file->md_integrity_scope;
-    input.axe_id = g_axe_id;
+    /* get the data integrity scope */
+    if(H5P_get(plist, H5VL_CS_BITFLAG_NAME, &raw_cs_scope) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get scope for data integrity checks");
 
-    status = (int *)malloc(sizeof(int));
+    /* Check for VDS */
+    if(dset->is_virtual) {
+        dset_multi_io_in_t vds_input;
+        H5VL_iod_multi_write_info_t *vds_info; /* info struct used to manage I/O parameters once the operation completes*/
+        size_t virtual_count;
+        H5S_t *projected_src_space = NULL;
+        hid_t projected_src_space_id = -1;
+        hsize_t tot_nelmts;
+        size_t i, j;
+        
+        /* Unlimited and printf selections not supported yet */
+        /* Nested VDSs not supported yet */
+        /* User defined checksums not supported yet */
+        /* SDS names must be full paths */
+
+        /* Set up selections for source dataset I/O */
+        if(H5VL_iod_vds_pre_io(dset, mem_space, file_space, dxpl_id, &virtual_count, &tot_nelmts) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't set up VDS I/O")
+
+        /* Allocate multi I/O list */
+        if(NULL == (vds_input.list.list = (dset_multi_io_list_ent_t *)H5MM_malloc(virtual_count * sizeof(dset_multi_io_list_ent_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate multi I/O list")
+        vds_input.list.count = virtual_count;
+
+        /* Allocate info struct */
+        if(NULL == (vds_info = (H5VL_iod_multi_write_info_t *)H5MM_calloc(sizeof(H5VL_iod_multi_write_info_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate a request")
+
+        /* Allocate multi I/O info list */
+        if(NULL == (vds_info->list = (H5VL_iod_multi_write_info_ent_t *)H5MM_malloc(virtual_count * sizeof(H5VL_iod_multi_write_info_ent_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate multi I/O list")
+        vds_info->count = virtual_count;
+
+        /* Iterate over mappings */
+        j = 0;
+        for(i = 0;
+                (i < dset->virtual_storage.list_nused) && (j < virtual_count);
+                i++)
+            /* Check if involved in I/O */
+            if(dset->virtual_storage.list[i].source_dset.projected_mem_space) {
+                /* Project intersection of file space and mapping virtual space onto
+                 * mapping source space */
+                if(H5S_select_project_intersection(dset->virtual_storage.list[i].source_dset.virtual_select, dset->virtual_storage.list[i].source_dset.clipped_source_select, file_space, &projected_src_space) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto source space")
+
+                /* Register ID for projected_src_space */
+                if((projected_src_space_id = H5I_register (H5I_DATASPACE, projected_src_space, FALSE)) < 0)
+                    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+
+                /* Allocate bulk data transfer handles */
+                if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate a bulk data transfer handle")
+                if(NULL == (vl_len_bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate a bulk data transfer handle")
+
+                if(raw_cs_scope) {
+                    /* compute checksum and create bulk handle */
+                    if(H5VL_iod_pre_write(mem_type_id, dset->virtual_storage.list[i].source_dset.projected_mem_space, buf, &internal_cs, &vl_len_cs, 
+                                          bulk_handle, vl_len_bulk_handle, &vl_lengths) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters")
+                } /* end if */
+                else {
+#if H5_EFF_DEBUG        
+                    printf("NO DATA INTEGRITY CHECKS ON RAW DATA WRITTEN\n");
+#endif
+                    /* compute checksum and create bulk handle */
+                    if(H5VL_iod_pre_write(mem_type_id, dset->virtual_storage.list[i].source_dset.projected_mem_space, buf, NULL, NULL, bulk_handle, 
+                                          vl_len_bulk_handle, &vl_lengths) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters")
+                    internal_cs = 0;
+                } /* end else */
+
+                /* Fill input structure list entry */
+                vds_input.list.list[j].iod_oh = ((H5VL_iod_dset_t *)dset->virtual_storage.list[i].source_dset.dset)->remote_dset.iod_oh;
+                vds_input.list.list[j].iod_id = ((H5VL_iod_dset_t *)dset->virtual_storage.list[i].source_dset.dset)->remote_dset.iod_id;
+                vds_input.list.list[j].mdkv_id = ((H5VL_iod_dset_t *)dset->virtual_storage.list[i].source_dset.dset)->remote_dset.mdkv_id;
+                vds_input.list.list[j].bulk_handle = *bulk_handle;
+                vds_input.list.list[j].vl_len_bulk_handle = *vl_len_bulk_handle;
+                vds_input.list.list[j].checksum = internal_cs;
+                vds_input.list.list[j].space_id = projected_src_space_id;
+                vds_input.list.list[j].dset_type_id = ((H5VL_iod_dset_t *)dset->virtual_storage.list[i].source_dset.dset)->remote_dset.type_id;
+                vds_input.list.list[j].mem_type_id = mem_type_id;
+
+                /* Fill info structure list entry */
+                vds_info->list[j].bulk_handle = bulk_handle;
+                vds_info->list[j].vl_len_bulk_handle = vl_len_bulk_handle;
+                vds_info->list[j].vl_lengths = vl_lengths;
+
+                /* Advance entry index */
+                j++;
+            } /* end if */
+
+        /* Free memory allocated by H5VL_iod_vds_pre_io() (no longer needed) */
+        if(H5VL_iod_vds_post_io(dset, virtual_count) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't set up VDS I/O")
+
+        /* Fill in rest of input structure */
+        vds_input.coh = dset->common.file->remote_file.coh;
+        vds_input.dxpl_id = dxpl_id;
+        vds_input.trans_num = tr->trans_num;
+        vds_input.rcxt_num  = tr->c_version;
+        vds_input.cs_scope = dset->common.file->md_integrity_scope;
+        vds_input.axe_id = g_axe_id;
+
+        if(NULL == (status = (int *)H5MM_malloc(sizeof(int))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate status");
+
+        /* Fill in rest of info structure */
+        vds_info->status = status;
+#ifdef H5_HAVE_INDEXING
+        /* setup extra info required for the index post_update operation */
+        vds_info->dset = dset;
+        vds_info->idx_handle = dset->idx_handle;
+        vds_info->idx_plugin_id = dset->idx_plugin_id;
+        vds_info->buf = buf;
+        vds_info->dataspace_id = file_space_id;
+        vds_info->trans_id = trans_id;
+#endif
+
+        if(H5VL__iod_create_and_forward(H5VL_DSET_MULTI_WRITE_ID, HG_DSET_MULTI_WRITE, 
+                                        (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,
+                                        (H5VL_iod_req_info_t *)tr, &vds_input, status, vds_info, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset multi write");
+
+        /* Clean up projected_src_spaces */
+        for(i = 0; i < virtual_count; i++)
+            if(H5I_dec_ref(vds_input.list.list[i].space_id) < 0)
+                HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "unable to decrement dataspace atom ref count")
+    } /* end if */
+    else {
+        dset_io_in_t input;
+        H5VL_iod_write_info_t *info; /* info struct used to manage I/O parameters once the operation completes*/
+
+        /* allocate a bulk data transfer handle */
+        if(NULL == (bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate a bulk data transfer handle");
+        if(NULL == (vl_len_bulk_handle = (hg_bulk_t *)H5MM_malloc(sizeof(hg_bulk_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate a bulk data transfer handle");
+
+        if(raw_cs_scope) {
+            /* compute checksum and create bulk handle */
+            if(H5VL_iod_pre_write(mem_type_id, mem_space, buf, &internal_cs, &vl_len_cs, 
+                                  bulk_handle, vl_len_bulk_handle, &vl_lengths) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
+        }
+        else {
+#if H5_EFF_DEBUG        
+            printf("NO DATA INTEGRITY CHECKS ON RAW DATA WRITTEN\n");
+#endif
+            /* compute checksum and create bulk handle */
+            if(H5VL_iod_pre_write(mem_type_id, mem_space, buf, NULL, NULL, bulk_handle, 
+                                  vl_len_bulk_handle, &vl_lengths) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't generate write parameters");
+            internal_cs = 0;
+        }
+
+        /* Verify the checksum value if the dxpl contains a user defined checksum */
+        if(H5P_get(plist, H5D_XFER_CHECKSUM_NAME, &user_cs) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get checksum value");
+
+        if((raw_cs_scope & H5_CHECKSUM_MEMORY) && user_cs && 
+           user_cs != internal_cs) {
+            fprintf(stderr, "Errrr.. In memory Data corruption. expecting %016lX, got %016lX\n",
+                    user_cs, internal_cs);
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "Checksum verification failed");
+        }
+
+        /* Fill input structure */
+        input.coh = dset->common.file->remote_file.coh;
+        input.iod_oh = dset->remote_dset.iod_oh;
+        input.iod_id = dset->remote_dset.iod_id;
+        input.mdkv_id = dset->remote_dset.mdkv_id;
+        input.bulk_handle = *bulk_handle;
+        input.vl_len_bulk_handle = *vl_len_bulk_handle;
+        input.checksum = internal_cs;
+        input.dxpl_id = dxpl_id;
+        if(H5S_ALL == file_space_id)
+            input.space_id = dset->remote_dset.space_id;
+        else
+            input.space_id = file_space_id;
+        input.dset_type_id = dset->remote_dset.type_id;
+        input.mem_type_id = mem_type_id;
+        input.trans_num = tr->trans_num;
+        input.rcxt_num  = tr->c_version;
+        input.cs_scope = dset->common.file->md_integrity_scope;
+        input.axe_id = g_axe_id;
+
+        if(NULL == (status = (int *)H5MM_malloc(sizeof(int))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate status");
 
 #if H5_EFF_DEBUG
-    printf("Dataset Write, axe id %"PRIu64"\n", g_axe_id);
+        printf("Dataset Write, axe id %"PRIu64"\n", g_axe_id);
 #endif
 
-    /* setup info struct for I/O request
-       This is to manage the I/O operation once the wait is called. */
-    if(NULL == (info = (H5VL_iod_write_info_t *)H5MM_calloc(sizeof(H5VL_iod_write_info_t))))
-	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "can't allocate a request");
-    info->status = status;
-    info->bulk_handle = bulk_handle;
-    info->vl_len_bulk_handle = vl_len_bulk_handle;
-    info->vl_lengths = vl_lengths;
+        /* setup info struct for I/O request
+           This is to manage the I/O operation once the wait is called. */
+        if(NULL == (info = (H5VL_iod_write_info_t *)H5MM_calloc(sizeof(H5VL_iod_write_info_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate a request");
+        info->status = status;
+        info->bulk_handle = bulk_handle;
+        info->vl_len_bulk_handle = vl_len_bulk_handle;
+        info->vl_lengths = vl_lengths;
 #ifdef H5_HAVE_INDEXING
-    /* setup extra info required for the index post_update operation */
-    info->dset = dset;
-    info->idx_handle = dset->idx_handle;
-    info->idx_plugin_id = dset->idx_plugin_id;
-    info->buf = buf;
-    info->dataspace_id = file_space_id;
-    info->trans_id = trans_id;
+        /* setup extra info required for the index post_update operation */
+        info->dset = dset;
+        info->idx_handle = dset->idx_handle;
+        info->idx_plugin_id = dset->idx_plugin_id;
+        info->buf = buf;
+        info->dataspace_id = file_space_id;
+        info->trans_id = trans_id;
 #endif
 
-    if(H5VL__iod_create_and_forward(H5VL_DSET_WRITE_ID, HG_DSET_WRITE, 
-                                    (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,
-                                    (H5VL_iod_req_info_t *)tr, &input, status, info, req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset write");
+        if(H5VL__iod_create_and_forward(H5VL_DSET_WRITE_ID, HG_DSET_WRITE, 
+                                        (H5VL_iod_object_t *)dset, 0, num_parents, parent_reqs,
+                                        (H5VL_iod_req_info_t *)tr, &input, status, info, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset write");
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3174,7 +3436,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_iod_dataset_close(void *_dset, hid_t H5_ATTR_UNUSED dxpl_id, void **req)
+H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
 {
     H5VL_iod_dset_t *dset = (H5VL_iod_dset_t *)_dset;
     dset_close_in_t input;
@@ -3229,6 +3491,17 @@ H5VL_iod_dataset_close(void *_dset, hid_t H5_ATTR_UNUSED dxpl_id, void **req)
                                     num_parents, parent_reqs,
                                     NULL, &input, status, status, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset close");
+
+    /* If dataset is virtual, close source datasets */
+    if(dset->is_virtual) {
+        size_t i;
+
+        for(i = 0; i < dset->virtual_storage.list_nused; i++) {
+            if(H5VL_iod_dataset_close(dset->virtual_storage.list[i].source_dset.dset, dxpl_id, req) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close source dataset")
+            dset->virtual_storage.list[i].source_dset.dset = NULL;
+        } /* end for */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

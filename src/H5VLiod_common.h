@@ -63,8 +63,10 @@ extern hg_id_t H5VL_MAP_CLOSE_ID;
 extern hg_id_t H5VL_DSET_CREATE_ID;
 extern hg_id_t H5VL_DSET_OPEN_ID;
 extern hg_id_t H5VL_DSET_READ_ID;
+extern hg_id_t H5VL_DSET_MULTI_READ_ID;
 extern hg_id_t H5VL_DSET_GET_VL_SIZE_ID;
 extern hg_id_t H5VL_DSET_WRITE_ID;
+extern hg_id_t H5VL_DSET_MULTI_WRITE_ID;
 extern hg_id_t H5VL_DSET_SET_EXTENT_ID;
 extern hg_id_t H5VL_DSET_CLOSE_ID;
 extern hg_id_t H5VL_DTYPE_COMMIT_ID;
@@ -265,8 +267,10 @@ H5_DLL int H5VL_iod_server_map_close(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_create(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_read(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_multi_read(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_get_vl_size(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_write(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_dset_multi_write(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_set_extent(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dset_close(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_dtype_commit(hg_handle_t handle);
@@ -328,6 +332,7 @@ H5_DLL int hg_proc_obj_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_attr_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_obj_iterate_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_attr_iterate_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_dset_multi_io_list_t(hg_proc_t proc, void *data);
 
 MERCURY_GEN_PROC(analysis_invoke_in_t, 
                  ((axe_t)(axe_info))
@@ -672,6 +677,29 @@ MERCURY_GEN_PROC(dset_io_in_t,
                  ((uint64_t)(checksum))
                  ((hg_bulk_t)(bulk_handle))
                  ((hg_bulk_t)(vl_len_bulk_handle))
+                 ((uint64_t)(axe_id)))
+MERCURY_GEN_PROC(dset_multi_io_list_ent_t,
+                 ((iod_handles_t)(iod_oh))
+                 ((iod_obj_id_t)(iod_id))
+                 ((iod_obj_id_t)(mdkv_id))
+                 ((hid_t)(dset_type_id))
+                 ((hid_t)(mem_type_id))
+                 ((hid_t)(space_id))
+                 ((uint64_t)(checksum))
+                 ((hg_bulk_t)(bulk_handle))
+                 ((hg_bulk_t)(vl_len_bulk_handle)))
+typedef struct dset_multi_io_list_t {
+    size_t count;
+    dset_multi_io_list_ent_t *list;
+} dset_multi_io_list_t;
+MERCURY_GEN_PROC(dset_multi_io_in_t, 
+                 ((axe_t)(axe_info))
+                 ((uint32_t)(cs_scope))
+                 ((uint64_t)(rcxt_num))
+                 ((uint64_t)(trans_num))
+                 ((iod_handle_t)(coh))
+                 ((dset_multi_io_list_t)(list))
+                 ((hid_t)(dxpl_id))
                  ((uint64_t)(axe_id)))
 MERCURY_GEN_PROC(dset_read_out_t, 
                  ((int32_t)(ret))
