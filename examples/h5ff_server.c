@@ -13,6 +13,9 @@
 int main(int argc, char **argv) {
     int my_size, my_rank;
     int provided;
+    char hostname[1024];
+
+    gethostname(hostname, 1024);
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
@@ -22,7 +25,7 @@ int main(int argc, char **argv) {
 
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &my_size);
-    printf("Number of server processes = %d, my rank is %d\n", my_size, my_rank);
+    printf("Number of server processes = %d, my rank is %d, hostname %s\n", my_size, my_rank, hostname);
 
     //H5open();
     /* This call initiliazes the FS for the server processes (create metadata and

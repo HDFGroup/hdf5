@@ -291,10 +291,8 @@ H5VL_iod_server_file_create_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
 
 done:
     if(ret_value < 0) {
-        if(coh.cookie != IOD_OH_UNDEFINED) {
-            if((ret = iod_container_close(coh, NULL, NULL)) < 0)
-                HDONE_ERROR_FF(ret, "can't close container");
-        }
+        if(coh.cookie != IOD_OH_UNDEFINED)
+            iod_container_close(coh, NULL, NULL);
         output.coh.cookie = IOD_OH_UNDEFINED;
         output.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
         output.root_oh.wr_oh.cookie = IOD_OH_UNDEFINED;
@@ -634,10 +632,8 @@ done:
         H5Pclose(output.fcpl_id);
 
     if(ret_value < 0) {
-        if(coh.cookie != IOD_OH_UNDEFINED) {
-            if((ret = iod_container_close(coh, NULL, NULL)) < 0)
-                HDONE_ERROR_FF(ret, "can't close container");
-        }
+        if(coh.cookie != IOD_OH_UNDEFINED)
+            iod_container_close(coh, NULL, NULL);
         output.coh.cookie = IOD_OH_UNDEFINED;
         output.root_id = IOD_OBJ_INVALID;
         output.root_oh.rd_oh.cookie = IOD_OH_UNDEFINED;
