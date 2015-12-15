@@ -1274,6 +1274,7 @@ H5B__remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *typ
     FUNC_ENTER_STATIC
 
     HDassert(f);
+    HDassert(H5F_addr_defined(addr));
     HDassert(type);
     HDassert(type->decode);
     HDassert(type->cmp3);
