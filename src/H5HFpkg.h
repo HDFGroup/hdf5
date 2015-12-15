@@ -360,6 +360,7 @@ typedef struct H5HF_hdr_t {
     uint8_t     heap_off_size;  /* Size of heap offsets (in bytes) */
     uint8_t     heap_len_size;  /* Size of heap ID lengths (in bytes) */
     hbool_t     checked_filters; /* TRUE if pipeline passes can_apply checks */
+    hbool_t     swmr_write;     /* Flag indicating the file is opened with SWMR-write access */
 } H5HF_hdr_t;
 
 /* Common indirect block doubling table entry */
@@ -544,6 +545,14 @@ typedef struct H5HF_dblock_cache_ud_t {
 				 * calls to it.
 				 */
     unsigned filter_mask;	/* Excluded filters for direct block */
+    uint8_t *dblk;		/* Pointer to the buffer containing the decompressed
+ 			         * direct block data obtained in verify_chksum callback.
+				 * It will be used later in deserialize callback.
+				 */
+    htri_t decompressed;	/* Indicate that the direct block has been
+ 				 * decompressed in verify_chksum callback.
+				 * It will be used later in deserialize callback.
+				 */
 } H5HF_dblock_cache_ud_t;
 
 
@@ -607,6 +616,12 @@ H5FL_BLK_EXTERN(direct_block);
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+
+/* Generic routines */
+H5_DLL herr_t H5HF__create_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5HF__destroy_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
 
 /* Doubling table routines */
 H5_DLL herr_t H5HF_dtable_init(H5HF_dtable_t *dtable);

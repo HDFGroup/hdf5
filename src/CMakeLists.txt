@@ -44,6 +44,7 @@ IDE_GENERATED_PROPERTIES ("H5A" "${H5A_HDRS}" "${H5A_SRCS}" )
 
 set (H5AC_SRCS
     ${HDF5_SRC_DIR}/H5AC.c
+    ${HDF5_SRC_DIR}/H5AClog.c
     ${HDF5_SRC_DIR}/H5ACmpio.c
 )
 
@@ -103,20 +104,25 @@ IDE_GENERATED_PROPERTIES ("H5CS" "${H5CS_HDRS}" "${H5CS_SRCS}" )
 set (H5D_SRCS
     ${HDF5_SRC_DIR}/H5D.c
     ${HDF5_SRC_DIR}/H5Dbtree.c
+    ${HDF5_SRC_DIR}/H5Dbtree2.c
     ${HDF5_SRC_DIR}/H5Dchunk.c
     ${HDF5_SRC_DIR}/H5Dcompact.c
     ${HDF5_SRC_DIR}/H5Dcontig.c
     ${HDF5_SRC_DIR}/H5Ddbg.c
     ${HDF5_SRC_DIR}/H5Ddeprec.c
+    ${HDF5_SRC_DIR}/H5Dearray.c
     ${HDF5_SRC_DIR}/H5Defl.c
+    ${HDF5_SRC_DIR}/H5Dfarray.c
     ${HDF5_SRC_DIR}/H5Dfill.c
     ${HDF5_SRC_DIR}/H5Dint.c
     ${HDF5_SRC_DIR}/H5Dio.c
     ${HDF5_SRC_DIR}/H5Dlayout.c
     ${HDF5_SRC_DIR}/H5Dmpio.c
+    ${HDF5_SRC_DIR}/H5Dnone.c
     ${HDF5_SRC_DIR}/H5Doh.c
     ${HDF5_SRC_DIR}/H5Dscatgath.c
     ${HDF5_SRC_DIR}/H5Dselect.c
+    ${HDF5_SRC_DIR}/H5Dsingle.c
     ${HDF5_SRC_DIR}/H5Dtest.c
     ${HDF5_SRC_DIR}/H5Dvirtual.c
 )
@@ -196,6 +202,7 @@ set (H5FA_SRCS
     ${HDF5_SRC_DIR}/H5FAdblkpage.c
     ${HDF5_SRC_DIR}/H5FAdblock.c
     ${HDF5_SRC_DIR}/H5FAhdr.c
+    ${HDF5_SRC_DIR}/H5FAint.c
     ${HDF5_SRC_DIR}/H5FAstat.c
     ${HDF5_SRC_DIR}/H5FAtest.c
 )
@@ -218,6 +225,7 @@ set (H5FD_SRCS
     ${HDF5_SRC_DIR}/H5FDsec2.c
     ${HDF5_SRC_DIR}/H5FDspace.c
     ${HDF5_SRC_DIR}/H5FDstdio.c
+    ${HDF5_SRC_DIR}/H5FDtest.c
     ${HDF5_SRC_DIR}/H5FDwindows.c
 )
 
@@ -258,6 +266,7 @@ set (H5FS_SRCS
     ${HDF5_SRC_DIR}/H5FS.c
     ${HDF5_SRC_DIR}/H5FScache.c
     ${HDF5_SRC_DIR}/H5FSdbg.c
+    ${HDF5_SRC_DIR}/H5FSint.c
     ${HDF5_SRC_DIR}/H5FSsection.c
     ${HDF5_SRC_DIR}/H5FSstat.c
     ${HDF5_SRC_DIR}/H5FStest.c
@@ -306,6 +315,7 @@ set (H5HF_SRCS
     ${HDF5_SRC_DIR}/H5HFhdr.c
     ${HDF5_SRC_DIR}/H5HFhuge.c
     ${HDF5_SRC_DIR}/H5HFiblock.c
+    ${HDF5_SRC_DIR}/H5HFint.c
     ${HDF5_SRC_DIR}/H5HFiter.c
     ${HDF5_SRC_DIR}/H5HFman.c
     ${HDF5_SRC_DIR}/H5HFsection.c
@@ -428,6 +438,7 @@ set (H5O_SRCS
     ${HDF5_SRC_DIR}/H5Odtype.c
     ${HDF5_SRC_DIR}/H5Oefl.c
     ${HDF5_SRC_DIR}/H5Ofill.c
+    ${HDF5_SRC_DIR}/H5Oflush.c
     ${HDF5_SRC_DIR}/H5Ofsinfo.c
     ${HDF5_SRC_DIR}/H5Oginfo.c
     ${HDF5_SRC_DIR}/H5Olayout.c
@@ -438,6 +449,7 @@ set (H5O_SRCS
     ${HDF5_SRC_DIR}/H5Oname.c
     ${HDF5_SRC_DIR}/H5Onull.c
     ${HDF5_SRC_DIR}/H5Opline.c
+    ${HDF5_SRC_DIR}/H5Oproxy.c
     ${HDF5_SRC_DIR}/H5Orefcount.c
     ${HDF5_SRC_DIR}/H5Osdspace.c
     ${HDF5_SRC_DIR}/H5Oshared.c

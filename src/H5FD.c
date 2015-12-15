@@ -840,6 +840,10 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* (This will be changed later, when the superblock is located) */
     file->base_addr = 0;
 
+    /* Check for SWMR reader access */
+    if(flags & H5F_ACC_SWMR_READ)
+        file->swmr_read = TRUE;
+
     /* Set return value */
     ret_value = file;
 
@@ -1438,6 +1442,32 @@ H5FD_get_feature_flags(const H5FD_t *file, unsigned long *feature_flags)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_get_feature_flags() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_set_feature_flags
+ *
+ * Purpose:	Set the feature flags for the VFD
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Vailin Choi; Oct 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_set_feature_flags(H5FD_t *file, unsigned long feature_flags)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(file);
+
+    /* Set the file's feature flags */
+    file->feature_flags = feature_flags;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD_set_feature_flags() */
 
 
 /*-------------------------------------------------------------------------

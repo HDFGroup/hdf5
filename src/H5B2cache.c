@@ -65,31 +65,43 @@
 /********************/
 
 /* Metadata cache callbacks */
-static herr_t H5B2__cache_hdr_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5B2__cache_hdr_get_load_size(const void *image_ptr, void *udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static htri_t H5B2__cache_hdr_verify_chksum(const void *image_ptr, size_t len, void *udata);
 static void *H5B2__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5B2__cache_hdr_image_len(const void *thing, size_t *image_len,
     hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
 static herr_t H5B2__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5B2__cache_hdr_free_icr(void *thing);
 
-static herr_t H5B2__cache_int_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5B2__cache_int_get_load_size(const void *image_ptr, void *udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static htri_t H5B2__cache_int_verify_chksum(const void *image_ptr, size_t len, void *udata);
 static void *H5B2__cache_int_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5B2__cache_int_image_len(const void *thing, size_t *image_len,
     hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
 static herr_t H5B2__cache_int_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5B2__cache_int_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5B2__cache_int_free_icr(void *thing);
 
-static herr_t H5B2__cache_leaf_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5B2__cache_leaf_get_load_size(const void * mage_ptr, void *udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static htri_t H5B2__cache_leaf_verify_chksum(const void *image_ptr, size_t len, void *udata);
 static void *H5B2__cache_leaf_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5B2__cache_leaf_image_len(const void *thing, size_t *image_len,
     hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
 static herr_t H5B2__cache_leaf_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5B2__cache_leaf_free_icr(void *thing);
 
 /*********************/
@@ -103,11 +115,12 @@ const H5AC_class_t H5AC_BT2_HDR[1] = {{
     H5FD_MEM_BTREE,                     /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
     H5B2__cache_hdr_get_load_size,      /* 'get_load_size' callback */
+    H5B2__cache_hdr_verify_chksum,
     H5B2__cache_hdr_deserialize,        /* 'deserialize' callback */
     H5B2__cache_hdr_image_len,          /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5B2__cache_hdr_serialize,          /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5B2__cache_hdr_notify, 		/* 'notify' callback */
     H5B2__cache_hdr_free_icr,           /* 'free_icr' callback */
     NULL,				/* 'clear' callback */
     NULL,				/* 'fsf_size' callback */
@@ -120,11 +133,12 @@ const H5AC_class_t H5AC_BT2_INT[1] = {{
     H5FD_MEM_BTREE,                     /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
     H5B2__cache_int_get_load_size,      /* 'get_load_size' callback */
+    H5B2__cache_int_verify_chksum,	/* 'verify_chksum' callback */
     H5B2__cache_int_deserialize,        /* 'deserialize' callback */
     H5B2__cache_int_image_len,          /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5B2__cache_int_serialize,          /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5B2__cache_int_notify,		/* 'notify' callback */
     H5B2__cache_int_free_icr,           /* 'free_icr' callback */
     NULL,				/* 'clear' callback */
     NULL,				/* 'fsf_size' callback */
@@ -137,11 +151,12 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     H5FD_MEM_BTREE,                     /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
     H5B2__cache_leaf_get_load_size,     /* 'get_load_size' callback */
+    H5B2__cache_leaf_verify_chksum,	/* 'verify_chksum' callback */
     H5B2__cache_leaf_deserialize,       /* 'deserialize' callback */
     H5B2__cache_leaf_image_len,         /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5B2__cache_leaf_serialize,         /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5B2__cache_leaf_notify,		/* 'notify' callback */
     H5B2__cache_leaf_free_icr,          /* 'free_icr' callback */
     NULL,				/* 'clear' callback */
     NULL,				/* 'fsf_size' callback */
@@ -173,21 +188,65 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_hdr_get_load_size(const void *_udata, size_t *image_len)
+H5B2__cache_hdr_get_load_size(const void *_image, void *_udata, size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
 {
-    const H5B2_hdr_cache_ud_t *udata = (const H5B2_hdr_cache_ud_t *)_udata; /* User data for callback */
+    const uint8_t *image = (const uint8_t *)_image;       		    /* Pointer into raw data buffer */
+    H5B2_hdr_cache_ud_t *udata = (H5B2_hdr_cache_ud_t *)_udata; /* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
     HDassert(udata);
+    HDassert(udata->f);
     HDassert(image_len);
 
-    /* Set the image length size */
-    *image_len = H5B2_HEADER_SIZE_FILE(udata->f);
+    if(image == NULL) {
+	/* Set the image length size */
+	*image_len = H5B2_HEADER_SIZE_FILE(udata->f);
+    } else {
+	HDassert(actual_len);
+	HDassert(*actual_len == *actual_len);
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B2__cache_hdr_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2__cache_hdr_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5B2__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+    htri_t ret_value = TRUE;	/* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__cache_hdr_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -214,7 +273,6 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     H5B2_subid_t        id;		/* ID of B-tree class, as found in file */
     uint16_t            depth;          /* Depth of B-tree */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     H5B2_hdr_t		*ret_value = NULL;      /* Return value */
 
@@ -260,22 +318,17 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     UINT16DECODE(image, hdr->root.node_nrec);
     H5F_DECODE_LENGTH(udata->f, image, hdr->root.all_nrec);
 
+    /* checksum verification already done in verify_chksum cb */
+
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == hdr->hdr_size);
 
-    /* Compute checksum on entire header */
-    computed_chksum = H5_checksum_metadata(_image, (hdr->hdr_size - H5B2_SIZEOF_CHKSUM), 0);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 B-tree header")
-
     /* Initialize B-tree header info */
     cparam.cls = H5B2_client_class_g[id];
-    if(H5B2__hdr_init(hdr, &cparam, udata->ctx_udata, depth) < 0)
+    if(H5B2__hdr_init(hdr, &cparam, udata->ctx_udata, udata->parent, depth) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't initialize B-tree header info")
 
     /* Set the B-tree header's address */
@@ -395,8 +448,90 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     /* Sanity check */
     HDassert((size_t)(image - (uint8_t *)_image) == len);
 
+    /* Clear shadowed node lists, as the header has been flushed and all
+     * nodes must be shadowed again (if doing SWMR writes).  Note that this
+     * algorithm does one extra iteration at the end, as the last node's
+     * shadowed_next pointer points to itself. */
+    while(hdr->shadowed_internal) {
+	H5B2_internal_t *next = hdr->shadowed_internal->shadowed_next;
+
+	HDassert(!hdr->shadowed_internal->cache_info.is_dirty);
+	hdr->shadowed_internal->shadowed_next = NULL;
+	hdr->shadowed_internal->shadowed_prev = NULL;
+	hdr->shadowed_internal = next;
+    } /* end while */
+    while(hdr->shadowed_leaf) {
+	H5B2_leaf_t *next = hdr->shadowed_leaf->shadowed_next;
+
+	HDassert(!hdr->shadowed_leaf->cache_info.is_dirty);
+	hdr->shadowed_leaf->shadowed_next = NULL;
+	hdr->shadowed_leaf->shadowed_prev = NULL;
+	hdr->shadowed_leaf = next;
+    } /* end while */
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2__cache_hdr_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2__cache_hdr_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              nfortne2@hdfgroup.org
+ *              Apr 24 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
+{
+    H5B2_hdr_t 	*hdr = (H5B2_hdr_t *)_thing;
+    herr_t 	ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(hdr->swmr_write) {
+        HDassert(hdr->parent);
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+                /* Create flush dependency on parent */
+                if(H5B2__create_flush_depend((H5AC_info_t *)hdr->parent, (H5AC_info_t *)hdr) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                break;
+
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+		/* do nothing */
+		break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+		/* Destroy flush dependency on parent */
+		if(H5B2__destroy_flush_depend((H5AC_info_t *)hdr->parent, (H5AC_info_t *)hdr) < 0)
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+		break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__cache_hdr_notify() */
 
 
 /*-------------------------------------------------------------------------
@@ -446,9 +581,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_int_get_load_size(const void *_udata, size_t *image_len)
+H5B2__cache_int_get_load_size(const void *_image, void *_udata, size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
 {
-    const H5B2_internal_cache_ud_t *udata = (const H5B2_internal_cache_ud_t *)_udata; /* User data for callback */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    H5B2_internal_cache_ud_t *udata = (H5B2_internal_cache_ud_t *)_udata; /* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -457,11 +594,57 @@ H5B2__cache_int_get_load_size(const void *_udata, size_t *image_len)
     HDassert(udata->hdr);
     HDassert(image_len);
 
-    /* Set the image length size */
-    *image_len = udata->hdr->node_size;
+    if(image == NULL) {
+	/* Set the image length size */
+	*image_len = udata->hdr->node_size;
+    } else {
+	HDassert(actual_len);
+	HDassert(*actual_len == *image_len);
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B2__cache_int_get_load_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2__cache_int_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5B2__cache_int_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, void *_udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;       			/* Pointer into raw data buffer */
+    H5B2_internal_cache_ud_t *udata = (H5B2_internal_cache_ud_t *)_udata;     	/* Pointer to user data */
+    size_t chk_size;       	/* Exact size of the node with checksum at the end */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+    htri_t ret_value = TRUE;	/* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments */
+    HDassert(image);
+    HDassert(udata);
+
+    /* Internal node prefix header + records + child pointer triplets: size with checksum at the end */
+    chk_size = H5B2_INT_PREFIX_SIZE + (udata->nrec * udata->hdr->rrec_size) + ((size_t)(udata->nrec + 1) * H5B2_INT_POINTER_SIZE(udata->hdr, udata->depth));
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, chk_size, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__cache_int_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -488,7 +671,6 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     uint8_t		*native;        /* Pointer to native record info */
     H5B2_node_ptr_t	*int_node_ptr;  /* Pointer to node pointer info */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
     H5B2_internal_t	*ret_value = NULL;      /* Return value */
 
@@ -509,6 +691,9 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
 
     /* Share B-tree information */
     internal->hdr = udata->hdr;
+    internal->parent = udata->parent;
+    internal->shadowed_next = NULL;
+    internal->shadowed_prev = NULL;
 
     /* Magic number */
     if(HDmemcmp(image, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC))
@@ -562,18 +747,13 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
         int_node_ptr++;
     } /* end for */
 
-    /* Compute checksum on internal node */
-    computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check parsing */
     HDassert((size_t)(image - (const uint8_t *)_image) <= len);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 internal node")
 
     /* Set return value */
     ret_value = internal;
@@ -709,6 +889,68 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5B2__cache_int_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              nfortne2@hdfgroup.org
+ *              Apr 25 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
+{
+    H5B2_internal_t 	*internal = (H5B2_internal_t *)_thing;
+    herr_t   		ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(internal);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(internal->hdr->swmr_write) {
+        HDassert(internal->parent);
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+                /* Create flush dependency on parent */
+                if(H5B2__create_flush_depend((H5AC_info_t *)internal->parent, (H5AC_info_t *)internal) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                break;
+
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+		/* do nothing */
+		break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+		/* Destroy flush dependency on parent */
+		if(H5B2__destroy_flush_depend((H5AC_info_t *)internal->parent, (H5AC_info_t *)internal) < 0)
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__cache_int_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2__cache_int_free_icr
  *
  * Purpose:	Destroy/release an "in core representation" of a data
@@ -723,17 +965,43 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_int_free_icr(void *thing)
+H5B2__cache_int_free_icr(void *_thing)
 {
+    H5B2_internal_t *internal = (H5B2_internal_t *)_thing;
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(thing);
+    HDassert(internal);
+    HDassert(internal->hdr);
+
+    /* Unlink from shadowed list */
+    if(internal->shadowed_next) {
+        if(internal->shadowed_next != internal) {
+            internal->shadowed_next->shadowed_prev = internal->shadowed_prev;
+
+            if(internal->shadowed_prev)
+                internal->shadowed_prev->shadowed_next = internal->shadowed_next;
+            else {
+                HDassert(internal->hdr->shadowed_internal = internal);
+
+                internal->hdr->shadowed_internal = internal->shadowed_next;
+            } /* end else */
+        } /* end if */
+        else {
+            if(internal->shadowed_prev)
+                internal->shadowed_prev->shadowed_next = internal->shadowed_prev;
+            else {
+                HDassert(internal->hdr->shadowed_internal = internal);
+
+                internal->hdr->shadowed_internal = NULL;
+            } /* end else */
+        } /* end else */
+    } /* end if */
 
     /* Release v2 B-tree internal node */
-    if(H5B2__internal_free((H5B2_internal_t *)thing) < 0)
+    if(H5B2__internal_free(internal) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release v2 B-tree internal node")
 
 done:
@@ -755,9 +1023,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_leaf_get_load_size(const void *_udata, size_t *image_len)
+H5B2__cache_leaf_get_load_size(const void *_image, void *_udata, size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
 {
-    const H5B2_leaf_cache_ud_t *udata = (const H5B2_leaf_cache_ud_t *)_udata; /* User data for callback */
+    const uint8_t *image = (const uint8_t *)_image;       		      /* Pointer into raw data buffer */
+    H5B2_leaf_cache_ud_t *udata = (H5B2_leaf_cache_ud_t *)_udata; /* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -766,11 +1036,57 @@ H5B2__cache_leaf_get_load_size(const void *_udata, size_t *image_len)
     HDassert(udata->hdr);
     HDassert(image_len);
 
-    /* Set the image length size */
-    *image_len = udata->hdr->node_size;
+    if(image == NULL) {
+	/* Set the image length size */
+	*image_len = udata->hdr->node_size;
+    } else {
+	HDassert(actual_len);
+	HDassert(*actual_len == *image_len);
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B2__cache_leaf_get_load_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2__cache_leaf_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5B2__cache_leaf_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, void *_udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;       			/* Pointer into raw data buffer */
+    H5B2_internal_cache_ud_t *udata = (H5B2_internal_cache_ud_t *)_udata;     	/* Pointer to user data */
+    size_t chk_size;       	/* Exact size of the node with checksum at the end */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+    htri_t ret_value = TRUE;	/* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments */
+    HDassert(image);
+    HDassert(udata);
+
+    /* Leaf node prefix header + records: size with checksum at the end */
+    chk_size = H5B2_LEAF_PREFIX_SIZE + (udata->nrec * udata->hdr->rrec_size);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, chk_size, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__cache_leaf_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -796,7 +1112,6 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native keys */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
     H5B2_leaf_t		*ret_value = NULL;      /* Return value */
 
@@ -817,6 +1132,9 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
 
     /* Share B-tree header information */
     leaf->hdr = udata->hdr;
+    leaf->parent = udata->parent;
+    leaf->shadowed_next = NULL;
+    leaf->shadowed_prev = NULL;
 
     /* Magic number */
     if(HDmemcmp(image, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC))
@@ -850,18 +1168,13 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
         native += udata->hdr->cls->nrec_size;
     } /* end for */
 
-    /* Compute checksum on leaf node */
-    computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check parsing */
     HDassert((size_t)(image - (const uint8_t *)_image) <= udata->hdr->node_size);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, NULL, "incorrect metadata checksum for v2 leaf node")
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) <= len);
@@ -986,6 +1299,67 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5B2__cache_leaf_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              nfortne2@hdfgroup.org
+ *              Apr 25 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
+{
+    H5B2_leaf_t 	*leaf = (H5B2_leaf_t *)_thing;
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(leaf);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(leaf->hdr->swmr_write) {
+        HDassert(leaf->parent);
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+                /* Create flush dependency on parent */
+                if(H5B2__create_flush_depend((H5AC_info_t *)leaf->parent, (H5AC_info_t *)leaf) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                break;
+
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+                /* do nothing */
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+		/* Destroy flush dependency on parent */
+                if(H5B2__destroy_flush_depend((H5AC_info_t *)leaf->parent, (H5AC_info_t *)leaf) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__cache_leaf_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2__cache_leaf_free_icr
  *
  * Purpose:	Destroy/release an "in core representation" of a data
@@ -1000,17 +1374,43 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_leaf_free_icr(void *thing)
+H5B2__cache_leaf_free_icr(void *_thing)
 {
+    H5B2_leaf_t *leaf = (H5B2_leaf_t *)_thing;
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(thing);
+    HDassert(leaf);
+    HDassert(leaf->hdr);
+
+    /* Unlink from shadowed list */
+    if(leaf->shadowed_next) {
+        if(leaf->shadowed_next != leaf) {
+            leaf->shadowed_next->shadowed_prev = leaf->shadowed_prev;
+
+            if(leaf->shadowed_prev)
+                leaf->shadowed_prev->shadowed_next = leaf->shadowed_next;
+            else {
+                HDassert(leaf->hdr->shadowed_leaf = leaf);
+
+                leaf->hdr->shadowed_leaf = leaf->shadowed_next;
+            } /* end else */
+        } /* end if */
+        else {
+            if(leaf->shadowed_prev)
+                leaf->shadowed_prev->shadowed_next = leaf->shadowed_prev;
+            else {
+                HDassert(leaf->hdr->shadowed_leaf = leaf);
+
+                leaf->hdr->shadowed_leaf = NULL;
+            } /* end else */
+        } /* end else */
+    } /* end if */
 
     /* Destroy v2 B-tree leaf node */
-    if(H5B2__leaf_free((H5B2_leaf_t *)thing) < 0)
+    if(H5B2__leaf_free(leaf) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree leaf node")
 
 done:

@@ -3602,6 +3602,7 @@ done:
 herr_t
 H5T_close(H5T_t *dt)
 {
+    hbool_t 	corked;			/* Whether the named datatype is corked or not */
     herr_t      ret_value = SUCCEED;   	/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3612,6 +3613,16 @@ H5T_close(H5T_t *dt)
         dt->shared->fo_count--;
 
     if(dt->shared->state != H5T_STATE_OPEN || dt->shared->fo_count == 0) {
+	/* Uncork cache entries with object address tag for named datatype only */
+	if(dt->shared->state == H5T_STATE_OPEN && dt->shared->fo_count == 0) {
+	    if(H5AC_cork(dt->oloc.file, dt->oloc.addr, H5AC__GET_CORKED, &corked) < 0)
+		HGOTO_ERROR(H5E_ATOM, H5E_SYSTEM, FAIL, "unable to retrieve an object's cork status")
+	    if(corked) {
+		if(H5AC_cork(dt->oloc.file, dt->oloc.addr, H5AC__UNCORK, NULL) < 0)
+		    HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to uncork an object")
+	    } /* end if */
+	} /* end if */
+
         if(H5T__free(dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
@@ -5452,4 +5463,76 @@ H5T_patch_file(H5T_t *dt, H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_patch_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Tflush
+ *
+ * Purpose:     Flushes all buffers associated with a named datatype to disk.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              May 19, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tflush(hid_t type_id)
+{
+    H5T_t *dt; /* Datatype for this operation */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", type_id);
+    
+    /* Check args */
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(!H5T_is_named(dt))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
+
+    /* To flush metadata and invoke flush callback if there is */
+    if(H5O_flush_common(&dt->oloc, type_id, H5AC_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype and object flush callback")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Tflush */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Trefresh
+ *
+ * Purpose:     Refreshes all buffers associated with a named datatype.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              July 21, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Trefresh(hid_t type_id)
+{
+    H5T_t * dt = NULL;
+    herr_t ret_value = SUCCEED; /* return value */
+    
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", type_id);
+
+    /* Check args */
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(!H5T_is_named(dt))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
+
+    /* Call private function to refresh datatype object */
+    if ((H5O_refresh_metadata(type_id, dt->oloc, H5AC_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "unable to refresh datatype")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Trefresh */
 

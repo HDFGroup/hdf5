@@ -41,8 +41,8 @@
 /**************************/
 
 /* Cache configuration settings */
-#define H5C__MAX_NUM_TYPE_IDS	28
-#define H5C__PREFIX_LEN		32
+#define H5C__MAX_NUM_TYPE_IDS   29
+#define H5C__PREFIX_LEN         32
 
 /* This sanity checking constant was picked out of the air.  Increase
  * or decrease it if appropriate.  Its purposes is to detect corrupt
@@ -70,6 +70,7 @@
 #define H5C__CLASS_SPECULATIVE_LOAD_FLAG	((unsigned)0x1)
 #define H5C__CLASS_COMPRESSED_FLAG		((unsigned)0x2)
 /* The following flags may only appear in test code */
+/* The H5C__CLASS_SKIP_READS & H5C__CLASS_SKIP_WRITES flags are used in H5Oproxy.c */
 #define H5C__CLASS_NO_IO_FLAG			((unsigned)0x4)
 #define H5C__CLASS_SKIP_READS			((unsigned)0x8)
 #define H5C__CLASS_SKIP_WRITES			((unsigned)0x10)
@@ -96,14 +97,6 @@
  */
 #define H5C__DEFAULT_MAX_CACHE_SIZE     ((size_t)(4 * 1024 * 1024))
 #define H5C__DEFAULT_MIN_CLEAN_SIZE     ((size_t)(2 * 1024 * 1024))
-
-/* Maximum height of flush dependency relationships between entries.  This is
- * currently tuned to the extensible array (H5EA) data structure, which only
- * requires 6 levels of dependency (i.e. heights 0-6) (actually, the extensible
- * array needs 4 levels, plus another 2 levels are needed: one for the layer
- * under the extensible array and one for the layer above it).
- */
-#define H5C__NUM_FLUSH_DEP_HEIGHTS            6
 
 /* Values for cache entry magic field */
 #define H5C__H5C_CACHE_ENTRY_T_MAGIC		0x005CAC0A
@@ -205,11 +198,17 @@
 #define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0080
 #define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0100
 #define H5C__READ_ONLY_FLAG			0x0200
-#define H5C__FREE_FILE_SPACE_FLAG		0x0800
-#define H5C__TAKE_OWNERSHIP_FLAG		0x1000
-#define H5C__FLUSH_LAST_FLAG			0x2000
-#define H5C__FLUSH_COLLECTIVELY_FLAG		0x4000
+#define H5C__FREE_FILE_SPACE_FLAG		0x0400
+#define H5C__TAKE_OWNERSHIP_FLAG		0x0800
+#define H5C__FLUSH_LAST_FLAG			0x1000
+#define H5C__FLUSH_COLLECTIVELY_FLAG		0x2000
+#define H5C__EVICT_ALLOW_LAST_PINS_FLAG         0x4000
 #define H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG     0x8000
+
+/* Definitions for cache "tag" property */
+#define H5C_TAG_NAME           "H5C_tag"
+#define H5C_TAG_SIZE           sizeof(H5C_tag_t)
+#define H5C_TAG_DEF            {(haddr_t)0, H5C_GLOBALITY_NONE}
 
 /* Debugging/sanity checking/statistics settings */
 #ifndef NDEBUG
@@ -226,6 +225,11 @@
 #define H5C_DO_TAGGING_SANITY_CHECKS	0
 #define H5C_DO_EXTREME_SANITY_CHECKS	0
 #endif /* NDEBUG */
+
+/* Cork actions: cork/uncork/get cork status of an object */
+#define H5C__SET_CORK                  0x1
+#define H5C__UNCORK                    0x2
+#define H5C__GET_CORKED                0x4
 
 /* Note: The memory sanity checks aren't going to work until I/O filters are
  *      changed to call a particular alloc/free routine for their buffers,
@@ -268,8 +272,20 @@
 /* Typedef for the main structure for the cache (defined in H5Cpkg.h) */
 typedef struct H5C_t H5C_t;
 
+/* Cache entry tag structure */
+typedef struct H5C_tag_t {
+    haddr_t value;
+    int globality;
+} H5C_tag_t;
 
-/***************************************************************************
+/* Define enum for cache entry tag 'globality' value */
+typedef enum {
+    H5C_GLOBALITY_NONE=0, /* Non-global tag */
+    H5C_GLOBALITY_MINOR,  /* global, not flushed during single object flush */
+    H5C_GLOBALITY_MAJOR   /* global, needs flushed during single obect flush */
+} H5C_tag_globality_t;
+
+/*
  *
  * Struct H5C_class_t
  *
@@ -376,32 +392,68 @@ typedef struct H5C_t H5C_t;
  *		code.  When it is set, reads on load will be skipped,
  *		and an uninitialize buffer will be passed to the 
  *		deserialize function.
+ *		This flag is used in H5Oproxy.c because this client does not
+ *		exist on disk.  See description in that file.
  *
  *	H5C__CLASS_SKIP_WRITES: This flags is intended only for use in test
  *		code.  When it is set, writes of buffers prepared by the 
  *		serialize callback will be skipped.
+ *		This flag is used in H5Oproxy.c because this client does not
+ *		exist on disk.  See description in that file.
  *
  * GET_LOAD_SIZE: Pointer to the 'get load size' function.
  *
- * 	This function must be able to determine the size of the disk image of
- *      a metadata cache entry, given the 'udata' that will be passed to the
- *      'deserialize' callback.
+ * 	This function determines the size of a metadata cache entry based
+ *      on the parameter "image":
+ *	(a) When the piece of metadata has not been read, "image" is null.  
+ *	    This function determines the size based on the information in the 
+ *	    parameter "udata" or an initial speculative guess.  The size is
+ *	    returned in the parameter "image_len_ptr".
+ *	(b) When the piece of metadata has been read, "image" is non-null.
+ *	    This function might deserialize the needed metadata information
+ *	    to determine the actual size.  The size is returned in the
+ *	    parameter "actual_len_ptr".  The calculation of actual size is
+ *	    needed for checksum verification.
  *
- *	Note that if either the H5C__CLASS_SPECULATIVE_LOAD_FLAG or
- *	the H5C__CLASS_COMPRESSED_FLAG is set, the disk image size 
- *	returned by this callback is either a first guess (if the 
- *	H5C__CLASS_SPECULATIVE_LOAD_FLAG is set) or (if the
- *      H5C__CLASS_COMPRESSED_FLAG is set), the exact on disk size 
- *	of the entry whether it has been run through filters or not.
- *	In all other cases, the value returned should be the correct 
- *	uncompressed size of the entry.
+ * 	For an entry with H5C__CLASS_NO_FLAGS_SET:
+ *	  This function computes either one of the following:
+ *		(1) When "image" is null, it returns in "image_len_ptr" 
+ *		    the on disk size of the entry.
+ *		(2) When "image" is non-null, it does nothing.
+ *		    The values stored in "image_len_ptr" and "actual_len_ptr" 
+ *		    should be the same.
+ *	
+ * 	For an entry with H5C__CLASS_SPECULATIVE_LOAD_FLAG:
+ *	  This function computes either one of the following:
+ *		(1) When "image" is null, it returns in "image_len_ptr" 
+ *		    the initial guess of the entry's on disk size.
+ *		(2) When "image" is non-null, it returns in "actual_len_ptr" 
+ *		    the actual size of the entry on disk by 
+ *		    deserializing the needed metadata information.
  *
- *	The typedef for the deserialize callback is as follows:
+ * 	For an entry with H5C__CLASS_COMPRESSED_FLAG:
+ *	  This function computes either one of the following:
+ *		(1) When "image" is null, it returns in "image_len_ptr" 
+ *		    the entry's on disk size:
+ *		    --for a filtered entry: the compressed size
+ *		    --for a non-filtered entry: the uncompressed size
+ *		(2) When "image" is non-null, it returns in "actual_len_ptr:
+ *		    --for a filtered entry: the de-compressed size based on 
+ *		      "udata" information
+ *		    --for a non-filtered entry: the uncompressed size
  *
- * 	   typedef herr_t (*H5C_get_load_size_func_t)(void *udata_ptr,
- * 	                                           size_t *image_len_ptr);
+ *	The typedef for the get_load_size callback is as follows:
  *
- *	The parameters of the deserialize callback are as follows:
+ * 	   typedef herr_t (*H5C_get_load_size_func_t)(const void *image_ptr,
+ *						      void *udata_ptr,
+ * 	                                              size_t *image_len_ptr,
+ *						      size_t *actual_len_ptr,
+ *						      size_t *compressed_ptr,
+ *						      size_t *compressed_image_len_ptr);
+ *
+ *	The parameters of the get_load_size callback are as follows:
+ *
+ *	image_ptr: Pointer to a buffer containing the metadata read in.
  *
  *	udata_ptr: Pointer to user data provided in the protect call, which
  *         	will also be passed through to the deserialize callback.
@@ -412,16 +464,52 @@ typedef struct H5C_t H5C_t;
  *              This value is used by the cache to determine the size of
  *              the disk image for the metadata, in order to read the disk
  *              image from the file.
+ *	
+ *	actual_len_ptr: Pointer to the location containing the actual length
+ *			of the metadata entry on disk.
+ *
+ *	compressed_ptr: See description in image_len callback.
+ *	
+ *	compressed_image_len_ptr: See description in image_len callback.
  *
  *	Processing in the get_load_size function should proceed as follows:
  *
- *	If successful, the function will place the length of the on disk
- *	image associated with supplied user data in *image_len_ptr, and 
- *	then return SUCCEED.
+ *	If successful, the function will place the length in either the
+ *	*image_len_ptr or *actual_le_ptr associated with supplied user data
+ *	and then return SUCCEED.
  *
  *	On failure, the function must return FAIL and push error information
  *	onto the error stack with the error API routines, without modifying
- *      the value pointed to by the image_len_ptr.
+ *      the value pointed to by image_len_ptr or actual_len_ptr.
+ *
+ *
+ * VERIFY_CHKSUM: Pointer to the verify_chksum function.
+ *
+ *	This function verifies the checksum computed for the metadata is
+ *	the same as the checksum stored in the metadata.
+ *
+ *	It computes the checksum based on the metadata stored in the
+ *	parameter "image_ptr" and the actual length of the metadata in the 
+ * 	parameter "len"  which is obtained from the "get_load_size" callback.
+ *
+ *	For a filtered metadata entry with H5C__CLASS_COMPRESSED_FLAG, 
+ *	"len" is the decompressed size.  This function will decompress 
+ *	the metadata and compute the checksum for the metadata with 
+ *	length "len".
+ *
+ *	The typedef for the verify_chksum callback is as follows:
+ *
+ *	   typedef htri_t (*H5C_verify_chksum_func_t)(const void *image_ptr, 
+ *						      size_t len, 
+ *						      void *udata_ptr);
+ *
+ *	The parameters of the verify_chksum callback are as follows:
+ *	
+ *	image_ptr: Pointer to a buffer containing the metadata read in.
+ *
+ *	len: The actual length of the metadata.
+ *
+ *	udata_ptr: Pointer to user data.
  *
  *
  * DESERIALIZE: Pointer to the deserialize function.
@@ -459,6 +547,12 @@ typedef struct H5C_t H5C_t;
  *      	an old bug in the HDF5 library.
  *
  *	Processing in the deserialize function should proceed as follows:
+ *
+ *	NOTE: With the modification to get_load_size callback (see above 
+ *	description) to compute the actual length of a metadata entry for 
+ *	checksum verification, the value in the parameter "len" will be the 
+ *	actual length of the metadata and a subsequent call to image_len
+ * 	callback is not needed.
  *
  *      If the image contains valid data, and is of the correct length,
  *      the deserialize function must allocate space for an in core
@@ -513,6 +607,10 @@ typedef struct H5C_t H5C_t;
  *
  *
  * IMAGE_LEN: Pointer to the image length callback.
+
+ *	NOTE: With the modification to the get_load_size callback (see above
+ *	description) due to checksum verification, the image_len callback 
+ *	is mainly used for newly inserted entries and assert verification.
  *
  *	This callback exists primarily to support 
  *	H5C__CLASS_SPECULATIVE_LOAD_FLAG and H5C__CLASS_COMPRESSED_FLAG 
@@ -1072,8 +1170,10 @@ typedef enum H5C_notify_action_t {
 } H5C_notify_action_t;
 
 /* Cache client callback function pointers */
-typedef herr_t (*H5C_get_load_size_func_t)(const void *udata_ptr,
-    size_t *image_len_ptr);
+typedef herr_t (*H5C_get_load_size_func_t)(const void *image_ptr, void *udata_ptr,
+    size_t *image_len_ptr, size_t *actual_len_ptr, 
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+typedef htri_t (*H5C_verify_chksum_func_t)(const void *image_ptr, size_t len, void *udata_ptr);
 typedef void *(*H5C_deserialize_func_t)(const void *image_ptr,
     size_t len, void *udata_ptr, hbool_t *dirty_ptr);
 typedef herr_t (*H5C_image_len_func_t)(const void *thing,
@@ -1097,6 +1197,7 @@ typedef struct H5C_class_t {
     H5FD_mem_t			mem_type;
     unsigned			flags;
     H5C_get_load_size_func_t 	get_load_size;
+    H5C_verify_chksum_func_t	verify_chksum;
     H5C_deserialize_func_t 	deserialize;
     H5C_image_len_func_t	image_len;
     H5C_pre_serialize_func_t	pre_serialize;
@@ -1272,6 +1373,9 @@ typedef int H5C_ring_t;
  *
  *		The name is not particularly descriptive, but is retained
  *		to avoid changes in existing code.
+ *
+ * is_corked:	Boolean flag indicating whether the cache entry associated
+ *		with an object is corked or not corked.
  *
  * is_dirty:	Boolean flag indicating whether the contents of the cache
  *		entry has been modified since the last time it was written
@@ -1451,33 +1555,29 @@ typedef int H5C_ring_t;
  *
  * Fields supporting the 'flush dependency' feature:
  *
- * Entries in the cache may have a 'flush dependency' on another entry in the
+ * Entries in the cache may have a 'flush dependencies' on other entries in the
  * cache.  A flush dependency requires that all dirty child entries be flushed
  * to the file before a dirty parent entry (of those child entries) can be
  * flushed to the file.  This can be used by cache clients to create data
  * structures that allow Single-Writer/Multiple-Reader (SWMR) access for the
  * data structure.
  *
- * The leaf child entry will have a "height" of 0, with any parent entries
- * having a height of 1 greater than the maximum height of any of their child
- * entries (flush dependencies are allowed to create asymmetric trees of
- * relationships).
+ * flush_dep_parent:    Pointer to the array of flush dependency parent entries
+ *              for this entry.
  *
- * flush_dep_parent:	Pointer to the parent entry for an entry in a flush
- *		dependency relationship.
+ * flush_dep_nparents:  Number of flush dependency parent entries for this
+ *              entry, i.e. the number of valid elements in flush_dep_parent.
  *
- * child_flush_dep_height_rc:	An array of reference counts for child entries,
- *		where the number of children of each height is tracked.
+ * flush_dep_parent_nalloc: The number of allocated elements in
+ *              flush_dep_parent_nalloc.
  *
- * flush_dep_height:	The height of the entry, which is one greater than the
- *		maximum height of any of its child entries..
+ * flush_dep_nchildren: Number of flush dependency children for this entry.  If
+ *              this field is nonzero, then this entry must be pinned and
+ *              therefore cannot be evicted.
  *
- * pinned_from_client:	Whether the entry was pinned by an explicit pin request
- *		from a cache client.
- *
- * pinned_from_cache:	Whether the entry was pinned implicitly as a
- *		request of being a parent entry in a flush dependency
- *		relationship.
+ * flush_dep_ndirty_children: Number of flush dependency children that are
+ *              either dirty or have a nonzero flush_dep_ndirty_children.  If
+ *              this field is nonzero, then this entry cannot be flushed.
  *
  *
  * Fields supporting the hash table:
@@ -1599,6 +1699,8 @@ typedef struct H5C_cache_entry_t {
     hbool_t			image_up_to_date;
     const H5C_class_t	      *	type;
     haddr_t		        tag;
+    int				globality;
+    hbool_t			is_corked;
     hbool_t			is_dirty;
     hbool_t			dirtied;
     hbool_t			is_protected;
@@ -1620,9 +1722,11 @@ typedef struct H5C_cache_entry_t {
     H5C_ring_t                  ring;
 
     /* fields supporting the 'flush dependency' feature: */
-    struct H5C_cache_entry_t  *	flush_dep_parent;
-    uint64_t			child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
-    unsigned			flush_dep_height;
+    struct H5C_cache_entry_t ** flush_dep_parent;
+    unsigned                    flush_dep_nparents;
+    unsigned                    flush_dep_parent_nalloc;
+    unsigned                    flush_dep_nchildren;
+    unsigned                    flush_dep_ndirty_children;
     hbool_t			pinned_from_client;
     hbool_t			pinned_from_cache;
 
@@ -1942,14 +2046,26 @@ H5_DLL H5C_t *H5C_create(size_t max_cache_size, size_t min_clean_size,
     int max_type_id, const char *(*type_name_table_ptr),
     H5C_write_permitted_func_t check_write_permitted, hbool_t write_permitted,
     H5C_log_flush_func_t log_flush, void *aux_ptr);
+H5_DLL herr_t H5C_set_up_logging(H5C_t *cache_ptr, const char log_location[], hbool_t start_immediately);
+H5_DLL herr_t H5C_tear_down_logging(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_start_logging(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_stop_logging(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_get_logging_status(const H5C_t *cache_ptr, /*OUT*/ hbool_t *is_enabled,
+    /*OUT*/ hbool_t *is_currently_logging);
+H5_DLL herr_t H5C_write_log_message(const H5C_t *cache_ptr, const char message[]);
+
 H5_DLL void H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr, int32_t version,
     double hit_rate, enum H5C_resize_status status,
     size_t old_max_cache_size, size_t new_max_cache_size,
     size_t old_min_clean_size, size_t new_min_clean_size);
 H5_DLL herr_t H5C_dest(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5C_expunge_entry(H5F_t *f, hid_t dxpl_id,
-    const H5C_class_t *type, haddr_t addr, unsigned flags);
+H5_DLL herr_t H5C_evict(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5C_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type, haddr_t addr, unsigned flags);
+
+
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag); 
+H5_DLL herr_t H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag);
 H5_DLL herr_t H5C_flush_to_min_clean(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5C_get_cache_auto_resize_config(const H5C_t *cache_ptr,
     H5C_auto_size_ctl_t *config_ptr);
@@ -1959,7 +2075,7 @@ H5_DLL herr_t H5C_get_cache_size(H5C_t *cache_ptr, size_t *max_size_ptr,
 H5_DLL herr_t H5C_get_cache_hit_rate(H5C_t *cache_ptr, double *hit_rate_ptr);
 H5_DLL herr_t H5C_get_entry_status(const H5F_t *f, haddr_t addr,
     size_t *size_ptr, hbool_t *in_cache_ptr, hbool_t *is_dirty_ptr,
-    hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr,
+    hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr, hbool_t *is_corked_ptr,
     hbool_t *is_flush_dep_parent_ptr, hbool_t *is_flush_dep_child_ptr);
 H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictions_enabled_ptr);
 H5_DLL void * H5C_get_aux_ptr(const H5C_t *cache_ptr);
@@ -1991,7 +2107,8 @@ H5_DLL herr_t H5C_unprotect(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *thing,
 H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr,
     unsigned int tests);
 H5_DLL herr_t H5C_ignore_tags(H5C_t *cache_ptr);
-H5_DLL void H5C_retag_copied_metadata(H5C_t *cache_ptr, haddr_t metadata_tag);
+H5_DLL void H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
+H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
 
 #ifdef H5_HAVE_PARALLEL

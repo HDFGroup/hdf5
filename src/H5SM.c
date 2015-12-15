@@ -500,7 +500,7 @@ H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
         bt2_cparam.rrec_size = (uint32_t)H5SM_SOHM_ENTRY_SIZE(f);
         bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
         bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
-        if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam, f)))
+        if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam, f, NULL)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index")
 
         /* Retrieve the v2 B-tree's address in the file */
@@ -600,7 +600,7 @@ H5SM_delete_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id,
         HDassert(header->index_type == H5SM_BTREE);
 
         /* Delete the B-tree. */
-        if(H5B2_delete(f, dxpl_id, header->index_addr, f, NULL, NULL) < 0)
+        if(H5B2_delete(f, dxpl_id, header->index_addr, f, NULL, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete B-tree")
 
         /* Revert to list unless B-trees can have zero records */
@@ -743,7 +743,7 @@ H5SM_convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header,
     bt2_cparam.rrec_size = (uint32_t)H5SM_SOHM_ENTRY_SIZE(f);
     bt2_cparam.split_percent = H5SM_B2_SPLIT_PERCENT;
     bt2_cparam.merge_percent = H5SM_B2_MERGE_PERCENT;
-    if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam, f)))
+    if(NULL == (bt2 = H5B2_create(f, dxpl_id, &bt2_cparam, f, NULL)))
         HGOTO_ERROR(H5E_SOHM, H5E_CANTCREATE, FAIL, "B-tree creation failed for SOHM index")
 
     /* Retrieve the v2 B-tree's address in the file */
@@ -856,7 +856,7 @@ H5SM_convert_btree_to_list(H5F_t * f, H5SM_index_header_t * header, hid_t dxpl_i
     /* Delete the B-tree and have messages copy themselves to the
      * list as they're deleted
      */
-    if(H5B2_delete(f, dxpl_id, btree_addr, f, H5SM_bt2_convert_to_list_op, list) < 0)
+    if(H5B2_delete(f, dxpl_id, btree_addr, f, NULL, H5SM_bt2_convert_to_list_op, list) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete B-tree")
 
 done:
@@ -1339,7 +1339,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         HDassert(header->index_type == H5SM_BTREE);
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f, NULL)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
         if(defer) {
@@ -1467,7 +1467,7 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 
                 /* Open the index v2 B-tree, if it isn't already */
                 if(NULL == bt2) {
-                    if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
+                    if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f, NULL)))
                         HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
                 } /* end if */
 
@@ -1836,7 +1836,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         HDassert(header->index_type == H5SM_BTREE);
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f, NULL)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
         /* If this returns failure, it means that the message wasn't found.
@@ -1866,7 +1866,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         else {
             /* Open the index v2 B-tree, if it isn't already */
             if(NULL == bt2) {
-                if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
+                if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f, NULL)))
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
             } /* end if */
 
@@ -2218,7 +2218,7 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
         HDassert(header->index_type == H5SM_BTREE);
 
         /* Open the index v2 B-tree */
-        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f)))
+        if(NULL == (bt2 = H5B2_open(f, dxpl_id, header->index_addr, f, NULL)))
             HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
         /* Look up the message in the v2 B-tree */
@@ -2752,7 +2752,7 @@ H5SM_ih_size(H5F_t *f, hid_t dxpl_id, hsize_t *hdr_size, H5_ih_info_t *ih_info)
 	if(table->indexes[u].index_type == H5SM_BTREE) {
 	    if(H5F_addr_defined(table->indexes[u].index_addr)) {
                 /* Open the index v2 B-tree */
-                if(NULL == (bt2 = H5B2_open(f, dxpl_id, table->indexes[u].index_addr, f)))
+                if(NULL == (bt2 = H5B2_open(f, dxpl_id, table->indexes[u].index_addr, f, NULL)))
                     HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
 		if(H5B2_size(bt2, dxpl_id, &(ih_info->index_size)) < 0)

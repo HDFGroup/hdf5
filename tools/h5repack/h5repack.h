@@ -105,7 +105,7 @@ typedef struct {
  int             verbose;     /*verbose mode */
  hsize_t         min_comp;    /*minimum size to compress, in bytes */
  int             use_native;  /*use a native type in write */
- int             latest;      /*pack file with the latest file format */
+ hbool_t         latest;      /*pack file with the latest file format */
  int             grp_compact; /* Set the maximum number of links to store as header messages in the group */
  int             grp_indexed; /* Set the minimum number of links to store in the indexed format */
  int             msg_size[8]; /* Minimum size of shared messages: dataspace,
@@ -138,7 +138,8 @@ extern "C" {
 int h5repack(const char* infile, const char* outfile, pack_opt_t *options);
 int h5repack_addfilter(const char* str, pack_opt_t *options);
 int h5repack_addlayout(const char* str, pack_opt_t *options);
-int h5repack_init(pack_opt_t *options, int verbose, H5F_file_space_type_t strategy, hsize_t threshold);
+int h5repack_init(pack_opt_t *options, int verbose, hbool_t latest,
+    H5F_file_space_type_t strategy, hsize_t threshold);
 int h5repack_end(pack_opt_t *options);
 int h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options);
 int h5repack_cmp_pl(const char *fname1, const char *fname2);

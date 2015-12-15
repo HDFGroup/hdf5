@@ -209,6 +209,8 @@ set (H5_TESTS
     ohdr
     stab
     gheap
+    cache_logging
+    cork
     pool
     istore
     bittests
@@ -216,6 +218,7 @@ set (H5_TESTS
     dtypes
     dsets
     cmpd_dset
+    chunk_info
     filter_fail
     extend
     external
@@ -232,6 +235,7 @@ set (H5_TESTS
     app_ref
     enum
     set_extent
+    space_overflow
     getname
     vfd
     ntypes
@@ -252,6 +256,7 @@ set (H5_TESTS
     enc_dec_plist
     enc_dec_plist_cross_platform
     unregister
+    swmr
 )
 
 foreach (test ${H5_TESTS})
@@ -400,6 +405,21 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (links_env-shared SHARED " " " ")
   target_link_libraries (links_env-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (links_env-shared PROPERTIES FOLDER test)
+endif (BUILD_SHARED_LIBS)
+
+#-- Adding test for accum_swmr_reader
+#   This has to be copied to the test directory for execve() to find it
+#   and it can't be renamed (i.e., no <foo>-shared).
+add_executable (accum_swmr_reader ${HDF5_TEST_SOURCE_DIR}/accum_swmr_reader.c)
+TARGET_NAMING (accum_swmr_reader STATIC)
+TARGET_C_PROPERTIES (accum_swmr_reader STATIC " " " ")
+target_link_libraries (accum_swmr_reader ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (accum_swmr_reader PROPERTIES FOLDER test)
+
+#-- Set accum dependencies
+set_target_properties (accum PROPERTIES DEPENDS accum_swmr_reader)
+if (BUILD_SHARED_LIBS)
+  set_target_properties (accum-shared PROPERTIES DEPENDS accum_swmr_reader-shared)
 endif (BUILD_SHARED_LIBS)
 
 #-- Adding test for libinfo

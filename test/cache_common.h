@@ -152,6 +152,9 @@
 					 * cache entry.
 					 */
 
+#define MAX_FLUSH_DEP_PARS      8       /* Maximum number of flush dependency
+                                         * parents in the test */
+
 typedef struct flush_op
 {
     int			op_code;	/* integer op code indicating the
@@ -284,6 +287,8 @@ typedef struct test_entry_t
     hbool_t		  is_pinned;	/* entry is currently pinned in
 					 * the cache.
                                          */
+    haddr_t		  tag;          /* the base_addr as tag for corking entries */
+    hbool_t		  is_corked;	/* entry is currently corked or not */
     int			  pinning_ref_count; /* Number of entries that
 					 * pin this entry in the cache.
 					 * When this count drops to zero,
@@ -338,19 +343,20 @@ typedef struct test_entry_t
     hbool_t 		  expunged;     /* entry has been expunged since the 
                                          * last time it was reset.
                                          */
-    int                   flush_dep_par_type; /* Entry type of flush dependency parent */
-    int                   flush_dep_par_idx; /* Index of flush dependency parent */
-    uint64_t              child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
-                                        /* flush dependency heights of flush
-                                         * dependency children
-                                         */
-    unsigned              flush_dep_height; /* flush dependency height of entry */
-    hbool_t		  pinned_from_client;	/* entry was pinned by client call */
-    hbool_t		  pinned_from_cache;	/* entry was pinned by cache internally */
-    unsigned              flush_order;    /* Order that entry was flushed in */
+    int                 flush_dep_par_type[MAX_FLUSH_DEP_PARS]; /* Entry types of flush dependency parents */
+    int                 flush_dep_par_idx[MAX_FLUSH_DEP_PARS]; /* Indices of flush dependency parents */
+    unsigned            flush_dep_npar; /* Number of flush dependency parents */
+    unsigned            flush_dep_nchd; /* Number of flush dependency children */
+    unsigned            flush_dep_ndirty_chd; /* Number of dirty flush dependency children (including granchildren, etc.) */
+    hbool_t		pinned_from_client;	/* entry was pinned by client call */
+    hbool_t		pinned_from_cache;	/* entry was pinned by cache internally */
+    unsigned            flush_order;    /* Order that entry was flushed in */
 
     unsigned              notify_after_insert_count;    /* Count of times that entry was inserted in cache */
     unsigned              notify_before_evict_count;    /* Count of times that entry was removed in cache */
+    unsigned		actual_len;	/* Simulate the entry's actual size for a speculative load */
+    unsigned		max_verify_ct;  /* Maximum # of times to verify an entry's checksum */
+    unsigned		verify_ct;	/* Count the # of checksum verification for an entry */
 } test_entry_t;
 
 /* The following are cut down test versions of the hash table manipulation
@@ -518,14 +524,13 @@ struct expected_entry_status
     hbool_t		deserialized;
     hbool_t		serialized;
     hbool_t		destroyed;
-    int                 flush_dep_par_type; /* Entry type of flush dependency parent */
-    int                 flush_dep_par_idx; /* Index of flush dependency parent */
-    uint64_t            child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
-                                        /* flush dependency heights of flush
-                                         * dependency children
-                                         */
-    unsigned            flush_dep_height; /* flush dependency height of entry */
+    int                 flush_dep_par_type[MAX_FLUSH_DEP_PARS]; /* Entry types of flush dependency parents */
+    int                 flush_dep_par_idx[MAX_FLUSH_DEP_PARS]; /* Indices of flush dependency parents */
+    unsigned            flush_dep_npar; /* Number of flush dependency parents */
+    unsigned            flush_dep_nchd; /* Number of flush dependency children */
+    unsigned            flush_dep_ndirty_chd; /* Number of dirty flush dependency children */
     int                 flush_order;    /* flush order of entry */
+    unsigned char	is_corked;	/* cork status of entry */
 };
 
 
@@ -615,6 +620,11 @@ void create_pinned_entry_dependency(H5F_t * file_ptr,
 		                    int pinned_idx);
 
 void reset_entries(void);
+
+void cork_entry_type(H5F_t * file_ptr, int32_t type);
+void uncork_entry_type(H5F_t * file_ptr, int32_t type);
+
+
 
 void resize_entry(H5F_t * file_ptr,
                   int32_t type,

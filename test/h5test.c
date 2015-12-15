@@ -1263,8 +1263,6 @@ getenv_all(MPI_Comm comm, int root, const char* name)
  * Programmer:  Larry Knox
  *              Monday, October 13, 2009
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1276,20 +1274,22 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
     const char *filename = H5_get_srcdir_filename(origfilename);;       /* Get the test file name to copy */
 
     /* Copy old file into temporary file */
-    if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0) return -1;
-    if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, 0666))
-        < 0) return -1;
+    if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0)
+        return -1;
+    if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
+        return -1;
 
     /* Copy data */
     while((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
-        HDwrite(fd_new, buf, (size_t)nread);
+        if(HDwrite(fd_new, buf, (size_t)nread) < 0)
+            return -1;
 
     /* Close files */
     if(HDclose(fd_old) < 0) return -1;
     if(HDclose(fd_new) < 0) return -1;
 
     return 0;
-}
+} /* end h5_make_local_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -1379,3 +1379,56 @@ error:
     return -1;
 }
 
+/*
+ * To send a message by creating the file.
+ * This is a helper routine used in:
+ *	1) tfile.c: test_file_lock_concur() and test_file_lock_swmr_concur()
+ *	2) use_common.c
+ *	3) swmr_addrme_writer.c, swmr_remove_writer.c, swmr_sparse_writer.c, swmr_writer.c
+ */
+void
+h5_send_message(const char *file)
+{
+    FILE *id;
+
+    id = HDfopen(file, "w+");
+    HDfclose(id);
+} /* h5_send_message() */
+
+/*
+ * Repeatedly check for the message file.
+ * It will stop when the file exists or exceeds the timeout limit.
+ * This is a helper routine used in:
+ *	1) tfile.c: test_file_lock_concur() and test_file_lock_swmr_concur()
+ *	2) use_common.c
+ */
+int
+h5_wait_message(const char *file)
+{
+    FILE *id;           /* File pointer */
+    time_t t0, t1;      /* Time info */
+
+    /* Start timer */
+    HDtime(&t0);
+
+    /* Repeatedly check whether the file exists */
+    while((id = HDfopen(file, "r")) == NULL) {
+        /* Get current time */
+        HDtime(&t1);
+        /*
+         * Determine time difference--
+         *   if waiting too long for the message, then it is
+         *   unlikely the message will get sent, then fail rather
+         *   than loop forever.
+         */
+        if(HDdifftime(t1, t0) > MESSAGE_TIMEOUT)
+            goto done;
+    }
+
+    if(id != NULL) HDfclose(id);
+    HDunlink(file);
+    return(1);
+
+done:
+    return(-1);
+} /* h5_wait_message() */

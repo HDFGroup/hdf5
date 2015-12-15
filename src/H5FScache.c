@@ -78,7 +78,10 @@ static herr_t H5FS__sinfo_serialize_sect_cb(void *_item, void H5_ATTR_UNUSED *ke
 static herr_t H5FS__sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata);
 
 /* Metadata cache callbacks */
-static herr_t H5FS__cache_hdr_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5FS__cache_hdr_get_load_size(const void *image_ptr, void *udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static htri_t H5FS__cache_hdr_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5FS__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5FS__cache_hdr_image_len(const void *thing, size_t *image_len,
@@ -91,7 +94,10 @@ static herr_t H5FS__cache_hdr_serialize(const H5F_t *f, void *image,
     size_t len, void *thing);
 static herr_t H5FS__cache_hdr_free_icr(void *thing);
 
-static herr_t H5FS__cache_sinfo_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5FS__cache_sinfo_get_load_size(const void *image_ptr, void *udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static htri_t H5FS__cache_sinfo_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5FS__cache_sinfo_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5FS__cache_sinfo_image_len(const void *thing, size_t *image_len,
@@ -102,6 +108,7 @@ static herr_t H5FS__cache_sinfo_pre_serialize(const H5F_t *f, hid_t dxpl_id,
     unsigned *flags);
 static herr_t H5FS__cache_sinfo_serialize(const H5F_t *f, void *image,
     size_t len, void *thing);
+static herr_t H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5FS__cache_sinfo_free_icr(void *thing);
 
 
@@ -116,6 +123,7 @@ const H5AC_class_t H5AC_FSPACE_HDR[1] = {{
     H5FD_MEM_FSPACE_HDR,                /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
     H5FS__cache_hdr_get_load_size,      /* 'get_load_size' callback */
+    H5FS__cache_hdr_verify_chksum,	/* 'verify_chksum' callback */
     H5FS__cache_hdr_deserialize,        /* 'deserialize' callback */
     H5FS__cache_hdr_image_len,          /* 'image_len' callback */
     H5FS__cache_hdr_pre_serialize,      /* 'pre_serialize' callback */
@@ -133,11 +141,12 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
     H5FD_MEM_FSPACE_SINFO,              /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
     H5FS__cache_sinfo_get_load_size,    /* 'get_load_size' callback */
+    H5FS__cache_sinfo_verify_chksum,	/* 'verify_chksum' callback */
     H5FS__cache_sinfo_deserialize,      /* 'deserialize' callback */
     H5FS__cache_sinfo_image_len,        /* 'image_len' callback */
     H5FS__cache_sinfo_pre_serialize,    /* 'pre_serialize' callback */
     H5FS__cache_sinfo_serialize,        /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5FS__cache_sinfo_notify, 		/* 'notify' callback */
     H5FS__cache_sinfo_free_icr,         /* 'free_icr' callback */
     NULL,			        /* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
@@ -169,9 +178,11 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS__cache_hdr_get_load_size(const void *_udata, size_t *image_len)
+H5FS__cache_hdr_get_load_size(const void *_image, void *_udata, size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
 {
-    const H5FS_hdr_cache_ud_t *udata = (const H5FS_hdr_cache_ud_t *)_udata; /* User-data for metadata cache callback */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    H5FS_hdr_cache_ud_t *udata = (H5FS_hdr_cache_ud_t *)_udata; /* User-data for metadata cache callback */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -180,11 +191,52 @@ H5FS__cache_hdr_get_load_size(const void *_udata, size_t *image_len)
     HDassert(udata->f);
     HDassert(image_len);
 
-    /* Set the image length size */
-    *image_len = (size_t)H5FS_HEADER_SIZE(udata->f);
+    if(image == NULL) {
+	/* Set the image length size */
+	*image_len = (size_t)H5FS_HEADER_SIZE(udata->f);
+    } else {
+        HDassert(actual_len);
+        HDassert(*actual_len == *image_len);
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FS__cache_hdr_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FS__cache_hdr_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FS__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+    htri_t ret_value = TRUE;	/* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+        ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FS__cache_hdr_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -212,7 +264,6 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     H5FS_hdr_cache_ud_t *udata = (H5FS_hdr_cache_ud_t *)_udata;  /* User data for callback */
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned            nclasses;       /* Number of section classes */
     H5FS_t		*ret_value = NULL;      /* Return value */
 
@@ -285,18 +336,13 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     /* Allocated size of serialized free space sections */
     H5F_DECODE_LENGTH(udata->f, image, fspace->alloc_sect_size);
 
-    /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) <= len);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-	HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Set return value */
     ret_value = fspace;
@@ -796,10 +842,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5FS__cache_sinfo_get_load_size(const void  *_udata, size_t *image_len)
+H5FS__cache_sinfo_get_load_size(const void *_image, void  *_udata, size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
 {
-    const H5FS_t 		*fspace;        /* free space manager */
-    const H5FS_sinfo_cache_ud_t *udata = (const H5FS_sinfo_cache_ud_t *)_udata; /* User data for callback */
+    const uint8_t *image = (const uint8_t *)_image;     /* Pointer into raw data buffer */
+    const H5FS_t *fspace;        			/* free space manager */
+    H5FS_sinfo_cache_ud_t *udata = (H5FS_sinfo_cache_ud_t *)_udata; /* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -810,10 +858,51 @@ H5FS__cache_sinfo_get_load_size(const void  *_udata, size_t *image_len)
     HDassert(fspace->sect_size > 0);
     HDassert(image_len);
 
-    *image_len = (size_t)(fspace->sect_size);
+    if(image == NULL)
+	*image_len = (size_t)(fspace->sect_size);
+    else {
+        HDassert(actual_len);
+        HDassert(*actual_len == *image_len);
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FS__cache_sinfo_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FS__cache_sinfo_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FS__cache_sinfo_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+    htri_t ret_value = TRUE;	/* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+        ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FS__cache_sinfo_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -843,7 +932,6 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
     size_t                  old_sect_size;  /* Old section size */
     const uint8_t          *image = (const uint8_t *)_image;    /* Pointer into raw data buffer */
     uint32_t                stored_chksum;  /* Stored metadata checksum  */
-    uint32_t                computed_chksum;    /* Computed metadata checksum */
     void *                  ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -950,15 +1038,10 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
         HDassert(old_tot_space == fspace->tot_space);
     } /* end if */
 
-    /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata((const uint8_t *)_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == old_sect_size);
@@ -1183,6 +1266,64 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_sinfo_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FS__cache_sinfo_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *_thing)
+{
+    H5FS_sinfo_t *sinfo = (H5FS_sinfo_t *)_thing;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+    
+    /* Sanity check */
+    HDassert(sinfo);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(sinfo->fspace->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+                /* Create flush dependency on parent */
+                if(H5FS__create_flush_depend((H5AC_info_t *)sinfo->fspace, (H5AC_info_t *)sinfo) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency between data block and header, address = %llu", (unsigned long long)sinfo->fspace->sect_addr)
+                break;
+
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+                /* do nothing */
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+		/* Destroy flush dependency on parent */
+                if(H5FS__destroy_flush_depend((H5AC_info_t *)sinfo->fspace, (H5AC_info_t *)sinfo) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5FS__cache_sinfo_notify() */
 
 
 /*-------------------------------------------------------------------------

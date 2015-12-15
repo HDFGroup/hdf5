@@ -62,7 +62,9 @@
 /********************/
 
 /* Metadata cache callbacks */
-static herr_t H5HG__cache_heap_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5HG__cache_heap_get_load_size(const void *_image, void *udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
 static void *H5HG__cache_heap_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5HG__cache_heap_image_len(const void *thing, size_t *image_len,
@@ -83,6 +85,7 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
     H5FD_MEM_GHEAP,                     /* File space memory type for client */
     H5AC__CLASS_SPECULATIVE_LOAD_FLAG,  /* Client class behavior flags */
     H5HG__cache_heap_get_load_size,     /* 'get_load_size' callback */
+    NULL, 				/* 'verify_chksum' callback */
     H5HG__cache_heap_deserialize,       /* 'deserialize' callback */
     H5HG__cache_heap_image_len,         /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -123,15 +126,48 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG__cache_heap_get_load_size(const void H5_ATTR_UNUSED *_udata, size_t *image_len)
+H5HG__cache_heap_get_load_size(const void *_image, void *_udata, size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
 {
-    FUNC_ENTER_STATIC_NOERR
+    const uint8_t *image = (const uint8_t *)_image;   	/* Pointer into raw data buffer */
+    H5F_t *f = (H5F_t *)_udata;                         /* File pointer -- obtained from user data */
+    size_t heap_size;                                   /* Total size of collection      */
+    htri_t ret_value = SUCCEED;                         /* Return value */
+
+    FUNC_ENTER_STATIC
 
     HDassert(image_len);
 
-    *image_len = (size_t)H5HG_MINSIZE;
+    if(image == NULL) {
+	*image_len = (size_t)H5HG_MINSIZE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    } else { /* compute actual_len */
+	HDassert(f);
+	HDassert(actual_len);
+	HDassert(*actual_len == *image_len);
+
+	/* Magic number */
+	if(HDmemcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "bad global heap collection signature")
+	image += H5_SIZEOF_MAGIC;
+
+	/* Version */
+	if(H5HG_VERSION != *image++)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "wrong version number in global heap")
+
+	/* Reserved */
+	image += 3;
+
+	/* Size */
+	H5F_DECODE_LENGTH(f, image, heap_size);
+	HDassert(heap_size >= H5HG_MINSIZE);
+	HDassert(*image_len == H5HG_MINSIZE);
+
+	*actual_len = heap_size;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HG__cache_heap_get_load_size() */
 
 

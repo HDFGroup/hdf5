@@ -32,6 +32,11 @@
 #define NUM_GRPS 	35000
 #define NUM_ATTRS	100
 
+/* Declarations for gen_idx_file() */
+#define IDX_FILE 	"h5stat_idx.h5"
+#define DSET		"dset"
+#define DSET_FILTER	"dset_filter"
+
 /* For gen_threshold_file() */
 #define THRESHOLD_FILE 		"h5stat_threshold.h5"
 #define THRES_ATTR_NAME		"attr"
@@ -43,7 +48,6 @@
 /*
  * Generate HDF5 file with latest format with
  * NUM_GRPS groups and NUM_ATTRS attributes for the dataset
- *
  */
 static void 
 gen_newgrat_file(const char *fname)
@@ -111,26 +115,32 @@ gen_newgrat_file(const char *fname)
     } /* end for */
 
     /* Close dataset, dataspace, datatype, file */
+    if(H5Pclose(fapl) < 0)
+	goto error;
+    if(H5Pclose(fcpl) < 0)
+	goto error;
     if(H5Dclose(did) < 0)
 	goto error;
-    if(H5Sclose(sid) < 0)
-	goto error;
     if(H5Tclose(tid) < 0)
+	goto error;
+    if(H5Sclose(sid) < 0)
 	goto error;
     if(H5Fclose(fid) < 0)
 	goto error;
 
 error:
     H5E_BEGIN_TRY {
+	H5Pclose(fapl);
+	H5Pclose(fcpl);
 	H5Aclose(attr_id);
-        H5Dclose(did);
         H5Tclose(tid);
         H5Sclose(sid);
         H5Gclose(gid);
+        H5Dclose(did);
         H5Fclose(fid);
     } H5E_END_TRY;
-
 } /* gen_newgrat_file() */
+
 
 /*
  * Generate an HDF5 file with groups, datasets, attributes for testing the options:
@@ -331,10 +341,109 @@ error:
 
 } /* gen_threshold_file() */
 
+/*
+ * Function: gen_idx_file
+ *
+ * Purpose: Create a file with datasets that use Fixed Array indexing:
+ *   	one dataset: fixed dimension, chunked layout, w/o filters
+ *     	one dataset: fixed dimension, chunked layout, w/ filters
+ *
+ */
+static void 
+gen_idx_file(const char *fname)
+{
+    hid_t	fapl = -1;		    /* file access property id */
+    hid_t	fid = -1;	            /* file id */
+    hid_t   	sid = -1;	            /* space id */
+    hid_t	dcpl = -1;	    	    /* dataset creation property id */
+    hid_t	did = -1, did2 = -1;	    /* dataset id */
+    hsize_t 	dims[1] = {10};     /* dataset dimension */
+    hsize_t 	c_dims[1] = {2};    /* chunk dimension */
+    int		i;		    /* local index variable */
+    int     	buf[10];            /* data buffer */
+
+    /* Get a copy of the file access property */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+	goto error;
+
+    /* Set the "use the latest format" bounds for creating objects in the file */
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+	goto error;
+
+    /* Create file */
+    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+	goto error;
+
+    /* Create data */
+    for(i = 0; i < 10; i++)
+	buf[i] = i;
+
+    /* Set chunk */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+	goto error;
+
+    if(H5Pset_chunk(dcpl, 1, c_dims) < 0)
+	goto error;
+
+    /* Create a 1D dataset */
+    if((sid = H5Screate_simple(1, dims, NULL)) < 0)
+	goto error;
+    if((did  = H5Dcreate2(fid, DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+	goto error;
+    
+    /* Write to the dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+	goto error;
+
+#if defined (H5_HAVE_FILTER_DEFLATE)
+    /* set deflate data */
+    if(H5Pset_deflate(dcpl, 9) < 0)
+	goto error;
+
+    /* Create and write the dataset */
+    if((did2  = H5Dcreate2(fid, DSET_FILTER, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+	goto error;
+    if(H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+	goto error;
+
+    /* Close the dataset */
+    if(H5Dclose(did2) < 0)
+	goto error;
+#endif
+
+    /* closing: dataspace, dataset, file */
+    if(H5Pclose(fapl) < 0)
+	goto error;
+    if(H5Pclose(dcpl) < 0)
+	goto error;
+    if(H5Sclose(sid) < 0)
+	goto error;
+    if(H5Dclose(did) < 0)
+	goto error;
+    if(H5Fclose(fid) < 0)
+	goto error;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Fclose(fid);
+#if defined (H5_HAVE_FILTER_DEFLATE)
+        H5Dclose(did2);
+#endif
+    } H5E_END_TRY;
+
+} /* gen_idx_file() */
+
 int main(void)
 {
     gen_newgrat_file(NEWGRAT_FILE);
     gen_threshold_file(THRESHOLD_FILE);
+
+    /* Generate an HDF file to test for datasets with Fixed Array indexing */
+    gen_idx_file(IDX_FILE);
 
     return 0;
 }

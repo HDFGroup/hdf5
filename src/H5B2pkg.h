@@ -170,6 +170,7 @@ typedef struct H5B2_hdr_t {
 
     /* Shared internal data structures (not stored) */
     H5F_t       *f;             /* Pointer to the file that the B-tree is in */
+    void        *parent;        /* Flush dependency parent */
     haddr_t     addr;           /* Address of B-tree header in the file */
     size_t      hdr_size;       /* Size of the B-tree header on disk */
     size_t      rc;             /* Reference count of nodes using this header */
@@ -182,6 +183,9 @@ typedef struct H5B2_hdr_t {
     uint8_t	*page;	        /* Common disk page for I/O */
     size_t      *nat_off;       /* Array of offsets of native records */
     H5B2_node_info_t *node_info; /* Table of node info structs for current depth of B-tree */
+    hbool_t     swmr_write;     /* Whether we are doing SWMR writes */
+    struct H5B2_leaf_t *shadowed_leaf; /* Linked list of shadowed leaf nodes */
+    struct H5B2_internal_t *shadowed_internal; /* Linked list of shadowed internal nodes */
     uint8_t     *min_native_rec;   /* Pointer to minimum native record                  */
     uint8_t     *max_native_rec;   /* Pointer to maximum native record                  */
 
@@ -197,8 +201,11 @@ typedef struct H5B2_leaf_t {
 
     /* Internal B-tree information */
     H5B2_hdr_t	*hdr;		/* Pointer to the [pinned] v2 B-tree header   */
+    void        *parent;        /* Flush dependency parent                    */
     uint8_t     *leaf_native;   /* Pointer to native records                  */
     uint16_t    nrec;           /* Number of records in node                  */
+    struct H5B2_leaf_t *shadowed_next; /* Next node in shadowed list          */
+    struct H5B2_leaf_t *shadowed_prev; /* Previous node in shadowed list      */
 } H5B2_leaf_t;
 
 /* B-tree internal node information */
@@ -208,10 +215,13 @@ typedef struct H5B2_internal_t {
 
     /* Internal B-tree information */
     H5B2_hdr_t	*hdr;		/* Pointer to the [pinned] v2 B-tree header   */
+    void        *parent;        /* Flush dependency parent                    */
     uint8_t     *int_native;    /* Pointer to native records                  */
     H5B2_node_ptr_t *node_ptrs; /* Pointer to node pointers                   */
     uint16_t    nrec;           /* Number of records in node                  */
     uint16_t    depth;          /* Depth of this node in the B-tree           */
+    struct H5B2_internal_t *shadowed_next; /* Next node in shadowed list      */
+    struct H5B2_internal_t *shadowed_prev; /* Previous node in shadowed list  */
 } H5B2_internal_t;
 
 /* v2 B-tree */
@@ -231,6 +241,7 @@ typedef enum H5B2_nodepos_t {
 /* Callback info for loading a free space header into the cache */
 typedef struct H5B2_hdr_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
+    void *parent;               /* Flush dependency parent */
     haddr_t addr;               /* Address of B-tree header in the file */
     void *ctx_udata;            /* User-data for protecting */
 } H5B2_hdr_cache_ud_t;
@@ -239,6 +250,7 @@ typedef struct H5B2_hdr_cache_ud_t {
 typedef struct H5B2_internal_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
     H5B2_hdr_t *hdr;            /* v2 B-tree header */
+    void *parent;               /* Flush dependency parent */
     uint16_t nrec;              /* Number of records in node to load */
     uint16_t depth;             /* Depth of node to load */
 } H5B2_internal_cache_ud_t;
@@ -247,14 +259,15 @@ typedef struct H5B2_internal_cache_ud_t {
 typedef struct H5B2_leaf_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
     H5B2_hdr_t *hdr;            /* v2 B-tree header */
+    void *parent;               /* Flush dependency parent */
     uint16_t nrec;              /* Number of records in node to load */
 } H5B2_leaf_cache_ud_t;
 
 #ifdef H5B2_TESTING
 /* Node information for testing */
 typedef struct {
-    unsigned depth;             /* Depth of node */
-    unsigned nrec;              /* Number of records in node */
+    uint16_t depth;             /* Depth of node */
+    uint16_t nrec;              /* Number of records in node */
 } H5B2_node_info_test_t;
 #endif /* H5B2_TESTING */
 
@@ -291,12 +304,18 @@ extern const H5B2_class_t *const H5B2_client_class_g[H5B2_NUM_BTREE_ID];
 /* Package Private Prototypes */
 /******************************/
 
+/* Generic routines */
+H5_DLL herr_t H5B2__create_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5B2__destroy_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+
 /* Routines for managing B-tree header info */
 H5_DLL H5B2_hdr_t *H5B2__hdr_alloc(H5F_t *f);
 H5_DLL haddr_t H5B2__hdr_create(H5F_t *f, hid_t dxpl_id,
-    const H5B2_create_t *cparam, void *ctx_udata);
+    const H5B2_create_t *cparam, void *ctx_udata, void *parent);
 H5_DLL herr_t H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam,
-    void *ctx_udata, uint16_t depth);
+    void *ctx_udata, void *parent, uint16_t depth);
 H5_DLL herr_t H5B2__hdr_incr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2__hdr_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2__hdr_fuse_incr(H5B2_hdr_t *hdr);
@@ -306,15 +325,15 @@ H5_DLL herr_t H5B2__hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id);
 
 /* Routines for operating on leaf nodes */
 H5B2_leaf_t *H5B2__protect_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, haddr_t addr,
-    uint16_t nrec, unsigned flags);
+    void *parent, uint16_t nrec, unsigned flags);
 
 /* Routines for operating on internal nodes */
 H5_DLL H5B2_internal_t *H5B2__protect_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t addr, uint16_t nrec, uint16_t depth, unsigned flags);
+    haddr_t addr, void *parent, uint16_t nrec, uint16_t depth, unsigned flags);
 
 /* Routines for allocating nodes */
 H5_DLL herr_t H5B2__split_root(H5B2_hdr_t *hdr, hid_t dxpl_id);
-H5_DLL herr_t H5B2__create_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
+H5_DLL herr_t H5B2__create_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, void *parent,
     H5B2_node_ptr_t *node_ptr);
 
 /* Routines for releasing structures */
@@ -325,47 +344,50 @@ H5_DLL herr_t H5B2__internal_free(H5B2_internal_t *i);
 /* Routines for inserting records */
 H5_DLL herr_t H5B2__insert_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
     uint16_t depth, unsigned *parent_cache_info_flags_ptr,
-    H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, void *udata);
+    H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, void *parent, void *udata);
 H5_DLL herr_t H5B2__insert_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, void *udata);
+    H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, void *parent, void *udata);
 
 /* Routines for iterating over nodes/records */
 H5_DLL herr_t H5B2__iterate_node(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
-    const H5B2_node_ptr_t *curr_node, H5B2_operator_t op, void *op_data);
+    const H5B2_node_ptr_t *curr_node, void *parent, H5B2_operator_t op, void *op_data);
 H5_DLL herr_t H5B2__node_size(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    uint16_t depth, const H5B2_node_ptr_t *curr_node, hsize_t *op_data);
+    uint16_t depth, const H5B2_node_ptr_t *curr_node, void *parent,
+    hsize_t *op_data);
 
 /* Routines for locating records */
 H5_DLL int H5B2__locate_record(const H5B2_class_t *type, unsigned nrec,
     size_t *rec_off, const uint8_t *native, const void *udata, unsigned *idx);
 H5_DLL herr_t H5B2__neighbor_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
     uint16_t depth, H5B2_node_ptr_t *curr_node_ptr, void *neighbor_loc,
-    H5B2_compare_t comp, void *udata, H5B2_found_t op, void *op_data);
+    H5B2_compare_t comp, void *parent, void *udata, H5B2_found_t op,
+    void *op_data);
 H5_DLL herr_t H5B2__neighbor_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    H5B2_node_ptr_t *curr_node_ptr, void *neighbor_loc,
-    H5B2_compare_t comp, void *udata, H5B2_found_t op, void *op_data);
+    H5B2_node_ptr_t *curr_node_ptr, void *neighbor_loc, H5B2_compare_t comp,
+    void *parent, void *udata, H5B2_found_t op, void *op_data);
 
 /* Routines for removing records */
 H5_DLL herr_t H5B2__remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    hbool_t *depth_decreased, void *swap_loc, uint16_t depth,
+    hbool_t *depth_decreased, void *swap_loc, void *swap_parent, uint16_t depth,
     H5AC_info_t *parent_cache_info, unsigned *parent_cache_info_flags_ptr,
     H5B2_nodepos_t curr_pos, H5B2_node_ptr_t *curr_node_ptr, void *udata,
     H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2__remove_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos,
+    H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, void *parent,
     void *udata, H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    hbool_t *depth_decreased, void *swap_loc, uint16_t depth,
+    hbool_t *depth_decreased, void *swap_loc, void *swap_parent, uint16_t depth,
     H5AC_info_t *parent_cache_info, unsigned *parent_cache_info_flags_ptr,
     H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, hsize_t n,
-    H5B2_remove_t op, void *op_data);
+    void *udata, H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2__remove_leaf_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
-    H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos,
+    H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, void *parent,
     unsigned idx, H5B2_remove_t op, void *op_data);
 
 /* Routines for deleting nodes */
 H5_DLL herr_t H5B2__delete_node(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
-    const H5B2_node_ptr_t *curr_node, H5B2_remove_t op, void *op_data);
+    const H5B2_node_ptr_t *curr_node, void *parent, H5B2_remove_t op,
+    void *op_data);
 
 /* Debugging routines for dumping file structures */
 H5_DLL herr_t H5B2__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,

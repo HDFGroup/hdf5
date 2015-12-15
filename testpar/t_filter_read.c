@@ -213,6 +213,8 @@ test_filter_read(void)
     hid_t	dc;                 /* HDF5 IDs */
     const hsize_t chunk_size[2] = {CHUNK_DIM1, CHUNK_DIM2};  /* Chunk dimensions */
     hsize_t     null_size;          /* Size of dataset without filters */
+    unsigned    chunk_opts;         /* Chunk options */
+    unsigned    disable_partial_chunk_filters; /* Whether filters are disabled on partial chunks */
     herr_t      hrc;
     const char *filename;
     hsize_t     fletcher32_size;       /* Size of dataset with Fletcher32 checksum */
@@ -254,81 +256,111 @@ test_filter_read(void)
     hrc = H5Pclose (dc);
     VRFY(hrc>=0,"H5Pclose");
 
-    /*----------------------------------------------------------
-     * STEP 1: Test Fletcher32 Checksum by itself.
-     *----------------------------------------------------------
-     */
+    /* Run steps 1-3 both with and without filters disabled on partial chunks */
+    for(disable_partial_chunk_filters = 0; disable_partial_chunk_filters <= 1;
+            disable_partial_chunk_filters++) {
+        /* Set chunk options appropriately */
+        dc = H5Pcreate(H5P_DATASET_CREATE);
+        VRFY(dc>=0,"H5Pcreate");
 
-    dc = H5Pcreate(H5P_DATASET_CREATE);
-    VRFY(dc>=0,"H5Pset_filter");
+        hrc = H5Pset_chunk (dc, 2, chunk_size);
+        VRFY(hrc>=0,"H5Pset_filter");
 
-    hrc = H5Pset_chunk (dc, 2, chunk_size);
-    VRFY(hrc>=0,"H5Pset_filter");
+        hrc = H5Pget_chunk_opts(dc, &chunk_opts);
+        VRFY(hrc>=0,"H5Pget_chunk_opts");
 
-    hrc = H5Pset_filter (dc,H5Z_FILTER_FLETCHER32,0,0,NULL);
-    VRFY(hrc>=0,"H5Pset_filter");
+        if(disable_partial_chunk_filters)
+            chunk_opts |= H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS;
 
-    filter_read_internal(filename,dc,&fletcher32_size);
-    VRFY(fletcher32_size > null_size,"Size after checksumming is incorrect.");
+        hrc = H5Pclose (dc);
+        VRFY(hrc>=0,"H5Pclose");
 
-    /* Clean up objects used for this test */
-    hrc = H5Pclose (dc);
-    VRFY(hrc>=0, "H5Pclose");
+        /*----------------------------------------------------------
+        * STEP 1: Test Fletcher32 Checksum by itself.
+        *----------------------------------------------------------
+        */
+#ifdef H5_HAVE_FILTER_FLETCHER32
 
+        dc = H5Pcreate(H5P_DATASET_CREATE);
+        VRFY(dc>=0,"H5Pset_filter");
 
-    /*----------------------------------------------------------
-     * STEP 2: Test deflation by itself.
-     *----------------------------------------------------------
-     */
+        hrc = H5Pset_chunk (dc, 2, chunk_size);
+        VRFY(hrc>=0,"H5Pset_filter");
+
+        hrc = H5Pset_chunk_opts (dc, chunk_opts);
+        VRFY(hrc>=0,"H5Pset_chunk_opts");
+
+        hrc = H5Pset_filter (dc,H5Z_FILTER_FLETCHER32,0,0,NULL);
+        VRFY(hrc>=0,"H5Pset_filter");
+
+        filter_read_internal(filename,dc,&fletcher32_size);
+        VRFY(fletcher32_size > null_size,"Size after checksumming is incorrect.");
+
+        /* Clean up objects used for this test */
+        hrc = H5Pclose (dc);
+        VRFY(hrc>=0, "H5Pclose");
+
+#endif /* H5_HAVE_FILTER_FLETCHER32 */
+
+        /*----------------------------------------------------------
+        * STEP 2: Test deflation by itself.
+        *----------------------------------------------------------
+        */
 #ifdef H5_HAVE_FILTER_DEFLATE
 
-    dc = H5Pcreate(H5P_DATASET_CREATE);
-    VRFY(dc>=0, "H5Pcreate");
-
-    hrc = H5Pset_chunk (dc, 2, chunk_size);
-    VRFY(hrc>=0, "H5Pset_chunk");
-
-    hrc = H5Pset_deflate (dc, 6);
-    VRFY(hrc>=0, "H5Pset_deflate");
-
-    filter_read_internal(filename,dc,&deflate_size);
-
-    /* Clean up objects used for this test */
-    hrc = H5Pclose (dc);
-    VRFY(hrc>=0, "H5Pclose");
-
-#endif /* H5_HAVE_FILTER_DEFLATE */
-
-
-    /*----------------------------------------------------------
-     * STEP 3: Test szip compression by itself.
-     *----------------------------------------------------------
-     */
-#ifdef H5_HAVE_FILTER_SZIP
-    if(h5_szip_can_encode() == 1) {
         dc = H5Pcreate(H5P_DATASET_CREATE);
         VRFY(dc>=0, "H5Pcreate");
 
         hrc = H5Pset_chunk (dc, 2, chunk_size);
         VRFY(hrc>=0, "H5Pset_chunk");
 
-	hrc = H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block);
-        VRFY(hrc>=0, "H5Pset_szip");
+        hrc = H5Pset_chunk_opts (dc, chunk_opts);
+        VRFY(hrc>=0,"H5Pset_chunk_opts");
 
-	filter_read_internal(filename,dc,&szip_size);
+        hrc = H5Pset_deflate (dc, 6);
+        VRFY(hrc>=0, "H5Pset_deflate");
+
+        filter_read_internal(filename,dc,&deflate_size);
 
         /* Clean up objects used for this test */
         hrc = H5Pclose (dc);
         VRFY(hrc>=0, "H5Pclose");
-    }
+
+#endif /* H5_HAVE_FILTER_DEFLATE */
+
+        /*----------------------------------------------------------
+        * STEP 3: Test szip compression by itself.
+        *----------------------------------------------------------
+        */
+#ifdef H5_HAVE_FILTER_SZIP
+        if(h5_szip_can_encode() == 1) {
+            dc = H5Pcreate(H5P_DATASET_CREATE);
+            VRFY(dc>=0, "H5Pcreate");
+
+            hrc = H5Pset_chunk (dc, 2, chunk_size);
+            VRFY(hrc>=0, "H5Pset_chunk");
+
+            hrc = H5Pset_chunk_opts (dc, chunk_opts);
+            VRFY(hrc>=0,"H5Pset_chunk_opts");
+
+            hrc = H5Pset_szip(dc, szip_options_mask, szip_pixels_per_block);
+            VRFY(hrc>=0, "H5Pset_szip");
+
+            filter_read_internal(filename,dc,&szip_size);
+
+            /* Clean up objects used for this test */
+            hrc = H5Pclose (dc);
+            VRFY(hrc>=0, "H5Pclose");
+        }
 #endif /* H5_HAVE_FILTER_SZIP */
+    } /* end for */
 
 
     /*----------------------------------------------------------
      * STEP 4: Test shuffling by itself.
      *----------------------------------------------------------
      */
-
+#ifdef H5_HAVE_FILTER_SHUFFLE
     dc = H5Pcreate(H5P_DATASET_CREATE);
     VRFY(dc>=0, "H5Pcreate");
 
@@ -345,12 +377,13 @@ test_filter_read(void)
     hrc = H5Pclose (dc);
     VRFY(hrc>=0, "H5Pclose");
 
+#endif /* H5_HAVE_FILTER_SHUFFLE */
 
     /*----------------------------------------------------------
      * STEP 5: Test shuffle + deflate + checksum in any order.
      *----------------------------------------------------------
      */
-#ifdef H5_HAVE_FILTER_DEFLATE
+#if defined H5_HAVE_FILTER_DEFLATE && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
     /* Testing shuffle+deflate+checksum filters (checksum first) */
     dc = H5Pcreate(H5P_DATASET_CREATE);
     VRFY(dc>=0, "H5Pcreate");
@@ -395,13 +428,13 @@ test_filter_read(void)
     hrc = H5Pclose (dc);
     VRFY(hrc>=0, "H5Pclose");
 
-#endif /* H5_HAVE_FILTER_DEFLATE */
+#endif /* H5_HAVE_FILTER_DEFLATE && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
 
     /*----------------------------------------------------------
      * STEP 6: Test shuffle + szip + checksum in any order.
      *----------------------------------------------------------
      */
-#ifdef H5_HAVE_FILTER_SZIP
+#if defined H5_HAVE_FILTER_SZIP && defined H5_HAVE_FILTER_SHUFFLE && defined H5_HAVE_FILTER_FLETCHER32
 
     /* Testing shuffle+szip(with encoder)+checksum filters(checksum first) */
     dc = H5Pcreate(H5P_DATASET_CREATE);
@@ -453,6 +486,6 @@ test_filter_read(void)
         VRFY(hrc>=0, "H5Pclose");
     }
 
-#endif /* H5_HAVE_FILTER_SZIP */
+#endif /* H5_HAVE_FILTER_SZIP && H5_HAVE_FILTER_SHUFFLE && H5_HAVE_FILTER_FLETCHER32 */
 }
 

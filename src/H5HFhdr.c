@@ -126,6 +126,7 @@ H5HF_hdr_alloc(H5F_t *f)
 
     /* Set the internal parameters for the heap */
     hdr->f = f;
+    hdr->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
     hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
     hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
 
@@ -427,7 +428,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOPY, HADDR_UNDEF, "can't copy I/O filter pipeline")
 
         /* Pay attention to the latest version flag for the file */
-        if(H5F_USE_LATEST_FORMAT(hdr->f))
+        if(H5F_USE_LATEST_FLAGS(hdr->f, H5F_LATEST_PLINE_MSG))
             /* Set the latest version for the I/O pipeline message */
             if(H5O_pline_set_latest_version(&(hdr->pline)) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTSET, HADDR_UNDEF, "can't set latest version of I/O filter pipeline")

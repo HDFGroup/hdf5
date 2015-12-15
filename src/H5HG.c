@@ -299,9 +299,9 @@ done:
 static size_t
 H5HG_alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
 {
-    size_t	idx;
-    uint8_t	*p;
-    size_t	need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
+    size_t      idx;
+    uint8_t     *p;
+    size_t      need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
     size_t      ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -360,11 +360,11 @@ H5HG_alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
 
     /* Fix the free space object */
     if(need == heap->obj[0].size) {
-	/*
-	 * All free space has been exhausted from this collection.
-	 */
-	heap->obj[0].size = 0;
-	heap->obj[0].begin = NULL;
+        /*
+         * All free space has been exhausted from this collection.
+         */
+        heap->obj[0].size = 0;
+        heap->obj[0].begin = NULL;
     } /* end if */
     else if(heap->obj[0].size-need >= H5HG_SIZEOF_OBJHDR (f)) {
 	/*
@@ -789,10 +789,10 @@ done:
 herr_t
 H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
 {
-    H5HG_heap_t	*heap = NULL;
-    uint8_t	*p = NULL, *obj_start = NULL;
-    size_t	need;
-    unsigned	u;
+    H5HG_heap_t *heap = NULL;
+    uint8_t     *p = NULL, *obj_start = NULL;
+    size_t      need;
+    unsigned    u;
     unsigned    flags = H5AC__NO_FLAGS_SET;/* Whether the heap gets deleted */
     herr_t      ret_value = SUCCEED;       /* Return value */
 

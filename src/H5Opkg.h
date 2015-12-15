@@ -31,7 +31,7 @@
 #define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
 #define H5O_MIN_SIZE	22		/* Min. obj header data size (must be big enough for a message prefix and a continuation message) */
-#define H5O_MSG_TYPES   25              /* # of types of messages            */
+#define H5O_MSG_TYPES   26              /* # of types of messages            */
 #define H5O_MAX_CRT_ORDER_IDX 65535     /* Max. creation order index value   */
 
 /* Versions of object header structure */
@@ -47,6 +47,17 @@
 /* The latest version of the format.  Look through the 'flush'
  *      and 'size' callback for places to change when updating this. */
 #define H5O_VERSION_LATEST	H5O_VERSION_2
+
+/* This is the initial size of the dynamically allocated list of object 
+ * header continuation chunk flush dependency parents maintained by the 
+ * object header proxy.  
+ *
+ * The current value of 1 presumes that the typical number of entries 
+ * on this list is almost always either zero or 1.  Increase this value 
+ * if appropriate.
+ */
+#define H5O_FD_PAR_LIST_BASE	1
+
 
 /*
  * Align messages on 8-byte boundaries because we would like to copy the
@@ -66,7 +77,7 @@
 #define H5O_ALIGN_OH(O, X)						      \
      H5O_ALIGN_VERS((O)->version, X)
 #define H5O_ALIGN_F(F, X)						      \
-     H5O_ALIGN_VERS((H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1), X)
+     H5O_ALIGN_VERS((H5F_USE_LATEST_FLAGS(F, H5F_LATEST_OBJ_HEADER) ? H5O_VERSION_LATEST : H5O_VERSION_1), X)
 
 /* Size of checksum (on disk) */
 #define H5O_SIZEOF_CHKSUM               4
@@ -138,7 +149,7 @@
 #define H5O_SIZEOF_MSGHDR_OH(O)						      \
     H5O_SIZEOF_MSGHDR_VERS((O)->version, (O)->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)
 #define H5O_SIZEOF_MSGHDR_F(F, C)						      \
-    H5O_SIZEOF_MSGHDR_VERS((H5F_USE_LATEST_FORMAT(F) || H5F_STORE_MSG_CRT_IDX(F)) ? H5O_VERSION_LATEST : H5O_VERSION_1, (C))
+    H5O_SIZEOF_MSGHDR_VERS((H5F_USE_LATEST_FLAGS(F, H5F_LATEST_OBJ_HEADER) || H5F_STORE_MSG_CRT_IDX(F)) ? H5O_VERSION_LATEST : H5O_VERSION_1, (C))
 
 /*
  * Size of chunk "header" for each chunk
@@ -267,6 +278,7 @@ struct H5O_t {
     /* File-specific information (not stored) */
     size_t      sizeof_size;            /* Size of file sizes 		     */
     size_t      sizeof_addr;            /* Size of file addresses	     */
+    hbool_t     swmr_write;             /* Whether we are doing SWMR writes  */
 
     /* Debugging information (not stored) */
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
@@ -312,6 +324,10 @@ struct H5O_t {
     size_t	nchunks;		/*number of chunks		     */
     size_t	alloc_nchunks;		/*chunks allocated		     */
     H5O_chunk_t *chunk;			/*array of chunks		     */
+
+    /* Object header proxy information (not stored) */
+    haddr_t     proxy_addr;             /* Temporary address of object header proxy */
+    hbool_t     proxy_present;          /* Whether the proxy is present in cache (and we have to track dependencies) */
 };
 
 /* Class for types of objects in file */
@@ -325,7 +341,7 @@ typedef struct H5O_obj_class_t {
     void	*(*create)(H5F_t *, void *, H5G_loc_t *, hid_t );	/*create an object of this class */
     H5O_loc_t	*(*get_oloc)(hid_t );		/*get the object header location for an object */
     herr_t      (*bh_info)(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info); /*get the index & heap info for an object */
-    herr_t      (*flush)(H5G_loc_t *loc, hid_t dxpl_id); /*flush an opened object of this class */
+    herr_t      (*flush)(void *obj_ptr, hid_t dxpl_id); /*flush an opened object of this class */
 } H5O_obj_class_t;
 
 /* Node in skip list to map addresses from one file to another during object header copy */
@@ -360,6 +376,9 @@ typedef struct H5O_common_cache_ud_t {
 typedef struct H5O_cache_ud_t {
     hbool_t made_attempt;               /* Whether the deserialize routine was already attempted */
     unsigned v1_pfx_nmesgs;             /* Number of messages from v1 prefix header */
+    uint8_t     version;                /* Version number obtained in get_load_size callback.
+					 * It will be used later in verify_chksum callback
+					 */ 
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_cache_ud_t;
 
@@ -368,8 +387,34 @@ typedef struct H5O_chunk_proxy_t {
     H5AC_info_t cache_info;    /* Information for metadata cache functions, _must_ be */
                                 /* first field in structure */
 
+    H5F_t *f;                           /* Pointer to file for object header/chunk */
     H5O_t       *oh;                    /* Object header for this chunk */
     unsigned    chunkno;                /* Chunk number for this chunk */
+    unsigned    cont_chunkno;           /* Chunk number for the chunk containing the continuation message that points to this chunk */
+
+    /* Flush depencency parent information (not stored) 
+     *
+     * The following fields are used to store the base address and a pointer 
+     * to the in core representation of the chunk proxy's flush dependency
+     * parent -- if it exists.  If it does not exist, these fields will
+     * contain HADDR_UNDEF and NULL respectively.
+     *
+     * If the file is opened in SWMR write mode, the flush dependency 
+     * parent of the chunk proxy will be either its object header 
+     * (if cont_chunkno == 0) or the chunk proxy indicated by the 
+     * cont_chunkno field (if cont_chunkno > 0).
+     *
+     * Note that the flush dependency parent address is maintained purely
+     * for sanity checking.  Once we are reasonably confident of the code,
+     * it can be deleted or be maintained only in debug mode.
+     */
+    haddr_t fd_parent_addr;             /* Address of flush dependency parent
+                                         * if any.  This field is initialized
+                                         * to HADDR_UNDEF.  
+                                         */
+    void * fd_parent_ptr;               /* pointer to flush dependency parent
+                                         * it it exists.  NULL otherwise.
+                                         */
 } H5O_chunk_proxy_t;
 
 /* Callback information for loading object header chunk from disk */
@@ -381,6 +426,65 @@ typedef struct H5O_chk_cache_ud_t {
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_chk_cache_ud_t;
 
+/* Metadata cache object header proxy type */
+struct H5O_proxy_t {
+    H5AC_info_t cache_info;             /* Information for H5AC cache functions, _must_ be */
+                                        /* first field in structure */
+    H5F_t *f;                           /* Pointer to file for object header/chunk */
+    H5O_t *oh;                          /* Object header */
+
+    /* Flush depencency parent information (not stored) 
+     *
+     * The following fields are used to store base addresses and pointers
+     * to the in core representations of the object header proxy's flush 
+     * dependency parents -- if they exist.
+     *
+     * At present, object header proxies may have two types of parents:
+     *
+     * 1) Exactly one object header.
+     *
+     * 2) Zero or more object header continuation chunks.
+     *
+     * The base address and pointer to the object header flush dependency 
+     * parent are stored in the oh_fd_parent_addr and oh_fd_parent_ptr fields.
+     * These fields are set to HADDR_UNDEF and NULL if there is no object 
+     * header flush dependency parent.  Note that when defined, 
+     * oh_fd_parent_ptr should point to the same object as oh.
+     *
+     * The number of object header continuation chunks (H5O_chunk_proxy_t) 
+     * that are flush dependency parents of the object header proxy is stored
+     * in chk_fd_parent_count.  
+     *
+     * If this field is greater than zero, chk_fd_parent_addrs must point to 
+     * a dynamically allocated array of haddr_t of length chk_fd_parent_alloc, 
+     * and chk_fd_parent_ptrs must point to a dynamically allocated array of 
+     * void * of the same length.  These arrays are used to store the base 
+     * addresses and pointers to the object header continuation chunk flush 
+     * dependency parents of the object header proxy.  chk_fd_parent_alloc
+     * must always be greater than or equal to chk_fd_parent_count.
+     *
+     * If chk_fd_parent_count is zero, chk_fd_parent_addrs and 
+     * chk_fd_parent_ptrs must be NULL.
+     *
+     * Note that the flush dependency parent addresses are maintined 
+     * purely for sanity checking.  Once we are confident of the code,
+     * these fields and their supporting code can be either deleted 
+     * on maintained only in debug builds.
+     */
+    haddr_t oh_fd_parent_addr;
+    void * oh_fd_parent_ptr;
+
+    unsigned chk_fd_parent_count;
+    unsigned chk_fd_parent_alloc;
+    haddr_t *chk_fd_parent_addrs;
+    void **chk_fd_parent_ptrs;
+};
+
+/* Callback information for loading object header proxy */
+typedef struct H5O_proxy_cache_ud_t {
+    H5F_t *f;                           /* Pointer to file for object header/chunk */
+    H5O_t *oh;                          /* Object header for this chunk */
+} H5O_proxy_cache_ud_t;
 
 /* H5O object header inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];
@@ -556,7 +660,8 @@ H5_DLL herr_t H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *t
     const H5O_mesg_operator_t *op, void *op_data, hid_t dxpl_id);
 
 /* Object header chunk routines */
-H5_DLL herr_t H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx);
+H5_DLL herr_t H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
+    unsigned cont_chunkno);
 H5_DLL H5O_chunk_proxy_t *H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     unsigned idx);
 H5_DLL herr_t H5O_chunk_unprotect(H5F_t *f, hid_t dxpl_id,
@@ -604,9 +709,12 @@ H5_DLL herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg
 H5_DLL herr_t H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     hsize_t *nattrs);
 
-
-/* These functions operate on object locations */
-H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);
+/* Object header proxy operators */
+H5_DLL herr_t H5O_proxy_create(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
+H5_DLL H5O_proxy_t *H5O_proxy_pin(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
+H5_DLL herr_t H5O_proxy_unpin(H5O_proxy_t *proxy);
+H5_DLL herr_t H5O_proxy_depend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent);
+H5_DLL herr_t H5O_proxy_undepend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent);
 
 /* Testing functions */
 #ifdef H5O_TESTING

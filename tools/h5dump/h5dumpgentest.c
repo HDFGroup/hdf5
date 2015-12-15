@@ -98,6 +98,7 @@
 #define FILE66  "packedbits.h5"
 #define FILE67  "zerodim.h5"
 #define FILE68  "charsets.h5"
+#define FILE68a "tdset_idx.h5"
 #define FILE69  "tattrintsize.h5"
 #define FILE70  "tcmpdintsize.h5"
 #define FILE71  "tcmpdattrintsize.h5"
@@ -285,6 +286,16 @@ typedef struct s1_t {
 #define F66_DATASETS64       "DS64BITS"
 #define F66_YDIM64      64
 #define F66_DUMMYDBL	    "DummyDBL"
+
+/* Declarations for gent_dataset_idx() for "FILE68a" */
+#define F68a_DSET_FIXED		"dset_fixed"
+#define F68a_DSET_FIXED_FILTER	"dset_filter"
+#define F68a_DSET_BTREE		"dset_btree"
+#define F68a_DIM200		200
+#define F68a_DIM100		100
+#define F68a_DIM20		20
+#define F68a_DIM10		10
+#define F68a_CHUNK		5
 
 /* "FILE70" macros and for FILE71 */
 /* Name of dataset to create in datafile   */
@@ -7012,6 +7023,90 @@ gent_fs_strategy_threshold(void)
     H5Pclose(fcpl);
 }
 
+/*
+ * Create a file with new format:
+ * Create one dataset with (set_chunk, fixed dims, null max. dims) 
+ *	so that Fixed Array indexing will be used.
+ * Create one dataset with (set_chunk, fixed dims, null max. dims, filter) 
+ *	so that Fixed Array indexing will be used.
+ * Create one dataset with (set_chunk, fixed dims, fixed max. dims)
+ *	so that Fixed Array indexing will be used.
+ * 
+ * Modifications:
+ *	Fixed Array indexing will be used for chunked dataset
+ *	with fixed max. dims setting.
+ *
+ */
+static void
+gent_dataset_idx(void)
+{
+    hid_t fid, space, dcpl, fapl;
+    hsize_t dims[2];
+    hsize_t maxdims[2];
+    int buf[20][10];
+    int i, j, ret;
+
+    /* Get a copy of the file aaccess property */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    assert(ret >= 0);
+
+    fid = H5Fcreate(FILE68a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+
+    dims[0] = F68a_CHUNK;
+    dims[1] = F68a_CHUNK;
+
+    /* set chunk */
+    ret = H5Pset_chunk(dcpl, RANK, dims);
+    assert(ret >= 0);
+
+    /* dataset with fixed dimensions */
+    dims[0] = F68a_DIM20; 
+    dims[1] = F68a_DIM10;
+    space = H5Screate_simple(RANK, dims, NULL);
+
+    for(i = 0; i < F68a_DIM20; i++)
+         for(j = 0; j < F68a_DIM10; j++)
+              buf[i][j] = j;
+
+    ret = make_dset(fid, F68a_DSET_FIXED, space, H5T_NATIVE_INT, dcpl, buf);
+    assert(ret >= 0);
+    H5Sclose(space);
+
+    /* dataset with non-fixed dimensions */
+    maxdims[0] = F68a_DIM200; 
+    maxdims[1] = F68a_DIM100;
+    space = H5Screate_simple(RANK, dims, maxdims);
+
+    ret = make_dset(fid, F68a_DSET_BTREE, space, H5T_NATIVE_INT, dcpl, buf);
+    assert(ret >= 0);
+    H5Sclose(space);
+
+#if defined (H5_HAVE_FILTER_DEFLATE)
+
+    /* dataset with fixed dimensions and filters */
+    /* remove the filters from the dcpl */
+    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    assert(ret >= 0);
+
+    /* set deflate data */
+    ret = H5Pset_deflate(dcpl, 9);
+    assert(ret >= 0);
+
+    space = H5Screate_simple(RANK, dims, NULL);
+    ret = make_dset(fid, F68a_DSET_FIXED_FILTER, space, H5T_NATIVE_INT, dcpl, buf);
+    assert(ret >= 0);
+
+    H5Sclose(space);
+#endif
+
+    H5Pclose(dcpl);
+    H5Fclose(fid);
+}
+
 /*-------------------------------------------------------------------------
  * Function:    gent_packedbits
  *
@@ -7050,9 +7145,8 @@ gent_packedbits(void)
     valu8bits = (uint8_t) ~0u;  /* all 1s */
     for(i = 0; i < dims[0]; i++){
         dsetu8[i][0] = valu8bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dsetu8[i][j] = dsetu8[i][j-1] << 1;
-        }
         valu8bits <<= 1;
     }
 
@@ -7068,9 +7162,8 @@ gent_packedbits(void)
     valu16bits = (uint16_t) ~0u;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
         dsetu16[i][0] = valu16bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dsetu16[i][j] = dsetu16[i][j-1] << 1;
-        }
         valu16bits <<= 1;
     }
 
@@ -7086,9 +7179,8 @@ gent_packedbits(void)
     valu32bits = (uint32_t) ~0u;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
         dsetu32[i][0] = valu32bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dsetu32[i][j] = dsetu32[i][j-1] << 1;
-        }
         valu32bits <<= 1;
     }
 
@@ -7104,9 +7196,8 @@ gent_packedbits(void)
     valu64bits = (uint64_t) ~0Lu;    /* all 1s */
     for(i = 0; i < dims[0]; i++){
         dsetu64[i][0] = valu64bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dsetu64[i][j] = dsetu64[i][j-1] << 1;
-        }
         valu64bits <<= 1;
     }
 
@@ -7122,9 +7213,8 @@ gent_packedbits(void)
     val8bits = (int8_t) ~0;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
         dset8[i][0] = val8bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dset8[i][j] = dset8[i][j-1] << 1;
-        }
         val8bits <<= 1;
     }
 
@@ -7140,9 +7230,8 @@ gent_packedbits(void)
     val16bits = (int16_t) ~0;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
         dset16[i][0] = val16bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dset16[i][j] = dset16[i][j-1] << 1;
-        }
         val16bits <<= 1;
     }
 
@@ -7158,9 +7247,8 @@ gent_packedbits(void)
     val32bits = (int32_t) ~0;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
         dset32[i][0] = val32bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dset32[i][j] = dset32[i][j-1] << 1;
-        }
         val32bits <<= 1;
     }
 
@@ -7176,9 +7264,8 @@ gent_packedbits(void)
     val64bits = (int64_t) ~0L;   /* all 1s */
     for(i = 0; i < dims[0]; i++){
         dset64[i][0] = val64bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dset64[i][j] = dset64[i][j-1] << 1;
-        }
         val64bits <<= 1;
     }
 
@@ -7415,17 +7502,22 @@ gent_charsets(void)
             const char *utf8_p_;
     } CharSetInfo;
 
-    hid_t charset_dtid = H5Tcreate( H5T_COMPOUND, sizeof( CharSetInfo ) );
-    hid_t ascii_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
+    hid_t charset_dtid;
+    hid_t ascii_dtid;
     hid_t utf8_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
     const char * writeData[] = { "ascii", "utf8", };
 
     sid = H5Screate_simple( 1, dim, NULL );
     fid = H5Fcreate( FILE68, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
+
+    charset_dtid = H5Tcreate( H5T_COMPOUND, sizeof( CharSetInfo ) );
+
+    ascii_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
     status = H5Tset_cset( ascii_dtid, H5T_CSET_ASCII );
     HDassert(status >= 0);
     H5Tinsert( charset_dtid, "ascii", HOFFSET(CharSetInfo, ascii_p_ ), ascii_dtid );
 
+    utf8_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
     status = H5Tset_cset( utf8_dtid, H5T_CSET_UTF8 );
     HDassert(status >= 0);
     H5Tinsert( charset_dtid, "utf8", HOFFSET( CharSetInfo, utf8_p_ ), utf8_dtid );
@@ -9795,6 +9887,7 @@ int main(void)
     gent_extlinks();
     gent_fs_strategy_threshold();
     gent_packedbits();
+    gent_dataset_idx();
     gent_attr_intsize();
     gent_charsets();
     gent_compound_intsizes();

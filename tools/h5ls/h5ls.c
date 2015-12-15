@@ -70,6 +70,7 @@ static h5tool_format_t         ls_dataformat = {
         "{", /*cmpd_pre */
         "}", /*cmpd_suf */
         "", /*cmpd_end */
+        NULL, /* cmpd_listv */
 
         ",", /*vlen_sep */
         "(", /*vlen_pre */

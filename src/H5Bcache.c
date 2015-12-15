@@ -54,7 +54,8 @@
 /********************/
 
 /* Metadata cache callbacks */
-static herr_t H5B__get_load_size(const void *udata, size_t *image_len);
+static herr_t H5B__get_load_size(const void *image, void *udata, size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
 static void *H5B__deserialize(const void *image, size_t len, void *udata,
     hbool_t *dirty);
 static herr_t H5B__image_len(const void *thing, size_t *image_len, 
@@ -75,6 +76,7 @@ const H5AC_class_t H5AC_BT[1] = {{
     H5FD_MEM_BTREE,                     /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
     H5B__get_load_size,                 /* 'get_load_size' callback */
+    NULL,				/* 'verify_chksum' callback */
     H5B__deserialize,                   /* 'deserialize' callback */
     H5B__image_len,                     /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -105,9 +107,11 @@ const H5AC_class_t H5AC_BT[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B__get_load_size(const void *_udata, size_t *image_len)
+H5B__get_load_size(const void *_image, void *_udata, size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
 {
-    const H5B_cache_ud_t *udata = (const H5B_cache_ud_t *)_udata;       /* User data for callback */
+    const uint8_t *image = (const uint8_t *)_image;     		/* Pointer into image buffer */
+    H5B_cache_ud_t *udata = (H5B_cache_ud_t *)_udata;       /* User data for callback */
     H5B_shared_t *shared;       /* Pointer to shared B-tree info */
 
     FUNC_ENTER_STATIC_NOERR
@@ -116,12 +120,17 @@ H5B__get_load_size(const void *_udata, size_t *image_len)
     HDassert(udata);
     HDassert(image_len);
 
-    /* Get shared info for B-tree */
-    shared = (H5B_shared_t *)H5UC_GET_OBJ(udata->rc_shared);
-    HDassert(shared);
+    if(image == NULL) {
+	/* Get shared info for B-tree */
+	shared = (H5B_shared_t *)H5UC_GET_OBJ(udata->rc_shared);
+	HDassert(shared);
 
-    /* Set the image length size */
-    *image_len = shared->sizeof_rnode;
+	/* Set the image length size */
+	*image_len = shared->sizeof_rnode;
+    } else {
+	HDassert(actual_len);
+        HDassert(*actual_len == *image_len);
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B__get_load_size() */
@@ -384,4 +393,3 @@ H5B__free_icr(void *thing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B__free_icr() */
-

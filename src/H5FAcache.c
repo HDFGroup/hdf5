@@ -71,16 +71,23 @@
 /********************/
 
 /* Metadata cache (H5AC) callbacks */
-static herr_t H5FA__cache_hdr_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5FA__cache_hdr_get_load_size(const void *image_ptr, void *udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static htri_t H5FA__cache_hdr_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5FA__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5FA__cache_hdr_image_len(const void *thing, size_t *image_len,
     hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
 static herr_t H5FA__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5FA__cache_hdr_free_icr(void *thing);
 
-static herr_t H5FA__cache_dblock_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5FA__cache_dblock_get_load_size(const void *image_ptr, void *udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static htri_t H5FA__cache_dblock_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5FA__cache_dblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5FA__cache_dblock_image_len(const void *thing, 
@@ -88,10 +95,14 @@ static herr_t H5FA__cache_dblock_image_len(const void *thing,
     size_t *compressed_image_len_ptr);
 static herr_t H5FA__cache_dblock_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5FA__cache_dblock_free_icr(void *thing);
 static herr_t H5FA__cache_dblock_fsf_size(const void *thing, size_t *fsf_size);
 
-static herr_t H5FA__cache_dblk_page_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5FA__cache_dblk_page_get_load_size(const void *image_ptr, void *udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static htri_t H5FA__cache_dblk_page_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5FA__cache_dblk_page_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5FA__cache_dblk_page_image_len(const void *thing, 
@@ -113,11 +124,12 @@ const H5AC_class_t H5AC_FARRAY_HDR[1] = {{
     H5FD_MEM_FARRAY_HDR,                /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
     H5FA__cache_hdr_get_load_size,      /* 'get_load_size' callback */
+    H5FA__cache_hdr_verify_chksum,	/* 'verify_chksum' callback */
     H5FA__cache_hdr_deserialize,        /* 'deserialize' callback */
     H5FA__cache_hdr_image_len,          /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5FA__cache_hdr_serialize,          /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5FA__cache_hdr_notify,             /* 'notify' callback */
     H5FA__cache_hdr_free_icr,           /* 'free_icr' callback */
     NULL,				/* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
@@ -130,11 +142,12 @@ const H5AC_class_t H5AC_FARRAY_DBLOCK[1] = {{
     H5FD_MEM_FARRAY_DBLOCK,             /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
     H5FA__cache_dblock_get_load_size,   /* 'get_load_size' callback */
+    H5FA__cache_dblock_verify_chksum,	/* 'verify_chksum' callback */
     H5FA__cache_dblock_deserialize,     /* 'deserialize' callback */
     H5FA__cache_dblock_image_len,       /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5FA__cache_dblock_serialize,       /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5FA__cache_dblock_notify,		/* 'notify' callback */
     H5FA__cache_dblock_free_icr,        /* 'free_icr' callback */
     NULL,				/* 'clear' callback */
     H5FA__cache_dblock_fsf_size,        /* 'fsf_size' callback */
@@ -147,6 +160,7 @@ const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1] = {{
     H5FD_MEM_FARRAY_DBLK_PAGE,          /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
     H5FA__cache_dblk_page_get_load_size, /* 'get_load_size' callback */
+    H5FA__cache_dblk_page_verify_chksum, /* 'verify_chksum' callback */
     H5FA__cache_dblk_page_deserialize,  /* 'deserialize' callback */
     H5FA__cache_dblk_page_image_len,    /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -184,20 +198,62 @@ const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1] = {{
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__cache_hdr_get_load_size(const void *_udata, size_t *image_len))
+H5FA__cache_hdr_get_load_size(const void *_image, void *_udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr))
 
     /* Local variables */
-    const H5FA_hdr_cache_ud_t *udata = (const H5FA_hdr_cache_ud_t *)_udata; /* User data for callback */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    H5FA_hdr_cache_ud_t *udata = (H5FA_hdr_cache_ud_t *)_udata; /* User data for callback */
 
     /* Check arguments */
     HDassert(udata);
     HDassert(udata->f);
     HDassert(image_len);
 
-    /* Set the image length size */
-    *image_len = (size_t)H5FA_HEADER_SIZE_FILE(udata->f);
+    if(image == NULL) {
+	/* Set the image length size */
+	*image_len = (size_t)H5FA_HEADER_SIZE_FILE(udata->f);
+    } else {
+        HDassert(actual_len);
+        HDassert(*actual_len == *image_len);
+    }
 
 END_FUNC(STATIC)   /* end H5FA__cache_hdr_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_hdr_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, NOERR,
+htri_t, TRUE, -,
+H5FA__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata))
+
+    /* Local variables */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+END_FUNC(STATIC) 	/* end H5FA__cache_hdr_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -225,7 +281,6 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t len,
     H5FA_hdr_cache_ud_t *udata = (H5FA_hdr_cache_ud_t *)_udata;
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
 
     /* Check arguments */
     HDassert(udata);
@@ -268,30 +323,28 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t len,
 
     /* Check for data block */
     if(H5F_addr_defined(hdr->dblk_addr)) {
-	H5FA_dblock_t  dblock;  	/* Fake data block for computing size */
-	size_t	dblk_page_nelmts;	/* # of elements per data block page */
+        H5FA_dblock_t  dblock;  	/* Fake data block for computing size */
+        size_t	dblk_page_nelmts;	/* # of elements per data block page */
 
-	/* Set up fake data block for computing size on disk */
-	dblock.hdr = hdr;
-	dblock.dblk_page_init_size = 0;
-	dblock.npages = 0;
-	dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
-	if(hdr->cparam.nelmts > dblk_page_nelmts) {
-	    dblock.npages = (size_t)(((hdr->cparam.nelmts + dblk_page_nelmts) - 1) / dblk_page_nelmts);
-	    dblock.dblk_page_init_size = (dblock.npages + 7) / 8;
-	} /* end if */
+        /* Set up fake data block for computing size on disk */
+        dblock.hdr = hdr;
+        dblock.dblk_page_init_size = 0;
+        dblock.npages = 0;
+        dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
+        if(hdr->cparam.nelmts > dblk_page_nelmts) {
+            dblock.npages = (size_t)(((hdr->cparam.nelmts + dblk_page_nelmts) - 1) / dblk_page_nelmts);
+            dblock.dblk_page_init_size = (dblock.npages + 7) / 8;
+        } /* end if */
 
         /* Compute Fixed Array data block size for hdr statistics */
-	hdr->stats.dblk_size = (size_t)H5FA_DBLOCK_SIZE(&dblock);
+        hdr->stats.dblk_size = (size_t)H5FA_DBLOCK_SIZE(&dblock);
     } /* end if */
 
     /* Sanity check */
     /* (allow for checksum not decoded yet) */
     HDassert((size_t)(image - (const uint8_t *)_image) == (len - H5FA_SIZEOF_CHKSUM));
 
-    /* Compute checksum on entire header */
-    /* (including the filter information, if present) */
-    computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
@@ -299,13 +352,9 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t len,
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == len);
 
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array header")
-
     /* Finish initializing fixed array header */
     if(H5FA__hdr_init(hdr, udata->ctx_udata) < 0)
-	H5E_THROW(H5E_CANTINIT, "initialization failed for fixed array header")
+        H5E_THROW(H5E_CANTINIT, "initialization failed for fixed array header")
     HDassert(hdr->size == len);
 
     /* Set return value */
@@ -413,6 +462,82 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_serialize() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_hdr_notify
+ *
+ * Purpose:	Handle cache action notifications
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Dana Robinson
+ *              December 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
+
+    /* Local variables */
+    H5FA_hdr_t *hdr = (H5FA_hdr_t *)_thing;      /* Pointer to the object */
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	        case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+	        case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+                /* do nothing */
+                break;
+
+	        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* If hdr->fd_parent_addr != HADDR_UNDEF, the fixed 
+                 * array header must be employed as the index for a chunked
+                 * data set which has been modified by the SWMR writer.
+                 * 
+                 * In this case, hdr->fd_parent_addr must contain the 
+                 * address of object header proxy which is the flush 
+                 * dependency parent of the fixed array header.
+                 *
+                 * hdr->fd_parent_addr (and hdr->fd_parent_ptr) are used to
+                 * destroy the flush dependency before the fixed array
+                 * header is evicted.
+                 */
+                if(hdr->fd_parent_addr != HADDR_UNDEF) {
+                    HDassert(hdr->fd_parent_ptr);
+                    HDassert(hdr->fd_parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                    HDassert(hdr->fd_parent_ptr->addr == hdr->fd_parent_addr);
+                    HDassert(hdr->fd_parent_ptr->type);
+                    HDassert(hdr->fd_parent_ptr->type->id == H5AC_OHDR_PROXY_ID);
+
+                    /* Destroy flush dependency on object header proxy */
+                    if(H5FA__destroy_flush_depend((H5AC_info_t *)hdr->fd_parent_ptr, (H5AC_info_t *)hdr) < 0)
+                        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between fa header and object header proxy, address = %llu", (unsigned long long)hdr->fd_parent_addr)
+                } /* end if */
+                break;
+
+            default:
+#ifdef NDEBUG
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+    else {
+        HDassert(hdr->fd_parent_addr == HADDR_UNDEF);
+        HDassert(hdr->fd_parent_ptr == NULL);
+    } /* end else */
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5FA__cache_hdr_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FA__cache_hdr_free_icr
  *
  * Purpose:	Destroy/release an "in core representation" of a data
@@ -457,43 +582,86 @@ END_FUNC(STATIC)   /* end H5FA__cache_hdr_free_icr() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__cache_dblock_get_load_size(const void *_udata, size_t *image_len))
+H5FA__cache_dblock_get_load_size(const void *_image, void *_udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr))
 
     /* Local variables */
-    const H5FA_dblock_cache_ud_t *udata = (const H5FA_dblock_cache_ud_t *)_udata;      /* User data */
-    H5FA_dblock_t dblock;           /* Fake data block for computing size */
-    size_t	dblk_page_nelmts;	/* # of elements per data block page */
+    const uint8_t *image = (const uint8_t *)_image;    	/* Pointer into raw data buffer */
+    H5FA_dblock_cache_ud_t *udata = (H5FA_dblock_cache_ud_t *)_udata;      /* User data */
+    H5FA_dblock_t dblock;           			/* Fake data block for computing size */
+    size_t dblk_page_nelmts;				/* # of elements per data block page */
 
     /* Check arguments */
     HDassert(udata);
     HDassert(udata->hdr);
     HDassert(image_len);
 
-    /* Set up fake data block for computing size on disk */
-    /* (Note: extracted from H5FA__dblock_alloc) */
-    HDmemset(&dblock, 0, sizeof(dblock));
+    if(image == NULL) {
 
-    /* Set up fake data block for computing size on disk
-     *
-     * need: dblock->hdr
-     *       dblock->npages
-     *       dblock->dblk_page_init_size
-     */
+	/* Set up fake data block for computing size on disk */
+	/* (Note: extracted from H5FA__dblock_alloc) */
+	HDmemset(&dblock, 0, sizeof(dblock));
 
-    dblock.hdr = udata->hdr;
-    dblk_page_nelmts = (size_t)1 << udata->hdr->cparam.max_dblk_page_nelmts_bits;
-    if(udata->hdr->cparam.nelmts > dblk_page_nelmts) {
-        dblock.npages = (size_t)(((udata->hdr->cparam.nelmts + dblk_page_nelmts) - 1) / dblk_page_nelmts);
-        dblock.dblk_page_init_size = (dblock.npages + 7) / 8;
-    } /* end if */
+	/* Set up fake data block for computing size on disk
+	 *
+	 * need: dblock->hdr
+	 *       dblock->npages
+	 *       dblock->dblk_page_init_size
+	 */
 
-    /* Set the image length size */
-    if(!dblock.npages)
-        *image_len = (size_t)H5FA_DBLOCK_SIZE(&dblock);
-    else
-        *image_len = (size_t)H5FA_DBLOCK_PREFIX_SIZE(&dblock);
+	dblock.hdr = udata->hdr;
+	dblk_page_nelmts = (size_t)1 << udata->hdr->cparam.max_dblk_page_nelmts_bits;
+	if(udata->hdr->cparam.nelmts > dblk_page_nelmts) {
+	    dblock.npages = (size_t)(((udata->hdr->cparam.nelmts + dblk_page_nelmts) - 1) / dblk_page_nelmts);
+	    dblock.dblk_page_init_size = (dblock.npages + 7) / 8;
+	} /* end if */
+
+	/* Set the image length size */
+	if(!dblock.npages)
+	    *image_len = (size_t)H5FA_DBLOCK_SIZE(&dblock);
+	else
+	    *image_len = (size_t)H5FA_DBLOCK_PREFIX_SIZE(&dblock);
+    } else {
+        HDassert(actual_len);
+        HDassert(*actual_len == *image_len);
+    }
 
 END_FUNC(STATIC)   /* end H5FA__cache_dblock_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_dblock_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, NOERR,
+htri_t, TRUE, -,
+H5FA__cache_dblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata))
+
+    /* Local variables */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+END_FUNC(STATIC) 	/* end H5FA__cache_dblock_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -520,7 +688,6 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t len,
     H5FA_dblock_cache_ud_t *udata = (H5FA_dblock_cache_ud_t *)_udata; /* User data for loading data block */
     const uint8_t  *image = (const uint8_t *)_image;    /* Pointer into raw data buffer */
     uint32_t       stored_chksum;   /* Stored metadata checksum value */
-    uint32_t       computed_chksum; /* Computed metadata checksum value */
     haddr_t        arr_addr;        /* Address of array header in the file */
 
     /* Sanity check */
@@ -577,18 +744,13 @@ H5FA__cache_dblock_deserialize(const void *_image, size_t len,
     /* Set the data block's size */
     dblock->size = H5FA_DBLOCK_SIZE(dblock);
 
-    /* Compute checksum on data block */
-    computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == len);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array data block")
 
     /* Set return value */
     ret_value = dblock;
@@ -710,6 +872,66 @@ CATCH
 
 END_FUNC(STATIC)   /* end H5FA__cache_dblock_serialize() */
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FA__cache_dblock_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing))
+
+    /* Local variables */
+    H5FA_dblock_t *dblock = (H5FA_dblock_t *)_thing;
+
+    /* Sanity check */
+    HDassert(dblock);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(dblock->hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+                /* Create flush dependency on parent */
+                if(H5FA__create_flush_depend((H5AC_info_t *)dblock->hdr, (H5AC_info_t *)dblock) < 0)
+                    H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block and header, address = %llu", (unsigned long long)dblock->addr)
+                break;
+
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+                /* do nothing */
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+		/* Destroy flush dependency on parent */
+                if(H5FA__destroy_flush_depend((H5AC_info_t *)dblock->hdr, (H5AC_info_t *)dblock) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency")
+
+                break;
+
+            default:
+#ifdef NDEBUG
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5FA__cache_dblock_notify() */
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5FA__cache_dblock_free_icr
@@ -804,10 +1026,13 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_fsf_size() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5FA__cache_dblk_page_get_load_size(const void *_udata, size_t *image_len))
+H5FA__cache_dblk_page_get_load_size(const void *_image, void *_udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr))
 
     /* Local variables */
-    const H5FA_dblk_page_cache_ud_t *udata = (const H5FA_dblk_page_cache_ud_t *)_udata;      /* User data */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    H5FA_dblk_page_cache_ud_t *udata = (H5FA_dblk_page_cache_ud_t *)_udata;      /* User data */
 
     /* Check arguments */
     HDassert(udata);
@@ -815,9 +1040,48 @@ H5FA__cache_dblk_page_get_load_size(const void *_udata, size_t *image_len))
     HDassert(udata->nelmts > 0);
     HDassert(image_len);
 
-    *image_len = (size_t)H5FA_DBLK_PAGE_SIZE(udata->hdr, udata->nelmts);
+    if(image == NULL)
+	*image_len = (size_t)H5FA_DBLK_PAGE_SIZE(udata->hdr, udata->nelmts);
+    else {
+        HDassert(actual_len);
+        HDassert(*actual_len == *image_len);
+    }
 
 END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_get_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_dblk_page_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, NOERR,
+htri_t, TRUE, -,
+H5FA__cache_dblk_page_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata))
+
+    /* Local variables */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+END_FUNC(STATIC) 	/* end H5FA__cache_dblk_page_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -840,11 +1104,10 @@ H5FA__cache_dblk_page_deserialize(const void *_image, size_t len,
     void *_udata, hbool_t H5_ATTR_UNUSED *dirty))
 
     /* Local variables */
-    H5FA_dblk_page_t	*dblk_page = NULL; /* Data block page info */
+    H5FA_dblk_page_t    *dblk_page = NULL; /* Data block page info */
     H5FA_dblk_page_cache_ud_t *udata = (H5FA_dblk_page_cache_ud_t *)_udata; /* User data for loading data block page */
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
 
     /* Sanity check */
     HDassert(udata);
@@ -854,7 +1117,7 @@ H5FA__cache_dblk_page_deserialize(const void *_image, size_t len,
 
     /* Allocate the fixed array data block page */
     if(NULL == (dblk_page = H5FA__dblk_page_alloc(udata->hdr, udata->nelmts)))
-	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block page")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block page")
 
     /* Set the fixed array data block's information */
     dblk_page->addr = udata->dblk_page_addr;
@@ -874,18 +1137,13 @@ H5FA__cache_dblk_page_deserialize(const void *_image, size_t len,
     /* Set the data block page's size */
     dblk_page->size = len;
 
-    /* Compute checksum on data block */
-    computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == dblk_page->size);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for fixed array data block page")
 
     /* Set return value */
     ret_value = dblk_page;
@@ -1011,4 +1269,3 @@ H5FA__cache_dblk_page_free_icr(void *thing))
 CATCH
 
 END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_free_icr() */
-

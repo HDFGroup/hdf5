@@ -115,7 +115,7 @@ H5F_super_ext_create(H5F_t *f, hid_t dxpl_id, H5O_loc_t *ext_ptr)
          * extension.
          */
         H5O_loc_reset(ext_ptr);
-        if(H5O_create(f, dxpl_id, 0, (size_t)1, H5P_GROUP_CREATE_DEFAULT, ext_ptr) < 0)
+        if(H5O_create(f, dxpl_id, (size_t)0, (size_t)1, H5P_GROUP_CREATE_DEFAULT, ext_ptr) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
 
         /* Record the address of the superblock extension */
@@ -239,7 +239,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__super_read(H5F_t *f, hid_t dxpl_id)
+H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
 {
     H5P_genplist_t     *dxpl = NULL;        /* DXPL object */
     H5AC_ring_t         ring, orig_ring = H5AC_RING_INV;
@@ -250,6 +250,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id)
     haddr_t             super_addr;         /* Absolute address of superblock */
     haddr_t             eof;                /* End of file address */
     unsigned      	rw_flags;           /* Read/write permissions for file */
+    hbool_t 		skip_eof_check = FALSE; /* Whether to skip checking the EOF value */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
@@ -316,6 +317,14 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id)
     /* Look up the superblock */
     if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, &udata, rw_flags)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
+
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+       	if(sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "invalid superblock version for SWMR_WRITE")
+
+    /* Enable all latest version support when file has v3 superblock */
+    if(sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
+	f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
 
     /* Pin the superblock in the cache */
     if(H5AC_pin_protected_entry(sblock) < 0)
@@ -400,12 +409,39 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id)
      * possible is if the first file of a family of files was opened
      * individually.
      */
-    if(HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine file size")
+    /* Can skip this test when it is not the initial file open--
+     * H5F_super_read() call from H5F_evict_tagged_metadata() for
+     * refreshing object.
+     * When flushing file buffers and fractal heap is involved,
+     * the library will allocate actual space for tmp addresses
+     * via the file layer.  The aggregator allocates a block,
+     * thus the eoa might be greater than eof.
+     * Note: the aggregator is changed again after being reset
+     * earlier before H5AC_flush due to allocation of tmp addresses.
+     */
+    /* The EOF check must be skipped when the file is opened for SWMR read,
+     * as the file can appear truncated if only part of it has been
+     * been flushed to disk by the SWMR writer process.
+     */
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_READ) {
+	/* 
+	 * When the file is opened for SWMR read access, skip the check if:
+	 * --the file is already marked for SWMR writing and
+	 * --the file has version 3 superblock for SWMR support
+	 */
+	if((sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS) &&
+               (sblock->status_flags & H5F_SUPER_WRITE_ACCESS) &&
+                sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
+	    skip_eof_check = TRUE;
+    } /* end if */
+    if(!skip_eof_check && initial_read) {
+        if(HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to determine file size")
 
-    /* (Account for the stored EOA being absolute offset -QAK) */
-    if((eof + sblock->base_addr) < udata.stored_eof)
-        HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, FAIL, "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eoa = %llu", (unsigned long long)eof, (unsigned long long)sblock->base_addr, (unsigned long long)udata.stored_eof)
+        /* (Account for the stored EOA being absolute offset -QAK) */
+        if((eof + sblock->base_addr) < udata.stored_eof)
+            HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, FAIL, "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eof = %llu", (unsigned long long)eof, (unsigned long long)sblock->base_addr, (unsigned long long)udata.stored_eof)
+    } /* end if */
 
     /*
      * Tell the file driver how much address space has already been
@@ -742,8 +778,8 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
     if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, &sblock->btree_k[0]) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get rank for btree internal nodes")
 
-    /* Bump superblock version if we are to use the latest version of the format */
-    if(f->shared->latest_format)
+    /* Bump superblock version if latest superblock version support is enabled */
+    if(H5F_USE_LATEST_FLAGS(f, H5F_LATEST_SUPERBLOCK))
         super_vers = HDF5_SUPERBLOCK_VERSION_LATEST;
     /* Bump superblock version to create superblock extension for SOHM info */
     else if(f->shared->sohm_nindexes > 0)

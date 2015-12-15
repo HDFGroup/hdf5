@@ -93,9 +93,10 @@ H5FL_DEFINE(H5O_chunk_proxy_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
+H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
+    unsigned cont_chunkno)
 {
-    H5O_chunk_proxy_t *chk_proxy = NULL;       /* Proxy for chunk, to mark it dirty in the cache */
+    H5O_chunk_proxy_t *chk_proxy = NULL;        /* Proxy for chunk, to mark it dirty in the cache */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, oh->cache_info.addr, FAIL)
@@ -111,8 +112,13 @@ H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Set the values in the chunk proxy */
+    chk_proxy->f = f;
     chk_proxy->oh = oh;
     chk_proxy->chunkno = idx;
+    chk_proxy->cont_chunkno = cont_chunkno;
+
+    chk_proxy->fd_parent_addr = HADDR_UNDEF;
+    chk_proxy->fd_parent_ptr = NULL;
 
     /* Increment reference count on object header */
     if(H5O_inc_rc(oh) < 0)
@@ -121,6 +127,7 @@ H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     /* Insert the chunk proxy into the cache */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header chunk")
+
     chk_proxy = NULL;
 
 done:
@@ -171,6 +178,7 @@ H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINC, NULL, "can't increment reference count on object header")
 
         /* Set chunk proxy fields */
+        chk_proxy->f = f;
         chk_proxy->oh = oh;
         chk_proxy->chunkno = idx;
     } /* end if */
@@ -372,6 +380,7 @@ H5O_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
 {
     H5O_chunk_proxy_t *chk_proxy;       /* Proxy for chunk, to mark it dirty in the cache */
     H5O_chk_cache_ud_t chk_udata;       /* User data for loading chunk */
+    unsigned cache_flags = H5AC__DELETED_FLAG; /* Flags for unprotecting proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, oh->cache_info.addr, FAIL)
@@ -397,8 +406,19 @@ H5O_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     HDassert(chk_proxy->oh == oh);
     HDassert(chk_proxy->chunkno == idx);
 
+    /* Update flush dependencies if doing SWMR writes */
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
+        /* Remove flush dependency on object header proxy, if proxy exists */
+        if(oh->proxy_present)
+            if(H5O_proxy_undepend(f, dxpl_id, oh, chk_proxy) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "can't destroy flush dependency on object header proxy")
+    } /* end if */
+    else
+        /* Only free file space if not doing SWMR writes */
+        cache_flags |= H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
+
     /* Release the chunk proxy from the cache, marking it deleted */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, (H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG)) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, cache_flags) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header chunk")
 
 done:

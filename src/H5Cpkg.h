@@ -45,21 +45,12 @@
 /* Package Private Macros */
 /**************************/
 
-/* With the introduction of the fractal heap, it is now possible for
- * entries to be dirtied, resized, and/or moved in the flush callbacks.
- * As a result, on flushes, it may be necessary to make multiple passes
- * through the slist before it is empty.  The H5C__MAX_PASSES_ON_FLUSH
- * #define is used to set an upper limit on the number of passes.
- * The current value was obtained via personal communication with
- * Quincey.  I have applied a fudge factor of 2.
- *
- *						-- JRM
- */
-#define H5C__MAX_PASSES_ON_FLUSH	4
-
 /* Cache configuration settings */
 #define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
 #define H5C__H5C_T_MAGIC	0x005CAC0E
+
+/* Initial allocated size of the "flush_dep_parent" array */
+#define H5C_FLUSH_DEP_PARENT_INIT 8
 
 /****************************************************************************
  *
@@ -2954,6 +2945,29 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *              When we get to using H5C in other places, we may add
  *              code to write trace file data at the H5C level as well.
  *
+ * logging_enabled: Boolean flag indicating whether cache logging
+ *              which is used to record cache operations for use in
+ *              debugging and performance analysis. When this flag is set
+ *              to TRUE, it means that the log file is open and ready to
+ *              receive log entries. It does NOT mean that cache operations
+ *              are currently being recorded. That is controlled by the
+ *              currently_logging flag (below).
+ *
+ *              Since much of the code supporting the parallel metadata
+ *              cache is in H5AC, we don't write the trace file from
+ *              H5C.  Instead, H5AC reads the trace_file_ptr as needed.
+ *
+ *              When we get to using H5C in other places, we may add
+ *              code to write trace file data at the H5C level as well.
+ *
+ * currently_logging: Boolean flag that indicates if cache operations are
+ *              currently being logged. This flag is flipped by the
+ *              H5Fstart/stop_mdc_logging functions.
+ *
+ * log_file_ptr:  File pointer pointing to the log file. The I/O functions
+ *              in stdio.h are used to write to the log file regardless of
+ *              the VFD selected.
+ *
  * aux_ptr:	Pointer to void used to allow wrapper code to associate
  *		its data with an instance of H5C_t.  The H5C cache code
  *		sets this field to NULL, and otherwise leaves it alone.
@@ -3226,6 +3240,11 @@ if ( ( (cache_ptr)->index_size !=                                           \
  * 		to the slist since the last time this field was set to
  * 		zero.  Note that this value can be negative.
  *
+ * cork_list_ptr: A skip list to track object addresses that are corked.
+ *                When an entry is inserted or protected in the cache,
+ *                the entry's associated object address (tag field) is
+ *                checked against this skip list.  If found, the entry
+ *                is corked.
  *
  * When a cache entry is protected, it must be removed from the LRU
  * list(s) as it cannot be either flushed or evicted until it is unprotected.
@@ -3812,6 +3831,9 @@ struct H5C_t {
     uint32_t			magic;
     hbool_t			flush_in_progress;
     FILE *			trace_file_ptr;
+    hbool_t                     logging_enabled;
+    hbool_t                     currently_logging;
+    FILE *			log_file_ptr;
     void *			aux_ptr;
     int32_t			max_type_id;
     const char *                (* type_name_table_ptr);
@@ -3854,6 +3876,8 @@ struct H5C_t {
     int64_t			slist_len_increase;
     int64_t			slist_size_increase;
 #endif /* H5C_DO_SANITY_CHECKS */
+
+    H5SL_t *                    cork_list_ptr; /* list of corked object addresses */
 
     /* Fields for tracking protected entries */
     int32_t                     pl_len;

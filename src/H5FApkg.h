@@ -137,6 +137,7 @@ typedef struct H5FA_hdr_t {
     haddr_t addr;                       /* Address of header in file                                    */
     size_t size;                        /* Size of header in file                                       */
     H5F_t *f;                           /* Pointer to file for fixed array                              */
+    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access    */
     size_t file_rc;                     /* Reference count of files using array header                  */
     hbool_t pending_delete;             /* Array is pending deletion                                    */
     size_t sizeof_addr;                 /* Size of file addresses                                       */
@@ -144,6 +145,33 @@ typedef struct H5FA_hdr_t {
 
     /* Client information (not stored) */
     void *cb_ctx;                       /* Callback context */
+
+    /* Flush depencency parent information (not stored) */
+    haddr_t fd_parent_addr;             /* Address of flush dependency parent,
+                                         * if any.  This field is initialized
+                                         * to HADDR_UNDEF.  If the fixed
+                                         * array is being used to index a 
+                                         * chunked data set and the dataset
+                                         * metadata is modified by a SWMR 
+                                         * writer, this field will be set equal
+                                         * to the object header proxy that is 
+                                         * the flush dependency parent of the
+                                         * fixed array header.
+                                         *
+                                         * The field is used to avoid duplicate
+                                         * setups of the flush dependency 
+                                         * relationship, and to allow the 
+                                         * fixed array header to destroy
+                                         * the flush dependency on receipt of 
+                                         * an eviction notification from the
+                                         * metadata cache.
+                                         */
+
+    H5AC_info_t *fd_parent_ptr;		    /* Pointer to flush dependency parent,
+                                         * if it exists, otherwise NULL.  (See
+                                         * comment for fd_parent_addr above for
+                                         * further details)
+                                         */
 } H5FA_hdr_t;
 
 /* The fixed array data block information */
@@ -240,6 +268,12 @@ H5_DLLVAR const H5FA_class_t *const H5FA_client_class_g[H5FA_NUM_CLS_ID];
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+
+/* Generic routines */
+H5_DLL herr_t H5FA__create_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5FA__destroy_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
 
 /* Header routines */
 H5_DLL H5FA_hdr_t *H5FA__hdr_alloc(H5F_t *f);

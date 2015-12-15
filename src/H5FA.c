@@ -79,7 +79,9 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  * client class..
  */
 const H5FA_class_t *const H5FA_client_class_g[] = {
-    H5FA_CLS_TEST,		/* ? - H5FA_CLS_TEST_ID 		*/
+    H5FA_CLS_CHUNK,             /* 0 - H5FA_CLS_CHUNK_ID                */
+    H5FA_CLS_FILT_CHUNK,        /* 1 - H5FA_CLS_FILT_CHUNK_ID           */
+    H5FA_CLS_TEST,              /* ? - H5FA_CLS_TEST_ID                 */
 };
 
 
@@ -739,3 +741,112 @@ CATCH
 
 END_FUNC(PRIV)  /* end H5FA_iterate() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FA_depend
+ *
+ * Purpose:     Make a child flush dependency between the fixed array's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA_depend(H5AC_info_t *parent_entry, H5FA_t *fa))
+
+    /* Local variables */
+    H5FA_hdr_t *hdr = fa->hdr;          /* Header for FA */
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     *
+     * At present, this function is only used to setup a flush dependency
+     * between an object header proxy and the extensible array header when
+     * the extensible array is being used to index a chunked data set.
+     *
+     * Make sure that the parameters are congruent with this.
+     */
+    HDassert(fa);
+    HDassert(hdr);
+    HDassert(parent_entry);
+    HDassert(parent_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(parent_entry->type);
+    HDassert(parent_entry->type->id == H5AC_OHDR_PROXY_ID);
+    HDassert((hdr->fd_parent_addr == HADDR_UNDEF) ||
+             (hdr->fd_parent_addr == parent_entry->addr));
+    HDassert((hdr->fd_parent_ptr == NULL) ||
+             (hdr->fd_parent_ptr == parent_entry));
+
+    /*
+     * Check to see if the flush dependency between the object header proxy
+     * and the fixed array header has already been setup.  If it hasn't
+     * set it up.
+     */
+    if(!H5F_addr_defined(hdr->fd_parent_addr)) {
+        /* Set the shared array header's file context for this operation */
+        hdr->f = fa->f;
+
+        /* Set up flush dependency between parent entry and fixed
+         * array header 
+         */
+        if(H5FA__create_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
+            H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on file metadata")
+
+        hdr->fd_parent_addr = parent_entry->addr;
+        hdr->fd_parent_ptr = parent_entry;
+    } /* end if */
+
+CATCH
+
+END_FUNC(PRIV)  /* end H5FA_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FA_undepend
+ *
+ * Purpose:     Remove a child flush dependency between the fixed array's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA_undepend(H5AC_info_t *parent_entry, H5FA_t *fa))
+
+    /* Local variables */
+    H5FA_hdr_t *hdr = fa->hdr;          /* Header for FA */
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fa);
+    HDassert(hdr);
+
+    /* Set the shared array header's file context for this operation */
+    hdr->f = fa->f;
+
+    /* Remove flush dependency between parent entry and fixed array header */
+    if(H5FA__destroy_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
+        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency on file metadata")
+
+CATCH
+
+END_FUNC(PRIV)  /* end H5FA_undepend() */

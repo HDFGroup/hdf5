@@ -207,7 +207,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
     /* Set the latest format for datatype, if requested */
-    if(H5F_USE_LATEST_FORMAT(loc->oloc->file))
+    if(H5F_USE_LATEST_FLAGS(loc->oloc->file, H5F_LATEST_DATATYPE))
         if(H5T_set_latest_version(attr->shared->dt) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of datatype")
 
@@ -215,7 +215,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     attr->shared->ds = H5S_copy(space, FALSE, TRUE);
 
     /* Set the latest format for dataspace, if requested */
-    if(H5F_USE_LATEST_FORMAT(loc->oloc->file))
+    if(H5F_USE_LATEST_FLAGS(loc->oloc->file, H5F_LATEST_DATASPACE))
         if(H5S_set_latest_version(attr->shared->ds) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of dataspace")
 
@@ -1407,7 +1407,8 @@ done:
  */
 herr_t
 H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
-    H5_index_t idx_type, H5_iter_order_t order, H5A_attr_table_t *atable)
+    H5_index_t idx_type, H5_iter_order_t order, void *parent,
+    H5A_attr_table_t *atable)
 {
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     hsize_t nrec;                       /* # of records in v2 B-tree */
@@ -1423,7 +1424,7 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     HDassert(atable);
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, parent)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Retrieve # of records in "name" B-tree */
@@ -1454,7 +1455,7 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
 
         /* Iterate over the links in the group, building a table of the link messages */
         if(H5A_dense_iterate(f, dxpl_id, (hid_t)0, ainfo, H5_INDEX_NAME,
-                H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, &udata) < 0)
+                H5_ITER_NATIVE, (hsize_t)0, parent, NULL, &attr_op, &udata) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
         /* Sort attribute table in correct iteration order */
@@ -1787,8 +1788,9 @@ done:
 htri_t
 H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
 {
-    H5B2_t *bt2_name = NULL;    /* v2 B-tree handle for name index */
-    htri_t ret_value = FAIL;    /* Return value */
+    H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
+    H5O_proxy_t *oh_proxy = NULL;       /* Object header proxy */
+    htri_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, oh->cache_info.addr, FAIL)
 
@@ -1809,8 +1811,14 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
         if(ainfo->nattrs == HSIZET_MAX) {
             /* Check if we are using "dense" attribute storage */
             if(H5F_addr_defined(ainfo->fheap_addr)) {
+                /* Check for SWMR writes to the file */
+                if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+                    /* Pin the attribute's object header proxy */
+                    if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy_oh(f, dxpl_id, oh)))
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header proxy")
+
                 /* Open the name index v2 B-tree */
-                if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
+                if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, oh_proxy)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
                 /* Retrieve # of records in "name" B-tree */
@@ -1826,6 +1834,8 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
 
 done:
     /* Release resources */
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header proxy")
     if(bt2_name && H5B2_close(bt2_name, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
 
@@ -1853,7 +1863,7 @@ herr_t
 H5A_set_version(const H5F_t *f, H5A_t *attr)
 {
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
-    hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
+    hbool_t use_latest_format;          /* Flag indicating the latest attribute version support is enabled */
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1862,8 +1872,8 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
     HDassert(f);
     HDassert(attr);
 
-    /* Get the file's 'use the latest version of the format' flag */
-    use_latest_format = H5F_USE_LATEST_FORMAT(f);
+    /* Get the file's 'use the latest attribute version support' flag */
+    use_latest_format = H5F_USE_LATEST_FLAGS(f, H5F_LATEST_ATTRIBUTE);
 
     /* Check whether datatype and dataspace are shared */
     if(H5O_msg_is_shared(H5O_DTYPE_ID, attr->shared->dt) > 0)
@@ -1878,7 +1888,7 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
 
     /* Check which version to encode attribute with */
     if(use_latest_format)
-        attr->shared->version = H5O_ATTR_VERSION_LATEST;      /* Write out latest version of format */
+        attr->shared->version = H5O_ATTR_VERSION_LATEST;      /* Write out latest attribute version */
     else if(attr->shared->encoding != H5T_CSET_ASCII)
         attr->shared->version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
     else if(type_shared || space_shared)
@@ -2354,9 +2364,9 @@ H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainfo
     attr_op.op_type = H5A_ATTR_OP_LIB;
     attr_op.u.lib_op = H5A__dense_post_copy_file_cb;
 
-
-     if(H5A_dense_iterate(src_oloc->file, dxpl_id, (hid_t)0, ainfo_src, H5_INDEX_NAME,
-            H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, &udata) < 0)
+    /*!FIXME must pass something for parent once SWMR works with H5Ocopy -NAF */
+    if(H5A_dense_iterate(src_oloc->file, dxpl_id, (hid_t)0, ainfo_src, H5_INDEX_NAME,
+            H5_ITER_NATIVE, (hsize_t)0, NULL, NULL, &attr_op, &udata) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
 done:

@@ -152,8 +152,8 @@ H5G__stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint, hid_t 
     HDassert(size_hint > 0);
 
     /* Create the B-tree */
-    if(H5B_create(f, dxpl_id, H5B_SNODE, NULL, &(stab->btree_addr)/*out*/) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create B-tree")
+    if(FAIL == H5B_create(f, dxpl_id, H5B_SNODE, NULL, &(stab->btree_addr)/*out*/))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create B-tree")
 
     /* Create symbol table private heap */
     if(FAIL == H5HL_create(f, dxpl_id, size_hint, &(stab->heap_addr)/*out*/))
@@ -1067,10 +1067,10 @@ H5G__stab_valid(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5O_stab_t *alt_stab)
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "unable to read symbol table message");
 
     /* Check if the symbol table message's b-tree address is valid */
-    if(H5B_valid(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr) < 0) {
+    if(H5B_valid(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, NULL) < 0) {
         /* Address is invalid, try the b-tree address in the alternate symbol
          * table message */
-        if(!alt_stab || H5B_valid(grp_oloc->file, dxpl_id, H5B_SNODE, alt_stab->btree_addr) < 0)
+        if(!alt_stab || H5B_valid(grp_oloc->file, dxpl_id, H5B_SNODE, alt_stab->btree_addr, NULL) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to locate b-tree")
         else {
             /* The alternate symbol table's b-tree address is valid.  Adjust the

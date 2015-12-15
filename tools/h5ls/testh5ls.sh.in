@@ -88,6 +88,7 @@ $SRC_H5LS_TESTFILES/tsoftlinks.h5
 $SRC_H5LS_TESTFILES/tstr.h5
 $SRC_H5LS_TESTFILES/tudlink.h5
 $SRC_H5LS_TESTFILES/tvldtypes1.h5
+$SRC_H5LS_TESTFILES/tdset_idx.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -147,6 +148,7 @@ $SRC_H5LS_TESTFILES/tudlink-1.ls
 $SRC_H5LS_TESTFILES/tvldtypes1.ls
 $SRC_H5LS_TESTFILES/tvldtypes2le.ls
 $SRC_H5LS_TESTFILES/tvldtypes2be.ls
+$SRC_H5LS_TESTFILES/tdset_idx.ls
 "
 
 
@@ -418,6 +420,9 @@ else
  TOOLTEST tdataregbe.ls 0 -v tdatareg.h5
 fi 
 
+# test for file with datasets that use Fixed Array chunk indices
+echo "***skip testing tdset_idx.h5"
+#TOOLTEST tdset_idx.ls 0 -w80 -d tdset_idx.h5
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR
 

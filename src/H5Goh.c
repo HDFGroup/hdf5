@@ -363,7 +363,7 @@ H5O_group_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *
         /* Check if name index available */
         if(H5F_addr_defined(linfo.name_bt2_addr)) {
             /* Open the name index v2 B-tree */
-            if(NULL == (bt2_name = H5B2_open(loc->file, dxpl_id, linfo.name_bt2_addr, NULL)))
+            if(NULL == (bt2_name = H5B2_open(loc->file, dxpl_id, linfo.name_bt2_addr, NULL, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
             /* Get name index B-tree size */
@@ -374,7 +374,7 @@ H5O_group_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *
         /* Check if creation order index available */
 	if(H5F_addr_defined(linfo.corder_bt2_addr)) {
             /* Open the creation order index v2 B-tree */
-            if(NULL == (bt2_corder = H5B2_open(loc->file, dxpl_id, linfo.corder_bt2_addr, NULL)))
+            if(NULL == (bt2_corder = H5B2_open(loc->file, dxpl_id, linfo.corder_bt2_addr, NULL, NULL)))
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
             /* Get creation order index B-tree size */

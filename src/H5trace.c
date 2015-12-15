@@ -495,6 +495,52 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         } /* end else */
                         break;
 
+                    case 'k':
+                        if(ptr) {
+                            if(vp)
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
+                        else {
+                            H5D_chunk_index_t idx = (H5D_chunk_index_t)va_arg(ap, int);
+
+                            switch(idx) {
+                                case H5D_CHUNK_IDX_BTREE:
+                                    fprintf(out, "H5D_CHUNK_IDX_BTREE");
+                                    break;
+
+                                case H5D_CHUNK_IDX_NONE:
+                                    fprintf(out, "H5D_CHUNK_IDX_NONE");
+                                    break;
+
+                                case H5D_CHUNK_IDX_FARRAY:
+                                    fprintf(out, "H5D_CHUNK_IDX_FARRAY");
+                                    break;
+
+                                case H5D_CHUNK_IDX_EARRAY:
+                                    fprintf(out, "H5D_CHUNK_IDX_EARRAY");
+                                    break;
+
+                                case H5D_CHUNK_IDX_BT2:
+                                    fprintf(out, "H5D_CHUNK_IDX_BT2");
+                                    break;
+
+                                case H5D_CHUNK_IDX_SINGLE:
+                                    fprintf(out, "H5D_CHUNK_IDX_SINGLE");
+                                    break;
+
+                                case H5D_CHUNK_IDX_NTYPES:
+                                    fprintf(out, "ERROR: H5D_CHUNK_IDX_NTYPES (invalid value)");
+                                    break;
+
+                                default:
+                                    fprintf(out, "UNKNOWN VALUE: %ld", (long)idx);
+                                    break;
+                            } /* end switch */
+                        } /* end else */
+                        break;
+
                     case 'l':
                         if(ptr) {
                             if(vp)

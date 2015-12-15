@@ -71,7 +71,9 @@
 
 /* Metadata cache callbacks */
 /* Local heap prefix */
-static herr_t H5HL__cache_prefix_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5HL__cache_prefix_get_load_size(const void *_image, void *udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
 static void *H5HL__cache_prefix_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5HL__cache_prefix_image_len(const void *thing, 
@@ -82,8 +84,9 @@ static herr_t H5HL__cache_prefix_serialize(const H5F_t *f, void *image,
 static herr_t H5HL__cache_prefix_free_icr(void *thing);
 
 /* Local heap data block */
-static herr_t H5HL__cache_datablock_get_load_size(const void *udata,
-    size_t *image_len); 
+static herr_t H5HL__cache_datablock_get_load_size(const void *_image, void *udata,
+    size_t *image_len, size_t *actual_len,
+    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
 static void *H5HL__cache_datablock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5HL__cache_datablock_image_len(const void *thing, 
@@ -108,6 +111,7 @@ const H5AC_class_t H5AC_LHEAP_PRFX[1] = {{
     H5FD_MEM_LHEAP,                     /* File space memory type for client */
     H5AC__CLASS_SPECULATIVE_LOAD_FLAG,  /* Client class behavior flags */
     H5HL__cache_prefix_get_load_size,   /* 'get_load_size' callback */
+    NULL,				/* 'verify_chksum' callback */
     H5HL__cache_prefix_deserialize,     /* 'deserialize' callback */
     H5HL__cache_prefix_image_len,       /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -124,6 +128,7 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
     H5FD_MEM_LHEAP,                     /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
     H5HL__cache_datablock_get_load_size,/* 'get_load_size' callback */
+    NULL,				/* 'verify_chksum' callback */
     H5HL__cache_datablock_deserialize,  /* 'deserialize' callback */
     H5HL__cache_datablock_image_len,    /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -281,15 +286,68 @@ H5HL__fl_serialize(const H5HL_t *heap)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL__cache_prefix_get_load_size(const void H5_ATTR_UNUSED *_udata, size_t *image_len)
+H5HL__cache_prefix_get_load_size(const void *_image, void *_udata, size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
 {
-    FUNC_ENTER_STATIC_NOERR
+    const uint8_t *image = (const uint8_t *)_image;   			/* Pointer into raw data buffer */
+    H5HL_cache_prfx_ud_t *udata = (H5HL_cache_prfx_ud_t *)_udata; 	/* User data for callback */
+    H5HL_t heap;        	/* Local heap */
+    htri_t ret_value = SUCCEED; /* Return value */
 
+    FUNC_ENTER_STATIC
+
+    HDassert(udata);
     HDassert(image_len);
 
-    *image_len = H5HL_SPEC_READ_SIZE;
+    if(image == NULL)
+	*image_len = H5HL_SPEC_READ_SIZE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    else { /* compute actual_len */
+
+	HDassert(actual_len);
+	HDassert(*actual_len == *image_len);
+
+	/* Check magic number */
+	if(HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC)) 
+	    HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad local heap signature")
+	image += H5_SIZEOF_MAGIC;
+
+	/* Version */
+	if(H5HL_VERSION != *image++) 
+	    HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "wrong version number in local heap")
+
+	/* Reserved */
+	image += 3;
+    
+	/* Store the prefix's address & length */
+	heap.prfx_addr = udata->prfx_addr; /* NEED */
+	heap.prfx_size = udata->sizeof_prfx; /* NEED */
+
+	/* Heap data size */
+	H5F_DECODE_LENGTH_LEN(image, heap.dblk_size, udata->sizeof_size); /* NEED */
+
+	/* Free list head */
+	H5F_DECODE_LENGTH_LEN(image, heap.free_block, udata->sizeof_size);
+	if(heap.free_block != H5HL_FREE_NULL && heap.free_block >= heap.dblk_size)
+	    HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad heap free list");
+
+	/* Heap data address */
+	H5F_addr_decode_len(udata->sizeof_addr, &image, &(heap.dblk_addr)); /* NEED */
+
+	*actual_len = heap.prfx_size;
+
+	/* Check if heap block exists */
+	if(heap.dblk_size) {
+	    /* Check if heap data block is contiguous with header */
+	    if(H5F_addr_eq((heap.prfx_addr + heap.prfx_size), heap.dblk_addr)) {
+		/* Note that the heap should be a single object in the cache */
+		*actual_len += heap.dblk_size;
+	    } 
+	} /* end if */
+    } /* end compute actual_len */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HL__cache_prefix_get_load_size() */
 
 
@@ -647,9 +705,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HL__cache_datablock_get_load_size(const void *_udata, size_t *image_len)
+H5HL__cache_datablock_get_load_size(const void *_image, void *_udata, 
+    size_t *image_len, size_t *actual_len,
+    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
 {
-    const H5HL_cache_dblk_ud_t *udata = (const H5HL_cache_dblk_ud_t *)_udata; /* User data for callback */
+    const uint8_t *image = (const uint8_t *)_image;     	  /* Pointer into image buffer */
+    H5HL_cache_dblk_ud_t *udata = (H5HL_cache_dblk_ud_t *)_udata; /* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -659,7 +720,12 @@ H5HL__cache_datablock_get_load_size(const void *_udata, size_t *image_len)
     HDassert(udata->heap->dblk_size > 0);
     HDassert(image_len);
 
-    *image_len = udata->heap->dblk_size;
+    if(image == NULL)
+	*image_len = udata->heap->dblk_size;
+    else {
+	HDassert(actual_len);
+        HDassert(*actual_len == *image_len);
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HL__cache_datablock_get_load_size() */

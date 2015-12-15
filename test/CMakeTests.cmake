@@ -43,6 +43,21 @@ set (HDF5_TEST_FILES
   tnullspace.h5
 )
 
+add_custom_command (
+    TARGET     accum_swmr_reader
+    POST_BUILD
+    COMMAND    ${CMAKE_COMMAND}
+    ARGS       -E copy_if_different "$<TARGET_FILE:accum_swmr_reader>" "${PROJECT_BINARY_DIR}/H5TEST/accum_swmr_reader"
+)
+if (BUILD_SHARED_LIBS)
+  add_custom_command (
+      TARGET     accum_swmr_reader
+      POST_BUILD
+      COMMAND    ${CMAKE_COMMAND}
+      ARGS       -E copy_if_different "$<TARGET_FILE:accum_swmr_reader>" "${PROJECT_BINARY_DIR}/H5TEST-shared/accum_swmr_reader"
+  )
+endif (BUILD_SHARED_LIBS)
+
 foreach (h5_tfile ${HDF5_TEST_FILES})
   set (dest "${PROJECT_BINARY_DIR}/H5TEST/${h5_tfile}")
   add_custom_command (
@@ -229,6 +244,8 @@ set (HDF5_REFERENCE_TEST_FILES
     be_data.h5
     be_extlink1.h5
     be_extlink2.h5
+    btree_idx_1_6.h5
+    btree_idx_1_8.h5
     corrupt_stab_msg.h5
     deflate.h5
     family_v16_00000.h5
@@ -942,7 +959,7 @@ if (HDF5_TEST_VFD)
 
   set (H5_VFD_TESTS
       testhdf5
-      accum
+#      accum
       lheap
       ohdr
       stab

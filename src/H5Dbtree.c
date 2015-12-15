@@ -153,6 +153,7 @@ static herr_t H5D__btree_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* v1 B-tree indexed chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_BTREE[1] = {{
+    FALSE,                              /* v1 B-tree indices does not support SWMR access */
     H5D__btree_idx_init,                /* insert */
     H5D__btree_idx_create,              /* create */
     H5D__btree_idx_is_space_alloc,      /* is_space_alloc */
@@ -939,6 +940,7 @@ H5D__btree_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* Initialize "user" data for B-tree callbacks, etc. */
     udata.layout = idx_info->layout;
     udata.storage = idx_info->storage;
+    udata.rdcc = NULL;
 
     /* Create the v1 B-tree for the chunk index */
     if(H5B_create(idx_info->f, idx_info->dxpl_id, H5B_BTREE, &udata, &(idx_info->storage->idx_addr)/*out*/) < 0)

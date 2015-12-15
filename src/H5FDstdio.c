@@ -114,6 +114,7 @@ typedef struct H5FD_stdio_t {
     
     HANDLE          hFile;      /* Native windows file handle */
 #endif  /* H5_HAVE_WIN32_API */
+
 } H5FD_stdio_t;
 
 /* Use similar structure as in H5private.h by defining Windows stuff first. */
@@ -558,7 +559,11 @@ H5FD_stdio_query(const H5FD_t *_f, unsigned long /*OUT*/ *flags)
     /* Quiet the compiler */
     _f=_f;
 
-    /* Set the VFL feature flags that this driver supports */
+    /* Set the VFL feature flags that this driver supports.
+     *
+     * Note that this VFD does not support SWMR due to the unpredictable
+     * nature of the buffering layer.
+     */
     if(flags) {
         *flags = 0;
         *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */

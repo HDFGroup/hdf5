@@ -208,7 +208,7 @@ H5G__obj_create_real(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
 
     /* Check for using the latest version of the group format */
     /* (add more checks for creating "new format" groups when needed) */
-    if(H5F_USE_LATEST_FORMAT(f) || linfo->track_corder
+    if(H5F_USE_LATEST_FLAGS(f, H5F_LATEST_STYLE_GROUP) || linfo->track_corder
             || (pline && pline->nused))
         use_latest_format = TRUE;
     else
@@ -342,7 +342,7 @@ H5G__obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
             /* Check if we are using "dense" link storage */
             if(H5F_addr_defined(linfo->fheap_addr)) {
                 /* Open the name index v2 B-tree */
-                if(NULL == (bt2_name = H5B2_open(grp_oloc->file, dxpl_id, linfo->name_bt2_addr, NULL)))
+                if(NULL == (bt2_name = H5B2_open(grp_oloc->file, dxpl_id, linfo->name_bt2_addr, NULL, NULL)))
                     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
                 /* Retrieve # of records in "name" B-tree */

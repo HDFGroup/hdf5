@@ -413,7 +413,7 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
         HGOTO_DONE_TAG(FAIL, FAIL)
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(grp->oloc.file, dxpl_id, linfo.name_bt2_addr, NULL)))
+    if(NULL == (bt2_name = H5B2_open(grp->oloc.file, dxpl_id, linfo.name_bt2_addr, NULL, NULL)))
         HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Retrieve # of records in name index */
@@ -423,7 +423,7 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     /* Check if there is a creation order index */
     if(H5F_addr_defined(linfo.corder_bt2_addr)) {
         /* Open the creation order index v2 B-tree */
-        if(NULL == (bt2_corder = H5B2_open(grp->oloc.file, dxpl_id, linfo.corder_bt2_addr, NULL)))
+        if(NULL == (bt2_corder = H5B2_open(grp->oloc.file, dxpl_id, linfo.corder_bt2_addr, NULL, NULL)))
             HGOTO_ERROR_TAG(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for creation order index")
 
         /* Retrieve # of records in creation order index */
@@ -633,7 +633,7 @@ H5G__verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent)
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "cached stab info does not match object header")
 
     /* Verify that the btree address is valid */
-    if(H5B_valid(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr) < 0)
+    if(H5B_valid(grp_oloc->file, H5AC_ind_dxpl_id, H5B_SNODE, stab.btree_addr, NULL) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "b-tree address is invalid")
 
     /* Verify that the heap address is valid */

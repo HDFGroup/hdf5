@@ -240,10 +240,10 @@ file_image_daisy_chain_test(void)
             if(vector_ptr[i] != i)
                 vector_ok = FALSE;
         VRFY((vector_ok), "verified received vector.");
- 
-        HDfree(vector_ptr);
-        vector_ptr = NULL;
 
+    HDfree(vector_ptr);
+    vector_ptr = NULL;
+ 
 	/* 7) closes the core file and exit. */
 
         err = H5Sclose(space_id);

@@ -442,10 +442,6 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst
     HDassert(storage_dst);
     HDassert(dt_src);
 
-    /* Allocate space for destination data */
-    if(NULL == (storage_dst->buf = H5MM_malloc(storage_src->size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory for compact dataset")
-
     /* Create datatype ID for src datatype, so it gets freed */
     if((tid_src = H5I_register(H5I_DATATYPE, dt_src, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")

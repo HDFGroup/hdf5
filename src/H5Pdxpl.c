@@ -260,7 +260,6 @@ static const void *H5D_def_vlen_alloc_info_g = H5D_XFER_VLEN_ALLOC_INFO_DEF;   /
 static const H5MM_free_t H5D_def_vlen_free_g = H5D_XFER_VLEN_FREE_DEF;         /* Default value for vlen free function */
 static const void *H5D_def_vlen_free_info_g = H5D_XFER_VLEN_FREE_INFO_DEF;     /* Default value for vlen free information */
 static const size_t H5D_def_hyp_vec_size_g = H5D_XFER_HYPER_VECTOR_SIZE_DEF;   /* Default value for vector size */
-static const haddr_t H5D_def_metadata_tag_g = H5AC_METADATA_TAG_DEF;              /* Default value for metadata tag */
 static const H5FD_mpio_xfer_t H5D_def_io_xfer_mode_g = H5D_XFER_IO_XFER_MODE_DEF;      /* Default value for I/O transfer mode */
 static const H5FD_mpio_chunk_opt_t H5D_def_mpio_chunk_opt_mode_g = H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF;
 static const H5FD_mpio_collective_opt_t H5D_def_mpio_collective_opt_mode_g = H5D_XFER_MPIO_COLLECTIVE_OPT_DEF;
@@ -298,6 +297,7 @@ static const H5AC_ring_t H5D_ring_g = H5AC_XFER_RING_DEF; /* Default value for t
 static herr_t
 H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 {
+    H5C_tag_t tag = H5C_TAG_DEF;                                /* Default value for cache entry tag */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -308,10 +308,8 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the metadata tag property */
-    /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P_register_real(pclass, H5AC_METADATA_TAG_NAME, H5AC_METADATA_TAG_SIZE, &H5D_def_metadata_tag_g, 
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    /* Register the cache tag property */
+    if(H5P_register_real(pclass, H5C_TAG_NAME, H5C_TAG_SIZE, &tag, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the type conversion buffer property */
