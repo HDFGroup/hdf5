@@ -13,6 +13,12 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* NOTE!
+ *
+ * If you make any changes to H5LTparse.y, please run bin/genparser to
+ * recreate the output files.
+ */
+
 %{
 #include <stdio.h>
 #include <string.h>
@@ -190,7 +196,10 @@ memb_def        :       ddl_type { cmpd_stack[csindex].is_field = 1; /*notify le
                                     H5Tinsert(dtype_id, $<sval>4, $<ival>6, $<hid>1);
                                 }
                             }
-                          
+                            if($<sval>4) {
+                                free($<sval>4);
+                                $<sval>4 = NULL;
+                            }
                             cmpd_stack[csindex].is_field = 0;
                             H5Tclose($<hid>1);
                              
@@ -199,7 +208,9 @@ memb_def        :       ddl_type { cmpd_stack[csindex].is_field = 1; /*notify le
                 ;
 field_name      :       STRING
                         {
-                            $<sval>$ = yylval.sval;
+                            $<sval>$ = strdup(yylval.sval);
+                            free(yylval.sval);
+                            yylval.sval = NULL;
                         }                            
                 ;
 field_offset    :       /*empty*/
@@ -247,6 +258,8 @@ opaque_type     :       H5T_OPAQUE_TOKEN
                             OPQ_TAG_TOKEN { is_opq_tag = 1; } '"' opaque_tag '"' ';'
                             {  
                                 H5Tset_tag($<hid>7, yylval.sval);
+                                free(yylval.sval);
+                                yylval.sval = NULL;
                                 is_opq_tag = 0;
                             }                             
                         '}' { $<hid>$ = $<hid>7; }
@@ -335,6 +348,8 @@ enum_def        :       '"' enum_symbol '"' {
 #else /* H5_HAVE_WIN32_API */
                                                 enum_memb_symbol = strdup(yylval.sval); 
 #endif  /* H5_HAVE_WIN32_API */
+                                                free(yylval.sval);
+                                                yylval.sval = NULL;
                                             }
                         enum_val ';'
                             {

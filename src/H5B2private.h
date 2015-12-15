@@ -93,7 +93,9 @@ struct H5B2_class_t {
     herr_t (*encode)(uint8_t *raw, const void *record, void *ctx);  	/* Encode record from native form to disk storage form */
     herr_t (*decode)(const uint8_t *raw, void *record, void *ctx);  	/* Decode record from disk storage form to native form */
     herr_t (*debug)(FILE *stream, int indent, int fwidth,    	/* Print a record for debugging */
-        const void *record);
+        const void *record,  const void *ctx);
+    void *(*crt_dbg_ctx)(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr); 	/* Create debugging context */
+    herr_t (*dst_dbg_ctx)(void *dbg_ctx);       /* Destroy debugging context */
 };
 
 /* v2 B-tree creation parameters */

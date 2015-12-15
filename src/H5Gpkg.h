@@ -516,7 +516,6 @@ H5_DLL herr_t H5G__name_init(H5G_name_t *name, const char *path);
 /*
  * These functions operate on group "locations"
  */
-H5_DLL herr_t H5G__loc_copy(H5G_loc_t *dst, const H5G_loc_t *src, H5_copy_depth_t depth);
 H5_DLL herr_t H5G__loc_insert(H5G_loc_t *grp_loc, const char *name,
     H5G_loc_t *obj_loc, H5O_type_t obj_type, const void *crt_info, hid_t dxpl_id);
 

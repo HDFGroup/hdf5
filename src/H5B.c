@@ -531,6 +531,7 @@ H5B__split(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud, unsigned idx,
     } /* end if */
 
     bt_ud->bt->right = split_bt_ud->addr;
+    HDassert(bt_ud->cache_flags & H5AC__DIRTIED_FLAG);
 
 done:
     if(ret_value < 0) {
@@ -647,7 +648,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
     /* Unprotect the old root so we can move it.  Also force it to be marked
      * dirty so it is written to the new location. */
     if(H5AC_unprotect(f, dxpl_id, H5AC_BT, bt_ud.addr, bt_ud.bt, H5AC__DIRTIED_FLAG) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release old root")
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release old root")
     bt_ud.bt = NULL;  /* Make certain future references will be caught */
 
     /* Move the location of the old root on the disk */
@@ -1060,7 +1061,7 @@ H5B__insert_helper(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud,
 	bt->child[idx] = new_child_bt_ud.addr;
         bt_ud->cache_flags |= H5AC__DIRTIED_FLAG;
     } else if(H5B_INS_LEFT == my_ins || H5B_INS_RIGHT == my_ins) {
-        hbool_t *tmp_bt_flags_ptr = NULL;
+        unsigned *tmp_bt_flags_ptr = NULL;
         H5B_t	*tmp_bt;
 
 	/*

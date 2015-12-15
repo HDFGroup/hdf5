@@ -105,10 +105,10 @@ typedef off_t                   h5_stat_size_t;
  * HDF Boolean type.
  */
 #ifndef FALSE
-#   define FALSE 0
+#   define FALSE false
 #endif
 #ifndef TRUE
-#   define TRUE 1
+#   define TRUE true
 #endif
 
 

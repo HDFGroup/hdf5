@@ -70,7 +70,6 @@ const H5Z_class2_t H5Z_FLETCHER32[1] = {{
  *              with Release 1.6.2 and before.
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static size_t
 H5Z_filter_fletcher32 (unsigned flags, size_t H5_ATTR_UNUSED cd_nelmts, const unsigned H5_ATTR_UNUSED cd_values[],
                      size_t nbytes, size_t *buf_size, void **buf)

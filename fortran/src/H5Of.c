@@ -901,13 +901,19 @@ h5oget_comment_by_name_c (hid_t_f *loc_id, _fcd name, size_t_f *name_size,
   if((c_bufsize = H5Oget_comment_by_name((hid_t)*loc_id, c_name, c_comment, (size_t)*commentsize,(hid_t)*lapl_id )) < 0)
     HGOTO_DONE(FAIL);
 
+  if(c_name)
+    HDfree(c_name);
+
   *bufsize = (size_t_f)c_bufsize;
 
   /*
    * Convert C name to FORTRAN and place it in the given buffer
    */
-  if(c_comment)
+  if(c_comment) {
     HD5packFstring(c_comment, _fcdtocp(comment), c_commentsize - 1);
+    HDfree(c_comment);
+  }
+
   return ret_value;
 
  done:

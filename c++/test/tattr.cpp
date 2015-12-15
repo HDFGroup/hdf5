@@ -1794,7 +1794,7 @@ void test_attr()
         // use_shared test
 
         // Loop over using new group format
-        hbool_t new_format;
+        unsigned new_format;
         for (new_format = FALSE; new_format <= TRUE; new_format++)
         {
             FileAccPropList curr_fapl;

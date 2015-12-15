@@ -15,9 +15,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FAstat.c
+ * Created:         H5FAstat.c
  *
- * Purpose:	        Fixed array metadata statistics functions.
+ * Purpose:         Fixed array metadata statistics functions.
  *
  *-------------------------------------------------------------------------
  */
@@ -37,9 +37,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FApkg.h"		/* Fixed Arrays				*/
+#include "H5private.h"      /* Generic Functions                        */
+#include "H5Eprivate.h"     /* Error handling                           */
+#include "H5FApkg.h"        /* Fixed Arrays                             */
 
 
 /****************/
@@ -79,13 +79,13 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FA_get_stats
+ * Function:    H5FA_get_stats
  *
- * Purpose:	Query the metadata stats of an array
+ * Purpose:     Query the metadata stats of an array
  *
- * Return:	SUCCEED/FAIL
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:	Vailin Choi
+ * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
  *-------------------------------------------------------------------------

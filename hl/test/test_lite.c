@@ -1282,6 +1282,7 @@ static int test_strings(void)
       HDfree(dt_str);
       goto out;
     }
+    HDfree(dt_str);
 
     /* Length of the character buffer is smaller then needed */
     str_len = 21;

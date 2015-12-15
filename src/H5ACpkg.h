@@ -401,7 +401,6 @@ typedef struct H5AC_aux_t
 
     void	(* sync_point_done)(int num_writes, 
                                     haddr_t * written_entries_tbl);
-
 } H5AC_aux_t; /* struct H5AC_aux_t */
 
 /* Package scoped functions */

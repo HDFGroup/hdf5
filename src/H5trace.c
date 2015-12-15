@@ -155,8 +155,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     } /* end if */
 
     /* Get time for event */
-    if(HDfabs(first_time.etime) < 0.0000000001F)
-        /* That is == 0.0, but direct comparison between floats is bad */
+    if(H5_DBL_ABS_EQUAL(first_time.etime, H5_DOUBLE(0.0)))
         H5_timer_begin(&first_time);
     if(H5_debug_g.ttimes)
         H5_timer_begin(&event_time);
@@ -269,8 +268,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         fprintf(out, "NULL");
                     } /* end if */
                 else {
-                    hbool_t bool_var = va_arg(ap, hbool_t); /*lint !e732 Loss of sign not really occuring */
-
+                    /* Can't pass hbool_t to va_arg() */
+                    hbool_t bool_var = (hbool_t)va_arg(ap, int);
                     if(TRUE == bool_var)
                         fprintf(out, "TRUE");
                     else if(!bool_var)

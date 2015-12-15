@@ -256,7 +256,7 @@ H5SM__cache_table_deserialize(const void *_image, size_t len, void *_udata,
         /* Address of the index's heap */
         H5F_addr_decode(f, &image, &(table->indexes[u].heap_addr));
 
-        /* Compute the size of a list index for this SOHM index */
+	/* Compute the size of a list index for this SOHM index */
         table->indexes[u].list_size = H5SM_LIST_SIZE(f, table->indexes[u].list_max);
     } /* end for */
 
@@ -540,7 +540,7 @@ H5SM__cache_list_deserialize(const void *_image, size_t len, void *_udata,
     /* Read messages into the list array */
     ctx.sizeof_addr = H5F_SIZEOF_ADDR(udata->f);
     for(u = 0; u < udata->header->num_messages; u++) {
-        if(H5SM_message_decode(image, &(list->messages[u]), &ctx) < 0)
+        if(H5SM__message_decode(image, &(list->messages[u]), &ctx) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "can't decode shared message")
 
         image += H5SM_SOHM_ENTRY_SIZE(udata->f);
@@ -661,7 +661,7 @@ H5SM__cache_list_serialize(const H5F_t *f, void *_image, size_t len,
     ctx.sizeof_addr = H5F_SIZEOF_ADDR(f);
     for(u = 0; ((u < list->header->list_max) && (mesgs_serialized < list->header->num_messages)); u++) {
         if(list->messages[u].location != H5SM_NO_LOC) {
-            if(H5SM_message_encode(image, &(list->messages[u]), &ctx) < 0)
+            if(H5SM__message_encode(image, &(list->messages[u]), &ctx) < 0)
                 HGOTO_ERROR(H5E_SOHM, H5E_CANTFLUSH, FAIL, "unable to serialize shared message")
 
             image += H5SM_SOHM_ENTRY_SIZE(f);

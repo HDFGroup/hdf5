@@ -217,9 +217,9 @@ list(GET PROG_OUTPUT 4 NUM_RKIND)
 set(H5CONFIG_F_NUM_IKIND "INTEGER, PARAMETER :: num_ikinds = ${NUM_IKIND}")
 set(H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/${pac_validIntKinds}/)")
 
-message ( "   ........REAL KINDS FOUND ${PAC_FC_ALL_REAL_KINDS}")
-message ( "   ........INTEGER KINDS FOUND ${PAC_FC_ALL_REAL_KINDS}")
-message ( "   ........MAX DECIMAL PRECISION ${H5_PAC_FC_MAX_REAL_PRECISION}")
+message (STATUS "....REAL KINDS FOUND ${PAC_FC_ALL_REAL_KINDS}")
+message (STATUS "....INTEGER KINDS FOUND ${PAC_FC_ALL_REAL_KINDS}")
+message (STATUS "....MAX DECIMAL PRECISION ${H5_PAC_FC_MAX_REAL_PRECISION}")
 
 #-----------------------------------------------------------------------------
 # Determine the available KINDs for REALs and INTEGERs
@@ -258,7 +258,7 @@ string(REGEX REPLACE " " "" pack_int_sizeof "${pack_int_sizeof}")
 
 set(PAC_FC_ALL_INTEGER_KINDS_SIZEOF "\{${pack_int_sizeof}\}")
 
-message("...FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
+message(STATUS "....FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
 # **********
 # REALS
 # **********
@@ -297,7 +297,7 @@ string(REGEX REPLACE " " "" pack_real_sizeof "${pack_real_sizeof}")
 
 set(H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${pack_real_sizeof}/)")
 
-message("...FOUND SIZEOF for REAL KINDs \{${pack_real_sizeof}\}")
+message(STATUS "....FOUND SIZEOF for REAL KINDs \{${pack_real_sizeof}\}")
 
 set(PAC_FC_ALL_REAL_KINDS_SIZEOF "\{${pack_real_sizeof}\}")
 

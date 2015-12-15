@@ -167,14 +167,14 @@
   ENDMACRO (ADD_HELP_TEST)
 
   MACRO (ADD_H5_TEST_OLD testname testtype testfile)
-    if (${testtype} STREQUAL "SKIP")
+    if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_OLD-${testname}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
         )
       endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else (${testtype} STREQUAL "SKIP")
+    else ("${testtype}" STREQUAL "SKIP")
       add_test (
           NAME H5REPACK_OLD-${testname}
           COMMAND $<TARGET_FILE:h5repack> ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
@@ -187,18 +187,18 @@
           COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK_OLD-${testname}_DFF PROPERTIES DEPENDS H5REPACK_OLD-${testname})
-    endif (${testtype} STREQUAL "SKIP")
+    endif ("${testtype}" STREQUAL "SKIP")
   ENDMACRO (ADD_H5_TEST_OLD)
 
   MACRO (ADD_H5_TEST testname testtype testfile)
-    if (${testtype} STREQUAL "SKIP")
+    if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK-${testname}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
         )
       endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else (${testtype} STREQUAL "SKIP")
+    else ("${testtype}" STREQUAL "SKIP")
       add_test (
           NAME H5REPACK-${testname}
           COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
@@ -211,18 +211,18 @@
           COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES DEPENDS H5REPACK-${testname})
-    endif (${testtype} STREQUAL "SKIP")
+    endif ("${testtype}" STREQUAL "SKIP")
   ENDMACRO (ADD_H5_TEST)
 
   MACRO (ADD_H5_CMP_TEST testname testfilter testtype resultcode resultfile)
-    if (${testtype} STREQUAL "SKIP")
+    if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_CMP-${testname}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
         )
       endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else (${testtype} STREQUAL "SKIP")
+    else ("${testtype}" STREQUAL "SKIP")
       # If using memchecker add tests without using scripts
       if (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
@@ -245,18 +245,18 @@
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES DEPENDS ${last_test})
       endif (NOT "${last_test}" STREQUAL "")
-    endif (${testtype} STREQUAL "SKIP")
+    endif ("${testtype}" STREQUAL "SKIP")
   ENDMACRO (ADD_H5_CMP_TEST)
 
   MACRO (ADD_H5_DMP_TEST testname testtype resultcode resultfile)
-    if (${testtype} STREQUAL "SKIP")
+    if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_DMP-${testname}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
         )
       endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else (${testtype} STREQUAL "SKIP")
+    else ("${testtype}" STREQUAL "SKIP")
       # If using memchecker add tests without using scripts
       add_test (
           NAME H5REPACK_DMP-${testname}
@@ -278,18 +278,18 @@
         )
         set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DEPENDS "H5REPACK_DMP-${testname}")
       endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    endif (${testtype} STREQUAL "SKIP")
+    endif ("${testtype}" STREQUAL "SKIP")
   ENDMACRO (ADD_H5_DMP_TEST)
 
   MACRO (ADD_H5_VERIFY_TEST testname testtype resultcode testfile testdset testfilter)
-    if (${testtype} STREQUAL "SKIP")
+    if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP -d ${testdset} -pH ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
         )
       endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else (${testtype} STREQUAL "SKIP")
+    else ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}
@@ -303,7 +303,7 @@
             COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
         )
         set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DFF PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname})
-        if (${resultcode} STREQUAL "0")
+        if ("${resultcode}" STREQUAL "0")
           add_test (
               NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
               COMMAND "${CMAKE_COMMAND}"
@@ -317,16 +317,16 @@
                   -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
           )
           set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF)
-        else (${resultcode} STREQUAL "0")
-          if (${testfilter} STREQUAL "CHUNKED")
+        else ("${resultcode}" STREQUAL "0")
+          if ("${testfilter}" STREQUAL "CHUNKED")
             set (nottestfilter "(CONTIGUOUS|COMPACT)")
-          endif (${testfilter} STREQUAL "CHUNKED")
-          if (${testfilter} STREQUAL "CONTIGUOUS")
+          endif ("${testfilter}" STREQUAL "CHUNKED")
+          if ("${testfilter}" STREQUAL "CONTIGUOUS")
             set (nottestfilter "(CHUNK|COMPACT)")
-          endif (${testfilter} STREQUAL "CONTIGUOUS")
-          if (${testfilter} STREQUAL "COMPACT")
+          endif ("${testfilter}" STREQUAL "CONTIGUOUS")
+          if ("${testfilter}" STREQUAL "COMPACT")
             set (nottestfilter "(CONTIGUOUS|CHUNK)")
-          endif (${testfilter} STREQUAL "COMPACT")
+          endif ("${testfilter}" STREQUAL "COMPACT")
           add_test (
               NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
               COMMAND "${CMAKE_COMMAND}"
@@ -340,9 +340,9 @@
                   -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
           )
           set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF)
-        endif (${resultcode} STREQUAL "0")
+        endif ("${resultcode}" STREQUAL "0")
       endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    endif (${testtype} STREQUAL "SKIP")
+    endif ("${testtype}" STREQUAL "SKIP")
   ENDMACRO (ADD_H5_VERIFY_TEST)
 
   MACRO (ADD_H5_TEST_META testname testfile)

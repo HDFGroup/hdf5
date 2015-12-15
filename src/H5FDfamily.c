@@ -106,6 +106,8 @@ static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, h
 				size_t size, const void *_buf);
 static herr_t H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 static herr_t H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_family_lock(H5FD_t *_file, hbool_t rw);
+static herr_t H5FD_family_unlock(H5FD_t *_file);
 
 /* The class struct */
 static const H5FD_class_t H5FD_family_g = {
@@ -138,8 +140,8 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_write,				/*write			*/
     H5FD_family_flush,				/*flush			*/
     H5FD_family_truncate,			/*truncate		*/
-    NULL,                                       /*lock                  */
-    NULL,                                       /*unlock                */
+    H5FD_family_lock,                           /*lock                  */
+    H5FD_family_unlock,                         /*unlock                */
     H5FD_FLMAP_DICHOTOMY                        /*fl_map                */
 };
 
@@ -859,7 +861,6 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_family_query(const H5FD_t * _file, unsigned long *flags /* out */)
 {
@@ -1302,3 +1303,79 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_family_truncate() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_family_lock
+ *
+ * Purpose:     To place an advisory lock on a file.
+ *              The lock type to apply depends on the parameter "rw":
+ *                      TRUE--opens for write: an exclusive lock
+ *                      FALSE--opens for read: a shared lock
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Vailin Choi; May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_family_lock(H5FD_t *_file, hbool_t rw)
+{
+    H5FD_family_t *file = (H5FD_family_t *)_file;   	/* VFD file struct */
+    unsigned	u, i;      	/* Local index variable */
+    herr_t ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Place the lock on all the member files */
+    for(u = 0; u < file->nmembs; u++) {
+        if(file->memb[u]) {
+            if(H5FD_lock(file->memb[u], rw) < 0)
+		break;
+        } /* end if */
+    } /* end for */
+
+    if(u < file->nmembs) { /* Try to unlock the member files done before */
+	for(i = 0; i < u; i++) {
+	    if(H5FD_unlock(file->memb[i]) < 0)
+		/* Push error, but keep going*/
+		HDONE_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock member files")
+	}
+	HGOTO_ERROR(H5E_IO, H5E_CANTLOCK, FAIL, "unable to lock member files")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_family_lock() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_family_unlock
+ *
+ * Purpose:     To remove the existing lock on the file
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Vailin Choi; May 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_family_unlock(H5FD_t *_file)
+{
+    H5FD_family_t *file = (H5FD_family_t *)_file;   	/* VFD file struct */
+    unsigned	u;      	/* Local index variable */
+    herr_t ret_value = SUCCEED;	/* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Remove the lock on the member files */
+    for(u = 0; u < file->nmembs; u++) {
+        if(file->memb[u]) {
+            if(H5FD_unlock(file->memb[u]) < 0)
+		HGOTO_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock member files")
+        } /* end if */
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_family_unlock() */

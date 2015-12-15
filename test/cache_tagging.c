@@ -2463,6 +2463,9 @@ check_dataset_write_tags(hid_t fcpl, int type)
     for (i=0; i<10; i++)
         if ( verify_tag(fid, H5AC_BT_ID, d_tag) < 0 ) TEST_ERROR;
 
+    /* Verify object header for dataset */
+    if ( verify_tag(fid, H5AC_OHDR_ID, d_tag) < 0 ) TEST_ERROR;
+
     /* verify no other entries present */
     if ( verify_no_unknown_tags(fid) < 0 ) TEST_ERROR;
 

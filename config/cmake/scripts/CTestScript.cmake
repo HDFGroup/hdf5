@@ -56,6 +56,13 @@ if(APPLE)
   set(ENV{CC} "${XCODE_CC}")
   set(ENV{CXX} "${XCODE_CXX}")
 
+  if(NOT NO_MAC_FORTRAN)
+    # Shared fortran is not supported, build static 
+    set(BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
+  else(NOT NO_MAC_FORTRAN)
+    set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+  endif(NOT NO_MAC_FORTRAN)
+
   set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_USE_LAUNCHERS:BOOL=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=OFF")
 endif(APPLE)
 
@@ -66,13 +73,13 @@ if(CTEST_USE_TAR_SOURCE)
   ## Uncompress source if tar file provided
   ## --------------------------
   if(WIN32)
-    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} x ${CTEST_USE_TAR_SOURCE}.zip]")
+    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} x ${CTEST_DASHBOARD_ROOT}\\${CTEST_USE_TAR_SOURCE}.zip]")
     execute_process(COMMAND ${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}\\${CTEST_USE_TAR_SOURCE}.zip RESULT_VARIABLE rv)
   else()
-    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_USE_TAR_SOURCE}.tar]")
+    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}/${CTEST_USE_TAR_SOURCE}.tar]")
     execute_process(COMMAND ${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}/${CTEST_USE_TAR_SOURCE}.tar RESULT_VARIABLE rv)
   endif()
-
+ 
   if(NOT rv EQUAL 0)
     message(STATUS "extracting... [error-(${rv}) clean up]")
     file(REMOVE_RECURSE "${CTEST_SOURCE_DIRECTORY}")
@@ -159,12 +166,23 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Send the main script as a note.
-list(APPEND CTEST_NOTES_FILES
-    "${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}"
-    "${CMAKE_CURRENT_LIST_FILE}"
-    "${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake"
-)
-
+if(USE_AUTOTOOLS)
+  ## autotools builds need to use make and does not use the cacheinit.cmake file
+  ## -- make command
+  ## -----------------
+  find_program(MAKE NAMES make)
+  list(APPEND CTEST_NOTES_FILES
+      "${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}"
+      "${CMAKE_CURRENT_LIST_FILE}"
+  )
+else()
+  list(APPEND CTEST_NOTES_FILES
+      "${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}"
+      "${CMAKE_CURRENT_LIST_FILE}"
+      "${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake"
+  )
+endif()
+ 
 #-----------------------------------------------------------------------------
 # Check for required variables.
 # --------------------------
@@ -181,20 +199,27 @@ endforeach(req)
 #-----------------------------------------------------------------------------
 # Initialize the CTEST commands
 #------------------------------
-if(LOCAL_MEMCHECK_TEST)
-  find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
-  set (CTEST_CONFIGURE_COMMAND
-      "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/mccacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\""
-  )
-else()
-  if(LOCAL_COVERAGE_TEST)
-    find_program(CTEST_COVERAGE_COMMAND NAMES gcov)
+if(USE_AUTOTOOLS)
+  set(CTEST_CONFIGURE_COMMAND  "${CTEST_SOURCE_DIRECTORY}/configure ${ADD_BUILD_OPTIONS}")
+  set(CTEST_BUILD_COMMAND      "${MAKE} ${CTEST_BUILD_FLAGS}")
+  configure_file(${CTEST_SOURCE_DIRECTORY}/config/cmake/CTestCustom.cmake ${CTEST_BINARY_DIRECTORY}/CTestCustom.cmake)
+  file(WRITE ${CTEST_BINARY_DIRECTORY}/CTestTestfile.cmake "ADD_TEST(makecheck \"${MAKE}\" \"${CTEST_BUILD_FLAGS}\" \"-i\" \"check\")")
+else(USE_AUTOTOOLS)
+  if(LOCAL_MEMCHECK_TEST)
+    find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
+    set (CTEST_CONFIGURE_COMMAND
+        "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/mccacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\""
+    )
+  else()
+    if(LOCAL_COVERAGE_TEST)
+      find_program(CTEST_COVERAGE_COMMAND NAMES gcov)
+    endif()
+    set (CTEST_CONFIGURE_COMMAND
+        "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\""
+    )
   endif()
-  set (CTEST_CONFIGURE_COMMAND
-      "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\""
-  )
 endif()
-
+ 
 #-----------------------------------------------------------------------------
 ## -- set output to english
 set($ENV{LC_MESSAGES}  "en_EN")

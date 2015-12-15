@@ -1,8 +1,8 @@
-##########################################################################################
-### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                    ###
-### BUILD_GENERATOR required [Unix, VS2013, VS201364, VS2012, VS201264]                ###
-### ctest -S HDF518config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf518.log   ###
-##########################################################################################
+#############################################################################################
+### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
+### BUILD_GENERATOR required [Unix, VS2015, VS201564, VS2013, VS201364, VS2012, VS201264] ###
+### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf519.log        ###
+#############################################################################################
 
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 ############################################################################
@@ -11,6 +11,8 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 # where valid options for OPTION are:
 #     BUILD_GENERATOR - The cmake build generator:
 #            Unix    * Unix Makefiles
+#            VS2015    * Visual Studio 14 2015
+#            VS201564 * Visual Studio 14 2015 Win64
 #            VS2013    * Visual Studio 12 2013
 #            VS201364 * Visual Studio 12 2013 Win64
 #            VS2012    * Visual Studio 11 2012
@@ -19,11 +21,13 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_BUILD_CONFIGURATION  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
-#     STATICLIBRARIES  -  Build/use static libraries
+#     STATIC_LIBRARIES  -  Build/use static libraries
+#     FORTRAN_LIBRARIES -  Build/use fortran libraries
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
 set(CTEST_SOURCE_VERSION 1.9)
+set(CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
 # handle input parameters to script.
@@ -31,7 +35,8 @@ set(CTEST_SOURCE_VERSION 1.9)
 #INSTALLDIR - HDF5-1.9 root folder
 #CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.9
-#STATICLIBRARIES - Default is YES
+#STATIC_LIBRARIES - Default is YES
+#FORTRAN_LIBRARIES - Default is NO
 #NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
 if(DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
@@ -47,28 +52,32 @@ endif()
 
 # build generator must be defined
 if(NOT DEFINED BUILD_GENERATOR)
-  message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2013, VS201364, VS2012, or VS201264")
+  message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
 else()
   if(${BUILD_GENERATOR} STREQUAL "Unix")
-    set(CMAKE_GENERATOR "Unix Makefiles")
+    set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS2015")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 14 2015")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS201564")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 14 2015 Win64")
   elseif(${BUILD_GENERATOR} STREQUAL "VS2013")
-    set(CMAKE_GENERATOR "Visual Studio 12 2013")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 12 2013")
   elseif(${BUILD_GENERATOR} STREQUAL "VS201364")
-    set(CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 12 2013 Win64")
   elseif(${BUILD_GENERATOR} STREQUAL "VS2012")
-    set(CMAKE_GENERATOR "Visual Studio 11 2012")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 11 2012")
   elseif(${BUILD_GENERATOR} STREQUAL "VS201264")
-    set(CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
+    set(CTEST_CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
   else()
-    message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2013, VS201364, VS2012, or VS201264")
+    message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
   endif()
 endif()
 
 if(NOT DEFINED INSTALLDIR)
   if(WIN32)
-    set(INSTALLDIR "/usr/local/myhdf5")
-  else()
     set(INSTALLDIR "C:\\Program\ Files\\myhdf5")
+  else()
+    set(INSTALLDIR "/usr/local/myhdf5")
   endif()
 endif()
 if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
@@ -77,10 +86,10 @@ endif()
 if(NOT DEFINED CTEST_SOURCE_NAME)
     set(CTEST_SOURCE_NAME "hdf5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
 endif()
-if(NOT DEFINED STATICLIBRARIES)
+if(NOT DEFINED STATIC_LIBRARIES)
     set(STATICLIBRARIES "YES")
 endif()
-if(NOT DEFINED FORTRANLIBRARIES)
+if(NOT DEFINED FORTRAN_LIBRARIES)
     set(FORTRANLIBRARIES "NO")
 endif()
 
@@ -99,7 +108,15 @@ endif()
 if(WIN32)
   set(SITE_OS_NAME "Windows")
   set(SITE_OS_VERSION "WIN7")
-  if(${BUILD_GENERATOR} STREQUAL "VS201364")
+  if(${BUILD_GENERATOR} STREQUAL "VS201564")
+    set(SITE_OS_BITS "64")
+    set(SITE_COMPILER_NAME "vs2015")
+    set(SITE_COMPILER_VERSION "14")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS2015")
+    set(SITE_OS_BITS "32")
+    set(SITE_COMPILER_NAME "vs2015")
+    set(SITE_COMPILER_VERSION "14")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS201364")
     set(SITE_OS_BITS "64")
     set(SITE_COMPILER_NAME "vs2013")
     set(SITE_COMPILER_VERSION "12")
@@ -155,12 +172,12 @@ set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/trunk")
 ####  format: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")
 
 ###################################################################
-if(STATICLIBRARIES)
+if(${STATICLIBRARIES})
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
   #########       Following describes computer           ############
   ## following is optional to describe build                       ##
   set(SITE_BUILDNAME_SUFFIX "STATIC")
-endif(STATICLIBRARIES)
+endif()
 ###################################################################
 
 ### uncomment/comment and change the following lines for other configuration options
@@ -178,11 +195,11 @@ set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
 ####      fortran       ####
-if(FORTRANLIBRARIES)
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
-  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
-endif(FORTRANLIBRARIES)
+if(${FORTRANLIBRARIES})
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+else()
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+endif()
 
 ### disable test program builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_TESTING:BOOL=OFF")
