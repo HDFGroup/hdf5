@@ -239,6 +239,7 @@ int main(int argc, char **argv) {
         href_ff_t ref1, ref2, ref3, ref4, ref5, ref6;
         hid_t dspace_region;
         H5O_type_t obj_type;
+        char aname[1024];
 
         ret = H5Rcreate_object_ff(&ref1, file_id, "/G1", H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
         assert(ret == 0);
@@ -296,6 +297,14 @@ int main(int argc, char **argv) {
         assert(ret == 0);
         ret = H5Rprint_ref(&ref6);
         assert(ret == 0);
+
+        assert(H5Rget_attr_name_ff(&ref4, aname, 1024) == 11);
+        assert(strcmp(aname, "Temperature") == 0);
+        assert(H5Rget_attr_name_ff(&ref5, aname, 1024) == 10);
+        assert(strcmp(aname, "TYPE_SIZE1") == 0);
+        assert(H5Rget_attr_name_ff(&ref6, aname, 1024) == 10);
+        assert(strcmp(aname, "TYPE_SIZE2") == 0);
+
         {
             hid_t obj_id;
 
@@ -361,7 +370,7 @@ int main(int argc, char **argv) {
         href_ff_t ref1, ref2, ref3;
         hid_t dspace_region;
         H5O_type_t obj_type;
-        char fname[1024], pname[1024];
+        char fname[1024], pname[1024], aname[1024];
 
         ret = H5Rcreate_object_ext_ff(&ref1, "ref1_file", "/G1/G2/G3");
         assert(ret == 0);
@@ -375,6 +384,9 @@ int main(int argc, char **argv) {
 
         ret = H5Rcreate_attr_ext_ff(&ref3, "ref3_file", "/G18/M6", "Temperature");
         assert(ret == 0);
+
+        assert(H5Rget_attr_name_ff(&ref3, aname, 1024) == 11);
+        assert(strcmp(aname, "Temperature") == 0);
 
         ret = H5Rprint_ref(&ref1);
         assert(ret == 0);
