@@ -288,8 +288,9 @@ main (void)
 
     /* Read all VDS data */
 
-    //EIP We should be able to do it by using H5S_ALL instead of making selection
-    // or using H5Sselect_all from vspace.
+    /* EIP We should be able to do it by using H5S_ALL instead of making selection
+     * or using H5Sselect_all from vspace. 
+     */
     start[0] = 0;
     start[1] = 0;
     start[2] = 0;

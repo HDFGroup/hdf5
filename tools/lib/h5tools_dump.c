@@ -1543,7 +1543,6 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
     /* Hyperslab info */
     hsize_t             hs_offset[H5S_MAX_RANK];  /* starting offset */
     hsize_t             hs_size[H5S_MAX_RANK];    /* size this pass */
-    //hsize_t             hs_count[H5S_MAX_RANK];    /* size this pass */
     hsize_t             hs_nelmts;                /* elements in request */
 
     /* VL data special information */
@@ -1626,11 +1625,9 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, h5tools_cont
                 hs_size[i] = MIN(total_size[i] - hs_offset[i], sm_size[i]);
                 ctx->p_max_idx[i] = ctx->p_min_idx[i] + hs_size[i];
                 hs_nelmts *= hs_size[i];
-//                hs_count[i] = 1;
             }
 
             H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL);
-//            H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL, hs_count, hs_size);
             H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL);
         }
         else {
