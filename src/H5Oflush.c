@@ -241,6 +241,9 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    if(H5F_INTENT(oloc.file) & H5F_ACC_RDWR)
+	HGOTO_DONE(SUCCEED)
+
     /* Create empty object location */
     obj_loc.oloc = &obj_oloc;
     obj_loc.path = &obj_path;
