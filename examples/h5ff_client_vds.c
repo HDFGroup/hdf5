@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     uint32_t cs_scope = 0;
     herr_t ret;
 
-    sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_dset.h5");
+    sprintf(file_name, "%s_%s", getenv("USER"), "eff_file_vds.h5");
 
     MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
     if(MPI_THREAD_MULTIPLE != provided) {
