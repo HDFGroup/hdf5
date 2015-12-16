@@ -227,6 +227,7 @@ H5_DLL ssize_t H5Rget_filename_ff(const href_ff_t *ref, char *name/*out*/, size_
 H5_DLL herr_t H5Rget_obj_type_ff(const href_ff_t *ref, H5O_type_t *obj_type);
 H5_DLL hid_t  H5Rget_region_ff(const href_ff_t *ref);
 H5_DLL ssize_t H5Rget_name_ff(const href_ff_t *ref, char *name/*out*/, size_t size);
+H5_DLL ssize_t H5Rget_attr_name_ff(const href_ff_t *ref, char *attr_name/*out*/, size_t size);
 H5_DLL hid_t  H5Rdereference_ff(hid_t loc_id, hid_t oapl_id, const href_ff_t *ref, 
                                 hid_t rcxt_id, hid_t estack_id);
 

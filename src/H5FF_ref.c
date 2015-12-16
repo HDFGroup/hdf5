@@ -863,6 +863,82 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Rget_attr_name_ff
+ *
+ * Purpose:	Return object name from reference
+ *
+ * Return:	Success:	length of the attr_name if successful.
+ *		Failure:	FAIL
+ *
+ * Programmer:	Mohamad Chaarawi
+ *		November, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t H5Rget_attr_name_ff(const href_ff_t *ref, char *attr_name/*out*/, size_t size)
+{
+    const uint8_t *p;
+    size_t name_size;
+    ssize_t ret_value = -1;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(ref == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer");
+    if(ref->buf == NULL || ref->buf_size == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference");
+    if(ref->ref_type != H5R_ATTR && ref->ref_type != H5R_ATTR_EXT)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type");
+
+    p = (uint8_t *)ref->buf;
+
+    if(H5R_ATTR == ref->ref_type) {
+        size_t token_size;
+
+        UINT64DECODE(p, token_size);
+        p += token_size;
+
+        UINT64DECODE(p, name_size);
+
+        if(attr_name && size >= name_size) {
+            HDmemcpy(attr_name, p, name_size);
+            attr_name[name_size] = '\0';
+        }
+        else if(attr_name) {
+            HDmemcpy(attr_name, p, size);
+            attr_name[size] = '\0';
+        }
+    }
+    else {
+        /* file name */
+        UINT64DECODE(p, name_size);
+        p += name_size;
+
+        /* path name */
+        UINT64DECODE(p, name_size);
+        p += name_size;
+
+        /* attr name */
+        UINT64DECODE(p, name_size);
+        if(attr_name && size >= name_size) {
+            HDmemcpy(attr_name, p, name_size);
+            attr_name[name_size] = '\0';
+        }
+        else if(attr_name) {
+            HDmemcpy(attr_name, p, size);
+            attr_name[size] = '\0';
+        }
+    }
+
+    ret_value = (ssize_t)name_size;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Rget_attr_name_ff */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Rget_filename_ff
  *
  * Purpose:	Filename associated with the reference (FF)

@@ -296,7 +296,6 @@ int main(int argc, char **argv) {
         assert(ret == 0);
         ret = H5Rprint_ref(&ref6);
         assert(ret == 0);
-        assert(ret == 0);
         {
             hid_t obj_id;
 

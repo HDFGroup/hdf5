@@ -449,7 +449,7 @@ int main(int argc, char **argv) {
 
     H5ESwait(e_stack, 0, &status);
     printf("ESWait H5Dread Completion status = %d\n", status);
-    assert (status);
+    assert (status == H5ES_STATUS_SUCCEED);
 
     printf("Rank %d read value %d\n", my_rank, element);
     assert(element == 450);
@@ -468,7 +468,6 @@ int main(int argc, char **argv) {
     assert(0 == ret);
 
     /* Do more updates on transaction 2 */
-
     {
         extent = nelem+10;
 
