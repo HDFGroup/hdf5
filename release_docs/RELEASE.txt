@@ -1,4 +1,4 @@
-HDF5 version 1.9.233 released on 2015-10-06
+HDF5 version 1.10.0-alpha0 currently under development
 ================================================================================
 
 
