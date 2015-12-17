@@ -156,13 +156,13 @@ typedef enum H5F_mem_t	H5FD_mem_t;
 /* Define VFL driver features that can be enabled on a per-driver basis */
 /* These are returned with the 'query' function pointer in H5FD_class_t */
     /*
-     * Defining the H5FD_FEAT_AGGREGATE_METADATA for a VFL driver means that
+     * Defining H5FD_FEAT_AGGREGATE_METADATA for a VFL driver means that
      * the library will attempt to allocate a larger block for metadata and
      * then sub-allocate each metadata request from that larger block.
      */
 #define H5FD_FEAT_AGGREGATE_METADATA    0x00000001
     /*
-     * Defining the H5FD_FEAT_ACCUMULATE_METADATA for a VFL driver means that
+     * Defining H5FD_FEAT_ACCUMULATE_METADATA for a VFL driver means that
      * the library will attempt to cache metadata as it is written to the file
      * and build up a larger block of metadata to eventually pass to the VFL
      * 'write' routine.
@@ -177,7 +177,7 @@ typedef enum H5F_mem_t	H5FD_mem_t;
 #define H5FD_FEAT_ACCUMULATE_METADATA_READ      0x00000004
 #define H5FD_FEAT_ACCUMULATE_METADATA   (H5FD_FEAT_ACCUMULATE_METADATA_WRITE|H5FD_FEAT_ACCUMULATE_METADATA_READ)
     /*
-     * Defining the H5FD_FEAT_DATA_SIEVE for a VFL driver means that
+     * Defining H5FD_FEAT_DATA_SIEVE for a VFL driver means that
      * the library will attempt to cache raw data as it is read from/written to
      * a file in a "data seive" buffer.  See Rajeev Thakur's papers:
      *  http://www.mcs.anl.gov/~thakur/papers/romio-coll.ps.gz
@@ -185,13 +185,13 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      */
 #define H5FD_FEAT_DATA_SIEVE            0x00000008
     /*
-     * Defining the H5FD_FEAT_AGGREGATE_SMALLDATA for a VFL driver means that
+     * Defining H5FD_FEAT_AGGREGATE_SMALLDATA for a VFL driver means that
      * the library will attempt to allocate a larger block for "small" raw data
      * and then sub-allocate "small" raw data requests from that larger block.
      */
 #define H5FD_FEAT_AGGREGATE_SMALLDATA   0x00000010
     /*
-     * Defining the H5FD_FEAT_IGNORE_DRVRINFO for a VFL driver means that
+     * Defining H5FD_FEAT_IGNORE_DRVRINFO for a VFL driver means that
      * the library will ignore the driver info that is encoded in the file
      * for the VFL driver.  (This will cause the driver info to be eliminated
      * from the file when it is flushed/closed, if the file is opened R/W).
@@ -205,13 +205,13 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      */
 #define H5FD_FEAT_DIRTY_DRVRINFO_LOAD   0x00000040
     /*
-     * Defining the H5FD_FEAT_POSIX_COMPAT_HANDLE for a VFL driver means that
+     * Defining H5FD_FEAT_POSIX_COMPAT_HANDLE for a VFL driver means that
      * the handle for the VFD (returned with the 'get_handle' callback) is
      * of type 'int' and is compatible with POSIX I/O calls.
      */
 #define H5FD_FEAT_POSIX_COMPAT_HANDLE   0x00000080    
     /*
-     * Defining the H5FD_FEAT_HAS_MPI for a VFL driver means that
+     * Defining H5FD_FEAT_HAS_MPI for a VFL driver means that
      * the driver makes use of MPI communication and code may retrieve
      * communicator/rank information from it
      */
@@ -223,13 +223,13 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      */
 #define H5FD_FEAT_ALLOCATE_EARLY        0x00000200
     /* 
-     * Defining the H5FD_FEAT_ALLOW_FILE_IMAGE for a VFL driver means that
+     * Defining H5FD_FEAT_ALLOW_FILE_IMAGE for a VFL driver means that
      * the driver is able to use a file image in the fapl as the initial
      * contents of a file.
      */
 #define H5FD_FEAT_ALLOW_FILE_IMAGE      0x00000400
     /*
-     * Defining the H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS for a VFL driver
+     * Defining H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS for a VFL driver
      * means that the driver is able to use callbacks to make a copy of the
      * image to store in memory.
      */
@@ -274,8 +274,8 @@ typedef struct H5FD_class_t {
                      haddr_t addr, size_t size, const void *buffer);
     herr_t  (*flush)(H5FD_t *file, hid_t dxpl_id, unsigned closing);
     herr_t  (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
-    herr_t  (*lock)(H5FD_t *file, unsigned char *oid, unsigned lock_type, hbool_t last);
-    herr_t  (*unlock)(H5FD_t *file, unsigned char *oid, hbool_t last);
+    herr_t  (*lock)(H5FD_t *file, hbool_t rw);
+    herr_t  (*unlock)(H5FD_t *file);
     H5FD_mem_t fl_map[H5FD_MEM_NTYPES];
 } H5FD_class_t;
 
@@ -355,6 +355,8 @@ H5_DLL herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                         haddr_t addr, size_t size, const void *buf);
 H5_DLL herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, unsigned closing);
 H5_DLL herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
+H5_DLL herr_t H5FDlock(H5FD_t *file, hbool_t rw);
+H5_DLL herr_t H5FDunlock(H5FD_t *file);
 
 #ifdef __cplusplus
 }

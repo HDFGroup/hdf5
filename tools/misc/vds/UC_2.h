@@ -138,7 +138,7 @@ static char UC_2_FILE_NAMES[UC_2_N_SOURCES][NAME_LEN] = {
 #define UC_2_VDS_DSET_NAME      "vds_dset"
 
 /* Fill values */
-static hsize_t UC_2_FILL_VALUES[UC_2_N_SOURCES] = {
+static int UC_2_FILL_VALUES[UC_2_N_SOURCES] = {
     -1,
     -2,
     -3,

@@ -646,8 +646,7 @@ H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
 H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
 H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f, H5FD_mem_t type);
-H5_DLL herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl,
-    void **file_handle);
+H5_DLL herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle);
 
 /* Functions that check file mounting information */
 H5_DLL hbool_t H5F_is_mount(const H5F_t *file);

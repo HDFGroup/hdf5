@@ -262,27 +262,23 @@ set (LINUX_LFS 0)
 set (HDF_EXTRA_C_FLAGS)
 set (HDF_EXTRA_FLAGS)
 if (NOT WINDOWS)
-  if (NOT ${HDF_PREFIX}_HAVE_SOLARIS)
+  # Might want to check explicitly for Linux and possibly Cygwin
+  # instead of checking for not Solaris or Darwin.
+  if (NOT ${HDF_PREFIX}_HAVE_SOLARIS AND NOT ${HDF_PREFIX}_HAVE_DARWIN)
   # Linux Specific flags
   # This was originally defined as _POSIX_SOURCE which was updated to
   # _POSIX_C_SOURCE=199506L to expose a greater amount of POSIX
   # functionality so clock_gettime and CLOCK_MONOTONIC are defined
-  # correctly.
+  # correctly. This was later updated to 200112L so that
+  # posix_memalign() is visible for the direct VFD code on Linux
+  # systems.
   # POSIX feature information can be found in the gcc manual at:
   # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=199506L)
-  # _BSD_SOURCE deprecated in GLIBC >= 2.20
-  TRY_RUN (HAVE_DEFAULT_SOURCE_RUN HAVE_DEFAULT_SOURCE_COMPILE
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
-        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=-DHAVE_DEFAULT_SOURCE
-        OUTPUT_VARIABLE OUTPUT
-    )
-  if (HAVE_DEFAULT_SOURCE_COMPILE AND HAVE_DEFAULT_SOURCE_RUN)
-    set (HDF_EXTRA_FLAGS -D_DEFAULT_SOURCE)
-  else (HAVE_DEFAULT_SOURCE_COMPILE AND HAVE_DEFAULT_SOURCE_RUN)
-    set (HDF_EXTRA_FLAGS -D_BSD_SOURCE)
-  endif (HAVE_DEFAULT_SOURCE_COMPILE AND HAVE_DEFAULT_SOURCE_RUN)
+  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200112L)
+
+  # Need to add this so that O_DIRECT is visible for the direct
+  # VFD on Linux systems.
+  set (HDF_EXTRA_C_FLAGS -D_GNU_SOURCE)
 
   option (HDF_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
   if (HDF_ENABLE_LARGE_FILE)
@@ -293,6 +289,11 @@ if (NOT WINDOWS)
         CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=-DTEST_LFS_WORKS
         OUTPUT_VARIABLE OUTPUT
     )
+
+    # The LARGEFILE definitions were from the transition period
+    # and are probably no longer needed. The FILE_OFFSET_BITS
+    # check should be generalized for all POSIX systems as it
+    # is in the Autotools.
     if (TEST_LFS_WORKS_COMPILE)
       if (TEST_LFS_WORKS_RUN  MATCHES 0)
         set (TEST_LFS_WORKS 1 CACHE INTERNAL ${msg})
@@ -315,7 +316,7 @@ if (NOT WINDOWS)
     endif (TEST_LFS_WORKS_COMPILE)
   endif (HDF_ENABLE_LARGE_FILE)
   set (CMAKE_REQUIRED_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS} ${HDF_EXTRA_FLAGS})
-  endif (NOT ${HDF_PREFIX}_HAVE_SOLARIS)
+  endif (NOT ${HDF_PREFIX}_HAVE_SOLARIS AND NOT ${HDF_PREFIX}_HAVE_DARWIN)
 endif (NOT WINDOWS)
 
 add_definitions (${HDF_EXTRA_FLAGS})
@@ -489,6 +490,8 @@ endif (NOT WINDOWS)
 # Check for some functions that are used
 #
 CHECK_FUNCTION_EXISTS (alarm             ${HDF_PREFIX}_HAVE_ALARM)
+CHECK_FUNCTION_EXISTS (fcntl             ${HDF_PREFIX}_HAVE_FCNTL)
+CHECK_FUNCTION_EXISTS (flock             ${HDF_PREFIX}_HAVE_FLOCK)
 CHECK_FUNCTION_EXISTS (fork              ${HDF_PREFIX}_HAVE_FORK)
 CHECK_FUNCTION_EXISTS (frexpf            ${HDF_PREFIX}_HAVE_FREXPF)
 CHECK_FUNCTION_EXISTS (frexpl            ${HDF_PREFIX}_HAVE_FREXPL)

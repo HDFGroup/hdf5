@@ -390,7 +390,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5D__contig_construct(H5F_t *f, H5D_t *dset)
 {

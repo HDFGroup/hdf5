@@ -655,11 +655,10 @@ H5D__virtual_copy(H5F_t H5_ATTR_UNUSED *f_dst, H5O_layout_t *layout_dst,
 {
     herr_t          ret_value = SUCCEED;
 
+#ifdef NOT_YET
     FUNC_ENTER_PACKAGE
-
-    /* Copy message in memory */
-    if(H5D__virtual_copy_layout(layout_dst) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy virtual layout")
+#endif /* NOT_YET */
+    FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef NOT_YET
     /* Check for copy to the same file */
@@ -677,7 +676,9 @@ H5D__virtual_copy(H5F_t H5_ATTR_UNUSED *f_dst, H5O_layout_t *layout_dst,
         layout_dst->storage.u.virt.serial_list_hobjid.idx = (size_t)0;
     } /* end block/else */
 
+#ifdef NOT_YET
 done:
+#endif /* NOT_YET */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_copy() */
 
@@ -1336,7 +1337,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
         new_dims[i] = HSIZE_UNDEF;
 
     /* Iterate over mappings */
-    for(i = 0; i < storage->list_nalloc; i++)
+    for(i = 0; i < storage->list_nused; i++)
         /* Check for unlimited dimension */
         if(storage->list[i].unlim_dim_virtual >= 0) {
             /* Check for "printf" source dataset resolution */
@@ -1581,7 +1582,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset, hid_t dxpl_id)
     if(changed || (!storage->init && (storage->view == H5D_VDS_FIRST_MISSING))) {
         /* Iterate over mappings again to update source selections and virtual
          * mapping extents */
-        for(i = 0; i < storage->list_nalloc; i++) {
+        for(i = 0; i < storage->list_nused; i++) {
             /* If there is an unlimited dimension, we are setting extent by the
              * minimum of mappings, and the virtual extent in the unlimited
              * dimension has changed since the last time the VDS extent/mapping
@@ -1761,7 +1762,7 @@ H5D__virtual_init_all(const H5D_t *dset, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get VDS dimensions")
 
     /* Iterate over mappings */
-    for(i = 0; i < storage->list_nalloc; i++)
+    for(i = 0; i < storage->list_nused; i++)
         /* Check for unlimited dimension */
         if(storage->list[i].unlim_dim_virtual >= 0) {
             /* Check for "printf" source dataset resolution */
@@ -2761,7 +2762,7 @@ H5D__virtual_flush(H5D_t *dset, hid_t dxpl_id)
             if(storage->list[i].source_dset.dset)
                 /* Flush source dataset */
                 if(H5D__flush_real(storage->list[i].source_dset.dset, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to write to source dataset")
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to flush source dataset")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

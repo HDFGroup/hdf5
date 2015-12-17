@@ -1335,6 +1335,7 @@ test_h5o_getinfo_same_file(void)
 
 } /* test_h5o_getinfo_same_file() */
 
+
 
 /****************************************************************
 **

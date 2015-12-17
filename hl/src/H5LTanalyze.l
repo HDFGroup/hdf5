@@ -13,11 +13,22 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* NOTE!
+ *
+ * If you make any changes to H5LTanalyze.l, please run bin/genparser to
+ * recreate the output files.
+ */
+
 %{
 #include <stdlib.h>
 #include <string.h>
 #include <hdf5.h>
 #include "H5LTparse.h"
+
+/* Turn off suggest const attribute warning in gcc */
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >=2 
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=const"
+#endif 
 
 int my_yyinput(char *, int);
 #undef YY_INPUT
