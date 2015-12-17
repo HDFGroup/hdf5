@@ -7502,22 +7502,17 @@ gent_charsets(void)
             const char *utf8_p_;
     } CharSetInfo;
 
-    hid_t charset_dtid;
-    hid_t ascii_dtid;
+    hid_t charset_dtid = H5Tcreate( H5T_COMPOUND, sizeof( CharSetInfo ) );
+    hid_t ascii_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
     hid_t utf8_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
     const char * writeData[] = { "ascii", "utf8", };
 
     sid = H5Screate_simple( 1, dim, NULL );
     fid = H5Fcreate( FILE68, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT );
-
-    charset_dtid = H5Tcreate( H5T_COMPOUND, sizeof( CharSetInfo ) );
-
-    ascii_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
     status = H5Tset_cset( ascii_dtid, H5T_CSET_ASCII );
     HDassert(status >= 0);
     H5Tinsert( charset_dtid, "ascii", HOFFSET(CharSetInfo, ascii_p_ ), ascii_dtid );
 
-    utf8_dtid = H5Tcreate( H5T_STRING, H5T_VARIABLE );
     status = H5Tset_cset( utf8_dtid, H5T_CSET_UTF8 );
     HDassert(status >= 0);
     H5Tinsert( charset_dtid, "utf8", HOFFSET( CharSetInfo, utf8_p_ ), utf8_dtid );
