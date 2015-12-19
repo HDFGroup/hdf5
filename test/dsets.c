@@ -10069,6 +10069,80 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function: test_zero_dim_dset
+ *
+ * Purpose:     Tests support for reading a 1D chunled dataset with 
+ *              dimension size = 0.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              Wednesdat, July 9, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_zero_dim_dset(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hid_t       dsid = -1;      /* Dataset ID */
+    hsize_t     dim, chunk_dim; /* Dataset and chunk dimensions */
+    int         data[1];
+
+    TESTING("shrinking large chunk");
+
+    h5_fixname(FILENAME[16], fapl, filename, sizeof filename);
+
+    /* Create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+
+    /* Set 1 chunk size */
+    chunk_dim = 1;
+    if(H5Pset_chunk(dcpl, 1, &chunk_dim) < 0) FAIL_STACK_ERROR
+
+    /* Create 1D dataspace with 0 dim size */
+    dim = 0;
+    if((sid = H5Screate_simple(1, &dim, NULL)) < 0) FAIL_STACK_ERROR
+
+    /* Create chunked dataset */
+    if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* write 0 elements from dataset */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0) FAIL_STACK_ERROR
+
+    /* Read 0 elements from dataset */
+    if(H5Dread(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0) FAIL_STACK_ERROR
+
+    /* Close everything */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_zero_dim_dset() */
+
+
+/*-------------------------------------------------------------------------
  * Function: test_swmr_non_latest
  *
  * Purpose: Checks that a file created with either:
@@ -10669,80 +10743,6 @@ error:
     } H5E_END_TRY;
     return -1;
 } /* test_bt2_hdr_fd() */
-
-
-/*-------------------------------------------------------------------------
- * Function: test_zero_dim_dset
- *
- * Purpose:     Tests support for reading a 1D chunled dataset with 
- *              dimension size = 0.
- *
- * Return:      Success: 0
- *              Failure: -1
- *
- * Programmer:  Mohamad Chaarawi
- *              Wednesdat, July 9, 2014
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-test_zero_dim_dset(hid_t fapl)
-{
-    char        filename[FILENAME_BUF_SIZE];
-    hid_t       fid = -1;       /* File ID */
-    hid_t       dcpl = -1;      /* Dataset creation property list ID */
-    hid_t       sid = -1;       /* Dataspace ID */
-    hid_t       dsid = -1;      /* Dataset ID */
-    hsize_t     dim, chunk_dim; /* Dataset and chunk dimensions */
-    int         data[1];
-
-    TESTING("shrinking large chunk");
-
-    h5_fixname(FILENAME[16], fapl, filename, sizeof filename);
-
-    /* Create file */
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
-
-    /* Create dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
-
-    /* Set 1 chunk size */
-    chunk_dim = 1;
-    if(H5Pset_chunk(dcpl, 1, &chunk_dim) < 0) FAIL_STACK_ERROR
-
-    /* Create 1D dataspace with 0 dim size */
-    dim = 0;
-    if((sid = H5Screate_simple(1, &dim, NULL)) < 0) FAIL_STACK_ERROR
-
-    /* Create chunked dataset */
-    if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
-
-    /* write 0 elements from dataset */
-    if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0) FAIL_STACK_ERROR
-
-    /* Read 0 elements from dataset */
-    if(H5Dread(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data) < 0) FAIL_STACK_ERROR
-
-    /* Close everything */
-    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
-    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
-    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
-
-    PASSED();
-
-    return 0;
-
-error:
-    H5E_BEGIN_TRY {
-        H5Pclose(dcpl);
-        H5Dclose(dsid);
-        H5Sclose(sid);
-        H5Fclose(fid);
-    } H5E_END_TRY;
-    return -1;
-} /* end test_zero_dim_dset() */
 
 
 /*-------------------------------------------------------------------------
@@ -11851,38 +11851,38 @@ main(void)
         nerrors += (test_simple_io(envval, my_fapl) < 0		? 1 : 0);
         nerrors += (test_compact_io(my_fapl) < 0  		? 1 : 0);
         nerrors += (test_max_compact(my_fapl) < 0  		? 1 : 0);
-        nerrors += (test_conv_buffer(file) < 0		? 1 : 0);
+        nerrors += (test_conv_buffer(file) < 0		        ? 1 : 0);
         nerrors += (test_tconv(file) < 0			? 1 : 0);
         nerrors += (test_filters(file, my_fapl) < 0		? 1 : 0);
         nerrors += (test_onebyte_shuffle(file) < 0 		? 1 : 0);
-        nerrors += (test_nbit_int(file) < 0 		? 1 : 0);
-        nerrors += (test_nbit_float(file) < 0         	? 1 : 0);
-        nerrors += (test_nbit_double(file) < 0         	? 1 : 0);
-        nerrors += (test_nbit_array(file) < 0 		? 1 : 0);
+        nerrors += (test_nbit_int(file) < 0 		        ? 1 : 0);
+        nerrors += (test_nbit_float(file) < 0         	        ? 1 : 0);
+        nerrors += (test_nbit_double(file) < 0         	        ? 1 : 0);
+        nerrors += (test_nbit_array(file) < 0 		        ? 1 : 0);
         nerrors += (test_nbit_compound(file) < 0 		? 1 : 0);
         nerrors += (test_nbit_compound_2(file) < 0 		? 1 : 0);
         nerrors += (test_nbit_compound_3(file) < 0 		? 1 : 0);
         nerrors += (test_nbit_int_size(file) < 0 		? 1 : 0);
         nerrors += (test_nbit_flt_size(file) < 0 		? 1 : 0);
         nerrors += (test_scaleoffset_int(file) < 0 		? 1 : 0);
-        nerrors += (test_scaleoffset_int_2(file) < 0 	? 1 : 0);
-        nerrors += (test_scaleoffset_float(file) < 0 	? 1 : 0);
-        nerrors += (test_scaleoffset_float_2(file) < 0 	? 1 : 0);
-        nerrors += (test_scaleoffset_double(file) < 0 	? 1 : 0);
+        nerrors += (test_scaleoffset_int_2(file) < 0 	        ? 1 : 0);
+        nerrors += (test_scaleoffset_float(file) < 0 	        ? 1 : 0);
+        nerrors += (test_scaleoffset_float_2(file) < 0 	        ? 1 : 0);
+        nerrors += (test_scaleoffset_double(file) < 0 	        ? 1 : 0);
         nerrors += (test_scaleoffset_double_2(file) < 0 	? 1 : 0);
-        nerrors += (test_multiopen (file) < 0		? 1 : 0);
-        nerrors += (test_types(file) < 0       		? 1 : 0);
-        nerrors += (test_userblock_offset(envval, my_fapl) < 0     	? 1 : 0);
+        nerrors += (test_multiopen (file) < 0		        ? 1 : 0);
+        nerrors += (test_types(file) < 0       		        ? 1 : 0);
+        nerrors += (test_userblock_offset(envval, my_fapl) < 0  ? 1 : 0);
         nerrors += (test_missing_filter(file) < 0		? 1 : 0);
-        nerrors += (test_can_apply(file) < 0		? 1 : 0);
-        nerrors += (test_can_apply2(file) < 0		? 1 : 0);
-        nerrors += (test_set_local(my_fapl) < 0		? 1 : 0);
+        nerrors += (test_can_apply(file) < 0		        ? 1 : 0);
+        nerrors += (test_can_apply2(file) < 0		        ? 1 : 0);
+        nerrors += (test_set_local(my_fapl) < 0		        ? 1 : 0);
         nerrors += (test_can_apply_szip(file) < 0		? 1 : 0);
-        nerrors += (test_compare_dcpl(file) < 0		? 1 : 0);
-        nerrors += (test_copy_dcpl(file, my_fapl) < 0	? 1 : 0);
+        nerrors += (test_compare_dcpl(file) < 0		        ? 1 : 0);
+        nerrors += (test_copy_dcpl(file, my_fapl) < 0	        ? 1 : 0);
         nerrors += (test_filter_delete(file) < 0		? 1 : 0);
-        nerrors += (test_filters_endianess() < 0	? 1 : 0);
-        nerrors += (test_zero_dims(file) < 0		? 1 : 0);
+        nerrors += (test_filters_endianess() < 0	        ? 1 : 0);
+        nerrors += (test_zero_dims(file) < 0		        ? 1 : 0);
         nerrors += (test_missing_chunk(file) < 0		? 1 : 0);
         nerrors += (test_random_chunks(my_fapl) < 0		? 1 : 0);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -11902,10 +11902,10 @@ main(void)
         nerrors += (test_single_chunk(my_fapl) < 0              ? 1 : 0);	
         nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
         nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
-        nerrors += (test_swmr_non_latest(envval, my_fapl) < 0 ? 1 : 0);
-        nerrors += (test_earray_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
-        nerrors += (test_farray_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
-        nerrors += (test_bt2_hdr_fd(envval, my_fapl) < 0 ? 1 : 0);
+        nerrors += (test_swmr_non_latest(envval, my_fapl) < 0   ? 1 : 0);
+        nerrors += (test_earray_hdr_fd(envval, my_fapl) < 0     ? 1 : 0);
+        nerrors += (test_farray_hdr_fd(envval, my_fapl) < 0     ? 1 : 0);
+        nerrors += (test_bt2_hdr_fd(envval, my_fapl) < 0        ? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;

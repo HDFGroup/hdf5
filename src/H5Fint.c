@@ -1141,12 +1141,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 
             if(NULL == (lf = H5FD_open(name, flags, fapl_id, HADDR_UNDEF)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
-
         } /* end if */
 
-	/* Place an advisory lock on the file */
+	/* Place an advisory lock on the file & create the 'top' file structure */
         if((H5FD_lock(lf, (hbool_t)((flags & H5F_ACC_RDWR) ? TRUE : FALSE)) < 0) ||
-           (NULL == (file = H5F_new(NULL, flags, fcpl_id, fapl_id, lf)))) {
+                (NULL == (file = H5F_new(NULL, flags, fcpl_id, fapl_id, lf)))) {
             if(H5FD_close(lf) < 0) /* Closing will remove the lock */
                 HDONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to lock the file or initialize file structure")

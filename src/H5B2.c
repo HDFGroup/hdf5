@@ -139,7 +139,6 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
 {
     H5B2_t      *bt2 = NULL;            /* Pointer to the B-tree */
     H5B2_hdr_t  *hdr = NULL;            /* Pointer to the B-tree header */
-    H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     haddr_t     hdr_addr;               /* B-tree header address */
     H5B2_t      *ret_value = NULL;      /* Return value */
 
@@ -163,12 +162,8 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for v2 B-tree info")
 
     /* Look up the B-tree header */
-    cache_udata.f = f;
-    cache_udata.parent = parent;
-    cache_udata.addr = hdr_addr;
-    cache_udata.ctx_udata = ctx_udata;
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &cache_udata, H5AC__NO_FLAGS_SET)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree header")
+    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, hdr_addr, ctx_udata, parent, H5AC__NO_FLAGS_SET)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect v2 B-tree header")
 
     /* Point v2 B-tree wrapper at header and bump it's ref count */
     bt2->hdr = hdr;
@@ -186,7 +181,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     ret_value = bt2;
 
 done:
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5B2__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to release v2 B-tree header")
     if(!ret_value && bt2)
         if(H5B2_close(bt2, dxpl_id) < 0)
@@ -215,7 +210,6 @@ H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata, void *parent)
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
-    H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     H5B2_t	*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -225,12 +219,8 @@ H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata, void *parent)
     HDassert(H5F_addr_defined(addr));
 
     /* Look up the B-tree header */
-    cache_udata.f = f;
-    cache_udata.parent = parent;
-    cache_udata.addr = addr;
-    cache_udata.ctx_udata = ctx_udata;
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load B-tree header")
+    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, addr, ctx_udata, parent, H5AC__READ_ONLY_FLAG)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect v2 B-tree header")
 
     /* Check for pending heap deletion */
     if(hdr->pending_delete)
@@ -256,7 +246,7 @@ H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata, void *parent)
     ret_value = bt2;
 
 done:
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5B2__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to release v2 B-tree header")
     if(!ret_value && bt2)
         if(H5B2_close(bt2, dxpl_id) < 0)
@@ -1388,7 +1378,7 @@ H5B2_close(H5B2_t *bt2, hid_t dxpl_id)
 
         /* Lock the v2 B-tree header into memory */
         /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-        if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(bt2->f, dxpl_id, H5AC_BT2_HDR, bt2_addr, NULL, H5AC__NO_FLAGS_SET)))
+        if(NULL == (hdr = H5B2__hdr_protect(bt2->f, dxpl_id, bt2_addr, NULL, NULL, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header")
 
         /* Set the shared v2 B-tree header's file context for this operation */
@@ -1450,7 +1440,6 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata,
     void *parent, H5B2_remove_t op, void *op_data)
 {
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
-    H5B2_hdr_cache_ud_t cache_udata;    /* User-data for callback */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1463,11 +1452,7 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata,
 #ifdef QAK
 HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 #endif /* QAK */
-    cache_udata.f = f;
-    cache_udata.parent = parent;
-    cache_udata.addr = addr;
-    cache_udata.ctx_udata = ctx_udata;
-    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, addr, &cache_udata, H5AC__NO_FLAGS_SET)))
+    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, addr, ctx_udata, parent, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header")
 
     /* Remember the callback & context for later */
@@ -1489,7 +1474,7 @@ HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 
 done:
     /* Unprotect the header, if an error occurred */
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5B2__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header")
 
     FUNC_LEAVE_NOAPI(ret_value)

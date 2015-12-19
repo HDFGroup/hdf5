@@ -3428,7 +3428,7 @@ done:
          ( H5C_validate_pinned_entry_list(cache_ptr) < 0 ) ||
          ( H5C_validate_lru_list(cache_ptr) < 0 ) ) {
 
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, \
                     "an extreme sanity check failed on exit.\n");
     }
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
@@ -7610,8 +7610,8 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
     if((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
-            (H5C_validate_pinned_entry_list(cache_ptr) < 0  ||
-            (H5C_validate_lru_list(cache_ptr) < 0)) {
+            (H5C_validate_pinned_entry_list(cache_ptr) < 0) ||
+            (H5C_validate_lru_list(cache_ptr) < 0))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry.\n");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
@@ -9439,10 +9439,8 @@ H5C_validate_lru_list(H5C_t * cache_ptr)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
     }
 
-    if ( ( cache_ptr->LRU_list_len < 0 ) || ( cache_ptr->LRU_list_size < 0 ) ) {
-
+    if(cache_ptr->LRU_list_len < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
-    }
 
     if ( ( cache_ptr->LRU_list_len == 1 )
          &&
@@ -9569,10 +9567,8 @@ H5C_validate_pinned_entry_list(H5C_t * cache_ptr)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
     }
 
-    if ( ( cache_ptr->pel_len < 0 ) || ( cache_ptr->pel_size < 0 ) ) {
-
+    if(cache_ptr->pel_len < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
-    }
 
     if ( ( cache_ptr->pel_len == 1 )
          &&
@@ -9692,21 +9688,12 @@ H5C_validate_protected_entry_list(H5C_t * cache_ptr)
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
 
-    if ( ( ( cache_ptr->pl_head_ptr == NULL )
-           ||
-           ( cache_ptr->pl_tail_ptr == NULL )
-         )
-         &&
-         ( cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr )
-       ) {
-
+    if(((cache_ptr->pl_head_ptr == NULL) || (cache_ptr->pl_tail_ptr == NULL))
+             && (cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
-    }
 
-    if ( ( cache_ptr->pl_len < 0 ) || ( cache_ptr->pl_size < 0 ) ) {
-
+    if(cache_ptr->pl_len < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
-    }
 
     if ( ( cache_ptr->pl_len == 1 )
          &&

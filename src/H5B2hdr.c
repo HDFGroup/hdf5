@@ -220,10 +220,9 @@ HDmemset(hdr->page, 0, hdr->node_size);
     hdr->shadowed_internal = NULL;
 
     /* Create the callback context, if the callback exists */
-    if(hdr->cls->crt_context) {
+    if(hdr->cls->crt_context)
         if(NULL == (hdr->cb_ctx = (*hdr->cls->crt_context)(ctx_udata)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, FAIL, "unable to create v2 B-tree client callback context")
-    } /* end if */
 
 done:
     if(ret_value < 0)
@@ -499,6 +498,83 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5B2__hdr_protect
+ *
+ * Purpose:	Convenience wrapper around protecting v2 B-tree header
+ *
+ * Return:	Non-NULL pointer to header on success/NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec 18 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+H5B2_hdr_t *
+H5B2__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t hdr_addr, void *ctx_udata,
+    void *parent, unsigned flags)
+{
+    H5B2_hdr_cache_ud_t udata;          /* User data for cache callbacks */
+    H5B2_hdr_t *ret_value = NULL;       /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(H5F_addr_defined(hdr_addr));
+
+    /* only the H5AC__READ_ONLY_FLAG may appear in flags */
+    HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
+
+    /* Set up user data for cache callbacks */
+    udata.f = f;
+    udata.parent = parent;
+    udata.addr = hdr_addr;
+    udata.ctx_udata = ctx_udata;
+
+    /* Protect the header */
+    if(NULL == (ret_value = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &udata, flags)))
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load v2 B-tree header, address = %llu", (unsigned long long)hdr_addr)
+    ret_value->f = f;   /* (Must be set again here, in case the header was already in the cache -QAK) */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__hdr_protect() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2__hdr_unprotect
+ *
+ * Purpose:	Convenience wrapper around unprotecting v2 B-tree header
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec 18 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2__hdr_unprotect(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned cache_flags)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Unprotect the header */
+    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_HDR, hdr->addr, hdr, cache_flags) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to unprotect v2 B-tree header, address = %llu", (unsigned long long)hdr->addr)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__hdr_unprotect() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2__hdr_free
  *
  * Purpose:	Free B-tree header info
@@ -620,8 +696,8 @@ H5B2__hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id)
 
 done:
     /* Unprotect the header with appropriate flags */
-    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_HDR, hdr->addr, hdr, cache_flags) < 0)
-        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree header")
+    if(H5B2__hdr_unprotect(hdr, dxpl_id, cache_flags) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release v2 B-tree header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__hdr_delete() */
