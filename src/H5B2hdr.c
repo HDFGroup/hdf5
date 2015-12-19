@@ -109,7 +109,7 @@ H5FL_SEQ_DEFINE(H5B2_node_info_t);
  */
 herr_t
 H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
-    void *parent, uint16_t depth)
+    uint16_t depth)
 {
     size_t sz_max_nrec;                 /* Temporary variable for range checking */
     unsigned u_max_nrec_size;           /* Temporary variable for range checking */
@@ -133,7 +133,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
     HDassert(cparam->merge_percent < (cparam->split_percent / 2));
 
     /* Initialize basic information */
-    hdr->parent = parent;
+    hdr->parent = NULL;
     hdr->rc = 0;
     hdr->pending_delete = FALSE;
 
@@ -294,7 +294,7 @@ done:
  */
 haddr_t
 H5B2__hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
-    void *ctx_udata, void *parent)
+    void *ctx_udata)
 {
     H5B2_hdr_t *hdr = NULL;             /* The new v2 B-tree header information */
     haddr_t ret_value = HADDR_UNDEF;    /* Return value */
@@ -312,7 +312,7 @@ H5B2__hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "allocation failed for B-tree header")
 
     /* Initialize shared B-tree info */
-    if(H5B2__hdr_init(hdr, cparam, ctx_udata, parent, (uint16_t)0) < 0)
+    if(H5B2__hdr_init(hdr, cparam, ctx_udata, (uint16_t)0) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, HADDR_UNDEF, "can't create shared B-tree info")
 
     /* Allocate space for the header on disk */
@@ -512,7 +512,7 @@ done:
  */
 H5B2_hdr_t *
 H5B2__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t hdr_addr, void *ctx_udata,
-    void *parent, unsigned flags)
+    unsigned flags)
 {
     H5B2_hdr_cache_ud_t udata;          /* User data for cache callbacks */
     H5B2_hdr_t *ret_value = NULL;       /* Return value */
@@ -528,7 +528,6 @@ H5B2__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t hdr_addr, void *ctx_udata,
 
     /* Set up user data for cache callbacks */
     udata.f = f;
-    udata.parent = parent;
     udata.addr = hdr_addr;
     udata.ctx_udata = ctx_udata;
 

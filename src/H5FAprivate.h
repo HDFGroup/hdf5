@@ -128,7 +128,6 @@ H5_DLL herr_t H5FA_get_addr(const H5FA_t *fa, haddr_t *addr);
 H5_DLL herr_t H5FA_set(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, const void *elmt);
 H5_DLL herr_t H5FA_get(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, void *elmt);
 H5_DLL herr_t H5FA_depend(H5AC_info_t *parent_entry, H5FA_t *fa);
-H5_DLL herr_t H5FA_undepend(H5AC_info_t *parent_entry, H5FA_t *fa);
 H5_DLL herr_t H5FA_iterate(H5FA_t *fa, hid_t dxpl_id, H5FA_operator_t op, void *udata);
 H5_DLL herr_t H5FA_close(H5FA_t *fa, hid_t dxpl_id);
 H5_DLL herr_t H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata);

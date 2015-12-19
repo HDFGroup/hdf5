@@ -328,7 +328,7 @@ H5B2__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
 
     /* Initialize B-tree header info */
     cparam.cls = H5B2_client_class_g[id];
-    if(H5B2__hdr_init(hdr, &cparam, udata->ctx_udata, udata->parent, depth) < 0)
+    if(H5B2__hdr_init(hdr, &cparam, udata->ctx_udata, depth) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't initialize B-tree header info")
 
     /* Set the B-tree header's address */
@@ -501,23 +501,35 @@ H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
 
     /* Check if the file was opened with SWMR-write access */
     if(hdr->swmr_write) {
-        HDassert(hdr->parent);
         switch(action) {
             case H5AC_NOTIFY_ACTION_AFTER_INSERT:
 	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
-                /* Create flush dependency on parent */
-                if(H5B2__create_flush_depend((H5AC_info_t *)hdr->parent, (H5AC_info_t *)hdr) < 0)
-                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
-                break;
-
 	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
 		/* do nothing */
-		break;
+                break;
 
-            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-		/* Destroy flush dependency on parent */
-		if(H5B2__destroy_flush_depend((H5AC_info_t *)hdr->parent, (H5AC_info_t *)hdr) < 0)
-		    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+	    case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* If hdr->parent != NULL, the v2 B-tree header
+                 * must be employed as the index for a chunked
+                 * data set which has been modified by the SWMR writer.
+                 * 
+                 * In this case, hdr->parent must contain a
+                 * pointer to the object header proxy which is the flush 
+                 * dependency parent of the v2 B-tree header.
+                 *
+                 * hdr->parent is used to destroy the flush dependency
+                 * before the v2 B-tree header is evicted.
+                 */
+                if(hdr->parent) {
+                    /* Sanity checks */
+                    HDassert(((H5AC_info_t *)hdr->parent)->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                    HDassert(((H5AC_info_t *)hdr->parent)->type);
+                    HDassert(((H5AC_info_t *)hdr->parent)->type->id == H5AC_OHDR_PROXY_ID);
+
+		    /* Destroy flush dependency on object header proxy */
+		    if(H5B2__destroy_flush_depend((H5AC_info_t *)hdr->parent, (H5AC_info_t *)hdr) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+		} /* end if */
 		break;
 
             default:

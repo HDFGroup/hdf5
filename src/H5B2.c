@@ -134,8 +134,7 @@ H5FL_DEFINE_STATIC(H5B2_t);
  *-------------------------------------------------------------------------
  */
 H5B2_t *
-H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
-    void *ctx_udata, void *parent)
+H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam, void *ctx_udata)
 {
     H5B2_t      *bt2 = NULL;            /* Pointer to the B-tree */
     H5B2_hdr_t  *hdr = NULL;            /* Pointer to the B-tree header */
@@ -154,7 +153,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     HDcompile_assert(H5B2_NUM_BTREE_ID == NELMTS(H5B2_client_class_g));
 
     /* Create shared v2 B-tree header */
-    if(HADDR_UNDEF == (hdr_addr = H5B2__hdr_create(f, dxpl_id, cparam, ctx_udata, parent)))
+    if(HADDR_UNDEF == (hdr_addr = H5B2__hdr_create(f, dxpl_id, cparam, ctx_udata)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, NULL, "can't create v2 B-tree header")
 
     /* Create v2 B-tree wrapper */
@@ -162,7 +161,7 @@ H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for v2 B-tree info")
 
     /* Look up the B-tree header */
-    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, hdr_addr, ctx_udata, parent, H5AC__NO_FLAGS_SET)))
+    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, hdr_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect v2 B-tree header")
 
     /* Point v2 B-tree wrapper at header and bump it's ref count */
@@ -206,7 +205,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5B2_t *
-H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata, void *parent)
+H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata)
 {
     H5B2_t	*bt2 = NULL;            /* Pointer to the B-tree */
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
@@ -219,7 +218,7 @@ H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata, void *parent)
     HDassert(H5F_addr_defined(addr));
 
     /* Look up the B-tree header */
-    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, addr, ctx_udata, parent, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to protect v2 B-tree header")
 
     /* Check for pending heap deletion */
@@ -904,12 +903,6 @@ done:
  *
  * Purpose:	Removes the n'th record from a B-tree.
  *
- *              The 'udata' parameter is only used to pass through to the
- *              crt_flush_dep and upd_flush_dep callbacks, so it only
- *              needs to contain enough information for those (if any - it
- *              can be NULL).  Specifically, it does not need to identify
- *              the specific record to search for.
- *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
@@ -920,7 +913,7 @@ done:
  */
 herr_t
 H5B2_remove_by_idx(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
-    hsize_t idx, void *udata, H5B2_remove_t op, void *op_data)
+    hsize_t idx, H5B2_remove_t op, void *op_data)
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
@@ -954,7 +947,7 @@ H5B2_remove_by_idx(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
 
         if(H5B2__remove_internal_by_idx(hdr, dxpl_id, &depth_decreased, NULL,
                 NULL, hdr->depth, &(hdr->cache_info), NULL, &hdr->root,
-                H5B2_POS_ROOT, idx, udata, op, op_data) < 0)
+                H5B2_POS_ROOT, idx, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
 
         /* Check for decreasing the depth of the B-tree */
@@ -1378,7 +1371,7 @@ H5B2_close(H5B2_t *bt2, hid_t dxpl_id)
 
         /* Lock the v2 B-tree header into memory */
         /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-        if(NULL == (hdr = H5B2__hdr_protect(bt2->f, dxpl_id, bt2_addr, NULL, NULL, H5AC__NO_FLAGS_SET)))
+        if(NULL == (hdr = H5B2__hdr_protect(bt2->f, dxpl_id, bt2_addr, NULL, H5AC__NO_FLAGS_SET)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header")
 
         /* Set the shared v2 B-tree header's file context for this operation */
@@ -1437,7 +1430,7 @@ done:
  */
 herr_t
 H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata,
-    void *parent, H5B2_remove_t op, void *op_data)
+    H5B2_remove_t op, void *op_data)
 {
     H5B2_hdr_t	*hdr = NULL;            /* Pointer to the B-tree header */
     herr_t	ret_value = SUCCEED;    /* Return value */
@@ -1452,7 +1445,7 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata,
 #ifdef QAK
 HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 #endif /* QAK */
-    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, addr, ctx_udata, parent, H5AC__NO_FLAGS_SET)))
+    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, addr, ctx_udata, H5AC__NO_FLAGS_SET)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header")
 
     /* Remember the callback & context for later */
@@ -1509,64 +1502,38 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /*
      * Check arguments.
+     *
+     * At present, this function is only used to setup a flush dependency
+     * between an object header proxy and the v2 B-tree header when
+     * the B-tree is being used to index a chunked data set.
+     *
+     * Make sure that the parameters are congruent with this.
      */
     HDassert(bt2);
     HDassert(hdr);
-
-    /* Set the shared v2 B-tree header's file context for this operation */
-    bt2->hdr->f = bt2->f;
-
-    /* Set up flush dependency between parent entry and B-tree header */
-    if(H5B2__create_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on file metadata")
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_depend() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5B2_undepend
- *
- * Purpose:     Remove a child flush dependency between the v2 B-tree's
- *              header and another piece of metadata in the file.
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2012
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5B2_undepend(H5AC_info_t *parent_entry, H5B2_t *bt2)
-{
-    /* Local variables */
-    H5B2_hdr_t  *hdr = bt2->hdr;        /* Header for B-tree */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(SUCCEED)
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
+    HDassert(parent_entry);
+    HDassert(parent_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(parent_entry->type);
+    HDassert(parent_entry->type->id == H5AC_OHDR_PROXY_ID);
+    HDassert(hdr->parent == NULL || hdr->parent == parent_entry);
 
     /*
-     * Check arguments.
+     * Check to see if the flush dependency between the object header proxy
+     * and the v2 B-tree header has already been setup.  If it hasn't, then
+     * set it up.
      */
-    HDassert(bt2);
-    HDassert(hdr);
+    if(NULL == hdr->parent) {
+        /* Set the shared v2 B-tree header's file context for this operation */
+        bt2->hdr->f = bt2->f;
 
-    /* Set the shared v2 B-tree header's file context for this operation */
-    bt2->hdr->f = bt2->f;
+        /* Set up flush dependency between parent entry and B-tree header */
+        if(H5B2__create_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on file metadata")
 
-    /* Remove flush dependency between parent entry and B-tree header */
-    if(H5B2__destroy_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency on file metadata")
+	hdr->parent = parent_entry;
+    } /* end if */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B2_undepend() */
+} /* end H5B2_depend() */
 

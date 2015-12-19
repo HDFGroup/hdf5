@@ -129,9 +129,8 @@ typedef struct H5B2_t H5B2_t;
 /* Library-private Function Prototypes */
 /***************************************/
 H5_DLL H5B2_t *H5B2_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
-    void *ctx_udata, void *parent);
-H5_DLL H5B2_t *H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata,
-    void *parent);
+    void *ctx_udata);
+H5_DLL H5B2_t *H5B2_open(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udata);
 H5_DLL herr_t H5B2_get_addr(const H5B2_t *bt2, haddr_t *addr/*out*/);
 H5_DLL herr_t H5B2_insert(H5B2_t *bt2, hid_t dxpl_id, void *udata);
 H5_DLL herr_t H5B2_iterate(H5B2_t *bt2, hid_t dxpl_id, H5B2_operator_t op,
@@ -147,20 +146,19 @@ H5_DLL herr_t H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata,
 H5_DLL herr_t H5B2_remove(H5B2_t *b2, hid_t dxpl_id, void *udata,
     H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2_remove_by_idx(H5B2_t *bt2, hid_t dxpl_id,
-    H5_iter_order_t order, hsize_t idx, void *udata, H5B2_remove_t op,
+    H5_iter_order_t order, hsize_t idx, H5B2_remove_t op,
     void *op_data);
 H5_DLL herr_t H5B2_get_nrec(const H5B2_t *bt2, hsize_t *nrec);
 H5_DLL herr_t H5B2_size(H5B2_t *bt2, hid_t dxpl_id,
     hsize_t *btree_size);
 H5_DLL herr_t H5B2_close(H5B2_t *bt2, hid_t dxpl_id);
 H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    void *ctx_udata, void *parent, H5B2_remove_t op, void *op_data);
+    void *ctx_udata, H5B2_remove_t op, void *op_data);
 H5_DLL htri_t H5B2_support(H5B2_t *bt2, hid_t dxpl_id, void *udata,
     H5AC_info_t *child);
 H5_DLL herr_t H5B2_unsupport(H5B2_t *bt2, hid_t dxpl_id, void *udata,
     H5AC_info_t *child);
 H5_DLL herr_t H5B2_depend(H5AC_info_t *parent_entry, H5B2_t *bt2);
-H5_DLL herr_t H5B2_undepend(H5AC_info_t *parent_entry, H5B2_t *bt2);
 
 /* Statistics routines */
 H5_DLL herr_t H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info);

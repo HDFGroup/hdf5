@@ -1045,7 +1045,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FA_undepend
+ * Function:    H5FS_undepend
  *
  * Purpose:     Remove a child flush dependency between the free space
  *              manager's and another piece of metadata in the file.

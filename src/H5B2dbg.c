@@ -119,7 +119,7 @@ H5B2__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "unable to create v2 B-tree debugging context")
 
     /* Load the B-tree header  */
-    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, addr, dbg_ctx, NULL, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree header")
 
     /* Set file pointer for this B-tree operation */
@@ -229,7 +229,7 @@ H5B2__int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     } /* end if */
 
     /* Load the B-tree header */
-    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, hdr_addr, dbg_ctx, NULL, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load v2 B-tree header")
 
     /* Set file pointer for this B-tree operation */
@@ -350,7 +350,7 @@ H5B2__leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTGET, FAIL, "unable to create v2 B-tree debugging context")
 
     /* Load the B-tree header */
-    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, hdr_addr, dbg_ctx, NULL, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (hdr = H5B2__hdr_protect(f, dxpl_id, hdr_addr, dbg_ctx, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect v2 B-tree header")
 
     /* Set file pointer for this B-tree operation */
