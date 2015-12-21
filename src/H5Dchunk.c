@@ -1885,6 +1885,9 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             void *chunk = NULL;             /* Pointer to locked chunk buffer */
             htri_t cacheable;               /* Whether the chunk is cacheable */
 
+	    /* Set chunk's [scaled] coordinates */
+	    io_info->store->chunk.scaled = chunk_info->scaled;
+
             /* Determine if we should use the chunk cache */
             if((cacheable = H5D__chunk_cacheable(io_info, udata.chunk_block.offset, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable")
@@ -1894,9 +1897,6 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 /* Compute # of bytes accessed in chunk */
                 H5_CHECK_OVERFLOW(type_info->src_type_size, /*From:*/ size_t, /*To:*/ uint32_t);
                 src_accessed_bytes = chunk_info->chunk_points * (uint32_t)type_info->src_type_size;
-
-                /* Set chunk's [scaled] coordinates */
-                io_info->store->chunk.scaled = chunk_info->scaled;
 
                 /* Lock the chunk into the cache */
                 if(NULL == (chunk = H5D__chunk_lock(io_info, &udata, FALSE)))
@@ -2011,6 +2011,9 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         HDassert((H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length > 0) || 
                 (!H5F_addr_defined(udata.chunk_block.offset) && udata.chunk_block.length == 0));
 
+	/* Set chunk's [scaled] coordinates */
+	io_info->store->chunk.scaled = chunk_info->scaled;
+
         /* Determine if we should use the chunk cache */
         if((cacheable = H5D__chunk_cacheable(io_info, udata.chunk_block.offset, TRUE)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable")
@@ -2028,9 +2031,6 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                     (chunk_info->chunk_points * type_info->src_type_size) != ctg_store.contig.dset_size ||
 		    fm->fsel_type == H5S_SEL_POINTS)
                 entire_chunk = FALSE;
-
-            /* Set chunk's [scaled] coordinates */
-            io_info->store->chunk.scaled = chunk_info->scaled;
 
             /* Lock the chunk into the cache */
             if(NULL == (chunk = H5D__chunk_lock(io_info, &udata, entire_chunk)))
@@ -3684,9 +3684,6 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             } /* end if */
 
             /* Insert the chunk record into the index */
-            /* (Note that this isn't safe, from a SWMR perspective, unlike
-             *  serial operation. -QAK
-             */
 	    if(need_insert && ops->insert)
                 if((ops->insert)(&idx_info, &udata, dset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk addr into index")
