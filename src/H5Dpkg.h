@@ -455,8 +455,6 @@ typedef struct H5D_shared_t {
     hid_t               type_id;        /* ID for dataset's datatype    */
     H5T_t              *type;           /* Datatype for this dataset     */
     H5S_t              *space;          /* Dataspace of this dataset    */
-    hbool_t             space_dirty;    /* Whether the dataspace info needs to be flushed to the file */
-    hbool_t             layout_dirty;   /* Whether the layout info needs to be flushed to the file */
     hid_t               dcpl_id;        /* Dataset creation property id */
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5O_layout_t        layout;         /* Data layout                  */
@@ -765,17 +763,6 @@ H5_DLL herr_t H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf
 H5_DLL herr_t H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts,
     hid_t dxpl_id);
 H5_DLL herr_t H5D__fill_term(H5D_fill_buf_info_t *fb_info);
-
-/* Functions that operate on chunk proxy objects */
-H5_DLL herr_t H5D__chunk_proxy_create(H5D_t *dset, hid_t dxpl_id,
-    H5D_chunk_ud_t *udata, H5D_rdcc_ent_t *ent);
-H5_DLL herr_t H5D__chunk_proxy_remove(const H5D_t *dset, hid_t dxpl_it,
-    H5D_rdcc_ent_t *ent);
-H5_DLL herr_t H5D__chunk_proxy_mark(H5D_rdcc_ent_t *ent, hbool_t dirty);
-H5_DLL herr_t H5D__chunk_proxy_create_flush_dep(H5D_rdcc_ent_t *ent,
-    void *parent);
-H5_DLL herr_t H5D__chunk_proxy_update_flush_dep(H5D_rdcc_ent_t *ent,
-    void *old_parent, void *new_parent);
 
 #ifdef H5_HAVE_PARALLEL
 

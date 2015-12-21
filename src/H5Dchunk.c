@@ -1937,7 +1937,6 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 	    /* Set chunk's [scaled] coordinates */
 	    io_info->store->chunk.scaled = chunk_info->scaled;
 
-            /* Load the chunk into cache and lock it. */
             /* Determine if we should use the chunk cache */
             if((cacheable = H5D__chunk_cacheable(io_info, udata.chunk_block.offset, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable")
