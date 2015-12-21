@@ -40,19 +40,19 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+static void *H5O__layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned mesg_flags, unsigned *ioflags, const uint8_t *p);
-static herr_t H5O_layout_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void *H5O_layout_copy(const void *_mesg, void *_dest);
-static size_t H5O_layout_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
-static herr_t H5O_layout_reset(void *_mesg);
-static herr_t H5O_layout_free(void *_mesg);
-static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+static herr_t H5O__layout_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void *H5O__layout_copy(const void *_mesg, void *_dest);
+static size_t H5O__layout_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__layout_reset(void *_mesg);
+static herr_t H5O__layout_free(void *_mesg);
+static herr_t H5O__layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     void *_mesg);
-static void *H5O_layout_copy_file(H5F_t *file_src, void *mesg_src,
+static void *H5O__layout_copy_file(H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
     H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
-static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
+static herr_t H5O__layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
 			       int indent, int fwidth);
 
 /* This message derives from H5O message class */
@@ -61,22 +61,22 @@ const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     "layout",               	/*message name for debugging    */
     sizeof(H5O_layout_t),   	/*native message size           */
     0,				/* messages are sharable?       */
-    H5O_layout_decode,      	/*decode message                */
-    H5O_layout_encode,      	/*encode message                */
-    H5O_layout_copy,        	/*copy the native value         */
-    H5O_layout_size,        	/*size of message on disk       */
-    H5O_layout_reset,		/*reset method                  */
-    H5O_layout_free,        	/*free the struct		*/
-    H5O_layout_delete,	        /* file delete method		*/
+    H5O__layout_decode,      	/*decode message                */
+    H5O__layout_encode,      	/*encode message                */
+    H5O__layout_copy,        	/*copy the native value         */
+    H5O__layout_size,        	/*size of message on disk       */
+    H5O__layout_reset,		/*reset method                  */
+    H5O__layout_free,        	/*free the struct		*/
+    H5O__layout_delete,	        /* file delete method		*/
     NULL,			/* link method			*/
     NULL,			/*set share method		*/
     NULL,		    	/*can share method		*/
     NULL,			/* pre copy native value to file */
-    H5O_layout_copy_file,	/* copy native value to file    */
+    H5O__layout_copy_file,	/* copy native value to file    */
     NULL,		        /* post copy native value to file */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
-    H5O_layout_debug       	/*debug the message             */
+    H5O__layout_debug       	/*debug the message             */
 }};
 
 
@@ -85,7 +85,7 @@ H5FL_DEFINE(H5O_layout_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_layout_decode
+ * Function:    H5O__layout_decode
  *
  * Purpose:     Decode an data layout message and return a pointer to a
  *              new one created with malloc().
@@ -100,7 +100,7 @@ H5FL_DEFINE(H5O_layout_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
+H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_layout_t           *mesg = NULL;
@@ -108,7 +108,7 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
     unsigned               u;
     void                   *ret_value = NULL;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -117,6 +117,7 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
     /* decode */
     if(NULL == (mesg = H5FL_CALLOC(H5O_layout_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    mesg->storage.type = H5D_LAYOUT_ERROR;
 
     mesg->version = *p++;
     if(mesg->version < H5O_LAYOUT_VERSION_1 || mesg->version > H5O_LAYOUT_VERSION_4)
@@ -133,6 +134,9 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
         /* Layout class */
         mesg->type = (H5D_layout_t)*p++;
         HDassert(H5D_CONTIGUOUS == mesg->type || H5D_CHUNKED == mesg->type || H5D_COMPACT == mesg->type);
+
+        /* Set the storage type */
+        mesg->storage.type = mesg->type;
 
         /* Reserved bytes */
         p += 5;
@@ -194,16 +198,21 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
         } /* end if */
     } /* end if */
     else {
-        /* Layout class */
+        /* Layout & storage class */
         mesg->type = mesg->storage.type = (H5D_layout_t)*p++;
 
         /* Interpret the rest of the message according to the layout class */
         switch(mesg->type) {
             case H5D_COMPACT:
+                /* Compact data size */
                 UINT16DECODE(p, mesg->storage.u.compact.size);
+
                 if(mesg->storage.u.compact.size > 0) {
+                    /* Allocate space for compact data */
                     if(NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for compact data buffer")
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed for compact data buffer")
+
+                    /* Compact data */
                     HDmemcpy(mesg->storage.u.compact.buf, p, mesg->storage.u.compact.size);
                     p += mesg->storage.u.compact.size;
                 } /* end if */
@@ -213,7 +222,10 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                 break;
 
             case H5D_CONTIGUOUS:
+                /* Contiguous storage address */
                 H5F_addr_decode(f, &p, &(mesg->storage.u.contig.addr));
+
+                /* Contiguous storage size */
                 H5F_DECODE_LENGTH(f, p, mesg->storage.u.contig.size);
 
                 /* Set the layout operations */
@@ -409,11 +421,11 @@ done:
     heap_block = (uint8_t *)H5MM_xfree(heap_block);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_layout_decode() */
+} /* end H5O__layout_decode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_layout_encode
+ * Function:    H5O__layout_encode
  *
  * Purpose:     Encodes a message.
  *
@@ -426,24 +438,10 @@ done:
  *      Quincey Koziol, 2004-5-21
  *      We write out version 3 messages by default now.
  *
- * Modifications:
- * 	Robb Matzke, 1998-07-20
- *	Rearranged the message to add a version number at the beginning.
- *
- *	Raymond Lu, 2002-2-26
- *	Added version number 2 case depends on if space has been allocated
- *	at the moment when layout header message is updated.
- *
- *      Quincey Koziol, 2004-5-21
- *      Added version number 3 case to straighten out problems with contiguous
- *      layout's sizes (was encoding them as 4-byte values when they were
- *      really n-byte values (where n usually is 8)) and additionally clean up
- *      the information written out.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     uint8_t                *heap_block = NULL;
@@ -451,7 +449,7 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
     unsigned               u;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -482,7 +480,10 @@ H5O_layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, c
             break;
 
         case H5D_CONTIGUOUS:
+            /* Contiguous storage address */
             H5F_addr_encode(f, &p, mesg->storage.u.contig.addr);
+
+            /* Contiguous storage size */
             H5F_ENCODE_LENGTH(f, p, mesg->storage.u.contig.size);
             break;
 
@@ -613,11 +614,11 @@ done:
     str_size = (size_t *)H5MM_xfree(str_size);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_layout_encode() */
+} /* end H5O__layout_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_layout_copy
+ * Function:    H5O__layout_copy
  *
  * Purpose:     Copies a message from _MESG to _DEST, allocating _DEST if
  *              necessary.
@@ -632,13 +633,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_layout_copy(const void *_mesg, void *_dest)
+H5O__layout_copy(const void *_mesg, void *_dest)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     H5O_layout_t           *dest = (H5O_layout_t *) _dest;
     void                   *ret_value = NULL;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(mesg);
@@ -665,6 +666,8 @@ H5O_layout_copy(const void *_mesg, void *_dest)
                 /* Copy over the raw data */
                 HDmemcpy(dest->storage.u.compact.buf, mesg->storage.u.compact.buf, dest->storage.u.compact.size);
             } /* end if */
+            else
+                HDassert(dest->storage.u.compact.buf == NULL);
             break;
 
         case H5D_CONTIGUOUS:
@@ -697,11 +700,11 @@ done:
             dest = H5FL_FREE(H5O_layout_t, dest);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_layout_copy() */
+} /* end H5O__layout_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_layout_size
+ * Function:    H5O__layout_size
  *
  * Purpose:     Returns the size of the raw message in bytes.  If it's
  *              compact dataset, the data part is also included.
@@ -717,12 +720,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     size_t                  ret_value = 0;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -733,11 +736,11 @@ H5O_layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const voi
     ret_value = H5D__layout_meta_size(f, mesg, TRUE);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_layout_size() */
+} /* end H5O__layout_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_layout_reset
+ * Function:	H5O__layout_reset
  *
  * Purpose:	Frees resources within a data type message, but doesn't free
  *		the message itself.
@@ -750,12 +753,12 @@ H5O_layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const voi
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_reset(void *_mesg)
+H5O__layout_reset(void *_mesg)
 {
     H5O_layout_t     *mesg = (H5O_layout_t *)_mesg;
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     if(mesg) {
         /* Free the compact storage buffer */
@@ -768,15 +771,16 @@ H5O_layout_reset(void *_mesg)
 
         /* Reset the message */
         mesg->type = H5D_CONTIGUOUS;
+        mesg->version = H5O_LAYOUT_VERSION_DEFAULT;
     } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_layout_reset() */
+} /* end H5O__layout_reset() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_layout_free
+ * Function:	H5O__layout_free
  *
  * Purpose:	Free's the message
  *
@@ -788,28 +792,25 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_free(void *_mesg)
+H5O__layout_free(void *_mesg)
 {
     H5O_layout_t     *mesg = (H5O_layout_t *) _mesg;
-    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(mesg);
 
     /* Free resources within the message */
-    if(H5O_layout_reset(mesg) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free message resources")
+    H5O__layout_reset(mesg);
 
-    mesg = H5FL_FREE(H5O_layout_t, mesg);
+    (void)H5FL_FREE(H5O_layout_t, mesg);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_layout_free() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O__layout_free() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_layout_delete
+ * Function:    H5O__layout_delete
  *
  * Purpose:     Free file space referenced by message
  *
@@ -821,12 +822,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
+H5O__layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 {
     H5O_layout_t *mesg = (H5O_layout_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(f);
@@ -865,11 +866,11 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_layout_delete() */
+} /* end H5O__layout_delete() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_layout_copy_file
+ * Function:    H5O__layout_copy_file
  *
  * Purpose:     Copies a message from _MESG to _DEST in file
  *
@@ -883,7 +884,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
+H5O__layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     hbool_t H5_ATTR_UNUSED *recompute_size, unsigned H5_ATTR_UNUSED *mesg_flags,
     H5O_copy_t *cpy_info, void *_udata, hid_t dxpl_id)
 {
@@ -893,29 +894,26 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     hbool_t             copied = FALSE;         /* Whether the data was copied */
     void               *ret_value = NULL;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(file_src);
     HDassert(layout_src);
     HDassert(file_dst);
 
-    /* Allocate space for the destination layout */
-    if(NULL == (layout_dst = H5FL_MALLOC(H5O_layout_t)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL, "memory allocation failed")
-
-    /* Copy the "top level" information */
-    *layout_dst = *layout_src;
+    /* Copy the layout information */
+    if(NULL == (layout_dst = (H5O_layout_t *)H5O__layout_copy(layout_src, NULL)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy layout")
 
     /* Copy the layout type specific information */
     switch(layout_src->type) {
         case H5D_COMPACT:
-	    if(layout_src->storage.u.compact.buf) {
+            if(layout_src->storage.u.compact.buf) {
                 /* copy compact raw data */
                 if(H5D__compact_copy(file_src, &layout_src->storage.u.compact, file_dst, &layout_dst->storage.u.compact, udata->src_dtype, cpy_info, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy chunked storage")
                 copied = TRUE;
-	    } /* end if */
+            } /* end if */
             break;
 
         case H5D_CONTIGUOUS:
@@ -970,11 +968,11 @@ done:
 	    layout_dst = H5FL_FREE(H5O_layout_t, layout_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_layout_copy_file() */
+} /* end H5O__layout_copy_file() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_layout_debug
+ * Function:    H5O__layout_debug
  *
  * Purpose:     Prints debugging info for a message.
  *
@@ -986,13 +984,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg,
+H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     size_t                  u;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -1079,5 +1077,5 @@ H5O_layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
     } /* end switch */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_layout_debug() */
+} /* end H5O__layout_debug() */
 

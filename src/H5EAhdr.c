@@ -43,7 +43,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
 
 /****************/
@@ -128,7 +128,7 @@ H5EA__hdr_alloc(H5F_t *f))
 
     /* Allocate space for the shared information */
     if(NULL == (hdr = H5FL_CALLOC(H5EA_hdr_t)))
-	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array shared header")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array shared header")
 
     /* Set non-zero internal fields */
     hdr->addr = HADDR_UNDEF;
@@ -390,35 +390,35 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Check for valid parameters */
     if(cparam->raw_elmt_size == 0)
-	H5E_THROW(H5E_BADVALUE, "element size must be greater than zero")
+        H5E_THROW(H5E_BADVALUE, "element size must be greater than zero")
     if(cparam->max_nelmts_bits == 0)
-	H5E_THROW(H5E_BADVALUE, "max. # of elements bits must be greater than zero")
+        H5E_THROW(H5E_BADVALUE, "max. # of elements bits must be greater than zero")
     if(cparam->max_nelmts_bits > H5EA_MAX_NELMTS_IDX_MAX)
-	H5E_THROW(H5E_BADVALUE, "max. # of elements bits must be <= %u", (unsigned)H5EA_MAX_NELMTS_IDX_MAX)
+        H5E_THROW(H5E_BADVALUE, "max. # of elements bits must be <= %u", (unsigned)H5EA_MAX_NELMTS_IDX_MAX)
     if(cparam->sup_blk_min_data_ptrs < 2)
-	H5E_THROW(H5E_BADVALUE, "min # of data block pointers in super block must be >= two")
+        H5E_THROW(H5E_BADVALUE, "min # of data block pointers in super block must be >= two")
     if(!POWER_OF_TWO(cparam->sup_blk_min_data_ptrs))
-	H5E_THROW(H5E_BADVALUE, "min # of data block pointers in super block must be power of two")
+        H5E_THROW(H5E_BADVALUE, "min # of data block pointers in super block must be power of two")
     if(!POWER_OF_TWO(cparam->data_blk_min_elmts))
-	H5E_THROW(H5E_BADVALUE, "min # of elements per data block must be power of two")
+        H5E_THROW(H5E_BADVALUE, "min # of elements per data block must be power of two")
     dblk_page_nelmts = (size_t)1 << cparam->max_dblk_page_nelmts_bits;
     if(dblk_page_nelmts < cparam->idx_blk_elmts)
-	H5E_THROW(H5E_BADVALUE, "# of elements per data block page must be greater than # of elements in index block")
+        H5E_THROW(H5E_BADVALUE, "# of elements per data block page must be greater than # of elements in index block")
 
     /* Compute the number of elements in data blocks for first actual super block */
     sblk_idx = H5EA_SBLK_FIRST_IDX(cparam->sup_blk_min_data_ptrs);
     dblk_nelmts = H5EA_SBLK_DBLK_NELMTS(sblk_idx, cparam->data_blk_min_elmts);
     if(dblk_page_nelmts < dblk_nelmts)
-	H5E_THROW(H5E_BADVALUE, "max. # of elements per data block page bits must be > # of elements in first data block from super block")
+        H5E_THROW(H5E_BADVALUE, "max. # of elements per data block page bits must be > # of elements in first data block from super block")
 
     if(cparam->max_dblk_page_nelmts_bits > cparam->max_nelmts_bits)
-	H5E_THROW(H5E_BADVALUE, "max. # of elements per data block page bits must be <= max. # of elements bits")
+        H5E_THROW(H5E_BADVALUE, "max. # of elements per data block page bits must be <= max. # of elements bits")
 }
 #endif /* NDEBUG */
 
     /* Allocate space for the shared information */
     if(NULL == (hdr = H5EA__hdr_alloc(f)))
-	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array shared header")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array shared header")
 
     /* Set the internal parameters for the array */
     hdr->idx_blk_addr = HADDR_UNDEF;
@@ -428,15 +428,15 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Finish initializing extensible array header */
     if(H5EA__hdr_init(hdr, ctx_udata) < 0)
-	H5E_THROW(H5E_CANTINIT, "initialization failed for extensible array header")
+        H5E_THROW(H5E_CANTINIT, "initialization failed for extensible array header")
 
     /* Allocate space for the header on disk */
     if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_EARRAY_HDR, dxpl_id, (hsize_t)hdr->size)))
-	H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array header")
+        H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array header")
 
     /* Cache the new extensible array header */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_EARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
-	H5E_THROW(H5E_CANTINSERT, "can't add extensible array header to cache")
+        H5E_THROW(H5E_CANTINSERT, "can't add extensible array header to cache")
 
     /* Set address of array header to return */
     ret_value = hdr->addr;
@@ -616,7 +616,7 @@ END_FUNC(PKG)   /* end H5EA__hdr_modified() */
  *
  * Purpose:	Convenience wrapper around protecting extensible array header
  *
- * Return:	Non-NULL pointer to index block on success/NULL on failure
+ * Return:	Non-NULL pointer to header on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -647,6 +647,7 @@ H5EA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata,
     /* Protect the header */
     if(NULL == (ret_value = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, &udata, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
+    ret_value->f = f;   /* (Must be set again here, in case the header was already in the cache -QAK) */
 
 CATCH
 

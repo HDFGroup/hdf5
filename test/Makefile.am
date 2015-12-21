@@ -39,16 +39,14 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # executed, generally most specific tests to least specific tests.
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
-# These tests (fheap, btree2) are under development and are not used by
-# the library yet. Move them to the end so that their failure do not block
-# other current library code tests.
-TEST_PROG= testhdf5 lheap ohdr stab gheap cache cache_api cache_tagging \
+TEST_PROG= testhdf5 cache cache_api cache_tagging lheap ohdr stab gheap \
+           farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_cross_platform\
            getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf vds farray earray btree2 fheap file_image unregister
+           freespace mf vds file_image unregister
 
 # List programs to be built when testing here. error_test and err_compat are
 # built at the same time as the other tests, but executed by testerror.sh.
@@ -152,9 +150,9 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     multi_file-[rs].h5 core_file plugin.h5 \
     new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
-    unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \
-    objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5       \
-    earray.h5 efc[0-5].h5 log_vfd_out.log                            \
+    unlink_chunked.h5 btree2.h5 btree2_tmp.h5 objcopy_src.h5 objcopy_dst.h5 \
+    objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5 farray_tmp.h5 \
+    earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log              \
     new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \

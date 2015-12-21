@@ -17,9 +17,12 @@
 # Check that all the files in MANIFEST exist and that (if this is a
 # SVN checkout) that all the SVN-managed files appear in the
 # MANIFEST.
+# 
 
 verbose=yes
 MANIFEST=/tmp/HD_MANIFEST.$$
+AUTOGEN=./autogen.sh
+AUTOGEN_LOG=/tmp/autogen.log.$$
 
 # Main
 test "$verbose" && echo "   Checking MANIFEST..." 1>&2
@@ -47,6 +50,19 @@ else
 	echo MANIFEST file not found. Abort.
 	exit 1
     fi
+fi
+
+# Do an autogen if generated files (e.g., configure) is not present
+if [ ! -f configure ]; then
+    echo "   running $AUTOGEN -p"
+    $AUTOGEN -p > $AUTOGEN_LOG 2>&1
+    if [ $? -ne 0 ]; then
+	echo $AUTOGEN encountered error. Abort.
+	echo output from $AUTOGEN:
+	cat $AUTOGEN_LOG
+	exit 1
+    fi
+    rm $AUTOGEN_LOG
 fi
 
 # Check for duplicate entries.  This can be done at any time, but it may as 

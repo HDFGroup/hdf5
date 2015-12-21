@@ -134,7 +134,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
     hbool_t driver_prop_copied = FALSE;     /* Whether the driver property has been set up */
     unsigned    efc_size = 0;
-    hid_t	ret_value = SUCCEED;
+    hid_t	ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -389,8 +389,8 @@ int
 H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 {
     H5F_olist_t *olist = (H5F_olist_t *)key;    /* Alias for search info */
-    int         ret_value = H5_ITER_CONT;    /* Return value */
     hbool_t     add_obj = FALSE;
+    int         ret_value = H5_ITER_CONT;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -404,7 +404,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
                 ||  (!olist->file_info.local &&
                         ( !olist->file_info.ptr.shared || (olist->file_info.ptr.shared && ((H5F_t*)obj_ptr)->shared == olist->file_info.ptr.shared) ))) {
             add_obj = TRUE;
-	}
+	} /* end if */
     } /* end if */
     else { /* either count opened object IDs or put the IDs on the list */
         H5O_loc_t *oloc;        /* Group entry info for object */
@@ -458,7 +458,7 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
     	} /* end if */
     } /* end else */
 
-    if(TRUE==add_obj) {
+    if(add_obj) {
         /* Add the object's ID to the ID list, if appropriate */
         if(olist->obj_id_list) {
             olist->obj_id_list[olist->list_index] = obj_id;
@@ -473,9 +473,9 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
          * we have filled up the array. Otherwise return H5_ITER_CONT(RET_VALUE is
          * preset to H5_ITER_CONT) because H5I_iterate needs the return value of 
          * H5_ITER_CONT to continue the iteration. */
-        if(olist->max_nobjs>0 && olist->list_index>=olist->max_nobjs)
+        if(olist->max_nobjs > 0 && olist->list_index >= olist->max_nobjs)
             HGOTO_DONE(H5_ITER_STOP)  /* Indicate that the iterator should stop */
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1064,6 +1064,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         if(H5G_mkroot(file, dxpl_id, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
     } else if (1 == shared->nrefs) {
+
 	/* Read the superblock if it hasn't been read before. */
         if(H5F__super_read(file, dxpl_id) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
@@ -1111,8 +1112,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 
 done:
     if(!ret_value && file)
-        if(H5F_dest(file, dxpl_id, FALSE) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
+	if(H5F_dest(file, dxpl_id, FALSE) < 0)
+	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */

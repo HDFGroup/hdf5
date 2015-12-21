@@ -112,102 +112,104 @@ static unsigned check_invalid_tag_application(void);
 static void
 print_entry_type_to_screen(int id)
 {
-    printf("Type = ");
+    HDfprintf(stdout, "Type = ");
     
     switch (id) {
     
-        case 0:
-            printf("B-tree Node(0)");
+        case H5AC_BT_ID:
+            HDfprintf(stdout, "v1 B-tree Node");
             break;
-        case 1: 
-            printf("Symbol Table Node(1)");
+        case H5AC_SNODE_ID: 
+            HDfprintf(stdout, "Symbol Table Node");
             break;
-        case 2:
-            printf("Local Heap Prefix(2)");
+        case H5AC_LHEAP_PRFX_ID:
+            HDfprintf(stdout, "Local Heap Prefix");
             break;
-        case 3:
-            printf("Local Heap Data Block(3)");
+        case H5AC_LHEAP_DBLK_ID:
+            HDfprintf(stdout, "Local Heap Data Block");
             break;
-        case 4:
-            printf("Global Heap(4)");
+        case H5AC_GHEAP_ID:
+            HDfprintf(stdout, "Global Heap");
             break;
-        case 5:
-            printf("Object Header(5)");
+        case H5AC_OHDR_ID:
+            HDfprintf(stdout, "Object Header");
             break;
-        case 6:
-            printf("Object Header Chunk(6)");
+        case H5AC_OHDR_CHK_ID:
+            HDfprintf(stdout, "Object Header Chunk");
             break;
-        case 7:
-            printf("v2 B-tree Header(7)");
+        case H5AC_BT2_HDR_ID:
+            HDfprintf(stdout, "v2 B-tree Header");
             break;
-        case 8:
-            printf("v2 B-tree Internal Node(8)");
+        case H5AC_BT2_INT_ID:
+            HDfprintf(stdout, "v2 B-tree Internal Node");
             break;
-        case 9:
-            printf("v2 B-tree Leaf Node(9)");
+        case H5AC_BT2_LEAF_ID:
+            HDfprintf(stdout, "v2 B-tree Leaf Node");
             break;
-        case 10:
-            printf("Fractal Heap Header(10)");
+        case H5AC_FHEAP_HDR_ID:
+            HDfprintf(stdout, "Fractal Heap Header");
             break;
-        case 11:
-            printf("Fractal Heap Direct Block(11)");
+        case H5AC_FHEAP_DBLOCK_ID:
+            HDfprintf(stdout, "Fractal Heap Direct Block");
             break;
-        case 12:
-            printf("Fractal Heap Indirect Block(12)");
+        case H5AC_FHEAP_IBLOCK_ID:
+            HDfprintf(stdout, "Fractal Heap Indirect Block");
             break;
-        case 13:
-            printf("Free Space Header(13)");
+        case H5AC_FSPACE_HDR_ID:
+            HDfprintf(stdout, "Free Space Header");
             break;
-        case 14:
-            printf("Free Space Section(14)");
+        case H5AC_FSPACE_SINFO_ID:
+            HDfprintf(stdout, "Free Space Section");
             break;
-        case 15:
-            printf("Shared Object Header Message Master Table(15)");
+        case H5AC_SOHM_TABLE_ID:
+            HDfprintf(stdout, "Shared Object Header Message Master Table");
             break;
-        case 16:
-            printf("Shared Message Index Stored As A List(16)");
+        case H5AC_SOHM_LIST_ID:
+            HDfprintf(stdout, "Shared Message Index Stored As A List");
             break;
-        case 17:
-            printf("Extensible Array Header(17)");
+        case H5AC_EARRAY_HDR_ID:
+            HDfprintf(stdout, "Extensible Array Header");
             break;
-        case 18:
-            printf("Extensible Array Index Block(18)");
+        case H5AC_EARRAY_IBLOCK_ID:
+            HDfprintf(stdout, "Extensible Array Index Block");
             break;
-        case 19:
-            printf("Extensible Array Super Block(19)");
+        case H5AC_EARRAY_SBLOCK_ID:
+            HDfprintf(stdout, "Extensible Array Super Block");
             break;
-        case 20:
-            printf("Extensible Array Data Block(20)");
+        case H5AC_EARRAY_DBLOCK_ID:
+            HDfprintf(stdout, "Extensible Array Data Block");
             break;
-        case 21:
-            printf("Extensible Array Data Block Page(21)");
+        case H5AC_EARRAY_DBLK_PAGE_ID:
+            HDfprintf(stdout, "Extensible Array Data Block Page");
             break;
-        case 22:
-            printf("Chunk Proxy(22)");
+        case H5AC_FARRAY_HDR_ID:
+            HDfprintf(stdout, "Fixed Array Header");
             break;
-        case 23:
-            printf("Fixed Array Header(23)");
+        case H5AC_FARRAY_DBLOCK_ID:
+            HDfprintf(stdout, "Fixed Array Data Block");
             break;
-        case 24:
-            printf("Fixed Array Data Block(24)");
+        case H5AC_FARRAY_DBLK_PAGE_ID:
+            HDfprintf(stdout, "Fixed Array Data Block Page");
             break;
-        case 25:
-            printf("Fixed Array Data Block Page(25)");
+        case H5AC_SUPERBLOCK_ID:
+            HDfprintf(stdout, "File Superblock");
             break;
-        case 26:
-            printf("File Superblock(26)");
+        case H5AC_DRVRINFO_ID:
+            HDfprintf(stdout, "Driver Info Block");
             break;
-        case 27:
-            printf("Test Entry(27)");
+        case H5AC_TEST_ID:
+            HDfprintf(stdout, "Test Entry");
             break;
-        case 28:
-            printf("Number of Types(28)");
+        case H5AC_NTYPES:
+            HDfprintf(stdout, "BADNESS: Number of Types");
             break;
         default:
-            printf("*Unknown*");
+            HDfprintf(stdout, "BADNESS: *Unknown*");
             break;
 
     } /* end switch */
+
+    HDfprintf(stdout, " (%d)", id);
 
 } /* print_entry_type_to_screen */
 
@@ -224,8 +226,6 @@ print_entry_type_to_screen(int id)
  *
  * Programmer:  Mike McGreevy
  *              January 25, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2462,6 +2462,9 @@ check_dataset_write_tags(hid_t fcpl, int type)
     /* Verify 10 b-tree nodes belonging to dataset  */
     for (i=0; i<10; i++)
         if ( verify_tag(fid, H5AC_BT_ID, d_tag) < 0 ) TEST_ERROR;
+
+    /* Verify object header for dataset */
+    if ( verify_tag(fid, H5AC_OHDR_ID, d_tag) < 0 ) TEST_ERROR;
 
     /* verify no other entries present */
     if ( verify_no_unknown_tags(fid) < 0 ) TEST_ERROR;

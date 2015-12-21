@@ -835,8 +835,8 @@ main(void)
         if(H5Fclose(file) < 0)
             TEST_ERROR
 
-	/* Test object header creation metadata cache issues */
-	if(test_ohdr_cache(filename, fapl) < 0)
+	    /* Test object header creation metadata cache issues */
+	    if(test_ohdr_cache(filename, fapl) < 0)
             TEST_ERROR
     } /* end for */
 
@@ -845,7 +845,7 @@ main(void)
 
     puts("All object header tests passed.");
     h5_cleanup(FILENAME, fapl);
-    return(0);
+    return 0;
 
 error:
     puts("*** TESTS FAILED ***");
@@ -853,6 +853,6 @@ error:
         H5Fclose(file);
     } H5E_END_TRY;
 
-    return(1);
+    return 1;
 } /* end main() */
 

@@ -49,7 +49,7 @@ static herr_t H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t spac
 static size_t H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts,
     const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
 static void H5Z_scaleoffset_convert(void *buf, unsigned d_nelmts, size_t dtype_size);
-static unsigned H5Z_scaleoffset_log2(unsigned long long num);
+static H5_ATTR_CONST unsigned H5Z_scaleoffset_log2(unsigned long long num);
 static void H5Z_scaleoffset_precompress_i(void *data, unsigned d_nelmts,
     enum H5Z_scaleoffset_t type, unsigned filavail, const unsigned cd_values[],
     uint32_t *minbits, unsigned long long *minval);

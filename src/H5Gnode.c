@@ -119,7 +119,7 @@ H5B_class_t H5B_SNODE[1] = {{
     H5G_node_remove,		/*remove		*/
     H5G_node_decode_key,	/*decode		*/
     H5G_node_encode_key,	/*encode		*/
-    H5G_node_debug_key,		/*debug			*/
+    H5G_node_debug_key		/*debug			*/
 }};
 
 /* Declare a free list to manage the H5G_node_t struct */

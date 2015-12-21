@@ -21,8 +21,6 @@
 /* Name of tool */
 #define PROGRAMNAME "h5unjam"
 
-#define TRUE 1
-#define FALSE 0
 #define COPY_BUF_SIZE 1024
 
 hsize_t write_pad( int , hsize_t );

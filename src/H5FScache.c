@@ -15,11 +15,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5FScache.c
- *			May  2 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Created:     H5FScache.c
+ *              May  2 2006
+ *              Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		Implement file free space metadata cache methods.
+ * Purpose:     Implement file free space metadata cache methods.
  *
  *-------------------------------------------------------------------------
  */
@@ -176,6 +176,8 @@ H5FS__cache_hdr_get_load_size(const void *_udata, size_t *image_len)
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
+    HDassert(udata);
+    HDassert(udata->f);
     HDassert(image_len);
 
     /* Set the image length size */
@@ -223,24 +225,24 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
 
     /* Allocate a new free space manager */
     if(NULL == (fspace = H5FS__new(udata->f, udata->nclasses, udata->classes, udata->cls_init_udata)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set free space manager's internal information */
     fspace->addr = udata->addr;
 
     /* Magic number */
     if(HDmemcmp(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header signature")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header signature")
     image += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*image++ != H5FS_HDR_VERSION)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header version")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header version")
 
     /* Client ID */
     fspace->client = (H5FS_client_t)*image++;
     if(fspace->client >= H5FS_NUM_CLIENT_ID)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "unknown client ID in free space header")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "unknown client ID in free space header")
 
     /* Total space tracked */
     H5F_DECODE_LENGTH(udata->f, image, fspace->tot_space);
@@ -258,7 +260,7 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     /* (only check if we actually have some classes) */
     UINT16DECODE(image, nclasses);
     if(fspace->nclasses > 0 && fspace->nclasses != nclasses)
-	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "section class count mismatch")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "section class count mismatch")
 
     /* Shrink percent */
     UINT16DECODE(image, fspace->shrink_percent);
@@ -822,7 +824,6 @@ H5FS__cache_sinfo_get_load_size(const void  *_udata, size_t *image_len)
  *		it with the data contained in the image, and return a pointer to
  *		the new instance.
  *
- *
  * Return:	Success:	Pointer to in core representation
  *		Failure:	NULL
  *
@@ -1235,7 +1236,7 @@ done:
  * Purpose:	Skip list iterator callback to serialize free space sections
  *              of a particular size
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Monday, May  8, 2006
@@ -1291,7 +1292,7 @@ done:
  * Purpose:	Skip list iterator callback to serialize free space sections
  *              in a bin
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
  *              Monday, May  8, 2006
@@ -1329,4 +1330,3 @@ H5FS__sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udat
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS__sinfo_serialize_node_cb() */
-

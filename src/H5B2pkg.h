@@ -302,6 +302,10 @@ H5_DLL herr_t H5B2__hdr_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2__hdr_fuse_incr(H5B2_hdr_t *hdr);
 H5_DLL size_t H5B2__hdr_fuse_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2__hdr_dirty(H5B2_hdr_t *hdr);
+H5_DLL H5B2_hdr_t *H5B2__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t hdr_addr,
+    void *ctx_udata, unsigned flags);
+H5_DLL herr_t H5B2__hdr_unprotect(H5B2_hdr_t *hdr, hid_t dxpl_id,
+    unsigned cache_flags);
 H5_DLL herr_t H5B2__hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id);
 
 /* Routines for operating on leaf nodes */

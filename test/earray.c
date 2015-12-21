@@ -193,6 +193,7 @@ static herr_t earray_cache_test_free_icr(void *thing);
 /* Local variables */
 const char *FILENAME[] = {
     "earray",
+    "earray_tmp",
     NULL
 };
 
@@ -340,10 +341,10 @@ finish_tparam(earray_test_param_t *tparam)
  *-------------------------------------------------------------------------
  */
 static int
-create_file(hid_t fapl, hid_t *file, H5F_t **f)
+create_file(unsigned flags, hid_t fapl, hid_t *file, H5F_t **f)
 {
     /* Create the file to work on */
-    if((*file = H5Fcreate(filename_g, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    if((*file = H5Fcreate(filename_g, flags, H5P_DEFAULT, fapl)) < 0)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
@@ -351,9 +352,8 @@ create_file(hid_t fapl, hid_t *file, H5F_t **f)
         FAIL_STACK_ERROR
 
     /* Ignore metadata tags in the file's cache */
-    if(H5AC_ignore_tags(*f) < 0) {
+    if(H5AC_ignore_tags(*f) < 0)
         FAIL_STACK_ERROR
-    }
 
     /* Success */
     return(0);
@@ -462,17 +462,19 @@ reopen_file(hid_t *file, H5F_t **f, hid_t fapl, hid_t dxpl,
     /* (actually will close & re-open the file as well) */
     if(tparam->reopen_array) {
         /* Close array, if given */
-        if(ea) {
+        if(ea && *ea) {
             if(H5EA_close(*ea, dxpl) < 0)
                 FAIL_STACK_ERROR
             *ea = NULL;
         } /* end if */
 
         /* Close file */
-        if(H5Fclose(*file) < 0)
-            FAIL_STACK_ERROR
-        *file = (-1);
-        *f = NULL;
+        if(*file) {
+            if(H5Fclose(*file) < 0)
+                FAIL_STACK_ERROR
+            *file = (-1);
+            *f = NULL;
+        } /* end if */
 
         /* Re-open the file */
         if((*file = H5Fopen(filename_g, H5F_ACC_RDWR, fapl)) < 0)
@@ -483,15 +485,13 @@ reopen_file(hid_t *file, H5F_t **f, hid_t fapl, hid_t dxpl,
             FAIL_STACK_ERROR
 
         /* Ignore metadata tags in the file's cache */
-        if(H5AC_ignore_tags(*f) < 0) {
+        if(H5AC_ignore_tags(*f) < 0)
             FAIL_STACK_ERROR
-        }
 
         /* Re-open array, if given */
-        if(ea) {
+        if(ea)
             if(NULL == (*ea = H5EA_open(*f, dxpl, ea_addr, NULL)))
                 FAIL_STACK_ERROR
-        } /* end if */
     } /* end if */
 
     /* Success */
@@ -901,7 +901,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -1016,7 +1016,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
     /* Set invalid max. # of elements per data block page bits */
     if(test_cparam.idx_blk_elmts > 0) {
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
-        test_cparam.max_dblk_page_nelmts_bits = H5VM_log2_gen((uint64_t)test_cparam.idx_blk_elmts) - 1;
+        test_cparam.max_dblk_page_nelmts_bits = (uint8_t)(H5VM_log2_gen((uint64_t)test_cparam.idx_blk_elmts) - 1);
         H5E_BEGIN_TRY {
             ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
         } H5E_END_TRY;
@@ -1043,7 +1043,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSE
         TEST_ERROR
     } /* end if */
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
-    test_cparam.max_dblk_page_nelmts_bits = test_cparam.max_nelmts_bits + 1;
+    test_cparam.max_dblk_page_nelmts_bits = (uint8_t)(test_cparam.max_nelmts_bits + 1);
     H5E_BEGIN_TRY {
         ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
     } H5E_END_TRY;
@@ -1123,7 +1123,7 @@ test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -1196,7 +1196,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -1279,6 +1279,148 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_open_twice_diff
+ *
+ * Purpose:	Open an extensible array twice, through different "top" file
+ *              handles, with an intermediate file open that takes the "shared"
+ *              file handle from the first extensible array's file pointer.
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 18, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
+{
+    char        filename_tmp[EARRAY_FILENAME_LEN];      /* Temporary file name */
+    hid_t	file = -1;              /* File ID */
+    hid_t	file2 = -1;             /* File ID */
+    hid_t	file0 = -1;             /* File ID */
+    hid_t	file00 = -1;            /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5F_t	*f2 = NULL;             /* Internal file object pointer */
+    H5EA_t      *ea = NULL;             /* Extensible array wrapper */
+    H5EA_t      *ea2 = NULL;            /* Extensible array wrapper */
+    haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
+
+    /* Create file & retrieve pointer to internal file object */
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
+        TEST_ERROR
+
+    /*
+     * Display testing message
+     */
+    TESTING("open extensible array twice, through different file handles");
+
+    /* Create array */
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr, NULL) < 0)
+        TEST_ERROR
+
+    /* Open the array again, through the first file handle */
+    if(NULL == (ea2 = H5EA_open(f, H5P_DATASET_XFER_DEFAULT, ea_addr, NULL)))
+        FAIL_STACK_ERROR
+
+    /* Verify the creation parameters */
+    if(verify_cparam(ea, cparam) < 0)
+        TEST_ERROR
+    if(verify_cparam(ea2, cparam) < 0)
+        TEST_ERROR
+
+    /* Close the second extensible array wrapper */
+    if(H5EA_close(ea2, H5P_DATASET_XFER_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+    ea2 = NULL;
+
+    /* Re-open the file */
+    /* (So that there is something holding the file open when the extensible
+     *  array is closed)
+     */
+    if((file0 = H5Fopen(filename_g, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the file */
+    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, &ea, ea_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Verify the creation parameters */
+    if(verify_cparam(ea, cparam) < 0)
+        TEST_ERROR
+
+    /* Close the first extensible array wrapper */
+    if(H5EA_close(ea, H5P_DATASET_XFER_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+    ea = NULL;
+
+    /* Close the first file */
+    /* (close before second file, to detect error on internal array header's
+     *  shared file information)
+     */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+    file = -1;
+
+    /* Open a different file */
+    /* (This re-allocates the 'top' file pointer and assigns it a different
+     *  'shared' file pointer, making the file pointer in the extensible array's
+     *  header stale)
+     */
+    h5_fixname(FILENAME[1], fapl, filename_tmp, sizeof(filename_tmp));
+    if((file00 = H5Fcreate(filename_tmp, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Re-open the file with the extensible array */
+    if((file2 = H5Fopen(filename_g, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f2 = (H5F_t *)H5VL_object(file2)))
+        FAIL_STACK_ERROR
+
+    /* Open the extensible array through the second file handle */
+    if(NULL == (ea2 = H5EA_open(f2, H5P_DATASET_XFER_DEFAULT, ea_addr, NULL)))
+        FAIL_STACK_ERROR
+
+    /* Verify the creation parameters */
+    if(verify_cparam(ea2, cparam) < 0)
+        TEST_ERROR
+
+    /* Close the extra file handles */
+    if(H5Fclose(file0) < 0)
+        FAIL_STACK_ERROR
+    if(H5Fclose(file00) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close array, delete array, close file & verify file is empty */
+    if(finish(file2, fapl, f2, ea2, ea_addr) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    PASSED()
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if(ea)
+            H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+        if(ea2)
+            H5EA_close(ea2, H5P_DATASET_XFER_DEFAULT);
+	H5Fclose(file);
+	H5Fclose(file2);
+	H5Fclose(file0);
+	H5Fclose(file00);
+    } H5E_END_TRY;
+
+    return 1;
+} /* test_open_twice_diff() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_delete_open
  *
  * Purpose:	Delete opened extensible array (& open deleted array)
@@ -1302,7 +1444,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     h5_stat_size_t file_size;           /* File size, after deleting array */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -1491,7 +1633,7 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR
     hsize_t     idx;                    /* Index value of element */
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /*
@@ -1766,7 +1908,7 @@ eiter_fw_next(void *_eiter)
  *
  *-------------------------------------------------------------------------
  */
-static hssize_t
+static H5_ATTR_PURE hssize_t
 eiter_fw_max(const void *_eiter)
 {
     const eiter_fw_t *eiter = (const eiter_fw_t *)_eiter;
@@ -1984,7 +2126,7 @@ eiter_rv_next(void *_eiter)
  *
  *-------------------------------------------------------------------------
  */
-static hssize_t
+static H5_ATTR_PURE hssize_t
 eiter_rv_max(const void *_eiter)
 {
     const eiter_rv_t *eiter = (const eiter_rv_t *)_eiter;
@@ -2236,7 +2378,7 @@ eiter_rnd_next(void *_eiter)
  *
  *-------------------------------------------------------------------------
  */
-static hssize_t
+static H5_ATTR_PURE hssize_t
 eiter_rnd_max(const void *_eiter)
 {
     const eiter_rnd_t *eiter = (const eiter_rnd_t *)_eiter;
@@ -2457,7 +2599,7 @@ eiter_cyc_next(void *_eiter)
  *
  *-------------------------------------------------------------------------
  */
-static hssize_t
+static H5_ATTR_PURE hssize_t
 eiter_cyc_max(const void *_eiter)
 {
     const eiter_cyc_t *eiter = (const eiter_cyc_t *)_eiter;
@@ -2545,7 +2687,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
     TESTING(test_str);
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /* Create array */
@@ -2719,7 +2861,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
     TESTING(test_str);
 
     /* Create file & retrieve pointer to internal file object */
-    if(create_file(fapl, &file, &f) < 0)
+    if(create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
         TEST_ERROR
 
     /* Create array */
@@ -2879,7 +3021,7 @@ main(void)
 
     /* Seed random #'s */
     curr_time = HDtime(NULL);
-    HDsrandom((unsigned long)curr_time);
+    HDsrandom((unsigned)curr_time);
 
     /* Create an empty file to retrieve size */
     {
@@ -2930,6 +3072,7 @@ main(void)
         nerrors += test_create(fapl, &cparam, &tparam);
         nerrors += test_reopen(fapl, &cparam, &tparam);
         nerrors += test_open_twice(fapl, &cparam, &tparam);
+        nerrors += test_open_twice_diff(fapl, &cparam, &tparam);
         nerrors += test_delete_open(fapl, &cparam, &tparam);
         nerrors += test_flush_depend(fapl, &cparam, &tparam);
 

@@ -3601,25 +3601,12 @@ done:
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
  *
- * Modifications:
- *      Robb Matzke, 1999-04-27
- *      This function fails if the datatype state is IMMUTABLE.
- *
- *      Robb Matzke, 1999-05-20
- *      Closes opaque types also.
- *
- *      Pedro Vicente, <pvn@ncsa.uiuc.edu> 22 Aug 2002
- *      Added "ID to name" support
- *
- *      Quincey Koziol, 2003-01-06
- *      Moved "guts" of function to H5T__free()
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5T_close(H5T_t *dt)
 {
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;   	/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -3633,7 +3620,8 @@ H5T_close(H5T_t *dt)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
         dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
-    } else {
+    } /* end if */
+    else {
         /*
          * If a named type is being closed then close the object header and
          * remove from the list of open objects in the file.

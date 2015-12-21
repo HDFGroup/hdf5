@@ -1895,7 +1895,7 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
 
     /* Check which version to encode attribute with */
     if(use_latest_format)
-        attr->shared->version = H5O_ATTR_VERSION_LATEST;      /* Write out latest version of format */
+        attr->shared->version = H5O_ATTR_VERSION_LATEST;      /* Write out latest attribute version */
     else if(attr->shared->encoding != H5T_CSET_ASCII)
         attr->shared->version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
     else if(type_shared || space_shared)

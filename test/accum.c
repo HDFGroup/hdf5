@@ -164,7 +164,7 @@ test_write_read(const H5F_io_info_t *fio_info)
     /* Allocate buffers */
     write_buf = (int *)HDmalloc(1024 * sizeof(int));
     HDassert(write_buf);
-    read_buf = (int *)HDcalloc(1024, sizeof(int));
+    read_buf = (int *)HDcalloc((size_t)1024, sizeof(int));
     HDassert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
@@ -175,7 +175,7 @@ test_write_read(const H5F_io_info_t *fio_info)
     /* Write 1KB at Address 0 */
     if(accum_write(0, 1024, write_buf) < 0) FAIL_STACK_ERROR;
     if(accum_read(0, 1024, read_buf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(write_buf, read_buf, 1024) != 0) TEST_ERROR;
+    if(HDmemcmp(write_buf, read_buf, (size_t)1024) != 0) TEST_ERROR;
 
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
@@ -220,7 +220,7 @@ test_write_read_nonacc_front(const H5F_io_info_t *fio_info)
     /* Allocate buffers */
     write_buf = (int *)HDmalloc(2048 * sizeof(int));
     HDassert(write_buf);
-    read_buf = (int *)HDcalloc(2048, sizeof(int));
+    read_buf = (int *)HDcalloc((size_t)2048, sizeof(int));
     HDassert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
@@ -234,7 +234,7 @@ test_write_read_nonacc_front(const H5F_io_info_t *fio_info)
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
     if(accum_write(1024, 1024, write_buf) < 0) FAIL_STACK_ERROR;
     if(accum_read(0, 1024, read_buf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(write_buf, read_buf, 1024) != 0) TEST_ERROR;
+    if(HDmemcmp(write_buf, read_buf, (size_t)1024) != 0) TEST_ERROR;
 
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
@@ -279,7 +279,7 @@ test_write_read_nonacc_end(const H5F_io_info_t *fio_info)
     /* Allocate buffers */
     write_buf = (int *)HDmalloc(2048 * sizeof(int));
     HDassert(write_buf);
-    read_buf = (int *)HDcalloc(2048, sizeof(int));
+    read_buf = (int *)HDcalloc((size_t)2048, sizeof(int));
     HDassert(read_buf);
 
     /* Fill buffer with data, zero out read buffer */
@@ -293,7 +293,7 @@ test_write_read_nonacc_end(const H5F_io_info_t *fio_info)
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
     if(accum_write(0, 1024, write_buf) < 0) FAIL_STACK_ERROR;
     if(accum_read(1024, 1024, read_buf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(write_buf, read_buf, 1024) != 0) TEST_ERROR;
+    if(HDmemcmp(write_buf, read_buf, (size_t)1024) != 0) TEST_ERROR;
 
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
@@ -525,7 +525,7 @@ test_accum_overlap(const H5F_io_info_t *fio_info)
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
     HDassert(wbuf);
-    rbuf = (int32_t *)HDcalloc(4096, sizeof(int32_t));
+    rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
     HDassert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -697,7 +697,7 @@ test_accum_overlap_clean(const H5F_io_info_t *fio_info)
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
     HDassert(wbuf);
-    rbuf = (int32_t *)HDcalloc(4096, sizeof(int32_t));
+    rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
     HDassert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -876,7 +876,7 @@ test_accum_non_overlap_size(const H5F_io_info_t *fio_info)
     /* Allocate buffers */
     wbuf = (int *)HDmalloc(4096 * sizeof(int32_t));
     HDassert(wbuf);
-    rbuf = (int *)HDcalloc(4096, sizeof(int32_t));
+    rbuf = (int *)HDcalloc((size_t)4096, sizeof(int32_t));
     HDassert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -943,7 +943,7 @@ test_accum_overlap_size(const H5F_io_info_t *fio_info)
     /* Allocate buffers */
     wbuf = (int32_t *)HDmalloc(4096 * sizeof(int32_t));
     HDassert(wbuf);
-    rbuf = (int32_t *)HDcalloc(4096, sizeof(int32_t));
+    rbuf = (int32_t *)HDcalloc((size_t)4096, sizeof(int32_t));
     HDassert(rbuf);
 
     /* Case 1: No metadata in accumulator */
@@ -1050,11 +1050,11 @@ test_accum_adjust(const H5F_io_info_t *fio_info)
 
     /* Read back and verify first write */
     if(accum_read((1024 * 1024), (1024 * 1024) - 1, rbuf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(wbuf, rbuf, (1024 * 1024) - 1) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)((1024 * 1024) - 1)) != 0) TEST_ERROR;
 
     /* Read back and verify second write */
     if(accum_read((1024 * 1024) - 1024, 1024, rbuf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(wbuf, rbuf, 1024) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)1024) != 0) TEST_ERROR;
     
     /* Reset accumulator for next case */
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
@@ -1080,10 +1080,10 @@ test_accum_adjust(const H5F_io_info_t *fio_info)
 
     /* Read back and verify both pieces of data */
     if(accum_read(1048576, 1048575, rbuf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(wbuf, rbuf, 1048576) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)1048576) != 0) TEST_ERROR;
 
     if(accum_read(5, 1048571, rbuf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(wbuf, rbuf, 1048571) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)1048571) != 0) TEST_ERROR;
 
     /* Reset accumulator for next case */
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
@@ -1118,7 +1118,7 @@ test_accum_adjust(const H5F_io_info_t *fio_info)
     /* Read in the piece we wrote to disk above, and then verify that 
         the data is as expected */
     if(accum_read((1024 * 1024) - 1, 1024, rbuf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(wbuf, rbuf, 1024) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)1024) != 0) TEST_ERROR;
 
     /* Reset accumulator for next case */
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
@@ -1158,7 +1158,7 @@ test_accum_adjust(const H5F_io_info_t *fio_info)
     /* Read in the piece we wrote to disk above, and then verify that 
         the data is as expected */
     if(accum_read(1048571, 349523, rbuf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(wbuf, rbuf, 349523) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)349523) != 0) TEST_ERROR;
 
     /* Reset accumulator for next case */
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
@@ -1195,7 +1195,7 @@ test_accum_adjust(const H5F_io_info_t *fio_info)
     /* Read in the piece we wrote to disk above, and then verify that 
         the data is as expected */
     if(accum_read((1024 * 1024) - 5, 10, rbuf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(wbuf, rbuf, 10) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)10) != 0) TEST_ERROR;
 
     /* Reset accumulator for next case */
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
@@ -1227,7 +1227,7 @@ test_accum_adjust(const H5F_io_info_t *fio_info)
     /* Read in the piece we wrote to disk above, and then verify that 
         the data is as expected */
     if(accum_read(1048571, 349523, rbuf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(wbuf, rbuf, 349523) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)349523) != 0) TEST_ERROR;
 
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
@@ -1310,7 +1310,7 @@ test_read_after(const H5F_io_info_t *fio_info)
     /* Read in the piece we wrote to disk above, and then verify that 
         the data is as expected */
     if(accum_read(512, 512, rbuf) < 0) FAIL_STACK_ERROR;
-    if(HDmemcmp(wbuf, rbuf, 128) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)128) != 0) TEST_ERROR;
 
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
@@ -1352,13 +1352,13 @@ test_big(const H5F_io_info_t *fio_info)
     unsigned u;                         /* Local index variable */
 
     /* Allocate space for the write & read buffers */
-    wbuf = (uint8_t *)HDmalloc(BIG_BUF_SIZE);
+    wbuf = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE);
     HDassert(wbuf);
-    wbuf2 = (uint8_t *)HDmalloc(BIG_BUF_SIZE);
+    wbuf2 = (uint8_t *)HDmalloc((size_t)BIG_BUF_SIZE);
     HDassert(wbuf2);
-    rbuf = (uint8_t *)HDcalloc(BIG_BUF_SIZE + 1536, 1);
+    rbuf = (uint8_t *)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
     HDassert(rbuf);
-    zbuf = (uint8_t *)HDcalloc(BIG_BUF_SIZE + 1536, 1);
+    zbuf = (uint8_t *)HDcalloc((size_t)(BIG_BUF_SIZE + 1536), (size_t)1);
     HDassert(zbuf);
 
     /* Initialize write buffers */
@@ -1376,12 +1376,12 @@ test_big(const H5F_io_info_t *fio_info)
     if(accum_read(0, BIG_BUF_SIZE, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if(HDmemcmp(wbuf, rbuf, BIG_BUF_SIZE) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)BIG_BUF_SIZE) != 0) TEST_ERROR;
 
 
     /* Reset data in file back to zeros & reset the read buffer */
     if(accum_write(0, BIG_BUF_SIZE, zbuf) < 0) FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, BIG_BUF_SIZE);
+    HDmemset(rbuf, 0, (size_t)BIG_BUF_SIZE);
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
 
@@ -1393,14 +1393,14 @@ test_big(const H5F_io_info_t *fio_info)
     if(accum_read(0, BIG_BUF_SIZE, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if(HDmemcmp(zbuf, rbuf, 1024) != 0) TEST_ERROR;
-    if(HDmemcmp(wbuf, rbuf + 1024, 1024) != 0) TEST_ERROR;
-    if(HDmemcmp(zbuf, rbuf + 2048, (BIG_BUF_SIZE - 2048)) != 0) TEST_ERROR;
+    if(HDmemcmp(zbuf, rbuf, (size_t)1024) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf + 1024, (size_t)1024) != 0) TEST_ERROR;
+    if(HDmemcmp(zbuf, rbuf + 2048, (size_t)(BIG_BUF_SIZE - 2048)) != 0) TEST_ERROR;
 
 
     /* Reset data in file back to zeros & reset the read buffer */
     if(accum_write(1024, 1024, zbuf) < 0) FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, BIG_BUF_SIZE);
+    HDmemset(rbuf, 0, (size_t)BIG_BUF_SIZE);
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
 
@@ -1412,13 +1412,13 @@ test_big(const H5F_io_info_t *fio_info)
     if(accum_read(0, BIG_BUF_SIZE, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if(HDmemcmp(zbuf, rbuf, (BIG_BUF_SIZE - 512)) != 0) TEST_ERROR;
-    if(HDmemcmp(wbuf, rbuf + (BIG_BUF_SIZE - 512), 512) != 0) TEST_ERROR;
+    if(HDmemcmp(zbuf, rbuf, (size_t)(BIG_BUF_SIZE - 512)) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf + (BIG_BUF_SIZE - 512), (size_t)512) != 0) TEST_ERROR;
 
 
     /* Reset data in file back to zeros & reset the read buffer */
     if(accum_write(BIG_BUF_SIZE - 512, 1024, zbuf) < 0) FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, BIG_BUF_SIZE);
+    HDmemset(rbuf, 0, (size_t)BIG_BUF_SIZE);
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
 
@@ -1430,13 +1430,13 @@ test_big(const H5F_io_info_t *fio_info)
     if(accum_read(512, BIG_BUF_SIZE, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if(HDmemcmp(wbuf + 512, rbuf, 512) != 0) TEST_ERROR;
-    if(HDmemcmp(zbuf, rbuf + 512, (BIG_BUF_SIZE - 512)) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf + 512, rbuf, (size_t)512) != 0) TEST_ERROR;
+    if(HDmemcmp(zbuf, rbuf + 512, (size_t)(BIG_BUF_SIZE - 512)) != 0) TEST_ERROR;
 
 
     /* Reset data in file back to zeros & reset the read buffer */
     if(accum_write(0, 1024, zbuf) < 0) FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, BIG_BUF_SIZE);
+    HDmemset(rbuf, 0, (size_t)BIG_BUF_SIZE);
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
 
@@ -1453,12 +1453,12 @@ test_big(const H5F_io_info_t *fio_info)
     if(accum_read(0, BIG_BUF_SIZE, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if(HDmemcmp(wbuf2, rbuf, BIG_BUF_SIZE) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0) TEST_ERROR;
 
 
     /* Reset data in file back to zeros & reset the read buffer */
     if(accum_write(0, BIG_BUF_SIZE, zbuf) < 0) FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, BIG_BUF_SIZE);
+    HDmemset(rbuf, 0, (size_t)BIG_BUF_SIZE);
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
 
@@ -1475,13 +1475,13 @@ test_big(const H5F_io_info_t *fio_info)
     if(accum_read(0, BIG_BUF_SIZE + 512, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if(HDmemcmp(wbuf2, rbuf, BIG_BUF_SIZE) != 0) TEST_ERROR;
-    if(HDmemcmp(wbuf + 512, rbuf + BIG_BUF_SIZE, 512) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf + 512, rbuf + BIG_BUF_SIZE, (size_t)512) != 0) TEST_ERROR;
 
 
     /* Reset data in file back to zeros & reset the read buffer */
     if(accum_write(0, BIG_BUF_SIZE + 512, zbuf) < 0) FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, BIG_BUF_SIZE + 512);
+    HDmemset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 512));
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
 
@@ -1502,14 +1502,14 @@ test_big(const H5F_io_info_t *fio_info)
     if(accum_read(0, BIG_BUF_SIZE + 1024, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if(HDmemcmp(wbuf2, rbuf, BIG_BUF_SIZE) != 0) TEST_ERROR;
-    if(HDmemcmp(zbuf, rbuf + BIG_BUF_SIZE, 512) != 0) TEST_ERROR;
-    if(HDmemcmp(wbuf, rbuf + BIG_BUF_SIZE + 512, 512) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0) TEST_ERROR;
+    if(HDmemcmp(zbuf, rbuf + BIG_BUF_SIZE, (size_t)512) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf + BIG_BUF_SIZE + 512, (size_t)512) != 0) TEST_ERROR;
 
 
     /* Reset data in file back to zeros & reset the read buffer */
     if(accum_write(0, BIG_BUF_SIZE + 1536, zbuf) < 0) FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, BIG_BUF_SIZE + 1024);
+    HDmemset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 1024));
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
 
@@ -1531,13 +1531,13 @@ test_big(const H5F_io_info_t *fio_info)
     if(accum_read(0, BIG_BUF_SIZE + 1536, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if(HDmemcmp(zbuf, rbuf, 1536) != 0) TEST_ERROR;
-    if(HDmemcmp(wbuf2, rbuf + 1536, BIG_BUF_SIZE) != 0) TEST_ERROR;
+    if(HDmemcmp(zbuf, rbuf, (size_t)1536) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf2, rbuf + 1536, (size_t)BIG_BUF_SIZE) != 0) TEST_ERROR;
 
 
     /* Reset data in file back to zeros & reset the read buffer */
     if(accum_write(1536, BIG_BUF_SIZE, zbuf) < 0) FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, BIG_BUF_SIZE + 1536);
+    HDmemset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 1536));
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
 
@@ -1558,13 +1558,13 @@ test_big(const H5F_io_info_t *fio_info)
     if(accum_read(0, BIG_BUF_SIZE + 512, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if(HDmemcmp(zbuf, rbuf, 512) != 0) TEST_ERROR;
-    if(HDmemcmp(wbuf2, rbuf + 512, BIG_BUF_SIZE) != 0) TEST_ERROR;
+    if(HDmemcmp(zbuf, rbuf, (size_t)512) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf2, rbuf + 512, (size_t)BIG_BUF_SIZE) != 0) TEST_ERROR;
 
 
     /* Reset data in file back to zeros & reset the read buffer */
     if(accum_write(512, BIG_BUF_SIZE, zbuf) < 0) FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, BIG_BUF_SIZE + 512);
+    HDmemset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 512));
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
 
@@ -1585,14 +1585,14 @@ test_big(const H5F_io_info_t *fio_info)
     if(accum_read(0, BIG_BUF_SIZE + 1536, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if(HDmemcmp(wbuf, rbuf, 1024) != 0) TEST_ERROR;
-    if(HDmemcmp(zbuf, rbuf + 1024, 512) != 0) TEST_ERROR;
-    if(HDmemcmp(wbuf2, rbuf + 1536, BIG_BUF_SIZE) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)1024) != 0) TEST_ERROR;
+    if(HDmemcmp(zbuf, rbuf + 1024, (size_t)512) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf2, rbuf + 1536, (size_t)BIG_BUF_SIZE) != 0) TEST_ERROR;
 
 
     /* Reset data in file back to zeros & reset the read buffer */
     if(accum_write(0, BIG_BUF_SIZE + 1536, zbuf) < 0) FAIL_STACK_ERROR;
-    HDmemset(rbuf, 0, BIG_BUF_SIZE + 1536);
+    HDmemset(rbuf, 0, (size_t)(BIG_BUF_SIZE + 1536));
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 
 
@@ -1613,8 +1613,8 @@ test_big(const H5F_io_info_t *fio_info)
     if(accum_read(0, BIG_BUF_SIZE + 512, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read */
-    if(HDmemcmp(wbuf, rbuf, 512) != 0) TEST_ERROR;
-    if(HDmemcmp(wbuf2, rbuf + 512, BIG_BUF_SIZE) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)512) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf2, rbuf + 512, (size_t)BIG_BUF_SIZE) != 0) TEST_ERROR;
 
 
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
@@ -1666,9 +1666,9 @@ test_random_write(const H5F_io_info_t *fio_info)
     unsigned u;                 /* Local index variable */
 
     /* Allocate space for the write & read buffers */
-    wbuf = (uint8_t *)HDmalloc(RANDOM_BUF_SIZE);
+    wbuf = (uint8_t *)HDmalloc((size_t)RANDOM_BUF_SIZE);
     HDassert(wbuf);
-    rbuf = (uint8_t *)HDcalloc(RANDOM_BUF_SIZE, 1);
+    rbuf = (uint8_t *)HDcalloc((size_t)RANDOM_BUF_SIZE, (size_t)1);
     HDassert(rbuf);
 
     /* Initialize write buffer */
@@ -1752,7 +1752,7 @@ HDfprintf(stderr, "Random # seed was: %u\n", seed);
     if(accum_read(RANDOM_BASE_OFF, RANDOM_BUF_SIZE, rbuf) < 0) FAIL_STACK_ERROR;
 
     /* Verify data read back in */
-    if(HDmemcmp(wbuf, rbuf, RANDOM_BUF_SIZE) != 0) TEST_ERROR;
+    if(HDmemcmp(wbuf, rbuf, (size_t)RANDOM_BUF_SIZE) != 0) TEST_ERROR;
 
     if(accum_reset(fio_info) < 0) FAIL_STACK_ERROR;
 

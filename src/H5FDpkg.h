@@ -57,8 +57,7 @@ H5_DLL haddr_t H5FD_alloc_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
 H5_DLL herr_t H5FD_free_real(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
     haddr_t addr, hsize_t size);
 
-
-/* Testing routines */
+/* Testing functions */
 #ifdef H5FD_TESTING
 #endif /* H5FD_TESTING */
 

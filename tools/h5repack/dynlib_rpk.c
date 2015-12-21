@@ -24,6 +24,18 @@
 
 #define H5Z_FILTER_DYNLIB1      257
 
+/* gcc attribute support from H5private.h */
+#ifdef __cplusplus
+#   define H5_ATTR_CONST        /*void*/
+#else /* __cplusplus */
+#if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
+#   define H5_ATTR_CONST        __attribute__((const))
+#else
+#   define H5_ATTR_CONST        /*void*/
+#endif
+#endif /* __cplusplus */
+
+
 static size_t H5Z_filter_dynlib1(unsigned int flags, size_t cd_nelmts,
                 const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 
@@ -38,8 +50,8 @@ const H5Z_class2_t H5Z_DYNLIB1[1] = {{
     (H5Z_func_t)H5Z_filter_dynlib1,    /* The actual filter function	*/
 }};
 
-H5PL_type_t   H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
-const void    *H5PLget_plugin_info(void) {return H5Z_DYNLIB1;}
+H5_ATTR_CONST H5PL_type_t H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
+H5_ATTR_CONST const void *H5PLget_plugin_info(void) {return H5Z_DYNLIB1;}
 
 /*-------------------------------------------------------------------------
  * Function:	H5Z_filter_dynlib1

@@ -76,8 +76,8 @@ static herr_t H5B2__merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
     H5B2_node_ptr_t *curr_node_ptr, unsigned *parent_cache_info_flags_ptr,
     H5B2_internal_t *internal, unsigned *internal_flags_ptr, unsigned idx);
 static herr_t H5B2__swap_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
-    H5B2_internal_t *internal, unsigned *internal_flags_ptr,
-    unsigned idx, void *swap_loc);
+    H5B2_internal_t *internal, unsigned *internal_flags_ptr, unsigned idx,
+    void *swap_loc);
 static herr_t H5B2__create_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
     H5B2_node_ptr_t *node_ptr, uint16_t depth);
 #ifdef H5B2_DEBUG
@@ -570,6 +570,9 @@ H5B2__redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
 
         uint16_t new_left_nrec = (uint16_t)(*left_nrec + *right_nrec) / 2;    /* New number of records for left child */
         uint16_t move_nrec = (uint16_t)(*left_nrec - new_left_nrec);        /* Number of records to move from left node to right */
+
+        /* Sanity check */
+        HDassert(*left_nrec > *right_nrec);
 
         /* Slide records in right node up */
         HDmemmove(H5B2_NAT_NREC(right_native, hdr, move_nrec),

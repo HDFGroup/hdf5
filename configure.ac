@@ -362,16 +362,16 @@ AC_CHECK_TYPE([ptrdiff_t], [],
         [AC_DEFINE_UNQUOTED([ptrdiff_t], [long],
                 [Define to `long' if <sys/types.h> does not define.])])
 AC_C_BIGENDIAN
-AC_CHECK_SIZEOF([char], [1])
-AC_CHECK_SIZEOF([short], [2])
-AC_CHECK_SIZEOF([int], [4])
-AC_CHECK_SIZEOF([unsigned], [4])
-AC_CHECK_SIZEOF([long], [4])
-AC_CHECK_SIZEOF([long long], [8])
-AC_CHECK_SIZEOF([__int64], [8])
-AC_CHECK_SIZEOF([float], [4])
-AC_CHECK_SIZEOF([double], [8])
-AC_CHECK_SIZEOF([long double], [8])
+AC_CHECK_SIZEOF([char])
+AC_CHECK_SIZEOF([short])
+AC_CHECK_SIZEOF([int])
+AC_CHECK_SIZEOF([unsigned])
+AC_CHECK_SIZEOF([long])
+AC_CHECK_SIZEOF([long long])
+AC_CHECK_SIZEOF([__int64])
+AC_CHECK_SIZEOF([float])
+AC_CHECK_SIZEOF([double])
+AC_CHECK_SIZEOF([long double])
 
 ## Check for non-standard extenstion __FLOAT128
 HAVE_FLOAT128=0
@@ -947,7 +947,7 @@ AC_HEADER_TIME
 
 ## Unix
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
-AC_CHECK_HEADERS([sys/socket.h sys/types.h])
+AC_CHECK_HEADERS([sys/socket.h sys/types.h sys/file.h])
 AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
@@ -1093,43 +1093,43 @@ if test "X$C9x" = "Xyes"; then
 EOF
 fi
 
-AC_CHECK_SIZEOF(        [int8_t], [1])
-AC_CHECK_SIZEOF(       [uint8_t], [1])
-AC_CHECK_SIZEOF(  [int_least8_t], [1])
-AC_CHECK_SIZEOF( [uint_least8_t], [1])
-AC_CHECK_SIZEOF(   [int_fast8_t], [1])
-AC_CHECK_SIZEOF(  [uint_fast8_t], [1])
+AC_CHECK_SIZEOF(        [int8_t])
+AC_CHECK_SIZEOF(       [uint8_t])
+AC_CHECK_SIZEOF(  [int_least8_t])
+AC_CHECK_SIZEOF( [uint_least8_t])
+AC_CHECK_SIZEOF(   [int_fast8_t])
+AC_CHECK_SIZEOF(  [uint_fast8_t])
 
-AC_CHECK_SIZEOF(       [int16_t], [2])
-AC_CHECK_SIZEOF(      [uint16_t], [2])
-AC_CHECK_SIZEOF( [int_least16_t], [2])
-AC_CHECK_SIZEOF([uint_least16_t], [2])
-AC_CHECK_SIZEOF(  [int_fast16_t], [2])
-AC_CHECK_SIZEOF( [uint_fast16_t], [2])
+AC_CHECK_SIZEOF(       [int16_t])
+AC_CHECK_SIZEOF(      [uint16_t])
+AC_CHECK_SIZEOF( [int_least16_t])
+AC_CHECK_SIZEOF([uint_least16_t])
+AC_CHECK_SIZEOF(  [int_fast16_t])
+AC_CHECK_SIZEOF( [uint_fast16_t])
 
-AC_CHECK_SIZEOF(       [int32_t], [4])
-AC_CHECK_SIZEOF(      [uint32_t], [4])
-AC_CHECK_SIZEOF( [int_least32_t], [4])
-AC_CHECK_SIZEOF([uint_least32_t], [4])
-AC_CHECK_SIZEOF(  [int_fast32_t], [4])
-AC_CHECK_SIZEOF( [uint_fast32_t], [4])
+AC_CHECK_SIZEOF(       [int32_t])
+AC_CHECK_SIZEOF(      [uint32_t])
+AC_CHECK_SIZEOF( [int_least32_t])
+AC_CHECK_SIZEOF([uint_least32_t])
+AC_CHECK_SIZEOF(  [int_fast32_t])
+AC_CHECK_SIZEOF( [uint_fast32_t])
 
-AC_CHECK_SIZEOF(       [int64_t], [8])
-AC_CHECK_SIZEOF(      [uint64_t], [8])
-AC_CHECK_SIZEOF( [int_least64_t], [8])
-AC_CHECK_SIZEOF([uint_least64_t], [8])
-AC_CHECK_SIZEOF(  [int_fast64_t], [8])
-AC_CHECK_SIZEOF( [uint_fast64_t], [8])
+AC_CHECK_SIZEOF(       [int64_t])
+AC_CHECK_SIZEOF(      [uint64_t])
+AC_CHECK_SIZEOF( [int_least64_t])
+AC_CHECK_SIZEOF([uint_least64_t])
+AC_CHECK_SIZEOF(  [int_fast64_t])
+AC_CHECK_SIZEOF( [uint_fast64_t])
 
-AC_CHECK_SIZEOF([size_t], [4])
-AC_CHECK_SIZEOF([ssize_t], [4])
-AC_CHECK_SIZEOF([ptrdiff_t], [4])
+AC_CHECK_SIZEOF([size_t])
+AC_CHECK_SIZEOF([ssize_t])
+AC_CHECK_SIZEOF([ptrdiff_t])
 
 cat >>confdefs.h <<\EOF
 #include <sys/types.h> /*for off_t definition*/
 EOF
-AC_CHECK_SIZEOF([off_t], [4])
-AC_CHECK_SIZEOF([off64_t], [8])
+AC_CHECK_SIZEOF([off_t])
+AC_CHECK_SIZEOF([off64_t])
 
 if test "X$C9x" = "Xyes"; then
   cat >>confdefs.h <<\EOF
@@ -1139,7 +1139,7 @@ if test "X$C9x" = "Xyes"; then
 #define bool _Bool
 #endif
 EOF
-AC_CHECK_SIZEOF([bool], [1])
+AC_CHECK_SIZEOF([bool])
 fi
 
 ## Checkpoint the cache
@@ -1743,8 +1743,8 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## NOTE: clock_gettime may require linking to the rt or posix4 library
 ##       so we'll search for it before calling AC_CHECK_FUNCS.
 AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AC_CHECK_FUNCS([alarm clock_gettime difftime fork frexpf frexpl])
-AC_CHECK_FUNCS([gethostname getpwuid getrusage gettimeofday])
+AC_CHECK_FUNCS([alarm clock_gettime difftime fcntl flock fork frexpf])
+AC_CHECK_FUNCS([frexpl gethostname getpwuid getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])

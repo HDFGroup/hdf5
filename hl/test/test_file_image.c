@@ -158,7 +158,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             FAIL_PUTS_ERROR("H5Dclose() failed");
 
         /* get size of the file image i */
-        if ((buf_size[i] = H5Fget_file_image(file_id[i], NULL, 0)) < 0)
+        if ((buf_size[i] = H5Fget_file_image(file_id[i], NULL, (size_t)0)) < 0)
             FAIL_PUTS_ERROR("H5Fget_file_image() failed");
 
         /* allocate buffer for the file image i */
@@ -370,7 +370,9 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
                     H5Aclose(attr_id);
                 } H5E_END_TRY;
 #endif
-                file_id[i] = -1;
+		if (H5Dclose(dset_id[i]) < 0)
+		    FAIL_PUTS_ERROR("H5Dclose() failed");
+		dset_id[i] = -1;
             } /* end if */
             else {
                 /* write dataset without extending it */
@@ -399,7 +401,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
     /* read open file images and verify data */
     for (i = 0; i < open_images; i++) {
         /* if opening the file image failed, continue next iteration */
-        if ((file_id[i] <  0) || (!(input_flags[i] & H5LT_FILE_IMAGE_OPEN_RW )))
+        if ((dset_id[i] < 0) || (file_id[i] <  0) || (!(input_flags[i] & H5LT_FILE_IMAGE_OPEN_RW )))
             continue;
 
         /* open dataset in file image */ 
