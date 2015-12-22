@@ -3360,12 +3360,9 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                 if(NULL == (ent = H5FL_CALLOC(H5D_rdcc_ent_t)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate raw data chunk entry")
 
-		ent->locked = 0;
 		ent->edge_chunk_state = disable_filters ? H5D_RDCC_DISABLE_FILTERS : 0;
 		if(udata->new_unfilt_chunk)
 		    ent->edge_chunk_state |= H5D_RDCC_NEWLY_DISABLED_FILTERS;
-		ent->dirty = FALSE;
-		ent->deleted = FALSE;
 
                 /* Initialize the new entry */
                 ent->chunk_block.offset = chunk_addr;
@@ -3883,16 +3880,13 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
         } /* end else */
 
         while(!carry) {
-            /* None of the chunks should be allocated */
             hbool_t need_insert = FALSE;    /* Whether the chunk needs to be inserted into the index */
-
-            /* Reset size of chunk in bytes, in case filtered size changes */
-            /* chunk_size = orig_chunk_size; */
 
 	    /* Look up this chunk */
 	    if(H5D__chunk_lookup(dset, dxpl_id, scaled, &udata) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 #ifndef NDEBUG
+            /* None of the chunks should be allocated */
 	    if(H5D_CHUNK_IDX_NONE != layout->storage.u.chunk.idx_type)
 		HDassert(!H5F_addr_defined(udata.chunk_block.offset));
 
@@ -3960,7 +3954,6 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             udata.common.layout = &layout->u.chunk;
             udata.common.storage = &layout->storage.u.chunk;
             udata.common.scaled = scaled;
-            udata.common.rdcc = &dset->shared->cache.chunk;
             udata.chunk_block.offset = HADDR_UNDEF;
             H5_CHECKED_ASSIGN(udata.chunk_block.length, uint32_t, chunk_size, size_t);
             udata.filter_mask = filter_mask;
@@ -4749,7 +4742,6 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
     /* Initialize user data for removal */
     idx_udata.layout = &layout->u.chunk;
     idx_udata.storage = &layout->storage.u.chunk;
-    idx_udata.rdcc = rdcc;
 
     /* Determine if partial edge chunk filters are disabled */
     disable_edge_filters = (layout->u.chunk.flags

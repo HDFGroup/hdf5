@@ -276,9 +276,6 @@ typedef struct H5D_chunk_common_ud_t {
     const H5O_layout_chunk_t *layout;           /* Chunk layout description */
     const H5O_storage_chunk_t *storage;         /* Chunk storage description */
     const hsize_t *scaled;		        /* Scaled coordinates for a chunk */
-    const struct H5D_rdcc_t *rdcc;              /* Chunk cache.  Only necessary if the index may
-                                                 * be modified, and if any chunks in the dset
-                                                 * may be cached */
 } H5D_chunk_common_ud_t;
 
 /* B-tree callback info for various operations */
@@ -713,11 +710,6 @@ H5_DLL herr_t H5D__chunk_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh,
 H5_DLL herr_t H5D__chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream);
 H5_DLL herr_t H5D__chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5O_storage_t *store);
-H5_DLL herr_t H5D__chunk_create_flush_dep(const H5D_rdcc_t *rdcc,
-    const H5O_layout_chunk_t *layout, const hsize_t offset[], void *parent);
-H5_DLL herr_t H5D__chunk_update_flush_dep(const H5D_rdcc_t *rdcc,
-    const H5O_layout_chunk_t *layout, const hsize_t offset[], void *old_parent,
-    void *new_parent);
 H5_DLL herr_t H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, 
          hsize_t *offset, uint32_t data_size, const void *buf);
 #ifdef H5D_CHUNK_DEBUG

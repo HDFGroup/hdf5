@@ -931,12 +931,6 @@ H5_DLL herr_t H5O_loc_hold_file(H5O_loc_t *loc);
 H5_DLL herr_t H5O_loc_free(H5O_loc_t *loc);
 H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);
 
-/* Storage operators */
-H5_DLL void *H5O_storage_copy(const void *mesg, void *dest);
-H5_DLL herr_t H5O_storage_reset(void *mesg);
-H5_DLL size_t H5O_storage_meta_size(const H5F_t *f, const H5O_storage_t *storage,
-    hbool_t include_compact_data);
-
 /* EFL operators */
 H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);
 
