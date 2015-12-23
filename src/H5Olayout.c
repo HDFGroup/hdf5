@@ -307,7 +307,7 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
 			    if(mesg->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
                                 H5F_DECODE_LENGTH(f, p, mesg->storage.u.chunk.u.single.nbytes);
                                 UINT32DECODE(p, mesg->storage.u.chunk.u.single.filter_mask);
-                            }
+                            } /* end if */
 
                             /* Set the chunk operations */
                             mesg->storage.u.chunk.ops = H5D_COPS_SINGLE;
