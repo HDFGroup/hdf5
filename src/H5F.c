@@ -760,13 +760,6 @@ H5Fclose(hid_t file_id)
         if((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
         if(nref == 1) {
-	     if(f->shared->sblock) { /* Clear status_flags */
-                    f->shared->sblock->status_flags &= ~H5F_SUPER_WRITE_ACCESS;
-                    f->shared->sblock->status_flags &= ~H5F_SUPER_SWMR_WRITE_ACCESS;
-                    /* Mark superblock dirty in cache, so change will get encoded */
-                    if(H5F_super_dirty(f) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
-            }
             if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
 	}
@@ -1640,13 +1633,13 @@ H5Fstart_swmr_write(hid_t file_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
     /* Get the # of opened named datatypes and attributes */
-    if(H5F_get_obj_count(file, H5F_OBJ_LOCAL|H5F_OBJ_DATATYPE|H5F_OBJ_ATTR, FALSE, &nt_attr_count) < 0)
+    if(H5F_get_obj_count(file, H5F_OBJ_DATATYPE|H5F_OBJ_ATTR, FALSE, &nt_attr_count) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
     if(nt_attr_count)
 	HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "named datatypes and/or attributes opened in the file")
 
     /* Get the # of opened datasets and groups */
-    if(H5F_get_obj_count(file, H5F_OBJ_LOCAL|H5F_OBJ_GROUP|H5F_OBJ_DATASET, FALSE, &grp_dset_count) < 0)
+    if(H5F_get_obj_count(file, H5F_OBJ_GROUP|H5F_OBJ_DATASET, FALSE, &grp_dset_count) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
 
     if(grp_dset_count) {
@@ -1661,13 +1654,13 @@ H5Fstart_swmr_write(hid_t file_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5G_name_t")
 
         /* Get the list of opened object ids (groups & datasets) */
-	if(H5F_get_obj_ids(file, H5F_OBJ_LOCAL|H5F_OBJ_GROUP|H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE, &grp_dset_count) < 0)
+	if(H5F_get_obj_ids(file, H5F_OBJ_GROUP|H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE, &grp_dset_count) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "H5F_get_obj_ids failed")
 
         /* Refresh opened objects (groups, datasets) in the file */
         for(u = 0; u < grp_dset_count; u++) {
             H5O_loc_t *oloc;            /* object location */
-
+	    H5G_loc_t tmp_loc;
             /* Set up the id's group location */
             obj_glocs[u].oloc = &obj_olocs[u];
             obj_glocs[u].path = &obj_paths[u];
@@ -1677,9 +1670,13 @@ H5Fstart_swmr_write(hid_t file_id)
             if((oloc = H5O_get_loc(obj_ids[u])) == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
 
-            /* Refresh (part 1) */
-            if(H5O_refresh_metadata_close(obj_ids[u], *oloc, &obj_glocs[u], H5AC_dxpl_id) < 0)
-                HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
+	    /* Make deep local copy of object's location information */
+	    H5G_loc(obj_ids[u], &tmp_loc);
+	    H5G_loc_copy(&obj_glocs[u], &tmp_loc, H5_COPY_DEEP);
+
+	    /* Close the object */
+	    if(H5I_dec_ref(obj_ids[u]) < 0)
+		HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEOBJ, FAIL, "decrementing object ID failed")
         } /* end for */
     } /* end if */
 
@@ -1724,9 +1721,9 @@ H5Fstart_swmr_write(hid_t file_id)
     if(H5F_evict_cache_entries(file, H5AC_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to evict file's cached information")
 
-    /* Refresh (part 2: reopen) the objects (groups & datasets) in the file */
+    /* Refresh (reopen) the objects (groups & datasets) in the file */
     for(u = 0; u < grp_dset_count; u++) {
-	if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], H5AC_dxpl_id) < 0)
+	if(H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], H5AC_dxpl_id, TRUE) < 0)
 	    HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
     }
 

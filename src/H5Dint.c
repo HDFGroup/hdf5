@@ -1940,6 +1940,141 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_mult_refresh_close
+ *
+ * Purpose:	Closing down the needed information when the dataset has
+ *		multiple opens.  (From H5O_refresh_metadata_close())
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; 12/24/15
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_mult_refresh_close(hid_t dset_id, hid_t dxpl_id)
+{
+    H5D_t       *dataset;             	/* Dataset to refresh */
+    herr_t      ret_value = SUCCEED;    /* return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if(NULL == (dataset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* check args */
+    HDassert(dataset && dataset->oloc.file && dataset->shared);
+    HDassert(dataset->shared->fo_count > 0);
+
+    if(dataset->shared->fo_count > 1) {
+        /* Free cached information for each kind of dataset */
+        switch(dataset->shared->layout.type) {
+            case H5D_CONTIGUOUS:
+                /* Free the data sieve buffer, if it's been allocated */
+                if(dataset->shared->cache.contig.sieve_buf)
+                    dataset->shared->cache.contig.sieve_buf = (unsigned char *)H5FL_BLK_FREE(sieve_buf,dataset->shared->cache.contig.sieve_buf);
+                break;
+
+            case H5D_CHUNKED:
+                /* Check for skip list for iterating over chunks during I/O to close */
+                if(dataset->shared->cache.chunk.sel_chunks) {
+                    HDassert(H5SL_count(dataset->shared->cache.chunk.sel_chunks) == 0);
+                    H5SL_close(dataset->shared->cache.chunk.sel_chunks);
+                    dataset->shared->cache.chunk.sel_chunks = NULL;
+                } /* end if */
+
+                /* Check for cached single chunk dataspace */
+                if(dataset->shared->cache.chunk.single_space) {
+                    (void)H5S_close(dataset->shared->cache.chunk.single_space);
+                    dataset->shared->cache.chunk.single_space = NULL;
+                } /* end if */
+
+                /* Check for cached single element chunk info */
+                if(dataset->shared->cache.chunk.single_chunk_info) {
+                    dataset->shared->cache.chunk.single_chunk_info = H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
+                    dataset->shared->cache.chunk.single_chunk_info = NULL;
+                } /* end if */
+                break;
+
+            case H5D_COMPACT:
+                /* Nothing special to do (info freed in the layout destroy) */
+                break;
+
+            case H5D_VIRTUAL:
+		break;
+
+            case H5D_LAYOUT_ERROR:
+            case H5D_NLAYOUTS:
+            default:
+                HDassert("not implemented yet" && 0);
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
+#endif /* NDEBUG */
+        } /* end switch */ /*lint !e788 All appropriate cases are covered */
+
+        /* Destroy any cached layout information for the dataset */
+        if(dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset, dxpl_id) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info")
+
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_mult_refresh_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_mult_refresh_reopen
+ *
+ * Purpose:	Re-initialize the needed info when the dataset has multiple
+ *		opens. (From H5O_refresh_metadata_reopen())
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; 12/24/15
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_mult_refresh_reopen(H5D_t *dataset, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* check args */
+    HDassert(dataset && dataset->oloc.file && dataset->shared);
+    HDassert(dataset->shared->fo_count > 0);
+
+    if(dataset->shared->fo_count > 1) {
+
+	/* Release dataspace info */
+	if(H5S_close(dataset->shared->space) < 0)
+	    HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release dataspace")
+
+	/* Re-load dataspace info */
+	if(NULL == (dataset->shared->space = H5S_read(&(dataset->oloc), dxpl_id)))
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load dataspace info from dataset header")
+
+	/* Cache the dataset's dataspace info */
+	if(H5D__cache_dataspace_info(dataset) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't cache dataspace info")
+    
+	if(H5O_msg_reset(H5O_LAYOUT_ID, &dataset->shared->layout) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTRESET, NULL, "unable to reset layout info")
+
+	/* Re-load layout message info */
+	if(NULL == H5O_msg_read(&(dataset->oloc), H5O_LAYOUT_ID, &(dataset->shared->layout), dxpl_id))
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data layout message")	
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5D_mult_refresh_reopen() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_oloc
  *
  * Purpose:	Returns a pointer to the object location for a dataset.
