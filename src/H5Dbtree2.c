@@ -963,9 +963,23 @@ H5D__bt2_idx_is_space_alloc(const H5O_storage_chunk_t *storage)
 static herr_t
 H5D__bt2_mod_cb(void *_record, void *_op_data, hbool_t *changed)
 {
+    H5D_bt2_ud_t *op_data = (H5D_bt2_ud_t *)_op_data;       /* User data for v2 B-tree calls */
+    H5D_chunk_rec_t *record = (H5D_chunk_rec_t *)_record;   /* Chunk record */
+
     FUNC_ENTER_STATIC_NOERR
 
-    *(H5D_chunk_rec_t *)_record = *(H5D_chunk_rec_t *)_op_data;
+/* Sanity check */
+#ifndef NDEBUG
+{
+    unsigned u;                 /* Local index variable */
+
+    for(u = 0; u < op_data->ndims; u++)
+        HDassert(record->scaled[u] == op_data->rec.scaled[u]);
+}
+#endif /* NDEBUG */
+
+    /* Modify record */
+    *record = op_data->rec;
 
     /* Note that the record changed */
     *changed = TRUE;
@@ -1036,18 +1050,9 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     for(u = 0; u < (idx_info->layout->ndims - 1); u++)
         bt2_udata.rec.scaled[u] = udata->common.scaled[u];
 
-    if(udata->need_modify) {
-	HDassert(idx_info->pline->nused > 0);
-
-	/* Modify record for v2 B-tree */
-	if(H5B2_modify(bt2, idx_info->dxpl_id, &bt2_udata, H5D__bt2_mod_cb, &bt2_udata.rec) < 0)
-	    HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to modify record in v2 B-tree")
-    } /* end if */
-    else {
-	/* Insert record for object in v2 B-tree */
-	if(H5B2_insert(bt2, idx_info->dxpl_id, &bt2_udata) < 0)                
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "couldn't insert record in v2 B-tree")
-    } /* end else */
+    /* Update record for v2 B-tree (could be insert or modify) */
+    if(H5B2_update(bt2, idx_info->dxpl_id, &bt2_udata, H5D__bt2_mod_cb, &bt2_udata) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTUPDATE, FAIL, "unable to update record in v2 B-tree")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

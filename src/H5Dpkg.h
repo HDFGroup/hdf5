@@ -288,7 +288,6 @@ typedef struct H5D_chunk_ud_t {
     unsigned	filter_mask;		/*excluded filters	*/
     hbool_t     new_unfilt_chunk;       /*whether the chunk just became unfiltered */
     hsize_t     chunk_idx;              /*chunk index for EA, FA indexing */
-    hbool_t     need_modify;
 } H5D_chunk_ud_t;
 
 /* Typedef for "generic" chunk callbacks */
