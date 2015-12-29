@@ -19,19 +19,19 @@
  * Purpose:     Messages related to data layout.
  */
 
-#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
+#define H5D_FRIEND              /*suppress error about including H5Dpkg	  */
 #include "H5Omodule.h"          /* This source code file is part of the H5O module */
 
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dpkg.h"		/* Dataset functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5MFprivate.h"	/* File space management		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5Pprivate.h"		/* Property lists			*/
-#include "H5Sprivate.h"		/* Dataspaces				*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Dpkg.h"             /* Dataset functions                        */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free Lists                               */
+#include "H5MFprivate.h"        /* File space management                    */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Opkg.h"             /* Object headers                           */
+#include "H5Pprivate.h"         /* Property lists                           */
+#include "H5Sprivate.h"         /* Dataspaces                               */
 
 
 /* Local macros */
@@ -53,31 +53,31 @@ static herr_t H5O__layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 static void *H5O__layout_copy_file(H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
     H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
-static herr_t H5O__layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
-			       int indent, int fwidth);
+static herr_t H5O__layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
+    FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
-    H5O_LAYOUT_ID,          	/*message id number             */
-    "layout",               	/*message name for debugging    */
-    sizeof(H5O_layout_t),   	/*native message size           */
-    0,				/* messages are sharable?       */
-    H5O__layout_decode,      	/*decode message                */
-    H5O__layout_encode,      	/*encode message                */
-    H5O__layout_copy,        	/*copy the native value         */
-    H5O__layout_size,        	/*size of message on disk       */
-    H5O__layout_reset,		/*reset method                  */
-    H5O__layout_free,        	/*free the struct		*/
-    H5O__layout_delete,	        /* file delete method		*/
-    NULL,			/* link method			*/
-    NULL,			/*set share method		*/
-    NULL,		    	/*can share method		*/
-    NULL,			/* pre copy native value to file */
-    H5O__layout_copy_file,	/* copy native value to file    */
-    NULL,		        /* post copy native value to file */
-    NULL,			/* get creation index		*/
-    NULL,			/* set creation index		*/
-    H5O__layout_debug       	/*debug the message             */
+    H5O_LAYOUT_ID,              /* message id number                    */
+    "layout",                   /* message name for debugging           */
+    sizeof(H5O_layout_t),       /* native message size                  */
+    0,                          /* messages are sharable?               */
+    H5O__layout_decode,         /* decode message                       */
+    H5O__layout_encode,         /* encode message                       */
+    H5O__layout_copy,           /* copy the native value                */
+    H5O__layout_size,           /* size of message on disk              */
+    H5O__layout_reset,          /* reset method                         */
+    H5O__layout_free,           /* free the struct                      */
+    H5O__layout_delete,	        /* file delete method                   */
+    NULL,                       /* link method                          */
+    NULL,                       /* set share method                     */
+    NULL,                       /* can share method                     */
+    NULL,                       /* pre copy native value to file        */
+    H5O__layout_copy_file,      /* copy native value to file            */
+    NULL,                       /* post copy native value to file       */
+    NULL,                       /* get creation index                   */
+    NULL,                       /* set creation index                   */
+    H5O__layout_debug           /* debug the message                    */
 }};
 
 
@@ -125,7 +125,7 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for layout message")
 
     if(mesg->version < H5O_LAYOUT_VERSION_3) {
-        unsigned	ndims;			/* Num dimensions in chunk           */
+        unsigned    ndims;                      /* Num dimensions in chunk */
 
         /* Dimensionality */
         ndims = *p++;
@@ -297,21 +297,21 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
                     switch(mesg->u.chunk.idx_type) {
                         case H5D_CHUNK_IDX_BTREE:
                             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "v1 B-tree index type should never be in a v4 layout message")
-			    break;
+                            break;
 
-			case H5D_CHUNK_IDX_NONE:       /* Implicit Index */
+                        case H5D_CHUNK_IDX_NONE:       /* Implicit Index */
                             mesg->storage.u.chunk.ops = H5D_COPS_NONE;
-			    break;
+                            break;
 
-			case H5D_CHUNK_IDX_SINGLE:     /* Single Chunk Index */
-			    if(mesg->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
+                        case H5D_CHUNK_IDX_SINGLE:     /* Single Chunk Index */
+                            if(mesg->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
                                 H5F_DECODE_LENGTH(f, p, mesg->storage.u.chunk.u.single.nbytes);
                                 UINT32DECODE(p, mesg->storage.u.chunk.u.single.filter_mask);
                             } /* end if */
 
                             /* Set the chunk operations */
                             mesg->storage.u.chunk.ops = H5D_COPS_SINGLE;
-			    break;
+                            break;
 
                         case H5D_CHUNK_IDX_FARRAY:
                             /* Fixed array creation parameters */
@@ -345,8 +345,8 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
                             mesg->storage.u.chunk.ops = H5D_COPS_EARRAY;
                             break;
 
-			case H5D_CHUNK_IDX_BT2:       /* v2 B-tree index */
-			    UINT32DECODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
+                        case H5D_CHUNK_IDX_BT2:       /* v2 B-tree index */
+                            UINT32DECODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
                             mesg->u.chunk.u.btree2.cparam.split_percent = *p++;
                             mesg->u.chunk.u.btree2.cparam.merge_percent = *p++;
 
@@ -633,15 +633,15 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "v1 B-tree index type should never be in a v4 layout message")
                         break;
 
-		    case H5D_CHUNK_IDX_NONE:       /* Implicit */
+                    case H5D_CHUNK_IDX_NONE:       /* Implicit */
                         break;
 
-		    case H5D_CHUNK_IDX_SINGLE:     /* Single Chunk */
-			/* Filter information */
-			if(mesg->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
-			    H5F_ENCODE_LENGTH(f, p, mesg->storage.u.chunk.u.single.nbytes);
-			    UINT32ENCODE(p, mesg->storage.u.chunk.u.single.filter_mask);
-			} /* end if */
+                    case H5D_CHUNK_IDX_SINGLE:     /* Single Chunk */
+                        /* Filter information */
+                        if(mesg->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
+                            H5F_ENCODE_LENGTH(f, p, mesg->storage.u.chunk.u.single.nbytes);
+                            UINT32ENCODE(p, mesg->storage.u.chunk.u.single.filter_mask);
+                        } /* end if */
                         break;
 
                     case H5D_CHUNK_IDX_FARRAY:
@@ -658,8 +658,8 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                         *p++ = mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits;
                         break;
 
-		    case H5D_CHUNK_IDX_BT2:       /* v2 B-tree index */
-			UINT32ENCODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
+                    case H5D_CHUNK_IDX_BT2:       /* v2 B-tree index */
+                        UINT32ENCODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
                         *p++ = mesg->u.chunk.u.btree2.cparam.split_percent;
                         *p++ = mesg->u.chunk.u.btree2.cparam.merge_percent;
                         break;
@@ -669,7 +669,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "Invalid chunk index type")
                 } /* end switch */
 
-		/*
+                /*
                  * Implicit index: Address of the chunks
                  * Single chunk index: address of the single chunk
                  * Other indexes: chunk index address
@@ -918,14 +918,14 @@ H5O__layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const vo
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__layout_reset
+ * Function:    H5O__layout_reset
  *
- * Purpose:	Frees resources within a data type message, but doesn't free
- *		the message itself.
+ * Purpose:     Frees resources within a data type message, but doesn't free
+ *              the message itself.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, September 13, 2002
  *
  *-------------------------------------------------------------------------
@@ -1205,7 +1205,7 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const v
                               "Index Type:", "Implicit");
                     break;
 
-		 case H5D_CHUNK_IDX_SINGLE:
+                case H5D_CHUNK_IDX_SINGLE:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "Single Chunk");
                     break;
@@ -1222,7 +1222,7 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const v
                     /* (Should print the extensible array creation parameters) */
                     break;
 
-		case H5D_CHUNK_IDX_BT2:
+                case H5D_CHUNK_IDX_BT2:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v2 B-tree");
                     /* (Should print the v2-Btree creation parameters) */

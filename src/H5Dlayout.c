@@ -23,10 +23,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dpkg.h"		/* Datasets 				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5HLprivate.h"	/* Local heaps				*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Dpkg.h"             /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5HLprivate.h"        /* Local heaps                              */
 
 
 /****************/
@@ -61,15 +61,15 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__layout_set_io_ops
+ * Function:    H5D__layout_set_io_ops
  *
- * Purpose:	Set the I/O operation function pointers for a dataset,
+ * Purpose:     Set the I/O operation function pointers for a dataset,
  *              according to the dataset's layout
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March 20, 2008
+ * Programmer:  Quincey Koziol
+ *              Thursday, March 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -105,7 +105,7 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_NONE;
                     break;
 
-		case H5D_CHUNK_IDX_SINGLE:
+                case H5D_CHUNK_IDX_SINGLE:
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_SINGLE;
                     break;
 
@@ -226,16 +226,16 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, 0, "v1 B-tree index type found for layout message >v3")
 
                     case H5D_CHUNK_IDX_NONE:
-			/* nothing */
+                        /* nothing */
                         break;
 
-		    case H5D_CHUNK_IDX_SINGLE:
-			/* Possible filter information */
-			if(layout->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
-			    ret_value += H5F_SIZEOF_SIZE(f);        /* Size of chunk (in file) */
-			    ret_value += 4;                         /* Filter mask for chunk */
-			} /* end if */
-			break;
+                    case H5D_CHUNK_IDX_SINGLE:
+                        /* Possible filter information */
+                        if(layout->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
+                            ret_value += H5F_SIZEOF_SIZE(f);        /* Size of chunk (in file) */
+                            ret_value += 4;                         /* Filter mask for chunk */
+                        } /* end if */
+                        break;
 
                     case H5D_CHUNK_IDX_FARRAY:
                         /* Fixed array creation parameters */
@@ -247,7 +247,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                         ret_value += H5D_EARRAY_CREATE_PARAM_SIZE;
                         break;
 
-		    case H5D_CHUNK_IDX_BT2:
+                    case H5D_CHUNK_IDX_BT2:
                         /* v2 B-tree creation parameters */
                         ret_value += H5D_BT2_CREATE_PARAM_SIZE;
                         break;
@@ -282,10 +282,10 @@ done:
  * Function:    H5D__layout_set_latest_version
  *
  * Purpose:     Set the encoding for a layout to the latest version.
- *		Part of the coding in this routine is moved to
- *		H5D__layout_set_latest_indexing().
+ *              Part of the coding in this routine is moved to
+ *              H5D__layout_set_latest_indexing().
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Thursday, January 15, 2009
@@ -321,9 +321,9 @@ done:
  * Function:    H5D__layout_set_latest_indexing
  *
  * Purpose:     Set the latest indexing type for a layout message
- *		This is moved from H5D_layout_set_latest_version().
+ *              This is moved from H5D_layout_set_latest_version().
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
  *              Thursday, January 15, 2009
@@ -353,25 +353,25 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "invalid dataspace rank")
         ndims = (unsigned)sndims;
 
-	/* Avoid scalar/null dataspace */
-	if(ndims > 0) {
-	    hsize_t max_dims[H5O_LAYOUT_NDIMS]; /* Maximum dimension sizes */
-	    hsize_t cur_dims[H5O_LAYOUT_NDIMS]; /* Current dimension sizes */
-	    unsigned unlim_count = 0;          	/* Count of unlimited max. dimensions */
-	    hbool_t single = TRUE;              /* Fulfill single chunk indexing */
-	    unsigned u;                     	/* Local index variable */
+        /* Avoid scalar/null dataspace */
+        if(ndims > 0) {
+            hsize_t max_dims[H5O_LAYOUT_NDIMS]; /* Maximum dimension sizes */
+            hsize_t cur_dims[H5O_LAYOUT_NDIMS]; /* Current dimension sizes */
+            unsigned unlim_count = 0;          	/* Count of unlimited max. dimensions */
+            hbool_t single = TRUE;              /* Fulfill single chunk indexing */
+            unsigned u;                     	/* Local index variable */
 
-	    /* Query the dataspace's dimensions */
-	    if(H5S_get_simple_extent_dims(space, cur_dims, max_dims) < 0)
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions")
+            /* Query the dataspace's dimensions */
+            if(H5S_get_simple_extent_dims(space, cur_dims, max_dims) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions")
 
-	    /* Spin through the max. dimensions, looking for unlimited dimensions */
-	    for(u = 0; u < ndims; u++) {
-		if(max_dims[u] == H5S_UNLIMITED)
-		    unlim_count++;
-		if(cur_dims[u] != max_dims[u] || cur_dims[u] != layout->u.chunk.dim[u])
-		    single = FALSE;
-	    } /* end for */
+            /* Spin through the max. dimensions, looking for unlimited dimensions */
+            for(u = 0; u < ndims; u++) {
+                if(max_dims[u] == H5S_UNLIMITED)
+                    unlim_count++;
+                if(cur_dims[u] != max_dims[u] || cur_dims[u] != layout->u.chunk.dim[u])
+                    single = FALSE;
+            } /* end for */
 
             /* Chunked datasets with unlimited dimension(s) */
             if(unlim_count) { /* dataset with unlimited dimension(s) must be chunked */
@@ -407,7 +407,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
                 } /* end else */
             } /* end if */
             else {      /* Chunked dataset with fixed dimensions */
-		/* Check for correct condition for using "single chunk" chunk index */
+                /* Check for correct condition for using "single chunk" chunk index */
                 if(single) {
                     layout->u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
                     layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
@@ -443,15 +443,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__layout_oh_create
+ * Function:    H5D__layout_oh_create
  *
- * Purpose:	Create layout/pline/efl information for dataset
+ * Purpose:     Create layout/pline/efl information for dataset
  *
- * Return:	Success:    SUCCEED
- *		Failure:    FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, July 27, 2009
+ * Programmer:  Quincey Koziol
+ *              Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -460,7 +460,7 @@ H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
     hid_t dapl_id)
 {
     H5O_layout_t        *layout;        /* Dataset's layout information */
-    const H5O_fill_t	*fill_prop;     /* Pointer to dataset's fill value information */
+    const H5O_fill_t    *fill_prop;     /* Pointer to dataset's fill value information */
     unsigned layout_mesg_flags;         /* Flags for inserting layout message */
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -589,6 +589,8 @@ herr_t
 H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t *plist)
 {
     htri_t msg_exists;                  /* Whether a particular type of message exists */
+    uint64_t chunk_size;                /* Size of chunk in bytes */
+    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -645,12 +647,14 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
     /* Adjust chunk dimensions to omit datatype size (in last dimension) for creation property */
     if(H5D_CHUNKED == dataset->shared->layout.type)
         dataset->shared->layout.u.chunk.ndims--;
+
     /* Copy layout to the DCPL */
     if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &dataset->shared->layout) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout")
-    /* Adjust chunk dimensions back again (*sigh*) */
-    if(H5D_CHUNKED == dataset->shared->layout.type)
-        dataset->shared->layout.u.chunk.ndims++;
+
+    /* Set chunk sizes */
+    if(H5D__chunk_set_sizes(dataset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -525,6 +525,52 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D__chunk_set_sizes
+ *
+ * Purpose:     Sets chunk and type sizes.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:	Dana Robinson
+ *              December 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__chunk_set_sizes(H5D_t *dset)
+{
+    uint64_t chunk_size;            /* Size of chunk in bytes */
+    unsigned u;                     /* Iterator */
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(dset);
+
+    /* Increment # of chunk dimensions, to account for datatype size as last element */
+    dset->shared->layout.u.chunk.ndims++;
+
+    /* Set the last dimension of the chunk size to the size of the datatype */
+    dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = (uint32_t)H5T_GET_SIZE(dset->shared->type);
+
+    /* Compute and store the total size of a chunk */
+    /* (Use 64-bit value to ensure that we can detect >4GB chunks) */
+    for(u = 1, chunk_size = (uint64_t)dset->shared->layout.u.chunk.dim[0]; u < dset->shared->layout.u.chunk.ndims; u++)
+        chunk_size *= (uint64_t)dset->shared->layout.u.chunk.dim[u];
+
+    /* Check for chunk larger than can be represented in 32-bits */
+    /* (Chunk size is encoded in 32-bit value in v1 B-tree records) */
+    if(chunk_size > (uint64_t)0xffffffff)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be < 4GB")
+
+    H5_CHECKED_ASSIGN(dset->shared->layout.u.chunk.size, uint32_t, chunk_size, uint64_t);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__chunk_set_sizes */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D__chunk_construct
  *
  * Purpose:	Constructs new chunked layout information for dataset
@@ -539,8 +585,6 @@ done:
 static herr_t
 H5D__chunk_construct(H5F_t H5_ATTR_UNUSED *f, H5D_t *dset)
 {
-    const H5T_t *type = dset->shared->type;      /* Convenience pointer to dataset's datatype */
-    uint64_t chunk_size;        /* Size of chunk in bytes */
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -553,21 +597,17 @@ H5D__chunk_construct(H5F_t H5_ATTR_UNUSED *f, H5D_t *dset)
     /* Check for invalid chunk dimension rank */
     if(0 == dset->shared->layout.u.chunk.ndims)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "no chunk information set?")
-
-    /* Set up layout information */
     if(dset->shared->layout.u.chunk.ndims != dset->shared->ndims)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dimensionality of chunks doesn't match the dataspace")
 
-    /* Increment # of chunk dimensions, to account for datatype size as last element */
-    dset->shared->layout.u.chunk.ndims++;
+    /* Set chunk sizes */
+    if(H5D__chunk_set_sizes(dset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes")
     HDassert((unsigned)(dset->shared->layout.u.chunk.ndims) <= NELMTS(dset->shared->layout.u.chunk.dim));
 
     /* Chunked storage is not compatible with external storage (currently) */
     if(dset->shared->dcpl_cache.efl.nused > 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "external storage not supported with chunked layout")
-
-    /* Set the last dimension of the chunk size to the size of the datatype */
-    dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = (uint32_t)H5T_GET_SIZE(type);
 
     /* Sanity check dimensions */
     for(u = 0; u < dset->shared->layout.u.chunk.ndims - 1; u++) {
@@ -583,19 +623,6 @@ H5D__chunk_construct(H5F_t H5_ATTR_UNUSED *f, H5D_t *dset)
         if(dset->shared->curr_dims[u] && dset->shared->max_dims[u] != H5S_UNLIMITED && dset->shared->max_dims[u] < dset->shared->layout.u.chunk.dim[u])
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be <= maximum dimension size for fixed-sized dimensions")
     } /* end for */
-
-    /* Compute the total size of a chunk */
-    /* (Use 64-bit value to ensure that we can detect >4GB chunks) */
-    for(u = 1, chunk_size = (uint64_t)dset->shared->layout.u.chunk.dim[0]; u < dset->shared->layout.u.chunk.ndims; u++)
-        chunk_size *= (uint64_t)dset->shared->layout.u.chunk.dim[u];
-
-    /* Check for chunk larger than can be represented in 32-bits */
-    /* (Chunk size is encoded in 32-bit value in v1 B-tree records) */
-    if(chunk_size > (uint64_t)0xffffffff)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be < 4GB")
-
-    /* Retain computed chunk size */
-    H5_CHECKED_ASSIGN(dset->shared->layout.u.chunk.size, uint32_t, chunk_size, uint64_t);
 
     /* Reset address and pointer of the array struct for the chunked storage index */
     if(H5D_chunk_idx_reset(&dset->shared->layout.storage.u.chunk, TRUE) < 0)
