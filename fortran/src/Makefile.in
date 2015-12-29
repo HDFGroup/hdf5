@@ -737,8 +737,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 # See libtool versioning documentation online.
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
-LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 224
+LT_VERS_INTERFACE = 100
+LT_VERS_REVISION = 900
 LT_VERS_AGE = 0
 AM_FCLIBS = $(LIBHDF5)
 
