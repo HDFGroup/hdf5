@@ -86,6 +86,7 @@ extern const H5B2_class_t H5G_BT2_CORDER[1];
 extern const H5B2_class_t H5SM_INDEX[1];
 extern const H5B2_class_t H5A_BT2_NAME[1];
 extern const H5B2_class_t H5A_BT2_CORDER[1];
+extern const H5B2_class_t H5B2_TEST2[1];
 
 const H5B2_class_t *const H5B2_client_class_g[] = {
     H5B2_TEST,			/* 0 - H5B2_TEST_ID 			*/
@@ -98,6 +99,7 @@ const H5B2_class_t *const H5B2_client_class_g[] = {
     H5SM_INDEX,			/* 7 - H5B2_SOHM_INDEX_ID 		*/
     H5A_BT2_NAME,		/* 8 - H5B2_ATTR_DENSE_NAME_ID 		*/
     H5A_BT2_CORDER,		/* 9 - H5B2_ATTR_DENSE_CORDER_ID 	*/
+    H5B2_TEST2,			/* 10 - H5B2_TEST_ID 			*/
 };
 
 
@@ -282,36 +284,78 @@ H5B2_insert(H5B2_t *bt2, hid_t dxpl_id, void *udata)
     /* Get the v2 B-tree header */
     hdr = bt2->hdr;
 
+    /* Insert the record */
+    if(H5B2__insert_hdr(hdr, dxpl_id, udata) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5B2_insert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2_update
+ *
+ * Purpose:	Insert or modify a record to the B-tree.
+ *		If the record exists already, it is modified as if H5B2_modify
+ *		was called).  If it doesn't exist, it is inserted as if
+ *		H5B2_insert was called.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Dec 23 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_update(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op, void *op_data)
+{
+    H5B2_hdr_t	*hdr;           /* Pointer to the B-tree header */
+    H5B2_update_status_t status = H5B2_UPDATE_UNKNOWN;   /* Whether the record was inserted/modified */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check arguments. */
+    HDassert(bt2);
+    HDassert(udata);
+
+    /* Set the shared v2 B-tree header's file context for this operation */
+    bt2->hdr->f = bt2->f;
+
+    /* Get the v2 B-tree header */
+    hdr = bt2->hdr;
+
     /* Check if the root node is allocated yet */
     if(!H5F_addr_defined(hdr->root.addr)) {
         /* Create root node as leaf node in B-tree */
         if(H5B2__create_leaf(hdr, dxpl_id, &(hdr->root)) < 0)
 	    HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to create root node")
     } /* end if */
-    /* Check if we need to split the root node (equiv. to a 1->2 node split) */
-    else if(hdr->root.node_nrec == hdr->node_info[hdr->depth].split_nrec) {
-        /* Split root node */
-        if(H5B2__split_root(hdr, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to split root node")
-    } /* end if */
 
     /* Attempt to insert record into B-tree */
     if(hdr->depth > 0) {
-        if(H5B2__insert_internal(hdr, dxpl_id, hdr->depth, NULL, &hdr->root, H5B2_POS_ROOT, udata) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree internal node")
+        if(H5B2__update_internal(hdr, dxpl_id, hdr->depth, NULL, &hdr->root, &status, H5B2_POS_ROOT, udata, op, op_data) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to update record in B-tree internal node")
     } /* end if */
     else {
-        if(H5B2__insert_leaf(hdr, dxpl_id, &hdr->root, H5B2_POS_ROOT, udata) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree leaf node")
+        if(H5B2__update_leaf(hdr, dxpl_id, &hdr->root, &status, H5B2_POS_ROOT, udata, op, op_data) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to update record in B-tree leaf node")
     } /* end else */
 
-    /* Mark B-tree header as dirty */
-    if(H5B2__hdr_dirty(hdr) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTMARKDIRTY, FAIL, "unable to mark B-tree header dirty")
+    /* Sanity check */
+    HDassert(H5B2_UPDATE_UNKNOWN != status);
+
+    /* Use insert algorithm if nodes to leaf full */
+    if(H5B2_UPDATE_INSERT_CHILD_FULL == status)
+        if(H5B2__insert_hdr(hdr, dxpl_id, udata) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2_insert() */
+} /* H5B2_update() */
 
 
 /*-------------------------------------------------------------------------
@@ -1202,7 +1246,7 @@ H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
         /* Unlock current node */
         if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, leaf_flags) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
-    }
+    } /* end block */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

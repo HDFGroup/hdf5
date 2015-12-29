@@ -54,6 +54,7 @@ typedef enum H5B2_subid_t {
     H5B2_SOHM_INDEX_ID,         /* B-tree is an index for shared object header messages */
     H5B2_ATTR_DENSE_NAME_ID,    /* B-tree is for indexing 'name' field for "dense" attribute storage on objects */
     H5B2_ATTR_DENSE_CORDER_ID,  /* B-tree is for indexing 'creation order' field for "dense" attribute storage on objects */
+    H5B2_TEST2_ID,		/* Another B-tree is for testing (do not use for actual data) */
     H5B2_NUM_BTREE_ID           /* Number of B-tree IDs (must be last)  */
 } H5B2_subid_t;
 
@@ -94,8 +95,6 @@ struct H5B2_class_t {
     herr_t (*decode)(const uint8_t *raw, void *record, void *ctx);  	/* Decode record from disk storage form to native form */
     herr_t (*debug)(FILE *stream, int indent, int fwidth,    	/* Print a record for debugging */
         const void *record,  const void *ctx);
-    void *(*crt_dbg_ctx)(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr); 	/* Create debugging context */
-    herr_t (*dst_dbg_ctx)(void *dbg_ctx);       /* Destroy debugging context */
 };
 
 /* v2 B-tree creation parameters */
@@ -139,6 +138,8 @@ H5_DLL herr_t H5B2_index(H5B2_t *bt2, hid_t dxpl_id, H5_iter_order_t order,
 H5_DLL herr_t H5B2_neighbor(H5B2_t *bt2, hid_t dxpl_id, H5B2_compare_t range,
     void *udata, H5B2_found_t op, void *op_data);
 H5_DLL herr_t H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata,
+    H5B2_modify_t op, void *op_data);
+H5_DLL herr_t H5B2_update(H5B2_t *bt2, hid_t dxpl_id, void *udata,
     H5B2_modify_t op, void *op_data);
 H5_DLL herr_t H5B2_remove(H5B2_t *b2, hid_t dxpl_id, void *udata,
     H5B2_remove_t op, void *op_data);

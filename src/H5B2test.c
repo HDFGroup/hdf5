@@ -61,6 +61,7 @@ typedef struct H5B2_test_ctx_t {
 /* Local Prototypes */
 /********************/
 
+/* v2 B-tree driver callbacks for 'test' B-trees */
 static void *H5B2__test_crt_context(void *udata);
 static herr_t H5B2__test_dst_context(void *ctx);
 static herr_t H5B2__test_store(void *nrecord, const void *udata);
@@ -69,13 +70,21 @@ static herr_t H5B2__test_encode(uint8_t *raw, const void *nrecord, void *ctx);
 static herr_t H5B2__test_decode(const uint8_t *raw, void *nrecord, void *ctx);
 static herr_t H5B2__test_debug(FILE *stream, int indent, int fwidth,
     const void *record, const void *_udata);
-static void *H5B2__test_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
+
+/* v2 B-tree driver callbacks for 'test2' B-trees */
+static herr_t H5B2__test2_store(void *nrecord, const void *udata);
+static herr_t H5B2__test2_compare(const void *rec1, const void *rec2);
+static herr_t H5B2__test2_encode(uint8_t *raw, const void *nrecord, void *ctx);
+static herr_t H5B2__test2_decode(const uint8_t *raw, void *nrecord, void *ctx);
+static herr_t H5B2__test2_debug(FILE *stream, int indent, int fwidth,
+    const void *record, const void *_udata);
 
 
 /*********************/
 /* Package Variables */
 /*********************/
 
+/* Class structure for testing simple B-tree records */
 const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
     H5B2_TEST_ID,               /* Type of B-tree */
     "H5B2_TEST_ID",             /* Name of B-tree class */
@@ -86,9 +95,21 @@ const H5B2_class_t H5B2_TEST[1]={{   /* B-tree class information */
     H5B2__test_compare,          /* Record comparison callback */
     H5B2__test_encode,           /* Record encoding callback */
     H5B2__test_decode,           /* Record decoding callback */
-    H5B2__test_debug,            /* Record debugging callback */
-    H5B2__test_crt_dbg_context,  /* Create debugging context */
-    H5B2__test_dst_context       /* Destroy debugging context */
+    H5B2__test_debug             /* Record debugging callback */
+}};
+
+/* Class structure for testing key/value B-tree records */
+const H5B2_class_t H5B2_TEST2[1]={{   /* B-tree class information */
+    H5B2_TEST2_ID,               /* Type of B-tree */
+    "H5B2_TEST2_ID",             /* Name of B-tree class */
+    sizeof(H5B2_test_rec_t),     /* Size of native record */
+    H5B2__test_crt_context,      /* Create client callback context */
+    H5B2__test_dst_context,      /* Destroy client callback context */
+    H5B2__test2_store,           /* Record storage callback */
+    H5B2__test2_compare,         /* Record comparison callback */
+    H5B2__test2_encode,          /* Record encoding callback */
+    H5B2__test2_decode,          /* Record decoding callback */
+    H5B2__test2_debug            /* Record debugging callback */
 }};
 
 
@@ -310,42 +331,139 @@ H5B2__test_debug(FILE *stream, int indent, int fwidth, const void *record,
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5B2__test_crt_dbg_context
+ * Function:	H5B2__test2_store
  *
- * Purpose:	Create context for debugging callback
+ * Purpose:	Store native information into record for B-tree
  *
- * Return:	Success:	non-NULL
- *		Failure:	NULL
+ * Return:	Success:	non-negative
+ *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
- *              Tuesday, December 1, 2009
+ *              Friday, December 25, 2015
  *
  *-------------------------------------------------------------------------
  */
-static void *
-H5B2__test_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr)
+static herr_t
+H5B2__test2_store(void *nrecord, const void *udata)
 {
-    H5B2_test_ctx_t *ctx;       /* Callback context structure */
-    void *ret_value = NULL;     /* Return value */
+    FUNC_ENTER_STATIC_NOERR
 
-    FUNC_ENTER_STATIC
+    *(H5B2_test_rec_t *)nrecord = *(const H5B2_test_rec_t *)udata;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5B2__test2_store() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2__test2_compare
+ *
+ * Purpose:	Compare two native information records, according to some key
+ *
+ * Return:	<0 if rec1 < rec2
+ *              =0 if rec1 == rec2
+ *              >0 if rec1 > rec2
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 25, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2__test2_compare(const void *rec1, const void *rec2)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    FUNC_LEAVE_NOAPI((herr_t)(((const H5B2_test_rec_t *)rec1)->key - ((const H5B2_test_rec_t *)rec2)->key))
+} /* H5B2__test2_compare() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2__test2_encode
+ *
+ * Purpose:	Encode native information into raw form for storing on disk
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 25, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2__test2_encode(uint8_t *raw, const void *nrecord, void *_ctx)
+{
+    H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx;       /* Callback context structure */
+
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
-    HDassert(f);
+    HDassert(ctx);
 
-    /* Allocate callback context */
-    if(NULL == (ctx = H5FL_MALLOC(H5B2_test_ctx_t)))
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "can't allocate callback context")
+    H5F_ENCODE_LENGTH_LEN(raw, ((const H5B2_test_rec_t *)nrecord)->key, ctx->sizeof_size);
+    H5F_ENCODE_LENGTH_LEN(raw, ((const H5B2_test_rec_t *)nrecord)->val, ctx->sizeof_size);
 
-    /* Determine the size of addresses & lengths in the file */
-    ctx->sizeof_size = H5F_SIZEOF_SIZE(f);
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5B2__test2_encode() */
 
-    /* Set return value */
-    ret_value = ctx;
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2__test2_decode
+ *
+ * Purpose:	Decode raw disk form of record into native form
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 25, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2__test2_decode(const uint8_t *raw, void *nrecord, void *_ctx)
+{
+    H5B2_test_ctx_t *ctx = (H5B2_test_ctx_t *)_ctx;       /* Callback context structure */
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5B2__test_crt_dbg_context() */
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    H5F_DECODE_LENGTH_LEN(raw, ((H5B2_test_rec_t *)nrecord)->key, ctx->sizeof_size);
+    H5F_DECODE_LENGTH_LEN(raw, ((H5B2_test_rec_t *)nrecord)->val, ctx->sizeof_size);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5B2__test2_decode() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5B2__test2_debug
+ *
+ * Purpose:	Debug native form of record
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 25, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2__test2_debug(FILE *stream, int indent, int fwidth, const void *record,
+    const void H5_ATTR_UNUSED *_udata)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(record);
+
+    HDfprintf(stream, "%*s%-*s (%Hu, %Hu)\n", indent, "", fwidth, "Record:",
+        ((const H5B2_test_rec_t *)record)->key,
+        ((const H5B2_test_rec_t *)record)->val);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5B2__test2_debug() */
 
 
 /*-------------------------------------------------------------------------
