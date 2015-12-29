@@ -116,9 +116,7 @@ const H5B2_class_t H5A_BT2_NAME[1]={{  /* B-tree class information */
     H5A__dense_btree2_name_compare,     /* Record comparison callback */
     H5A__dense_btree2_name_encode,      /* Record encoding callback */
     H5A__dense_btree2_name_decode,      /* Record decoding callback */
-    H5A__dense_btree2_name_debug,       /* Record debugging callback */
-    NULL,                              /* Create debugging context */
-    NULL                               /* Destroy debugging context */
+    H5A__dense_btree2_name_debug        /* Record debugging callback */
 }};
 
 /* v2 B-tree class for indexing 'creation order' field of attributes */
@@ -132,9 +130,7 @@ const H5B2_class_t H5A_BT2_CORDER[1]={{ /* B-tree class information */
     H5A__dense_btree2_corder_compare,   /* Record comparison callback */
     H5A__dense_btree2_corder_encode,    /* Record encoding callback */
     H5A__dense_btree2_corder_decode,    /* Record decoding callback */
-    H5A__dense_btree2_corder_debug,     /* Record debugging callback */
-    NULL,                              /* Create debugging context */
-    NULL                               /* Destroy debugging context */
+    H5A__dense_btree2_corder_debug      /* Record debugging callback */
 }};
 
 
