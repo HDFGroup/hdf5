@@ -487,7 +487,6 @@ H5B__split(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud, unsigned idx,
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "unable to create B-tree")
     cache_udata.f = f;
     cache_udata.type = shared->type;
-    cache_udata.parent = bt_ud->bt->parent;
     cache_udata.rc_shared = bt_ud->bt->rc_shared;
     if(NULL == (split_bt_ud->bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, split_bt_ud->addr, &cache_udata, H5AC__NO_FLAGS_SET)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree")
@@ -613,8 +612,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
 
     /* Check if the root node split */
     if(H5B_INS_NOOP == my_ins) {
-        /* The root node did not split - just update the flush dependency (if
-         * necessary) and exit */
+        /* The root node did not split - just return */
         HDassert(!split_bt_ud.bt);
         HGOTO_DONE(SUCCEED)
     } /* end if */
@@ -878,7 +876,6 @@ H5B__insert_helper(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud,
     /* Set up user data for cache callbacks */
     cache_udata.f = f;
     cache_udata.type = type;
-    cache_udata.parent = bt;
     cache_udata.rc_shared = rc_shared;
 
     if(0 == bt->nchildren) {
@@ -1277,6 +1274,7 @@ H5B__remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *typ
     FUNC_ENTER_STATIC
 
     HDassert(f);
+    HDassert(H5F_addr_defined(addr));
     HDassert(type);
     HDassert(type->decode);
     HDassert(type->cmp3);
@@ -2038,11 +2036,10 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5B_valid(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
-    void *parent)
+H5B_valid(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr)
 {
     H5B_t               *bt = NULL;             /* The B-tree */
-    H5UC_t	        *rc_shared;             /* Ref-counted shared info */
+    H5UC_t              *rc_shared;             /* Ref-counted shared info */
     H5B_shared_t        *shared;                /* Pointer to shared B-tree info */
     H5B_cache_ud_t      cache_udata;            /* User-data for metadata cache callback */
     htri_t		ret_value = SUCCEED;    /* Return value */
@@ -2069,7 +2066,6 @@ H5B_valid(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
      */
     cache_udata.f = f;
     cache_udata.type = type;
-    cache_udata.parent = parent;
     cache_udata.rc_shared = rc_shared;
     if(NULL == (bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, &cache_udata, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree node")

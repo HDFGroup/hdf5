@@ -43,7 +43,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
 
 /****************/
@@ -619,7 +619,7 @@ END_FUNC(PKG)   /* end H5EA__hdr_modified() */
  *
  * Purpose:	Convenience wrapper around protecting extensible array header
  *
- * Return:	Non-NULL pointer to index block on success/NULL on failure
+ * Return:	Non-NULL pointer to header on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -650,6 +650,7 @@ H5EA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata,
     /* Protect the header */
     if(NULL == (ret_value = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, &udata, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
+    ret_value->f = f;   /* (Must be set again here, in case the header was already in the cache -QAK) */
 
 CATCH
 

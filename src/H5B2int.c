@@ -3410,7 +3410,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
     hbool_t *depth_decreased, void *swap_loc, void *swap_parent, uint16_t depth,
     H5AC_info_t *parent_cache_info, unsigned *parent_cache_info_flags_ptr,
     H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, hsize_t n,
-    void *udata, H5B2_remove_t op, void *op_data)
+    H5B2_remove_t op, void *op_data)
 {
     H5AC_info_t *new_cache_info;        /* Pointer to new cache info */
     unsigned *new_cache_info_flags_ptr = NULL;
@@ -3702,7 +3702,7 @@ H5B2__remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
     /* Attempt to remove record from child node */
     if(depth > 1) {
         if(H5B2__remove_internal_by_idx(hdr, dxpl_id, depth_decreased, swap_loc, swap_parent, (uint16_t)(depth - 1),
-                new_cache_info, new_cache_info_flags_ptr, new_node_ptr, next_pos, n, udata, op, op_data) < 0)
+                new_cache_info, new_cache_info_flags_ptr, new_node_ptr, next_pos, n, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to remove record from B-tree internal node")
     } /* end if */
     else {

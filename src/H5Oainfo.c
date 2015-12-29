@@ -339,7 +339,6 @@ static herr_t
 H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 {
     H5O_ainfo_t *ainfo = (H5O_ainfo_t *)_mesg;
-    H5O_proxy_t *oh_proxy = NULL; /* Object header proxy */
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -351,22 +350,12 @@ H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 
     /* If the object is using "dense" attribute storage, delete it */
     if(H5F_addr_defined(ainfo->fheap_addr)) {
-        /* Check for SWMR writes to the file */
-        if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
-            /* Pin the attribute's object header proxy */
-            if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy_oh(f, dxpl_id, open_oh)))
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header proxy")
-
         /* Delete the attribute */
-        if(H5A_dense_delete(f, dxpl_id, ainfo, oh_proxy) < 0)
+        if(H5A_dense_delete(f, dxpl_id, ainfo) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense attribute storage")
     } /* end if */
 
 done:
-    /* Release resources */
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header proxy")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ainfo_delete() */
 
@@ -449,9 +438,7 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
         /* Set copied metadata tag */
         H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, NULL);
 
-        /*!FIXME Must pass something for the parent, once we have a way to
-         * depend on an object being copied (ohdr proxy?) -NAF */
-        if(H5A_dense_create(file_dst, dxpl_id, ainfo_dst, NULL) < 0)
+        if(H5A_dense_create(file_dst, dxpl_id, ainfo_dst) < 0)
             HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
 
         /* Reset metadata tag */

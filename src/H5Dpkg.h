@@ -276,9 +276,6 @@ typedef struct H5D_chunk_common_ud_t {
     const H5O_layout_chunk_t *layout;           /* Chunk layout description */
     const H5O_storage_chunk_t *storage;         /* Chunk storage description */
     const hsize_t *scaled;		        /* Scaled coordinates for a chunk */
-    const struct H5D_rdcc_t *rdcc;              /* Chunk cache.  Only necessary if the index may
-                                                 * be modified, and if any chunks in the dset
-                                                 * may be cached */
 } H5D_chunk_common_ud_t;
 
 /* B-tree callback info for various operations */
@@ -455,8 +452,6 @@ typedef struct H5D_shared_t {
     hid_t               type_id;        /* ID for dataset's datatype    */
     H5T_t              *type;           /* Datatype for this dataset     */
     H5S_t              *space;          /* Dataspace of this dataset    */
-    hbool_t             space_dirty;    /* Whether the dataspace info needs to be flushed to the file */
-    hbool_t             layout_dirty;   /* Whether the layout info needs to be flushed to the file */
     hid_t               dcpl_id;        /* Dataset creation property id */
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5O_layout_t        layout;         /* Data layout                  */
@@ -715,11 +710,6 @@ H5_DLL herr_t H5D__chunk_bh_info(const H5O_loc_t *loc, hid_t dxpl_id, H5O_t *oh,
 H5_DLL herr_t H5D__chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream);
 H5_DLL herr_t H5D__chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5O_storage_t *store);
-H5_DLL herr_t H5D__chunk_create_flush_dep(const H5D_rdcc_t *rdcc,
-    const H5O_layout_chunk_t *layout, const hsize_t offset[], void *parent);
-H5_DLL herr_t H5D__chunk_update_flush_dep(const H5D_rdcc_t *rdcc,
-    const H5O_layout_chunk_t *layout, const hsize_t offset[], void *old_parent,
-    void *new_parent);
 H5_DLL herr_t H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters, 
          hsize_t *offset, uint32_t data_size, const void *buf);
 #ifdef H5D_CHUNK_DEBUG
@@ -765,17 +755,6 @@ H5_DLL herr_t H5D__fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf
 H5_DLL herr_t H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts,
     hid_t dxpl_id);
 H5_DLL herr_t H5D__fill_term(H5D_fill_buf_info_t *fb_info);
-
-/* Functions that operate on chunk proxy objects */
-H5_DLL herr_t H5D__chunk_proxy_create(H5D_t *dset, hid_t dxpl_id,
-    H5D_chunk_ud_t *udata, H5D_rdcc_ent_t *ent);
-H5_DLL herr_t H5D__chunk_proxy_remove(const H5D_t *dset, hid_t dxpl_it,
-    H5D_rdcc_ent_t *ent);
-H5_DLL herr_t H5D__chunk_proxy_mark(H5D_rdcc_ent_t *ent, hbool_t dirty);
-H5_DLL herr_t H5D__chunk_proxy_create_flush_dep(H5D_rdcc_ent_t *ent,
-    void *parent);
-H5_DLL herr_t H5D__chunk_proxy_update_flush_dep(H5D_rdcc_ent_t *ent,
-    void *old_parent, void *new_parent);
 
 #ifdef H5_HAVE_PARALLEL
 

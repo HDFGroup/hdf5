@@ -982,7 +982,6 @@ main(void)
             PASSED();
         }
 
-
         /* Close the file we created */
         if(H5Fclose(file) < 0)
             TEST_ERROR

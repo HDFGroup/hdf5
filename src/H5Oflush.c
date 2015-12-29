@@ -218,10 +218,11 @@ done:
  *
  * Note:	This is based on the original H5O_refresh_metadata() but
  *	        is split into 2 routines.  
- *	        (This is done so that H5Fstart_swmr_write() can use these
+ *	        This is done so that H5Fstart_swmr_write() can use these
  *	        2 routines to refresh opened objects.  This may be 
  *	        restored back to the original code when H5Fstart_swmr_write()
  *	        uses a different approach to handle issues with opened objects.	
+ *	 	H5Fstart_swmr_write() no longer calls the 1st routine.	(12/24/15)
  *
  * Return:    	Non-negative on success, negative on failure
  *
@@ -241,6 +242,11 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* If the file is opened with write access, 
+       no need to perform refresh actions. */
+    if(H5F_INTENT(oloc.file) & H5F_ACC_RDWR)
+	HGOTO_DONE(SUCCEED)
+
     /* Create empty object location */
     obj_loc.oloc = &obj_oloc;
     obj_loc.path = &obj_path;
@@ -257,7 +263,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
     /* Re-open the object, re-fetching its metadata */
-    if((H5O_refresh_metadata_reopen(oid, &obj_loc, dxpl_id)) < 0)
+    if((H5O_refresh_metadata_reopen(oid, &obj_loc, dxpl_id, FALSE)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:
@@ -273,10 +279,11 @@ done:
  *
  * Purpose:     This is the first part of the original routine H5O_refresh_metadata().
  *		(1) Save object location information.
- *		(2) Get object cork status
- *		(3) Close the object
- *		(4) Flush and evict object metadata
- *		(5) Re-cork the object if needed
+ *		(2) Handle multiple dataset opens
+ *		(3) Get object cork status
+ *		(4) Close the object
+ *		(5) Flush and evict object metadata
+ *		(6) Re-cork the object if needed
  *
  * Return:  Success:    Non-negative
  *          Failure:    Negative
@@ -302,6 +309,12 @@ H5O_refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc, hid_t 
         H5G_loc(oid, &tmp_loc);
         H5G_loc_copy(obj_loc, &tmp_loc, H5_COPY_DEEP);
     } /* end if */
+
+    /* Get object's type */
+    if(H5I_get_type(oid) == H5I_DATASET) {
+	if(H5D_mult_refresh_close(oid, dxpl_id) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to prepare refresh for dataset")
+    }
 
     /* Retrieve tag for object */
     if(H5O_oh_tag(&oloc, dxpl_id, &tag) < 0)
@@ -337,8 +350,8 @@ done:
  * Function:    H5O_refresh_metadata_reopen
  *
  * Purpose:     This is the second part of the original routine H5O_refresh_metadata().
- *		        (1) Re-open object with the saved object location information.
- *		        (2) Re-register object ID with the re-opened object.
+ *		  (1) Re-open object with the saved object location information.
+ *		  (2) Re-register object ID with the re-opened object.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -348,7 +361,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hid_t dxpl_id)
+H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hid_t dxpl_id, hbool_t start_swmr)
 {
     void *object = NULL;        /* Dataset for this operation */
     H5I_type_t type;
@@ -379,6 +392,10 @@ H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hid_t dxpl_id)
             /* Re-open the dataset */
             if(NULL == (object = H5D_open(obj_loc, H5P_DATASET_ACCESS_DEFAULT, dxpl_id)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
+	    if(!start_swmr) { /* No need to handle multiple opens when H5Fstart_swmr_write() */
+		if(H5D_mult_refresh_reopen(object, dxpl_id) < 0)
+		    HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to finish refresh for dataset")
+	    }
             break;
 
         case(H5I_UNINIT):

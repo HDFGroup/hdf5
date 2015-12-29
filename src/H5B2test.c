@@ -67,8 +67,8 @@ static herr_t H5B2__test_store(void *nrecord, const void *udata);
 static herr_t H5B2__test_compare(const void *rec1, const void *rec2);
 static herr_t H5B2__test_encode(uint8_t *raw, const void *nrecord, void *ctx);
 static herr_t H5B2__test_decode(const uint8_t *raw, void *nrecord, void *ctx);
-static herr_t H5B2__test_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
-    int indent, int fwidth, const void *record, const void *_udata);
+static herr_t H5B2__test_debug(FILE *stream, int indent, int fwidth,
+    const void *record, const void *_udata);
 static void *H5B2__test_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 
@@ -295,8 +295,7 @@ H5B2__test_decode(const uint8_t *raw, void *nrecord, void *_ctx)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__test_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-    int indent, int fwidth, const void *record,
+H5B2__test_debug(FILE *stream, int indent, int fwidth, const void *record,
     const void H5_ATTR_UNUSED *_udata)
 {
     FUNC_ENTER_STATIC_NOERR

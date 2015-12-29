@@ -126,7 +126,6 @@ H5HF_hdr_alloc(H5F_t *f)
 
     /* Set the internal parameters for the heap */
     hdr->f = f;
-    hdr->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
     hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
     hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
 

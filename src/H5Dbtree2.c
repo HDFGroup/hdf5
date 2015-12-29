@@ -107,6 +107,7 @@ static herr_t H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth,
 
 /* Helper routine */
 static herr_t H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info);
 
 /* Callback for H5B2_iterate() which is called in H5D__bt2_idx_iterate() */
 static int H5D__bt2_idx_iterate_cb(const void *_record, void *_udata);
@@ -735,6 +736,63 @@ H5D__bt2_idx_init(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D__btree2_idx_depend
+ *
+ * Purpose:	Create flush dependency between v2 B-tree and dataset's
+ *              object header.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Friday, December 18, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
+{
+    H5O_loc_t oloc;                     /* Temporary object header location for dataset */
+    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+    HDassert(idx_info);
+    HDassert(idx_info->f);
+    HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
+    HDassert(idx_info->pline);
+    HDassert(idx_info->layout);
+    HDassert(H5D_CHUNK_IDX_BT2 == idx_info->layout->idx_type);
+    HDassert(idx_info->storage);
+    HDassert(H5D_CHUNK_IDX_BT2 == idx_info->storage->idx_type);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(idx_info->storage->u.btree2.bt2);
+
+    /* Set up object header location for dataset */
+    H5O_loc_reset(&oloc);
+    oloc.file = idx_info->f;
+    oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
+
+    /* Pin the dataset's object header proxy */
+    if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
+
+    /* Make the v2 B-tree a child flush dependency of the dataset's object header */
+    if(H5B2_depend((H5AC_info_t *)oh_proxy, idx_info->storage->u.btree2.bt2) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
+
+done:
+    /* Unpin the dataset's object header proxy */
+    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__btree2_idx_depend() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D__bt2_idx_open()
  *
  * Purpose:	Opens an existing v2 B-tree.
@@ -755,8 +813,6 @@ static herr_t
 H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
 {
     H5D_bt2_ctx_ud_t u_ctx;	/* user data for creating context */
-    H5O_loc_t oloc;             /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL; /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -777,26 +833,16 @@ H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
     u_ctx.chunk_size = idx_info->layout->size;
     u_ctx.dim = idx_info->layout->dim;
 
-    /* Check for SWMR writes to the file */
-    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-        /* Set up object header location for dataset */
-        H5O_loc_reset(&oloc);
-        oloc.file = idx_info->f;
-        oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-        /* Pin the dataset's object header proxy */
-        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-    } /* end if */
-
     /* Open v2 B-tree for the chunk index */
-    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr , &u_ctx, oh_proxy)))
+    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &u_ctx)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open v2 B-tree for tracking chunked dataset")
 
-done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
+    /* Check for SWMR writes to the file */
+    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
+        if(H5D__btree2_idx_depend(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__bt2_idx_open() */
 
@@ -817,8 +863,6 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
     H5B2_create_t bt2_cparam;           /* v2 B-tree creation parameters */
     H5D_bt2_ctx_ud_t u_ctx;		/* data for context call */
-    H5O_loc_t oloc;                     /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -861,30 +905,20 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     u_ctx.chunk_size = idx_info->layout->size;
     u_ctx.dim = idx_info->layout->dim;
 
-    /* Check for SWMR writes to the file */
-    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-        /* Set up object header location for dataset */
-        H5O_loc_reset(&oloc);
-        oloc.file = idx_info->f;
-        oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-        /* Pin the dataset's object header proxy */
-        if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-    } /* end if */
-
     /* Create the v2 B-tree for the chunked dataset */
-    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_create(idx_info->f, idx_info->dxpl_id, &bt2_cparam, &u_ctx, oh_proxy)))
+    if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_create(idx_info->f, idx_info->dxpl_id, &bt2_cparam, &u_ctx)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create v2 B-tree for tracking chunked dataset")
 
     /* Retrieve the v2 B-tree's address in the file */
     if(H5B2_get_addr(idx_info->storage->u.btree2.bt2, &(idx_info->storage->idx_addr)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get v2 B-tree address for tracking chunked dataset")
 
-done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
+    /* Check for SWMR writes to the file */
+    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
+        if(H5D__btree2_idx_depend(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__bt2_idx_create() */
 
@@ -1345,8 +1379,6 @@ H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
     H5D_bt2_remove_ud_t remove_udata;	/* User data for removal callback */
     H5B2_remove_t remove_op;		/* The removal callback */
     H5D_bt2_ctx_ud_t u_ctx;		/* data for context call */
-    H5O_loc_t oloc;                     /* Temporary object header location for dataset */
-    H5O_proxy_t *oh_proxy = NULL;       /* Dataset's object header proxy */
     herr_t ret_value = SUCCEED;     	/* Return value */
 
     FUNC_ENTER_STATIC
@@ -1376,30 +1408,15 @@ H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
         else
             remove_op = H5D__bt2_remove_cb;
 
-        /* Check for SWMR writes to the file */
-        if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
-            /* Set up object header location for dataset */
-            H5O_loc_reset(&oloc);
-            oloc.file = idx_info->f;
-            oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
-
-            /* Pin the dataset's object header proxy */
-            if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy(&oloc, idx_info->dxpl_id)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header proxy")
-        } /* end if */
-
 	/* Delete the v2 B-tree */
 	/*(space in the file for each object is freed in the 'remove' callback) */
-	if(H5B2_delete(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &u_ctx, oh_proxy, remove_op, &remove_udata) < 0)
+	if(H5B2_delete(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &u_ctx, remove_op, &remove_udata) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "can't delete v2 B-tree")
 
 	idx_info->storage->idx_addr = HADDR_UNDEF;
     } /* end if */
 
 done:
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header proxy")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__bt2_idx_delete() */
 

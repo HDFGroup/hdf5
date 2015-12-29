@@ -1407,8 +1407,7 @@ done:
  */
 herr_t
 H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
-    H5_index_t idx_type, H5_iter_order_t order, void *parent,
-    H5A_attr_table_t *atable)
+    H5_index_t idx_type, H5_iter_order_t order, H5A_attr_table_t *atable)
 {
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
     hsize_t nrec;                       /* # of records in v2 B-tree */
@@ -1424,7 +1423,7 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     HDassert(atable);
 
     /* Open the name index v2 B-tree */
-    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, parent)))
+    if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
     /* Retrieve # of records in "name" B-tree */
@@ -1455,7 +1454,7 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
 
         /* Iterate over the links in the group, building a table of the link messages */
         if(H5A_dense_iterate(f, dxpl_id, (hid_t)0, ainfo, H5_INDEX_NAME,
-                H5_ITER_NATIVE, (hsize_t)0, parent, NULL, &attr_op, &udata) < 0)
+                H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, &udata) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
         /* Sort attribute table in correct iteration order */
@@ -1789,7 +1788,6 @@ htri_t
 H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
 {
     H5B2_t *bt2_name = NULL;            /* v2 B-tree handle for name index */
-    H5O_proxy_t *oh_proxy = NULL;       /* Object header proxy */
     htri_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(dxpl_id, oh->cache_info.addr, FAIL)
@@ -1811,14 +1809,8 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
         if(ainfo->nattrs == HSIZET_MAX) {
             /* Check if we are using "dense" attribute storage */
             if(H5F_addr_defined(ainfo->fheap_addr)) {
-                /* Check for SWMR writes to the file */
-                if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
-                    /* Pin the attribute's object header proxy */
-                    if(NULL == (oh_proxy = H5O_pin_flush_dep_proxy_oh(f, dxpl_id, oh)))
-                        HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header proxy")
-
                 /* Open the name index v2 B-tree */
-                if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL, oh_proxy)))
+                if(NULL == (bt2_name = H5B2_open(f, dxpl_id, ainfo->name_bt2_addr, NULL)))
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for name index")
 
                 /* Retrieve # of records in "name" B-tree */
@@ -1834,8 +1826,6 @@ H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
 
 done:
     /* Release resources */
-    if(oh_proxy && H5O_unpin_flush_dep_proxy(oh_proxy) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin attribute object header proxy")
     if(bt2_name && H5B2_close(bt2_name, dxpl_id) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close v2 B-tree for name index")
 
@@ -2364,9 +2354,8 @@ H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainfo
     attr_op.op_type = H5A_ATTR_OP_LIB;
     attr_op.u.lib_op = H5A__dense_post_copy_file_cb;
 
-    /*!FIXME must pass something for parent once SWMR works with H5Ocopy -NAF */
     if(H5A_dense_iterate(src_oloc->file, dxpl_id, (hid_t)0, ainfo_src, H5_INDEX_NAME,
-            H5_ITER_NATIVE, (hsize_t)0, NULL, NULL, &attr_op, &udata) < 0)
+            H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, &udata) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
 done:

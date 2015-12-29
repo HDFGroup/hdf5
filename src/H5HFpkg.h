@@ -360,7 +360,6 @@ typedef struct H5HF_hdr_t {
     uint8_t     heap_off_size;  /* Size of heap offsets (in bytes) */
     uint8_t     heap_len_size;  /* Size of heap ID lengths (in bytes) */
     hbool_t     checked_filters; /* TRUE if pipeline passes can_apply checks */
-    hbool_t     swmr_write;     /* Flag indicating the file is opened with SWMR-write access */
 } H5HF_hdr_t;
 
 /* Common indirect block doubling table entry */
