@@ -1034,9 +1034,8 @@ H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline)
     FUNC_ENTER_STATIC_NOERR
 
     HDassert(size);
-    HDassert(pline);
 
-    if(pline->nused > 0)
+    if(pline && pline->nused)
         ret_value = H5MM_malloc(size);
     else
         ret_value = H5FL_BLK_MALLOC(chunk, size);
@@ -1064,10 +1063,8 @@ H5D__chunk_mem_xfree(void *chk, const H5O_pline_t *pline)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(pline);
-
     if(chk) {
-        if(pline->nused > 0)
+        if(pline && pline->nused)
             H5MM_xfree(chk);
         else
             chk = H5FL_BLK_FREE(chunk, chk);
@@ -1751,6 +1748,7 @@ H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity check */
     HDassert(io_info);
     HDassert(dataset);
 
@@ -2551,13 +2549,14 @@ H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *scaled,
     H5D_chunk_ud_t *udata)
 {
     H5D_rdcc_ent_t  *ent = NULL;        /* Cache entry */
-    hbool_t         found = FALSE;      /* In cache? */
-    unsigned        u;                  /* Counter */
     H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
-    herr_t	ret_value = SUCCEED;	/* Return value */
+    unsigned idx;                       /* Index of chunk in cache, if present */
+    hbool_t found = FALSE;              /* In cache? */
+    herr_t ret_value = SUCCEED;	        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity checks */
     HDassert(dset);
     HDassert(dset->shared->layout.u.chunk.ndims > 0);
     H5D_CHUNK_STORAGE_INDEX_CHK(sc);
@@ -2567,7 +2566,7 @@ H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *scaled,
     /* Initialize the query information about the chunk we are looking for */
     udata->common.layout = &(dset->shared->layout.u.chunk);
     udata->common.storage = &(dset->shared->layout.storage.u.chunk);
-    udata->common.scaled =  scaled;
+    udata->common.scaled = scaled;
 
     /* Reset information about the chunk we are looking for */
     udata->chunk_block.offset = HADDR_UNDEF;
@@ -2576,19 +2575,29 @@ H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *scaled,
 
     /* Check for chunk in cache */
     if(dset->shared->cache.chunk.nslots > 0) {
-	udata->idx_hint = H5D__chunk_hash_val(dset->shared, scaled);
-        ent = dset->shared->cache.chunk.slot[udata->idx_hint];
+        /* Determine the chunk's location in the hash table */
+	idx = H5D__chunk_hash_val(dset->shared, scaled);
 
-        if(ent)
-            for(u = 0, found = TRUE; u < dset->shared->ndims; u++)
+        /* Get the chunk cache entry for that location */
+        ent = dset->shared->cache.chunk.slot[idx];
+        if(ent) {
+            unsigned u;                  /* Counter */
+
+            /* Speculatively set the 'found' flag */
+            found = TRUE;
+
+            /* Verify that the cache entry is the correct chunk */
+            for(u = 0; u < dset->shared->ndims; u++)
                 if(scaled[u] != ent->scaled[u]) {
                     found = FALSE;
                     break;
                 } /* end if */
+        } /* end if */
     } /* end if */
 
-    /* Find chunk addr */
+    /* Retrieve chunk addr */
     if(found) {
+        udata->idx_hint = idx;
         udata->chunk_block.offset = ent->chunk_block.offset;
         udata->chunk_block.length = ent->chunk_block.length;;
 	udata->chunk_idx = ent->chunk_idx;
@@ -3287,6 +3296,7 @@ H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity check */
     HDassert(io_info);
     HDassert(udata);
 
@@ -3294,8 +3304,6 @@ H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
         /*
          * It's not in the cache, probably because it's too big.  If it's
          * dirty then flush it to disk.  In any case, free the chunk.
-         * Note: we have to copy the layout and filter messages so we
-         *	 don't discard the `const' qualifier.
          */
         if(dirty) {
             H5D_rdcc_ent_t fake_ent;         /* "fake" chunk cache entry */
