@@ -90,8 +90,6 @@ static void *H5D__bt2_crt_context(void *udata);
 static herr_t H5D__bt2_dst_context(void *ctx);
 static herr_t H5D__bt2_store(void *native, const void *udata);
 static herr_t H5D__bt2_compare(const void *rec1, const void *rec2);
-static void *H5D__bt2_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t obj_addr);
-static herr_t H5D__bt2_dst_dbg_context(void *_u_ctx);
 
 /* v2 B-tree class for indexing non-filtered chunked datasets */
 static herr_t H5D__bt2_unfilt_encode(uint8_t *raw, const void *native, void *ctx);
@@ -189,9 +187,7 @@ const H5B2_class_t H5D_BT2[1] = {{  	/* B-tree class information */
     H5D__bt2_compare,   	/* Record comparison callback */
     H5D__bt2_unfilt_encode,    	/* Record encoding callback */
     H5D__bt2_unfilt_decode,    	/* Record decoding callback */
-    H5D__bt2_unfilt_debug,  	/* Record debugging callback */
-    H5D__bt2_crt_dbg_context,  	/* Create debugging context */
-    H5D__bt2_dst_dbg_context    /* Destroy debugging context */
+    H5D__bt2_unfilt_debug   	/* Record debugging callback */
 }};
 
 /* v2 B-tree class for indexing filtered chunked datasets */
@@ -205,9 +201,7 @@ const H5B2_class_t H5D_BT2_FILT[1] = {{	/* B-tree class information */
     H5D__bt2_compare,           /* Record comparison callback */
     H5D__bt2_filt_encode,       /* Record encoding callback */
     H5D__bt2_filt_decode,       /* Record decoding callback */
-    H5D__bt2_filt_debug,        /* Record debugging callback */
-    H5D__bt2_crt_dbg_context,  	/* Create debugging context */
-    H5D__bt2_dst_dbg_context   	/* Destroy debugging context */
+    H5D__bt2_filt_debug         /* Record debugging callback */
 }};
 
 
@@ -377,110 +371,6 @@ H5D__bt2_compare(const void *_udata, const void *_rec2)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__bt2_crt_dbg_context
- *
- * Purpose:     Create user data for debugged callback context 
- *
- * Return:      Success:        non-NULL
- *              Failure:        NULL
- *
- * Programmer:  Vailin Choi; June 2010
- *
- *-------------------------------------------------------------------------
- */
-static void *
-H5D__bt2_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t obj_addr)
-{
-    H5D_bt2_ctx_ud_t *u_ctx = NULL;     /* User data for creating callback context */
-    H5O_loc_t obj_loc;          /* Pointer to an object's location */
-    hbool_t obj_opened = FALSE; /* Flag to indicate that the object header was opened */
-    H5O_layout_t layout;        /* Layout message */
-    void *ret_value = NULL;     /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(H5F_addr_defined(obj_addr));
-
-    /* Set up the object header location info */
-    H5O_loc_reset(&obj_loc);
-    obj_loc.file = f;
-    obj_loc.addr = obj_addr;
-
-    /* Open the object header where the layout message resides */
-    if(H5O_open(&obj_loc) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, NULL, "can't open object header")
-    obj_opened = TRUE;
-
-    /* Read the layout message */
-    if(NULL == H5O_msg_read(&obj_loc, H5O_LAYOUT_ID, &layout, dxpl_id))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't get layout info")
-
-    /* close the object header */
-    if(H5O_close(&obj_loc) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
-
-    /* Allocate structure for storing user data to create callback context */
-    if(NULL == (u_ctx = H5FL_MALLOC(H5D_bt2_ctx_ud_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate user data context structure ")
-
-    /* Set information for context structure */
-    u_ctx->f = f;
-    u_ctx->chunk_size = layout.u.chunk.size;
-    u_ctx->ndims = layout.u.chunk.ndims - 1;
-
-    /* Set return value */
-    ret_value = u_ctx;
-
-done:
-     /* Cleanup on error */
-    if(ret_value == NULL) {
-        /* Release context structure */
-        if(u_ctx)
-            u_ctx = H5FL_FREE(H5D_bt2_ctx_ud_t, u_ctx);
-
-        /* Close object header */
-        if(obj_opened) {
-            if(H5O_close(&obj_loc) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, NULL, "can't close object header")
-        } /* end if */
-    } /* end if */
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5D__bt2_crt_dbg_context() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__bt2_dst_dbg_context
- *
- * Purpose:     Destroy client callback context
- *
- * Return:      Success:        non-negative
- *              Failure:        negative
- *
- * Programmer:  Vailin Choi; June 2010
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__bt2_dst_dbg_context(void *_u_ctx)
-{
-    H5D_bt2_ctx_ud_t *u_ctx = (H5D_bt2_ctx_ud_t *)_u_ctx; /* User data for creating callback context */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Sanity check */
-    HDassert(u_ctx);
-
-    /* Release user data for creating callback context */
-    u_ctx = H5FL_FREE(H5D_bt2_ctx_ud_t, u_ctx);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5D__bt2_dst_dbg_context() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5D__bt2_unfilt_encode
  *
  * Purpose:     Encode native information into raw form for storing on disk
@@ -565,23 +455,24 @@ H5D__bt2_unfilt_decode(const uint8_t *raw, void *_record, void *_ctx)
  */
 static herr_t
 H5D__bt2_unfilt_debug(FILE *stream, int indent, int fwidth,
-    const void *_record, const void *_u_ctx)
+    const void *_record, const void *_ctx)
 {
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record; /* The native record */
-    const H5D_bt2_ctx_ud_t *u_ctx = (const H5D_bt2_ctx_ud_t *)_u_ctx; 	  /* User data for creating callback context */
+    const H5D_bt2_ctx_t *ctx = (const H5D_bt2_ctx_t *)_ctx; 	  /* Callback context */
     unsigned u;		/* Local index variable */
 
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(record);
-    HDassert(u_ctx->chunk_size == record->nbytes);
+    HDassert(ctx->chunk_size == record->nbytes);
     HDassert(0 == record->filter_mask);
 
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Chunk address:", record->chunk_addr);
+
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
-    for(u = 0; u < u_ctx->ndims; u++)
-        HDfprintf(stream, "%s%Hd", u?", ":"", record->scaled[u] * u_ctx->dim[u]);
+    for(u = 0; u < ctx->ndims; u++)
+        HDfprintf(stream, "%s%Hd", u?", ":"", record->scaled[u] * ctx->dim[u]);
     HDfputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -671,7 +562,7 @@ H5D__bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
 /*-------------------------------------------------------------------------
  * Function:	H5D__bt2_filt_debug
  *
- * Purpose:	Debug native form of record (filterd)
+ * Purpose:	Debug native form of record (filtered)
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
@@ -682,10 +573,10 @@ H5D__bt2_filt_decode(const uint8_t *raw, void *_record, void *_ctx)
  */
 static herr_t
 H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth,
-    const void *_record, const void *_u_ctx)
+    const void *_record, const void *_ctx)
 {
     const H5D_chunk_rec_t *record = (const H5D_chunk_rec_t *)_record;   /* The native record */
-    const H5D_bt2_ctx_ud_t *u_ctx = (const H5D_bt2_ctx_ud_t *)_u_ctx; 	/* User data for creating callback context */
+    const H5D_bt2_ctx_t *ctx = (const H5D_bt2_ctx_t *)_ctx; 	/* Callback context */
     unsigned u;		/* Local index variable */
  
     FUNC_ENTER_STATIC_NOERR
@@ -700,8 +591,8 @@ H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth,
     HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth, "Filter mask:", record->filter_mask);
 
     HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Logical offset:");
-    for(u = 0; u < u_ctx->ndims; u++)
-        HDfprintf(stream, "%s%Hd", u?", ":"", record->scaled[u] * u_ctx->dim[u]);
+    for(u = 0; u < ctx->ndims; u++)
+        HDfprintf(stream, "%s%Hd", u?", ":"", record->scaled[u] * ctx->dim[u]);
     HDfputs("}\n", stream);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

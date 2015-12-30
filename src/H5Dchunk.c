@@ -261,13 +261,13 @@ static herr_t H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t reset);
 static herr_t H5D__chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t flush);
-static hbool_t H5D__chunk_is_partial_edge_chunk(const hsize_t *chunk_scaled,
-    unsigned dset_ndims, const hsize_t *dset_dims, const uint32_t *chunk_dims);
+static hbool_t H5D__chunk_is_partial_edge_chunk(unsigned dset_ndims,
+    const uint32_t *chunk_dims, const hsize_t *chunk_scaled, const hsize_t *dset_dims);
 static herr_t H5D__chunk_cache_prune(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, size_t size);
 static herr_t H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk);
 static herr_t H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info,
-    const H5F_block_t *old_chunk, H5F_block_t *new_chunk, hbool_t *need_insert, 
+    const H5F_block_t *old_chunk, H5F_block_t *new_chunk, hbool_t *need_insert,
     hsize_t scaled[]);
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D__chunk_collective_fill(const H5D_t *dset, hid_t dxpl_id,
@@ -1763,11 +1763,12 @@ htri_t
 H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_op)
 {
     const H5D_t *dataset = io_info->dset; /* Local pointer to dataset info */
-    hbool_t no_filters = TRUE;
+    hbool_t has_filters = FALSE;        /* Whether there are filters on the chunk or not */
     htri_t ret_value = FAIL;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity check */
     HDassert(io_info);
     HDassert(dataset);
 
@@ -1777,16 +1778,19 @@ H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_
     if(dataset->shared->dcpl_cache.pline.nused > 0) {
         if(dataset->shared->layout.u.chunk.flags
                 & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) {
-            no_filters = H5D__chunk_is_partial_edge_chunk(
-                    io_info->store->chunk.scaled, io_info->dset->shared->ndims,
-                    io_info->dset->shared->curr_dims, 
-                    io_info->dset->shared->layout.u.chunk.dim);
+            has_filters = !H5D__chunk_is_partial_edge_chunk(
+                    io_info->dset->shared->ndims,
+                    io_info->dset->shared->layout.u.chunk.dim,
+                    io_info->store->chunk.scaled,
+                    io_info->dset->shared->curr_dims);
         } /* end if */
         else
-            no_filters = FALSE;
+            has_filters = TRUE;
     } /* end if */
 
-    if(no_filters) {
+    if(has_filters)
+        ret_value = TRUE;
+    else {
 #ifdef H5_HAVE_PARALLEL
          /* If MPI based VFD is used and the file is opened for write access, must
           *         bypass the chunk-cache scheme because other MPI processes could
@@ -1827,9 +1831,7 @@ H5D__chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr, hbool_t write_
 #ifdef H5_HAVE_PARALLEL
         } /* end else */
 #endif /* H5_HAVE_PARALLEL */
-    } /* end if */
-    else
-        ret_value = TRUE;
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2582,13 +2584,14 @@ H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *scaled,
     H5D_chunk_ud_t *udata)
 {
     H5D_rdcc_ent_t  *ent = NULL;        /* Cache entry */
-    hbool_t         found = FALSE;      /* In cache? */
-    unsigned        u;                  /* Counter */
     H5O_storage_chunk_t *sc = &(dset->shared->layout.storage.u.chunk);
-    herr_t	ret_value = SUCCEED;	/* Return value */
+    unsigned idx;                       /* Index of chunk in cache, if present */
+    hbool_t found = FALSE;              /* In cache? */
+    herr_t ret_value = SUCCEED;	        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity checks */
     HDassert(dset);
     HDassert(dset->shared->layout.u.chunk.ndims > 0);
     H5D_CHUNK_STORAGE_INDEX_CHK(sc);
@@ -2598,7 +2601,7 @@ H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *scaled,
     /* Initialize the query information about the chunk we are looking for */
     udata->common.layout = &(dset->shared->layout.u.chunk);
     udata->common.storage = &(dset->shared->layout.storage.u.chunk);
-    udata->common.scaled =  scaled;
+    udata->common.scaled = scaled;
 
     /* Reset information about the chunk we are looking for */
     udata->chunk_block.offset = HADDR_UNDEF;
@@ -2608,19 +2611,29 @@ H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id, const hsize_t *scaled,
 
     /* Check for chunk in cache */
     if(dset->shared->cache.chunk.nslots > 0) {
-	udata->idx_hint = H5D__chunk_hash_val(dset->shared, scaled);
-        ent = dset->shared->cache.chunk.slot[udata->idx_hint];
+        /* Determine the chunk's location in the hash table */
+	idx = H5D__chunk_hash_val(dset->shared, scaled);
 
-        if(ent)
-            for(u = 0, found = TRUE; u < dset->shared->ndims; u++)
+        /* Get the chunk cache entry for that location */
+        ent = dset->shared->cache.chunk.slot[idx];
+        if(ent) {
+            unsigned u;                  /* Counter */
+
+            /* Speculatively set the 'found' flag */
+            found = TRUE;
+
+            /* Verify that the cache entry is the correct chunk */
+            for(u = 0; u < dset->shared->ndims; u++)
                 if(scaled[u] != ent->scaled[u]) {
                     found = FALSE;
                     break;
                 } /* end if */
+        } /* end if */
     } /* end if */
 
-    /* Find chunk addr */
+    /* Retrieve chunk addr */
     if(found) {
+        udata->idx_hint = idx;
         udata->chunk_block.offset = ent->chunk_block.offset;
         udata->chunk_block.length = ent->chunk_block.length;;
 	udata->chunk_idx = ent->chunk_idx;
@@ -3222,9 +3235,9 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
             else if(layout->u.chunk.flags
                     & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) {
                 /* Check if this is an edge chunk */
-                if(H5D__chunk_is_partial_edge_chunk(
-                        io_info->store->chunk.scaled, io_info->dset->shared->ndims,
-                        io_info->dset->shared->curr_dims, layout->u.chunk.dim)) {
+                if(H5D__chunk_is_partial_edge_chunk(io_info->dset->shared->ndims,
+                        layout->u.chunk.dim, io_info->store->chunk.scaled,
+                        io_info->dset->shared->curr_dims)) {
                     /* Disable the filters for both writing and reading */
                     disable_filters = TRUE;
                     old_pline = NULL;
@@ -3232,8 +3245,6 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                 } /* end if */
             } /* end if */
         } /* end if */
-        else
-            HDassert(!udata->new_unfilt_chunk && !prev_unfilt_chunk);
 
         if(relax) {
             /*
@@ -3461,6 +3472,7 @@ H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity check */
     HDassert(io_info);
     HDassert(udata);
 
@@ -3468,24 +3480,20 @@ H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
         /*
          * It's not in the cache, probably because it's too big.  If it's
          * dirty then flush it to disk.  In any case, free the chunk.
-         * Note: we have to copy the layout and filter messages so we
-         *	 don't discard the `const' qualifier.
          */
         hbool_t is_unfiltered_edge_chunk = FALSE; /* Whether the chunk is an unfiltered edge chunk */
 
         /* Check if we should disable filters on this chunk */
         if(udata->new_unfilt_chunk) {
-            HDassert(layout->u.chunk.flags
-                & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS);
+            HDassert(layout->u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS);
 
             is_unfiltered_edge_chunk = TRUE;
         } /* end if */
-        else if(layout->u.chunk.flags
-                & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) {
+        else if(layout->u.chunk.flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) {
             /* Check if the chunk is an edge chunk, and disable filters if so */
             is_unfiltered_edge_chunk = H5D__chunk_is_partial_edge_chunk(
-                    io_info->store->chunk.scaled, io_info->dset->shared->ndims,
-                    io_info->dset->shared->curr_dims, layout->u.chunk.dim);
+                    io_info->dset->shared->ndims, layout->u.chunk.dim,
+                    io_info->store->chunk.scaled, io_info->dset->shared->curr_dims);
         } /* end if */
 
         if(dirty) {
@@ -3497,7 +3505,6 @@ H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
                 fake_ent.edge_chunk_state = H5D_RDCC_DISABLE_FILTERS;
             if(udata->new_unfilt_chunk)
                 fake_ent.edge_chunk_state |= H5D_RDCC_NEWLY_DISABLED_FILTERS;
-	    HDmemcpy(fake_ent.scaled, udata->common.scaled, sizeof(hsize_t) * layout->u.chunk.ndims);
 	    HDmemcpy(fake_ent.scaled, udata->common.scaled, sizeof(hsize_t) * layout->u.chunk.ndims);
             HDassert(layout->u.chunk.size > 0);
 	    fake_ent.chunk_idx = udata->chunk_idx;
@@ -4014,7 +4021,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                             && scaled[i] < edge_chunk_scaled[i]) {
                         nunfilt_edge_chunk_dims--;
                         if(should_fill && nunfilt_edge_chunk_dims == 0 && !fb_info.has_vlen_fill_type) {
-                            HDassert(!H5D__chunk_is_partial_edge_chunk(scaled, space_ndims, space_dim, chunk_dim));
+                            HDassert(!H5D__chunk_is_partial_edge_chunk(space_ndims, chunk_dim, scaled, space_dim));
                             fill_buf = &fb_info.fill_buf;
                             chunk_size = orig_chunk_size;
                         } /* end if */
@@ -4026,7 +4033,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                         HDassert(edge_chunk_scaled[i] == max_unalloc[i]);
                         nunfilt_edge_chunk_dims++;
                         if(should_fill && nunfilt_edge_chunk_dims == 1 && !fb_info.has_vlen_fill_type) {
-                            HDassert(H5D__chunk_is_partial_edge_chunk(scaled, space_ndims, space_dim, chunk_dim));
+                            HDassert(H5D__chunk_is_partial_edge_chunk(space_ndims, chunk_dim, scaled, space_dim));
                             fill_buf = &unfilt_fill_buf;
                             chunk_size = layout->u.chunk.size;
                         } /* end if */
@@ -4200,8 +4207,8 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hid_t dxpl_id, hsize_t old_dim[])
             int i;                  /* Local index variable */
 
             /* Make sure the chunk is really a former edge chunk */
-            HDassert(H5D__chunk_is_partial_edge_chunk(chunk_sc, space_ndims, old_dim, chunk_dim)
-                    && !H5D__chunk_is_partial_edge_chunk(chunk_sc, space_ndims, space_dim, chunk_dim));
+            HDassert(H5D__chunk_is_partial_edge_chunk(space_ndims, chunk_dim, chunk_sc, old_dim)
+                    && !H5D__chunk_is_partial_edge_chunk(space_ndims, chunk_dim, chunk_sc, space_dim));
 
             /* Lookup the chunk */
             if(H5D__chunk_lookup(dset, dxpl_id, chunk_sc, &chk_udata) < 0)
@@ -4742,7 +4749,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
 
     /* Determine if partial edge chunk filters are disabled */
     disable_edge_filters = (layout->u.chunk.flags
-            & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS)
+                & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS)
             && (idx_info.pline->nused > 0);
 
     /*
@@ -4776,8 +4783,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
 
                 /* If necessary, check if chunks in this dimension that need to
                  * be filled are new partial edge chunks */
-                if(disable_edge_filters && old_dim[op_dim]
-                        >= (min_mod_chunk_sc[op_dim] + 1))
+                if(disable_edge_filters && old_dim[op_dim] >= (min_mod_chunk_sc[op_dim] + 1))
                     new_unfilt_dim[op_dim] = TRUE;
                 else
                     new_unfilt_dim[op_dim] = FALSE;
@@ -4837,8 +4843,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
                 HDassert(scaled[op_dim] == min_mod_chunk_sc[op_dim]);
 
                 /* Make sure this is an edge chunk */
-                HDassert(H5D__chunk_is_partial_edge_chunk(scaled, 
-                        space_ndims, space_dim, layout->u.chunk.dim));
+                HDassert(H5D__chunk_is_partial_edge_chunk(space_ndims, layout->u.chunk.dim, scaled, space_dim));
 
                 /* Determine if the chunk just became an unfiltered chunk */
                 if(new_unfilt_dim[op_dim]) {
@@ -4853,8 +4858,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
                 /* Make sure that, if we think this is a new unfiltered chunk,
                  * it was previously not an edge chunk */
                 HDassert(!new_unfilt_dim[op_dim] || (!new_unfilt_chunk !=
-                        !H5D__chunk_is_partial_edge_chunk(scaled, 
-                            space_ndims, old_dim, layout->u.chunk.dim)));
+                        !H5D__chunk_is_partial_edge_chunk(space_ndims, layout->u.chunk.dim, scaled, old_dim)));
                 HDassert(!new_unfilt_chunk || new_unfilt_dim[op_dim]);
 
                 /* Fill the unused parts of the chunk */
@@ -5300,8 +5304,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         if(udata->common.layout->flags
                 & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) {
             /* Check if the chunk is an edge chunk, and disable filters if so */
-            if(!H5D__chunk_is_partial_edge_chunk(chunk_rec->scaled, udata->dset_ndims,
-                    udata->dset_dims, udata->common.layout->dim))
+            if(!H5D__chunk_is_partial_edge_chunk(udata->dset_ndims, udata->common.layout->dim, chunk_rec->scaled, udata->dset_dims))
                 must_filter = TRUE;
         } /* end if */
         else
@@ -6070,8 +6073,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static hbool_t
-H5D__chunk_is_partial_edge_chunk(const hsize_t scaled[], unsigned dset_ndims,
-    const hsize_t *dset_dims, const uint32_t *chunk_dims)
+H5D__chunk_is_partial_edge_chunk(unsigned dset_ndims, const uint32_t *chunk_dims,
+    const hsize_t scaled[], const hsize_t *dset_dims)
 {
     unsigned    u;                      /* Local index variable */
     hbool_t      ret_value = FALSE;     /* Return value */
@@ -6130,9 +6133,8 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
 
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
-
-	HDassert(idx_info->storage->idx_type != H5D_CHUNK_IDX_NONE);
         /* Sanity/error checking block */
+	HDassert(idx_info->storage->idx_type != H5D_CHUNK_IDX_NONE);
         {
             unsigned allow_chunk_size_len;          /* Allowed size of encoded chunk size */
             unsigned new_chunk_size_len;            /* Size of encoded chunk size */
@@ -6228,6 +6230,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_file_alloc() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_format_convert_cb
  *
@@ -6259,9 +6262,8 @@ H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     chunk_addr = chunk_rec->chunk_addr;
 
     if(new_idx_info->pline->nused &&
-      (new_idx_info->layout->flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) &&
-      (H5D__chunk_is_partial_edge_chunk(chunk_rec->scaled, udata->dset_ndims, udata->dset_dims, 
-					 new_idx_info->layout->dim)) ) {
+          (new_idx_info->layout->flags & H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS) &&
+          (H5D__chunk_is_partial_edge_chunk(udata->dset_ndims, new_idx_info->layout->dim, chunk_rec->scaled, udata->dset_dims))) {
 	/* This is a partial non-filtered edge chunk */
 	/* Convert the chunk to a filtered edge chunk for v1 B-tree chunk index */
 
