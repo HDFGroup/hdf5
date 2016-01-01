@@ -462,7 +462,8 @@ static void test_misc2_write_attribute(void)
     ret = H5Aread(att1, type, &data_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    HDfree(data_check.string);
+    ret = H5Dvlen_reclaim(type, dataspace, H5P_DEFAULT, &data_check);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     ret = H5Aclose(att1);
     CHECK(ret, FAIL, "HAclose");
@@ -487,7 +488,8 @@ static void test_misc2_write_attribute(void)
     ret = H5Aread(att2, type, &data_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    HDfree(data_check.string);
+    ret = H5Dvlen_reclaim(type, dataspace, H5P_DEFAULT, &data_check);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     ret = H5Aclose(att2);
     CHECK(ret, FAIL, "HAclose");
@@ -514,6 +516,7 @@ static void test_misc2_read_attribute(const char *filename, const char *att_name
 {
     hid_t file, root, att;
     hid_t type;
+    hid_t space;
     herr_t ret;
     misc2_struct data_check;
 
@@ -528,10 +531,17 @@ static void test_misc2_read_attribute(const char *filename, const char *att_name
     att = H5Aopen(root, att_name, H5P_DEFAULT);
     CHECK(att, FAIL, "H5Aopen");
 
+    space = H5Aget_space(att);
+    CHECK(space, FAIL, "H5Aget_space");
+
     ret = H5Aread(att, type, &data_check);
     CHECK(ret, FAIL, "H5Aread");
 
-    HDfree(data_check.string);
+    ret = H5Dvlen_reclaim(type, space, H5P_DEFAULT, &data_check);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
+
+    ret = H5Sclose(space);
+    CHECK(ret, FAIL, "H5Sclose");
 
     ret = H5Aclose(att);
     CHECK(ret, FAIL, "H5Aclose");
