@@ -140,7 +140,7 @@ const char *FILENAME[] = {
 #define H5L_DIM1 100
 #define H5L_DIM2 100
 
-#define FILTER_FILESIZE_MAX_FRACTION 0.9F
+#define FILTER_FILESIZE_MAX_FRACTION (double)0.9F
 
 /* Creation order macros */
 #define CORDER_GROUP_NAME       "corder_group"
@@ -552,8 +552,27 @@ cklinks(hid_t fapl, hbool_t new_format)
 	HDputs("    expected file location.");
 	TEST_ERROR
     } /* end if */
+    if(H5Lexists(file, "/", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
     if(H5Lexists(file, "d1", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
     if(H5Lexists(file, "grp1/hard", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
+    if(H5Lexists(file, "/grp1", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
+    if(H5Lexists(file, "/grp1/hard", H5P_DEFAULT) != TRUE) FAIL_STACK_ERROR
+    H5E_BEGIN_TRY {
+        status = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(status >= 0) {
+	H5_FAILED();
+	HDputs("    H5Lexists() should have failed for a path with missing components.");
+	TEST_ERROR
+    } /* end if */
+    H5E_BEGIN_TRY {
+        status = H5Lexists(file, "/no_grp1/hard", H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(status >= 0) {
+	H5_FAILED();
+	HDputs("    H5Lexists() should have failed for a path with missing components.");
+	TEST_ERROR
+    } /* end if */
 
     /* Symbolic link */
     if(H5Oget_info_by_name(file, "grp1/soft", &oinfo2, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
@@ -11085,6 +11104,7 @@ link_info_by_idx(hid_t fapl)
     char        filename[NAME_BUF_SIZE];/* File name */
     char        tmpname[NAME_BUF_SIZE]; /* Temporary link name */
     unsigned    u;                      /* Local index variable */
+    ssize_t     name_len;               /* Length of name */
     herr_t      ret;                    /* Generic return value */
 
     /* Loop over creating hard or soft links */
@@ -11126,9 +11146,9 @@ link_info_by_idx(hid_t fapl)
             } H5E_END_TRY;
             if(ret >= 0) TEST_ERROR
             H5E_BEGIN_TRY {
-                ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             } H5E_END_TRY;
-            if(ret >= 0) TEST_ERROR
+            if(name_len >= 0) TEST_ERROR
 
             /* Create several links, up to limit of compact form */
             for(u = 0; u < max_compact; u++) {
@@ -11168,9 +11188,9 @@ link_info_by_idx(hid_t fapl)
             } H5E_END_TRY;
             if(ret >= 0) TEST_ERROR
             H5E_BEGIN_TRY {
-                ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             } H5E_END_TRY;
-            if(ret >= 0) TEST_ERROR
+            if(name_len >= 0) TEST_ERROR
 
             /* Create more links, to push group into dense form */
             for(; u < (max_compact * 2); u++) {
@@ -11210,9 +11230,9 @@ link_info_by_idx(hid_t fapl)
             } H5E_END_TRY;
             if(ret >= 0) TEST_ERROR
             H5E_BEGIN_TRY {
-                ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             } H5E_END_TRY;
-            if(ret >= 0) TEST_ERROR
+            if(name_len >= 0) TEST_ERROR
 
             /* Close the group */
             if(H5Gclose(group_id) < 0) TEST_ERROR
@@ -11267,6 +11287,7 @@ link_info_by_idx_old(hid_t fapl)
     char        tmpname[NAME_BUF_SIZE]; /* Temporary link name */
     char        tmpval[NAME_BUF_SIZE];  /* Temporary link value */
     unsigned    u;                      /* Local index variable */
+    ssize_t     name_len;               /* Length of name */
     herr_t      ret;                    /* Generic return value */
 
     /* Loop over creating hard or soft links */
@@ -11378,9 +11399,9 @@ link_info_by_idx_old(hid_t fapl)
         } H5E_END_TRY;
         if(ret >= 0) TEST_ERROR
         H5E_BEGIN_TRY {
-            ret = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
         } H5E_END_TRY;
-        if(ret >= 0) TEST_ERROR
+        if(name_len >= 0) TEST_ERROR
 
         /* Verify state of group */
         if(H5G__has_stab_test(group_id) != TRUE) TEST_ERROR
@@ -12138,7 +12159,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
-    iter_info->curr = order != H5_ITER_DEC ? skip : ((max_links - 1) - skip);
+    iter_info->curr = (int64_t)(order != H5_ITER_DEC ? skip : ((max_links - 1) - skip));
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if(H5Literate(group_id, idx_type, order, &skip, link_iterate_cb, iter_info) < 0) TEST_ERROR
 
@@ -12166,11 +12187,11 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Skip over some links in group, with H5Giterate */
-    iter_info->nskipped = gskip = max_links / 2;
+    iter_info->nskipped = (unsigned)(gskip = (int)(max_links / 2));
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
-    iter_info->curr = order != H5_ITER_DEC ? (unsigned)gskip : ((max_links - 1) - gskip);
+    iter_info->curr = order != H5_ITER_DEC ? (unsigned)gskip : ((max_links - 1) - (unsigned)gskip);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if(H5Giterate(group_id, ".", &gskip, group_iterate_cb, iter_info) < 0) TEST_ERROR
 
@@ -12211,7 +12232,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Iterate over links in group, stopping in the middle, with H5Giterate() */
-    iter_info->nskipped = gskip = 0;
+    iter_info->nskipped = (unsigned)(gskip = 0);
     iter_info->order = order;
     iter_info->stop = 3;
     iter_info->ncalled = 0;
@@ -12568,7 +12589,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Iterate over links in group, with H5Giterate */
-    iter_info->nskipped = gskip = 0;
+    iter_info->nskipped = (unsigned)(gskip = 0);
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
@@ -12588,7 +12609,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
-    iter_info->curr = order != H5_ITER_DEC ? skip : ((max_links - 1) - skip);
+    iter_info->curr = (int64_t)(order != H5_ITER_DEC ? skip : ((max_links - 1) - skip));
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if(H5Literate(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_cb, iter_info) < 0) TEST_ERROR
 
@@ -12616,11 +12637,11 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Skip over some links in group, with H5Giterate */
-    iter_info->nskipped = gskip = max_links / 2;
+    iter_info->nskipped = (unsigned)(gskip = (int)(max_links / 2));
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
-    iter_info->curr = order != H5_ITER_DEC ? (unsigned)gskip : ((max_links - 1) - gskip);
+    iter_info->curr = order != H5_ITER_DEC ? (unsigned)gskip : ((max_links - 1) - (unsigned)gskip);
     HDmemset(iter_info->visited, 0, sizeof(hbool_t) * iter_info->max_visit);
     if(H5Giterate(group_id, ".", &gskip, group_iterate_old_cb, iter_info) < 0) TEST_ERROR
 
@@ -12661,7 +12682,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Iterate over links in group, stopping in the middle, with H5Giterate() */
-    iter_info->nskipped = gskip = 0;
+    iter_info->nskipped = (unsigned)(gskip = 0);
     iter_info->order = order;
     iter_info->stop = 3;
     iter_info->ncalled = 0;

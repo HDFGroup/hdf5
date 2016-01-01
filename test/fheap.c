@@ -470,16 +470,16 @@ get_del_string(const fheap_test_param_t *tparam)
     /* Remove half of total objects from heap */
     if(tparam->del_dir == FHEAP_DEL_FORWARD)
         if(tparam->drain_half == FHEAP_DEL_DRAIN_ALL)
-            str = HDstrdup("(all - forward)");
+            str = H5MM_strdup("(all - forward)");
         else
-            str = HDstrdup("(half, refill, all - forward)");
+            str = H5MM_strdup("(half, refill, all - forward)");
     else if(tparam->del_dir == FHEAP_DEL_REVERSE)
         if(tparam->drain_half == FHEAP_DEL_DRAIN_ALL)
-            str = HDstrdup("(all - reverse)");
+            str = H5MM_strdup("(all - reverse)");
         else
-            str = HDstrdup("(half, refill, all - reverse)");
+            str = H5MM_strdup("(half, refill, all - reverse)");
     else
-        str = HDstrdup("(all - deleting heap)");
+        str = H5MM_strdup("(all - deleting heap)");
 
     return(str);
 } /* get_del_string() */

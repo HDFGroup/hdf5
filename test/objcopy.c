@@ -218,7 +218,7 @@ addr_insert(H5O_info_t *oi)
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static H5_ATTR_PURE hbool_t
 addr_lookup(H5O_info_t *oi)
 {
     size_t  n;
@@ -533,8 +533,12 @@ test_copy_attach_attribute_vl(hid_t loc_id)
     ret_value = 0;
 
 done:
-    if(tid >0 && sid > 0)
-        H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+    if(tid >0 && sid > 0) {
+        hid_t dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+        H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL);
+        H5Dvlen_reclaim(tid, sid, dxpl_id, buf);
+        H5Pclose(dxpl_id);
+    }
     if(sid > 0)
         H5Sclose(sid);
     if(tid > 0)
@@ -5030,6 +5034,7 @@ test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
     hid_t tid = -1;                             /* Datatype ID */
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j;                          /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hvl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
@@ -5113,7 +5118,12 @@ test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -5129,6 +5139,7 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
     	H5Tclose(tid);
     	H5Sclose(sid);
     	H5Fclose(fid_dst);
@@ -5160,6 +5171,7 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j;                          /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hsize_t chunk_dim1d[1] = {CHUNK_SIZE_1};    /* Chunk dimensions */
@@ -5289,7 +5301,12 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -5305,6 +5322,8 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
+    	H5Pclose(pid);
     	H5Tclose(tid);
     	H5Sclose(sid);
     	H5Fclose(fid_dst);
@@ -5336,6 +5355,7 @@ test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j;                          /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hvl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
@@ -5426,7 +5446,12 @@ test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -5442,6 +5467,7 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
     	H5Tclose(tid);
     	H5Sclose(sid);
     	H5Fclose(fid_dst);
@@ -5589,6 +5615,7 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     hid_t tid = -1;                             /* Datatype ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     hsize_t dim2d[2];                           /* Dataset dimensions */
     hsize_t chunk_dim2d[2] ={CHUNK_SIZE_1, CHUNK_SIZE_2};             /* Chunk dimensions */
     hvl_t buf[DIM_SIZE_1][DIM_SIZE_2];          /* Buffer for writing data */
@@ -5688,7 +5715,12 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -5707,6 +5739,7 @@ error:
     	H5Dclose(did);
     	H5Pclose(pid);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
     	H5Tclose(tid);
     	H5Sclose(sid);
     	H5Fclose(fid_dst);
@@ -7396,6 +7429,7 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j;                          /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hvl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
@@ -7495,7 +7529,12 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid_copy) < 0) TEST_ERROR
@@ -7512,6 +7551,7 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
     	H5Tclose(tid);
     	H5Tclose(tid_copy);
     	H5Sclose(sid);
@@ -7543,6 +7583,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     hid_t tid = -1, tid_copy=-1;                /* Datatype ID */
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j;                          /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hvl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
@@ -7635,7 +7676,12 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid_copy) < 0) TEST_ERROR
@@ -7651,6 +7697,7 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
     	H5Tclose(tid);
     	H5Tclose(tid_copy);
     	H5Sclose(sid);
@@ -7683,6 +7730,7 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j;                          /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hvl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
@@ -7783,7 +7831,12 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid_copy) < 0) TEST_ERROR
@@ -7800,6 +7853,7 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
     	H5Tclose(tid);
     	H5Tclose(tid_copy);
     	H5Sclose(sid);
@@ -7832,6 +7886,7 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j;                          /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hvl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
@@ -7933,7 +7988,12 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid_copy, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid_copy, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid_copy) < 0) TEST_ERROR
@@ -7950,6 +8010,7 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid_copy, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
     	H5Tclose(tid);
     	H5Tclose(tid_copy);
     	H5Sclose(sid);
@@ -7982,6 +8043,7 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j, k;                       /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hvl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
@@ -8088,7 +8150,12 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -8105,6 +8172,8 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
+    	H5Pclose(pid);
     	H5Tclose(tid);
     	H5Tclose(tid2);
     	H5Sclose(sid);
@@ -8137,6 +8206,7 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j, k;                       /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hvl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
@@ -8242,7 +8312,12 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     if(H5Fclose(fid_dst) < 0) TEST_ERROR
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -8259,6 +8334,8 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
+    	H5Pclose(pid);
     	H5Tclose(tid);
     	H5Tclose(tid2);
     	H5Sclose(sid);
@@ -8291,6 +8368,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j, k;                       /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hvl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
@@ -8435,7 +8513,12 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -8453,6 +8536,7 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
     	H5Tclose(tid);
     	H5Tclose(tid2);
     	H5Sclose(sid);
@@ -8485,6 +8569,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j, k;                       /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hvl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
@@ -8592,7 +8677,12 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid2, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid2, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -8610,6 +8700,7 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid2, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
     	H5Tclose(tid);
     	H5Tclose(tid2);
     	H5Sclose(sid);
@@ -8652,6 +8743,7 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t did = -1;                             /* Dataset ID */
     hid_t did2 = -1;                            /* Dataset ID */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j;                          /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     cmpd_vl_t buf[DIM_SIZE_1];                  /* Buffer for writing data */
@@ -8741,7 +8833,12 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid2) < 0) TEST_ERROR
@@ -8758,6 +8855,7 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Pclose(dxpl_id);
         H5Tclose(tid2);
     	H5Tclose(tid);
     	H5Sclose(sid);
@@ -8790,6 +8888,7 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j;                          /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     hsize_t chunk_dim1d[1] = {CHUNK_SIZE_1};    /* Chunk dimensions */
@@ -8887,7 +8986,12 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid2) < 0) TEST_ERROR
@@ -8904,6 +9008,8 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+        H5Pclose(dxpl_id);
+        H5Pclose(pid);
         H5Tclose(tid2);
     	H5Tclose(tid);
     	H5Sclose(sid);
@@ -8936,6 +9042,7 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     hid_t sid = -1;                             /* Dataspace ID */
     hid_t pid = -1;                             /* Dataset creation property list ID */
     hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t dxpl_id = -1;                         /* Dataset transfer property list ID */
     unsigned int i, j;                          /* Local index variables */
     hsize_t dim1d[1];                           /* Dataset dimensions */
     cmpd_vl_t buf[DIM_SIZE_1];                      /* Buffer for writing data */
@@ -9032,7 +9139,12 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
 
 
     /* Reclaim vlen buffer */
-    if(H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf) < 0) TEST_ERROR
+    if(H5Tdetect_class(tid, H5T_VLEN) == TRUE) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR
+        if(H5Pset_vlen_mem_manager(dxpl_id, NULL, NULL, NULL, NULL) < 0) TEST_ERROR
+        if(H5Dvlen_reclaim(tid, sid, dxpl_id, buf) < 0) TEST_ERROR
+        if(H5Pclose(dxpl_id) < 0) TEST_ERROR
+    } /* end if */
 
     /* close datatype */
     if(H5Tclose(tid2) < 0) TEST_ERROR
@@ -9049,6 +9161,8 @@ error:
     	H5Dclose(did2);
     	H5Dclose(did);
         H5Dvlen_reclaim(tid, sid, H5P_DEFAULT, buf);
+    	H5Pclose(dxpl_id);
+    	H5Pclose(pid);
         H5Tclose(tid2);
     	H5Tclose(tid);
     	H5Sclose(sid);

@@ -942,7 +942,6 @@ H5allocate_memory(size_t size, hbool_t clear)
         ret_value = H5MM_malloc(size);
 
     FUNC_LEAVE_API(ret_value)
-
 } /* end H5allocate_memory() */
 
 
@@ -981,7 +980,6 @@ H5resize_memory(void *mem, size_t size)
     ret_value = H5MM_realloc(mem, size);
 
     FUNC_LEAVE_API(ret_value)
-
 } /* end H5resize_memory() */
 
 
@@ -1004,10 +1002,9 @@ H5free_memory(void *mem)
     H5TRACE1("e", "*x", mem);
 
     /* At this time, it is impossible for this to fail. */
-    HDfree(mem);
+    H5MM_xfree(mem);
 
     FUNC_LEAVE_API(SUCCEED)
-
 } /* end H5free_memory() */
 
 
