@@ -38,7 +38,7 @@ const char *FILENAME[] = {
 #define INSERT_SPLIT_ROOT_NREC  63
 #define INSERT_SPLIT_ROOT_NREC_REC  64
 #define INSERT_MANY             (1000 * 1000)
-#define INSERT_MANY_REC         (2650 * 1000)
+#define INSERT_MANY_REC         (2675 * 1000)
 #define FIND_MANY               (INSERT_MANY / 100)
 #define FIND_MANY_REC           (INSERT_MANY_REC / 100)
 #define FIND_NEIGHBOR           2000
