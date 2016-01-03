@@ -1603,6 +1603,8 @@ int main (void)
 
     puts("All h5repack tests passed.");
 
+    h5tools_close();
+
     return 0;
 
 error:
