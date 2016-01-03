@@ -410,7 +410,7 @@ H5O_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
         /* Remove flush dependency on object header proxy, if proxy exists */
         if(oh->proxy_present)
-            if(H5O_proxy_undepend(f, dxpl_id, oh, chk_proxy) < 0)
+            if(H5O__proxy_undepend(f, dxpl_id, oh, chk_proxy) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "can't destroy flush dependency on object header proxy")
     } /* end if */
     else

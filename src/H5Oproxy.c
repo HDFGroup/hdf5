@@ -71,19 +71,20 @@
 /********************/
 
 /* Metadata cache (H5AC) callbacks */
-static herr_t H5O__cache_proxy_get_load_size(const void *image, void *udata, 
+static herr_t H5O__proxy_get_load_size(const void *image, void *udata, 
     size_t *image_len, size_t *actual_len,
     hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
-static void *H5O__cache_proxy_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
-static herr_t H5O__cache_proxy_image_len(const void *thing, size_t *image_len, hbool_t *compressed_ptr,
+static void *H5O__proxy_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static herr_t H5O__proxy_image_len(const void *thing, size_t *image_len, hbool_t *compressed_ptr,
     size_t *compressed_image_len_ptr);
-static herr_t H5O__cache_proxy_serialize(const H5F_t *f, void *image, size_t len, void *thing);
-static herr_t H5O__cache_proxy_notify(H5AC_notify_action_t action, void *thing);
-static herr_t H5O__cache_proxy_free_icr(void *thing);
+static herr_t H5O__proxy_serialize(const H5F_t *f, void *image, size_t len, void *thing);
+static herr_t H5O__proxy_notify(H5AC_notify_action_t action, void *thing);
+static herr_t H5O__proxy_free_icr(void *thing);
 
-static herr_t H5O_proxy_depend_core(void *parent, H5O_proxy_t *proxy);
-static herr_t H5O__cache_proxy_dest(H5O_proxy_t *proxy);
-static herr_t H5O_proxy_undepend_core(void *parent, H5O_proxy_t *proxy);
+/* Helper routines */
+static herr_t H5O__proxy_depend_core(void *parent, H5O_proxy_t *proxy);
+static herr_t H5O__proxy_dest(H5O_proxy_t *proxy);
+static herr_t H5O__proxy_undepend_core(void *parent, H5O_proxy_t *proxy);
 
 /*********************/
 /* Package Variables */
@@ -94,14 +95,14 @@ const H5AC_class_t H5AC_OHDR_PROXY[1] = {{
     "Object header proxy",           	/* Metadata client name (for debugging) */
     H5FD_MEM_OHDR,                     	/* File space memory type for client */
     H5AC__CLASS_SKIP_READS|H5AC__CLASS_SKIP_WRITES,           /* Client class behavior flags */
-    H5O__cache_proxy_get_load_size,    	/* 'get_load_size' callback */
+    H5O__proxy_get_load_size,    	/* 'get_load_size' callback */
     NULL,				/* 'verify_chksum' callback */
-    H5O__cache_proxy_deserialize,    	/* 'deserialize' callback */
-    H5O__cache_proxy_image_len,      	/* 'image_len' callback */
+    H5O__proxy_deserialize,    		/* 'deserialize' callback */
+    H5O__proxy_image_len,      		/* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
-    H5O__cache_proxy_serialize,       	/* 'serialize' callback */
-    H5O__cache_proxy_notify,		/* 'notify' callback */
-    H5O__cache_proxy_free_icr,        	/* 'free_icr' callback */
+    H5O__proxy_serialize,       	/* 'serialize' callback */
+    H5O__proxy_notify,			/* 'notify' callback */
+    H5O__proxy_free_icr,        	/* 'free_icr' callback */
     NULL,                              	/* 'clear' callback */
     NULL,                              	/* 'fsf_size' callback */
 }};
@@ -133,7 +134,7 @@ H5FL_BLK_DEFINE_STATIC(parent_ptr);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O__cache_proxy_get_load_size
+ * Function:    H5O__proxy_get_load_size
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -146,7 +147,7 @@ H5FL_BLK_DEFINE_STATIC(parent_ptr);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_proxy_get_load_size(const void *_image, void H5_ATTR_UNUSED *_udata, 
+H5O__proxy_get_load_size(const void *_image, void H5_ATTR_UNUSED *_udata, 
     size_t *image_len, size_t H5_ATTR_UNUSED *actual_len,
     hbool_t H5_ATTR_UNUSED *compressed_ptr, 
     size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
@@ -162,17 +163,17 @@ H5O__cache_proxy_get_load_size(const void *_image, void H5_ATTR_UNUSED *_udata,
 	/* Set the image length size */
 	/* Object header proxies are represented as 1 byte in cache */
 	/* (would be 0 bytes, but cache won't allow it currently.  See
-	* H5D_cache_proxy_size) */
+	* H5D_proxy_size) */
 	*image_len = 1;
     }
     /* Nothing to do for non-NULL image: no need to compute actual_len */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O__cache_proxy_get_load_size() */
+} /* end H5O__proxy_get_load_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O__cache_proxy_deserialize
+ * Function:    H5O__proxy_deserialize
  *
  * Purpose:     Creates an object header proxy and creates flush
  *              dependencies from all object header chunks on this proxy.
@@ -186,7 +187,7 @@ H5O__cache_proxy_get_load_size(const void *_image, void H5_ATTR_UNUSED *_udata,
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__cache_proxy_deserialize(const void H5_ATTR_UNUSED *_image, size_t H5_ATTR_UNUSED len, void *_udata,
+H5O__proxy_deserialize(const void H5_ATTR_UNUSED *_image, size_t H5_ATTR_UNUSED len, void *_udata,
     hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5O_proxy_t          *proxy = NULL;				/* Object header proxy */
@@ -219,15 +220,15 @@ H5O__cache_proxy_deserialize(const void H5_ATTR_UNUSED *_image, size_t H5_ATTR_U
 
 done:
     if(!ret_value && proxy)
-        if(H5O__cache_proxy_dest(proxy) < 0)
+        if(H5O__proxy_dest(proxy) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "unable to destroy object header proxy")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O__cache_proxy_deserialize() */
+} /* end H5O__proxy_deserialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B2__cache_hdr_image_len
+ * Function:    H5O__proxy_image_len
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -240,7 +241,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_proxy_image_len(const void H5_ATTR_UNUSED *_thing, size_t *image_len,
+H5O__proxy_image_len(const void H5_ATTR_UNUSED *_thing, size_t *image_len,
     hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
 {
     FUNC_ENTER_STATIC_NOERR
@@ -251,15 +252,15 @@ H5O__cache_proxy_image_len(const void H5_ATTR_UNUSED *_thing, size_t *image_len,
     /* Set the image length size */
     /* Object header proxies are represented as 1 byte in cache */
     /* (would be 0 bytes, but cache won't allow it currently.  See
-     * H5D_cache_proxy_size) */
+     * H5D_proxy_size) */
     *image_len = 1;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O__cache_proxy_image_len() */
+} /* end H5O__proxy_image_len() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__cache_proxy_serialize
+ * Function:	H5O__proxy_serialize
  *
  * Purpose:	A no-op
  *
@@ -272,7 +273,7 @@ H5O__cache_proxy_image_len(const void H5_ATTR_UNUSED *_thing, size_t *image_len,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_proxy_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *_image, size_t H5_ATTR_UNUSED len,
+H5O__proxy_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *_image, size_t H5_ATTR_UNUSED len,
     void H5_ATTR_UNUSED *_thing)
 {
     FUNC_ENTER_STATIC_NOERR
@@ -280,11 +281,11 @@ H5O__cache_proxy_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *_
     /* A no-op */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5O__cache_proxy_serialize() */
+} /* H5O__proxy_serialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O__cache_proxy_notify
+ * Function:    H5O__proxy_notify
  *
  * Purpose:     Handle cache action notifications
  *
@@ -297,14 +298,14 @@ H5O__cache_proxy_serialize(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED *_
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_proxy_notify(H5AC_notify_action_t action, void *_thing)
+H5O__proxy_notify(H5AC_notify_action_t action, void *_thing)
 {
     H5O_proxy_t *proxy = (H5O_proxy_t *)_thing;
     H5O_chunk_proxy_t *chk_proxy = NULL; 	/* Object header chunk proxy */
-    unsigned i;                         	/* Local index variable */
+    unsigned u;                         	/* Local index variable */
     herr_t ret_value = SUCCEED;         	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -318,15 +319,15 @@ H5O__cache_proxy_notify(H5AC_notify_action_t action, void *_thing)
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
 	case H5AC_NOTIFY_ACTION_AFTER_LOAD:
             /* Create flush dependency on object header chunk 0 */
-            if(H5O_proxy_depend_core(proxy->oh, proxy) < 0)
+            if(H5O__proxy_depend_core(proxy->oh, proxy) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
 
             /* Create flush dependencies on all other object header chunks */
-            for(i = 1; i < proxy->oh->nchunks; i++) {
-                if(NULL == (chk_proxy = H5O_chunk_protect(proxy->f, H5AC_ind_dxpl_id, proxy->oh, i)))
+            for(u = 1; u < proxy->oh->nchunks; u++) {
+                if(NULL == (chk_proxy = H5O_chunk_protect(proxy->f, H5AC_ind_dxpl_id, proxy->oh, u)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
 /* same as before, but looks backward...need to check into that..(proxy, chk_proxy) */
-                if(H5O_proxy_depend_core(chk_proxy, proxy) < 0)
+                if(H5O__proxy_depend_core(chk_proxy, proxy) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
                 if(H5O_chunk_unprotect(proxy->f, H5AC_ind_dxpl_id, chk_proxy, FALSE) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
@@ -346,16 +347,15 @@ H5O__cache_proxy_notify(H5AC_notify_action_t action, void *_thing)
 	    HDassert(proxy->oh_fd_parent_addr != HADDR_UNDEF);
             HDassert(proxy->oh_fd_parent_ptr != NULL);
 
-	    if(H5O_proxy_undepend_core(proxy->oh_fd_parent_ptr, proxy) < 0)
+	    if(H5O__proxy_undepend_core(proxy->oh_fd_parent_ptr, proxy) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency with object header")
 
-	    while(proxy->chk_fd_parent_count > 0){
+	    while(proxy->chk_fd_parent_count > 0) {
+		u = proxy->chk_fd_parent_count - 1;
 
-		i = proxy->chk_fd_parent_count - 1;
-
-	        if(H5O_proxy_undepend_core(proxy->chk_fd_parent_ptrs[i], proxy)<0)
+	        if(H5O__proxy_undepend_core(proxy->chk_fd_parent_ptrs[u], proxy)<0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency with object header continuation chunk")
-	    }
+	    } /* end while */
 
             /* Mark proxy as not present on the object header */
             proxy->oh->proxy_present = FALSE;
@@ -377,12 +377,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5O__cache_proxy_notify() */
+} /* end H5O__proxy_notify() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__cache_proxy_free_icr
+ * Function:	H5O__proxy_free_icr
  *
  * Purpose:	Destroy/release an "in core representation" of a data
  *              structure
@@ -395,23 +394,23 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_proxy_free_icr(void *_thing)
+H5O__proxy_free_icr(void *_thing)
 {
     H5O_proxy_t *proxy = (H5O_proxy_t *)_thing;
     herr_t ret_value = SUCCEED;     		/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
-    if(H5O__cache_proxy_dest(proxy) < 0)
+    if(H5O__proxy_dest(proxy) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header proxy")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O__cache_proxy_free_icr() */
+} /* H5O__proxy_free_icr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_cache_proxy_dest
+ * Function:    H5O_proxy_dest
  *
  * Purpose:     Destroys an object header proxy in memory.
  *
@@ -423,11 +422,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_proxy_dest(H5O_proxy_t *proxy)
+H5O__proxy_dest(H5O_proxy_t *proxy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(proxy);
     HDassert(proxy->oh);
@@ -436,11 +435,11 @@ H5O__cache_proxy_dest(H5O_proxy_t *proxy)
     proxy = H5FL_FREE(H5O_proxy_t, proxy);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O__cache_proxy_dest() */
+} /* end H5O__proxy_dest() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_proxy_create
+ * Function:    H5O__proxy_create
  *
  * Purpose:     Allocate temporary space for the object header proxy.  We
  *              save the actual creation of the proxy to the "load"
@@ -459,11 +458,11 @@ H5O__cache_proxy_dest(H5O_proxy_t *proxy)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_proxy_create(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t *oh)
+H5O__proxy_create(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t *oh)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(oh);
@@ -474,11 +473,11 @@ H5O_proxy_create(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t *oh)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_proxy_create() */
+} /* end H5O__proxy_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_proxy_pin
+ * Function:    H5O__proxy_pin
  *
  * Purpose:     Returns the proxy object for the specified object header,
  *              pinned.  This proxy can be used as a flush dependency
@@ -493,13 +492,13 @@ done:
  *-------------------------------------------------------------------------
  */
 H5O_proxy_t *
-H5O_proxy_pin(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
+H5O__proxy_pin(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 {
     H5O_proxy_t *proxy = NULL;          /* Object header proxy */
     H5O_proxy_cache_ud_t udata;		/* User-data for callback */
     H5O_proxy_t *ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(oh);
@@ -527,11 +526,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_proxy_pin() */
+} /* end H5O__proxy_pin() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_proxy_unpin
+ * Function:    H5O__proxy_unpin
  *
  * Purpose:     Unpins the specified object header proxy from the cache.
  *
@@ -543,11 +542,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_proxy_unpin(H5O_proxy_t *proxy)
+H5O__proxy_unpin(H5O_proxy_t *proxy)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     HDassert(proxy);
 
@@ -557,11 +556,11 @@ H5O_proxy_unpin(H5O_proxy_t *proxy)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_proxy_unpin() */
+} /* end H5O__proxy_unpin() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_proxy_depend
+ * Function:    H5O__proxy_depend
  *
  * Purpose:     Creates a flush dependency between the object header proxy
  *              (as child) and the specified object (as parent).
@@ -574,33 +573,32 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_proxy_depend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent)
+H5O__proxy_depend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent)
 {
     H5O_proxy_t *proxy = NULL;          /* Object header proxy */
     H5O_proxy_cache_ud_t udata;         /* User-data for callback */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(oh);
 
     HDassert(H5F_addr_defined(oh->proxy_addr));
     HDassert(parent);
-    HDassert(((H5C_cache_entry_t *)parent)->magic == 
-             H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(((H5C_cache_entry_t *)parent)->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(((H5C_cache_entry_t *)parent)->type);
     HDassert((((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_ID) ||
              (((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_CHK_ID));
 
+    /* Protect the object header proxy */
     udata.f = f;
     udata.oh  = oh;
-    /* Protect the object header proxy */
     if(NULL == (proxy = (H5O_proxy_t *)H5AC_protect(f, dxpl_id, H5AC_OHDR_PROXY, oh->proxy_addr, &udata, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header proxy");
 
     /* Add the flush dependency on the parent object */
-    if(H5O_proxy_depend_core(parent, proxy) < 0)
+    if(H5O__proxy_depend_core(parent, proxy) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
 
     /* Unprotect the object header proxy */
@@ -609,19 +607,15 @@ H5O_proxy_depend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent)
     proxy = NULL;
 
 done:
-    if(proxy) {
-        HDassert(ret_value < 0);
-        if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_PROXY, oh->proxy_addr, proxy, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header proxy");
-    } /* end if */
+    if(proxy && H5AC_unprotect(f, dxpl_id, H5AC_OHDR_PROXY, oh->proxy_addr, proxy, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header proxy")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_proxy_depend() */
-
+} /* end H5O__proxy_depend() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_proxy_depend_core
+ * Function:    H5O__proxy_depend_core
  *
  * Purpose:     Creates a flush dependency between the object header proxy
  *              (as child) and the specified object (as parent).
@@ -642,11 +636,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_proxy_depend_core(void *parent, H5O_proxy_t *proxy)
+H5O__proxy_depend_core(void *parent, H5O_proxy_t *proxy)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(parent);
     HDassert(((H5C_cache_entry_t *)parent)->magic == 
@@ -729,15 +723,12 @@ H5O_proxy_depend_core(void *parent, H5O_proxy_t *proxy)
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5O_proxy_depend_core() */
-
+} /* end H5O__proxy_depend_core() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_proxy_undepend
+ * Function:    H5O__proxy_undepend
  *
  * Purpose:     Destroys the flush dependency between the object header
  *              proxy (as child) and the specified object (as parent).
@@ -754,27 +745,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_proxy_undepend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent)
+H5O__proxy_undepend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent)
 {
     H5O_proxy_t *proxy = NULL;          /* Object header proxy */
     H5O_proxy_cache_ud_t udata;         /* User-data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
+    /* Sanity checks */
     HDassert(f);
     HDassert(oh);
     HDassert(H5F_addr_defined(oh->proxy_addr));
     HDassert(parent);
 
+    /* Protect the object header proxy */
     udata.f = f;
     udata.oh  = oh;
-    /* Protect the object header proxy */
     if(NULL == (proxy = (H5O_proxy_t *)H5AC_protect(f, dxpl_id, H5AC_OHDR_PROXY, oh->proxy_addr, &udata, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header proxy");
 
-    /* destroy the flush dependency on the parent object */
-    if(H5O_proxy_undepend_core(parent, proxy) < 0)
+    /* Destroy the flush dependency on the parent object */
+    if(H5O__proxy_undepend_core(parent, proxy) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
 
     /* Unprotect the object header proxy */
@@ -783,19 +775,15 @@ H5O_proxy_undepend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent)
     proxy = NULL;
 
 done:
-    if(proxy) {
-        HDassert(ret_value < 0);
-        if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_PROXY, oh->proxy_addr, proxy, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header proxy");
-    } /* end if */
+    if(proxy && H5AC_unprotect(f, dxpl_id, H5AC_OHDR_PROXY, oh->proxy_addr, proxy, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header proxy");
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_proxy_undepend() */
-
+} /* end H5O__proxy_undepend() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_proxy_undepend_core
+ * Function:    H5O__proxy_undepend_core
  *
  * Purpose:     Destroys the flush dependency between the object header
  *              proxy (as child) and the specified object (as parent).
@@ -818,34 +806,30 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_proxy_undepend_core(void *parent, H5O_proxy_t *proxy)
+H5O__proxy_undepend_core(void *parent, H5O_proxy_t *proxy)
 {
-    unsigned i;
+    unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(parent);
 
 #ifndef NDEBUG
-    /* do sanity checks */
+    /* Sanity checks */
     HDassert(parent);
-    HDassert(((H5C_cache_entry_t *)parent)->magic == 
-             H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(((H5C_cache_entry_t *)parent)->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(((H5C_cache_entry_t *)parent)->type);
     HDassert((((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_ID) ||
              (((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_CHK_ID));
 
     if ( (((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_ID) ) {
-
 	HDassert(proxy->oh_fd_parent_addr != HADDR_UNDEF);
 	HDassert(proxy->oh_fd_parent_ptr != NULL);
-	HDassert(proxy->oh_fd_parent_addr ==
-                 (((H5C_cache_entry_t *)(parent))->addr));
+	HDassert(proxy->oh_fd_parent_addr == (((H5C_cache_entry_t *)(parent))->addr));
 	HDassert(proxy->oh_fd_parent_ptr == parent);
-
-    } else {
-
+    } /* end if */
+    else {
 	hbool_t found = FALSE;
 
 	HDassert(proxy->chk_fd_parent_alloc > 0);
@@ -853,100 +837,64 @@ H5O_proxy_undepend_core(void *parent, H5O_proxy_t *proxy)
 	HDassert(proxy->chk_fd_parent_addrs);
 	HDassert(proxy->chk_fd_parent_ptrs);
 
-	for( i = 0; i < proxy->chk_fd_parent_count; i++ ) {
-
-            if ( proxy->chk_fd_parent_ptrs[i] == parent ) {
-
+	for(u = 0; u < proxy->chk_fd_parent_count; u++)
+            if(proxy->chk_fd_parent_ptrs[u] == parent) {
 		found = TRUE;
                 break;
-            }
-        }
+            } /* end if */
 
 	HDassert(found);
-	HDassert(proxy->chk_fd_parent_addrs[i] == 
-		 (((H5C_cache_entry_t *)(parent))->addr));
-    }
+	HDassert(proxy->chk_fd_parent_addrs[u] == (((H5C_cache_entry_t *)(parent))->addr));
+    } /* end else */
 #endif /* NDEBUG */
 
-    /* destroy the flush dependency on the parent object */
+    /* Destroy the flush dependency on the parent object */
     if(H5AC_destroy_flush_dependency(parent, proxy) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
 
-    /* delete parent from object header's list of parents */
-    if ( (((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_ID) ) {
-
+    /* Delete parent from object header's list of parents */
+    if((((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_ID)) {
 	proxy->oh_fd_parent_addr = HADDR_UNDEF;
 	proxy->oh_fd_parent_ptr = NULL;
-
-    } else {
-
-	/* find parent in parent ptrs array */
-	for ( i = 0; i < proxy->chk_fd_parent_count; i++ ) {
-
-            if ( proxy->chk_fd_parent_ptrs[i] == parent ) {
-
+    } /* end if */
+    else {
+	/* Find parent in parent ptrs array */
+	for(u = 0; u < proxy->chk_fd_parent_count; u++)
+            if(proxy->chk_fd_parent_ptrs[u] == parent)
                 break;
-	    }
-        }
-
-        if ( i == proxy->chk_fd_parent_count )
-
+        if(u == proxy->chk_fd_parent_count)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "Parent entry isn't in chunk fd parent list")
 
 	/* Remove parent entry from chunk fd parent ptr and addr lists */
-        if ( i < proxy->chk_fd_parent_count - 1 ) {
+        if(u < proxy->chk_fd_parent_count - 1) {
+            HDmemmove(&proxy->chk_fd_parent_addrs[u],
+                      &proxy->chk_fd_parent_addrs[u + 1],
+                      (proxy->chk_fd_parent_count - u - 1) * sizeof(proxy->chk_fd_parent_addrs[0]));
 
-            HDmemmove(&proxy->chk_fd_parent_addrs[i],
-                      &proxy->chk_fd_parent_addrs[i+1],
-                      (proxy->chk_fd_parent_count - i - 1)
-                       * sizeof(proxy->chk_fd_parent_addrs[0]));
-
-            HDmemmove(&proxy->chk_fd_parent_ptrs[i],
-                      &proxy->chk_fd_parent_ptrs[i+1],
-                      (proxy->chk_fd_parent_count - i - 1)
-                       * sizeof(proxy->chk_fd_parent_ptrs[0]));
-	}
+            HDmemmove(&proxy->chk_fd_parent_ptrs[u],
+                      &proxy->chk_fd_parent_ptrs[u + 1],
+                      (proxy->chk_fd_parent_count - u - 1) * sizeof(proxy->chk_fd_parent_ptrs[0]));
+	} /* end if */
 
     	proxy->chk_fd_parent_count--;
 
 	/* shrink or free the fd parent ptr and addr lists as appropriate */
-        if( proxy->chk_fd_parent_count == 0 ) {
-
-            proxy->chk_fd_parent_addrs = (haddr_t *)
-		H5FL_BLK_FREE(parent_addr, proxy->chk_fd_parent_addrs);
-
-            proxy->chk_fd_parent_ptrs = (void **)
-		H5FL_BLK_FREE(parent_ptr, proxy->chk_fd_parent_ptrs);
-
+        if(proxy->chk_fd_parent_count == 0) {
+            proxy->chk_fd_parent_addrs = (haddr_t *)H5FL_BLK_FREE(parent_addr, proxy->chk_fd_parent_addrs);
+            proxy->chk_fd_parent_ptrs = (void **)H5FL_BLK_FREE(parent_ptr, proxy->chk_fd_parent_ptrs);
 	    proxy->chk_fd_parent_alloc = 0;
-
-        } 
-        else if ( ( proxy->chk_fd_parent_count > H5O_FD_PAR_LIST_BASE ) &&
-                  ( proxy->chk_fd_parent_count <= 
-                    (proxy->chk_fd_parent_alloc / 4) ) ) {
-
-            if ( NULL == (proxy->chk_fd_parent_addrs = (haddr_t *)
-		    H5FL_BLK_REALLOC(parent_addr, proxy->chk_fd_parent_addrs, 
-				     (proxy->chk_fd_parent_alloc / 4) * 
-					sizeof(haddr_t))) )
-
+        }  /* end if */
+        else if((proxy->chk_fd_parent_count > H5O_FD_PAR_LIST_BASE) &&
+                  (proxy->chk_fd_parent_count <= (proxy->chk_fd_parent_alloc / 4))) {
+            if(NULL == (proxy->chk_fd_parent_addrs = (haddr_t *)H5FL_BLK_REALLOC(parent_addr, proxy->chk_fd_parent_addrs, (proxy->chk_fd_parent_alloc / 4) * sizeof(haddr_t))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory reallocation failed for chk fd parent addr list")
-
-            if ( NULL == (proxy->chk_fd_parent_ptrs = (void **)
-		    H5FL_BLK_REALLOC(parent_ptr, proxy->chk_fd_parent_ptrs, 
-				     (proxy->chk_fd_parent_alloc / 4) * 
-					sizeof(void *))) )
-
+            if(NULL == (proxy->chk_fd_parent_ptrs = (void **)H5FL_BLK_REALLOC(parent_ptr, proxy->chk_fd_parent_ptrs, (proxy->chk_fd_parent_alloc / 4) * sizeof(void *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory reallocation failed for chk fd parent ptr list")
-
             proxy->chk_fd_parent_alloc /= 4;
-
         } /* end if */
-    }
+    } /* end else */
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5O_proxy_undepend_core() */
+} /* end H5O__proxy_undepend_core() */
 

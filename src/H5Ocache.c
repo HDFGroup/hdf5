@@ -467,7 +467,7 @@ H5O__cache_deserialize(const void *_image, size_t len, void *_udata,
     /* Create object header proxy if doing SWMR writes */
     HDassert(!oh->proxy_present);
     if(H5F_INTENT(udata->common.f) & H5F_ACC_SWMR_WRITE) {
-	if(H5O_proxy_create(udata->common.f, udata->common.dxpl_id, oh) < 0)
+	if(H5O__proxy_create(udata->common.f, udata->common.dxpl_id, oh) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, NULL, "can't create object header proxy")
     } /* end if */
     else
@@ -1122,7 +1122,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 
                 /* Add flush dependency on object header proxy, if proxy exists */
                 if(chk_proxy->oh->proxy_present)
-                    if(H5O_proxy_depend(chk_proxy->f, H5AC_ind_dxpl_id, chk_proxy->oh, chk_proxy) < 0)
+                    if(H5O__proxy_depend(chk_proxy->f, H5AC_ind_dxpl_id, chk_proxy->oh, chk_proxy) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "can't create flush dependency on object header proxy")
 
 	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:

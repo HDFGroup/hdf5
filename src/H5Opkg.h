@@ -710,11 +710,11 @@ H5_DLL herr_t H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     hsize_t *nattrs);
 
 /* Object header proxy operators */
-H5_DLL herr_t H5O_proxy_create(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
-H5_DLL H5O_proxy_t *H5O_proxy_pin(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
-H5_DLL herr_t H5O_proxy_unpin(H5O_proxy_t *proxy);
-H5_DLL herr_t H5O_proxy_depend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent);
-H5_DLL herr_t H5O_proxy_undepend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent);
+H5_DLL herr_t H5O__proxy_create(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
+H5_DLL H5O_proxy_t *H5O__proxy_pin(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
+H5_DLL herr_t H5O__proxy_unpin(H5O_proxy_t *proxy);
+H5_DLL herr_t H5O__proxy_depend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent);
+H5_DLL herr_t H5O__proxy_undepend(H5F_t *f, hid_t dxpl_id, H5O_t *oh, void *parent);
 
 /* Testing functions */
 #ifdef H5O_TESTING
