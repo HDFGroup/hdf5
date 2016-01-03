@@ -396,6 +396,11 @@ H5_term_library(void)
         (void)H5MM_free(tmp_open_stream);
     } /* end while */
 
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
+    /* Sanity check memory allocations */
+    H5MM_final_sanity_check();
+#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
+
     /* Reset flag indicating that the library is being shut down */
     H5_TERM_GLOBAL = FALSE;
 

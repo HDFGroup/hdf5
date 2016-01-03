@@ -107,6 +107,25 @@
 /* Local Typedefs */
 /******************/
 
+/* Raw data chunks are cached.  Each entry in the cache is: */
+typedef struct H5D_rdcc_ent_t {
+    hbool_t	locked;		/*entry is locked in cache		*/
+    hbool_t	dirty;		/*needs to be written to disk?		*/
+    hbool_t     deleted;        /*chunk about to be deleted		*/
+    hsize_t 	scaled[H5O_LAYOUT_NDIMS]; /*scaled chunk 'name' (coordinates) */
+    uint32_t	rd_count;	/*bytes remaining to be read		*/
+    uint32_t	wr_count;	/*bytes remaining to be written		*/
+    H5F_block_t chunk_block;    /*offset/length of chunk in file        */
+    hsize_t     chunk_idx;  	/*index of chunk in dataset             */
+    uint8_t	*chunk;		/*the unfiltered chunk data		*/
+    unsigned	idx;		/*index in hash table			*/
+    struct H5D_rdcc_ent_t *next;/*next item in doubly-linked list	*/
+    struct H5D_rdcc_ent_t *prev;/*previous item in doubly-linked list	*/
+    struct H5D_rdcc_ent_t *tmp_next;/*next item in temporary doubly-linked list */
+    struct H5D_rdcc_ent_t *tmp_prev;/*previous item in temporary doubly-linked list */
+} H5D_rdcc_ent_t;
+typedef H5D_rdcc_ent_t *H5D_rdcc_ent_ptr_t; /* For free lists */
+
 /* Callback info for iteration to prune chunks */
 typedef struct H5D_chunk_it_ud1_t {
     H5D_chunk_common_ud_t common;       /* Common info for B-tree user data (must be first) */
@@ -244,6 +263,11 @@ static herr_t H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t reset);
 static herr_t H5D__chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t flush);
+static void *H5D__chunk_lock(const H5D_io_info_t *io_info,
+    H5D_chunk_ud_t *udata, hbool_t relax);
+static herr_t H5D__chunk_unlock(const H5D_io_info_t *io_info,
+    const H5D_chunk_ud_t *udata, hbool_t dirty, void *chunk,
+    uint32_t naccessed);
 static herr_t H5D__chunk_cache_prune(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, size_t size);
 static herr_t H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata);
@@ -3008,7 +3032,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
+static void *
 H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     hbool_t relax)
 {
@@ -3024,7 +3048,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     void		*chunk = NULL;		/*the file chunk	*/
     void		*ret_value = NULL;	/* Return value         */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     HDassert(io_info);
     HDassert(io_info->dxpl_cache);
@@ -3286,7 +3310,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
     hbool_t dirty, void *chunk, uint32_t naccessed)
 {
@@ -3294,7 +3318,7 @@ H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
     const H5D_rdcc_t	*rdcc = &(io_info->dset->shared->cache.chunk);
     herr_t              ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(io_info);
