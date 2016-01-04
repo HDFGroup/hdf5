@@ -36,6 +36,8 @@ set (HDF5_ENABLE_COVERAGE OFF CACHE BOOL "Enable code coverage for Libraries and
 
 set (HDF5_ENABLE_USING_MEMCHECKER OFF CACHE BOOL "Indicate that a memory checker is used" FORCE)
 
+set (HDF5_MEMORY_ALLOC_SANITY_CHECK OFF CACHE BOOL "Indicate that internal memory allocation sanity checks are enabled" FORCE)
+
 set (HDF5_DISABLE_COMPILER_WARNINGS OFF CACHE BOOL "Disable compiler warnings" FORCE)
 
 set (HDF5_USE_FOLDERS ON CACHE BOOL "Enable folder grouping of projects in IDEs." FORCE)
