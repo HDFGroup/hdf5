@@ -157,7 +157,7 @@ H5MM__sanity_check_block(const H5MM_block_t *block)
     HDassert(block->size > 0);
     HDassert(block->in_use);
     /* Check for head & tail guards, if not head of linked list */
-    if(block->size != SIZE_T_MAX) {
+    if(block->size != SIZET_MAX) {
         HDassert(0 == HDmemcmp(block->b, H5MM_block_head_guard_s, H5MM_HEAD_GUARD_SIZE));
         HDassert(0 == HDmemcmp(block->b + H5MM_HEAD_GUARD_SIZE + block->size, H5MM_block_tail_guard_s, H5MM_TAIL_GUARD_SIZE));
     }
@@ -251,7 +251,7 @@ H5MM_malloc(size_t size)
         HDmemcpy(H5MM_block_head_s.sig, H5MM_block_signature_s, H5MM_SIG_SIZE);
         H5MM_block_head_s.next = &H5MM_block_head_s;
         H5MM_block_head_s.prev = &H5MM_block_head_s;
-        H5MM_block_head_s.size = SIZE_T_MAX;
+        H5MM_block_head_s.size = SIZET_MAX;
         H5MM_block_head_s.in_use = TRUE;
 
         H5MM_init_s = TRUE;
