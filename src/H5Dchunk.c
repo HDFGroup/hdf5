@@ -4011,7 +4011,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                        write collectively at the end */
                     /* allocate/resize address array if no more space left */
                     if(0 == chunk_info.num_io % 1024)
-                        if(NULL == (chunk_info.addr = (haddr_t *)HDrealloc(chunk_info.addr, (chunk_info.num_io + 1024) * sizeof(haddr_t))))
+                        if(NULL == (chunk_info.addr = (haddr_t *)H5MM_realloc(chunk_info.addr, (chunk_info.num_io + 1024) * sizeof(haddr_t))))
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed for chunk addresses")
 
                     /* Store the chunk's address for later */
@@ -4104,7 +4104,7 @@ done:
 
 #ifdef H5_HAVE_PARALLEL
     if(using_mpi && chunk_info.addr)
-        HDfree(chunk_info.addr);
+        H5MM_free(chunk_info.addr);
 #endif
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
