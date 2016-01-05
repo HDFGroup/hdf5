@@ -416,7 +416,7 @@ done:
     if(NULL == ret_value)
         if(new_fa) {
             if(new_fa->logfile)
-                new_fa->logfile = H5MM_free(new_fa->logfile);
+                new_fa->logfile = H5MM_xfree(new_fa->logfile);
             H5MM_free(new_fa);
         } /* end if */
 
@@ -445,7 +445,7 @@ H5FD_log_fapl_free(void *_fa)
 
     /* Free the fapl information */
     if(fa->logfile)
-        fa->logfile = H5MM_free(fa->logfile);
+        fa->logfile = H5MM_xfree(fa->logfile);
     H5MM_xfree(fa);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -799,7 +799,7 @@ H5FD_log_close(H5FD_t *_file)
     } /* end if */
 
     if(file->fa.logfile)
-        file->fa.logfile = H5MM_free(file->fa.logfile);
+        file->fa.logfile = H5MM_xfree(file->fa.logfile);
 
     /* Release the file info */
     file = H5FL_FREE(H5FD_log_t, file);
