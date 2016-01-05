@@ -3435,7 +3435,8 @@ test_libver_macros(void)
     VERIFY(H5_VERSION_GE(major-1,minor,release+1), TRUE, "H5_VERSION_GE");
     VERIFY(H5_VERSION_GE(major,minor-1,release), TRUE, "H5_VERSION_GE");
     VERIFY(H5_VERSION_GE(major,minor-1,release+1), TRUE, "H5_VERSION_GE");
-    VERIFY(H5_VERSION_GE(major,minor,release-1), TRUE, "H5_VERSION_GE");
+    if(H5_VERS_RELEASE > 0)
+        VERIFY(H5_VERSION_GE(major,minor,release-1), TRUE, "H5_VERSION_GE");
 
     VERIFY(H5_VERSION_GE(major+1,minor,release), FALSE, "H5_VERSION_GE");
     VERIFY(H5_VERSION_GE(major+1,minor-1,release), FALSE, "H5_VERSION_GE");
@@ -3457,7 +3458,8 @@ test_libver_macros(void)
     VERIFY(H5_VERSION_LE(major-1,minor+1,release+1), FALSE, "H5_VERSION_LE");
     VERIFY(H5_VERSION_LE(major,minor-1,release), FALSE, "H5_VERSION_LE");
     VERIFY(H5_VERSION_LE(major,minor-1,release+1), FALSE, "H5_VERSION_LE");
-    VERIFY(H5_VERSION_LE(major,minor,release-1), FALSE, "H5_VERSION_LE");
+    if(H5_VERS_RELEASE > 0)
+        VERIFY(H5_VERSION_LE(major,minor,release-1), FALSE, "H5_VERSION_LE");
 } /* test_libver_macros() */
 
 /****************************************************************
@@ -3739,5 +3741,7 @@ cleanup_file(void)
     HDremove(FILE3);
     HDremove(FILE4);
     HDremove(FILE5);
+    HDremove(FILE6);
+    HDremove(FILE7);
 }
 
