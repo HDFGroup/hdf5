@@ -38,7 +38,8 @@
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
 /****************/
 /* Local Macros */
