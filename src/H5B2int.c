@@ -2554,13 +2554,13 @@ H5B2__remove_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr
         if(idx == 0) {
             if(H5B2_POS_LEFT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if(hdr->min_native_rec)
-                    hdr->min_native_rec = H5MM_free(hdr->min_native_rec);
+                    hdr->min_native_rec = H5MM_xfree(hdr->min_native_rec);
             } /* end if */
         } /* end if */
         if(idx == (unsigned)(leaf->nrec - 1)) {
             if(H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if(hdr->max_native_rec)
-                    hdr->max_native_rec = H5MM_free(hdr->max_native_rec);
+                    hdr->max_native_rec = H5MM_xfree(hdr->max_native_rec);
             } /* end if */
         } /* end if */
     } /* end if */
@@ -2865,13 +2865,13 @@ H5B2__remove_leaf_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
         if(idx == 0) {
             if(H5B2_POS_LEFT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if(hdr->min_native_rec)
-                    hdr->min_native_rec = H5MM_free(hdr->min_native_rec);
+                    hdr->min_native_rec = H5MM_xfree(hdr->min_native_rec);
             } /* end if */
         } /* end if */
         if(idx == (unsigned)(leaf->nrec - 1)) {
             if(H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if(hdr->max_native_rec)
-                    hdr->max_native_rec = H5MM_free(hdr->max_native_rec);
+                    hdr->max_native_rec = H5MM_xfree(hdr->max_native_rec);
             } /* end if */
         } /* end if */
     } /* end if */
