@@ -463,7 +463,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Allocate memory for "deleted" array.  This array marks the message in
      * the source that shouldn't be copied to the destination.
      */
-    if(NULL == (deleted = (hbool_t *)HDmalloc(sizeof(hbool_t) * oh_src->nmesgs)))
+    if(NULL == (deleted = (hbool_t *)H5MM_malloc(sizeof(hbool_t) * oh_src->nmesgs)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     HDmemset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
 
@@ -870,7 +870,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 done:
     /* Free deleted array */
     if(deleted)
-        HDfree(deleted);
+        H5MM_free(deleted);
 
     /* Release pointer to source object header and its derived objects */
     if(oh_src && H5O_unprotect(oloc_src, dxpl_id, oh_src, H5AC__NO_FLAGS_SET) < 0)

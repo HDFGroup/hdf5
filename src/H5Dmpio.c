@@ -1680,7 +1680,6 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
     MPI_Comm          comm;
     int               ic, root;
     int               mpi_code;
-    hbool_t           mem_cleanup      = FALSE;
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
     int new_value;
     htri_t check_prop;
@@ -1715,12 +1714,14 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
     threshold_nproc_per_chunk = mpi_size * percent_nproc_per_chunk/100;
 
     /* Allocate memory */
-    io_mode_info      = (uint8_t *)H5MM_calloc(total_chunks);
-    mergebuf          = H5MM_malloc((sizeof(haddr_t) + 1) * total_chunks);
+    if(NULL == (io_mode_info = (uint8_t *)H5MM_calloc(total_chunks)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate I/O mode info buffer")
+    if(NULL == (mergebuf = H5MM_malloc((sizeof(haddr_t) + 1) * total_chunks)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate mergebuf buffer")
     tempbuf           = mergebuf + total_chunks;
     if(mpi_rank == root)
-        recv_io_mode_info = (uint8_t *)H5MM_malloc(total_chunks * mpi_size);
-    mem_cleanup       = TRUE;
+        if(NULL == (recv_io_mode_info = (uint8_t *)H5MM_malloc(total_chunks * mpi_size)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate recv I/O mode info buffer")
 
     /* Obtain the regularity and selection information for all chunks in this process. */
     chunk_node        = H5SL_first(fm->sel_chunks);
@@ -1742,11 +1743,12 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
 
         /* pre-computing: calculate number of processes and
             regularity of the selection occupied in each chunk */
-        nproc_per_chunk = (int*)H5MM_calloc(total_chunks * sizeof(int));
+        if(NULL == (nproc_per_chunk = (int*)H5MM_calloc(total_chunks * sizeof(int))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate nproc_per_chunk buffer")
 
         /* calculating the chunk address */
         if(H5D__chunk_addrmap(io_info, chunk_addr) < 0) {
-            HDfree(nproc_per_chunk);
+            H5MM_free(nproc_per_chunk);
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
         } /* end if */
 
@@ -1774,7 +1776,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
         HDmemcpy(mergebuf, assign_io_mode, total_chunks);
         HDmemcpy(tempbuf, chunk_addr, sizeof(haddr_t) * total_chunks);
 
-        HDfree(nproc_per_chunk);
+        H5MM_free(nproc_per_chunk);
     } /* end if */
 
     /* Broadcasting the MPI_IO option info. and chunk address info. */
@@ -1824,11 +1826,13 @@ H5D__obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
 #endif
 
 done:
-    if(mem_cleanup) {
-        HDfree(io_mode_info);
-        HDfree(mergebuf);
-        if(mpi_rank == root)
-            HDfree(recv_io_mode_info);
+    if(io_mode_info)
+        H5MM_free(io_mode_info);
+    if(mergebuf)
+        H5MM_free(mergebuf);
+    if(recv_io_mode_info) {
+        HDassert(mpi_rank == root);
+        H5MM_free(recv_io_mode_info);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

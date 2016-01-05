@@ -1640,7 +1640,7 @@ H5B2__insert_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr
         if(idx == 0) {
             if(H5B2_POS_LEFT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if(hdr->min_native_rec == NULL)
-                    if(NULL == (hdr->min_native_rec = (uint8_t *)HDmalloc(hdr->cls->nrec_size)))
+                    if(NULL == (hdr->min_native_rec = (uint8_t *)H5MM_malloc(hdr->cls->nrec_size)))
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree min record info")
                 HDmemcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
             } /* end if */
@@ -1648,7 +1648,7 @@ H5B2__insert_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr
         if(idx == (unsigned)(leaf->nrec - 1)) {
             if(H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if(hdr->max_native_rec == NULL)
-                    if(NULL == (hdr->max_native_rec = (uint8_t *)HDmalloc(hdr->cls->nrec_size)))
+                    if(NULL == (hdr->max_native_rec = (uint8_t *)H5MM_malloc(hdr->cls->nrec_size)))
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree max record info")
                 HDmemcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
             } /* end if */
@@ -1929,7 +1929,7 @@ H5B2__update_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr
         if(idx == 0) {
             if(H5B2_POS_LEFT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if(hdr->min_native_rec == NULL)
-                    if(NULL == (hdr->min_native_rec = (uint8_t *)HDmalloc(hdr->cls->nrec_size)))
+                    if(NULL == (hdr->min_native_rec = (uint8_t *)H5MM_malloc(hdr->cls->nrec_size)))
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree min record info")
                 HDmemcpy(hdr->min_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
             } /* end if */
@@ -1937,7 +1937,7 @@ H5B2__update_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr
         if(idx == (unsigned)(leaf->nrec - 1)) {
             if(H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
                 if(hdr->max_native_rec == NULL)
-                    if(NULL == (hdr->max_native_rec = (uint8_t *)HDmalloc(hdr->cls->nrec_size)))
+                    if(NULL == (hdr->max_native_rec = (uint8_t *)H5MM_malloc(hdr->cls->nrec_size)))
                         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, FAIL, "memory allocation failed for v2 B-tree max record info")
                 HDmemcpy(hdr->max_native_rec, H5B2_LEAF_NREC(leaf, hdr, idx), hdr->cls->nrec_size);
             } /* end if */
@@ -2552,18 +2552,14 @@ H5B2__remove_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr
         /* (Don't use 'else' for the idx check, to allow for root leaf node) */
         if(idx == 0) {
             if(H5B2_POS_LEFT == curr_pos || H5B2_POS_ROOT == curr_pos) {
-                if(hdr->min_native_rec) {
-                    HDfree(hdr->min_native_rec);
-                    hdr->min_native_rec = NULL;
-                } /* end if */
+                if(hdr->min_native_rec)
+                    hdr->min_native_rec = H5MM_free(hdr->min_native_rec);
             } /* end if */
         } /* end if */
         if(idx == (unsigned)(leaf->nrec - 1)) {
             if(H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
-                if(hdr->max_native_rec) {
-                    HDfree(hdr->max_native_rec);
-                    hdr->max_native_rec = NULL;
-                } /* end if */
+                if(hdr->max_native_rec)
+                    hdr->max_native_rec = H5MM_free(hdr->max_native_rec);
             } /* end if */
         } /* end if */
     } /* end if */
@@ -2867,18 +2863,14 @@ H5B2__remove_leaf_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id,
         /* (Don't use 'else' for the idx check, to allow for root leaf node) */
         if(idx == 0) {
             if(H5B2_POS_LEFT == curr_pos || H5B2_POS_ROOT == curr_pos) {
-                if(hdr->min_native_rec) {
-                    HDfree(hdr->min_native_rec);
-                    hdr->min_native_rec = NULL;
-                } /* end if */
+                if(hdr->min_native_rec)
+                    hdr->min_native_rec = H5MM_free(hdr->min_native_rec);
             } /* end if */
         } /* end if */
         if(idx == (unsigned)(leaf->nrec - 1)) {
             if(H5B2_POS_RIGHT == curr_pos || H5B2_POS_ROOT == curr_pos) {
-                if(hdr->max_native_rec) {
-                    HDfree(hdr->max_native_rec);
-                    hdr->max_native_rec = NULL;
-                } /* end if */
+                if(hdr->max_native_rec)
+                    hdr->max_native_rec = H5MM_free(hdr->max_native_rec);
             } /* end if */
         } /* end if */
     } /* end if */
