@@ -1417,8 +1417,13 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
 done:
     if(va_started)
         va_end(ap);
+#ifdef H5_HAVE_VASPRINTF
+    if(tmp)
+        HDfree(tmp);
+#else /* H5_HAVE_VASPRINTF */
     if(tmp)
         H5MM_xfree(tmp);
+#endif /* H5_HAVE_VASPRINTF */
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Epush2() */
