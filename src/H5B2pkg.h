@@ -182,8 +182,8 @@ typedef struct H5B2_hdr_t {
     uint8_t	*page;	        /* Common disk page for I/O */
     size_t      *nat_off;       /* Array of offsets of native records */
     H5B2_node_info_t *node_info; /* Table of node info structs for current depth of B-tree */
-    uint8_t     *min_native_rec;   /* Pointer to minimum native record                  */
-    uint8_t     *max_native_rec;   /* Pointer to maximum native record                  */
+    void        *min_native_rec; /* Pointer to minimum native record                  */
+    void        *max_native_rec; /* Pointer to maximum native record                  */
 
     /* Client information (not stored) */
     const H5B2_class_t *cls;	/* Class of B-tree client */
