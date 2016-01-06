@@ -276,9 +276,6 @@ H5MM_malloc(size_t size)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if defined H5_MEMORY_ALLOC_SANITY_CHECK
-    /* Make certain that the buffer in the struct is properly aligned */
-    HDcompile_assert(offsetof(H5MM_block_t, b) % sizeof(double) == 0);
-
     /* Initialize block list head singleton */
     if(!H5MM_init_s) {
         HDmemcpy(H5MM_block_head_s.sig, H5MM_block_signature_s, H5MM_SIG_SIZE);
