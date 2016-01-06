@@ -546,8 +546,10 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver info message not present")
 
                 /* Validate and decode driver information */
-                if(H5FD_sb_load(f->shared->lf, drvinfo.name, drvinfo.buf) < 0)
+                if(H5FD_sb_load(f->shared->lf, drvinfo.name, drvinfo.buf) < 0) {
+                    H5O_msg_reset(H5O_DRVINFO_ID, &drvinfo);
                     HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, FAIL, "unable to decode driver information")
+                } /* end if */
 
                 /* Reset driver info message */
                 H5O_msg_reset(H5O_DRVINFO_ID, &drvinfo);
