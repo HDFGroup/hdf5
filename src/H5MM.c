@@ -60,9 +60,14 @@ typedef struct H5MM_block_t {
     unsigned char sig[H5MM_SIG_SIZE];   /* Signature for the block, to indicate it was allocated with H5MM* interface */
     struct H5MM_block_t *next;          /* Pointer to next block in the list of allocated blocks */
     struct H5MM_block_t *prev;          /* Pointer to previous block in the list of allocated blocks */
-    size_t size;
-    hbool_t in_use;
-    unsigned char b[];
+    union {
+        struct {
+            size_t size;                /* Size of allocated block */
+            hbool_t in_use;             /* Whether the block is in use or is free */
+        } info;
+        double _align;                  /* Align following buffer (b) to double boundary (unused) */
+    } u;
+    unsigned char b[];                  /* Buffer for caller (includes header and footer) */
 } H5MM_block_t;
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
@@ -154,12 +159,12 @@ H5MM__is_our_block(void *mem)
 static void
 H5MM__sanity_check_block(const H5MM_block_t *block)
 {
-    HDassert(block->size > 0);
-    HDassert(block->in_use);
+    HDassert(block->u.info.size > 0);
+    HDassert(block->u.info.in_use);
     /* Check for head & tail guards, if not head of linked list */
-    if(block->size != SIZET_MAX) {
+    if(block->u.info.size != SIZET_MAX) {
         HDassert(0 == HDmemcmp(block->b, H5MM_block_head_guard_s, H5MM_HEAD_GUARD_SIZE));
-        HDassert(0 == HDmemcmp(block->b + H5MM_HEAD_GUARD_SIZE + block->size, H5MM_block_tail_guard_s, H5MM_TAIL_GUARD_SIZE));
+        HDassert(0 == HDmemcmp(block->b + H5MM_HEAD_GUARD_SIZE + block->u.info.size, H5MM_block_tail_guard_s, H5MM_TAIL_GUARD_SIZE));
     }
 }
 
@@ -184,6 +189,31 @@ H5MM__sanity_check(void *mem)
 
     H5MM__sanity_check_block(block);
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MM_sanity_check_all
+ *
+ * Purpose:     Sanity check all current memory allocations.
+ *
+ * Return:	N/A (void)
+ *
+ * Programmer:  Quincey Koziol
+ *              Jan  5 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5MM_sanity_check_all(void)
+{
+    H5MM_block_t *curr;
+
+    curr = H5MM_block_head_s.next;
+    while(curr != &H5MM_block_head_s) {
+        H5MM__sanity_check_block(curr);
+        curr = curr->next;
+    } /* end while */
+} /* end H5MM_sanity_check_all() */
 
 
 /*-------------------------------------------------------------------------
@@ -246,13 +276,16 @@ H5MM_malloc(size_t size)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #if defined H5_MEMORY_ALLOC_SANITY_CHECK
+    /* Make certain that the buffer in the struct is properly aligned */
+    HDcompile_assert(offsetof(H5MM_block_t, b) % sizeof(double) == 0);
+
     /* Initialize block list head singleton */
     if(!H5MM_init_s) {
         HDmemcpy(H5MM_block_head_s.sig, H5MM_block_signature_s, H5MM_SIG_SIZE);
         H5MM_block_head_s.next = &H5MM_block_head_s;
         H5MM_block_head_s.prev = &H5MM_block_head_s;
-        H5MM_block_head_s.size = SIZET_MAX;
-        H5MM_block_head_s.in_use = TRUE;
+        H5MM_block_head_s.u.info.size = SIZET_MAX;
+        H5MM_block_head_s.u.info.in_use = TRUE;
 
         H5MM_init_s = TRUE;
     } /* end if */
@@ -270,8 +303,8 @@ H5MM_malloc(size_t size)
             H5MM_block_head_s.next = block;
             block->next->prev = block;
             block->prev = &H5MM_block_head_s;
-            block->size = size;
-            block->in_use = TRUE;
+            block->u.info.size = size;
+            block->u.info.in_use = TRUE;
             HDmemcpy(block->b, H5MM_block_head_guard_s, H5MM_HEAD_GUARD_SIZE);
             HDmemcpy(block->b + H5MM_HEAD_GUARD_SIZE + size, H5MM_block_tail_guard_s, H5MM_TAIL_GUARD_SIZE);
 
@@ -389,7 +422,7 @@ H5MM_realloc(void *mem, size_t size)
             if(mem) {
                 if(H5MM__is_our_block(mem)) {
                     H5MM_block_t *block = H5MM_BLOCK_FROM_BUF(mem);
-                    size_t old_size = block->size;
+                    size_t old_size = block->u.info.size;
 
                     H5MM__sanity_check(mem);
 
@@ -520,7 +553,7 @@ H5MM_xfree(void *mem)
             H5MM__sanity_check_block(block->prev);
 
             /* Update statistics */
-            H5MM_curr_alloc_bytes_s -= block->size;
+            H5MM_curr_alloc_bytes_s -= block->u.info.size;
             H5MM_curr_alloc_blocks_count_s--;
 
             /* Reset block info */
@@ -529,7 +562,7 @@ H5MM_xfree(void *mem)
             block->prev->next = block->next;
             block->next = NULL;
             block->prev = NULL;
-            block->in_use = FALSE;
+            block->u.info.in_use = FALSE;
 
             /* Free the block (finally!) */
             HDfree(block);
