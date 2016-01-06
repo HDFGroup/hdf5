@@ -48,6 +48,7 @@ H5_DLL char *H5MM_xstrdup(const char *s);
 H5_DLL char *H5MM_strdup(const char *s);
 H5_DLL void *H5MM_xfree(void *mem);
 #if defined H5_MEMORY_ALLOC_SANITY_CHECK
+H5_DLL void H5MM_sanity_check_all(void);
 H5_DLL void H5MM_final_sanity_check(void);
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 

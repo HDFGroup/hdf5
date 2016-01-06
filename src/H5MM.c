@@ -187,6 +187,31 @@ H5MM__sanity_check(void *mem)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5MM_sanity_check_all
+ *
+ * Purpose:     Sanity check all current memory allocations.
+ *
+ * Return:	N/A (void)
+ *
+ * Programmer:  Quincey Koziol
+ *              Jan  5 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5MM_sanity_check_all(void)
+{
+    H5MM_block_t *curr;
+
+    curr = H5MM_block_head_s.next;
+    while(curr != &H5MM_block_head_s) {
+        H5MM__sanity_check_block(curr);
+        curr = curr->next;
+    } /* end while */
+} /* end H5MM_sanity_check_all() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5MM_final_sanity_check
  *
  * Purpose:     Final sanity checks on memory allocation.
