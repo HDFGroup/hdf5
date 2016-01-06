@@ -186,8 +186,8 @@ typedef struct H5B2_hdr_t {
     hbool_t     swmr_write;     /* Whether we are doing SWMR writes */
     struct H5B2_leaf_t *shadowed_leaf; /* Linked list of shadowed leaf nodes */
     struct H5B2_internal_t *shadowed_internal; /* Linked list of shadowed internal nodes */
-    uint8_t     *min_native_rec;   /* Pointer to minimum native record                  */
-    uint8_t     *max_native_rec;   /* Pointer to maximum native record                  */
+    void        *min_native_rec; /* Pointer to minimum native record                  */
+    void        *max_native_rec; /* Pointer to maximum native record                  */
 
     /* Client information (not stored) */
     const H5B2_class_t *cls;	/* Class of B-tree client */
