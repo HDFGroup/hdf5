@@ -3486,22 +3486,24 @@ H5VL_iod_dataset_close(void *_dset, hid_t dxpl_id, void **req)
            input.iod_id, g_axe_id);
 #endif
 
-    if(H5VL__iod_create_and_forward(H5VL_DSET_CLOSE_ID, HG_DSET_CLOSE, 
-                                    (H5VL_iod_object_t *)dset, 1,
-                                    num_parents, parent_reqs,
-                                    NULL, &input, status, status, req) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset close");
-
     /* If dataset is virtual, close source datasets */
     if(dset->is_virtual) {
         size_t i;
 
         for(i = 0; i < dset->virtual_storage.list_nused; i++) {
-            if(H5VL_iod_dataset_close(dset->virtual_storage.list[i].source_dset.dset, dxpl_id, req) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close source dataset")
-            dset->virtual_storage.list[i].source_dset.dset = NULL;
+            if(dset->virtual_storage.list[i].source_dset.dset) {
+                if(H5VL_iod_dataset_close(dset->virtual_storage.list[i].source_dset.dset, dxpl_id, req) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close source dataset")
+                dset->virtual_storage.list[i].source_dset.dset = NULL;
+            } /* end if */
         } /* end for */
     } /* end if */
+
+    if(H5VL__iod_create_and_forward(H5VL_DSET_CLOSE_ID, HG_DSET_CLOSE, 
+                                    (H5VL_iod_object_t *)dset, 1,
+                                    num_parents, parent_reqs,
+                                    NULL, &input, status, status, req) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship dataset close");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
