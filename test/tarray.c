@@ -1031,8 +1031,8 @@ test_array_vlen_atomic(void)
     H5T_class_t mclass;     /* Datatype class for VL */
     hid_t       xfer_pid;   /* Dataset transfer property list ID */
     hsize_t     size;       /* Number of bytes which will be used */
-    int         mem_used=0; /* Memory used during allocation */
-    int        i,j,k;      /* counting variables */
+    size_t      mem_used=0; /* Memory used during allocation */
+    int         i,j,k;      /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1242,8 +1242,8 @@ test_array_vlen_array(void)
     H5T_class_t mclass;     /* Datatype class for VL */
     hid_t       xfer_pid;   /* Dataset transfer property list ID */
     hsize_t     size;       /* Number of bytes which will be used */
-    int         mem_used=0; /* Memory used during allocation */
-    int        i,j,k,l;    /* Index variables */
+    size_t      mem_used=0; /* Memory used during allocation */
+    int         i,j,k,l;    /* Index variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
