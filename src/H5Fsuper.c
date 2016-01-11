@@ -296,7 +296,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id)
 
     /* Make certain we can read the fixed-size portion of the superblock */
     if(H5F__set_eoa(f, H5FD_MEM_SUPER, 
-              H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE) < 0)
+              (haddr_t)(H5F_SUPERBLOCK_FIXED_SIZE + H5F_SUPERBLOCK_MINIMAL_VARLEN_SIZE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "set end of space allocation request failed")
 
     /* Set up the user data for cache callbacks */
@@ -510,8 +510,10 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver info message not present")
 
                 /* Validate and decode driver information */
-                if(H5FD_sb_load(f->shared->lf, drvinfo.name, drvinfo.buf) < 0)
+                if(H5FD_sb_load(f->shared->lf, drvinfo.name, drvinfo.buf) < 0) {
+                    H5O_msg_reset(H5O_DRVINFO_ID, &drvinfo);
                     HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, FAIL, "unable to decode driver information")
+                } /* end if */
 
                 /* Reset driver info message */
                 H5O_msg_reset(H5O_DRVINFO_ID, &drvinfo);

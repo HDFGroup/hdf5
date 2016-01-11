@@ -457,7 +457,6 @@ END_FUNC(PKG)   /* end H5EA__dblock_delete() */
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
 H5EA__dblock_dest(H5EA_dblock_t *dblock))

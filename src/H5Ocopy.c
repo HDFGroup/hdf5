@@ -213,10 +213,10 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* for opening the destination object */
     H5G_name_t  src_path;               /* Opened source object hier. path */
     H5O_loc_t   src_oloc;               /* Opened source object object location */
+    htri_t      dst_exists;             /* Does destination name exist already? */
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
-
-    herr_t      ret_value = SUCCEED;        /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name,
@@ -233,22 +233,10 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
 
     /* check if destination name already exists */
-    {
-        H5G_name_t  tmp_path;
-        H5O_loc_t   tmp_oloc;
-        H5G_loc_t   tmp_loc;
-
-        /* Set up group location */
-        tmp_loc.oloc = &tmp_oloc;
-        tmp_loc.path = &tmp_path;
-        H5G_loc_reset(&tmp_loc);
-
-        /* Check if object already exists in destination */
-        if(H5G_loc_find(&dst_loc, dst_name, &tmp_loc, H5P_DEFAULT, H5AC_ind_dxpl_id) >= 0) {
-            H5G_name_free(&tmp_path);
-            HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "destination object already exists")
-        } /* end if */
-    }
+    if((dst_exists = H5L_exists_tolerant(&dst_loc, dst_name, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check if destination name exists")
+    if(TRUE == dst_exists)
+        HGOTO_ERROR(H5E_OHDR, H5E_EXISTS, FAIL, "destination object already exists")
 
     /* Set up opened group location to fill in */
     src_loc.oloc = &src_oloc;
@@ -475,7 +463,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Allocate memory for "deleted" array.  This array marks the message in
      * the source that shouldn't be copied to the destination.
      */
-    if(NULL == (deleted = (hbool_t *)HDmalloc(sizeof(hbool_t) * oh_src->nmesgs)))
+    if(NULL == (deleted = (hbool_t *)H5MM_malloc(sizeof(hbool_t) * oh_src->nmesgs)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     HDmemset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
 
@@ -882,7 +870,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 done:
     /* Free deleted array */
     if(deleted)
-        HDfree(deleted);
+        H5MM_free(deleted);
 
     /* Release pointer to source object header and its derived objects */
     if(oh_src && H5O_unprotect(oloc_src, dxpl_id, oh_src, H5AC__NO_FLAGS_SET) < 0)

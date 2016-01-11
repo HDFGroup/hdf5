@@ -861,7 +861,6 @@ H5FD_family_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5FD_family_query(const H5FD_t * _file, unsigned long *flags /* out */)
 {

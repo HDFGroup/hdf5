@@ -718,6 +718,7 @@ static herr_t
 H5D__cache_dataspace_info(const H5D_t *dset)
 {
     int sndims;                         /* Signed number of dimensions of dataspace rank */
+    unsigned u;                         /* Local index value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -729,6 +730,10 @@ H5D__cache_dataspace_info(const H5D_t *dset)
     if((sndims = H5S_get_simple_extent_dims(dset->shared->space, dset->shared->curr_dims, dset->shared->max_dims)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't cache dataspace dimensions")
     dset->shared->ndims = (unsigned)sndims;
+
+    /* Compute the inital 'power2up' values */
+    for(u = 0; u < dset->shared->ndims; u++)
+        dset->shared->curr_power2up[u] = H5VM_power2up(dset->shared->curr_dims[u]);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1847,7 +1852,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
 
             case H5D_CHUNKED:
                 if(!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
-                    /* Create the root of the B-tree that describes chunked storage */
+                    /* Create the root of the index that manages chunked storage */
                     if(H5D__chunk_create(dset /*in,out*/, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
 
@@ -1860,7 +1865,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
 
                 /* If space allocation is set to 'early' and we are extending
 		 * the dataset, indicate that space should be allocated, so the
-                 * B-tree gets expanded. -QAK
+                 * index gets expanded. -QAK
                  */
 		if(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY
                         && time_alloc == H5D_ALLOC_EXTEND)
@@ -1911,7 +1916,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
         /* Check if we need to initialize the space */
         if(must_init_space) {
             if(layout->type == H5D_CHUNKED) {
-                /* If we are doing incremental allocation and the B-tree got
+                /* If we are doing incremental allocation and the index got
                  * created during a H5Dwrite call, don't initialize the storage
                  * now, wait for the actual writes to each block and let the
                  * low-level chunking routines handle initialize the fill-values.
@@ -1934,10 +1939,9 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
                 /* If we are filling the dataset on allocation or "if set" and
                  * the fill value _is_ set, do that now */
                 if(dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC ||
-                        (dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED)) {
+                        (dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED))
                     if(H5D__init_storage(dset, full_overwrite, old_dim, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
-                } /* end if */
             } /* end else */
         } /* end if */
 
@@ -2253,7 +2257,6 @@ H5D__vlen_get_buf_size_alloc(size_t size, void *info)
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
 H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_ATTR_UNUSED ndim, const hsize_t *point, void *op_data)
 {
@@ -2623,7 +2626,7 @@ H5D__mark(const H5D_t *dataset, hid_t H5_ATTR_UNUSED dxpl_id, unsigned flags)
         /* Update the layout on disk, if it's been changed */
         if(flags & H5D_MARK_LAYOUT) {
             if(H5D__layout_oh_write(dataset, dxpl_id, oh, update_flags) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout/pline/efl info")
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout info")
 
             /* Reset the "update the modification time" flag, so we only do it once */
             update_flags = 0;

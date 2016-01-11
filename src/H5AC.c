@@ -46,6 +46,7 @@
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Pprivate.h"         /* Property lists                       */
+#include "H5SLprivate.h"        /* Skip Lists                           */
 
 
 /****************/

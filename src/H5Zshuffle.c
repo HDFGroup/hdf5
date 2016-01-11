@@ -61,7 +61,6 @@ const H5Z_class2_t H5Z_SHUFFLE[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 static herr_t
 H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
