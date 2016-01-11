@@ -172,6 +172,7 @@ gen_latest(const char *fname)
 {
     hid_t	fid = -1;	 	/* file id */
     hid_t	fapl = -1;	       	/* file access property list */
+    hid_t	fcpl = -1;	       	/* file creation property list */
     hid_t	gid = -1;	       	/* group id */
     hid_t   	sid = -1;       	/* space id */
     hid_t	dcpl = -1;	    	/* dataset creation property id */
@@ -188,7 +189,12 @@ gen_latest(const char *fname)
     if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
 	goto error;
 
-    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        goto error;
+    if(H5Pset_shared_mesg_nindexes(fcpl, 4) < 0)
+        goto error;
+
+    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
 	goto error;
 
     /* Create a group */
@@ -365,6 +371,7 @@ static void
 gen_non(const char *fname)
 {
     hid_t	fid = -1;		/* file id */
+    hid_t	fcpl = -1;		/* file creation property list */
     hid_t	gid = -1;		/* group id */
     hid_t   	sid = -1;       	/* space id */
     hid_t	dcpl = -1;		/* dataset creation property id */
@@ -376,8 +383,15 @@ gen_non(const char *fname)
     int		i;		    	/* local index variable */
     int     	buf[24];            	/* data buffer */
 
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        goto error;
+    if(H5Pset_shared_mesg_nindexes(fcpl, 4) < 0)
+        goto error;
+    if(H5Pset_istore_k(fcpl, 64) < 0)
+        goto error;
+
     /* Create a new file with SWMR_WRITE + non-latest-format */
-    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, fcpl, H5P_DEFAULT)) < 0)
 	goto error;
 
     /* Create a group */

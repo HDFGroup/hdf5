@@ -377,6 +377,9 @@ main(int argc, const char *argv[])
     H5E_auto2_t func;
     void *edata;
     hid_t fid = -1;
+    hid_t fcpl = -1;
+    H5F_file_space_type_t strategy;
+    hsize_t threshold;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -405,6 +408,28 @@ main(int argc, const char *argv[])
     } else if(verbose_g)
 	printf("Open the file %s\n", fname_g);
 
+    /* A temporaray fix: 
+     * need to handle H5O_FSINFO_ID message when downgrade superblock version from 3 to 2 
+     */
+    if((fcpl = H5Fget_create_plist(fid)) < 0) {
+	error_msg("unable to get file creation property list for \"%s\"\n", fname_g);
+	h5tools_setstatus(EXIT_FAILURE);
+	goto done;
+    }
+    if(H5Pget_file_space(fcpl, &strategy, &threshold) < 0) {
+	error_msg("unable to get file space strategy/threshold\n");
+	h5tools_setstatus(EXIT_FAILURE);
+	goto done;
+    }
+    /* Check for non-default strategy/threshold: 
+     * --whether there is H5O_FSINFO_ID message in the superblock extension 
+     */
+    if(strategy != H5F_FILE_SPACE_ALL || threshold != 1) {
+	error_msg("unable to convert due to non-default file space strategy/threshold\n");
+	h5tools_setstatus(EXIT_FAILURE);
+	goto done;
+    }
+
     if(dset_g) { /* Convert a specified dataset in the file */
 	if(verbose_g)
 	    printf("Going to process dataset: %s...\n", dname_g);
@@ -415,6 +440,21 @@ main(int argc, const char *argv[])
 	    printf("Processing all datasets in the file...\n");
 	if(h5trav_visit(fid, "/", TRUE, TRUE, convert_dsets_cb, NULL, &fid) < 0)
 	    goto done;
+    }
+
+    if(verbose_g) {
+	if(noop_g) {
+            printf("Not processing the file's superblock version...\n");
+	    h5tools_setstatus(EXIT_SUCCESS);
+	    goto done;
+	}
+	printf("Processing the file's superblock version...\n");
+    }
+
+    if(H5Fformat_convert_super(fid) < 0) {
+        error_msg("unable to convert file's superblock version\"%s\"\n", fname_g);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
 done:

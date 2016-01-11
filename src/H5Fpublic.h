@@ -246,6 +246,7 @@ H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
 H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id,
                                         /*OUT*/ hbool_t *is_enabled,
                                         /*OUT*/ hbool_t *is_currently_logging);
+H5_DLL herr_t H5Fformat_convert_super(hid_t fid);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
 H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);

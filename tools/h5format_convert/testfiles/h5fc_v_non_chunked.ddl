@@ -6,4 +6,5 @@ Retrieve the dataset's layout
 Dataset is not chunked: no further action
 Close the dataset
 Close the dataset creation property list
+Processing the file's superblock version...
 Close the file
