@@ -2227,9 +2227,9 @@ H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name,
     HDmemset(ent, 0, sizeof(H5O_storage_virtual_ent_t));        /* Clear before starting to set up */
     if(NULL == (ent->source_dset.virtual_select = H5S_copy(vspace, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
-    if(NULL == (ent->source_file_name = HDstrdup(src_file_name)))
+    if(NULL == (ent->source_file_name = H5MM_xstrdup(src_file_name)))
         HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source file name")
-    if(NULL == (ent->source_dset_name = HDstrdup(src_dset_name)))
+    if(NULL == (ent->source_dset_name = H5MM_xstrdup(src_dset_name)))
         HGOTO_ERROR(H5E_PLIST, H5E_RESOURCE, FAIL, "can't duplicate source file name")
     if(NULL == (ent->source_select = H5S_copy(src_space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy source selection")

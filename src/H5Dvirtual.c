@@ -449,10 +449,10 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
 
             /* Copy original source names */
             if(NULL == (layout->storage.u.virt.list[i].source_file_name
-                    = HDstrdup(orig_list[i].source_file_name)))
+                    = H5MM_strdup(orig_list[i].source_file_name)))
                 HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source file name")
             if(NULL == (layout->storage.u.virt.list[i].source_dset_name
-                    = HDstrdup(orig_list[i].source_dset_name)))
+                    = H5MM_strdup(orig_list[i].source_dset_name)))
                 HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source dataset name")
 
             /* Copy source selection */
@@ -491,7 +491,7 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
                 } /* end if */
                 else
                     if(NULL == (layout->storage.u.virt.list[i].source_dset.file_name
-                            = HDstrdup(orig_list[i].source_dset.file_name)))
+                            = H5MM_strdup(orig_list[i].source_dset.file_name)))
                         HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source file name")
             } /* end if */
             if(orig_list[i].source_dset.dset_name) {
@@ -507,7 +507,7 @@ H5D__virtual_copy_layout(H5O_layout_t *layout)
                 } /* end if */
                 else
                     if(NULL == (layout->storage.u.virt.list[i].source_dset.dset_name
-                            = HDstrdup(orig_list[i].source_dset.dset_name)))
+                            = H5MM_strdup(orig_list[i].source_dset.dset_name)))
                         HGOTO_ERROR(H5E_DATASET, H5E_RESOURCE, FAIL, "unable to duplicate source dataset name")
             } /* end if */
 
@@ -1127,7 +1127,7 @@ H5D__virtual_copy_parsed_name(H5O_storage_virtual_name_seg_t **dst,
 
         /* Duplicate name segment */
         if(p_src->name_segment) {
-            if(NULL == ((*p_dst)->name_segment = HDstrdup(p_src->name_segment)))
+            if(NULL == ((*p_dst)->name_segment = H5MM_strdup(p_src->name_segment)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to duplicate name segment")
         } /* end if */
 

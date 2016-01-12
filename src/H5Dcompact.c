@@ -440,6 +440,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst
     HDassert(storage_src);
     HDassert(f_dst);
     HDassert(storage_dst);
+    HDassert(storage_dst->buf);
     HDassert(dt_src);
 
     /* Create datatype ID for src datatype, so it gets freed */

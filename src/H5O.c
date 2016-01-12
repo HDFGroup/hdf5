@@ -1278,7 +1278,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
 
     /* Create object header proxy if doing SWMR writes */
     if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) {
-        if(H5O_proxy_create(f, dxpl_id, oh) < 0)
+        if(H5O__proxy_create(f, dxpl_id, oh) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy")
     } /* end if */
     else
@@ -3701,7 +3701,7 @@ H5O_pin_flush_dep_proxy(H5O_loc_t *loc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to protect object header")
 
     /* Pin object header proxy */
-    if(NULL == (proxy = H5O_proxy_pin(loc->file, dxpl_id, oh)))
+    if(NULL == (proxy = H5O__proxy_pin(loc->file, dxpl_id, oh)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, NULL, "unable to pin object header proxy")
 
     /* Set the return value */
@@ -3713,7 +3713,7 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     if(!ret_value)
-        if(proxy && H5O_proxy_unpin(proxy) < 0)
+        if(proxy && H5O__proxy_unpin(proxy) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTUNPIN, NULL, "unable to release object header proxy")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3747,11 +3747,10 @@ H5O_pin_flush_dep_proxy_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
     HDassert(oh);
 
     /* Pin object header proxy */
-    if(NULL == (ret_value = H5O_proxy_pin(f, dxpl_id, oh)))
+    if(NULL == (ret_value = H5O__proxy_pin(f, dxpl_id, oh)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, NULL, "unable to pin object header proxy")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_pin_flush_dep_proxy_oh() */
 
@@ -3779,7 +3778,7 @@ H5O_unpin_flush_dep_proxy(H5O_proxy_t *proxy)
     HDassert(proxy);
 
     /* Unin object header proxy */
-    if(H5O_proxy_unpin(proxy) < 0)
+    if(H5O__proxy_unpin(proxy) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header proxy")
 
 done:

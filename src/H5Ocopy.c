@@ -475,7 +475,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 
     /* Create object header proxy if doing SWMR writes */
     if(H5F_INTENT(oloc_dst->file) & H5F_ACC_SWMR_WRITE) {
-        if(H5O_proxy_create(oloc_dst->file, dxpl_id, oh_dst) < 0)
+        if(H5O__proxy_create(oloc_dst->file, dxpl_id, oh_dst) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy")
     } /* end if */
     else
@@ -497,7 +497,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Allocate memory for "deleted" array.  This array marks the message in
      * the source that shouldn't be copied to the destination.
      */
-    if(NULL == (deleted = (hbool_t *)HDmalloc(sizeof(hbool_t) * oh_src->nmesgs)))
+    if(NULL == (deleted = (hbool_t *)H5MM_malloc(sizeof(hbool_t) * oh_src->nmesgs)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     HDmemset(deleted, FALSE, sizeof(hbool_t) * oh_src->nmesgs);
 
@@ -904,7 +904,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 done:
     /* Free deleted array */
     if(deleted)
-        HDfree(deleted);
+        H5MM_free(deleted);
 
     /* Release pointer to source object header and its derived objects */
     if(oh_src && H5O_unprotect(oloc_src, dxpl_id, oh_src, H5AC__NO_FLAGS_SET) < 0)

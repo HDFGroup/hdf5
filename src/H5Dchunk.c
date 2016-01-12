@@ -107,10 +107,35 @@
 
 /*#define H5D_CHUNK_DEBUG */
 
+/* Flags for the "edge_chunk_state" field below */
+#define H5D_RDCC_DISABLE_FILTERS 0x01u          /* Disable filters on this chunk */
+#define H5D_RDCC_NEWLY_DISABLED_FILTERS 0x02u   /* Filters have been disabled since
+                                                 * the last flush */
+
 
 /******************/
 /* Local Typedefs */
 /******************/
+
+/* Raw data chunks are cached.  Each entry in the cache is: */
+typedef struct H5D_rdcc_ent_t {
+    hbool_t	locked;		/*entry is locked in cache		*/
+    hbool_t	dirty;		/*needs to be written to disk?		*/
+    hbool_t     deleted;        /*chunk about to be deleted		*/
+    unsigned    edge_chunk_state; /*states related to edge chunks (see above) */
+    hsize_t 	scaled[H5O_LAYOUT_NDIMS]; /*scaled chunk 'name' (coordinates) */
+    uint32_t	rd_count;	/*bytes remaining to be read		*/
+    uint32_t	wr_count;	/*bytes remaining to be written		*/
+    H5F_block_t chunk_block;    /*offset/length of chunk in file        */
+    hsize_t     chunk_idx;  	/*index of chunk in dataset             */
+    uint8_t	*chunk;		/*the unfiltered chunk data		*/
+    unsigned	idx;		/*index in hash table			*/
+    struct H5D_rdcc_ent_t *next;/*next item in doubly-linked list	*/
+    struct H5D_rdcc_ent_t *prev;/*previous item in doubly-linked list	*/
+    struct H5D_rdcc_ent_t *tmp_next;/*next item in temporary doubly-linked list */
+    struct H5D_rdcc_ent_t *tmp_prev;/*previous item in temporary doubly-linked list */
+} H5D_rdcc_ent_t;
+typedef H5D_rdcc_ent_t *H5D_rdcc_ent_ptr_t; /* For free lists */
 
 /* Callback info for iteration to prune chunks */
 typedef struct H5D_chunk_it_ud1_t {
@@ -263,6 +288,11 @@ static herr_t H5D__chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t flush);
 static hbool_t H5D__chunk_is_partial_edge_chunk(const hsize_t *chunk_scaled,
     unsigned dset_ndims, const hsize_t *dset_dims, const uint32_t *chunk_dims);
+static void *H5D__chunk_lock(const H5D_io_info_t *io_info,
+    H5D_chunk_ud_t *udata, hbool_t relax, hbool_t prev_unfilt_chunk);
+static herr_t H5D__chunk_unlock(const H5D_io_info_t *io_info,
+    const H5D_chunk_ud_t *udata, hbool_t dirty, void *chunk,
+    uint32_t naccessed);
 static herr_t H5D__chunk_cache_prune(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, size_t size);
 static herr_t H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk);
@@ -3084,7 +3114,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
+static void *
 H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     hbool_t relax, hbool_t prev_unfilt_chunk)
 {
@@ -3102,7 +3132,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     void		*chunk = NULL;		/*the file chunk	*/
     void		*ret_value = NULL;	/* Return value         */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     HDassert(io_info);
     HDassert(io_info->dxpl_cache);
@@ -3480,7 +3510,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
     hbool_t dirty, void *chunk, uint32_t naccessed)
 {
@@ -3488,7 +3518,7 @@ H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
     const H5D_rdcc_t	*rdcc = &(io_info->dset->shared->cache.chunk);
     herr_t              ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     HDassert(io_info);
     HDassert(udata);
@@ -4004,7 +4034,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                        write collectively at the end */
                     /* allocate/resize address array if no more space left */
                     if(0 == chunk_info.num_io % 1024)
-                        if(NULL == (chunk_info.addr = (haddr_t *)HDrealloc(chunk_info.addr, (chunk_info.num_io + 1024) * sizeof(haddr_t))))
+                        if(NULL == (chunk_info.addr = (haddr_t *)H5MM_realloc(chunk_info.addr, (chunk_info.num_io + 1024) * sizeof(haddr_t))))
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed for chunk addresses")
 
                     /* Store the chunk's address for later */
@@ -4097,7 +4127,7 @@ done:
 
 #ifdef H5_HAVE_PARALLEL
     if(using_mpi && chunk_info.addr)
-        HDfree(chunk_info.addr);
+        H5MM_free(chunk_info.addr);
 #endif
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
