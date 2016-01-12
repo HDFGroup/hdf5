@@ -1,12 +1,12 @@
-HDF5 version 1.10.0-prealpha1 currently under development
+HDF5 version 1.10.0-prealpha1 released on 2016-01-12
 ================================================================================
 
 
 INTRODUCTION
 
 This document describes the differences between HDF5-1.8.* and
-HDF5 1.10.0-alpha0 release, and contains information on the platforms
-tested and known problems in HDF5-1.10.0-alpha0.
+HDF5 1.10.0-alpha1 release, and contains information on the platforms
+tested and known problems in HDF5-1.10.0-alpha1.
 
 
 Links to HDF5 1.10.0-alpha* source code can be found on The HDF Group's
@@ -26,6 +26,7 @@ If you have any questions or comments, please send them to the HDF Help Desk:
 CONTENTS
 
 - New Features
+- Issues Addressed in this Release
 - Tested Configuration Features Summary
 - More Tested Platforms
 - Known Problems
@@ -96,7 +97,10 @@ This alpha0 release supports the following new features:
     -------------
     See http://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesSwmrDocs.html#Tools
 
-
+Issues Addressed in this Release 
+================================
+    - h5format_convert tool didn't downgrade version of the superblock. Fixed. See
+      Known Problems section.  EIP 2016-01-11.
 
 Supported Platforms
 ===================
@@ -275,4 +279,7 @@ Known Problems
 WARNINGS: This section is under contsruction. It will be updated for the first HDF5 1.10.0-beta
 release. 
 
+  - h5format_convert only works with the files that contain chunked datasets.
+  - h5repack tool fails to downgrade object layout message to make file 
+    1.8 compatible.
 
