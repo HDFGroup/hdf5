@@ -122,8 +122,8 @@ Bug Fixes since HDF5-1.8.16
 
     Configuration
     -------------
-    - Updated Linux language level flags to match the Autotools and these
-      flags are no longer used on OS X.
+    - Updated Linux language level flags to match the Autotools. Removed
+      Linux-specific flags from OS X.
 
       An addition to the flags simply being out of sync with the Autotools,
       the Linux flags were used on OS X builds which led to symbols not being
@@ -142,7 +142,13 @@ Bug Fixes since HDF5-1.8.16
 
     Library
     -------
-    - None
+    - Fixed some format string warnings that prevent compiling with
+      -Werror=format-security on gcc.
+
+      These only appeared in error messages and would not cause problems
+      under normal operation.
+
+      (DER, 2016/01/13, HDFFV-9640)
 
     Parallel Library
     ----------------
