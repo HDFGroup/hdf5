@@ -888,6 +888,7 @@ void independent_group_read(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
+    H5Pset_coll_metadata_read(plist, 0);
     fid = H5Fopen(filename, H5F_ACC_RDONLY, plist);
     H5Pclose(plist);
 

@@ -29,6 +29,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -139,6 +140,8 @@ hid_t H5P_CLS_DATATYPE_ACCESS_ID_g              = FAIL;
 H5P_genclass_t *H5P_CLS_DATATYPE_ACCESS_g       = NULL;
 hid_t H5P_CLS_ATTRIBUTE_CREATE_ID_g             = FAIL;
 H5P_genclass_t *H5P_CLS_ATTRIBUTE_CREATE_g      = NULL;
+hid_t H5P_CLS_ATTRIBUTE_ACCESS_ID_g             = FAIL;
+H5P_genclass_t *H5P_CLS_ATTRIBUTE_ACCESS_g      = NULL;
 hid_t H5P_CLS_OBJECT_COPY_ID_g                  = FAIL;
 H5P_genclass_t *H5P_CLS_OBJECT_COPY_g           = NULL;
 hid_t H5P_CLS_LINK_CREATE_ID_g                  = FAIL;
@@ -163,6 +166,7 @@ hid_t H5P_LST_GROUP_ACCESS_ID_g         = FAIL;
 hid_t H5P_LST_DATATYPE_CREATE_ID_g      = FAIL;
 hid_t H5P_LST_DATATYPE_ACCESS_ID_g      = FAIL;
 hid_t H5P_LST_ATTRIBUTE_CREATE_ID_g     = FAIL;
+hid_t H5P_LST_ATTRIBUTE_ACCESS_ID_g     = FAIL;
 hid_t H5P_LST_OBJECT_COPY_ID_g          = FAIL;
 hid_t H5P_LST_LINK_CREATE_ID_g          = FAIL;
 hid_t H5P_LST_LINK_ACCESS_ID_g          = FAIL;
@@ -176,6 +180,26 @@ const H5P_libclass_t H5P_CLS_ROOT[1] = {{
     &H5P_CLS_ROOT_g,		/* Pointer to class             */
     &H5P_CLS_ROOT_ID_g,		/* Pointer to class ID          */
     NULL,			/* Pointer to default property list ID */
+    NULL,			/* Default property registration routine */
+
+    NULL,		        /* Class creation callback      */
+    NULL,		        /* Class creation callback info */
+    NULL,			/* Class copy callback          */
+    NULL,		        /* Class copy callback info     */
+    NULL,			/* Class close callback         */
+    NULL 		        /* Class close callback info    */
+}};
+
+/* Attribute access property list class library initialization object */
+/* (move to proper source code file when used for real) */
+const H5P_libclass_t H5P_CLS_AACC[1] = {{
+    "attribute access",		/* Class name for debugging     */
+    H5P_TYPE_ATTRIBUTE_ACCESS,  /* Class type                   */
+
+    &H5P_CLS_LINK_ACCESS_g,	/* Parent class                 */
+    &H5P_CLS_ATTRIBUTE_ACCESS_g,	/* Pointer to class             */
+    &H5P_CLS_ATTRIBUTE_ACCESS_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_ATTRIBUTE_ACCESS_ID_g,	/* Pointer to default property list ID */
     NULL,			/* Default property registration routine */
 
     NULL,		        /* Class creation callback      */
@@ -297,6 +321,7 @@ static H5P_libclass_t const * const init_class[] = {
     H5P_CLS_TCRT,       /* Datatype creation */
     H5P_CLS_TACC,       /* Datatype access */
     H5P_CLS_ACRT,       /* Attribute creation */
+    H5P_CLS_AACC,       /* Attribute access */
     H5P_CLS_LCRT        /* Link creation */
 };
 
@@ -487,6 +512,7 @@ H5P_term_package(void)
                         H5P_LST_DATATYPE_CREATE_ID_g =
                         H5P_LST_DATATYPE_ACCESS_ID_g =
                         H5P_LST_ATTRIBUTE_CREATE_ID_g =
+                        H5P_LST_ATTRIBUTE_ACCESS_ID_g =
                         H5P_LST_OBJECT_COPY_ID_g =
                         H5P_LST_LINK_CREATE_ID_g =
                         H5P_LST_LINK_ACCESS_ID_g =
@@ -513,6 +539,7 @@ H5P_term_package(void)
                         H5P_CLS_DATATYPE_ACCESS_g =
                         H5P_CLS_STRING_CREATE_g =
                         H5P_CLS_ATTRIBUTE_CREATE_g =
+                        H5P_CLS_ATTRIBUTE_ACCESS_g =
                         H5P_CLS_OBJECT_COPY_g =
                         H5P_CLS_LINK_CREATE_g =
                         H5P_CLS_LINK_ACCESS_g =
@@ -531,6 +558,7 @@ H5P_term_package(void)
                         H5P_CLS_DATATYPE_ACCESS_ID_g =
                         H5P_CLS_STRING_CREATE_ID_g =
                         H5P_CLS_ATTRIBUTE_CREATE_ID_g =
+                        H5P_CLS_ATTRIBUTE_ACCESS_ID_g =
                         H5P_CLS_OBJECT_COPY_ID_g =
                         H5P_CLS_LINK_CREATE_ID_g =
                         H5P_CLS_LINK_ACCESS_ID_g =
@@ -1187,7 +1215,7 @@ H5P__find_prop_plist(const H5P_genplist_t *plist, const char *name)
 
     /* Check if the property has been deleted from list */
     if(H5SL_search(plist->del,name) != NULL) {
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "can't find property in skip list")
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "property deleted from skip list")
     } /* end if */
     else {
         /* Get the property data from the skip list */
@@ -5253,7 +5281,7 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDcompile_assert(H5P_TYPE_LINK_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
+    HDcompile_assert(H5P_TYPE_ATTRIBUTE_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
     HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_LINK_ACCESS);
 
     /* Check arguments */
@@ -5314,6 +5342,10 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
         case H5P_TYPE_ATTRIBUTE_CREATE:
             class_id = H5P_CLS_ATTRIBUTE_CREATE_ID_g;
+            break;
+
+        case H5P_TYPE_ATTRIBUTE_ACCESS:
+            class_id = H5P_CLS_ATTRIBUTE_ACCESS_ID_g;
             break;
 
         case H5P_TYPE_OBJECT_COPY:
@@ -5403,3 +5435,39 @@ H5P_get_class(const H5P_genplist_t *plist)
     FUNC_LEAVE_NOAPI(plist->pclass)
 } /* end H5P_get_class() */
 
+herr_t 
+H5P_verify_and_set_dxpl(hid_t *acspl_id, hid_t pclass_id, hid_t default_id, hid_t *dxpl_id)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(acspl_id);
+
+    /* Check the access property list */
+    if(H5P_DEFAULT == *acspl_id)
+        *acspl_id = default_id;
+
+    if(TRUE != H5P_isa_class(*acspl_id, pclass_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Not the required access property list")
+
+    if(dxpl_id) {
+        H5P_coll_md_read_flag_t is_collective;
+        H5P_genplist_t *plist;      /* Property list pointer */
+
+        /* Get the plist structure */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(*acspl_id, H5I_GENPROP_LST)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &is_collective) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core collective metadata read flag")
+
+        if(TRUE == is_collective && *dxpl_id == H5AC_dxpl_id)
+            *dxpl_id = H5AC_coll_write_coll_read_dxpl_id;
+        else if(TRUE == is_collective && *dxpl_id == H5AC_ind_dxpl_id)
+            *dxpl_id = H5AC_ind_write_coll_read_dxpl_id;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_verify_and_set_dxpl */

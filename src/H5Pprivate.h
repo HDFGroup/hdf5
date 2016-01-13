@@ -46,6 +46,14 @@
 /* Library Private Typedefs */
 /****************************/
 
+#define H5_COLL_MD_READ_FLAG_NAME "collective_metadata_read"
+
+typedef enum H5P_coll_md_read_flag_t {
+    H5P_FORCE_FALSE             = -1,
+    H5P_USER_FALSE              = 0,
+    H5P_USER_TRUE               = 1
+} H5P_coll_md_read_flag_t;
+
 /* Forward declarations (for prototypes & type definitions) */
 struct H5O_fill_t;
 struct H5T_t;
@@ -73,6 +81,7 @@ typedef enum H5P_plist_type_t {
     H5P_TYPE_OBJECT_COPY       = 15,
     H5P_TYPE_LINK_CREATE       = 16,
     H5P_TYPE_LINK_ACCESS       = 17,
+    H5P_TYPE_ATTRIBUTE_ACCESS  = 18,
     H5P_TYPE_MAX_TYPE
 } H5P_plist_type_t;
 
@@ -94,6 +103,7 @@ H5_DLLVAR H5P_genclass_t *H5P_CLS_GROUP_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_DATATYPE_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_DATATYPE_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_ATTRIBUTE_CREATE_g;
+H5_DLLVAR H5P_genclass_t *H5P_CLS_ATTRIBUTE_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_OBJECT_COPY_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_LINK_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_LINK_ACCESS_g;
@@ -164,5 +174,6 @@ H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
 H5_DLL herr_t H5P_get_fill_value(H5P_genplist_t *plist, const struct H5T_t *type,
     void *value, hid_t dxpl_id);
 
+H5_DLL herr_t H5P_verify_and_set_dxpl(hid_t *acspl_id, hid_t pclass_id, hid_t default_id, hid_t *dxpl_id);
 #endif /* _H5Pprivate_H */
 

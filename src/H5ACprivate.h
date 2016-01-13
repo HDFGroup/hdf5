@@ -217,6 +217,9 @@ extern hid_t H5AC_dxpl_id;
 H5_DLLVAR H5P_genplist_t *H5AC_ind_dxpl_g;
 H5_DLLVAR hid_t H5AC_ind_dxpl_id;
 
+H5_DLLVAR hid_t H5AC_coll_write_coll_read_dxpl_id;
+H5_DLLVAR hid_t H5AC_ind_write_coll_read_dxpl_id;
+
 
 /* Default cache configuration. */
 
