@@ -1309,7 +1309,7 @@ TOOLTEST5 filter_fail.ddl --enable-error-stack filter_fail.h5
 TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1 tall.h5
 
 # test for non-existing file
-TOOLTEST5 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
+TOOLTEST3 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR
