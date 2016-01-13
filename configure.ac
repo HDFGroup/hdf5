@@ -2284,9 +2284,6 @@ fi
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##
-## ----------------------------------------------------------------------
-## Check if Direct I/O driver is enabled by --enable-direct-vfd
-##
 AC_CACHE_VAL([hdf5_cv_direct_io],
     AC_CHECK_DECL([O_DIRECT], [hdf5_cv_direct_io=yes], [hdf5_cv_direct_io=no], [[#include <fcntl.h>]]))
 AC_CACHE_VAL([hdf5_cv_posix_memalign],
