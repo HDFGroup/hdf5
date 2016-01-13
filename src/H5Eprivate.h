@@ -125,7 +125,7 @@ extern	int	H5E_mpi_error_str_len;
 
 #define	HMPI_ERROR(mpierr){						      \
     MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);      \
-    HERROR(H5E_INTERNAL, H5E_MPIERRSTR, H5E_mpi_error_str);                   \
+    HERROR(H5E_INTERNAL, H5E_MPIERRSTR, "%s", H5E_mpi_error_str);                   \
 }
 #define	HMPI_DONE_ERROR(retcode, str, mpierr){				      \
     HMPI_ERROR(mpierr);							      \

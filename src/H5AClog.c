@@ -116,7 +116,7 @@ H5AC__write_create_cache_log_msg(H5AC_t *cache)
 \"messages\":\n\
 [\n\
 "
-    , (long long)time(NULL));
+    , (long long)HDtime(NULL));
 
     /* Since we're about to override the current logging flag,
      * check the "log enabled" flag to see if we didn't get here
@@ -170,7 +170,7 @@ H5AC__write_destroy_cache_log_msg(H5AC_t *cache)
 \"close_time\":%lld,\n\
 }\n\
 "
-    , (long long)time(NULL));
+    , (long long)HDtime(NULL));
 
     /* Since we're about to override the current logging flag,
      * check the "log enabled" flag to see if we didn't get here
@@ -226,7 +226,7 @@ H5AC__write_evict_cache_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (int)fxn_ret_value);
+    , (long long)HDtime(NULL), (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if(H5C_write_log_message(cache, msg) < 0)
@@ -274,7 +274,7 @@ H5AC__write_expunge_entry_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (unsigned long)address, (int)type_id, (int)fxn_ret_value);
+    , (long long)HDtime(NULL), (unsigned long)address, (int)type_id, (int)fxn_ret_value);
 
 
     /* Write the log message to the file */
@@ -319,7 +319,7 @@ H5AC__write_flush_cache_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (int)fxn_ret_value);
+    , (long long)HDtime(NULL), (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if(H5C_write_log_message(cache, msg) < 0)
@@ -372,7 +372,7 @@ H5AC__write_insert_entry_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (unsigned long)address, flags, type_id, 
+    , (long long)HDtime(NULL), (unsigned long)address, flags, type_id, 
       (int)size, (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -420,7 +420,7 @@ H5AC__write_mark_dirty_entry_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
+    , (long long)HDtime(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
 
     /* Write the log message to the file */
     if(H5C_write_log_message(cache, msg) < 0)
@@ -470,7 +470,7 @@ H5AC__write_move_entry_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (unsigned long)old_addr, 
+    , (long long)HDtime(NULL), (unsigned long)old_addr, 
       (unsigned long)new_addr, type_id, (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -518,7 +518,7 @@ H5AC__write_pin_entry_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (unsigned long)entry->addr, 
+    , (long long)HDtime(NULL), (unsigned long)entry->addr, 
       (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -570,7 +570,7 @@ H5AC__write_create_fd_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (unsigned long)parent->addr, 
+    , (long long)HDtime(NULL), (unsigned long)parent->addr, 
       (unsigned long)child->addr, (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -627,7 +627,7 @@ H5AC__write_protect_entry_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (unsigned long)entry->addr, 
+    , (long long)HDtime(NULL), (unsigned long)entry->addr, 
       rw_s, (int)entry->size, (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -677,7 +677,7 @@ H5AC__write_resize_entry_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (unsigned long)entry->addr, 
+    , (long long)HDtime(NULL), (unsigned long)entry->addr, 
       (int)new_size, (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -725,7 +725,7 @@ H5AC__write_unpin_entry_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (unsigned long)entry->addr, 
+    , (long long)HDtime(NULL), (unsigned long)entry->addr, 
       (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -777,7 +777,7 @@ H5AC__write_destroy_fd_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (unsigned long)parent->addr, 
+    , (long long)HDtime(NULL), (unsigned long)parent->addr, 
       (unsigned long)child->addr, (int)fxn_ret_value);
 
     /* Write the log message to the file */
@@ -829,7 +829,7 @@ H5AC__write_unprotect_entry_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (unsigned long)entry->addr, 
+    , (long long)HDtime(NULL), (unsigned long)entry->addr, 
       type_id, flags, (int)fxn_ret_value);
 
     HDsnprintf(msg, MSG_SIZE, " ");
@@ -878,7 +878,7 @@ H5AC__write_set_cache_config_log_msg(const H5AC_t *cache,
 \"returned\":%d\
 },\n\
 "
-    , (long long)time(NULL), (int)fxn_ret_value);
+    , (long long)HDtime(NULL), (int)fxn_ret_value);
 
 
     /* Write the log message to the file */

@@ -66,6 +66,7 @@
 ./bin/runtest        _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
 ./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
+./bin/switch_maint_mode      _DO_NOT_DISTRIBUTE_
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
@@ -1445,6 +1446,7 @@
 ./tools/testfiles/filter_fail.h5
 ./tools/testfiles/filter_fail.ddl
 ./tools/testfiles/h5dump-help.txt
+./tools/testfiles/non_existing.ddl
 ./tools/testfiles/packedbits.ddl
 ./tools/testfiles/taindices.h5
 ./tools/testfiles/tall-1.ddl
@@ -1704,6 +1706,7 @@
 
 # h5dump test error files
 ./tools/h5dump/errfiles/filter_fail.err
+./tools/h5dump/errfiles/non_existing.err
 ./tools/h5dump/errfiles/tall-1.err
 ./tools/h5dump/errfiles/tall-2A.err
 ./tools/h5dump/errfiles/tall-2A0.err
