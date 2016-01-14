@@ -1733,7 +1733,7 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t lapl_id)
 {
     H5G_loc_t   loc;                    /* Object location */
-    hid_t       dxpl_id;                /* dxpl used by library */
+    hid_t       dxpl_id = H5AC_ind_dxpl_id;     /* dxpl used by library */
     htri_t	ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1749,7 +1749,6 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
-    dxpl_id = H5AC_ind_dxpl_id;
     /* Verify access property list and get correct dxpl */
     if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")

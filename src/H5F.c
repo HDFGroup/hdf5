@@ -447,7 +447,7 @@ hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
-    hid_t        dxpl_id;               /*dxpl used by library        */
+    hid_t        dxpl_id = H5AC_dxpl_id; /*dxpl used by library        */
     hid_t	 ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(FAIL)
@@ -472,7 +472,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list")
 
-    dxpl_id = H5AC_dxpl_id;
     /* Verify access property list and get correct dxpl */
     if(H5P_verify_and_set_dxpl(&fapl_id, H5P_FILE_ACCESS, H5P_FILE_ACCESS_DEFAULT, &dxpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
@@ -552,7 +551,7 @@ hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
-    hid_t        dxpl_id;               /*dxpl used by library        */
+    hid_t        dxpl_id = H5AC_dxpl_id; /*dxpl used by library        */
     hid_t	 ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(FAIL)
@@ -566,7 +565,6 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
             (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
 
-    dxpl_id = H5AC_dxpl_id;
     /* Verify access property list and get correct dxpl */
     if(H5P_verify_and_set_dxpl(&fapl_id, H5P_FILE_ACCESS, H5P_FILE_ACCESS_DEFAULT, &dxpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")

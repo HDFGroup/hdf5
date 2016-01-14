@@ -191,9 +191,8 @@ H5AC__init_package(void)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
     /* Get the property list object */
-    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_dxpl_id)))
+    if(NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
-            HDassert(xfer_plist);
 
     /* Insert 'collective metadata write' property */
     coll_meta_write = 1;
