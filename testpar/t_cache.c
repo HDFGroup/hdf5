@@ -7597,7 +7597,6 @@ main(int argc, char **argv)
                           world_mpi_rank, FUNC);
             }
         }
-
     }
 
     setup_rand();
@@ -7619,7 +7618,6 @@ main(int argc, char **argv)
 #if 1
     server_smoke_check();
 #endif
-
 #if 1
     smoke_check_1(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
     smoke_check_1(H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
@@ -7689,3 +7687,4 @@ finish:
     /* cannot just return (failures) because exit code is limited to 1byte */
     return(failures != 0);
 }
+

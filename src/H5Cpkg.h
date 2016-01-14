@@ -990,7 +990,7 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
 }
 
 #define H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size, \
-		                         entry_ptr, was_clean)         \
+		                         entry_ptr, was_clean)          \
 if ( ( (cache_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->index_len <= 0 ) ||                                 \
      ( (cache_ptr)->index_size <= 0 ) ||                                \
@@ -1233,7 +1233,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
     H5C__POST_HT_REMOVE_SC(cache_ptr, entry_ptr)              \
 }
 
-#define H5C__SEARCH_INDEX(cache_ptr, Addr, entry_ptr, fail_val) \
+#define H5C__SEARCH_INDEX(cache_ptr, Addr, entry_ptr, fail_val)             \
 {                                                                           \
     int k;                                                                  \
     int depth = 0;                                                          \
