@@ -1187,7 +1187,7 @@ H5P__find_prop_plist(const H5P_genplist_t *plist, const char *name)
 
     /* Check if the property has been deleted from list */
     if(H5SL_search(plist->del,name) != NULL) {
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "can't find property in skip list")
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "property deleted from skip list")
     } /* end if */
     else {
         /* Get the property data from the skip list */
