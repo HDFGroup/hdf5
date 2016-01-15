@@ -13,6 +13,7 @@ PROJECT (HDF5_CPP_TEST)
 #-----------------------------------------------------------------------------
 set (CPP_TEST_SRCS
     ${HDF5_CPP_TEST_SOURCE_DIR}/testhdf5.cpp
+    ${HDF5_CPP_TEST_SOURCE_DIR}/tarray.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tattr.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tcompound.cpp
     ${HDF5_CPP_TEST_SOURCE_DIR}/tdspl.cpp
