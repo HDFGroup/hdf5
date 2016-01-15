@@ -66,7 +66,6 @@ Features:
                         dmalloc: @HAVE_DMALLOC@
 Clear file buffers before write: @CLEARFILEBUF@
            Using memory checker: @USINGMEMCHECKER@
-Memory allocation sanity checks: @MEMORYALLOCSANITYCHECK@
          Function Stack Tracing: @CODESTACK@
       Strict File Format Checks: @STRICT_FORMAT_CHECKS@
    Optimization Instrumentation: @INSTRUMENT@
