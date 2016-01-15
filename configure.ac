@@ -2071,30 +2071,30 @@ esac
 ## Check if they would like to enable the internal memory allocation sanity
 ##     checking code.
 ##
-AC_SUBST([MEMORYALLOCSANITYCHECK])
-AC_MSG_CHECKING([whether internal memory allocation sanity checking is used])
-AC_ARG_ENABLE([memory-alloc-sanity-check],
-              [AS_HELP_STRING([--enable-memory-alloc-sanity-check],
-                              [Enable this option to turn on internal memory
-                              allocation sanity checking.  This could cause
-                              more memory use and somewhat slower allocation.
-                              This option is orthogonal to the
-                              --enable-using-memchecker option.
-                              Default=no.])],
-              [MEMORYALLOCSANITYCHECK=$enableval])
-
-case "X-$MEMORYALLOCSANITYCHECK" in
-  X-yes)
-      MEMORYALLOCSANITYCHECK=yes
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([MEMORY_ALLOC_SANITY_CHECK], [1],
-                [Define to enable internal memory allocation sanity checking.])
-    ;;
-  *)
-      MEMORYALLOCSANITYCHECK=no
-      AC_MSG_RESULT([no])
-    ;;
-esac
+##AC_SUBST([MEMORYALLOCSANITYCHECK])
+##AC_MSG_CHECKING([whether internal memory allocation sanity checking is used])
+##AC_ARG_ENABLE([memory-alloc-sanity-check],
+##              [AS_HELP_STRING([--enable-memory-alloc-sanity-check],
+##                              [Enable this option to turn on internal memory
+##                              allocation sanity checking.  This could cause
+##                              more memory use and somewhat slower allocation.
+##                              This option is orthogonal to the
+##                              --enable-using-memchecker option.
+##                              Default=no.])],
+##              [MEMORYALLOCSANITYCHECK=$enableval])
+##
+##case "X-$MEMORYALLOCSANITYCHECK" in
+##  X-yes)
+##      MEMORYALLOCSANITYCHECK=yes
+##      AC_MSG_RESULT([yes])
+##      AC_DEFINE([MEMORY_ALLOC_SANITY_CHECK], [1],
+##                [Define to enable internal memory allocation sanity checking.])
+##    ;;
+##  *)
+##      MEMORYALLOCSANITYCHECK=no
+##      AC_MSG_RESULT([no])
+##    ;;
+##esac
 
 ## Checkpoint the cache
 AC_CACHE_SAVE

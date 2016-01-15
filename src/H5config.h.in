@@ -426,9 +426,6 @@
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
-/* Define to enable internal memory allocation sanity checking. */
-#undef MEMORY_ALLOC_SANITY_CHECK
-
 /* Define if the metadata trace file code is to be compiled in */
 #undef METADATA_TRACE_FILE
 
