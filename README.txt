@@ -1,4 +1,4 @@
-HDF5 version 1.10.0-prealpha1 currently under development
+HDF5 version 1.10.0-alpha1 released on 2016-01-15
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 

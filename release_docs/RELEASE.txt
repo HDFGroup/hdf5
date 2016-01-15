@@ -1,4 +1,4 @@
-HDF5 version 1.10.0-prealpha1 released on 2016-01-12
+HDF5 version 1.10.0-alpha1 released on 2016-01-15
 ================================================================================
 
 
@@ -34,7 +34,7 @@ CONTENTS
 
 New Features
 ============
-This alpha0 release supports the following new features:
+This alpha1 release supports the following features:
 
     Library:
     --------
@@ -101,6 +101,14 @@ Issues Addressed in this Release
 ================================
     - h5format_convert tool didn't downgrade version of the superblock. Fixed. See
       Known Problems section.  EIP 2016-01-11.
+
+    - It was reported that alpha0 crashed when used with multiple threads. The issue exists
+      in the HDF5 library versions 1.8 and 1.9. 
+      The problem is related to a shared file pointer used in the misc. data structures. 
+      The thread-safe library exposed paths in the library where file pointer becomes invalid. 
+      Alpha1 release contains the fixes for the specific use case as decribed in HDFFV-9643.
+      We will keep working on identifying other paths in the library with similar problem and fixing the issue. 
+      EIP 2016-01-15
 
 Supported Platforms
 ===================
