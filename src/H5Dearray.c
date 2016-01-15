@@ -1038,10 +1038,12 @@ H5D__earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     HDassert(udata);
 
     /* Check if the extensible array is open yet */
-    if(NULL == idx_info->storage->u.earray.ea)
+    if(NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if(H5D__earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
+     } else  /* Patch the top level file pointer contained in ea if needed */
+        H5EA_patch_file(idx_info->storage->u.earray.ea, idx_info->f);
 
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->storage->u.earray.ea;
@@ -1107,10 +1109,12 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     HDassert(udata);
 
     /* Check if the extensible array is open yet */
-    if(NULL == idx_info->storage->u.earray.ea)
+    if(NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if(H5D__earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
+     } else  /* Patch the top level file pointer contained in ea if needed */
+        H5EA_patch_file(idx_info->storage->u.earray.ea, idx_info->f);
 
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->storage->u.earray.ea;
@@ -1309,10 +1313,12 @@ H5D__earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     HDassert(chunk_udata);
 
     /* Check if the extensible array is open yet */
-    if(NULL == idx_info->storage->u.earray.ea)
+    if(NULL == idx_info->storage->u.earray.ea) {
         /* Open the extensible array in file */
         if(H5D__earray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
+     } else  /* Patch the top level file pointer contained in ea if needed */
+        H5EA_patch_file(idx_info->storage->u.earray.ea, idx_info->f);
 
     /* Set convenience pointer to extensible array structure */
     ea = idx_info->storage->u.earray.ea;

@@ -146,6 +146,7 @@ H5_DLL herr_t H5EA_depend(H5AC_info_t *parent_entry, H5EA_t *ea);
 H5_DLL herr_t H5EA_iterate(H5EA_t *fa, hid_t dxpl_id, H5EA_operator_t op, void *udata);
 H5_DLL herr_t H5EA_close(H5EA_t *ea, hid_t dxpl_id);
 H5_DLL herr_t H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata);
+H5_DLL herr_t H5EA_patch_file(H5EA_t *fa, H5F_t *f);
 
 /* Statistics routines */
 H5_DLL herr_t H5EA_get_stats(const H5EA_t *ea, H5EA_stat_t *stats);

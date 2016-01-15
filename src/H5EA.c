@@ -1115,3 +1115,36 @@ CATCH
         elmt = H5FL_BLK_FREE(ea_native_elmt, elmt);
 
 END_FUNC(PRIV)  /* end H5EA_iterate() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5EA_patch_file
+ *
+ * Purpose:     Patch the top-level file pointer contained in ea
+ *              to point to idx_info->f if they are different.
+ *              This is possible because the file pointer in ea can be
+ *              closed out if ea remains open.
+ *
+ * Return:      SUCCEED
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, NOERR,
+herr_t, SUCCEED, -,
+H5EA_patch_file(H5EA_t *ea, H5F_t *f))
+
+    /* Local variables */
+
+#ifdef H5EA_DEBUG
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* H5EA_DEBUG */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(ea);
+    HDassert(f);
+
+    if(ea->f != f || ea->hdr->f != f)
+        ea->f = ea->hdr->f = f;
+
+END_FUNC(PRIV)  /* end H5EA_patch_file() */

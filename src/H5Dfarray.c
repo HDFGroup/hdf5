@@ -989,10 +989,12 @@ H5D__farray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
     HDassert(udata);
 
     /* Check if the fixed array is open yet */
-    if(NULL == idx_info->storage->u.farray.fa)
+    if(NULL == idx_info->storage->u.farray.fa) {
         /* Open the fixed array in file */
         if(H5D__farray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open fixed array")
+    } else  /* Patch the top level file pointer contained in fa if needed */
+	H5FA_patch_file(idx_info->storage->u.farray.fa, idx_info->f);
 
     /* Set convenience pointer to fixed array structure */
     fa = idx_info->storage->u.farray.fa;
@@ -1058,10 +1060,12 @@ H5D__farray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     HDassert(udata);
 
     /* Check if the fixed array is open yet */
-    if(NULL == idx_info->storage->u.farray.fa)
+    if(NULL == idx_info->storage->u.farray.fa) {
         /* Open the fixed array in file */
         if(H5D__farray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open fixed array")
+    } else  /* Patch the top level file pointer contained in fa if needed */
+	H5FA_patch_file(idx_info->storage->u.farray.fa, idx_info->f);
 
     /* Set convenience pointer to fixed array structure */
     fa = idx_info->storage->u.farray.fa;
@@ -1196,10 +1200,12 @@ H5D__farray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     HDassert(chunk_udata);
 
     /* Check if the fixed array is open yet */
-    if(NULL == idx_info->storage->u.farray.fa)
+    if(NULL == idx_info->storage->u.farray.fa) {
         /* Open the fixed array in file */
         if(H5D__farray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open fixed array")
+    } else  /* Patch the top level file pointer contained in fa if needed */
+	H5FA_patch_file(idx_info->storage->u.farray.fa, idx_info->f);
 
     /* Set convenience pointer to fixed array structure */
     fa = idx_info->storage->u.farray.fa;
