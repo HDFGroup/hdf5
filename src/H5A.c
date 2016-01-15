@@ -246,7 +246,7 @@ H5A_term_package(void)
 --------------------------------------------------------------------------*/
 hid_t
 H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
-    hid_t acpl_id, hid_t H5_ATTR_UNUSED aapl_id)
+    hid_t acpl_id, hid_t aapl_id)
 {
     H5A_t	        *attr = NULL;           /* Attribute created */
     H5G_loc_t           loc;                    /* Object location */
@@ -271,6 +271,10 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a type")
     if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&aapl_id, H5P_CLS_AACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Go do the real work for attaching the attribute to the object */
     if(NULL == (attr = H5A_create(&loc, attr_name, type, space, acpl_id, dxpl_id)))
@@ -321,7 +325,7 @@ done:
 --------------------------------------------------------------------------*/
 hid_t
 H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
-    hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t H5_ATTR_UNUSED aapl_id,
+    hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id,
     hid_t lapl_id)
 {
     H5A_t	        *attr = NULL;           /* Attribute created */
@@ -360,14 +364,22 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     obj_loc.path = &obj_path;
     H5G_loc_reset(&obj_loc);
 
-    /* Find the object's location */
+    /* Verify access property list and get correct dxpl */
     dxpl_id = H5AC_ind_dxpl_id;
+    if(H5P_verify_apl_and_dxpl(&aapl_id, H5P_CLS_AACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
+    /* Find the object's location */
     if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
     loc_found = TRUE;
 
-    /* Go do the real work for attaching the attribute to the dataset */
+    /* Verify access property list and get correct dxpl */
     dxpl_id = H5AC_dxpl_id;
+    if(H5P_verify_apl_and_dxpl(&aapl_id, H5P_CLS_AACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
+    /* Go do the real work for attaching the attribute to the dataset */
     if(NULL == (attr = H5A_create(&obj_loc, attr_name, type, space, acpl_id, dxpl_id)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
 
@@ -405,7 +417,7 @@ done:
     H5Aclose or resource leaks will develop.
 --------------------------------------------------------------------------*/
 hid_t
-H5Aopen(hid_t loc_id, const char *attr_name, hid_t H5_ATTR_UNUSED aapl_id)
+H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 {
     H5G_loc_t    	loc;            /* Object location */
     H5A_t               *attr = NULL;   /* Attribute opened */
@@ -422,6 +434,10 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t H5_ATTR_UNUSED aapl_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&aapl_id, H5P_CLS_AACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Read in attribute from object header */
     if(NULL == (attr = H5O_attr_open_by_name(loc.oloc, attr_name, dxpl_id)))
@@ -468,7 +484,7 @@ done:
 --------------------------------------------------------------------------*/
 hid_t
 H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
-    hid_t H5_ATTR_UNUSED aapl_id, hid_t lapl_id)
+    hid_t aapl_id, hid_t lapl_id)
 {
     H5G_loc_t    	loc;            /* Object location */
     H5A_t               *attr = NULL;   /* Attribute opened */
@@ -492,6 +508,10 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     else
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&aapl_id, H5P_CLS_AACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Open the attribute on the object header */
     if(NULL == (attr = H5A_open_by_name(&loc, obj_name, attr_name, lapl_id, dxpl_id)))
@@ -537,7 +557,7 @@ done:
 --------------------------------------------------------------------------*/
 hid_t
 H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-    H5_iter_order_t order, hsize_t n, hid_t H5_ATTR_UNUSED aapl_id, hid_t lapl_id)
+    H5_iter_order_t order, hsize_t n, hid_t aapl_id, hid_t lapl_id)
 {
     H5A_t       *attr = NULL;   /* Attribute opened */
     H5G_loc_t	loc;	        /* Object location */
@@ -564,6 +584,10 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     else
         if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&aapl_id, H5P_CLS_AACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Open the attribute in the object header */
     if(NULL == (attr = H5A_open_by_idx(&loc, obj_name, idx_type, order, n, lapl_id, dxpl_id)))
@@ -892,11 +916,10 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Open the attribute on the object header */
     if(NULL == (attr = H5A_open_by_idx(&loc, obj_name, idx_type, order, n, lapl_id, dxpl_id)))
@@ -1030,11 +1053,10 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
     if(NULL == ainfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info pointer")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Open the attribute on the object header */
     if(NULL == (attr = H5A_open_by_name(&loc, obj_name, attr_name, lapl_id, dxpl_id)))
@@ -1093,11 +1115,10 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(NULL == ainfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info pointer")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Open the attribute on the object header */
     if(NULL == (attr = H5A_open_by_idx(&loc, obj_name, idx_type, order, n, lapl_id, dxpl_id)))
@@ -1193,11 +1214,10 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no old attribute name")
     if(!new_attr_name || !*new_attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new attribute name")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Avoid thrashing things if the names are the same */
     if(HDstrcmp(old_attr_name, new_attr_name)) {
@@ -1370,11 +1390,10 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -1496,11 +1515,11 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    dxpl_id = H5AC_ind_dxpl_id;
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -1508,13 +1527,16 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     H5G_loc_reset(&obj_loc);
 
     /* Find the object's location */
-    dxpl_id = H5AC_ind_dxpl_id;
     if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
     loc_found = TRUE;
 
-    /* Delete the attribute from the location */
+    /* Verify access property list and get correct dxpl */
     dxpl_id = H5AC_dxpl_id;
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
+    /* Delete the attribute from the location */
     if(H5O_attr_remove(obj_loc.oloc, attr_name, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
@@ -1577,11 +1599,11 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    dxpl_id = H5AC_ind_dxpl_id;
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -1589,13 +1611,16 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5G_loc_reset(&obj_loc);
 
     /* Find the object's location */
-    dxpl_id = H5AC_ind_dxpl_id;
     if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
     loc_found = TRUE;
 
-    /* Delete the attribute from the location */
+    /* Verify access property list and get correct dxpl */
     dxpl_id = H5AC_dxpl_id;
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
+    /* Delete the attribute from the location */
     if(H5O_attr_remove_by_idx(obj_loc.oloc, idx_type, order, n, dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
@@ -1717,11 +1742,10 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
     if(!attr_name || !*attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     if((ret_value = H5A_exists_by_name(loc, obj_name, attr_name, lapl_id, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")

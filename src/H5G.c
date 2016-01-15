@@ -316,12 +316,9 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
         if(TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group create property list")
 
-    /* Check the group access property list */
-    if(H5P_DEFAULT == gapl_id)
-        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&gapl_id, H5P_CLS_GACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Create the new group & get its ID */
     if(NULL == (grp = H5G__create_named(&loc, name, lcpl_id, gcpl_id, gapl_id, dxpl_id)))
@@ -396,12 +393,9 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
         if(TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group create property list")
 
-    /* Check the group access property list */
-    if(H5P_DEFAULT == gapl_id)
-        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&gapl_id, H5P_CLS_GACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up group creation info */
     gcrt_info.gcpl_id = gcpl_id;
@@ -471,12 +465,9 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Check the group access property list */
-    if(H5P_DEFAULT == gapl_id)
-        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&gapl_id, H5P_CLS_GACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Open the group */
     if((grp = H5G__open_name(&loc, name, gapl_id, dxpl_id)) == NULL)
@@ -611,11 +602,10 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
     if(!grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up opened group location to fill in */
     grp_loc.oloc = &grp_oloc;
@@ -680,11 +670,10 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up opened group location to fill in */
     grp_loc.oloc = &grp_oloc;

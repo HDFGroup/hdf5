@@ -472,12 +472,9 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list")
 
-    /* Check the file access property list */
-    if(H5P_DEFAULT == fapl_id)
-        fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /*
      * Adjust bit flags by turning on the creation bit and making sure that
@@ -567,11 +564,10 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
             (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
-    if(H5P_DEFAULT == fapl_id)
-        fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Open the file */
     if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
