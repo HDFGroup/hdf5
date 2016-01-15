@@ -5466,6 +5466,35 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5T_patch_vlen_file
+ *
+ * Purpose:     Patch the top-level file pointer contained in (dt->shared->u.vlen.f)
+ *              to point to f.  This is possible because
+ *              the top-level file pointer can be closed out from under
+ *              dt while dt is contained in the shared file's cache.
+ *
+ * Return:      SUCCEED
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_patch_vlen_file(H5T_t *dt, H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(dt);
+    HDassert(dt->shared);
+    HDassert(f);
+
+    if((dt->shared->type == H5T_VLEN) && dt->shared->u.vlen.f != f)
+        dt->shared->u.vlen.f = f;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5T_patch_vlen_file() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Tflush
  *
  * Purpose:     Flushes all buffers associated with a named datatype to disk.

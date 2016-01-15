@@ -1538,3 +1538,35 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_depend() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5B2_patch_file
+ *
+ * Purpose:     Patch the top-level file pointer contained in bt2
+ *              to point to idx_info->f if they are different.  
+ *		This is possible because the file pointer in bt2 can be
+ *		closed out if bt2 remains open.
+ *
+ * Return:      SUCCEED
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5B2_patch_file(H5B2_t *bt2, H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(bt2);
+    HDassert(f);
+
+    if(bt2->f != f || bt2->hdr->f != f)
+        bt2->f = bt2->hdr->f = f;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5B2_patch_file() */

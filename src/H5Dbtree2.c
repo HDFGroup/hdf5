@@ -1014,10 +1014,12 @@ H5D__bt2_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata,
     HDassert(H5F_addr_defined(udata->chunk_block.offset));
 
     /* Check if the v2 B-tree is open yet */
-    if(NULL == idx_info->storage->u.btree2.bt2)
+    if(NULL == idx_info->storage->u.btree2.bt2) {
 	/* Open existing v2 B-tree */
         if(H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
+    } else  /* Patch the top level file pointer contained in bt2 if needed */
+	H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f);
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1114,10 +1116,12 @@ H5D__bt2_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     HDassert(udata);
 
     /* Check if the v2 B-tree is open yet */
-    if(NULL == idx_info->storage->u.btree2.bt2)
+    if(NULL == idx_info->storage->u.btree2.bt2) {
 	/* Open existing v2 B-tree */
         if(H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
+    } else  /* Patch the top level file pointer contained in bt2 if needed */
+	H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f);
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
@@ -1233,10 +1237,12 @@ H5D__bt2_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     HDassert(chunk_udata);
 
     /* Check if the v2 B-tree is open yet */
-    if(NULL == idx_info->storage->u.btree2.bt2)
+    if(NULL == idx_info->storage->u.btree2.bt2) {
 	/* Open existing v2 B-tree */
         if(H5D__bt2_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open v2 B-tree")
+    } else  /* Patch the top level file pointer contained in bt2 if needed */
+	H5B2_patch_file(idx_info->storage->u.btree2.bt2, idx_info->f);
 
     /* Set convenience pointer to v2 B-tree structure */
     bt2 = idx_info->storage->u.btree2.bt2;
