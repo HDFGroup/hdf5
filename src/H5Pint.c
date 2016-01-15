@@ -274,13 +274,10 @@ const H5P_libclass_t H5P_CLS_TACC[1] = {{
 /* Library property list classes defined in other code modules */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_OCRT[1];         /* Object creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_STRCRT[1];       /* String create */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_LACC[1];         /* Link access */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_GCRT[1];         /* Group create */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_OCPY[1];         /* Object copy */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FCRT[1];         /* File creation */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_FACC[1];         /* File access */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_DCRT[1];         /* Dataset creation */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_DACC[1];         /* Dataset access */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_DXFR[1];         /* Data transfer */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FMNT[1];         /* File mount */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_ACRT[1];         /* Attribute creation */
@@ -5435,39 +5432,64 @@ H5P_get_class(const H5P_genplist_t *plist)
     FUNC_LEAVE_NOAPI(plist->pclass)
 } /* end H5P_get_class() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_verify_apl_and_dxpl
+ *
+ * Purpose:	Validate access property list and/or switch from generic
+ *		property list to default of correct type.
+ *
+ *		Also, if using internal DXPL and collective flag is set,
+ *		switch to internal collective DXPL.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              Sunday, June 21, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t 
-H5P_verify_and_set_dxpl(hid_t *acspl_id, hid_t pclass_id, hid_t default_id, hid_t *dxpl_id)
+H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, hid_t *dxpl_id)
 {
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity check */
     HDassert(acspl_id);
+    HDassert(libclass);
+    HDassert(dxpl_id);
 
-    /* Check the access property list */
+    /* Set access plist to the default property list of the appropriate class if it's the generic default */
     if(H5P_DEFAULT == *acspl_id)
-        *acspl_id = default_id;
+        *acspl_id = *libclass->def_plist_id;
+    else {
+        H5P_coll_md_read_flag_t is_collective;      /* Collective metadata read flag */
+        H5P_genplist_t *plist;          /* Property list pointer */
 
-    if(TRUE != H5P_isa_class(*acspl_id, pclass_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Not the required access property list")
+        /* Sanity check the access property list class */
+        if(TRUE != H5P_isa_class(*acspl_id, *libclass->class_id))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not the required access property list")
 
-    if(dxpl_id) {
-        H5P_coll_md_read_flag_t is_collective;
-        H5P_genplist_t *plist;      /* Property list pointer */
+        /* Get the plist structure for the access property list */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(*acspl_id)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
 
-        /* Get the plist structure */
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(*acspl_id, H5I_GENPROP_LST)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-        if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &is_collective) < 0)
+        /* Get the collective metadata read flag */
+        if(H5P_peek(plist, H5_COLL_MD_READ_FLAG_NAME, &is_collective) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core collective metadata read flag")
 
-        if(TRUE == is_collective && *dxpl_id == H5AC_dxpl_id)
-            *dxpl_id = H5AC_coll_write_coll_read_dxpl_id;
-        else if(TRUE == is_collective && *dxpl_id == H5AC_ind_dxpl_id)
-            *dxpl_id = H5AC_ind_write_coll_read_dxpl_id;
-    }
+        /* If collective metadata read requested and using internal DXPL, switch to internal collective DXPL */
+        if(H5P_USER_TRUE == is_collective) {
+            if(*dxpl_id == H5AC_dxpl_id)
+                *dxpl_id = H5AC_coll_write_coll_read_dxpl_id;
+            else if(*dxpl_id == H5AC_ind_dxpl_id)
+                *dxpl_id = H5AC_ind_write_coll_read_dxpl_id;
+        } /* end if */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_verify_and_set_dxpl */
+} /* end H5P_verify_apl_and_dxpl() */
+

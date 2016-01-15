@@ -186,7 +186,7 @@ typedef H5C_t	H5AC_t;
 #ifdef H5_HAVE_PARALLEL
 /* Definitions for "collective metadata write" property */
 #define H5AC_COLLECTIVE_META_WRITE_NAME         "H5AC_collective_metadata_write"
-#define H5AC_COLLECTIVE_META_WRITE_SIZE         sizeof(unsigned)
+#define H5AC_COLLECTIVE_META_WRITE_SIZE         sizeof(hbool_t)
 #define H5AC_COLLECTIVE_META_WRITE_DEF          0
 #endif /* H5_HAVE_PARALLEL */
 

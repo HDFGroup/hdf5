@@ -439,27 +439,25 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the core VFD backing store write tracking flag */
-    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE, &H5F_def_core_write_tracking_flag_g , 
+    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE, &H5F_def_core_write_tracking_flag_g, 
             NULL, NULL, NULL, H5F_ACS_CORE_WRITE_TRACKING_FLAG_ENC, H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of the core VFD backing store page size */
-    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE, &H5F_def_core_write_tracking_page_size_g , 
+    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE, &H5F_def_core_write_tracking_page_size_g, 
             NULL, NULL, NULL, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the metadata collective read flag */
-    if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5F_ACS_COLL_MD_READ_FLAG_SIZE, 
-            &H5F_def_coll_md_read_flag_g, 
+    if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5F_ACS_COLL_MD_READ_FLAG_SIZE, &H5F_def_coll_md_read_flag_g, 
             NULL, NULL, NULL, H5F_ACS_COLL_MD_READ_FLAG_ENC, H5F_ACS_COLL_MD_READ_FLAG_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the metadata collective write flag */
-    if(H5P_register_real(pclass, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, H5F_ACS_COLL_MD_WRITE_FLAG_SIZE, 
-            &H5F_def_coll_md_write_flag_g, 
+    if(H5P_register_real(pclass, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, H5F_ACS_COLL_MD_WRITE_FLAG_SIZE, &H5F_def_coll_md_write_flag_g, 
             NULL, NULL, NULL, H5F_ACS_COLL_MD_WRITE_FLAG_ENC, H5F_ACS_COLL_MD_WRITE_FLAG_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -3434,6 +3432,9 @@ H5P__facc_multi_type_dec(const void **_pp, void *_value)
  *
  * Return:	Non-negative on success/Negative on failure
  *
+ * Programmer:  Dana Robinson
+ *              Tuesday, April 8, 2014
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3461,7 +3462,7 @@ H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_core_write_tracking() */
 
 
 /*-------------------------------------------------------------------------
@@ -3471,6 +3472,9 @@ done:
  *              aggregation size.
  *
  * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Dana Robinson
+ *              Tuesday, April 8, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -3500,7 +3504,7 @@ H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled, size_t *page_siz
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_core_write_tracking() */
 
 
 /*-------------------------------------------------------------------------
@@ -3512,6 +3516,7 @@ done:
  *		   Failure:	Negative
  *
  * Programmer:     Mohamad Chaarawi
+ *                 Sunday, June 21, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3549,6 +3554,7 @@ H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
  *		   Failure:	Negative
  *
  * Programmer:     Mohamad Chaarawi
+ *                 Sunday, June 21, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3577,12 +3583,21 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_coll_metadata_read
  *
- * Purpose: Tell the library whether the metadata read operations will
- * be done collectively (1) or not (0). Default is independent. With
- * collective mode, the library will optimize access to metdata
- * operations on the file.
+ * Purpose:	Tell the library whether the metadata read operations will
+ *		be done collectively (1) or not (0). Default is independent.
+ *		With collective mode, the library will optimize access to
+ *		metadata operations on the file.
+ *
+ * Note:	This routine accepts file access property lists, link
+ *		access property lists, attribute access property lists,
+ *		dataset access property lists, group access property lists,
+ *		named datatype access property lists,
+ *		and dataset transfer property lists.
  *
  * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              Sunday, June 21, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3590,34 +3605,38 @@ herr_t
 H5Pset_coll_metadata_read(hid_t plist_id, hbool_t is_collective)
 {
     H5P_genplist_t *plist;        /* Property list pointer */
+    H5P_coll_md_read_flag_t coll_meta_read;     /* Property value */
     herr_t ret_value = SUCCEED;   /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", plist_id, is_collective);
 
     /* Compare the property list's class against the other class */
+    /* (Dataset, group, attribute, and named datype  access property lists
+     *  are sub-classes of link access property lists -QAK)
+     */
     if(TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
-       TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) &&
-       TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+            TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) &&
+            TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
 
     /* set property to either TRUE if > 0, or FALSE otherwise */
-    if(is_collective > 0)
-        is_collective = TRUE;
+    if(is_collective)
+        coll_meta_read = H5P_USER_TRUE;
     else
-        is_collective = FALSE;
+        coll_meta_read = H5P_USER_FALSE;
 
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5_COLL_MD_READ_FLAG_NAME, &is_collective) < 0)
+    if(H5P_set(plist, H5_COLL_MD_READ_FLAG_NAME, &coll_meta_read) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set collective metadata read flag")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Pset_coll_metadata_read */
+} /* end H5Pset_coll_metadata_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -3625,7 +3644,16 @@ done:
  *
  * Purpose:	Gets information about collective metadata read mode.
  *
+ * Note:	This routine accepts file access property lists, link
+ *		access property lists, attribute access property lists,
+ *		dataset access property lists, group access property lists,
+ *		named datatype access property lists,
+ *		and dataset transfer property lists.
+ *
  * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              Sunday, June 21, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3638,9 +3666,12 @@ H5Pget_coll_metadata_read(hid_t plist_id, hbool_t *is_collective)
     H5TRACE2("e", "i*b", plist_id, is_collective);
 
     /* Compare the property list's class against the other class */
+    /* (Dataset, group, attribute, and named datype  access property lists
+     *  are sub-classes of link access property lists -QAK)
+     */
     if(TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
-       TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) &&
-       TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+            TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) &&
+            TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
 
     /* Get value */
@@ -3669,10 +3700,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_coll_metadata_write
  *
- * Purpose: Tell the library whether the metadata write operations will
- * be done collectively (1) or not (0). Default is collective.
+ * Purpose:	Tell the library whether the metadata write operations will
+ *		be done collectively (1) or not (0). Default is collective.
  *
  * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              Sunday, June 21, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3699,7 +3733,7 @@ H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Pset_coll_metadata_write */
+} /* end H5Pset_coll_metadata_write() */
 
 
 /*-------------------------------------------------------------------------
@@ -3708,6 +3742,9 @@ done:
  * Purpose:	Gets information about collective metadata write mode.
  *
  * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              Sunday, June 21, 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -3733,6 +3770,6 @@ H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Pget_coll_metadata_write */
-
+} /* end H5Pget_coll_metadata_write() */
 #endif /* H5_HAVE_PARALLEL */
+

@@ -357,6 +357,10 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
     /* Set up src & dst location pointers */
     src_loc_p = &src_loc;
     dst_loc_p = &dst_loc;
@@ -364,10 +368,6 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         src_loc_p = dst_loc_p;
     else if(dst_loc_id == H5L_SAME_LOC)
         dst_loc_p = src_loc_p;
-
-    /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Move the link */
     if(H5L_move(src_loc_p, src_name, dst_loc_p, dst_name, FALSE, lcpl_id,
@@ -420,6 +420,10 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
     /* Set up src & dst location pointers */
     src_loc_p = &src_loc;
     dst_loc_p = &dst_loc;
@@ -427,10 +431,6 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
         src_loc_p = dst_loc_p;
     else if(dst_loc_id == H5L_SAME_LOC)
         dst_loc_p = src_loc_p;
-
-    /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Copy the link */
     if(H5L_move(src_loc_p, src_name, dst_loc_p, dst_name, TRUE, lcpl_id,
@@ -482,8 +482,8 @@ H5Lcreate_soft(const char *link_target,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Create the link */
     if(H5L_create_soft(link_target, &link_loc, link_name, lcpl_id, lapl_id, dxpl_id) < 0)
@@ -537,6 +537,10 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
     /* Set up current & new location pointers */
     cur_loc_p = &cur_loc;
     new_loc_p = &new_loc;
@@ -546,10 +550,6 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
    	new_loc_p = cur_loc_p;
     else if(cur_loc_p->oloc->file != new_loc_p->oloc->file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "source and destination should be in the same file.")
-
-    /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Create the link */
     if(H5L_create_hard(cur_loc_p, cur_name, new_loc_p, new_name,
@@ -606,8 +606,8 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid link class")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Create external link */
     if(H5L_create_ud(&link_loc, link_name, udata, udata_size, link_type, lcpl_id, lapl_id, dxpl_id) < 0)
@@ -652,8 +652,8 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Unlink */
     if(H5L_delete(&loc, name, lapl_id, dxpl_id) < 0)
@@ -706,8 +706,8 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up user data for unlink operation */
     udata.idx_type = idx_type;
@@ -762,8 +762,8 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Get the link value */
     if(H5L_get_val(&loc, name, buf, size, lapl_id, dxpl_id) < 0)
@@ -817,8 +817,8 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up user data for retrieving information */
     udata.idx_type = idx_type;
@@ -869,8 +869,8 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Check for the existence of the link */
     if((ret_value = H5L__exists(&loc, name, lapl_id, dxpl_id)) < 0)
@@ -913,12 +913,12 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Get the link information */
     if(H5L_get_info(&loc, name, linfo, lapl_id, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
+	HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -964,8 +964,8 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up user data for callback */
     udata.idx_type = idx_type;
@@ -977,8 +977,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
     /* Traverse the group hierarchy to locate the object to get info about */
     if(H5G_traverse(&loc, group_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, 
                     H5L_get_info_by_idx_cb, &udata, lapl_id, dxpl_id) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to get link info")
-
+	HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "unable to get link info")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1154,8 +1153,8 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up user data for callback */
     udata.idx_type = idx_type;
@@ -1169,7 +1168,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
     /* Traverse the group hierarchy to locate the link to get name of */
     if(H5G_traverse(&loc, group_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, 
                     H5L_get_name_by_idx_cb, &udata, lapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "name doesn't exist")
+        HGOTO_ERROR(H5E_LINK, H5E_EXISTS, FAIL, "name doesn't exist")
 
     /* Set the return value */
     ret_value = udata.name_len;
@@ -1234,8 +1233,7 @@ H5Literate(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
     lnk_op.op_func.op_new = op;
 
     /* Iterate over the links */
-    if((ret_value = H5G_iterate(grp_id, ".", idx_type, order, idx, &last_lnk, &lnk_op, 
-                                op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_iterate(grp_id, ".", idx_type, order, idx, &last_lnk, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
     /* Set the index we stopped at */
@@ -1295,8 +1293,8 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up iteration beginning/end info */
     idx = (idx_p == NULL ? 0 : *idx_p);
@@ -1309,7 +1307,7 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
     /* Iterate over the links */
     if((ret_value = H5G_iterate(loc_id, group_name, idx_type, order, idx, &last_lnk, &lnk_op, 
                                 op_data, lapl_id, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+	HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
 
     /* Set the index we stopped at */
     if(idx_p)
@@ -1428,12 +1426,12 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&lapl_id, H5P_LINK_ACCESS, H5P_LINK_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Call internal group visitation routine */
     if((ret_value = H5G_visit(loc_id, group_name, idx_type, order, op, op_data, lapl_id, dxpl_id)) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visitation failed")
+	HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link visitation failed")
 
 done:
     FUNC_LEAVE_API(ret_value)

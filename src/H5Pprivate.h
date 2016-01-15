@@ -85,6 +85,32 @@ typedef enum H5P_plist_type_t {
     H5P_TYPE_MAX_TYPE
 } H5P_plist_type_t;
 
+/* Function pointer for library classes with properties to register */
+typedef herr_t (*H5P_reg_prop_func_t)(H5P_genclass_t *pclass);
+
+/*
+ * Each library property list class has a variable of this type that contains
+ * class variables and methods used to initialize the class.
+ */
+typedef struct H5P_libclass_t {
+    const char	*name;		        /* Class name */
+    H5P_plist_type_t type;              /* Class type */
+
+    H5P_genclass_t * * par_pclass;      /* Pointer to global parent class property list class */
+    H5P_genclass_t * * pclass;          /* Pointer to global property list class */
+    hid_t * const class_id;             /* Pointer to global property list class ID */
+    hid_t * const def_plist_id;         /* Pointer to global default property list ID */
+    H5P_reg_prop_func_t reg_prop_func;  /* Register class's properties */
+
+    /* Class callback function pointers & info */
+    H5P_cls_create_func_t create_func;  /* Function to call when a property list is created */
+    void *create_data;                  /* Pointer to user data to pass along to create callback */
+    H5P_cls_copy_func_t copy_func;      /* Function to call when a property list is copied */
+    void *copy_data;                    /* Pointer to user data to pass along to copy callback */
+    H5P_cls_close_func_t close_func;    /* Function to call when a property list is closed */
+    void *close_data;                   /* Pointer to user data to pass along to close callback */
+} H5P_libclass_t;
+
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -108,6 +134,14 @@ H5_DLLVAR H5P_genclass_t *H5P_CLS_OBJECT_COPY_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_LINK_CREATE_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_LINK_ACCESS_g;
 H5_DLLVAR H5P_genclass_t *H5P_CLS_STRING_CREATE_g;
+
+/* Internal property list classes */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_LACC[1];  /* Link access */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_AACC[1];  /* Attribute access */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_DACC[1];  /* Dataset access */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_GACC[1];  /* Group access */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_TACC[1];  /* Named datatype access */
+H5_DLLVAR const struct H5P_libclass_t H5P_CLS_FACC[1];  /* File access */
 
 
 /******************************/
@@ -134,6 +168,8 @@ H5_DLL herr_t H5P_remove(H5P_genplist_t *plist, const char *name);
 H5_DLL htri_t H5P_exist_plist(const H5P_genplist_t *plist, const char *name);
 H5_DLL htri_t H5P_class_isa(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2);
 H5_DLL char *H5P_get_class_name(H5P_genclass_t *pclass);
+
+/* Internal helper routines */
 H5_DLL herr_t H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops,
     hbool_t recurse);
 H5_DLL hid_t H5P_peek_driver(H5P_genplist_t *plist);
@@ -153,6 +189,7 @@ H5_DLL herr_t H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id,
     unsigned int *flags, size_t *cd_nelmts, unsigned cd_values[],
     size_t namelen, char name[], unsigned *filter_config);
 H5_DLL htri_t H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id);
+H5_DLL herr_t H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, hid_t *dxpl_id);
 
 /* Query internal fields of the property list struct */
 H5_DLL hid_t H5P_get_plist_id(const H5P_genplist_t *plist);
@@ -162,18 +199,11 @@ H5_DLL H5P_genclass_t *H5P_get_class(const H5P_genplist_t *plist);
 H5_DLL htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id);
 H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
 
-/* Private functions to "peek" at properties of a certain type */
-H5_DLL unsigned H5P_peek_unsigned(H5P_genplist_t *plist, const char *name);
-H5_DLL hid_t H5P_peek_hid_t(H5P_genplist_t *plist, const char *name);
-H5_DLL void *H5P_peek_voidp(H5P_genplist_t *plist, const char *name);
-H5_DLL size_t H5P_peek_size_t(H5P_genplist_t *plist, const char *name);
-
 /* Private DCPL routines */
 H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
     H5D_fill_value_t *status);
 H5_DLL herr_t H5P_get_fill_value(H5P_genplist_t *plist, const struct H5T_t *type,
     void *value, hid_t dxpl_id);
 
-H5_DLL herr_t H5P_verify_and_set_dxpl(hid_t *acspl_id, hid_t pclass_id, hid_t default_id, hid_t *dxpl_id);
 #endif /* _H5Pprivate_H */
 

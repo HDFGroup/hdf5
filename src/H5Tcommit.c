@@ -128,8 +128,8 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&tapl_id, H5P_DATATYPE_ACCESS, H5P_DATATYPE_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&tapl_id, H5P_CLS_TACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Commit the type */
     if(H5T__commit_named(&loc, name, type, lcpl_id, tcpl_id, tapl_id, dxpl_id) < 0)
@@ -266,8 +266,8 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&tapl_id, H5P_DATATYPE_ACCESS, H5P_DATATYPE_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&tapl_id, H5P_CLS_TACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Commit the type */
     if(H5T__commit(loc.oloc->file, type, tcpl_id, dxpl_id) < 0)
@@ -542,8 +542,8 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_and_set_dxpl(&tapl_id, H5P_DATATYPE_ACCESS, H5P_DATATYPE_ACCESS_DEFAULT, &dxpl_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+    if(H5P_verify_apl_and_dxpl(&tapl_id, H5P_CLS_TACC, &dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up datatype location to fill in */
     type_loc.oloc = &oloc;

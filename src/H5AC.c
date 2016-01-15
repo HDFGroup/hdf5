@@ -91,8 +91,8 @@ hid_t H5AC_dxpl_id = (-1);
 H5P_genplist_t *H5AC_ind_dxpl_g = NULL;
 hid_t H5AC_ind_dxpl_id = (-1);
 
-hid_t H5AC_coll_write_coll_read_dxpl_id=(-1);
-hid_t H5AC_ind_write_coll_read_dxpl_id=(-1);
+hid_t H5AC_coll_write_coll_read_dxpl_id = (-1);
+hid_t H5AC_ind_write_coll_read_dxpl_id = (-1);
 
 /*******************/
 /* Local Variables */
@@ -175,7 +175,7 @@ H5AC__init_package(void)
 {
 #ifdef H5_HAVE_PARALLEL
     H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
-    unsigned coll_meta_write;       /* "collective metadata write" property value */
+    hbool_t coll_meta_write;        /* "collective metadata write" property value */
     H5P_coll_md_read_flag_t coll_meta_read;
 #endif /* H5_HAVE_PARALLEL */
     herr_t ret_value = SUCCEED;     /* Return value */
@@ -195,7 +195,7 @@ H5AC__init_package(void)
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* Insert 'collective metadata write' property */
-    coll_meta_write = 1;
+    coll_meta_write = TRUE;
     if(H5P_insert(xfer_plist, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
@@ -209,7 +209,7 @@ H5AC__init_package(void)
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* Insert 'collective metadata write' property */
-    coll_meta_write = 0;
+    coll_meta_write = FALSE;
     if(H5P_insert(H5AC_ind_dxpl_g, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
@@ -223,7 +223,7 @@ H5AC__init_package(void)
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* Insert 'collective metadata write' property */
-    coll_meta_write = 1;
+    coll_meta_write = TRUE;
     if(H5P_insert(xfer_plist, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
                   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
@@ -243,7 +243,7 @@ H5AC__init_package(void)
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
 
     /* Insert 'collective metadata write' property */
-    coll_meta_write = 0;
+    coll_meta_write = FALSE;
     if(H5P_insert(xfer_plist, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
                   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")

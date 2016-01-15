@@ -7828,7 +7828,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
      */
     if(!clear_only && entry_ptr->is_dirty && H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
         H5P_genplist_t *dxpl;       /* Dataset transfer property list */
-        unsigned coll_meta;         /* Collective metadata write flag */
+        hbool_t coll_meta;          /* Collective metadata write flag */
 
         /* Get the dataset transfer property list */
         if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
