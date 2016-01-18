@@ -132,6 +132,7 @@ template <class Type1, class Type2>
 #ifdef __cplusplus
 extern "C" {
 #endif
+void test_array();
 void test_attr();
 void test_compound();
 void test_dsproplist();
@@ -146,6 +147,7 @@ void test_vlstrings();
 void test_dset();
 
 /* Prototypes for the cleanup routines */
+void cleanup_array();
 void cleanup_attr();
 void cleanup_compound();
 void cleanup_dsproplist();

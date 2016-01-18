@@ -141,8 +141,11 @@ ArrayType AbstractDs::getArrayType() const
    // depending on which object invokes getArrayType.  Then, create and
    // return the ArrayType object
    try {
+	// Create ArrayType and set values this way to work around the
+	// problem described in the JIRA issue HDFFV-7947
 	ArrayType arraytype;
 	f_DataType_setId(&arraytype, p_get_type());
+	arraytype.setArrayInfo();
 	return(arraytype);
    }
    catch (DataSetIException E) {

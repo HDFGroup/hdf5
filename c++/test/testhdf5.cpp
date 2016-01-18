@@ -91,6 +91,7 @@ main(int argc, char *argv[])
 	// testing variable-length strings in tvlstr.cpp
 	AddTest("tvlstr", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings", NULL);
 	AddTest("ttypes", test_types, cleanup_types,  "Generic Data Types", NULL);
+	AddTest("tarray", test_array, cleanup_array,  "Array Datatypes", NULL);
 	AddTest("tcompound", test_compound, cleanup_compound,  "Compound Data Types", NULL);
 	AddTest("tdspl", test_dsproplist, cleanup_dsproplist,  "Dataset Property List", NULL);
 	AddTest("tfilter", test_filters, cleanup_filters,  "Various Filters", NULL);
@@ -100,7 +101,6 @@ main(int argc, char *argv[])
 	AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);
 	AddTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes", NULL);
 	AddTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration", NULL);
-	AddTest("array", test_array, cleanup_array,  "Array Datatypes", NULL);
 	AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
 	AddTest("id", test_ids, NULL,  "User-Created Identifiers", NULL);
 
