@@ -89,26 +89,12 @@ New Features
 
     C++ API
     -------
-    - Class H5::ObjCreatPropList is added for the object creation property
-      list class.
+    - New function: ArrayType::setArrayInfo()
 
-      Class H5::ObjCreatPropList is derived from H5::PropList and is a
-      baseclass of H5::DSetCreatPropList.  Additional property list classes
-      will be derived from H5::ObjCreatPropList when they are added to the
-      library in future releases.
+      ArrayType::setArrayInfo() was added to retrieve rank and dimensions of
+      an array and store them in memory for easy access.
 
-      (BMR, 2015/10/13, Part of HDFFV-9169)
-
-    - New Wrappers for C Functions H5P[s/g]et_attr_phase_change and
-      H5P[s/g]et_attr_creation_order.
-
-      Wrappers were added to class H5::ObjCreatPropList for the C Functions
-      H5Pset_attr_phase_change:		H5::ObjCreatPropList::setAttrPhaseChange
-      H5Pget_attr_phase_change:		H5::ObjCreatPropList::getAttrPhaseChange
-      H5Pset_attr_creation_order:	H5::ObjCreatPropList::setAttrCrtOrder
-      H5Pget_attr_creation_order:	H5::ObjCreatPropList::getAttrCrtOrder
-
-      (BMR, 2015/10/13, Part of HDFFV-9167 and HDFFV-9169)
+      (BMR, 2016/01/13, part of fixing a user's problem)
 
 
 
@@ -168,25 +154,13 @@ Bug Fixes since HDF5-1.8.16
 
     C++ API
     ------
-    - Removed memory leaks
+    - The member function AbstractDs::getArrayType() caused failure in user's
+      program.
 
-      The static global constant objects were changed to constant references
-      referencing dynamically allocated objects.  This ensures that the clean-up
-      process in the C++ library occurs before the termination of the C library
-      and prevents memory leaks because the previous global constants were not
-      properly deleted before the C library termination.
+      This problem was caused by missing initialization of the ArrayType's
+      members.  The problem is now fixed.
 
-      (BMR, 2015/10/13, HDFFV-9529)
-
-    - Fixed the problem about identifier being closed prematurely
-
-      The C++ library needs to increment the id's reference counter when it is
-      duplicated in the form of C++ objects, but not when the id is obtained
-      from a C function.  With this approach, both problems, prematurely
-      closing id's and memory leak due to id not being closed, should be
-      eliminated.
-
-      (BMR, 2015/10/15, HDFFV-7947)
+      (BMR, 2016/01/13, User's report)
 
 
     High-Level APIs:
