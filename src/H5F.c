@@ -1870,3 +1870,62 @@ done:
     FUNC_LEAVE_API(ret_value)
 
 } /* H5Fstop_mdc_logging() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Fformat_convert_super (Internal)
+ *
+ * Purpose:	Downgrade the superblock version for the tool h5format_convert.
+ *		(NOTE: more needs to be done to this routine)
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi; Jan 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fformat_convert_super(hid_t fid)
+{
+    H5F_t	*f = NULL;              /* File to flush */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", fid);
+
+    switch(H5I_get_type(fid)) {
+        case H5I_FILE:
+            if(NULL == (f = (H5F_t *)H5I_object(fid)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+	    if(f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_LATEST)
+		HGOTO_DONE(SUCCEED)
+	    f->shared->sblock->super_vers = HDF5_SUPERBLOCK_VERSION_LATEST - 1;
+
+	    /* Mark superblock as dirty */
+	    if(H5F_super_dirty(f) < 0)
+		HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+
+            break;
+
+        case H5I_GROUP:
+        case H5I_DATATYPE:
+        case H5I_DATASET:
+        case H5I_ATTR:
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_DATASPACE:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fformat_convert_super() */

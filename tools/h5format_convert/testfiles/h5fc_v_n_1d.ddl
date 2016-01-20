@@ -10,4 +10,5 @@ Verify the dataset's chunk indexing type is not version 1 B-tree
 Not converting the dataset
 Close the dataset
 Close the dataset creation property list
+Not processing the file's superblock version...
 Close the file

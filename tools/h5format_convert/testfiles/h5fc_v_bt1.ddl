@@ -8,4 +8,5 @@ Retrieve the dataset's chunk indexing type
 Chunk indexing type is already version 1 B-tree: no further action
 Close the dataset
 Close the dataset creation property list
+Processing the file's superblock version...
 Close the file
