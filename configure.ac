@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.232], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.234], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -2044,6 +2044,8 @@ AC_ARG_ENABLE([using-memchecker],
                               library.  Enabling this causes the library to be
                               more picky about it's memory operations and also
                               disables the library's free space manager code.
+                              This option is orthogonal to the
+                              --enable-memory-alloc-sanity-check option.
                               Default=no.])],
               [USINGMEMCHECKER=$enableval])
 
@@ -2058,6 +2060,35 @@ case "X-$USINGMEMCHECKER" in
     ;;
   *)
       USINGMEMCHECKER=no
+      AC_MSG_RESULT([no])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if they would like to enable the internal memory allocation sanity
+##     checking code.
+##
+AC_SUBST([MEMORYALLOCSANITYCHECK])
+AC_MSG_CHECKING([whether internal memory allocation sanity checking is used])
+AC_ARG_ENABLE([memory-alloc-sanity-check],
+              [AS_HELP_STRING([--enable-memory-alloc-sanity-check],
+                              [Enable this option to turn on internal memory
+                              allocation sanity checking.  This could cause
+                              more memory use and somewhat slower allocation.
+                              This option is orthogonal to the
+                              --enable-using-memchecker option.
+                              Default=no.])],
+              [MEMORYALLOCSANITYCHECK=$enableval])
+
+case "X-$MEMORYALLOCSANITYCHECK" in
+  X-yes)
+      MEMORYALLOCSANITYCHECK=yes
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([MEMORY_ALLOC_SANITY_CHECK], [1],
+                [Define to enable internal memory allocation sanity checking.])
+    ;;
+  *)
+      MEMORYALLOCSANITYCHECK=no
       AC_MSG_RESULT([no])
     ;;
 esac
@@ -2250,9 +2281,6 @@ if test -n "$PARALLEL"; then
   fi
 fi
 
-## ----------------------------------------------------------------------
-## Check if Direct I/O driver is enabled by --enable-direct-vfd
-##
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
 ##

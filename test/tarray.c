@@ -178,7 +178,7 @@ test_array_funcs(void)
 {
     hid_t		type;       /* Datatype ID */
     hsize_t		tdims1[] = {ARRAY1_DIM1};
-    int                 size;
+    size_t              size;
     H5T_pad_t           inpad;
     H5T_norm_t          norm;
     H5T_cset_t          cset;
@@ -190,13 +190,13 @@ test_array_funcs(void)
     CHECK(type, FAIL, "H5Tarray_create2");
 
     size=H5Tget_precision(type);
-    CHECK(size, FAIL, "H5Tget_precision");
+    CHECK(size, 0, "H5Tget_precision");
 
     size=H5Tget_size(type);
-    CHECK(size, FAIL, "H5Tget_size");
+    CHECK(size, 0, "H5Tget_size");
 
     size=H5Tget_ebias(type);
-    CHECK(size, FAIL, "H5Tget_ebias");
+    CHECK(size, 0, "H5Tget_ebias");
 
     ret=H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);
     CHECK(ret, FAIL, "H5Tset_pad");
@@ -541,7 +541,7 @@ test_array_compound_atomic(void)
     for(i = 0; i < SPACE1_DIM1; i++)
         for(j = 0; j < ARRAY1_DIM1; j++) {
             wdata[i][j].i = i * 10 + j;
-            wdata[i][j].f = (float)(i * 2.5F + j);
+            wdata[i][j].f = (float)i * 2.5F + (float)j;
         } /* end for */
 
     /* Create file */
@@ -745,7 +745,7 @@ test_array_compound_array(void)
         for(j=0; j<ARRAY1_DIM1; j++) {
             wdata[i][j].i=i*10+j;
             for(k=0; k<ARRAY1_DIM1; k++)
-                wdata[i][j].f[k]=(float)(i * 10.0F + j * 2.5F + k);
+                wdata[i][j].f[k] = (float)i * 10.0F + (float)j * 2.5F + (float)k;
         } /* end for */
 
     /* Create file */
@@ -962,22 +962,22 @@ void test_array_free_custom(void *mem, void *info);
 ****************************************************************/
 void *test_array_alloc_custom(size_t size, void *info)
 {
-    void *ret_value=NULL;       /* Pointer to return */
-    int *mem_used=(int *)info;  /* Get the pointer to the memory used */
-    size_t extra;               /* Extra space needed */
+    void *ret_value = NULL;             /* Pointer to return */
+    size_t *mem_used = (size_t *)info;  /* Get the pointer to the memory used */
+    size_t extra;                       /* Extra space needed */
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
      *  alignment correct - QAK
      */
-    extra=MAX(sizeof(void *),sizeof(size_t));
+    extra = MAX(sizeof(void *), sizeof(size_t));
 
-    if((ret_value=HDmalloc(extra+size))!=NULL) {
-        *(size_t *)ret_value=size;
-        *mem_used+=size;
+    if((ret_value = HDmalloc(extra+size)) != NULL) {
+        *(size_t *)ret_value = size;
+        *mem_used += size;
     } /* end if */
-    ret_value=((unsigned char *)ret_value)+extra;
-    return(ret_value);
+    ret_value = ((unsigned char *)ret_value) + extra;
+    return ret_value;
 }
 
 /****************************************************************
@@ -990,19 +990,19 @@ void *test_array_alloc_custom(size_t size, void *info)
 ****************************************************************/
 void test_array_free_custom(void *_mem, void *info)
 {
-    unsigned char *mem;
-    int *mem_used=(int *)info;  /* Get the pointer to the memory used */
-    size_t extra;               /* Extra space needed */
+    unsigned char *mem = NULL;
+    size_t *mem_used = (size_t *)info;  /* Get the pointer to the memory used */
+    size_t extra;                       /* Extra space needed */
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
      *  alignment correct - QAK
      */
-    extra=MAX(sizeof(void *),sizeof(size_t));
+    extra = MAX(sizeof(void *), sizeof(size_t));
 
-    if(_mem!=NULL) {
-        mem=((unsigned char *)_mem)-extra;
-        *mem_used-=*(size_t *)mem;
+    if(_mem != NULL) {
+        mem = ((unsigned char *)_mem) - extra;
+        *mem_used -= *(size_t *)mem;
         HDfree(mem);
     } /* end if */
 }
@@ -1031,8 +1031,8 @@ test_array_vlen_atomic(void)
     H5T_class_t mclass;     /* Datatype class for VL */
     hid_t       xfer_pid;   /* Dataset transfer property list ID */
     hsize_t     size;       /* Number of bytes which will be used */
-    int         mem_used=0; /* Memory used during allocation */
-    int        i,j,k;      /* counting variables */
+    size_t      mem_used=0; /* Memory used during allocation */
+    int         i,j,k;      /* counting variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1041,10 +1041,10 @@ test_array_vlen_atomic(void)
     /* Initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
         for(j=0; j<ARRAY1_DIM1; j++) {
-            wdata[i][j].p=HDmalloc((i+j+1)*sizeof(unsigned int));
-            wdata[i][j].len=i+j+1;
+            wdata[i][j].p=HDmalloc((size_t)(i+j+1) * sizeof(unsigned int));
+            wdata[i][j].len = (size_t)(i+j+1);
             for(k=0; k<(i+j+1); k++)
-                ((unsigned int *)wdata[i][j].p)[k]=i*100+j*10+k;
+                ((unsigned int *)wdata[i][j].p)[k] = (unsigned int)(i*100+j*10+k);
         } /* end for */
 
     /* Create file */
@@ -1242,8 +1242,8 @@ test_array_vlen_array(void)
     H5T_class_t mclass;     /* Datatype class for VL */
     hid_t       xfer_pid;   /* Dataset transfer property list ID */
     hsize_t     size;       /* Number of bytes which will be used */
-    int         mem_used=0; /* Memory used during allocation */
-    int        i,j,k,l;    /* Index variables */
+    size_t      mem_used=0; /* Memory used during allocation */
+    int         i,j,k,l;    /* Index variables */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -1252,11 +1252,11 @@ test_array_vlen_array(void)
     /* Initialize array data to write */
     for(i=0; i<SPACE1_DIM1; i++)
         for(j=0; j<ARRAY1_DIM1; j++) {
-            wdata[i][j].p=HDmalloc((i+j+1)*(sizeof(unsigned int)*ARRAY1_DIM1));
-            wdata[i][j].len=i+j+1;
+            wdata[i][j].p = HDmalloc((size_t)(i+j+1) * sizeof(unsigned int) * (size_t)ARRAY1_DIM1);
+            wdata[i][j].len = (size_t)(i+j+1);
             for(k=0; k<(i+j+1); k++)
                 for(l=0; l<ARRAY1_DIM1; l++)
-                    ((unsigned int *)wdata[i][j].p)[k*ARRAY1_DIM1+l]=i*1000+j*100+k*10+l;
+                    ((unsigned int *)wdata[i][j].p)[k*ARRAY1_DIM1+l] = (unsigned int)(i*1000+j*100+k*10+l);
         } /* end for */
 
     /* Create file */
@@ -1505,8 +1505,7 @@ test_array_bkg(void)
     int          i, j;
     unsigned     ndims[3] = {1,1,1};
 
-    typedef struct
-    {
+    typedef struct {
 	  int      a[ALEN];
 	  float    b[ALEN];
 	  double   c[ALEN];
@@ -1514,10 +1513,9 @@ test_array_bkg(void)
 
     CmpField     cf[LENGTH];
     CmpField     cfr[LENGTH];
-    CmpDTSinfo   dtsinfo;
+    CmpDTSinfo   *dtsinfo = NULL;
 
-    typedef struct
-    {
+    typedef struct {
       float   b[ALEN];
     } fld_t;
 
@@ -1529,42 +1527,43 @@ test_array_bkg(void)
 
     /* Initialize the data */
     /* ------------------- */
-    for (i = 0; i < LENGTH; i++)
-	  {
-		for (j = 0; j < ALEN; j++)
-		  {
-			cf[i].a[j] = 100*(i+1) + j;
-			cf[i].b[j] = (float)(100.0F*(i+1) + 0.01F*j);
-			cf[i].c[j] = (double)(100.0F*(i+1) + 0.02F*j);
-		  }
-	  }
+    dtsinfo = (CmpDTSinfo *)HDmalloc(sizeof(CmpDTSinfo));
+    CHECK(dtsinfo, NULL, "HDmalloc");
+    HDmemset(dtsinfo, 0, sizeof(CmpDTSinfo));
+    for (i = 0; i < LENGTH; i++) {
+		for (j = 0; j < ALEN; j++) {
+			cf[i].a[j] = 100 * (i + 1) + j;
+			cf[i].b[j] = 100.0F * ((float)i + 1.0F) + 0.01F * (float)j;
+			cf[i].c[j] = (double)(100.0F * ((float)i + 1.0F) + 0.02F * (float)j);
+        } /* end for */
+    } /* end for */
 
 
     /* Set the number of data members */
     /* ------------------------------ */
-    dtsinfo.nsubfields = 3;
+    dtsinfo->nsubfields = 3;
 
     /* Initialize the offsets  */
     /* ----------------------- */
-    dtsinfo.offset[0]   = HOFFSET(CmpField, a);
-    dtsinfo.offset[1]   = HOFFSET(CmpField, b);
-    dtsinfo.offset[2]   = HOFFSET(CmpField, c);
+    dtsinfo->offset[0]   = HOFFSET(CmpField, a);
+    dtsinfo->offset[1]   = HOFFSET(CmpField, b);
+    dtsinfo->offset[2]   = HOFFSET(CmpField, c);
 
     /* Initialize the data type IDs */
     /* ---------------------------- */
-    dtsinfo.datatype[0] = H5T_NATIVE_INT;
-    dtsinfo.datatype[1] = H5T_NATIVE_FLOAT;
-    dtsinfo.datatype[2] = H5T_NATIVE_DOUBLE;
+    dtsinfo->datatype[0] = H5T_NATIVE_INT;
+    dtsinfo->datatype[1] = H5T_NATIVE_FLOAT;
+    dtsinfo->datatype[2] = H5T_NATIVE_DOUBLE;
 
 
     /* Initialize the names of data members */
     /* ------------------------------------ */
-    for (i = 0; i < dtsinfo.nsubfields; i++)
-      dtsinfo.name[i] = (char *)HDcalloc((size_t)20, sizeof(char));
+    for (i = 0; i < dtsinfo->nsubfields; i++)
+      dtsinfo->name[i] = (char *)HDcalloc((size_t)20, sizeof(char));
 
-	strcpy(dtsinfo.name[0], "One");
-	strcpy(dtsinfo.name[1], "Two");
-	strcpy(dtsinfo.name[2], "Three");
+	strcpy(dtsinfo->name[0], "One");
+	strcpy(dtsinfo->name[1], "Two");
+	strcpy(dtsinfo->name[2], "Three");
 
 
     /* Create file */
@@ -1585,17 +1584,16 @@ test_array_bkg(void)
 
     /* Add  members to the compound data type */
     /* -------------------------------------- */
-    for ( i = 0; i < dtsinfo.nsubfields; i++)
-    {
-        array_dt = H5Tarray_create2(dtsinfo.datatype[i], ndims[i], dima);
+    for ( i = 0; i < dtsinfo->nsubfields; i++) {
+        array_dt = H5Tarray_create2(dtsinfo->datatype[i], ndims[i], dima);
         CHECK(array_dt, FAIL, "H5Tarray_create2");
 
-        status = H5Tinsert (type, dtsinfo.name[i], dtsinfo.offset[i], array_dt);
+        status = H5Tinsert (type, dtsinfo->name[i], dtsinfo->offset[i], array_dt);
         CHECK(status, FAIL, "H5Tinsert");
 
         status = H5Tclose(array_dt);
         CHECK(status, FAIL, "H5Tclose");
-    }
+    } /* end for */
 
     /* Create the dataset */
     /* ------------------ */
@@ -1617,23 +1615,23 @@ test_array_bkg(void)
             if(cf[i].a[j]!=cfr[i].a[j]) {
                 TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
                 continue;
-            }
+            } /* end if */
             if(!H5_FLT_ABS_EQUAL(cf[i].b[j],cfr[i].b[j])) {
                 TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].b[j],(int)i,(int)j,(double)cfr[i].b[j]);
                 continue;
-            }
+            } /* end if */
             if(!H5_DBL_ABS_EQUAL(cf[i].c[j],cfr[i].c[j])) {
                 TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].c[j],(int)i,(int)j,(double)cfr[i].c[j]);
                 continue;
-            }
-        }
-    }
+            } /* end if */
+        } /* end for */
+    } /* end for */
 
 
     /* Release memory resources */
     /* ------------------------ */
-    for (i = 0; i < dtsinfo.nsubfields; i++)
-        HDfree(dtsinfo.name[i]);
+    for (i = 0; i < dtsinfo->nsubfields; i++)
+        HDfree(dtsinfo->name[i]);
 
 
     /* Release IDs */
@@ -1651,9 +1649,9 @@ test_array_bkg(void)
     CHECK(status, FAIL, "H5Fclose");
 
 
-/******************************/
-/* Reopen the file and update */
-/******************************/
+    /******************************/
+    /* Reopen the file and update */
+    /******************************/
 
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
@@ -1674,7 +1672,7 @@ test_array_bkg(void)
     /* -------------------------------- */
     for (i=0; i< LENGTH; i++)
         for (j = 0; j < ALEN; j++)
-            cf[i].b[j]=fld[i].b[j] = 1.313F;
+            cf[i].b[j] = fld[i].b[j] = 1.313F;
 
     status = H5Dwrite (dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, fld);
     CHECK(status, FAIL, "H5Dwrite");
@@ -1688,7 +1686,7 @@ test_array_bkg(void)
             if(!H5_FLT_ABS_EQUAL(fld[i].b[j],fldr[i].b[j])) {
                 TestErrPrintf("Field data doesn't match, fld[%d].b[%d]=%f, fldr[%d].b[%d]=%f\n",(int)i,(int)j,(double)fld[i].b[j],(int)i,(int)j,(double)fldr[i].b[j]);
                 continue;
-            }
+            } /* end if */
 
     status = H5Tclose (type);
     CHECK(status, FAIL, "H5Tclose");
@@ -1710,17 +1708,17 @@ test_array_bkg(void)
             if(cf[i].a[j]!=cfr[i].a[j]) {
                 TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
                 continue;
-            }
+            } /* end if */
             if(!H5_FLT_ABS_EQUAL(cf[i].b[j],cfr[i].b[j])) {
                 TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].b[j],(int)i,(int)j,(double)cfr[i].b[j]);
                 continue;
-            }
+            } /* end if */
             if(!H5_DBL_ABS_EQUAL(cf[i].c[j],cfr[i].c[j])) {
                 TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].c[j],(int)i,(int)j,(double)cfr[i].c[j]);
                 continue;
-            }
-        }
-    }
+            } /* end if */
+        } /* end for */
+    } /* end for */
 
     status = H5Dclose(dataset);
     CHECK(status, FAIL, "H5Dclose");
@@ -1731,9 +1729,9 @@ test_array_bkg(void)
     status = H5Fclose(fid);
     CHECK(status, FAIL, "H5Fclose");
 
-/****************************************************/
-/* Reopen the file and print out all the data again */
-/****************************************************/
+    /****************************************************/
+    /* Reopen the file and print out all the data again */
+    /****************************************************/
 
     fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
@@ -1759,17 +1757,17 @@ test_array_bkg(void)
             if(cf[i].a[j]!=cfr[i].a[j]) {
                 TestErrPrintf("Field a data doesn't match, cf[%d].a[%d]=%d, cfr[%d].a[%d]=%d\n",(int)i,(int)j,(int)cf[i].a[j],(int)i,(int)j,(int)cfr[i].a[j]);
                 continue;
-            }
+            } /* end if */
             if(!H5_FLT_ABS_EQUAL(cf[i].b[j],cfr[i].b[j])) {
                 TestErrPrintf("Field b data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].b[j],(int)i,(int)j,(double)cfr[i].b[j]);
                 continue;
-            }
+            } /* end if */
             if(!H5_DBL_ABS_EQUAL(cf[i].c[j],cfr[i].c[j])) {
                 TestErrPrintf("Field c data doesn't match, cf[%d].b[%d]=%f, cfr[%d].b[%d]=%f\n",(int)i,(int)j,(double)cf[i].c[j],(int)i,(int)j,(double)cfr[i].c[j]);
                 continue;
-            }
-        }
-    }
+            } /* end if */
+        } /* end for */
+    } /* end for */
 
     status = H5Dclose(dataset);
     CHECK(status, FAIL, "H5Dclose");
@@ -1779,6 +1777,8 @@ test_array_bkg(void)
 
     status = H5Fclose(fid);
     CHECK(status, FAIL, "H5Fclose");
+
+    HDfree(dtsinfo);
 } /* end test_array_bkg() */
 
 /****************************************************************

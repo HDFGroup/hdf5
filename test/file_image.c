@@ -156,8 +156,8 @@ error:
     if(H5Pclose(fapl_1) < 0) retval = 1;
     if(H5Pclose(fapl_2) < 0) retval = 1;
     HDfree(buffer);
-    HDfree(temp);
-    HDfree(temp2);
+    H5free_memory(temp);
+    H5free_memory(temp2);
 
     if(retval == 0)
         PASSED();

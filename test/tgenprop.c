@@ -1780,7 +1780,7 @@ test_genprop_path(void)
     CHECK_PTR(path, "H5P_get_class_path_test");
     if(HDstrcmp(path,CLASS1_PATH)!=0)
         TestErrPrintf("Class names don't match!, path=%s, CLASS1_PATH=%s\n",path,CLASS1_PATH);
-    HDfree(path);
+    H5free_memory(path);
 
     /* Create another new generic class, derived from first class */
     cid2 = H5Pcreate_class(cid1,CLASS2_NAME, NULL, NULL, NULL, NULL, NULL, NULL);
@@ -1805,7 +1805,7 @@ test_genprop_path(void)
     VERIFY(ret, 1, "H5Pequal");
 
     /* Release the path string */
-    HDfree(path);
+    H5free_memory(path);
 
     /* Close class */
     ret = H5Pclose_class(cid3);

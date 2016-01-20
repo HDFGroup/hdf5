@@ -413,9 +413,9 @@ H5PL__init_path_table(void)
      */
     origin_dl_path = HDgetenv("HDF5_PLUGIN_PATH");
     if(NULL == origin_dl_path)
-        dl_path = HDstrdup(H5PL_DEFAULT_PATH);
+        dl_path = H5MM_strdup(H5PL_DEFAULT_PATH);
     else
-        dl_path = HDstrdup(origin_dl_path);
+        dl_path = H5MM_strdup(origin_dl_path);
     if(NULL == dl_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
 
@@ -425,7 +425,7 @@ H5PL__init_path_table(void)
         /* Check for too many directories in path */
         if(H5PL_num_paths_g == H5PL_MAX_PATH_NUM)
             HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "too many directories in path for table")
-        if(NULL == (H5PL_path_table_g[H5PL_num_paths_g] = HDstrdup(dir)))
+        if(NULL == (H5PL_path_table_g[H5PL_num_paths_g] = H5MM_strdup(dir)))
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
         H5PL_num_paths_g++;
         dir = HDstrtok(NULL, H5PL_PATH_SEPARATOR);
