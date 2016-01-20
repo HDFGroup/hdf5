@@ -426,13 +426,13 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the core VFD backing store write tracking flag */
-    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE, &H5F_def_core_write_tracking_flag_g , 
+    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME, H5F_ACS_CORE_WRITE_TRACKING_FLAG_SIZE, &H5F_def_core_write_tracking_flag_g, 
             NULL, NULL, NULL, H5F_ACS_CORE_WRITE_TRACKING_FLAG_ENC, H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of the core VFD backing store page size */
-    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE, &H5F_def_core_write_tracking_page_size_g , 
+    if(H5P_register_real(pclass, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_SIZE, &H5F_def_core_write_tracking_page_size_g, 
             NULL, NULL, NULL, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_ENC, H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
@@ -3407,6 +3407,9 @@ H5P__facc_multi_type_dec(const void **_pp, void *_value)
  *
  * Return:	Non-negative on success/Negative on failure
  *
+ * Programmer:  Dana Robinson
+ *              Tuesday, April 8, 2014
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3434,7 +3437,7 @@ H5Pset_core_write_tracking(hid_t plist_id, hbool_t is_enabled, size_t page_size)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pset_core_write_tracking() */
 
 
 /*-------------------------------------------------------------------------
@@ -3444,6 +3447,9 @@ done:
  *              aggregation size.
  *
  * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Dana Robinson
+ *              Tuesday, April 8, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -3473,5 +3479,5 @@ H5Pget_core_write_tracking(hid_t plist_id, hbool_t *is_enabled, size_t *page_siz
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Pget_core_write_tracking() */
 

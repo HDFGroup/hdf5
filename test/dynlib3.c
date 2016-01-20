@@ -81,7 +81,7 @@ H5Z_filter_dynlib3(unsigned int flags, size_t cd_nelmts,
         void    *outbuf = NULL;     /* Pointer to new buffer */
         unsigned char *dst;         /* Temporary pointer to destination buffer */
 
-	dst = (unsigned char *)(outbuf = malloc(nbytes + SUFFIX_LEN));
+	dst = (unsigned char *)(outbuf = H5allocate_memory(nbytes + SUFFIX_LEN, 0));
 
         /* Copy raw data */
         memcpy((void*)dst, (void*)(*buf), nbytes);
@@ -91,7 +91,7 @@ H5Z_filter_dynlib3(unsigned int flags, size_t cd_nelmts,
         memcpy(dst, (void*)GROUP_SUFFIX, SUFFIX_LEN);
 
         /* Free input buffer */
- 	free(*buf);
+ 	H5free_memory(*buf);
 
         /* Set return values */
         *buf_size = nbytes + SUFFIX_LEN;

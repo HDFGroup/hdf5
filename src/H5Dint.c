@@ -718,6 +718,7 @@ static herr_t
 H5D__cache_dataspace_info(const H5D_t *dset)
 {
     int sndims;                         /* Signed number of dimensions of dataspace rank */
+    unsigned u;                         /* Local index value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -729,6 +730,10 @@ H5D__cache_dataspace_info(const H5D_t *dset)
     if((sndims = H5S_get_simple_extent_dims(dset->shared->space, dset->shared->curr_dims, dset->shared->max_dims)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't cache dataspace dimensions")
     dset->shared->ndims = (unsigned)sndims;
+
+    /* Compute the inital 'power2up' values */
+    for(u = 0; u < dset->shared->ndims; u++)
+        dset->shared->curr_power2up[u] = H5VM_power2up(dset->shared->curr_dims[u]);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

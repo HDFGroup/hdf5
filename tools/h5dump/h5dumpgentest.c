@@ -7050,9 +7050,8 @@ gent_packedbits(void)
     valu8bits = (uint8_t) ~0u;  /* all 1s */
     for(i = 0; i < dims[0]; i++){
         dsetu8[i][0] = valu8bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dsetu8[i][j] = dsetu8[i][j-1] << 1;
-        }
         valu8bits <<= 1;
     }
 
@@ -7068,9 +7067,8 @@ gent_packedbits(void)
     valu16bits = (uint16_t) ~0u;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
         dsetu16[i][0] = valu16bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dsetu16[i][j] = dsetu16[i][j-1] << 1;
-        }
         valu16bits <<= 1;
     }
 
@@ -7086,9 +7084,8 @@ gent_packedbits(void)
     valu32bits = (uint32_t) ~0u;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
         dsetu32[i][0] = valu32bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dsetu32[i][j] = dsetu32[i][j-1] << 1;
-        }
         valu32bits <<= 1;
     }
 
@@ -7104,9 +7101,8 @@ gent_packedbits(void)
     valu64bits = (uint64_t) ~0Lu;    /* all 1s */
     for(i = 0; i < dims[0]; i++){
         dsetu64[i][0] = valu64bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dsetu64[i][j] = dsetu64[i][j-1] << 1;
-        }
         valu64bits <<= 1;
     }
 
@@ -7122,9 +7118,8 @@ gent_packedbits(void)
     val8bits = (int8_t) ~0;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
         dset8[i][0] = val8bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dset8[i][j] = dset8[i][j-1] << 1;
-        }
         val8bits <<= 1;
     }
 
@@ -7140,9 +7135,8 @@ gent_packedbits(void)
     val16bits = (int16_t) ~0;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
         dset16[i][0] = val16bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dset16[i][j] = dset16[i][j-1] << 1;
-        }
         val16bits <<= 1;
     }
 
@@ -7158,9 +7152,8 @@ gent_packedbits(void)
     val32bits = (int32_t) ~0;	/* all 1s */
     for(i = 0; i < dims[0]; i++){
         dset32[i][0] = val32bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dset32[i][j] = dset32[i][j-1] << 1;
-        }
         val32bits <<= 1;
     }
 
@@ -7176,9 +7169,8 @@ gent_packedbits(void)
     val64bits = (int64_t) ~0L;   /* all 1s */
     for(i = 0; i < dims[0]; i++){
         dset64[i][0] = val64bits;
-        for(j = 1; j < dims[1]; j++) {
+        for(j = 1; j < dims[1]; j++)
             dset64[i][j] = dset64[i][j-1] << 1;
-        }
         val64bits <<= 1;
     }
 

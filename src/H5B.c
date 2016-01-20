@@ -612,6 +612,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
 
     /* Check if the root node split */
     if(H5B_INS_NOOP == my_ins) {
+        /* The root node did not split - just return */
         HDassert(!split_bt_ud.bt);
         HGOTO_DONE(SUCCEED)
     } /* end if */
@@ -2035,7 +2036,7 @@ htri_t
 H5B_valid(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr)
 {
     H5B_t               *bt = NULL;             /* The B-tree */
-    H5UC_t	        *rc_shared;             /* Ref-counted shared info */
+    H5UC_t              *rc_shared;             /* Ref-counted shared info */
     H5B_shared_t        *shared;                /* Pointer to shared B-tree info */
     H5B_cache_ud_t      cache_udata;            /* User-data for metadata cache callback */
     htri_t		ret_value = SUCCEED;    /* Return value */

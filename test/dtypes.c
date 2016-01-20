@@ -1789,6 +1789,13 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
+    if(H5Dvlen_reclaim(dup_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't reclaim read data\n");
+        goto error;
+    } /* end if */
+    rdata.str = NULL;
+
     if(H5Dclose(dset_id) < 0)
         goto error;
     if(H5Tclose(cmpd_tid) < 0)
@@ -1812,6 +1819,12 @@ test_compound_9(void)
     if((dset_id = H5Dopen2(file, "Dataset", H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("cannot open dataset\n");
+        goto error;
+    } /* end if */
+
+    if((space_id = H5Dget_space(dset_id)) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't get space\n");
         goto error;
     } /* end if */
 
@@ -1842,9 +1855,18 @@ test_compound_9(void)
         goto error;
     } /* end if */
 
+    if(H5Dvlen_reclaim(dup_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't read data\n");
+        goto error;
+    } /* end if */
+    rdata.str = NULL;
+
     if(rdata.str) HDfree(rdata.str);
 
     if(H5Dclose(dset_id) < 0)
+        goto error;
+    if(H5Sclose(space_id) < 0)
         goto error;
     if(H5Tclose(cmpd_tid) < 0)
         goto error;
@@ -2020,12 +2042,17 @@ test_compound_10(void)
             printf("incorrect VL read data\n");
             goto error;
         }
-
-        HDfree(t1);
-        HDfree(t2);
-        HDfree(wdata[i].str);
-        HDfree(rdata[i].str);
     } /* end for */
+    if(H5Dvlen_reclaim(arr_tid, space_id, H5P_DEFAULT, &rdata) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't reclaim read data\n");
+        goto error;
+    } /* end if */
+    if(H5Dvlen_reclaim(arr_tid, space_id, H5P_DEFAULT, &wdata) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't reclaim read data\n");
+        goto error;
+    } /* end if */
 
     if(H5Dclose(dset_id) < 0)
         goto error;
@@ -2090,6 +2117,8 @@ test_compound_11(void)
     hid_t big_tid, little_tid;  /* Datatype IDs for type conversion */
     hid_t big_tid2, little_tid2;  /* Datatype IDs for type conversion */
     hid_t opaq_src_tid, opaq_dst_tid;  /* Datatype IDs for type conversion */
+    hid_t space_id;             /* Dataspace for buffer elements */
+    hsize_t dim[1];             /* Dimensions for dataspace */
     void *buf = NULL;          /* Conversion buffer */
     void *buf_orig = NULL;      /* Copy of original conversion buffer */
     void *bkg = NULL;           /* Background buffer */
@@ -2138,6 +2167,13 @@ test_compound_11(void)
     /* Make copy of buffer before conversion */
     HDmemcpy(buf_orig,buf,sizeof(big_t)*NTESTELEM);
 
+    dim[0] = NTESTELEM;
+    if((space_id = H5Screate_simple(1, dim, NULL)) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't create space\n");
+        goto error;
+    } /* end if */
+
     /* Make copies of the 'big' and 'little' datatypes, so the type
      * conversion routine doesn't use the same ones this time and next time
      */
@@ -2169,8 +2205,12 @@ test_compound_11(void)
                     (unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
-        HDfree(((little_t *)buf)[u].s1);
     } /* end for */
+    if(H5Dvlen_reclaim(little_tid2, space_id, H5P_DEFAULT, buf) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't reclaim data\n");
+        goto error;
+    } /* end if */
 
     /* Build source and destination types for conversion routine */
     if((opaq_src_tid=H5Tcreate(H5T_OPAQUE, (size_t)4)) < 0) TEST_ERROR
@@ -2209,8 +2249,12 @@ test_compound_11(void)
                     (unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
-        HDfree(((little_t *)buf)[u].s1);
     } /* end for */
+    if(H5Dvlen_reclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't reclaim data\n");
+        goto error;
+    } /* end if */
 
     /* Unregister the conversion routine */
     if(H5Tunregister(H5T_PERS_HARD, "opaq_test", opaq_src_tid, opaq_dst_tid, convert_opaque) < 0) TEST_ERROR
@@ -2243,12 +2287,17 @@ test_compound_11(void)
                     (unsigned)u,((big_t *)buf_orig)[u].s1,(unsigned)u,((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
-        HDfree(((little_t *)buf)[u].s1);
     } /* end for */
+    if(H5Dvlen_reclaim(little_tid, space_id, H5P_DEFAULT, buf) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't reclaim data\n");
+        goto error;
+    } /* end if */
 
     /* Free everything */
     for(u=0; u<NTESTELEM; u++)
         HDfree(((big_t *)buf_orig)[u].s1);
+    if(H5Sclose(space_id) < 0) TEST_ERROR
     if(H5Tclose(opaq_dst_tid) < 0) TEST_ERROR
     if(H5Tclose(opaq_src_tid) < 0) TEST_ERROR
     if(H5Tclose(little_tid2) < 0) TEST_ERROR
@@ -2727,6 +2776,18 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
+    if(H5Dvlen_reclaim(cmpd_m1_tid, space_id, H5P_DEFAULT, &rdata1) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't reclaim read data\n");
+        goto error;
+    } /* end if */
+    rdata1.str = NULL;
+    if(H5Dvlen_reclaim(cmpd_m2_tid, space_id, H5P_DEFAULT, &rdata2) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't reclaim read data\n");
+        goto error;
+    } /* end if */
+    rdata2.str = NULL;
     if(H5Dclose(dset1_id) < 0)
         goto error;
     if(H5Dclose(dset2_id) < 0)
@@ -2758,6 +2819,12 @@ test_compound_14(void)
     if((dset2_id = H5Dopen2(file, "Dataset2", H5P_DEFAULT)) < 0) {
         H5_FAILED(); AT();
         printf("cannot open dataset\n");
+        goto error;
+    } /* end if */
+
+    if((space_id = H5Dget_space(dset2_id)) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't get space\n");
         goto error;
     } /* end if */
 
@@ -2796,12 +2863,24 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if(rdata1.str) HDfree(rdata1.str);
-    if(rdata2.str) HDfree(rdata2.str);
+    if(H5Dvlen_reclaim(cmpd_m1_tid, space_id, H5P_DEFAULT, &rdata1) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't reclaim read data\n");
+        goto error;
+    } /* end if */
+    rdata1.str = NULL;
+    if(H5Dvlen_reclaim(cmpd_m2_tid, space_id, H5P_DEFAULT, &rdata2) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't reclaim read data\n");
+        goto error;
+    } /* end if */
+    rdata2.str = NULL;
 
     if(H5Dclose(dset1_id) < 0)
         goto error;
     if(H5Dclose(dset2_id) < 0)
+        goto error;
+    if(H5Sclose(space_id) < 0)
         goto error;
     if(H5Tclose(cmpd_m1_tid) < 0)
         goto error;

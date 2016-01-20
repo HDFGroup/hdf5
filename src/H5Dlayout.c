@@ -150,6 +150,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
 
     switch(layout->type) {
         case H5D_COMPACT:
+            /* This information only present in older versions of message */
             /* Size of raw data */
             ret_value += 2;
             if(include_compact_data)
@@ -157,6 +158,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
             break;
 
         case H5D_CONTIGUOUS:
+            /* This information only present in older versions of message */
             ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
             ret_value += H5F_SIZEOF_SIZE(f);    /* Length of data */
             break;
@@ -206,7 +208,7 @@ herr_t
 H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
     hid_t dapl_id)
 {
-    H5O_layout_t        *layout;         /* Dataset's layout information */
+    H5O_layout_t        *layout;        /* Dataset's layout information */
     const H5O_fill_t	*fill_prop;     /* Pointer to dataset's fill value information */
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -401,7 +403,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5D__layout_oh_write
  *
- * Purpose:	Write layout/pline/efl information for dataset
+ * Purpose:	Write layout information for dataset
  *
  * Return:	Success:    SUCCEED
  *		Failure:    FAIL

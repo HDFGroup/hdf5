@@ -1442,7 +1442,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t dxpl_id, had
 #endif
 
     /* Only look for MPI views for raw data transfers */
-    if(type==H5FD_MEM_DRAW) {
+    if(type == H5FD_MEM_DRAW) {
         H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
 
         /* Obtain the data transfer properties */
@@ -1799,6 +1799,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         if(H5FD_mpio_Debug[(int)'t'])
             fprintf(stdout, "H5FD_mpio_write: using MPIO collective mode\n");
 #endif
+
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
         HDassert(plist);
         /* get the transfer mode from the dxpl */

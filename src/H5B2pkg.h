@@ -182,8 +182,8 @@ typedef struct H5B2_hdr_t {
     uint8_t	*page;	        /* Common disk page for I/O */
     size_t      *nat_off;       /* Array of offsets of native records */
     H5B2_node_info_t *node_info; /* Table of node info structs for current depth of B-tree */
-    uint8_t     *min_native_rec;   /* Pointer to minimum native record                  */
-    uint8_t     *max_native_rec;   /* Pointer to maximum native record                  */
+    void        *min_native_rec; /* Pointer to minimum native record                  */
+    void        *max_native_rec; /* Pointer to maximum native record                  */
 
     /* Client information (not stored) */
     const H5B2_class_t *cls;	/* Class of B-tree client */
@@ -228,6 +228,14 @@ typedef enum H5B2_nodepos_t {
     H5B2_POS_MIDDLE             /* Node is neither right or left-most in tree */
 } H5B2_nodepos_t;
 
+/* Update status */
+typedef enum H5B2_update_status_t {
+    H5B2_UPDATE_UNKNOWN,            /* Unknown update status (initial state) */
+    H5B2_UPDATE_MODIFY_DONE,        /* Update successfully modified existing record */
+    H5B2_UPDATE_INSERT_DONE,        /* Update inserted record successfully */
+    H5B2_UPDATE_INSERT_CHILD_FULL   /* Update will insert record, but child is full */
+} H5B2_update_status_t;
+
 /* Callback info for loading a free space header into the cache */
 typedef struct H5B2_hdr_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
@@ -252,7 +260,7 @@ typedef struct H5B2_leaf_cache_ud_t {
 
 #ifdef H5B2_TESTING
 /* Node information for testing */
-typedef struct {
+typedef struct H5B2_node_info_test_t {
     unsigned depth;             /* Depth of node */
     unsigned nrec;              /* Number of records in node */
 } H5B2_node_info_test_t;
@@ -281,6 +289,13 @@ H5FL_EXTERN(H5B2_leaf_t);
 /* Internal v2 B-tree testing class */
 #ifdef H5B2_TESTING
 H5_DLLVAR const H5B2_class_t H5B2_TEST[1];
+H5_DLLVAR const H5B2_class_t H5B2_TEST2[1];
+
+/* B-tree record for testing H5B2_TEST2 class */
+typedef struct H5B2_test_rec_t {
+    hsize_t key;        /* Key for record */
+    hsize_t val;        /* Value for record */
+} H5B2_test_rec_t;
 #endif /* H5B2_TESTING */
 
 /* Array of v2 B-tree client ID -> client class mappings */
@@ -302,6 +317,10 @@ H5_DLL herr_t H5B2__hdr_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2__hdr_fuse_incr(H5B2_hdr_t *hdr);
 H5_DLL size_t H5B2__hdr_fuse_decr(H5B2_hdr_t *hdr);
 H5_DLL herr_t H5B2__hdr_dirty(H5B2_hdr_t *hdr);
+H5_DLL H5B2_hdr_t *H5B2__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t hdr_addr,
+    void *ctx_udata, unsigned flags);
+H5_DLL herr_t H5B2__hdr_unprotect(H5B2_hdr_t *hdr, hid_t dxpl_id,
+    unsigned cache_flags);
 H5_DLL herr_t H5B2__hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id);
 
 /* Routines for operating on leaf nodes */
@@ -323,11 +342,21 @@ H5_DLL herr_t H5B2__leaf_free(H5B2_leaf_t *l);
 H5_DLL herr_t H5B2__internal_free(H5B2_internal_t *i);
 
 /* Routines for inserting records */
+H5_DLL herr_t H5B2__insert_hdr(H5B2_hdr_t *hdr, hid_t dxpl_id, void *udata);
 H5_DLL herr_t H5B2__insert_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
     uint16_t depth, unsigned *parent_cache_info_flags_ptr,
     H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, void *udata);
 H5_DLL herr_t H5B2__insert_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
     H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, void *udata);
+
+/* Routines for update records */
+H5_DLL herr_t H5B2__update_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
+    uint16_t depth, unsigned *parent_cache_info_flags_ptr,
+    H5B2_node_ptr_t *curr_node_ptr, H5B2_update_status_t *status,
+    H5B2_nodepos_t curr_pos, void *udata, H5B2_modify_t op, void *op_data);
+H5_DLL herr_t H5B2__update_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
+    H5B2_node_ptr_t *curr_node_ptr, H5B2_update_status_t *status,
+    H5B2_nodepos_t curr_pos, void *udata, H5B2_modify_t op, void *op_data);
 
 /* Routines for iterating over nodes/records */
 H5_DLL herr_t H5B2__iterate_node(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,

@@ -228,12 +228,12 @@ hid_t CompType::p_get_member_type(unsigned member_num) const
 DataType CompType::getMemberDataType( unsigned member_num ) const
 {
    try {
-      DataType datatype;
+	DataType datatype;
 	f_DataType_setId(&datatype, p_get_member_type(member_num));
-      return(datatype);
+	return(datatype);
    }
    catch (DataTypeIException E) {
-      throw DataTypeIException("CompType::getMemberDataType", E.getDetailMsg());
+	throw DataTypeIException("CompType::getMemberDataType", E.getDetailMsg());
    }
 }
 
@@ -249,9 +249,10 @@ DataType CompType::getMemberDataType( unsigned member_num ) const
 ArrayType CompType::getMemberArrayType( unsigned member_num ) const
 {
    try {
-      ArrayType arraytype(p_get_member_type(member_num));
+	ArrayType arraytype;
 	f_DataType_setId(&arraytype, p_get_member_type(member_num));
-      return(arraytype);
+	arraytype.setArrayInfo();
+	return(arraytype);
    }
    catch (DataTypeIException E) {
       throw DataTypeIException("CompType::getMemberArrayType", E.getDetailMsg());

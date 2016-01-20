@@ -35,12 +35,7 @@ namespace H5 {
 ///\brief	Default constructor: Creates a stub ArrayType
 // Programmer	Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-ArrayType::ArrayType() : DataType()
-{
-   // Initialize members
-   rank = -1;
-   dimensions = NULL;
-}
+ArrayType::ArrayType() : DataType(), rank(-1), dimensions(NULL) {}
 
 //--------------------------------------------------------------------------
 // Function:	ArrayType overloaded constructor
@@ -51,20 +46,7 @@ ArrayType::ArrayType() : DataType()
 //--------------------------------------------------------------------------
 ArrayType::ArrayType( const hid_t existing_id ) : DataType( existing_id )
 {
-   // Get the rank of the existing array and store it in this array
-   rank = H5Tget_array_ndims(existing_id);
-   if (rank < 0)
-   {
-      throw DataTypeIException("ArrayType constructor (existing id)", "H5Tget_array_ndims failed");
-   }
-
-    // Allocate space for the dimensions
-    dimensions = new hsize_t[rank];
-
-    // Get the dimensions of the existing array and store it in this array
-    int ret_value = H5Tget_array_dims2(id, dimensions);
-    if (ret_value < 0)
-	throw DataTypeIException("ArrayType constructor (existing id)", "H5Tget_array_dims2 failed");
+    setArrayInfo();
 }
 
 //--------------------------------------------------------------------------
@@ -111,25 +93,67 @@ ArrayType::ArrayType(const DataType& base_type, int ndims, const hsize_t* dims) 
 }
 
 //--------------------------------------------------------------------------
+// Function:	ArrayType::setArrayInfo
+///\brief	Retrieves the rank and dimensions from the array datatype
+///		and store the info in this ArrayType object.
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - January 2016
+//--------------------------------------------------------------------------
+void ArrayType::setArrayInfo()
+{
+    // Get the rank of the array type specified by id from the C API
+    int ndims = H5Tget_array_ndims(id);
+    if (ndims < 0)
+    {
+	throw DataTypeIException("ArrayType::setArrayInfo", "H5Tget_array_ndims failed");
+    }
+
+    // Get the dimensions from the C API
+    hsize_t* dims;
+    dims = new hsize_t[ndims];
+    if (dims != NULL)
+    {
+	// Get the dimensions
+	ndims = H5Tget_array_dims2(id, dims);
+	if (ndims < 0)
+	    throw DataTypeIException("ArrayType::setArrayInfo", "H5Tget_array_dims2 failed");
+
+	// Store the array's info in memory
+	rank = ndims;
+	dimensions = new hsize_t[rank];
+	for (int i = 0; i < rank; i++)
+	    dimensions[i] = dims[i];
+	delete []dims;
+    }
+} // setArrayInfo
+
+//--------------------------------------------------------------------------
 // Function:	ArrayType::getArrayNDims
 ///\brief	Returns the number of dimensions for an array datatype.
 ///\return	Number of dimensions
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May 2004
+// Modification
+//		Modified to use setArrayInfo().
+//		If rank is positive, return rank
+//		If rank is invalid but object has a valid identifier, obtain the
+//		  rank and dimensions, store them in the object, and return rank
+//		Otherwise, i.e., rank is invalid and object doesn't have a
+//		  valid identifier, throw an exception
 //--------------------------------------------------------------------------
 int ArrayType::getArrayNDims()
 {
-   // If the array's rank has not been stored, i.e. rank is init to -1,
-   // retrieve it via the C API
-   if (rank < 0)
-   {
-      rank = H5Tget_array_ndims(id);
-      if (rank < 0)
-      {
-         throw DataTypeIException("ArrayType::getArrayNDims", "H5Tget_array_ndims failed");
-      }
-   }
-   return(rank);
+    // Validate the id first, this object could be a default object
+    if (!p_valid_id(id))
+	throw DataTypeIException("ArrayType::getArrayNDims", "ArrayType object is not a valid array type.");
+
+    // If the array's info has not been stored, i.e. "rank" still has its
+    // initial value, -1, and "dimensions" is still NULL, retrieve rank and
+    // dimensions via the C API and store them in this ArrayType object.
+    if (rank < 0 && dimensions == NULL)
+	setArrayInfo();
+
+    return(rank);
 }
 
 //--------------------------------------------------------------------------
@@ -139,25 +163,30 @@ int ArrayType::getArrayNDims()
 ///\return	Number of dimensions
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - May 2004
+// Modification
+//	Jan, 2016
+//		Modified to use setArrayInfo().
+//		If the array information has not been stored, retrieve rank and
+//		dimensions of the array type identified by "id" via the C API.
+//		Copy "dimensions" to the user's buffer
 //--------------------------------------------------------------------------
 int ArrayType::getArrayDims(hsize_t* dims)
 {
-   // If the array's dimensions have not been stored, retrieve them via C API
-   if (dimensions == NULL)
-   {
-      int ndims = H5Tget_array_dims2(id, dims);
-      if (ndims < 0)
-         throw DataTypeIException("ArrayType::getArrayDims", "H5Tget_array_dims2 failed");
-      // Store the array's info in memory
-      rank = ndims;
-      dimensions = new hsize_t[rank];
-      for (int i = 0; i < rank; i++)
-         dimensions[i] = dims[i];
-   }
-   // Otherwise, simply copy what's in 'dimensions' to 'dims'
-   for (int i = 0; i < rank; i++)
-      dims[i] = dimensions[i];
-   return(rank);
+    // Validate the id first, this object could be a default object
+    if (!p_valid_id(id))
+	throw DataTypeIException("ArrayType::getArrayDims", "ArrayType object is not a valid array type.");
+
+    // If the array's info has not been stored, i.e. "rank" still has its
+    // initial value, -1, and "dimensions" is still NULL, retrieve rank and
+    // dimensions via the C API and store them in this ArrayType object.
+    if (rank < 0 && dimensions == NULL)
+	setArrayInfo();
+
+    // Copy what's in "dimensions" to user's buffer "dims"
+    for (int i = 0; i < rank; i++)
+	dims[i] = dimensions[i];
+
+    return(rank);
 }
 
 //--------------------------------------------------------------------------

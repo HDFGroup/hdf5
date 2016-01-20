@@ -27,10 +27,10 @@ EXIT_FAILURE=1
 DUMPER=h5dump                     # The tool name
 DUMPER_BIN=`pwd`/$DUMPER          # The path of the tool binary
 
-H5DIFF=../h5diff/h5diff           # The h5diff tool name 
+H5DIFF=../h5diff/h5diff           # The h5diff tool name
 H5DIFF_BIN=`pwd`/$H5DIFF          # The path of the h5diff  tool binary
 
-H5IMPORT=../h5import/h5import     # The h5import tool name 
+H5IMPORT=../h5import/h5import     # The h5import tool name
 H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 
 RM='rm -rf'
@@ -176,6 +176,7 @@ LIST_OTHER_TEST_FILES="
 $SRC_H5DUMP_TESTFILES/charsets.ddl
 $SRC_H5DUMP_TESTFILES/file_space.ddl
 $SRC_H5DUMP_TESTFILES/filter_fail.ddl
+$SRC_H5DUMP_TESTFILES/non_existing.ddl
 $SRC_H5DUMP_TESTFILES/packedbits.ddl
 $SRC_H5DUMP_TESTFILES/tall-1.ddl
 $SRC_H5DUMP_TESTFILES/tall-2.ddl
@@ -266,7 +267,7 @@ $SRC_H5DUMP_TESTFILES/tindicessub4.ddl
 $SRC_H5DUMP_TESTFILES/tindicesyes.ddl
 $SRC_H5DUMP_TESTFILES/tintsattrs.ddl
 $SRC_H5DUMP_TESTFILES/tlarge_objname.ddl
-#$SRC_H5DUMP_TESTFILES/tldouble.ddl 
+#$SRC_H5DUMP_TESTFILES/tldouble.ddl
 $SRC_H5DUMP_TESTFILES/tlonglinks.ddl
 $SRC_H5DUMP_TESTFILES/tloop-1.ddl
 $SRC_H5DUMP_TESTFILES/tmulti.ddl
@@ -347,6 +348,7 @@ $SRC_H5DUMP_TESTFILES/tbinregR.exp
 
 LIST_ERROR_TEST_FILES="
 ${SRC_H5DUMP_ERRORFILES}/filter_fail.err
+${SRC_H5DUMP_ERRORFILES}/non_existing.err
 ${SRC_H5DUMP_ERRORFILES}/tall-1.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2A.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2A0.err
@@ -393,10 +395,10 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-    	        $CP -f $tstfile $TESTDIR
+                $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
-                
+
                     # Comment out this to CREATE expected file
                     exit $EXIT_FAILURE
                 fi
@@ -441,14 +443,14 @@ TESTING() {
 TOOLTEST() {
     # check if caseless compare and diff requested
     if [ "$1" = ignorecase ]; then
-	caseless="-i"
-	# replace cmp with diff which runs much longer.
-	xCMP="$DIFF -i"
-	shift
+    caseless="-i"
+    # replace cmp with diff which runs much longer.
+    xCMP="$DIFF -i"
+    shift
     else
-	caseless=""
-	# stick with faster cmp if ignorecase is not requested.
-	xCMP="$CMP"
+    caseless=""
+    # stick with faster cmp if ignorecase is not requested.
+    xCMP="$CMP"
     fi
 
     expect="$TESTDIR/$1"
@@ -537,7 +539,7 @@ TOOLTEST2() {
      nerrors="`expr $nerrors + 1`"
      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
-    
+
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
      rm -f $actual $actualdata $actual_err
@@ -545,7 +547,7 @@ TOOLTEST2() {
 
 }
 
-# same as TOOLTEST2 but compares generated file to expected ddl file 
+# same as TOOLTEST2 but compares generated file to expected ddl file
 #                   and compares the generated data file to the expected data file
 # used for the binary tests that expect a full path in -o without -b
 # ADD_H5_TEST_EXPORT
@@ -603,7 +605,7 @@ TOOLTEST2A() {
      nerrors="`expr $nerrors + 1`"
      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
-    
+
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
      rm -f $actual $actualdata $actual_err $actualmeta
@@ -642,7 +644,7 @@ TOOLTEST2B() {
       nerrors="`expr $nerrors + 1`"
       test yes = "$verbose" && $DIFF $expectdata $actualdata |sed 's/^/    /'
     fi
-    
+
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
      rm -f $actual $actualdata $actual_err
@@ -859,7 +861,7 @@ TOOLTEST_HELP() {
       echo "    Expected output (*.txt) differs from actual output (*.out)"
       nerrors="`expr $nerrors + 1`"
     fi
-    
+
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
      rm -f $actual $actual_err
@@ -872,7 +874,7 @@ SKIP() {
    TESTING $DUMPER $@
     echo  " -SKIP-"
 }
-  
+
 # Print a line-line message left justified in a field of 70 characters
 #
 PRINT_H5DIFF() {
@@ -883,7 +885,7 @@ PRINT_H5DIFF() {
 
 # Call the h5diff tool
 #
-DIFFTEST() 
+DIFFTEST()
 {
     PRINT_H5DIFF  $@
     (
@@ -897,7 +899,7 @@ DIFFTEST()
     else
          echo " PASSED"
     fi
-        
+
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -910,7 +912,7 @@ PRINT_H5IMPORT() {
 
 # Call the h5import tool
 #
-IMPORTTEST() 
+IMPORTTEST()
 {
     # remove the output hdf5 file if it exists
     hdf5_file="$TESTDIR/$5"
@@ -921,7 +923,7 @@ IMPORTTEST()
     PRINT_H5IMPORT  $@
     (
   cd $TESTDIR
-  $RUNSERIAL $H5IMPORT_BIN "$@" 
+  $RUNSERIAL $H5IMPORT_BIN "$@"
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -930,7 +932,7 @@ IMPORTTEST()
     else
          echo " PASSED"
     fi
-        
+
 }
 
 
@@ -1021,7 +1023,7 @@ TOOLTEST tcomp-1.ddl --enable-error-stack tcompound.h5
 # test for named data types
 TOOLTEST tcomp-2.ddl --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5
 TOOLTEST tcomp-2.ddl --enable-error-stack -N /type1 --any_path /type2 --any_path=/group1/type3 tcompound.h5
-# test for unamed type 
+# test for unamed type
 TOOLTEST4 tcomp-3.ddl --enable-error-stack -t /#6632 -g /group2 tcompound.h5
 # test complicated compound datatype
 TOOLTEST tcomp-4.ddl --enable-error-stack tcompound_complex.h5
@@ -1041,7 +1043,7 @@ TOOLTEST tall-7N.ddl --enable-error-stack -N attr1 tall.h5
 # test for loop detection
 TOOLTEST tloop-1.ddl --enable-error-stack tloop.h5
 
-# test for string 
+# test for string
 TOOLTEST tstr-1.ddl --enable-error-stack tstr.h5
 TOOLTEST tstr-2.ddl --enable-error-stack tstr2.h5
 
@@ -1136,7 +1138,7 @@ TOOLTEST tcompact.ddl --enable-error-stack -H -p -d compact tfilters.h5
 TOOLTEST tcontiguos.ddl --enable-error-stack -H -p -d contiguous tfilters.h5
 # chunked
 TOOLTEST tchunked.ddl --enable-error-stack -H -p -d chunked tfilters.h5
-# external 
+# external
 TOOLTEST texternal.ddl --enable-error-stack -H -p -d external tfilters.h5
 
 # fill values
@@ -1205,7 +1207,7 @@ fi
 # test for displaying objects with very long names
 TOOLTEST tlonglinks.ddl --enable-error-stack tlonglinks.h5
 
-# dimensions over 4GB, print boundary 
+# dimensions over 4GB, print boundary
 TOOLTEST tbigdims.ddl --enable-error-stack -d dset4gb -s 4294967284 -c 22 tbigdims.h5
 
 # hyperslab read
@@ -1213,7 +1215,7 @@ TOOLTEST thyperslab.ddl --enable-error-stack thyperslab.h5
 
 
 #
-    
+
 # test for displaying dataset and attribute of null space
 TOOLTEST tnullspace.ddl --enable-error-stack tnullspace.h5
 
@@ -1252,7 +1254,7 @@ IMPORTTEST out3.bin -c tbin3.ddl -o out3D.h5
 DIFFTEST   tbinary.h5 out3D.h5 /integer /integer
 
 TOOLTEST   tbin4.ddl --enable-error-stack -d double  -b FILE -o out4.bin    tbinary.h5
-   
+
 # Clean up binary output files
 if test -z "$HDF5_NOCLEANUP"; then
  rm -f out[1-4].bin
@@ -1260,7 +1262,7 @@ if test -z "$HDF5_NOCLEANUP"; then
  rm -f out3.h5
 fi
 
-# test for dataset region references 
+# test for dataset region references
 TOOLTEST  tdatareg.ddl --enable-error-stack tdatareg.h5
 TOOLTEST4 tdataregR.ddl --enable-error-stack -R tdatareg.h5
 TOOLTEST  tattrreg.ddl --enable-error-stack tattrreg.h5
@@ -1305,6 +1307,9 @@ TOOLTEST5 filter_fail.ddl --enable-error-stack filter_fail.h5
 
 # test for -o -y for dataset with attributes
 TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1 tall.h5
+
+# test for non-existing file
+TOOLTEST3 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

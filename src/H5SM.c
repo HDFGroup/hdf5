@@ -1375,11 +1375,23 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         } /* end else */
     } /* end else */
 
-    if(found)
+    if(found) {
         /* If the message was found, it's shared in the heap (now).  Set up a
          * shared message so we can mark it as shared.
          */
         shared.type = H5O_SHARE_TYPE_SOHM;
+
+#ifdef H5_USING_MEMCHECKER
+        /* Reset the shared message payload if deferring.  This doesn't matter
+         *      in the long run since the payload will get overwritten when the
+         *      non-deferred call to this routine occurs, but it stops memory
+         *      checkers like valgrind from whining when the partially initialized
+         *      shared message is serialized. -QAK
+         */
+        if(defer)
+            HDmemset(&shared.u, 0, sizeof(shared.u));
+#endif /* H5_USING_MEMCHECKER */
+    } /* end if */
     else {
         htri_t share_in_ohdr;           /* Whether the new message can be shared in another object's header */
 

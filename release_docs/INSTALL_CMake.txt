@@ -411,6 +411,7 @@ These five steps are described in detail below.
                 set (HDF5_BUILD_PARALLEL_ALL OFF CACHE BOOL "Build Parallel Programs" FORCE)
                 set (HDF5_ENABLE_COVERAGE OFF CACHE BOOL "Enable code coverage for Libraries and Programs" FORCE)
                 set (HDF5_ENABLE_USING_MEMCHECKER OFF CACHE BOOL "Indicate that a memory checker is used" FORCE)
+                set (HDF5_MEMORY_ALLOC_SANITY_CHECK OFF CACHE BOOL "Indicate that internal memory allocation sanity checks are enabled" FORCE)
                 set (HDF5_DISABLE_COMPILER_WARNINGS OFF CACHE BOOL "Disable compiler warnings" FORCE)
                 set (HDF5_USE_FOLDERS ON CACHE BOOL "Enable folder grouping of projects in IDEs." FORCE)
                 set (HDF5_USE_16_API_DEFAULT OFF CACHE BOOL "Use the HDF5 1.6.x API by default" FORCE)
@@ -587,6 +588,7 @@ HDF5_ENABLE_LARGE_FILE         "Enable support for large (64-bit) files on Linux
 HDF5_ENABLE_PARALLEL           "Enable parallel build (requires MPI)"                         OFF
 HDF5_ENABLE_TRACE              "Enable API tracing capability"                                OFF
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
+HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF
 HDF5_METADATA_TRACE_FILE       "Enable metadata trace file collection"                        OFF
 HDF5_NO_PACKAGES               "Do not include CPack Packaging"                               OFF
 HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                           OFF

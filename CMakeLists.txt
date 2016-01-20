@@ -376,6 +376,14 @@ if (HDF5_ENABLE_USING_MEMCHECKER)
 endif (HDF5_ENABLE_USING_MEMCHECKER)
 
 #-----------------------------------------------------------------------------
+# Option to indicate internal memory allocation sanity checks are enabled
+#-----------------------------------------------------------------------------
+option (HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF)
+if (HDF5_MEMORY_ALLOC_SANITY_CHECK)
+  set (H5_MEMORY_ALLOC_SANITY_CHECK 1)
+endif (HDF5_MEMORY_ALLOC_SANITY_CHECK)
+
+#-----------------------------------------------------------------------------
 # Option to use deprecated public API symbols
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_DEPRECATED_SYMBOLS "Enable deprecated public API symbols" ON)
