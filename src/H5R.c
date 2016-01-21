@@ -621,7 +621,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     file = loc.oloc->file;
 
     /* Create reference */
-    if((ret_value = H5R_dereference(file, oapl_id, H5AC_ind_dxpl_id, ref_type, _ref, TRUE)) < 0)
+    if((ret_value = H5R_dereference(file, oapl_id, H5AC_dxpl_id, ref_type, _ref, TRUE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to dereference object")
 
 done:
@@ -740,7 +740,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
     /* Get the dataspace with the correct region selected */
-    if((space = H5R_get_region(loc.oloc->file, H5AC_ind_dxpl_id, ref)) == NULL)
+    if((space = H5R_get_region(loc.oloc->file, H5AC_dxpl_id, ref)) == NULL)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create dataspace")
 
     /* Atomize */
@@ -880,7 +880,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
     /* Get the object information */
-    if(H5R_get_obj_type(loc.oloc->file, H5AC_ind_dxpl_id, ref_type, ref, obj_type) < 0)
+    if(H5R_get_obj_type(loc.oloc->file, H5AC_dxpl_id, ref_type, ref, obj_type) < 0)
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object type")
 
 done:
@@ -1044,7 +1044,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
     file = loc.oloc->file;
 
     /* Get name */
-    if((ret_value = H5R_get_name(file, H5P_DEFAULT, H5AC_ind_dxpl_id, id, ref_type, _ref, name, size)) < 0)
+    if((ret_value = H5R_get_name(file, H5P_DEFAULT, H5AC_dxpl_id, id, ref_type, _ref, name, size)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object path")
 
 done:

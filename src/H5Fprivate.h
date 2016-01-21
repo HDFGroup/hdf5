@@ -604,7 +604,6 @@ H5_DLL unsigned H5F_get_nopen_objs(const H5F_t *f);
 H5_DLL unsigned H5F_incr_nopen_objs(H5F_t *f);
 H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
 H5_DLL hid_t H5F_get_file_id(const H5F_t *f);
-H5_DLL ssize_t H5F_get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
 H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned H5F_get_nmounts(const H5F_t *f);
 H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
@@ -680,6 +679,7 @@ H5_DLL herr_t H5F_super_dirty(H5F_t *f);
 H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int H5F_mpi_get_size(const H5F_t *f);
+H5_DLL herr_t H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */
