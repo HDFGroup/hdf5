@@ -5453,7 +5453,6 @@ herr_t
 H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, 
                         hid_t *dxpl_id, hid_t loc_id, hbool_t is_collective)
 {
-    MPI_Comm    mpi_comm;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -5479,6 +5478,8 @@ H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass,
     happens only when the environment variable H5_COLL_BARRIER is set
     to non 0. */
     if(is_collective && H5_coll_api_sanity_check_g) {
+        MPI_Comm mpi_comm; /* file communicator */
+
         /* retrieve the MPI communicator from the loc_id or the fapl_id */
         if(H5F_mpi_retrieve_comm(loc_id, *acspl_id, &mpi_comm) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
