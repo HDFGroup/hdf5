@@ -96,6 +96,14 @@ typedef struct {
     const void *driver_info;    /* Driver info, for open callbacks */
 } H5FD_driver_prop_t;
 
+#ifdef H5_HAVE_PARALLEL
+/* MPIO-specific file access properties */
+typedef struct H5FD_mpio_fapl_t {
+    MPI_Comm		comm;		/*communicator			*/
+    MPI_Info		info;		/*file information		*/
+} H5FD_mpio_fapl_t;
+#endif /* H5_HAVE_PARALLEL */
+
 
 /*****************************/
 /* Library Private Variables */

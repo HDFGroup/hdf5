@@ -1,0 +1,83 @@
+#!/bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+#
+# Switch AM_MAINTAINER_MODE value in configure.ac
+# Usage: See USAGE()
+# Programmer: Dana Robinson
+# Creation date: January 2016
+
+USAGE()
+{
+cat <<EOF
+
+switch_maint_mode reverses the status of AM_MAINTAINER_MODE in
+configure.ac from enable to disable or vice-versa. When enabled,
+this feature forces the autotools to run when the input files are
+older than the output files. This is the default for development
+branches. When disabled, the autotools will NOT be re-run regardless
+of their timestamps or any modifications. This is the default for
+tarballs and release branches since it avoids having end-users
+requiring the autotools.
+
+Command Syntax
+==============
+switch_maint_mode [-help] [-enable|disable] <path-to-configure.ac>
+
+EOF
+}
+
+MODE="notset"
+CONFIG_AC_PATH=
+
+# Display help/usage if any options were passed in
+while [ $# -gt 0 ]; do
+    case "$1" in
+    -enable)
+        MODE="enable"
+        ;;
+    -disable)
+        MODE="disable"
+        ;;
+	-help)
+	    USAGE
+	    exit 0
+	    ;;
+    *)
+	    CONFIG_AC_PATH="$1"
+	    ;;
+    esac
+    shift
+done
+
+# Did we get a file path?
+if test -z $CONFIG_AC_PATH ; then
+    USAGE
+    exit 1
+fi
+
+# Did we get a mode?
+if test -z $MODE ; then
+    USAGE
+    exit 1
+fi
+
+# Run perl over configure.ac
+if test "X-$MODE" = "X-enable" ; then
+    perl -pi -e 's/^(AM_MAINTAINER_MODE\(\[)([a-z]+)(\]\))/$1enable$3/g' $CONFIG_AC_PATH
+fi
+if test "X-$MODE" = "X-disable" ; then
+    perl -pi -e 's/^(AM_MAINTAINER_MODE\(\[)([a-z]+)(\]\))/$1disable$3/g' $CONFIG_AC_PATH
+fi
+

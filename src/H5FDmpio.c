@@ -96,12 +96,6 @@ static int H5FD_mpio_mpi_rank(const H5FD_t *_file);
 static int H5FD_mpio_mpi_size(const H5FD_t *_file);
 static MPI_Comm H5FD_mpio_communicator(const H5FD_t *_file);
 
-/* MPIO-specific file access properties */
-typedef struct H5FD_mpio_fapl_t {
-    MPI_Comm		comm;		/*communicator			*/
-    MPI_Info		info;		/*file information		*/
-} H5FD_mpio_fapl_t;
-
 /* The MPIO file driver information */
 static const H5FD_class_mpi_t H5FD_mpio_g = {
     {   /* Start of superclass information */

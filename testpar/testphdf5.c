@@ -536,7 +536,6 @@ int main(int argc, char **argv)
     AddTest("denseattr", test_dense_attr, NULL,
 	    "Store Dense Attributes", PARATESTFILE);
 
-
     /* Display testing information */
     TestInfo(argv[0]);
 

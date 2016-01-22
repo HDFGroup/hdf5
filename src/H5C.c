@@ -1775,7 +1775,6 @@ H5C_insert_entry(H5F_t *             f,
     hbool_t             flush_last;
 #ifdef H5_HAVE_PARALLEL
     hbool_t             coll_access = FALSE; /* whether access to the cache entry is done collectively */
-    hbool_t             flush_collectively;
 #endif /* H5_HAVE_PARALLEL */
     hbool_t             set_flush_marker;
     hbool_t		write_permitted = TRUE;
@@ -1814,9 +1813,6 @@ H5C_insert_entry(H5F_t *             f,
     set_flush_marker   = ( (flags & H5C__SET_FLUSH_MARKER_FLAG) != 0 );
     insert_pinned      = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
     flush_last         = ( (flags & H5C__FLUSH_LAST_FLAG) != 0 );
-#ifdef H5_HAVE_PARALLEL
-    flush_collectively = ( (flags & H5C__FLUSH_COLLECTIVELY_FLAG) != 0 );
-#endif /* H5_HAVE_PARALLEL */
 
     /* Get the dataset transfer property list */
     if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
@@ -1861,9 +1857,6 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->pinned_from_client = insert_pinned;
     entry_ptr->pinned_from_cache = FALSE;
     entry_ptr->flush_me_last = flush_last;
-#ifdef H5_HAVE_PARALLEL
-    entry_ptr->flush_me_collectively = flush_collectively;
-#endif
 
     /* newly inserted entries are assumed to be dirty */
     entry_ptr->is_dirty = TRUE;
@@ -2632,10 +2625,10 @@ done:
  *		This allows H5C_protect to accept flags other than 
  *		H5C__READ_ONLY_FLAG.  
  *
- *		Added support for the H5C__FLUSH_LAST_FLAG and 
- *		H5C__FLUSH_COLLECTIVELY_FLAG flags.  At present, these 
- *		flags are only applied if the entry is not in cache, and 
- *		is loaded into the cache as a result of this call.
+ *		Added support for the H5C__FLUSH_LAST_FLAG.
+ *		At present, this flag is only applied if the entry is 
+ *              not in cache, and is loaded into the cache as a result of 
+ *              this call.
  *
  *-------------------------------------------------------------------------
  */
@@ -2654,7 +2647,6 @@ H5C_protect(H5F_t *		f,
     hbool_t		read_only = FALSE;
     hbool_t             flush_last;
 #ifdef H5_HAVE_PARALLEL
-    hbool_t             flush_collectively;
     hbool_t             coll_access = FALSE; /* whether access to the cache entry is done collectively */
 #endif /* H5_HAVE_PARALLEL */
     hbool_t		write_permitted;
@@ -2689,9 +2681,6 @@ H5C_protect(H5F_t *		f,
 
     read_only          = ( (flags & H5C__READ_ONLY_FLAG) != 0 );
     flush_last         = ( (flags & H5C__FLUSH_LAST_FLAG) != 0 );
-#ifdef H5_HAVE_PARALLEL
-    flush_collectively = ( (flags & H5C__FLUSH_COLLECTIVELY_FLAG) != 0 );
-#endif /* H5_HAVE_PARALLEL */
 
     /* Get the dataset transfer property list */
     if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
@@ -2933,20 +2922,16 @@ H5C_protect(H5F_t *		f,
          *
          *   *******************************************
          *
-         * Set the flush_last (and possibly flush_collectively) fields 
+         * Set the flush_last field
  	 * of the newly loaded entry before inserting it into the 
          * index.  Must do this, as the index tracked the number of 
          * entries with the flush_last field set, but assumes that 
          * the field will not change after insertion into the index.
          *
-         * Note that this means that the H5C__FLUSH_LAST_FLAG and 
-         * H5C__FLUSH_COLLECTIVELY_FLAG flags are ignored if the 
-         * entry is already in cache.
+         * Note that this means that the H5C__FLUSH_LAST_FLAG flag 
+         * is ignored if the entry is already in cache.
          */
         entry_ptr->flush_me_last = flush_last;
-#ifdef H5_HAVE_PARALLEL
-        entry_ptr->flush_me_collectively = flush_collectively;
-#endif
 
         H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, NULL)
 
@@ -7819,31 +7804,6 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     entry_ptr->flush_in_progress = TRUE;
     entry_ptr->flush_marker = FALSE;
 
-#ifdef H5_HAVE_PARALLEL
-#ifndef NDEBUG
-    /* If MPI based VFD is used, do special parallel I/O sanity checks.
-     * Note that we only do these sanity checks when the clear_only flag
-     * is not set, and the entry to be flushed is dirty.  Don't bother
-     * otherwise as no file I/O can result.
-     */
-    if(!clear_only && entry_ptr->is_dirty && H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-        H5P_genplist_t *dxpl;       /* Dataset transfer property list */
-        hbool_t coll_meta;          /* Collective metadata write flag */
-
-        /* Get the dataset transfer property list */
-        if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
-            HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
-
-        /* Get the collective metadata write property */
-        if(H5P_get(dxpl, H5AC_COLLECTIVE_META_WRITE_NAME, &coll_meta) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't retrieve xfer mode")
-
-        /* Sanity check collective metadata write flag */
-        HDassert(coll_meta);
-    } /* end if */
-#endif /* NDEBUG */
-#endif /* H5_HAVE_PARALLEL */
-
     /* serialize the entry if necessary, and then write it to disk. */
     if(write_entry) {
         unsigned serialize_flags = H5C__SERIALIZE_NO_FLAGS_SET;
@@ -8421,8 +8381,8 @@ H5C_load_entry(H5F_t *             f,
     size_t              len;            /* Size of image in file */
     unsigned            u;              /* Local index variable */
 #ifdef H5_HAVE_PARALLEL
-    int                 mpi_rank;       /* MPI process rank */
-    MPI_Comm            comm;           /* File MPI Communicator */
+    int                 mpi_rank = 0;   /* MPI process rank */
+    MPI_Comm            comm = MPI_COMM_NULL; /* File MPI Communicator */
     int                 mpi_code;       /* MPI error code */
 #endif /* H5_HAVE_PARALLEL */
     void *		ret_value = NULL;       /* Return value */
@@ -8583,7 +8543,6 @@ H5C_load_entry(H5F_t *             f,
 #ifdef H5_HAVE_PARALLEL
         if(!coll_access || 0 == mpi_rank) {
 #endif /* H5_HAVE_PARALLEL */
-
             if(H5F_block_read(f, type->mem_type, addr, len, dxpl_id, image) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
 

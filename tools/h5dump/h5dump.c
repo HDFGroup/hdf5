@@ -620,7 +620,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
                 size_count++;
 
             last_digit = 1;
-        } 
+        }
         else {
             last_digit = 0;
         }
@@ -643,7 +643,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
         }
     d->data = p_list;
     d->len = size_count;
-    
+
     return;
 }
 
@@ -705,7 +705,7 @@ parse_subset_params(char *dset)
  *
  * Purpose:     Parse a list of comma or space separated integers and fill
  *              the packed_bits list and counter. The string being passed into this function
- *              should be at the start of the list you want to parse. 
+ *              should be at the start of the list you want to parse.
  *
  * Return:      Success:        SUCCEED
  *
@@ -831,7 +831,7 @@ static void
 free_handler(struct handler_t *hand, int len)
 {
     int i;
-    
+
     if(hand) {
         for (i = 0; i < len; i++) {
             if(hand[i].obj) {
@@ -1161,7 +1161,7 @@ parse_start:
             }
             if (HDstrcmp(opt_arg,":") == 0) {
                 xmlnsprefix = "";
-            } 
+            }
             else {
                 xmlnsprefix = opt_arg;
             }
@@ -1187,7 +1187,7 @@ parse_start:
                  * the two.
                  */
                 s = last_dset->subset_info;
-            } 
+            }
             else {
                 last_dset->subset_info = s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
             }
@@ -1358,7 +1358,7 @@ main(int argc, const char *argv[])
     /* Disable tools error reporting */
     H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
     H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
-    
+
     if((hand = parse_command_line(argc, argv))==NULL) {
         goto done;
     }
@@ -1444,12 +1444,12 @@ main(int argc, const char *argv[])
             if (xml_dtd_uri == NULL) {
                 if (useschema) {
                     xml_dtd_uri = DEFAULT_XSD;
-                } 
+                }
                 else {
                     xml_dtd_uri = DEFAULT_DTD;
                     xmlnsprefix = "";
                 }
-            } 
+            }
             else {
                 if (useschema && HDstrcmp(xmlnsprefix,"")) {
                     error_msg("Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
@@ -1486,7 +1486,7 @@ main(int argc, const char *argv[])
         /* start to dump - display file header information */
         if (!doxml) {
             begin_obj(h5tools_dump_header_format->filebegin, fname, h5tools_dump_header_format->fileblockbegin);
-        } 
+        }
         else {
             PRINTVALSTREAM(rawoutstream, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
@@ -1495,7 +1495,7 @@ main(int argc, const char *argv[])
                 if (HDstrcmp(xmlnsprefix,"") == 0) {
                     PRINTSTREAM(rawoutstream, "<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
                             xml_dtd_uri);
-                } 
+                }
                 else {
                     /*  TO DO: make -url option work in this case (may need new option) */
                     char *ns;
@@ -1511,7 +1511,7 @@ main(int argc, const char *argv[])
                             "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\">\n",xmlnsprefix,ns);
                     HDfree(ns);
                 }
-            } 
+            }
             else {
                 PRINTSTREAM(rawoutstream, "<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n", xml_dtd_uri);
                 PRINTVALSTREAM(rawoutstream, "<HDF5-File>\n");
@@ -1570,7 +1570,7 @@ main(int argc, const char *argv[])
         if (!doxml) {
             end_obj(h5tools_dump_header_format->fileend, h5tools_dump_header_format->fileblockend);
             PRINTVALSTREAM(rawoutstream, "\n");
-        } 
+        }
         else {
             PRINTSTREAM(rawoutstream, "</%sHDF5-File>\n", xmlnsprefix);
         }
@@ -1581,13 +1581,17 @@ main(int argc, const char *argv[])
             if (H5Fclose(fid) < 0)
                 h5tools_setstatus(EXIT_FAILURE);
 
-        if(prefix)
+        if(prefix) {
             HDfree(prefix);
-        if(fname)
+            prefix = NULL;
+        }
+        if(fname) {
             HDfree(fname);
+            fname = NULL;
+        }
     } /* end while */
 
-    if(hand) 
+    if(hand)
         free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
@@ -1601,13 +1605,17 @@ done:
     if(fid >=0)
         if (H5Fclose(fid) < 0)
             h5tools_setstatus(EXIT_FAILURE);
-    
-    if(prefix)
-        HDfree(prefix);
-    if(fname)
-        HDfree(fname);
 
-    if(hand) 
+    if(prefix) {
+        HDfree(prefix);
+        prefix = NULL;
+    }
+    if(fname) {
+        HDfree(fname);
+        fname = NULL;
+    }
+
+    if(hand)
         free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
@@ -1660,20 +1668,20 @@ h5_fileaccess(void)
     if (!HDstrcmp(name, "sec2")) {
         /* Unix read() and write() system calls */
         if (H5Pset_fapl_sec2(fapl)<0) return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "stdio")) {
         /* Standard C fread() and fwrite() system calls */
         if (H5Pset_fapl_stdio(fapl)<0) return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "core")) {
         /* In-core temporary file with 1MB increment */
         if (H5Pset_fapl_core(fapl, 1024*1024, FALSE)<0) return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "split")) {
         /* Split meta data and raw data each using default driver */
         if (H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "multi")) {
         /* Multi-file driver, general case of the split driver */
         H5FD_mem_t      memb_map[H5FD_MEM_NTYPES];
@@ -1699,7 +1707,7 @@ h5_fileaccess(void)
 
         if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "family")) {
         hsize_t fam_size = 100*1024*1024; /*100 MB*/
 
@@ -1708,7 +1716,7 @@ h5_fileaccess(void)
             fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024);
         if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "log")) {
         long log_flags = H5FD_LOG_LOC_IO;
 
@@ -1718,12 +1726,12 @@ h5_fileaccess(void)
 
         if (H5Pset_fapl_log(fapl, NULL, (unsigned)log_flags, 0) < 0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "direct")) {
         /* Substitute Direct I/O driver with sec2 driver temporarily because
          * some output has sec2 driver as the standard. */
         if (H5Pset_fapl_sec2(fapl)<0) return -1;
-    } 
+    }
     else {
         /* Unknown driver */
         return -1;

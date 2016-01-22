@@ -197,19 +197,11 @@ typedef H5C_t	H5AC_t;
 #define H5AC_RING_NAME  "H5AC_ring_type"
 
 /* Dataset transfer property list for flush calls */
-/* (Collective set, "block before metadata write" set and "library internal" set) */
-/* (Global variable declaration, definition is in H5AC.c) */
 extern hid_t H5AC_dxpl_id;
-
-/* Dataset transfer property list for independent metadata I/O calls */
-/* (just "library internal" set - i.e. independent transfer mode) */
-/* (Global variable declaration, definition is in H5AC.c) */
-H5_DLLVAR H5P_genplist_t *H5AC_ind_dxpl_g;
-H5_DLLVAR hid_t H5AC_ind_dxpl_id;
-
-H5_DLLVAR hid_t H5AC_coll_write_coll_read_dxpl_id;
-H5_DLLVAR hid_t H5AC_ind_write_coll_read_dxpl_id;
-
+extern hid_t H5AC_ind_read_dxpl_id;
+#ifdef H5_HAVE_PARALLEL
+extern hid_t H5AC_coll_read_dxpl_id;
+#endif /* H5_HAVE_PARALLEL */
 
 /* Default cache configuration. */
 
