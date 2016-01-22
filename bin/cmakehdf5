@@ -47,6 +47,7 @@ build_cpp_lib=-DHDF5_BUILD_CPP_LIB:BOOL=OFF	# C++ interface default off
 build_fortran=-DHDF5_BUILD_FORTRAN:BOOL=OFF	# Fortran interface default off
 enable_f2003=-DHDF5_ENABLE_F2003:BOOL=OFF	# Fortran2003 interface default off
 build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=ON	# High Level interface default on
+build_threadsafe=-DHDF5_ENABLE_THREADSAFE:BOOL=OFF	# Threadsafe feature default off
 build_testing=-DBUILD_TESTING:BOOL=ON		# Build tests default on
 build_tools=-DHDF5_BUILD_TOOLS:BOOL=ON		# Build tools default on
 with_zlib=-DHDF5_ENABLE_Z_LIB_SUPPORT=ON	# enable zlib filter default on
@@ -85,6 +86,8 @@ Usage: $progname [<options>]
     enable or disable c++ API. Default is off.
   --enable-hl | --disable-hl:
     enable or disable high level API. Default is on.
+  --enable-threadsafe | --disable-threadsafe:
+    enable or disable threadsafe feature. Default is off
   --enable-shared | --disable-shared:
     enable or disable shared lib. Default is on.
   --enable-tools | --disable-tools:
@@ -238,6 +241,12 @@ while [ $# -gt 0 ]; do
 	--disable-hl)
 	    build_hl_lib=-DHDF5_BUILD_HL_LIB:BOOL=OFF
 	    ;;
+	--enable-threadsafe)
+	    build_threadsafe=-DHDF5_ENABLE_THREADSAFE:BOOL=ON
+	    ;;
+	--disable-threadsafe)
+	    build_threadsafe=-DHDF5_ENABLE_THREADSAFE:BOOL=OFF
+	    ;;
 	--enable-shared)
 	    shared_lib=-DBUILD_SHARED_LIBS:BOOL=ON
 	    ;;
@@ -340,6 +349,7 @@ STEP "Configure..." \
     $build_fortran \
     $enable_f2003 \
     $build_hl_lib \
+    $build_threadsafe \
     $shared_lib \
     $build_testing \
     $build_tools \
