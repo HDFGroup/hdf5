@@ -92,6 +92,9 @@ else
     esac
 fi
 
+# Figure out GNU FC compiler flags
+. $srcdir/config/gnu-fflags
+
 # Figure out PGI FC compiler flags
 . $srcdir/config/pgi-fflags
 
