@@ -1295,9 +1295,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
                 HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof)
         } /* end else */
 
-#ifdef H5_CLEAR_MEMORY
         HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
-#endif /* H5_CLEAR_MEMORY */
         file->mem = x;
 
         file->eof = new_eof;
@@ -1469,10 +1467,8 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
                     HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate memory block")
             } /* end else */
 
-#ifdef H5_CLEAR_MEMORY
             if(file->eof < new_eof)
                 HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
-#endif /* H5_CLEAR_MEMORY */
             file->mem = x;
 
             /* Update backing store, if using it and if closing */

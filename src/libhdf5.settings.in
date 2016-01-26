@@ -64,7 +64,6 @@ Features:
                             MPE: @MPE@
                      Direct VFD: @DIRECT_VFD@
                         dmalloc: @HAVE_DMALLOC@
-Clear file buffers before write: @CLEARFILEBUF@
            Using memory checker: @USINGMEMCHECKER@
 Memory allocation sanity checks: @MEMORYALLOCSANITYCHECK@
          Function Stack Tracing: @CODESTACK@

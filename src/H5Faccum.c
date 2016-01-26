@@ -164,9 +164,9 @@ H5F__accum_read(const H5F_io_info_t *fio_info, H5FD_mem_t type, haddr_t addr,
 
                     /* Note the new buffer size */
                     accum->alloc_size = new_alloc_size;
-#ifdef H5_CLEAR_MEMORY
-    HDmemset(accum->buf + accum->size, 0, (accum->alloc_size - accum->size));
-#endif /* H5_CLEAR_MEMORY */
+
+                    /* Clear the memory */
+                    HDmemset(accum->buf + accum->size, 0, (accum->alloc_size - accum->size));
                 } /* end if */
 
                 /* Read the part before the metadata accumulator */
@@ -395,9 +395,9 @@ H5F__accum_adjust(H5F_meta_accum_t *accum, const H5F_io_info_t *fio_info,
             /* Update accumulator info */
             accum->buf = new_buf;
             accum->alloc_size = new_size;
-#ifdef H5_CLEAR_MEMORY
-HDmemset(accum->buf + accum->size, 0, (accum->alloc_size - (accum->size + size)));
-#endif /* H5_CLEAR_MEMORY */
+
+            /* Clear the memory */
+            HDmemset(accum->buf + accum->size, 0, (accum->alloc_size - (accum->size + size)));
         } /* end if */
     } /* end if */
 
@@ -623,9 +623,9 @@ H5F__accum_write(const H5F_io_info_t *fio_info, H5FD_mem_t type, haddr_t addr,
 
                             /* Note the new buffer size */
                             accum->alloc_size = new_alloc_size;
-#ifdef H5_CLEAR_MEMORY
-HDmemset(accum->buf + size, 0, (accum->alloc_size - size));
-#endif /* H5_CLEAR_MEMORY */
+
+                            /* Clear the memory */
+                            HDmemset(accum->buf + size, 0, (accum->alloc_size - size));
                         } /* end if */
 
                         /* Copy the new metadata to the buffer */
@@ -656,6 +656,7 @@ HDmemset(accum->buf + size, 0, (accum->alloc_size - size));
                     /* Check if we need to resize the buffer */
                     if(size > accum->alloc_size) {
                         size_t new_size;        /* New size of accumulator */
+                        size_t clear_size;      /* Size of memory that needs clearing */
 
                         /* Adjust the buffer size to be a power of 2 that is large enough to hold data */
                         new_size = (size_t)1 << (1 + H5VM_log2_gen((uint64_t)(size - 1)));
@@ -666,12 +667,10 @@ HDmemset(accum->buf + size, 0, (accum->alloc_size - size));
 
                         /* Note the new buffer size */
                         accum->alloc_size = new_size;
-#ifdef H5_CLEAR_MEMORY
-{
-size_t clear_size = MAX(accum->size, size);
-HDmemset(accum->buf + clear_size, 0, (accum->alloc_size - clear_size));
-}
-#endif /* H5_CLEAR_MEMORY */
+
+                        /* Clear the memory */
+                        clear_size = MAX(accum->size, size);
+                        HDmemset(accum->buf + clear_size, 0, (accum->alloc_size - clear_size));
                     } /* end if */
                     else {
                         /* Check if we should shrink the accumulator buffer */
@@ -716,9 +715,9 @@ HDmemset(accum->buf + clear_size, 0, (accum->alloc_size - clear_size));
 
                     /* Note the new buffer size */
                     accum->alloc_size = new_size;
-#ifdef H5_CLEAR_MEMORY
-HDmemset(accum->buf + size, 0, (accum->alloc_size - size));
-#endif /* H5_CLEAR_MEMORY */
+
+                    /* Clear the memory */
+                    HDmemset(accum->buf + size, 0, (accum->alloc_size - size));
                 } /* end if */
 
                 /* Update the metadata accumulator information */

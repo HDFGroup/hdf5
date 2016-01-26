@@ -572,10 +572,8 @@ H5HL__cache_prefix_serialize(const H5F_t *f, void *_image, size_t len,
         /* Sanity check */
         HDassert((size_t)(image - (uint8_t *)_image) <= len);
 
-#ifdef H5_CLEAR_MEMORY
         /* Clear rest of local heap */
         HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
-#endif /* H5_CLEAR_MEMORY */
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

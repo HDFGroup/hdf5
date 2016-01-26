@@ -1026,10 +1026,9 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
             if(NULL == (dset_contig->sieve_buf = H5FL_BLK_CALLOC(sieve_buf, dset_contig->sieve_buf_size)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
-#ifdef H5_CLEAR_MEMORY
-if(dset_contig->sieve_size > len)
-    HDmemset(dset_contig->sieve_buf + len, 0, (dset_contig->sieve_size - len));
-#endif /* H5_CLEAR_MEMORY */
+            /* Clear memory */
+            if(dset_contig->sieve_size > len)
+                HDmemset(dset_contig->sieve_buf + len, 0, (dset_contig->sieve_size - len));
 
             /* Determine the new sieve buffer size & location */
             dset_contig->sieve_loc = addr;
