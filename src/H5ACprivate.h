@@ -197,7 +197,7 @@ typedef H5C_t	H5AC_t;
 #define H5AC_RING_NAME  "H5AC_ring_type"
 
 /* Dataset transfer property list for flush calls */
-extern hid_t H5AC_dxpl_id;
+H5_DLLVAR hid_t H5AC_dxpl_id;
 
 /* Default cache configuration. */
 
