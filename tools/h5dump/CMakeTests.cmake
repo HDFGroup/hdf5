@@ -11,6 +11,7 @@
   set (HDF5_REFERENCE_FILES
       ${HDF5_TOOLS_SRC_DIR}/testfiles/charsets.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/filter_fail.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/non_existing.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/packedbits.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2.ddl
@@ -282,6 +283,7 @@
   )
   set (HDF5_ERROR_REFERENCE_TEST_FILES
       ${PROJECT_SOURCE_DIR}/errfiles/filter_fail.err
+      ${PROJECT_SOURCE_DIR}/errfiles/non_existing.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-1.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2A.err
       ${PROJECT_SOURCE_DIR}/errfiles/tall-2A0.err
@@ -734,6 +736,8 @@
           charsets.out.err
           filter_fail.out
           filter_fail.out.err
+          non_existing.out
+          non_existing.out.err
           packedbits.out
           packedbits.out.err
           tall-1.out
@@ -1425,3 +1429,6 @@
 
   # test for -o -y for dataset with attributes
   ADD_H5_TEST_EXPORT (tall-6 tall.h5 0 --enable-error-stack -d /g1/g1.1/dset1.1.1 -y -o)
+
+  # test for non-existing file
+  ADD_H5_TEST (non_existing 1 --enable-error-stack tgroup.h5 non_existing.h5)

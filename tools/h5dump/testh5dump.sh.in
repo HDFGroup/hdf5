@@ -174,6 +174,7 @@ $SRC_H5DUMP_TESTFILES/tvms.h5
 LIST_OTHER_TEST_FILES="
 $SRC_H5DUMP_TESTFILES/charsets.ddl
 $SRC_H5DUMP_TESTFILES/filter_fail.ddl
+$SRC_H5DUMP_TESTFILES/non_existing.ddl
 $SRC_H5DUMP_TESTFILES/packedbits.ddl
 $SRC_H5DUMP_TESTFILES/tall-1.ddl
 $SRC_H5DUMP_TESTFILES/tall-2.ddl
@@ -345,6 +346,7 @@ $SRC_H5DUMP_TESTFILES/tbinregR.exp
 
 LIST_ERROR_TEST_FILES="
 ${SRC_H5DUMP_ERRORFILES}/filter_fail.err
+${SRC_H5DUMP_ERRORFILES}/non_existing.err
 ${SRC_H5DUMP_ERRORFILES}/tall-1.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2A.err
 ${SRC_H5DUMP_ERRORFILES}/tall-2A0.err
@@ -1302,6 +1304,9 @@ TOOLTEST5 filter_fail.ddl --enable-error-stack filter_fail.h5
 
 # test for -o -y for dataset with attributes
 TOOLTEST2 tall-6.exp --enable-error-stack -y -o tall-6.txt -d /g1/g1.1/dset1.1.1 tall.h5
+
+# test for non-existing file
+TOOLTEST3 non_existing.ddl --enable-error-stack tgroup.h5 non_existing.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

@@ -1581,10 +1581,14 @@ main(int argc, const char *argv[])
             if (H5Fclose(fid) < 0)
                 h5tools_setstatus(EXIT_FAILURE);
 
-        if(prefix)
+        if(prefix) {
             HDfree(prefix);
-        if(fname)
+            prefix = NULL;
+        }
+        if(fname) {
             HDfree(fname);
+            fname = NULL;
+        }
     } /* end while */
 
     if(hand) 
@@ -1601,11 +1605,15 @@ done:
     if(fid >=0)
         if (H5Fclose(fid) < 0)
             h5tools_setstatus(EXIT_FAILURE);
-    
-    if(prefix)
+
+    if(prefix) {
         HDfree(prefix);
-    if(fname)
+        prefix = NULL;
+    }
+    if(fname) {
         HDfree(fname);
+        fname = NULL;
+    }
 
     if(hand) 
         free_handler(hand, argc);
