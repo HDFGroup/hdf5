@@ -133,6 +133,9 @@ if test -z "$CXX"; then
   CXX_BASENAME=g++
 fi
 
+# Figure out GNU CXX compiler flags
+. $srcdir/config/gnu-cxxflags
+
 # compiler version strings
 
 # check if the compiler_version_info is already set
