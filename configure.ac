@@ -1863,10 +1863,10 @@ if test "X-$DEBUG_PKG" = X- ; then
 fi
 
 AC_SUBST([DEBUG_PKG])
-all_packages="ac,b,b2,d,e,f,g,hg,hl,i,mf,mm,o,p,s,st,t,v,z"
+all_packages="AC,B,B2,D,F,I,HL,O,S,ST,T,Z"
 case "X-$DEBUG_PKG" in
   X-yes)
-    DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
+    DEBUG_PKG="D,F,I,O,S,T,Z"
 ##    H5_CPPFLAGS="$H5_CPPFLAGS -UNDEBUG"
     AC_MSG_RESULT([default ($DEBUG_PKG)])
     ;;
