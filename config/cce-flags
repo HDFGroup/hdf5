@@ -55,17 +55,27 @@ if test "X-cce" = "X-$cc_vendor"; then
 
     # Production
     # -Wl,-s to remove all symbols for smaller file
-    PROD_CFLAGS="-O3 -Wl,-s"
+    PROD_CFLAGS="-Wl,-s"
     PROD_CPPFLAGS=
 
     # Debug
-    DEBUG_CFLAGS="-g -O0"
+    # NDEBUG is handled explicitly in configure
+    DEBUG_CFLAGS=
     DEBUG_CPPFLAGS=
 
-    # Profile
+    # Symbols
+    SYMBOL_CFLAGS="-g"
+    SYMBOL_CPPFLAGS=
+
+    # Profiling
     # Use this for profiling with gprof
-    PROFILE_CFLAGS="-g -p"
+    PROFILE_CFLAGS="-p"
     PROFILE_CPPFLAGS=
+
+    # Optimization
+    HIGH_OPT_CFLAGS="-O3"
+    DEBUG_OPT_CFLAGS="-O0"
+    NO_OPT_CFLAGS="-O0"
 
     # Flags are set
     cc_flags_set=yes

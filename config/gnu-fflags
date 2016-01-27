@@ -83,13 +83,21 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     H5_FCFLAGS="$H5_FCFLAGS -Wno-c-binding-type"
 
     # Production
-    PROD_FCFLAGS="-O2 -s"
+    PROD_FCFLAGS="-s"
 
     # Debug
-    DEBUG_FCFLAGS="-g -fbounds-check"
+    DEBUG_FCFLAGS="-fbounds-check"
 
-    # Profile
-    PROFILE_FCFLAGS="-g -pg"
+    # Symbols
+    SYMBOLS_FCFLAGS="-g"
+
+    # Profiling
+    PROFILE_FCFLAGS="-pg"
+
+    # Optimization
+    HIGH_OPT_FCFLAGS="-O2"
+    DEBUG_OPT_FCFLAGS="-O0"
+    NO_OPT_FCFLAGS="-O0"
 
     # Flags are set
     f9x_flags_set=yes

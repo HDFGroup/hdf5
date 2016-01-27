@@ -51,7 +51,7 @@ if test "X-" = "X-$FC"; then
             FC=gfortran
             FC_BASENAME=gfortran
             ;;
-	pgcc*)
+        pgcc*)
             FC=pgf90
             FC_BASENAME=pgf90
             ;;
