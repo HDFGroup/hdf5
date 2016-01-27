@@ -209,7 +209,7 @@ typedef H5C_t	H5AC_t;
 /* Dataset transfer property list for flush calls */
 /* (Collective set, "block before metadata write" set and "library internal" set) */
 /* (Global variable declaration, definition is in H5AC.c) */
-extern hid_t H5AC_dxpl_id;
+H5_DLLVAR hid_t H5AC_dxpl_id;
 
 /* Dataset transfer property list for independent metadata I/O calls */
 /* (just "library internal" set - i.e. independent transfer mode) */
