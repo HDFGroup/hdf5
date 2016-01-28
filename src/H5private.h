@@ -870,58 +870,31 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #endif /* HDfrexpl */
 /* fscanf() variable arguments */
 #ifndef HDfseek
-    #ifdef H5_HAVE_FSEEKO
-             #define HDfseek(F,O,W)  fseeko(F,O,W)
-    #else /* H5_HAVE_FSEEKO */
-             #define HDfseek(F,O,W)  fseek(F,O,W)
-    #endif /* H5_HAVE_FSEEKO */
+    #define HDfseek(F,O,W)  fseeko(F,O,W)
 #endif /* HDfseek */
 #ifndef HDfsetpos
     #define HDfsetpos(F,P)    fsetpos(F,P)
 #endif /* HDfsetpos */
-/* definitions related to the file stat utilities.
- * For Unix, if off_t is not 64bit big, try use the pseudo-standard
- * xxx64 versions if available.
- */
-#if !defined(HDfstat) || !defined(HDstat) || !defined(HDlstat)
-    #if H5_SIZEOF_OFF_T!=8 && H5_SIZEOF_OFF64_T==8 && defined(H5_HAVE_STAT64)
-        #ifndef HDfstat
-            #define HDfstat(F,B)        fstat64(F,B)
-        #endif /* HDfstat */
-        #ifndef HDlstat
-            #define HDlstat(S,B)    lstat64(S,B)
-        #endif /* HDlstat */
-        #ifndef HDstat
-            #define HDstat(S,B)    stat64(S,B)
-        #endif /* HDstat */
-        typedef struct stat64       h5_stat_t;
-        typedef off64_t             h5_stat_size_t;
-        #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF64_T
-    #else /* H5_SIZEOF_OFF_T!=8 && ... */
-        #ifndef HDfstat
-            #define HDfstat(F,B)        fstat(F,B)
-        #endif /* HDfstat */
-        #ifndef HDlstat
-            #define HDlstat(S,B)    lstat(S,B)
-        #endif /* HDlstat */
-        #ifndef HDstat
-            #define HDstat(S,B)    stat(S,B)
-        #endif /* HDstat */
-        typedef struct stat         h5_stat_t;
-        typedef off_t               h5_stat_size_t;
-        #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
-    #endif /* H5_SIZEOF_OFF_T!=8 && ... */
-#endif /* !defined(HDfstat) || !defined(HDstat) */
+#ifndef HDfstat
+    #define HDfstat(F,B)        fstat(F,B)
+#endif /* HDfstat */
+#ifndef HDlstat
+    #define HDlstat(S,B)    lstat(S,B)
+#endif /* HDlstat */
+#ifndef HDstat
+    #define HDstat(S,B)    stat(S,B)
+#endif /* HDstat */
+
+typedef struct stat         h5_stat_t;
+typedef off_t               h5_stat_size_t;
+#define HDoff_t    off_t
+#define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
 
 #ifndef HDftell
-    #define HDftell(F)    ftell(F)
+    #define HDftell(F)    ftello(F)
 #endif /* HDftell */
 #ifndef HDftruncate
-  #ifdef H5_HAVE_FTRUNCATE64
-    #define HDftruncate(F,L)        ftruncate64(F,L)
-  #else
     #define HDftruncate(F,L)        ftruncate(F,L)
-  #endif
 #endif /* HDftruncate */
 #ifndef HDfwrite
     #define HDfwrite(M,Z,N,F)  fwrite(M,Z,N,F)
@@ -1064,15 +1037,8 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDlongjmp
     #define HDlongjmp(J,N)    longjmp(J,N)
 #endif /* HDlongjmp */
-/* HDlseek and HDoff_t must be defined together for consistency. */
 #ifndef HDlseek
-    #ifdef H5_HAVE_LSEEK64
-        #define HDlseek(F,O,W)  lseek64(F,O,W)
-        #define HDoff_t    off64_t
-    #else
-        #define HDlseek(F,O,W)  lseek(F,O,W)
-  #define HDoff_t    off_t
-    #endif
+    #define HDlseek(F,O,W)  lseek(F,O,W)
 #endif /* HDlseek */
 #ifndef HDmalloc
     #define HDmalloc(Z)    malloc(Z)

@@ -1045,10 +1045,6 @@ fi
 ##
 case "$host_cpu-$host_vendor-$host_os" in
   *linux*)
-    ## Make available various LFS-related routines using the following
-    ## _LARGEFILE*_SOURCE macros.
-    AM_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
-
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
     ## defined correctly in <stdio.h>.
@@ -1082,23 +1078,6 @@ esac
 ## Note: Both will be restored by the end of configure.
 CPPFLAGS="$H5_CPPFLAGS $AM_CPPFLAGS $CPPFLAGS"
 CFLAGS="$H5_CFLAGS $AM_CFLAGS $CFLAGS"
-
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/types.h>
-]],
-    [[off64_t n = 0;]])],
-    [AC_CHECK_FUNCS([lseek64 fseeko64 ftello64 ftruncate64])],
-    [AC_MSG_RESULT([skipping test for lseek64, fseeko64 , ftello64, ftruncate64 because off64_t is not defined])])
-
-AC_CHECK_FUNCS([fseeko ftello])
-
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#include <sys/stat.h>
-]],
-[[struct stat64 sb;]])],
-[AC_CHECK_FUNCS([stat64 fstat64])],
-[AC_MSG_RESULT([skipping test for stat64 and fstat64])])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
@@ -1150,7 +1129,6 @@ cat >>confdefs.h <<\EOF
 #include <sys/types.h> /*for off_t definition*/
 EOF
 AC_CHECK_SIZEOF([off_t])
-AC_CHECK_SIZEOF([off64_t])
 
 if test "X$C9x" = "Xyes"; then
   cat >>confdefs.h <<\EOF
