@@ -1875,8 +1875,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Fformat_convert_super (Internal)
  *
- * Purpose:	Downgrade the superblock version for the tool h5format_convert.
- *		(NOTE: more needs to be done to this routine)
+ * Purpose:	Downgrade the superblock version to v2 and
+ *		downgrade persistent file space to non-persistent
+ *		for 1.8 library.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1885,9 +1886,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fformat_convert_super(hid_t fid)
+H5Fformat_convert(hid_t fid)
 {
     H5F_t	*f = NULL;              /* File to flush */
+    hbool_t	mark_dirty = FALSE;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1897,13 +1899,37 @@ H5Fformat_convert_super(hid_t fid)
         case H5I_FILE:
             if(NULL == (f = (H5F_t *)H5I_object(fid)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-	    if(f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_LATEST)
+
+	    if(f->shared->sblock->super_vers > HDF5_SUPERBLOCK_VERSION_V18_LATEST) {
+		f->shared->sblock->super_vers = HDF5_SUPERBLOCK_VERSION_V18_LATEST;
+		mark_dirty = TRUE;
+	    }
+
+            if(f->shared->fs_strategy == H5F_FILE_SPACE_STRATEGY_DEF &&
+	       f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF) {
+		if(mark_dirty) {
+		    /* Mark superblock as dirty */
+		    if(H5F_super_dirty(f) < 0)
+			HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+		}
 		HGOTO_DONE(SUCCEED)
-	    f->shared->sblock->super_vers = HDF5_SUPERBLOCK_VERSION_LATEST - 1;
+	    }
+
+	    /* Check to remove free-space manager info message from superblock extension */
+            if(H5F_addr_defined(f->shared->sblock->ext_addr)) {
+                if(H5F_super_ext_remove_msg(f, H5AC_dxpl_id, H5O_FSINFO_ID) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
+	    }
+
+            if(H5MF_try_close(f, H5AC_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to free free-space address")
+
+            f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
+            f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
 
 	    /* Mark superblock as dirty */
 	    if(H5F_super_dirty(f) < 0)
-		HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+		HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
             break;
 
@@ -1928,4 +1954,4 @@ H5Fformat_convert_super(hid_t fid)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Fformat_convert_super() */
+} /* end H5Fformat_convert() */

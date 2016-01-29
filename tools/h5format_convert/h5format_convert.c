@@ -408,28 +408,6 @@ main(int argc, const char *argv[])
     } else if(verbose_g)
 	printf("Open the file %s\n", fname_g);
 
-    /* A temporaray fix: 
-     * need to handle H5O_FSINFO_ID message when downgrade superblock version from 3 to 2 
-     */
-    if((fcpl = H5Fget_create_plist(fid)) < 0) {
-	error_msg("unable to get file creation property list for \"%s\"\n", fname_g);
-	h5tools_setstatus(EXIT_FAILURE);
-	goto done;
-    }
-    if(H5Pget_file_space(fcpl, &strategy, &threshold) < 0) {
-	error_msg("unable to get file space strategy/threshold\n");
-	h5tools_setstatus(EXIT_FAILURE);
-	goto done;
-    }
-    /* Check for non-default strategy/threshold: 
-     * --whether there is H5O_FSINFO_ID message in the superblock extension 
-     */
-    if(strategy != H5F_FILE_SPACE_ALL || threshold != 1) {
-	error_msg("unable to convert due to non-default file space strategy/threshold\n");
-	h5tools_setstatus(EXIT_FAILURE);
-	goto done;
-    }
-
     if(dset_g) { /* Convert a specified dataset in the file */
 	if(verbose_g)
 	    printf("Going to process dataset: %s...\n", dname_g);
@@ -443,16 +421,16 @@ main(int argc, const char *argv[])
     }
 
     if(verbose_g) {
-	if(noop_g) {
-            printf("Not processing the file's superblock version...\n");
-	    h5tools_setstatus(EXIT_SUCCESS);
-	    goto done;
-	}
-	printf("Processing the file's superblock version...\n");
+        if(noop_g) {
+            printf("Not processing the file's superblock...\n");
+            h5tools_setstatus(EXIT_SUCCESS);
+            goto done;
+        }
+        printf("Processing the file's superblock...\n");
     }
 
-    if(H5Fformat_convert_super(fid) < 0) {
-        error_msg("unable to convert file's superblock version\"%s\"\n", fname_g);
+    if(H5Fformat_convert(fid) < 0) {
+        error_msg("unable to convert file's superblock\"%s\"\n", fname_g);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
