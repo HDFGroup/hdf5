@@ -68,20 +68,30 @@ if test "X-icc" = "X-$cc_vendor"; then
 
     # General
     # Default to C99 standard.
-    H5_CFLAGS="${H5_CFLAGS:--std=c99 $arch}"
+    H5_CFLAGS="${H5_CFLAGS:--std=c99 $arch} -Wcheck -Wall"
 
     # Production is set to default; see settings for specific version further down
-    PROD_CFLAGS="-O" 
+    PROD_CFLAGS=
     PROD_CPPFLAGS=
 
     # Debug
-    DEBUG_CFLAGS="-Wcheck -Wall -g -O0"
+    # NDEBUG is handled explicitly in configure
+    DEBUG_CFLAGS=
     DEBUG_CPPFLAGS=
 
-    # Profile
+    # Symbols
+    SYMBOL_CFLAGS="-g"
+    SYMBOL_CPPFLAGS=
+
+    # Profiling
     # Use this for profiling with gprof
-    PROFILE_CFLAGS="-g -p"
+    PROFILE_CFLAGS="-p"
     PROFILE_CPPFLAGS=
+
+    # Optimization
+    HIGH_OPT_CFLAGS="-O"
+    DEBUG_OPT_CFLAGS="-O0"
+    NO_OPT_CFLAGS="-O0"
 
     # Flags are set
     cc_flags_set=yes

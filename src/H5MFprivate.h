@@ -21,8 +21,6 @@
  *
  * Purpose:             Private header file for file memory management.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #ifndef _H5MFprivate_H
@@ -36,13 +34,6 @@
 /* Library Private Macros */
 /**************************/
 
-/*
- * Feature: Define H5MF_DEBUG on the compiler command line if you want to
- *	    see diagnostics from this layer.
- */
-#ifdef NDEBUG
-#  undef H5MF_DEBUG
-#endif
 
 /****************************/
 /* Library Private Typedefs */

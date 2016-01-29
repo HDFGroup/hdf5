@@ -2390,9 +2390,7 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
 
     TESTING("H5Ocopy(): compound dataset");
 
-#ifdef H5_CLEAR_MEMORY
     HDmemset(buf, 0, sizeof(buf));
-#endif /* H5_CLEAR_MEMORY */
     for(i = 0; i < DIM_SIZE_1; i++) {
         buf[i].a = i;
         buf[i].d = (double)1.0F / (double)(i + 1);
