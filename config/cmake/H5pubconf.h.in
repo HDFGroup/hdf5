@@ -18,10 +18,6 @@
 /* Define if building universal (internal helper macro) */
 #cmakedefine H5_AC_APPLE_UNIVERSAL_BUILD @H5_AC_APPLE_UNIVERSAL_BUILD@
 
-/* Define if the memory buffers being written to disk should be cleared before
-   writing. */
-#cmakedefine H5_CLEAR_MEMORY @H5_CLEAR_MEMORY@
-
 /* Define if C++ compiler recognizes offsetof */
 #cmakedefine H5_CXX_HAVE_OFFSETOF @H5_CXX_HAVE_OFFSETOF@
 

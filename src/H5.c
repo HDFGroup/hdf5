@@ -552,30 +552,29 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5_debug_mask
+ * Function:    H5_debug_mask
  *
- * Purpose:	Set runtime debugging flags according to the string S.  The
- *		string should contain file numbers and package names
- *		separated by other characters. A file number applies to all
- *		following package names up to the next file number. The
- *		initial file number is `2' (the standard error stream). Each
- *		package name can be preceded by a `+' or `-' to add or remove
- *		the package from the debugging list (`+' is the default). The
- *		special name `all' means all packages.
+ * Purpose:     Set runtime debugging flags according to the string S.  The
+ *              string should contain file numbers and package names
+ *              separated by other characters. A file number applies to all
+ *              following package names up to the next file number. The
+ *              initial file number is `2' (the standard error stream). Each
+ *              package name can be preceded by a `+' or `-' to add or remove
+ *              the package from the debugging list (`+' is the default). The
+ *              special name `all' means all packages.
  *
- *		The name `trace' indicates that API tracing is to be turned
- *		on or off.
+ *              The name `trace' indicates that API tracing is to be turned
+ *              on or off.
  *
- * Return:	void
+ *              The name 'ttop' indicates that only top-level API calls
+ *              should be shown. This also turns on tracing as if the
+ *              'trace' word was shown.
  *
- * Programmer:	Robb Matzke
+ * Return:      void
+ *
+ * Programmer:  Robb Matzke
  *              Wednesday, August 19, 1998
  *
- * Modifications:
- *              Robb Matzke, 2002-08-08
- *              Accepts the `ttop' word. If enabled then show only the
- *              top level API calls, otherwise show all API calls.  Also
- *              turns on tracing as if the `trace' word was present.
  *-------------------------------------------------------------------------
  */
 static void
@@ -587,55 +586,57 @@ H5_debug_mask(const char *s)
     hbool_t	clear;
 
     while (s && *s) {
-	if (HDisalpha(*s) || '-'==*s || '+'==*s) {
-	    /* Enable or Disable debugging? */
-	    if ('-'==*s) {
-		clear = TRUE;
-		s++;
-	    } else if ('+'==*s) {
-		clear = FALSE;
-		s++;
-	    } else {
-		clear = FALSE;
-	    }
 
-	    /* Get the name */
-	    for (i=0; HDisalpha(*s); i++, s++)
-		if (i<sizeof pkg_name)
+        if (HDisalpha(*s) || '-'==*s || '+'==*s) {
+
+            /* Enable or Disable debugging? */
+            if ('-'==*s) {
+                clear = TRUE;
+                s++;
+            } else if ('+'==*s) {
+                clear = FALSE;
+                s++;
+            } else {
+                clear = FALSE;
+            } /* end if */
+
+            /* Get the name */
+            for (i=0; HDisalpha(*s); i++, s++)
+                if (i<sizeof pkg_name)
                     pkg_name[i] = *s;
-	    pkg_name[MIN(sizeof(pkg_name)-1, i)] = '\0';
+            pkg_name[MIN(sizeof(pkg_name)-1, i)] = '\0';
 
-	    /* Trace, all, or one? */
-	    if (!HDstrcmp(pkg_name, "trace")) {
-		H5_debug_g.trace = clear ? NULL : stream;
+            /* Trace, all, or one? */
+            if (!HDstrcmp(pkg_name, "trace")) {
+                H5_debug_g.trace = clear ? NULL : stream;
             } else if (!HDstrcmp(pkg_name, "ttop")) {
                 H5_debug_g.trace = stream;
                 H5_debug_g.ttop = (hbool_t)!clear;
             } else if (!HDstrcmp(pkg_name, "ttimes")) {
                 H5_debug_g.trace = stream;
                 H5_debug_g.ttimes = (hbool_t)!clear;
-	    } else if (!HDstrcmp(pkg_name, "all")) {
-		for (i=0; i<(size_t)H5_NPKGS; i++)
-		    H5_debug_g.pkg[i].stream = clear ? NULL : stream;
-	    } else {
-		for (i=0; i<(size_t)H5_NPKGS; i++) {
-		    if (!HDstrcmp(H5_debug_g.pkg[i].name, pkg_name)) {
-			H5_debug_g.pkg[i].stream = clear ? NULL : stream;
-			break;
-		    }
-		}
-		if (i>=(size_t)H5_NPKGS)
-		    fprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
-	    }
+            } else if (!HDstrcmp(pkg_name, "all")) {
+                for (i=0; i<(size_t)H5_NPKGS; i++)
+                    H5_debug_g.pkg[i].stream = clear ? NULL : stream;
+            } else {
+                for (i=0; i<(size_t)H5_NPKGS; i++) {
+                    if (!HDstrcmp(H5_debug_g.pkg[i].name, pkg_name)) {
+                        H5_debug_g.pkg[i].stream = clear ? NULL : stream;
+                        break;
+		            } /* end if */
+                } /* end for */
+                if (i>=(size_t)H5_NPKGS)
+                    fprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
+            } /* end if-else */
 
-	} else if (HDisdigit(*s)) {
-	    int fd = (int)HDstrtol(s, &rest, 0);
-	    H5_debug_open_stream_t *open_stream;
+        } else if (HDisdigit(*s)) {
+            int fd = (int)HDstrtol(s, &rest, 0);
+            H5_debug_open_stream_t *open_stream;
 
-	    if((stream = HDfdopen(fd, "w")) != NULL) {
-	        (void)HDsetvbuf(stream, NULL, _IOLBF, (size_t)0);
+            if((stream = HDfdopen(fd, "w")) != NULL) {
+                (void)HDsetvbuf(stream, NULL, _IOLBF, (size_t)0);
 
-	        if(NULL == (open_stream = (H5_debug_open_stream_t *)H5MM_malloc(sizeof(H5_debug_open_stream_t)))) {
+                if(NULL == (open_stream = (H5_debug_open_stream_t *)H5MM_malloc(sizeof(H5_debug_open_stream_t)))) {
                     (void)HDfclose(stream);
                     return;
                 } /* end if */
@@ -644,11 +645,15 @@ H5_debug_mask(const char *s)
                 open_stream->next = H5_debug_g.open_stream;
                 H5_debug_g.open_stream = open_stream;
             } /* end if */
-	    s = rest;
-	} else {
-	    s++;
-	}
-    }
+
+            s = rest;
+        } else {
+            s++;
+        } /* end if-else */
+    } /* end while */
+
+    return;
+
 } /* end H5_debug_mask() */
 
 #ifdef H5_HAVE_PARALLEL

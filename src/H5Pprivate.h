@@ -181,7 +181,8 @@ H5_DLL herr_t H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id,
     unsigned int *flags, size_t *cd_nelmts, unsigned cd_values[],
     size_t namelen, char name[], unsigned *filter_config);
 H5_DLL htri_t H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id);
-H5_DLL herr_t H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, hid_t *dxpl_id);
+H5_DLL herr_t H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, 
+    hid_t *dxpl_id, hid_t loc_id, hbool_t is_collective);
 
 /* Query internal fields of the property list struct */
 H5_DLL hid_t H5P_get_plist_id(const H5P_genplist_t *plist);

@@ -344,10 +344,8 @@ H5B__serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
     /* Sanity check */
     HDassert((size_t)(image - (uint8_t *)_image) <= len);
 
-#ifdef H5_CLEAR_MEMORY
     /* Clear rest of node */
     HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
-#endif /* H5_CLEAR_MEMORY */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

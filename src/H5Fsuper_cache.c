@@ -625,9 +625,6 @@ H5F__cache_superblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
     /* (We'll rely on the cache to make sure it actually *is* flushed
        last (and collectively in parallel), but this check doesn't hurt) */
     HDassert(sblock->cache_info.flush_me_last);    
-#ifdef H5_HAVE_PARALLEL
-    HDassert(sblock->cache_info.flush_me_collectively);
-#endif
 
     /* Encode the common portion of the file superblock for all versions */
     HDmemcpy(image, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN);

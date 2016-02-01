@@ -386,7 +386,7 @@ H5C_apply_candidate_list(H5F_t * f,
      * Now scan the LRU and PEL lists, flushing or clearing entries as
      * needed.
      *
-     * The flush_me_last and flush_me_collectively flags may dictate how or
+     * The flush_me_last flag may dictate how or
      * when some entries can be flushed, and should be addressed here.
      * However, in their initial implementation, these flags only apply to the
      * superblock, so there's only a relatively small change to this function
@@ -607,11 +607,10 @@ H5C_apply_candidate_list(H5F_t * f,
                    it is the simple case of a single pinned entry needing
                    flushed last and collectively is just a minor addition to
                    this routine, but signficantly buffing up the usage of
-                   flush_me_last or flush_me_collectively will require a more
+                   flush_me_last will require a more
                    intense rework of this function and potentially the function
                    of candidate lists as a whole. */
 
-                HDassert(entry_ptr->flush_me_collectively);
                 entries_to_flush_or_clear_last++;
                 entries_to_flush_collectively++;
                 HDassert(entries_to_flush_or_clear_last == 1);

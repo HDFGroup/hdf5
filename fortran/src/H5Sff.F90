@@ -1232,7 +1232,7 @@ CONTAINS
     ENDIF
     ! Case of optional parameters.
     !
-    ! Find the rank of the dataspace to allocate memery for
+    ! Find the rank of the dataspace to allocate memory for
     ! default stride and block arrays.
     !
     CALL h5sget_simple_extent_ndims_f(space_id, rank, hdferr)
@@ -1378,7 +1378,7 @@ CONTAINS
 !  endif
             ! Case of optional parameters.
             !
-            ! Find the rank of the dataspace to allocate memery for
+            ! Find the rank of the dataspace to allocate memory for
             ! default stride and block arrays.
             !
 !  CALL h5sget_simple_extent_ndims_f(space_id, rank, hdferr)
