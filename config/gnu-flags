@@ -127,8 +127,8 @@ case "$cc_vendor-$cc_version" in
     DEBUG_CPPFLAGS=
 
     # Symbols
-    SYMBOL_CFLAGS="-g"
-    SYMBOL_CPPFLAGS=
+    SYMBOLS_CFLAGS="-g"
+    SYMBOLS_CPPFLAGS=
 
     # Profile
     PROFILE_CFLAGS="-pg"
