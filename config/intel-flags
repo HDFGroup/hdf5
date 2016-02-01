@@ -80,8 +80,8 @@ if test "X-icc" = "X-$cc_vendor"; then
     DEBUG_CPPFLAGS=
 
     # Symbols
-    SYMBOL_CFLAGS="-g"
-    SYMBOL_CPPFLAGS=
+    SYMBOLS_CFLAGS="-g"
+    SYMBOLS_CPPFLAGS=
 
     # Profiling
     # Use this for profiling with gprof

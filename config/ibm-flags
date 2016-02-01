@@ -74,8 +74,8 @@ if test "XL" = "$cc_vendor"; then
     DEBUG_CPPFLAGS=
 
     # Symbols
-    SYMBOL_CFLAGS="-g"
-    SYMBOL_CPPFLAGS=
+    SYMBOLS_CFLAGS="-g"
+    SYMBOLS_CPPFLAGS=
 
     # Profiling
     PROFILE_CFLAGS="-pg"
