@@ -124,9 +124,7 @@ while [ $# -gt 0 ]; do
 done
 
 # Loop over index types
-# Comment out until I figure out the v2 B-tree bug -QAK
-#for index_type in "-i ea" "-i b2" 
-for index_type in "-i ea"
+for index_type in "-i ea" "-i b2" 
 do
     # Try with and without compression
     for compress in "" "-c 5"
@@ -450,7 +448,7 @@ do
         pid_readers=""
         echo launch $Nrdrs_spa swmr_sparse_readers
         while [ $n -lt $Nrdrs_spa ]; do
-            # The sparse writer spits out a LOT of data so it's set to 'quiet'
+            # The sparse reader spits out a LOT of data so it's set to 'quiet'
             ./swmr_sparse_reader -q $Nrecs_spa &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`

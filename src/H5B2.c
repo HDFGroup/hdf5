@@ -354,9 +354,19 @@ H5B2_update(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op, void *op_
     HDassert(H5B2_UPDATE_UNKNOWN != status);
 
     /* Use insert algorithm if nodes to leaf full */
-    if(H5B2_UPDATE_INSERT_CHILD_FULL == status)
+    if(H5B2_UPDATE_INSERT_CHILD_FULL == status) {
         if(H5B2__insert_hdr(hdr, dxpl_id, udata) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into B-tree")
+    } /* end if */
+    else if(H5B2_UPDATE_SHADOW_DONE == status || H5B2_UPDATE_INSERT_DONE == status) {
+        /* Mark B-tree header as dirty */
+        if(H5B2__hdr_dirty(hdr) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTMARKDIRTY, FAIL, "unable to mark B-tree header dirty")
+    } /* end else-if */
+    else {
+        /* Sanity check */
+        HDassert(H5B2_UPDATE_MODIFY_DONE == status);
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

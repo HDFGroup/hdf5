@@ -242,6 +242,7 @@ typedef enum H5B2_nodepos_t {
 typedef enum H5B2_update_status_t {
     H5B2_UPDATE_UNKNOWN,            /* Unknown update status (initial state) */
     H5B2_UPDATE_MODIFY_DONE,        /* Update successfully modified existing record */
+    H5B2_UPDATE_SHADOW_DONE,        /* Update modified existing record and modified node was shadowed */
     H5B2_UPDATE_INSERT_DONE,        /* Update inserted record successfully */
     H5B2_UPDATE_INSERT_CHILD_FULL   /* Update will insert record, but child is full */
 } H5B2_update_status_t;
