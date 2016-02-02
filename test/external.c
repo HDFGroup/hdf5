@@ -974,52 +974,83 @@ test_open_ext_link_twice(hid_t fapl)
 int
 main(void)
 {
-    hid_t	fapl_id = -1;       /* file access properties               */
+    hid_t	fapl_id_old = -1;   /* file access properties (old format)  */
+    hid_t	fapl_id_new = -1;   /* file access properties (new format)  */
     hid_t	fid = -1;           /* file for test_1* functions           */
-    char	filename[1024];     /* file name for test_1* funcs          */
     hid_t	gid = -1;           /* group to emit diagnostics            */
+    char	filename[1024];     /* file name for test_1* funcs          */
+    unsigned latest_format;     /* default or latest file format        */
     int		nerrors = 0;        /* number of errors                     */
 
     h5_reset();
-    fapl_id = h5_fileaccess();
-    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
 
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+    /* Get a fapl for the old (default) file format */
+    fapl_id_old = h5_fileaccess();
+    h5_fixname(FILENAME[0], fapl_id_old, filename, sizeof(filename));
+
+    /* Copy and set up a fapl for the latest file format */
+    if((fapl_id_new = H5Pcopy(fapl_id_old)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_libver_bounds(fapl_id_new, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         FAIL_STACK_ERROR
 
-    /* Create a group that will be used in the file set read test */
-    if((gid = H5Gcreate2(fid, "emit-diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
-    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+    /* Test with old & new format groups */
+    for(latest_format = FALSE; latest_format <= TRUE; latest_format++) {
+        hid_t current_fapl_id = -1;
 
-    /* These tests use a common file */
-    nerrors += test_non_extendible(fid);
-    nerrors += test_too_small(fid);
-    nerrors += test_large_enough_current_eventual(fid);
-    nerrors += test_large_enough_current_not_eventual(fid);
-    nerrors += test_unlimited(fid);
-    nerrors += test_multiple_files(fid);
+        /* Set the fapl for different file formats */
+        if(latest_format) {
+            puts("\nTesting with the latest file format:");
+            current_fapl_id = fapl_id_new;
+        } /* end if */
+        else {
+            puts("Testing with the default file format:");
+            current_fapl_id = fapl_id_old;
+        } /* end else */
 
-    /* These tests use no file */
-    nerrors += test_add_to_unlimited();
-    nerrors += test_overflow();
+        /* Create the common file used by some of the tests */
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, current_fapl_id)) < 0)
+            FAIL_STACK_ERROR
 
-    /* These tests use the VFD-aware fapl */
-    nerrors += test_read_file_set(fapl_id);
-    nerrors += test_write_file_set(fapl_id);
-    nerrors += test_open_ext_link_twice(fapl_id);
+        /* Create a group that will be used in the file set read test */
+        if((gid = H5Gcreate2(fid, "emit-diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
+        if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
-    /* Verify symbol table messages are cached */
-    nerrors += (h5_verify_cached_stabs(FILENAME, fapl_id) < 0 ? 1 : 0);
+        /* These tests use a common file */
+        nerrors += test_non_extendible(fid);
+        nerrors += test_too_small(fid);
+        nerrors += test_large_enough_current_eventual(fid);
+        nerrors += test_large_enough_current_not_eventual(fid);
+        nerrors += test_unlimited(fid);
+        nerrors += test_multiple_files(fid);
+
+        /* These tests use no file */
+        nerrors += test_add_to_unlimited();
+        nerrors += test_overflow();
+
+        /* These tests use the VFD-aware fapl */
+        nerrors += test_read_file_set(current_fapl_id);
+        nerrors += test_write_file_set(current_fapl_id);
+        nerrors += test_open_ext_link_twice(current_fapl_id);
+
+        /* Verify symbol table messages are cached */
+        nerrors += (h5_verify_cached_stabs(FILENAME, current_fapl_id) < 0 ? 1 : 0);
+
+        /* Close the common file */
+        if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    } /* end for */
 
     if(nerrors > 0) goto error;
 
-    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    /* Close the new ff fapl. h5_cleanup will take care of the old ff fapl */
+    if(H5Pclose(fapl_id_new) < 0) FAIL_STACK_ERROR
 
     HDputs("All external storage tests passed.");
 
     /* Clean up files used by file set tests */
-    if(h5_cleanup(FILENAME, fapl_id)) {
+    if(h5_cleanup(FILENAME, fapl_id_old)) {
         HDremove("extern_1a.raw");
         HDremove("extern_1b.raw");
         HDremove("extern_2a.raw");
@@ -1035,7 +1066,8 @@ main(void)
 error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
-        H5Pclose(fapl_id);
+        H5Pclose(fapl_id_old);
+        H5Pclose(fapl_id_new);
         H5Gclose(gid);
     } H5E_END_TRY;
     nerrors = MAX(1, nerrors);
