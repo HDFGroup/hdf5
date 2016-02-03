@@ -1897,16 +1897,16 @@ AC_ARG_ENABLE([clear-file-buffers],
               [CLEARFILEBUF=$enableval])
 
 case "X-$CLEARFILEBUF" in
+  X-no)
+      CLEARFILEBUF=no
+      AC_MSG_RESULT([no])
+    ;;
   *)
       CLEARFILEBUF=yes
       AC_MSG_RESULT([yes])
       AC_DEFINE([CLEAR_MEMORY], [1],
                 [Define if the memory buffers being written to disk should be
                 cleared before writing.])
-    ;;
-  X-no)
-      CLEARFILEBUF=no
-      AC_MSG_RESULT([no])
     ;;
 esac
 

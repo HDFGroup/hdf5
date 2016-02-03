@@ -126,6 +126,24 @@ Bug Fixes since HDF5-1.8.16
 
       (DER, 2015/12/08, HDFFV-9627)
 
+    - The --enable-clear-file-buffers configure option was non-functional so
+      the feature was always enabled (its default value).
+
+      Regardless of the configure flag, the setting was always enabled when
+      the autotools were used to configure HDF5. This was due to the "no"
+      option being processed after the "*" option in configure.ac so "*"
+      matched first. CMake was unaffected.
+
+      The option now works correctly.
+
+      NOTE that builders are always advised to leave this option enabled.
+      When disabled, buffers that are written to disk may contain the
+      memory's previous contents, which may include secure information.
+      The performance overhead of the feature (a single memset call per
+      allocation) is minimal.
+
+      (DER, 2016/02/03, HDFFV-9676)
+
     Library
     -------
     - Fixed some format string warnings that prevent compiling with
