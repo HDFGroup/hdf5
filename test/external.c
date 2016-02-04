@@ -222,7 +222,7 @@ test_non_extendible(hid_t file)
     hsize_t	max_size[1];        /* data space maximum size              */
     int		n;                  /* number of external files             */
     char	name[256];          /* external file name                   */
-    HDoff_t	file_offset;        /* external file offset                 */
+    off_t	file_offset;        /* external file offset                 */
     hsize_t	file_size;          /* sizeof external file segment         */
     haddr_t dset_addr;          /* address of dataset                   */
 
@@ -494,7 +494,7 @@ test_unlimited(hid_t file)
     hsize_t	max_size[1];        /* data space maximum size              */
     int		n;                  /* number of external files             */
     char	name[256];          /* external file name                   */
-    HDoff_t	file_offset;        /* external file offset                 */
+    off_t	file_offset;        /* external file offset                 */
     hsize_t	file_size;          /* sizeof external file segment         */
 
     TESTING("unlimited dataspace, unlimited external storage");
@@ -810,7 +810,7 @@ test_read_file_set(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Verify data */
-    for(i = hs_start; i < hs_start + hs_count; i++) {
+    for(i = (size_t)hs_start; i < (size_t)(hs_start + hs_count); i++) {
         if(whole[i] != (signed)i)
             FAIL_PUTS_ERROR("Incorrect value(s) read (hyperslab).");
     } /* end for */

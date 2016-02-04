@@ -813,8 +813,8 @@ Wsetenv(const char *name, const char *value, int overwrite)
      */
     if(!overwrite) {
         err = getenv_s(&bufsize, NULL, 0, name);
-        if(err || bufsize)
-            return (int)err
+        if (err || bufsize)
+            return (int)err;
     } /* end if */
 
     return (int)_putenv_s(name, value);
