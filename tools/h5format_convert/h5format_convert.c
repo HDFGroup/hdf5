@@ -88,16 +88,20 @@ static void usage(const char *prog)
 	printf("Examples of use:\n");
 	printf("\n");
 	printf("h5format_convert -d /group/dataset file_name\n");
-	printf("  Convert the chunk indexing type to version 1 B-tree\n");
-	printf("  for the chunked dataset </group/dataset> in the HDF5 file <file_name>.\n");
+	printf("  Convert the dataset </group/dataset> in the HDF5 file <file_name>:\n");
+	printf("    a. chunked dataset: convert the chunk indexing type to version 1 B-tree\n");
+	printf("    b. compact/contiguous dataset: downgrade the layout version to 3\n");
+	printf("    c. virtual dataset: no action\n");
 	printf("\n");
 	printf("h5format_convert file_name\n");
-	printf("  Convert the chunk indexing type to version 1 B-tree\n");
-	printf("  for all the chunked datasets in the HDF5 file <file_name>.\n");
+	printf("  Convert all datasets in the HDF5 file <file_name>:\n");
+	printf("    a. chunked dataset: convert the chunk indexing type to version 1 B-tree\n");
+	printf("    b. compact/contiguous dataset: downgrade the layout version to 3\n");
+	printf("    c. virtual dataset: no action\n");
 	printf("\n");
 	printf("h5format_convert -n -d /group/dataset file_name\n");
 	printf("  Go through all the steps except the actual conversion when \n");
-	printf("  converting the chunked dataset </group/dataset> in the HDF5 file <file_name>.\n");
+	printf("  converting the dataset </group/dataset> in the HDF5 file <file_name>.\n");
 } /* usage() */
 
 /*-------------------------------------------------------------------------
@@ -200,11 +204,15 @@ leave(int ret)
 /*-------------------------------------------------------------------------
  * Function: convert()
  *
- * Purpose: To change the chunk indexing type for the dataset to version 1 B-tree.
- *	    -- the dataset has to be chunked
- *	    -- the dataset's chunk indexing type is not already version 1 B-tree.
- *	    If the above conditions are not fulfilled, the tool will not perform
- *	    the conversion but will exit with success.
+ * Purpose: To downgrade a dataset's indexing type or layout version:
+ *		For chunked:
+ *		  Downgrade the chunk indexing type to version 1 B-tree
+ *	    	  If type is already version 1 B-tree, no further action
+ *		For compact/contiguous:
+ *		  Downgrade the layout version from 4 to 3
+ *		  If version is already <= 3, no further action
+ *		For virtual:
+ *		  No further action
  *
  * Return: Success: 0
  *  	   Failure: 1
@@ -244,34 +252,49 @@ convert(hid_t fid, const char *dname)
     } else if(verbose_g)
 	printf("Retrieve the dataset's layout\n");
 
-    /* No further action if not a chunked dataset */
-    if(layout_type != H5D_CHUNKED) {
-	if(verbose_g)
-	    printf("Dataset is not chunked: no further action\n");
-	h5tools_setstatus(EXIT_SUCCESS);
-	goto done;
+    switch(layout_type) {
+	case H5D_CHUNKED:
+	    if(verbose_g)
+		printf("Dataset is a chunked dataset\n");
 
-    } else if(verbose_g)
-	printf("Verify the dataset is a chunked dataset\n");
+	    /* Get the dataset's chunk indexing type */
+	    if(H5Dget_chunk_index_type(did, &idx_type) < 0) {
+		error_msg("unable to get the chunk indexing type for \"%s\"\n", dname);
+		h5tools_setstatus(EXIT_FAILURE);
+		goto error;
+	    } else if(verbose_g)
+		printf("Retrieve the dataset's chunk indexing type\n");
 
-    /* Get the dataset's chunk indexing type */
-    if(H5Dget_chunk_index_type(did, &idx_type) < 0) {
-	error_msg("unable to get the chunk indexing type for \"%s\"\n", dname);
-	h5tools_setstatus(EXIT_FAILURE);
-	goto error;
+	    if(idx_type == H5D_CHUNK_IDX_BTREE) {
+		if(verbose_g)
+		    printf("Dataset's chunk indexing type is already version 1 B-tree: no further action\n");
+		h5tools_setstatus(EXIT_SUCCESS);
+		goto done;
+	    } else if (verbose_g)
+		printf("Dataset's chunk indexing type is not version 1 B-tree\n");
+	    break;
 
-    } else if(verbose_g)
-	printf("Retrieve the dataset's chunk indexing type\n");
+	case H5D_CONTIGUOUS:
+	    if(verbose_g)
+		printf("Dataset is a contiguous dataset: downgrade layout version as needed\n");
+	    break;
 
-    /* No further action if the chunk indexing type is already version 1 B-tree */
-    if(idx_type == H5D_CHUNK_IDX_BTREE) {
-	if(verbose_g)
-	    printf("Chunk indexing type is already version 1 B-tree: no further action\n");
-	h5tools_setstatus(EXIT_SUCCESS);
-	goto done;
+        case H5D_COMPACT:
+	    if(verbose_g)
+		printf("Dataset is a compact dataset: downgrade layout version as needed\n");
+	    break;
 
-    } else if (verbose_g)
-	printf("Verify the dataset's chunk indexing type is not version 1 B-tree\n");
+        case H5D_VIRTUAL:
+	    if(verbose_g)
+		printf("No further action for virtual dataset\n");
+	    goto done;
+
+	default:
+	    error_msg("unknown layout type for \"%s\"\n", dname);
+	    h5tools_setstatus(EXIT_FAILURE);
+	    goto error;
+
+    } /* end switch */
 
     /* No further action if it is a noop */
     if(noop_g) {
@@ -284,12 +307,11 @@ convert(hid_t fid, const char *dname)
     if(verbose_g)
 	printf("Converting the dataset...\n");
 
-    /* Convert the dataset's chunk indexing type to version 1 B-tree */
+    /* Downgrade the dataset */
     if(H5Dformat_convert(did) < 0) {
-	error_msg("unable to convert chunk indexing for \"%s\"\n", dname);
+	error_msg("unable to downgrade dataset for \"%s\"\n", dname);
 	h5tools_setstatus(EXIT_FAILURE);
 	goto error;
-
     } else if(verbose_g)
 	printf("Done\n");
 
@@ -377,9 +399,6 @@ main(int argc, const char *argv[])
     H5E_auto2_t func;
     void *edata;
     hid_t fid = -1;
-    hid_t fcpl = -1;
-    H5F_file_space_type_t strategy;
-    hsize_t threshold;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -429,6 +448,7 @@ main(int argc, const char *argv[])
         printf("Processing the file's superblock...\n");
     }
 
+    /* Process superblock */
     if(H5Fformat_convert(fid) < 0) {
         error_msg("unable to convert file's superblock\"%s\"\n", fname_g);
         h5tools_setstatus(EXIT_FAILURE);

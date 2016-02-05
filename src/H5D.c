@@ -993,7 +993,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Dformat_convert (Internal)
  *
- * Purpose:     Convert a dataset's chunk indexing type to version 1 B-tree
+ * Purpose:     For chunked: 
+ *		  Convert the chunk indexing type to version 1 B-tree if not
+ *		For compact/contiguous: 
+ *		  Downgrade layout version to 3 if greater than 3
+ *		For virtual: no conversion
  *
  * Return:      Non-negative on success, negative on failure
  *
@@ -1014,17 +1018,31 @@ H5Dformat_convert(hid_t dset_id)
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
-    /* Nothing to do if not a chunked dataset  */
-    if(dset->shared->layout.type != H5D_CHUNKED)
-	HGOTO_DONE(SUCCEED)
+    switch(dset->shared->layout.type) {
+	case H5D_CHUNKED:
+	    /* Convert the chunk indexing type to version 1 B-tree if not */
+	    if(dset->shared->layout.u.chunk.idx_type != H5D_CHUNK_IDX_BTREE) {
+		if((H5D__format_convert(dset, H5AC_dxpl_id)) < 0)
+		    HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to downgrade chunk indexing type for dataset")
+	    }
+	    break;
 
-    /* Nothing to do if the chunk indexing type is already version 1 B-tree */
-    if(dset->shared->layout.u.chunk.idx_type == H5D_CHUNK_IDX_BTREE)
-	HGOTO_DONE(SUCCEED)
+	case H5D_CONTIGUOUS:
+	case H5D_COMPACT:
+	    /* Downgrade the layout version to 3 if greater than 3 */
+	    if(dset->shared->layout.version > H5O_LAYOUT_VERSION_DEFAULT) {
+		if((H5D__format_convert(dset, H5AC_dxpl_id)) < 0)
+		    HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to downgrade layout version for dataset")
+	    }
+	    break;
 
-    /* Call private function to do the conversion */
-    if((H5D__format_convert(dset, H5AC_dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to convert chunk indexing type for dataset")
+	case H5D_VIRTUAL:
+	    /* Nothing to do even though layout is version 4 */
+	    break;
+
+	default: 
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown dataset layout type")
+    } /* end switch */
 
 done:
     FUNC_LEAVE_API(ret_value)
