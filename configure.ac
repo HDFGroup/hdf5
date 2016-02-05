@@ -193,6 +193,7 @@ case "X-$BUILD_MODE" in
     AC_MSG_RESULT([clean])
     ;;
   X-debug)
+    AC_DEFINE([DEBUG_BUILD], [1], [Define if this is a debug build.])
     H5_CFLAGS="$H5_CFLAGS $DEBUG_CFLAGS"
     H5_CPPFLAGS="$H5_CPPFLAGS $DEBUG_CPPFLAGS"
     H5_CXXFLAGS="$H5_CXXFLAGS $DEBUG_CXXFLAGS"
