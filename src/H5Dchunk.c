@@ -570,11 +570,13 @@ herr_t
 H5D__chunk_set_sizes(H5D_t *dset)
 {
     uint64_t chunk_size;            /* Size of chunk in bytes */
+    unsigned max_enc_bytes_per_dim; /* Max. number of bytes required to encode this dimension */
     unsigned u;                     /* Iterator */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Sanity checks */
     HDassert(dset);
 
     /* Increment # of chunk dimensions, to account for datatype size as last element */
@@ -582,6 +584,21 @@ H5D__chunk_set_sizes(H5D_t *dset)
 
     /* Set the last dimension of the chunk size to the size of the datatype */
     dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = (uint32_t)H5T_GET_SIZE(dset->shared->type);
+
+    /* Compute number of bytes to use for encoding chunk dimensions */
+    max_enc_bytes_per_dim = 0;
+    for(u = 0; u < (unsigned)dset->shared->layout.u.chunk.ndims; u++) {
+        unsigned enc_bytes_per_dim;     /* Number of bytes required to encode this dimension */
+
+        /* Get encoded size of dim, in bytes */
+        enc_bytes_per_dim = (H5VM_log2_gen(dset->shared->layout.u.chunk.dim[u]) + 8) / 8;
+
+        /* Check if this is the largest value so far */
+        if(enc_bytes_per_dim > max_enc_bytes_per_dim)
+            max_enc_bytes_per_dim = enc_bytes_per_dim;
+    } /* end for */
+    HDassert(max_enc_bytes_per_dim > 0 && max_enc_bytes_per_dim <= 8);
+    dset->shared->layout.u.chunk.enc_bytes_per_dim = max_enc_bytes_per_dim;
 
     /* Compute and store the total size of a chunk */
     /* (Use 64-bit value to ensure that we can detect >4GB chunks) */
