@@ -51,7 +51,7 @@ if test "X-" = "X-$FC"; then
             FC=gfortran
             FC_BASENAME=gfortran
             ;;
-	pgcc*)
+        pgcc*)
             FC=pgf90
             FC_BASENAME=pgf90
             ;;
@@ -92,6 +92,9 @@ else
     esac
 fi
 
+# Figure out GNU FC compiler flags
+. $srcdir/config/gnu-fflags
+
 # Figure out PGI FC compiler flags
 . $srcdir/config/pgi-fflags
 
@@ -129,6 +132,9 @@ if test -z "$CXX"; then
   CXX=g++
   CXX_BASENAME=g++
 fi
+
+# Figure out GNU CXX compiler flags
+. $srcdir/config/gnu-cxxflags
 
 # compiler version strings
 
@@ -177,6 +183,7 @@ case $FC in
     *mpif90*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -v 2>&1 | grep 'version' |\
             sed 's/^[a-z0-9]* for //' |\
+            sed ’s/\”/\\\”/g’ |\
             sed 's/^\([a-z]* \)/ built with \1/1'`
         fc_version_info=`echo $fc_version_info`
         ;;

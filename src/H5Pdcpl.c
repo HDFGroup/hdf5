@@ -2517,8 +2517,8 @@ done:
  *
  *              If the length of the filename, which determines the
  *              required value of size, is unknown, a preliminary call to
- *              H5Pget_virtual_filename with the last two parameters set
- *              to NULL can be made.  The return value of this call will
+ *              H5Pget_virtual_filename with 'name' set to NULL and 'size'
+ *              set to zero can be made. The return value of this call will
  *              be the size in bytes of the filename.  That value, plus 1
  *              for a NULL terminator, is then assigned to size for a
  *              second H5Pget_virtual_filename call, which will retrieve
@@ -2578,14 +2578,14 @@ done:
  *              additional characters, if any, are not returned to the
  *              user application.
  *
- *              If the length of the filename, which determines the
+ *              If the length of the dataset name, which determines the
  *              required value of size, is unknown, a preliminary call to
- *              H5Pget_virtual_dsetname with the last two parameters set
- *              to NULL can be made.  The return value of this call will
- *              be the size in bytes of the filename.  That value, plus 1
+ *              H5Pget_virtual_dsetname with 'name' set to NULL and 'size'
+ *              set to zero can be made.  The return value of this call will
+ *              be the size in bytes of the dataset name.  That value, plus 1
  *              for a NULL terminator, is then assigned to size for a
  *              second H5Pget_virtual_dsetname call, which will retrieve
- *              the actual filename. 
+ *              the actual dataset name. 
  *
  * Return:      Returns the length of the name if successful, otherwise
  *              returns a negative value.

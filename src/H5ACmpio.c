@@ -1874,7 +1874,7 @@ H5AC__rsp__p0_only__flush(H5F_t *f, hid_t dxpl_id)
     } /* end if */
 
     /* Propagate cleaned entries to other ranks. */
-    if(H5AC__propagate_flushed_and_still_clean_entries_list(f, H5AC_dxpl_id) < 0)
+    if(H5AC__propagate_flushed_and_still_clean_entries_list(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't propagate clean entries list.")
 
 done:

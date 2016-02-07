@@ -363,22 +363,35 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters,
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     hsize_t scaled[H5S_MAX_RANK];       /* Scaled coordinates for this chunk */
     hbool_t need_insert = FALSE;        /* Whether the chunk needs to be inserted into the index */
+    H5D_io_info_t io_info;              /* to hold the dset and two dxpls (meta and raw data) */
+    hbool_t md_dxpl_generated = FALSE;  /* bool to indicate whether we should free the md_dxpl_id at exit */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC_TAG(dxpl_id, dset->oloc.addr, FAIL)
 
-    /* Allocate dataspace and initialize it if it hasn't been. */
-    if(!(*layout->ops->is_space_alloc)(&layout->storage))
- 	/* Allocate storage */
-        if(H5D__alloc_storage(dset, dxpl_id, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
+    io_info.dset = dset;
+    io_info.raw_dxpl_id = dxpl_id;
+    io_info.md_dxpl_id = dxpl_id;
 
+    /* set the dxpl IO type for sanity checking at the FD layer */
+#ifdef H5_DEBUG_BUILD
+    if(H5D_set_io_info_dxpls(&io_info, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't set metadata and raw data dxpls")
+    md_dxpl_generated = TRUE;
+#endif /* H5_DEBUG_BUILD */
+
+    /* Allocate dataspace and initialize it if it hasn't been. */
+    if(!(*layout->ops->is_space_alloc)(&layout->storage)) {
+ 	/* Allocate storage */
+        if(H5D__alloc_storage(&io_info, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
+    }
     /* Calculate the index of this chunk */
     H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, scaled);
     scaled[dset->shared->ndims] = 0;
 
     /* Find out the file address of the chunk (if any) */
-    if(H5D__chunk_lookup(dset, dxpl_id, scaled, &udata) < 0)
+    if(H5D__chunk_lookup(dset, io_info.md_dxpl_id, scaled, &udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 
     /* Sanity check */
@@ -396,7 +409,7 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters,
 
     /* Compose chunked index info struct */
     idx_info.f = dset->oloc.file;
-    idx_info.dxpl_id = dxpl_id;
+    idx_info.dxpl_id = io_info.md_dxpl_id;
     idx_info.pline = &(dset->shared->dcpl_cache.pline);
     idx_info.layout = &(dset->shared->layout.u.chunk);
     idx_info.storage = &(dset->shared->layout.storage.u.chunk);
@@ -422,15 +435,15 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters,
         const H5D_rdcc_t *rdcc = &(dset->shared->cache.chunk);	/*raw data chunk cache */
 
         /* Fill the DXPL cache values for later use */
-        if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+        if(H5D__get_dxpl_cache(io_info.raw_dxpl_id, &dxpl_cache) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
-        if(H5D__chunk_cache_evict(dset, dxpl_id, dxpl_cache, rdcc->slot[udata.idx_hint], FALSE) < 0)
+        if(H5D__chunk_cache_evict(dset, io_info.md_dxpl_id, dxpl_cache, rdcc->slot[udata.idx_hint], FALSE) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to evict chunk")
     } /* end if */
 
     /* Write the data to the file */
-    if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, data_size, dxpl_id, buf) < 0)
+    if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, data_size, io_info.raw_dxpl_id, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
     /* Insert the chunk record into the index */
@@ -443,6 +456,10 @@ H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t filters,
     } /* end if */
 
 done:
+#ifdef H5_DEBUG_BUILD
+    if(md_dxpl_generated && H5I_dec_ref(io_info.md_dxpl_id) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close metadata dxpl")
+#endif /* H5_DEBUG_BUILD */
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D__chunk_direct_write() */
 
@@ -1912,7 +1929,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         chunk_info = H5D_CHUNK_GET_NODE_INFO(fm, chunk_node);
 
         /* Get the info for the chunk in the file */
-        if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->scaled, &udata) < 0)
+        if(H5D__chunk_lookup(io_info->dset, io_info->md_dxpl_id, chunk_info->scaled, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 
         /* Sanity check */
@@ -2045,7 +2062,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         chunk_info = H5D_CHUNK_GET_NODE_INFO(fm, chunk_node);
 
         /* Look up the chunk */
-        if(H5D__chunk_lookup(io_info->dset, io_info->dxpl_id, chunk_info->scaled, &udata) < 0)
+        if(H5D__chunk_lookup(io_info->dset, io_info->md_dxpl_id, chunk_info->scaled, &udata) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 
         /* Sanity check */
@@ -2088,7 +2105,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             if(!H5F_addr_defined(udata.chunk_block.offset)) {
                 /* Compose chunked index info struct */
                 idx_info.f = io_info->dset->oloc.file;
-                idx_info.dxpl_id = io_info->dxpl_id;
+                idx_info.dxpl_id = io_info->md_dxpl_id;
                 idx_info.pline = &(io_info->dset->shared->dcpl_cache.pline);
                 idx_info.layout = &(io_info->dset->shared->layout.u.chunk);
                 idx_info.storage = &(io_info->dset->shared->layout.storage.u.chunk);
@@ -2794,7 +2811,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t 
         /* Write the data to the file */
         HDassert(H5F_addr_defined(udata.chunk_block.offset));
         H5_CHECK_OVERFLOW(udata.chunk_block.length, hsize_t, size_t);
-        if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, (size_t)udata.chunk_block.length, dxpl_id, buf) < 0)
+        if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, (size_t)udata.chunk_block.length, H5AC_rawdata_dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
         /* Insert the chunk record into the index */
@@ -3076,7 +3093,8 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     HDassert(io_info->store);
     HDassert(udata);
     HDassert(dset);
-    HDassert(TRUE == H5P_isa_class(io_info->dxpl_id, H5P_DATASET_XFER));
+    HDassert(TRUE == H5P_isa_class(io_info->md_dxpl_id, H5P_DATASET_XFER));
+    HDassert(TRUE == H5P_isa_class(io_info->raw_dxpl_id, H5P_DATASET_XFER));
     HDassert(!rdcc->tmp_head);
 
     /* Get the chunk's size */
@@ -3166,7 +3184,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                  * size in memory, so allocate memory big enough. */
                 if(NULL == (chunk = H5D__chunk_mem_alloc(my_chunk_alloc, pline)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for raw data chunk")
-                if(H5F_block_read(dset->oloc.file, H5FD_MEM_DRAW, chunk_addr, my_chunk_alloc, io_info->dxpl_id, chunk) < 0)
+                if(H5F_block_read(dset->oloc.file, H5FD_MEM_DRAW, chunk_addr, my_chunk_alloc, io_info->raw_dxpl_id, chunk) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk")
 
                 if(pline->nused)
@@ -3204,14 +3222,14 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
                     /* (use the compact dataset storage buffer as the fill value buffer) */
                     if(H5D__fill_init(&fb_info, chunk, NULL, NULL, NULL, NULL,
                             &dset->shared->dcpl_cache.fill, dset->shared->type,
-                            dset->shared->type_id, (size_t)0, chunk_size, io_info->dxpl_id) < 0)
+                            dset->shared->type_id, (size_t)0, chunk_size, io_info->md_dxpl_id) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't initialize fill buffer info")
                     fb_info_init = TRUE;
 
                     /* Check for VL datatype & non-default fill value */
                     if(fb_info.has_vlen_fill_type)
                         /* Fill the buffer with VL datatype fill values */
-                        if(H5D__fill_refill_vl(&fb_info, fb_info.elmts_per_buf, io_info->dxpl_id) < 0)
+                        if(H5D__fill_refill_vl(&fb_info, fb_info.elmts_per_buf, io_info->md_dxpl_id) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, NULL, "can't refill fill value buffer")
                 } /* end if */
                 else
@@ -3232,10 +3250,10 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
             if(!ent || !ent->locked) {
                 /* Preempt enough things from the cache to make room */
                 if(ent) {
-                    if(H5D__chunk_cache_evict(io_info->dset, io_info->dxpl_id, io_info->dxpl_cache, ent, TRUE) < 0)
+                    if(H5D__chunk_cache_evict(io_info->dset, io_info->md_dxpl_id, io_info->dxpl_cache, ent, TRUE) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk from cache")
                 } /* end if */
-                if(H5D__chunk_cache_prune(io_info->dset, io_info->dxpl_id, io_info->dxpl_cache, chunk_size) < 0)
+                if(H5D__chunk_cache_prune(io_info->dset, io_info->md_dxpl_id, io_info->dxpl_cache, chunk_size) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to preempt chunk(s) from cache")
 
                 /* Create a new entry */
@@ -3363,7 +3381,7 @@ H5D__chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
             fake_ent.chunk_block.length = udata->chunk_block.length;
             fake_ent.chunk = (uint8_t *)chunk;
 
-            if(H5D__chunk_flush_entry(io_info->dset, io_info->dxpl_id, io_info->dxpl_cache, &fake_ent, TRUE) < 0)
+            if(H5D__chunk_flush_entry(io_info->dset, io_info->md_dxpl_id, io_info->dxpl_cache, &fake_ent, TRUE) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
         } /* end if */
         else {
@@ -3501,9 +3519,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
-    hsize_t old_dim[])
+H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[])
 {
+    const H5D_t *dset = io_info->dset;  /* the dataset pointer */
     H5D_chk_idx_info_t idx_info;        /* Chunked index info */
     const H5D_chunk_ops_t *ops = dset->shared->layout.storage.u.chunk.ops;      /* Chunk operations */
     hsize_t     min_unalloc[H5O_LAYOUT_NDIMS]; /* First chunk in each dimension that is unallocated (in scaled coordinates) */
@@ -3524,6 +3542,8 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     hbool_t     using_mpi = FALSE;    /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
     H5D_chunk_coll_info_t chunk_info; /* chunk address information for doing I/O */
 #endif /* H5_HAVE_PARALLEL */
+    hid_t       md_dxpl_id = io_info->md_dxpl_id;
+    hid_t       raw_dxpl_id = io_info->raw_dxpl_id;
     hbool_t	carry;          /* Flag to indicate that chunk increment carrys to higher dimension (sorta) */
     unsigned    space_ndims;    /* Dataset's space rank */
     const hsize_t *space_dim;   /* Dataset's dataspace dimensions */
@@ -3534,13 +3554,14 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
     const H5O_storage_chunk_t *sc = &(layout->storage.u.chunk);
     herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(dxpl_id, dset->oloc.addr, FAIL)
+    FUNC_ENTER_PACKAGE_TAG(md_dxpl_id, dset->oloc.addr, FAIL)
 
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
     HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
     H5D_CHUNK_STORAGE_INDEX_CHK(sc);
-    HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
+    HDassert(TRUE == H5P_isa_class(md_dxpl_id, H5P_DATASET_XFER));
+    HDassert(TRUE == H5P_isa_class(raw_dxpl_id, H5P_DATASET_XFER));
 
     /* Retrieve the dataset dimensions */
     space_dim = dset->shared->curr_dims;
@@ -3571,7 +3592,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
 #endif  /* H5_HAVE_PARALLEL */
 
     /* Fill the DXPL cache values for later use */
-    if(H5D__get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
+    if(H5D__get_dxpl_cache(raw_dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Get original chunk size */
@@ -3601,7 +3622,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
         if(H5D__fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc,
                 (void *)pline, (H5MM_free_t)H5D__chunk_mem_xfree, (void *)pline,
                 &dset->shared->dcpl_cache.fill, dset->shared->type,
-                dset->shared->type_id, (size_t)0, orig_chunk_size, dxpl_id) < 0)
+                dset->shared->type_id, (size_t)0, orig_chunk_size, md_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         fb_info_init = TRUE;
 
@@ -3625,7 +3646,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
 
     /* Compose chunked index info struct */
     idx_info.f = dset->oloc.file;
-    idx_info.dxpl_id = dxpl_id;
+    idx_info.dxpl_id = md_dxpl_id;
     idx_info.pline = &dset->shared->dcpl_cache.pline;
     idx_info.layout = &dset->shared->layout.u.chunk;
     idx_info.storage = &dset->shared->layout.storage.u.chunk;
@@ -3679,7 +3700,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
             hbool_t need_insert = FALSE;    /* Whether the chunk needs to be inserted into the index */
 
 	    /* Look up this chunk */
-	    if(H5D__chunk_lookup(dset, dxpl_id, scaled, &udata) < 0)
+	    if(H5D__chunk_lookup(dset, md_dxpl_id, scaled, &udata) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 #ifndef NDEBUG
             /* None of the chunks should be allocated */
@@ -3717,7 +3738,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                 } /* end if */
 
                 /* Fill the buffer with VL datatype fill values */
-                if(H5D__fill_refill_vl(&fb_info, fb_info.elmts_per_buf, dxpl_id) < 0)
+                if(H5D__fill_refill_vl(&fb_info, fb_info.elmts_per_buf, md_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
 
                 /* Check if there are filters which need to be applied to the chunk */
@@ -3779,7 +3800,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                 } /* end if */
                 else {
 #endif /* H5_HAVE_PARALLEL */
-                    if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, chunk_size, dxpl_id, fb_info.fill_buf) < 0)
+                    if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.chunk_block.offset, chunk_size, raw_dxpl_id, fb_info.fill_buf) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 #ifdef H5_HAVE_PARALLEL
                 } /* end else */
@@ -3820,7 +3841,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
 #ifdef H5_HAVE_PARALLEL
     /* do final collective I/O */
     if(using_mpi && blocks_written)
-        if(H5D__chunk_collective_fill(dset, dxpl_id, &chunk_info, chunk_size, fb_info.fill_buf) < 0)
+        if(H5D__chunk_collective_fill(dset, raw_dxpl_id, &chunk_info, chunk_size, fb_info.fill_buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 #endif /* H5_HAVE_PARALLEL */
 
@@ -4035,7 +4056,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     H5_CHECKED_ASSIGN(chunk_size, size_t, layout->u.chunk.size, uint32_t);
 
     /* Get the info for the chunk in the file */
-    if(H5D__chunk_lookup(dset, io_info->dxpl_id, scaled, &chk_udata) < 0)
+    if(H5D__chunk_lookup(dset, io_info->md_dxpl_id, scaled, &chk_udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 
     /* If this chunk does not exist in cache or on disk, no need to do anything */
@@ -4048,7 +4069,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
         if(H5D__fill_init(&udata->fb_info, NULL, NULL, NULL, NULL, NULL,
                 &dset->shared->dcpl_cache.fill,
                 dset->shared->type, dset->shared->type_id, (size_t)udata->elmts_per_chunk,
-                chunk_size, io_info->dxpl_id) < 0)
+                chunk_size, io_info->md_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         udata->fb_info_init = TRUE;
     } /* end if */
@@ -4085,7 +4106,7 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata)
     /* Check for VL datatype & non-default fill value */
     if(udata->fb_info.has_vlen_fill_type)
         /* Re-fill the buffer to use for this I/O operation */
-        if(H5D__fill_refill_vl(&udata->fb_info, (size_t)sel_nelmts, io_info->dxpl_id) < 0)
+        if(H5D__fill_refill_vl(&udata->fb_info, (size_t)sel_nelmts, io_info->md_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
 
     /* Create a selection iterator for scattering the elements to memory buffer */
@@ -4297,6 +4318,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
      * will never change. */
     chk_store.chunk.scaled = scaled;
     H5D_BUILD_IO_INFO_RD(&chk_io_info, dset, dxpl_cache, dxpl_id, &chk_store, NULL);
+    chk_io_info.raw_dxpl_id = H5AC_rawdata_dxpl_id;
 
     /* Compose chunked index info struct */
     idx_info.f = dset->oloc.file;
@@ -4569,7 +4591,7 @@ H5D__chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[])
 
     /* Compose chunked index info struct */
     idx_info.f = dset->oloc.file;
-    idx_info.dxpl_id = io_info->dxpl_id;
+    idx_info.dxpl_id = io_info->md_dxpl_id;
     idx_info.pline = &dset->shared->dcpl_cache.pline;
     idx_info.layout = &dset->shared->layout.u.chunk;
     idx_info.storage = &dset->shared->layout.storage.u.chunk;
@@ -4814,7 +4836,6 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     hbool_t                 must_filter = FALSE;        /* Whether chunk must be filtered during copy */
     size_t                  nbytes;                     /* Size of chunk in file (in bytes) */
     H5Z_cb_t                cb_struct;                  /* Filter failure callback struct */
-
     int                     ret_value = H5_ITER_CONT;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -4861,7 +4882,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     } /* end if */
 
     /* read chunk data from the source file */
-    if(H5F_block_read(udata->file_src, H5FD_MEM_DRAW, chunk_rec->chunk_addr, nbytes, udata->idx_info_dst->dxpl_id, buf) < 0)
+    if(H5F_block_read(udata->file_src, H5FD_MEM_DRAW, chunk_rec->chunk_addr, nbytes, H5AC_rawdata_dxpl_id, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
 
     /* Need to uncompress variable-length & reference data elements */
@@ -4899,7 +4920,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "datatype conversion failed")
 
         /* Reclaim space from variable length data */
-        if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
+        if(H5D_vlen_reclaim(tid_mem, buf_space, udata->idx_info_dst->dxpl_id, reclaim_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, H5_ITER_ERROR, "unable to reclaim variable-length data")
     } /* end if */
     else if(fix_ref) {
@@ -4951,7 +4972,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
     /* Write chunk data to destination file */
     HDassert(H5F_addr_defined(udata_dst.chunk_block.offset));
-    if(H5F_block_write(udata->idx_info_dst->f, H5FD_MEM_DRAW, udata_dst.chunk_block.offset, nbytes, udata->idx_info_dst->dxpl_id, buf) < 0)
+    if(H5F_block_write(udata->idx_info_dst->f, H5FD_MEM_DRAW, udata_dst.chunk_block.offset, nbytes, H5AC_rawdata_dxpl_id, buf) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, H5_ITER_ERROR, "unable to write raw data to file")
 
     /* Set metadata tag in dxpl_id */
@@ -5569,7 +5590,7 @@ H5D__nonexistent_readvv(const H5D_io_info_t *io_info,
     /* Set up user data for H5VM_opvv() */
     udata.rbuf = (unsigned char *)io_info->u.rbuf;
     udata.dset = io_info->dset;
-    udata.dxpl_id = io_info->dxpl_id;
+    udata.dxpl_id = io_info->md_dxpl_id;
 
     /* Call generic sequence operation routine */
     if((ret_value = H5VM_opvv(chunk_max_nseq, chunk_curr_seq, chunk_len_arr, chunk_off_arr,

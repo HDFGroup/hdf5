@@ -87,12 +87,20 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     PROD_FCFLAGS="-fast -s -Mnoframe"
 
     # Debug
-    DEBUG_FCFLAGS="-g -Mbounds -Mchkptr -Mdclchk"
+    DEBUG_FCFLAGS="-Mbounds -Mchkptr -Mdclchk"
 
-    # Profile
-    PROFILE_FCFLAGS="-g -Mprof=func,line"
+    # Symbols
+    SYMBOLS_FCFLAGS="-g"
+
+    # Profiling
+    PROFILE_FCFLAGS="-Mprof=func,line"
     # Use this for profiling with gprof
-    #PROFILE_FCFLAGS="-g -pg"
+    #PROFILE_FCFLAGS="-pg"
+
+    # Optimization
+    HIGH_OPT_FCFLAGS=
+    DEBUG_OPT_FCFLAGS=
+    NO_OPT_FCFLAGS=
 
     # Flags are set
     f9x_flags_set=yes

@@ -653,7 +653,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
     bt_ud.bt = NULL;  /* Make certain future references will be caught */
 
     /* Move the location of the old root on the disk */
-    if(H5AC_move_entry(f, H5AC_BT, bt_ud.addr, old_root_addr) < 0)
+    if(H5AC_move_entry(f, H5AC_BT, bt_ud.addr, old_root_addr, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to move B-tree root node")
     bt_ud.addr = old_root_addr;
 
@@ -1731,14 +1731,13 @@ H5B_shared_new(const H5F_t *f, const H5B_class_t *type, size_t sizeof_rkey)
 	    (shared->two_k + 1) * shared->sizeof_rkey);	/*keys		*/
     HDassert(shared->sizeof_rnode);
 
-    /* Allocate shared buffers */
+    /* Allocate and clear shared buffers */
     if(NULL == (shared->page = H5FL_BLK_MALLOC(page, shared->sizeof_rnode)))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree page")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(shared->page, 0, shared->sizeof_rnode);
-#endif /* H5_CLEAR_MEMORY */
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree page")
+    HDmemset(shared->page, 0, shared->sizeof_rnode);
+
     if(NULL == (shared->nkey = H5FL_SEQ_MALLOC(size_t, (size_t)(shared->two_k + 1))))
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree native keys")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed for B-tree native keys")
 
     /* Initialize the offsets into the native key buffer */
     for(u = 0; u < (shared->two_k + 1); u++)

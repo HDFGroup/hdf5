@@ -77,7 +77,7 @@ TOOLTEST ./h52gif $TESTFILE1 image1.gif -i image
 echo ""
 
 # Negative tests.
-echo "**verify the the h52gif tool handle error conditions correctly..."
+echo "**verify that the h52gif tool handles error conditions correctly..."
 # nonexisting dataset name
 TESTING "./h52gif h52giftst.h5 image.gif -i nosuch_image" 
 TOOLTESTFAIL "./h52gif $TESTFILE1 image.gif -i nosuch_image" 

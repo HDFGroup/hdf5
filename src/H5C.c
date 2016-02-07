@@ -7720,6 +7720,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     hbool_t		was_dirty;
     haddr_t		new_addr = HADDR_UNDEF;
     haddr_t		old_addr = HADDR_UNDEF;
+    haddr_t             entry_addr = HADDR_UNDEF;
     size_t		new_len = 0;
     size_t		new_compressed_len = 0;
     herr_t		ret_value = SUCCEED;      /* Return value */
@@ -8213,6 +8214,10 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     /* reset the flush_in progress flag */
     entry_ptr->flush_in_progress = FALSE;
 
+    /* capture the cache entry address for the log_flush call at the
+       end before the entry_ptr gets freed */
+    entry_addr = entry_ptr->addr;
+
     /* Internal cache data structures should now be up to date, and 
      * consistant with the status of the entry.  
      *
@@ -8324,7 +8329,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     } /* if (destroy) */
 
     if(cache_ptr->log_flush)
-        if((cache_ptr->log_flush)(cache_ptr, entry_ptr->addr, was_dirty, flags) < 0)
+        if((cache_ptr->log_flush)(cache_ptr, entry_addr, was_dirty, flags) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "log_flush callback failed.")
 
 done:

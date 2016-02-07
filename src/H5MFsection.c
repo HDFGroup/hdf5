@@ -66,7 +66,7 @@ static htri_t H5MF_sect_simple_can_merge(const H5FS_section_info_t *sect1,
 static herr_t H5MF_sect_simple_merge(H5FS_section_info_t *sect1,
     H5FS_section_info_t *sect2, void *udata);
 static herr_t H5MF_sect_simple_valid(const H5FS_section_class_t *cls,
-    const H5FS_section_info_t *sect);
+    const H5FS_section_info_t *sect, hid_t dxpl_id);
 static H5FS_section_info_t *H5MF_sect_simple_split(H5FS_section_info_t *sect,
     hsize_t frag_size);
 
@@ -488,7 +488,7 @@ H5MF_sect_simple_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls,
 #ifdef NDEBUG
     H5_ATTR_UNUSED
 #endif /* NDEBUG */
-    *_sect)
+    *_sect, hid_t H5_ATTR_UNUSED dxpl_id)
 {
 #ifndef NDEBUG
     const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect;   /* File free section */

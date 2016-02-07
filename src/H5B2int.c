@@ -2191,32 +2191,30 @@ H5B2__create_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *node_ptr)
 
     /* Increment ref. count on B-tree header */
     if(H5B2__hdr_incr(hdr) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, FAIL, "can't increment ref. count on B-tree header")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINC, FAIL, "can't increment ref. count on B-tree header")
 
     /* Share B-tree header information */
     leaf->hdr = hdr;
 
     /* Allocate space for the native keys in memory */
     if(NULL == (leaf->leaf_native = (uint8_t *)H5FL_FAC_MALLOC(hdr->node_info[0].nat_rec_fac)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree leaf native keys")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(leaf->leaf_native, 0, hdr->cls->nrec_size * hdr->node_info[0].max_nrec);
-#endif /* H5_CLEAR_MEMORY */
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree leaf native keys")
+    HDmemset(leaf->leaf_native, 0, hdr->cls->nrec_size * hdr->node_info[0].max_nrec);
 
     /* Set number of records */
     leaf->nrec = 0;
 
     /* Allocate space on disk for the leaf */
     if(HADDR_UNDEF == (node_ptr->addr = H5MF_alloc(hdr->f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)hdr->node_size)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for B-tree leaf node")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for B-tree leaf node")
 
     /* Cache the new B-tree node */
     if(H5AC_insert_entry(hdr->f, dxpl_id, H5AC_BT2_LEAF, node_ptr->addr, leaf, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree leaf to cache")
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree leaf to cache")
 
 done:
     if(ret_value < 0) {
-	if(leaf)
+        if(leaf)
             if(H5B2__leaf_free(leaf) < 0)
                 HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release v2 B-tree leaf node")
     } /* end if */
@@ -2313,16 +2311,12 @@ H5B2__create_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *node_ptr,
     /* Allocate space for the native keys in memory */
     if(NULL == (internal->int_native = (uint8_t *)H5FL_FAC_MALLOC(hdr->node_info[depth].nat_rec_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal native keys")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(internal->int_native, 0, hdr->cls->nrec_size * hdr->node_info[depth].max_nrec);
-#endif /* H5_CLEAR_MEMORY */
+    HDmemset(internal->int_native, 0, hdr->cls->nrec_size * hdr->node_info[depth].max_nrec);
 
     /* Allocate space for the node pointers in memory */
     if(NULL == (internal->node_ptrs = (H5B2_node_ptr_t *)H5FL_FAC_MALLOC(hdr->node_info[depth].node_ptr_fac)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for B-tree internal node pointers")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (hdr->node_info[depth].max_nrec + 1));
-#endif /* H5_CLEAR_MEMORY */
+    HDmemset(internal->node_ptrs, 0, sizeof(H5B2_node_ptr_t) * (hdr->node_info[depth].max_nrec + 1));
 
     /* Set number of records & depth of the node */
     internal->nrec = 0;

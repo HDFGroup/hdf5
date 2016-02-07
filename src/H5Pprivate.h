@@ -143,7 +143,6 @@ H5_DLLVAR const struct H5P_libclass_t H5P_CLS_GACC[1];  /* Group access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_TACC[1];  /* Named datatype access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_FACC[1];  /* File access */
 
-
 /******************************/
 /* Library Private Prototypes */
 /******************************/

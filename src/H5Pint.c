@@ -5500,7 +5500,7 @@ H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, hid_t *
     happens only when the environment variable H5_COLL_BARRIER is set
     to non 0. */
     if(is_collective && H5_coll_api_sanity_check_g) {
-        MPI_Comm mpi_comm;
+        MPI_Comm mpi_comm; /* file communicator */
 
         /* retrieve the MPI communicator from the loc_id or the fapl_id */
         if(H5F_mpi_retrieve_comm(loc_id, *acspl_id, &mpi_comm) < 0)

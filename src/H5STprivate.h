@@ -58,7 +58,9 @@ H5_DLL H5ST_ptr_t H5ST_findfirst(H5ST_tree_t *p);
 H5_DLL H5ST_ptr_t H5ST_findnext(H5ST_ptr_t p);
 H5_DLL void *H5ST_remove(H5ST_tree_t *root, const char *s);
 H5_DLL herr_t H5ST_delete(H5ST_tree_t *root, H5ST_ptr_t p);
-H5_DLL herr_t H5ST_dump(H5ST_ptr_t p);
+#ifdef H5ST_DEBUG
+H5_DLL herr_t H5ST_dump(H5ST_tree_t *tree);
+#endif /* H5ST_DEBUG */
 
 #endif /* _H5STprivate_H */
 
