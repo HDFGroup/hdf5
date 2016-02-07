@@ -3225,7 +3225,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
 
         if ( result < 0 ) {
 
@@ -3236,7 +3236,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -3247,7 +3247,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_CLEAR_ONLY_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_CLEAR_ONLY_FLAG);
 
         if ( result < 0 ) {
 
@@ -3259,7 +3259,7 @@ check_flush_cache__empty_cache(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_MARKED_ENTRIES_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_MARKED_ENTRIES_FLAG);
 
         if ( result < 0 ) {
 
@@ -4930,7 +4930,7 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, flush_flags);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, flush_flags);
 
         if ( result < 0 ) {
 
@@ -5004,7 +5004,7 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -5161,7 +5161,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, flush_flags);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, flush_flags);
 
         if ( result < 0 ) {
 
@@ -5235,7 +5235,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -9232,7 +9232,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, flush_flags);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, flush_flags);
 
         if ( result < 0 ) {
 
@@ -9424,7 +9424,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -10685,7 +10685,7 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -12414,7 +12414,7 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, flush_flags);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, flush_flags);
 
         if ( result < 0 ) {
 
@@ -12473,7 +12473,7 @@ check_flush_cache__single_entry_test(H5F_t * file_ptr,
     /* clean up the cache to prep for the next test */
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -12606,7 +12606,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, flush_flags);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, flush_flags);
 
         if ( result < 0 ) {
 
@@ -12681,7 +12681,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t * file_ptr,
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -14206,7 +14206,7 @@ check_resize_entry(void)
 
         } else {
 
-            result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+            result = H5C_unprotect(file_ptr, H5AC_dxpl_id,
                        entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if ( result < 0 ) {
@@ -14291,7 +14291,7 @@ check_resize_entry(void)
 
         } else {
 
-            result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+            result = H5C_unprotect(file_ptr, H5AC_dxpl_id,
                        entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if ( result < 0 ) {
@@ -14651,7 +14651,7 @@ check_resize_entry(void)
 
         } else {
 
-            result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+            result = H5C_unprotect(file_ptr, H5AC_dxpl_id,
                        entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if ( result < 0 ) {
@@ -14738,7 +14738,7 @@ check_resize_entry(void)
 
         } else {
 
-            result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+            result = H5C_unprotect(file_ptr, H5AC_dxpl_id,
                        entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
             if ( result < 0 ) {
@@ -15806,7 +15806,7 @@ check_flush_protected_err(void)
 
         protect_entry(file_ptr, 0, 0);
 
-        if ( H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET) >= 0 ) {
+        if ( H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET) >= 0 ) {
 
             pass = FALSE;
             failure_mssg = "flush succeeded on cache with protected entry.\n";
@@ -15815,7 +15815,7 @@ check_flush_protected_err(void)
 
             unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
-            if ( H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET) < 0 ) {
+            if ( H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET) < 0 ) {
 
                 pass = FALSE;
                 failure_mssg = "flush failed after unprotect.\n";
@@ -15884,7 +15884,7 @@ check_destroy_pinned_err(void)
         protect_entry(file_ptr, 0, 0);
 	unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
-        if ( H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT) >= 0 ) {
+        if ( H5C_dest(file_ptr, H5AC_dxpl_id) >= 0 ) {
 
             pass = FALSE;
             failure_mssg = "destroy succeeded on cache with pinned entry.\n";
@@ -15893,7 +15893,7 @@ check_destroy_pinned_err(void)
 
 	    unpin_entry(0, 0);
 
-            if ( H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0 ) {
+            if ( H5C_dest(file_ptr, H5AC_dxpl_id) < 0 ) {
 
                 pass = FALSE;
                 failure_mssg = "destroy failed after unpin.\n";
@@ -15970,7 +15970,7 @@ check_destroy_protected_err(void)
 
         protect_entry(file_ptr, 0, 0);
 
-        if ( H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT) >= 0 ) {
+        if ( H5C_dest(file_ptr, H5AC_dxpl_id) >= 0 ) {
 
             pass = FALSE;
             failure_mssg = "destroy succeeded on cache with protected entry.\n";
@@ -15979,7 +15979,7 @@ check_destroy_protected_err(void)
 
             unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
 
-            if ( H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0 ) {
+            if ( H5C_dest(file_ptr, H5AC_dxpl_id) < 0 ) {
 
                 pass = FALSE;
                 failure_mssg = "destroy failed after unprotect.\n";
@@ -16063,7 +16063,7 @@ check_duplicate_insert_err(void)
             base_addr = entries[0];
             entry_ptr = &(base_addr[0]);
 
-            result = H5C_insert_entry(file_ptr, H5P_DATASET_XFER_DEFAULT,
+            result = H5C_insert_entry(file_ptr, H5AC_dxpl_id,
                                       &(types[0]), entry_ptr->addr,
                                       (void *)entry_ptr, H5C__NO_FLAGS_SET);
 
@@ -16241,7 +16241,7 @@ check_double_pin_err(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        result = H5C_unprotect(file_ptr, H5AC_dxpl_id,
                     entry_ptr->addr, (void *)entry_ptr, H5C__PIN_ENTRY_FLAG);
 
         if ( result > 0 ) {
@@ -16325,7 +16325,7 @@ check_double_unpin_err(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        result = H5C_unprotect(file_ptr, H5AC_dxpl_id,
                     entry_ptr->addr, (void *)entry_ptr, H5C__UNPIN_ENTRY_FLAG);
 
         if ( result > 0 ) {
@@ -16525,7 +16525,7 @@ check_double_protect_err(void)
 
     if ( pass ) {
 
-        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_dxpl_id,
 			               &(types[0]), entry_ptr->addr,
 				       &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
@@ -16605,7 +16605,7 @@ check_double_unprotect_err(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        result = H5C_unprotect(file_ptr, H5AC_dxpl_id,
                     entry_ptr->addr, (void *)entry_ptr, H5C__NO_FLAGS_SET);
 
         if ( result > 0 ) {
@@ -16769,7 +16769,7 @@ check_expunge_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT,
+	result = H5C_expunge_entry(file_ptr, H5AC_dxpl_id,
                 &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( result > 0 ) {
@@ -16787,7 +16787,7 @@ check_expunge_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT,
+	result = H5C_expunge_entry(file_ptr, H5AC_dxpl_id,
                 &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( result > 0 ) {
@@ -16805,7 +16805,7 @@ check_expunge_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT,
+	result = H5C_expunge_entry(file_ptr, H5AC_dxpl_id,
                 &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( result < 0 ) {
@@ -16981,7 +16981,7 @@ check_unprotect_ro_dirty_err(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        result = H5C_unprotect(file_ptr, H5AC_dxpl_id,
                     entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
         if ( result >= 0 ) {
@@ -17024,7 +17024,7 @@ check_unprotect_ro_dirty_err(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        result = H5C_unprotect(file_ptr, H5AC_dxpl_id,
                     entry_ptr->addr, (void *)entry_ptr, H5C__DIRTIED_FLAG);
 
         if ( result > 0 ) {
@@ -17109,7 +17109,7 @@ check_protect_ro_rw_err(void)
 
     if ( pass ) {
 
-        thing_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        thing_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_dxpl_id,
 			         &(types[0]), entry_ptr->addr,
 				 &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
@@ -30888,7 +30888,7 @@ check_flush_deps_order(void)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -30995,7 +30995,7 @@ check_flush_deps_order(void)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31108,7 +31108,7 @@ check_flush_deps_order(void)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31229,7 +31229,7 @@ check_flush_deps_order(void)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31408,7 +31408,7 @@ check_flush_deps_order(void)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31633,7 +31633,7 @@ check_flush_deps_order(void)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31806,7 +31806,7 @@ check_flush_deps_order(void)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -31942,7 +31942,7 @@ check_flush_deps_order(void)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32140,7 +32140,7 @@ check_flush_deps_order(void)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32391,7 +32391,7 @@ check_flush_deps_order(void)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32658,7 +32658,7 @@ check_flush_deps_order(void)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__NO_FLAGS_SET);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__NO_FLAGS_SET);
         if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -33243,7 +33243,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -33604,7 +33604,7 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -34047,7 +34047,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -34422,7 +34422,7 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 
@@ -34929,7 +34929,7 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
     if ( pass ) {
 
-        result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT, H5C__FLUSH_INVALIDATE_FLAG);
+        result = H5C_flush_cache(file_ptr, H5AC_dxpl_id, H5C__FLUSH_INVALIDATE_FLAG);
 
         if ( result < 0 ) {
 

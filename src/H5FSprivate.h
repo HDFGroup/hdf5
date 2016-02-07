@@ -106,7 +106,7 @@ typedef struct H5FS_section_class_t {
     htri_t (*can_shrink)(const H5FS_section_info_t *, void *);        /* Routine to determine if node can shrink container */
     herr_t (*shrink)(H5FS_section_info_t **, void *);   /* Routine to shrink container */
     herr_t (*free)(H5FS_section_info_t *);              /* Routine to free node */
-    herr_t (*valid)(const struct H5FS_section_class_t *, const H5FS_section_info_t *);   /* Routine to check if a section is valid */
+    herr_t (*valid)(const struct H5FS_section_class_t *, const H5FS_section_info_t *, hid_t dxpl_id);   /* Routine to check if a section is valid */
     H5FS_section_info_t *(*split)(H5FS_section_info_t *, hsize_t);     /* Routine to create the split section */
     herr_t (*debug)(const H5FS_section_info_t *, FILE *, int , int );   /* Routine to dump debugging information about a section */
 } H5FS_section_class_t;

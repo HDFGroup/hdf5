@@ -66,8 +66,8 @@ static herr_t H5D__update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset,
 static herr_t H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id,
     char **extfile_prefix);
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
-static herr_t H5D__init_storage(const H5D_t *dataset, hbool_t full_overwrite,
-    hsize_t old_dim[], hid_t dxpl_id);
+static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
+    hsize_t old_dim[]);
 
 
 /*********************/
@@ -1610,7 +1610,13 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
     if((H5F_INTENT(dataset->oloc.file) & H5F_ACC_RDWR)
             && !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)
             && H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_ALLOCATE_EARLY)) {
-        if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_OPEN, FALSE, NULL) < 0)
+        H5D_io_info_t io_info;
+
+        io_info.dset = dataset;
+        io_info.raw_dxpl_id = H5AC_rawdata_dxpl_id;
+        io_info.md_dxpl_id = dxpl_id;
+
+        if(H5D__alloc_storage(&io_info, H5D_ALLOC_OPEN, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage")
     } /* end if */
 
@@ -1916,9 +1922,10 @@ H5D_typeof(const H5D_t *dset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc,
+H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc,
     hbool_t full_overwrite, hsize_t old_dim[])
 {
+    const H5D_t *dset = io_info->dset;   /* The dataset object */
     H5F_t *f = dset->oloc.file;         /* The dataset's file pointer */
     H5O_layout_t *layout;               /* The dataset's layout information */
     hbool_t must_init_space = FALSE;    /* Flag to indicate that space should be initialized */
@@ -1945,7 +1952,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
                     /* Check if we have a zero-sized dataset */
                     if(layout->storage.u.contig.size > 0) {
                         /* Reserve space in the file for the entire array */
-                        if(H5D__contig_alloc(f, dxpl_id, &layout->storage.u.contig/*out*/) < 0)
+                        if(H5D__contig_alloc(f, io_info->md_dxpl_id, &layout->storage.u.contig/*out*/) < 0)
                             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize contiguous storage")
 
                         /* Indicate that we should initialize storage space */
@@ -1962,7 +1969,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
             case H5D_CHUNKED:
                 if(!(*dset->shared->layout.ops->is_space_alloc)(&dset->shared->layout.storage)) {
                     /* Create the root of the index that manages chunked storage */
-                    if(H5D__chunk_create(dset /*in,out*/, dxpl_id) < 0)
+                    if(H5D__chunk_create(dset /*in,out*/, io_info->md_dxpl_id) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to initialize chunked storage")
 
                     /* Indicate that we set the storage addr */
@@ -2035,7 +2042,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
                  * this is icky. -QAK
                  */
                 if(!(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_INCR && time_alloc == H5D_ALLOC_WRITE))
-                    if(H5D__init_storage(dset, full_overwrite, old_dim, dxpl_id) < 0)
+                    if(H5D__init_storage(io_info, full_overwrite, old_dim) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
             } /* end if */
             else {
@@ -2049,7 +2056,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
                  * the fill value _is_ set, do that now */
                 if(dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC ||
                         (dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET && fill_status == H5D_FILL_VALUE_USER_DEFINED))
-                    if(H5D__init_storage(dset, full_overwrite, old_dim, dxpl_id) < 0)
+                    if(H5D__init_storage(io_info, full_overwrite, old_dim) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
             } /* end else */
         } /* end if */
@@ -2063,7 +2070,7 @@ H5D__alloc_storage(const H5D_t *dset, hid_t dxpl_id, H5D_time_alloc_t time_alloc
          */
         if(time_alloc != H5D_ALLOC_CREATE && addr_set)
             /* Mark the layout as dirty, for later writing to the file */
-            if(H5D__mark(dset, dxpl_id, H5D_MARK_LAYOUT) < 0)
+            if(H5D__mark(dset, io_info->md_dxpl_id, H5D_MARK_LAYOUT) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
     } /* end if */
 
@@ -2087,10 +2094,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__init_storage(const H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
-    hid_t dxpl_id)
+H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[])
 {
-    herr_t		ret_value = SUCCEED;    /* Return value */
+    const H5D_t *dset = io_info->dset;     /* dataset pointer */
+    herr_t ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -2101,7 +2108,7 @@ H5D__init_storage(const H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
             /* If we will be immediately overwriting the values, don't bother to clear them */
             if(!full_overwrite) {
                 /* Fill the compact dataset storage */
-                if(H5D__compact_fill(dset, dxpl_id) < 0)
+                if(H5D__compact_fill(dset, io_info->md_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize compact dataset storage")
             } /* end if */
             break;
@@ -2110,7 +2117,7 @@ H5D__init_storage(const H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
             /* Don't write default fill values to external files */
             /* If we will be immediately overwriting the values, don't bother to clear them */
             if((dset->shared->dcpl_cache.efl.nused == 0 || dset->shared->dcpl_cache.fill.buf) && !full_overwrite)
-                if(H5D__contig_fill(dset, dxpl_id) < 0)
+                if(H5D__contig_fill(io_info) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
             break;
 
@@ -2126,7 +2133,7 @@ H5D__init_storage(const H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[],
                 if(old_dim == NULL)
                     old_dim = zero_dim;
 
-                if(H5D__chunk_allocate(dset, dxpl_id, full_overwrite, old_dim) < 0)
+                if(H5D__chunk_allocate(io_info, full_overwrite, old_dim) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
                 break;
             } /* end block */
@@ -2595,10 +2602,16 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
         } /* end if */
 
         /* Allocate space for the new parts of the dataset, if appropriate */
-        if(expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY)
-            if(H5D__alloc_storage(dset, dxpl_id, H5D_ALLOC_EXTEND, FALSE, curr_dims) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset storage")
+        if(expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
+            H5D_io_info_t io_info;
 
+            io_info.dset = dset;
+            io_info.raw_dxpl_id = H5AC_rawdata_dxpl_id;
+            io_info.md_dxpl_id = dxpl_id;
+
+            if(H5D__alloc_storage(&io_info, H5D_ALLOC_EXTEND, FALSE, curr_dims) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset storage")
+        }
         /*-------------------------------------------------------------------------
          * Remove chunk information in the case of chunked datasets
          * This removal takes place only in case we are shrinking the dateset
@@ -2940,7 +2953,7 @@ H5D_get_create_plist(H5D_t *dset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy dataset datatype for fill value")
 
         /* Set up type conversion function */
-        if(NULL == (tpath = H5T_path_find(dset->shared->type, copied_fill.type, NULL, NULL, H5AC_dxpl_id, FALSE)))
+        if(NULL == (tpath = H5T_path_find(dset->shared->type, copied_fill.type, NULL, NULL, H5AC_noio_dxpl_id, FALSE)))
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
 
         /* Convert disk form of fill value into memory form */
@@ -2968,7 +2981,7 @@ H5D_get_create_plist(H5D_t *dset)
             } /* end if */
 
             /* Convert fill value */
-            if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, copied_fill.buf, bkg_buf, H5AC_dxpl_id) < 0) {
+            if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, copied_fill.buf, bkg_buf, H5AC_noio_dxpl_id) < 0) {
                 H5I_dec_ref(src_id);
                 H5I_dec_ref(dst_id);
                 if(bkg_buf)

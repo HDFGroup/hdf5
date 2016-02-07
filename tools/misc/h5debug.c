@@ -306,13 +306,13 @@ main(int argc, char *argv[])
         /*
          * Debug a local heap.
          */
-        status = H5HL_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+        status = H5HL_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL);
 
     } else if(!HDmemcmp (sig, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
 	/*
 	 * Debug a global heap collection.
 	 */
-	status = H5HG_debug (f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+	status = H5HG_debug (f, H5AC_dxpl_id, addr, stdout, 0, VCOL);
 
     } else if(!HDmemcmp(sig, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -326,7 +326,7 @@ main(int argc, char *argv[])
             HDfprintf(stderr, "\th5debug <filename> <Symbol table node address> <address of local heap>\n\n");
         } /* end if */
 
-        status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
+        status = H5G_node_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, extra);
 
     } else if(!HDmemcmp(sig, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -348,7 +348,7 @@ main(int argc, char *argv[])
                     HDexit(4);
                 } /* end if */
 
-                status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
+                status = H5G_node_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, extra);
                 break;
 
             case H5B_CHUNK_ID:
@@ -386,7 +386,7 @@ main(int argc, char *argv[])
                 /* Set the last dimension (the element size) to zero */
                 dim[ndims] = 0;
 
-                status = H5D_btree_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims, dim);
+                status = H5D_btree_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, ndims, dim);
                 break;
 
             case H5B_NUM_BTREE_ID:
@@ -402,7 +402,7 @@ main(int argc, char *argv[])
         const H5B2_class_t *cls = get_H5B2_class(sig);
         HDassert(cls);
 
-        status = H5B2__hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, (haddr_t)extra);
+        status = H5B2__hdr_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, cls, (haddr_t)extra);
 
     } else if(!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -420,7 +420,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5B2__int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3, (haddr_t)extra4);
+        status = H5B2__int_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3, (haddr_t)extra4);
 
     } else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -437,13 +437,13 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5B2__leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (haddr_t)extra3);
+        status = H5B2__leaf_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (haddr_t)extra3);
 
     } else if(!HDmemcmp(sig, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a fractal heap header.
          */
-        status = H5HF_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+        status = H5HF_hdr_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL);
 
     } else if(!HDmemcmp(sig, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -458,7 +458,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5HF_dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (size_t)extra2);
+        status = H5HF_dblock_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, extra, (size_t)extra2);
 
     } else if(!HDmemcmp(sig, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -473,14 +473,14 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5HF_iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, (unsigned)extra2);
+        status = H5HF_iblock_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, extra, (unsigned)extra2);
 
     } else if(!HDmemcmp(sig, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug a free space header.
          */
 
-        status = H5FS_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+        status = H5FS_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL);
 
     } else if(!HDmemcmp(sig, H5FS_SINFO_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -495,14 +495,14 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5FS_sects_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra, extra2);
+        status = H5FS_sects_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, extra, extra2);
 
     } else if(!HDmemcmp(sig, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug shared message master table.
          */
 
-        status = H5SM_table_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned) UFAIL, (unsigned) UFAIL);
+        status = H5SM_table_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, (unsigned) UFAIL, (unsigned) UFAIL);
 
     } else if(!HDmemcmp(sig, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -517,7 +517,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5SM_list_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (haddr_t)extra);
+        status = H5SM_list_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, (haddr_t)extra);
 
     } else if(!HDmemcmp(sig, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -534,7 +534,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5EA__hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra);
+        status = H5EA__hdr_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, cls, extra);
 
     } else if(!HDmemcmp(sig, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -551,7 +551,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5EA__iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, extra2);
+        status = H5EA__iblock_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, cls, extra, extra2);
 
     } else if(!HDmemcmp(sig, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -568,7 +568,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5EA__sblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, extra3);
+        status = H5EA__sblock_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, extra3);
 
     } else if(!HDmemcmp(sig, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -585,7 +585,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5EA__dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (size_t)extra2, extra3);
+        status = H5EA__dblock_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, cls, extra, (size_t)extra2, extra3);
 
     } else if(!HDmemcmp(sig, H5FA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -602,7 +602,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5FA__hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra);
+        status = H5FA__hdr_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, cls, extra);
 
     } else if(!HDmemcmp(sig, H5FA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
@@ -619,21 +619,21 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        status = H5FA__dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, extra2);
+        status = H5FA__dblock_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL, cls, extra, extra2);
 
     } else if(!HDmemcmp(sig, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug v2 object header (which have signatures).
          */
 
-        status = H5O_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+        status = H5O_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL);
 
     } else if(sig[0] == H5O_VERSION_1) {
         /*
          * This could be a v1 object header.  Since they don't have a signature
          * it's a somewhat "ify" detection.
          */
-        status = H5O_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL);
+        status = H5O_debug(f, H5AC_dxpl_id, addr, stdout, 0, VCOL);
 
     } else {
         /*

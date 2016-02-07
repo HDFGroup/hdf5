@@ -266,7 +266,7 @@ H5HL__dblk_realloc(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t new_heap_size))
                 H5E_THROW(H5E_CANTRESIZE, "unable to resize heap data block in cache");
 
             /* Relocate the heap data block in the cache */
-            if(FAIL == H5AC_move_entry(f, H5AC_LHEAP_DBLK, old_addr, new_addr))
+            if(FAIL == H5AC_move_entry(f, H5AC_LHEAP_DBLK, old_addr, new_addr, dxpl_id))
                 H5E_THROW(H5E_CANTMOVE, "unable to move heap data block in cache");
 
         } /* end else */

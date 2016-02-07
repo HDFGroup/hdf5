@@ -111,7 +111,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size,
     HDassert(io_info);
     HDassert(io_info->dset);
     HDassert(io_info->store);
-    HDassert(TRUE == H5P_isa_class(io_info->dxpl_id, H5P_DATASET_XFER));
+    HDassert(TRUE == H5P_isa_class(io_info->raw_dxpl_id, H5P_DATASET_XFER));
     HDassert(io_info->u.rbuf);
 
     /* Allocate the vector I/O arrays */

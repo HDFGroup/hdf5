@@ -657,7 +657,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -871,7 +871,7 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1048,7 +1048,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1203,7 +1203,7 @@ test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1365,7 +1365,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1508,7 +1508,7 @@ test_insert_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1627,7 +1627,7 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1809,7 +1809,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2038,7 +2038,7 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2272,7 +2272,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2444,7 +2444,7 @@ test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2623,7 +2623,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2801,7 +2801,7 @@ test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2981,7 +2981,7 @@ test_insert_lots(hid_t fapl, const H5B2_create_t *cparam,
     hid_t	file = -1;              /* File ID */
     char	filename[1024];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -3211,7 +3211,7 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -3581,7 +3581,7 @@ test_update_split_root(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -3834,7 +3834,7 @@ test_update_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -3993,7 +3993,7 @@ test_update_level1_side_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -4159,7 +4159,7 @@ test_update_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -4306,7 +4306,7 @@ test_update_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -4428,7 +4428,7 @@ test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     H5B2_test_rec_t record;             /* Record to insert into tree */
@@ -4982,7 +4982,7 @@ test_update_lots(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     time_t      curr_time;              /* Current time, for seeding random number generator */
@@ -5224,7 +5224,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5532,7 +5532,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5755,7 +5755,7 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5952,7 +5952,7 @@ test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6131,7 +6131,7 @@ test_remove_level1_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6257,7 +6257,7 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6484,7 +6484,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6632,7 +6632,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6780,7 +6780,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6925,7 +6925,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7070,7 +7070,7 @@ test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7209,7 +7209,7 @@ test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7495,7 +7495,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl, const H5B2_create_t *
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7645,7 +7645,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl, const H5B2_create_t *
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7795,7 +7795,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl, const H5B2_create_t *cpar
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7946,7 +7946,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl, const H5B2_create_t *cpar
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -8097,7 +8097,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -8223,7 +8223,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl, const H5B2_create_t *cparam
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -8349,7 +8349,7 @@ test_remove_level2_3internal_merge(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -8475,7 +8475,7 @@ test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -8601,7 +8601,7 @@ gen_l4_btree2(const char *filename, hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     hsize_t     record;                 /* Record to insert into tree */
     unsigned    u;                      /* Local index variable */
@@ -8682,7 +8682,7 @@ test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cpara
     int         fd = -1;                /* File descriptor */
     h5_stat_t	sb;                     /* Stat buffer for file */
     void        *file_data = NULL;      /* Copy of file data */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -9130,7 +9130,7 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -9354,7 +9354,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     H5F_t	*f = NULL;              /* Internal file object pointer */
     h5_stat_size_t       empty_size;             /* Size of an empty file */
     h5_stat_size_t       file_size;              /* Size of each file created */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -9461,7 +9461,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, f, NULL, NULL) < 0)
+    if(H5B2_delete(f, H5AC_dxpl_id, bt2_addr, f, NULL, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Close file */
@@ -9624,7 +9624,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -9858,7 +9858,7 @@ test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
     hid_t	file00 = -1;            /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5F_t	*f2 = NULL;             /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     H5B2_t      *bt2_2 = NULL;          /* Second v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
