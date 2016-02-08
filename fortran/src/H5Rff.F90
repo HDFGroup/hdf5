@@ -4,7 +4,7 @@
 !  MODULE H5R
 !
 ! FILE
-!  fortran/src/H5Rff.f90
+!  fortran/src/H5Rff.F90
 !
 ! PURPOSE
 !  This file contains Fortran interfaces for H5R functions.

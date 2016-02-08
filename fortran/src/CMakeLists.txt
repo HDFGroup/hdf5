@@ -161,6 +161,7 @@ set (f90_F_BASE_SRCS
 
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90global.F90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5fortkit.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5_ff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff.F90

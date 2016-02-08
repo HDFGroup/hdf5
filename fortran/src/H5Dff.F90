@@ -4,7 +4,7 @@
 !  MODULE H5D
 !
 ! FILE
-!  fortran/src/H5Dff.f90
+!  fortran/src/H5Dff.F90
 !
 ! PURPOSE
 !  This file contains Fortran interfaces for H5D functions.
