@@ -161,7 +161,7 @@ do
         echo "## Use H5Fstart_swmr_write() to enable SWMR writing mode"
         echo "###############################################################################"
 
-	# Remove any possible writer message file before launching writer
+        # Remove any possible writer message file before launching writer
         rm -f $WRITER_MESSAGE
         #
         # Launch the Writer
@@ -170,7 +170,7 @@ do
         ./swmr_start_write $compress $index_type $Nrecords $seed &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
-	#
+
         # Wait for message from writer process before starting reader(s)
         WAIT_MESSAGE $WRITER_MESSAGE
 
@@ -228,7 +228,8 @@ do
             echo generator had error
             nerrors=`expr $nerrors + 1`
         fi
-	# Remove any possible writer message file before launching writer
+
+        # Remove any possible writer message file before launching writer
         rm -f $WRITER_MESSAGE
         #
         # Launch the Writer
@@ -237,7 +238,7 @@ do
         ./swmr_writer -o $Nrecords $seed &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
-	#
+
         # Wait for message from writer process before starting reader(s)
         WAIT_MESSAGE $WRITER_MESSAGE
         #
@@ -286,7 +287,7 @@ do
         echo "###############################################################################"
         echo "## Remove test - test shrinking the dataset"
         echo "###############################################################################"
-	#
+
         # Remove any possible writer message file before launching writer
         rm -f $WRITER_MESSAGE
         # Launch the Remove Writer
@@ -295,7 +296,7 @@ do
         ./swmr_remove_writer -o $Nrecs_rem $seed &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
-	#
+
         # Wait for message from writer process before starting reader(s)
         WAIT_MESSAGE $WRITER_MESSAGE
         #
@@ -361,7 +362,7 @@ do
             echo writer had error
             nerrors=`expr $nerrors + 1`
         fi
-	#
+
         # Remove any possible writer message file before launching writer
         rm -f $WRITER_MESSAGE
         #
@@ -371,7 +372,7 @@ do
         ./swmr_addrem_writer $Nrecords $seed &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
-	#
+
         # Wait for message from writer process before starting reader(s)
         WAIT_MESSAGE $WRITER_MESSAGE
         #
@@ -431,7 +432,7 @@ do
             echo generator had error
             nerrors=`expr $nerrors + 1`
         fi
-	#
+
         # Remove any possible writer message file before launching writer
         rm -f $WRITER_MESSAGE
         # Launch the Sparse writer
@@ -439,7 +440,7 @@ do
         nice -n 20 ./swmr_sparse_writer $Nrecs_spa &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
-	#
+
         # Wait for message from writer process before starting reader(s)
         WAIT_MESSAGE $WRITER_MESSAGE
         #
@@ -495,3 +496,4 @@ else
     echo "SWMR tests failed with $nerrors errors."
     exit 1
 fi
+
