@@ -4,7 +4,7 @@
 !  MODULE H5E
 !
 ! FILE
-!  fortran/src/H5Eff.f90
+!  fortran/src/H5Eff.F90
 !
 ! PURPOSE
 !  This Module contains Fortran interfaces for H5E functions.

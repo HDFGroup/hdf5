@@ -476,6 +476,10 @@ h5init_flags_c( int_f *h5d_flags, size_t_f *h5d_size_flags,
     h5d_flags[22] = (int_f)H5D_MPIO_CHUNK_COLLECTIVE;
     h5d_flags[23] = (int_f)H5D_MPIO_CHUNK_MIXED;
     h5d_flags[24] = (int_f)H5D_MPIO_CONTIGUOUS_COLLECTIVE;
+    h5d_flags[25] = (int_f)H5D_VDS_ERROR;
+    h5d_flags[26] = (int_f)H5D_VDS_FIRST_MISSING;
+    h5d_flags[27] = (int_f)H5D_VDS_LAST_AVAILABLE;
+    h5d_flags[28] = (int_f)H5D_VIRTUAL;
 
 /*
  *  H5E flags

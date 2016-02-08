@@ -1,13 +1,6 @@
-!****h* ROBODoc/HDF5
-!
-! NAME
-!  MODULE HDF5
-!
-! FILE
-!  src/fortran/src/HDF5.F90
-!
+!****h* H5fortkit/H5fortkit
 ! PURPOSE
-!  This is the main module used for linking to the Fortran HDF library.
+!  Routines to deal with C-FORTRAN issues.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -25,22 +18,41 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+MODULE H5fortkit
+
+CONTAINS
+
+!****if* H5fortkit/HD5c2fstring
+! NAME
+!  HD5c2fstring
+! INPUTS
+!  cstring  -  C string stored as a string array of size 'len' of string size LEN=1
+!  len      -  length of Fortran string
+! OUTPUT
+!   fstring -  Fortran string array of LEN=1
+! PURPOSE
+!   Copies a Fortran array of strings having a length of one to a fortran string and removes the C Null
+!   terminator. The Null terminator is returned from C when calling the C APIs directly.
+!
+!   The fortran standard does not allow C_LOC to be used on a character string of
+!   length greater than one, which is why we use the array of characters instead.
+!
+! SOURCE
+  SUBROUTINE HD5c2fstring(fstring,cstring,len)
 !*****
-MODULE HDF5
-  USE H5GLOBAL
-  USE H5F
-  USE H5G
-  USE H5E
-  USE H5I
-  USE H5L
-  USE H5S
-  USE H5D
-  USE H5A
-  USE H5T
-  USE H5O
-  USE H5P
-  USE H5R
-  USE H5Z
-  USE H5_gen
-  USE H5LIB
-END MODULE HDF5
+    IMPLICIT NONE
+
+    INTEGER :: i
+    INTEGER :: len
+    CHARACTER(LEN=len) :: fstring
+    CHARACTER(LEN=1), DIMENSION(1:len) :: cstring 
+    
+    fstring = ''
+    DO i = 1, len
+       IF (cstring(i)(1:1)==CHAR(0)) EXIT
+       fstring(i:i) = cstring(i)(1:1)
+    END DO
+
+  END SUBROUTINE HD5c2fstring
+
+END MODULE H5fortkit

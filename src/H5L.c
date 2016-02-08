@@ -717,7 +717,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     udata.idx_type = idx_type;
     udata.order = order;
     udata.n = n;
-    udata.dxpl_id = H5AC_dxpl_id;
+    udata.dxpl_id = dxpl_id;
 
     /* Traverse the group hierarchy to remove the link */
     if(H5G_traverse(&loc, group_name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK|H5G_TARGET_MOUNT, 

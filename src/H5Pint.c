@@ -5463,36 +5463,6 @@ H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, hid_t *
     HDassert(libclass);
     HDassert(dxpl_id);
 
-    /* Set access plist to the default property list of the appropriate class if it's the generic default */
-    if(H5P_DEFAULT == *acspl_id)
-        *acspl_id = *libclass->def_plist_id;
-    else {
-#ifdef H5_HAVE_PARALLEL
-        H5P_coll_md_read_flag_t is_collective;      /* Collective metadata read flag */
-        H5P_genplist_t *plist;          /* Property list pointer */
-#endif /* H5_HAVE_PARALLEL */
-
-        /* Sanity check the access property list class */
-        if(TRUE != H5P_isa_class(*acspl_id, *libclass->class_id))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not the required access property list")
-
-        *dxpl_id = H5AC_ind_read_dxpl_id;
-
-#ifdef H5_HAVE_PARALLEL
-        /* Get the plist structure for the access property list */
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object(*acspl_id)))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
-
-        /* Get the collective metadata read flag */
-        if(H5P_peek(plist, H5_COLL_MD_READ_FLAG_NAME, &is_collective) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core collective metadata read flag")
-
-        /* If collective metadata read requested and using internal DXPL, switch to internal collective DXPL */
-        if(H5P_USER_TRUE == is_collective)
-            *dxpl_id = H5AC_coll_read_dxpl_id;
-#endif /* H5_HAVE_PARALLEL */
-    } /* end else */
-
 #ifdef H5_HAVE_PARALLEL
     /* If parallel is enabled and the file driver used in the MPI-IO
     VFD, issue an MPI barrier for easier debugging if the API function
@@ -5511,6 +5481,36 @@ H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, hid_t *
             MPI_Barrier(mpi_comm);
     }
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Set access plist to the default property list of the appropriate class if it's the generic default */
+    if(H5P_DEFAULT == *acspl_id)
+        *acspl_id = *libclass->def_plist_id;
+    else {
+#ifdef H5_HAVE_PARALLEL
+        H5P_coll_md_read_flag_t md_coll_read;      /* Collective metadata read flag */
+        H5P_genplist_t *plist;          /* Property list pointer */
+#endif /* H5_HAVE_PARALLEL */
+
+        /* Sanity check the access property list class */
+        if(TRUE != H5P_isa_class(*acspl_id, *libclass->class_id))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not the required access property list")
+
+        *dxpl_id = H5AC_ind_read_dxpl_id;
+
+#ifdef H5_HAVE_PARALLEL
+        /* Get the plist structure for the access property list */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(*acspl_id)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        /* Get the collective metadata read flag */
+        if(H5P_peek(plist, H5_COLL_MD_READ_FLAG_NAME, &md_coll_read) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core collective metadata read flag")
+
+        /* If collective metadata read requested and using internal DXPL, switch to internal collective DXPL */
+        if(H5P_USER_TRUE == md_coll_read)
+            *dxpl_id = H5AC_coll_read_dxpl_id;
+#endif /* H5_HAVE_PARALLEL */
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
