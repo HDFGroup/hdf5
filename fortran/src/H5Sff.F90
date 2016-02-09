@@ -1784,7 +1784,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
 !*****
     TYPE(C_PTR) :: start_c, stride_c, count_c, block_c
-    INTEGER(C_INT) :: n
+    INTEGER :: n
     
     INTERFACE
        INTEGER FUNCTION h5sget_regular_hyperslab(space_id, start, stride, count, block) BIND(C,NAME='H5Sget_regular_hyperslab')
