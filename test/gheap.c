@@ -51,7 +51,7 @@ const char *FILENAME[] = {
     "gheap2",
     "gheap3",
     "gheap4",
-    "gheapooo",
+    "gheap5",
     NULL
 };
 
@@ -82,17 +82,27 @@ const char *FILENAME[] = {
 static int
 test_monotonic_increasing(hid_t fapl)
 {
-    hid_t	fid = -1;               /* HDF5 file ID                     */
-    H5F_t 	*f = NULL;              /* file object pointer              */
-    H5HG_t	obj[N_GHEAP_OBJS];      /* global heap objects              */
-    uint8_t	in[OBJ_BUF_SIZE];       /* global heap data sent            */
-    uint8_t	out[OBJ_BUF_SIZE];      /* global heap data received        */
+    char        *filename = NULL;   /* VFD-dependent filename           */
+    hid_t       fid = -1;           /* HDF5 file ID                     */
+    H5F_t       *f = NULL;          /* file object pointer              */
+    H5HG_t      *obj = NULL;        /* global heap objects              */
+    uint8_t     *in = NULL;         /* global heap data sent            */
+    uint8_t     *out = NULL;        /* global heap data received        */
     unsigned    i;                  /* iterator                         */
-    size_t	size;                   /* heap object size                 */
-    int		nerrors = 0;            /* # of errors encountered          */
-    char	filename[FILENAME_SIZE];    /* VFD-dependent filename       */
+    size_t      size;               /* heap object size                 */
+    int         nerrors = 0;        /* # of errors encountered          */
 
     TESTING("monotonically increasing lengths");
+
+    /* allocate memory */
+    if(NULL == (filename = (char *)HDcalloc(FILENAME_SIZE, sizeof(char))))
+        goto error;
+    if(NULL == (obj = (H5HG_t *)HDcalloc(N_GHEAP_OBJS, sizeof(H5HG_t))))
+        goto error;
+    if(NULL == (in = (uint8_t *)HDcalloc(OBJ_BUF_SIZE, sizeof(uint8_t))))
+        goto error;
+    if(NULL == (out = (uint8_t *)HDcalloc(OBJ_BUF_SIZE, sizeof(uint8_t))))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -142,6 +152,11 @@ test_monotonic_increasing(hid_t fapl)
     if(H5Fclose(fid) < 0) goto error;
     if(nerrors) goto error;
 
+    HDfree(filename);
+    HDfree(obj);
+    HDfree(in);
+    HDfree(out);
+
     PASSED();
     return 0;
 
@@ -149,6 +164,14 @@ error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
     } H5E_END_TRY;
+    if(filename)
+        HDfree(filename);
+    if(obj)
+        HDfree(obj);
+    if(in)
+        HDfree(in);
+    if(out)
+        HDfree(out);
     return MAX(1, nerrors);
 } /* end test_monotonic_increasing() */
 
@@ -170,17 +193,27 @@ error:
 static int
 test_monotonic_decreasing(hid_t fapl)
 {
-    hid_t	fid = -1;               /* HDF5 file ID                     */
-    H5F_t 	*f = NULL;              /* file object pointer              */
-    H5HG_t	obj[N_GHEAP_OBJS];      /* global heap objects              */
-    uint8_t	in[OBJ_BUF_SIZE];       /* global heap data sent            */
-    uint8_t	out[OBJ_BUF_SIZE];      /* global heap data received        */
+    char        *filename = NULL;   /* VFD-dependent filename           */
+    hid_t       fid = -1;           /* HDF5 file ID                     */
+    H5F_t       *f = NULL;          /* file object pointer              */
+    H5HG_t      *obj = NULL;        /* global heap objects              */
+    uint8_t     *in = NULL;         /* global heap data sent            */
+    uint8_t     *out = NULL;        /* global heap data received        */
     unsigned    i;                  /* iterator                         */
-    size_t	size;                   /* heap object size                 */
-    int		nerrors = 0;            /* # of errors encountered          */
-    char	filename[FILENAME_SIZE];    /* VFD-dependent filename       */
+    size_t      size;               /* heap object size                 */
+    int         nerrors = 0;        /* # of errors encountered          */
 
     TESTING("monotonically decreasing lengths");
+
+    /* allocate memory */
+    if(NULL == (filename = (char *)HDcalloc(FILENAME_SIZE, sizeof(char))))
+        goto error;
+    if(NULL == (obj = (H5HG_t *)HDcalloc(N_GHEAP_OBJS, sizeof(H5HG_t))))
+        goto error;
+    if(NULL == (in = (uint8_t *)HDcalloc(OBJ_BUF_SIZE, sizeof(uint8_t))))
+        goto error;
+    if(NULL == (out = (uint8_t *)HDcalloc(OBJ_BUF_SIZE, sizeof(uint8_t))))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof(filename));
@@ -194,7 +227,7 @@ test_monotonic_decreasing(hid_t fapl)
 
     /* Write the objects, monotonically decreasing in length. */
     for(i = 0; i < N_GHEAP_OBJS; i++) {
-        size = 1024 - i;
+        size = N_GHEAP_OBJS - i;
         HDmemset(out, 'A' + (int)i % 26, size);
         H5Eclear2(H5E_DEFAULT);
         if(H5HG_insert(f, H5AC_dxpl_id, size, out, obj+i) < 0) {
@@ -206,7 +239,7 @@ test_monotonic_decreasing(hid_t fapl)
 
     /* Now try to read each object back. */
     for(i = 0; i < N_GHEAP_OBJS; i++) {
-        size = OBJ_BUF_SIZE - i;
+        size = N_GHEAP_OBJS - i;
         HDmemset(out, 'A' + (int)i % 26, size);
         H5Eclear2(H5E_DEFAULT);
         if(NULL == H5HG_read(f, H5AC_dxpl_id, obj+i, in, NULL)) {
@@ -222,6 +255,12 @@ test_monotonic_decreasing(hid_t fapl)
 
     if(H5Fclose(fid) < 0) goto error;
     if(nerrors) goto error;
+
+    HDfree(filename);
+    HDfree(obj);
+    HDfree(in);
+    HDfree(out);
+
     PASSED();
     return 0;
 
@@ -229,6 +268,14 @@ test_monotonic_decreasing(hid_t fapl)
     H5E_BEGIN_TRY {
         H5Fclose(fid);
     } H5E_END_TRY;
+    if(filename)
+        HDfree(filename);
+    if(obj)
+        HDfree(obj);
+    if(in)
+        HDfree(in);
+    if(out)
+        HDfree(out);
     return MAX(1, nerrors);
 } /* end test_monotonic_decreasing() */
 
@@ -250,16 +297,24 @@ test_monotonic_decreasing(hid_t fapl)
 static int
 test_complete_removal(hid_t fapl)
 {
-    hid_t	fid = -1;               /* HDF5 file ID                     */
-    H5F_t 	*f = NULL;              /* file object pointer              */
-    H5HG_t	obj[N_GHEAP_OBJS];      /* global heap objects              */
-    uint8_t	out[OBJ_BUF_SIZE];      /* global heap data received        */
+    char        *filename = NULL;   /* VFD-dependent filename           */
+    hid_t       fid = -1;           /* HDF5 file ID                     */
+    H5F_t       *f = NULL;          /* file object pointer              */
+    H5HG_t      *obj = NULL;        /* global heap objects              */
+    uint8_t     *out = NULL;        /* global heap data received        */
     unsigned    i;                  /* iterator                         */
-    size_t	size;                   /* heap object size                 */
-    int		nerrors = 0;            /* # of errors encountered          */
-    char	filename[FILENAME_SIZE];    /* VFD-dependent filename       */
+    size_t      size;               /* heap object size                 */
+    int         nerrors = 0;        /* # of errors encountered          */
 
     TESTING("complete object removal");
+
+    /* allocate memory */
+    if(NULL == (filename = (char *)HDcalloc(FILENAME_SIZE, sizeof(char))))
+        goto error;
+    if(NULL == (obj = (H5HG_t *)HDcalloc(N_GHEAP_OBJS, sizeof(H5HG_t))))
+        goto error;
+    if(NULL == (out = (uint8_t *)HDcalloc(OBJ_BUF_SIZE, sizeof(uint8_t))))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[2], fapl, filename, sizeof(filename));
@@ -272,7 +327,7 @@ test_complete_removal(hid_t fapl)
     } /* end if */
 
     /* Create some stuff */
-    for(i=0; i < N_GHEAP_OBJS; i++) {
+    for(i = 0; i < N_GHEAP_OBJS; i++) {
         size = i % 30 + 100;
         HDmemset(out, 'A' + (int)i % 26, size);
         H5Eclear2(H5E_DEFAULT);
@@ -295,6 +350,10 @@ test_complete_removal(hid_t fapl)
     if(H5Fclose(fid) < 0) goto error;
     if(nerrors) goto error;
 
+    HDfree(filename);
+    HDfree(obj);
+    HDfree(out);
+
     PASSED();
     return 0;
 
@@ -302,6 +361,12 @@ test_complete_removal(hid_t fapl)
     H5E_BEGIN_TRY {
         H5Fclose(fid);
     } H5E_END_TRY;
+    if(filename)
+        HDfree(filename);
+    if(obj)
+        HDfree(obj);
+    if(out)
+        HDfree(out);
     return MAX(1, nerrors);
 } /* end test_complete_removal() */
 
@@ -324,16 +389,24 @@ test_complete_removal(hid_t fapl)
 static int
 test_partial_removal(hid_t fapl)
 {
-    hid_t	fid = -1;               /* HDF5 file ID                     */
-    H5F_t 	*f = NULL;              /* file object pointer              */
-    H5HG_t	obj[N_GHEAP_OBJS];      /* global heap objects              */
-    uint8_t	out[OBJ_BUF_SIZE];      /* global heap data received        */
+    char        *filename = NULL;   /* VFD-dependent filename           */
+    hid_t       fid = -1;           /* HDF5 file ID                     */
+    H5F_t       *f = NULL;          /* file object pointer              */
+    H5HG_t      *obj = NULL;        /* global heap objects              */
+    uint8_t     *out = NULL;        /* global heap data received        */
     unsigned    i;                  /* iterator                         */
-    size_t	size;                   /* heap object size                 */
-    int		nerrors = 0;            /* # of errors encountered          */
-    char	filename[FILENAME_SIZE];    /* VFD-dependent filename       */
+    size_t      size;               /* heap object size                 */
+    int         nerrors = 0;        /* # of errors encountered          */
 
     TESTING("partial object removal");
+
+    /* allocate memory */
+    if(NULL == (filename = (char *)HDcalloc(FILENAME_SIZE, sizeof(char))))
+        goto error;
+    if(NULL == (obj = (H5HG_t *)HDcalloc(N_GHEAP_OBJS, sizeof(H5HG_t))))
+        goto error;
+    if(NULL == (out = (uint8_t *)HDcalloc(OBJ_BUF_SIZE, sizeof(uint8_t))))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof(filename));
@@ -375,6 +448,10 @@ test_partial_removal(hid_t fapl)
     if(H5Fclose(fid) < 0) goto error;
     if(nerrors) goto error;
 
+    HDfree(filename);
+    HDfree(obj);
+    HDfree(out);
+
     PASSED();
     return 0;
 
@@ -382,6 +459,12 @@ test_partial_removal(hid_t fapl)
     H5E_BEGIN_TRY {
         H5Fclose(fid);
     } H5E_END_TRY;
+    if(filename)
+        HDfree(filename);
+    if(obj)
+        HDfree(obj);
+    if(out)
+        HDfree(out);
     return MAX(1, nerrors);
 } /* end test_partial_removal() */
 
@@ -405,15 +488,18 @@ test_partial_removal(hid_t fapl)
 static int
 test_ooo_indices(hid_t fapl)
 {
-    hid_t	fid = -1;               /* HDF5 file ID                     */
-    H5F_t 	*f = NULL;              /* file object pointer              */
-    H5HG_t	*obj = NULL;            /* global heap objects              */
-    unsigned i, j;                  /* iterators                        */
-    int		nerrors = 0;            /* # of errors encountered          */
-    char	filename[FILENAME_SIZE];    /* VFD-dependent filename       */
+    char        *filename = NULL;   /* VFD-dependent filename           */
+    hid_t       fid = -1;           /* HDF5 file ID                     */
+    H5F_t       *f = NULL;          /* file object pointer              */
+    H5HG_t      *obj = NULL;        /* global heap objects              */
+    unsigned    i, j;               /* iterators                        */
+    int         nerrors = 0;        /* # of errors encountered          */
 
     TESTING("out of order indices");
 
+    /* allocate memory */
+    if(NULL == (filename = (char *)HDcalloc(FILENAME_SIZE, sizeof(char))))
+        goto error;
     if(NULL == (obj = (H5HG_t *)HDmalloc(2000 * sizeof(*obj))))
         goto error;
 
@@ -483,8 +569,9 @@ test_ooo_indices(hid_t fapl)
     if(H5Fclose(fid) < 0) goto error;
     if(nerrors) goto error;
 
+    HDfree(filename);
     HDfree(obj);
-    obj = NULL;
+
     PASSED();
     return 0;
 
@@ -492,6 +579,8 @@ error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
     } H5E_END_TRY;
+    if(filename)
+        HDfree(filename);
     if(obj)
         HDfree(obj);
     return MAX(1, nerrors);
