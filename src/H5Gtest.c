@@ -97,7 +97,7 @@ H5G__is_empty_test(hid_t gid)
     H5G_t *grp = NULL;          /* Pointer to group */
     htri_t msg_exists = FALSE;  /* Indicate that a header message is present */
     htri_t linfo_exists = FALSE;/* Indicate that the 'link info' message is present */
-    hid_t dxpl_id = H5AC_dxpl_id;  /* transfer property list used for this operation */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id;  /* transfer property list used for this operation */
     htri_t ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -209,7 +209,7 @@ H5G__has_links_test(hid_t gid, unsigned *nmsgs)
 {
     H5G_t *grp = NULL;          /* Pointer to group */
     htri_t msg_exists = 0;      /* Indicate that a header message is present */
-    hid_t dxpl_id = H5AC_dxpl_id;  /* transfer property list used for this operation */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id;  /* transfer property list used for this operation */
     htri_t ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -268,7 +268,7 @@ H5G__has_stab_test(hid_t gid)
 {
     H5G_t *grp = NULL;          /* Pointer to group */
     htri_t msg_exists = 0;      /* Indicate that a header message is present */
-    hid_t dxpl_id = H5AC_dxpl_id;  /* transfer property list used for this operation */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id;  /* transfer property list used for this operation */
     htri_t ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -319,7 +319,7 @@ H5G__is_new_dense_test(hid_t gid)
 {
     H5G_t *grp = NULL;          /* Pointer to group */
     htri_t msg_exists = 0;      /* Indicate that a header message is present */
-    hid_t dxpl_id = H5AC_dxpl_id;  /* transfer property list used for this operation */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id;  /* transfer property list used for this operation */
     htri_t ret_value = TRUE;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -390,7 +390,7 @@ H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     H5B2_t *bt2_corder = NULL;  /* v2 B-tree handle for creation order index */
     H5O_linfo_t linfo;		/* Link info message */
     H5G_t *grp = NULL;          /* Pointer to group */
-    hid_t dxpl_id = H5AC_dxpl_id;  /* transfer property list used for this operation */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id;  /* transfer property list used for this operation */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -471,7 +471,7 @@ H5G__lheap_size_test(hid_t gid, size_t *lheap_size)
 {
     H5G_t *grp = NULL;          /* Pointer to group */
     H5O_stab_t stab;		/* Symbol table message	*/
-    hid_t dxpl_id = H5AC_dxpl_id;  /* transfer property list used for this operation */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id;  /* transfer property list used for this operation */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -613,7 +613,7 @@ H5G__verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent)
 {
     H5O_stab_t  stab;                   /* Symbol table */
     H5HL_t      *heap = NULL;           /* Pointer to local heap */
-    hid_t dxpl_id = H5AC_dxpl_id;  /* transfer property list used for this operation */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id;  /* transfer property list used for this operation */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, grp_oloc->addr, FAIL)
@@ -770,7 +770,7 @@ H5G__verify_cached_stabs_test(hid_t gid)
     H5O_stab_t          stab;                   /* Symbol table message */
     H5G_bt_common_t     udata = {NULL, NULL};   /* Dummy udata so H5B_iterate doesn't freak out */
     haddr_t             prev_tag = HADDR_UNDEF; /* Previous metadata tag */
-    hid_t               dxpl_id = H5AC_dxpl_id;  /* transfer property list used for this operation */
+    hid_t               dxpl_id = H5AC_ind_read_dxpl_id;  /* transfer property list used for this operation */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE

@@ -99,7 +99,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
 {
     H5G_loc_t	loc;                    /* Location to create datatype */
     H5T_t	*type;                  /* Datatype for ID */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */ 
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */ 
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -246,7 +246,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 {
     H5G_loc_t	loc;                    /* Group location for location */
     H5T_t	*type = NULL;           /* Datatype created */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -529,7 +529,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     H5O_type_t   obj_type;              /* Type of object at location */
     H5G_loc_t    type_loc;              /* Group object for datatype */
     hbool_t      obj_found = FALSE;     /* Object at 'name' found */
-    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
+    hid_t        dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl to use to open datatype */
     hid_t        ret_value = FAIL;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -637,7 +637,7 @@ H5Tget_create_plist(hid_t dtype_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
         /* Retrieve any object creation properties */
-        if(H5O_get_create_plist(&type->oloc, H5AC_dxpl_id, new_plist) < 0)
+        if(H5O_get_create_plist(&type->oloc, H5AC_ind_read_dxpl_id, new_plist) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object creation info")
     } /* end if */
 

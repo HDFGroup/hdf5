@@ -122,7 +122,7 @@ test_monotonic_increasing(hid_t fapl)
         size = i + 1;
         HDmemset(out, 'A' + (int)i % 26, size);
         H5Eclear2(H5E_DEFAULT);
-        if(H5HG_insert(f, H5AC_dxpl_id, size, out, obj + i) < 0) {
+        if(H5HG_insert(f, H5AC_ind_read_dxpl_id, size, out, obj + i) < 0) {
             H5_FAILED();
             HDputs("    Unable to insert object into global heap");
 	        nerrors++;
@@ -138,7 +138,7 @@ test_monotonic_increasing(hid_t fapl)
         size = i + 1;
         HDmemset(out, 'A' + (int)i % 26, size);
         H5Eclear2(H5E_DEFAULT);
-        if(NULL == H5HG_read(f, H5AC_dxpl_id, obj + i, in, NULL)) {
+        if(NULL == H5HG_read(f, H5AC_ind_read_dxpl_id, obj + i, in, NULL)) {
             H5_FAILED();
             HDputs("    Unable to read object");
             nerrors++;
@@ -230,7 +230,7 @@ test_monotonic_decreasing(hid_t fapl)
         size = N_GHEAP_OBJS - i;
         HDmemset(out, 'A' + (int)i % 26, size);
         H5Eclear2(H5E_DEFAULT);
-        if(H5HG_insert(f, H5AC_dxpl_id, size, out, obj+i) < 0) {
+        if(H5HG_insert(f, H5AC_ind_read_dxpl_id, size, out, obj+i) < 0) {
             H5_FAILED();
             HDputs("    Unable to insert object into global heap");
             nerrors++;
@@ -242,7 +242,7 @@ test_monotonic_decreasing(hid_t fapl)
         size = N_GHEAP_OBJS - i;
         HDmemset(out, 'A' + (int)i % 26, size);
         H5Eclear2(H5E_DEFAULT);
-        if(NULL == H5HG_read(f, H5AC_dxpl_id, obj+i, in, NULL)) {
+        if(NULL == H5HG_read(f, H5AC_ind_read_dxpl_id, obj+i, in, NULL)) {
             H5_FAILED();
             HDputs("    Unable to read object");
             nerrors++;
@@ -331,7 +331,7 @@ test_complete_removal(hid_t fapl)
         size = i % 30 + 100;
         HDmemset(out, 'A' + (int)i % 26, size);
         H5Eclear2(H5E_DEFAULT);
-        if(H5HG_insert(f, H5AC_dxpl_id, size, out, obj+i) < 0) {
+        if(H5HG_insert(f, H5AC_ind_read_dxpl_id, size, out, obj+i) < 0) {
             H5_FAILED();
             HDputs("    Unable to insert object into global heap");
             nerrors++;
@@ -340,7 +340,7 @@ test_complete_removal(hid_t fapl)
 
     /* Remove everything */
     for(i = 0; i < N_GHEAP_OBJS; i++) {
-        if(H5HG_remove(f, H5AC_dxpl_id, obj+i) < 0) {
+        if(H5HG_remove(f, H5AC_ind_read_dxpl_id, obj+i) < 0) {
             H5_FAILED();
             HDputs("    Unable to remove object");
             nerrors++;
@@ -424,7 +424,7 @@ test_partial_removal(hid_t fapl)
         size = i % 30 + 100;
         HDmemset(out, 'A' + (int)i % 26, size);
         H5Eclear2(H5E_DEFAULT);
-        if(H5HG_insert(f, H5AC_dxpl_id, size, out, obj+i) < 0) {
+        if(H5HG_insert(f, H5AC_ind_read_dxpl_id, size, out, obj+i) < 0) {
             H5_FAILED();
             HDputs("    Unable to insert object into global heap");
             nerrors++;
@@ -436,7 +436,7 @@ test_partial_removal(hid_t fapl)
          */
         if(1 == i % 3) {
             H5Eclear2(H5E_DEFAULT);
-            if(H5HG_remove(f, H5AC_dxpl_id, obj+i-1) < 0) {
+            if(H5HG_remove(f, H5AC_ind_read_dxpl_id, obj+i-1) < 0) {
                 H5_FAILED();
                 HDputs("    Unable to remove object");
                 nerrors++;
@@ -524,7 +524,7 @@ test_ooo_indices(hid_t fapl)
          */
         for(j = 1000 * ((~i & 1)); j < 1000 * ((~i & 1) + 1); j++) {
             H5Eclear2(H5E_DEFAULT);
-            if(H5HG_insert(f, H5AC_dxpl_id, sizeof(j), &j, &obj[j]) < 0)
+            if(H5HG_insert(f, H5AC_ind_read_dxpl_id, sizeof(j), &j, &obj[j]) < 0)
                 GHEAP_REPEATED_ERR("    Unable to insert object into global heap")
 
             /* Check that the index is as expected */
@@ -536,7 +536,7 @@ test_ooo_indices(hid_t fapl)
         if(i > 0)
             for(j = 1000 * (i & 1); j < 1000 * ((i & 1) + 1); j++) {
                 H5Eclear2(H5E_DEFAULT);
-                if(H5HG_remove(f, H5AC_dxpl_id, &obj[j]) < 0)
+                if(H5HG_remove(f, H5AC_ind_read_dxpl_id, &obj[j]) < 0)
                     GHEAP_REPEATED_ERR("    Unable to remove object from global heap");
             } /* end for */
     } /* end for */
@@ -557,7 +557,7 @@ test_ooo_indices(hid_t fapl)
 
     /* Read the objects to make sure the heap is still readable */
     for(i = 0; i < 1000; i++) {
-        if(NULL == H5HG_read(f, H5AC_dxpl_id, &obj[i], &j, NULL))
+        if(NULL == H5HG_read(f, H5AC_ind_read_dxpl_id, &obj[i], &j, NULL))
             goto error;
         if(i != j) {
             H5_FAILED();

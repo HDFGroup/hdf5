@@ -27,6 +27,9 @@
 #include "H5FDpublic.h"		/* File drivers				*/
 
 /* Private headers needed by this file */
+#ifdef H5_HAVE_PARALLEL
+#include "H5Pprivate.h"		/* Property lists			*/
+#endif /* H5_HAVE_PARALLEL */
 #include "H5VMprivate.h"		/* Vectors and arrays */
 
 
@@ -312,6 +315,9 @@
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (((F)->shared->grp_btree_shared = (RC)) ? SUCCEED : FAIL)
 #define H5F_USE_TMP_SPACE(F)    ((F)->shared->use_tmp_space)
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->tmp_addr, (ADDR)))
+#ifdef H5_HAVE_PARALLEL
+#define H5F_COLL_MD_READ(F)     ((F)->coll_md_read)
+#endif /* H5_HAVE_PARALLEL */
 #else /* H5F_MODULE */
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_OPEN_NAME(F)        (H5F_get_open_name(F))
@@ -354,6 +360,9 @@
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (H5F_set_grp_btree_shared((F), (RC)))
 #define H5F_USE_TMP_SPACE(F)    (H5F_use_tmp_space(F))
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_is_tmp_addr((F), (ADDR)))
+#ifdef H5_HAVE_PARALLEL
+#define H5F_COLL_MD_READ(F)     (H5F_coll_md_read(F))
+#endif /* H5_HAVE_PARALLEL */
 #endif /* H5F_MODULE */
 
 
@@ -454,6 +463,7 @@
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
 #define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME       "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME  "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
+#define H5F_ACS_COLL_MD_WRITE_FLAG_NAME         "collective_metadata_write" /* property indicating whether metadata writes are done collectively or not */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"                 /* Whether absolute symlinks local to file. */
@@ -638,6 +648,10 @@ H5_DLL struct H5UC_t *H5F_grp_btree_shared(const H5F_t *f);
 H5_DLL herr_t H5F_set_grp_btree_shared(H5F_t *f, struct H5UC_t *rc);
 H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);
 H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
+#ifdef H5_HAVE_PARALLEL
+H5_DLL H5P_coll_md_read_flag_t H5F_coll_md_read(const H5F_t *f);
+H5_DLL void H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t flag);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Functions that retrieve values from VFD layer */
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
@@ -676,6 +690,7 @@ H5_DLL herr_t H5F_super_dirty(H5F_t *f);
 
 /* Parallel I/O (i.e. MPI) related routines */
 #ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle);
 H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int H5F_mpi_get_size(const H5F_t *f);

@@ -181,21 +181,17 @@ typedef H5C_cache_entry_t		H5AC_info_t;
 /* Typedef for metadata cache (defined in H5Cpkg.h) */
 typedef H5C_t	H5AC_t;
 
-#ifdef H5_HAVE_PARALLEL
-/* Definitions for "collective metadata write" property */
-#define H5AC_COLLECTIVE_META_WRITE_NAME         "H5AC_collective_metadata_write"
-#define H5AC_COLLECTIVE_META_WRITE_SIZE         sizeof(unsigned)
-#define H5AC_COLLECTIVE_META_WRITE_DEF          0
-#endif /* H5_HAVE_PARALLEL */
-
 #define H5AC_METADATA_TAG_NAME           "H5AC_metadata_tag"
 #define H5AC_METADATA_TAG_SIZE           sizeof(haddr_t)
 #define H5AC_METADATA_TAG_DEF            H5AC__INVALID_TAG
 
 #define H5AC_RING_NAME  "H5AC_ring_type"
 
-/* Dataset transfer property list for metadata calls */
-H5_DLLVAR hid_t H5AC_dxpl_id;
+/* Dataset transfer property lists for metadata calls */
+H5_DLLVAR hid_t H5AC_ind_read_dxpl_id;
+#ifdef H5_HAVE_PARALLEL
+H5_DLLVAR hid_t H5AC_coll_read_dxpl_id;
+#endif /* H5_HAVE_PARALLEL */
 
 /* DXPL to be used in operations that will not result in I/O calls */
 H5_DLLVAR hid_t H5AC_noio_dxpl_id;

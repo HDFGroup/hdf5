@@ -1073,3 +1073,31 @@ H5F_use_tmp_space(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->use_tmp_space)
 } /* end H5F_use_tmp_space() */
 
+#ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_coll_md_read
+ *
+ * Purpose:	Retrieve the 'collective metadata reads' flag for the file.
+ *
+ * Return:	Success:	Non-negative, the 'collective metadata reads' flag
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Feb 10 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+H5P_coll_md_read_flag_t
+H5F_coll_md_read(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->coll_md_read)
+} /* end H5F_coll_md_read() */
+#endif /* H5_HAVE_PARALLEL */
+

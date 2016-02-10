@@ -216,7 +216,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     htri_t      dst_exists;             /* Does destination name exist already? */
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
     hbool_t     obj_open = FALSE;       /* Entry at 'name' found */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)

@@ -351,6 +351,12 @@ H5_DLL herr_t H5Pget_file_image_callbacks(hid_t fapl_id,
        H5FD_file_image_callbacks_t *callbacks_ptr);
 H5_DLL herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size_t page_size);
 H5_DLL herr_t H5Pget_core_write_tracking(hid_t fapl_id, hbool_t *is_enabled, size_t *page_size);
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective);
+H5_DLL herr_t H5Pget_coll_metadata_read(hid_t plist_id, hbool_t *is_collective);
+H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
+H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Dataset creation property list (DCPL) routines */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);

@@ -501,6 +501,7 @@ static hbool_t smoke_check_2(int metadata_write_strategy);
 static hbool_t smoke_check_3(int metadata_write_strategy);
 static hbool_t smoke_check_4(int metadata_write_strategy);
 static hbool_t smoke_check_5(int metadata_write_strategy);
+static hbool_t smoke_check_6(int metadata_write_strategy);
 static hbool_t trace_file_check(int metadata_write_strategy);
 
 
@@ -3123,7 +3124,7 @@ insert_entry(H5C_t * cache_ptr,
         (entry_ptr->ver)++;
         entry_ptr->dirty = TRUE;
 
-        result = H5AC_insert_entry(file_ptr, H5AC_dxpl_id, &(types[0]),
+        result = H5AC_insert_entry(file_ptr, H5AC_ind_read_dxpl_id, &(types[0]),
                entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||
@@ -3522,7 +3523,7 @@ lock_entry(H5F_t * file_ptr,
 	HDassert( ! (entry_ptr->locked) );
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5AC_protect(file_ptr, 
-                                        H5AC_dxpl_id,
+                                        H5AC_ind_read_dxpl_id,
                                         &(types[0]), entry_ptr->base_addr,
                                         &entry_ptr->base_addr, 
                                         H5AC__NO_FLAGS_SET);
@@ -3819,7 +3820,7 @@ move_entry(H5F_t * file_ptr,
 	    new_entry_ptr->local_len = tmp_len;
 	} /* end if */
 
-        result = H5AC_move_entry(file_ptr, &(types[0]), old_addr, new_addr, H5AC_dxpl_id);
+        result = H5AC_move_entry(file_ptr, &(types[0]), old_addr, new_addr, H5AC_ind_read_dxpl_id);
 
         if ( ( result < 0 ) || ( old_entry_ptr->header.addr != new_addr ) ) {
 
@@ -4202,7 +4203,7 @@ setup_cache_for_test(hid_t * fid_ptr,
      */
     if ( success ) { /* allocate space for test entries */
 
-        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5AC_dxpl_id,
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id,
                                       (hsize_t)(max_addr + BASE_ADDR));
 
         if ( actual_base_addr == HADDR_UNDEF ) {
@@ -4985,7 +4986,7 @@ unlock_entry(H5F_t * file_ptr,
             entry_ptr->dirty = TRUE;
         }
 
-        result = H5AC_unprotect(file_ptr, H5AC_dxpl_id, &(types[0]),
+        result = H5AC_unprotect(file_ptr, H5AC_ind_read_dxpl_id, &(types[0]),
                 entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||
@@ -7145,6 +7146,263 @@ trace_file_check(int metadata_write_strategy)
 
 /*****************************************************************************
  *
+ * Function:	smoke_check_6()
+ *
+ * Purpose:	Sixth smoke check for the parallel cache.
+ *
+ * Return:	Success:	TRUE
+ *
+ *		Failure:	FALSE
+ *
+ * Programmer:	JRM -- 1/13/06
+ *
+ *****************************************************************************/
+static hbool_t
+smoke_check_6(int metadata_write_strategy)
+{
+    hbool_t success = TRUE;
+    int i;
+    int max_nerrors;
+    int min_count;
+    int max_count;
+    int min_idx;
+    int max_idx;
+    hid_t fid = -1;
+    H5F_t * file_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
+    struct mssg_t mssg;
+
+    switch ( metadata_write_strategy ) {
+
+	case H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY:
+            if ( world_mpi_rank == 0 ) {
+        	TESTING("smoke check #6 -- process 0 only md write strategy");
+            }
+	    break;
+
+	case H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED:
+            if ( world_mpi_rank == 0 ) {
+        	TESTING("smoke check #6 -- distributed md write strategy");
+            }
+	    break;
+
+        default:
+            if ( world_mpi_rank == 0 ) {
+        	TESTING("smoke check #6 -- unknown md write strategy");
+            }
+	    break;
+    }
+
+    nerrors = 0;
+    init_data();
+    reset_stats();
+
+    if ( world_mpi_rank == world_server_mpi_rank ) {
+
+	if ( ! server_main() ) {
+
+            /* some error occured in the server -- report failure */
+            nerrors++;
+            if ( verbose ) {
+		HDfprintf(stdout, "%d:%s: server_main() failed.\n",
+                          world_mpi_rank, FUNC);
+            }
+        }
+    }
+    else /* run the clients */
+    {
+        int temp;
+
+        if ( ! setup_cache_for_test(&fid, &file_ptr, &cache_ptr,
+                                    metadata_write_strategy) ) {
+
+            nerrors++;
+            fid = -1;
+            cache_ptr = NULL;
+            if ( verbose ) {
+		HDfprintf(stdout, "%d:%s: setup_cache_for_test() failed.\n",
+                          world_mpi_rank, FUNC);
+            }
+        }
+
+        min_count = 100 / ((file_mpi_rank + 1) * (file_mpi_rank + 1));
+        max_count = min_count + 50;
+
+        temp = virt_num_data_entries;
+        virt_num_data_entries = NUM_DATA_ENTRIES;
+
+        /* insert the first half collectively */
+        file_ptr->coll_md_read = H5P_USER_TRUE;
+        for ( i = 0; i < virt_num_data_entries/2; i++ )
+        {
+            struct datum * entry_ptr;
+            entry_ptr = &(data[i]);
+
+            insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
+
+            if(TRUE != entry_ptr->header.coll_access) {
+                nerrors++;
+                if ( verbose ) {
+                    HDfprintf(stdout, "%d:%s: Entry inserted not marked as collective.\n",
+                              world_mpi_rank, FUNC);
+                }
+            }
+
+            /* Make sure coll entries do not cross the 80% threshold */
+            HDassert(cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
+        }
+
+        /* insert the other half independently */
+        file_ptr->coll_md_read = H5P_USER_FALSE;
+        for ( i = virt_num_data_entries/2; i < virt_num_data_entries; i++ )
+        {
+            struct datum * entry_ptr;
+            entry_ptr = &(data[i]);
+
+            insert_entry(cache_ptr, file_ptr, i, H5AC__NO_FLAGS_SET);
+
+            if(FALSE != entry_ptr->header.coll_access) {
+                nerrors++;
+                if ( verbose ) {
+                    HDfprintf(stdout, "%d:%s: Entry inserted indepedently marked as collective.\n",
+                              world_mpi_rank, FUNC);
+                }
+            }
+
+            /* Make sure coll entries do not cross the 80% threshold */
+            HDassert(cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
+        }
+
+	/* flush the file */
+        if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
+            nerrors++;
+            if ( verbose ) {
+	        HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n",
+                          world_mpi_rank, FUNC);
+            }
+        }
+
+        /* Protect the first half of the entries collectively */
+        file_ptr->coll_md_read = H5P_USER_TRUE;
+        for ( i = 0; i < (virt_num_data_entries / 2); i++ )
+        {
+            struct datum * entry_ptr;
+            entry_ptr = &(data[i]);
+
+	    lock_entry(file_ptr, i);
+
+            if(TRUE != entry_ptr->header.coll_access) {
+                nerrors++;
+                if ( verbose ) {
+                    HDfprintf(stdout, "%d:%s: Entry protected not marked as collective.\n",
+                              world_mpi_rank, FUNC);
+                }
+            }
+
+            /* Make sure coll entries do not cross the 80% threshold */
+            HDassert(cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
+        }
+
+        /* protect the other half independently */
+        file_ptr->coll_md_read = H5P_USER_FALSE;
+        for ( i = virt_num_data_entries/2; i < virt_num_data_entries; i++ )
+        {
+            struct datum * entry_ptr;
+            entry_ptr = &(data[i]);
+
+	    lock_entry(file_ptr, i);
+
+            if(FALSE != entry_ptr->header.coll_access) {
+                nerrors++;
+                if ( verbose ) {
+                    HDfprintf(stdout, "%d:%s: Entry inserted indepedently marked as collective.\n",
+                              world_mpi_rank, FUNC);
+                }
+            }
+
+            /* Make sure coll entries do not cross the 80% threshold */
+            HDassert(cache_ptr->max_cache_size*0.8 > cache_ptr->coll_list_size);
+        }
+
+        for ( i = 0; i < (virt_num_data_entries); i++ )
+        {
+            unlock_entry(file_ptr, i, H5AC__NO_FLAGS_SET);
+        }
+
+        if ( fid >= 0 ) {
+
+            if ( ! take_down_cache(fid) ) {
+
+                nerrors++;
+                if ( verbose ) {
+		    HDfprintf(stdout, "%d:%s: take_down_cache() failed.\n",
+                              world_mpi_rank, FUNC);
+                }
+            }
+        }
+
+        /* verify that all instances of datum are back where the started
+         * and are clean.
+         */
+
+        for ( i = 0; i < NUM_DATA_ENTRIES; i++ )
+        {
+            HDassert( data_index[i] == i );
+            HDassert( ! (data[i].dirty) );
+        }
+
+        /* compose the done message */
+        mssg.req       = DONE_REQ_CODE;
+        mssg.src       = world_mpi_rank;
+        mssg.dest      = world_server_mpi_rank;
+        mssg.mssg_num  = -1; /* set by send function */
+        mssg.base_addr = 0; /* not used */
+        mssg.len       = 0; /* not used */
+        mssg.ver       = 0; /* not used */
+        mssg.count     = 0; /* not used */
+        mssg.magic     = MSSG_MAGIC;
+
+        if ( success ) {
+
+
+            success = send_mssg(&mssg, FALSE);
+
+            if ( ! success ) {
+
+                nerrors++;
+                if ( verbose ) {
+                    HDfprintf(stdout, "%d:%s: send_mssg() failed on done.\n",
+                              world_mpi_rank, FUNC);
+                }
+            }
+        }
+        virt_num_data_entries = temp;
+    }
+
+    max_nerrors = get_max_nerrors();
+
+    if ( world_mpi_rank == 0 ) {
+
+	if ( max_nerrors == 0 ) {
+
+	    PASSED();
+
+        } else {
+
+            failures++;
+            H5_FAILED();
+        }
+    }
+
+    success = ( ( success ) && ( max_nerrors == 0 ) );
+
+    return(success);
+
+} /* smoke_check_6() */
+
+
+/*****************************************************************************
+ *
  * Function:	main()
  *
  * Purpose:	Main function for the parallel cache test.
@@ -7335,6 +7593,22 @@ main(int argc, char **argv)
     smoke_check_5(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
     smoke_check_5(H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
 #endif
+    /* enable the collective metadata read property */
+    if ( world_mpi_rank != world_server_mpi_rank ) {
+        if ( H5Pset_all_coll_metadata_ops(fapl, TRUE) < 0 ) {
+
+            nerrors++;
+            if ( verbose ) {
+                HDfprintf(stdout, "%d:%s: H5Pset_all_coll_metadata_ops() failed 1.\n",
+                          world_mpi_rank, FUNC);
+            }
+        }
+    }
+#if 1
+    smoke_check_6(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
+    smoke_check_6(H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);
+#endif
+
 #if 1
     trace_file_check(H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY);
     trace_file_check(H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED);

@@ -222,7 +222,7 @@ H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
     char        *actual_file_name = NULL; /* Parent file's actual name */
     H5P_genplist_t  *fa_plist;          /* File access property list pointer */
     H5F_close_degree_t 	fc_degree = H5F_CLOSE_WEAK;  /* File close degree for target file */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t ret_value = H5I_INVALID_HID;  /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -568,7 +568,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     size_t      file_name_len;          /* Length of file name string */
     size_t      norm_obj_name_len;      /* Length of normalized object name string */
     uint8_t    *p;                      /* Pointer into external link buffer */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */ 
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */ 
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)

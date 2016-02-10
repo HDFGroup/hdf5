@@ -407,7 +407,7 @@ H5Fis_hdf5(const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* call the private is_HDF5 function */
-    if((ret_value = H5F_is_hdf5(name, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5F_is_hdf5(name, H5AC_ind_read_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable open file")
 
 done:
@@ -447,7 +447,7 @@ hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
-    hid_t        dxpl_id = H5AC_dxpl_id; /*dxpl used by library        */
+    hid_t        dxpl_id = H5AC_ind_read_dxpl_id; /*dxpl used by library        */
     hid_t	 ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(FAIL)
@@ -551,7 +551,7 @@ hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
-    hid_t        dxpl_id = H5AC_dxpl_id; /*dxpl used by library        */
+    hid_t        dxpl_id = H5AC_ind_read_dxpl_id; /*dxpl used by library        */
     hid_t	 ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(FAIL)
@@ -693,12 +693,12 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
         /* Flush other files, depending on scope */
         if(H5F_SCOPE_GLOBAL == scope) {
             /* Call the flush routine for mounted file hierarchies */
-            if(H5F_flush_mounts(f, H5AC_dxpl_id) < 0)
+            if(H5F_flush_mounts(f, H5AC_ind_read_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
         } /* end if */
         else {
             /* Call the flush routine, for this file */
-            if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
+            if(H5F_flush(f, H5AC_ind_read_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
         } /* end else */
     } /* end if */
@@ -753,7 +753,7 @@ H5Fclose(hid_t file_id)
         if((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
         if(nref == 1)
-            if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
+            if(H5F_flush(f, H5AC_ind_read_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
@@ -821,7 +821,7 @@ H5Freopen(hid_t file_id)
 
 done:
     if(ret_value < 0 && new_file)
-	if(H5F_dest(new_file, H5AC_dxpl_id, FALSE) < 0)
+	if(H5F_dest(new_file, H5AC_ind_read_dxpl_id, FALSE) < 0)
 	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
     FUNC_LEAVE_API(ret_value)
@@ -901,7 +901,7 @@ H5Fget_freespace(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the actual amount of free space in the file */
-    if(H5MF_get_freespace(file, H5AC_dxpl_id, &tot_space, NULL) < 0)
+    if(H5MF_get_freespace(file, H5AC_ind_read_dxpl_id, &tot_space, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
     ret_value = (hssize_t)tot_space;
@@ -1015,7 +1015,7 @@ H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* call private get_file_image function */
-    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len, H5AC_ind_read_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file image")
 
 done:
@@ -1348,16 +1348,16 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
     HDmemset(finfo, 0, sizeof(*finfo));
 
     /* Get the size of the superblock and any superblock extensions */
-    if(H5F__super_size(f, H5AC_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
+    if(H5F__super_size(f, H5AC_ind_read_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
 
     /* Get the size of any persistent free space */
-    if(H5MF_get_freespace(f, H5AC_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
+    if(H5MF_get_freespace(f, H5AC_ind_read_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
 
     /* Check for SOHM info */
     if(H5F_addr_defined(f->shared->sohm_addr))
-        if(H5SM_ih_size(f, H5AC_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
+        if(H5SM_ih_size(f, H5AC_ind_read_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
 
     /* Set version # fields */
@@ -1402,7 +1402,7 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nsects must be > 0")
 
     /* Go get the free-space section information in the file */
-    if((ret_value = H5MF_get_free_sections(file, H5AC_dxpl_id, type, nsects, sect_info)) < 0)
+    if((ret_value = H5MF_get_free_sections(file, H5AC_ind_read_dxpl_id, type, nsects, sect_info)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
 done:
