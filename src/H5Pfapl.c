@@ -208,16 +208,7 @@
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF     FALSE
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC     H5P__encode_hbool_t
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC     H5P__decode_hbool_t
-/* Definition of collective metadata read mode flag */
-#define H5F_ACS_COLL_MD_READ_FLAG_SIZE   sizeof(H5P_coll_md_read_flag_t)
-#define H5F_ACS_COLL_MD_READ_FLAG_DEF    H5P_USER_FALSE
-#define H5F_ACS_COLL_MD_READ_FLAG_ENC    H5P__encode_coll_md_read_flag_t
-#define H5F_ACS_COLL_MD_READ_FLAG_DEC    H5P__decode_coll_md_read_flag_t
-/* Definition of collective metadata write mode flag */
-#define H5F_ACS_COLL_MD_WRITE_FLAG_SIZE   sizeof(hbool_t)
-#define H5F_ACS_COLL_MD_WRITE_FLAG_DEF    FALSE
-#define H5F_ACS_COLL_MD_WRITE_FLAG_ENC    H5P__encode_hbool_t
-#define H5F_ACS_COLL_MD_WRITE_FLAG_DEC    H5P__decode_hbool_t
+
 
 /******************/
 /* Local Typedefs */
@@ -334,8 +325,7 @@ static const hbool_t H5F_def_clear_status_flags_g = H5F_ACS_CLEAR_STATUS_FLAGS_D
 static const hbool_t H5F_def_use_mdc_logging_g = H5F_ACS_USE_MDC_LOGGING_DEF;                 /* Default metadata cache logging flag */
 static const char *H5F_def_mdc_log_location_g = H5F_ACS_MDC_LOG_LOCATION_DEF;                 /* Default mdc log location */
 static const hbool_t H5F_def_start_mdc_log_on_access_g = H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF; /* Default mdc log start on access flag */
-static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_MD_READ_FLAG_DEF;  /* Default setting for the collective metedata read flag */
-static const hbool_t H5F_def_coll_md_write_flag_g = H5F_ACS_COLL_MD_WRITE_FLAG_DEF;  /* Default setting for the collective metedata write flag */
+
 
 
 /*-------------------------------------------------------------------------
@@ -523,20 +513,6 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
     /* Register the flag that indicates whether mdc logging starts on file access. */
     if(H5P_register_real(pclass, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE, &H5F_def_start_mdc_log_on_access_g,
             NULL, NULL, NULL, H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC, H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the metadata collective read flag */
-    if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5F_ACS_COLL_MD_READ_FLAG_SIZE, 
-            &H5F_def_coll_md_read_flag_g, 
-            NULL, NULL, NULL, H5F_ACS_COLL_MD_READ_FLAG_ENC, H5F_ACS_COLL_MD_READ_FLAG_DEC, 
-            NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the metadata collective write flag */
-    if(H5P_register_real(pclass, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, H5F_ACS_COLL_MD_WRITE_FLAG_SIZE, 
-            &H5F_def_coll_md_write_flag_g, 
-            NULL, NULL, NULL, H5F_ACS_COLL_MD_WRITE_FLAG_ENC, H5F_ACS_COLL_MD_WRITE_FLAG_DEC, 
-            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -4050,237 +4026,3 @@ H5P_facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_close() */
 
-
-/*-------------------------------------------------------------------------
- * Function:       H5P__encode_coll_md_read_flag_t
- *
- * Purpose:        Generic encoding callback routine for 'coll_md_read_flag' properties.
- *
- * Return:	   Success:	Non-negative
- *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
-{
-    const H5P_coll_md_read_flag_t *coll_md_read_flag = (const H5P_coll_md_read_flag_t *)value;
-    uint8_t **pp = (uint8_t **)_pp;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    /* Sanity checks */
-    HDassert(coll_md_read_flag);
-    HDassert(size);
-
-    if(NULL != *pp) {
-        /* Encode the value */
-        HDmemcpy(*pp, coll_md_read_flag, sizeof(H5P_coll_md_read_flag_t));
-        *pp += sizeof(H5P_coll_md_read_flag_t);
-    } /* end if */
-
-    /* Set size needed for encoding */
-    *size += sizeof(H5P_coll_md_read_flag_t);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__encode_coll_md_read_flag_t() */
-
-
-/*-------------------------------------------------------------------------
- * Function:       H5P__decode_coll_md_read_flag_t
- *
- * Purpose:        Generic decoding callback routine for 'coll_md_read_flag' properties.
- *
- * Return:	   Success:	Non-negative
- *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
-{
-    H5P_coll_md_read_flag_t *coll_md_read_flag = (H5P_coll_md_read_flag_t *)_value;            /* File close degree */
-    const uint8_t **pp = (const uint8_t **)_pp;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Sanity checks */
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(coll_md_read_flag);
-
-    /* Decode file close degree */
-    *coll_md_read_flag = (H5P_coll_md_read_flag_t)*(*pp);
-    *pp += sizeof(H5P_coll_md_read_flag_t);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__decode_coll_md_read_flag_t() */
-
-#ifdef H5_HAVE_PARALLEL
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_coll_metadata_read
- *
- * Purpose: Tell the library whether the metadata read operations will
- * be done collectively (1) or not (0). Default is independent. With
- * collective mode, the library will optimize access to metdata
- * operations on the file.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_coll_metadata_read(hid_t plist_id, hbool_t is_collective)
-{
-    H5P_genplist_t *plist;        /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ib", plist_id, is_collective);
-
-    /* Compare the property list's class against the other class */
-    if(TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
-       TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) &&
-       TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
-
-    /* set property to either TRUE if > 0, or FALSE otherwise */
-    if(is_collective > 0)
-        is_collective = TRUE;
-    else
-        is_collective = FALSE;
-
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* Set values */
-    if(H5P_set(plist, H5_COLL_MD_READ_FLAG_NAME, &is_collective) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set collective metadata read flag")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* H5Pset_coll_metadata_read */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_coll_metadata_read
- *
- * Purpose:	Gets information about collective metadata read mode.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_coll_metadata_read(hid_t plist_id, hbool_t *is_collective)
-{
-    herr_t ret_value = SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*b", plist_id, is_collective);
-
-    /* Compare the property list's class against the other class */
-    if(TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
-       TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) &&
-       TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
-
-    /* Get value */
-    if(is_collective) {
-        H5P_coll_md_read_flag_t internal_flag; /* property setting. we need to convert to either TRUE or FALSE */
-        H5P_genplist_t *plist;      /* Property list pointer */
-
-        /* Get the plist structure */
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-        if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &internal_flag) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core collective metadata read flag")
-
-        if(internal_flag < 0)
-            *is_collective = FALSE;
-        else
-            *is_collective = (hbool_t)internal_flag;
-    } /* end if */
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* H5Pget_coll_metadata_read */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_coll_metadata_write
- *
- * Purpose: Tell the library whether the metadata write operations will
- * be done collectively (1) or not (0). Default is collective.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective)
-{
-    H5P_genplist_t *plist;        /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ib", plist_id, is_collective);
-
-    /* Compare the property list's class against the other class */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
-
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    /* Set values */
-    if(H5P_set(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &is_collective) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set collective metadata write flag")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* H5Pset_coll_metadata_write */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pget_coll_metadata_write
- *
- * Purpose:	Gets information about collective metadata write mode.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*b", plist_id, is_collective);
-
-    /* Compare the property list's class against the other class */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
-
-    /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-    if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, is_collective) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get collective metadata write flag")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* H5Pget_coll_metadata_write */
-
-#endif /* H5_HAVE_PARALLEL */

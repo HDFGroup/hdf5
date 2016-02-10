@@ -457,7 +457,7 @@ dataset_readInd(void)
     VRFY((acc_tpl >= 0), "");
 
     /* open the file collectively */
-    fid = H5Fopen(filename, H5F_ACC_RDONLY, acc_tpl);
+    fid=H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);
     VRFY((fid >= 0), "");
 
     /* Release file-access template */

@@ -219,8 +219,6 @@ H5_DLL herr_t H5P__decode_unsigned(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_uint8_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_hbool_t(const void **_pp, void *value);
 H5_DLL herr_t H5P__decode_double(const void **_pp, void *value);
-H5_DLL herr_t H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size);
-H5_DLL herr_t H5P__decode_coll_md_read_flag_t(const void **_pp, void *value);
 
 /* Private OCPL routines */
 H5_DLL herr_t H5P_get_filter(const struct H5Z_filter_info_t *filter,
