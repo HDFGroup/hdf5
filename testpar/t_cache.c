@@ -7595,11 +7595,11 @@ main(int argc, char **argv)
 #endif
     /* enable the collective metadata read property */
     if ( world_mpi_rank != world_server_mpi_rank ) {
-        if ( H5Pset_coll_metadata_read(fapl, TRUE) < 0 ) {
+        if ( H5Pset_all_coll_metadata_ops(fapl, TRUE) < 0 ) {
 
             nerrors++;
             if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: H5Pset_coll_metadata_read() failed 1.\n",
+                HDfprintf(stdout, "%d:%s: H5Pset_all_coll_metadata_ops() failed 1.\n",
                           world_mpi_rank, FUNC);
             }
         }

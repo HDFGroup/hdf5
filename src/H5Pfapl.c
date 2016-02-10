@@ -3581,7 +3581,7 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_coll_metadata_read
+ * Function:	H5Pset_all_coll_metadata_ops
  *
  * Purpose:	Tell the library whether the metadata read operations will
  *		be done collectively (1) or not (0). Default is independent.
@@ -3602,7 +3602,7 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_coll_metadata_read(hid_t plist_id, hbool_t is_collective)
+H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective)
 {
     H5P_genplist_t *plist;        /* Property list pointer */
     H5P_coll_md_read_flag_t coll_meta_read;     /* Property value */
@@ -3636,7 +3636,7 @@ H5Pset_coll_metadata_read(hid_t plist_id, hbool_t is_collective)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_coll_metadata_read() */
+} /* end H5Pset_all_coll_metadata_ops() */
 
 
 /*-------------------------------------------------------------------------
