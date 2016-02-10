@@ -231,6 +231,7 @@ hid_t
 H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
 {
     H5G_loc_t	loc;
+    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
@@ -242,8 +243,12 @@ H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id)
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
     /* Open the object */
-    if((ret_value = H5O_open_name(&loc, name, lapl_id, TRUE)) < 0)
+    if((ret_value = H5O_open_name(&loc, name, lapl_id, dxpl_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
 done:
@@ -724,7 +729,7 @@ H5Oget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     loc_found = TRUE;
 
     /* Retrieve the object's information */
-    if(H5O_get_info(obj_loc.oloc, H5AC_dxpl_id, TRUE, oinfo) < 0)
+    if(H5O_get_info(obj_loc.oloc, dxpl_id, TRUE, oinfo) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object info")
 
 done:
@@ -1345,13 +1350,12 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id, hbool_t app_ref)
+H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id, hbool_t app_ref)
 {
     H5G_loc_t   obj_loc;                /* Location used to open group */
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
     hid_t       ret_value = FAIL;
 
     FUNC_ENTER_NOAPI(FAIL)

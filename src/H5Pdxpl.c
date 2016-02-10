@@ -485,11 +485,12 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the ring property */
+    /* Register the ring property (private) */
     if(H5P_register_real(pclass, H5AC_RING_NAME, H5AC_XFER_RING_SIZE, &H5D_ring_g,
             NULL, NULL, NULL, H5AC_XFER_RING_ENC, H5AC_XFER_RING_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 #ifdef H5_DEBUG_BUILD
     /* Register the dxpl IO type property */
     if(H5P_register_real(pclass, H5FD_DXPL_TYPE_NAME, H5FD_DXPL_TYPE_SIZE, &H5D_dxpl_type_g,

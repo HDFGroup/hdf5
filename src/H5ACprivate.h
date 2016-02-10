@@ -198,11 +198,11 @@ typedef H5C_t	H5AC_t;
 H5_DLLVAR hid_t H5AC_dxpl_id;
 
 /* DXPL to be used in operations that will not result in I/O calls */
-extern hid_t H5AC_noio_dxpl_id;
+H5_DLLVAR hid_t H5AC_noio_dxpl_id;
 
 /* DXPL to be used for raw data I/O operations when one is not
    provided by the user (fill values in H5Dcreate) */
-extern hid_t H5AC_rawdata_dxpl_id;
+H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
 
 /* Default cache configuration. */
 
