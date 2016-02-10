@@ -41,12 +41,12 @@
 #define H5P_CLASS(P)        (H5P_get_class(P))
 #endif /* H5P_MODULE */
 
+#define H5_COLL_MD_READ_FLAG_NAME "collective_metadata_read"
+
 
 /****************************/
 /* Library Private Typedefs */
 /****************************/
-
-#define H5_COLL_MD_READ_FLAG_NAME "collective_metadata_read"
 
 typedef enum H5P_coll_md_read_flag_t {
     H5P_FORCE_FALSE             = -1,

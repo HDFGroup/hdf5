@@ -181,13 +181,6 @@ typedef H5C_cache_entry_t		H5AC_info_t;
 /* Typedef for metadata cache (defined in H5Cpkg.h) */
 typedef H5C_t	H5AC_t;
 
-#ifdef H5_HAVE_PARALLEL
-/* Definitions for "collective metadata write" property */
-#define H5AC_COLLECTIVE_META_WRITE_NAME         "H5AC_collective_metadata_write"
-#define H5AC_COLLECTIVE_META_WRITE_SIZE         sizeof(hbool_t)
-#define H5AC_COLLECTIVE_META_WRITE_DEF          0
-#endif /* H5_HAVE_PARALLEL */
-
 #define H5AC_METADATA_TAG_NAME           "H5AC_metadata_tag"
 #define H5AC_METADATA_TAG_SIZE           sizeof(haddr_t)
 #define H5AC_METADATA_TAG_DEF            H5AC__INVALID_TAG
@@ -196,17 +189,17 @@ typedef H5C_t	H5AC_t;
 
 /* Dataset transfer property list for metadata calls */
 H5_DLLVAR hid_t H5AC_dxpl_id;
-extern hid_t H5AC_ind_read_dxpl_id;
+H5_DLLVAR hid_t H5AC_ind_read_dxpl_id;
 #ifdef H5_HAVE_PARALLEL
-extern hid_t H5AC_coll_read_dxpl_id;
+H5_DLLVAR hid_t H5AC_coll_read_dxpl_id;
 #endif /* H5_HAVE_PARALLEL */
 
 /* DXPL to be used in operations that will not result in I/O calls */
-extern hid_t H5AC_noio_dxpl_id;
+H5_DLLVAR hid_t H5AC_noio_dxpl_id;
 
 /* DXPL to be used for raw data I/O operations when one is not
    provided by the user (fill values in H5Dcreate) */
-extern hid_t H5AC_rawdata_dxpl_id;
+H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
 
 /* Default cache configuration. */
 

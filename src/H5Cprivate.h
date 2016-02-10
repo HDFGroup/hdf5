@@ -1609,7 +1609,6 @@ typedef struct H5C_cache_entry_t {
     hbool_t			clear_on_unprotect;
     hbool_t			flush_immediately;
     hbool_t			coll_access;
-    hbool_t                     ind_access_while_coll;
 #endif /* H5_HAVE_PARALLEL */
     hbool_t			flush_in_progress;
     hbool_t			destroy_in_progress;
@@ -1633,8 +1632,10 @@ typedef struct H5C_cache_entry_t {
     struct H5C_cache_entry_t  *	prev;
     struct H5C_cache_entry_t  *	aux_next;
     struct H5C_cache_entry_t  *	aux_prev;
+#ifdef H5_HAVE_PARALLEL
     struct H5C_cache_entry_t  *	coll_next;
     struct H5C_cache_entry_t  *	coll_prev;
+#endif /* H5_HAVE_PARALLEL */
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     /* cache entry stats fields */

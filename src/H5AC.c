@@ -88,8 +88,6 @@ hid_t H5AC_dxpl_id;
 hid_t H5AC_coll_read_dxpl_id = (-1);
 #endif /* H5_HAVE_PARALLEL */
 
-/* global flag for collective API sanity checks */
-
 /* DXPL to be used in operations that will not result in I/O calls */
 hid_t H5AC_noio_dxpl_id = (-1);
 
@@ -216,7 +214,7 @@ H5AC__init_package(void)
     /* Get the property list object */
     if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
-    /* set metadata dxpl type */
+    /* Insert the dxpl type property  */
     dxpl_type = H5FD_METADATA_DXPL;
     if(H5P_set(xfer_plist, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set dxpl type property")
@@ -551,7 +549,6 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
-
     if(aux_ptr)
         /* Sanity check */
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);

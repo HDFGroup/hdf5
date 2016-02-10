@@ -7595,7 +7595,7 @@ main(int argc, char **argv)
 #endif
     /* enable the collective metadata read property */
     if ( world_mpi_rank != world_server_mpi_rank ) {
-        if ( H5Pset_coll_metadata_read(fapl, 1) < 0 ) {
+        if ( H5Pset_coll_metadata_read(fapl, TRUE) < 0 ) {
 
             nerrors++;
             if ( verbose ) {

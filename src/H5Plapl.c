@@ -94,6 +94,7 @@
 #define H5L_ACS_COLL_MD_READ_ENC    H5P__encode_coll_md_read_flag_t
 #define H5L_ACS_COLL_MD_READ_DEC    H5P__decode_coll_md_read_flag_t
 
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -222,8 +223,7 @@ H5P__lacc_reg_prop(H5P_genclass_t *pclass)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the metadata collective read flag */
-    if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5L_ACS_COLL_MD_READ_SIZE, 
-            &H5L_def_coll_md_read_g, 
+    if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5L_ACS_COLL_MD_READ_SIZE, &H5L_def_coll_md_read_g, 
             NULL, NULL, NULL, H5L_ACS_COLL_MD_READ_ENC, H5L_ACS_COLL_MD_READ_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")

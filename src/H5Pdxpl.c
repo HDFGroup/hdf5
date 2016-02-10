@@ -179,7 +179,6 @@
 #ifdef H5_DEBUG_BUILD
 /* dxpl I/O type - private property */
 #define H5FD_DXPL_TYPE_SIZE       sizeof(H5FD_dxpl_type_t)
-#define H5FD_DXPL_TYPE_DEF        H5FD_NOIO_DXPL
 #endif /* H5_DEBUG_BUILD */
 #ifdef H5_HAVE_PARALLEL
 /* Definition for reading metadata collectively */
@@ -187,7 +186,9 @@
 #define H5D_XFER_COLL_MD_READ_DEF    H5P_USER_FALSE
 #define H5D_XFER_COLL_MD_READ_ENC    H5P__encode_coll_md_read_flag_t
 #define H5D_XFER_COLL_MD_READ_DEC    H5P__decode_coll_md_read_flag_t
-#endif H5_HAVE_PARALLEL
+#endif /* H5_HAVE_PARALLEL */
+
+
 /******************/
 /* Local Typedefs */
 /******************/

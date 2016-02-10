@@ -2110,3 +2110,33 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_eoa() */
 
+#ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_coll_md_read
+ *
+ * Purpose:     Set the coll_md_read field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              2/10/16
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(f);
+
+    f->coll_md_read = cmr;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* H5F_set_coll_md_read() */
+#endif /* H5_HAVE_PARALLEL */
+

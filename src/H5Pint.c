@@ -29,7 +29,9 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#ifdef H5_HAVE_PARALLEL
+#include "H5ACprivate.h"        /* Metadata cache                       */
+#endif /* H5_HAVE_PARALLEL */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free lists                           */
@@ -5452,7 +5454,15 @@ H5P_get_class(const H5P_genplist_t *plist)
  */
 herr_t 
 H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, hid_t *dxpl_id, 
-                        hid_t loc_id, hbool_t is_collective)
+                        hid_t
+#ifndef H5_HAVE_PARALLEL
+                        H5_ATTR_UNUSED
+#endif /* H5_HAVE_PARALLEL */
+                        loc_id, hbool_t
+#ifndef H5_HAVE_PARALLEL
+                        H5_ATTR_UNUSED
+#endif /* H5_HAVE_PARALLEL */
+                        is_collective)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -5494,8 +5504,6 @@ H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, hid_t *
         /* Sanity check the access property list class */
         if(TRUE != H5P_isa_class(*acspl_id, *libclass->class_id))
             HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not the required access property list")
-
-        *dxpl_id = H5AC_ind_read_dxpl_id;
 
 #ifdef H5_HAVE_PARALLEL
         /* Get the plist structure for the access property list */

@@ -3133,11 +3133,11 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
                          (cache_ptr)->coll_list_size,                   \
                          (fail_val))                                    \
                                                                         \
-        H5C__COLL_DLL_PREPEND((entry_ptr), (cache_ptr)->coll_head_ptr,  \
-                              (cache_ptr)->coll_tail_ptr,               \
-                              (cache_ptr)->coll_list_len,               \
-                              (cache_ptr)->coll_list_size,              \
-                              (fail_val))                               \
+    H5C__COLL_DLL_PREPEND((entry_ptr), (cache_ptr)->coll_head_ptr,      \
+                          (cache_ptr)->coll_tail_ptr,                   \
+                          (cache_ptr)->coll_list_len,                   \
+                          (cache_ptr)->coll_list_size,                  \
+                          (fail_val))                                   \
                                                                         \
 } /* H5C__MOVE_TO_TOP_IN_COLL_LIST */
 #endif /* H5_HAVE_PARALLEL */
@@ -4254,6 +4254,7 @@ typedef struct H5C_collective_write_t {
 } H5C_collective_write_t;
 #endif /* H5_HAVE_PARALLEL */
 
+
 /*****************************/
 /* Package Private Variables */
 /*****************************/
@@ -4264,10 +4265,6 @@ typedef struct H5C_collective_write_t {
 /******************************/
 H5_DLL herr_t H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id,
     H5C_cache_entry_t *entry_ptr, unsigned flags, int64_t *entry_size_change_ptr, H5SL_t *collective_write_list);
-#ifdef H5_HAVE_PARALLEL
-H5_DLL herr_t H5C_collective_write(H5F_t *f, hid_t dxpl_id, H5SL_t *collective_write_list);
-H5_DLL herr_t H5C_collective_write_free(void *_item, void *key, void *op_data);
-#endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5Cpkg_H */
 

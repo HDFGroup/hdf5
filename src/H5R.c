@@ -611,10 +611,10 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
     if(_ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
-   
+
     /* Verify access property list and get correct dxpl */
     if(H5P_verify_apl_and_dxpl(&oapl_id, H5P_CLS_DACC, &dxpl_id, obj_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Get the file pointer from the entry */
     file = loc.oloc->file;

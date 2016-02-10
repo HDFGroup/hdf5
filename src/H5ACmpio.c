@@ -2067,7 +2067,7 @@ HDfprintf(stdout, "%d:H5AC_propagate...:%u: (u/uu/i/iu/r/ru) = %zu/%u/%zu/%u/%zu
 
     /* clear collective access flag on half of the entries in the
        cache and mark them as independent in case they need to be
-       evicted later. All ranks are guranteed to mark the same entires
+       evicted later. All ranks are guranteed to mark the same entries
        since we don't modify the order of the collectively accessed
        entries except through collective access. */
     if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
