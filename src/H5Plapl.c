@@ -88,12 +88,13 @@
 #define H5L_ACS_ELINK_CB_SIZE           sizeof(H5L_elink_cb_t)
 #define H5L_ACS_ELINK_CB_DEF            {NULL,NULL}
 
+#ifdef H5_HAVE_PARALLEL
 /* Definition for reading metadata collectively */
 #define H5L_ACS_COLL_MD_READ_SIZE   sizeof(H5P_coll_md_read_flag_t)
 #define H5L_ACS_COLL_MD_READ_DEF    H5P_USER_FALSE
 #define H5L_ACS_COLL_MD_READ_ENC    H5P__encode_coll_md_read_flag_t
 #define H5L_ACS_COLL_MD_READ_DEC    H5P__decode_coll_md_read_flag_t
-
+#endif /* H5_HAVE_PARALLEL */
 
 /******************/
 /* Local Typedefs */
@@ -170,7 +171,9 @@ static const char *H5L_def_elink_prefix_g = H5L_ACS_ELINK_PREFIX_DEF; /* Default
 static const hid_t H5L_def_fapl_id_g = H5L_ACS_ELINK_FAPL_DEF;    /* Default fapl for external link access */
 static const unsigned H5L_def_elink_flags_g = H5L_ACS_ELINK_FLAGS_DEF; /* Default file access flags for external link traversal */
 static const H5L_elink_cb_t H5L_def_elink_cb_g = H5L_ACS_ELINK_CB_DEF; /* Default external link traversal callback */
+#ifdef H5_HAVE_PARALLEL
 static const H5P_coll_md_read_flag_t H5L_def_coll_md_read_g = H5L_ACS_COLL_MD_READ_DEF;  /* Default setting for the collective metedata read flag */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
@@ -222,11 +225,13 @@ H5P__lacc_reg_prop(H5P_genclass_t *pclass)
              NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+#ifdef H5_HAVE_PARALLEL
     /* Register the metadata collective read flag */
     if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5L_ACS_COLL_MD_READ_SIZE, &H5L_def_coll_md_read_g, 
             NULL, NULL, NULL, H5L_ACS_COLL_MD_READ_ENC, H5L_ACS_COLL_MD_READ_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
