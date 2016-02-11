@@ -183,7 +183,7 @@ case $FC in
     *mpif90*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -v 2>&1 | grep 'version' |\
             sed 's/^[a-z0-9]* for //' |\
-            sed ’s/\”/\\\”/g’ |\
+            sed 's/\"/\\\"/g' |\
             sed 's/^\([a-z]* \)/ built with \1/1'`
         fc_version_info=`echo $fc_version_info`
         ;;
