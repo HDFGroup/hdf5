@@ -71,24 +71,21 @@ struct timezone {
 };
 
 #ifdef __cplusplus
-extern "C" {
+        extern "C" {
 #endif /* __cplusplus */
-    H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
-    H5_DLL int Wsetenv(const char *name, const char *value, int overwrite);
-    H5_DLL int Wflock(int fd, int operation);
-    H5_DLL char* Wgetlogin(void);
-    H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
-    H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
+        H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
+        H5_DLL int Wflock(int fd, int operation);
+        H5_DLL char* Wgetlogin(void);
+        H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
+        H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
 #ifdef __cplusplus
-}
+        }
 #endif /* __cplusplus */
-
 #define HDgettimeofday(V,Z) Wgettimeofday(V,Z)
-#define HDsetenv(N,V,O)     Wsetenv(N,V,O)
 #define HDflock(F,L)        Wflock(F,L)
 #define HDgetlogin()        Wgetlogin()
 #define HDsnprintf          c99_snprintf /*varargs*/
-#define HDvsnprintf         c99_vsnprintf /*varargs*/
+#define HDvsnprintf         c99_vsnprintf
 
 #endif /* H5_HAVE_VISUAL_STUDIO */
 
@@ -101,7 +98,5 @@ extern "C" {
 #ifndef H5_HAVE_MINGW
 #define HDftruncate(F,L)    _chsize_s(F,L)
 #define HDfseek(F,O,W)      _fseeki64(F,O,W)
-#endif /* H5_HAVE_MINGW */
-
+#endif
 #endif /* H5_HAVE_WIN32_API */
-

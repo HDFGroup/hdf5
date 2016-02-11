@@ -193,8 +193,7 @@ H5_init_library(void)
 
         /* Normal library termination code */
         (void)HDatexit(H5_term_library);
-
-        H5_dont_atexit_g = TRUE;
+	H5_dont_atexit_g = TRUE;
     } /* end if */
 
     /*

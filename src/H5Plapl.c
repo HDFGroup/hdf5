@@ -795,8 +795,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__lacc_elink_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+H5P__lacc_elink_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     FUNC_ENTER_STATIC_NOERR
 
