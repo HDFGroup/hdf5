@@ -3640,7 +3640,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_coll_metadata_read
+ * Function:	H5Pget_all_coll_metadata_ops
  *
  * Purpose:	Gets information about collective metadata read mode.
  *
@@ -3658,7 +3658,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_coll_metadata_read(hid_t plist_id, hbool_t *is_collective)
+H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective)
 {
     herr_t ret_value = SUCCEED;   /* return value */
 
@@ -3694,7 +3694,7 @@ H5Pget_coll_metadata_read(hid_t plist_id, hbool_t *is_collective)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Pget_coll_metadata_read */
+} /* H5Pget_all_coll_metadata_ops */
 
 
 /*-------------------------------------------------------------------------
