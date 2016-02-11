@@ -664,7 +664,7 @@ SUBROUTINE test_vds(total_error)
 
   INTEGER(hid_t) :: vfile, file, src_space, mem_space, vspace, vdset, dset !Handles
   INTEGER(hid_t) :: dcpl, dapl
-  INTEGER ::       status, error
+  INTEGER :: error
   INTEGER(hsize_t), DIMENSION(1:3) :: vdsdims = (/4*DIM0_1, VDSDIM1, VDSDIM2/), &
                  vdsdims_max, &
                  dims = (/DIM0_1, DIM1, DIM2/), &
@@ -731,7 +731,7 @@ SUBROUTINE test_vds(total_error)
      !
      ! Create the source files and  datasets. Write data to each dataset and 
      ! close all resources.
-     CALL h5fcreate_f(SRC_FILE(i), H5F_ACC_TRUNC_F, file, status)
+     CALL h5fcreate_f(SRC_FILE(i), H5F_ACC_TRUNC_F, file, error)
      CALL check("h5fcreate_f", error, total_error)
 
      CALL h5screate_simple_f(RANK, dims,  src_space, error, dims_max)
