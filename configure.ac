@@ -2125,8 +2125,13 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## These are all the packages that use H5*_DEBUG.
 ## There is no harm in specifying a package not in this list;
 ## you'll just get an unused H5<pkg>_DEBUG symbol.
+##
+## Some packages that define debug checks or output are
+## too specialized or have huge performance hits. These
+## are not listed in the "all" packages list.
+##
 ## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
-all_packages="AC,B,B2,D,F,HL,I,O,S,ST,T,Z"
+all_packages="AC,B2,D,F,HL,I,O,S,ST,T,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
