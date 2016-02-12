@@ -207,6 +207,14 @@ H5AC__init_package(void)
     if((H5AC_ind_read_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
+    /* Get an ID for the no I/O internal dxpl */
+    if((H5AC_noio_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
+
+    /* Get an ID for the raw data (H5AC) dxpl */
+    if((H5AC_rawdata_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
+
     /* if this is a debug build, set the dxpl type flag on the
        independent metadata dxpl and create the noio and raw data internal dxpls */
 #ifdef H5_DEBUG_BUILD
@@ -218,9 +226,6 @@ H5AC__init_package(void)
     if(H5P_set(xfer_plist, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set dxpl type property")
 
-    /* Get an ID for the no I/O internal dxpl */
-    if((H5AC_noio_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
     /* Get the property list object */
     if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_noio_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
@@ -229,9 +234,6 @@ H5AC__init_package(void)
     if(H5P_set(xfer_plist, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set dxpl type property")
 
-    /* Get an ID for the metadata (H5AC) dxpl */
-    if((H5AC_rawdata_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
     /* Get the property list object */
     if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
