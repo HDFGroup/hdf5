@@ -66,6 +66,7 @@ const char *FILENAME[] = {
     "earray_hdr_fd",    /* 19 */
     "farray_hdr_fd",    /* 20 */
     "bt2_hdr_fd",    /* 21 */
+    "dls_01_strings.h5",/* 22 */ /* used by dls_01 test only */
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -11766,6 +11767,278 @@ error:
     return -1;
 } /* end test_gather_error() */
 
+/*-------------------------------------------------------------------------
+ * DLS bug -- HDFFV-9672
+ *
+ * The following functions replicate the test code provided by DLS to 
+ * expose bug hdffv-9672.  All functions associated with this test
+ * have the prefix DLS_01_
+ *
+ * The note documenting the bug is reproduced below:
+ *
+ * ------------------------------------------------------
+ * 
+ * Hi,
+ * We've found an issue regarding fixed length strings.
+ *
+ * If we create a chunked dataset of large fixed length strings 
+ * (up to 1kb per string) with small chunk sizes (~8 elements per 
+ * chunk) then the resulting dataset may not be read later.
+ * This only happens if the file is created with LIBVER_LATEST 
+ * for the version bounds.
+ *
+ * Calling H5Oget_info(...) on the dataset results in the following:
+ * 
+ * H5Dearray.c:250: H5D__earray_crt_context: Assertion 
+ * `udata->chunk_size > 0' failed.
+ * 
+ * Example:
+ * void create_data(...) 
+ * {
+ *    ...
+ * 
+ *    hsize_t chunks[1] = {8} ;
+ *
+ *    err = H5Tset_size( tid, 256 );
+ *
+ *    err = H5Pset_chunk( dcpl, 1, chunks );
+ *
+ *    H5Dcreate2( fid, "data", tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT );
+ * 
+ *    // write data
+ * }                                                                       
+ *                                                                        
+ * void read_data(...)                                                     
+ * {                                                                       
+ *    ...                                                                  
+ *                                                                         
+ *    H5O_into_t info; status = H5Oget_info( did, &info ) // crash
+ *    ...                                                                  
+ * }                                                                       
+ *                                                                         
+ * If the size of the chunk is increased (usually matching the             
+ * string length) then this problem disappears.                            
+ *                                                                         
+ * A full program that produces such a file (and crashes trying to         
+ * read it) is attached.
+ * 
+ * Tested with 1.10.0-alpha1.
+ * 
+ * Regards,
+ * 
+ * Charles Mita
+ * Software Engineer
+ * Diamond Light Source Ltd.
+ * +44 1235 778029
+ *
+ * ------------------------------------------------------
+ * 
+ * The bug in question turned out to be caused by a failure to update
+ * the enc_bytes_per_dim field in the layout if the size of the 
+ * underlying type required more bytes to encode than any of the 
+ * chunk dimensions.
+ *
+ * At least in debug builds, the following test code exposes the 
+ * failure via an assertion failure.
+ *
+ * Note that the test code make no attempt to run with different 
+ * file drivers, as the bug is in the actual on disk encoding of 
+ * the chunk layout.
+ *
+ *                                           JRM -- 2/5/16
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define DLS_01_DATASET		"data"
+#define DLS_01_STR_SIZE 	256
+#define DLS_01_CHUNK_SIZE 	8
+#define DLS_01_DIMS 		4
+
+static herr_t dls_01_setup_file( hid_t fid );
+static herr_t dls_01_write_data( hid_t fid, char* buffer );
+static herr_t dls_01_read_stuff( hid_t fid );
+static herr_t dls_01_main( void );
+
+static herr_t
+dls_01_setup_file( hid_t fid ) {
+
+    int status = 0;
+    hid_t sid = 0, did = 0, tid = 0, dcpl = 0;
+    int ndims = 1;
+    hsize_t max_shape[1] = {H5S_UNLIMITED};
+    hsize_t initial_shape[1] = {0};
+    hsize_t chunks[1] = {DLS_01_CHUNK_SIZE};
+
+    sid = H5Screate_simple( ndims, initial_shape, max_shape );
+    if ( sid <= 0 ) TEST_ERROR
+
+    tid = H5Tcopy( H5T_C_S1 );
+    if ( tid <= 0 ) TEST_ERROR
+
+    status = H5Tset_size( tid, DLS_01_STR_SIZE );
+    if ( status != 0 ) TEST_ERROR
+
+    dcpl = H5Pcreate( H5P_DATASET_CREATE );
+    if ( dcpl <= 0 ) TEST_ERROR
+
+    status = H5Pset_chunk( dcpl, ndims, chunks );
+    if ( status != 0 ) TEST_ERROR
+
+    did = H5Dcreate2( fid, DLS_01_DATASET, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT );
+    if ( did <= 0 ) TEST_ERROR
+
+    status = H5Dclose( did );
+    if ( status != 0 ) TEST_ERROR
+
+    status = H5Pclose( dcpl );
+    if ( status != 0 ) TEST_ERROR
+
+    status = H5Tclose( tid );
+    if ( status != 0 ) TEST_ERROR
+
+    status = H5Sclose( sid );
+    if ( status != 0 ) TEST_ERROR
+
+    return 0;
+
+error:
+
+    return -1;
+
+} /* dls_01_setup_file */
+
+static herr_t
+dls_01_write_data( hid_t fid, char* buffer ) {
+
+    int status = 0;
+    hid_t did = 0, tid = 0;
+    hsize_t extent[1] = {4};
+
+    did = H5Dopen2( fid, DLS_01_DATASET, H5P_DEFAULT );
+    if ( did <= 0 ) TEST_ERROR
+
+    tid = H5Dget_type( did );
+    if ( tid <= 0 ) TEST_ERROR
+
+    status = H5Dset_extent( did, extent );
+    if ( status != 0 ) TEST_ERROR
+
+    status = H5Dwrite( did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer );
+    if ( status != 0 ) TEST_ERROR
+
+    status = H5Fflush( fid, H5F_SCOPE_LOCAL );
+    if ( status != 0 ) TEST_ERROR
+
+    status = H5Tclose( tid );
+    if ( status != 0 ) TEST_ERROR
+
+    status = H5Dclose( did );
+    if ( status != 0 ) TEST_ERROR
+
+    return 0;
+
+error:
+
+    return -1;
+
+} /* dls_01_write_data */
+
+static herr_t
+dls_01_read_stuff( hid_t fid ) {
+
+    int status = 0;
+    hid_t did = 0;
+    H5O_info_t info;
+
+    did = H5Dopen( fid, DLS_01_DATASET, H5P_DEFAULT );
+    if ( did <= 0 ) TEST_ERROR
+
+    status = H5Oget_info( did, &info );
+    if ( status != 0 ) TEST_ERROR
+
+    status = H5Dclose( did );
+    if ( status != 0 ) TEST_ERROR
+
+    return 0;
+
+error:
+
+    return -1;
+
+} /* dls_01_read_stuff() */
+
+static herr_t
+dls_01_main( void ) {
+
+    char filename[512];
+    int status = 0;
+    hid_t fapl = 0, fid = 0;
+    const char* strings[DLS_01_DIMS] = 
+	{ "String 1", "Test string 2", "Another string", "Final String" };
+    char* buffer = NULL;
+
+    TESTING("Testing DLS bugfix 1");
+
+    if ( NULL == h5_fixname(FILENAME[22], H5P_DEFAULT, filename, 
+                            sizeof(filename)) )
+	TEST_ERROR
+
+    buffer = (char *)HDcalloc( DLS_01_DIMS, DLS_01_STR_SIZE );
+    if ( NULL == buffer ) 
+        TEST_ERROR
+
+    HDstrcpy( buffer, strings[0] );
+    HDstrcpy( buffer + DLS_01_STR_SIZE, strings[1] );
+    HDstrcpy( buffer + DLS_01_STR_SIZE * 2, strings[2] );
+    HDstrcpy( buffer + DLS_01_STR_SIZE * 3, strings[3] );
+
+    fapl = H5Pcreate( H5P_FILE_ACCESS );
+    if ( fapl <= 0 ) TEST_ERROR
+
+    status = H5Pset_libver_bounds( fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST );
+    if ( status != 0 ) TEST_ERROR
+
+    fid = H5Fcreate( filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl );
+    if ( fid <= 0 ) TEST_ERROR
+
+    if ( 0 != dls_01_setup_file( fid ) )
+	goto error;
+
+    if ( 0 != dls_01_write_data( fid, buffer ) )
+	goto error;
+
+    status = H5Fclose( fid );
+    if ( status != 0 ) TEST_ERROR
+
+    fid = H5Fopen( filename, H5F_ACC_RDONLY, fapl );
+    if ( fid <= 0 ) TEST_ERROR
+
+    if ( 0 != dls_01_read_stuff( fid ) )
+	goto error;
+
+    status = H5Fclose( fid );
+    if ( status != 0 ) TEST_ERROR
+
+    status = H5Pclose( fapl );
+    if ( status != 0 ) TEST_ERROR
+
+    HDfree(buffer);
+
+    PASSED();
+
+    return 0;
+
+error:
+
+    if ( buffer ) HDfree(buffer);
+
+    return -1;
+
+} /* dls_01_main() */
+
+
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -11919,6 +12192,9 @@ main(void)
     nerrors += (test_gather() < 0                           ? 1 : 0);
     nerrors += (test_scatter_error() < 0                    ? 1 : 0);
     nerrors += (test_gather_error() < 0                     ? 1 : 0);
+
+    /* Run misc tests */
+    nerrors += dls_01_main();
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
