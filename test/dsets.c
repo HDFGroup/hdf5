@@ -11951,7 +11951,7 @@ dls_01_read_stuff( hid_t fid ) {
     hid_t did = 0;
     H5O_info_t info;
 
-    did = H5Dopen( fid, DLS_01_DATASET, H5P_DEFAULT );
+    did = H5Dopen2( fid, DLS_01_DATASET, H5P_DEFAULT );
     if ( did <= 0 ) TEST_ERROR
 
     status = H5Oget_info( did, &info );
