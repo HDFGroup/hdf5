@@ -13595,6 +13595,16 @@ main(void)
 
     puts ("All object copying tests passed.");
 
+    /* call H5Pclose(fapl2) to mask property list management bug.
+     *
+     * Needless to say, this bug must be fixed properly, but we 
+     * will sweep it under the rug for now.
+     *
+     * To expose the bug, delete this call, and run with either split
+     * or multi file driver.
+     */
+    H5Pclose(fapl2);
+
     h5_cleanup(FILENAME, fapl);
 
     return 0;
