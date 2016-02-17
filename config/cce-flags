@@ -54,23 +54,20 @@ if test "X-cce" = "X-$cc_vendor"; then
     H5_CFLAGS="${H5_CFLAGS:--hc99 $arch}"
 
     # Production
-    # -Wl,-s to remove all symbols for smaller file
-    PROD_CFLAGS="-Wl,-s"
-    PROD_CPPFLAGS=
+    PROD_CFLAGS=
 
     # Debug
     # NDEBUG is handled explicitly in configure
     DEBUG_CFLAGS=
-    DEBUG_CPPFLAGS=
 
     # Symbols
+    # -Wl,-s to remove all symbols for smaller file
     SYMBOLS_CFLAGS="-g"
-    SYMBOLS_CPPFLAGS=
+    NO_SYMBOLS_CFLAGS="-Wl,-s"
 
     # Profiling
     # Use this for profiling with gprof
     PROFILE_CFLAGS="-p"
-    PROFILE_CPPFLAGS=
 
     # Optimization
     HIGH_OPT_CFLAGS="-O3"
@@ -87,3 +84,4 @@ if test "X-$cc_flags_set" = "X-"; then
     cc_vendor=
     cc_version=
 fi
+

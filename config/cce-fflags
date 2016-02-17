@@ -52,15 +52,15 @@ if test "X-cce" = "X-$f9x_vendor"; then
     H5_FCFLAGS="${H5_FCFLAGS} -hnocaf"
 
     # Production
-    # -Wl,-s to remove all symbols for smaller file
-    # Note that this will likely override the symbols flag
-    PROD_FCFLAGS="-Wl,-s"
+    PROD_FCFLAGS=
 
     # Debug
     DEBUG_FCFLAGS=
 
     # Symbols
+    # -Wl,-s to remove all symbols for smaller file
     SYMBOLS_FCFLAGS="-g"
+    NO_SYMBOLS_FCFLAGS="-Wl,-s"
 
     # Profiling
     # Use this for profiling with gprof
