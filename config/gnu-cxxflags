@@ -100,30 +100,54 @@ case "$cxx_vendor-$cxx_version" in
     H5_CXXFLAGS="$H5_CXXFLAGS -Wsign-promo -Woverloaded-virtual -Wold-style-cast -Weffc++ -Wreorder -Wnon-virtual-dtor -Wctor-dtor-privacy -Wabi"
 
     # Production
+    # NDEBUG is handled explicitly by the configure script
     case "$cxx_vendor-$cxx_version" in
       g++-[34].*)
-        PROD_CXXFLAGS="-O3"
+        PROD_CXXFLAGS=
         ;;
       g++-5.*)
-        PROD_CXXFLAGS="-O3 -fstdarg-opt"
+        PROD_CXXFLAGS="-fstdarg-opt"
         ;;
       *)
-        PROD_CXXFLAGS="-O -finline-functions"
+        PROD_CXXFLAGS="-finline-functions"
         ;;
     esac
 
     # Debug
+    # NDEBUG is handled explicitly by the configure script
+    # -g is hanled by the symbols flags
     case "$cxx_vendor-$cxx_version" in
       g++-5.*)
-        DEBUG_CXXFLAGS="-Og -g -ftrapv -fno-common"
+        DEBUG_CXXFLAGS="-ftrapv -fno-common"
         ;;
       *)
-        DEBUG_CXXFLAGS="-g"
+        DEBUG_CXXFLAGS=
         ;;
     esac
 
+    # Symbols
+    NO_SYMBOLS_CXXFLAGS="-s"
+    SYMBOLS_CXXFLAGS="-g"
+
     # Profile
-    PROFILE_CXXFLAGS="-Og -g -pg"
+    PROFILE_CXXFLAGS="-pg"
+
+    # Optimization
+    case "$cxx_vendor-$cxx_version" in
+      g++-[34].*)
+        HIGH_OPT_CXXFLAGS="-O3"
+        DEBUG_OPT_CXXFLAGS=
+        ;;
+      g++-5.*)
+        HIGH_OPT_CXXFLAGS="-O3"
+        DEBUG_OPT_CXXFLAGS="-Og"
+        ;;
+      *)
+        HIGH_OPT_CXXFLAGS="-O"
+        DEBUG_OPT_CXXFLAGS=
+        ;;
+    esac
+    NO_OPT_CXXFLAGS="-O0"
 
     # Flags are set
     cxx_flags_set=yes

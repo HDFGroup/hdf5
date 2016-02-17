@@ -132,7 +132,7 @@ case "$cc_vendor-$cc_version" in
     # Profile
     PROFILE_CFLAGS="-pg"
 
-    # Optimization (only CFLAGS at this time)
+    # Optimization
     case "$cc_vendor-$cc_version" in
       gcc-[34].*)
         HIGH_OPT_CFLAGS="-O3"
