@@ -84,13 +84,14 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     #else
     #    PROD_FCFLAGS="-O2 -s"
     #fi
-    PROD_FCFLAGS="-fast -s -Mnoframe"
+    PROD_FCFLAGS="-fast -Mnoframe"
 
     # Debug
     DEBUG_FCFLAGS="-Mbounds -Mchkptr -Mdclchk"
 
     # Symbols
     SYMBOLS_FCFLAGS="-g"
+    NO_SYMBOLS_FCFLAGS="-s"
 
     # Profiling
     PROFILE_FCFLAGS="-Mprof=func,line"
