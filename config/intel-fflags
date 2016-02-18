@@ -80,6 +80,7 @@ if test "X-ifort" = "X-$f9x_vendor"; then
 
     # Symbols
     SYMBOLS_FCFLAGS="-g"
+    NO_SYMBOLS_FCFLAGS=
 
     # Profiling
     # Use this for profiling with gprof

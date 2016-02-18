@@ -158,59 +158,6 @@ AC_SUBST([UNAME_INFO])
 UNAME_INFO=`uname -a`
 
 ## ----------------------------------------------------------------------
-## Determine build mode (debug, production, clean).
-## This has to be done early since the build mode is referred to
-## frequently.
-##
-AC_MSG_CHECKING([build mode])
-AC_ARG_ENABLE([build-mode],
-              [AS_HELP_STRING([--enable-build-mode=(debug|production|clean)],
-                              [Sets the build mode. Debug turns on symbols, API
-                               tracing, asserts, and debug optimization,
-                               as well as several other minor configure options
-                               that aid in debugging.
-                               Production turns high optimizations on.
-                               Clean turns nothing on and disables optimization
-                               (i.e.: a 'clean slate' configuration).
-                               All these settings can be overridden by using
-                               specific configure flags.
-                               [default=debug]
-                               ])],
-              [BUILD_MODE=$enableval])
-
-## Set the default
-## Depends on branch, set via script at branch creation time
-if test "X-$BUILD_MODE" = X- ; then
-    BUILD_MODE=debug
-fi
-
-## Allow this variable to be substituted in
-## other files (src/libhdf5.settings.in, etc.)
-AC_SUBST([BUILD_MODE])
-
-case "X-$BUILD_MODE" in
-  X-clean)
-    AC_MSG_RESULT([clean])
-    ;;
-  X-debug)
-    H5_CFLAGS="$H5_CFLAGS $DEBUG_CFLAGS"
-    H5_CPPFLAGS="$H5_CPPFLAGS $DEBUG_CPPFLAGS"
-    H5_CXXFLAGS="$H5_CXXFLAGS $DEBUG_CXXFLAGS"
-    H5_FCFLAGS="$H5_FCFLAGS $DEBUG_FCFLAGS"
-    AC_MSG_RESULT([debug])
-    ;;
-  X-production)
-    H5_CFLAGS="$H5_CFLAGS $PROD_CFLAGS"
-    H5_CPPFLAGS="$H5_CPPFLAGS $PROD_CPPFLAGS"
-    H5_CXXFLAGS="$H5_CXXFLAGS $PROD_CXXFLAGS"
-    H5_FCFLAGS="$H5_FCFLAGS $PROD_FCFLAGS"
-    AC_MSG_RESULT([production])
-    ;;
-  *)
-    AC_MSG_ERROR([Unrecognized build mode: $BUILD_MODE. Use debug, production, or clean.])
-esac
-
-## ----------------------------------------------------------------------
 ## Some platforms have broken basename, and/or xargs programs. Check
 ## that it actually does what it's supposed to do. Catch this early
 ## since configure and scripts relies upon them heavily and there's
@@ -318,6 +265,60 @@ while test -n "$hname"; do
   hname="`echo $hname | cut -d. -f2-99`"
   test "$hname_tmp" = "$hname" && break
 done
+
+## ----------------------------------------------------------------------
+## Determine build mode (debug, production, clean).
+## This has to be done early since the build mode is referred to
+## frequently.
+##
+AC_MSG_CHECKING([build mode])
+AC_ARG_ENABLE([build-mode],
+              [AS_HELP_STRING([--enable-build-mode=(debug|production|clean)],
+                              [Sets the build mode. Debug turns on symbols, API
+                               tracing, asserts, and debug optimization,
+                               as well as several other minor configure options
+                               that aid in debugging.
+                               Production turns high optimizations on.
+                               Clean turns nothing on and disables optimization
+                               (i.e.: a 'clean slate' configuration).
+                               All these settings can be overridden by using
+                               specific configure flags.
+                               [default=debug]
+                               ])],
+              [BUILD_MODE=$enableval])
+
+## Set the default
+## Depends on branch, set via script at branch creation time
+if test "X-$BUILD_MODE" = X- ; then
+    BUILD_MODE=debug
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([BUILD_MODE])
+
+case "X-$BUILD_MODE" in
+  X-clean)
+    AC_MSG_RESULT([clean])
+    ;;
+  X-debug)
+    AC_DEFINE([DEBUG_BUILD], [1], [Define if this is a debug build.])
+    H5_CFLAGS="$H5_CFLAGS $DEBUG_CFLAGS"
+    H5_CPPFLAGS="$H5_CPPFLAGS $DEBUG_CPPFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DEBUG_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DEBUG_FCFLAGS"
+    AC_MSG_RESULT([debug])
+    ;;
+  X-production)
+    H5_CFLAGS="$H5_CFLAGS $PROD_CFLAGS"
+    H5_CPPFLAGS="$H5_CPPFLAGS $PROD_CPPFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $PROD_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $PROD_FCFLAGS"
+    AC_MSG_RESULT([production])
+    ;;
+  *)
+    AC_MSG_ERROR([Unrecognized build mode: $BUILD_MODE. Use debug, production, or clean.])
+esac
 
 ## ----------------------------------------------------------------------
 ## Some built-in configure checks can only see CFLAGS (not AM_CFLAGS), so
@@ -1934,6 +1935,9 @@ case "X-$SYMBOLS" in
     AC_MSG_RESULT([yes])
     ;;
   X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_SYMBOLS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_SYMBOLS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_SYMBOLS_FCFLAGS"
     AC_MSG_RESULT([no])
     ;;
   *)
@@ -2074,21 +2078,25 @@ AC_SUBST([OPTIMIZATION])
 case "X-$OPTIMIZATION" in
   X-high)
     H5_CFLAGS="$H5_CFLAGS $HIGH_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $HIGH_OPT_CXXFLAGS"
     H5_FCFLAGS="$H5_FCFLAGS $HIGH_OPT_FCFLAGS"
     AC_MSG_RESULT([high])
     ;;
   X-debug)
     H5_CFLAGS="$H5_CFLAGS $DEBUG_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DEBUG_OPT_CXXFLAGS"
     H5_FCFLAGS="$H5_FCFLAGS $DEBUG_OPT_FCFLAGS"
     AC_MSG_RESULT([debug])
     ;;
   X-none)
     H5_CFLAGS="$H5_CFLAGS $NO_OPT_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_OPT_CXXFLAGS"
     H5_FCFLAGS="$H5_FCFLAGS $NO_OPT_FCFLAGS"
     AC_MSG_RESULT([none])
     ;;
   *)
     H5_CFLAGS="$H5_CFLAGS $OPTIMIZATION"
+    H5_CXXFLAGS="$H5_CXXFLAGS $OPTIMIZATION"
     H5_FCFLAGS="$H5_FCFLAGS $OPTIMIZATION"
     OPTIMIZATION="custom ($OPTIMIZATION)"
     AC_MSG_RESULT([$OPTIMIZATION])

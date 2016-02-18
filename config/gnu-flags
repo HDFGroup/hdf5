@@ -124,17 +124,15 @@ case "$cc_vendor-$cc_version" in
         ;;
     esac
     #DEBUG_CFLAGS="-fsanitize=undefined"
-    DEBUG_CPPFLAGS=
 
     # Symbols
+    NO_SYMBOLS_CFLAGS="-s"
     SYMBOLS_CFLAGS="-g"
-    SYMBOLS_CPPFLAGS=
 
     # Profile
     PROFILE_CFLAGS="-pg"
-    PROFILE_CPPFLAGS=
 
-    # Optimization (only CFLAGS at this time)
+    # Optimization
     case "$cc_vendor-$cc_version" in
       gcc-[34].*)
         HIGH_OPT_CFLAGS="-O3"
