@@ -89,7 +89,7 @@ CONTAINS
        error_string = skip
     ENDIF
 
-    WRITE(*, fmt = '(A, T72, A)') test_title, error_string
+    WRITE(*, fmt = '(A, T80, A)') test_title, error_string
 
     IF(test_result.GT.0) total_error = total_error + test_result
 
