@@ -1,10 +1,10 @@
-!****p* Program/H5_buildiface
+!****p* Program/H5_test_buildiface
 !
 ! NAME
-!  Executable: H5_buildiface
+!  Executable: H5_test_buildiface
 !
 ! FILE
-!  fortran/src/H5_buildiface.f90
+!  fortran/src/H5_test_buildiface.F90
 !
 ! PURPOSE
 !  This stand alone program is used at build time to generate the program

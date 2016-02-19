@@ -1,4 +1,11 @@
-!****h* H5fortkit/H5fortkit
+!****h* ROBODoc/H5fortkit
+!
+! NAME
+!  MODULE H5fortkit
+!
+! FILE
+!  fortran/src/H5fortkit.F90
+!
 ! PURPOSE
 !  Routines to deal with C-FORTRAN issues.
 !
@@ -18,6 +25,7 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
+!*****
 MODULE H5fortkit
 
 CONTAINS
