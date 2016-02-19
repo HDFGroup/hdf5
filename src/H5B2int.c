@@ -132,20 +132,24 @@ H5FL_SEQ_EXTERN(H5B2_node_info_t);
  *
  *-------------------------------------------------------------------------
  */
-int
+herr_t
 H5B2_locate_record(const H5B2_class_t *type, unsigned nrec, size_t *rec_off,
-    const uint8_t *native, const void *udata, unsigned *idx)
+                    const uint8_t *native, const void *udata, unsigned *idx, int *cmp)
 {
     unsigned	lo = 0, hi;     /* Low & high index values */
     unsigned    my_idx = 0;     /* Final index value */
-    int         cmp = -1;       /* Key comparison value */
+    herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
+
+    *cmp = -1;
 
     hi = nrec;
-    while(lo < hi && cmp) {
+    while(lo < hi && *cmp) {
 	my_idx = (lo + hi) / 2;
-	if((cmp = (type->compare)(udata, native + rec_off[my_idx])) < 0)
+	if((type->compare)(udata, native + rec_off[my_idx], cmp) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+	if(*cmp < 0)
 	    hi = my_idx;
 	else
 	    lo = my_idx + 1;
@@ -153,7 +157,8 @@ H5B2_locate_record(const H5B2_class_t *type, unsigned nrec, size_t *rec_off,
 
     *idx = my_idx;
 
-    FUNC_LEAVE_NOAPI(cmp)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_locate_record */
 
 
@@ -1555,7 +1560,9 @@ H5B2_insert_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr,
         idx = 0;
     else {
         /* Find correct location to insert this record */
-        if((cmp = H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx)) == 0)
+        if(H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx, &cmp) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+        if(cmp == 0)
             HGOTO_ERROR(H5E_BTREE, H5E_EXISTS, FAIL, "record is already in B-tree")
         if(cmp > 0)
             idx++;
@@ -1649,7 +1656,10 @@ H5B2_insert_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
         size_t      split_nrec; /* Number of records to split node at */
 
         /* Locate node pointer for child */
-        if((cmp = H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx)) == 0)
+        if(H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, 
+                               udata, &idx, &cmp) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+        if(cmp == 0)
             HGOTO_ERROR(H5E_BTREE, H5E_EXISTS, FAIL, "record is already in B-tree")
         if(cmp > 0)
             idx++;
@@ -1704,8 +1714,11 @@ H5B2_insert_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
             } /* end else */
 
             /* Locate node pointer for child (after split/redistribute) */
-/* Actually, this can be easily updated (for 2-node redistrib.) and shouldn't require re-searching */
-            if((cmp = H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx)) == 0)
+            /* Actually, this can be easily updated (for 2-node redistrib.) and shouldn't require re-searching */
+            if(H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, 
+                                   udata, &idx, &cmp) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+            if(cmp == 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_EXISTS, FAIL, "record is already in B-tree")
             if(cmp > 0)
                 idx++;
@@ -2116,6 +2129,7 @@ H5B2_remove_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr,
     haddr_t     leaf_addr = HADDR_UNDEF;  /* Leaf address on disk */
     unsigned    leaf_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting leaf node */
     unsigned    idx;                    /* Location of record which matches key */
+    int         cmp;                    /* Comparison value of records */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2135,7 +2149,9 @@ H5B2_remove_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr,
     HDassert(leaf->nrec == curr_node_ptr->node_nrec);
 
     /* Find correct location to remove this record */
-    if(H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx) != 0)
+    if(H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx, &cmp) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+    if(cmp != 0)
         HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "record is not in B-tree")
 
     /* Check for invalidating the min/max record for the tree */
@@ -2283,7 +2299,9 @@ H5B2_remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased,
         if(swap_loc)
             idx = 0;
         else {
-            cmp = H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
+            if(H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, 
+                                   udata, &idx, &cmp) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
             if(cmp >= 0)
                 idx++;
         } /* end else */
@@ -2345,7 +2363,8 @@ H5B2_remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased,
                 idx = 0;
             else {
 /* Actually, this can be easily updated (for 2-node redistrib.) and shouldn't require re-searching */
-                cmp = H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
+                if(H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx, &cmp) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
                 if(cmp >= 0)
                     idx++;
             } /* end else */
@@ -2833,7 +2852,8 @@ H5B2_neighbor_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_pt
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
     /* Locate node pointer for child */
-    cmp = H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
+    if(H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx, &cmp) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
     if(cmp > 0)
         idx++;
     else
@@ -2920,7 +2940,9 @@ H5B2_neighbor_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree internal node")
 
     /* Locate node pointer for child */
-    cmp = H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
+    if(H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, 
+                           udata, &idx, &cmp) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
     if(cmp > 0)
         idx++;
 

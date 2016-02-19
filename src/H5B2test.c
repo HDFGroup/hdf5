@@ -64,7 +64,7 @@ typedef struct H5B2_test_ctx_t {
 static void *H5B2_test_crt_context(void *udata);
 static herr_t H5B2_test_dst_context(void *ctx);
 static herr_t H5B2_test_store(void *nrecord, const void *udata);
-static herr_t H5B2_test_compare(const void *rec1, const void *rec2);
+static herr_t H5B2_test_compare(const void *rec1, const void *rec2, int *result);
 static herr_t H5B2_test_encode(uint8_t *raw, const void *nrecord, void *ctx);
 static herr_t H5B2_test_decode(const uint8_t *raw, void *nrecord, void *ctx);
 static herr_t H5B2_test_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id,
@@ -215,11 +215,13 @@ H5B2_test_store(void *nrecord, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_test_compare(const void *rec1, const void *rec2)
+H5B2_test_compare(const void *rec1, const void *rec2, int *result)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    FUNC_LEAVE_NOAPI((herr_t)(*(const hssize_t *)rec1 - *(const hssize_t *)rec2))
+    *result = (int)(*(const hssize_t *)rec1 - *(const hssize_t *)rec2);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_test_compare() */
 
 
@@ -434,7 +436,10 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate node pointer for child */
-        cmp = H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
+        if(H5B2_locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, 
+                               udata, &idx, &cmp) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+
         if(cmp > 0)
             idx++;
 
@@ -474,7 +479,9 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
         /* Locate record */
-        cmp = H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
+        if(H5B2_locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, 
+                               udata, &idx, &cmp) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
 
         /* Unlock current node */
         if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)

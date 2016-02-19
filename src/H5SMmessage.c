@@ -190,13 +190,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_message_compare(const void *rec1, const void *rec2)
+H5SM_message_compare(const void *rec1, const void *rec2, int *result)
 {
     const H5SM_mesg_key_t *key = (const H5SM_mesg_key_t *) rec1;
     const H5SM_sohm_t *mesg = (const H5SM_sohm_t *) rec2;
-    herr_t ret_value = 0;
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* If the key has an fheap ID, we're looking for a message that's
      * already in the index; if the fheap ID matches, we've found the message
@@ -205,28 +205,31 @@ H5SM_message_compare(const void *rec1, const void *rec2)
      * message in the index, we've found the message.
      */
     if(mesg->location == H5SM_IN_HEAP && key->message.location == H5SM_IN_HEAP) {
-        if(key->message.u.heap_loc.fheap_id.val == mesg->u.heap_loc.fheap_id.val)
-            HGOTO_DONE(0);
+        if(key->message.u.heap_loc.fheap_id.val == mesg->u.heap_loc.fheap_id.val) {
+            *result = 0;
+            HGOTO_DONE(SUCCEED);
+        }
     } /* end if */
     else if(mesg->location == H5SM_IN_OH && key->message.location == H5SM_IN_OH) {
         if(key->message.u.mesg_loc.oh_addr == mesg->u.mesg_loc.oh_addr &&
-                key->message.u.mesg_loc.index == mesg->u.mesg_loc.index &&
-                key->message.msg_type_id == mesg->msg_type_id)
-            HGOTO_DONE(0);
+           key->message.u.mesg_loc.index == mesg->u.mesg_loc.index &&
+           key->message.msg_type_id == mesg->msg_type_id) {
+            *result = 0;
+            HGOTO_DONE(SUCCEED);
+        }
     } /* end if */
 
     /* Compare hash values */
     if(key->message.hash > mesg->hash)
-        ret_value = 1;
+        *result = 1;
     else if(key->message.hash < mesg->hash)
-        ret_value = -1;
+        *result = -1;
     /* If the hash values match, make sure the messages are really the same */
     else {
         /* Hash values match; compare the encoded message with the one in
          * the index.
          */
         H5SM_compare_udata_t udata;
-        herr_t status;
 
         HDassert(key->message.hash == mesg->hash);
         HDassert(key->encoding_size > 0 && key->encoding);
@@ -239,8 +242,8 @@ H5SM_message_compare(const void *rec1, const void *rec2)
          */
         if(mesg->location == H5SM_IN_HEAP) {
             /* Call heap op routine with comparison callback */
-            status = H5HF_op(key->fheap, key->dxpl_id, &(mesg->u.heap_loc.fheap_id), H5SM_compare_cb, &udata);
-            HDassert(status >= 0);
+            if(H5HF_op(key->fheap, key->dxpl_id, &(mesg->u.heap_loc.fheap_id), H5SM_compare_cb, &udata) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
         } /* end if */
         else {
             H5O_loc_t oloc;             /* Object owning the message */
@@ -251,8 +254,8 @@ H5SM_message_compare(const void *rec1, const void *rec2)
             HDassert(mesg->location == H5SM_IN_OH);
 
             /* Reset the object location */
-            status = H5O_loc_reset(&oloc);
-            HDassert(status >= 0);
+            if(H5O_loc_reset(&oloc) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTRESET, FAIL, "unable to initialize target location")
 
             /* Set up object location */
             oloc.file = key->file;
@@ -264,11 +267,11 @@ H5SM_message_compare(const void *rec1, const void *rec2)
             /* Locate the right message and compare with it */
             op.op_type = H5O_MESG_OP_LIB;
             op.u.lib_op = H5SM_compare_iter_op;
-            status = H5O_msg_iterate(&oloc, mesg->msg_type_id, &op, &udata, key->dxpl_id);
-            HDassert(status >= 0);
+            if(H5O_msg_iterate(&oloc, mesg->msg_type_id, &op, &udata, key->dxpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over links")
         } /* end else */
 
-        ret_value = udata.ret;
+        *result = udata.ret;
     } /* end if */
 
 done:
