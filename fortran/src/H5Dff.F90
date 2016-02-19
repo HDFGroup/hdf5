@@ -172,7 +172,7 @@ MODULE H5D
      MODULE PROCEDURE h5dfill_integer
      MODULE PROCEDURE h5dfill_c_float
      MODULE PROCEDURE h5dfill_c_double
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
      MODULE PROCEDURE h5dfill_c_long_double
 #endif
      MODULE PROCEDURE h5dfill_char
@@ -1753,7 +1753,7 @@ CONTAINS
 
   END SUBROUTINE h5dfill_c_double
 
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
+#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
   SUBROUTINE h5dfill_c_long_double(fill_value, space_id, buf,  hdferr)
     IMPLICIT NONE
     REAL(KIND=C_LONG_DOUBLE), INTENT(IN), TARGET :: fill_value  ! Fill value
