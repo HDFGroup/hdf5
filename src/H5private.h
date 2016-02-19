@@ -885,9 +885,15 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
     #define HDstat(S,B)    stat(S,B)
 #endif /* HDstat */
 
+#ifndef H5_HAVE_WIN32_API
+/* These definitions differ in Windows and are defined in
+ * H5win32defs for that platform.
+ */
 typedef struct stat         h5_stat_t;
 typedef off_t               h5_stat_size_t;
-#define HDoff_t    off_t
+#define HDoff_t             off_t
+#endif /* H5_HAVE_WIN32_API */
+
 #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
 
 #ifndef HDftell
