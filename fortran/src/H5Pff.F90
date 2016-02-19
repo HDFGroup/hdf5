@@ -7508,7 +7508,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 ! V I R T U A L  D A T S E T S
 !
 
-!****s* 
+!****s* H5P/h5pset_virtual_view_f
 ! NAME
 !  h5pset_virtual_view_f
 !
@@ -7553,7 +7553,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     
   END SUBROUTINE h5pset_virtual_view_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_view_f
 ! NAME
 !  h5pget_virtual_view_f
 !
@@ -7597,7 +7597,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     
   END SUBROUTINE h5pget_virtual_view_f
 
-!****s* 
+!****s* H5P/h5pset_virtual_printf_gap_f
 ! NAME
 !  h5pset_virtual_printf_gap_f
 !
@@ -7639,7 +7639,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     
   END SUBROUTINE h5pset_virtual_printf_gap_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_printf_gap_f
 ! NAME
 !  h5pget_virtual_printf_gap_f
 !
@@ -7682,7 +7682,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     
   END SUBROUTINE h5pget_virtual_printf_gap_f
 
-!****s* 
+!****s* H5P/h5pset_virtual_f
 ! NAME
 !  h5pset_virtual_f
 !
@@ -7742,7 +7742,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pset_virtual_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_count_f
 ! NAME
 !  h5pget_virtual_count_f
 !
@@ -7783,7 +7783,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_virtual_count_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_vspace_f
 ! NAME
 !  h5pget_virtual_vspace_f
 !
@@ -7831,7 +7831,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
 END SUBROUTINE h5pget_virtual_vspace_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_srcspace_f
 ! NAME
 !  h5pget_virtual_srcspace_f
 !
@@ -7881,7 +7881,7 @@ SUBROUTINE h5pget_virtual_srcspace_f(dcpl_id, index, ds_id, hdferr)
 
 END SUBROUTINE h5pget_virtual_srcspace_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_filename_f
 ! NAME
 !  h5pget_virtual_filename_f
 !
@@ -7947,10 +7947,9 @@ SUBROUTINE h5pget_virtual_filename_f(dcpl_id, index, name, hdferr, name_len)
 
   ENDIF
 
-
 END SUBROUTINE h5pget_virtual_filename_f
 
-!****s*
+!****s* H5P/h5pget_virtual_dsetname_f
 ! NAME
 !  h5pget_virtual_dsetname_f
 !
