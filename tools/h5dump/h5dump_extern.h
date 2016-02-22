@@ -77,8 +77,6 @@ extern int          enable_error_stack; /* re-enable error stack */
 extern int          disable_compact_subset; /* disable compact form of subset notation */
 extern int          display_packed_bits; /*print 1-8 byte numbers as packed bits*/
 extern int          include_attrs; /* Display attributes */
-extern int          display_vds_first; /* vds display to first missing */
-extern int          vds_gap_size; /* vds skip missing files */
 
 /* sort parameters */
 extern H5_index_t   sort_by; /*sort_by [creation_order | name]  */
