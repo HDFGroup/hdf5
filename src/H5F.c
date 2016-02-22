@@ -785,10 +785,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, October 16, 1998
  *
- * Modifications:
- *              Quincey Koziol, May 14, 2002
- *              Keep old file's read/write intent in reopened file.
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -803,26 +799,27 @@ H5Freopen(hid_t file_id)
 
     /* Check arguments */
     if(NULL == (old_file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Get a new "top level" file struct, sharing the same "low level" file struct */
     if(NULL == (new_file = H5F_new(old_file->shared, 0, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
 
     /* Duplicate old file's names */
     new_file->open_name = H5MM_xstrdup(old_file->open_name);
     new_file->actual_name = H5MM_xstrdup(old_file->actual_name);
+    new_file->extpath = H5MM_xstrdup(old_file->extpath);
 
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
 done:
     if(ret_value < 0 && new_file)
-	if(H5F_dest(new_file, H5AC_ind_read_dxpl_id, FALSE) < 0)
-	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+        if(H5F_dest(new_file, H5AC_ind_read_dxpl_id, FALSE) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Freopen() */
