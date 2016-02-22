@@ -3718,6 +3718,7 @@ test_file(void)
 
     test_file_create();         /* Test file creation(also creation templates)*/
     test_file_open();           /* Test file opening */
+    test_file_reopen();         /* Test file reopening */
     test_file_close();          /* Test file close behavior */
     test_get_file_id();         /* Test H5Iget_file_id */
     test_get_obj_ids();         /* Test H5Fget_obj_ids for Jira Issue 8528 */
