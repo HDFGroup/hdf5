@@ -78,6 +78,8 @@ int          enable_error_stack= FALSE; /* re-enable error stack */
 int          disable_compact_subset= FALSE; /* disable compact form of subset notation */
 int          display_packed_bits = FALSE; /*print 1-8 byte numbers as packed bits*/
 int          include_attrs     = TRUE; /* Display attributes */
+int          display_vds_first = FALSE; /* vds display to all by default*/
+int          vds_gap_size       = 0; /* vds skip missing files default is none */
 
 /* sort parameters */
 H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */

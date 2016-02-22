@@ -26,12 +26,12 @@
 
 typedef struct {
     hid_t fid;                      /* File ID being traversed */
-    char *op_name;					/* Object name wanted */
+    char *op_name;                    /* Object name wanted */
 } trav_handle_udata_t;
 
 typedef struct {
-	char *path;                     /* Path of object being searched */
-    char *op_name;					/* Object name wanted */
+    char *path;                     /* Path of object being searched */
+    char *op_name;                    /* Object name wanted */
 } trav_attr_udata_t;
 
 /* callback function used by H5Literate() */
@@ -90,7 +90,7 @@ dump_dataspace(hid_t space)
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent/COL;
     ctx.cur_column = dump_indent;
-   
+
     h5tools_dump_dataspace(rawoutstream, outputformat, &ctx, space);
 }
 
@@ -117,19 +117,19 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
     h5tools_context_t ctx;            /* print context  */
     h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
-    
+
     hid_t       attr_id;
     herr_t      ret = SUCCEED;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent/COL;
     ctx.cur_column = dump_indent;
-    
+
     attr_id = H5Aopen(oid, attr_name, H5P_DEFAULT);
     oid_output = display_oid;
     data_output = display_data;
     attr_data_output = display_attr_data;
-    
+
     string_dataformat = *outputformat;
 
     if (fp_format) {
@@ -155,7 +155,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
         h5tools_setstatus(EXIT_FAILURE);
         ret = FAIL;
     }
-    
+
     return ret;
 }
 
@@ -185,6 +185,7 @@ static herr_t
 dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR_UNUSED *op_data)
 {
     hid_t       obj;
+    hid_t       dapl_id = H5P_DEFAULT;  /* dataset access property list ID */
     herr_t      ret = SUCCEED;
     char       *obj_path = NULL;    /* Full path of object */
     h5tools_str_t buffer;          /* string into which to render   */
@@ -199,7 +200,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent/COL;
     ctx.cur_column = dump_indent;
-    
+
     string_dataformat = *outputformat;
 
     if (fp_format) {
@@ -222,8 +223,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
     if(!obj_path) {
         ret = FAIL;
         goto done;
-    } 
-    
+    }
+
     HDstrcpy(obj_path, prefix);
     HDstrcat(obj_path, "/");
     HDstrcat(obj_path, name);
@@ -269,7 +270,20 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
             break;
 
         case H5O_TYPE_DATASET:
-            if((obj = H5Dopen2(group, name, H5P_DEFAULT)) >= 0) {
+            if(display_data) {
+                if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0) {
+                    error_msg("error in creating default access property list ID\n");
+                }
+                if (display_vds_first) {
+                    if(H5Pset_virtual_view(dapl_id, H5D_VDS_FIRST_MISSING) < 0)
+                        error_msg("error in setting access property list ID, virtual_view\n");
+                }
+                if (vds_gap_size > 0) {
+                    if(H5Pset_virtual_printf_gap(dapl_id, (hsize_t)vds_gap_size) < 0)
+                        error_msg("error in setting access property list ID, virtual_printf_gap\n");
+                }
+            }
+            if((obj = H5Dopen2(group, name, dapl_id)) >= 0) {
                 if(oinfo.rc > 1 || hit_elink) {
                     obj_t  *found_obj;    /* Found object */
 
@@ -308,9 +322,11 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
 
                         h5tools_setstatus(EXIT_FAILURE);
                         ret = FAIL;
+                        if (dapl_id != H5P_DEFAULT)
+                            H5Pclose(dapl_id);
                         H5Dclose(obj);
                         goto done;
-                    } 
+                    }
                     else if(found_obj->displayed) {
                         ctx.need_prefix = TRUE;
                         h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
@@ -347,18 +363,24 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                             h5tools_str_append(&buffer, "%s", h5tools_dump_header_format->datasetend);
                         h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
+                        if (dapl_id != H5P_DEFAULT)
+                            H5Pclose(dapl_id);
                         H5Dclose(obj);
                         goto done;
-                    } 
+                    }
                     else {
                         found_obj->displayed = TRUE;
                     }
                 } /* end if */
 
                 dump_function_table->dump_dataset_function(obj, name, NULL);
+                if (dapl_id != H5P_DEFAULT)
+                    H5Pclose(dapl_id);
                 H5Dclose(obj);
-            } 
+            }
             else {
+                if (dapl_id)
+                    H5Pclose(dapl_id && dapl_id != H5P_DEFAULT);
                 error_msg("unable to dump dataset \"%s\"\n", name);
                 h5tools_setstatus(EXIT_FAILURE);
                 ret = FAIL;
@@ -370,7 +392,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                 error_msg("unable to dump datatype \"%s\"\n", name);
                 h5tools_setstatus(EXIT_FAILURE);
                 ret = FAIL;
-            } 
+            }
             else {
                 dump_function_table->dump_named_datatype_function(obj, name);
                 H5Tclose(obj);
@@ -408,7 +430,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
                 error_msg("unable to get link value\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret = FAIL;
-            } 
+            }
             else {
                 /* print the value of a soft link */
                 /* Standard DDL: no modification */
@@ -558,7 +580,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
 done:
 
     h5tools_str_close(&buffer);
-    
+
     if(obj_path)
         HDfree(obj_path);
     return ret;
@@ -650,7 +672,7 @@ dump_named_datatype(hid_t tid, const char *name)
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent/COL;
     ctx.cur_column = dump_indent;
-    
+
     string_dataformat = *outputformat;
 
     if (fp_format) {
@@ -685,7 +707,7 @@ dump_named_datatype(hid_t tid, const char *name)
     }
 
     ctx.need_prefix = TRUE;
-    
+
     /* Render the element */
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s \"%s\" %s",
@@ -718,7 +740,7 @@ dump_named_datatype(hid_t tid, const char *name)
         else
             found_obj->displayed = TRUE;
     } /* end if */
-    
+
     /* Render the element */
     h5tools_str_reset(&buffer);
     h5tools_print_datatype(rawoutstream, &buffer, outputformat, &ctx, tid, FALSE);
@@ -726,7 +748,7 @@ dump_named_datatype(hid_t tid, const char *name)
     if(H5Tget_class(tid) != H5T_COMPOUND) {
         h5tools_str_append(&buffer, ";");
     }
-    
+
     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
     /* print attributes */
@@ -813,7 +835,7 @@ dump_group(hid_t gid, const char *name)
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent/COL;
     ctx.cur_column = dump_indent;
-    
+
     string_dataformat = *outputformat;
 
     if (fp_format) {
@@ -839,7 +861,7 @@ dump_group(hid_t gid, const char *name)
                         h5tools_dump_header_format->groupbegin, name,
                         h5tools_dump_header_format->groupblockbegin);
     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-    
+
     ctx.indent_level++;
     dump_indent += COL;
 
@@ -948,7 +970,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent/COL;
     ctx.cur_column = dump_indent;
-    
+
     string_dataformat = *outputformat;
 
     if (fp_format) {
@@ -982,7 +1004,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 
     ctx.need_prefix = TRUE;
     h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-    
+
      /* Render the element */
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s \"%s\" %s",
@@ -994,7 +1016,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 
     dump_indent += COL;
     ctx.indent_level++;
-    
+
     type = H5Dget_type(did);
     h5dump_type_table = type_table;
     h5tools_dump_datatype(rawoutstream, outputformat, &ctx, type);
@@ -1018,6 +1040,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     if(display_data) {
         int  data_loop = 1;
         int  i;
+
         if(display_packed_bits)
             data_loop = packed_bits_num;
         for(i=0; i<data_loop; i++) {
@@ -1042,7 +1065,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
                 h5tools_str_reset(&buffer);
                 h5tools_str_append(&buffer, "DATA{ not yet implemented.}");
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-                
+
                 ctx.indent_level--;
                 break;
 
@@ -1079,7 +1102,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 
     ctx.need_prefix = TRUE;
     h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-    
+
     /* Render the element */
     h5tools_str_reset(&buffer);
     if(HDstrlen(h5tools_dump_header_format->datasetblockend)) {
@@ -1189,7 +1212,7 @@ dump_fcpl(hid_t fid)
     fdriver=H5Pget_driver(fapl);
     H5Pclose(fapl);
 #endif
-    
+
    /*-------------------------------------------------------------------------
     * SUPER_BLOCK
     *-------------------------------------------------------------------------
@@ -1308,54 +1331,54 @@ static herr_t
 attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ainfo, void *_op_data)
 {
     herr_t              ret = SUCCEED;
-    int 				i;
-    int 				j;
-    int 				k;
-    char			   *obj_op_name;
+    int                 i;
+    int                 j;
+    int                 k;
+    char               *obj_op_name;
     char               *obj_name;
-	trav_attr_udata_t  *attr_data = (trav_attr_udata_t*)_op_data;
+    trav_attr_udata_t  *attr_data = (trav_attr_udata_t*)_op_data;
     char               *buf = attr_data->path;
-    char			   *op_name = attr_data->op_name;
+    char               *op_name = attr_data->op_name;
 
     j = (int)HDstrlen(op_name) - 1;
     /* find the last / */
     while(j >= 0) {
-    	if (op_name[j] == '/' && (j==0 || (j>0 && op_name[j-1]!='\\')))
-    		break;
-    	j--;
+        if (op_name[j] == '/' && (j==0 || (j>0 && op_name[j-1]!='\\')))
+            break;
+        j--;
     }
 
     obj_op_name = h5tools_str_replace(op_name + j + 1, "\\/", "/");
 
     if(obj_op_name == NULL) {
-    	h5tools_setstatus(EXIT_FAILURE);
-    	ret = FAIL;
+        h5tools_setstatus(EXIT_FAILURE);
+        ret = FAIL;
     }
     else {
-    	if(HDstrcmp(attr_name, obj_op_name)==0) {
-    	    /* object name */
-    	    i = (int)HDstrlen(buf);
-    	    j = (int)HDstrlen(op_name);
-    	    k = (size_t)i + 1 + (size_t)j + 1 + 2;
-    	    obj_name = (char *)HDmalloc((size_t)k);
-    	    if(obj_name == NULL) {
-    	    	h5tools_setstatus(EXIT_FAILURE);
-    	    	ret = FAIL;
-    	    }
-    	    else {
-    	    	HDmemset(obj_name, '\0', (size_t)k);
-    	        if(op_name[0] != '/') {
-    	        	HDstrncat(obj_name, buf, (size_t)i + 1);
-    	        	if(buf[i-1] != '/')
-    	            	HDstrncat(obj_name, "/", (size_t)2);
-    	        }
-    	        HDstrncat(obj_name, op_name, (size_t)j + 1);
+        if(HDstrcmp(attr_name, obj_op_name)==0) {
+            /* object name */
+            i = (int)HDstrlen(buf);
+            j = (int)HDstrlen(op_name);
+            k = (size_t)i + 1 + (size_t)j + 1 + 2;
+            obj_name = (char *)HDmalloc((size_t)k);
+            if(obj_name == NULL) {
+                h5tools_setstatus(EXIT_FAILURE);
+                ret = FAIL;
+            }
+            else {
+                HDmemset(obj_name, '\0', (size_t)k);
+                if(op_name[0] != '/') {
+                    HDstrncat(obj_name, buf, (size_t)i + 1);
+                    if(buf[i-1] != '/')
+                        HDstrncat(obj_name, "/", (size_t)2);
+                }
+                HDstrncat(obj_name, op_name, (size_t)j + 1);
 
-    	    	handle_attributes(oid, obj_name, NULL, 0, NULL);
-    	    	HDfree(obj_name);
-        	}
-    	}
-    	HDfree(obj_op_name);
+                handle_attributes(oid, obj_name, NULL, 0, NULL);
+                HDfree(obj_name);
+            }
+        }
+        HDfree(obj_op_name);
     }
     return ret;
 } /* end attr_search() */
@@ -1363,7 +1386,7 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *a
 static herr_t
 obj_search(const char *path, const H5O_info_t *oi, const char H5_ATTR_UNUSED *already_visited, void *_op_data)
 {
-	trav_handle_udata_t  *handle_data = (trav_handle_udata_t*)_op_data;
+    trav_handle_udata_t  *handle_data = (trav_handle_udata_t*)_op_data;
     char *op_name = (char*)handle_data->op_name;
 
     trav_attr_udata_t  attr_data;
@@ -1372,22 +1395,22 @@ obj_search(const char *path, const H5O_info_t *oi, const char H5_ATTR_UNUSED *al
     H5Aiterate_by_name(handle_data->fid, path, H5_INDEX_NAME, H5_ITER_INC, NULL, attr_search, (void*)&attr_data, H5P_DEFAULT);
 
     if(HDstrcmp(path, op_name)==0) {
-    	switch(oi->type) {
-    	case H5O_TYPE_GROUP:
-    		handle_groups(handle_data->fid, path, NULL, 0, NULL);
-    		break;
-    	case H5O_TYPE_DATASET:
-    		handle_datasets(handle_data->fid, path, NULL, 0, NULL);
-    		break;
-    	case H5O_TYPE_NAMED_DATATYPE:
-    		handle_datatypes(handle_data->fid, path, NULL, 0, NULL);
-    		break;
-    	case H5O_TYPE_UNKNOWN:
-    	case H5O_TYPE_NTYPES:
-    	default:
-    		error_msg("unknown object type value\n");
-    		h5tools_setstatus(EXIT_FAILURE);
-    	} /* end switch */
+        switch(oi->type) {
+        case H5O_TYPE_GROUP:
+            handle_groups(handle_data->fid, path, NULL, 0, NULL);
+            break;
+        case H5O_TYPE_DATASET:
+            handle_datasets(handle_data->fid, path, NULL, 0, NULL);
+            break;
+        case H5O_TYPE_NAMED_DATATYPE:
+            handle_datatypes(handle_data->fid, path, NULL, 0, NULL);
+            break;
+        case H5O_TYPE_UNKNOWN:
+        case H5O_TYPE_NTYPES:
+        default:
+            error_msg("unknown object type value\n");
+            h5tools_setstatus(EXIT_FAILURE);
+        } /* end switch */
     }
 
     return 0;
@@ -1397,48 +1420,48 @@ static herr_t
 lnk_search(const char *path, const H5L_info_t *li, void *_op_data)
 {
     int         search_len;
-    int			k;
+    int            k;
     char       *search_name;
-	trav_handle_udata_t  *handle_data = (trav_handle_udata_t*)_op_data;
+    trav_handle_udata_t  *handle_data = (trav_handle_udata_t*)_op_data;
     char *op_name = (char*)handle_data->op_name;
 
     search_len = HDstrlen(op_name);
     if(search_len > 0 && op_name[0] != '/') {
-    	k = 2;
+        k = 2;
     }
     else
         k = 1;
-   	search_name = (char *)HDmalloc((size_t)(search_len + k));
+    search_name = (char *)HDmalloc((size_t)(search_len + k));
     if(search_name == NULL) {
-		error_msg("creating temporary link\n");
-    	h5tools_setstatus(EXIT_FAILURE);
+        error_msg("creating temporary link\n");
+        h5tools_setstatus(EXIT_FAILURE);
     }
     else {
-		if (k == 2) {
-			HDstrcpy(search_name, "/");
-			HDstrncat(search_name, op_name, (size_t)search_len + 1);
-		}
-		else
-			HDstrncpy(search_name, op_name, (size_t)search_len + 1);
-		search_name[search_len + k - 1] = '\0';
+        if (k == 2) {
+            HDstrcpy(search_name, "/");
+            HDstrncat(search_name, op_name, (size_t)search_len + 1);
+        }
+        else
+            HDstrncpy(search_name, op_name, (size_t)search_len + 1);
+        search_name[search_len + k - 1] = '\0';
 
-		if(HDstrcmp(path, search_name) == 0) {
-			switch(li->type) {
-			case H5L_TYPE_SOFT:
-			case H5L_TYPE_EXTERNAL:
-				handle_links(handle_data->fid, op_name, NULL, 0, NULL);
-				break;
+        if(HDstrcmp(path, search_name) == 0) {
+            switch(li->type) {
+            case H5L_TYPE_SOFT:
+            case H5L_TYPE_EXTERNAL:
+                handle_links(handle_data->fid, op_name, NULL, 0, NULL);
+                break;
 
-			case H5L_TYPE_HARD:
-			case H5L_TYPE_MAX:
-			case H5L_TYPE_ERROR:
-			default:
-				error_msg("unknown link type value\n");
-				h5tools_setstatus(EXIT_FAILURE);
-				break;
-			} /* end switch() */
-		}
-		HDfree(search_name);
+            case H5L_TYPE_HARD:
+            case H5L_TYPE_MAX:
+            case H5L_TYPE_ERROR:
+            default:
+                error_msg("unknown link type value\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                break;
+            } /* end switch() */
+        }
+        HDfree(search_name);
     }
     return 0;
 } /* end lnk_search() */
@@ -1465,7 +1488,7 @@ handle_paths(hid_t fid, const char *path_name, void H5_ATTR_UNUSED * data, int H
         hid_t       gcpl_id;
         unsigned    crt_order_flags;
         unsigned    attr_crt_order_flags;
-		trav_handle_udata_t handle_udata;     /* User data for traversal */
+        trav_handle_udata_t handle_udata;     /* User data for traversal */
 
         if ((gcpl_id = H5Gget_create_plist(gid)) < 0) {
             error_msg("error in getting group creation property list ID\n");
@@ -1489,12 +1512,12 @@ handle_paths(hid_t fid, const char *path_name, void H5_ATTR_UNUSED * data, int H
             h5tools_setstatus(EXIT_FAILURE);
         }
 
-		handle_udata.fid = fid;
-		handle_udata.op_name = (char*)path_name;
-		if(h5trav_visit(fid, "/", TRUE, TRUE, obj_search, lnk_search, &handle_udata) < 0) {
-			error_msg("error traversing information\n");
-			h5tools_setstatus(EXIT_FAILURE);
-		}
+        handle_udata.fid = fid;
+        handle_udata.op_name = (char*)path_name;
+        if(h5trav_visit(fid, "/", TRUE, TRUE, obj_search, lnk_search, &handle_udata) < 0) {
+            error_msg("error traversing information\n");
+            h5tools_setstatus(EXIT_FAILURE);
+        }
     }
 }
 
@@ -1536,7 +1559,7 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H
 
     /* find the last / */
     while(j >= 0) {
-        if (attr[j] == '/' && (j==0 || (j>0 && attr[j-1]!='\\'))) 
+        if (attr[j] == '/' && (j==0 || (j>0 && attr[j-1]!='\\')))
             break;
         j--;
     }
@@ -1571,7 +1594,7 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H
     string_dataformat.do_escape = display_escape;
     outputformat = &string_dataformat;
 
-	attr_name = h5tools_str_replace(attr + j + 1, "\\/", "/");
+    attr_name = h5tools_str_replace(attr + j + 1, "\\/", "/");
 
     /* handle error case: cannot open the object with the attribute */
     if((oid = H5Oopen(fid, obj_name, H5P_DEFAULT)) < 0) {
@@ -1627,7 +1650,7 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H
     } /* end if */
 
     HDfree(obj_name);
-	HDfree(attr_name);
+    HDfree(attr_name);
     dump_indent -= COL;
     return;
 
@@ -1635,9 +1658,9 @@ error:
     h5tools_setstatus(EXIT_FAILURE);
     if(obj_name)
         HDfree(obj_name);
-		
-	if (attr_name)
-		HDfree(attr_name);
+
+    if (attr_name)
+        HDfree(attr_name);
 
     H5E_BEGIN_TRY {
         H5Oclose(oid);
@@ -1672,10 +1695,24 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
 {
     H5O_info_t       oinfo;
     hid_t            dsetid;
+    hid_t            dapl_id = H5P_DEFAULT;  /* dataset access property list ID */
     struct subset_t *sset = (struct subset_t *)data;
     const char      *real_name = display_name ? display_name : dset;
 
-    if((dsetid = H5Dopen2(fid, dset, H5P_DEFAULT)) < 0) {
+    if(display_data) {
+        if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0) {
+            error_msg("error in creating default access property list ID\n");
+        }
+        if (display_vds_first) {
+            if(H5Pset_virtual_view(dapl_id, H5D_VDS_FIRST_MISSING) < 0)
+                error_msg("error in setting access property list ID, virtual_view\n");
+        }
+        if (vds_gap_size > 0) {
+            if(H5Pset_virtual_printf_gap(dapl_id, (hsize_t)vds_gap_size) < 0)
+                error_msg("error in setting access property list ID, virtual_printf_gap\n");
+        }
+    }
+    if((dsetid = H5Dopen2(fid, dset, dapl_id)) < 0) {
         if (pe) {
             handle_links(fid, dset, data, pe, display_name);
         }
@@ -1752,7 +1789,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
             h5tools_setstatus(EXIT_FAILURE);
             return;
         }
-        
+
         /*-------------------------------------------------------------------------
          * check for block overlap
          *-------------------------------------------------------------------------
@@ -1785,7 +1822,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
                 PRINTSTREAM(rawoutstream, "%s \"%s\"\n", HARDLINK, found_obj->objname);
                 indentation(dump_indent);
                 end_obj(h5tools_dump_header_format->datasetend, h5tools_dump_header_format->datasetblockend);
-            } 
+            }
             else {
                 found_obj->displayed = TRUE;
                 dump_indent += COL;
@@ -1801,7 +1838,8 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
         dump_dataset(dsetid, real_name, sset);
         dump_indent -= COL;
     }
-
+    if (dapl_id != H5P_DEFAULT)
+        H5Pclose(dapl_id);
     if(H5Dclose(dsetid) < 0)
         h5tools_setstatus(EXIT_FAILURE);
 }
@@ -1884,11 +1922,11 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
     if(H5Lget_info(fid, links, &linfo, H5P_DEFAULT) < 0) {
         error_msg("unable to get link info from \"%s\"\n", links);
         h5tools_setstatus(EXIT_FAILURE);
-    } 
+    }
     else if(linfo.type == H5L_TYPE_HARD) {
         error_msg("\"%s\" is a hard link\n", links);
         h5tools_setstatus(EXIT_FAILURE);
-    } 
+    }
     else {
         char *buf = (char *)HDmalloc(linfo.u.val_size);
         PRINTVALSTREAM(rawoutstream, "\n");
@@ -1925,12 +1963,12 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
                     PRINTSTREAM(rawoutstream, "TARGETFILE \"%s\"\n", elink_file);
                     indentation(COL);
                     PRINTSTREAM(rawoutstream, "TARGETPATH \"%s\"\n", elink_path);
-                } 
+                }
                 else {
                     error_msg("h5dump error: unable to unpack external link value for \"%s\"\n", links);
                     h5tools_setstatus(EXIT_FAILURE);
                 }
-            } 
+            }
             else {
                 error_msg("h5dump error: unable to get external link value for \"%s\"\n", links);
                 h5tools_setstatus(EXIT_FAILURE);
