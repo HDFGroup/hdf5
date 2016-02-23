@@ -33,9 +33,7 @@
 /* Headers */
 /***********/
 
-#include <assert.h>
-#include <sys/time.h>
-
+#include "h5test.h"
 #include "swmr_common.h"
 
 /****************/
@@ -82,7 +80,7 @@ open_skeleton(const char *filename, unsigned verbose)
     hsize_t dim[2];     /* Dataspace dimension */
     unsigned u, v;      /* Local index variable */
 
-    assert(filename);
+    HDassert(filename);
 
     /* Create file access property list */
     if((fapl = h5_fileaccess()) < 0)
@@ -99,8 +97,8 @@ open_skeleton(const char *filename, unsigned verbose)
 
         mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
         H5Pget_mdc_config(fapl, &mdc_config);
-        fprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
-        fprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
+        HDfprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
+        HDfprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
         mdc_config.set_initial_size = 1;
         mdc_config.initial_size = 16 * 1024 * 1024;
         /* mdc_config.epoch_length = 5000; */
@@ -122,7 +120,7 @@ open_skeleton(const char *filename, unsigned verbose)
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Opening datasets\n");
+        HDfprintf(stderr, "Opening datasets\n");
 
     /* Open the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -178,10 +176,10 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
     unsigned long op_to_flush;          /* # of operations before flush */
     unsigned long u, v;                 /* Local index variables */
 
-    assert(fid > 0);
+    HDassert(fid > 0);
 
     /* Reset the buffer */
-    memset(&buf, 0, sizeof(buf));
+    HDmemset(&buf, 0, sizeof(buf));
 
     /* Create a dataspace for the record to add */
     if((mem_sid = H5Screate_simple(2, count, NULL)) < 0)
@@ -196,7 +194,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
     mdc_config_orig.version = H5AC__CURR_CACHE_CONFIG_VERSION;
     if(H5Fget_mdc_config(fid, &mdc_config_orig) < 0)
         return -1;
-    memcpy(&mdc_config_cork, &mdc_config_orig, sizeof(mdc_config_cork));
+    HDmemcpy(&mdc_config_cork, &mdc_config_orig, sizeof(mdc_config_cork));
     mdc_config_cork.evictions_enabled = FALSE;
     mdc_config_cork.incr_mode = H5C_incr__off;
     mdc_config_cork.flash_incr_mode = H5C_flash_incr__off;
@@ -213,7 +211,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
         symbol = choose_dataset();
 
         /* Decide whether to shrink or expand, and by how much */
-        count[1] = (hsize_t)random() % (MAX_SIZE_CHANGE * 2) + 1;
+        count[1] = (hsize_t)HDrandom() % (MAX_SIZE_CHANGE * 2) + 1;
 
         if(count[1] > MAX_SIZE_CHANGE) {
             /* Add records */
@@ -291,7 +289,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Closing datasets\n");
+        HDfprintf(stderr, "Closing datasets\n");
 
     /* Close the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -343,7 +341,7 @@ int main(int argc, const char *argv[])
                 switch(argv[u][1]) {
                     /* # of records to write between flushing file */
                     case 'f':
-                        flush_count = atol(argv[u + 1]);
+                        flush_count = HDatol(argv[u + 1]);
                         if(flush_count < 0)
                             usage();
                         u += 2;
@@ -358,7 +356,7 @@ int main(int argc, const char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = 1;
-                        temp = atoi(argv[u + 1]);
+                        temp = HDatoi(argv[u + 1]);
                         if(temp < 0)
                             usage();
                         else
@@ -373,7 +371,7 @@ int main(int argc, const char *argv[])
             } /* end if */
             else {
                 /* Get the number of records to append */
-                nops = atol(argv[u]);
+                nops = HDatol(argv[u]);
                 if(nops <= 0)
                     usage();
 
@@ -388,24 +386,24 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose) {
-        fprintf(stderr, "Parameters:\n");
-        fprintf(stderr, "\t# of operations between flushes = %ld\n", flush_count);
-        fprintf(stderr, "\t# of operations = %ld\n", nops);
+        HDfprintf(stderr, "Parameters:\n");
+        HDfprintf(stderr, "\t# of operations between flushes = %ld\n", flush_count);
+        HDfprintf(stderr, "\t# of operations = %ld\n", nops);
     } /* end if */
 
     /* Set the random seed */
     if(0 == use_seed) {
         struct timeval t;
-        gettimeofday(&t, NULL);
+        HDgettimeofday(&t, NULL);
         random_seed = (unsigned)(t.tv_usec);
     } /* end if */
-    srandom(random_seed);
+    HDsrandom(random_seed);
     /* ALWAYS emit the random seed for possible debugging */
-    fprintf(stderr, "Using writer random seed: %u\n", random_seed);
+    HDfprintf(stderr, "Using writer random seed: %u\n", random_seed);
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Generating symbol names\n");
+        HDfprintf(stderr, "Generating symbol names\n");
 
     /* Generate dataset names */
     if(generate_symbols() < 0)
@@ -413,12 +411,12 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Opening skeleton file: %s\n", FILENAME);
+        HDfprintf(stderr, "Opening skeleton file: %s\n", FILENAME);
 
     /* Open file skeleton */
     if((fid = open_skeleton(FILENAME, verbose)) < 0) {
-        fprintf(stderr, "Error opening skeleton file!\n");
-        exit(1);
+        HDfprintf(stderr, "Error opening skeleton file!\n");
+        HDexit(1);
     } /* end if */
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
@@ -426,32 +424,32 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Adding and removing records\n");
+        HDfprintf(stderr, "Adding and removing records\n");
 
     /* Grow and shrink datasets */
     if(addrem_records(fid, verbose, (unsigned long)nops, (unsigned long)flush_count) < 0) {
-        fprintf(stderr, "Error adding and removing records from datasets!\n");
-        exit(1);
+        HDfprintf(stderr, "Error adding and removing records from datasets!\n");
+        HDexit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Releasing symbols\n");
+        HDfprintf(stderr, "Releasing symbols\n");
 
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
-        fprintf(stderr, "Error releasing symbols!\n");
-        exit(1);
+        HDfprintf(stderr, "Error releasing symbols!\n");
+        HDexit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Closing objects\n");
+        HDfprintf(stderr, "Closing objects\n");
 
     /* Close objects opened */
     if(H5Fclose(fid) < 0) {
-        fprintf(stderr, "Error closing file!\n");
-        exit(1);
+        HDfprintf(stderr, "Error closing file!\n");
+        HDexit(1);
     } /* end if */
 
     return 0;

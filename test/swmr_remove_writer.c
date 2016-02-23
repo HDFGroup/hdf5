@@ -33,9 +33,7 @@
 /* Headers */
 /***********/
 
-#include <assert.h>
-#include <sys/time.h>
-
+#include "h5test.h"
 #include "swmr_common.h"
 
 /****************/
@@ -82,16 +80,16 @@ open_skeleton(const char *filename, unsigned verbose, unsigned old)
     hsize_t dim[2];     /* Dataspace dimensions */
     unsigned u, v;      /* Local index variable */
 
-    assert(filename);
+    HDassert(filename);
 
     /* Create file access property list */
     if((fapl = h5_fileaccess()) < 0)
         return -1;
 
     if(!old) {
-	/* Set to use the latest library format */
-	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	    return -1;
+        /* Set to use the latest library format */
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            return -1;
     }
 
 #ifdef QAK
@@ -101,8 +99,8 @@ open_skeleton(const char *filename, unsigned verbose, unsigned old)
 
         mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
         H5Pget_mdc_config(fapl, &mdc_config);
-        fprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
-        fprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
+        HDfprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
+        HDfprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
         mdc_config.set_initial_size = 1;
         mdc_config.initial_size = 16 * 1024 * 1024;
         /* mdc_config.epoch_length = 5000; */
@@ -124,7 +122,7 @@ open_skeleton(const char *filename, unsigned verbose, unsigned old)
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Opening datasets\n");
+        HDfprintf(stderr, "Opening datasets\n");
 
     /* Open the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -174,7 +172,7 @@ remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned lon
     hsize_t dim[2] = {1,0};             /* Dataspace dimensions */
     unsigned long u, v;                 /* Local index variables */
 
-    assert(fid >= 0);
+    HDassert(fid >= 0);
 
     /* Remove records from random datasets, according to frequency distribution */
     shrink_to_flush = flush_count;
@@ -186,7 +184,7 @@ remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned lon
         symbol = choose_dataset();
 
         /* Shrink the dataset's dataspace */
-        remove_size = (hsize_t)random() % MAX_REMOVE_SIZE + 1;
+        remove_size = (hsize_t)HDrandom() % MAX_REMOVE_SIZE + 1;
         if(remove_size > symbol->nrecords)
             symbol->nrecords = 0;
         else
@@ -214,7 +212,7 @@ remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned lon
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Closing datasets\n");
+        HDfprintf(stderr, "Closing datasets\n");
 
     /* Close the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -249,7 +247,7 @@ int main(int argc, const char *argv[])
     long nshrinks = 0;          /* # of times to shrink the dataset */
     long flush_count = 1000;    /* # of records to write between flushing file */
     unsigned verbose = 1;       /* Whether to emit some informational messages */
-    unsigned old = 0;       	/* Whether to use non-latest-format when opening file */
+    unsigned old = 0;           /* Whether to use non-latest-format when opening file */
     unsigned use_seed = 0;      /* Set to 1 if a seed was set on the command line */
     unsigned random_seed = 0;   /* Random # seed */
     unsigned u;                 /* Local index variable */
@@ -265,7 +263,7 @@ int main(int argc, const char *argv[])
                 switch(argv[u][1]) {
                     /* # of records to write between flushing file */
                     case 'f':
-                        flush_count = atol(argv[u + 1]);
+                        flush_count = HDatol(argv[u + 1]);
                         if(flush_count < 0)
                             usage();
                         u += 2;
@@ -280,16 +278,16 @@ int main(int argc, const char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = 1;
-                        temp = atoi(argv[u + 1]);
+                        temp = HDatoi(argv[u + 1]);
                         random_seed = (unsigned)temp;
                         u += 2;
                         break;
 
-		    /* Use non-latest-format when opening file */
+                    /* Use non-latest-format when opening file */
                     case 'o':
-			old = 1;
-			u++;
-			break;
+                        old = 1;
+                        u++;
+                        break;
 
                     default:
                         usage();
@@ -298,7 +296,7 @@ int main(int argc, const char *argv[])
             } /* end if */
             else {
                 /* Get the number of records to append */
-                nshrinks = atol(argv[u]);
+                nshrinks = HDatol(argv[u]);
                 if(nshrinks <= 0)
                     usage();
 
@@ -313,24 +311,24 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose) {
-        fprintf(stderr, "Parameters:\n");
-        fprintf(stderr, "\t# of shrinks between flushes = %ld\n", flush_count);
-        fprintf(stderr, "\t# of shrinks = %ld\n", nshrinks);
+        HDfprintf(stderr, "Parameters:\n");
+        HDfprintf(stderr, "\t# of shrinks between flushes = %ld\n", flush_count);
+        HDfprintf(stderr, "\t# of shrinks = %ld\n", nshrinks);
     } /* end if */
 
     /* Set the random seed */
     if(0 == use_seed) {
         struct timeval t;
-        gettimeofday(&t, NULL);
+        HDgettimeofday(&t, NULL);
         random_seed = (unsigned)(t.tv_usec);
     } /* end if */
-    srandom(random_seed);
+    HDsrandom(random_seed);
     /* ALWAYS emit the random seed for possible debugging */
-    fprintf(stderr, "Using writer random seed: %u\n", random_seed);
+    HDfprintf(stderr, "Using writer random seed: %u\n", random_seed);
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Generating symbol names\n");
+        HDfprintf(stderr, "Generating symbol names\n");
 
     /* Generate dataset names */
     if(generate_symbols() < 0)
@@ -338,12 +336,12 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Opening skeleton file: %s\n", FILENAME);
+        HDfprintf(stderr, "Opening skeleton file: %s\n", FILENAME);
 
     /* Open file skeleton */
     if((fid = open_skeleton(FILENAME, verbose, old)) < 0) {
-        fprintf(stderr, "Error opening skeleton file!\n");
-        exit(1);
+        HDfprintf(stderr, "Error opening skeleton file!\n");
+        HDexit(1);
     } /* end if */
 
     /* Send a message to indicate "H5Fopen" is complete--releasing the file lock */
@@ -351,32 +349,32 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Removing records\n");
+        HDfprintf(stderr, "Removing records\n");
 
     /* Remove records from datasets */
     if(remove_records(fid, verbose, (unsigned long)nshrinks, (unsigned long)flush_count) < 0) {
-        fprintf(stderr, "Error removing records from datasets!\n");
-        exit(1);
+        HDfprintf(stderr, "Error removing records from datasets!\n");
+        HDexit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Releasing symbols\n");
+        HDfprintf(stderr, "Releasing symbols\n");
 
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
-        fprintf(stderr, "Error releasing symbols!\n");
-        exit(1);
+        HDfprintf(stderr, "Error releasing symbols!\n");
+        HDexit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Closing objects\n");
+        HDfprintf(stderr, "Closing objects\n");
 
     /* Close objects opened */
     if(H5Fclose(fid) < 0) {
-        fprintf(stderr, "Error closing file!\n");
-        exit(1);
+        HDfprintf(stderr, "Error closing file!\n");
+        HDexit(1);
     } /* end if */
 
     return 0;

@@ -18,12 +18,12 @@
  * Created:     swmr_start_write.c
  *
  * Purpose:     This program enables SWMR writing mode via H5Fstart_swmr_write().
- *		It writes data to a randomly selected subset of the datasets
+ *              It writes data to a randomly selected subset of the datasets
  *              in the SWMR test file; and it is intended to run concurrently
  *              with the swmr_reader program.
  *
  * NOTE: The routines in this program are basically copied and modified from
- *	 swmr*.c.
+ *          swmr*.c.
  *-------------------------------------------------------------------------
  */
 
@@ -31,9 +31,7 @@
 /* Headers */
 /***********/
 
-#include <assert.h>
-#include <sys/time.h>
-
+#include "h5test.h"
 #include "swmr_common.h"
 
 /********************/
@@ -61,12 +59,12 @@ static void usage(void);
  *              which will be used for testing H5Fstart_swmr_write().
  *
  * Parameters:  
- *		filename: The SWMR test file's name.
+ *              filename: The SWMR test file's name.
  *              verbose: whether verbose console output is desired.
  *              index_type: The chunk index type (b1 | b2 | ea | fa)
- *		random_seed: The random seed to store in the file.  
- *			     The sparse tests use this value.
- *	
+ *              random_seed: The random seed to store in the file.  
+ *              The sparse tests use this value.
+ *
  * Return:      Success:    the file ID
  *              Failure:     -1
  *
@@ -86,8 +84,8 @@ create_file(const char *filename, unsigned verbose,
     symbol_t fillval;   /* Dataset fill value */
 #endif /* FILLVAL_WORKS */
 
-    assert(filename);
-    assert(index_type);
+    HDassert(filename);
+    HDassert(index_type);
 
     /* Create file access property list */
     if((fapl = h5_fileaccess()) < 0)
@@ -101,7 +99,7 @@ create_file(const char *filename, unsigned verbose,
      * With one unlimited dimension, we get the extensible array index
      * type, with two unlimited dimensions, we get a v-2 B-tree.
      */
-    if(!strcmp(index_type, "b2"))
+    if(!HDstrcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
     /* Create file creation property list */
@@ -110,7 +108,7 @@ create_file(const char *filename, unsigned verbose,
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Creating file without SWMR access\n");
+        HDfprintf(stderr, "Creating file without SWMR access\n");
 
     /* Create the file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
@@ -144,10 +142,10 @@ create_file(const char *filename, unsigned verbose,
  * Function:    create_datasets
  *
  * Purpose:     Create datasets (and keep them opened) which will be used for testing 
- *		H5Fstart_swmr_write().
+ *              H5Fstart_swmr_write().
  *
  * Parameters:  
- *		fid: file ID for the SWMR test file
+ *              fid: file ID for the SWMR test file
  *              comp_level: the compresssion level
  *              verbose: whether verbose console output is desired.
  *
@@ -187,7 +185,7 @@ create_datasets(hid_t fid, int comp_level, unsigned verbose)
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Creating datasets\n");
+        HDfprintf(stderr, "Creating datasets\n");
 
     /* Create the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -207,10 +205,10 @@ create_datasets(hid_t fid, int comp_level, unsigned verbose)
  * Function:    create_close_datasets
  *
  * Purpose:     Create and close datasets which will be used for testing 
- *		H5Fstart_swmr_write().
+ *              H5Fstart_swmr_write().
  *
  * Parameters:  
- *		fid: file ID for the SWMR test file
+ *              fid: file ID for the SWMR test file
  *              comp_level: the compresssion level
  *              verbose: whether verbose console output is desired.
  *
@@ -250,7 +248,7 @@ create_close_datasets(hid_t fid, int comp_level, unsigned verbose)
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Creating datasets\n");
+        HDfprintf(stderr, "Creating datasets\n");
 
     /* Create the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -284,7 +282,7 @@ create_close_datasets(hid_t fid, int comp_level, unsigned verbose)
  * Purpose:     Opens the HDF5 test file without SWMR access.
  *
  * Parameters:  
- *		filename: The filename of the HDF5 file to open
+ *              filename: The filename of the HDF5 file to open
  *              verbose: whether or not to emit verbose console messages
  *
  * Return:      Success: The file ID of the opened SWMR file
@@ -298,7 +296,7 @@ open_file(const char *filename, unsigned verbose)
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fapl;         /* File access property list */
 
-    assert(filename);
+    HDassert(filename);
 
     /* Create file access property list */
     if((fapl = h5_fileaccess()) < 0)
@@ -310,7 +308,7 @@ open_file(const char *filename, unsigned verbose)
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Opening the file without SWMR access: %s\n", filename);
+        HDfprintf(stderr, "Opening the file without SWMR access: %s\n", filename);
 
     /* Open the file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
@@ -331,7 +329,7 @@ open_file(const char *filename, unsigned verbose)
  * Purpose:     Opens the datasets.
  *
  * Parameters:  
-*		filename: the filename of the SWMR HDF5 file to open
+ *              filename: the filename of the SWMR HDF5 file to open
  *              verbose: whether or not to emit verbose console messages
  *
  * Return:      Success: 0
@@ -346,7 +344,7 @@ open_datasets(hid_t fid, unsigned verbose)
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Opening datasets\n");
+        HDfprintf(stderr, "Opening datasets\n");
 
     /* Open the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -367,7 +365,7 @@ open_datasets(hid_t fid, unsigned verbose)
  *              the SWMR test file.
  *
  * Parameters:  
-*		fid: The file ID of the SWMR HDF5 file
+ *              fid: The file ID of the SWMR HDF5 file
  *              verbose: Whether or not to emit verbose console messages
  *              nrecords: # of records to write to the datasets
  *              flush_count: # of records to write before flushing the file to disk
@@ -394,7 +392,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
-    memset(&record, 0, sizeof(record));
+    HDmemset(&record, 0, sizeof(record));
 
     /* Create a dataspace for the record to add */
     if((mem_sid = H5Screate(H5S_SCALAR)) < 0)
@@ -409,7 +407,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
     mdc_config_orig.version = H5AC__CURR_CACHE_CONFIG_VERSION;
     if(H5Fget_mdc_config(fid, &mdc_config_orig) < 0)
         return -1;
-    memcpy(&mdc_config_cork, &mdc_config_orig, sizeof(mdc_config_cork));
+    HDmemcpy(&mdc_config_cork, &mdc_config_orig, sizeof(mdc_config_cork));
     mdc_config_cork.evictions_enabled = FALSE;
     mdc_config_cork.incr_mode = H5C_incr__off;
     mdc_config_cork.flash_incr_mode = H5C_flash_incr__off;
@@ -479,7 +477,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Closing datasets\n");
+        HDfprintf(stderr, "Closing datasets\n");
 
     /* Close the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -525,16 +523,16 @@ usage(void)
  */
 int main(int argc, const char *argv[])
 {
-    hid_t fid;                  	/* File ID for file opened */
-    long nrecords = 0;          	/* # of records to append */
-    long flush_count = 10000;   	/* # of records to write between flushing file */
-    unsigned verbose = 1;       	/* Whether to emit some informational messages */
-    unsigned use_seed = 0;      	/* Set to 1 if a seed was set on the command line */
-    unsigned random_seed = 0;   	/* Random # seed */
-    int comp_level = -1;		/* Compression level (-1 is no compression) */
-    const char *index_type = "b1";	/* Chunk index type */
-    unsigned u;                 	/* Local index variable */
-    int temp;				/* Temporary variable */
+    hid_t fid;                      /* File ID for file opened */
+    long nrecords = 0;              /* # of records to append */
+    long flush_count = 10000;       /* # of records to write between flushing file */
+    unsigned verbose = 1;           /* Whether to emit some informational messages */
+    unsigned use_seed = 0;          /* Set to 1 if a seed was set on the command line */
+    unsigned random_seed = 0;       /* Random # seed */
+    int comp_level = -1;            /* Compression level (-1 is no compression) */
+    const char *index_type = "b1";  /* Chunk index type */
+    unsigned u;                     /* Local index variable */
+    int temp;                       /* Temporary variable */
 
     /* Parse command line options */
     if(argc < 2)
@@ -544,9 +542,9 @@ int main(int argc, const char *argv[])
         while(u < (unsigned)argc) {
             if(argv[u][0] == '-') {
                 switch(argv[u][1]) {
-		    /* Compress dataset chunks */
+                    /* Compress dataset chunks */
                     case 'c':
-                        comp_level = atoi(argv[u + 1]);
+                        comp_level = HDatoi(argv[u + 1]);
                         if(comp_level < -1 || comp_level > 9)
                             usage();
                         u += 2;
@@ -555,15 +553,15 @@ int main(int argc, const char *argv[])
                     /* Chunk index type */
                     case 'i':
                         index_type = argv[u + 1];
-                        if(strcmp(index_type, "ea")
-                                && strcmp(index_type, "b2"))
+                        if(HDstrcmp(index_type, "ea")
+                                && HDstrcmp(index_type, "b2"))
                             usage();
                         u += 2;
                         break;
 
                     /* # of records to write between flushing file */
                     case 'f':
-                        flush_count = atol(argv[u + 1]);
+                        flush_count = HDatol(argv[u + 1]);
                         if(flush_count < 0)
                             usage();
                         u += 2;
@@ -578,7 +576,7 @@ int main(int argc, const char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = 1;
-                        temp = atoi(argv[u + 1]);
+                        temp = HDatoi(argv[u + 1]);
                         if(temp < 0)
                             usage();
                         else
@@ -593,7 +591,7 @@ int main(int argc, const char *argv[])
             } /* end if */
             else {
                 /* Get the number of records to append */
-                nrecords = atol(argv[u]);
+                nrecords = HDatol(argv[u]);
                 if(nrecords <= 0)
                     usage();
 
@@ -609,32 +607,32 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose) {
-        fprintf(stderr, "Parameters:\n");
-        fprintf(stderr, "\tindex type = %s\n", index_type);
-        fprintf(stderr, "\tcompression level = %d\n", comp_level);
-        fprintf(stderr, "\t# of records between flushes = %ld\n", flush_count);
-        fprintf(stderr, "\t# of records to write = %ld\n", nrecords);
+        HDfprintf(stderr, "Parameters:\n");
+        HDfprintf(stderr, "\tindex type = %s\n", index_type);
+        HDfprintf(stderr, "\tcompression level = %d\n", comp_level);
+        HDfprintf(stderr, "\t# of records between flushes = %ld\n", flush_count);
+        HDfprintf(stderr, "\t# of records to write = %ld\n", nrecords);
     } /* end if */
 
     /* Set the random seed */
     if(0 == use_seed) {
         struct timeval t;
-        gettimeofday(&t, NULL);
+        HDgettimeofday(&t, NULL);
         random_seed = (unsigned)(t.tv_usec);
     } /* end if */
-    srandom(random_seed);
+    HDsrandom(random_seed);
     /* ALWAYS emit the random seed for possible debugging */
-    fprintf(stderr, "Using writer random seed: %u\n", random_seed);
+    HDfprintf(stderr, "Using writer random seed: %u\n", random_seed);
 
     /* Create the test file */
     if((fid = create_file(FILENAME, verbose, index_type, random_seed)) < 0) {
-        fprintf(stderr, "Error creating the file...\n");
-        exit(1);
+        HDfprintf(stderr, "Error creating the file...\n");
+        HDexit(1);
     }
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Generating symbol names\n");
+        HDfprintf(stderr, "Generating symbol names\n");
 
     /* Generate dataset names */
     if(generate_symbols() < 0)
@@ -642,43 +640,43 @@ int main(int argc, const char *argv[])
 
     /* Create the datasets in the file */
     if(create_datasets(fid, comp_level, verbose) < 0) {
-        fprintf(stderr, "Error creating datasets...\n");
-        exit(1);
+        HDfprintf(stderr, "Error creating datasets...\n");
+        HDexit(1);
     }
 
     /* Enable SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0) {
-        fprintf(stderr, "Error starting SWMR writing mode...\n");
-        exit(1);
+        HDfprintf(stderr, "Error starting SWMR writing mode...\n");
+        HDexit(1);
     }
 
 #ifdef OUT
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Creating and closing datasets: %s\n", FILENAME);
+        HDfprintf(stderr, "Creating and closing datasets: %s\n", FILENAME);
 
     /* Create and close the datasets in the file */
     if(create_close_datasets(fid, comp_level, verbose) < 0) {
-        fprintf(stderr, "Error creating datasets...\n");
-        exit(1);
+        HDfprintf(stderr, "Error creating datasets...\n");
+        HDexit(1);
     }
 
     /* Close the file */
     if(H5Fclose(fid) < 0) {
-        fprintf(stderr, "Error closing file!\n");
-        exit(1);
+        HDfprintf(stderr, "Error closing file!\n");
+        HDexit(1);
     } /* end if */
 
     /* Open the file */
     if((fid = open_file(FILENAME, verbose)) < 0) {
-        fprintf(stderr, "Error opening the file...\n");
-        exit(1);
+        HDfprintf(stderr, "Error opening the file...\n");
+        HDexit(1);
     }
 
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Generating symbol names\n");
+        HDfprintf(stderr, "Generating symbol names\n");
 
     /* Generate dataset names */
     if(generate_symbols() < 0)
@@ -686,19 +684,19 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Opening datasets: %s\n", FILENAME);
+        HDfprintf(stderr, "Opening datasets: %s\n", FILENAME);
 
     /* Open the file's datasets */
     if(open_datasets(fid, verbose) < 0) {
-        fprintf(stderr, "Error opening datasets...\n");
-        exit(1);
+        HDfprintf(stderr, "Error opening datasets...\n");
+        HDexit(1);
     } /* end if */
 
 
     /* Enable SWMR writing mode */
     if(H5Fstart_swmr_write(fid) < 0) {
-        fprintf(stderr, "Error starting SWMR writing mode...\n");
-        exit(1);
+        HDfprintf(stderr, "Error starting SWMR writing mode...\n");
+        HDexit(1);
     }
 #endif
 
@@ -707,32 +705,32 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Adding records\n");
+        HDfprintf(stderr, "Adding records\n");
 
     /* Append records to datasets */
     if(add_records(fid, verbose, (unsigned long)nrecords, (unsigned long)flush_count) < 0) {
-        fprintf(stderr, "Error appending records to datasets!\n");
-        exit(1);
+        HDfprintf(stderr, "Error appending records to datasets!\n");
+        HDexit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Releasing symbols\n");
+        HDfprintf(stderr, "Releasing symbols\n");
 
     /* Clean up the symbols */
     if(shutdown_symbols() < 0) {
-        fprintf(stderr, "Error releasing symbols!\n");
-        exit(1);
+        HDfprintf(stderr, "Error releasing symbols!\n");
+        HDexit(1);
     } /* end if */
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Closing the file\n");
+        HDfprintf(stderr, "Closing the file\n");
 
     /* Close objects opened */
     if(H5Fclose(fid) < 0) {
-        fprintf(stderr, "Error closing file!\n");
-        exit(1);
+        HDfprintf(stderr, "Error closing file!\n");
+        HDexit(1);
     } /* end if */
 
     return 0;
