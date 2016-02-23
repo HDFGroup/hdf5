@@ -98,6 +98,14 @@ $SRC_H5DUMP_TESTFILES/vds/5_a.h5
 $SRC_H5DUMP_TESTFILES/vds/5_b.h5
 $SRC_H5DUMP_TESTFILES/vds/5_c.h5
 $SRC_H5DUMP_TESTFILES/vds/5_vds.h5
+$SRC_H5DUMP_TESTFILES/vds/a.h5
+$SRC_H5DUMP_TESTFILES/vds/b.h5
+$SRC_H5DUMP_TESTFILES/vds/c.h5
+$SRC_H5DUMP_TESTFILES/vds/d.h5
+$SRC_H5DUMP_TESTFILES/vds/vds-percival-unlim-maxmin.h5
+$SRC_H5DUMP_TESTFILES/vds/f-0.h5
+$SRC_H5DUMP_TESTFILES/vds/f-3.h5
+$SRC_H5DUMP_TESTFILES/vds/vds-eiger.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -113,6 +121,11 @@ $SRC_H5DUMP_TESTFILES/vds/tvds_layout-3_1.ddl
 $SRC_H5DUMP_TESTFILES/vds/tvds_layout-3_2.ddl
 $SRC_H5DUMP_TESTFILES/vds/tvds_layout-4.ddl
 $SRC_H5DUMP_TESTFILES/vds/tvds_layout-5.ddl
+$SRC_H5DUMP_TESTFILES/vds/vds-first.ddl
+$SRC_H5DUMP_TESTFILES/vds/vds-gap1.ddl
+$SRC_H5DUMP_TESTFILES/vds/vds-gap2.ddl
+$SRC_H5DUMP_TESTFILES/vds/vds_layout-eiger.ddl
+$SRC_H5DUMP_TESTFILES/vds/vds_layout-maxmin.ddl
 "
 
 LIST_ERROR_TEST_FILES="
@@ -480,6 +493,9 @@ if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST tvds-3_2.ddl --enable-error-stack 3_2_vds.h5
     TOOLTEST tvds-4.ddl --enable-error-stack 4_vds.h5
     TOOLTEST tvds-5.ddl --enable-error-stack 5_vds.h5
+    TOOLTEST vds-first.ddl --vds-view-first-missing --enable-error-stack vds-percival-unlim-maxmin.h5
+    TOOLTEST vds-gap1.ddl -d /VDS-Eiger --vds-gap-size=1 --enable-error-stack vds-eiger.h5
+    TOOLTEST vds-gap2.ddl --vds-gap-size=2 --enable-error-stack vds-eiger.h5
 fi
 
   # Layout read
@@ -490,6 +506,8 @@ if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST tvds_layout-3_2.ddl -p --enable-error-stack 3_2_vds.h5
     TOOLTEST tvds_layout-4.ddl -p --enable-error-stack 4_vds.h5
     TOOLTEST tvds_layout-5.ddl -p --enable-error-stack 5_vds.h5
+    TOOLTEST vds_layout-eiger.ddl -p --enable-error-stack vds-eiger.h5
+    TOOLTEST vds_layout-maxmin.ddl -p --enable-error-stack vds-percival-unlim-maxmin.h5
 fi
 
 # Clean up temporary files/directories
