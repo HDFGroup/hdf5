@@ -202,7 +202,7 @@ generate_symbols(void)
             char name_buf[64];
 
             generate_name(name_buf, u, v);
-            symbol_info[u][v].name = (char *)HDmalloc(strlen(name_buf) + 1);
+            symbol_info[u][v].name = (char *)HDmalloc(HDstrlen(name_buf) + 1);
             HDstrcpy(symbol_info[u][v].name, name_buf);
             symbol_info[u][v].dsid = -1;
             symbol_info[u][v].nrecords = 0;

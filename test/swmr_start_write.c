@@ -388,7 +388,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
     unsigned long rec_to_flush;             /* # of records left to write before flush */
     unsigned long u, v;                     /* Local index variables */
 
-    assert(fid >= 0);
+    HDassert(fid >= 0);
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
@@ -511,7 +511,7 @@ usage(void)
     printf("v1 b-tree indexing (-i b1), compression ('-c -1'),\n");
     printf("will generate a random seed (no -r given), and verbose (no '-q' given)\n");
     printf("\n");
-    exit(1);
+    HDexit(1);
 } /* usage() */
 
 /*

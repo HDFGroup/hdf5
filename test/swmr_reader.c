@@ -205,7 +205,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
     /* Allocate space for 'common' datasets, if any */
     if(ncommon > 0) {
         /* Allocate array to hold pointers to symbols for common datasets */
-        if(NULL == (sym_com = (symbol_info_t **)malloc(sizeof(symbol_info_t *) * ncommon)))
+        if(NULL == (sym_com = (symbol_info_t **)HDmalloc(sizeof(symbol_info_t *) * ncommon)))
             return -1;
 
         /* Open the common datasets */
@@ -313,7 +313,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
         HDsleep(poll_time);
 
         /* Retrieve the current time */
-        curr_time = time(NULL);
+        curr_time = HDtime(NULL);
     } /* end while */
 
     /* Close the memory dataspace */
@@ -359,7 +359,7 @@ usage(void)
     printf("5 common symbols to poll ('-h 5'), 10 random symbols to poll ('-l 10'),\n");
     printf("and will generate a random seed (no -r given).\n");
     printf("\n");
-    exit(1);
+    HDexit(1);
 }
 
 int main(int argc, const char *argv[])

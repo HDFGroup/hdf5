@@ -180,7 +180,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
     hsize_t dim[2] = {1,0};             /* Dataspace dimensions */
     unsigned long u, v;                 /* Local index variables */
 
-    assert(fid >= 0);
+    HDassert(fid >= 0);
 
     /* Reset the record */
     /* (record's 'info' field might need to change for each record written, also) */
@@ -344,7 +344,7 @@ usage(void)
     printf("Defaults to verbose (no '-q' given) and flushing every 1000 records\n");
     printf("('-f 1000')\n");
     printf("\n");
-    exit(1);
+    HDexit(1);
 }
 
 int main(int argc, const char *argv[])
@@ -365,7 +365,7 @@ int main(int argc, const char *argv[])
                 switch(argv[u][1]) {
                     /* # of records to write between flushing file */
                     case 'f':
-                        flush_count = atol(argv[u + 1]);
+                        flush_count = HDatol(argv[u + 1]);
                         if(flush_count < 0)
                             usage();
                         u += 2;

@@ -253,7 +253,7 @@ usage(void)
     printf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
     printf("seed (no -r given).\n");
     printf("\n");
-    exit(1);
+    HDexit(1);
 } /* end usage() */
 
 int main(int argc, const char *argv[])
@@ -284,8 +284,8 @@ int main(int argc, const char *argv[])
                     /* Chunk index type */
                     case 'i':
                         index_type = argv[u + 1];
-                        if(strcmp(index_type, "ea")
-                                && strcmp(index_type, "b2"))
+                        if(HDstrcmp(index_type, "ea")
+                                && HDstrcmp(index_type, "b2"))
                             usage();
                         u += 2;
                         break;

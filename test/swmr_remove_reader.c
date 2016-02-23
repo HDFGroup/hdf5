@@ -268,7 +268,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds,
         HDfprintf(stderr, "Reading records\n");
 
     /* Get the starting time */
-    start_time = time(NULL);
+    start_time = HDtime(NULL);
     curr_time = start_time;
 
     /* Create file access property list */
@@ -372,7 +372,7 @@ usage(void)
     printf("5 common symbols to poll ('-h 5'), 10 random symbols to poll ('-l 10'),\n");
     printf("and will generate a random seed (no -r given).\n");
     printf("\n");
-    exit(1);
+    HDexit(1);
 } 
 
 int main(int argc, const char *argv[])

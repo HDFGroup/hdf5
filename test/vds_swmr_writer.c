@@ -52,7 +52,7 @@ main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    file_number = atoi(argv[1]);
+    file_number = HDatoi(argv[1]);
     if(file_number < 0 || file_number >= N_SOURCES)
         TEST_ERROR
 
@@ -110,8 +110,8 @@ main(int argc, char *argv[])
             TEST_ERROR
 
         /* Wait one second between writing planes */
-        delay = time(0) + 1;
-        while(time(0) < delay)
+        delay = HDtime(0) + 1;
+        while(HDtime(0) < delay)
             ;
 
         /* Flush */

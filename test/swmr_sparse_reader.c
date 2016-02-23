@@ -261,7 +261,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords,
             } /* end if */
 
             /* Check for timeout */
-            if(time(NULL) >= (time_t)(start_time + (time_t)TIMEOUT)) {
+            if(HDtime(NULL) >= (time_t)(start_time + (time_t)TIMEOUT)) {
                 HDfprintf(stderr, "Reader timed out\n");
                 return -1;
             } /* end if */
@@ -340,7 +340,7 @@ usage(void)
     printf("Note that the # of records *must* be the same as that supplied to\n");
     printf("swmr_sparse_writer\n");
     printf("\n");
-    exit(1);
+    HDexit(1);
 } /* end usage() */
 
 int main(int argc, const char *argv[])

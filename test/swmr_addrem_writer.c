@@ -317,7 +317,7 @@ usage(void)
     printf("Defaults to verbose (no '-q' given), flushing every 1000 operations\n");
     printf("('-f 1000'), and will generate a random seed (no -r given).\n");
     printf("\n");
-    exit(1);
+    HDexit(1);
 }
 
 int main(int argc, const char *argv[])
