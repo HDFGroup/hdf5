@@ -1237,7 +1237,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
 
 	/* Write free-space manager info message to superblock extension object header */
 	/* Create the superblock extension object header in advance if needed */
-	if(H5F_super_ext_write_msg(f, dxpl_id, &fsinfo, H5O_FSINFO_ID, TRUE) < 0)
+	if(H5F_super_ext_write_msg(f, dxpl_id, H5O_FSINFO_ID, &fsinfo, TRUE) < 0)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension")
 
 	/* Re-allocate free-space manager header and/or section info header */
@@ -1272,7 +1272,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
 
 	/* Update the free space manager info message in superblock extension object header */
 	if(update)
-            if(H5F_super_ext_write_msg(f, dxpl_id, &fsinfo, H5O_FSINFO_ID, FALSE) < 0)
+	    if(H5F_super_ext_write_msg(f, dxpl_id, H5O_FSINFO_ID, &fsinfo, FALSE) < 0)
 	        HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension")
 
 	/* Final close of free-space managers */

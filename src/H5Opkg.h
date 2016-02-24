@@ -31,7 +31,7 @@
 #define H5O_NMESGS	8 		/*initial number of messages	     */
 #define H5O_NCHUNKS	2		/*initial number of chunks	     */
 #define H5O_MIN_SIZE	22		/* Min. obj header data size (must be big enough for a message prefix and a continuation message) */
-#define H5O_MSG_TYPES   25              /* # of types of messages            */
+#define H5O_MSG_TYPES   26              /* # of types of messages            */
 #define H5O_MAX_CRT_ORDER_IDX 65535     /* Max. creation order index value   */
 
 /* Versions of object header structure */
@@ -440,11 +440,13 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_EFL[1];
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_LAYOUT[1];
 
 #ifdef H5O_ENABLE_BOGUS
-/* "Bogus" Message. (0x0009) */
+/* "Bogus valid" Message. (0x0009) */
+/* "Bogus invalid" Message. (0x0019) */
 /*
  * Used for debugging - should never be found in valid HDF5 file.
  */
-H5_DLLVAR const H5O_msg_class_t H5O_MSG_BOGUS[1];
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_BOGUS_VALID[1];
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_BOGUS_INVALID[1];
 #endif /* H5O_ENABLE_BOGUS */
 
 /* Group Information Message. (0x000a) */

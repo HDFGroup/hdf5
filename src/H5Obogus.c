@@ -47,9 +47,9 @@ static herr_t H5O_bogus_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *
 			     int indent, int fwidth);
 
 /* This message derives from H5O message class */
-const H5O_msg_class_t H5O_MSG_BOGUS[1] = {{
-    H5O_BOGUS_ID,            	/*message id number             */
-    "bogus",                 	/*message name for debugging    */
+const H5O_msg_class_t H5O_MSG_BOGUS_VALID[1] = {{
+    H5O_BOGUS_VALID_ID,		/*message id number             */
+    "bogus valid",             	/*message name for debugging    */
     0,     	                /*native message size           */
     0,				/* messages are sharable?       */
     H5O_bogus_decode,        	/*decode message                */
@@ -68,6 +68,30 @@ const H5O_msg_class_t H5O_MSG_BOGUS[1] = {{
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
     H5O_bogus_debug         	/*debug the message             */
+}};
+
+/* This message derives from H5O message class */
+const H5O_msg_class_t H5O_MSG_BOGUS_INVALID[1] = {{
+    H5O_BOGUS_INVALID_ID, 	/*message id number             */
+    "bogus invalid",          	/*message name for debugging    */
+    0,                          /*native message size           */
+    0,                          /* messages are sharable?       */
+    H5O_bogus_decode,           /*decode message                */
+    H5O_bogus_encode,           /*encode message                */
+    NULL,                       /*copy the native value         */
+    H5O_bogus_size,             /*raw message size              */
+    NULL,                       /*free internal memory          */
+    NULL,                       /*free method                   */
+    NULL,                       /* file delete method           */
+    NULL,                       /* link method                  */
+    NULL,                       /*set share method              */
+    NULL,                       /*can share method              */
+    NULL,                       /* pre copy native value to file */
+    NULL,                       /* copy native value to file    */
+    NULL,                       /* post copy native value to file    */
+    NULL,                       /* get creation index           */
+    NULL,                       /* set creation index           */
+    H5O_bogus_debug             /*debug the message             */
 }};
 
 

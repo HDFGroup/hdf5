@@ -98,7 +98,13 @@ typedef struct H5O_t H5O_t;
 #ifdef H5O_ENABLE_BOGUS
 #define H5O_BOGUS_MSG_FLAGS_NAME        "bogus msg flags"       /* Flags for 'bogus' message */
 #define H5O_BOGUS_MSG_FLAGS_SIZE        sizeof(uint8_t)
+
+/* bogus ID can be either (a) H5O_BOGUS_VALID_ID 0x0009 or (b) H5O_BOGUS_INVALID_ID 0x0019 */
+#define H5O_BOGUS_MSG_ID_NAME        "bogus msg id" 		/* ID for 'bogus' message */
+#define H5O_BOGUS_MSG_ID_SIZE        sizeof(unsigned)
+
 #endif /* H5O_ENABLE_BOGUS */
+
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
 #define H5O_BAD_MESG_COUNT_NAME         "bad message count"       /* Flag setting bad message count */
 #define H5O_BAD_MESG_COUNT_SIZE         sizeof(hbool_t)
@@ -183,7 +189,7 @@ typedef struct H5O_copy_t {
 #define H5O_LINK_ID     0x0006          /* Link Message. */
 #define H5O_EFL_ID	0x0007          /* External File List Message  */
 #define H5O_LAYOUT_ID	0x0008          /* Data Layout Message.  */
-#define H5O_BOGUS_ID	0x0009          /* "Bogus" Message.  */
+#define H5O_BOGUS_VALID_ID	0x0009  /* "Bogus valid" Message.  */
 #define H5O_GINFO_ID	0x000a          /* Group info Message.  */
 #define H5O_PLINE_ID	0x000b          /* Filter pipeline message.  */
 #define H5O_ATTR_ID	0x000c          /* Attribute Message.  */
@@ -200,6 +206,7 @@ typedef struct H5O_copy_t {
 #define H5O_FSINFO_ID   0x0017          /* Free-space manager info message.  */
 #define H5O_UNKNOWN_ID  0x0018          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
+#define H5O_BOGUS_INVALID_ID	0x0019  /* "Bogus invalid" Message.  */
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -755,7 +762,7 @@ H5_DLL herr_t H5O_touch(const H5O_loc_t *loc, hbool_t force, hid_t dxpl_id);
 H5_DLL herr_t H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     hbool_t force);
 #ifdef H5O_ENABLE_BOGUS
-H5_DLL herr_t H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags);
+H5_DLL herr_t H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_id, unsigned mesg_flags);
 #endif /* H5O_ENABLE_BOGUS */
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_hdr_info(const H5O_loc_t *oloc, hid_t dxpl_id, H5O_hdr_info_t *hdr);
