@@ -66,20 +66,17 @@ if test "XL" = "$cc_vendor"; then
 
     # Produciton
     PROD_CFLAGS=
-    PROD_CPPFLAGS=
 
     # Debug
     # NDEBUG is handled explicitly in configure
     DEBUG_CFLAGS="-qfullpath"
-    DEBUG_CPPFLAGS=
 
     # Symbols
     SYMBOLS_CFLAGS="-g"
-    SYMBOLS_CPPFLAGS=
+    NO_SYMBOLS_CFLAGS=
 
     # Profiling
     PROFILE_CFLAGS="-pg"
-    PROFILE_CPPFLAGS=
 
     # Optimization
     # -O causes test/dtypes to fail badly. Turn it off for now.
@@ -125,3 +122,4 @@ if test X != X$CXX; then
 
     fi
 fi
+

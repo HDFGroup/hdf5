@@ -109,7 +109,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     H5G_loc_t	   loc;                 /* Object location to insert dataset into */
     H5D_t	   *dset = NULL;        /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
-    hid_t           dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t           dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t           ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -199,7 +199,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
     H5G_loc_t	   loc;                 /* Object location to insert dataset into */
     H5D_t	   *dset = NULL;        /* New dataset's info */
     const H5S_t    *space;              /* Dataspace for dataset */
-    hid_t           dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t           dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t           ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -275,7 +275,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 {
     H5D_t       *dset = NULL;
     H5G_loc_t   loc;                    /* Object location of group */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datset */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl to use to open datset */
     hid_t       ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -410,7 +410,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Read dataspace address and return */
-    if(H5D__get_space_status(dset, allocation, H5AC_dxpl_id) < 0)
+    if(H5D__get_space_status(dset, allocation, H5AC_ind_read_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status")
 
 done:
@@ -579,7 +579,7 @@ H5Dget_storage_size(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset")
 
     /* Set return value */
-    if(H5D__get_storage_size(dset, H5AC_dxpl_id, &ret_value) < 0)
+    if(H5D__get_storage_size(dset, H5AC_ind_read_dxpl_id, &ret_value) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of dataset's storage")
 
 done:
@@ -910,7 +910,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
     /* Private function */
-    if(H5D__set_extent(dset, size, H5AC_dxpl_id) < 0)
+    if(H5D__set_extent(dset, size, H5AC_ind_read_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset")
 
 done:

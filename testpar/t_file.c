@@ -94,4 +94,117 @@ test_split_comm_access(void)
     VRFY((mrc==MPI_SUCCESS), "final MPI_Barrier succeeded");
 }
 
+void
+test_file_properties(void)
+{
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t fapl_id;		/* File access plist */
+    hbool_t is_coll;
+    const char *filename;
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+    int mpi_size, mpi_rank;
+    herr_t ret;                 /* Generic return value */
 
+    filename = GetTestParameters();
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    /* setup file access plist */
+    fapl_id = H5Pcreate (H5P_FILE_ACCESS);
+    VRFY((fapl_id >= 0), "H5P_FILE_ACCESS");
+
+    /* create the file with the SEC2 driver */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
+
+    /* verify settings for file access properties */
+
+    /* Collective metadata writes */
+    ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
+    VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
+    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata writes");
+
+    /* Collective metadata read API calling requirement */
+    ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
+    VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
+    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata API calls requirement");
+
+    ret = H5Fclose(fid);
+    VRFY((ret >= 0), "H5Fclose succeeded");
+
+    /* Open the file with the MPI-IO driver */
+    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+    VRFY((ret >= 0), "H5Pset_fapl_mpio failed");
+    fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
+
+    /* verify settings for file access properties */
+
+    /* Collective metadata writes */
+    ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
+    VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
+    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata writes");
+
+    /* Collective metadata read API calling requirement */
+    ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
+    VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
+    VRFY((is_coll == FALSE), "Incorrect property setting for coll metadata API calls requirement");
+
+    ret = H5Fclose(fid);
+    VRFY((ret >= 0), "H5Fclose succeeded");
+
+    /* Open the file with the MPI-IO driver w collective settings */
+    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+    VRFY((ret >= 0), "H5Pset_fapl_mpio failed");
+    /* Collective metadata writes */
+    ret = H5Pset_coll_metadata_write(fapl_id, TRUE);
+    VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
+    /* Collective metadata read API calling requirement */
+    ret = H5Pset_all_coll_metadata_ops(fapl_id, TRUE);
+    VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
+    fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
+
+    /* verify settings for file access properties */
+
+    /* Collective metadata writes */
+    ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
+    VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
+    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata writes");
+
+    /* Collective metadata read API calling requirement */
+    ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
+    VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
+    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata API calls requirement");
+
+    /* close fapl and retrieve it from file */
+    ret = H5Pclose(fapl_id);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+    fapl_id = -1;
+
+    fapl_id = H5Fget_access_plist(fid);
+    VRFY((fapl_id >= 0), "H5P_FILE_ACCESS");
+
+    /* verify settings for file access properties */
+
+    /* Collective metadata writes */
+    ret = H5Pget_coll_metadata_write(fapl_id, &is_coll);
+    VRFY((ret >= 0), "H5Pget_coll_metadata_write succeeded");
+    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata writes");
+
+    /* Collective metadata read API calling requirement */
+    ret = H5Pget_all_coll_metadata_ops(fapl_id, &is_coll);
+    VRFY((ret >= 0), "H5Pget_all_coll_metadata_ops succeeded");
+    VRFY((is_coll == TRUE), "Incorrect property setting for coll metadata API calls requirement");
+
+    /* close file */
+    ret = H5Fclose(fid);
+    VRFY((ret >= 0), "H5Fclose succeeded");
+
+    /* Release file-access plist */
+    ret = H5Pclose(fapl_id);
+    VRFY((ret >= 0), "H5Pclose succeeded");
+}

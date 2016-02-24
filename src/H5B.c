@@ -653,7 +653,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
     bt_ud.bt = NULL;  /* Make certain future references will be caught */
 
     /* Move the location of the old root on the disk */
-    if(H5AC_move_entry(f, H5AC_BT, bt_ud.addr, old_root_addr) < 0)
+    if(H5AC_move_entry(f, H5AC_BT, bt_ud.addr, old_root_addr, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to move B-tree root node")
     bt_ud.addr = old_root_addr;
 

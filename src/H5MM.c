@@ -125,10 +125,10 @@ static size_t H5MM_peak_alloc_blocks_count_s = 0;
  * Function:    H5MM__is_our_block
  *
  * Purpose:     Try to determine if a memory buffer has been allocated through
- *		the H5MM* interface, instead of the system's malloc() routines.
+ *              the H5MM* interface, instead of the system's malloc() routines.
  *
- * Return:	Success:    TRUE/FALSE
- *		Failure:    (Can't fail)
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    (Can't fail)
  *
  * Programmer:  Quincey Koziol
  *              Dec 30 2015
@@ -149,7 +149,7 @@ H5MM__is_our_block(void *mem)
  *
  * Purpose:     Check a block wrapper around a buffer to validate it.
  *
- * Return:	N/A (void)
+ * Return:      N/A (void)
  *
  * Programmer:  Quincey Koziol
  *              Dec 30 2015
@@ -173,9 +173,9 @@ H5MM__sanity_check_block(const H5MM_block_t *block)
  * Function:    H5MM__sanity_check
  *
  * Purpose:     Check a buffer to validate it (just calls
- *		H5MM__sanity_check_block after finding block for buffer)
+ *              H5MM__sanity_check_block after finding block for buffer)
  *
- * Return:	N/A (void)
+ * Return:      N/A (void)
  *
  * Programmer:  Quincey Koziol
  *              Dec 30 2015
@@ -196,7 +196,7 @@ H5MM__sanity_check(void *mem)
  *
  * Purpose:     Sanity check all current memory allocations.
  *
- * Return:	N/A (void)
+ * Return:      N/A (void)
  *
  * Programmer:  Quincey Koziol
  *              Jan  5 2016
@@ -206,7 +206,7 @@ H5MM__sanity_check(void *mem)
 void
 H5MM_sanity_check_all(void)
 {
-    H5MM_block_t *curr;
+    H5MM_block_t *curr = NULL;
 
     curr = H5MM_block_head_s.next;
     while(curr != &H5MM_block_head_s) {
@@ -221,7 +221,7 @@ H5MM_sanity_check_all(void)
  *
  * Purpose:     Final sanity checks on memory allocation.
  *
- * Return:	N/A (void)
+ * Return:      N/A (void)
  *
  * Programmer:  Quincey Koziol
  *              Jan  1 2016
@@ -257,8 +257,8 @@ H5MM_final_sanity_check(void)
  *              considered an error condition since allocations of zero
  *              bytes usually indicate problems.
  *  
- * Return:  Success:    Pointer new memory
- *          Failure:	NULL
+ * Return:      Success:    Pointer to new memory
+ *              Failure:    NULL
  *
  * Programmer:  Quincey Koziol
  *              Nov  8 2003
@@ -268,7 +268,7 @@ H5MM_final_sanity_check(void)
 void *
 H5MM_malloc(size_t size)
 {
-    void *ret_value;
+    void *ret_value = NULL;
 
     HDassert(size);
 
@@ -346,8 +346,8 @@ H5MM_malloc(size_t size)
  *              bytes usually indicate problems.
  *
  *
- * Return:  Success:    Pointer new memory
- *          Failure:	NULL
+ * Return:      Success:    Pointer to new memory
+ *              Failure:    NULL
  *
  * Programmer:	Quincey Koziol
  *              Nov  8 2003
@@ -357,7 +357,7 @@ H5MM_malloc(size_t size)
 void *
 H5MM_calloc(size_t size)
 {
-    void *ret_value;
+    void *ret_value = NULL;
 
     HDassert(size);
 
@@ -392,8 +392,9 @@ H5MM_calloc(size_t size)
  *              Note that the (NULL, 0) combination is undefined behavior
  *              in the C standard.
  *
- * Return:  Success:    Ptr to new memory if size > 0, NULL if size is zero
- *          Failure:    NULL (input buffer is unchanged on failure)
+ * Return:      Success:    Ptr to new memory if size > 0
+ *                          NULL if size is zero
+ *              Failure:    NULL (input buffer is unchanged on failure)
  *
  * Programmer:  Robb Matzke
  *              Jul 10 1997
@@ -403,7 +404,7 @@ H5MM_calloc(size_t size)
 void *
 H5MM_realloc(void *mem, size_t size)
 {
-    void *ret_value;
+    void *ret_value = NULL;
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -458,7 +459,6 @@ H5MM_realloc(void *mem, size_t size)
  *              Failure:    abort()
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 10 1997
  *-------------------------------------------------------------------------
  */
@@ -490,17 +490,16 @@ done:
  *              an error will be raised.
  *
  * Return:      Success:    Pointer to a new string
- *              Failure:    abort()
+ *              Failure:    NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 10 1997
  *-------------------------------------------------------------------------
  */
 char *
 H5MM_strdup(const char *s)
 {
-    char *ret_value;
+    char *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -528,7 +527,6 @@ done:
  *              Failure:    never fails
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 10 1997
  *
  *-------------------------------------------------------------------------

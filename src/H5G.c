@@ -290,7 +290,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
 {
     H5G_loc_t	    loc;                /* Location to create group */
     H5G_t	   *grp = NULL;         /* New group created */
-    hid_t           dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t           dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t	    ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -376,7 +376,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     H5G_loc_t	    loc;
     H5G_t	   *grp = NULL;
     H5G_obj_create_t gcrt_info;         /* Information for group creation */
-    hid_t           dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t           dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t	    ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -453,7 +453,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 {
     H5G_t       *grp = NULL;            /* Group opened */
     H5G_loc_t	loc;                    /* Location of parent for group */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -559,7 +559,7 @@ H5Gget_info(hid_t grp_id, H5G_info_t *grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     /* Retrieve the group's information */
-    if(H5G__obj_info(loc.oloc, grp_info/*out*/, H5AC_dxpl_id) < 0)
+    if(H5G__obj_info(loc.oloc, grp_info/*out*/, H5AC_ind_read_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve group info")
 
 done:
@@ -589,7 +589,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
     H5G_name_t  grp_path;            	/* Opened object group hier. path */
     H5O_loc_t   grp_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Location at 'name' found */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -652,7 +652,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     H5G_name_t  grp_path;            	/* Opened object group hier. path */
     H5O_loc_t   grp_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'name' found */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)

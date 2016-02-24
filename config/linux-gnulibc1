@@ -117,9 +117,25 @@ case $FC_BASENAME in
 # (just in case since this should be a default EIP)
         H5_FCFLAGS="$H5_FCFLAGS"
         FSEARCH_DIRS=""
-        DEBUG_FCFLAGS="-g"
-        PROD_FCFLAGS="-O"
-        PROFILE_FCFLAGS="-g -pg"
+
+        # Production
+        PROD_FCFLAGS=
+
+        # Debug
+        DEBUG_FCFLAGS=
+
+        # Symbols
+        SYMBOLS_FCFLAGS="-g"
+        NO_SYMBOLS_FCFLAGS="-s"
+
+        # Profiling
+        PROFILE_FCFLAGS="-pg"
+
+        # Optimization
+        HIGH_OPT_FCFLAGS="-O"
+        DEBUG_OPT_FCFLAGS=
+        NO_OPT_FCFLAGS=
+
         f9x_flags_set=yes
         ;;
 
@@ -183,7 +199,7 @@ case $FC in
     *mpif90*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -v 2>&1 | grep 'version' |\
             sed 's/^[a-z0-9]* for //' |\
-            sed ’s/\”/\\\”/g’ |\
+            sed 's/\"/\\\"/g' |\
             sed 's/^\([a-z]* \)/ built with \1/1'`
         fc_version_info=`echo $fc_version_info`
         ;;

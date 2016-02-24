@@ -104,6 +104,17 @@ typedef struct H5FD_mpio_fapl_t {
 } H5FD_mpio_fapl_t;
 #endif /* H5_HAVE_PARALLEL */
 
+#ifdef H5_DEBUG_BUILD
+/* Definitions for the internal DXPL types created in H5AC__init_package() */
+typedef enum {
+    H5FD_METADATA_DXPL = 0,
+    H5FD_NOIO_DXPL,
+    H5FD_RAWDATA_DXPL
+} H5FD_dxpl_type_t;
+
+#define H5FD_DXPL_TYPE_NAME              "H5P_dxpl_type"
+#endif /* H5_DEBUG_BUILD */
+
 
 /*****************************/
 /* Library Private Variables */

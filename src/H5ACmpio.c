@@ -1874,7 +1874,7 @@ H5AC__rsp__p0_only__flush(H5F_t *f, hid_t dxpl_id)
     } /* end if */
 
     /* Propagate cleaned entries to other ranks. */
-    if(H5AC__propagate_flushed_and_still_clean_entries_list(f, H5AC_dxpl_id) < 0)
+    if(H5AC__propagate_flushed_and_still_clean_entries_list(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't propagate clean entries list.")
 
 done:
@@ -2064,6 +2064,14 @@ HDfprintf(stdout, "%d:H5AC_propagate...:%u: (u/uu/i/iu/r/ru) = %zu/%u/%zu/%u/%zu
     aux_ptr->rename_dirty_bytes,
     aux_ptr->rename_dirty_bytes_updates);
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
+
+    /* clear collective access flag on half of the entries in the
+       cache and mark them as independent in case they need to be
+       evicted later. All ranks are guranteed to mark the same entries
+       since we don't modify the order of the collectively accessed
+       entries except through collective access. */
+    if(H5C_clear_coll_entries(cache_ptr, TRUE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
 
     switch(aux_ptr->metadata_write_strategy) {
         case H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY:

@@ -3866,26 +3866,26 @@ check_invalid_tag_application(void)
 
     /* Call H5HL_create, an internal function that calls H5AC_insert_entry without setting up a tag */
     /* Ensure this returns FAILURE, as a tag has not been set up. */
-    if ( H5HL_create(f, H5AC_dxpl_id, (size_t)1024, &addr) >= 0) TEST_ERROR;
+    if ( H5HL_create(f, H5AC_ind_read_dxpl_id, (size_t)1024, &addr) >= 0) TEST_ERROR;
 
     /* Now set up a tag in the dxpl */
-    if ( H5AC_tag(H5AC_dxpl_id, (haddr_t)25, NULL) < 0) TEST_ERROR;
+    if ( H5AC_tag(H5AC_ind_read_dxpl_id, (haddr_t)25, NULL) < 0) TEST_ERROR;
 
     /* Verify the same call to H5HL_create now works as intended, with a tag set up. */
-    if ( H5HL_create(f, H5AC_dxpl_id, (size_t)1024, &addr) < 0) TEST_ERROR;
+    if ( H5HL_create(f, H5AC_ind_read_dxpl_id, (size_t)1024, &addr) < 0) TEST_ERROR;
 
     /* Reset dxpl to use invalid tag. */
-    if ( H5AC_tag(H5AC_dxpl_id, H5AC__INVALID_TAG, NULL) < 0) TEST_ERROR;
+    if ( H5AC_tag(H5AC_ind_read_dxpl_id, H5AC__INVALID_TAG, NULL) < 0) TEST_ERROR;
 
     /* Call H5HL_protect to protect the local heap created above. */
     /* This should fail as no tag is set up during the protect call */
-    if (( lheap = H5HL_protect(f, H5AC_dxpl_id, addr, H5AC__NO_FLAGS_SET)) != NULL ) TEST_ERROR;
+    if (( lheap = H5HL_protect(f, H5AC_ind_read_dxpl_id, addr, H5AC__NO_FLAGS_SET)) != NULL ) TEST_ERROR;
 
     /* Again, set up a valid tag in the DXPL */
-    if ( H5AC_tag(H5AC_dxpl_id, (haddr_t)25, NULL) < 0) TEST_ERROR;
+    if ( H5AC_tag(H5AC_ind_read_dxpl_id, (haddr_t)25, NULL) < 0) TEST_ERROR;
 
     /* Call H5HL_protect again to protect the local heap. This should succeed. */
-    if (( lheap = H5HL_protect(f, H5AC_dxpl_id, addr, H5AC__NO_FLAGS_SET)) == NULL ) TEST_ERROR;
+    if (( lheap = H5HL_protect(f, H5AC_ind_read_dxpl_id, addr, H5AC__NO_FLAGS_SET)) == NULL ) TEST_ERROR;
 
     /* Now unprotect the heap, as we're done with the test. */
     if ( H5HL_unprotect(lheap) < 0 ) TEST_ERROR;

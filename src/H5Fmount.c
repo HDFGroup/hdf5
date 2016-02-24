@@ -466,7 +466,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not property list")
 
     /* Do the mount */
-    if(H5F_mount(&loc, name, child, plist_id, H5AC_dxpl_id) < 0)
+    if(H5F_mount(&loc, name, child, plist_id, H5AC_ind_read_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
 done:
@@ -509,7 +509,7 @@ H5Funmount(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Unmount */
-    if (H5F_unmount(&loc, name, H5AC_dxpl_id) < 0)
+    if (H5F_unmount(&loc, name, H5AC_ind_read_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
 done:

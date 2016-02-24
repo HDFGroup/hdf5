@@ -193,6 +193,107 @@ h5_clean_files(const char *base_name[], hid_t fapl)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    h5_delete_test_file
+ *
+ * Purpose      Clean up temporary test files.
+ *
+ *              When a test calls h5_fixname() get a VFD-dependent
+ *              test file name, this function can be used to clean it up.
+ *
+ * Return:      void
+ *
+ *              Since this is a cleanup file, we don't care if it fails.
+ *
+ * Programmer:  Dana Robinson
+ *              February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5_delete_test_file(const char *base_name, hid_t fapl)
+{
+    char filename[1024];        /* VFD-dependent filename to delete     */
+    char sub_filename[2048];    /* sub-files in multi & family VFDs     */
+    hid_t driver = -1;          /* VFD ID                               */
+
+    /* Get the VFD-dependent filename */
+    if(NULL == h5_fixname(base_name, fapl, filename, sizeof(filename)))
+        return;
+
+    driver = H5Pget_driver(fapl);
+
+    if(driver == H5FD_FAMILY) {
+        int j;
+        for(j = 0; /*void*/; j++) {
+            HDsnprintf(sub_filename, sizeof(sub_filename), filename, j);
+
+            /* If we can't access the file, it probably doesn't exist
+             * and we are done deleting the sub-files.
+             */
+            if(HDaccess(sub_filename, F_OK) < 0)
+                break;
+
+            HDremove(sub_filename);
+        } /* end for */
+    } else if(driver == H5FD_CORE) {
+        hbool_t backing;        /* Whether the core file has backing store */
+
+        H5Pget_fapl_core(fapl, NULL, &backing);
+
+        /* If the file was stored to disk with bacing store, remove it */
+        if(backing)
+            HDremove(filename);
+    } else if (driver == H5FD_MULTI) {
+        H5FD_mem_t mt;
+
+        HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+            HDsnprintf(sub_filename, sizeof(sub_filename), "%s-%c.h5", filename, multi_letters[mt]);
+            HDremove(sub_filename);
+        } /* end for */
+    } else {
+        HDremove(filename);
+    } /* end if */
+
+    return;
+} /* end h5_delete_test_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_delete_all_test_files
+ *
+ * Purpose      Clean up temporary test files.
+ *
+ *              When a test calls h5_fixname() get a VFD-dependent
+ *              test file name, this function can be used to clean it up.
+ *
+ *              This function takes an array of filenames that ends with
+ *              a NULL string and cleans them all.
+ *
+ * Return:      void
+ *
+ *              Since this is a cleanup file, we don't care if it fails.
+ *
+ * Programmer:  Dana Robinson
+ *              February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5_delete_all_test_files(const char *base_name[], hid_t fapl)
+{
+    int i;                      /* iterator                             */
+
+    for(i = 0; base_name[i]; i++) {
+        h5_delete_test_file(base_name[i], fapl);
+    } /* end for */
+
+    return;
+} /* end h5_delete_all_test_files() */
+
+
+/*-------------------------------------------------------------------------
  * Function:  h5_cleanup
  *
  * Purpose:  Cleanup temporary test files.
@@ -223,6 +324,35 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 
     return retval;
 } /* end h5_cleanup() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_test_shutdown
+ *
+ * Purpose:     Performs any special test cleanup required before the test
+ *              ends.
+ *
+ *              NOTE: This function should normally only be called once
+ *              in a given test, usually just before leaving main(). It
+ *              is intended for use in the single-file unit tests, not
+ *              testhdf5.
+ *
+ * Return:      void
+ *
+ * Programmer:  Dana Robinson
+ *              February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5_test_shutdown(void)
+{
+
+    /* Restore the original error reporting routine */
+    h5_restore_err();
+
+    return;
+} /* end h5_test_shutdown() */
 
 
 /*-------------------------------------------------------------------------
@@ -300,6 +430,39 @@ h5_reset(void)
 }
 #endif /* OLD_WAY */
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_test_init
+ *
+ * Purpose:     Performs any special actions before the test begins.
+ *
+ *              NOTE: This function should normally only be called once
+ *              in a given test, usually at the beginning of main(). It
+ *              is intended for use in the single-file unit tests, not
+ *              testhdf5.
+ *
+ * Return:      void
+ *
+ * Programmer:  Dana Robinson
+ *              February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+h5_test_init(void)
+{
+    HDfflush(stdout);
+    HDfflush(stderr);
+    H5close();
+
+    /* Save current error stack reporting routine and redirect to our local one */
+    HDassert(err_func == NULL);
+    H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
+    H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
+
+    return;
+} /* end h5_test_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -741,6 +904,137 @@ h5_fileaccess(void)
 
     return fapl;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    h5_get_vfd_fapl
+ *
+ * Purpose:     Returns a file access property list which is the default
+ *              fapl but with a file driver set according to the constant or
+ *              environment variable HDF5_DRIVER.
+ *
+ * Return:      Success:    A file access property list ID
+ *              Failure:    -1
+ *
+ * Programmer:  Dana Robinson
+ *              February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+h5_get_vfd_fapl(void)
+{
+    const char  *env = NULL;    /* HDF5_DRIVER environment variable     */
+    const char  *tok = NULL;    /* strtok pointer                       */
+    char        buf[1024];      /* buffer for tokenizing HDF5_DRIVER    */
+    hid_t       fapl = -1;      /* fapl to be returned                  */
+
+    /* Get the environment variable, if it exists */
+    env = HDgetenv("HDF5_DRIVER");
+
+    /* Create a default fapl */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        return -1;
+
+    /* If the environment variable was not set, just return
+     * the default fapl.
+     */
+    if(!env || !*env)
+        return fapl;
+
+    /* Get the first 'word' of the environment variable.
+     * If it's nothing (environment variable was whitespace)
+     * just return the default fapl.
+     */
+    HDstrncpy(buf, env, sizeof(buf));
+    HDmemset(buf, 0, sizeof(buf));
+    if(NULL == (tok = HDstrtok(buf, " \t\n\r")))
+        return fapl;
+
+    if(!HDstrcmp(tok, "sec2")) {
+        /* POSIX (section 2) read() and write() system calls */
+        if(H5Pset_fapl_sec2(fapl) < 0)
+            return -1;
+    } else if(!HDstrcmp(tok, "stdio")) {
+        /* Standard C fread() and fwrite() system calls */
+        if(H5Pset_fapl_stdio(fapl) < 0)
+            return -1;
+    } else if(!HDstrcmp(tok, "core")) {
+        /* In-memory driver settings (backing store on, 1 MB increment) */
+        if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
+            return -1;
+    } else if(!HDstrcmp(tok, "core_paged")) {
+        /* In-memory driver with write tracking and paging on */
+        if(H5Pset_fapl_core(fapl, (size_t)1, TRUE) < 0)
+            return -1;
+        if(H5Pset_core_write_tracking(fapl, TRUE, (size_t)4096) < 0)
+            return -1;
+     } else if(!HDstrcmp(tok, "split")) {
+        /* Split meta data and raw data each using default driver */
+        if(H5Pset_fapl_split(fapl,
+            "-m.h5", H5P_DEFAULT,
+            "-r.h5", H5P_DEFAULT) < 0)
+            return -1;
+    } else if(!HDstrcmp(tok, "multi")) {
+        /* Multi-file driver, general case of the split driver */
+        H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];
+        hid_t       memb_fapl[H5FD_MEM_NTYPES];
+        const char  *memb_name[H5FD_MEM_NTYPES];
+        char        sv[H5FD_MEM_NTYPES][1024];
+        haddr_t     memb_addr[H5FD_MEM_NTYPES];
+        H5FD_mem_t  mt;
+
+        HDmemset(memb_map, 0, sizeof(memb_map));
+        HDmemset(memb_fapl, 0, sizeof(memb_fapl));
+        HDmemset(memb_name, 0, sizeof(memb_name));
+        HDmemset(memb_addr, 0, sizeof(memb_addr));
+
+        HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+            memb_fapl[mt] = H5P_DEFAULT;
+            HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
+            memb_name[mt] = sv[mt];
+            memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
+        } /* end for */
+
+        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
+          memb_addr, FALSE) < 0) {
+            return -1;
+        } /* end if */
+    } else if(!HDstrcmp(tok, "family")) {
+        /* Family of files, each 1MB and using the default driver */
+        hsize_t fam_size = 100*1024*1024; /*100 MB*/
+
+        /* Was a family size specified in the environment variable? */
+        if((tok = HDstrtok(NULL, " \t\n\r")))
+            fam_size = (hsize_t)(HDstrtod(tok, NULL) * 1024*1024);
+        if(H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT) < 0)
+            return -1;
+    } else if(!HDstrcmp(tok, "log")) {
+        /* Log file access */
+        unsigned log_flags = H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC;
+
+        /* Were special log file flags specified in the environment variable? */
+        if((tok = HDstrtok(NULL, " \t\n\r")))
+            log_flags = (unsigned)HDstrtol(tok, NULL, 0);
+
+        if(H5Pset_fapl_log(fapl, NULL, log_flags, (size_t)0) < 0)
+            return -1;
+#ifdef H5_HAVE_DIRECT
+    } else if(!HDstrcmp(tok, "direct")) {
+        /* Linux direct read() and write() system calls.  Set memory boundary,
+         * file block size, and copy buffer size to the default values.
+         */
+        if(H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096)<0)
+            return -1;
+#endif
+    } else {
+        /* Unknown driver */
+        return -1;
+    } /* end if */
+
+    return fapl;
+} /* end h5_get_vfd_fapl() */
 
 
 /*-------------------------------------------------------------------------

@@ -1,7 +1,7 @@
-!****h* root/fortran/test/tH5F_F03.f90
+!****h* root/fortran/test/tH5F_F03
 !
 ! NAME
-!  tH5F_F03.f90
+!  tH5F_F03.F90
 !
 ! FUNCTION
 !  Test FORTRAN HDF5 H5F APIs which are dependent on FORTRAN 2003

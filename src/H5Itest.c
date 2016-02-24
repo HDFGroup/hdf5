@@ -89,7 +89,7 @@ H5I_get_name_test(hid_t id, char *name/*out*/, size_t size, hbool_t *cached)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
 
     /* Call internal group routine to retrieve object's name */
-    if((ret_value = H5G_get_name(&loc, name, size, cached, H5P_DEFAULT, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5G_get_name(&loc, name, size, cached, H5P_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
 
 done:
