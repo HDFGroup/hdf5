@@ -1843,6 +1843,11 @@
 ./tools/testfiles/vds/tvds_layout-3_2.ddl
 ./tools/testfiles/vds/tvds_layout-4.ddl
 ./tools/testfiles/vds/tvds_layout-5.ddl
+./tools/testfiles/vds/vds-first.ddl
+./tools/testfiles/vds/vds-gap1.ddl
+./tools/testfiles/vds/vds-gap2.ddl
+./tools/testfiles/vds/vds_layout-eiger.ddl
+./tools/testfiles/vds/vds_layout-maxmin.ddl
 ./tools/testfiles/vds/1_a.h5
 ./tools/testfiles/vds/1_b.h5
 ./tools/testfiles/vds/1_c.h5
@@ -1866,6 +1871,14 @@
 ./tools/testfiles/vds/5_b.h5
 ./tools/testfiles/vds/5_c.h5
 ./tools/testfiles/vds/5_vds.h5
+./tools/testfiles/vds/a.h5
+./tools/testfiles/vds/b.h5
+./tools/testfiles/vds/c.h5
+./tools/testfiles/vds/d.h5
+./tools/testfiles/vds/vds-percival-unlim-maxmin.h5
+./tools/testfiles/vds/f-0.h5
+./tools/testfiles/vds/f-3.h5
+./tools/testfiles/vds/vds-eiger.h5
 
 # h5dump h5import validation
 ./tools/testfiles/out3.h5import
