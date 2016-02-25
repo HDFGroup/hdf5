@@ -7399,7 +7399,7 @@ error:
     } H5E_END_TRY
 
     return -1;
-} /* end efc_open_twice */
+} /* end external_open_twice() */
 
 
 /*-------------------------------------------------------------------------
