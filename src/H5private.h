@@ -1673,6 +1673,7 @@ typedef struct H5_debug_t {
     H5_debug_open_stream_t *open_stream; /* Stack of open output streams */
 } H5_debug_t;
 
+extern hbool_t H5_coll_api_sanity_check_g;
 extern H5_debug_t    H5_debug_g;
 #define H5DEBUG(X)    (H5_debug_g.pkg[H5_PKG_##X].stream)
 /* Do not use const else AIX strings does not show it. */

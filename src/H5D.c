@@ -139,7 +139,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&dapl_id, H5P_CLS_DACC, &dxpl_id) < 0)
+    if(H5P_verify_apl_and_dxpl(&dapl_id, H5P_CLS_DACC, &dxpl_id, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Create the new dataset & get its ID */
@@ -219,7 +219,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&dapl_id, H5P_CLS_DACC, &dxpl_id) < 0)
+    if(H5P_verify_apl_and_dxpl(&dapl_id, H5P_CLS_DACC, &dxpl_id, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* build and open the new dataset */
@@ -275,7 +275,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 {
     H5D_t       *dset = NULL;
     H5G_loc_t   loc;                    /* Object location of group */
-    hid_t       dxpl_id = H5AC_ind_dxpl_id; /* dxpl to use to open datset */
+    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datset */
     hid_t       ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -288,7 +288,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&dapl_id, H5P_CLS_DACC, &dxpl_id) < 0)
+    if(H5P_verify_apl_and_dxpl(&dapl_id, H5P_CLS_DACC, &dxpl_id, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Open the dataset */
@@ -410,7 +410,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Read dataspace address and return */
-    if(H5D__get_space_status(dset, allocation, H5AC_ind_dxpl_id) < 0)
+    if(H5D__get_space_status(dset, allocation, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get space status")
 
 done:
@@ -579,7 +579,7 @@ H5Dget_storage_size(hid_t dset_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataset")
 
     /* Set return value */
-    if(H5D__get_storage_size(dset, H5AC_ind_dxpl_id, &ret_value) < 0)
+    if(H5D__get_storage_size(dset, H5AC_dxpl_id, &ret_value) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, 0, "can't get size of dataset's storage")
 
 done:

@@ -3249,7 +3249,7 @@ H5D_get_create_plist(H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Retrieve any object creation properties */
-    if(H5O_get_create_plist(&dset->oloc, H5AC_ind_dxpl_id, new_plist) < 0)
+    if(H5O_get_create_plist(&dset->oloc, H5AC_dxpl_id, new_plist) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object creation info")
 
     /* Get the layout property */
@@ -3311,7 +3311,7 @@ H5D_get_create_plist(H5D_t *dset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy dataset datatype for fill value")
 
         /* Set up type conversion function */
-        if(NULL == (tpath = H5T_path_find(dset->shared->type, copied_fill.type, NULL, NULL, H5AC_ind_dxpl_id, FALSE)))
+        if(NULL == (tpath = H5T_path_find(dset->shared->type, copied_fill.type, NULL, NULL, H5AC_dxpl_id, FALSE)))
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
 
         /* Convert disk form of fill value into memory form */
@@ -3339,7 +3339,7 @@ H5D_get_create_plist(H5D_t *dset)
             } /* end if */
 
             /* Convert fill value */
-            if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, copied_fill.buf, bkg_buf, H5AC_ind_dxpl_id) < 0) {
+            if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, copied_fill.buf, bkg_buf, H5AC_dxpl_id) < 0) {
                 H5I_dec_ref(src_id);
                 H5I_dec_ref(dst_id);
                 if(bkg_buf)
@@ -3481,7 +3481,7 @@ H5D_get_space(H5D_t *dset)
 
     /* If the layout is virtual, update the extent */
     if(dset->shared->layout.type == H5D_VIRTUAL)
-        if(H5D__virtual_set_extent_unlim(dset, H5AC_ind_dxpl_id) < 0)
+        if(H5D__virtual_set_extent_unlim(dset, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update virtual dataset extent")
 
     /* Read the data space message and return a data space object */

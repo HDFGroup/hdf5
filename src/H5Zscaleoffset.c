@@ -1003,7 +1003,7 @@ H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id)
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot use C integer datatype for cast")
 
         /* Get dataset fill value and store in cd_values[] */
-        if(H5Z_scaleoffset_set_parms_fillval(dcpl_plist, type, scale_type, cd_values, need_convert, H5AC_ind_dxpl_id) < 0)
+        if(H5Z_scaleoffset_set_parms_fillval(dcpl_plist, type, scale_type, cd_values, need_convert, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTSET, FAIL, "unable to set fill value")
     } /* end else */
 

@@ -241,7 +241,7 @@ H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
         using_mpi = TRUE;
 
         /* Use the internal "independent" DXPL */
-        my_dxpl_id = H5AC_ind_dxpl_id;
+        my_dxpl_id = H5AC_dxpl_id;
     } /* end if */
     else {
 #endif  /* H5_HAVE_PARALLEL */

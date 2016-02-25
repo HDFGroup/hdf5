@@ -1487,13 +1487,10 @@ typedef int H5C_ring_t;
  *		flushed from the cache until all other entries without
  *              the flush_me_last flag set have been flushed.
  *
- * flush_me_collectively:  Boolean flag indicating that this entry needs
- *              to be flushed collectively when in a parallel situation.
- * 
  *		Note: 
  *		
- *		At this time, the flush_me_last and flush_me_collectively
- *              flags will only be applied to one entry, the superblock,
+ *		At this time, the flush_me_last 
+ *              flag will only be applied to one entry, the superblock,
  *              and the code utilizing these flags is protected with HDasserts
  *              to enforce this. This restraint can certainly be relaxed in
  *              the future if the the need for multiple entries getting flushed
@@ -1711,7 +1708,6 @@ typedef struct H5C_cache_entry_t {
     hbool_t			flush_marker;
     hbool_t                     flush_me_last;
 #ifdef H5_HAVE_PARALLEL
-    hbool_t                     flush_me_collectively;
     hbool_t			clear_on_unprotect;
     hbool_t			flush_immediately;
 #endif /* H5_HAVE_PARALLEL */

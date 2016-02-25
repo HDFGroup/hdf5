@@ -406,7 +406,7 @@ H5Fis_hdf5(const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* call the private is_HDF5 function */
-    if((ret_value = H5F_is_hdf5(name)) < 0)
+    if((ret_value = H5F_is_hdf5(name, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable open file")
 
 done:
@@ -472,7 +472,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id) < 0)
+    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /*
@@ -571,7 +571,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "SWMR read access on a file open for read-write access is not allowed")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id) < 0)
+    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Open the file */
@@ -917,7 +917,7 @@ H5Fget_freespace(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the actual amount of free space in the file */
-    if(H5MF_get_freespace(file, H5AC_ind_dxpl_id, &tot_space, NULL) < 0)
+    if(H5MF_get_freespace(file, H5AC_dxpl_id, &tot_space, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
     ret_value = (hssize_t)tot_space;
@@ -1031,7 +1031,7 @@ H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* call private get_file_image function */
-    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len)) < 0)
+    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file image")
 
 done:
@@ -1364,16 +1364,16 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
     HDmemset(finfo, 0, sizeof(*finfo));
 
     /* Get the size of the superblock and any superblock extensions */
-    if(H5F__super_size(f, H5AC_ind_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
+    if(H5F__super_size(f, H5AC_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
 
     /* Get the size of any persistent free space */
-    if(H5MF_get_freespace(f, H5AC_ind_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
+    if(H5MF_get_freespace(f, H5AC_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
 
     /* Check for SOHM info */
     if(H5F_addr_defined(f->shared->sohm_addr))
-        if(H5SM_ih_size(f, H5AC_ind_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
+        if(H5SM_ih_size(f, H5AC_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
 
     /* Set version # fields */
@@ -1511,7 +1511,7 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nsects must be > 0")
 
     /* Go get the free-space section information in the file */
-    if((ret_value = H5MF_get_free_sections(file, H5AC_ind_dxpl_id, type, nsects, sect_info)) < 0)
+    if((ret_value = H5MF_get_free_sections(file, H5AC_dxpl_id, type, nsects, sect_info)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
 done:

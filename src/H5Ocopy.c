@@ -233,7 +233,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination name specified")
 
     /* check if destination name already exists */
-    if((dst_exists = H5L_exists_tolerant(&dst_loc, dst_name, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    if((dst_exists = H5L_exists_tolerant(&dst_loc, dst_name, H5P_DEFAULT, H5AC_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to check if destination name exists")
     if(TRUE == dst_exists)
         HGOTO_ERROR(H5E_OHDR, H5E_EXISTS, FAIL, "destination object already exists")
@@ -244,7 +244,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5G_loc_reset(&src_loc);
 
     /* Find the source object to copy */
-    if(H5G_loc_find(&loc, src_name, &src_loc/*out*/, H5P_DEFAULT, H5AC_ind_dxpl_id) < 0)
+    if(H5G_loc_find(&loc, src_name, &src_loc/*out*/, H5P_DEFAULT, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "source object not found")
     loc_found = TRUE;
 

@@ -509,10 +509,11 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5F_is_hdf5(const char *name)
+H5F_is_hdf5(const char *name, hid_t dxpl_id)
 {
     H5FD_t	*file = NULL;           /* Low-level file struct */
     haddr_t     sig_addr;               /* Addess of hdf5 file signature */
+    H5P_genplist_t  *xfer_plist= NULL;  /* Dataset transfer property list object */
     htri_t	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -521,8 +522,12 @@ H5F_is_hdf5(const char *name)
     if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
+    /* Get the property list object */
+    if(NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    if(H5FD_locate_signature(file, H5AC_ind_dxpl_g, &sig_addr) < 0)
+    if(H5FD_locate_signature(file, xfer_plist, &sig_addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
     ret_value = (HADDR_UNDEF != sig_addr);
 
@@ -2131,7 +2136,7 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
+H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t dxpl_id)
 {
     H5FD_t     *fd_ptr;                 /* file driver */
     haddr_t     eoa;                    /* End of file address */
@@ -2199,8 +2204,9 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
     /* test to see if a buffer was provided -- if not, we are done */
     if(buf_ptr != NULL) {
         size_t	space_needed;		/* size of file image */
-	hsize_t tmp;
+        hsize_t tmp;
         size_t tmp_size;
+        H5P_genplist_t *xfer_plist= NULL;  /* Dataset transfer property list object */
 
         /* Check for buffer too small */
         if((haddr_t)buf_len < eoa)
@@ -2208,12 +2214,16 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
 
         space_needed = (size_t)eoa;
 
+        /* Get the property list object */
+        if(NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+
         /* read in the file image */
         /* (Note compensation for base address addition in internal routine) */
-        if(H5FD_read(fd_ptr, H5AC_ind_dxpl_g, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
+        if(H5FD_read(fd_ptr, xfer_plist, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "file image read request failed")
 
-	/* Offset to "status_flags" in the superblock */
+        /* Offset to "status_flags" in the superblock */
         tmp = H5F_SUPER_STATUS_FLAGS_OFF(file->shared->sblock->super_vers);
         /* Size of "status_flags" depends on the superblock version */
         tmp_size = H5F_SUPER_STATUS_FLAGS_SIZE(file->shared->sblock->super_vers);
