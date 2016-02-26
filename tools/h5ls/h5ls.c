@@ -1115,8 +1115,11 @@ print_reference_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
     if (H5Tequal(type, H5T_STD_REF_OBJ)==TRUE) {
         h5tools_str_append(buffer, "object reference");
     }
-    else if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
+    else if (H5Tequal(type, H5T_STD_REF_REG)==TRUE) {
         h5tools_str_append(buffer, "dataset region reference");
+    }
+    else if (H5Tequal(type, H5T_STD_REF_ATTR)==TRUE) {
+        h5tools_str_append(buffer, "attribute reference");
     }
     else {
         h5tools_str_append(buffer, "%lu-byte unknown reference",
@@ -1894,7 +1897,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
             break;
 
         case H5T_REFERENCE:
-            if ( H5Tequal(type, H5T_STD_REF_DSETREG))
+            if ( H5Tequal(type, H5T_STD_REF_REG) || H5Tequal(type, H5T_STD_REF_ATTR))
             {
                 h5tools_str_append(&buffer, "information not available");
             }

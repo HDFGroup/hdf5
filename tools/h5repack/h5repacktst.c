@@ -2179,7 +2179,7 @@ int make_deflate(hid_t loc_id)
     hsize_t    dims[RANK]={DIM1,DIM2};
     hsize_t    chunk_dims[RANK]={CDIM1,CDIM2};
     int        buf[DIM1][DIM2];
-    hobj_ref_t bufref[1]; /* reference */
+    href_t     bufref[1]; /* reference */
     hsize_t    dims1r[1]={1};
     int        i, j, n;
 
@@ -2214,9 +2214,11 @@ int make_deflate(hid_t loc_id)
 
     /* create a reference to the dataset, test second seeep of file for references */
 
-    if (H5Rcreate(&bufref[0],loc_id,"dset_deflate",H5R_OBJECT,(hid_t)-1) < 0)
+    if (NULL == (bufref[0] = H5Rcreate_object(loc_id,"dset_deflate")))
         goto out;
     if (write_dset(loc_id,1,dims1r,"ref",H5T_STD_REF_OBJ,bufref) < 0)
+        goto out;
+    if (H5Rdestroy(bufref[0]) < 0)
         goto out;
 #endif
 
@@ -3549,7 +3551,7 @@ int write_dset_in(hid_t loc_id,
     char       buf1[2][3]= {"ab","de"};        /* string */
     char       buf2[2]= {1,2};                 /* bitfield, opaque */
     s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
-    hobj_ref_t buf4[2];                        /* reference */
+    href_t buf4[2];                            /* reference */
     e_t        buf45[2]= {RED,GREEN};          /* enum */
     hvl_t      buf5[2];                        /* vlen */
     hsize_t    dimarray[1]={3};                /* array dimension */
@@ -3563,7 +3565,7 @@ int write_dset_in(hid_t loc_id,
     char       buf12[6][3]= {"ab","cd","ef","gh","ij","kl"};         /* string */
     char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
     s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
-    hobj_ref_t buf42[1][1];                                          /* reference */
+    href_t     buf42[1][1];                                          /* reference */
     hvl_t      buf52[3][2];                                          /* vlen */
     int        buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};  /* array */
     int        buf72[3][2]= {{1,2},{3,4},{5,6}};                     /* integer */
@@ -3577,7 +3579,7 @@ int write_dset_in(hid_t loc_id,
         "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
     char       buf23[4][3][2];    /* bitfield, opaque */
     s_t        buf33[4][3][2];    /* compound */
-    hobj_ref_t buf43[1][1][1];    /* reference */
+    href_t     buf43[1][1][1];    /* reference */
     hvl_t      buf53[4][3][2];    /* vlen */
     int        buf63[24][3];      /* array */
     int        buf73[4][3][2];    /* integer */
@@ -3693,9 +3695,11 @@ int write_dset_in(hid_t loc_id,
     buf4[1]=0;
     if (dset_name)
     {
-        if (H5Rcreate(&buf4[0],file_id,dset_name,H5R_OBJECT,(hid_t)-1) < 0)
+        if (NULL == (buf4[0] = H5Rcreate_object(file_id,dset_name)))
             goto out;
         if (write_dset(loc_id,1,dims1r,"refobj",H5T_STD_REF_OBJ,buf4) < 0)
+            goto out;
+        if (H5Rdestroy(buf4[0]) < 0)
             goto out;
     }
 
@@ -3928,9 +3932,11 @@ int write_dset_in(hid_t loc_id,
     /* Create references to dataset */
     if (dset_name)
     {
-        if (H5Rcreate(&buf42[0][0], file_id, dset_name, H5R_OBJECT, (hid_t)-1) < 0)
+        if (NULL == (buf42[0][0] = H5Rcreate_object(file_id, dset_name)))
             goto out;
         if (write_dset(loc_id, 2, dims2r, "refobj2D", H5T_STD_REF_OBJ, buf42) < 0)
+            goto out;
+        if (H5Rdestroy(buf42[0][0]) < 0)
             goto out;
     }
 
@@ -4147,9 +4153,11 @@ int write_dset_in(hid_t loc_id,
     /* Create references to dataset */
     if (dset_name)
     {
-        if (H5Rcreate(&buf43[0][0][0], file_id, dset_name, H5R_OBJECT, (hid_t)-1) < 0)
+        if (NULL == (buf43[0][0][0] = H5Rcreate_object(file_id, dset_name)))
             goto out;
         if (write_dset(loc_id, 3, dims3r, "refobj3D", H5T_STD_REF_OBJ, buf43) < 0)
+            goto out;
+        if (H5Rdestroy(buf43[0][0][0]) < 0)
             goto out;
     }
 
@@ -4308,13 +4316,13 @@ int make_dset_reg_ref(hid_t loc_id)
     hsize_t         stride[SPACE2_RANK];    /* Stride of hyperslab */
     hsize_t         count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t         block[SPACE2_RANK];     /* Block size of hyperslab */
-    hdset_reg_ref_t *wbuf=NULL;  /* buffer to write to disk */
+    href_t          *wbuf=NULL;  /* buffer to write to disk */
     int             *dwbuf=NULL; /* Buffer for writing numeric data to disk */
     int             i;      /* counting variables */
     int             retval = -1;  /* return value */
 
     /* Allocate write & read buffers */
-    wbuf = (hdset_reg_ref_t *)HDcalloc(sizeof(hdset_reg_ref_t), (size_t)SPACE1_DIM1);
+    wbuf = (href_t *)HDcalloc(sizeof(href_t), (size_t)SPACE1_DIM1);
     dwbuf = (int *)HDmalloc(sizeof(int) * SPACE2_DIM1 * SPACE2_DIM2);
 
     /* Create dataspace for datasets */
@@ -4337,7 +4345,7 @@ int make_dset_reg_ref(hid_t loc_id)
         goto out;
 
     /* Create a dataset */
-    if ((did1 = H5Dcreate2(loc_id, "refreg", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((did1 = H5Dcreate2(loc_id, "refreg", H5T_STD_REF_REG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
 
     /* Select 6x6 hyperslab for first reference */
@@ -4350,11 +4358,11 @@ int make_dset_reg_ref(hid_t loc_id)
 
 
     /* Store dataset region */
-    if (H5Rcreate(&wbuf[0], loc_id, "dsetreg", H5R_DATASET_REGION, sid2) < 0)
+    if (NULL == (wbuf[0] = H5Rcreate_region(loc_id, "dsetreg", sid2)))
         goto out;
 
     /* Write selection to disk */
-    if (H5Dwrite(did1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf) < 0)
+    if (H5Dwrite(did1,H5T_STD_REF_REG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf) < 0)
         goto out;
 
     /* Close all objects */
@@ -4365,6 +4373,8 @@ int make_dset_reg_ref(hid_t loc_id)
     if (H5Sclose(sid2) < 0)
         goto out;
     if (H5Dclose(did2) < 0)
+        goto out;
+    if (H5Rdestroy(wbuf[0]) < 0)
         goto out;
 
     retval = 0;
@@ -4428,7 +4438,7 @@ int write_attr_in(hid_t loc_id,
     char       buf1[2][3]= {"ab","de"};        /* string */
     char       buf2[2]= {1,2};                 /* bitfield, opaque */
     s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
-    hobj_ref_t buf4[2];                        /* reference */
+    href_t     buf4[2];                        /* reference */
     e_t        buf45[2]= {RED,RED};            /* enum */
     hvl_t      buf5[2];                        /* vlen */
     hsize_t    dimarray[1]={3};                /* array dimension */
@@ -4441,7 +4451,7 @@ int write_attr_in(hid_t loc_id,
     char       buf12[6][3]= {"ab","cd","ef","gh","ij","kl"};         /* string */
     char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
     s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
-    hobj_ref_t buf42[3][2];                                          /* reference */
+    href_t     buf42[3][2];                                          /* reference */
     e_t        buf452[3][2];                                         /* enum */
     hvl_t      buf52[3][2];                                          /* vlen */
     int        buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};  /* array */
@@ -4455,7 +4465,7 @@ int write_attr_in(hid_t loc_id,
         "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
     char       buf23[4][3][2];    /* bitfield, opaque */
     s_t        buf33[4][3][2];    /* compound */
-    hobj_ref_t buf43[4][3][2];    /* reference */
+    href_t     buf43[4][3][2];    /* reference */
     e_t        buf453[4][3][2];   /* enum */
     hvl_t      buf53[4][3][2];    /* vlen */
     int        buf63[24][3];      /* array */
@@ -4605,11 +4615,15 @@ int write_attr_in(hid_t loc_id,
     /* object references ( H5R_OBJECT  */
     if (dset_name)
     {
-        if (H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,(hid_t)-1) < 0)
+        if (NULL == (buf4[0] = H5Rcreate_object(fid,dset_name)))
             goto out;
-        if (H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,(hid_t)-1) < 0)
+        if (NULL == (buf4[1] = H5Rcreate_object(fid,dset_name)))
             goto out;
         if (make_attr(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4) < 0)
+            goto out;
+        if (H5Rdestroy(buf4[0]) < 0)
+            goto out;
+        if (H5Rdestroy(buf4[1]) < 0)
             goto out;
     }
 
@@ -4916,15 +4930,17 @@ int write_attr_in(hid_t loc_id,
     if (dset_name)
     {
         for (i = 0; i < 3; i++)
-        {
             for (j = 0; j < 2; j++)
-            {
-                if (H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,(hid_t)-1) < 0)
+                if (NULL == (buf42[i][j] = H5Rcreate_object(fid,dset_name)))
                     goto out;
-            }
-        }
+
         if (make_attr(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42) < 0)
             goto out;
+
+        for (i = 0; i < 3; i++)
+            for (j = 0; j < 2; j++)
+                if (H5Rdestroy(buf42[i][j]) < 0)
+                    goto out;
     }
 
     /*-------------------------------------------------------------------------
@@ -5350,16 +5366,19 @@ int write_attr_in(hid_t loc_id,
     if (dset_name)
     {
         for (i = 0; i < 4; i++)
-        {
             for (j = 0; j < 3; j++)
-            {
                 for (k = 0; k < 2; k++)
-                    if (H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,(hid_t)-1) < 0)
+                    if (NULL == (buf43[i][j][k] = H5Rcreate_object(fid,dset_name)))
                         goto out;
-            }
-        }
+
         if (make_attr(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43) < 0)
             goto out;
+
+        for (i = 0; i < 4; i++)
+            for (j = 0; j < 3; j++)
+                for (k = 0; k < 2; k++)
+                    if (H5Rdestroy(buf43[i][j][k]) < 0)
+                        goto out;
     }
 
     /*-------------------------------------------------------------------------
@@ -5854,17 +5873,18 @@ out:
 static herr_t add_attr_with_objref(hid_t file_id, hid_t obj_id)
 {
     int ret = SUCCEED;
-    int status;
+    int status = 0;
+    int i;
     /* attr obj ref */
     hsize_t dim_attr_objref[1]={3};
-    hobj_ref_t data_attr_objref[3];
+    href_t data_attr_objref[3];
 
     /* --------------------------------
      * add attribute with obj ref type
      */    
     /* ref to dset */
-    status = H5Rcreate(&data_attr_objref[0],file_id,NAME_OBJ_DS1,H5R_OBJECT,(hid_t)-1);
-    if (status < 0)
+    data_attr_objref[0] = H5Rcreate_object(file_id,NAME_OBJ_DS1);
+    if (!data_attr_objref[0])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -5872,8 +5892,8 @@ static herr_t add_attr_with_objref(hid_t file_id, hid_t obj_id)
     }
 
     /* ref to group */
-    status = H5Rcreate(&data_attr_objref[1],file_id,NAME_OBJ_GRP,H5R_OBJECT,(hid_t)-1);
-    if (status < 0)
+    data_attr_objref[1] = H5Rcreate_object(file_id,NAME_OBJ_GRP);
+    if (!data_attr_objref[1])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -5881,8 +5901,8 @@ static herr_t add_attr_with_objref(hid_t file_id, hid_t obj_id)
     }
 
     /* ref to datatype */
-    status = H5Rcreate(&data_attr_objref[2],file_id,NAME_OBJ_NDTYPE,H5R_OBJECT,(hid_t)-1);
-    if (status < 0)
+    data_attr_objref[2] = H5Rcreate_object(file_id,NAME_OBJ_NDTYPE);
+    if (!data_attr_objref[2])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -5897,6 +5917,11 @@ static herr_t add_attr_with_objref(hid_t file_id, hid_t obj_id)
         ret = FAIL;
         goto out;
     }
+
+    /* Destroy references */
+    for (i = 0; i < 3; i++)
+        if (H5Rdestroy(data_attr_objref[i]) < 0)
+            ret = FAIL;
 
 out:
 
@@ -5926,7 +5951,7 @@ static herr_t add_attr_with_regref(hid_t file_id, hid_t obj_id)
     hsize_t dim_regrefed_dset[2]={3,6};
     hsize_t coords_regrefed_dset[3][2] = {{0,1},{1,2},{2,3}};
     hsize_t dim_attr_regref[1]= {1}; /* dim of  */
-    hdset_reg_ref_t data_attr_regref[1];
+    href_t data_attr_regref[1];
 
 
     /* -----------------------------------
@@ -5950,8 +5975,8 @@ static herr_t add_attr_with_regref(hid_t file_id, hid_t obj_id)
     }
 
     /* create region reference from elements space */
-    status = H5Rcreate (&data_attr_regref[0], file_id, NAME_OBJ_DS2, H5R_DATASET_REGION, sid_regrefed_dset);
-    if (status < 0)
+    data_attr_regref[0] = H5Rcreate_region(file_id, NAME_OBJ_DS2, sid_regrefed_dset);
+    if (!data_attr_regref[0])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -5959,13 +5984,16 @@ static herr_t add_attr_with_regref(hid_t file_id, hid_t obj_id)
     }
 
     /* create attr with region ref type */
-    status = make_attr(obj_id,1,dim_attr_regref,"Attr_REGREF",H5T_STD_REF_DSETREG,data_attr_regref);
+    status = make_attr(obj_id,1,dim_attr_regref,"Attr_REGREF",H5T_STD_REF_REG,data_attr_regref);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> make_attr failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
+
+    if (H5Rdestroy(data_attr_regref[0]) < 0)
+        ret = FAIL;
 
 out:
     if (sid_regrefed_dset > 0)
@@ -6116,7 +6144,7 @@ out:
  *------------------------------------------------------------------------*/
 static herr_t gen_obj_ref(hid_t loc_id)
 {
-    int status;
+    int status, i;
     herr_t ret = SUCCEED;
 
     hid_t sid=0, oid=0;
@@ -6127,15 +6155,15 @@ static herr_t gen_obj_ref(hid_t loc_id)
     int data_attr_int[2] = {10,20}; 
 
     /* write buffer for obj reference */
-    hobj_ref_t objref_buf[3];
+    href_t objref_buf[3];
 
     /*---------------------------------------------------------
      * create obj references to the previously created objects.
      * Passing -1 as reference is an object.*/
 
     /* obj ref to dataset */
-    status = H5Rcreate (&objref_buf[0], loc_id, NAME_OBJ_DS1, H5R_OBJECT, (hid_t)-1);
-    if (status < 0)
+    objref_buf[0] = H5Rcreate_object (loc_id, NAME_OBJ_DS1);
+    if (!objref_buf[0])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -6143,8 +6171,8 @@ static herr_t gen_obj_ref(hid_t loc_id)
     }
 
     /* obj ref to group */
-    status = H5Rcreate (&objref_buf[1], loc_id, NAME_OBJ_GRP, H5R_OBJECT, (hid_t)-1);
-    if (status < 0)
+    objref_buf[1] = H5Rcreate_object (loc_id, NAME_OBJ_GRP);
+    if (!objref_buf[1])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -6152,8 +6180,8 @@ static herr_t gen_obj_ref(hid_t loc_id)
     }
 
     /* obj ref to named-datatype */
-    status = H5Rcreate (&objref_buf[2], loc_id, NAME_OBJ_NDTYPE, H5R_OBJECT, (hid_t)-1);
-    if (status < 0)
+    objref_buf[2] = H5Rcreate_object (loc_id, NAME_OBJ_NDTYPE);
+    if (!objref_buf[2])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -6209,6 +6237,10 @@ static herr_t gen_obj_ref(hid_t loc_id)
         goto out;
     }
 
+    for (i = 0; i < 3; i++)
+        if (H5Rdestroy(objref_buf[i]) < 0)
+            ret = FAIL;
+
 out:
     if(oid > 0)
         H5Dclose(oid);
@@ -6243,7 +6275,7 @@ static herr_t gen_region_ref(hid_t loc_id)
 
     /* region ref to target dataset */
     hsize_t coords[4][2] = { {0,1}, {2,11}, {1,0}, {2,4} };
-    hdset_reg_ref_t  rr_data[2];
+    href_t  rr_data[2];
     hsize_t start[2] = {0,0};
     hsize_t stride[2] = {2,11};
     hsize_t count[2] = {2,2};
@@ -6272,8 +6304,8 @@ static herr_t gen_region_ref(hid_t loc_id)
     }
 
     /* create region reference from elements space */
-    status = H5Rcreate (&rr_data[0], loc_id, NAME_OBJ_DS2, H5R_DATASET_REGION, sid_trg);
-    if (status < 0)
+    rr_data[0] = H5Rcreate_region (loc_id, NAME_OBJ_DS2, sid_trg);
+    if (!rr_data[0])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -6290,8 +6322,8 @@ static herr_t gen_region_ref(hid_t loc_id)
     }
 
     /* create region reference from hyperslab space */
-    status = H5Rcreate (&rr_data[1], loc_id, NAME_OBJ_DS2, H5R_DATASET_REGION, sid_trg);
-    if (status < 0)
+    rr_data[1] = H5Rcreate_region (loc_id, NAME_OBJ_DS2, sid_trg);
+    if (!rr_data[1])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -6308,7 +6340,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     }
 
     /* create region reference dataset */
-    oid_ref = H5Dcreate2 (loc_id, REG_REF_DS1, H5T_STD_REF_DSETREG, sid_ref, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    oid_ref = H5Dcreate2 (loc_id, REG_REF_DS1, H5T_STD_REF_REG, sid_ref, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     if (oid_ref < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
@@ -6317,7 +6349,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     }
 
     /* write data as region references */
-    status = H5Dwrite (oid_ref, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rr_data);
+    status = H5Dwrite (oid_ref, H5T_STD_REF_REG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rr_data);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
@@ -6346,6 +6378,11 @@ static herr_t gen_region_ref(hid_t loc_id)
         ret = FAIL;
         goto out;
     }
+
+    if (H5Rdestroy(rr_data[0]) < 0)
+        ret = FAIL;
+    if (H5Rdestroy(rr_data[1]) < 0)
+        ret = FAIL;
 
 out:
     if (oid_ref > 0)
@@ -6439,6 +6476,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
 {
     herr_t ret = SUCCEED;
     herr_t status; 
+    int i;
     /* 
      * for objects 
      */
@@ -6466,7 +6504,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      */
     hid_t comp_objref_tid=0, comp_objref_aid=0;
     typedef struct comp_objref_t {
-        hobj_ref_t val_objref;
+        href_t val_objref;
         int val_int;
     } comp_objref_t;
     comp_objref_t comp_objref_data[DIM_COMP_OBJREF];
@@ -6478,7 +6516,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      */
     hid_t comp_regref_tid=0, comp_regref_aid=0;
     typedef struct comp_regref_t {
-        hdset_reg_ref_t val_regref;
+        href_t val_regref;
         int val_int;
     } comp_regref_t;
     comp_regref_t comp_regref_data[DIM_COMP_REGREF];
@@ -6493,6 +6531,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     hid_t vlen_objref_attr_id=0;
     hvl_t vlen_objref_data[DIM_VLEN_OBJREF];
     hsize_t vlen_objref_dims[RANK_VLEN_OBJREF] = {DIM_VLEN_OBJREF};
+    href_t *vlen_objref_data_ptr[DIM_VLEN_OBJREF];
 
     /* 
      * 4. region references in vlen attr
@@ -6501,6 +6540,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     hid_t vlen_regref_attr_id=0;
     hvl_t vlen_regref_data[DIM_VLEN_REGREF];
     hsize_t vlen_regref_dim[RANK_VLEN_REGREF] = {DIM_VLEN_REGREF};
+    href_t *vlen_regref_data_ptr[DIM_VLEN_REGREF];
 
 
     /* ---------------------------------------
@@ -6574,8 +6614,8 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      * Create the object references into compound type
      */
      /* references to dataset */
-    status = H5Rcreate (&(comp_objref_data[0].val_objref), loc_id, NAME_OBJ_DS1, H5R_OBJECT,(hid_t)-1);
-    if (status < 0)
+    comp_objref_data[0].val_objref = H5Rcreate_object (loc_id, NAME_OBJ_DS1);
+    if (!comp_objref_data[0].val_objref)
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -6584,8 +6624,8 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     comp_objref_data[0].val_int = 0;
 
      /* references to group */
-    status = H5Rcreate (&(comp_objref_data[1].val_objref), loc_id, NAME_OBJ_GRP, H5R_OBJECT,(hid_t)-1);
-    if (status < 0)
+    comp_objref_data[1].val_objref = H5Rcreate_object (loc_id, NAME_OBJ_GRP);
+    if (!comp_objref_data[1].val_objref)
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -6594,8 +6634,8 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     comp_objref_data[1].val_int = 10;
 
      /* references to datatype */
-    status = H5Rcreate (&(comp_objref_data[2].val_objref), loc_id, NAME_OBJ_NDTYPE, H5R_OBJECT,(hid_t)-1);
-    if (status < 0)
+    comp_objref_data[2].val_objref = H5Rcreate_object (loc_id, NAME_OBJ_NDTYPE);
+    if (!comp_objref_data[2].val_objref)
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -6624,7 +6664,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      */
     comp_regref_tid = H5Tcreate (H5T_COMPOUND, sizeof(comp_regref_t));
 
-    H5Tinsert(comp_regref_tid, "value_regref", HOFFSET(comp_regref_t, val_regref), H5T_STD_REF_DSETREG);
+    H5Tinsert(comp_regref_tid, "value_regref", HOFFSET(comp_regref_t, val_regref), H5T_STD_REF_REG);
     H5Tinsert(comp_regref_tid, "value_int", HOFFSET(comp_regref_t, val_int), H5T_NATIVE_INT);
 
     /*
@@ -6637,8 +6677,8 @@ static herr_t make_complex_attr_references(hid_t loc_id)
         ret = FAIL;
         goto out;
     }
-    status = H5Rcreate (&(comp_regref_data[0].val_regref), loc_id, NAME_OBJ_DS1, H5R_DATASET_REGION, objsid);
-    if (status < 0)
+    comp_regref_data[0].val_regref = H5Rcreate_region (loc_id, NAME_OBJ_DS1, objsid);
+    if (!comp_regref_data[0].val_regref)
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -6667,34 +6707,37 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      * prepare vlen data
      */
      vlen_objref_data[0].len = LEN0_VLEN_OBJREF;
-     vlen_objref_data[0].p = HDmalloc (vlen_objref_data[0].len * sizeof(hobj_ref_t));
+     vlen_objref_data[0].p = HDmalloc (vlen_objref_data[0].len * sizeof(href_t));
+     vlen_objref_data_ptr[0] = (href_t *) vlen_objref_data[0].p;
      vlen_objref_data[1].len = LEN1_VLEN_OBJREF;
-     vlen_objref_data[1].p = HDmalloc (vlen_objref_data[1].len * sizeof(hobj_ref_t));
+     vlen_objref_data[1].p = HDmalloc (vlen_objref_data[1].len * sizeof(href_t));
+     vlen_objref_data_ptr[1] = (href_t *) vlen_objref_data[1].p;
      vlen_objref_data[2].len = LEN2_VLEN_OBJREF;
-     vlen_objref_data[2].p = HDmalloc (vlen_objref_data[2].len * sizeof(hobj_ref_t));
+     vlen_objref_data[2].p = HDmalloc (vlen_objref_data[2].len * sizeof(href_t));
+     vlen_objref_data_ptr[2] = (href_t *) vlen_objref_data[2].p;
 
      /* 
       * create obj references 
       */
      /* reference to dataset */
-     status = H5Rcreate (&((hobj_ref_t*)vlen_objref_data[0].p)[0], loc_id, NAME_OBJ_DS1, H5R_OBJECT, (hid_t)-1);
-    if (status < 0)
+     *vlen_objref_data_ptr[0] = (href_t) H5Rcreate_object(loc_id, NAME_OBJ_DS1);
+    if (!(vlen_objref_data_ptr[0]))
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
      /* reference to group */
-     status = H5Rcreate (&((hobj_ref_t*)vlen_objref_data[1].p)[0], loc_id, NAME_OBJ_GRP, H5R_OBJECT, (hid_t)-1); 
-    if (status < 0)
+    *vlen_objref_data_ptr[1] = (href_t) H5Rcreate_object(loc_id, NAME_OBJ_GRP);
+    if (!(vlen_objref_data_ptr[1]))
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
      /* reference to datatype */
-     status = H5Rcreate (&((hobj_ref_t*)vlen_objref_data[2].p)[0], loc_id, NAME_OBJ_NDTYPE, H5R_OBJECT, (hid_t)-1);
-    if (status < 0)
+    *vlen_objref_data_ptr[2] = (href_t) H5Rcreate_object(loc_id, NAME_OBJ_NDTYPE);
+    if (!(vlen_objref_data_ptr[2]))
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -6736,7 +6779,8 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      * prepare vlen data
      */
     vlen_regref_data[0].len = LEN0_VLEN_REGREF;
-    vlen_regref_data[0].p = HDmalloc (vlen_regref_data[0].len * sizeof(hdset_reg_ref_t));
+    vlen_regref_data[0].p = HDmalloc (vlen_regref_data[0].len * sizeof(href_t));
+    vlen_regref_data_ptr[0] = (href_t *) vlen_regref_data[0].p;
 
     /*
      * create region reference 
@@ -6748,8 +6792,8 @@ static herr_t make_complex_attr_references(hid_t loc_id)
         ret = FAIL;
         goto out;
     }
-    status = H5Rcreate (&((hdset_reg_ref_t*)vlen_regref_data[0].p)[0], loc_id, NAME_OBJ_DS1, H5R_DATASET_REGION, objsid);
-    if (status < 0)
+    *vlen_regref_data_ptr[0] = (href_t) H5Rcreate_region(loc_id, NAME_OBJ_DS1, objsid);
+    if (!(*vlen_regref_data_ptr[0]))
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -6759,7 +6803,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     /* 
      * create vlen type with region reference
      */
-    vlen_regref_attr_tid = H5Tvlen_create(H5T_STD_REF_DSETREG);
+    vlen_regref_attr_tid = H5Tvlen_create(H5T_STD_REF_REG);
     vlen_regref_attr_sid = H5Screate_simple(RANK_VLEN_REGREF, vlen_regref_dim, NULL);
     
     /*
@@ -6782,6 +6826,20 @@ static herr_t make_complex_attr_references(hid_t loc_id)
         ret = FAIL;
         goto out;
     }
+
+    /* Destroy references */
+    for (i = 0; i < DIM_COMP_OBJREF; i++)
+        if (H5Rdestroy(comp_objref_data[i].val_objref) < 0)
+            ret = FAIL;
+    for (i = 0; i < DIM_COMP_REGREF; i++)
+        if (H5Rdestroy(comp_regref_data[i].val_regref) < 0)
+            ret = FAIL;
+    for (i = 0; i < DIM_VLEN_OBJREF; i++)
+        if (H5Rdestroy(*vlen_objref_data_ptr[i]) < 0)
+            ret = FAIL;
+    for (i = 0; i < DIM_VLEN_REGREF; i++)
+        if (H5Rdestroy(*vlen_regref_data_ptr[i]) < 0)
+            ret = FAIL;
 
 out:
     /* release resources */

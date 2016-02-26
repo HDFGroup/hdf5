@@ -1092,11 +1092,13 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     h5tools_str_append(str, "NULL");
                 }
                 else {
-                    if (nsize == H5R_DSET_REG_REF_BUF_SIZE) {
+                    href_t ref = *((href_t*)vp);
+                    H5R_type_t ref_type = H5Rget_type(ref);
+                    if (ref_type == H5R_REGION) {
                         /* if (H5Tequal(type, H5T_STD_REF_DSETREG)) */
                         h5tools_str_sprint_region(str, info, container, vp);
                     }
-                    else if (nsize == H5R_OBJ_REF_BUF_SIZE) {
+                    else if (ref_type == H5R_OBJECT) {
                         /* if (H5Tequal(type, H5T_STD_REF_OBJ)) */
                             /*
                              * Object references -- show the type and OID of the referenced
@@ -1105,7 +1107,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             H5O_info_t oi;
                             const char *path;
 
-                            obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, vp);
+                            obj = H5Rdereference3(container, H5P_DEFAULT, ref);
                             H5Oget_info(obj, &oi);
 
                             /* Print object type and close object */
@@ -1295,12 +1297,13 @@ h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info,
     hid_t   obj, region;
     char    ref_name[1024];
     H5S_sel_type region_type;
+    href_t  ref = *((href_t*)vp);
 
-    obj = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, vp);
+    obj = H5Rdereference3(container, H5P_DEFAULT, ref);
     if (obj >= 0) {
-        region = H5Rget_region(container, H5R_DATASET_REGION, vp);
+        region = H5Rget_region2(container, ref);
         if (region >= 0) {
-            H5Rget_name(obj, H5R_DATASET_REGION, vp, (char*) ref_name, 1024);
+            H5Rget_obj_name(obj, ref, (char*) ref_name, 1024);
 
             h5tools_str_append(str, info->dset_format, ref_name);
 

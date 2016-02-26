@@ -928,24 +928,29 @@ static hsize_t diff_datum(void       *_mem1,
         }
         else if (!iszero1 && !iszero2)
         {
+            href_t ref1 = (href_t)_mem1;
+            href_t ref2 = (href_t)_mem2;
+            H5R_type_t ref_type = H5Rget_type(ref1);
+            if (H5Rget_type(ref2) != ref_type)
+                return 1;
 
         /*-------------------------------------------------------------------------
         * H5T_STD_REF_DSETREG
         * Dataset region reference
         *-------------------------------------------------------------------------
             */
-            if (type_size==H5R_DSET_REG_REF_BUF_SIZE)
+            if (ref_type==H5R_REGION)
             {
                 hid_t  region1_id;
                 hid_t  region2_id;
 
-                if ((obj1_id = H5Rdereference2(container1_id, H5P_DEFAULT, H5R_DATASET_REGION, _mem1))<0)
+                if ((obj1_id = H5Rdereference3(container1_id, H5P_DEFAULT, ref1))<0)
                     ret= -1;
-                if ((obj2_id = H5Rdereference2(container2_id, H5P_DEFAULT, H5R_DATASET_REGION, _mem2))<0)
+                if ((obj2_id = H5Rdereference3(container2_id, H5P_DEFAULT, ref2))<0)
                     ret= -1;
-                if ((region1_id = H5Rget_region(container1_id, H5R_DATASET_REGION, _mem1))<0)
+                if ((region1_id = H5Rget_region2(container1_id, ref1))<0)
                     ret= -1;
-                if ((region2_id = H5Rget_region(container2_id, H5R_DATASET_REGION, _mem2))<0)
+                if ((region2_id = H5Rget_region2(container2_id, ref2))<0)
                     ret= -1;
 
                 if (ret==-1) {
@@ -968,14 +973,14 @@ static hsize_t diff_datum(void       *_mem1,
             * Object references. get the type and OID of the referenced object
             *-------------------------------------------------------------------------
             */
-            else if (type_size == H5R_OBJ_REF_BUF_SIZE)
+            else if (ref_type==H5R_OBJECT)
             {
                 H5O_type_t     obj1_type;
                 H5O_type_t     obj2_type;
 
-                if(H5Rget_obj_type2(container1_id, H5R_OBJECT, _mem1, &obj1_type) < 0)
+                if(H5Rget_obj_type3(container1_id, _mem1, &obj1_type) < 0)
                     ret = -1;
-                if(H5Rget_obj_type2(container2_id, H5R_OBJECT, _mem2, &obj2_type) < 0)
+                if(H5Rget_obj_type3(container2_id, _mem2, &obj2_type) < 0)
                     ret = -1;
                 if(ret == -1) {
                     options->err_stat = 1;
@@ -990,9 +995,9 @@ static hsize_t diff_datum(void       *_mem1,
                     return 0;
                 }
 
-                if((obj1_id = H5Rdereference2(container1_id, H5P_DEFAULT, H5R_OBJECT, _mem1)) < 0)
+                if((obj1_id = H5Rdereference3(container1_id, H5P_DEFAULT, _mem1)) < 0)
                     ret = -1;
-                if((obj2_id = H5Rdereference2(container2_id, H5P_DEFAULT, H5R_OBJECT, _mem2)) < 0)
+                if((obj2_id = H5Rdereference3(container2_id, H5P_DEFAULT, _mem2)) < 0)
                     ret = -1;
                 if(ret == -1) {
                     options->err_stat = 1;

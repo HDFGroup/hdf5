@@ -1467,18 +1467,19 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
             break;
         case H5T_REFERENCE:
             {
-                if (size == H5R_DSET_REG_REF_BUF_SIZE) {
-                    /* if (H5Tequal(tid, H5T_STD_REF_DSETREG)) */
+                href_t ref = *((href_t*)mem);
+                H5R_type_t ref_type = H5Rget_type(ref);
+                if (ref_type == H5R_REGION) {
                     if (region_output) {
                         /* region data */
                         hid_t   region_id, region_space;
                         H5S_sel_type region_type;
 
                         for (block_index = 0; block_index < block_nelmts; block_index++) {
-                            mem = ((unsigned char*)_mem) + block_index * size;
-                            region_id = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, mem);
+                            ref = *((href_t*)(mem + block_index * size));
+                            region_id = H5Rdereference3(container, H5P_DEFAULT, ref);
                             if (region_id >= 0) {
-                                region_space = H5Rget_region(container, H5R_DATASET_REGION, mem);
+                                region_space = H5Rget_region2(container, ref);
                                 if (region_space >= 0) {
                                     region_type = H5Sget_select_type(region_space);
                                     if(region_type == H5S_SEL_POINTS)
@@ -1492,7 +1493,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                         }
                     } /* end if (region_output... */
                 }
-                else if (size == H5R_OBJ_REF_BUF_SIZE) {
+                else if (ref_type == H5R_OBJECT) {
                     /* if (H5Tequal(tid, H5T_STD_REF_OBJ)) */
                     ;
                 }
