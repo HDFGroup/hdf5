@@ -13,26 +13,27 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*
+ * Purpose:     Reference routines.
+ */
+
 /****************/
 /* Module Setup */
 /****************/
 
 #include "H5Rmodule.h"      /* This source code file is part of the H5R module */
 
-
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"      /* Generic Functions    */
-#include "H5ACprivate.h"    /* Metadata cache       */
-#include "H5Aprivate.h"     /* Attributes           */
-#include "H5Dprivate.h"     /* Datasets             */
+#include "H5Rpkg.h"         /* References           */
 #include "H5Eprivate.h"     /* Error handling       */
-#include "H5Gprivate.h"     /* Groups               */
-#include "H5HGprivate.h"    /* Global Heaps         */
 #include "H5Iprivate.h"     /* IDs                  */
 #include "H5MMprivate.h"    /* Memory management    */
-#include "H5Rpkg.h"         /* References           */
+#include "H5Aprivate.h"     /* Attributes           */
+#include "H5Dprivate.h"     /* Datasets             */
+#include "H5Gprivate.h"     /* Groups               */
 #include "H5Sprivate.h"     /* Dataspaces           */
 
 
@@ -50,10 +51,8 @@
 /* Local Prototypes */
 /********************/
 
-static H5S_t * H5R__get_region(H5F_t *file, hid_t dxpl_id, const href_t *_ref);
-static ssize_t H5R__get_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id, hid_t id,
-    const href_t *_ref, char *name, size_t size);
-static ssize_t H5R__get_filename(const href_t *ref, char *name, size_t size);
+static htri_t H5R__equal(href_t _ref1, href_t _ref2);
+static ssize_t H5R__get_file_name(href_t ref, char *name, size_t size);
 
 
 /*********************/
@@ -75,16 +74,15 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Reference ID class */
 static const H5I_class_t H5I_REFERENCE_CLS[1] = {{
-    H5I_REFERENCE,		/* ID class value */
-    0,				/* Class flags */
-    0,				/* # of reserved IDs for class */
-    NULL			/* Callback routine for closing objects of this class */
+    H5I_REFERENCE,              /* ID class value */
+    0,                          /* Class flags */
+    0,                          /* # of reserved IDs for class */
+    (H5I_free_t) H5R_destroy    /* Callback routine for closing objects of this class */
 }};
 
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5R_top_package_initialize_s = FALSE;
 
-
 /*--------------------------------------------------------------------------
 NAME
    H5R__init_package -- Initialize interface-specific information
@@ -115,7 +113,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__init_package() */
 
-
 /*--------------------------------------------------------------------------
  NAME
     H5R_top_term_package
@@ -155,7 +152,6 @@ H5R_top_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5R_top_term_package() */
 
-
 /*--------------------------------------------------------------------------
  NAME
     H5R_term_package
@@ -199,33 +195,25 @@ H5R_term_package(void)
     FUNC_LEAVE_NOAPI(n)
 } /* end H5R_term_package() */
 
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R_create_object
- PURPOSE
-    Creates a particular kind of reference for the user
- USAGE
-    href_t *H5R_create_object(loc, name, dxpl_id)
-        H5G_loc_t *loc;     IN: File location used to locate object pointed to
-        const char *name;   IN: Name of object at location of object pointed to
-        hid_t dxpl_id;      IN: Property list ID
-
- RETURNS
-    Reference created on success/NULL on failure
- DESCRIPTION
-    Creates a particular type of reference specified with REF_TYPE, in the
-    space pointed to by REF.  The LOC and NAME are used to locate the object
-    pointed to.
---------------------------------------------------------------------------*/
-href_t *
+/*-------------------------------------------------------------------------
+ * Function:    H5R_create_object
+ *
+ * Purpose: Creates an object reference. The LOC and NAME are used to locate
+ * the object pointed to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
 H5R_create_object(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
 {
     H5G_loc_t obj_loc;          /* Group hier. location of object */
     H5G_name_t path;            /* Object group hier. path */
     H5O_loc_t oloc;             /* Object object location */
     hbool_t obj_found = FALSE;  /* Object location found */
-    href_t *ret_value = NULL;   /* Return value */
+    struct href_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -242,11 +230,11 @@ H5R_create_object(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
         HGOTO_ERROR(H5E_REFERENCE, H5E_NOTFOUND, NULL, "object not found")
     obj_found = TRUE;
 
-    if(NULL == (ret_value = (href_t *)H5MM_malloc(sizeof(href_t))))
+    if(NULL == (ret_value = (struct href_t *)H5MM_malloc(sizeof(struct href_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Cannot allocate memory for reference")
 
     ret_value->ref_type = H5R_OBJECT;
-    ret_value->obj_addr = obj_loc.oloc->addr;
+    ret_value->ref.addr = obj_loc.oloc->addr;
 
 done:
     if(obj_found)
@@ -255,27 +243,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R_create_object() */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5R_create_region
- PURPOSE
-    Creates a particular kind of reference for the user
- USAGE
-    href_t *H5R_create_region(loc, name, dxpl_id, space)
-        H5G_loc_t *loc;     IN: File location used to locate object pointed to
-        const char *name;   IN: Name of object at location of object pointed to
-        hid_t dxpl_id;      IN: Property list ID
-        H5S_t *space;       IN: Dataspace with selection, used for Dataset
-                                Region references.
-
- RETURNS
-    Reference created on success/NULL on failure
- DESCRIPTION
-    Creates a particular type of reference specified with REF_TYPE, in the
-    space pointed to by REF. The LOC and NAME are used to locate the object
-    pointed to and the SPACE is used to choose the region pointed to.
---------------------------------------------------------------------------*/
-href_t *
+/*-------------------------------------------------------------------------
+ * Function:    H5R_create_region
+ *
+ * Purpose: Creates a region reference. The LOC and NAME are used to locate
+ * the object pointed to and the SPACE is used to choose the region pointed to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
 H5R_create_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, H5S_t *space)
 {
     H5G_loc_t obj_loc;          /* Group hier. location of object */
@@ -284,8 +263,8 @@ H5R_create_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, H5S_t *space)
     hbool_t obj_found = FALSE;  /* Object location found */
     hssize_t buf_size;          /* Size of buffer needed to serialize selection */
     uint8_t *p;                 /* Pointer to OID to store */
-    href_t *ref = NULL;         /* Reference to be returned */
-    href_t *ret_value = NULL;   /* Return value */
+    struct href_t *ref = NULL;         /* Reference to be returned */
+    struct href_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -312,15 +291,15 @@ H5R_create_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, H5S_t *space)
 
     /* Allocate the space to store the serialized information */
     H5_CHECK_OVERFLOW(buf_size, hssize_t, size_t);
-    if(NULL == (ref = (href_t *)H5MM_malloc(sizeof(href_t))))
+    if(NULL == (ref = (struct href_t *)H5MM_malloc(sizeof(struct href_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Cannot allocate memory for reference")
-    if (NULL == (ref->obj_enc.buf = H5MM_malloc((size_t) buf_size)))
+    if(NULL == (ref->ref.serial.buf = H5MM_malloc((size_t) buf_size)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, NULL, "Cannot allocate buffer to serialize selection")
-    ref->obj_enc.buf_size = (size_t) buf_size;
+    ref->ref.serial.buf_size = (size_t) buf_size;
     ref->ref_type = H5R_REGION;
 
     /* Serialize information for dataset OID into buffer */
-    p = (uint8_t *)ref->obj_enc.buf;
+    p = (uint8_t *)ref->ref.serial.buf;
     H5F_addr_encode(loc->oloc->file, &p, obj_loc.oloc->addr);
 
     /* Serialize the selection into buffer */
@@ -333,34 +312,25 @@ done:
     if(obj_found)
         H5G_loc_free(&obj_loc);
     if(NULL == ret_value) {
-        H5MM_free(ref->obj_enc.buf);
+        H5MM_free(ref->ref.serial.buf);
         H5MM_free(ref);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5R_create_region */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5R_create_attr
- PURPOSE
-    Creates a particular kind of reference for the user
- USAGE
-    href_t *H5R_create_attr(loc, name, dxpl_id, attr_name)
-        H5G_loc_t *loc;         IN: File location used to locate object pointed to
-        const char *name;       IN: Name of object at location of object pointed to
-        hid_t dxpl_id;          IN: Property list ID
-        const char *attr_name;  IN: Name of attribute pointed to, used for
-                                    Attribute references.
-
- RETURNS
-    Reference created on success/NULL on failure
- DESCRIPTION
-    Creates a particular type of reference specified with REF_TYPE, in the
-    space pointed to by REF.  The LOC, NAME and ATTR_NAME are used to locate
-    the attribute pointed to.
---------------------------------------------------------------------------*/
-href_t *
+/*-------------------------------------------------------------------------
+ * Function:    H5R_create_attr
+ *
+ * Purpose: Creates an attribute reference. The LOC, NAME and ATTR_NAME are
+ * used to locate the attribute pointed to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
 H5R_create_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char *attr_name)
 {
     H5G_loc_t obj_loc;          /* Group hier. location of object */
@@ -370,8 +340,8 @@ H5R_create_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char *att
     size_t buf_size;            /* Size of buffer needed to serialize attribute */
     size_t attr_name_len;       /* Length of the attribute name */
     uint8_t *p;                 /* Pointer to OID to store */
-    href_t *ref = NULL;         /* Reference to be returned */
-    href_t *ret_value = NULL;   /* Return value */
+    struct href_t *ref = NULL;         /* Reference to be returned */
+    struct href_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -398,15 +368,15 @@ H5R_create_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char *att
     buf_size = attr_name_len + 2 + sizeof(haddr_t);
 
     /* Allocate the space to store the serialized information */
-    if(NULL == (ref = (href_t *)H5MM_malloc(sizeof(href_t))))
+    if(NULL == (ref = (struct href_t *)H5MM_malloc(sizeof(struct href_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Cannot allocate memory for reference")
-    if (NULL == (ref->obj_enc.buf = H5MM_malloc((size_t) buf_size)))
+    if (NULL == (ref->ref.serial.buf = H5MM_malloc((size_t) buf_size)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, NULL, "Cannot allocate buffer to serialize selection")
-    ref->obj_enc.buf_size = (size_t) buf_size;
+    ref->ref.serial.buf_size = (size_t) buf_size;
     ref->ref_type = H5R_ATTR;
 
     /* Serialize information for object's OID into buffer */
-    p = (uint8_t *)ref->obj_enc.buf;
+    p = (uint8_t *)ref->ref.serial.buf;
     H5F_addr_encode(loc->oloc->file, &p, obj_loc.oloc->addr);
 
     /* Serialize information for attribute name length into the buffer */
@@ -416,7 +386,7 @@ H5R_create_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char *att
     HDmemcpy(p, attr_name, attr_name_len);
 
     /* Sanity check */
-    HDassert((size_t)((p + attr_name_len) - (uint8_t *)ref->obj_enc.buf) == buf_size);
+    HDassert((size_t)((p + attr_name_len) - (uint8_t *)ref->ref.serial.buf) == buf_size);
 
     ret_value = ref;
 
@@ -424,32 +394,25 @@ done:
     if(obj_found)
         H5G_loc_free(&obj_loc);
     if(NULL == ret_value) {
-        H5MM_free(ref->obj_enc.buf);
+        H5MM_free(ref->ref.serial.buf);
         H5MM_free(ref);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5R_create_attr */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5R_create_ext_object
- PURPOSE
-    Creates a particular kind of reference for the user
- USAGE
-    href_t *H5R_create_ext_object(loc, name, dxpl_id)
-        H5G_loc_t *loc;     IN: File location used to locate object pointed to
-        const char *name;   IN: Name of object at location of object pointed to
-        hid_t dxpl_id;      IN: Property list ID
-
- RETURNS
-    Reference created on success/NULL on failure
- DESCRIPTION
-    Creates a particular type of reference specified with REF_TYPE, in the
-    space pointed to by REF.  The LOC and NAME are used to locate the object
-    pointed to.
---------------------------------------------------------------------------*/
-href_t *
+/*-------------------------------------------------------------------------
+ * Function:    H5R_create_ext_object
+ *
+ * Purpose: Creates an external object reference. The LOC and NAME are used to locate
+ * the object pointed to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
 H5R_create_ext_object(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
 {
     H5G_loc_t obj_loc;          /* Group hier. location of object */
@@ -459,8 +422,8 @@ H5R_create_ext_object(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
     size_t filename_len;        /* Length of the file name */
     size_t buf_size;            /* Size of buffer needed to serialize reference */
     uint8_t *p;                 /* Pointer to OID to store */
-    href_t *ref = NULL;         /* Reference to be returned */
-    href_t *ret_value = NULL;   /* Return value */
+    struct href_t *ref = NULL;         /* Reference to be returned */
+    struct href_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -483,15 +446,15 @@ H5R_create_ext_object(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
     /* Compute buffer size, allow for the attribute name length and object's OID */
     buf_size = filename_len + 2 + sizeof(haddr_t);
 
-    if(NULL == (ref = (href_t *)H5MM_malloc(sizeof(href_t))))
+    if(NULL == (ref = (struct href_t *)H5MM_malloc(sizeof(struct href_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Cannot allocate memory for reference")
-    if (NULL == (ref->obj_enc.buf = H5MM_malloc((size_t) buf_size)))
+    if (NULL == (ref->ref.serial.buf = H5MM_malloc((size_t) buf_size)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, NULL, "Cannot allocate buffer to serialize selection")
-    ref->obj_enc.buf_size = (size_t) buf_size;
+    ref->ref.serial.buf_size = (size_t) buf_size;
     ref->ref_type = H5R_EXT_OBJECT;
 
     /* Serialize information for file name length into the buffer */
-    p = (uint8_t *)ref->obj_enc.buf;
+    p = (uint8_t *)ref->ref.serial.buf;
     UINT16ENCODE(p, filename_len);
 
     /* Copy the file name into the buffer */
@@ -507,34 +470,25 @@ done:
     if(obj_found)
         H5G_loc_free(&obj_loc);
     if(NULL == ret_value) {
-        H5MM_free(ref->obj_enc.buf);
+        H5MM_free(ref->ref.serial.buf);
         H5MM_free(ref);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R_create_ext_object() */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5R_create_ext_region
- PURPOSE
-    Creates a particular kind of reference for the user
- USAGE
-    href_t *H5R_create_ext_region(loc, name, dxpl_id, space)
-        H5G_loc_t *loc;     IN: File location used to locate object pointed to
-        const char *name;   IN: Name of object at location of object pointed to
-        hid_t dxpl_id;      IN: Property list ID
-        H5S_t *space;       IN: Dataspace with selection, used for Dataset
-                                Region references.
-
- RETURNS
-    Reference created on success/NULL on failure
- DESCRIPTION
-    Creates a particular type of reference specified with REF_TYPE, in the
-    space pointed to by REF. The LOC and NAME are used to locate the object
-    pointed to and the SPACE is used to choose the region pointed to.
---------------------------------------------------------------------------*/
-href_t *
+/*-------------------------------------------------------------------------
+ * Function:    H5R_create_ext_region
+ *
+ * Purpose: Creates an external region reference. The LOC and NAME are used to locate
+ * the object pointed to and the SPACE is used to choose the region pointed to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
 H5R_create_ext_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, H5S_t *space)
 {
     H5G_loc_t obj_loc;          /* Group hier. location of object */
@@ -544,8 +498,8 @@ H5R_create_ext_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, H5S_t *sp
     size_t filename_len;        /* Length of the file name */
     hssize_t buf_size;          /* Size of buffer needed to serialize selection */
     uint8_t *p;                 /* Pointer to OID to store */
-    href_t *ref = NULL;         /* Reference to be returned */
-    href_t *ret_value = NULL;   /* Return value */
+    struct href_t *ref = NULL;         /* Reference to be returned */
+    struct href_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -575,15 +529,15 @@ H5R_create_ext_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, H5S_t *sp
 
     /* Allocate the space to store the serialized information */
     H5_CHECK_OVERFLOW(buf_size, hssize_t, size_t);
-    if(NULL == (ref = (href_t *)H5MM_malloc(sizeof(href_t))))
+    if(NULL == (ref = (struct href_t *)H5MM_malloc(sizeof(struct href_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Cannot allocate memory for reference")
-    if (NULL == (ref->obj_enc.buf = H5MM_malloc((size_t) buf_size)))
+    if (NULL == (ref->ref.serial.buf = H5MM_malloc((size_t) buf_size)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, NULL, "Cannot allocate buffer to serialize selection")
-    ref->obj_enc.buf_size = (size_t) buf_size;
+    ref->ref.serial.buf_size = (size_t) buf_size;
     ref->ref_type = H5R_EXT_REGION;
 
     /* Serialize information for file name length into the buffer */
-    p = (uint8_t *)ref->obj_enc.buf;
+    p = (uint8_t *)ref->ref.serial.buf;
     UINT16ENCODE(p, filename_len);
 
     /* Copy the file name into the buffer */
@@ -603,34 +557,25 @@ done:
     if(obj_found)
         H5G_loc_free(&obj_loc);
     if(NULL == ret_value) {
-        H5MM_free(ref->obj_enc.buf);
+        H5MM_free(ref->ref.serial.buf);
         H5MM_free(ref);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5R_create_ext_region */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5R_create_ext_attr
- PURPOSE
-    Creates a particular kind of reference for the user
- USAGE
-    href_t *H5R_create_ext_attr(loc, name, dxpl_id, attr_name)
-        H5G_loc_t *loc;         IN: File location used to locate object pointed to
-        const char *name;       IN: Name of object at location of object pointed to
-        hid_t dxpl_id;          IN: Property list ID
-        const char *attr_name;  IN: Name of attribute pointed to, used for
-                                    Attribute references.
-
- RETURNS
-    Reference created on success/NULL on failure
- DESCRIPTION
-    Creates a particular type of reference specified with REF_TYPE, in the
-    space pointed to by REF.  The LOC, NAME and ATTR_NAME are used to locate
-    the attribute pointed to.
---------------------------------------------------------------------------*/
-href_t *
+/*-------------------------------------------------------------------------
+ * Function:    H5R_create_ext_attr
+ *
+ * Purpose: Creates an external attribute reference. The LOC, NAME and ATTR_NAME are
+ * used to locate the attribute pointed to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
 H5R_create_ext_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char *attr_name)
 {
     H5G_loc_t obj_loc;          /* Group hier. location of object */
@@ -641,8 +586,8 @@ H5R_create_ext_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char 
     size_t buf_size;            /* Size of buffer needed to serialize attribute */
     size_t attr_name_len;       /* Length of the attribute name */
     uint8_t *p;                 /* Pointer to OID to store */
-    href_t *ref = NULL;         /* Reference to be returned */
-    href_t *ret_value = NULL;   /* Return value */
+    struct href_t *ref = NULL;         /* Reference to be returned */
+    struct href_t *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -672,15 +617,15 @@ H5R_create_ext_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char 
     buf_size = filename_len + 2 + attr_name_len + 2 + sizeof(haddr_t);
 
     /* Allocate the space to store the serialized information */
-    if(NULL == (ref = (href_t *)H5MM_malloc(sizeof(href_t))))
+    if(NULL == (ref = (struct href_t *)H5MM_malloc(sizeof(struct href_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Cannot allocate memory for reference")
-    if (NULL == (ref->obj_enc.buf = H5MM_malloc((size_t) buf_size)))
+    if (NULL == (ref->ref.serial.buf = H5MM_malloc((size_t) buf_size)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, NULL, "Cannot allocate buffer to serialize selection")
-    ref->obj_enc.buf_size = (size_t) buf_size;
+    ref->ref.serial.buf_size = (size_t) buf_size;
     ref->ref_type = H5R_EXT_ATTR;
 
     /* Serialize information for file name length into the buffer */
-    p = (uint8_t *)ref->obj_enc.buf;
+    p = (uint8_t *)ref->ref.serial.buf;
     UINT16ENCODE(p, filename_len);
 
     /* Copy the file name into the buffer */
@@ -697,7 +642,7 @@ H5R_create_ext_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char 
     HDmemcpy(p, attr_name, attr_name_len);
 
     /* Sanity check */
-    HDassert((size_t)((p + attr_name_len) - (uint8_t *)ref->obj_enc.buf) == buf_size);
+    HDassert((size_t)((p + attr_name_len) - (uint8_t *)ref->ref.serial.buf) == buf_size);
 
     ret_value = ref;
 
@@ -705,37 +650,29 @@ done:
     if(obj_found)
         H5G_loc_free(&obj_loc);
     if(NULL == ret_value) {
-        H5MM_free(ref->obj_enc.buf);
+        H5MM_free(ref->ref.serial.buf);
         H5MM_free(ref);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5R_create_ext_attr */
 
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Rcreate_object
- PURPOSE
-    Creates a particular kind of reference for the user
- USAGE
-    href_t *H5Rcreate_object(loc_id, name)
-        hid_t loc_id;       IN: Location ID used to locate object pointed to
-        const char *name;   IN: Name of object at location LOC_ID of object
-                                pointed to
-
- RETURNS
-    Reference created on success/NULL on failure
- DESCRIPTION
-    Creates a particular type of reference specified with REF_TYPE, in the
-    space pointed to by REF.  The LOC_ID and NAME are used to locate the object
-    pointed to.
---------------------------------------------------------------------------*/
-href_t *
+/*-------------------------------------------------------------------------
+ * Function:    H5Rcreate_object
+ *
+ * Purpose: Creates an object reference. The LOC_ID and NAME are used to locate
+ * the object pointed to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
 H5Rcreate_object(hid_t loc_id, const char *name)
 {
     H5G_loc_t loc; /* File location */
-    href_t     *ret_value = NULL; /* Return value */
+    href_t    ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
@@ -752,32 +689,24 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rcreate_object() */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5Rcreate_region
- PURPOSE
-    Creates a particular kind of reference for the user
- USAGE
-    href_t *H5Rcreate_region(loc_id, name, space_id)
-        hid_t loc_id;       IN: Location ID used to locate object pointed to
-        const char *name;   IN: Name of object at location LOC_ID of object
-                                pointed to
-        hid_t space_id;     IN: Dataspace ID with selection, used for Dataset
-                                Region references.
-
- RETURNS
-    Reference created on success/NULL on failure
- DESCRIPTION
-    Creates a particular type of reference specified with REF_TYPE, in the
-    space pointed to by REF.  The LOC_ID and NAME are used to locate the object
-    pointed to and the SPACE_ID is used to choose the region pointed to.
---------------------------------------------------------------------------*/
-href_t *
+/*-------------------------------------------------------------------------
+ * Function:    H5Rcreate_region
+ *
+ * Purpose: Creates a region reference. The LOC_ID and NAME are used to locate
+ * the object pointed to and the SPACE_ID is used to choose the region pointed
+ * to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
 H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id)
 {
     H5G_loc_t loc; /* File location */
     H5S_t      *space = NULL;   /* Pointer to dataspace containing region */
-    href_t     *ret_value = NULL; /* Return value */
+    href_t     ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
@@ -798,31 +727,22 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rcreate_region() */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5Rcreate_attr
- PURPOSE
-    Creates a particular kind of reference for the user
- USAGE
-    href_t *H5Rcreate_attr(loc_id, name, attr_name)
-        hid_t loc_id;       IN: Location ID used to locate object pointed to
-        const char *name;   IN: Name of object at location LOC_ID of object
-                                pointed to
-        const char *attr_name;   IN: Name of attribute pointed to, used for
-                                  Attribute references.
-
- RETURNS
-    Reference created on success/NULL on failure
- DESCRIPTION
-    Creates a particular type of reference specified with REF_TYPE, in the
-    space pointed to by REF.  The LOC_ID, NAME and ATTR_NAME are used to locate
-    the attribute pointed to.
---------------------------------------------------------------------------*/
-href_t *
+/*-------------------------------------------------------------------------
+ * Function:    H5Rcreate_attr
+ *
+ * Purpose: Creates an attribute reference. The LOC_ID, NAME and ATTR_NAME are
+ * used to locate the attribute pointed to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
 H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name)
 {
     H5G_loc_t loc; /* File location */
-    href_t    *ret_value = NULL; /* Return value */
+    href_t    ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
 
@@ -841,23 +761,123 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rcreate_attr() */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5R_destroy
- PURPOSE
-    Destroy a reference
- USAGE
-    herr_t H5R_destroy(ref)
-        href_t *ref;       IN: Reference
-
- RETURNS
-    Reference created on success/NULL on failure
- DESCRIPTION
-    Destroy reference and free resources allocated during H5Rcreate.
---------------------------------------------------------------------------*/
-herr_t
-H5R_destroy(href_t *ref)
+/*-------------------------------------------------------------------------
+ * Function:    H5Rcreate_ext_object
+ *
+ * Purpose: Creates an external object reference. The LOC_ID and NAME are
+ * used to locate the object pointed to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
+H5Rcreate_ext_object(hid_t loc_id, const char *name)
 {
+    H5G_loc_t loc; /* File location */
+    href_t    ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_API(NULL)
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a location")
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "no name given")
+
+    if(NULL == (ret_value = H5R_create_ext_object(&loc, name, H5AC_dxpl_id)))
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, NULL, "unable to create object reference")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Rcreate_ext_object() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Rcreate_ext_region
+ *
+ * Purpose: Creates an external region reference. The LOC_ID and NAME are
+ * used to locate the object pointed to and the SPACE_ID is used to choose
+ * the region pointed to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
+H5Rcreate_ext_region(hid_t loc_id, const char *name, hid_t space_id)
+{
+    H5G_loc_t loc; /* File location */
+    H5S_t      *space = NULL;   /* Pointer to dataspace containing region */
+    href_t     ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_API(NULL)
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a location")
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "no name given")
+    if(space_id == H5I_BADID)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "reference region dataspace id must be valid")
+    if(space_id != H5I_BADID && (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE))))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace")
+
+    if(NULL == (ret_value = H5R_create_ext_region(&loc, name, H5AC_dxpl_id, space)))
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, NULL, "unable to create region reference")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Rcreate_ext_region() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Rcreate_ext_attr
+ *
+ * Purpose: Creates an external attribute reference. The LOC_ID, NAME and
+ * ATTR_NAME are used to locate the attribute pointed to.
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
+H5Rcreate_ext_attr(hid_t loc_id, const char *name, const char *attr_name)
+{
+    H5G_loc_t loc; /* File location */
+    href_t    ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_API(NULL)
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a location")
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "no name given")
+    if(!attr_name || !*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "no attribute name given")
+
+    if(NULL == (ret_value = H5R_create_ext_attr(&loc, name, H5AC_dxpl_id, attr_name)))
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, NULL, "unable to create atribute reference")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Rcreate_ext_attr() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5R_destroy
+ *
+ * Purpose: Destroy reference and free resources allocated during H5R_create.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5R_destroy(href_t _ref)
+{
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
     herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -865,28 +885,23 @@ H5R_destroy(href_t *ref)
     HDassert(ref);
 
     if(H5R_OBJECT != ref->ref_type)
-        H5MM_free(ref->obj_enc.buf);
+        H5MM_free(ref->ref.serial.buf);
     H5MM_free(ref);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Rdestroy() */
+} /* end H5R_destroy() */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5Rdestroy
- PURPOSE
-    Destroy a reference
- USAGE
-    herr_t H5Rdestroy(ref)
-        href_t *ref;       IN: Reference
-
- RETURNS
-    Reference created on success/NULL on failure
- DESCRIPTION
-    Destroy reference and free resources allocated during H5Rcreate.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5Rdestroy
+ *
+ * Purpose: Destroy reference and free resources allocated during H5Rcreate.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
-H5Rdestroy(href_t *ref)
+H5Rdestroy(href_t ref)
 {
     herr_t    ret_value = FAIL; /* Return value */
 
@@ -903,37 +918,157 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rdestroy() */
 
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R__dereference
- PURPOSE
-    Opens the HDF5 object referenced.
- USAGE
-    hid_t H5R__dereference(file, oapl_id, dxpl_id, ref, app_ref)
-        H5F_t *file;        IN: File the object being dereferenced is within
-        hid_t oapl_id;      IN: Property list of the object being referenced.
-        hid_t dxpl_id;      IN: Property list ID
-        ref_t *ref;         IN: Reference to open
-        hbool_t app_ref     IN: Referenced by application.
+/*-------------------------------------------------------------------------
+ * Function:    H5R_get_type
+ *
+ * Purpose: Given a reference to some object, return the type of that reference.
+ *
+ * Return:  Type of the reference
+ *
+ *-------------------------------------------------------------------------
+ */
+H5R_type_t
+H5R_get_type(href_t _ref)
+{
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
+    H5R_type_t ret_value = H5R_BADTYPE;
 
- RETURNS
-    Valid ID on success, Negative on failure
- DESCRIPTION
-    Given a reference to some object, open that object and return an ID for
-    that object.
---------------------------------------------------------------------------*/
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(ref);
+    ret_value = ref->ref_type;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5R_get_type() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Rget_type
+ *
+ * Purpose: Given a reference to some object, return the type of that reference.
+ *
+ * Return:  Reference type/H5R_BADTYPE on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+H5R_type_t
+H5Rget_type(href_t ref)
+{
+    H5R_type_t ret_value;
+
+    FUNC_ENTER_API(H5R_BADTYPE)
+
+    /* Check args */
+    if(ref == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5R_BADTYPE, "invalid reference pointer")
+
+    /* Create reference */
+    ret_value = H5R_get_type(ref);
+    if((ret_value <= H5R_BADTYPE) || (ret_value >= H5R_MAXTYPE))
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5R_BADTYPE, "invalid reference type")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Rget_type() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5R__equal
+ *
+ * Purpose: Compare two references
+ *
+ * Return:  TRUE if equal, FALSE if unequal, FAIL if error
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5R__equal(href_t _ref1, href_t _ref2)
+{
+    struct href_t *ref1 = (struct href_t *) _ref1; /* Reference */
+    struct href_t *ref2 = (struct href_t *) _ref2; /* Reference */
+    htri_t ret_value = FAIL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(ref1);
+    HDassert(ref2);
+
+    if (ref1->ref_type != ref2->ref_type)
+        HGOTO_DONE(FALSE);
+
+    switch (ref1->ref_type) {
+        case H5R_OBJECT:
+            if (ref1->ref.addr != ref2->ref.addr)
+                HGOTO_DONE(FALSE);
+            break;
+        case H5R_REGION:
+        case H5R_ATTR:
+        case H5R_EXT_OBJECT:
+        case H5R_EXT_REGION:
+        case H5R_EXT_ATTR:
+            if (ref1->ref.serial.buf_size != ref2->ref.serial.buf_size)
+                HGOTO_DONE(FALSE);
+            if (0 != HDstrcmp(ref1->ref.serial.buf, ref2->ref.serial.buf))
+                HGOTO_DONE(FALSE);
+            break;
+        default:
+            HDassert("unknown reference type" && 0);
+            HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
+    }
+
+    ret_value = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5R__equal() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Requal
+ *
+ * Purpose: Compare two references
+ *
+ * Return:  TRUE if equal, FALSE if unequal, FAIL if error
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Requal(href_t ref1, href_t ref2)
+{
+    htri_t ret_value;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(!ref1 || !ref2)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
+
+    /* Create reference */
+    if (FAIL == (ret_value = H5R__equal(ref1, ref2)))
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOMPARE, FAIL, "cannot compare references")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Requal() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5R__dereference
+ *
+ * Purpose: Given a reference to some object, open that object and return an
+ * ID for that object.
+ *
+ * Return:  Valid ID on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 hid_t
-H5R__dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, const href_t *ref, hbool_t app_ref)
+H5R__dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, href_t _ref, hbool_t app_ref)
 {
     H5O_loc_t oloc;                 /* Object location */
     H5G_name_t path;                /* Path of object */
     H5G_loc_t loc;                  /* Group location */
-    char *filename = NULL;          /* Name of the file (for external references) */
     char *attr_name = NULL;         /* Name of the attribute (for attribute references) */
-    unsigned rc;		            /* Reference count of object */
+    unsigned rc;                    /* Reference count of object */
     H5O_type_t obj_type;            /* Type of object */
     const uint8_t *p = NULL;        /* Pointer to OID to store */
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
     hid_t ret_value = H5I_BADID;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -954,17 +1089,11 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, const href_t *ref, h
             size_t filename_len; /* Length of the file name */
 
             /* Get the file name length */
-            p = (const uint8_t *)ref->obj_enc.buf;
+            p = (const uint8_t *)ref->ref.serial.buf;
             UINT16DECODE(p, filename_len);
             HDassert(filename_len < H5R_MAX_ATTR_REF_NAME_LEN);
 
-            /* Allocate space for the file name */
-            if(NULL == (filename = (char *)H5MM_malloc(filename_len + 1)))
-                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, FAIL, "memory allocation failed")
-
-            /* Get the file name */
-            HDmemcpy(filename, p, filename_len);
-            filename[filename_len] = '\0';
+            /* Skip the file name */
             p += filename_len;
         }
             break;
@@ -979,7 +1108,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, const href_t *ref, h
 
     switch(ref->ref_type) {
         case H5R_OBJECT:
-            oloc.addr = ref->obj_addr;
+            oloc.addr = ref->ref.addr;
             if(!H5F_addr_defined(oloc.addr) || oloc.addr == 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Undefined reference pointer")
             break;
@@ -989,7 +1118,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, const href_t *ref, h
         case H5R_REGION:
         {
             /* Get the object oid for the dataset */
-            if (!p) p = (const uint8_t *)ref->obj_enc.buf;
+            if (!p) p = (const uint8_t *)ref->ref.serial.buf;
             H5F_addr_decode(oloc.file, &p, &(oloc.addr));
         } /* end case */
         break;
@@ -1000,7 +1129,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, const href_t *ref, h
             size_t attr_name_len; /* Length of the attribute name */
 
             /* Get the object oid for the dataset */
-            if (!p) p = (const uint8_t *)ref->obj_enc.buf;
+            if (!p) p = (const uint8_t *)ref->ref.serial.buf;
             H5F_addr_decode(oloc.file, &p, &(oloc.addr));
 
             /* Get the attribute name length */
@@ -1115,34 +1244,25 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, const href_t *ref, h
     } /* end else */
 
 done:
-    H5MM_xfree(filename);
     H5MM_xfree(attr_name);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__dereference() */
 
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Rdereference2
- PURPOSE
-    Opens the HDF5 object referenced.
- USAGE
-    hid_t H5Rdereference2(obj_id, oapl_id, ref)
-        hid_t obj_id;   IN: Dataset reference object is in or location ID of
-                            object that the dataset is located within.
-        hid_t oapl_id;  IN: Property list of the object being referenced.
-        href_t *ref;    IN: Reference to open.
-
- RETURNS
-    Valid ID on success, Negative on failure
- DESCRIPTION
-    Given a reference to some object, open that object and return an ID for
-    that object.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5Rdereference3
+ *
+ * Purpose: Given a reference to some object, open that object and return an
+ * ID for that object.
+ *
+ * Return:  Valid ID on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 hid_t
-H5Rdereference2(hid_t obj_id, hid_t oapl_id, const href_t *ref)
+H5Rdereference3(hid_t obj_id, hid_t oapl_id, href_t _ref)
 {
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
     H5G_loc_t loc;      /* Group location */
     hid_t ret_value;
 
@@ -1158,40 +1278,32 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, const href_t *ref)
     if(ref->ref_type <= H5R_BADTYPE || ref->ref_type >= H5R_MAXTYPE)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
 
-    /* Create reference */
+    /* Dereference */
     if((ret_value = H5R__dereference(loc.oloc->file, oapl_id, H5AC_ind_dxpl_id, ref, TRUE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to dereference object")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Rdereference2() */
+} /* end H5Rdereference3() */
 
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R__get_region
- PURPOSE
-    Retrieves a dataspace with the region pointed to selected.
- USAGE
-    H5S_t *H5R__get_region(file, dxpl_id, ref_type, ref)
-        H5F_t *file;            IN: File the object being dereferenced is within
-        hid_t dxpl_id;          IN: Property list ID
-        href_t *ref;            IN: Reference to open.
-
- RETURNS
-    Pointer to the dataspace on success, NULL on failure
- DESCRIPTION
-    Given a reference to some object, creates a copy of the dataset pointed
-    to's dataspace and defines a selection in the copy which is the region
-    pointed to.
---------------------------------------------------------------------------*/
-static H5S_t *
-H5R__get_region(H5F_t *file, hid_t dxpl_id, const href_t *ref)
+/*-------------------------------------------------------------------------
+ * Function:    H5R__get_region
+ *
+ * Purpose: Given a reference to some object, creates a copy of the dataset
+ * pointed to's dataspace and defines a selection in the copy which is the
+ * region pointed to.
+ *
+ * Return:  Pointer to the dataspace on success/NULL on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+H5S_t *
+H5R__get_region(H5F_t *file, hid_t dxpl_id, href_t _ref)
 {
     H5O_loc_t oloc;             /* Object location */
-    const uint8_t *p;           /* Pointer to OID to store */
-    char *filename = NULL;      /* Name of the file (for external references) */
-    H5S_t *ret_value;
+    const uint8_t *p = NULL;    /* Pointer to OID to store */
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
+    H5S_t *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1204,7 +1316,7 @@ H5R__get_region(H5F_t *file, hid_t dxpl_id, const href_t *ref)
     oloc.file = file;
 
     /* Point to reference buffer now */
-    p = (const uint8_t *)ref->obj_enc.buf;
+    p = (const uint8_t *)ref->ref.serial.buf;
 
     if (ref->ref_type == H5R_EXT_REGION) {
         size_t filename_len; /* Length of the file name */
@@ -1213,13 +1325,7 @@ H5R__get_region(H5F_t *file, hid_t dxpl_id, const href_t *ref)
         UINT16DECODE(p, filename_len);
         HDassert(filename_len < H5R_MAX_ATTR_REF_NAME_LEN);
 
-        /* Allocate space for the file name */
-        if(NULL == (filename = (char *)H5MM_malloc(filename_len + 1)))
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, NULL, "memory allocation failed")
-
-        /* Get the file name */
-        HDmemcpy(filename, p, filename_len);
-        filename[filename_len] = '\0';
+        /* Skip the file name */
         p += filename_len;
     }
 
@@ -1235,34 +1341,26 @@ H5R__get_region(H5F_t *file, hid_t dxpl_id, const href_t *ref)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, NULL, "can't deserialize selection")
 
 done:
-    H5MM_xfree(filename);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_region() */
 
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Rget_region
- PURPOSE
-    Retrieves a dataspace with the region pointed to selected.
- USAGE
-    hid_t H5Rget_region(loc_id, ref)
-        hid_t loc_id;   IN: Dataset reference object is in or location ID of
-                            object that the dataset is located within.
-        href_t *ref;    IN: Reference to open.
-
- RETURNS
-    Valid ID on success, Negative on failure
- DESCRIPTION
-    Given a reference to some object, creates a copy of the dataset pointed
-    to's dataspace and defines a selection in the copy which is the region
-    pointed to.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5Rget_region2
+ *
+ * Purpose: Given a reference to some object, creates a copy of the dataset
+ * pointed to's dataspace and defines a selection in the copy which is the
+ * region pointed to.
+ *
+ * Return:  Valid ID on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 hid_t
-H5Rget_region(hid_t loc_id, const href_t *ref)
+H5Rget_region2(hid_t loc_id, href_t _ref)
 {
     H5G_loc_t loc;          /* Object's group location */
     H5S_t *space = NULL;    /* Dataspace object */
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -1285,32 +1383,24 @@ H5Rget_region(hid_t loc_id, const href_t *ref)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Rget_region() */
+} /* end H5Rget_region2() */
 
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R__get_obj_type
- PURPOSE
-    Retrieves the type of object that an object reference points to
- USAGE
-    herr_t H5R_get_obj_type(file, dxpl_id, ref, obj_type)
-        H5F_t *file;            IN: File the object being dereferenced is within
-        hid_t dxpl_id;          IN: Property list ID
-        href_t *ref;            IN: Reference to open
-        H5O_type_t *obj_type    OUT: Object type
-
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Given a reference to some object, this function returns the type of object
-    pointed to.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5R__get_obj_type
+ *
+ * Purpose: Given a reference to some object, this function returns the type
+ * of object pointed to.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
-H5R__get_obj_type(H5F_t *file, hid_t dxpl_id, const href_t *ref, H5O_type_t *obj_type)
+H5R__get_obj_type(H5F_t *file, hid_t dxpl_id, href_t _ref, H5O_type_t *obj_type)
 {
     H5O_loc_t oloc;             /* Object location */
     unsigned rc;                /* Reference count of object    */
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1325,7 +1415,7 @@ H5R__get_obj_type(H5F_t *file, hid_t dxpl_id, const href_t *ref, H5O_type_t *obj
     switch(ref->ref_type) {
         case H5R_OBJECT:
             /* Get the object oid */
-            oloc.addr = ref->obj_addr;
+            oloc.addr = ref->ref.addr;
             break;
 
         case H5R_REGION:
@@ -1333,7 +1423,7 @@ H5R__get_obj_type(H5F_t *file, hid_t dxpl_id, const href_t *ref, H5O_type_t *obj
             const uint8_t *p;   /* Pointer to reference to decode */
 
             /* Get the object oid for the dataset */
-            p = (const uint8_t *)ref->obj_enc.buf;
+            p = (const uint8_t *)ref->ref.serial.buf;
             H5F_addr_decode(oloc.file, &p, &(oloc.addr));
 
             break;
@@ -1344,7 +1434,7 @@ H5R__get_obj_type(H5F_t *file, hid_t dxpl_id, const href_t *ref, H5O_type_t *obj
             const uint8_t *p;   /* Pointer to reference to decode */
 
             /* Get the object oid for the dataset */
-            p = (const uint8_t *)ref->obj_enc.buf;
+            p = (const uint8_t *)ref->ref.serial.buf;
             H5F_addr_decode(oloc.file, &p, &(oloc.addr));
 
             break;
@@ -1366,29 +1456,21 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__get_obj_type() */
 
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Rget_obj_type2
- PURPOSE
-    Retrieves the type of object that an object reference points to
- USAGE
-    herr_t H5Rget_obj_type2(loc_id, ref, obj_type)
-        hid_t loc_id;       IN: Dataset reference object is in or location ID of
-                            object that the dataset is located within.
-        href_t *ref;        IN: Reference to query.
-        H5O_type_t *obj_type;   OUT: Type of object reference points to
-
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Given a reference to some object, this function retrieves the type of
-    object pointed to.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5Rget_obj_type3
+ *
+ * Purpose: Given a reference to some object, this function returns the type
+ * of object pointed to.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 herr_t
-H5Rget_obj_type2(hid_t loc_id, const href_t *ref, H5O_type_t *obj_type)
+H5Rget_obj_type3(hid_t loc_id, href_t _ref, H5O_type_t *obj_type)
 {
     H5G_loc_t loc;              /* Object location */
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1407,40 +1489,27 @@ H5Rget_obj_type2(hid_t loc_id, const href_t *ref, H5O_type_t *obj_type)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Rget_obj_type2() */
+} /* end H5Rget_obj_type3() */
 
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R__get_name
- PURPOSE
-    Internal routine to determine a name for the object referenced
- USAGE
-    ssize_t H5R__get_name(f, lapl_id, dxpl_id, loc_id, ref, name, size)
-        H5F_t *f;       IN: Pointer to the file that the reference is pointing
-                            into
-        hid_t lapl_id;  IN: LAPL to use for operation
-        hid_t dxpl_id;  IN: DXPL to use for operation
-        hid_t loc_id;   IN: Location ID given for reference
-        href_t *ref;    IN: Reference to query.
-        char *name;     OUT: Buffer to place name of object referenced
-        size_t size;    IN: Size of name buffer
-
- RETURNS
-    Non-negative length of the path on success, Negative on failure
- DESCRIPTION
-    Given a reference to some object, determine a path to the object
-    referenced in the file.
---------------------------------------------------------------------------*/
-static ssize_t
-H5R__get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t loc_id, const href_t *ref,
+/*-------------------------------------------------------------------------
+ * Function:    H5R__get_obj_name
+ *
+ * Purpose: Given a reference to some object, determine a path to the object
+ * referenced in the file.
+ *
+ * Return:  Non-negative length of the path on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5R__get_obj_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t loc_id, href_t _ref,
     char *name, size_t size)
 {
     hid_t file_id = H5I_BADID;  /* ID for file that the reference is in */
     H5O_loc_t oloc;             /* Object location describing object for reference */
     ssize_t ret_value = -1;     /* Return value */
-    char *filename = NULL;      /* Name of the file (for external references) */
-    const uint8_t *p;           /* Pointer to reference to decode */
+    const uint8_t *p = NULL;    /* Pointer to reference to decode */
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1460,17 +1529,11 @@ H5R__get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t loc_id, const href_t
             size_t filename_len; /* Length of the file name */
 
             /* Get the file name length */
-            p = (const uint8_t *)ref->obj_enc.buf;
+            p = (const uint8_t *)ref->ref.serial.buf;
             UINT16DECODE(p, filename_len);
             HDassert(filename_len < H5R_MAX_ATTR_REF_NAME_LEN);
 
-            /* Allocate space for the file name */
-            if(NULL == (filename = (char *)H5MM_malloc(filename_len + 1)))
-                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, FAIL, "memory allocation failed")
-
-            /* Get the file name */
-            HDmemcpy(filename, p, filename_len);
-            filename[filename_len] = '\0';
+            /* Skip the file name */
             p += filename_len;
         }
             break;
@@ -1486,41 +1549,18 @@ H5R__get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t loc_id, const href_t
     /* Get address for reference */
     switch(ref->ref_type) {
         case H5R_OBJECT:
-            oloc.addr = ref->obj_addr;
+            oloc.addr = ref->ref.addr;
             break;
 
         case H5R_EXT_OBJECT:
         case H5R_EXT_REGION:
         case H5R_REGION:
-        {
-            /* Get the object oid for the dataset */
-            if (!p) p = (const uint8_t *)ref->obj_enc.buf;
-            H5F_addr_decode(oloc.file, &p, &(oloc.addr));
-
-        } /* end case */
-        break;
-
         case H5R_EXT_ATTR:
         case H5R_ATTR:
         {
-            size_t attr_name_len; /* Length of the attribute name */
-            size_t copy_len;
-
             /* Get the object oid for the dataset */
-            if (!p) p = (const uint8_t *)ref->obj_enc.buf;
+            if (!p) p = (const uint8_t *)ref->ref.serial.buf;
             H5F_addr_decode(oloc.file, &p, &(oloc.addr));
-
-            /* Get the attribute name length */
-            UINT16DECODE(p, attr_name_len);
-            HDassert(attr_name_len < H5R_MAX_ATTR_REF_NAME_LEN);
-            copy_len = MIN(attr_name_len, size - 1);
-
-            /* Get the attribute name */
-            if (name) {
-                HDmemcpy(name, p, copy_len);
-                name[copy_len] = '\0';
-            }
-            ret_value = (ssize_t)copy_len;
         } /* end case */
         break;
         case H5R_BADTYPE:
@@ -1530,51 +1570,37 @@ H5R__get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t loc_id, const href_t
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
     } /* end switch */
 
-    if (ref->ref_type != H5R_ATTR && ref->ref_type != H5R_EXT_ATTR) {
-        /* Retrieve file ID for name search */
-        if((file_id = H5I_get_file_id(loc_id, FALSE)) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve file ID")
+    /* Retrieve file ID for name search */
+    if((file_id = H5I_get_file_id(loc_id, FALSE)) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
-            /* Get name, length, etc. */
-            if((ret_value = H5G_get_name_by_addr(file_id, lapl_id, dxpl_id, &oloc, name, size)) < 0)
-                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't determine name")
-    }
+    /* Get name, length, etc. */
+    if((ret_value = H5G_get_name_by_addr(file_id, lapl_id, dxpl_id, &oloc, name, size)) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't determine name")
 
 done:
     /* Close file ID used for search */
     if(file_id > 0 && H5I_dec_ref(file_id) < 0)
         HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "can't decrement ref count of temp ID")
-    H5MM_xfree(filename);
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5R__get_name() */
+} /* end H5R__get_obj_name() */
 
-
-/*--------------------------------------------------------------------------
- NAME
-    H5Rget_name
- PURPOSE
-    Determines a name for the object referenced
- USAGE
-    ssize_t H5Rget_name(loc_id, ref, name, size)
-        hid_t loc_id;   IN: Dataset reference object is in or location ID of
-                            object that the dataset is located within.
-        href_t *ref;    IN: Reference to query.
-        char *name;     OUT: Buffer to place name of object referenced. If NULL
-	                     then this call will return the size in bytes of name.
-        size_t size;    IN: Size of name buffer (user needs to include NULL terminator
-                            when passing in the size)
-
- RETURNS
-    Non-negative length of the path on success, Negative on failure
- DESCRIPTION
-    Given a reference to some object, determine a path to the object
-    referenced in the file.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5Rget_obj_name
+ *
+ * Purpose: Given a reference to some object, determine a path to the object
+ * referenced in the file.
+ *
+ * Return:  Non-negative length of the path on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 ssize_t
-H5Rget_name(hid_t loc_id, const href_t *ref, char *name, size_t size)
+H5Rget_obj_name(hid_t loc_id, href_t _ref, char *name, size_t size)
 {
     H5G_loc_t loc;      /* Group location */
     H5F_t *file;        /* File object */
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
     ssize_t ret_value;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1591,35 +1617,127 @@ H5Rget_name(hid_t loc_id, const href_t *ref, char *name, size_t size)
     file = loc.oloc->file;
 
     /* Get name */
-    if((ret_value = H5R__get_name(file, H5P_DEFAULT, H5AC_ind_dxpl_id, loc_id, ref, name, size)) < 0)
+    if((ret_value = H5R__get_obj_name(file, H5P_DEFAULT, H5AC_ind_dxpl_id, loc_id, ref, name, size)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object path")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Rget_name() */
+} /* end H5Rget_obj_name() */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5R__get_filename
- PURPOSE
-    Determines a file name for the object referenced
- USAGE
-    ssize_t H5R__get_filename(ref, name, size)
-        href_t *ref;    IN: Reference to query.
-        char *name;     OUT: Buffer to place file name of object referenced. If NULL
-                         then this call will return the size in bytes of name.
-        size_t size;    IN: Size of name buffer (user needs to include NULL terminator
-                            when passing in the size)
-
- RETURNS
-    Non-negative length of the path on success, Negative on failure
- DESCRIPTION
-    Given a reference to some object, determine a file name to the object
-    referenced.
---------------------------------------------------------------------------*/
-static ssize_t
-H5R__get_filename(const href_t *ref, char *name, size_t size)
+/*-------------------------------------------------------------------------
+ * Function:    H5R__get_attr_name
+ *
+ * Purpose: Given a reference to some attribute, determine its name.
+ *
+ * Return:  Non-negative length of the path on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5R__get_attr_name(H5F_t *f, href_t _ref, char *name, size_t size)
 {
+    H5O_loc_t oloc;             /* Object location describing object for reference */
+    ssize_t ret_value = -1;     /* Return value */
+    const uint8_t *p = NULL;    /* Pointer to reference to decode */
+    size_t attr_name_len;       /* Length of the attribute name */
+    size_t copy_len;
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check args */
+    HDassert(f);
+    HDassert(ref);
+    HDassert((ref->ref_type == H5R_ATTR) || (ref->ref_type == H5R_EXT_ATTR));
+
+    /* Initialize the object location */
+    H5O_loc_reset(&oloc);
+    oloc.file = f;
+
+    if (ref->ref_type == H5R_EXT_ATTR) {
+        size_t filename_len; /* Length of the file name */
+
+        /* Get the file name length */
+        p = (const uint8_t *)ref->ref.serial.buf;
+        UINT16DECODE(p, filename_len);
+        HDassert(filename_len < H5R_MAX_ATTR_REF_NAME_LEN);
+
+        /* Skip the file name */
+        p += filename_len;
+    }
+
+    /* Get the object oid for the dataset */
+    if (!p) p = (const uint8_t *)ref->ref.serial.buf;
+    H5F_addr_decode(oloc.file, &p, &(oloc.addr));
+
+    /* Get the attribute name length */
+    UINT16DECODE(p, attr_name_len);
+    HDassert(attr_name_len < H5R_MAX_ATTR_REF_NAME_LEN);
+    copy_len = MIN(attr_name_len, size - 1);
+
+    /* Get the attribute name */
+    if (name) {
+        HDmemcpy(name, p, copy_len);
+        name[copy_len] = '\0';
+    }
+
+    ret_value = (ssize_t)copy_len;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5R__get_attr_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Rget_attr_name
+ *
+ * Purpose: Given a reference to some attribute, determine its name.
+ *
+ * Return:  Non-negative length of the path on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Rget_attr_name(hid_t loc_id, href_t _ref, char *name, size_t size)
+{
+    H5G_loc_t loc;      /* Group location */
+    H5F_t *file;        /* File object */
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
+    ssize_t ret_value;  /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(H5G_loc(loc_id, &loc) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
+    if(ref == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
+    if((ref->ref_type != H5R_ATTR) && (ref->ref_type != H5R_EXT_ATTR))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
+
+    /* Get the file pointer from the entry */
+    file = loc.oloc->file;
+
+    /* Get name */
+    if((ret_value = H5R__get_attr_name(file, ref, name, size)) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object path")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Rget_attr_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5R__get_file_name
+ *
+ * Purpose: Given a reference to some object, determine a file name of the
+ * object located into.
+ *
+ * Return:  Non-negative length of the path on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static ssize_t
+H5R__get_file_name(href_t _ref, char *name, size_t size)
+{
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
     ssize_t ret_value = -1;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1637,7 +1755,7 @@ H5R__get_filename(const href_t *ref, char *name, size_t size)
             size_t copy_len;
 
             /* Get the file name length */
-            p = (const uint8_t *)ref->obj_enc.buf;
+            p = (const uint8_t *)ref->ref.serial.buf;
             UINT16DECODE(p, filename_len);
             copy_len = MIN(filename_len, size - 1);
 
@@ -1662,30 +1780,22 @@ H5R__get_filename(const href_t *ref, char *name, size_t size)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5R__get_filename() */
+} /* end H5R__get_file_name() */
 
-/*--------------------------------------------------------------------------
- NAME
-    H5Rget_filename
- PURPOSE
-    Determines a file name for the object referenced
- USAGE
-    ssize_t H5Rget_filename(ref, name, size)
-        href_t *ref;    IN: Reference to query.
-        char *name;     OUT: Buffer to place file name of object referenced. If NULL
-                         then this call will return the size in bytes of name.
-        size_t size;    IN: Size of name buffer (user needs to include NULL terminator
-                            when passing in the size)
-
- RETURNS
-    Non-negative length of the path on success, Negative on failure
- DESCRIPTION
-    Given a reference to some object, determine a file name to the object
-    referenced.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5Rget_file_name
+ *
+ * Purpose: Given a reference to some object, determine a file name of the
+ * object located into.
+ *
+ * Return:  Non-negative length of the path on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
 ssize_t
-H5Rget_filename(const href_t *ref, char *name, size_t size)
+H5Rget_file_name(href_t _ref, char *name, size_t size)
 {
+    struct href_t *ref = (struct href_t *) _ref; /* Reference */
     ssize_t ret_value;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1697,9 +1807,9 @@ H5Rget_filename(const href_t *ref, char *name, size_t size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
 
     /* Get name */
-    if((ret_value = H5R__get_filename(ref, name, size)) < 0)
+    if((ret_value = H5R__get_file_name(ref, name, size)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to retrieve file name")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Rget_filename() */
+} /* end H5Rget_file_name() */

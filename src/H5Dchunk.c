@@ -4772,8 +4772,14 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         /* Check for expanding references */
         /* (background buffer has already been zeroed out, if not expanding) */
         if(udata->cpy_info->expand_ref) {
-            /* TODO needs to be implemented (should use H5Tconvert) */
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy reference attribute")
+            size_t ref_count;
+
+            /* Determine # of reference elements to copy */
+            ref_count = nbytes / H5T_get_size(udata->dt_src);
+
+            /* Copy the reference elements */
+            if(H5O_copy_expand_ref(udata->file_src, buf, udata->idx_info_dst->dxpl_id, udata->idx_info_dst->f, bkg, ref_count, H5T_get_ref_type(udata->dt_src), udata->cpy_info) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy reference attribute")
         } /* end if */
 
         /* After fix ref, copy the new reference elements to the buffer to write out */

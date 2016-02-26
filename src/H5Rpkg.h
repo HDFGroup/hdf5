@@ -38,11 +38,23 @@
 /* Package Private Macros */
 /**************************/
 
+#define H5R_INITIALIZER { H5R_BADTYPE, {0, NULL} }
 
 /****************************/
 /* Package Private Typedefs */
 /****************************/
 
+/* Internal data structures */
+struct href_t {
+    H5R_type_t ref_type;
+    union {
+        struct {
+            size_t buf_size;/* Size of serialized reference */
+            void *buf;      /* Pointer to serialized reference */
+        } serial;
+        haddr_t addr;
+    } ref;
+};
 
 /*****************************/
 /* Package Private Variables */
@@ -54,11 +66,14 @@
 /******************************/
 
 /* General functions */
-H5_DLL herr_t H5R__get_obj_type(H5F_t *file, hid_t dxpl_id, const href_t *ref,
+H5_DLL herr_t H5R__get_obj_type(H5F_t *file, hid_t dxpl_id, href_t ref,
     H5O_type_t *obj_type);
 H5_DLL hid_t H5R__dereference(H5F_t *file, hid_t dapl_id, hid_t dxpl_id,
-    const href_t *ref, hbool_t app_ref);
-
+    href_t ref, hbool_t app_ref);
+H5_DLL struct H5S_t *H5R__get_region(H5F_t *file, hid_t dxpl_id, href_t ref);
+H5_DLL ssize_t H5R__get_obj_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id,
+    hid_t id, href_t ref, char *name, size_t size);
+H5_DLL ssize_t H5R__get_attr_name(H5F_t *file, href_t ref, char *name, size_t size);
 
 #endif /* _H5Rpkg_H */
 

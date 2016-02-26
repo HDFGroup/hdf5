@@ -19,17 +19,15 @@
  */
 
 #include "H5Tmodule.h"          /* This source code file is part of the H5T module */
-
+#define H5R_FRIEND              /*suppress error about including H5Rpkg   */
 
 #include "H5private.h"      /* Generic Functions    */
-#include "H5Dprivate.h"     /* Dataset functions    */
+#include "H5Tpkg.h"         /* Datatypes            */
+#include "H5Rpkg.h"         /* References           */
 #include "H5Eprivate.h"     /* Error handling       */
-#include "H5HGprivate.h"    /* Global Heaps         */
 #include "H5Iprivate.h"     /* IDs                  */
 #include "H5MMprivate.h"    /* Memory management    */
-#include "H5Pprivate.h"     /* Property lists       */
-#include "H5Rprivate.h"     /* References           */
-#include "H5Tpkg.h"         /* Datatypes            */
+#include "H5HGprivate.h"    /* Global Heaps         */
 
 /* Local functions */
 static herr_t H5T__ref_reclaim_recurse(void *elem, const H5T_t *dt);
@@ -171,25 +169,17 @@ done:
 static size_t
 H5T__ref_mem_getsize(const void *_ref)
 {
-#ifdef H5_NO_ALIGNMENT_RESTRICTIONS
-    const struct href_t *ref = (const struct href_t *)_ref;
-#else
-    struct href_t ref;
-#endif
+    const href_t *ref_ptr = (const href_t *)_ref;
+    const struct href_t *ref;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check parameters, return result */
-#ifdef H5_NO_ALIGNMENT_RESTRICTIONS
+    HDassert(ref_ptr);
+    ref = *ref_ptr;
     HDassert(ref);
 
-    FUNC_LEAVE_NOAPI(ref->obj_enc.buf_size)
-#else
-    HDassert(_ref);
-    HDmemcpy(&ref, _ref, sizeof(struct href_t));
-
-    FUNC_LEAVE_NOAPI(ref.buf_size)
-#endif
+    FUNC_LEAVE_NOAPI(ref->ref.serial.buf_size)
 }   /* end H5T__ref_mem_getsize() */
 
 /*-------------------------------------------------------------------------
@@ -203,29 +193,20 @@ H5T__ref_mem_getsize(const void *_ref)
  */
 static herr_t
 H5T__ref_mem_read(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-        void *_ref, void *buf, size_t buf_size)
+    void *_ref, void *buf, size_t buf_size)
 {
-#ifdef H5_NO_ALIGNMENT_RESTRICTIONS
-    const struct href_t *ref = (const struct href_t *)_ref;
-#else
-    struct href_t ref;
-#endif
+    const href_t *ref_ptr = (const href_t *)_ref;
+    const struct href_t *ref;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check parameters, copy data */
     HDassert(buf);
-#ifdef H5_NO_ALIGNMENT_RESTRICTIONS
-    HDassert(ref && ref->obj_enc.buf);
+    HDassert(ref_ptr);
+    ref = *ref_ptr;
+    HDassert(ref && ref->ref.serial.buf);
 
-    HDmemcpy(buf, ref->obj_enc.buf, buf_size);
-#else
-    HDassert(_ref);
-    HDmemcpy(&ref, _ref, sizeof(struct href_t));
-    HDassert(ref.obj_enc.buf);
-
-    HDmemcpy(buf, ref.obj_enc.buf, buf_size);
-#endif
+    HDmemcpy(buf, ref->ref.serial.buf, buf_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* end H5T__ref_mem_read() */
@@ -241,35 +222,36 @@ H5T__ref_mem_read(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
  */
 static herr_t
 H5T__ref_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-        void *_ref, void *buf, void H5_ATTR_UNUSED *_bg, size_t buf_size, H5R_type_t ref_type)
+    void *_ref, void *buf, void H5_ATTR_UNUSED *_bg, size_t buf_size,
+    H5R_type_t ref_type)
 {
-    struct href_t ref;
     herr_t ret_value = SUCCEED; /* Return value */
+    href_t *ref_ptr = (href_t *)_ref;
+    struct href_t *ref;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* check parameters */
-    HDassert(_ref);
+    HDassert(ref_ptr);
     HDassert(buf);
+    HDassert(buf_size);
 
-    if (buf_size != 0) {
-        if (NULL == (ref.obj_enc.buf = H5MM_malloc(buf_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for reference data")
+    if (NULL == (ref = (struct href_t *)H5MM_malloc(sizeof(struct href_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for reference data")
+    if (NULL == (ref->ref.serial.buf = H5MM_malloc(buf_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for reference data")
 
-        /* Copy the data into the newly allocated buffer */
-        HDmemcpy(ref.obj_enc.buf, buf, buf_size);
-    } /* end if */
-    else
-        ref.obj_enc.buf = NULL;
+    /* Copy the data into the newly allocated buffer */
+    HDmemcpy(ref->ref.serial.buf, buf, buf_size);
 
     /* Set the size */
-    ref.obj_enc.buf_size = buf_size;
+    ref->ref.serial.buf_size = buf_size;
 
     /* Set the type */
-    ref.ref_type = ref_type;
+    ref->ref_type = ref_type;
 
-    /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
-    HDmemcpy(_ref, &ref, sizeof(struct href_t));
+    /* Set the ref */
+    *ref_ptr = ref;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -303,28 +285,20 @@ H5T__obj_ref_mem_getsize(const void H5_ATTR_UNUSED *_ref)
  */
 static herr_t
 H5T__obj_ref_mem_read(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-        void *_ref, void *buf, size_t buf_size)
+    void *_ref, void *buf, size_t H5_ATTR_UNUSED buf_size)
 {
-#ifdef H5_NO_ALIGNMENT_RESTRICTIONS
-    const struct href_t *ref = (const struct href_t *)_ref;
-#else
-    struct href_t ref;
-#endif
+    const href_t *ref_ptr = (const href_t *)_ref;
+    const struct href_t *ref;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* check parameters, copy data */
     HDassert(buf);
-#ifdef H5_NO_ALIGNMENT_RESTRICTIONS
+    HDassert(ref_ptr);
+    ref = *ref_ptr;
     HDassert(ref);
 
-    HDmemcpy(buf, &ref->obj_addr, sizeof(haddr_t));
-#else
-    HDassert(_ref);
-    HDmemcpy(&ref, _ref, sizeof(struct href_t));
-
-    HDmemcpy(buf, &ref.obj_addr, sizeof(haddr_t));
-#endif
+    HDmemcpy(buf, &ref->ref.addr, sizeof(haddr_t));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* end H5T__obj_ref_mem_read() */
@@ -340,27 +314,32 @@ H5T__obj_ref_mem_read(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
  */
 static herr_t
 H5T__obj_ref_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-        void *_ref, void *buf, void H5_ATTR_UNUSED *_bg, size_t buf_size, H5R_type_t ref_type)
+    void *_ref, void *buf, void H5_ATTR_UNUSED *_bg, size_t buf_size,
+    H5R_type_t ref_type)
 {
-    struct href_t ref;
     herr_t ret_value = SUCCEED; /* Return value */
+    href_t *ref_ptr = (href_t *)_ref;
+    struct href_t *ref;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* check parameters */
-    HDassert(_ref);
+    HDassert(ref_ptr);
     HDassert(buf);
-    HDassert(buf_size == sizeof(haddr_t));
+    HDassert(buf_size);
+
+    if (NULL == (ref = (struct href_t *)H5MM_malloc(sizeof(struct href_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for reference data")
 
     /* Copy the data into the newly allocated buffer */
-    HDmemcpy(&ref.obj_addr, buf, buf_size);
+    HDmemcpy(&ref->ref.addr, buf, buf_size);
 
     /* Set the type */
-    ref.ref_type = ref_type;
+    ref->ref_type = ref_type;
 
-    /* Set pointer in user's buffer with memcpy, to avoid alignment issues */
-    HDmemcpy(_ref, &ref, sizeof(struct href_t));
-
+    /* Set the ref */
+    *ref_ptr = ref;
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5T__obj_ref_mem_write() */
 
@@ -400,7 +379,7 @@ H5T__ref_disk_getsize(const void *_ref)
  */
 static herr_t
 H5T__ref_disk_read(H5F_t *f, hid_t dxpl_id, void *_ref, void *buf,
-        size_t H5_ATTR_UNUSED buf_size)
+    size_t H5_ATTR_UNUSED buf_size)
 {
     const uint8_t *ref = (const uint8_t *)_ref;
     H5HG_t hobjid;
@@ -420,12 +399,12 @@ H5T__ref_disk_read(H5F_t *f, hid_t dxpl_id, void *_ref, void *buf,
     H5F_addr_decode(f, (const uint8_t **)&ref, &(hobjid.addr));
     UINT32DECODE(ref, hobjid.idx);
 
-    /* Check if this sequence actually has any data */
-    if(hobjid.addr > 0) {
-        /* Read the information from disk */
-        if(H5HG_read(f, dxpl_id, &hobjid, buf, NULL) == NULL)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "Unable to read reference information")
-    } /* end if */
+    if(!H5F_addr_defined(hobjid.addr) || hobjid.addr == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Undefined reference pointer")
+
+    /* Read the information from disk */
+    if(H5HG_read(f, dxpl_id, &hobjid, buf, NULL) == NULL)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_READERROR, FAIL, "Unable to read reference information")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -442,7 +421,7 @@ done:
  */
 static herr_t
 H5T__ref_disk_write(H5F_t *f, hid_t dxpl_id, void *_ref, void *buf, void *_bg,
-        size_t buf_size, H5R_type_t H5_ATTR_UNUSED ref_type)
+    size_t buf_size, H5R_type_t H5_ATTR_UNUSED ref_type)
 {
     uint8_t *ref = (uint8_t *)_ref; /* Pointer to the user's information */
     const uint8_t *bg = (const uint8_t *)_bg; /* Pointer to the old data */
@@ -517,8 +496,8 @@ H5T__obj_ref_disk_getsize(const void H5_ATTR_UNUSED *_ref)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__obj_ref_disk_read(H5F_t H5_ATTR_UNUSED *f, hid_t dxpl_id, void *_ref, void *buf,
-        size_t H5_ATTR_UNUSED buf_size)
+H5T__obj_ref_disk_read(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    void *_ref, void *buf, size_t H5_ATTR_UNUSED buf_size)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -543,8 +522,9 @@ H5T__obj_ref_disk_read(H5F_t H5_ATTR_UNUSED *f, hid_t dxpl_id, void *_ref, void 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__obj_ref_disk_write(H5F_t H5_ATTR_UNUSED *f, hid_t dxpl_id, void *_ref, void *buf, void *_bg,
-        size_t buf_size, H5R_type_t H5_ATTR_UNUSED ref_type)
+H5T__obj_ref_disk_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    void *_ref, void *buf, void H5_ATTR_UNUSED *_bg, size_t buf_size,
+    H5R_type_t H5_ATTR_UNUSED ref_type)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -571,6 +551,7 @@ H5T__obj_ref_disk_write(H5F_t H5_ATTR_UNUSED *f, hid_t dxpl_id, void *_ref, void
 static herr_t
 H5T__ref_reclaim_recurse(void *elem, const H5T_t *dt)
 {
+    unsigned u;                     /* Local index variable */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -580,19 +561,45 @@ H5T__ref_reclaim_recurse(void *elem, const H5T_t *dt)
 
     /* Check the datatype of this element */
     switch(dt->shared->type) {
+        case H5T_ARRAY:
+            /* Recurse on each element, if the array's base type is array, VL, enum or compound */
+            if(H5T_IS_COMPLEX(dt->shared->parent->shared->type)) {
+                void *off;     /* offset of field */
+
+                /* Calculate the offset member and recurse on it */
+                for(u = 0; u < dt->shared->u.array.nelem; u++) {
+                    off = ((uint8_t *)elem) + u * (dt->shared->parent->shared->size);
+                    if(H5T__ref_reclaim_recurse(off, dt->shared->parent) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Unable to free array element")
+                } /* end for */
+            } /* end if */
+            break;
+
+        case H5T_COMPOUND:
+            /* Check each field and recurse on VL, compound, enum or array ones */
+            for(u = 0; u < dt->shared->u.compnd.nmembs; u++) {
+                /* Recurse if it's VL, compound, enum or array */
+                if(H5T_IS_COMPLEX(dt->shared->u.compnd.memb[u].type->shared->type)) {
+                    void *off;     /* offset of field */
+
+                    /* Calculate the offset member and recurse on it */
+                    off = ((uint8_t *)elem) + dt->shared->u.compnd.memb[u].offset;
+                    if(H5T__ref_reclaim_recurse(off, dt->shared->u.compnd.memb[u].type) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "Unable to free compound field")
+                } /* end if */
+            } /* end for */
+            break;
         case H5T_REFERENCE:
         {
-            struct href_t *ref = (struct href_t *)elem;
+            href_t *ref = (href_t *)elem;
 
-            if((ref->ref_type != H5R_OBJECT) && (ref->obj_enc.buf_size != 0)) {
-                ref->obj_enc.buf = H5MM_xfree(ref->obj_enc.buf);
-            } /* end if */
+            HDassert(ref);
+            if (H5R_destroy(*ref) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTFREE, FAIL, "cannot free reference")
         }
             break;
 
         /* Don't do anything for other types */
-        case H5T_ARRAY:
-        case H5T_COMPOUND:
         case H5T_INTEGER:
         case H5T_FLOAT:
         case H5T_TIME:
@@ -626,7 +633,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_ref_reclaim(void *elem, hid_t type_id, unsigned H5_ATTR_UNUSED ndim, const hsize_t H5_ATTR_UNUSED *point, void H5_ATTR_UNUSED *op_data)
+H5T_ref_reclaim(void *elem, hid_t type_id, unsigned H5_ATTR_UNUSED ndim,
+    const hsize_t H5_ATTR_UNUSED *point, void H5_ATTR_UNUSED *op_data)
 {
     H5T_t	*dt;
     herr_t ret_value = SUCCEED;     /* Return value */

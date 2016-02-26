@@ -430,7 +430,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
 
         case H5T_REFERENCE: /* Reference datatypes...  */
             dt->shared->u.atomic.order = H5T_ORDER_NONE;
-            dt->shared->u.atomic.prec = 8 * dt->shared->size;
+            dt->shared->u.atomic.prec = 0;
             dt->shared->u.atomic.offset = 0;
             dt->shared->u.atomic.lsb_pad = H5T_PAD_ZERO;
             dt->shared->u.atomic.msb_pad = H5T_PAD_ZERO;

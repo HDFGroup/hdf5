@@ -1546,8 +1546,17 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
         else if(fix_ref) {
             /* Check for expanding references */
             if(cpy_info->expand_ref) {
-                /* TODO needs to be implemented (should use H5Tconvert) */
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
+                size_t ref_count;
+
+                /* Determine # of reference elements to copy */
+                ref_count = src_nbytes / H5T_get_size(dt_src);
+
+                /* Copy the reference elements */
+                if(H5O_copy_expand_ref(f_src, buf, dxpl_id, f_dst, bkg, ref_count, H5T_get_ref_type(dt_src), cpy_info) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
+
+                /* After fix ref, copy the new reference elements to the buffer to write out */
+                HDmemcpy(buf, bkg,  buf_size);
             } /* end if */
             else
                 /* Reset value to zero */

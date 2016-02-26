@@ -30,6 +30,7 @@
 typedef enum {
     H5R_BADTYPE     =   (-1),   /*invalid Reference Type                     */
     H5R_OBJECT,                 /*Object reference                           */
+    H5R_DATASET_REGION,         /*For backward compatibility                 */
     H5R_REGION,                 /*Dataset Region Reference                   */
     H5R_ATTR,                   /*Attribute Reference                        */
     H5R_EXT_OBJECT,             /*External Object reference                  */
@@ -39,7 +40,10 @@ typedef enum {
 } H5R_type_t;
 
 /* Opaque reference type */
-typedef struct href_t href_t;
+typedef struct href_t *href_t;
+
+/* NULL reference */
+#define HREF_NULL ((href_t)0)
 
 /* Publicly visible data structures */
 
@@ -48,19 +52,24 @@ extern "C" {
 #endif
 
 /* Functions in H5R.c */
-H5_DLL href_t *H5Rcreate_object(hid_t loc_id, const char *name);
-H5_DLL href_t *H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id);
-H5_DLL href_t *H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name);
-H5_DLL href_t *H5Rcreate_ext_object(hid_t loc_id, const char *name);
-H5_DLL href_t *H5Rcreate_ext_region(hid_t loc_id, const char *name, hid_t space_id);
-H5_DLL href_t *H5Rcreate_ext_attr(hid_t loc_id, const char *name, const char *attr_name);
-H5_DLL herr_t  H5Rdestroy(href_t *ref);
+H5_DLL href_t H5Rcreate_object(hid_t loc_id, const char *name);
+H5_DLL href_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id);
+H5_DLL href_t H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name);
+H5_DLL href_t H5Rcreate_ext_object(hid_t loc_id, const char *name);
+H5_DLL href_t H5Rcreate_ext_region(hid_t loc_id, const char *name, hid_t space_id);
+H5_DLL href_t H5Rcreate_ext_attr(hid_t loc_id, const char *name, const char *attr_name);
+H5_DLL herr_t H5Rdestroy(href_t ref);
 
-H5_DLL hid_t   H5Rdereference2(hid_t obj_id, hid_t oapl_id, const href_t *ref);
-H5_DLL hid_t   H5Rget_region(hid_t loc_id, const href_t *ref);
-H5_DLL herr_t  H5Rget_obj_type2(hid_t loc_id, const href_t *ref, H5O_type_t *obj_type);
-H5_DLL ssize_t H5Rget_name(hid_t loc_id, const href_t *ref, char *name/*out*/, size_t size);
-H5_DLL ssize_t H5Rget_filename(const href_t *ref, char *name/*out*/, size_t size);
+H5_DLL H5R_type_t H5Rget_type(href_t ref);
+H5_DLL htri_t     H5Requal(href_t ref1, href_t ref2);
+
+H5_DLL hid_t      H5Rdereference3(hid_t obj_id, hid_t oapl_id, href_t ref);
+H5_DLL hid_t      H5Rget_region2(hid_t loc_id, href_t ref);
+H5_DLL herr_t     H5Rget_obj_type3(hid_t loc_id, href_t ref, H5O_type_t *obj_type);
+H5_DLL ssize_t    H5Rget_obj_name(hid_t loc_id, href_t ref, char *name/*out*/, size_t size);
+H5_DLL ssize_t    H5Rget_attr_name(hid_t loc_id, href_t ref, char *name/*out*/, size_t size);
+H5_DLL ssize_t    H5Rget_file_name(href_t ref, char *name/*out*/, size_t size);
+
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
@@ -70,14 +79,19 @@ H5_DLL ssize_t H5Rget_filename(const href_t *ref, char *name/*out*/, size_t size
 
 /* Macros */
 
-
 /* Typedefs */
 
-
 /* Function prototypes */
-/* TODO should add a H5Rcreate1 that maps to other types */
-H5_DLL H5G_obj_t H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *_ref);
+H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name,
+                        H5R_type_t ref_type, hid_t space_id);
 H5_DLL hid_t H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *ref);
+H5_DLL hid_t H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *ref);
+H5_DLL hid_t H5Rget_region1(hid_t dataset, H5R_type_t ref_type, const void *ref);
+H5_DLL H5G_obj_t H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *_ref);
+H5_DLL herr_t H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *_ref,
+    H5O_type_t *obj_type);
+H5_DLL ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *ref,
+    char *name/*out*/, size_t size);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

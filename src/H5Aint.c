@@ -2279,8 +2279,15 @@ H5A_attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *attr_src,
 
         /* Check for expanding references */
         if(cpy_info->expand_ref) {
-            /* TODO needs to be implemented (should use H5Tconvert) */
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
+            size_t ref_count;
+
+            /* Determine # of reference elements to copy */
+            ref_count = attr_dst->shared->data_size / H5T_get_size(attr_dst->shared->dt);
+
+            /* Copy objects referenced in source buffer to destination file and set destination elements */
+            if(H5O_copy_expand_ref(file_src, attr_dst->shared->data, dxpl_id,
+                    file_dst, attr_dst->shared->data, ref_count, H5T_get_ref_type(attr_dst->shared->dt), cpy_info) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
         } /* end if */
         else
             /* Reset value to zero */

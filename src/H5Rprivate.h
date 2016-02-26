@@ -25,30 +25,18 @@
 /* Private headers needed by this file */
 #include "H5Gprivate.h"
 
-/* Internal data structures */
-struct href_t {
-    H5R_type_t ref_type;
-    union {
-        struct {
-            size_t buf_size;/* Size of serialized reference */
-            void *buf;      /* Pointer to serialized reference */
-        } obj_enc;
-        haddr_t obj_addr;
-    };
-};
-
-#define H5R_INITIALIZER { H5R_BADTYPE, {0, NULL} }
-
 /* To prevent including H5Sprivate.h that includes H5Rprivate.h */
 struct H5S_t;
 
 /* Private functions */
-H5_DLL href_t *H5R_create_object(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
-H5_DLL href_t *H5R_create_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, struct H5S_t *space);
-H5_DLL href_t *H5R_create_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char *attr_name);
-H5_DLL href_t *H5R_create_ext_object(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
-H5_DLL href_t *H5R_create_ext_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, struct H5S_t *space);
-H5_DLL href_t *H5R_create_ext_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char *attr_name);
-H5_DLL herr_t  H5R_destroy(href_t *ref);
+H5_DLL href_t H5R_create_object(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
+H5_DLL href_t H5R_create_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, struct H5S_t *space);
+H5_DLL href_t H5R_create_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char *attr_name);
+H5_DLL href_t H5R_create_ext_object(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
+H5_DLL href_t H5R_create_ext_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, struct H5S_t *space);
+H5_DLL href_t H5R_create_ext_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char *attr_name);
+H5_DLL herr_t H5R_destroy(href_t ref);
+
+H5_DLL H5R_type_t H5R_get_type(href_t ref);
 
 #endif  /* _H5Rprivate_H */

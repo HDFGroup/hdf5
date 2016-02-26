@@ -56,7 +56,7 @@ static const char *FileHeader = "\n\
 #undef NDEBUG
 #include "H5private.h"
 #include "H5Tpublic.h"
-#include "H5Rprivate.h"
+#include "H5Rpublic.h"
 
 #define MAXDETECT 64
 

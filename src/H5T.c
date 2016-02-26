@@ -1070,6 +1070,9 @@ H5T__init_package(void)
     status |= H5T_register(H5T_PERS_SOFT, "objref", objref, objref, H5T__conv_ref, H5AC_ind_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_SOFT, "regref", regref, regref, H5T__conv_ref, H5AC_ind_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_SOFT, "attrref", attrref, attrref, H5T__conv_ref, H5AC_ind_dxpl_id, FALSE);
+    status |= H5T_register(H5T_PERS_SOFT, "extobjref", extobjref, extobjref, H5T__conv_ref, H5AC_ind_dxpl_id, FALSE);
+    status |= H5T_register(H5T_PERS_SOFT, "extregref", extregref, extregref, H5T__conv_ref, H5AC_ind_dxpl_id, FALSE);
+    status |= H5T_register(H5T_PERS_SOFT, "extattrref", extattrref, extattrref, H5T__conv_ref, H5AC_ind_dxpl_id, FALSE);
 
     /*
      * Native conversions should be listed last since we can use hardware to
