@@ -3680,7 +3680,7 @@ test_nbit_compound_3(hid_t file)
         char str[30];       /* fixed-length string, no-op type */
         char *vl_str;       /* varible-length string, no-op type */
         hvl_t v;            /* VL datatype field, no-op type */
-        hobj_ref_t r;       /* Object reference field, no-op type */
+        href_t r;           /* Object reference field, no-op type */
         unsigned char o[5]; /* Opaque field, no-op type */
     } atomic;
     hid_t               i_tid, str_tid, vl_str_tid, v_tid, o_tid;
@@ -3749,7 +3749,7 @@ test_nbit_compound_3(hid_t file)
         for(k = 0; k < (i+1); k++) ((unsigned int *)orig_data[i].v.p)[k] = (unsigned int)(i*100 + k);
 
         /* Create reference to the dataset "nbit_obj_ref" */
-        if(H5Rcreate(&orig_data[i].r, H5R_OBJECT, file, "nbit_obj_ref") < 0) goto error;
+        if(NULL == (orig_data[i].r = H5Rcreate_object(file, "nbit_obj_ref"))) goto error;
 
         for(j = 0; j < 5; j++) orig_data[i].o[j] = (unsigned char)(i + j);
     }
@@ -3785,7 +3785,7 @@ test_nbit_compound_3(hid_t file)
            strcmp(new_data[i].str, orig_data[i].str) !=0 ||
            strcmp(new_data[i].vl_str, orig_data[i].vl_str) !=0 ||
            new_data[i].v.len != orig_data[i].v.len ||
-           new_data[i].r != orig_data[i].r)
+           (TRUE != H5Requal(new_data[i].r, orig_data[i].r)))
         {
             H5_FAILED();
             printf("    Read different values than written.\n");
@@ -3818,6 +3818,8 @@ test_nbit_compound_3(hid_t file)
      */
     if(H5Dvlen_reclaim(cmpd_tid, space, H5P_DEFAULT, new_data) < 0) goto error;
     if(H5Dvlen_reclaim(cmpd_tid, space, H5P_DEFAULT, orig_data) < 0) goto error;
+    if(H5Dref_reclaim(cmpd_tid, space, H5P_DEFAULT, new_data) < 0) goto error;
+    if(H5Dref_reclaim(cmpd_tid, space, H5P_DEFAULT, orig_data) < 0) goto error;
     if(H5Tclose(i_tid) < 0) goto error;
     if(H5Tclose(str_tid) < 0) goto error;
     if(H5Tclose(vl_str_tid) < 0) goto error;

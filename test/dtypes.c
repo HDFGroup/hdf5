@@ -346,7 +346,7 @@ test_detect(void)
         short s;
     };
     struct complex {    /* Struct with complex fields */
-        hobj_ref_t arr_r[3][3];
+        href_t arr_r[3][3];
         int i;
         hvl_t vl_f;
         hvl_t vl_s;
@@ -6216,7 +6216,7 @@ test_set_order(void)
     if (H5Tclose(dtype) < 0) TEST_ERROR
 
     /* Region reference */
-    if ((dtype = H5Tcopy(H5T_STD_REF_DSETREG)) < 0) TEST_ERROR
+    if ((dtype = H5Tcopy(H5T_STD_REF_REG)) < 0) TEST_ERROR
     if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;
     if (H5Tset_order(dtype, H5T_ORDER_NONE) < 0) TEST_ERROR;
     if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;

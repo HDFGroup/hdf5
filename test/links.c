@@ -5937,7 +5937,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     		buf[NAME_BUF_SIZE];             /* misc. buffer */
     H5L_info_t  li;
     H5O_info_t  oi;
-    hobj_ref_t  obj_ref;
+    href_t obj_ref;
 
     if(new_format)
         TESTING("that external files are closed during traversal (w/new group format)")
@@ -6053,7 +6053,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY
 
     /* Test H5Rcreate */
-    if(H5Rcreate(&obj_ref, H5R_OBJECT, fid1, "elink/elink/elink/type1_moved") < 0) TEST_ERROR
+    if(NULL == (obj_ref = H5Rcreate_object(fid1, "elink/elink/elink/type1_moved"))) TEST_ERROR
 
     /* Test unlink */
     if(H5Ldelete(fid1, "elink/elink/elink/group1_moved", H5P_DEFAULT) < 0) TEST_ERROR
@@ -6115,6 +6115,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
     if((fid4 = H5Fcreate(filename4, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
     /* Cleanup */
+    if(H5Rdestroy(obj_ref) < 0) TEST_ERROR
     if(H5Sclose(sid) < 0) TEST_ERROR
     if(H5Tclose(tid2) < 0) TEST_ERROR
     if(H5Fclose(fid4) < 0) TEST_ERROR
@@ -6128,6 +6129,7 @@ external_link_closing(hid_t fapl, hbool_t new_format)
 
 error:
     H5E_BEGIN_TRY {
+        H5Rdestroy(obj_ref);
         H5Gclose(gid);
         H5Tclose(tid);
         H5Dclose(did);

@@ -2098,17 +2098,11 @@ test_refer_dtype(hid_t file)
     hid_t	tid1 = -1, dtype = -1, native_type = -1;       /* Datatype ID	*/
     hsize_t	dims1[] = {1};
     H5O_type_t  obj_type;       /* Object type */
-    hobj_ref_t *wbuf = NULL,    /* buffer to write to disk */
-               *rbuf = NULL;    /* buffer read from disk */
+    href_t wref = NULL,    /* reference to write to disk */
+           rref = NULL;    /* reference to read from disk */
 
     /* Output message about test being performed */
     TESTING("reference datatype");
-
-    /* Allocate write & read buffers */
-    if(NULL == (wbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)))))
-        TEST_ERROR
-    if(NULL == (rbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)))))
-        TEST_ERROR
 
     /* Create dataspace for datasets */
     if((sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL)) < 0)
@@ -2148,15 +2142,15 @@ test_refer_dtype(hid_t file)
         TEST_ERROR;
 
     /* Create reference to named datatype */
-    if(H5Rcreate(wbuf, H5R_OBJECT, file, "/Group1/Datatype1") < 0)
+    if(NULL == (wref = H5Rcreate_object(file, "/Group1/Datatype1")))
         TEST_ERROR;
-    if(H5Rget_obj_type2(dataset, H5R_OBJECT, wbuf, &obj_type) < 0)
+    if(H5Rget_obj_type3(dataset, wref, &obj_type) < 0)
         TEST_ERROR;
     if(obj_type != H5O_TYPE_NAMED_DATATYPE)
         TEST_ERROR;
 
     /* Write selection to disk */
-    if(H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+    if(H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wref) < 0)
         TEST_ERROR;
 
     /* Close disk dataspace */
@@ -2184,11 +2178,11 @@ test_refer_dtype(hid_t file)
         TEST_ERROR;
 
     /* Read selection from disk */
-    if(H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+    if(H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rref) < 0)
         TEST_ERROR;
 
     /* Open datatype object */
-    if((tid1 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, rbuf)) < 0)
+    if((tid1 = H5Rdereference3(dataset, H5P_DEFAULT, rref)) < 0)
         TEST_ERROR;
 
     /* Verify correct datatype */
@@ -2209,19 +2203,21 @@ test_refer_dtype(hid_t file)
     if(H5Dclose(dataset) < 0)
         TEST_ERROR;
 
-    /* Free memory buffers */
-    HDfree(wbuf);
-    HDfree(rbuf);
+    /* Free references */
+    if(H5Rdestroy(wref) < 0)
+        TEST_ERROR;
+    if(H5Rdestroy(rref) < 0)
+        TEST_ERROR;
 
     PASSED();
 
     return 0;
 
 error:
-    if(wbuf)
-        HDfree(wbuf);
-    if(rbuf)
-        HDfree(rbuf);
+    if(wref)
+        H5Rdestroy(wref);
+    if(rref)
+        H5Rdestroy(rref);
 
     H5E_BEGIN_TRY {
         H5Sclose(sid1);
@@ -2265,10 +2261,10 @@ test_refer_dtype2(hid_t file)
     hsize_t         stride[SPACE2_RANK];    /* Stride of hyperslab */
     hsize_t         count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t         block[SPACE2_RANK];     /* Block size of hyperslab */
-    hdset_reg_ref_t wbuf,       /* buffer to write to disk */
-                    rbuf;       /* buffer read from disk */
+    href_t          wref,       /* reference to write to disk */
+                    rref;       /* reference to read from disk */
     uint8_t        *dwbuf = NULL, /* Buffer for writing numeric data to disk */
-                    *drbuf = NULL; /* Buffer for reading numeric data from disk */
+                   *drbuf = NULL; /* Buffer for reading numeric data from disk */
     uint8_t        *tu8 = NULL; /* Temporary pointer to uint8 data */
     H5O_type_t      obj_type;   /* Object type */
     int             i;          /* counting variables */
@@ -2307,7 +2303,7 @@ test_refer_dtype2(hid_t file)
         TEST_ERROR;
 
     /* Create a reference dataset */
-    if((dset1 = H5Dcreate2(file, "Dataset1", H5T_STD_REF_DSETREG, sid1,
+    if((dset1 = H5Dcreate2(file, "Dataset1", H5T_STD_REF_REG, sid1,
             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -2329,15 +2325,15 @@ test_refer_dtype2(hid_t file)
         TEST_ERROR;
 
     /* Store first dataset region */
-    if(H5Rcreate(&wbuf, H5R_DATASET_REGION, file, "/Dataset2", sid2) < 0)
+    if(NULL == (wref = H5Rcreate_region(file, "/Dataset2", sid2)))
         TEST_ERROR;
-    if(H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &wbuf, &obj_type) < 0)
+    if(H5Rget_obj_type3(dset1, wref, &obj_type) < 0)
         TEST_ERROR;
     if(obj_type != H5O_TYPE_DATASET)
         TEST_ERROR;
 
     /* Write selection to disk */
-    if(H5Dwrite(dset1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wbuf) < 0)
+    if(H5Dwrite(dset1, H5T_STD_REF_REG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wref) < 0)
         TEST_ERROR;
 
     /* Close disk dataspace */
@@ -2365,19 +2361,19 @@ test_refer_dtype2(hid_t file)
         TEST_ERROR;
 
     /* Check if the data type is equal */
-    if(!H5Tequal(native_type, H5T_STD_REF_DSETREG))
+    if(!H5Tequal(native_type, H5T_STD_REF_REG))
         TEST_ERROR;
 
     /* Read selection from disk */
-    if(H5Dread(dset1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rbuf) < 0)
+    if(H5Dread(dset1, H5T_STD_REF_REG, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rref) < 0)
         TEST_ERROR;
 
     /* Try to open objects */
-    if((dset2 = H5Rdereference2(dset1, H5P_DEFAULT, H5R_DATASET_REGION, &rbuf)) < 0)
+    if((dset2 = H5Rdereference3(dset1, H5P_DEFAULT, rref)) < 0)
         TEST_ERROR;
 
-    /* Check what H5Rget_obj_type2 function returns */
-    if(H5Rget_obj_type2(dset1, H5R_DATASET_REGION, &rbuf, &obj_type) < 0)
+    /* Check what H5Rget_obj_type3 function returns */
+    if(H5Rget_obj_type3(dset1, rref, &obj_type) < 0)
         TEST_ERROR;
     if(obj_type != H5O_TYPE_DATASET)
         TEST_ERROR;
@@ -2398,13 +2394,19 @@ test_refer_dtype2(hid_t file)
             TEST_ERROR;
 
     /* Get the hyperslab selection */
-    if((sid2 = H5Rget_region(dset1, H5R_DATASET_REGION, &rbuf)) < 0)
+    if((sid2 = H5Rget_region2(dset1, rref)) < 0)
         TEST_ERROR;
 
     /* Verify correct hyperslab selected */
     if((int)H5Sget_select_npoints(sid2) != 36)
         TEST_ERROR;
     if((int)H5Sget_select_hyper_nblocks(sid2) != 1)
+        TEST_ERROR;
+
+    /* Destroy references */
+    if(H5Rdestroy(wref) < 0)
+        TEST_ERROR;
+    if(H5Rdestroy(rref) < 0)
         TEST_ERROR;
 
     /* Close region space */
