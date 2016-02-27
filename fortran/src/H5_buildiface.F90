@@ -4,7 +4,7 @@
 !  Executable: H5_buildiface
 !
 ! FILE
-!  fortran/src/H5_buildiface.f90
+!  fortran/src/H5_buildiface.F90
 !
 ! PURPOSE
 !  This stand alone program is used at build time to generate the module

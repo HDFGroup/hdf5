@@ -4,7 +4,7 @@
 !  MODULE H5G
 !
 ! FILE
-!  fortran/src/H5Gff.f90
+!  fortran/src/H5Gff.F90
 !
 ! PURPOSE
 !  This file contains Fortran interfaces for H5G functions.
