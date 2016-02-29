@@ -100,6 +100,7 @@ AC_CONFIG_COMMANDS([pubconf], [
 
 AC_CANONICAL_HOST
 AC_SUBST([CPPFLAGS])
+AC_SUBST([JNIFLAGS])
 
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
@@ -107,6 +108,9 @@ AC_SUBST([H5_CFLAGS])
 AC_SUBST([H5_CPPFLAGS])
 AC_SUBST([H5_FCFLAGS])
 AC_SUBST([H5_CXXFLAGS])
+AC_SUBST([H5_JNIFLAGS])
+AC_SUBST([H5_JAVACFLAGS])
+AC_SUBST([H5_JAVAFLAGS])
 AC_SUBST([H5_LDFLAGS])
 
 ## AM_CFLAGS (and company) are for CFLAGS that should be used on HDF5,
@@ -115,6 +119,9 @@ AC_SUBST([AM_CFLAGS])
 AC_SUBST([AM_FCFLAGS])
 AC_SUBST([AM_CXXFLAGS])
 AC_SUBST([AM_CPPFLAGS])
+AC_SUBST([AM_JNIFLAGS])
+AC_SUBST([AM_JAVACFLAGS])
+AC_SUBST([AM_JAVAFLAGS])
 AC_SUBST([AM_LDFLAGS])
 
 ## Make sure flags are initialized.
@@ -122,11 +129,17 @@ AM_CFLAGS="${AM_CFLAGS}"
 AM_CXXFLAGS="${AM_CXXFLAGS}"
 AM_FCFLAGS="${AM_FCFLAGS}"
 AM_CPPFLAGS="${AM_CPPFLAGS}"
+AM_JNIFLAGS="${AM_JNIFLAGS}"
+AM_JAVACFLAGS="${AM_JAVACFLAGS}"
+AM_JAVAFLAGS="${AM_JAVAFLAGS}"
 AM_LDFLAGS="${AM_LDFLAGS}"
 CFLAGS="${CFLAGS}"
 CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
 CPPFLAGS="${CPPFLAGS}"
+JNIFLAGS="${JNIFLAGS}"
+JAVACFLAGS="${JAVACFLAGS}"
+JAVAFLAGS="${JAVAFLAGS}"
 LDFLAGS="${LDFLAGS}"
 
 ## Configure may need to alter any of the *FLAGS variables in order for
@@ -135,6 +148,8 @@ LDFLAGS="${LDFLAGS}"
 saved_user_CFLAGS="$CFLAGS"
 saved_user_CXXFLAGS="$CXXFLAGS"
 saved_user_FCFLAGS="$FCFLAGS"
+saved_user_JAVACFLAGS="$JAVACFLAGS"
+saved_user_JAVAFLAGS="$JAVAFLAGS"
 saved_user_LDFLAGS="$LDFLAGS"
 saved_user_CPPFLAGS="$CPPFLAGS"
 
@@ -326,6 +341,8 @@ esac
 ## reset this value at the end of configure, to preserve the user's settings.
 CFLAGS="${AM_CFLAGS} ${CFLAGS}"
 FCFLAGS="${AM_FCFLAGS} ${FCFLAGS}"
+JAVACFLAGS="${AM_JAVACFLAGS} ${JAVACFLAGS}"
+JAVAFLAGS="${AM_JAVAFLAGS} ${JAVAFLAGS}"
 CXXFLAGS="${AM_CXXFLAGS} ${CXXFLAGS}"
 CPPFLAGS="${AM_CPPFLAGS} ${CPPFLAGS}"
 LDFLAGS="${AM_LDFLAGS} ${LDFLAGS}"
@@ -833,6 +850,55 @@ case "`uname`" in
     CHECK_WARN="Shared libraries are not currently supported on CYGWIN."
     ;;
 esac
+
+## ----------------------------------------------------------------------
+## Check if they would like the Java native interface (JNI) compiled
+##
+
+AC_SUBST([H5_CLASSPATH]) H5_CLASSPATH=""
+AC_MSG_CHECKING([if Java JNI interface enabled])
+
+AC_ARG_ENABLE([java],
+              [AS_HELP_STRING([--enable-java],
+                              [Compile the Java JNI interface [default=no]])],
+              [HDF_JAVA=$enableval],
+              [HDF_JAVA=no])
+
+if test "X$HDF_JAVA" = "Xyes" && test "X${enable_shared}" != "Xno"; then
+  echo "yes"
+  if test "X$CLASSPATH" = "X"; then
+    H5_CLASSPATH=".:$srcdir/java/lib"
+  else
+    H5_CLASSPATH=".:$CLASSPATH:$srcdir/java/lib"
+  fi
+## Checks for programs.
+  AX_JAVA_OPTIONS
+  H5_JAVACFLAGS=$JAVACFLAGS
+  H5_JAVAFLAGS=$JAVAFLAGS
+  AX_PROG_JAVAC
+  AX_PROG_JAVA
+  AX_PROG_JAR
+  AX_PROG_JAVADOC
+  ## Find the include directories needed for building JNI code
+  AX_JNI_INCLUDE_DIR()
+  for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS
+  do
+    JNIFLAGS="$JNIFLAGS -I$JNI_INCLUDE_DIR"
+  done
+  ## Find junit for testing the JNI code
+  AX_CHECK_CLASSPATH()
+  CLASSPATH_ENV=$H5_CLASSPATH
+  AX_CHECK_JUNIT()
+  AX_CHECK_JAVA_HOME
+
+  AC_MSG_RESULT([yes])
+else
+  if test "X${enable_shared}" = "Xno"; then
+    AC_MSG_ERROR([Java requires shared libraries to be built])
+  fi
+  HDF_JAVA="no"
+  AC_MSG_RESULT([no])
+fi
 
 ## ----------------------------------------------------------------------
 ## Fortran libraries are not currently supported on Mac. Disable them.
@@ -3071,7 +3137,7 @@ CXX_NOFLAGS=`echo $CXX | sed 's/ -.*//'`
 if `echo $CXX_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
   CXX_VERSION="$CXX"
 else
-  CXX_VERSION="$FC";
+  CXX_VERSION="$CXX";
   for x in `echo $PATH | sed -e 's/:/ /g'`; do
     if test -x $x/$CXX_NOFLAGS; then
       CXX_VERSION="$x/$CXX"
@@ -3081,6 +3147,27 @@ else
 fi
 if test -n "$cxx_version_info"; then
   CXX_VERSION="$CXX_VERSION ( $cxx_version_info)"
+fi
+
+AC_SUBST([JAVA_VERSION])
+## Strip anything that looks like a flag off of $JAVA
+JAVA_NOFLAGS=`echo $JAVA | sed 's/ -.*//'`
+
+if `echo $JAVA_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
+  JAVA_VERSION="$JAVA"
+else
+  JAVA_VERSION="$JAVA";
+  for x in `echo $PATH | sed -e 's/:/ /g'`; do
+    if test -x $x/$JAVA_NOFLAGS; then
+      JAVA_VERSION="$x/$JAVA"
+      break
+    fi
+  done
+fi
+java_version_info=`$JAVA -version 2>&1 |\
+  grep 'version' | sed -e 's/version "//' | sed -e 's/"//'`
+if test -n "$java_version_info"; then
+  JAVA_VERSION="$JAVA_VERSION ( $java_version_info)"
 fi
 
 ## ----------------------------------------------------------------------
@@ -3296,6 +3383,8 @@ CFLAGS="$saved_user_CFLAGS"
 FCFLAGS="$saved_user_FCFLAGS"
 CXXFLAGS="$saved_user_CXXFLAGS"
 CPPFLAGS="$saved_user_CPPFLAGS"
+JAVACFLAGS="$saved_user_JAVACFLAGS"
+JAVAFLAGS="$saved_user_JAVAFLAGS"
 LDFLAGS="$saved_user_LDFLAGS"
 
 
@@ -3306,6 +3395,7 @@ LDFLAGS="$saved_user_LDFLAGS"
 AM_CONDITIONAL([BUILD_CXX_CONDITIONAL], [test "X$HDF_CXX" = "Xyes"])
 AM_CONDITIONAL([BUILD_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_FORTRAN_CONDITIONAL], [test "X$HDF_FORTRAN" = "Xyes"])
+AM_CONDITIONAL([BUILD_JAVA_CONDITIONAL], [test "X$HDF_JAVA" = "Xyes"])
 AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
 
 
@@ -3451,6 +3541,20 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  fortran/examples/Makefile
                  fortran/examples/run-fortran-ex.sh
                  fortran/examples/testh5fc.sh
+                 java/Makefile
+                 java/src/Makefile
+                 java/src/jni/Makefile
+                 java/test/Makefile
+                 java/test/junit.sh
+                 java/examples/Makefile
+                 java/examples/intro/Makefile
+                 java/examples/intro/runExample.sh
+                 java/examples/datasets/Makefile
+                 java/examples/datasets/runExample.sh
+                 java/examples/datatypes/Makefile
+                 java/examples/datatypes/runExample.sh
+                 java/examples/groups/Makefile
+                 java/examples/groups/runExample.sh
                  hl/Makefile
                  hl/src/Makefile
                  hl/test/Makefile
