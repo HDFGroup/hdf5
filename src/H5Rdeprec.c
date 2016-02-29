@@ -129,7 +129,6 @@ H5Rcreate(void *_ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t
         default:
             HDassert("unsupported reference type" && 0);
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unsupported reference type)")
-            break;
     }
 
     *ref_ptr = ref;
@@ -171,7 +170,7 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
     file = loc.oloc->file;
 
     /* Dereference */
-    if((ret_value = H5R__dereference(file, H5P_DATASET_ACCESS_DEFAULT, H5AC_ind_dxpl_id, *ref_ptr, TRUE)) < 0)
+    if((ret_value = H5R__get_object(file, H5P_DATASET_ACCESS_DEFAULT, H5AC_ind_dxpl_id, *ref_ptr, TRUE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable dereference object")
 
 done:
@@ -208,7 +207,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
 
     /* Dereference */
-    if((ret_value = H5R__dereference(loc.oloc->file, oapl_id, H5AC_ind_dxpl_id, *ref_ptr, TRUE)) < 0)
+    if((ret_value = H5R__get_object(loc.oloc->file, oapl_id, H5AC_ind_dxpl_id, *ref_ptr, TRUE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable dereference object")
 
 done:
@@ -381,7 +380,6 @@ ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *_ref,
         default:
             HDassert("unsupported reference type" && 0);
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unsupported reference type)")
-            break;
     }
 
 done:

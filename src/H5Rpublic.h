@@ -30,8 +30,8 @@
 typedef enum {
     H5R_BADTYPE     =   (-1),   /*invalid Reference Type                     */
     H5R_OBJECT,                 /*Object reference                           */
-    H5R_DATASET_REGION,         /*For backward compatibility                 */
-    H5R_REGION,                 /*Dataset Region Reference                   */
+    H5R_REGION_COMPAT,          /*For backward compatibility (region)        */
+    H5R_REGION,                 /*Region Reference                           */
     H5R_ATTR,                   /*Attribute Reference                        */
     H5R_EXT_OBJECT,             /*External Object reference                  */
     H5R_EXT_REGION,             /*External Region reference                  */
@@ -55,16 +55,18 @@ extern "C" {
 H5_DLL href_t H5Rcreate_object(hid_t loc_id, const char *name);
 H5_DLL href_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id);
 H5_DLL href_t H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name);
-H5_DLL href_t H5Rcreate_ext_object(hid_t loc_id, const char *name);
-H5_DLL href_t H5Rcreate_ext_region(hid_t loc_id, const char *name, hid_t space_id);
-H5_DLL href_t H5Rcreate_ext_attr(hid_t loc_id, const char *name, const char *attr_name);
+H5_DLL href_t H5Rcreate_ext_object(const char *filename, const char *pathname);
+H5_DLL href_t H5Rcreate_ext_region(const char *filename, const char *pathname, hid_t space_id);
+H5_DLL href_t H5Rcreate_ext_attr(const char *filename, const char *pathname, const char *attr_name);
 H5_DLL herr_t H5Rdestroy(href_t ref);
 
 H5_DLL H5R_type_t H5Rget_type(href_t ref);
 H5_DLL htri_t     H5Requal(href_t ref1, href_t ref2);
 
-H5_DLL hid_t      H5Rdereference3(hid_t obj_id, hid_t oapl_id, href_t ref);
+H5_DLL hid_t      H5Rget_object(hid_t loc_id, hid_t oapl_id, href_t ref);
 H5_DLL hid_t      H5Rget_region2(hid_t loc_id, href_t ref);
+H5_DLL hid_t      H5Rget_attr(hid_t loc_id, href_t ref);
+
 H5_DLL herr_t     H5Rget_obj_type3(hid_t loc_id, href_t ref, H5O_type_t *obj_type);
 H5_DLL ssize_t    H5Rget_obj_name(hid_t loc_id, href_t ref, char *name/*out*/, size_t size);
 H5_DLL ssize_t    H5Rget_attr_name(hid_t loc_id, href_t ref, char *name/*out*/, size_t size);
@@ -78,6 +80,7 @@ H5_DLL ssize_t    H5Rget_file_name(href_t ref, char *name/*out*/, size_t size);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /* Macros */
+#define H5R_DATASET_REGION H5R_REGION_COMPAT
 
 /* Typedefs */
 

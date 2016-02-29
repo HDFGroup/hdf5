@@ -32,9 +32,9 @@ struct H5S_t;
 H5_DLL href_t H5R_create_object(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
 H5_DLL href_t H5R_create_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, struct H5S_t *space);
 H5_DLL href_t H5R_create_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char *attr_name);
-H5_DLL href_t H5R_create_ext_object(H5G_loc_t *loc, const char *name, hid_t dxpl_id);
-H5_DLL href_t H5R_create_ext_region(H5G_loc_t *loc, const char *name, hid_t dxpl_id, struct H5S_t *space);
-H5_DLL href_t H5R_create_ext_attr(H5G_loc_t *loc, const char *name, hid_t dxpl_id, const char *attr_name);
+H5_DLL href_t H5R_create_ext_object(const char *filename, const char *pathname);
+H5_DLL href_t H5R_create_ext_region(const char *filename, const char *pathname, struct H5S_t *space);
+H5_DLL href_t H5R_create_ext_attr(const char *filename, const char *pathname, const char *attr_name);
 H5_DLL herr_t H5R_destroy(href_t ref);
 
 H5_DLL H5R_type_t H5R_get_type(href_t ref);
