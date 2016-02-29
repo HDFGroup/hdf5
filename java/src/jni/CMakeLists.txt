@@ -71,6 +71,7 @@ endif (WIN32)
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 if (HDF5_EXPORTED_TARGETS)
+  INSTALL_TARGET_PDB (${HDF5_JAVA_JNI_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} libraries)
   install (
       TARGETS
           ${HDF5_JAVA_JNI_LIB_TARGET}
