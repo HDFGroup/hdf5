@@ -179,13 +179,13 @@ test_reference_params(void)
     wbuf[0] = H5Rcreate_region(fid1, "/Group1/Dataset1", (hid_t)-1);
     VERIFY(wbuf[0], NULL, "H5Rcreate region space");
 
-    /* Test parameters to H5Rdereference3 */
-    dset2 = H5Rdereference3((hid_t)-1, H5P_DEFAULT, rbuf[0]);
-    VERIFY(dset2, FAIL, "H5Rdereference3 loc_id");
-    dset2 = H5Rdereference3(dataset, (hid_t)-1, rbuf[0]);
-    VERIFY(dset2, FAIL, "H5Rdereference3 oapl_id");
-    dset2 = H5Rdereference3(dataset, dapl_id, NULL);
-    VERIFY(dset2, FAIL, "H5Rdereference3 ref");
+    /* Test parameters to H5Rget_object */
+    dset2 = H5Rget_object((hid_t)-1, H5P_DEFAULT, rbuf[0]);
+    VERIFY(dset2, FAIL, "H5Rget_object loc_id");
+    dset2 = H5Rget_object(dataset, (hid_t)-1, rbuf[0]);
+    VERIFY(dset2, FAIL, "H5Rget_object oapl_id");
+    dset2 = H5Rget_object(dataset, dapl_id, NULL);
+    VERIFY(dset2, FAIL, "H5Rget_object ref");
 
     /* Test parameters to H5Rget_region2 */
     ret_id = H5Rget_region2((hid_t)-1, rbuf[0]);
@@ -399,8 +399,8 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Open dataset object */
-    dset2 = H5Rdereference3(dataset, dapl_id, rbuf[0]);
-    CHECK(dset2, FAIL, "H5Rdereference3");
+    dset2 = H5Rget_object(dataset, dapl_id, rbuf[0]);
+    CHECK(dset2, FAIL, "H5Rget_object");
 
     /* Check information in referenced dataset */
     sid1 = H5Dget_space(dset2);
@@ -421,8 +421,8 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Dclose");
 
     /* Open group object.  GAPL isn't supported yet.  But it's harmless to pass in */
-    group = H5Rdereference3(dataset, H5P_DEFAULT, rbuf[2]);
-    CHECK(group, FAIL, "H5Rdereference3");
+    group = H5Rget_object(dataset, H5P_DEFAULT, rbuf[2]);
+    CHECK(group, FAIL, "H5Rget_object");
 
     /* Get group's comment */
     ret = (herr_t)H5Oget_comment(group, read_comment, (size_t)10);
@@ -437,8 +437,8 @@ test_reference_obj(void)
     CHECK(ret, FAIL, "H5Gclose");
 
     /* Open datatype object. TAPL isn't supported yet.  But it's harmless to pass in */
-    tid1 = H5Rdereference3(dataset, H5P_DEFAULT, rbuf[3]);
-    CHECK(tid1, FAIL, "H5Rdereference3");
+    tid1 = H5Rget_object(dataset, H5P_DEFAULT, rbuf[3]);
+    CHECK(tid1, FAIL, "H5Rget_object");
 
     /* Verify correct datatype */
     {
@@ -694,15 +694,15 @@ test_reference_region(void)
      * Dereference an undefined reference (should fail)
      */
     H5E_BEGIN_TRY {
-      dset2 = H5Rdereference3(dset_NA, H5P_DEFAULT, rdata_NA[0]);
+      dset2 = H5Rget_object(dset_NA, H5P_DEFAULT, rdata_NA[0]);
     } H5E_END_TRY;                                  
-    VERIFY(dset2, FAIL, "H5Rdereference3");
+    VERIFY(dset2, FAIL, "H5Rget_object");
 
     /* Close and release resources. */
     ret = H5Dclose(dset_NA);
     CHECK(ret, FAIL, "H5Dclose");
 
-    /* This close should fail since H5Rdereference3 never created
+    /* This close should fail since H5Rget_object never created
      * the id of the referenced object. */
     H5E_BEGIN_TRY {
       ret = H5Dclose(dset2);
@@ -722,8 +722,8 @@ test_reference_region(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Try to open objects */
-    dset2 = H5Rdereference3(dset1, dapl_id, rbuf[0]);
-    CHECK(dset2, FAIL, "H5Rdereference3");
+    dset2 = H5Rget_object(dset1, dapl_id, rbuf[0]);
+    CHECK(dset2, FAIL, "H5Rget_object");
 
     /* Check what H5Rget_obj_type3 function returns */
     ret = H5Rget_obj_type3(dset1, rbuf[0], &obj_type);
@@ -1028,8 +1028,8 @@ test_reference_region_1D(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Try to open objects */
-    dset3 = H5Rdereference3(dset1, dapl_id, rbuf[0]);
-    CHECK(dset3, FAIL, "H5Rdereference3");
+    dset3 = H5Rget_object(dset1, dapl_id, rbuf[0]);
+    CHECK(dset3, FAIL, "H5Rget_object");
 
     /* Check what H5Rget_obj_type3 function returns */
     ret = H5Rget_obj_type3(dset1, rbuf[0], &obj_type);
@@ -1250,8 +1250,8 @@ test_reference_obj_deleted(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Open deleted dataset object */
-    dset2 = H5Rdereference3(dataset, H5P_DEFAULT, oref);
-    VERIFY(dset2, FAIL, "H5Rdereference3");
+    dset2 = H5Rget_object(dataset, H5P_DEFAULT, oref);
+    VERIFY(dset2, FAIL, "H5Rget_object");
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -1396,8 +1396,8 @@ test_reference_group(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Dereference to get the group */
-    gid = H5Rdereference3(did, H5P_DEFAULT, rref);
-    CHECK(gid, FAIL, "H5Rdereference3");
+    gid = H5Rget_object(did, H5P_DEFAULT, rref);
+    CHECK(gid, FAIL, "H5Rget_object");
 
     /* Iterate through objects in dereferenced group */
     ret = H5Literate(gid, H5_INDEX_NAME, H5_ITER_INC, NULL, test_deref_iter_op, &count);
@@ -1939,8 +1939,8 @@ test_reference_attr(void)
     CHECK(ret, FAIL, "H5Dread");
 
     /* Open attribute on dataset object */
-    attr = H5Rdereference3(dataset, dapl_id, ref_rbuf[0]);
-    CHECK(attr, FAIL, "H5Rdereference3");
+    attr = H5Rget_attr(dataset, ref_rbuf[0]);
+    CHECK(attr, FAIL, "H5Rget_attr");
 
     /* Check information in referenced dataset */
     sid = H5Aget_space(attr);
@@ -1961,8 +1961,8 @@ test_reference_attr(void)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Open attribute on group object */
-    attr = H5Rdereference3(dataset, H5P_DEFAULT, ref_rbuf[2]);
-    CHECK(attr, FAIL, "H5Rdereference3");
+    attr = H5Rget_attr(dataset, ref_rbuf[2]);
+    CHECK(attr, FAIL, "H5Rget_attr");
 
     /* Read from disk */
     ret = H5Aread(attr, H5T_NATIVE_UINT, rbuf);
@@ -1976,8 +1976,8 @@ test_reference_attr(void)
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Open attribute on group object */
-    attr = H5Rdereference3(dataset, H5P_DEFAULT, ref_rbuf[3]);
-    CHECK(attr, FAIL, "H5Rdereference3");
+    attr = H5Rget_attr(dataset, ref_rbuf[3]);
+    CHECK(attr, FAIL, "H5Rget_attr");
 
     /* Read from disk */
     ret = H5Aread(attr, H5T_NATIVE_UINT, rbuf);

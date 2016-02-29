@@ -1031,8 +1031,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 if(obj1_type != obj2_type) TEST_ERROR
 
                 /* Open referenced objects */
-                if((obj1_id = H5Rdereference3(parent1, H5P_DEFAULT, *ref_buf1)) < 0) TEST_ERROR
-                if((obj2_id = H5Rdereference3(parent2, H5P_DEFAULT, *ref_buf2)) < 0) TEST_ERROR
+                if((obj1_id = H5Rget_object(parent1, H5P_DEFAULT, *ref_buf1)) < 0) TEST_ERROR
+                if((obj2_id = H5Rget_object(parent2, H5P_DEFAULT, *ref_buf2)) < 0) TEST_ERROR
 
                 /* break the infinite loop when the ref_object points to itself */
                 if(obj_owner > 0) {
@@ -1089,8 +1089,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
                 if(obj1_type != obj2_type) TEST_ERROR
 
                 /* Open referenced objects */
-                if((obj1_id = H5Rdereference3(parent1, H5P_DEFAULT, *ref_buf1)) < 0) TEST_ERROR
-                if((obj2_id = H5Rdereference3(parent2, H5P_DEFAULT, *ref_buf2)) < 0) TEST_ERROR
+                if((obj1_id = H5Rget_object(parent1, H5P_DEFAULT, *ref_buf1)) < 0) TEST_ERROR
+                if((obj2_id = H5Rget_object(parent2, H5P_DEFAULT, *ref_buf2)) < 0) TEST_ERROR
 
                 /* break the infinite loop when the ref_object points to itself */
                 if(obj_owner > 0) {

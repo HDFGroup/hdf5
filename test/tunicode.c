@@ -465,8 +465,8 @@ void test_objnames(hid_t fid, const char* string)
   CHECK(ret, FAIL, "H5Dread");
 
   /* Ensure that we can open named datatype using object reference */
-  type_id = H5Rdereference3(dset_id, H5P_DEFAULT, obj_ref);
-  CHECK(type_id, FAIL, "H5Rdereference3");
+  type_id = H5Rget_object(dset_id, H5P_DEFAULT, obj_ref);
+  CHECK(type_id, FAIL, "H5Rget_object");
   ret = H5Rdestroy(obj_ref);
   CHECK(ret, FAIL, "H5Rdestroy");
   ret = H5Tcommitted(type_id);

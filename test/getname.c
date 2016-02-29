@@ -2573,7 +2573,7 @@ test_obj_ref(hid_t fapl)
         FAIL_STACK_ERROR
 
     TESTING("getting path to normal dataset in root group");
-    if((dataset2 = H5Rdereference3(dataset, H5P_DEFAULT, wbuf[0])) < 0) FAIL_STACK_ERROR
+    if((dataset2 = H5Rget_object(dataset, H5P_DEFAULT, wbuf[0])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
     if(H5Dclose(dataset2) < 0) FAIL_STACK_ERROR
@@ -2593,7 +2593,7 @@ test_obj_ref(hid_t fapl)
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset in /Group1");
-    if((dataset2 = H5Rdereference3(dataset, H5P_DEFAULT, wbuf[1])) < 0) FAIL_STACK_ERROR
+    if((dataset2 = H5Rget_object(dataset, H5P_DEFAULT, wbuf[1])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
     if(H5Dclose(dataset2) < 0) FAIL_STACK_ERROR
@@ -2605,7 +2605,7 @@ test_obj_ref(hid_t fapl)
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to /Group1");
-    if((group = H5Rdereference3(dataset, H5P_DEFAULT, wbuf[2])) < 0) FAIL_STACK_ERROR
+    if((group = H5Rget_object(dataset, H5P_DEFAULT, wbuf[2])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(group, (char*)buf, sizeof(buf));
     if(H5Gclose(group) < 0) FAIL_STACK_ERROR
@@ -2617,7 +2617,7 @@ test_obj_ref(hid_t fapl)
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to datatype in /Group1");
-    if((tid1 = H5Rdereference3(dataset, H5P_DEFAULT, wbuf[3])) < 0) FAIL_STACK_ERROR
+    if((tid1 = H5Rget_object(dataset, H5P_DEFAULT, wbuf[3])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(tid1, (char*)buf, sizeof(buf));
     if(H5Tclose(tid1) < 0) FAIL_STACK_ERROR
@@ -2629,7 +2629,7 @@ test_obj_ref(hid_t fapl)
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset in nested group");
-    if((dataset2 = H5Rdereference3(dataset, H5P_DEFAULT, wbuf[4])) < 0) FAIL_STACK_ERROR
+    if((dataset2 = H5Rget_object(dataset, H5P_DEFAULT, wbuf[4])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
     if(H5Dclose(dataset2) < 0) FAIL_STACK_ERROR
@@ -2641,7 +2641,7 @@ test_obj_ref(hid_t fapl)
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to nested group");
-    if((group = H5Rdereference3(dataset, H5P_DEFAULT, wbuf[5])) < 0) FAIL_STACK_ERROR
+    if((group = H5Rget_object(dataset, H5P_DEFAULT, wbuf[5])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(group, (char*)buf, sizeof(buf));
     if(H5Gclose(group) < 0) FAIL_STACK_ERROR
@@ -2653,7 +2653,7 @@ test_obj_ref(hid_t fapl)
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset created via hard link");
-    if((dataset2 = H5Rdereference3(dataset, H5P_DEFAULT, wbuf[6])) < 0) FAIL_STACK_ERROR
+    if((dataset2 = H5Rget_object(dataset, H5P_DEFAULT, wbuf[6])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
     if(H5Dclose(dataset2) < 0) FAIL_STACK_ERROR
@@ -2665,7 +2665,7 @@ test_obj_ref(hid_t fapl)
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to root group");
-    if((group = H5Rdereference3(dataset, H5P_DEFAULT, wbuf[7])) < 0) FAIL_STACK_ERROR
+    if((group = H5Rget_object(dataset, H5P_DEFAULT, wbuf[7])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(group, (char*)buf, sizeof(buf));
     if(H5Gclose(group) < 0) FAIL_STACK_ERROR
@@ -2680,7 +2680,7 @@ test_obj_ref(hid_t fapl)
         FAIL_STACK_ERROR
 
     TESTING("getting path to dataset hidden by a mounted file");
-    if((dataset2 = H5Rdereference3(dataset, H5P_DEFAULT, wbuf[4])) < 0) FAIL_STACK_ERROR
+    if((dataset2 = H5Rget_object(dataset, H5P_DEFAULT, wbuf[4])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
     if(H5Dclose(dataset2) < 0) FAIL_STACK_ERROR
@@ -2691,7 +2691,7 @@ test_obj_ref(hid_t fapl)
     PASSED()
 
     /* Now we try unlinking dataset2 from the file and searching for it.  It shouldn't be found */
-    if((dataset2 = H5Rdereference3(dataset, H5P_DEFAULT, wbuf[1])) < 0)
+    if((dataset2 = H5Rget_object(dataset, H5P_DEFAULT, wbuf[1])) < 0)
         FAIL_STACK_ERROR
     if(H5Ldelete(fid1, "/Group1/Dataset2", H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
@@ -2843,7 +2843,7 @@ test_reg_ref(hid_t fapl)
     TESTING("H5Iget_name to get name from region reference(hyperslab)");
 
     /* Dereference the first reference */
-    dsetv_id = H5Rdereference3(dsetr_id, H5P_DEFAULT, ref_out[0]);
+    dsetv_id = H5Rget_object(dsetr_id, H5P_DEFAULT, ref_out[0]);
 
     /* Get name of the dataset the first region reference points using H5Iget_name */
     *buf2 = '\0';
@@ -2864,7 +2864,7 @@ test_reg_ref(hid_t fapl)
     TESTING("H5Iget_name to get name from region reference(pnt selec)");
 
     /* Dereference the second reference */
-    if((dsetv_id = H5Rdereference3(dsetr_id, H5P_DEFAULT, ref_out[1])) < 0) TEST_ERROR
+    if((dsetv_id = H5Rget_object(dsetr_id, H5P_DEFAULT, ref_out[1])) < 0) TEST_ERROR
 
     /* Get name of the dataset the first region reference points using H5Iget_name */
     *buf2 = '\0';
