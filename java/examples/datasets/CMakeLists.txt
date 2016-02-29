@@ -83,6 +83,16 @@ MACRO (ADD_H5_TEST resultfile resultcode)
 ENDMACRO (ADD_H5_TEST file)
 
 if (BUILD_TESTING)
+
+# detect whether the encoder is present.
+  if (H5_HAVE_FILTER_DEFLATE)
+    set (USE_FILTER_DEFLATE "true")
+  endif (H5_HAVE_FILTER_DEFLATE)
+
+  if (H5_HAVE_FILTER_SZIP)
+    set (USE_FILTER_SZIP "true")
+  endif (H5_HAVE_FILTER_SZIP)
+
   foreach (example ${HDF_JAVA_EXAMPLES})
     if (${example} STREQUAL "H5Ex_D_External")
       add_test (
@@ -116,6 +126,13 @@ if (BUILD_TESTING)
     )
     set_tests_properties (JAVA_datasets-${example}-copy-objects PROPERTIES DEPENDS JAVA_datasets-${example}-clearall-objects)
     set (last_test "JAVA_datasets-${example}-copy-objects")
-    ADD_H5_TEST (${example} 0)
+    if (${example} STREQUAL "H5Ex_D_Szip")
+      if (USE_FILTER_SZIP)
+        ADD_H5_TEST (${example} 0)
+      endif (USE_FILTER_SZIP)
+    else (${example} STREQUAL "H5Ex_D_Szip")
+      ADD_H5_TEST (${example} 0)
+    endif (${example} STREQUAL "H5Ex_D_Szip")
+
   endforeach (example ${HDF_JAVA_EXAMPLES})
 endif (BUILD_TESTING)
