@@ -926,7 +926,7 @@ endif (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB)
 # Option to build HDF5 Java Library
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
-  option (HDF5_BUILD_JAVA  "Build Java HDF5 Library" ON)
+  option (HDF5_BUILD_JAVA  "Build Java HDF5 Library" OFF)
   if (HDF5_BUILD_JAVA)
     add_subdirectory (${HDF5_SOURCE_DIR}/java ${PROJECT_BINARY_DIR}/java)
   endif (HDF5_BUILD_JAVA)
