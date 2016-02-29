@@ -1477,7 +1477,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
 
                         for (block_index = 0; block_index < block_nelmts; block_index++) {
                             ref = *((href_t*)(mem + block_index * size));
-                            region_id = H5Rdereference3(container, H5P_DEFAULT, ref);
+                            region_id = H5Rget_object(container, H5P_DEFAULT, ref);
                             if (region_id >= 0) {
                                 region_space = H5Rget_region2(container, ref);
                                 if (region_space >= 0) {

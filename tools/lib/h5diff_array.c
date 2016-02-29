@@ -944,9 +944,9 @@ static hsize_t diff_datum(void       *_mem1,
                 hid_t  region1_id;
                 hid_t  region2_id;
 
-                if ((obj1_id = H5Rdereference3(container1_id, H5P_DEFAULT, ref1))<0)
+                if ((obj1_id = H5Rget_object(container1_id, H5P_DEFAULT, ref1))<0)
                     ret= -1;
-                if ((obj2_id = H5Rdereference3(container2_id, H5P_DEFAULT, ref2))<0)
+                if ((obj2_id = H5Rget_object(container2_id, H5P_DEFAULT, ref2))<0)
                     ret= -1;
                 if ((region1_id = H5Rget_region2(container1_id, ref1))<0)
                     ret= -1;
@@ -995,9 +995,9 @@ static hsize_t diff_datum(void       *_mem1,
                     return 0;
                 }
 
-                if((obj1_id = H5Rdereference3(container1_id, H5P_DEFAULT, _mem1)) < 0)
+                if((obj1_id = H5Rget_object(container1_id, H5P_DEFAULT, _mem1)) < 0)
                     ret = -1;
-                if((obj2_id = H5Rdereference3(container2_id, H5P_DEFAULT, _mem2)) < 0)
+                if((obj2_id = H5Rget_object(container2_id, H5P_DEFAULT, _mem2)) < 0)
                     ret = -1;
                 if(ret == -1) {
                     options->err_stat = 1;

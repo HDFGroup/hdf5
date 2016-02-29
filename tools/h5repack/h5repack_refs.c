@@ -180,7 +180,7 @@ int do_copy_refobjs(hid_t fidin,
                             } /* end if */
                             for(u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY {
-                                    if((refobj_id = H5Rdereference3(dset_in, H5P_DEFAULT, buf[u])) < 0)
+                                    if((refobj_id = H5Rget_object(dset_in, H5P_DEFAULT, buf[u])) < 0)
                                         continue;
                                 } H5E_END_TRY;
 
@@ -268,7 +268,7 @@ int do_copy_refobjs(hid_t fidin,
 
                             for(u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY {
-                                    if((refobj_id = H5Rdereference3(dset_in, H5P_DEFAULT, buf[u])) < 0)
+                                    if((refobj_id = H5Rget_object(dset_in, H5P_DEFAULT, buf[u])) < 0)
                                         continue;
                                 } H5E_END_TRY;
 
@@ -813,7 +813,7 @@ static herr_t update_ref_value(hid_t obj_id, href_t ref_in, hid_t fid_out,
     if (ref_type == H5R_BADTYPE)
         goto done;
 
-    ref_obj_id = H5Rdereference3(obj_id, H5P_DEFAULT, ref_in);
+    ref_obj_id = H5Rget_object(obj_id, H5P_DEFAULT, ref_in);
     if (ref_obj_id<0)
         goto done;
 
