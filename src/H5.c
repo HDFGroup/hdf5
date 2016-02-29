@@ -361,16 +361,16 @@ H5_term_library(void)
         } /* end if */
     } while(pending && ntries++ < 100);
 
-    if(pending) {
+//    if(pending) {
         /* Only display the error message if the user is interested in them. */
-        if(func) {
-            fprintf(stderr, "HDF5: infinite loop closing library\n");
-            fprintf(stderr, "      %s\n", loop);
-#ifndef NDEBUG
-            HDabort();
-#endif /* NDEBUG */
-        } /* end if */
-    } /* end if */
+//        if(func) {
+//            fprintf(stderr, "HDF5: infinite loop closing library\n");
+//            fprintf(stderr, "      %s\n", loop);
+//#ifndef NDEBUG
+//            HDabort();
+//#endif /* NDEBUG */
+//        } /* end if */
+//    } /* end if */
 
 #ifdef H5_HAVE_MPE
     /* Close MPE instrumentation library.  May need to move this
