@@ -129,6 +129,10 @@ get_H5B2_class(const uint8_t *sig)
             cls = H5D_BT2_FILT;
             break;
 
+        case H5B2_TEST2_ID:
+            cls = H5B2_TEST2;
+            break;
+
         case H5B2_NUM_BTREE_ID:
         default:
             HDfprintf(stderr, "Unknown v2 B-tree subtype %u\n", (unsigned)(subtype));

@@ -485,6 +485,7 @@
 #define HDF5_SUPERBLOCK_VERSION_2	2	/* Revised version with superblock extension and checksum */
 #define HDF5_SUPERBLOCK_VERSION_3	3	/* With file locking and consistency flags (at least this version for SWMR support) */
 #define HDF5_SUPERBLOCK_VERSION_LATEST	HDF5_SUPERBLOCK_VERSION_3	/* The maximum super block format    */
+#define HDF5_SUPERBLOCK_VERSION_V18_LATEST HDF5_SUPERBLOCK_VERSION_2    /* The latest superblock version for v18 */
 #define HDF5_FREESPACE_VERSION	        0	/* of the Free-Space Info	  */
 #define HDF5_OBJECTDIR_VERSION	        0	/* of the Object Directory format */
 #define HDF5_SHAREDHEADER_VERSION       0	/* of the Shared-Header Info	  */
@@ -647,7 +648,6 @@ H5_DLL unsigned H5F_get_nopen_objs(const H5F_t *f);
 H5_DLL unsigned H5F_incr_nopen_objs(H5F_t *f);
 H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
 H5_DLL hid_t H5F_get_file_id(const H5F_t *f);
-H5_DLL ssize_t H5F_get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
 H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned H5F_get_nmounts(const H5F_t *f);
 H5_DLL unsigned H5F_get_read_attempts(const H5F_t *f);
@@ -746,6 +746,7 @@ H5_DLL herr_t H5F_super_dirty(H5F_t *f);
 H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int H5F_mpi_get_size(const H5F_t *f);
+H5_DLL herr_t H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */

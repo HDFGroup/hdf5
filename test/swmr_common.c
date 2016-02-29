@@ -26,8 +26,7 @@
 /* Headers */
 /***********/
 
-#include <assert.h>
-
+#include "h5test.h"
 #include "swmr_common.h"
 
 /*******************/
@@ -96,10 +95,10 @@ choose_dataset(void)
     unsigned offset;            /* The "offset" of the dataset at that level */
 
     /* Determine level of dataset */
-    level = symbol_mapping[random() % NMAPPING];
+    level = symbol_mapping[HDrandom() % NMAPPING];
 
     /* Determine the offset of the level */
-    offset = random() % symbol_count[level];
+    offset = HDrandom() % symbol_count[level];
 
     return &symbol_info[level][offset];
 } /* end choose_dataset() */
@@ -172,7 +171,7 @@ create_symbol_datatype(void)
 int
 generate_name(char *name_buf, unsigned level, unsigned count)
 {
-    assert(name_buf);
+    HDassert(name_buf);
     
     sprintf(name_buf, "%u-%04u", level, count);
 
@@ -198,13 +197,13 @@ generate_symbols(void)
     unsigned u, v;      /* Local index variables */
 
     for(u = 0; u < NLEVELS; u++) {
-        symbol_info[u] = (symbol_info_t *)malloc(symbol_count[u] * sizeof(symbol_info_t));
+        symbol_info[u] = (symbol_info_t *)HDmalloc(symbol_count[u] * sizeof(symbol_info_t));
         for(v = 0; v < symbol_count[u]; v++) {
             char name_buf[64];
 
             generate_name(name_buf, u, v);
-            symbol_info[u][v].name = (char *)malloc(strlen(name_buf) + 1);
-            strcpy(symbol_info[u][v].name, name_buf);
+            symbol_info[u][v].name = (char *)HDmalloc(HDstrlen(name_buf) + 1);
+            HDstrcpy(symbol_info[u][v].name, name_buf);
             symbol_info[u][v].dsid = -1;
             symbol_info[u][v].nrecords = 0;
         } /* end for */
@@ -234,8 +233,8 @@ shutdown_symbols(void)
     /* Clean up the symbols */
     for(u = 0; u < NLEVELS; u++) {
         for(v = 0; v < symbol_count[u]; v++)
-            free(symbol_info[u][v].name);
-        free(symbol_info[u]);
+            HDfree(symbol_info[u][v].name);
+        HDfree(symbol_info[u]);
     } /* end for */
 
     return 0;
@@ -262,31 +261,30 @@ print_metadata_retries_info(hid_t fid)
 
     /* Retrieve the collection of retries */
     if(H5Fget_metadata_read_retry_info(fid, &info) < 0)
-	return (-1);
+        return (-1);
 
     /* Print information for each non-NULL retries[i] */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++) {
         unsigned power;
         unsigned j;
 
-	if(NULL == info.retries[i])
-	    continue;
+        if(NULL == info.retries[i])
+            continue;
 
-	fprintf(stderr, "Metadata read retries for item %u:\n", i);
-	power = 1;
-	for(j = 0; j < info.nbins; j++) {
-	    if(info.retries[i][j])
-		fprintf(stderr, "\t# of retries for %u - %u retries: %u\n", 
-		       power, (power * 10) - 1, info.retries[i][j]);
-	    power *= 10;
-	} /* end for */
+        HDfprintf(stderr, "Metadata read retries for item %u:\n", i);
+        power = 1;
+        for(j = 0; j < info.nbins; j++) {
+            if(info.retries[i][j])
+            HDfprintf(stderr, "\t# of retries for %u - %u retries: %u\n", 
+                power, (power * 10) - 1, info.retries[i][j]);
+            power *= 10;
+        } /* end for */
     } /* end for */
 
     /* Free memory for each non-NULL retries[i] */
     for(i = 0; i < H5F_NUM_METADATA_READ_RETRY_TYPES; i++)
         if(info.retries[i] != NULL)
-            free(info.retries[i]);
+            HDfree(info.retries[i]);
 
     return 0;
 } /* print_metadata_retries_info() */
-

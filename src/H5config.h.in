@@ -3,12 +3,11 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
-/* Define if the memory buffers being written to disk should be cleared before
-   writing. */
-#undef CLEAR_MEMORY
-
 /* Define if C++ compiler recognizes offsetof */
 #undef CXX_HAVE_OFFSETOF
+
+/* Define if this is a debug build. */
+#undef DEBUG_BUILD
 
 /* Define the default plugins path to compile */
 #undef DEFAULT_PLUGINDIR
@@ -136,24 +135,6 @@
 /* Define to 1 if you have the `frexpl' function. */
 #undef HAVE_FREXPL
 
-/* Define to 1 if you have the `fseeko' function. */
-#undef HAVE_FSEEKO
-
-/* Define to 1 if you have the `fseeko64' function. */
-#undef HAVE_FSEEKO64
-
-/* Define to 1 if you have the `fstat64' function. */
-#undef HAVE_FSTAT64
-
-/* Define to 1 if you have the `ftello' function. */
-#undef HAVE_FTELLO
-
-/* Define to 1 if you have the `ftello64' function. */
-#undef HAVE_FTELLO64
-
-/* Define to 1 if you have the `ftruncate64' function. */
-#undef HAVE_FTRUNCATE64
-
 /* Define if the compiler understands the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION
 
@@ -181,7 +162,7 @@
 /* Define if the compiler understands inline */
 #undef HAVE_INLINE
 
-/* Define if library will contain instrumentation to detect correct
+/* Define if parallel library will contain instrumentation to detect correct
    optimization operation */
 #undef HAVE_INSTRUMENTED_LIBRARY
 
@@ -220,9 +201,6 @@
 
 /* Define to 1 if you have the `longjmp' function. */
 #undef HAVE_LONGJMP
-
-/* Define to 1 if you have the `lseek64' function. */
-#undef HAVE_LSEEK64
 
 /* Define to 1 if you have the `lstat' function. */
 #undef HAVE_LSTAT
@@ -286,9 +264,6 @@
 
 /* Define to 1 if you have the `srandom' function. */
 #undef HAVE_SRANDOM
-
-/* Define to 1 if you have the `stat64' function. */
-#undef HAVE_STAT64
 
 /* Define if struct stat has the st_blocks field */
 #undef HAVE_STAT_ST_BLOCKS
@@ -404,7 +379,7 @@
 /* Define if the compiler understands __inline__ */
 #undef HAVE___INLINE__
 
-/* Define if HDF5's high-level library headers should be included in hdf5.h */
+/* Define if the high-level library headers should be included in hdf5.h */
 #undef INCLUDE_HL
 
 /* Define if your system can convert long double to (unsigned) long long
@@ -423,7 +398,8 @@
    with special algorithm. */
 #undef LONG_TO_LDOUBLE_SPECIAL
 
-/* Define to the sub-directory where libtool stores uninstalled libraries. */
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
 #undef LT_OBJDIR
 
 /* Define to enable internal memory allocation sanity checking. */
@@ -528,9 +504,6 @@
 /* The size of `long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
 
-/* The size of `off64_t', as computed by sizeof. */
-#undef SIZEOF_OFF64_T
-
 /* The size of `off_t', as computed by sizeof. */
 #undef SIZEOF_OFF_T
 
@@ -609,6 +582,9 @@
 
 /* Define using v1.6 public API symbols by default */
 #undef USE_16_API_DEFAULT
+
+/* Define using v1.8 public API symbols by default */
+#undef USE_18_API_DEFAULT
 
 /* Define if a memory checking tool will be used on the library, to cause
    library to be very picky about memory operations and also disable the

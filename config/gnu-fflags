@@ -78,14 +78,27 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     FSEARCH_DIRS=""
     H5_FCFLAGS="$H5_FCFLAGS -pedantic -Wall -Wconversion -Wunderflow -Wimplicit-interface -W"
 
+    # Turn off warnings for passing non-ANSI types to BIND().
+    # We pass a lot of hid_t, etc. types so this generates a LOT of spurious warnings.
+    H5_FCFLAGS="$H5_FCFLAGS -Wno-c-binding-type"
+
     # Production
-    PROD_FCFLAGS="-O2 -s"
+    PROD_FCFLAGS=
 
     # Debug
-    DEBUG_FCFLAGS="-g -fbounds-check"
+    DEBUG_FCFLAGS="-fbounds-check"
 
-    # Profile
-    PROFILE_FCFLAGS="-g -pg"
+    # Symbols
+    SYMBOLS_FCFLAGS="-g"
+    NO_SYMBOLS_FCFLAGS="-s"
+
+    # Profiling
+    PROFILE_FCFLAGS="-pg"
+
+    # Optimization
+    HIGH_OPT_FCFLAGS="-O2"
+    DEBUG_OPT_FCFLAGS="-O0"
+    NO_OPT_FCFLAGS="-O0"
 
     # Flags are set
     f9x_flags_set=yes

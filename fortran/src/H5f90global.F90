@@ -4,7 +4,7 @@
 !  MODULE H5GLOBAL
 !
 ! FILE
-!  src/fortran/H5f90global.f90
+!  src/fortran/H5f90global.F90
 !
 ! PURPOSE
 !  This module is used to pass C stubs for H5 Fortran APIs. The C stubs are
@@ -46,12 +46,19 @@ MODULE H5GLOBAL
 
   IMPLICIT NONE
 
+  ! Enumerate data type that is interoperable with C.
+  ENUM, BIND(C)
+    ENUMERATOR :: enum_dtype
+  END ENUM
+  INTEGER, PARAMETER :: ENUM_T = KIND(enum_dtype)
+  
+
   ! Definitions for reference datatypes.
   ! If you change the value of these parameters, do not forget to change corresponding
   ! values in the H5f90.h file.
   INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3
 
-  ! Parameters used in the function 'h5kind_to_type' located in H5_ff.f90.
+  ! Parameters used in the function 'h5kind_to_type' located in H5_ff.F90.
   ! The flag is used to tell the function whether the kind input variable
   ! is for a REAL or INTEGER data type.
 
@@ -366,11 +373,11 @@ MODULE H5GLOBAL
   EQUIVALENCE(H5G_flags(10), H5G_STORAGE_TYPE_SYMBOL_TABLE_F)
   EQUIVALENCE(H5G_flags(11), H5G_STORAGE_TYPE_COMPACT_F)
   EQUIVALENCE(H5G_flags(12), H5G_STORAGE_TYPE_DENSE_F)
+
   !
   ! H5D flags declaration
   !
-
-  INTEGER, PARAMETER :: H5D_FLAGS_LEN = 25
+  INTEGER, PARAMETER :: H5D_FLAGS_LEN = 29
   INTEGER :: H5D_flags(H5D_FLAGS_LEN)
   INTEGER, PARAMETER :: H5D_SIZE_FLAGS_LEN = 2
   INTEGER(SIZE_T) :: H5D_size_flags(H5D_SIZE_FLAGS_LEN)
@@ -418,6 +425,10 @@ MODULE H5GLOBAL
   INTEGER :: H5D_MPIO_CHUNK_COLLECTIVE_F
   INTEGER :: H5D_MPIO_CHUNK_MIXED_F
   INTEGER :: H5D_MPIO_CONTIG_COLLECTIVE_F
+  INTEGER :: H5D_VDS_ERROR_F
+  INTEGER :: H5D_VDS_FIRST_MISSING_F
+  INTEGER :: H5D_VDS_LAST_AVAILABLE_F
+  INTEGER :: H5D_VIRTUAL_F
 
   EQUIVALENCE(H5D_flags(1), H5D_COMPACT_F)
   EQUIVALENCE(H5D_flags(2), H5D_CONTIGUOUS_F)
@@ -449,6 +460,10 @@ MODULE H5GLOBAL
   EQUIVALENCE(H5D_flags(23), H5D_MPIO_CHUNK_COLLECTIVE_F)
   EQUIVALENCE(H5D_flags(24), H5D_MPIO_CHUNK_MIXED_F)
   EQUIVALENCE(H5D_flags(25), H5D_MPIO_CONTIG_COLLECTIVE_F)
+  EQUIVALENCE(H5D_flags(26), H5D_VDS_ERROR_F)
+  EQUIVALENCE(H5D_flags(27), H5D_VDS_FIRST_MISSING_F)
+  EQUIVALENCE(H5D_flags(28), H5D_VDS_LAST_AVAILABLE_F)
+  EQUIVALENCE(H5D_flags(29), H5D_VIRTUAL_F)
 
   EQUIVALENCE(H5D_size_flags(1), H5D_CHUNK_CACHE_NSLOTS_DFLT_F)
   EQUIVALENCE(H5D_size_flags(2), H5D_CHUNK_CACHE_NBYTES_DFLT_F)

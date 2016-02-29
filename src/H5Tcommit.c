@@ -99,6 +99,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
 {
     H5G_loc_t	loc;                    /* Location to create datatype */
     H5T_t	*type;                  /* Datatype for ID */
+    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */ 
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -126,15 +127,12 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
         if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
 
-    /* Get correct property list */
-    if(H5P_DEFAULT == tapl_id)
-        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&tapl_id, H5P_CLS_TACC, &dxpl_id, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Commit the type */
-    if(H5T__commit_named(&loc, name, type, lcpl_id, tcpl_id, tapl_id, H5AC_dxpl_id) < 0)
+    if(H5T__commit_named(&loc, name, type, lcpl_id, tcpl_id, tapl_id, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
 done:
@@ -248,6 +246,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 {
     H5G_loc_t	loc;                    /* Group location for location */
     H5T_t	*type = NULL;           /* Datatype created */
+    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -266,15 +265,12 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
 
-    /* Get correct property list */
-    if(H5P_DEFAULT == tapl_id)
-        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&tapl_id, H5P_CLS_TACC, &dxpl_id, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Commit the type */
-    if(H5T__commit(loc.oloc->file, type, tcpl_id, H5AC_dxpl_id) < 0)
+    if(H5T__commit(loc.oloc->file, type, tcpl_id, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* Release the datatype's object header */
@@ -286,7 +282,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get object location of committed datatype")
 
         /* Decrement refcount on committed datatype's object header in memory */
-        if(H5O_dec_rc_by_loc(oloc, H5AC_dxpl_id) < 0)
+        if(H5O_dec_rc_by_loc(oloc, dxpl_id) < 0)
            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
     } /* end if */
 
@@ -533,7 +529,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     H5O_type_t   obj_type;              /* Type of object at location */
     H5G_loc_t    type_loc;              /* Group object for datatype */
     hbool_t      obj_found = FALSE;     /* Object at 'name' found */
-    hid_t        dxpl_id = H5AC_ind_dxpl_id; /* dxpl to use to open datatype */
+    hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
     hid_t        ret_value = FAIL;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -545,12 +541,9 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Get correct property list */
-    if(H5P_DEFAULT == tapl_id)
-        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&tapl_id, H5P_CLS_TACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Set up datatype location to fill in */
     type_loc.oloc = &oloc;
@@ -644,7 +637,7 @@ H5Tget_create_plist(hid_t dtype_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
         /* Retrieve any object creation properties */
-        if(H5O_get_create_plist(&type->oloc, H5AC_ind_dxpl_id, new_plist) < 0)
+        if(H5O_get_create_plist(&type->oloc, H5AC_dxpl_id, new_plist) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get object creation info")
     } /* end if */
 

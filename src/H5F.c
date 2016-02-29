@@ -406,7 +406,7 @@ H5Fis_hdf5(const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* call the private is_HDF5 function */
-    if((ret_value = H5F_is_hdf5(name)) < 0)
+    if((ret_value = H5F_is_hdf5(name, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable open file")
 
 done:
@@ -446,7 +446,8 @@ hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
-    hid_t	ret_value;	        /*return value			*/
+    hid_t        dxpl_id = H5AC_dxpl_id; /*dxpl used by library        */
+    hid_t	 ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
@@ -470,12 +471,9 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list")
 
-    /* Check the file access property list */
-    if(H5P_DEFAULT == fapl_id)
-        fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /*
      * Adjust bit flags by turning on the creation bit and making sure that
@@ -489,7 +487,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /*
      * Create a new file or truncate an existing file.
      */
-    if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
     /* Get an atom for the file */
@@ -552,7 +550,8 @@ hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
-    hid_t	ret_value;	        /*return value			*/
+    hid_t        dxpl_id = H5AC_dxpl_id; /*dxpl used by library        */
+    hid_t	 ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
@@ -570,14 +569,13 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* Asking for SWMR read access on a non-read-only file is invalid */
     if((flags & H5F_ACC_SWMR_READ) && (flags & H5F_ACC_RDWR))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "SWMR read access on a file open for read-write access is not allowed")
-    if(H5P_DEFAULT == fapl_id)
-        fapl_id = H5P_FILE_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Open the file */
-    if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)))
+    if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
 
     /* Get an atom for the file */
@@ -919,7 +917,7 @@ H5Fget_freespace(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the actual amount of free space in the file */
-    if(H5MF_get_freespace(file, H5AC_ind_dxpl_id, &tot_space, NULL) < 0)
+    if(H5MF_get_freespace(file, H5AC_dxpl_id, &tot_space, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
     ret_value = (hssize_t)tot_space;
@@ -1033,7 +1031,7 @@ H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* call private get_file_image function */
-    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len)) < 0)
+    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len, H5AC_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file image")
 
 done:
@@ -1366,16 +1364,16 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
     HDmemset(finfo, 0, sizeof(*finfo));
 
     /* Get the size of the superblock and any superblock extensions */
-    if(H5F__super_size(f, H5AC_ind_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
+    if(H5F__super_size(f, H5AC_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
 
     /* Get the size of any persistent free space */
-    if(H5MF_get_freespace(f, H5AC_ind_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
+    if(H5MF_get_freespace(f, H5AC_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
 
     /* Check for SOHM info */
     if(H5F_addr_defined(f->shared->sohm_addr))
-        if(H5SM_ih_size(f, H5AC_ind_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
+        if(H5SM_ih_size(f, H5AC_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
 
     /* Set version # fields */
@@ -1513,7 +1511,7 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nsects must be > 0")
 
     /* Go get the free-space section information in the file */
-    if((ret_value = H5MF_get_free_sections(file, H5AC_ind_dxpl_id, type, nsects, sect_info)) < 0)
+    if((ret_value = H5MF_get_free_sections(file, H5AC_dxpl_id, type, nsects, sect_info)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
 done:
@@ -1877,8 +1875,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Fformat_convert_super (Internal)
  *
- * Purpose:	Downgrade the superblock version for the tool h5format_convert.
- *		(NOTE: more needs to be done to this routine)
+ * Purpose:	Downgrade the superblock version to v2 and
+ *		downgrade persistent file space to non-persistent
+ *		for 1.8 library.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1887,9 +1886,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Fformat_convert_super(hid_t fid)
+H5Fformat_convert(hid_t fid)
 {
     H5F_t	*f = NULL;              /* File to flush */
+    hbool_t	mark_dirty = FALSE;
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1899,13 +1899,37 @@ H5Fformat_convert_super(hid_t fid)
         case H5I_FILE:
             if(NULL == (f = (H5F_t *)H5I_object(fid)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
-	    if(f->shared->sblock->super_vers < HDF5_SUPERBLOCK_VERSION_LATEST)
+
+	    if(f->shared->sblock->super_vers > HDF5_SUPERBLOCK_VERSION_V18_LATEST) {
+		f->shared->sblock->super_vers = HDF5_SUPERBLOCK_VERSION_V18_LATEST;
+		mark_dirty = TRUE;
+	    }
+
+            if(f->shared->fs_strategy == H5F_FILE_SPACE_STRATEGY_DEF &&
+	       f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF) {
+		if(mark_dirty) {
+		    /* Mark superblock as dirty */
+		    if(H5F_super_dirty(f) < 0)
+			HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+		}
 		HGOTO_DONE(SUCCEED)
-	    f->shared->sblock->super_vers = HDF5_SUPERBLOCK_VERSION_LATEST - 1;
+	    }
+
+	    /* Check to remove free-space manager info message from superblock extension */
+            if(H5F_addr_defined(f->shared->sblock->ext_addr)) {
+                if(H5F_super_ext_remove_msg(f, H5AC_dxpl_id, H5O_FSINFO_ID) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
+	    }
+
+            if(H5MF_try_close(f, H5AC_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to free free-space address")
+
+            f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
+            f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
 
 	    /* Mark superblock as dirty */
 	    if(H5F_super_dirty(f) < 0)
-		HDONE_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+		HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
 
             break;
 
@@ -1930,4 +1954,4 @@ H5Fformat_convert_super(hid_t fid)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Fformat_convert_super() */
+} /* end H5Fformat_convert() */

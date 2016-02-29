@@ -67,6 +67,85 @@ if (BUILD_SHARED_LIBS)
 endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
+# Build SWMR test programs
+#
+# These programs are currently not used in CMake tests but we build them
+# here anyway for manual testing and to ensure that the code compiles
+# on all platforms.
+#-----------------------------------------------------------------------------
+MACRO (ADD_H5_SWMR_EXE file)
+  add_executable (${file}
+    ${HDF5_TEST_SOURCE_DIR}/${file}.c
+    ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
+    ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
+  )
+  TARGET_NAMING (${file} STATIC)
+  TARGET_C_PROPERTIES (${file} STATIC " " " ")
+  target_link_libraries (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+  set_target_properties (${file} PROPERTIES FOLDER test)
+  if (BUILD_SHARED_LIBS)
+    add_executable (${file}-shared
+      ${HDF5_TEST_SOURCE_DIR}/${file}.c
+      ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
+      ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
+    )
+    TARGET_NAMING (${file}-shared SHARED)
+    TARGET_C_PROPERTIES (${file}-shared SHARED " " " ")
+    target_link_libraries (${file}-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+    set_target_properties (${file}-shared PROPERTIES FOLDER test)
+  endif (BUILD_SHARED_LIBS)
+ENDMACRO (ADD_H5_SWMR_EXE file)
+
+set (H5_SWMR_TESTS
+    swmr_addrem_writer
+    swmr_check_compat_vfd
+    swmr_generator
+    swmr_reader
+    swmr_remove_reader
+    swmr_remove_writer
+    swmr_sparse_reader
+    swmr_sparse_writer
+    swmr_start_write
+    swmr_writer
+)
+
+foreach (test ${H5_SWMR_TESTS})
+  ADD_H5_SWMR_EXE(${test})
+endforeach (test ${H5_SWMR_TESTS})
+
+#-----------------------------------------------------------------------------
+# Build VDS SWMR test programs
+#
+# These programs are currently not used in CMake tests but we build them
+# here anyway for manual testing and to ensure that the code compiles
+# on all platforms.
+#-----------------------------------------------------------------------------
+MACRO (ADD_H5_VDS_SWMR_EXE file)
+  add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
+  TARGET_NAMING (${file} STATIC)
+  TARGET_C_PROPERTIES (${file} STATIC " " " ")
+  target_link_libraries (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
+  set_target_properties (${file} PROPERTIES FOLDER test)
+  if (BUILD_SHARED_LIBS)
+    add_executable (${file}-shared ${HDF5_TEST_SOURCE_DIR}/${file}.c)
+    TARGET_NAMING (${file}-shared SHARED)
+    TARGET_C_PROPERTIES (${file}-shared SHARED " " " ")
+    target_link_libraries (${file}-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+    set_target_properties (${file}-shared PROPERTIES FOLDER test)
+  endif (BUILD_SHARED_LIBS)
+ENDMACRO (ADD_H5_VDS_SWMR_EXE file)
+
+set (H5_VDS_SWMR_TESTS
+    vds_swmr_gen
+    vds_swmr_reader
+    vds_swmr_writer
+)
+
+foreach (test ${H5_VDS_SWMR_TESTS})
+  ADD_H5_VDS_SWMR_EXE(${test})
+endforeach (test ${H5_VDS_SWMR_TESTS})
+
+#-----------------------------------------------------------------------------
 # If plugin library tests can be tested
 #-----------------------------------------------------------------------------
   # make plugins dir
@@ -74,7 +153,7 @@ endif (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir2")
 
   #-----------------------------------------------------------------------------
-  # Define Test Library Sources
+  # Define Plugin Test Sources
   #-----------------------------------------------------------------------------
   set (TEST_PLUGIN_LIBS
       dynlib1

@@ -30,6 +30,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* File access				*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
@@ -139,6 +140,8 @@ hid_t H5P_CLS_DATATYPE_ACCESS_ID_g              = FAIL;
 H5P_genclass_t *H5P_CLS_DATATYPE_ACCESS_g       = NULL;
 hid_t H5P_CLS_ATTRIBUTE_CREATE_ID_g             = FAIL;
 H5P_genclass_t *H5P_CLS_ATTRIBUTE_CREATE_g      = NULL;
+hid_t H5P_CLS_ATTRIBUTE_ACCESS_ID_g             = FAIL;
+H5P_genclass_t *H5P_CLS_ATTRIBUTE_ACCESS_g      = NULL;
 hid_t H5P_CLS_OBJECT_COPY_ID_g                  = FAIL;
 H5P_genclass_t *H5P_CLS_OBJECT_COPY_g           = NULL;
 hid_t H5P_CLS_LINK_CREATE_ID_g                  = FAIL;
@@ -163,6 +166,7 @@ hid_t H5P_LST_GROUP_ACCESS_ID_g         = FAIL;
 hid_t H5P_LST_DATATYPE_CREATE_ID_g      = FAIL;
 hid_t H5P_LST_DATATYPE_ACCESS_ID_g      = FAIL;
 hid_t H5P_LST_ATTRIBUTE_CREATE_ID_g     = FAIL;
+hid_t H5P_LST_ATTRIBUTE_ACCESS_ID_g     = FAIL;
 hid_t H5P_LST_OBJECT_COPY_ID_g          = FAIL;
 hid_t H5P_LST_LINK_CREATE_ID_g          = FAIL;
 hid_t H5P_LST_LINK_ACCESS_ID_g          = FAIL;
@@ -176,6 +180,26 @@ const H5P_libclass_t H5P_CLS_ROOT[1] = {{
     &H5P_CLS_ROOT_g,		/* Pointer to class             */
     &H5P_CLS_ROOT_ID_g,		/* Pointer to class ID          */
     NULL,			/* Pointer to default property list ID */
+    NULL,			/* Default property registration routine */
+
+    NULL,		        /* Class creation callback      */
+    NULL,		        /* Class creation callback info */
+    NULL,			/* Class copy callback          */
+    NULL,		        /* Class copy callback info     */
+    NULL,			/* Class close callback         */
+    NULL 		        /* Class close callback info    */
+}};
+
+/* Attribute access property list class library initialization object */
+/* (move to proper source code file when used for real) */
+const H5P_libclass_t H5P_CLS_AACC[1] = {{
+    "attribute access",		/* Class name for debugging     */
+    H5P_TYPE_ATTRIBUTE_ACCESS,  /* Class type                   */
+
+    &H5P_CLS_LINK_ACCESS_g,	/* Parent class                 */
+    &H5P_CLS_ATTRIBUTE_ACCESS_g,	/* Pointer to class             */
+    &H5P_CLS_ATTRIBUTE_ACCESS_ID_g,	/* Pointer to class ID          */
+    &H5P_LST_ATTRIBUTE_ACCESS_ID_g,	/* Pointer to default property list ID */
     NULL,			/* Default property registration routine */
 
     NULL,		        /* Class creation callback      */
@@ -250,13 +274,10 @@ const H5P_libclass_t H5P_CLS_TACC[1] = {{
 /* Library property list classes defined in other code modules */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_OCRT[1];         /* Object creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_STRCRT[1];       /* String create */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_LACC[1];         /* Link access */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_GCRT[1];         /* Group create */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_OCPY[1];         /* Object copy */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FCRT[1];         /* File creation */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_FACC[1];         /* File access */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_DCRT[1];         /* Dataset creation */
-H5_DLLVAR const H5P_libclass_t H5P_CLS_DACC[1];         /* Dataset access */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_DXFR[1];         /* Data transfer */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FMNT[1];         /* File mount */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_ACRT[1];         /* Attribute creation */
@@ -297,6 +318,7 @@ static H5P_libclass_t const * const init_class[] = {
     H5P_CLS_TCRT,       /* Datatype creation */
     H5P_CLS_TACC,       /* Datatype access */
     H5P_CLS_ACRT,       /* Attribute creation */
+    H5P_CLS_AACC,       /* Attribute access */
     H5P_CLS_LCRT        /* Link creation */
 };
 
@@ -487,6 +509,7 @@ H5P_term_package(void)
                         H5P_LST_DATATYPE_CREATE_ID_g =
                         H5P_LST_DATATYPE_ACCESS_ID_g =
                         H5P_LST_ATTRIBUTE_CREATE_ID_g =
+                        H5P_LST_ATTRIBUTE_ACCESS_ID_g =
                         H5P_LST_OBJECT_COPY_ID_g =
                         H5P_LST_LINK_CREATE_ID_g =
                         H5P_LST_LINK_ACCESS_ID_g =
@@ -513,6 +536,7 @@ H5P_term_package(void)
                         H5P_CLS_DATATYPE_ACCESS_g =
                         H5P_CLS_STRING_CREATE_g =
                         H5P_CLS_ATTRIBUTE_CREATE_g =
+                        H5P_CLS_ATTRIBUTE_ACCESS_g =
                         H5P_CLS_OBJECT_COPY_g =
                         H5P_CLS_LINK_CREATE_g =
                         H5P_CLS_LINK_ACCESS_g =
@@ -531,6 +555,7 @@ H5P_term_package(void)
                         H5P_CLS_DATATYPE_ACCESS_ID_g =
                         H5P_CLS_STRING_CREATE_ID_g =
                         H5P_CLS_ATTRIBUTE_CREATE_ID_g =
+                        H5P_CLS_ATTRIBUTE_ACCESS_ID_g =
                         H5P_CLS_OBJECT_COPY_ID_g =
                         H5P_CLS_LINK_CREATE_ID_g =
                         H5P_CLS_LINK_ACCESS_ID_g =
@@ -1187,7 +1212,7 @@ H5P__find_prop_plist(const H5P_genplist_t *plist, const char *name)
 
     /* Check if the property has been deleted from list */
     if(H5SL_search(plist->del,name) != NULL) {
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "can't find property in skip list")
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "property deleted from skip list")
     } /* end if */
     else {
         /* Get the property data from the skip list */
@@ -5253,7 +5278,7 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDcompile_assert(H5P_TYPE_LINK_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
+    HDcompile_assert(H5P_TYPE_ATTRIBUTE_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
     HDassert(type >= H5P_TYPE_USER && type <= H5P_TYPE_LINK_ACCESS);
 
     /* Check arguments */
@@ -5314,6 +5339,10 @@ H5P__new_plist_of_type(H5P_plist_type_t type)
 
         case H5P_TYPE_ATTRIBUTE_CREATE:
             class_id = H5P_CLS_ATTRIBUTE_CREATE_ID_g;
+            break;
+
+        case H5P_TYPE_ATTRIBUTE_ACCESS:
+            class_id = H5P_CLS_ATTRIBUTE_ACCESS_ID_g;
             break;
 
         case H5P_TYPE_OBJECT_COPY:
@@ -5403,3 +5432,64 @@ H5P_get_class(const H5P_genplist_t *plist)
     FUNC_LEAVE_NOAPI(plist->pclass)
 } /* end H5P_get_class() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5P_verify_apl_and_dxpl
+ *
+ * Purpose:	Validate access property list and/or switch from generic
+ *		property list to default of correct type.
+ *
+ *		Also, if using internal DXPL and collective flag is set,
+ *		switch to internal collective DXPL.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              Sunday, June 21, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, 
+                        hid_t *dxpl_id, hid_t loc_id, hbool_t is_collective)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Sanity check */
+    HDassert(acspl_id);
+    HDassert(libclass);
+    HDassert(dxpl_id);
+
+    /* Set access plist to the default property list of the appropriate class if it's the generic default */
+    if(H5P_DEFAULT == *acspl_id)
+        *acspl_id = *libclass->def_plist_id;
+    else {
+        /* Sanity check the access property list class */
+        if(TRUE != H5P_isa_class(*acspl_id, *libclass->class_id))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not the required access property list")
+    } /* end else */
+
+#ifdef H5_HAVE_PARALLEL
+    /* If parallel is enabled and the file driver used in the MPI-IO
+    VFD, issue an MPI barrier for easier debugging if the API function
+    calling this is supposed to be called collectively. Note that this
+    happens only when the environment variable H5_COLL_BARRIER is set
+    to non 0. */
+    if(is_collective && H5_coll_api_sanity_check_g) {
+        MPI_Comm mpi_comm; /* file communicator */
+
+        /* retrieve the MPI communicator from the loc_id or the fapl_id */
+        if(H5F_mpi_retrieve_comm(loc_id, *acspl_id, &mpi_comm) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
+
+        /* issue the barrier */
+        if(mpi_comm != MPI_COMM_NULL)
+            MPI_Barrier(mpi_comm);
+    }
+#endif /* H5_HAVE_PARALLEL */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_verify_apl_and_dxpl() */

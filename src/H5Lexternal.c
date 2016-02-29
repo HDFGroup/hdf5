@@ -282,7 +282,7 @@ H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
         parent_file_name = H5F_OPEN_NAME(loc.oloc->file);
 
         /* Query length of parent group name */
-        if((group_name_len = H5G_get_name(&loc, NULL, (size_t) 0, NULL, lapl_id, H5AC_ind_dxpl_id)) < 0)
+        if((group_name_len = H5G_get_name(&loc, NULL, (size_t) 0, NULL, lapl_id, H5AC_dxpl_id)) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve length of group name")
 
         /* Account for null terminator */
@@ -297,7 +297,7 @@ H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group,
             parent_group_name = local_group_name;
 
         /* Get parent group name */
-        if(H5G_get_name(&loc, parent_group_name, (size_t) group_name_len, NULL, lapl_id, H5AC_ind_dxpl_id) < 0)
+        if(H5G_get_name(&loc, parent_group_name, (size_t) group_name_len, NULL, lapl_id, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve group name")
 
         /* Make callback */
@@ -563,6 +563,7 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     size_t      file_name_len;          /* Length of file name string */
     size_t      norm_obj_name_len;      /* Length of normalized object name string */
     uint8_t    *p;                      /* Pointer into external link buffer */
+    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by library */ 
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -597,8 +598,12 @@ H5Lcreate_external(const char *file_name, const char *obj_name,
     p += file_name_len;
     HDstrncpy((char *)p, norm_obj_name, buf_size - (file_name_len + 1));       /* External link's object */
 
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, link_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
     /* Create an external link */
-    if(H5L_create_ud(&link_loc, link_name, ext_link_buf, buf_size, H5L_TYPE_EXTERNAL, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
+    if(H5L_create_ud(&link_loc, link_name, ext_link_buf, buf_size, H5L_TYPE_EXTERNAL, lcpl_id, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:

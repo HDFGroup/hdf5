@@ -1998,7 +1998,6 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
     H5P_genplist_t *plist;      /* Property list pointer */
     H5O_layout_t chunk_layout;  /* Layout information for setting chunk info */
     uint64_t chunk_nelmts;      /* Number of elements in chunk */
-    unsigned max_enc_bytes_per_dim;     /* Max. number of bytes required to encode this dimension */
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2026,10 +2025,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
     HDmemcpy(&chunk_layout, &H5D_def_layout_chunk_g, sizeof(H5D_def_layout_chunk_g));
     HDmemset(&chunk_layout.u.chunk.dim, 0, sizeof(chunk_layout.u.chunk.dim));
     chunk_nelmts = 1;
-    max_enc_bytes_per_dim = 0;
     for(u = 0; u < (unsigned)ndims; u++) {
-        unsigned enc_bytes_per_dim;     /* Number of bytes required to encode this dimension */
-
         if(dim[u] == 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "all chunk dimensions must be positive")
         if(dim[u] != (dim[u] & 0xffffffff))
@@ -2038,16 +2034,7 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
         if(chunk_nelmts > (uint64_t)0xffffffff)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "number of elements in chunk must be < 4GB")
         chunk_layout.u.chunk.dim[u] = (uint32_t)dim[u]; /* Store user's chunk dimensions */
-
-        /* Get encoded size of dim, in bytes */
-        enc_bytes_per_dim = (H5VM_log2_gen(dim[u]) + 8) / 8;
-
-        /* Check if this is the largest value so far */
-        if(enc_bytes_per_dim > max_enc_bytes_per_dim)
-            max_enc_bytes_per_dim = enc_bytes_per_dim;
     } /* end for */
-    HDassert(max_enc_bytes_per_dim > 0 && max_enc_bytes_per_dim <= 8);
-    chunk_layout.u.chunk.enc_bytes_per_dim = max_enc_bytes_per_dim;
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
@@ -2517,8 +2504,8 @@ done:
  *
  *              If the length of the filename, which determines the
  *              required value of size, is unknown, a preliminary call to
- *              H5Pget_virtual_filename with the last two parameters set
- *              to NULL can be made.  The return value of this call will
+ *              H5Pget_virtual_filename with 'name' set to NULL and 'size'
+ *              set to zero can be made. The return value of this call will
  *              be the size in bytes of the filename.  That value, plus 1
  *              for a NULL terminator, is then assigned to size for a
  *              second H5Pget_virtual_filename call, which will retrieve
@@ -2578,14 +2565,14 @@ done:
  *              additional characters, if any, are not returned to the
  *              user application.
  *
- *              If the length of the filename, which determines the
+ *              If the length of the dataset name, which determines the
  *              required value of size, is unknown, a preliminary call to
- *              H5Pget_virtual_dsetname with the last two parameters set
- *              to NULL can be made.  The return value of this call will
- *              be the size in bytes of the filename.  That value, plus 1
+ *              H5Pget_virtual_dsetname with 'name' set to NULL and 'size'
+ *              set to zero can be made.  The return value of this call will
+ *              be the size in bytes of the dataset name.  That value, plus 1
  *              for a NULL terminator, is then assigned to size for a
  *              second H5Pget_virtual_dsetname call, which will retrieve
- *              the actual filename. 
+ *              the actual dataset name. 
  *
  * Return:      Returns the length of the name if successful, otherwise
  *              returns a negative value.
@@ -3246,7 +3233,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
         HDmemcpy(fill.buf, value, (size_t)fill.size);
 
         /* Set up type conversion function */
-        if(NULL == (tpath = H5T_path_find(type, type, NULL, NULL, H5AC_ind_dxpl_id, FALSE)))
+        if(NULL == (tpath = H5T_path_find(type, type, NULL, NULL, H5AC_dxpl_id, FALSE)))
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest data types")
 
         /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
@@ -3258,7 +3245,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             /* Convert the fill value */
-            if(H5T_convert(tpath, type_id, type_id, (size_t)1, (size_t)0, (size_t)0, fill.buf, bkg_buf, H5AC_ind_dxpl_id) < 0) {
+            if(H5T_convert(tpath, type_id, type_id, (size_t)1, (size_t)0, (size_t)0, fill.buf, bkg_buf, H5AC_dxpl_id) < 0) {
                 if(bkg_buf)
                     bkg_buf = H5FL_BLK_FREE(type_conv, bkg_buf);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
@@ -3413,7 +3400,7 @@ H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value/*out*/)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the fill value */
-    if(H5P_get_fill_value(plist, type, value, H5AC_ind_dxpl_id) < 0)
+    if(H5P_get_fill_value(plist, type, value, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fill value")
 
 done:

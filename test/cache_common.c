@@ -3600,7 +3600,7 @@ insert_entry(H5F_t * file_ptr,
 {
     H5C_t * cache_ptr;
     herr_t result;
-    hid_t xfer = H5AC_ind_dxpl_id;
+    hid_t xfer = H5AC_dxpl_id;
     hbool_t insert_pinned;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -3887,7 +3887,7 @@ protect_entry(H5F_t * file_ptr,
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
     haddr_t baddrs;
-    hid_t xfer = H5AC_ind_dxpl_id;
+    hid_t xfer = H5AC_dxpl_id;
     H5C_cache_entry_t * cache_entry_ptr;
 
     if ( pass ) {

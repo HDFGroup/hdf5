@@ -115,33 +115,6 @@ struct H5P_genplist_t {
     H5SL_t *props;      /* Skip list containing properties */
 };
 
-/* Function pointer for library classes with properties to register */
-typedef herr_t (*H5P_init_class_op_t)(H5P_genclass_t *pclass);
-typedef herr_t (*H5P_reg_prop_func_t)(H5P_genclass_t *pclass);
-
-/*
- * Each library property list class has a variable of this type that contains
- * class variables and methods used to initialize the class.
- */
-typedef struct H5P_libclass_t {
-    const char	*name;		        /* Class name */
-    H5P_plist_type_t type;              /* Class type */
-
-    H5P_genclass_t * * par_pclass;      /* Pointer to global parent class property list class */
-    H5P_genclass_t * * pclass;          /* Pointer to global property list class */
-    hid_t * const class_id;             /* Pointer to global property list class ID */
-    hid_t * const def_plist_id;         /* Pointer to global default property list ID */
-    H5P_reg_prop_func_t reg_prop_func;  /* Register class's properties */
-
-    /* Class callback function pointers & info */
-    H5P_cls_create_func_t create_func;  /* Function to call when a property list is created */
-    void *create_data;                  /* Pointer to user data to pass along to create callback */
-    H5P_cls_copy_func_t copy_func;      /* Function to call when a property list is copied */
-    void *copy_data;                    /* Pointer to user data to pass along to copy callback */
-    H5P_cls_close_func_t close_func;    /* Function to call when a property list is closed */
-    void *close_data;                   /* Pointer to user data to pass along to close callback */
-} H5P_libclass_t;
-
 /* Property list/class iterator callback function pointer */
 typedef int (*H5P_iterate_int_t)(H5P_genprop_t *prop, void *udata);
 

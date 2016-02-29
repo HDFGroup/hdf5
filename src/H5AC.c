@@ -80,22 +80,13 @@ static herr_t H5AC__verify_tag(hid_t dxpl_id, const H5AC_class_t * type);
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
 
 /* Default dataset transfer property list for metadata I/O calls */
-/* (Collective set, "block before metadata write" set and "library internal" set) */
-/* (Global variable definition, declaration is in H5ACprivate.h also) */
 hid_t H5AC_dxpl_id = (-1);
-
-/* Dataset transfer property list for independent metadata I/O calls */
-/* (just "library internal" set - i.e. independent transfer mode) */
-/* (Global variable definition, declaration is in H5ACprivate.h also) */
-H5P_genplist_t *H5AC_ind_dxpl_g = NULL;
-hid_t H5AC_ind_dxpl_id = (-1);
-
+hbool_t H5_coll_api_sanity_check_g = false;
 
 /*******************/
 /* Local Variables */
@@ -177,55 +168,27 @@ done:
 herr_t
 H5AC__init_package(void)
 {
-#ifdef H5_HAVE_PARALLEL
-    H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
-    unsigned coll_meta_write;       /* "collective metadata write" property value */
-#endif /* H5_HAVE_PARALLEL */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
 
 #ifdef H5_HAVE_PARALLEL
-    /* Sanity check */
-    HDassert(H5P_CLS_DATASET_XFER_g != NULL);
-
-    /* Get an ID for the collective H5AC dxpl */
+    /* Get an ID for the metadata (H5AC) dxpl */
     if((H5AC_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
-    /* Get the property list object */
-    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_dxpl_id)))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+    /* check whether to enable strict collective function calling
+       sanity checks using MPI barriers */
+    {
+        const char *s;  /* String for environment variables */
 
-    /* Insert 'collective metadata write' property */
-    coll_meta_write = 1;
-    if(H5P_insert(xfer_plist, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
-
-    /* Get an ID for the independent H5AC dxpl */
-    if((H5AC_ind_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
-
-    /* Get the property list object */
-    if(NULL == (H5AC_ind_dxpl_g = (H5P_genplist_t *)H5I_object(H5AC_ind_dxpl_id)))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
-
-    /* Insert 'collective metadata write' property */
-    coll_meta_write = 0;
-    if(H5P_insert(H5AC_ind_dxpl_g, H5AC_COLLECTIVE_META_WRITE_NAME, H5AC_COLLECTIVE_META_WRITE_SIZE, &coll_meta_write,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't insert metadata cache dxpl property")
+        s = HDgetenv("H5_COLL_API_SANITY_CHECK");
+        if(s && HDisdigit(*s)) {
+            H5_coll_api_sanity_check_g = (hbool_t)HDstrtol(s, NULL, 0);
+        }
+    }
 #else /* H5_HAVE_PARALLEL */
-    /* Sanity check */
-    HDassert(H5P_LST_DATASET_XFER_ID_g!=(-1));
-
     H5AC_dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    H5AC_ind_dxpl_id = H5P_DATASET_XFER_DEFAULT;
-
-    /* Get the property list objects for the IDs */
-    if(NULL == (H5AC_ind_dxpl_g = (H5P_genplist_t *)H5I_object(H5AC_ind_dxpl_id)))
-        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list object")
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -256,19 +219,18 @@ H5AC_term_package(void)
 
     if(H5_PKG_INIT_VAR) {
 #ifdef H5_HAVE_PARALLEL
-        if(H5AC_dxpl_id > 0 || H5AC_ind_dxpl_id > 0) {
+        if(H5AC_dxpl_id > 0) {
             /* Indicate more work to do */
             n = 1; /* H5I */
 
             /* Close H5AC dxpl */
-            if(H5I_dec_ref(H5AC_dxpl_id) < 0 || H5I_dec_ref(H5AC_ind_dxpl_id) < 0)
+            if(H5I_dec_ref(H5AC_dxpl_id) < 0)
                 H5E_clear_stack(NULL); /*ignore error*/
         } /* end if */
 #endif /* H5_HAVE_PARALLEL */
-            
+
         /* Reset static IDs */
         H5AC_dxpl_id = (-1);
-        H5AC_ind_dxpl_id = (-1);
 
         /* Reset interface initialization flag */
         if(0 == n)
@@ -496,7 +458,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
     } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
-    aux_ptr = H5C_get_aux_ptr(f->shared->cache);
+    aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
     if(aux_ptr)
         /* Sanity check */
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
@@ -865,7 +827,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 {
     H5AC_aux_t *aux_ptr;
 
-    if(NULL != (aux_ptr = H5C_get_aux_ptr(f->shared->cache))) {
+    if(NULL != (aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache))) {
         /* Log the new entry */
         if(H5AC__log_inserted_entry((H5AC_info_t *)thing) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5AC__log_inserted_entry() failed")
@@ -944,7 +906,7 @@ H5AC_mark_entry_dirty(void *thing)
 {
     H5AC_aux_t *aux_ptr;
 
-    aux_ptr = H5C_get_aux_ptr(cache_ptr);
+    aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     if((!entry_ptr->is_dirty) && (!entry_ptr->is_protected) &&
              (entry_ptr->is_pinned) && (NULL != aux_ptr))
         if(H5AC__log_dirtied_entry(entry_ptr) < 0)
@@ -1024,7 +986,7 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
 
 #ifdef H5_HAVE_PARALLEL
     /* Log moving the entry */
-    if(NULL != (aux_ptr = H5C_get_aux_ptr(f->shared->cache)))
+    if(NULL != (aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache)))
         if(H5AC__log_moved_entry(f, old_addr, new_addr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log moved entry")
 #endif /* H5_HAVE_PARALLEL */
@@ -1363,7 +1325,7 @@ H5AC_resize_entry(void *thing, size_t new_size)
 {
     H5AC_aux_t *aux_ptr;
 
-    aux_ptr = H5C_get_aux_ptr(cache_ptr);
+    aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     if((!entry_ptr->is_dirty) && (NULL != aux_ptr))
         if(H5AC__log_dirtied_entry(entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "can't log dirtied entry")
@@ -1623,7 +1585,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
-    if(NULL != (aux_ptr = H5C_get_aux_ptr(f->shared->cache))) {
+    if(NULL != (aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache))) {
         if(dirtied && ((H5AC_info_t *)thing)->is_dirty == FALSE)
             if(H5AC__log_dirtied_entry((H5AC_info_t *)thing) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "can't log dirtied entry")
@@ -1753,7 +1715,7 @@ H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr,
 {
     H5AC_aux_t *aux_ptr;
 
-    aux_ptr = H5C_get_aux_ptr(cache_ptr);
+    aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     if((aux_ptr != NULL) && (aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad aux_ptr on entry.")
 }
@@ -1800,7 +1762,7 @@ H5AC_get_cache_auto_resize_config(const H5AC_t *cache_ptr,
 {
     H5AC_aux_t *aux_ptr;
 
-    if(NULL != (aux_ptr = H5C_get_aux_ptr(cache_ptr))) {
+    if(NULL != (aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr))) {
         config_ptr->dirty_bytes_threshold = aux_ptr->dirty_bytes_threshold;
 	config_ptr->metadata_write_strategy = aux_ptr->metadata_write_strategy;
     } /* end if */
@@ -1948,7 +1910,7 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config
 {
     H5AC_aux_t *aux_ptr;
 
-    aux_ptr = H5C_get_aux_ptr(cache_ptr);
+    aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     if((aux_ptr != NULL) && (aux_ptr->magic != H5AC__H5AC_AUX_T_MAGIC))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad aux_ptr on entry.")
 }
@@ -1992,7 +1954,7 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config
 
     /* Set parallel configuration values */
     /* (Which are only held in the H5AC layer -QAK) */
-    if(NULL != (aux_ptr = H5C_get_aux_ptr(cache_ptr))) {
+    if(NULL != (aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr))) {
         aux_ptr->dirty_bytes_threshold = config_ptr->dirty_bytes_threshold;
         aux_ptr->metadata_write_strategy = config_ptr->metadata_write_strategy;
     } /* end if */
@@ -2212,7 +2174,7 @@ H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name)
 {
     H5AC_aux_t * aux_ptr;
 
-    aux_ptr = H5C_get_aux_ptr(cache_ptr);
+    aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
     if(aux_ptr == NULL)
         sprintf(file_name, "%s", trace_file_name);
     else {
@@ -2393,7 +2355,7 @@ H5_ATTR_UNUSED
     HDassert(f != NULL);
     HDassert(f->shared != NULL);
     HDassert(f->shared->cache != NULL);
-    aux_ptr = H5C_get_aux_ptr(f->shared->cache);
+    aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
     if(aux_ptr != NULL) {
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 

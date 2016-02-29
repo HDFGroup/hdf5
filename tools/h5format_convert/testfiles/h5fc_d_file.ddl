@@ -9,14 +9,18 @@ usage: h5format_convert [OPTIONS] file_name
 Examples of use:
 
 h5format_convert -d /group/dataset file_name
-  Convert the chunk indexing type to version 1 B-tree
-  for the chunked dataset </group/dataset> in the HDF5 file <file_name>.
+  Convert the dataset </group/dataset> in the HDF5 file <file_name>:
+    a. chunked dataset: convert the chunk indexing type to version 1 B-tree
+    b. compact/contiguous dataset: downgrade the layout version to 3
+    c. virtual dataset: no action
 
 h5format_convert file_name
-  Convert the chunk indexing type to version 1 B-tree
-  for all the chunked datasets in the HDF5 file <file_name>.
+  Convert all datasets in the HDF5 file <file_name>:
+    a. chunked dataset: convert the chunk indexing type to version 1 B-tree
+    b. compact/contiguous dataset: downgrade the layout version to 3
+    c. virtual dataset: no action
 
 h5format_convert -n -d /group/dataset file_name
   Go through all the steps except the actual conversion when 
-  converting the chunked dataset </group/dataset> in the HDF5 file <file_name>.
+  converting the dataset </group/dataset> in the HDF5 file <file_name>.
 h5format_convert error: missing file name

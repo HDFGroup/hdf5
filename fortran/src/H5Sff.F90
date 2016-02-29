@@ -4,7 +4,7 @@
 !  MODULE H5S
 !
 ! FILE
-!  fortran/src/H5Sff.f90
+!  fortran/src/H5Sff.F90
 !
 ! PURPOSE
 !  This file contains Fortran interfaces for H5S functions.
@@ -41,7 +41,7 @@
 !*****
 
 MODULE H5S
-  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_INT
   USE H5GLOBAL
 
 CONTAINS
@@ -1232,7 +1232,7 @@ CONTAINS
     ENDIF
     ! Case of optional parameters.
     !
-    ! Find the rank of the dataspace to allocate memery for
+    ! Find the rank of the dataspace to allocate memory for
     ! default stride and block arrays.
     !
     CALL h5sget_simple_extent_ndims_f(space_id, rank, hdferr)
@@ -1378,7 +1378,7 @@ CONTAINS
 !  endif
             ! Case of optional parameters.
             !
-            ! Find the rank of the dataspace to allocate memery for
+            ! Find the rank of the dataspace to allocate memory for
             ! default stride and block arrays.
             !
 !  CALL h5sget_simple_extent_ndims_f(space_id, rank, hdferr)
@@ -1750,5 +1750,119 @@ CONTAINS
     IF(c_equal.GT.0) equal = .TRUE.
 
   END SUBROUTINE h5sextent_equal_f
+
+!
+!****s* H5S/h5sget_regular_hyperslab_f
+!
+! NAME
+!  h5sget_regular_hyperslab_f
+!
+! PURPOSE
+!  Retrieves a regular hyperslab selection.
+!
+! INPUTS
+!  space_id - The identifier of the dataspace.
+! OUTPUTS
+!  start    - Offset of the start of the regular hyperslab.
+!  stride   - Stride of the regular hyperslab.
+!  count    - Number of blocks in the regular hyperslab.
+!  block    - Size of a block in the regular hyperslab.
+!  hdferr   - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  January, 28 2016
+! SOURCE
+  SUBROUTINE h5sget_regular_hyperslab_f(space_id, start, stride, count, block, hdferr)
+    
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) ::  space_id
+    INTEGER(HSIZE_T), INTENT(OUT), DIMENSION(*), TARGET ::  start
+    INTEGER(HSIZE_T), INTENT(OUT), DIMENSION(*), TARGET ::  stride
+    INTEGER(HSIZE_T), INTENT(OUT), DIMENSION(*), TARGET ::  count
+    INTEGER(HSIZE_T), INTENT(OUT), DIMENSION(*), TARGET ::  block
+    INTEGER, INTENT(OUT) :: hdferr
+!*****
+    TYPE(C_PTR) :: start_c, stride_c, count_c, block_c
+    INTEGER :: n
+    
+    INTERFACE
+       INTEGER FUNCTION h5sget_regular_hyperslab(space_id, start, stride, count, block) BIND(C,NAME='H5Sget_regular_hyperslab')
+         IMPORT :: HID_T, C_PTR
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: space_id
+         TYPE(C_PTR), VALUE :: start, stride, count, block
+       END FUNCTION h5sget_regular_hyperslab
+    END INTERFACE
+
+    hdferr = 0
+
+    start_c = C_LOC(start(1))
+    stride_c = C_LOC(stride(1))
+    count_c = C_LOC(count(1))
+    block_c = C_LOC(block(1))
+
+    IF(INT(h5sget_regular_hyperslab(space_id, start_c, stride_c, count_c, block_c)).LT.0) hdferr = -1
+
+    ! Reverse the C arrays description values of the hyperslab because 
+    ! the hyperslab was for a C stored hyperslab
+
+    CALL H5Sget_simple_extent_ndims_f(space_id,n,hdferr)
+    IF(hdferr.LT.0.OR.n.EQ.0)THEN
+       hdferr=-1
+    ELSE
+       start(1:n)  = start(n:1:-1)
+       stride(1:n) = stride(n:1:-1)
+       count(1:n)  = count(n:1:-1)
+       block(1:n)  = block(n:1:-1)
+    ENDIF
+
+  END SUBROUTINE h5sget_regular_hyperslab_f
+
+!****s* H5S/h5sis_regular_hyperslab_f
+!
+! NAME
+!  h5sis_regular_hyperslab_f
+!
+! PURPOSE
+!  Retrieves a regular hyperslab selection.
+!
+! INPUTS
+!  space_id  - The identifier of the dataspace.
+! OUTPUTS
+!  IsRegular - TRUE or FALSE for hyperslab selection if successful.
+!  hdferr    - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  January, 28 2016
+! SOURCE
+  SUBROUTINE h5sis_regular_hyperslab_f(space_id, IsRegular, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) ::  space_id
+    LOGICAL :: IsRegular
+    INTEGER, INTENT(OUT) :: hdferr
+!*****
+    INTEGER(C_INT) :: status 
+    
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Sis_regular_hyperslab(space_id) BIND(C,NAME='H5Sis_regular_hyperslab')
+         IMPORT :: HID_T, C_INT
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: space_id
+       END FUNCTION H5Sis_regular_hyperslab
+    END INTERFACE
+
+    status = H5Sis_regular_hyperslab(space_id)
+
+    hdferr = 0
+    IsRegular = .FALSE.
+    IF(status.GT.0)THEN
+       IsRegular = .TRUE.
+    ELSE IF(status.LT.0)THEN
+       hdferr = -1
+    ENDIF
+
+  END SUBROUTINE H5Sis_regular_hyperslab_f
 
 END MODULE H5S

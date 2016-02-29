@@ -41,6 +41,8 @@ RM='rm -rf'
 CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
+H5DUMP=../h5dump/h5dump         # The h5dump tool name
+H5DUMP_BIN=`pwd`/$H5DUMP        # The path of the h5dump tool binary
 DIRNAME='dirname'
 LS='ls'
 AWK='awk'
@@ -79,10 +81,24 @@ TMPFILE=tmp.h5
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
 LIST_HDF5_TEST_FILES="
-$SRC_H5FORMCONV_TESTFILES/h5fc_v1.h5
-$SRC_H5FORMCONV_TESTFILES/h5fc_latest_v3.h5
 $SRC_H5FORMCONV_TESTFILES/h5fc_non_v3.h5
 $SRC_H5FORMCONV_TESTFILES/h5fc_edge_v3.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext_none.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext_none.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_i.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_s.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_f.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_if.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_is.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_sf.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext3_isf.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_i.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_s.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_f.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_if.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_is.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_sf.h5
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext3_isf.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -98,6 +114,20 @@ $SRC_H5FORMCONV_TESTFILES/h5fc_v_ndata_bt1.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_v_all.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_v_n_1d.ddl
 $SRC_H5FORMCONV_TESTFILES/h5fc_v_n_all.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_i.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_s.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext1_f.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_if.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_is.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext2_sf.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_ext3_isf.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_i.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_s.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext1_f.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_if.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_is.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_sf.ddl
+$SRC_H5FORMCONV_TESTFILES/old_h5fc_ext3_isf.ddl
 "
 
 #
@@ -199,14 +229,7 @@ TOOLTEST_OUT() {
     cat $actual_err >> $actual
 
     # Compare output
-    if $CMP $expect $actual; then
-	echo " PASSED"
-    else
-	echo "*FAILED*"
-	echo "    Expected result (*.ddl) differs from actual result (*.out)"
-	nerrors="`expr $nerrors + 1`"
-	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
-    fi
+    COMPARE_OUT $expect $actual
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
@@ -243,8 +266,8 @@ CHECKING() {
    echo "Verifying $* $SPACES" | cut -c1-80 | tr -d '\012'
 }
 
-# $1 dataset name
 # Assume $TESTDIR/$TMPFILE is the converted test file
+# $1 dataset name
 IDX_CHECK() {
     CHECKING $1
     $RUNSERIAL $CHK_IDX_BIN $TESTDIR/$TMPFILE $1
@@ -255,6 +278,39 @@ IDX_CHECK() {
 	echo "*FAILED*"
 	echo "    The chunk indexing type is not correct"
 	nerrors="`expr $nerrors + 1`"
+    fi
+}
+
+# $1 is the expected output
+# $2 is the output from testing
+COMPARE_OUT() {
+    if $CMP $1 $2; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        echo "    Expected result (*.ddl) differs from actual result (*.out)"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+}
+
+# Assume $TESTDIR/$TMPFILE is the converted test file
+# $1 is the test file for verifying h5dump output
+# $2 is the expected output from h5dump
+H5DUMP_CHECK() {
+    CHECKING h5dump output for $1
+    expect="$TESTDIR/$2"
+    actual="$TESTDIR/`basename $2 .ddl`.out"
+    actual_err="$TESTDIR/`basename $2 .ddl`.err"
+    $RUNSERIAL $H5DUMP_BIN -BH $TESTDIR/$TMPFILE > $actual 2>$actual_err
+    cat $actual_err >> $actual
+
+    # Compare output
+    COMPARE_OUT $expect $actual
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+	$RM $actual $actual_err
     fi
 }
 
@@ -284,31 +340,31 @@ TOOLTEST_OUT h5fc_nooption.ddl ''
 TOOLTEST_OUT h5fc_nonexistfile.ddl nonexist.h5
 #
 #
-# h5format_convert -d h5fc_v1.h5 (just -d option, file exists)
-# h5format_convert --dname h5fc_v1.h5 (just --dname option, file exists)
+# h5format_convert -d old_h5fc_ext_none.h5 (just -d option, file exists)
+# h5format_convert --dname old_h5fc_ext_none.h5 (just --dname option, file exists)
 # h5format_convert --dname (just --dname option)
-# h5format_convert --dname=nonexist h5fc_v1.h5 (dataset does not exist, file exists)
-TOOLTEST_OUT h5fc_d_file.ddl h5fc_v1.h5 -d
-TOOLTEST_OUT h5fc_d_file.ddl h5fc_v1.h5 --dname
+# h5format_convert --dname=nonexist old_h5fc_ext_none.h5 (dataset does not exist, file exists)
+TOOLTEST_OUT h5fc_d_file.ddl old_h5fc_ext_none.h5 -d
+TOOLTEST_OUT h5fc_d_file.ddl old_h5fc_ext_none.h5 --dname
 TOOLTEST_OUT h5fc_dname.ddl '' --dname
-TOOLTEST_OUT h5fc_nonexistdset_file.ddl h5fc_v1.h5 --dname=nonexist
+TOOLTEST_OUT h5fc_nonexistdset_file.ddl old_h5fc_ext_none.h5 --dname=nonexist
 #
 #
 #
-# h5format_convert -d /DSET_NON_CHUNKED -v h5fc_v1.h5 (verbose, non-chunked dataset)
-# h5format_convert -d /GROUP/DSET_BT1 --verbose h5fc_v1.h5 (verbose, bt1 dataset)
-# h5format_convert -d /DSET_NDATA_BT1 -v -n h5fc_v1.h5 (verbose, noop, bt1+nodata dataset)
-# h5format_convert -v h5fc_v1.h5 (verbose, all datasets)
-TOOLTEST_OUT h5fc_v_non_chunked.ddl h5fc_v1.h5 -d /DSET_NON_CHUNKED -v
-TOOLTEST_OUT h5fc_v_bt1.ddl h5fc_v1.h5 -d /GROUP/DSET_BT1 --verbose
-TOOLTEST_OUT h5fc_v_ndata_bt1.ddl h5fc_v1.h5 -d /DSET_NDATA_BT1 -v -n
-TOOLTEST_OUT h5fc_v_all.ddl h5fc_v1.h5 -v
+# h5format_convert -d /DSET_CONTIGUOUS -v old_h5fc_ext_none.h5 (verbose, contiguous dataset)
+# h5format_convert -d /GROUP/DSET_BT2 --verbose old_h5fc_ext_none.h5 (verbose, bt1 dataset)
+# h5format_convert -d /DSET_NDATA_BT2 -v -n old_h5fc_ext_none.h5 (verbose, noop, bt1+nodata dataset)
+# h5format_convert -v old_h5fc_ext_none.h5 (verbose, all datasets)
+TOOLTEST_OUT h5fc_v_non_chunked.ddl old_h5fc_ext_none.h5 -d /DSET_CONTIGUOUS -v
+TOOLTEST_OUT h5fc_v_bt1.ddl old_h5fc_ext_none.h5 -d /GROUP/DSET_BT2 --verbose
+TOOLTEST_OUT h5fc_v_ndata_bt1.ddl old_h5fc_ext_none.h5 -d /DSET_NDATA_BT2 -v -n
+TOOLTEST_OUT h5fc_v_all.ddl old_h5fc_ext_none.h5 -v
 #
 #
 #
-# h5format_convert -d /DSET_EA -v -n h5fc_latest_v3.h5 (verbose, noop, one ea dataset)
+# h5format_convert -d /DSET_EA -v -n h5fc_ext_none.h5 (verbose, noop, one ea dataset)
 # h5format_convert -v -n h5fc_non_v3.h5 (verbose, noop, all datasets)
-TOOLTEST_OUT h5fc_v_n_1d.ddl h5fc_latest_v3.h5 -d /DSET_EA -v -n
+TOOLTEST_OUT h5fc_v_n_1d.ddl h5fc_ext_none.h5 -d /DSET_EA -v -n
 TOOLTEST_OUT h5fc_v_n_all.ddl h5fc_non_v3.h5 -v -n
 #
 #
@@ -316,45 +372,45 @@ TOOLTEST_OUT h5fc_v_n_all.ddl h5fc_non_v3.h5 -v -n
 # No output from tests
 # 1) Use the tool to convert the dataset
 # 2) Verify the chunk indexing type is correct
-# h5format_convert -d /DSET_EA h5fc_latest_v3.h5
-# h5format_convert -d /GROUP/DSET_NDATA_EA h5fc_latest_v3.h5
-# h5format_convert -d /GROUP/DSET_BT2 h5fc_latest_v3.h5
-# h5format_convert -d /DSET_NDATA_BT2 h5fc_latest_v3.h5
-# h5format_convert -d /DSET_FA h5fc_latest_v3.h5
-# h5format_convert -d /GROUP/DSET_FA h5fc_latest_v3.h5
-# h5format_convert -d /DSET_NONE h5fc_latest_v3.h5
-# h5format_convert -d /GROUP/DSET_NONE h5fc_latest_v3.h5
-TOOLTEST h5fc_latest_v3.h5 -d /DSET_EA
+# h5format_convert -d /DSET_EA h5fc_ext_none.h5
+# h5format_convert -d /GROUP/DSET_NDATA_EA h5fc_ext_none.h5
+# h5format_convert -d /GROUP/DSET_BT2 h5fc_ext_none.h5
+# h5format_convert -d /DSET_NDATA_BT2 h5fc_ext_none.h5
+# h5format_convert -d /DSET_FA h5fc_ext_none.h5
+# h5format_convert -d /GROUP/DSET_FA h5fc_ext_none.h5
+# h5format_convert -d /DSET_NONE h5fc_ext_none.h5
+# h5format_convert -d /GROUP/DSET_NDATA_NONE h5fc_ext_none.h5
+TOOLTEST h5fc_ext_none.h5 -d /DSET_EA
 IDX_CHECK /DSET_EA
 #
-TOOLTEST h5fc_latest_v3.h5 -d /GROUP/DSET_NDATA_EA
+TOOLTEST h5fc_ext_none.h5 -d /GROUP/DSET_NDATA_EA
 IDX_CHECK /GROUP/DSET_NDATA_EA
 #
-TOOLTEST h5fc_latest_v3.h5 -d /GROUP/DSET_BT2
+TOOLTEST h5fc_ext_none.h5 -d /GROUP/DSET_BT2
 IDX_CHECK /GROUP/DSET_BT2
 #
-TOOLTEST h5fc_latest_v3.h5 -d /DSET_NDATA_BT2
+TOOLTEST h5fc_ext_none.h5 -d /DSET_NDATA_BT2
 IDX_CHECK /DSET_NDATA_BT2
 #
-TOOLTEST h5fc_latest_v3.h5 -d /DSET_FA
+TOOLTEST h5fc_ext_none.h5 -d /DSET_FA
 IDX_CHECK /DSET_FA
 #
-TOOLTEST h5fc_latest_v3.h5 -d /GROUP/DSET_NDATA_FA
+TOOLTEST h5fc_ext_none.h5 -d /GROUP/DSET_NDATA_FA
 IDX_CHECK /GROUP/DSET_NDATA_FA
 #
-TOOLTEST h5fc_latest_v3.h5 -d /DSET_NONE
+TOOLTEST h5fc_ext_none.h5 -d /DSET_NONE
 IDX_CHECK /DSET_NONE
 #
-TOOLTEST h5fc_latest_v3.h5 -d /GROUP/DSET_NDATA_NONE
+TOOLTEST h5fc_ext_none.h5 -d /GROUP/DSET_NDATA_NONE
 IDX_CHECK /GROUP/DSET_NDATA_NONE
 #
 #
 #
 # No output from tests: just check exit code
-# h5format_convert -d /DSET_NDATA_BT1 h5fc_v1.h5 (v1-btree dataset)
-# h5format_convert -d /GROUP/DSET_NON_CHUNKED h5fc_non_v3.h5 (non-chunked dataset)
-TOOLTEST h5fc_v1.h5 -d /DSET_NDATA_BT1
-TOOLTEST h5fc_non_v3.h5 -d /GROUP/DSET_NON_CHUNKED
+# h5format_convert -d /DSET_NDATA_BT2 old_h5fc_ext_none.h5 (v1-btree dataset)
+# h5format_convert -d /DSET_CONTIGUOUS h5fc_non_v3.h5 (non-chunked dataset)
+TOOLTEST old_h5fc_ext_none.h5 -d /DSET_NDATA_BT2
+TOOLTEST h5fc_non_v3.h5 -d /DSET_CONTIGUOUS
 #
 #
 #
@@ -386,6 +442,44 @@ TOOLTEST h5fc_edge_v3.h5
 IDX_CHECK /DSET_EDGE
 #
 #
+
+# The following test files have messages in the superblock extension.
+# Verify h5dump output for correctness after conversion
+TOOLTEST h5fc_ext1_i.h5
+H5DUMP_CHECK h5fc_ext1_i.h5 h5fc_ext1_i.ddl
+TOOLTEST h5fc_ext1_s.h5
+H5DUMP_CHECK h5fc_ext1_s.h5 h5fc_ext1_s.ddl
+TOOLTEST h5fc_ext1_f.h5
+H5DUMP_CHECK h5fc_ext1_f.h5 h5fc_ext1_f.ddl
+#
+TOOLTEST h5fc_ext2_if.h5
+H5DUMP_CHECK h5fc_ext2_if.h5 h5fc_ext2_if.ddl
+TOOLTEST h5fc_ext2_is.h5
+H5DUMP_CHECK h5fc_ext2_is.h5 h5fc_ext2_is.ddl
+TOOLTEST h5fc_ext2_sf.h5
+H5DUMP_CHECK h5fc_ext2_sf.h5 h5fc_ext2_sf.ddl
+#
+TOOLTEST h5fc_ext3_isf.h5
+H5DUMP_CHECK h5fc_ext3_isf.h5 h5fc_ext3_isf.ddl
+#
+#
+#
+TOOLTEST old_h5fc_ext1_i.h5
+H5DUMP_CHECK old_h5fc_ext1_i.h5 old_h5fc_ext1_i.ddl
+TOOLTEST old_h5fc_ext1_s.h5
+H5DUMP_CHECK old_h5fc_ext1_s.h5 old_h5fc_ext1_s.ddl
+TOOLTEST old_h5fc_ext1_f.h5
+H5DUMP_CHECK old_h5fc_ext1_f.h5 old_h5fc_ext1_f.ddl
+#
+TOOLTEST old_h5fc_ext2_if.h5
+H5DUMP_CHECK old_h5fc_ext2_if.h5 old_h5fc_ext2_if.ddl
+TOOLTEST old_h5fc_ext2_is.h5
+H5DUMP_CHECK old_h5fc_ext2_is.h5 old_h5fc_ext2_is.ddl
+TOOLTEST old_h5fc_ext2_sf.h5
+H5DUMP_CHECK old_h5fc_ext2_sf.h5 old_h5fc_ext2_sf.ddl
+#
+TOOLTEST old_h5fc_ext3_isf.h5
+H5DUMP_CHECK old_h5fc_ext3_isf.h5 old_h5fc_ext3_isf.ddl
 #
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

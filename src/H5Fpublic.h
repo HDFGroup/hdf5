@@ -32,6 +32,14 @@
 #define H5CHECK
 #endif  /* _H5private_H */
 
+/* When this header is included from a private HDF5 header, don't make calls to H5open() */
+#undef H5OPEN
+#ifndef _H5private_H
+#define H5OPEN        H5open(),
+#else   /* _H5private_H */
+#define H5OPEN
+#endif  /* _H5private_H */
+
 /*
  * These are the bits that can be passed to the `flags' argument of
  * H5Fcreate() and H5Fopen(). Use the bit-wise OR operator (|) to combine
@@ -44,12 +52,12 @@
  * Note that H5F_ACC_DEBUG is deprecated (nonfuncational) but retained as a
  * symbol for backward compatibility.
  */
-#define H5F_ACC_RDONLY	(H5CHECK 0x0000u)	/*absence of rdwr => rd-only */
-#define H5F_ACC_RDWR	(H5CHECK 0x0001u)	/*open for read and write    */
-#define H5F_ACC_TRUNC	(H5CHECK 0x0002u)	/*overwrite existing files   */
-#define H5F_ACC_EXCL	(H5CHECK 0x0004u)	/*fail if file already exists*/
+#define H5F_ACC_RDONLY	(H5CHECK H5OPEN 0x0000u)	/*absence of rdwr => rd-only */
+#define H5F_ACC_RDWR	(H5CHECK H5OPEN 0x0001u)	/*open for read and write    */
+#define H5F_ACC_TRUNC	(H5CHECK H5OPEN 0x0002u)	/*overwrite existing files   */
+#define H5F_ACC_EXCL	(H5CHECK H5OPEN 0x0004u)	/*fail if file already exists*/
 /* NOTE: 0x0008u was H5F_ACC_DEBUG, now deprecated */
-#define H5F_ACC_CREAT	(H5CHECK 0x0010u)	/*create non-existing files  */
+#define H5F_ACC_CREAT	(H5CHECK H5OPEN 0x0010u)	/*create non-existing files  */
 #define H5F_ACC_SWMR_WRITE	(H5CHECK 0x0020u) /*indicate that this file is
                                                  * open for writing in a
                                                  * single-writer/multi-reader (SWMR)
@@ -70,7 +78,7 @@
 
 /* Value passed to H5Pset_elink_acc_flags to cause flags to be taken from the
  * parent file. */
-#define H5F_ACC_DEFAULT (H5CHECK 0xffffu)	/*ignore setting on lapl     */
+#define H5F_ACC_DEFAULT (H5CHECK H5OPEN 0xffffu)	/*ignore setting on lapl     */
 
 /* Flags for H5Fget_obj_count() & H5Fget_obj_ids() calls */
 #define H5F_OBJ_FILE	(0x0001u)       /* File objects */
@@ -246,7 +254,7 @@ H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
 H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id,
                                         /*OUT*/ hbool_t *is_enabled,
                                         /*OUT*/ hbool_t *is_currently_logging);
-H5_DLL herr_t H5Fformat_convert_super(hid_t fid);
+H5_DLL herr_t H5Fformat_convert(hid_t fid);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
 H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
@@ -259,7 +267,7 @@ H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /* Macros */
-#define H5F_ACC_DEBUG	(H5CHECK 0x0000u)	/*print debug info (deprecated)*/
+#define H5F_ACC_DEBUG	(H5CHECK H5OPEN 0x0000u)	/*print debug info (deprecated)*/
 
 /* Typedefs */
 

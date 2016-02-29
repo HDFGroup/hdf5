@@ -186,8 +186,8 @@ typedef struct H5B2_hdr_t {
     hbool_t     swmr_write;     /* Whether we are doing SWMR writes */
     struct H5B2_leaf_t *shadowed_leaf; /* Linked list of shadowed leaf nodes */
     struct H5B2_internal_t *shadowed_internal; /* Linked list of shadowed internal nodes */
-    uint8_t     *min_native_rec;   /* Pointer to minimum native record                  */
-    uint8_t     *max_native_rec;   /* Pointer to maximum native record                  */
+    void        *min_native_rec; /* Pointer to minimum native record                  */
+    void        *max_native_rec; /* Pointer to maximum native record                  */
 
     /* Client information (not stored) */
     const H5B2_class_t *cls;	/* Class of B-tree client */
@@ -238,6 +238,15 @@ typedef enum H5B2_nodepos_t {
     H5B2_POS_MIDDLE             /* Node is neither right or left-most in tree */
 } H5B2_nodepos_t;
 
+/* Update status */
+typedef enum H5B2_update_status_t {
+    H5B2_UPDATE_UNKNOWN,            /* Unknown update status (initial state) */
+    H5B2_UPDATE_MODIFY_DONE,        /* Update successfully modified existing record */
+    H5B2_UPDATE_SHADOW_DONE,        /* Update modified existing record and modified node was shadowed */
+    H5B2_UPDATE_INSERT_DONE,        /* Update inserted record successfully */
+    H5B2_UPDATE_INSERT_CHILD_FULL   /* Update will insert record, but child is full */
+} H5B2_update_status_t;
+
 /* Callback info for loading a free space header into the cache */
 typedef struct H5B2_hdr_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
@@ -264,7 +273,7 @@ typedef struct H5B2_leaf_cache_ud_t {
 
 #ifdef H5B2_TESTING
 /* Node information for testing */
-typedef struct {
+typedef struct H5B2_node_info_test_t {
     uint16_t depth;             /* Depth of node */
     uint16_t nrec;              /* Number of records in node */
 } H5B2_node_info_test_t;
@@ -293,6 +302,13 @@ H5FL_EXTERN(H5B2_leaf_t);
 /* Internal v2 B-tree testing class */
 #ifdef H5B2_TESTING
 H5_DLLVAR const H5B2_class_t H5B2_TEST[1];
+H5_DLLVAR const H5B2_class_t H5B2_TEST2[1];
+
+/* B-tree record for testing H5B2_TEST2 class */
+typedef struct H5B2_test_rec_t {
+    hsize_t key;        /* Key for record */
+    hsize_t val;        /* Value for record */
+} H5B2_test_rec_t;
 #endif /* H5B2_TESTING */
 
 /* Array of v2 B-tree client ID -> client class mappings */
@@ -345,11 +361,23 @@ H5_DLL herr_t H5B2__leaf_free(H5B2_leaf_t *l);
 H5_DLL herr_t H5B2__internal_free(H5B2_internal_t *i);
 
 /* Routines for inserting records */
+H5_DLL herr_t H5B2__insert_hdr(H5B2_hdr_t *hdr, hid_t dxpl_id, void *udata);
 H5_DLL herr_t H5B2__insert_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
     uint16_t depth, unsigned *parent_cache_info_flags_ptr,
     H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, void *parent, void *udata);
 H5_DLL herr_t H5B2__insert_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
     H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, void *parent, void *udata);
+
+/* Routines for update records */
+H5_DLL herr_t H5B2__update_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
+    uint16_t depth, unsigned *parent_cache_info_flags_ptr,
+    H5B2_node_ptr_t *curr_node_ptr, H5B2_update_status_t *status,
+    H5B2_nodepos_t curr_pos, void *parent, void *udata, H5B2_modify_t op,
+    void *op_data);
+H5_DLL herr_t H5B2__update_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
+    H5B2_node_ptr_t *curr_node_ptr, H5B2_update_status_t *status,
+    H5B2_nodepos_t curr_pos, void *parent, void *udata, H5B2_modify_t op,
+    void *op_data);
 
 /* Routines for iterating over nodes/records */
 H5_DLL herr_t H5B2__iterate_node(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,

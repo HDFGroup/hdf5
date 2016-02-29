@@ -4,7 +4,7 @@
 !  MODULE HDF5
 !
 ! FILE
-!  src/fortran/src/HDF5.f90
+!  src/fortran/src/HDF5.F90
 !
 ! PURPOSE
 !  This is the main module used for linking to the Fortran HDF library.

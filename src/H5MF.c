@@ -86,6 +86,7 @@ typedef struct {
 /* Allocator routines */
 static herr_t H5MF_alloc_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
 static herr_t H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
+static herr_t H5MF_close_delete(H5F_t *f, hid_t dxpl_id);
 
 
 /*********************/
@@ -1145,6 +1146,141 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_close_shrink_eoa() */
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF_close_delete
+ *
+ * Purpose:     The coding is copied from H5MF_close() "else" statement
+ *		to this routine so it can also be called by H5MF_try_close().
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:  
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5MF_close_delete(H5F_t *f, hid_t dxpl_id)
+{
+    H5FD_mem_t type;                    /* Memory type for iteration */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+#ifdef H5MF_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Entering\n", FUNC);
+#endif /* H5MF_ALLOC_DEBUG */
+
+    /* check args */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* super_vers can be 0, 1, 2 */
+    /* Iterate over all the free space types that have managers and get each free list's space */
+    for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
+#ifdef H5MF_ALLOC_DEBUG_MORE
+HDfprintf(stderr, "%s: Check 1.0 - f->shared->fs_man[%u] = %p, f->shared->fs_addr[%u] = %a\n", FUNC, (unsigned)type, f->shared->fs_man[type], (unsigned)type, f->shared->fs_addr[type]);
+#endif /* H5MF_ALLOC_DEBUG_MORE */
+	    /* If the free space manager for this type is open, close it */
+	    if(f->shared->fs_man[type]) {
+#ifdef H5MF_ALLOC_DEBUG_MORE
+HDfprintf(stderr, "%s: Before closing free space manager\n", FUNC);
+#endif /* H5MF_ALLOC_DEBUG_MORE */
+		if(H5FS_close(f, dxpl_id, f->shared->fs_man[type]) < 0)
+		    HGOTO_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release free space info")
+		f->shared->fs_man[type] = NULL;
+		f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
+	    } /* end if */
+#ifdef H5MF_ALLOC_DEBUG_MORE
+HDfprintf(stderr, "%s: Check 2.0 - f->shared->fs_man[%u] = %p, f->shared->fs_addr[%u] = %a\n", FUNC, (unsigned)type, f->shared->fs_man[type], (unsigned)type, f->shared->fs_addr[type]);
+#endif /* H5MF_ALLOC_DEBUG_MORE */
+
+	    /* If there is free space manager info for this type, delete it */
+	    if(H5F_addr_defined(f->shared->fs_addr[type])) {
+		haddr_t tmp_fs_addr;            /* Temporary holder for free space manager address */
+
+		/* Put address into temporary variable and reset it */
+		/* (Avoids loopback in file space freeing routine) */
+		tmp_fs_addr = f->shared->fs_addr[type];
+		f->shared->fs_addr[type] = HADDR_UNDEF;
+
+		/* Shift to "deleting" state, to make certain we don't track any
+		 *  file space freed as a result of deleting the free space manager.
+		 */
+		f->shared->fs_state[type] = H5F_FS_STATE_DELETING;
+
+#ifdef H5MF_ALLOC_DEBUG_MORE
+HDfprintf(stderr, "%s: Before deleting free space manager\n", FUNC);
+#endif /* H5MF_ALLOC_DEBUG_MORE */
+
+		/* Delete free space manager for this type */
+		if(H5FS_delete(f, dxpl_id, tmp_fs_addr) < 0)
+		    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "can't delete free space manager")
+
+		/* Shift [back] to closed state */
+		HDassert(f->shared->fs_state[type] == H5F_FS_STATE_DELETING);
+		f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
+
+		/* Sanity check that the free space manager for this type wasn't started up again */
+		HDassert(!H5F_addr_defined(f->shared->fs_addr[type]));
+	    } /* end if */
+    } /* end for */
+
+done:
+#ifdef H5MF_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Leaving\n", FUNC);
+#endif /* H5MF_ALLOC_DEBUG */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5MF_close_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF_try_close
+ *
+ * Purpose:     This is called by H5Fformat_convert() to close and delete
+ *		free-space managers when downgrading persistent free-space
+ *		to non-persistent.
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:  
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MF_try_close(H5F_t *f, hid_t dxpl_id)
+{
+    H5P_genplist_t *dxpl = NULL;        /* DXPL for setting ring */
+    H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+#ifdef H5MF_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Entering\n", FUNC);
+#endif /* H5MF_ALLOC_DEBUG */
+
+    /* check args */
+    HDassert(f);
+
+    /* Set the ring type in the DXPL */
+    if(H5AC_set_ring(dxpl_id, H5AC_RING_FSM, &dxpl, &orig_ring) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set ring value")
+
+    if(H5MF_close_delete(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to close delete free-space managers")
+
+done:
+    /* Reset the ring in the DXPL */
+    if(H5AC_reset_ring(dxpl, orig_ring) < 0)
+        HDONE_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set property value")
+
+#ifdef H5MF_ALLOC_DEBUG
+HDfprintf(stderr, "%s: Leaving\n", FUNC);
+#endif /* H5MF_ALLOC_DEBUG */
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5MF_try_close() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    H5MF_close
@@ -1287,55 +1423,10 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
 	} /* end for */
     } /* end if */
     else {  /* super_vers can be 0, 1, 2 */
-	/* Iterate over all the free space types that have managers and get each free list's space */
-	for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
-#ifdef H5MF_ALLOC_DEBUG_MORE
-HDfprintf(stderr, "%s: Check 1.0 - f->shared->fs_man[%u] = %p, f->shared->fs_addr[%u] = %a\n", FUNC, (unsigned)type, f->shared->fs_man[type], (unsigned)type, f->shared->fs_addr[type]);
-#endif /* H5MF_ALLOC_DEBUG_MORE */
-	    /* If the free space manager for this type is open, close it */
-	    if(f->shared->fs_man[type]) {
-#ifdef H5MF_ALLOC_DEBUG_MORE
-HDfprintf(stderr, "%s: Before closing free space manager\n", FUNC);
-#endif /* H5MF_ALLOC_DEBUG_MORE */
-		if(H5FS_close(f, dxpl_id, f->shared->fs_man[type]) < 0)
-		    HGOTO_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release free space info")
-		f->shared->fs_man[type] = NULL;
-		f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
-	    } /* end if */
-#ifdef H5MF_ALLOC_DEBUG_MORE
-HDfprintf(stderr, "%s: Check 2.0 - f->shared->fs_man[%u] = %p, f->shared->fs_addr[%u] = %a\n", FUNC, (unsigned)type, f->shared->fs_man[type], (unsigned)type, f->shared->fs_addr[type]);
-#endif /* H5MF_ALLOC_DEBUG_MORE */
 
-	    /* If there is free space manager info for this type, delete it */
-	    if(H5F_addr_defined(f->shared->fs_addr[type])) {
-		haddr_t tmp_fs_addr;            /* Temporary holder for free space manager address */
+	if(H5MF_close_delete(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
 
-		/* Put address into temporary variable and reset it */
-		/* (Avoids loopback in file space freeing routine) */
-		tmp_fs_addr = f->shared->fs_addr[type];
-		f->shared->fs_addr[type] = HADDR_UNDEF;
-
-		/* Shift to "deleting" state, to make certain we don't track any
-		 *  file space freed as a result of deleting the free space manager.
-		 */
-		f->shared->fs_state[type] = H5F_FS_STATE_DELETING;
-
-#ifdef H5MF_ALLOC_DEBUG_MORE
-HDfprintf(stderr, "%s: Before deleting free space manager\n", FUNC);
-#endif /* H5MF_ALLOC_DEBUG_MORE */
-
-		/* Delete free space manager for this type */
-		if(H5FS_delete(f, dxpl_id, tmp_fs_addr) < 0)
-		    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "can't delete free space manager")
-
-		/* Shift [back] to closed state */
-		HDassert(f->shared->fs_state[type] == H5F_FS_STATE_DELETING);
-		f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
-
-		/* Sanity check that the free space manager for this type wasn't started up again */
-		HDassert(!H5F_addr_defined(f->shared->fs_addr[type]));
-	    } /* end if */
-	} /* end for */
     } /* end else */
 
     /* Free the space in aggregators (again) */

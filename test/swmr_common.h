@@ -16,15 +16,10 @@
 #ifndef _SWMR_COMMON_H
 #define _SWMR_COMMON_H
 
-/* Headers needed */
+/***********/
+/* Headers */
+/***********/
 
-#include <limits.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-
-#include "hdf5.h"
 #include "h5test.h"
 
 /**********/
@@ -75,4 +70,3 @@ int shutdown_symbols(void);
 int print_metadata_retries_info(hid_t fid);
 
 #endif /* _SWMR_COMMON_H */
-

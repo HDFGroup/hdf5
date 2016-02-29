@@ -123,10 +123,11 @@ CONFIG_CLEAN_FILES = H5srcdir_str.h
 CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = testhdf5$(EXEEXT)
 am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) dsets.$(OBJEXT) \
-	tattr.$(OBJEXT) tcompound.$(OBJEXT) tdspl.$(OBJEXT) \
-	tfile.$(OBJEXT) tfilter.$(OBJEXT) th5s.$(OBJEXT) \
-	tlinks.$(OBJEXT) tobject.$(OBJEXT) trefer.$(OBJEXT) \
-	ttypes.$(OBJEXT) tvlstr.$(OBJEXT) h5cpputil.$(OBJEXT)
+	tattr.$(OBJEXT) tarray.$(OBJEXT) tcompound.$(OBJEXT) \
+	tdspl.$(OBJEXT) tfile.$(OBJEXT) tfilter.$(OBJEXT) \
+	th5s.$(OBJEXT) tlinks.$(OBJEXT) tobject.$(OBJEXT) \
+	trefer.$(OBJEXT) ttypes.$(OBJEXT) tvlstr.$(OBJEXT) \
+	h5cpputil.$(OBJEXT)
 testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
 testhdf5_LDADD = $(LDADD)
 testhdf5_DEPENDENCIES = $(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
@@ -420,16 +421,17 @@ AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
 AR = @AR@
+ASSERTS = @ASSERTS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BUILD_MODE = @BUILD_MODE@
 BYTESEX = @BYTESEX@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CC_VERSION = @CC_VERSION@
 CFLAGS = @CFLAGS@
-CLEARFILEBUF = @CLEARFILEBUF@
 CODESTACK = @CODESTACK@
 CONFIG_DATE = @CONFIG_DATE@
 CONFIG_MODE = @CONFIG_MODE@
@@ -442,7 +444,6 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CXX_VERSION = @CXX_VERSION@
 CYGPATH_W = @CYGPATH_W@
-DEBUG_PKG = @DEBUG_PKG@
 DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -504,8 +505,8 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-INSTRUMENT = @INSTRUMENT@
 INSTRUMENT_LIBRARY = @INSTRUMENT_LIBRARY@
+INTERNAL_DEBUG_OUTPUT = @INTERNAL_DEBUG_OUTPUT@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -516,11 +517,11 @@ LL_PATH = @LL_PATH@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
-LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MEMORYALLOCSANITYCHECK = @MEMORYALLOCSANITYCHECK@
+METADATATRACEFILE = @METADATATRACEFILE@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 NM = @NM@
@@ -528,6 +529,7 @@ NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJECT_NAMELEN_DEFAULT_F = @OBJECT_NAMELEN_DEFAULT_F@
 OBJEXT = @OBJEXT@
+OPTIMIZATION = @OPTIMIZATION@
 OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
@@ -551,6 +553,7 @@ PAC_FORTRAN_NATIVE_REAL_KIND = @PAC_FORTRAN_NATIVE_REAL_KIND@
 PAC_FORTRAN_NATIVE_REAL_SIZEOF = @PAC_FORTRAN_NATIVE_REAL_SIZEOF@
 PARALLEL = @PARALLEL@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PROFILING = @PROFILING@
 RANLIB = @RANLIB@
 ROOT = @ROOT@
 RUNPARALLEL = @RUNPARALLEL@
@@ -566,6 +569,7 @@ STATIC_EXEC = @STATIC_EXEC@
 STATIC_SHARED = @STATIC_SHARED@
 STRICT_FORMAT_CHECKS = @STRICT_FORMAT_CHECKS@
 STRIP = @STRIP@
+SYMBOLS = @SYMBOLS@
 TESTPARALLEL = @TESTPARALLEL@
 THREADSAFE = @THREADSAFE@
 TIME = @TIME@
@@ -698,9 +702,10 @@ TEST_PROG = testhdf5
 
 # The tests depend on the hdf5 library, test library, and the c++ library
 LDADD = $(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
-testhdf5_SOURCES = testhdf5.cpp dsets.cpp tattr.cpp tcompound.cpp	\
-	tdspl.cpp tfile.cpp tfilter.cpp th5s.cpp tlinks.cpp tobject.cpp \
-	trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp
+testhdf5_SOURCES = testhdf5.cpp dsets.cpp tattr.cpp tarray.cpp	\
+	tcompound.cpp tdspl.cpp tfile.cpp tfilter.cpp th5s.cpp	\
+	tlinks.cpp tobject.cpp trefer.cpp ttypes.cpp tvlstr.cpp	\
+	h5cpputil.cpp
 
 
 # Tell conclude.am that these are C++ tests.
@@ -783,6 +788,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dsets.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5cpputil.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tarray.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tattr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tcompound.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tdspl.Po@am__quote@

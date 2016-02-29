@@ -134,7 +134,7 @@ error:
         if(fsid >= 0)
             (void)H5Sclose(fsid);
         if(buffer != NULL)
-            free(buffer);
+            HDfree(buffer);
     } H5E_END_TRY
 
     HDfprintf(stderr, "ERROR: SWMR reader exited with errors\n");

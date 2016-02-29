@@ -272,7 +272,6 @@ typedef struct H5D_chunk_rec_t {
  * to which the index points.
  */
 typedef struct H5D_chunk_common_ud_t {
-    /* downward */
     const H5O_layout_chunk_t *layout;           /* Chunk layout description */
     const H5O_storage_chunk_t *storage;         /* Chunk storage description */
     const hsize_t *scaled;		        /* Scaled coordinates for a chunk */
@@ -280,15 +279,15 @@ typedef struct H5D_chunk_common_ud_t {
 
 /* B-tree callback info for various operations */
 typedef struct H5D_chunk_ud_t {
+    /* Downward */
     H5D_chunk_common_ud_t common;       /* Common info for B-tree user data (must be first) */
 
     /* Upward */
-    unsigned    idx_hint;               /*index of chunk in cache, if present */
-    H5F_block_t chunk_block;            /*offset/length of chunk in file */
-    unsigned	filter_mask;		/*excluded filters	*/
-    hbool_t     new_unfilt_chunk;       /*whether the chunk just became unfiltered */
-    hsize_t     chunk_idx;              /*chunk index for EA, FA indexing */
-    hbool_t     need_modify;
+    unsigned    idx_hint;               /* Index of chunk in cache, if present */
+    H5F_block_t chunk_block;            /* Offset/length of chunk in file */
+    unsigned	filter_mask;		/* Excluded filters	*/
+    hbool_t     new_unfilt_chunk;       /* Whether the chunk just became unfiltered */
+    hsize_t     chunk_idx;              /* Chunk index for EA, FA indexing */
 } H5D_chunk_ud_t;
 
 /* Typedef for "generic" chunk callbacks */

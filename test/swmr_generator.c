@@ -27,9 +27,7 @@
 /* Headers */
 /***********/
 
-#include <assert.h>
-#include <sys/time.h>
-
+#include "h5test.h"
 #include "swmr_common.h"
 
 /****************/
@@ -95,8 +93,8 @@ gen_skeleton(const char *filename, unsigned verbose, unsigned swmr_write,
 #endif /* FILLVAL_WORKS */
     unsigned u, v;      /* Local index variable */
 
-    assert(filename);
-    assert(index_type);
+    HDassert(filename);
+    HDassert(index_type);
 
     /* Create file access property list */
     if((fapl = h5_fileaccess()) < 0)
@@ -104,15 +102,15 @@ gen_skeleton(const char *filename, unsigned verbose, unsigned swmr_write,
 
     /* Can create a file for SWMR support with: (a) (write+latest-format) or (b) (SWMR write+non-latest-format) */
     if(!swmr_write) {
-	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	    return -1;
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            return -1;
     }
 
     /* There are two chunk indexes tested here.
      * With one unlimited dimension, we get the extensible array index
      * type, with two unlimited dimensions, we get a v-2 B-tree.
      */
-    if(!strcmp(index_type, "b2"))
+    if(!HDstrcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
 #ifdef QAK
@@ -122,8 +120,8 @@ gen_skeleton(const char *filename, unsigned verbose, unsigned swmr_write,
 
         mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
         H5Pget_mdc_config(fapl, &mdc_config);
-        fprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
-        fprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
+        HDfprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
+        HDfprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
         mdc_config.set_initial_size = 1;
         mdc_config.initial_size = 16 * 1024 * 1024;
         /* mdc_config.epoch_length = 5000; */
@@ -149,7 +147,7 @@ gen_skeleton(const char *filename, unsigned verbose, unsigned swmr_write,
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Creating file\n");
+        HDfprintf(stderr, "Creating file\n");
 
     /* Create the file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (swmr_write ? H5F_ACC_SWMR_WRITE : 0), fcpl, fapl)) < 0)
@@ -194,7 +192,7 @@ gen_skeleton(const char *filename, unsigned verbose, unsigned swmr_write,
     /* Currently fill values do not work because they can bump the dataspace
      * message to the second object header chunk.  We should enable the fillval
      * here when this is fixed.  -NAF 8/11/11 */
-    memset(&fillval, 0, sizeof(fillval));
+    HDmemset(&fillval, 0, sizeof(fillval));
     fillval.rec_id = (uint64_t)ULLONG_MAX;
     if(H5Pset_fill_value(dcpl, tid, &fillval) < 0)
         return -1;
@@ -202,7 +200,7 @@ gen_skeleton(const char *filename, unsigned verbose, unsigned swmr_write,
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Creating datasets\n");
+        HDfprintf(stderr, "Creating datasets\n");
 
     /* Create the datasets */
     for(u = 0; u < NLEVELS; u++)
@@ -220,7 +218,7 @@ gen_skeleton(const char *filename, unsigned verbose, unsigned swmr_write,
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Closing objects\n");
+        HDfprintf(stderr, "Closing objects\n");
 
     /* Close everythign */
     if(H5Pclose(dcpl) < 0)
@@ -255,7 +253,7 @@ usage(void)
     printf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
     printf("seed (no -r given).\n");
     printf("\n");
-    exit(1);
+    HDexit(1);
 } /* end usage() */
 
 int main(int argc, const char *argv[])
@@ -277,7 +275,7 @@ int main(int argc, const char *argv[])
                 switch(argv[u][1]) {
                     /* Compress dataset chunks */
                     case 'c':
-                        comp_level = atoi(argv[u + 1]);
+                        comp_level = HDatoi(argv[u + 1]);
                         if(comp_level < -1 || comp_level > 9)
                             usage();
                         u += 2;
@@ -286,8 +284,8 @@ int main(int argc, const char *argv[])
                     /* Chunk index type */
                     case 'i':
                         index_type = argv[u + 1];
-                        if(strcmp(index_type, "ea")
-                                && strcmp(index_type, "b2"))
+                        if(HDstrcmp(index_type, "ea")
+                                && HDstrcmp(index_type, "b2"))
                             usage();
                         u += 2;
                         break;
@@ -295,7 +293,7 @@ int main(int argc, const char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = 1;
-                        temp = atoi(argv[u + 1]);
+                        temp = HDatoi(argv[u + 1]);
                         if(temp < 0)
                             usage();
                         else
@@ -325,30 +323,30 @@ int main(int argc, const char *argv[])
 
     /* Emit informational message */
     if(verbose) {
-        fprintf(stderr, "Parameters:\n");
-        fprintf(stderr, "\tswmr writes %s\n", swmr_write ? "on" : "off");
-        fprintf(stderr, "\tcompression level = %d\n", comp_level);
-        fprintf(stderr, "\tindex type = %s\n", index_type);
+        HDfprintf(stderr, "Parameters:\n");
+        HDfprintf(stderr, "\tswmr writes %s\n", swmr_write ? "on" : "off");
+        HDfprintf(stderr, "\tcompression level = %d\n", comp_level);
+        HDfprintf(stderr, "\tindex type = %s\n", index_type);
     } /* end if */
     
     /* Set the random seed */
     if(0 == use_seed) {
         struct timeval t;
-        gettimeofday(&t, NULL);
+        HDgettimeofday(&t, NULL);
         random_seed = (unsigned)(t.tv_usec);
     } /* end if */
-    srandom(random_seed);
+    HDsrandom(random_seed);
     /* ALWAYS emit the random seed for possible debugging */
-    fprintf(stderr, "Using generator random seed (used in sparse test only): %u\n", random_seed);
+    HDfprintf(stderr, "Using generator random seed (used in sparse test only): %u\n", random_seed);
 
     /* Emit informational message */
     if(verbose)
-        fprintf(stderr, "Generating skeleton file: %s\n", FILENAME);
+        HDfprintf(stderr, "Generating skeleton file: %s\n", FILENAME);
 
     /* Generate file skeleton */
     if(gen_skeleton(FILENAME, verbose, swmr_write, comp_level, index_type, random_seed) < 0) {
-        fprintf(stderr, "Error generating skeleton file!\n");
-        exit(1);
+        HDfprintf(stderr, "Error generating skeleton file!\n");
+        HDexit(1);
     } /* end if */
 
     return 0;

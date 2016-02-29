@@ -21,8 +21,6 @@
  *
  * Purpose:             Private header file for file memory management.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 #ifndef _H5MFprivate_H
@@ -36,13 +34,6 @@
 /* Library Private Macros */
 /**************************/
 
-/*
- * Feature: Define H5MF_DEBUG on the compiler command line if you want to
- *	    see diagnostics from this layer.
- */
-#ifdef NDEBUG
-#  undef H5MF_DEBUG
-#endif
 
 /****************************/
 /* Library Private Typedefs */
@@ -63,6 +54,7 @@ H5_DLL herr_t H5MF_init_merge_flags(H5F_t *f);
 H5_DLL herr_t H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space,
     hsize_t *meta_size);
 H5_DLL herr_t H5MF_close(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5MF_try_close(H5F_t *f, hid_t dxpl_id);
 
 /* File space allocation routines */
 H5_DLL haddr_t H5MF_alloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
