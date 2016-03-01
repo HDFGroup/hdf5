@@ -855,6 +855,9 @@ esac
 ## Check if they would like the Java native interface (JNI) compiled
 ##
 
+## This needs to be exposed for the library info file even if JAVA is disabled.
+AC_SUBST([HDF_JAVA])
+
 AC_SUBST([H5_CLASSPATH]) H5_CLASSPATH=""
 AC_MSG_CHECKING([if Java JNI interface enabled])
 
