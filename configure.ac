@@ -900,8 +900,10 @@ if test "X$HDF_JAVA" = "Xyes"; then
     AC_MSG_RESULT([yes])
   else
     AC_MSG_ERROR([Java requires shared libraries to be built])
+    HDF_JAVA="no"
+    AC_MSG_RESULT([no])
   fi
-  HDF_JAVA="no"
+else
   AC_MSG_RESULT([no])
 fi
 
