@@ -1386,9 +1386,9 @@ Java_hdf_hdf5lib_H5_H5Tis_1variable_1str(JNIEnv *env, jclass clss, jlong type_id
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Tget_native_type
- * Signature: (JI)I
+ * Signature: (JI)J
  */
-JNIEXPORT jint JNICALL
+JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Tget_1native_1type(JNIEnv *env, jclass clss, jlong type_id, jint direction)
 {
     hid_t native_tid = -1;
@@ -1398,7 +1398,7 @@ Java_hdf_hdf5lib_H5__1H5Tget_1native_1type(JNIEnv *env, jclass clss, jlong type_
     if (native_tid < 0)
         h5libraryError(env);
 
-    return (jint)native_tid;
+    return (jlong)native_tid;
 } /* end Java_hdf_hdf5lib_H5__1H5Tget_1native_1type */
 
 /*
