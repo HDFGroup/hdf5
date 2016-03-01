@@ -858,14 +858,16 @@ esac
 ## This needs to be exposed for the library info file even if JAVA is disabled.
 AC_SUBST([HDF_JAVA])
 
+## Default is no JAVA
+HDF_JAVA=no
+
 AC_SUBST([H5_CLASSPATH]) H5_CLASSPATH=""
 AC_MSG_CHECKING([if Java JNI interface enabled])
 
 AC_ARG_ENABLE([java],
               [AS_HELP_STRING([--enable-java],
                               [Compile the Java JNI interface [default=no]])],
-              [HDF_JAVA=$enableval],
-              [HDF_JAVA=no])
+              [HDF_JAVA=$enableval])
 
 if test "X$HDF_JAVA" = "Xyes"; then
   if test "X${enable_shared}" != "Xno"; then
