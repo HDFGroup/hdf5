@@ -864,7 +864,7 @@ AC_ARG_ENABLE([java],
               [HDF_JAVA=$enableval],
               [HDF_JAVA=no])
 
-if test "X$HDF_JAVA" = "Xyes"
+if test "X$HDF_JAVA" = "Xyes"; then
   if test "X${enable_shared}" != "Xno"; then
     echo "yes"
     if test "X$CLASSPATH" = "X"; then
