@@ -379,7 +379,7 @@ HDfprintf(stderr, "%s: obj_size = %Zu, obj = %p\n", FUNC, obj_size, obj);
         HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap huge object")
 
     /* Write the object's data to disk */
-    if(H5F_block_write(hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, obj_addr, write_size, dxpl_id, write_buf) < 0)
+    if(H5F_block_write(hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, obj_addr, write_size, H5AC_rawdata_dxpl_id, write_buf) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "writing 'huge' object to file failed")
 
     /* Release buffer for writing, if we had one */
@@ -770,7 +770,7 @@ H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 
     /* Read the object's (possibly filtered) data from the file */
     /* (reads directly into application's buffer if no filters are present) */
-    if(H5F_block_read(hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, obj_addr, (size_t)obj_size, dxpl_id, read_buf) < 0)
+    if(H5F_block_read(hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, obj_addr, (size_t)obj_size, H5AC_rawdata_dxpl_id, read_buf) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_READERROR, FAIL, "can't read 'huge' object's data from the file")
 
     /* Check for I/O pipeline filter on heap */
@@ -889,7 +889,7 @@ H5HF_huge_write(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
 
     /* Write the object's data to the file */
     /* (writes directly from application's buffer) */
-    if(H5F_block_write(hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, obj_addr, obj_size, dxpl_id, obj) < 0)
+    if(H5F_block_write(hdr->f, H5FD_MEM_FHEAP_HUGE_OBJ, obj_addr, obj_size, H5AC_rawdata_dxpl_id, obj) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_WRITEERROR, FAIL, "writing 'huge' object to file failed")
 
 done:

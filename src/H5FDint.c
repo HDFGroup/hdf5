@@ -170,6 +170,26 @@ H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t add
     HDassert(TRUE == H5P_class_isa(H5P_CLASS(dxpl), H5P_CLS_DATASET_XFER_g));
     HDassert(buf);
 
+    /* Sanity check the dxpl type against the mem type */
+#ifdef H5_DEBUG_BUILD
+    {
+        H5FD_dxpl_type_t dxpl_type;    /* Property indicating the type of the internal dxpl */
+
+        /* get the dxpl type */
+        if(H5P_get(dxpl, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't retrieve dxpl type")
+
+        /* we shouldn't be here if the dxpl is labeled with NO I/O */
+        HDassert(H5FD_NOIO_DXPL != dxpl_type);
+
+        if(H5FD_MEM_DRAW == type)
+            HDassert(H5FD_RAWDATA_DXPL == dxpl_type);
+        else
+            HDassert(H5FD_METADATA_DXPL == dxpl_type);
+
+    }
+#endif /* H5_DEBUG_BUILD */
+
 #ifndef H5_HAVE_PARALLEL
     /* Do not return early for Parallel mode since the I/O could be a */
     /* collective transfer. */
@@ -226,6 +246,25 @@ H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t ad
     HDassert(file && file->cls);
     HDassert(TRUE == H5P_class_isa(H5P_CLASS(dxpl), H5P_CLS_DATASET_XFER_g));
     HDassert(buf);
+
+    /* Sanity check the dxpl type against the mem type */
+#ifdef H5_DEBUG_BUILD
+    {
+        H5FD_dxpl_type_t dxpl_type;    /* Property indicating the type of the internal dxpl */
+
+        /* get the dxpl type */
+        if(H5P_get(dxpl, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't retrieve dxpl type")
+
+        /* we shouldn't be here if the dxpl is labeled with NO I/O */
+        HDassert(H5FD_NOIO_DXPL != dxpl_type);
+
+        if(H5FD_MEM_DRAW == type)
+            HDassert(H5FD_RAWDATA_DXPL == dxpl_type);
+        else
+            HDassert(H5FD_METADATA_DXPL == dxpl_type);
+    }
+#endif /* H5_DEBUG_BUILD */
 
 #ifndef H5_HAVE_PARALLEL
     /* Do not return early for Parallel mode since the I/O could be a */

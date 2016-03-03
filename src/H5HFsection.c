@@ -99,7 +99,7 @@ static htri_t H5HF_sect_single_can_shrink(const H5FS_section_info_t *sect,
 static herr_t H5HF_sect_single_shrink(H5FS_section_info_t **_sect,
     void *udata);
 static herr_t H5HF_sect_single_valid(const H5FS_section_class_t *cls,
-    const H5FS_section_info_t *sect);
+    const H5FS_section_info_t *sect, hid_t dxpl_id);
 
 /* 'row' section routines */
 static H5HF_free_section_t *H5HF_sect_row_create(haddr_t sect_off,
@@ -129,7 +129,7 @@ static herr_t H5HF_sect_row_shrink(H5FS_section_info_t **sect,
     void *udata);
 static herr_t H5HF_sect_row_free(H5FS_section_info_t *sect);
 static herr_t H5HF_sect_row_valid(const H5FS_section_class_t *cls,
-    const H5FS_section_info_t *sect);
+    const H5FS_section_info_t *sect, hid_t dxpl_id);
 static herr_t H5HF_sect_row_debug(const H5FS_section_info_t *sect,
     FILE *stream, int indent, int fwidth);
 
@@ -1172,7 +1172,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5FS_section_info_t *_sect)
+H5HF_sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5FS_section_info_t *_sect, hid_t dxpl_id)
 {
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect;   /* Pointer to section to check */
 
@@ -1222,7 +1222,7 @@ H5HF_sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5F
                 H5HF_direct_t *dblock;      /* Direct block for section */
 
                 /* Protect the direct block for the section */
-                dblock = H5HF_man_dblock_protect(iblock->hdr, H5AC_dxpl_id, dblock_addr, dblock_size, iblock, sect->u.single.par_entry, H5AC__READ_ONLY_FLAG);
+                dblock = H5HF_man_dblock_protect(iblock->hdr, dxpl_id, dblock_addr, dblock_size, iblock, sect->u.single.par_entry, H5AC__READ_ONLY_FLAG);
                 HDassert(dblock);
 
                 /* Sanity check settings for section */
@@ -1233,7 +1233,7 @@ H5HF_sect_single_valid(const H5FS_section_class_t H5_ATTR_UNUSED *cls, const H5F
                         (sect->sect_info.addr + sect->sect_info.size)));
 
                 /* Release direct block */
-                status = H5AC_unprotect(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET);
+                status = H5AC_unprotect(iblock->hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET);
                 HDassert(status >= 0);
             } /* end if */
         } /* end if */
@@ -1992,7 +1992,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_row_valid(const H5FS_section_class_t *cls, const H5FS_section_info_t *_sect)
+H5HF_sect_row_valid(const H5FS_section_class_t *cls, const H5FS_section_info_t *_sect, 
+                    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     H5HF_sect_private_t *cls_prvt;    /* Pointer to class private info */
     const H5HF_hdr_t *hdr;      /* Fractal heap header */

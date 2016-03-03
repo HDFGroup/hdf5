@@ -386,9 +386,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
-#ifdef H5_HAVE_PARALLEL
     hbool_t     io_info_init = FALSE;   /* Whether the I/O info has been initialized */
-#endif /*H5_HAVE_PARALLEL*/
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
@@ -508,7 +506,8 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
             HGOTO_DONE(SUCCEED)
 
         /* Go fill the user's selection with the dataset's fill value */
-        if(H5D__fill(dataset->shared->dcpl_cache.fill.buf, dataset->shared->type, buf, type_info.mem_type, mem_space, dxpl_id) < 0)
+        if(H5D__fill(dataset->shared->dcpl_cache.fill.buf, dataset->shared->type, buf, 
+                     type_info.mem_type, mem_space, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
         else
             HGOTO_DONE(SUCCEED)
@@ -519,9 +518,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     io_info.u.rbuf = buf;
     if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
-#ifdef H5_HAVE_PARALLEL
     io_info_init = TRUE;
-#endif /*H5_HAVE_PARALLEL*/
 
     /* Sanity check that space is allocated, if there are elements */
     if(nelmts > 0)
@@ -549,12 +546,20 @@ done:
     /* Shut down the I/O op information */
     if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+
+    if(io_info_init) {
+#ifdef H5_DEBUG_BUILD
+        /* release the metadata dxpl that was copied in the init function */
+        if(H5I_dec_ref(io_info.md_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close metadata dxpl")
+#endif /* H5_DEBUG_BUILD */
 #ifdef H5_HAVE_PARALLEL
-    /* Shut down io_info struct */
-    if(io_info_init)
+        /* Shut down io_info struct */
         if(H5D__ioinfo_term(&io_info) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
+    }
+
     /* Shut down datatype info for operation */
     if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
@@ -605,9 +610,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
-#ifdef H5_HAVE_PARALLEL
     hbool_t     io_info_init = FALSE;   /* Whether the I/O info has been initialized */
-#endif /*H5_HAVE_PARALLEL*/
     hbool_t     io_op_init = FALSE;     /* Whether the I/O op has been initialized */
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
@@ -740,6 +743,13 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Retrieve dataset properties */
     /* <none needed currently> */
 
+    /* Set up I/O operation */
+    io_info.op_type = H5D_IO_OP_WRITE;
+    io_info.u.wbuf = buf;
+    if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
+    io_info_init = TRUE;
+
     /* Allocate data space and initialize it if it hasn't been. */
     if(nelmts > 0 && dataset->shared->dcpl_cache.efl.nused == 0 &&
             !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage)) {
@@ -756,19 +766,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         else
             full_overwrite = (hbool_t)((hsize_t)file_nelmts == nelmts ? TRUE : FALSE);
 
- 	/* Allocate storage */
-        if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
+ 	    /* Allocate storage */
+        if(H5D__alloc_storage(&io_info, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
     } /* end if */
-
-    /* Set up I/O operation */
-    io_info.op_type = H5D_IO_OP_WRITE;
-    io_info.u.wbuf = buf;
-    if(H5D__ioinfo_init(dataset, dxpl_cache, dxpl_id, &type_info, &store, &io_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up I/O operation")
-#ifdef H5_HAVE_PARALLEL
-    io_info_init = TRUE;
-#endif /*H5_HAVE_PARALLEL*/
 
     /* Call storage method's I/O initialization routine */
     HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
@@ -808,11 +809,20 @@ done:
     /* Shut down the I/O op information */
     if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+
+    if(io_info_init) {
+#ifdef H5_DEBUG_BUILD
+        /* release the metadata dxpl that was copied in the init function */
+        if(H5I_dec_ref(io_info.md_dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close metadata dxpl")
+#endif /* H5_DEBUG_BUILD */
 #ifdef H5_HAVE_PARALLEL
-    /* Shut down io_info struct */
-    if(io_info_init && H5D__ioinfo_term(&io_info) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
+        /* Shut down io_info struct */
+        if(H5D__ioinfo_term(&io_info) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
+    }
+
     /* Shut down datatype info for operation */
     if(type_info_init && H5D__typeinfo_term(&type_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
@@ -847,7 +857,9 @@ const
     H5D_dxpl_cache_t *dxpl_cache, hid_t dxpl_id,
     const H5D_type_info_t *type_info, H5D_storage_t *store, H5D_io_info_t *io_info)
 {
-    FUNC_ENTER_STATIC_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(dset);
@@ -856,10 +868,19 @@ const
     HDassert(type_info->tpath);
     HDassert(io_info);
 
+    /* init both dxpls to the original one */
+    io_info->md_dxpl_id = dxpl_id;
+    io_info->raw_dxpl_id = dxpl_id;
+
+    /* set the dxpl IO type for sanity checking at the FD layer */
+#ifdef H5_DEBUG_BUILD
+    if(H5D_set_io_info_dxpls(io_info, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't set metadata and raw data dxpls")
+#endif /* H5_DEBUG_BUILD */
+
     /* Set up "normal" I/O fields */
     io_info->dset = dset;
     io_info->dxpl_cache = dxpl_cache;
-    io_info->dxpl_id = dxpl_id;
     io_info->store = store;
 
     /* Set I/O operations to initial values */
@@ -891,7 +912,8 @@ const
     io_info->using_mpi_vfd = H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI);
 #endif /* H5_HAVE_PARALLEL */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__ioinfo_init() */
 
 
@@ -1171,7 +1193,7 @@ H5D__ioinfo_term(H5D_io_info_t *io_info)
             H5P_genplist_t *dx_plist;           /* Data transer property list */
 
             /* Get the dataset transfer property list */
-            if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(io_info->dxpl_id)))
+            if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(io_info->raw_dxpl_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
             /* Restore the original parallel I/O mode */
@@ -1184,7 +1206,7 @@ H5D__ioinfo_term(H5D_io_info_t *io_info)
             H5P_genplist_t *dx_plist;           /* Data transer property list */
 
             /* Get the dataset transfer property list */
-            if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(io_info->dxpl_id)))
+            if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(io_info->raw_dxpl_id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
             /* Restore the original parallel I/O mode */
@@ -1230,3 +1252,53 @@ H5D__typeinfo_term(const H5D_type_info_t *type_info)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__typeinfo_term() */
 
+#ifdef H5_DEBUG_BUILD
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_set_io_info_dxpls
+ *
+ * Purpose:	Set the metadata and raw data dxpls in an io_info struct 
+ *              for sanity checking at the H5FD layer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              January 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_set_io_info_dxpls(H5D_io_info_t *io_info, hid_t dxpl_id)
+{
+    H5P_genplist_t  *xfer_plist = NULL; /* Dataset transfer property list object */
+    H5FD_dxpl_type_t  dxpl_type;    /* Property indicating the type of the internal dxpl */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get the property list object */
+    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADATOM, FAIL, "can't get new property list object")
+            
+    /* create the metadata dxpl */
+    if((io_info->md_dxpl_id = H5P_copy_plist(xfer_plist, FALSE)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dxpl")
+
+    /* Set the dxpl type property  */
+    dxpl_type = H5FD_RAWDATA_DXPL;
+    if(H5P_set(xfer_plist, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set dxpl type property")
+
+    /* Get the property list object */
+    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(io_info->md_dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_BADATOM, FAIL, "can't get new property list object")
+
+    /* Set the dxpl type property  */
+    dxpl_type = H5FD_METADATA_DXPL;
+    if(H5P_set(xfer_plist, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set dxpl type property")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_set_io_info_dxpls */
+#endif /* H5_DEBUG_BUILD */

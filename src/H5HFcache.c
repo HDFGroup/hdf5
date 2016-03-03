@@ -1304,7 +1304,7 @@ H5HF__cache_iblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
         HDassert(!H5F_addr_eq(iblock->addr, iblock_addr));
 
         /* Let the metadata cache know the block moved */
-        if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_IBLOCK, iblock->addr, iblock_addr) < 0)
+        if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_IBLOCK, iblock->addr, iblock_addr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move indirect block")
 
         /* Update the internal address for the block */
@@ -2391,7 +2391,7 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
 
                 /* Let the metadata cache know, if the block moved */
                 if(!H5F_addr_eq(hdr->man_dtable.table_addr, dblock_addr))
-                    if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock_addr) < 0)
+                    if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock_addr, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
 
                 /* Update information about compressed direct block's 
@@ -2449,7 +2449,7 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
 
                 /* Let the metadata cache know, if the block moved */
                 if(!H5F_addr_eq(par_iblock->ents[par_entry].addr, dblock_addr))
-                    if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, dblock_addr) < 0)
+                    if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, dblock_addr, dxpl_id) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
 
                 /* Update information about compressed direct block's 
@@ -2501,7 +2501,7 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
                 HDassert(!H5F_addr_eq(hdr->man_dtable.table_addr, dblock_addr));
 
                 /* Let the metadata cache know the block moved */
-                if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock_addr) < 0)
+                if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock_addr, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
 
                 /* Update information about direct block's location */
@@ -2525,7 +2525,7 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
                 HDassert(!H5F_addr_eq(par_iblock->ents[par_entry].addr, dblock_addr));
 
                 /* Let the metadata cache know the block moved */
-                if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, dblock_addr) < 0)
+                if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, dblock_addr, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
 
                 /* Update information about direct block's location */

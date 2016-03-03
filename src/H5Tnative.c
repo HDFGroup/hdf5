@@ -358,7 +358,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "unable to create enum type")
 
                 /* Find the conversion function */
-                if(NULL == (tpath = H5T_path_find(super_type, nat_super_type, NULL, NULL, H5P_DEFAULT, FALSE)))
+                if(NULL == (tpath = H5T_path_find(super_type, nat_super_type, NULL, NULL, H5AC_noio_dxpl_id, FALSE)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to convert between src and dst data types")
 
                 /* Retrieve member info and insert members into new enum type */
@@ -372,7 +372,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value")
                     HDmemcpy(memb_value, tmp_memb_value, H5T_get_size(super_type));
 
-                    if(H5T_convert(tpath, super_type_id, nat_super_type_id, (size_t)1, (size_t)0, (size_t)0, memb_value, NULL, H5P_DATASET_XFER_DEFAULT) < 0)
+                    if(H5T_convert(tpath, super_type_id, nat_super_type_id, (size_t)1, (size_t)0, (size_t)0, memb_value, NULL, H5AC_noio_dxpl_id) < 0)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot get member value")
 
                     if(H5T__enum_insert(new_type, memb_name, memb_value) < 0)

@@ -575,7 +575,7 @@ H5FS__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
                 HDassert(fspace->sinfo->cache_info.size == fspace->alloc_sect_size);
 
                 /* Let the metadata cache know the section info moved */
-                if(H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, new_sect_addr) < 0)
+                if(H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, new_sect_addr, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move section info")
 
                 fspace->sect_addr = new_sect_addr;
@@ -637,7 +637,7 @@ H5FS__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
             HDassert(!H5F_addr_eq(fspace->sect_addr, new_sect_addr));
 
             /* Let the metadata cache know the section info moved */
-            if(H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, new_sect_addr) < 0)
+            if(H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, fspace->sect_addr, new_sect_addr, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTMOVE, FAIL, "unable to move section info")
 
             /* Update the internal address for the section info */
@@ -1163,7 +1163,7 @@ H5FS__cache_sinfo_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
         HDassert(!H5F_addr_eq(sinfo->fspace->sect_addr, sinfo_addr));
 
         /* Let the metadata cache know the section info moved */
-        if(H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, sinfo->fspace->sect_addr, sinfo_addr) < 0)
+        if(H5AC_move_entry((H5F_t *)f, H5AC_FSPACE_SINFO, sinfo->fspace->sect_addr, sinfo_addr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMOVE, FAIL, "unable to move section info")
 
         /* Update the internal address for the section info */

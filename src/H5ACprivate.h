@@ -195,8 +195,6 @@ typedef H5C_cache_entry_t		H5AC_info_t;
 /* Typedef for metadata cache (defined in H5Cpkg.h) */
 typedef H5C_t	H5AC_t;
 
-/* Metadata specific properties for FAPL */
-/* (Only used for parallel I/O) */
 #ifdef H5_HAVE_PARALLEL
 /* Definitions for "collective metadata write" property */
 #define H5AC_COLLECTIVE_META_WRITE_NAME         "H5AC_collective_metadata_write"
@@ -206,8 +204,15 @@ typedef H5C_t	H5AC_t;
 
 #define H5AC_RING_NAME  "H5AC_ring_type"
 
-/* Dataset transfer property list for flush calls */
+/* Dataset transfer property list for metadata calls */
 H5_DLLVAR hid_t H5AC_dxpl_id;
+
+/* DXPL to be used in operations that will not result in I/O calls */
+H5_DLLVAR hid_t H5AC_noio_dxpl_id;
+
+/* DXPL to be used for raw data I/O operations when one is not
+   provided by the user (fill values in H5Dcreate) */
+H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
 
 /* Default cache configuration. */
 
@@ -349,7 +354,7 @@ H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_mark_entry_dirty(void *thing);
 H5_DLL herr_t H5AC_move_entry(H5F_t *f, const H5AC_class_t *type,
-    haddr_t old_addr, haddr_t new_addr);
+    haddr_t old_addr, haddr_t new_addr, hid_t dxpl_id);
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_evict(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id,

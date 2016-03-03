@@ -129,7 +129,7 @@ herr_t
 H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, 
            hid_t memtype, const void *buf)
 {
-
+    hbool_t created_dxpl = FALSE;       /* Whether we created a DXPL */
     hsize_t size[H5S_MAX_RANK];		/* The new size (after extension */
     hsize_t old_size = 0; 		/* The size of the dimension to be extended */
     int sndims; 			/* Number of dimensions in dataspace (signed) */
@@ -158,11 +158,13 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     if(H5I_DATASET != H5Iget_type(dset_id))
 	goto done;
 
-    /* Get the default dataset transfer property list if the user didn't provide one */
-    if(H5P_DEFAULT == dxpl_id)
-        dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else
-	if(TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
+    /* If the user passed in a default DXPL, create one to pass to H5Dwrite() */
+    if(H5P_DEFAULT == dxpl_id) {
+        if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+            goto done;
+        created_dxpl = TRUE;
+    } /* end if */
+    else if(TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
 	    goto done;
 
     /* Get the dataspace of the dataset */
@@ -259,6 +261,12 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     ret_value = SUCCEED;
 
 done:
+    /* Close dxpl if we created it vs. one was passed in */
+    if(created_dxpl) {
+        if(H5Pclose(dxpl_id) < 0)
+            ret_value = FAIL;
+    } /* end if */
+
     /* Close old dataspace */
     if(space_id != FAIL && H5Sclose(space_id) < 0)
 	ret_value = FAIL;
