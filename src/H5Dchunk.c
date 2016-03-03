@@ -4007,7 +4007,7 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
 
                 /* Check if there are filters which need to be applied to the chunk */
-                if(!nunfilt_edge_chunk_dims) {
+                if((pline->nused > 0) && !nunfilt_edge_chunk_dims) {
                     size_t nbytes = orig_chunk_size;
 
                     /* Push the chunk through the filters */
@@ -4054,6 +4054,9 @@ H5D__chunk_allocate(const H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite,
                     /* collect all chunk addresses to be written to
                        write collectively at the end */
                     /* allocate/resize address array if no more space left */
+                    /* Note that if we add support for parallel filters we must
+                     * also store an array of chunk sizes and pass it to the
+                     * apporpriate collective write function */
                     if(0 == chunk_info.num_io % 1024)
                         if(NULL == (chunk_info.addr = (haddr_t *)H5MM_realloc(chunk_info.addr, (chunk_info.num_io + 1024) * sizeof(haddr_t))))
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed for chunk addresses")
