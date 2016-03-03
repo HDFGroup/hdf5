@@ -3522,12 +3522,22 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s ", "VALUE ");
     H5Pfill_value_defined(dcpl_id, &fvstatus);
-    if(fvstatus == H5D_FILL_VALUE_UNDEFINED)
-        h5tools_str_append(&buffer, "%s", "H5D_FILL_VALUE_UNDEFINED");
-    else {
-        ctx->indent_level--;
-        h5tools_print_fill_value(&buffer, info, ctx, dcpl_id, type_id, obj_id);
-        ctx->indent_level++;
+    switch (fvstatus) {
+        case H5D_FILL_VALUE_UNDEFINED:
+            h5tools_str_append(&buffer, "%s", "H5D_FILL_VALUE_UNDEFINED");
+            break;
+        case H5D_FILL_VALUE_DEFAULT:
+            h5tools_str_append(&buffer, "%s", "H5D_FILL_VALUE_DEFAULT");
+            break;
+        case H5D_FILL_VALUE_USER_DEFINED:
+            ctx->indent_level--;
+            h5tools_print_fill_value(&buffer, info, ctx, dcpl_id, type_id, obj_id);
+            ctx->indent_level++;
+            break;
+        case H5D_FILL_VALUE_ERROR:
+        default:
+            HDassert(0);
+            break;
     }
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
     ctx->indent_level--;
