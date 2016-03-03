@@ -5450,8 +5450,16 @@ H5P_get_class(const H5P_genplist_t *plist)
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, 
-                        hid_t *dxpl_id, hid_t loc_id, hbool_t is_collective)
+H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass, hid_t *dxpl_id, 
+                        hid_t
+#ifndef H5_HAVE_PARALLEL
+                        H5_ATTR_UNUSED
+#endif /* H5_HAVE_PARALLEL */
+                        loc_id, hbool_t
+#ifndef H5_HAVE_PARALLEL
+                        H5_ATTR_UNUSED
+#endif /* H5_HAVE_PARALLEL */
+                        is_collective)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -5461,15 +5469,6 @@ H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass,
     HDassert(acspl_id);
     HDassert(libclass);
     HDassert(dxpl_id);
-
-    /* Set access plist to the default property list of the appropriate class if it's the generic default */
-    if(H5P_DEFAULT == *acspl_id)
-        *acspl_id = *libclass->def_plist_id;
-    else {
-        /* Sanity check the access property list class */
-        if(TRUE != H5P_isa_class(*acspl_id, *libclass->class_id))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not the required access property list")
-    } /* end else */
 
 #ifdef H5_HAVE_PARALLEL
     /* If parallel is enabled and the file driver used in the MPI-IO
@@ -5489,6 +5488,15 @@ H5P_verify_apl_and_dxpl(hid_t *acspl_id, const H5P_libclass_t *libclass,
             MPI_Barrier(mpi_comm);
     }
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Set access plist to the default property list of the appropriate class if it's the generic default */
+    if(H5P_DEFAULT == *acspl_id)
+        *acspl_id = *libclass->def_plist_id;
+    else {
+        /* Sanity check the access property list class */
+        if(TRUE != H5P_isa_class(*acspl_id, *libclass->class_id))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not the required access property list")
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

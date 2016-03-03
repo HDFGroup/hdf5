@@ -179,8 +179,6 @@ H5Dopen1(hid_t loc_id, const char *name)
 {
     H5D_t       *dset = NULL;
     H5G_loc_t   loc;                    /* Object location of group */
-    hid_t       dapl_id = H5P_DATASET_ACCESS_DEFAULT; /* dapl to use to open dataset */
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datset */
     hid_t       ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -193,7 +191,7 @@ H5Dopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Open the dataset */
-    if(NULL == (dset = H5D__open_name(&loc, name, dapl_id, dxpl_id)))
+    if(NULL == (dset = H5D__open_name(&loc, name, H5P_DATASET_ACCESS_DEFAULT, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
 
     /* Register an atom for the dataset */

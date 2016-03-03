@@ -434,7 +434,7 @@ H5C_apply_candidate_list(H5F_t * f,
              */
 
             if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't clear entry.")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
         } /* end if */
 
         /* Else, if this process needs to flush this entry. */
@@ -479,7 +479,7 @@ H5C_apply_candidate_list(H5F_t * f,
             cache_ptr->last_entry_removed_ptr  = NULL;
 
             if(H5C__flush_single_entry(f, dxpl_id, flush_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't flush entry.")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry.")
 
             if ( ( cache_ptr->entries_removed_counter > 1 ) ||
                  ( cache_ptr->last_entry_removed_ptr == entry_ptr ) )
@@ -632,12 +632,12 @@ H5C_apply_candidate_list(H5F_t * f,
                 entries_cleared++;
 
 #if ( H5C_APPLY_CANDIDATE_LIST__DEBUG > 1 )
-            HDfprintf(stdout, "%s:%d: clearing 0x%llx.\n", FUNC, mpi_rank,
-                      (long long)clear_ptr->addr);
+                HDfprintf(stdout, "%s:%d: clearing 0x%llx.\n", FUNC, mpi_rank,
+                          (long long)clear_ptr->addr);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
                 if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't clear entry.")
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
             } /* end else-if */
 
             /* Else, if this process needs to independently flush this entry. */
@@ -653,7 +653,7 @@ H5C_apply_candidate_list(H5F_t * f,
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
                 if(H5C__flush_single_entry(f, dxpl_id, flush_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't clear entry.")
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
             } /* end else-if */
         } /* end if */
 
@@ -694,7 +694,7 @@ H5C_apply_candidate_list(H5F_t * f,
         } /* end if */
 
         if(H5C__flush_single_entry(f, dxpl_id, delayed_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't flush entry collectively.")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry collectively.")
 
         entries_flushed_collectively++;
         entries_flushed_or_cleared_last++;
@@ -710,9 +710,9 @@ H5C_apply_candidate_list(H5F_t * f,
     HDassert((entries_flushed_collectively == entries_to_flush_collectively));
     
     if((entries_flushed != entries_to_flush) || 
-       (entries_cleared != entries_to_clear) ||
-       (entries_flushed_or_cleared_last != entries_to_flush_or_clear_last) ||
-       (entries_flushed_collectively != entries_to_flush_collectively))
+           (entries_cleared != entries_to_clear) ||
+           (entries_flushed_or_cleared_last != entries_to_flush_or_clear_last) ||
+           (entries_flushed_collectively != entries_to_flush_collectively))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry count mismatch.")
 
 done:
@@ -1143,7 +1143,7 @@ H5C_mark_entries_as_clean(H5F_t *  f,
             entries_cleared++;
 
             if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't clear entry.")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
         } else {
 
             entry_ptr = entry_ptr->prev;
@@ -1171,7 +1171,7 @@ H5C_mark_entries_as_clean(H5F_t *  f,
             entries_cleared++;
 
             if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0 )
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't clear entry.")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
         } else {
 
             entry_ptr = entry_ptr->next;
