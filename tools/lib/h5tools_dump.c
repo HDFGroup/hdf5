@@ -1359,7 +1359,7 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
 
     if (ctx->ndims > 2) {
         for (i = 0; i < (size_t) ctx->ndims - 2; i++) {
-            max_start[i] = temp_start[i] + sset->count.data[i];
+            max_start[i] = temp_start[i] + sset->count.data[i] * sset->stride.data[i];
             temp_count[i] = 1;
         }
     }
@@ -1401,13 +1401,9 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
             /* increment start dimension */
             do {
                 reset_dim = 0;
-                temp_start[current_outer_dim]++;
+                temp_start[current_outer_dim] += sset->stride.data[current_outer_dim];
                 if (temp_start[current_outer_dim] >= max_start[current_outer_dim]) {
                     temp_start[current_outer_dim] = sset->start.data[current_outer_dim];
-
-                    /* consider block */
-                    if (sset->block.data[current_outer_dim] > 1)
-                        temp_start[current_outer_dim]++;
 
                     current_outer_dim--;
                     reset_dim = 1;
