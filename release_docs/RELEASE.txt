@@ -60,6 +60,17 @@ New Features
 
     High-Level APIs:
     ------
+    - New public functions in Packet Table API
+
+      Two accessor functions were added per HDFFV-8623/patch 003.
+            /* Returns the ID of the dataset associated with the packet table */
+            hid_t H5PTget_dataset(hid_t table_id);
+
+            /* Returns the ID of the datatype the packet table uses */
+            hid_t H5PTget_type(hid_t table_id);
+
+      (BMR, 2016/03/04, HDFFV-8623)
+
 
     Documentation
     -------------
@@ -87,6 +98,19 @@ Bug Fixes since HDF5-1.8.0 release
 
     High-Level APIs:
      ------
+    - Packet Table is updated.
+
+      In the Packet Table C API, there are changes with the following functions,
+      which had been ifdef'ed out with VLPT_REMOVED since 2006
+      * H5PTcreate_vl, is removed from this release
+      * H5PTfree_vlen_readbuff, is renamed to H5PTfree_vlen_buff
+      * H5PTis_varlen, is made available again
+
+      Various cleanup: replacing 0/-1 with SUCCEED/FAIL and H5I_BADID with
+        H5I_INVALID_HID.
+
+      (BMR, 2016/03/04, HDFFV-442)
+
 
     Fortran High-Level APIs:
      ------
