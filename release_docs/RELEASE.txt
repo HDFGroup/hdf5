@@ -95,6 +95,16 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+    - h5dump subsetting fixed for dims greater then two
+
+      When a dataset has more then two dimensions, subsetting would incorrectly
+      calculate the data that needed to be displayed.
+
+      Added in block and stride calculation that account for dimensions greater then two.
+      NOTE: lines that have line breaks inserted because of display length calculations, may
+      have index info that is incorrect until the next dimension break.
+
+      (ADB, 2016/03/04, HDFFV-9698)
 
     High-Level APIs:
      ------
@@ -302,8 +312,8 @@ The following platforms are not supported but have been tested for this release.
                                   gfortran 4.6.1 20110422
 
     Mac OS X El Capitan 10.11     Apple clang/clang++ version 7.0.0 from Xcode 7.0.1
-    64-bit    			  gfortran GNU Fortran (GCC) 5.2.0
-    (VM)      
+    64-bit                  gfortran GNU Fortran (GCC) 5.2.0
+    (VM)
 
     Debian7.5.0 3.2.0-4-686 #1 SMP Debian 3.2.51-1 i686 GNU/Linux
                                   gcc (Debian 4.7.2-5) 4.7.2
