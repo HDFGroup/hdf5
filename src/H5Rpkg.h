@@ -74,7 +74,7 @@ H5_DLL hid_t H5R__get_object(H5F_t *file, hid_t dapl_id, hid_t dxpl_id,
 H5_DLL struct H5S_t *H5R__get_region(H5F_t *file, hid_t dxpl_id, href_t ref);
 H5_DLL H5A_t *H5R__get_attr(H5F_t *file, hid_t dxpl_id, href_t ref);
 H5_DLL ssize_t H5R__get_obj_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id,
-    hid_t id, href_t ref, char *name, size_t size);
+    href_t ref, char *name, size_t size);
 H5_DLL ssize_t H5R__get_attr_name(H5F_t *file, href_t ref, char *name, size_t size);
 
 #endif /* _H5Rpkg_H */

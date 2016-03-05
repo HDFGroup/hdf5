@@ -365,7 +365,7 @@ ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *_ref,
         case H5R_OBJECT:
         case H5R_DATASET_REGION:
         case H5R_REGION:
-            if((ret_value = H5R__get_obj_name(file, H5P_DEFAULT, H5AC_ind_dxpl_id, loc_id, *ref_ptr, name, size)) < 0)
+            if((ret_value = H5R__get_obj_name(file, H5P_DEFAULT, H5AC_ind_dxpl_id, *ref_ptr, name, size)) < 0)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object path")
             break;
         case H5R_ATTR:

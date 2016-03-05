@@ -1667,7 +1667,7 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5R__get_obj_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t loc_id, href_t _ref,
+H5R__get_obj_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, href_t _ref,
     char *name, size_t size)
 {
     hid_t file_id = H5I_BADID;  /* ID for file that the reference is in */
@@ -1746,8 +1746,8 @@ H5R__get_obj_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t loc_id, href_t _
     /* Get object location */
     if (!ext_ref) {
         /* Retrieve file ID for name search */
-        if((file_id = H5I_get_file_id(loc_id, FALSE)) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve file ID")
+        if((file_id = H5F_get_id(f, FALSE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get file ID")
 
         /* Get name, length, etc. */
         if((ret_value = H5G_get_name_by_addr(file_id, lapl_id, dxpl_id, &oloc, name, size)) < 0)
