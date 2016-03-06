@@ -1360,7 +1360,7 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
 
     if (ctx->ndims > 2) {
         for (i = 0; i < (size_t) ctx->ndims - 2; i++) {
-            max_start[i] = temp_start[i] + sset->count.data[i];
+            max_start[i] = temp_start[i] + sset->count.data[i] * sset->stride.data[i];
             temp_count[i] = 1;
         }
     }
@@ -1402,13 +1402,9 @@ h5tools_display_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools
             /* increment start dimension */
             do {
                 reset_dim = 0;
-                temp_start[current_outer_dim]++;
+                temp_start[current_outer_dim] += sset->stride.data[current_outer_dim];
                 if (temp_start[current_outer_dim] >= max_start[current_outer_dim]) {
                     temp_start[current_outer_dim] = sset->start.data[current_outer_dim];
-
-                    /* consider block */
-                    if (sset->block.data[current_outer_dim] > 1)
-                        temp_start[current_outer_dim]++;
 
                     current_outer_dim--;
                     reset_dim = 1;
@@ -3525,12 +3521,22 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
     h5tools_str_reset(&buffer);
     h5tools_str_append(&buffer, "%s ", "VALUE ");
     H5Pfill_value_defined(dcpl_id, &fvstatus);
-    if(fvstatus == H5D_FILL_VALUE_UNDEFINED)
-        h5tools_str_append(&buffer, "%s", "H5D_FILL_VALUE_UNDEFINED");
-    else {
-        ctx->indent_level--;
-        h5tools_print_fill_value(&buffer, info, ctx, dcpl_id, type_id, obj_id);
-        ctx->indent_level++;
+    switch (fvstatus) {
+        case H5D_FILL_VALUE_UNDEFINED:
+            h5tools_str_append(&buffer, "%s", "H5D_FILL_VALUE_UNDEFINED");
+            break;
+        case H5D_FILL_VALUE_DEFAULT:
+            h5tools_str_append(&buffer, "%s", "H5D_FILL_VALUE_DEFAULT");
+            break;
+        case H5D_FILL_VALUE_USER_DEFINED:
+            ctx->indent_level--;
+            h5tools_print_fill_value(&buffer, info, ctx, dcpl_id, type_id, obj_id);
+            ctx->indent_level++;
+            break;
+        case H5D_FILL_VALUE_ERROR:
+        default:
+            HDassert(0);
+            break;
     }
     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
     ctx->indent_level--;
