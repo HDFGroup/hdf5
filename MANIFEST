@@ -2479,6 +2479,7 @@
 ./hl/test/test_lite.c
 ./hl/test/test_packet.c
 ./hl/test/test_table_be.h5
+./hl/test/test_packet_vlen.c
 ./hl/test/test_table.c
 ./hl/test/test_table_cray.h5
 ./hl/test/test_table_le.h5
