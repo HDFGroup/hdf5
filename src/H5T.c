@@ -3521,7 +3521,7 @@ H5T__free(H5T_t *dt)
         /* Remove the datatype from the list of opened objects in the file */
         if(H5FO_top_decr(dt->sh_loc.file, dt->sh_loc.u.loc.oh_addr) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
-        if(H5FO_delete(dt->sh_loc.file, H5AC_dxpl_id, dt->sh_loc.u.loc.oh_addr) < 0)
+        if(H5FO_delete(dt->sh_loc.file, H5AC_ind_read_dxpl_id, dt->sh_loc.u.loc.oh_addr) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't remove datatype from list of open objects")
         if(H5O_close(&dt->oloc) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to close data type object header")
@@ -5522,7 +5522,7 @@ H5Tflush(hid_t type_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
     /* To flush metadata and invoke flush callback if there is */
-    if(H5O_flush_common(&dt->oloc, type_id, H5AC_dxpl_id) < 0)
+    if(H5O_flush_common(&dt->oloc, type_id, H5AC_ind_read_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype and object flush callback")
 
 done:
@@ -5558,7 +5558,7 @@ H5Trefresh(hid_t type_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
     /* Call private function to refresh datatype object */
-    if ((H5O_refresh_metadata(type_id, dt->oloc, H5AC_dxpl_id)) < 0)
+    if ((H5O_refresh_metadata(type_id, dt->oloc, H5AC_ind_read_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "unable to refresh datatype")
 
 done:

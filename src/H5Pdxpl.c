@@ -179,8 +179,15 @@
 #ifdef H5_DEBUG_BUILD
 /* dxpl I/O type - private property */
 #define H5FD_DXPL_TYPE_SIZE       sizeof(H5FD_dxpl_type_t)
-#define H5FD_DXPL_TYPE_DEF        H5FD_NOIO_DXPL
 #endif /* H5_DEBUG_BUILD */
+#ifdef H5_HAVE_PARALLEL
+/* Definition for reading metadata collectively */
+#define H5D_XFER_COLL_MD_READ_SIZE   sizeof(H5P_coll_md_read_flag_t)
+#define H5D_XFER_COLL_MD_READ_DEF    H5P_USER_FALSE
+#define H5D_XFER_COLL_MD_READ_ENC    H5P__encode_coll_md_read_flag_t
+#define H5D_XFER_COLL_MD_READ_DEC    H5P__decode_coll_md_read_flag_t
+#endif /* H5_HAVE_PARALLEL */
+
 
 /******************/
 /* Local Typedefs */
@@ -277,6 +284,7 @@ static const H5D_mpio_no_collective_cause_t H5D_def_mpio_no_collective_cause_g =
 #ifdef H5_HAVE_PARALLEL
 static const MPI_Datatype H5D_def_btype_g = H5FD_MPI_XFER_MEM_MPI_TYPE_DEF;  /* Default value for MPI buffer type */
 static const MPI_Datatype H5D_def_ftype_g = H5FD_MPI_XFER_FILE_MPI_TYPE_DEF; /* Default value for MPI file type */
+static const H5P_coll_md_read_flag_t H5D_def_coll_md_read_g = H5D_XFER_COLL_MD_READ_DEF;  /* Default setting for the collective metedata read flag */
 #endif /* H5_HAVE_PARALLEL */
 static const H5Z_EDC_t H5D_def_enable_edc_g = H5D_XFER_EDC_DEF;            /* Default value for EDC property */
 static const H5Z_cb_t H5D_def_filter_cb_g = H5D_XFER_FILTER_CB_DEF;        /* Default value for filter callback */
@@ -432,6 +440,13 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if(H5P_register_real(pclass, H5FD_MPI_XFER_FILE_MPI_TYPE_NAME, H5FD_MPI_XFER_FILE_MPI_TYPE_SIZE, &H5D_def_ftype_g,
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the metadata collective read flag */
+    if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5D_XFER_COLL_MD_READ_SIZE, 
+            &H5D_def_coll_md_read_g, 
+            NULL, NULL, NULL, H5D_XFER_COLL_MD_READ_ENC, H5D_XFER_COLL_MD_READ_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 #endif /* H5_HAVE_PARALLEL */
 

@@ -1782,7 +1782,7 @@ H5D_close(H5D_t *dataset)
     dataset->shared->fo_count--;
     if(dataset->shared->fo_count == 0) {
         /* Flush the dataset's information.  Continue to close even if it fails. */
-        if(H5D__flush_real(dataset, H5AC_dxpl_id) < 0)
+        if(H5D__flush_real(dataset, H5AC_ind_read_dxpl_id) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
 
         /* Set a flag to indicate the dataset is closing, before we start freeing things */
@@ -1862,7 +1862,7 @@ H5D_close(H5D_t *dataset)
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
         /* Destroy any cached layout information for the dataset */
-        if(dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset, H5AC_dxpl_id) < 0)
+        if(dataset->shared->layout.ops->dest && (dataset->shared->layout.ops->dest)(dataset, H5AC_ind_read_dxpl_id) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy layout info")
 
         /* Release layout, fill-value, efl & pipeline messages */
@@ -1881,7 +1881,7 @@ H5D_close(H5D_t *dataset)
 
         /* If the dataset is opened for SWMR access, shut that down */
         if(dataset->shared->is_swimming)
-            if(H5D__swmr_teardown(dataset, H5AC_dxpl_id) < 0)
+            if(H5D__swmr_teardown(dataset, H5AC_ind_read_dxpl_id) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to shut down SWMR access")
         
         /*
@@ -1895,7 +1895,7 @@ H5D_close(H5D_t *dataset)
         /* Remove the dataset from the list of opened objects in the file */
         if(H5FO_top_decr(dataset->oloc.file, dataset->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
-        if(H5FO_delete(dataset->oloc.file, H5AC_dxpl_id, dataset->oloc.addr) < 0)
+        if(H5FO_delete(dataset->oloc.file, H5AC_ind_read_dxpl_id, dataset->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects")
 
         /* Close the dataset object */
@@ -3262,7 +3262,7 @@ H5D_get_create_plist(H5D_t *dset)
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Retrieve any object creation properties */
-    if(H5O_get_create_plist(&dset->oloc, H5AC_dxpl_id, new_plist) < 0)
+    if(H5O_get_create_plist(&dset->oloc, H5AC_ind_read_dxpl_id, new_plist) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get object creation info")
 
     /* Get the layout property */
@@ -3494,7 +3494,7 @@ H5D_get_space(H5D_t *dset)
 
     /* If the layout is virtual, update the extent */
     if(dset->shared->layout.type == H5D_VIRTUAL)
-        if(H5D__virtual_set_extent_unlim(dset, H5AC_dxpl_id) < 0)
+        if(H5D__virtual_set_extent_unlim(dset, H5AC_ind_read_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update virtual dataset extent")
 
     /* Read the data space message and return a data space object */

@@ -4630,7 +4630,7 @@ H5B2__shadow_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, uint16_t depth,
         node_protected = FALSE;
 
         /* Move the location of the old child on the disk */
-        if(H5AC_move_entry(hdr->f, H5AC_BT2_INT, curr_node_ptr->addr, new_node_addr, H5AC_dxpl_id) < 0)
+        if(H5AC_move_entry(hdr->f, H5AC_BT2_INT, curr_node_ptr->addr, new_node_addr, H5AC_ind_read_dxpl_id) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTMOVE, FAIL, "unable to move B-tree node")
         curr_node_ptr->addr = new_node_addr;
 
@@ -4739,7 +4739,7 @@ H5B2__shadow_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id,
         node_protected = FALSE;
 
         /* Move the location of the old child on the disk */
-        if(H5AC_move_entry(hdr->f, H5AC_BT2_LEAF, curr_node_ptr->addr, new_node_addr, H5AC_dxpl_id) < 0)
+        if(H5AC_move_entry(hdr->f, H5AC_BT2_LEAF, curr_node_ptr->addr, new_node_addr, H5AC_ind_read_dxpl_id) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTMOVE, FAIL, "unable to move B-tree node")
         curr_node_ptr->addr = new_node_addr;
 

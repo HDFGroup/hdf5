@@ -81,19 +81,19 @@ H5Oflush(hid_t obj_id)
 
     /* Get the object pointer */
     if(NULL == (obj_ptr = H5I_object(obj_id)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Get the object class */
-    if(NULL == (obj_class = H5O_obj_class(oloc, H5AC_dxpl_id)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object class")
+    if(NULL == (obj_class = H5O_obj_class(oloc, H5AC_ind_read_dxpl_id)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to determine object class")
 
     /* Flush the object of this class */
-    if(obj_class->flush && obj_class->flush(obj_ptr, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
+    if(obj_class->flush && obj_class->flush(obj_ptr, H5AC_ind_read_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
     /* Flush the object metadata and invoke flush callback */
-    if(H5O_flush_common(oloc, obj_id, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object and object flush callback")
+    if(H5O_flush_common(oloc, obj_id, H5AC_ind_read_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object and object flush callback")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -203,7 +203,7 @@ H5Orefresh(hid_t oid)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
 
     /* Private function */
-    if(H5O_refresh_metadata(oid, *oloc, H5AC_dxpl_id) < 0)
+    if(H5O_refresh_metadata(oid, *oloc, H5AC_ind_read_dxpl_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:

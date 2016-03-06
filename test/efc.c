@@ -3171,7 +3171,7 @@ main(void)
     /* Create property lists */
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     fapl_id = h5_fileaccess();
-    dxpl_id = H5AC_dxpl_id;
+    dxpl_id = H5AC_ind_read_dxpl_id;
 
     /* Patch filenames */
     h5_fixname(FILENAME[0], fapl_id, filename[0], sizeof(filename[0]));

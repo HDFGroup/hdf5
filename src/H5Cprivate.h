@@ -1710,6 +1710,7 @@ typedef struct H5C_cache_entry_t {
 #ifdef H5_HAVE_PARALLEL
     hbool_t			clear_on_unprotect;
     hbool_t			flush_immediately;
+    hbool_t			coll_access;
 #endif /* H5_HAVE_PARALLEL */
     hbool_t			flush_in_progress;
     hbool_t			destroy_in_progress;
@@ -1735,6 +1736,10 @@ typedef struct H5C_cache_entry_t {
     struct H5C_cache_entry_t  *	prev;
     struct H5C_cache_entry_t  *	aux_next;
     struct H5C_cache_entry_t  *	aux_prev;
+#ifdef H5_HAVE_PARALLEL
+    struct H5C_cache_entry_t  *	coll_next;
+    struct H5C_cache_entry_t  *	coll_prev;
+#endif /* H5_HAVE_PARALLEL */
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     /* cache entry stats fields */
@@ -2113,6 +2118,7 @@ H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,
     int mpi_rank, int mpi_size);
 H5_DLL herr_t H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_clear_coll_entries(H5C_t * cache_ptr, hbool_t partial);
 H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, int32_t ce_array_len,
     haddr_t *ce_array_ptr);
 #endif /* H5_HAVE_PARALLEL */

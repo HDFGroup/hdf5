@@ -1095,7 +1095,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 if(chk_proxy->cont_chunkno == 0)
                     parent = chk_proxy->oh;
                 else {
-                    if(NULL == (cont_chk_proxy = H5O_chunk_protect(chk_proxy->f, H5AC_dxpl_id, chk_proxy->oh, chk_proxy->cont_chunkno)))
+                    if(NULL == (cont_chk_proxy = H5O_chunk_protect(chk_proxy->f, H5AC_ind_read_dxpl_id, chk_proxy->oh, chk_proxy->cont_chunkno)))
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
                     parent = cont_chk_proxy;
                 } /* end else */
@@ -1122,7 +1122,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 
                 /* Add flush dependency on object header proxy, if proxy exists */
                 if(chk_proxy->oh->proxy_present)
-                    if(H5O__proxy_depend(chk_proxy->f, H5AC_dxpl_id, chk_proxy->oh, chk_proxy) < 0)
+                    if(H5O__proxy_depend(chk_proxy->f, H5AC_ind_read_dxpl_id, chk_proxy->oh, chk_proxy) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "can't create flush dependency on object header proxy")
 
 	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -1151,7 +1151,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 
 done:
     if(cont_chk_proxy)
-        if(H5O_chunk_unprotect(chk_proxy->f, H5AC_dxpl_id, cont_chk_proxy, FALSE) < 0)
+        if(H5O_chunk_unprotect(chk_proxy->f, H5AC_ind_read_dxpl_id, cont_chk_proxy, FALSE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
     FUNC_LEAVE_NOAPI(ret_value)

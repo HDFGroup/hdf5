@@ -3210,7 +3210,7 @@ setup_cache(size_t max_cache_size,
 
     if ( pass ) { /* allocate space for test entries */
 
-        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5AC_dxpl_id,
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id,
 			              (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
 
 	if ( actual_base_addr == HADDR_UNDEF ) {
@@ -3295,7 +3295,7 @@ takedown_cache(H5F_t * file_ptr,
 
         flush_cache(file_ptr, TRUE, FALSE, FALSE);
 
-        H5C_dest(file_ptr, H5AC_dxpl_id);
+        H5C_dest(file_ptr, H5AC_ind_read_dxpl_id);
 
 	if ( saved_cache != NULL ) {
 
@@ -3320,7 +3320,7 @@ takedown_cache(H5F_t * file_ptr,
                 HDassert ( file_ptr );
             }
 
-            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5AC_dxpl_id, saved_actual_base_addr,
+            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id, saved_actual_base_addr,
                                           (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
             saved_actual_base_addr = HADDR_UNDEF;
         }
@@ -3409,7 +3409,7 @@ expunge_entry(H5F_t * file_ptr,
         HDassert( ! ( entry_ptr->header.is_pinned ) );
 	HDassert( ! ( entry_ptr->is_pinned ) );
 
-        result = H5C_expunge_entry(file_ptr, H5AC_dxpl_id,
+        result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
                 &(types[type]), entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( result < 0 ) {
@@ -3461,11 +3461,11 @@ flush_cache(H5F_t * file_ptr,
         cache_ptr = file_ptr->shared->cache;
 
         if(destroy_entries)
-            result = H5C_flush_cache(file_ptr, H5AC_dxpl_id,
+            result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id,
                                      H5C__FLUSH_INVALIDATE_FLAG);
 
         else
-            result = H5C_flush_cache(file_ptr, H5AC_dxpl_id,
+            result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id,
                                      H5C__NO_FLAGS_SET);
 
         if(dump_stats)
@@ -3600,7 +3600,7 @@ insert_entry(H5F_t * file_ptr,
 {
     H5C_t * cache_ptr;
     herr_t result;
-    hid_t xfer = H5AC_dxpl_id;
+    hid_t xfer = H5AC_ind_read_dxpl_id;
     hbool_t insert_pinned;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -3887,7 +3887,7 @@ protect_entry(H5F_t * file_ptr,
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
     haddr_t baddrs;
-    hid_t xfer = H5AC_dxpl_id;
+    hid_t xfer = H5AC_ind_read_dxpl_id;
     H5C_cache_entry_t * cache_entry_ptr;
 
     if ( pass ) {
@@ -4019,7 +4019,7 @@ protect_entry_ro(H5F_t * file_ptr,
 		  ( ( entry_ptr->is_read_only ) &&
 		    ( entry_ptr->ro_ref_count > 0 ) ) );
 
-        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_dxpl_id,
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
                 &(types[type]), entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
@@ -4236,7 +4236,7 @@ unprotect_entry(H5F_t * file_ptr,
                 mark_flush_dep_dirty(entry_ptr);
         } /* end if */
 
-        result = H5C_unprotect(file_ptr, H5AC_dxpl_id,
+        result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
                     entry_ptr->addr, (void *)entry_ptr, flags);
 
         if ( ( result < 0 ) ||
