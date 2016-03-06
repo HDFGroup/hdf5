@@ -551,7 +551,7 @@ done:
 #ifdef H5_DEBUG_BUILD
         /* release the metadata dxpl that was copied in the init function */
         if(H5I_dec_ref(io_info.md_dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close metadata dxpl")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close metadata dxpl")
 #endif /* H5_DEBUG_BUILD */
 #ifdef H5_HAVE_PARALLEL
         /* Shut down io_info struct */
@@ -814,7 +814,7 @@ done:
 #ifdef H5_DEBUG_BUILD
         /* release the metadata dxpl that was copied in the init function */
         if(H5I_dec_ref(io_info.md_dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close metadata dxpl")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't close metadata dxpl")
 #endif /* H5_DEBUG_BUILD */
 #ifdef H5_HAVE_PARALLEL
         /* Shut down io_info struct */
