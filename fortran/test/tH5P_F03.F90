@@ -1,7 +1,7 @@
-!****h* root/fortran/test/tH5P_F03.f90
+!****h* root/fortran/test/TH5P_F03
 !
 ! NAME
-!  tH5P_F03.f90
+!  tH5P_F03.F90
 !
 ! FUNCTION
 !  Test FORTRAN HDF5 H5P APIs which are dependent on FORTRAN 2003
@@ -618,8 +618,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
 
 END SUBROUTINE external_test_offset
 
-!****h* root/fortran/test/tH5P_F03.f90
-!
+!-------------------------------------------------------------------------
 ! NAME
 !  test_vds
 !

@@ -132,10 +132,7 @@ ignore files:
     *.o
     *e
     *.mod
-    *_F90.f90
     *.c
 accept files:
-    *_F03.f90
-    *_F90.f90
-    *.f90
+    *.F90
     *.h

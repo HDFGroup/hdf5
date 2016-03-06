@@ -7320,13 +7320,195 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_mpio_actual_io_mode_c(dxpl_id, actual_io_mode)
 
   END SUBROUTINE h5pget_mpio_actual_io_mode_f
+
+!****s* H5P/h5pset_all_coll_metadata_ops_f
+! NAME
+!  h5pset_all_coll_metadata_ops_f
+!
+! PURPOSE
+!  Sets requirement whether HDF5 metadata read operations using the access property 
+!  list are required to be collective or independent. If collective requirement is 
+!  selected, the HDF5 library will optimize the metadata reads improving performance. 
+!  The default setting is independent (false).
+!
+! INPUTS
+!  plist_id       - File access property list identifier.
+!  is_collective  - Indicates if metadata writes are collective or not.
+! OUTPUTS
+!  hdferr         - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Feb, 10 2016
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pset_all_coll_metadata_ops_f(plist_id, is_collective, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+    LOGICAL, INTENT(IN)           :: is_collective
+    INTEGER, INTENT(OUT)          :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_is_collective
+    
+    INTERFACE
+       INTEGER FUNCTION h5pset_all_coll_metadata_ops(plist_id, is_collective) BIND(C, NAME='H5Pset_all_coll_metadata_ops')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T) , INTENT(IN), VALUE :: plist_id
+         LOGICAL(C_BOOL), INTENT(IN), VALUE :: is_collective
+       END FUNCTION h5pset_all_coll_metadata_ops
+    END INTERFACE
+
+    ! Transfer value of Fortran LOGICAL to C c_bool type
+    c_is_collective = is_collective
+    
+    hdferr = INT(H5Pset_all_coll_metadata_ops(plist_id, c_is_collective))
+    
+  END SUBROUTINE h5pset_all_coll_metadata_ops_f
+
+!****s* H5P/h5pget_all_coll_metadata_ops_f 
+! NAME
+!  h5pget_all_coll_metadata_ops_f
+!
+! PURPOSE
+!  Retrieves metadata read mode from the access property list.
+!
+! INPUTS
+!  plist_id        - File access property list identifier.
+! OUTPUTS
+!  is_collective   - Collective access setting.
+!  hdferr          - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Feb, 10 2016
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pget_all_coll_metadata_ops_f(plist_id, is_collective, hdferr)
+    
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+    LOGICAL, INTENT(OUT)          :: is_collective
+    INTEGER, INTENT(OUT)          :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_is_collective
+    
+    INTERFACE
+       INTEGER FUNCTION h5pget_all_coll_metadata_ops(plist_id, is_collective) BIND(C, NAME='H5Pget_all_coll_metadata_ops')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T) , INTENT(IN), VALUE :: plist_id
+         LOGICAL(C_BOOL), INTENT(OUT) :: is_collective
+       END FUNCTION h5pget_all_coll_metadata_ops
+    END INTERFACE
+    
+    hdferr = INT(H5Pget_all_coll_metadata_ops(plist_id, c_is_collective))
+    
+    ! Transfer value of C c_bool type to Fortran LOGICAL 
+    is_collective = c_is_collective
+    
+  END SUBROUTINE h5pget_all_coll_metadata_ops_f
+
+!****s* H5P/h5pset_coll_metadata_write_f
+! NAME
+!  h5pset_coll_metadata_write_f
+!
+! PURPOSE
+!  Sets metadata writes to collective or independent. Default setting is independent (false).
+!
+! INPUTS
+!  fapl_id        - File access property list identifier.
+!  is_collective  - Indicates if metadata writes are collective or not.
+! OUTPUTS
+!  hdferr         - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Feb, 10 2016
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pset_coll_metadata_write_f(plist_id, is_collective, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+    LOGICAL, INTENT(IN)           :: is_collective
+    INTEGER, INTENT(OUT)          :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_is_collective
+    
+    INTERFACE
+       INTEGER FUNCTION h5pset_coll_metadata_write(plist_id, is_collective) BIND(C, NAME='H5Pset_coll_metadata_write')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T) , INTENT(IN), VALUE :: plist_id
+         LOGICAL(C_BOOL), INTENT(IN), VALUE :: is_collective
+       END FUNCTION h5pset_coll_metadata_write
+    END INTERFACE
+    
+    ! Transfer value of Fortran LOGICAL to C c_bool type
+    c_is_collective = is_collective
+    
+    hdferr = INT(H5Pset_coll_metadata_write(plist_id, c_is_collective))
+    
+  END SUBROUTINE h5pset_coll_metadata_write_f
+
+!****s* H5P/h5pget_coll_metadata_write_f
+! NAME
+!  h5pget_coll_metadata_write_f
+!
+! PURPOSE
+!  Retrieves metadata write mode from the file access property list.
+!
+! INPUTS
+!  plist_id        - File access property list identifier.
+! OUTPUTS
+!  is_collective   - Collective access setting.
+!  hdferr          - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Feb, 10 2016
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pget_coll_metadata_write_f(plist_id, is_collective, hdferr)
+    
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+    LOGICAL, INTENT(OUT)          :: is_collective
+    INTEGER, INTENT(OUT)          :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_is_collective
+    
+    INTERFACE
+       INTEGER FUNCTION h5pget_coll_metadata_write(plist_id, is_collective) BIND(C, NAME='H5Pget_coll_metadata_write')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T) , INTENT(IN), VALUE :: plist_id
+         LOGICAL(C_BOOL), INTENT(OUT) :: is_collective
+       END FUNCTION h5pget_coll_metadata_write
+    END INTERFACE
+    
+    hdferr = INT(H5Pget_coll_metadata_write(plist_id, c_is_collective))
+    
+    ! Transfer value of C c_bool type to Fortran LOGICAL 
+    is_collective = c_is_collective
+    
+  END SUBROUTINE h5pget_coll_metadata_write_f
+  
 #endif
 
 !
 ! V I R T U A L  D A T S E T S
 !
 
-!****s* 
+!****s* H5P/h5pset_virtual_view_f
 ! NAME
 !  h5pset_virtual_view_f
 !
@@ -7371,7 +7553,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     
   END SUBROUTINE h5pset_virtual_view_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_view_f
 ! NAME
 !  h5pget_virtual_view_f
 !
@@ -7415,7 +7597,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     
   END SUBROUTINE h5pget_virtual_view_f
 
-!****s* 
+!****s* H5P/h5pset_virtual_printf_gap_f
 ! NAME
 !  h5pset_virtual_printf_gap_f
 !
@@ -7457,7 +7639,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     
   END SUBROUTINE h5pset_virtual_printf_gap_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_printf_gap_f
 ! NAME
 !  h5pget_virtual_printf_gap_f
 !
@@ -7500,7 +7682,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     
   END SUBROUTINE h5pget_virtual_printf_gap_f
 
-!****s* 
+!****s* H5P/h5pset_virtual_f
 ! NAME
 !  h5pset_virtual_f
 !
@@ -7560,7 +7742,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pset_virtual_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_count_f
 ! NAME
 !  h5pget_virtual_count_f
 !
@@ -7601,7 +7783,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_virtual_count_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_vspace_f
 ! NAME
 !  h5pget_virtual_vspace_f
 !
@@ -7649,7 +7831,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
 END SUBROUTINE h5pget_virtual_vspace_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_srcspace_f
 ! NAME
 !  h5pget_virtual_srcspace_f
 !
@@ -7699,7 +7881,7 @@ SUBROUTINE h5pget_virtual_srcspace_f(dcpl_id, index, ds_id, hdferr)
 
 END SUBROUTINE h5pget_virtual_srcspace_f
 
-!****s* 
+!****s* H5P/h5pget_virtual_filename_f
 ! NAME
 !  h5pget_virtual_filename_f
 !
@@ -7765,10 +7947,9 @@ SUBROUTINE h5pget_virtual_filename_f(dcpl_id, index, name, hdferr, name_len)
 
   ENDIF
 
-
 END SUBROUTINE h5pget_virtual_filename_f
 
-!****s*
+!****s* H5P/h5pget_virtual_dsetname_f
 ! NAME
 !  h5pget_virtual_dsetname_f
 !
@@ -7835,6 +8016,7 @@ SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
   ENDIF
 
 END SUBROUTINE h5pget_virtual_dsetname_f
+
 
 END MODULE H5P
 
