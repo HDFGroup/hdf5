@@ -187,6 +187,8 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 #ifdef H5_HAVE_PARALLEL
     if(H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
+    if(H5P_set(new_plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
 #endif /* H5_HAVE_PARALLEL */
 
     /* Prepare the driver property */

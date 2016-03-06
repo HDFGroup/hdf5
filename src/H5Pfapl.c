@@ -208,6 +208,8 @@
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF     FALSE
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC     H5P__encode_hbool_t
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC     H5P__decode_hbool_t
+
+#ifdef H5_HAVE_PARALLEL
 /* Definition of collective metadata read mode flag */
 #define H5F_ACS_COLL_MD_READ_FLAG_SIZE   sizeof(H5P_coll_md_read_flag_t)
 #define H5F_ACS_COLL_MD_READ_FLAG_DEF    H5P_USER_FALSE
@@ -218,7 +220,7 @@
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEF    FALSE
 #define H5F_ACS_COLL_MD_WRITE_FLAG_ENC    H5P__encode_hbool_t
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEC    H5P__decode_hbool_t
-
+#endif /* H5_HAVE_PARALLEL */
 
 /******************/
 /* Local Typedefs */
@@ -335,9 +337,10 @@ static const hbool_t H5F_def_clear_status_flags_g = H5F_ACS_CLEAR_STATUS_FLAGS_D
 static const hbool_t H5F_def_use_mdc_logging_g = H5F_ACS_USE_MDC_LOGGING_DEF;                 /* Default metadata cache logging flag */
 static const char *H5F_def_mdc_log_location_g = H5F_ACS_MDC_LOG_LOCATION_DEF;                 /* Default mdc log location */
 static const hbool_t H5F_def_start_mdc_log_on_access_g = H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF; /* Default mdc log start on access flag */
+#ifdef H5_HAVE_PARALLEL
 static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_MD_READ_FLAG_DEF;  /* Default setting for the collective metedata read flag */
 static const hbool_t H5F_def_coll_md_write_flag_g = H5F_ACS_COLL_MD_WRITE_FLAG_DEF;  /* Default setting for the collective metedata write flag */
-
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
@@ -527,6 +530,7 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC, H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+#ifdef H5_HAVE_PARALLEL
     /* Register the metadata collective read flag */
     if(H5P_register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5F_ACS_COLL_MD_READ_FLAG_SIZE, &H5F_def_coll_md_read_flag_g, 
             NULL, NULL, NULL, H5F_ACS_COLL_MD_READ_FLAG_ENC, H5F_ACS_COLL_MD_READ_FLAG_DEC, 
@@ -538,6 +542,7 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, H5F_ACS_COLL_MD_WRITE_FLAG_ENC, H5F_ACS_COLL_MD_WRITE_FLAG_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4056,6 +4061,7 @@ H5P_facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_close() */
 
+#ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:       H5P__encode_coll_md_read_flag_t
@@ -4128,7 +4134,6 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__decode_coll_md_read_flag_t() */
 
-#ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_all_coll_metadata_ops
@@ -4190,7 +4195,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_coll_metadata_read
+ * Function:	H5Pget_all_coll_metadata_ops
  *
  * Purpose:	Gets information about collective metadata read mode.
  *
@@ -4208,7 +4213,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_coll_metadata_read(hid_t plist_id, hbool_t *is_collective)
+H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective)
 {
     herr_t ret_value = SUCCEED;   /* return value */
 
@@ -4244,7 +4249,7 @@ H5Pget_coll_metadata_read(hid_t plist_id, hbool_t *is_collective)
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Pget_coll_metadata_read */
+} /* H5Pget_all_coll_metadata_ops */
 
 
 /*-------------------------------------------------------------------------

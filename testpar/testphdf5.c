@@ -351,6 +351,9 @@ int main(int argc, char **argv)
     AddTest("split", test_split_comm_access, NULL,
 	    "dataset using split communicators", PARATESTFILE);
 
+    AddTest("props", test_file_properties, NULL,
+	    "Coll Metadata file property settings", PARATESTFILE);
+
     AddTest("idsetw", dataset_writeInd, NULL,
 	    "dataset independent write", PARATESTFILE);
     AddTest("idsetr", dataset_readInd, NULL,
