@@ -85,7 +85,7 @@
 
 /* v2 B-tree creation values for raw meta_size */
 #define H5D_BT2_CREATE_PARAM_SIZE	6		/* Size of the creation parameters in bytes */
-#define H5D_BT2_NODE_SIZE       	512
+#define H5D_BT2_NODE_SIZE       	2048
 #define H5D_BT2_SPLIT_PERC      	100
 #define H5D_BT2_MERGE_PERC      	40
 

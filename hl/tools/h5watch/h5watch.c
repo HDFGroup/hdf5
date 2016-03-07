@@ -39,6 +39,9 @@
  */
 
 const char  *progname = "h5watch";	/* tool name */
+hid_t g_fid = -1;
+hid_t g_fapl = -1;
+
 static char *g_list_of_fields = NULL; 	/* command line input for "list_of_fields" */
 static char *g_dup_fields = NULL; 	/* copy of "list_of_fields" */
 static H5LD_memb_t **g_listv = NULL;   	/* vector info for "list_of_fields" */
@@ -803,8 +806,20 @@ parse_command_line(int argc, const char *argv[])
  */
 static void catch_signal(int H5_ATTR_UNUSED signo)
 {
+    /* Close the file access property list */
+    if(g_fapl > 0 && H5Pclose(g_fapl) < 0) {
+	error_msg("unable to close property list\n");
+	h5tools_setstatus(EXIT_FAILURE);
+    }
+
+    /* Close the file */
+    if(g_fid > 0 && H5Fclose(g_fid) < 0) {
+	error_msg("unable to close file\n");
+	h5tools_setstatus(EXIT_FAILURE);
+    }
+
     /* Exit from h5watch */
-    leave(EXIT_SUCCESS);
+    leave(h5tools_getstatus());
 
 } /* catch_signal() */
 
@@ -830,8 +845,6 @@ main(int argc, const char *argv[])
     void               *edata;
     H5E_auto2_t         func;
     char	*x;
-    hid_t	fid = -1;
-    hid_t	fapl = -1;
 
     /* Set up tool name and exit status */
     h5tools_setprogname(PROGRAMNAME);
@@ -887,18 +900,18 @@ main(int argc, const char *argv[])
     }
 
     /* Create a copy of file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if((g_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         return -1;
 
     /* Set to use the latest library format */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+    if(H5Pset_libver_bounds(g_fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         return -1;
 
     do {
 	while(fname && *fname) {
-	    fid = h5tools_fopen(fname, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, fapl, NULL, drivername, sizeof drivername);
+	    g_fid = h5tools_fopen(fname, H5F_ACC_RDONLY|H5F_ACC_SWMR_READ, g_fapl, NULL, drivername, sizeof drivername);
 
-	    if(fid >= 0) {
+	    if(g_fid >= 0) {
 		HDfprintf(stdout, "Opened \"%s\" with %s driver.\n", fname, drivername);
 		break; /*success*/
 	    } /* end if */
@@ -913,12 +926,12 @@ main(int argc, const char *argv[])
 	    *dname = '\0';
 	} /* end while */
     /* Try opening the file again if somehow unstable */
-    } while(g_retry-- > 0 && fid == FAIL);
+    } while(g_retry-- > 0 && g_fid == FAIL);
 
-    if(fid < 0) {
+    if(g_fid < 0) {
 	error_msg("unable to open file \"%s\"\n", fname);
 	if(fname) HDfree(fname);
-	if(fapl >= 0) H5Pclose(fapl);
+	if(g_fapl >= 0) H5Pclose(g_fapl);
 	leave(EXIT_FAILURE);
     } 
 
@@ -935,18 +948,18 @@ main(int argc, const char *argv[])
 	} else {
 	    *x = '\0';
 	    /* Validate dataset */
-	    if(check_dataset(fid, dname) < 0)
+	    if(check_dataset(g_fid, dname) < 0)
 		h5tools_setstatus(EXIT_FAILURE);
 	    /* Validate input "fields" */
 	    else if(g_list_of_fields && *g_list_of_fields)
-		if(process_cmpd_fields(fid, dname) < 0)
+		if(process_cmpd_fields(g_fid, dname) < 0)
 		    h5tools_setstatus(EXIT_FAILURE);
 	}
     } 
 
     /* If everything is fine, start monitoring the datset */
     if(h5tools_getstatus() != EXIT_FAILURE)
-	if(monitor_dataset(fid, dname) < 0)
+	if(monitor_dataset(g_fid, dname) < 0)
 	    h5tools_setstatus(EXIT_FAILURE);
      	    
     /* Free spaces */
@@ -960,13 +973,13 @@ main(int argc, const char *argv[])
     if(g_dup_fields) HDfree(g_dup_fields);
 
     /* Close the file access property list */
-    if(fapl >= 0 && H5Pclose(fapl) < 0) {
+    if(g_fapl >= 0 && H5Pclose(g_fapl) < 0) {
 	error_msg("unable to close file access property list\n");
 	h5tools_setstatus(EXIT_FAILURE);
     }
 
     /* Close the file */
-    if(H5Fclose(fid) < 0) {
+    if(H5Fclose(g_fid) < 0) {
 	error_msg("unable to close file\n");
 	h5tools_setstatus(EXIT_FAILURE);
     }
