@@ -328,7 +328,7 @@ void CommonFG::unlink( const H5std_string& name ) const
 ///		Exercise care in moving groups as it is possible to render
 ///		data in a file inaccessible with Group::move. Please refer
 ///		to the Group Interface in the HDF5 User's Guide for details at:
-/// http://www.hdfgroup.org/HDF5/doc/UG/UG_frame09Groups.html
+/// https://www.hdfgroup.org/HDF5/doc/UG/HDF5_Users_Guide-Responsive%20HTML5/index.html#t=HDF5_Users_Guide%2FGroups%2FHDF5_Groups.htm
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
 //	2007: QAK modified to use H5L APIs - BMR

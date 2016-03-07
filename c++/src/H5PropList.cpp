@@ -104,9 +104,8 @@ PropList::PropList() : IdComponent(), id(H5P_DEFAULT) {}
 ///\param	original - IN: The original property list to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PropList::PropList(const PropList& original) : IdComponent()
+PropList::PropList(const PropList& original) : IdComponent(), id(original.id)
 {
-    id = original.getId();
     incRefCount(); // increment number of references to this id
 }
 

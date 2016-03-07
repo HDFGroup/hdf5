@@ -276,6 +276,13 @@ New Features
 
     C++ Library:
     ------------
+     - New member function added
+
+       The assignment operator ArrayType::operator= is added because ArrayType
+       has pointer data members.
+
+       (BMR, 2016/03/07, HDFFV-9562)
+
   - New member functions
     + Overloaded CommonFG::getObjnameByIdx to take char* for name
     + Overloaded CommonFG::getObjTypeByIdx to return type name as a char*.

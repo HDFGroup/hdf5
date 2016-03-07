@@ -67,9 +67,8 @@ DataSet::DataSet() : H5Object(), AbstractDs(), id(H5I_INVALID_HID) {}
 //		when one of those objects is deleted, the id will be closed if
 //		the reference counter is only 1.
 //--------------------------------------------------------------------------
-DataSet::DataSet(const hid_t existing_id) : H5Object(), AbstractDs()
+DataSet::DataSet(const hid_t existing_id) : H5Object(), AbstractDs(), id(existing_id)
 {
-    id = existing_id;
     incRefCount(); // increment number of references to this id
 }
 
@@ -79,9 +78,8 @@ DataSet::DataSet(const hid_t existing_id) : H5Object(), AbstractDs()
 ///\param	original - IN: DataSet instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet(const DataSet& original) : H5Object(), AbstractDs()
+DataSet::DataSet(const DataSet& original) : H5Object(), AbstractDs(), id(original.id)
 {
-    id = original.getId();
     incRefCount(); // increment number of references to this id
 }
 
