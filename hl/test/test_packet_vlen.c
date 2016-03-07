@@ -758,7 +758,7 @@ static int adding_attribute(hid_t fid, const char *table_name, const char *attr_
 	goto error;
 
     /* Add the specified attribute to it */
-    attr_id = H5Acreate(dset_id, attr_name, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT);
+    attr_id = H5Acreate2(dset_id, attr_name, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT);
     if (attr_id < 0)
 	goto error;
 
