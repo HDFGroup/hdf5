@@ -94,7 +94,7 @@ case "$cxx_vendor-$cxx_version" in
     esac
 
     # General (copied from H5_CFLAGS)
-    H5_CXXFLAGS="$H5_CXXFLAGS $arch -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wmissing-declarations -Wredundant-decls -Winline"
+    H5_CXXFLAGS="$H5_CXXFLAGS $arch -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wredundant-decls -Winline"
 
     # C++-specific
     H5_CXXFLAGS="$H5_CXXFLAGS -Wsign-promo -Woverloaded-virtual -Wold-style-cast -Weffc++ -Wreorder -Wnon-virtual-dtor -Wctor-dtor-privacy -Wabi"
