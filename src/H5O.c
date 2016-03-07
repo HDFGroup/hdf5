@@ -112,9 +112,9 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_EFL,		/*0x0007 Data storage -- external data files */
     H5O_MSG_LAYOUT,		/*0x0008 Data Layout			*/
 #ifdef H5O_ENABLE_BOGUS
-    H5O_MSG_BOGUS,		/*0x0009 "Bogus" (for testing)		*/
+    H5O_MSG_BOGUS_VALID,	/*0x0009 "Bogus valid" (for testing)	*/
 #else /* H5O_ENABLE_BOGUS */
-    NULL,			/*0x0009 "Bogus" (for testing)		*/
+    NULL,			/*0x0009 "Bogus valid" (for testing)	*/
 #endif /* H5O_ENABLE_BOGUS */
     H5O_MSG_GINFO,		/*0x000A Group information		*/
     H5O_MSG_PLINE,		/*0x000B Data storage -- filter pipeline */
@@ -131,6 +131,11 @@ const H5O_msg_class_t *const H5O_msg_class_g[] = {
     H5O_MSG_REFCOUNT,		/*0x0016 Object's ref. count		*/
     H5O_MSG_FSINFO,		/*0x0017 Free-space manager info message */
     H5O_MSG_UNKNOWN,		/*0x0018 Placeholder for unknown message */
+#ifdef H5O_ENABLE_BOGUS
+    H5O_MSG_BOGUS_INVALID, 	/*0x0019 "Bogus invalid" (for testing) 	*/
+#else /* H5O_ENABLE_BOGUS */
+    NULL,                      /*0x0019 "Bogus invalid" (for testing)  	*/
+#endif /* H5O_ENABLE_BOGUS */
 };
 
 /* Declare a free list to manage the H5O_t struct */
@@ -2261,9 +2266,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
+H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned bogus_id, unsigned mesg_flags)
 {
     size_t	idx;                /* Local index variable */
+    H5O_msg_class_t *type;	    /* Message class type */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2273,7 +2279,8 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
 
     /* Look for existing message */
     for(idx = 0; idx < oh->nmesgs; idx++)
-	if(H5O_MSG_BOGUS == oh->mesg[idx].type)
+	if(H5O_MSG_BOGUS_VALID == oh->mesg[idx].type || 
+	   H5O_MSG_BOGUS_INVALID == oh->mesg[idx].type)
             break;
 
     /* Create a new message */
@@ -2287,8 +2294,15 @@ H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags)
         /* Update the native value */
         bogus->u = H5O_BOGUS_VALUE;
 
+	if(bogus_id == H5O_BOGUS_VALID_ID)
+	    type = H5O_MSG_BOGUS_VALID;
+	else if(bogus_id == H5O_BOGUS_INVALID_ID)
+	    type = H5O_MSG_BOGUS_INVALID;
+	else
+	    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID for 'bogus' message")
+
         /* Allocate space in the object header for bogus message */
-	if(H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_BOGUS, &mesg_flags, bogus, &idx) < 0)
+	if(H5O_msg_alloc(f, dxpl_id, oh, type, &mesg_flags, bogus, &idx) < 0)
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for 'bogus' message")
 
         /* Point to "bogus" information (take it over) */

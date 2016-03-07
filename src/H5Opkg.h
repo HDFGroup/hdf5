@@ -544,11 +544,13 @@ H5_DLLVAR const H5O_msg_class_t H5O_MSG_EFL[1];
 H5_DLLVAR const H5O_msg_class_t H5O_MSG_LAYOUT[1];
 
 #ifdef H5O_ENABLE_BOGUS
-/* "Bogus" Message. (0x0009) */
+/* "Bogus valid" Message. (0x0009) */
+/* "Bogus invalid" Message. (0x0019) */
 /*
  * Used for debugging - should never be found in valid HDF5 file.
  */
-H5_DLLVAR const H5O_msg_class_t H5O_MSG_BOGUS[1];
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_BOGUS_VALID[1];
+H5_DLLVAR const H5O_msg_class_t H5O_MSG_BOGUS_INVALID[1];
 #endif /* H5O_ENABLE_BOGUS */
 
 /* Group Information Message. (0x000a) */
