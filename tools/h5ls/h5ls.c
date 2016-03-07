@@ -973,7 +973,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
 
         /* Release resources */
         for(i = 0; i < (unsigned)nmembs; i++)
-            HDfree(name[i]);
+            H5free_memory(name[i]);
         HDfree(name);
         HDfree(value);
     }
@@ -1848,6 +1848,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                 } /* end if */
                 break;
             default:
+                HDassert(0);
                 break;
         }
         /* Print total raw storage size */

@@ -102,6 +102,12 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tindicessub3.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tindicessub4.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tindicesyes.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tints4dims.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tints4dimsBlock2.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tints4dimsBlockEq.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tints4dimsCount2.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tints4dimsCountEq.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tints4dimsStride2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tintsattrs.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tlarge_objname.ddl
       #${HDF5_TOOLS_SRC_DIR}/testfiles/tldouble.ddl
@@ -242,6 +248,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tgrp_comments.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/thlink.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/thyperslab.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tints4dims.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tintsattrs.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tlarge_objname.h5
       #${HDF5_TOOLS_SRC_DIR}/testfiles/tldouble.h5
@@ -911,6 +918,18 @@
           texceedsubblock.out.err
           tindicesyes.out
           tindicesyes.out.err
+          tints4dims.out
+          tints4dims.out.err
+          tints4dimsBlock2.out
+          tints4dimsBlock2.out.err
+          tints4dimsBlockEq.out
+          tints4dimsBlockEq.out.err
+          tints4dimsCount2.out
+          tints4dimsCount2.out.err
+          tints4dimsCountEq.out
+          tints4dimsCountEq.out.err
+          tints4dimsStride2.out
+          tints4dimsStride2.out.err
           tintsattrs.out
           tintsattrs.out.err
           tlarge_objname.out
@@ -1231,6 +1250,12 @@
   ADD_H5_TEST (tall-5s 0 --enable-error-stack -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5)
   ADD_H5_TEST (tdset-3s 0 --enable-error-stack -d "/dset1[1,1;;;]" tdset.h5)
   ADD_H5_TEST (tno-subset 0 --enable-error-stack --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5)
+
+  ADD_H5_TEST (tints4dimsCount2 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -c 2,2,2,2 tints4dims.h5)
+  ADD_H5_TEST (tints4dimsBlock2 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -c 1,1,1,1 -k 2,2,2,2 tints4dims.h5)
+  ADD_H5_TEST (tints4dimsStride2 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,2,2 -c 2,2,2,2 tints4dims.h5)
+  ADD_H5_TEST (tints4dimsCountEq 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,1,1 -k 1,2,1,1 -c 2,2,4,4 tints4dims.h5)
+  ADD_H5_TEST (tints4dimsBlockEq 0 --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,1,1 -c 2,2,1,1 -k 1,2,4,4 tints4dims.h5)
 
   # test printing characters in ASCII instead of decimal
   ADD_H5_TEST (tchar1 0 --enable-error-stack -r tchar.h5)

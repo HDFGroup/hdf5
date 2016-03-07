@@ -359,6 +359,8 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_
             }
             break;
 
+        case H5O_TYPE_UNKNOWN:
+        case H5O_TYPE_NTYPES:
         default:
             error_msg("unknown object \"%s\"\n", name);
             h5tools_setstatus(EXIT_FAILURE);
@@ -521,6 +523,11 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_
             HDfree(targbuf);
             break;
 
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_MAX:
+            HDassert(0);
+            /* fall through */
+        case H5L_TYPE_HARD:
         default:
         {
             char linkxid[100];
@@ -976,9 +983,13 @@ xml_print_datatype(hid_t type, unsigned in_group)
                 h5tools_str_append(&buffer, "BE");
                 break;
             case H5T_ORDER_VAX:
+                case H5T_ORDER_MIXED:
+                case H5T_ORDER_NONE:
+                case H5T_ORDER_ERROR:
             default:
                 h5tools_str_append(&buffer, "ERROR_UNKNOWN");
-            }
+                    break;
+            } /* end switch */
             
             h5tools_str_append(&buffer, "\" Sign=\"");
             
@@ -989,9 +1000,12 @@ xml_print_datatype(hid_t type, unsigned in_group)
             case H5T_SGN_2:
                 h5tools_str_append(&buffer, "true");
                 break;
+                case H5T_SGN_ERROR:
+                case H5T_NSGN:
             default:
                 h5tools_str_append(&buffer, "ERROR_UNKNOWN");
-            }
+                    break;
+            } /* end switch */
             
             h5tools_str_append(&buffer, "\" Size=\"");
             sz = H5Tget_size(type);
@@ -1042,9 +1056,12 @@ xml_print_datatype(hid_t type, unsigned in_group)
             case H5T_ORDER_VAX:
                 h5tools_str_append(&buffer, "VAX");
                 break;
+                case H5T_ORDER_MIXED:
+                case H5T_ORDER_NONE:
+                case H5T_ORDER_ERROR:
             default:
                 h5tools_str_append(&buffer, "ERROR_UNKNOWN");
-            }
+            } /* end switch */
             
             h5tools_str_append(&buffer, "\" Size=\"");
             sz = H5Tget_size(type);
@@ -1179,9 +1196,12 @@ xml_print_datatype(hid_t type, unsigned in_group)
                 h5tools_str_append(&buffer, "BE");
                 break;
             case H5T_ORDER_VAX:
+                case H5T_ORDER_MIXED:
+                case H5T_ORDER_NONE:
+                case H5T_ORDER_ERROR:
             default:
                 h5tools_str_append(&buffer, "ERROR_UNKNOWN");
-            }
+            } /* end switch */
             
             size = H5Tget_size(type);
             h5tools_str_append(&buffer, "\" Size=\"%lu\"/>", (unsigned long)size);
@@ -1516,6 +1536,10 @@ xml_print_datatype(hid_t type, unsigned in_group)
             H5Tclose(super);
             break;
 
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+            HDassert(0);
+            /* fall through */
         default:
             ctx.need_prefix = TRUE;
             h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
@@ -1813,6 +1837,7 @@ xml_dump_dataspace(hid_t space)
        break;
 #endif /* TMP */
 
+    case H5S_NULL:
     case H5S_NO_CLASS:
     default:
         ctx.need_prefix = TRUE;
@@ -2246,6 +2271,10 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED
 
                 dump_function_table->dump_data_function(attr_id, ATTRIBUTE_DATA, NULL, 0);
                 break;
+            case H5T_NO_CLASS:
+            case H5T_NCLASSES:
+                HDassert(0);
+                /* fall through */
             default:
                 ctx.need_prefix = TRUE;
                 h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
@@ -2938,9 +2967,9 @@ static int
 xml_print_refs(hid_t did, int source)
 {
     herr_t      e;
-    hid_t       type;
-    hid_t       space;
-    hssize_t    ssiz;
+    hid_t       type    = -1;
+    hid_t       space   = -1;
+    hssize_t    ssiz    = -1;
     hsize_t     i;
     size_t      tsiz;
     hobj_ref_t *refbuf = NULL;
@@ -3095,11 +3124,11 @@ static int
 xml_print_strs(hid_t did, int source)
 {
     herr_t      e;
-    hid_t       type;
-    hid_t       space;
-    hssize_t    ssiz;
+    hid_t       type    = -1;
+    hid_t       space   = -1;
+    hssize_t    ssiz    = -1;
     htri_t      is_vlstr = FALSE;
-    size_t      tsiz;
+    size_t      tsiz    = 0;
     size_t      i;
     size_t      str_size = 0;
     char       *bp = NULL;
@@ -3563,7 +3592,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
 
             /* Render the element */
             h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "\"%f\"", *(float *) buf);
+            h5tools_str_append(&buffer, "\"%f\"", (double)*(float *)buf);
             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
             ctx.need_prefix = TRUE;
@@ -3701,6 +3730,12 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
             h5tools_str_append(&buffer, "<%sNoData />", xmlnsprefix);
             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
             break;
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+            HDassert(0);
+            /* fall through */
+        case H5T_STRING:
+        case H5T_REFERENCE:
         default:
             ctx.need_prefix = TRUE;
             h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
@@ -4013,10 +4048,13 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * s
     case H5D_FILL_TIME_IFSET:
         h5tools_str_append(&buffer, "FillIfSet");
         break;
+        case H5D_FILL_TIME_ERROR:
+            HDassert(0);
+            /* fall through */
     default:
         h5tools_str_append(&buffer, "?");
         break;
-    }
+    } /* end switch */
     h5tools_str_append(&buffer, "\" ");
     H5Pget_alloc_time(dcpl, &at);
     h5tools_str_append(&buffer, "AllocationTime=\"");
@@ -4031,10 +4069,13 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * s
         h5tools_str_append(&buffer, "Late");
         break;
     case H5D_ALLOC_TIME_DEFAULT:
+        case H5D_ALLOC_TIME_ERROR:
+            HDassert(0);
+            /* fall through */
     default:
         h5tools_str_append(&buffer, "?");
         break;
-    }
+    } /* end switch */
     h5tools_str_append(&buffer, "\"");
     h5tools_str_append(&buffer, ">");
     h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
@@ -4255,6 +4296,11 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * s
             ctx.indent_level--;
             dump_indent -= COL;
             break;
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+            HDassert(0);
+            /* fall through */
+
         default:
             ctx.need_prefix = TRUE;
             h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);

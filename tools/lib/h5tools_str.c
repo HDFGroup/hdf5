@@ -1058,6 +1058,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                                     h5tools_str_append(str, H5_TOOLS_DATATYPE);
                                     break;
 
+                                case H5O_TYPE_UNKNOWN:
+                                case H5O_TYPE_NTYPES:
                                 default:
                                     h5tools_str_append(str, "%u-", (unsigned) oi.type);
                                     break;
@@ -1187,7 +1189,9 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 }
                 break;
 
-            default:
+            case H5T_TIME:
+            case H5T_BITFIELD:
+            case H5T_OPAQUE:
                 {
                     /* All other types get printed as hexadecimal */
                     size_t i;
@@ -1199,6 +1203,12 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             h5tools_str_append(str, "%s%02x", i ? ":" : "", ucp_vp[i]);
                     }
                 }
+                break;
+
+            case H5T_NO_CLASS:
+            case H5T_NCLASSES:
+            default:
+                h5tools_str_append(str, "invalid datatype");
                 break;
         } /* end switch */
     }
@@ -1388,13 +1398,12 @@ h5tools_str_replace ( const char *string, const char *substr, const char *replac
 	char *head = NULL;
      
 	if ( substr == NULL || replacement == NULL ) 
-		return HDstrdup (string);
-		
+	    return HDstrdup (string);
 	newstr = HDstrdup (string);
 	head = newstr;
 	while ( (tok = HDstrstr ( head, substr ))){
 		oldstr = newstr;
-		newstr = HDmalloc ( HDstrlen ( oldstr ) - HDstrlen ( substr ) + HDstrlen ( replacement ) + 1 );
+		newstr = (char *)HDmalloc( HDstrlen( oldstr ) - HDstrlen( substr ) + HDstrlen( replacement ) + 1 );
 
         if ( newstr == NULL ){
 			HDfree (oldstr);

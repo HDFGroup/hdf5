@@ -65,7 +65,9 @@ New Features
     - Cmakehdf5: added --with-szlib to support szip library support; and
       --enable/disable-verbose to display all cmake process output.
       (AKC, 2015/11/16, HDFFV-8932 and DAILYTEST-195)
-      
+
+     - CMake minimum is now 3.1.0. (ADB 2015/11/14)
+
     Library
     -------
     - None
@@ -164,7 +166,29 @@ Bug Fixes since HDF5-1.8.16
 
     Tools
     -----
-    - None
+    - h5dump subsetting fixed for dims greater then two.
+
+      When a dataset has more then two dimensions, subsetting would incorrectly
+      calculate the data that needed to be displayed.
+      Added in block and stride calculation that account for dimensions greater
+      then two.  NOTE: lines that have line breaks inserted because of display
+      length calculations, may have index info that is incorrect until the next
+      dimension break.
+
+      (ADB, 2016/03/07, HDFFV-9698)
+
+    - h5dump issue with argument segfault.
+
+      When an argument with an optional value was at the end of the command line
+      with a value, h5dump would crash. Reworked check for remaining arguments.
+
+      (ADB, 2016/03/07, HDFFV-9570)
+
+    - h5dump issue with default fill value.
+
+      Added all default cases of fill value to display of fill value..
+
+      (ADB, 2016/03/07, HDFFV-9241)
 
     Fortran API
     ------------
@@ -238,13 +262,13 @@ They are built with the configure process unless specified otherwise.
 
     Windows 7                     Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+                                  Visual Studio 2015  (cmake)
                                   Cygwin(CYGWIN_NT-6.1 2.2.1(0.289/5/3) gcc(4.9.3) compiler and gfortran)
                                   (cmake and autotools)
 
     Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2015 w/ Intel Fortran 16 (cmake)
+                                  Visual Studio 2015  (cmake)
 
     Windows 8.1                   Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)

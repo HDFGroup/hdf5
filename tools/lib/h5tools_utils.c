@@ -177,7 +177,7 @@ warn_msg(const char *fmt, ...)
 /*-------------------------------------------------------------------------
  * Function:  help_ref_msg
  *
- * Purpose: Print a message to refer help page 
+ * Purpose: Print a message to refer help page
  *
  * Return:  Nothing
  *
@@ -224,7 +224,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
         /* check for more flag-like tokens */
         if (opt_ind >= argc || argv[opt_ind][0] != '-' || argv[opt_ind][1] == '\0') {
             return EOF;
-        } 
+        }
         else if (HDstrcmp(argv[opt_ind], "--") == 0) {
             opt_ind++;
             return EOF;
@@ -248,10 +248,10 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
                         opt_arg = &arg[len + 1];
                     }
                     else if (l_opts[i].has_arg != optional_arg) {
-                        if (opt_ind < (argc - 1)) 
+                        if (opt_ind < (argc - 1))
                             if (argv[opt_ind + 1][0] != '-')
                                 opt_arg = argv[++opt_ind];
-                    } 
+                    }
                     else if (l_opts[i].has_arg == require_arg) {
                         if (opt_err)
                             HDfprintf(rawerrorstream,
@@ -262,7 +262,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
                     }
                     else
                         opt_arg = NULL;
-                } 
+                }
                 else {
                     if (arg[len] == '=') {
                         if (opt_err)
@@ -288,7 +288,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
         opt_ind++;
         sp = 1;
-    } 
+    }
     else {
         register char *cp;    /* pointer into current token */
 
@@ -313,7 +313,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
             if (argv[opt_ind][sp + 1] != '\0') {
                 /* flag value is rest of current token */
                 opt_arg = &argv[opt_ind++][sp + 1];
-            } 
+            }
             else if (++opt_ind >= argc) {
                 if (opt_err)
                     HDfprintf(rawerrorstream,
@@ -321,7 +321,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
                             argv[0], opt_opt);
 
                 opt_opt = '?';
-            } 
+            }
             else {
                 /* flag value is next token */
                 opt_arg = argv[opt_ind++];
@@ -334,8 +334,13 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
             /* check the next argument */
             opt_ind++;
             /* we do have an extra argument, check if not last */
-            if ( argv[opt_ind][0] != '-' && (opt_ind+1) < argc ) {
-                opt_arg = argv[opt_ind++];
+            if ( (opt_ind+1) < argc ) {
+                if ( argv[opt_ind][0] != '-' ) {
+                    opt_arg = argv[opt_ind++];
+                }
+                else {
+                    opt_arg = NULL;
+                }
             }
             else {
                 opt_arg = NULL;
@@ -376,7 +381,7 @@ indentation(int x)
     if (x < h5tools_nCols) {
         while (x-- > 0)
             PRINTVALSTREAM(rawoutstream, " ");
-    } 
+    }
     else {
         HDfprintf(rawerrorstream, "error: the indentation exceeds the number of cols.\n");
         HDexit(1);
@@ -482,11 +487,10 @@ dump_table(char* tablename, table_t *table)
     unsigned u;
 
     PRINTSTREAM(rawoutstream,"%s: # of entries = %d\n", tablename,table->nobjs);
-    for (u = 0; u < table->nobjs; u++) {
+    for (u = 0; u < table->nobjs; u++)
         PRINTSTREAM(rawoutstream,"%a %s %d %d\n", table->objs[u].objno,
            table->objs[u].objname,
            table->objs[u].displayed, table->objs[u].recorded);
-    }
 }
 
 
@@ -613,7 +617,10 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
             } /* end if */
             break;
 
+        case H5O_TYPE_UNKNOWN:
+        case H5O_TYPE_NTYPES:
         default:
+            HDassert(0);
             break;
     } /* end switch */
 
@@ -719,7 +726,7 @@ tmpfile(void)
 /*-------------------------------------------------------------------------
  * Function: H5tools_get_symlink_info
  *
- * Purpose: Get symbolic link (soft, external) info and its target object type 
+ * Purpose: Get symbolic link (soft, external) info and its target object type
             (dataset, group, named datatype) and path, if exist
  *
  * Patameters:
@@ -727,9 +734,9 @@ tmpfile(void)
  *  - [IN]  linkpath : link path
  *  - [OUT] link_info: returning target object info (h5tool_link_info_t)
  *
- * Return: 
- *   2 : given pathname is object 
- *   1 : Succed to get link info.  
+ * Return:
+ *   2 : given pathname is object
+ *   1 : Succed to get link info.
  *   0 : Detected as a dangling link
  *  -1 : H5 API failed.
  *
@@ -793,7 +800,7 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
     } /* end if */
 
     /*-----------------------------------------------------
-     * if link type is external link use different lapl to 
+     * if link type is external link use different lapl to
      * follow object in other file
      */
     if(link_info->linfo.type == H5L_TYPE_EXTERNAL) {
@@ -814,7 +821,7 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
          */
          /* check if target object exist */
         l_ret = H5Oexists_by_name(file_id, linkpath, lapl);
-        
+
         /* detect dangling link */
         if(l_ret == FALSE) {
             ret = 0;
@@ -822,7 +829,7 @@ H5tools_get_symlink_info(hid_t file_id, const char * linkpath, h5tool_link_info_
         } /* end if */
         /* function failed */
         else if(l_ret < 0)
-            goto out;    
+            goto out;
 
         /* get target object info */
         if(H5Oget_info_by_name(file_id, linkpath, &trg_oinfo, lapl) < 0) {
@@ -887,8 +894,8 @@ int h5tools_getstatus(void)
 }
 
 /*-----------------------------------------------------------
- * PURPOSE : 
- * if environment variable H5TOOLS_BUFSIZE is set, 
+ * PURPOSE :
+ * if environment variable H5TOOLS_BUFSIZE is set,
  * update H5TOOLS_BUFSIZE and H5TOOLS_MALLOCSIZE from the env
  * This can be called from each tools main() as part of initial act.
  * Note: this is more of debugging purpose for now.
@@ -905,11 +912,11 @@ int h5tools_getenv_update_hyperslab_bufsize(void)
         hyperslab_bufsize_mb = HDstrtol(env_str, (char**)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
         {
-            
-            /* TODO: later when pubilshed  
+
+            /* TODO: later when pubilshed
             HDfprintf(rawerrorstream,"Error: Invalid environment variable \"H5TOOLS_BUFSIZE\" : %s\n", env_str);
             */
-            
+
             goto error;
         }
 

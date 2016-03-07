@@ -377,6 +377,8 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
             }
             break;
 
+        case H5O_TYPE_UNKNOWN:
+        case H5O_TYPE_NTYPES:
         default:
             error_msg("unknown object \"%s\"\n", name);
             h5tools_setstatus(EXIT_FAILURE);
@@ -509,6 +511,11 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
             HDfree(targbuf);
             break;
 
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_MAX:
+            HDassert(0);
+            /* fall through */
+        case H5L_TYPE_HARD:
         default:
             ctx.need_prefix = TRUE;
             h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
@@ -1054,7 +1061,10 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
                 }
                 break;
 
+            case H5T_NO_CLASS:
+            case H5T_NCLASSES:
             default:
+                HDassert(0);
                 break;
             } /* end switch */
         } /* for(i=0;i<data_loop;i++) */
@@ -1497,8 +1507,8 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H
 {
     hid_t  oid = -1;
     hid_t  attr_id = -1;
-    char *obj_name;
-    char *attr_name;
+    char *obj_name      = NULL;
+    char *attr_name     = NULL;
     int j;
     h5tools_str_t buffer;          /* string into which to render   */
     h5tools_context_t ctx;            /* print context  */
@@ -1915,6 +1925,11 @@ handle_links(hid_t fid, const char *links, void H5_ATTR_UNUSED * data, int H5_AT
             end_obj(h5tools_dump_header_format->extlinkend, h5tools_dump_header_format->extlinkblockend);
             break;
 
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_MAX:
+            HDassert(0);
+            /* fall through */
+        case H5L_TYPE_HARD:
         default:
             begin_obj(h5tools_dump_header_format->udlinkbegin, links, h5tools_dump_header_format->udlinkblockbegin);
             PRINTVALSTREAM(rawoutstream, "\n");
@@ -2082,6 +2097,8 @@ dump_extlink(hid_t group, const char *linkname, const char *objname)
             case H5O_TYPE_NAMED_DATATYPE:
                 handle_datatypes(group, linkname, NULL, 0, objname);
                 break;
+            case H5O_TYPE_UNKNOWN:
+            case H5O_TYPE_NTYPES:
             default:
                 h5tools_setstatus(EXIT_FAILURE);
         }

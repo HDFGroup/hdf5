@@ -38,16 +38,17 @@ typedef struct dump_functions_t {
 } dump_functions;
 
 /* List of table structures.  There is one table structure for each file */
-typedef struct h5dump_table_list_t {
-    size_t      nalloc;
-    size_t      nused;
-    struct {
+typedef struct h5dump_table_items_t {
         unsigned long   fileno;         /* File number that these tables refer to */
         hid_t           oid;            /* ID of an object in this file, held open so fileno is consistent */
         table_t         *group_table;   /* Table of groups */
         table_t         *dset_table;    /* Table of datasets */
         table_t         *type_table;    /* Table of datatypes */
-    } *tables;
+} h5dump_table_items_t;
+typedef struct h5dump_table_list_t {
+    size_t                  nalloc;
+    size_t                  nused;
+    h5dump_table_items_t    *tables;
 } h5dump_table_list_t;
 
 h5dump_table_list_t  table_list = {0, 0, NULL};

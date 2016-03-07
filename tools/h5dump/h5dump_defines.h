@@ -27,7 +27,8 @@
     do {                                                                         \
         if ((name)) {                                                            \
             PRINTSTREAM(rawoutstream, "%s \"%s\" %s", (obj), (name), (begin));   \
-        } else {                                                                 \
+        }                                                                   \
+        else {                                                              \
             PRINTSTREAM(rawoutstream, "%s %s", (obj), (begin));                  \
         }                                                                        \
     } while(0);
@@ -36,13 +37,11 @@
     do {                                               \
         if(HDstrlen(end)) {                            \
             PRINTSTREAM(rawoutstream, "%s", end);      \
-            if(HDstrlen(obj)) {                        \
+            if(HDstrlen(obj))                                               \
                 PRINTVALSTREAM(rawoutstream, " ");     \
             }                                          \
-        }                                              \
-        if(HDstrlen(obj)) {                            \
+        if(HDstrlen(obj))                                                   \
             PRINTSTREAM(rawoutstream, "%s", obj);      \
-        }                                              \
     } while(0);
 
 

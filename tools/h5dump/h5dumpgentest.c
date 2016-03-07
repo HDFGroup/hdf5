@@ -110,6 +110,7 @@
 #define FILE78  "tscalarintattrsize.h5"
 #define FILE79  "tintsattrs.h5"
 #define FILE80  "tbitnopaque.h5"
+#define FILE81  "tints4dims.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -342,6 +343,13 @@ typedef struct s1_t {
 #define F77_LENGTH      64
 
 #define F80_DIM32      32
+
+#define F81_DATASETNAME   "FourDimInts"
+#define F81_RANK        4
+#define F81_WDIM        10
+#define F81_XDIM        8
+#define F81_YDIM        6
+#define F81_ZDIM        4
 
 static void
 gent_group(void)
@@ -9682,6 +9690,41 @@ static void gent_bitnopaquefields(void)
     H5Fclose(file);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    gent_intsfourdims
+ *
+ * Purpose:     Generate a file to be used in the h5dump subsetting tests.
+ *   One datasets of unsigned int types are created in four dimensions 2,4,6,10.
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_intsfourdims(void)
+{
+    hid_t fid, dataset, space, tid;
+    hsize_t dims[F81_RANK];
+    uint32_t dset1[F81_ZDIM][F81_YDIM][F81_XDIM][F81_WDIM];
+    unsigned int i, j, k, l;
+
+    fid = H5Fcreate(FILE81, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Dataset of 32 bits unsigned int */
+    dims[0] = F81_ZDIM; dims[1] = F81_YDIM; dims[2] = F81_XDIM; dims[3] = F81_WDIM;
+    space = H5Screate_simple(F81_RANK, dims, NULL);
+    dataset = H5Dcreate2(fid, F81_DATASETNAME, H5T_STD_U32LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    for(i = 0; i < F81_ZDIM; i++)
+        for(j = 0; j < F81_YDIM; j++)
+            for(k = 0; k < F81_XDIM; k++)
+                for(l = 0; l < F81_WDIM; l++)
+            dset1[i][j][k][l] = i*F81_YDIM*F81_XDIM*F81_WDIM + j*F81_XDIM*F81_WDIM + k*F81_WDIM + l;
+
+    H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset1);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    H5Fclose(fid);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -9772,6 +9815,8 @@ int main(void)
     gent_intattrscalars();
     gent_intsattrs();
     gent_bitnopaquefields();
+
+    gent_intsfourdims();
 
     return 0;
 }

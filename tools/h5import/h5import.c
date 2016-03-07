@@ -265,7 +265,7 @@ err:
 static int gtoken(char *s)
 {
     size_t      len;
-    int         token;
+    int         token = ERR;
 
     const char *err1 = "Illegal argument: %s.\n";
 
@@ -995,16 +995,16 @@ out:
  */
 static int processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
 {
-    hid_t   group_id;
-    hid_t   dset_id;
-    hid_t   space_id;
-    hid_t   mspace_id;
-    hid_t   type_id;
-    hid_t   handle;
-    char   *str1 = NULL;
-    char   *str2 = NULL;
-    char   *str3 = NULL;
-    char    str[1024] = "";
+    hid_t   group_id    = -1;
+    hid_t   dset_id     = -1;
+    hid_t   space_id    = -1;
+    hid_t   mspace_id   = -1;
+    hid_t   type_id     = -1;
+    hid_t   handle      = -1;
+    char   *str1        = NULL;
+    char   *str2        = NULL;
+    char   *str3        = NULL;
+    char    str[1024]   = "";
     int     j;
     hsize_t     line;
 

@@ -34,6 +34,10 @@ void      dump_fcontents(hid_t fid);
 /* callback function used by H5Aiterate2() */
 herr_t    dump_attr_cb(hid_t loc_id, const char *attr_name, const H5A_info_t *info, void *_op_data);
 
+/* other iteration functions */
+void link_iteration(hid_t gid, unsigned crt_order_flags);
+void attr_iteration(hid_t gid, unsigned attr_crt_order_flags);
+
 void handle_paths(hid_t fid, const char *path_name, void *data, int pe, const char *display_name);
 void handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *display_name);
 void handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED * data, int H5_ATTR_UNUSED pe, const char H5_ATTR_UNUSED *display_name);

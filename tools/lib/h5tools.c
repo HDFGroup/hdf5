@@ -1498,14 +1498,24 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem,  hsize_t
                 }
             }
             break;
-        default:
+
+        case H5T_TIME:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
             for (block_index = 0; block_index < block_nelmts; block_index++) {
                 mem = ((unsigned char*)_mem) + block_index * size;
                 if (size != HDfwrite(mem, sizeof(char), size, stream))
                     H5E_THROW(FAIL, H5E_tools_min_id_g, "fwrite failed");
-            }
+            } /* end for */
             break;
-    }
+
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            /* Badness */
+            H5E_THROW(FAIL, H5E_tools_min_id_g, "bad type class");
+            break;
+    } /* end switch */
 
 CATCH
     return ret_value;
@@ -1631,8 +1641,8 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
     hsize_t      alloc_size;
     hsize_t     *ptdata;
     int          ndims;
-    hid_t        dtype;
-    hid_t        type_id;
+    hid_t        dtype = -1;
+    hid_t        type_id = -1;
 
     if((snblocks = H5Sget_select_hyper_nblocks(region_space)) <= 0)
         H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_select_hyper_nblocks failed");
@@ -1662,10 +1672,10 @@ render_bin_output_region_blocks(hid_t region_space, hid_t region_id,
  done:
     HDfree(ptdata);
 
-    if(H5Tclose(type_id) < 0)
+    if(type_id > 0 && H5Tclose(type_id) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
 
-    if(H5Tclose(dtype) < 0)
+    if(dtype > 0 && H5Tclose(dtype) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
 
     H5_LEAVE(TRUE)
@@ -1755,8 +1765,8 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
     HERR_INIT(hbool_t, TRUE)
     hssize_t npoints;
     int      ndims;
-    hid_t    dtype;
-    hid_t    type_id;
+    hid_t    dtype = -1;
+    hid_t    type_id = -1;
 
     if((npoints = H5Sget_select_elem_npoints(region_space)) <= 0)
         H5E_THROW(FALSE, H5E_tools_min_id_g, "H5Sget_select_elem_npoints failed");
@@ -1775,10 +1785,10 @@ render_bin_output_region_points(hid_t region_space, hid_t region_id,
             stream, container, ndims, type_id, npoints);
 
  done:
-    if(H5Tclose(type_id) < 0)
+    if(type_id > 0 && H5Tclose(type_id) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
 
-    if(H5Tclose(dtype) < 0)
+    if(dtype > 0 && H5Tclose(dtype) < 0)
         HERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
 
     H5_LEAVE(ret_value)

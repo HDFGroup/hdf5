@@ -242,7 +242,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -o F, --output=F     Output raw data into file F\n");
     PRINTVALSTREAM(rawoutstream, "     -b B, --binary=B     Binary file output, of form B\n");
     PRINTVALSTREAM(rawoutstream, "     -O F, --ddl=F        Output ddl text into file F\n");
-    PRINTVALSTREAM(rawoutstream, "                          Do not use filename F to suppress ddl display\n");
+    PRINTVALSTREAM(rawoutstream, "                          Use blank(empty) filename F to suppress ddl display\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Object Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -a P, --attribute=P  Print the specified attribute\n");
     PRINTVALSTREAM(rawoutstream, "                          If an attribute name contains a slash (/), escape the\n");
@@ -389,10 +389,10 @@ table_list_add(hid_t oid, unsigned long file_no)
 
     /* Allocate space if necessary */
     if(table_list.nused == table_list.nalloc) {
-        void        *tmp_ptr;
+        h5dump_table_items_t    *tmp_ptr;
 
         table_list.nalloc = MAX(1, table_list.nalloc * 2);
-        if(NULL == (tmp_ptr = HDrealloc(table_list.tables, table_list.nalloc * sizeof(table_list.tables[0]))))
+        if(NULL == (tmp_ptr = (h5dump_table_items_t *)HDrealloc(table_list.tables, table_list.nalloc * sizeof(table_list.tables[0]))))
             return -1;
         table_list.tables = tmp_ptr;
     } /* end if */

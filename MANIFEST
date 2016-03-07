@@ -1394,6 +1394,13 @@
 ./tools/testfiles/tindicessub3.ddl
 ./tools/testfiles/tindicessub4.ddl
 ./tools/testfiles/tindicessub1.ddl
+./tools/testfiles/tints4dims.ddl
+./tools/testfiles/tints4dimsBlock2.ddl
+./tools/testfiles/tints4dimsBlockEq.ddl
+./tools/testfiles/tints4dimsCount2.ddl
+./tools/testfiles/tints4dimsCountEq.ddl
+./tools/testfiles/tints4dimsStride2.ddl
+./tools/testfiles/tints4dims.h5
 ./tools/testfiles/tintsattrs.ddl
 ./tools/testfiles/tintsattrs.h5
 ./tools/testfiles/tlarge_objname.ddl

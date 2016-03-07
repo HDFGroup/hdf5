@@ -11,7 +11,7 @@ usage: h5dump [OPTIONS] files
      -o F, --output=F     Output raw data into file F
      -b B, --binary=B     Binary file output, of form B
      -O F, --ddl=F        Output ddl text into file F
-                          Do not use filename F to suppress ddl display
+                          Use blank(empty) filename F to suppress ddl display
 --------------- Object Options ---------------
      -a P, --attribute=P  Print the specified attribute
                           If an attribute name contains a slash (/), escape the
