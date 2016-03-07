@@ -357,13 +357,6 @@ CONTAINS
           end do
 
           !
-          !Initialize FORTRAN predifined datatypes
-          !
-!          CALL h5init_types_f(error)
-!               CALL check("h5init_types_f",error,total_error)
-
-
-          !
           !Create file "reopen.h5" using default properties.
           !
           CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)

@@ -418,6 +418,8 @@ H5_DLL herr_t H5Pset_append_flush(hid_t plist_id, unsigned ndims,
     const hsize_t boundary[], H5D_append_cb_t func, void *udata);
 H5_DLL herr_t H5Pget_append_flush(hid_t plist_id, unsigned dims,
     hsize_t boundary[], H5D_append_cb_t *func, void **udata);
+H5_DLL herr_t H5Pset_efile_prefix(hid_t dapl_id, const char* prefix);
+H5_DLL ssize_t H5Pget_efile_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
 
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);

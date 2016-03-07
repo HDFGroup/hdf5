@@ -477,7 +477,10 @@ typedef struct H5D_shared_t {
                                          */
         H5D_rdcc_t      chunk;          /* Information about chunked data */
     } cache;
+
     H5D_append_flush_t  append_flush;	/* Append flush property information */
+
+    char                *extfile_prefix; /* expanded external file prefix */
 } H5D_shared_t;
 
 struct H5D_t {
