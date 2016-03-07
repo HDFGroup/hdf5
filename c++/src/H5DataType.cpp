@@ -304,13 +304,16 @@ void DataType::commit(const H5Location& loc, const char* name)
 
 //--------------------------------------------------------------------------
 // Function:	DataType::commit
-///\brief	This is an overloaded member function, kept for backward
-///		compatibility.  It differs from the above function in that it
-///		misses const's.  This wrapper will be removed in future release.
-///\param	loc - IN: A location (file, dataset, datatype, or group)
-///\param	name - IN: Name of the datatype
-///\exception	H5::DataTypeIException
+// Purpose	This is an overloaded member function, kept for backward
+//		compatibility.  It differs from the above function in that it
+//		misses const's.  This wrapper will be removed in future release.
+// Param	loc - IN: A location (file, dataset, datatype, or group)
+// Param 	name - IN: Name of the datatype
+// Exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - Jan, 2007
+// Modification
+//		Planned for removal. -BMR, 2014/04/16
+//		Removed from documentation. -BMR, 2016/03/07
 //--------------------------------------------------------------------------
 void DataType::commit(H5Location& loc, const char* name)
 {
@@ -331,13 +334,16 @@ void DataType::commit(const H5Location& loc, const H5std_string& name)
 
 //--------------------------------------------------------------------------
 // Function:	DataType::commit
-///\brief	This is an overloaded member function, kept for backward
-///		compatibility.  It differs from the above function in that it
-///		misses const's.  This wrapper will be removed in future release.
-///\param	loc - IN: A location (file, dataset, datatype, or group)
-///\param	name - IN: Name of the datatype
-///\exception	H5::DataTypeIException
+// Purpose	This is an overloaded member function, kept for backward
+//		compatibility.  It differs from the above function in that it
+//		misses const's.  This wrapper will be removed in future release.
+// Param 	loc - IN: A location (file, dataset, datatype, or group)
+// Param 	name - IN: Name of the datatype
+// Exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - Jan, 2007
+// Modification
+//		Planned for removal. -BMR, 2014/04/16
+//		Removed from documentation. -BMR, 2016/03/07
 //--------------------------------------------------------------------------
 void DataType::commit(H5Location& loc, const H5std_string& name)
 {
