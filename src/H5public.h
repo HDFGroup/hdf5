@@ -99,8 +99,12 @@ extern "C" {
 				/* Empty string for real releases.           */
 #define H5_VERS_INFO    "HDF5 library version: 1.9.234"      /* Full version string */
 
-#define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
-				        H5_VERS_RELEASE)
+/* LT Version numbers */
+#define LT_VERS_INTERFACE      6
+#define LT_VERS_AGE            0
+#define LT_VERS_REVISION       224
+
+#define H5check()	H5check_interface_compatibility(LT_VERS_INTERFACE, LT_VERS_AGE, LT_VERS_REVISION)
 
 /* macros for comparing the version */
 #define H5_VERSION_GE(Maj,Min,Rel) \
@@ -343,8 +347,13 @@ H5_DLL herr_t H5set_free_list_limits (int reg_global_lim, int reg_list_lim,
                 int blk_list_lim);
 H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum,
 				unsigned *relnum);
+/* Deprecated by H5check_interface_compatibility. Need to keep it because
+ * Fortran API calls it. To be retired later.
+ */
 H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum,
-			       unsigned relnum);
+				unsigned relnum);
+H5_DLL herr_t H5check_interface_compatibility(unsigned interface, unsigned age, \
+				unsigned revision);
 H5_DLL herr_t H5is_library_threadsafe(hbool_t *is_ts);
 H5_DLL herr_t H5free_memory(void *mem);
 H5_DLL void *H5allocate_memory(size_t size, hbool_t clear);
