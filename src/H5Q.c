@@ -2756,6 +2756,7 @@ H5Qapply_multi(size_t loc_count, hid_t *loc_ids, hid_t query_id,
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("i", "z*ii*Iui", loc_count, loc_ids, query_id, result, vcpl_id);
 
     /* Check args and get the query objects */
     if (!loc_count)
