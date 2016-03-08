@@ -2011,7 +2011,6 @@ herr_t H5LTfind_attribute( hid_t loc_id, const char* attr_name )
 }
 
 
-
 /*-------------------------------------------------------------------------
 * Function: H5LT_find_attribute
 *
@@ -2040,6 +2039,37 @@ herr_t
 H5LT_find_attribute( hid_t loc_id, const char* attr_name )
 {
     return H5Aiterate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, find_attr, (void *)attr_name);
+}
+
+
+/*-------------------------------------------------------------------------
+* Function: H5LT_find_attribute
+*
+* Purpose: Inquires if an attribute named attr_name exists attached to the object loc_id.
+*
+* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+*
+* Date: June 21, 2001
+*
+* Comments:
+*  The function uses H5Aiterate2 with the operator function find_attr
+*
+* Return:
+*  Success: The return value of the first operator that
+*              returns non-zero, or zero if all members were
+*              processed with no operator returning non-zero.
+*
+*  Failure: Negative if something goes wrong within the
+*              library, or the negative value returned by one
+*              of the operators.
+*
+*-------------------------------------------------------------------------
+*/
+
+herr_t
+H5LT_find_attribute_ff( hid_t loc_id, const char* attr_name, hid_t rc_id, hid_t estack_id)
+{
+  return H5Aiterate_ff(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, find_attr, (void *)attr_name, rc_id, estack_id);
 }
 
 
@@ -3642,7 +3672,7 @@ out:
 */
 herr_t H5LT_set_attribute_string(hid_t dset_id,
                                  const char *name,
-                                 const char *buf )
+                                 const char *buf)
 {
     hid_t   tid;
     hid_t   sid = -1;
@@ -3655,7 +3685,7 @@ herr_t H5LT_set_attribute_string(hid_t dset_id,
 
     /* the attribute already exists, delete it */
     if(has_attr == 1)
-        if(H5Adelete(dset_id, name) < 0)
+      if(H5Adelete(dset_id, name ) < 0)
             return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -3708,6 +3738,93 @@ out:
     return FAIL;
 
 }
+
+/*-------------------------------------------------------------------------
+* Function: H5LT_set_attribute_string
+*
+* Purpose: creates and writes an attribute named NAME to the dataset DSET_ID
+*
+* Return: FAIL on error, SUCCESS on success
+*
+* Programmer: pvn@ncsa.uiuc.edu
+*
+* Date: January 04, 2005
+*
+* Comments:
+*
+* Modifications:
+*
+*-------------------------------------------------------------------------
+*/
+herr_t H5LT_set_attribute_string_ff(hid_t dset_id,
+                                 const char *name,
+                                 const char *buf, hid_t rc_id, hid_t tr_id, hid_t estack_id  )
+{
+    hid_t   tid;
+    hid_t   sid = -1;
+    hid_t   aid = -1;
+    int     has_attr;
+    size_t  size;
+
+    /* verify if the attribute already exists */
+    has_attr = H5LT_find_attribute_ff(dset_id,name, rc_id, estack_id);
+
+    /* the attribute already exists, delete it */
+    if(has_attr == 1)
+      if(H5Adelete_ff(dset_id, name, tr_id, estack_id) < 0)
+            return FAIL;
+
+    /*-------------------------------------------------------------------------
+    * create the attribute type
+    *-------------------------------------------------------------------------
+    */
+    if((tid = H5Tcopy(H5T_C_S1)) < 0)
+        return FAIL;
+
+    size = HDstrlen(buf) + 1; /* extra null term */
+
+    if(H5Tset_size(tid,(size_t)size) < 0)
+        goto out;
+
+    if(H5Tset_strpad(tid, H5T_STR_NULLTERM) < 0)
+        goto out;
+
+    if((sid = H5Screate(H5S_SCALAR)) < 0)
+        goto out;
+
+
+    /*-------------------------------------------------------------------------
+    * create and write the attribute
+    *-------------------------------------------------------------------------
+    */
+    if((aid = H5Acreate_ff(dset_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, tr_id, estack_id)) < 0)
+        goto out;
+
+    if(H5Awrite_ff(aid, tid, buf, tr_id, estack_id) < 0)
+        goto out;
+
+    if(H5Aclose_ff(aid, estack_id) < 0)
+        goto out;
+
+    if(H5Sclose(sid) < 0)
+        goto out;
+
+    if(H5Tclose(tid) < 0)
+        goto out;
+
+    return SUCCEED;
+
+    /* error zone */
+out:
+    H5E_BEGIN_TRY {
+        H5Aclose_ff(aid, estack_id);
+        H5Tclose(tid);
+        H5Sclose(sid);
+    } H5E_END_TRY;
+    return FAIL;
+
+}
+
 
 htri_t
 H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)

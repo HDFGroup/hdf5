@@ -42,6 +42,9 @@ H5_HLDLL herr_t  H5DSdetach_scale( hid_t did,
 H5_HLDLL herr_t  H5DSset_scale( hid_t dsid,
                      const char *dimname);
 
+H5_HLDLL herr_t H5DSset_scale_ff(hid_t dsid,
+				 const char *dimname, hid_t rc_id, hid_t tr_id, hid_t estack_id);
+
 H5_HLDLL int H5DSget_num_scales( hid_t did,
                        unsigned int dim);
 

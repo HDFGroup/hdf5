@@ -95,6 +95,73 @@ herr_t H5DSset_scale(hid_t dsid,
 }
 
 
+/*-------------------------------------------------------------------------
+* Function: H5DSset_scale
+*
+* Purpose: The dataset DSID is converted to a Dimension Scale dataset.
+*   Creates the CLASS attribute, set to the value "DIMENSION_SCALE"
+*   and an empty REFERENCE_LIST attribute.
+*   If DIMNAME is specified, then an attribute called NAME is created,
+*   with the value DIMNAME.
+*
+* Return: Success: SUCCEED, Failure: FAIL
+*
+* Programmer: pvn@ncsa.uiuc.edu
+*
+* Date: January 04, 2005
+*
+* Comments:
+*
+* Modifications:
+*
+*-------------------------------------------------------------------------
+*/
+
+herr_t H5DSset_scale_ff(hid_t dsid,
+                     const char *dimname, hid_t rc_id, hid_t tr_id, hid_t estack_id)
+{
+    int has_dimlist;
+    H5I_type_t it;
+
+    /*-------------------------------------------------------------------------
+    * parameter checking
+    *-------------------------------------------------------------------------
+    */
+    /* get ID type */
+    if ((it = H5Iget_type(dsid)) < 0)
+        return FAIL;
+
+    if (H5I_DATASET!=it)
+        return FAIL;
+
+    /*-------------------------------------------------------------------------
+    * check if the dataset is a dataset wich has references to dimension scales
+    *-------------------------------------------------------------------------
+    */
+
+    /* try to find the attribute "DIMENSION_LIST"  */
+    if ((has_dimlist = H5LT_find_attribute_ff(dsid,DIMENSION_LIST, rc_id, estack_id)) < 0)
+        return FAIL;
+
+    if (has_dimlist == 1)
+        return FAIL;
+
+    /*-------------------------------------------------------------------------
+    * write the standard attributes for a Dimension Scale dataset
+    *-------------------------------------------------------------------------
+    */
+
+    if (H5LT_set_attribute_string_ff(dsid,"CLASS",DIMENSION_SCALE_CLASS, rc_id, tr_id, estack_id) < 0)
+        return FAIL;
+
+    if (dimname!=NULL)
+    {
+      if (H5LT_set_attribute_string_ff(dsid,"NAME",dimname, rc_id, tr_id, estack_id) < 0)
+            return FAIL;
+    }
+
+    return SUCCEED;
+}
 
 /*-------------------------------------------------------------------------
 * Function: H5DSattach_scale
