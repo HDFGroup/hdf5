@@ -1818,7 +1818,7 @@ H5Rget_obj_name(hid_t loc_id, href_t _ref, char *name, size_t size)
     file = loc.oloc->file;
 
     /* Get name */
-    if((ret_value = H5R__get_obj_name(file, H5P_DEFAULT, H5AC_ind_dxpl_id, loc_id, ref, name, size)) < 0)
+    if((ret_value = H5R__get_obj_name(file, H5P_DEFAULT, H5AC_ind_dxpl_id, ref, name, size)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object path")
 
 done:
