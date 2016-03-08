@@ -99,6 +99,7 @@ H5Rcreate(void *_ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t
     herr_t ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*xi*sRti", _ref, loc_id, name, ref_type, space_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -157,6 +158,7 @@ H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("i", "iRt*x", obj_id, ref_type, _ref);
 
     /* Check args */
     if(H5G_loc(obj_id, &loc) < 0)
@@ -195,6 +197,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("i", "iiRt*x", obj_id, oapl_id, ref_type, _ref);
 
     /* Check args */
     if(H5G_loc(obj_id, &loc) < 0)
@@ -234,6 +237,7 @@ H5Rget_region1(hid_t dataset, H5R_type_t ref_type, const void *_ref)
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("i", "iRt*x", dataset, ref_type, _ref);
 
     /* Check args */
     if(H5G_loc(dataset, &loc) < 0)
@@ -274,6 +278,7 @@ H5Rget_obj_type1(hid_t id, H5R_type_t ref_type, const void *_ref)
     H5G_obj_t ret_value;        /* Return value */
 
     FUNC_ENTER_API(H5G_UNKNOWN)
+    H5TRACE3("Go", "iRt*x", id, ref_type, _ref);
 
     /* Check args */
     if(H5G_loc(id, &loc) < 0)

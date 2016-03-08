@@ -657,6 +657,7 @@ H5Rcreate_object(hid_t loc_id, const char *name)
     href_t    ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE2("r", "i*s", loc_id, name);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -691,6 +692,7 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id)
     href_t     ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE3("r", "i*si", loc_id, name, space_id);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -727,6 +729,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name)
     href_t    ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE3("r", "i*s*s", loc_id, name, attr_name);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -760,6 +763,7 @@ H5Rcreate_ext_object(const char *filename, const char *pathname)
     href_t    ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE2("r", "*s*s", filename, pathname);
 
     /* Check args */
     if(!filename || !*filename)
@@ -793,6 +797,7 @@ H5Rcreate_ext_region(const char *filename, const char *pathname, hid_t space_id)
     href_t     ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE3("r", "*s*si", filename, pathname, space_id);
 
     /* Check args */
     if(!filename || !*filename)
@@ -828,6 +833,7 @@ H5Rcreate_ext_attr(const char *filename, const char *pathname, const char *attr_
     href_t    ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
+    H5TRACE3("r", "*s*s*s", filename, pathname, attr_name);
 
     /* Check args */
     if(!filename || !*filename)
@@ -885,6 +891,7 @@ H5Rdestroy(href_t ref)
     herr_t    ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "r", ref);
 
     /* Check args */
     if(NULL == ref)
@@ -935,6 +942,7 @@ H5Rget_type(href_t ref)
     H5R_type_t ret_value;
 
     FUNC_ENTER_API(H5R_BADTYPE)
+    H5TRACE1("Rt", "r", ref);
 
     /* Check args */
     if(ref == NULL)
@@ -1014,6 +1022,7 @@ H5Requal(href_t ref1, href_t ref2)
     htri_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("t", "rr", ref1, ref2);
 
     /* Check args */
     if(!ref1 || !ref2)
@@ -1230,6 +1239,7 @@ H5Rget_object(hid_t obj_id, hid_t oapl_id, href_t _ref)
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("i", "iir", obj_id, oapl_id, _ref);
 
     /* Check args */
     if(H5G_loc(obj_id, &loc) < 0)
@@ -1340,6 +1350,7 @@ H5Rget_region2(hid_t loc_id, href_t _ref)
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("i", "ir", loc_id, _ref);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -1481,6 +1492,7 @@ H5Rget_attr(hid_t loc_id, href_t _ref)
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("i", "ir", loc_id, _ref);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -1641,6 +1653,7 @@ H5Rget_obj_type3(hid_t loc_id, href_t _ref, H5O_type_t *obj_type)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ir*Ot", loc_id, _ref, obj_type);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -1791,6 +1804,7 @@ H5Rget_obj_name(hid_t loc_id, href_t _ref, char *name, size_t size)
     ssize_t ret_value;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("Zs", "ir*sz", loc_id, _ref, name, size);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -1901,6 +1915,7 @@ H5Rget_attr_name(hid_t loc_id, href_t _ref, char *name, size_t size)
     ssize_t ret_value;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("Zs", "ir*sz", loc_id, _ref, name, size);
 
     /* Check args */
     if(H5G_loc(loc_id, &loc) < 0)
@@ -1995,6 +2010,7 @@ H5Rget_file_name(href_t _ref, char *name, size_t size)
     ssize_t ret_value;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("Zs", "r*sz", _ref, name, size);
 
     /* Check args */
     if(ref == NULL)
