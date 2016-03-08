@@ -437,7 +437,7 @@
 #define H5F_CRT_SHMSG_BTREE_MIN_NAME "shmsg_btree_min"  /* Shared message B-tree minimum size */
 #define H5F_CRT_FILE_SPACE_STRATEGY_NAME "file_space_strategy"  /* File space handling strategy */
 #define H5F_CRT_FREE_SPACE_THRESHOLD_NAME "free_space_threshold"  /* Free space section threshold */
-
+#define H5F_CRT_NUM_SUBFILES_NAME    "num_subfiles"     /* number of subfiles that datasets will be split into */
 
 
 /* ========= File Access properties ============ */
@@ -464,6 +464,10 @@
 #define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME       "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME  "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
 #define H5F_ACS_COLL_MD_WRITE_FLAG_NAME         "collective_metadata_write" /* property indicating whether metadata writes are done collectively or not */
+#define H5F_ACS_NUM_SUBFILE_GROUPS_NAME         "number_subfiling_groups" /* number of process groups to do subfiling with */
+#define H5F_ACS_SUBFILE_COMM_NAME               "subfiling_communicator" /* Communicator the process belongs to for subfiled access */
+#define H5F_ACS_SUBFILE_INFO_NAME               "subfiling_info_object" /* Info object for the subfile access */
+
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"                 /* Whether absolute symlinks local to file. */

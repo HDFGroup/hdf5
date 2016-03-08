@@ -105,7 +105,13 @@
 #define H5F_CRT_FREE_SPACE_THRESHOLD_DEF       H5F_FREE_SPACE_THRESHOLD_DEF
 #define H5F_CRT_FREE_SPACE_THRESHOLD_ENC       H5P__encode_hsize_t
 #define H5F_CRT_FREE_SPACE_THRESHOLD_DEC       H5P__decode_hsize_t
-
+#ifdef H5_HAVE_PARALLEL
+/* Definitions for subfiling */
+#define H5F_CRT_NUM_SUBFILES_SIZE     sizeof(unsigned)
+#define H5F_CRT_NUM_SUBFILES_DEF      (0)
+#define H5F_CRT_NUM_SUBFILES_ENC      H5P__encode_unsigned
+#define H5F_CRT_NUM_SUBFILES_DEC      H5P__decode_unsigned
+#endif /* H5_HAVE_PARALLEL */
 
 /******************/
 /* Local Typedefs */
@@ -180,7 +186,9 @@ static const unsigned H5F_def_sohm_list_max_g  = H5F_CRT_SHMSG_LIST_MAX_DEF;
 static const unsigned H5F_def_sohm_btree_min_g  = H5F_CRT_SHMSG_BTREE_MIN_DEF;
 static const unsigned H5F_def_file_space_strategy_g = H5F_CRT_FILE_SPACE_STRATEGY_DEF;
 static const hsize_t H5F_def_free_space_threshold_g = H5F_CRT_FREE_SPACE_THRESHOLD_DEF;
-
+#ifdef H5_HAVE_PARALLEL
+static const unsigned H5F_def_num_subfiles_g = H5F_CRT_NUM_SUBFILES_DEF;
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
@@ -272,6 +280,14 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, H5F_CRT_FREE_SPACE_THRESHOLD_ENC, H5F_CRT_FREE_SPACE_THRESHOLD_DEC, 
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+#ifdef H5_HAVE_PARALLEL
+    /* Register the number of subfiles */
+    if(H5P_register_real(pclass, H5F_CRT_NUM_SUBFILES_NAME, H5F_CRT_NUM_SUBFILES_SIZE, &H5F_def_num_subfiles_g, 
+            NULL, NULL, NULL, H5F_CRT_NUM_SUBFILES_ENC, H5F_CRT_NUM_SUBFILES_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1345,3 +1361,70 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_file_space() */
 
+#ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_num_subfiles
+ *
+ * Purpose:	Sets the number of subfiles that datasets can be split into.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi, February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_num_subfiles(hid_t plist_id, unsigned num_subfiles)
+{
+    H5P_genplist_t *plist = NULL;       /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "iIu", plist_id, num_subfiles);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(H5P_set(plist, H5F_CRT_NUM_SUBFILES_NAME, &num_subfiles) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set number of subfiles")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_num_subfiles() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_num_subfiles
+ *
+ * Purpose:	Retrieves the number of subfiles from a file.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi, February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_num_subfiles(hid_t plist_id, unsigned *num_subfiles)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Iu", plist_id, num_subfiles);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get value(s) */
+    if(num_subfiles)
+        if(H5P_get(plist, H5F_CRT_NUM_SUBFILES_NAME, num_subfiles) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of subfiles")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_num_subfiles() */
+#endif /* H5_HAVE_PARALLEL */

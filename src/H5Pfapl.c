@@ -189,7 +189,19 @@
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEF    FALSE
 #define H5F_ACS_COLL_MD_WRITE_FLAG_ENC    H5P__encode_hbool_t
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEC    H5P__decode_hbool_t
+/* Definitions for number of groups to do subfiling with */
+#define H5F_ACS_NUM_SUBFILE_GROUPS_SIZE     sizeof(unsigned)
+#define H5F_ACS_NUM_SUBFILE_GROUPS_DEF      (0)
+#define H5F_ACS_NUM_SUBFILE_GROUPS_ENC      H5P__encode_unsigned
+#define H5F_ACS_NUM_SUBFILE_GROUPS_DEC      H5P__decode_unsigned
+/* Definition of the subfiling communicator */
+#define H5F_ACS_SUBFILE_COMM_SIZE       sizeof(MPI_Comm)
+#define H5F_ACS_SUBFILE_COMM_DEF        MPI_COMM_NULL
+/* Definition of the subfiling info object */
+#define H5F_ACS_SUBFILE_INFO_SIZE       sizeof(MPI_Info)
+#define H5F_ACS_SUBFILE_INFO_DEF        MPI_INFO_NULL
 #endif /* H5_HAVE_PARALLEL */
+
 
 /******************/
 /* Local Typedefs */
@@ -295,6 +307,9 @@ static const size_t H5F_def_core_write_tracking_page_size_g = H5F_ACS_CORE_WRITE
 #ifdef H5_HAVE_PARALLEL
 static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_MD_READ_FLAG_DEF;  /* Default setting for the collective metedata read flag */
 static const hbool_t H5F_def_coll_md_write_flag_g = H5F_ACS_COLL_MD_WRITE_FLAG_DEF;  /* Default setting for the collective metedata write flag */
+static const unsigned H5F_def_num_subfile_groups_g = H5F_ACS_NUM_SUBFILE_GROUPS_DEF; /* Default number of groups for subfiling */
+static const MPI_Comm H5F_def_subfile_comm_g = H5F_ACS_SUBFILE_COMM_DEF; /* Default communicator for subfiling */
+static const MPI_Info H5F_def_subfile_info_g = H5F_ACS_SUBFILE_INFO_DEF; /* Default info object for subfiling */
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -463,6 +478,22 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, H5F_ACS_COLL_MD_WRITE_FLAG_SIZE, &H5F_def_coll_md_write_flag_g, 
             NULL, NULL, NULL, H5F_ACS_COLL_MD_WRITE_FLAG_ENC, H5F_ACS_COLL_MD_WRITE_FLAG_DEC, 
             NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the number of subfiling groups */
+    if(H5P_register_real(pclass, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, H5F_ACS_NUM_SUBFILE_GROUPS_SIZE, &H5F_def_num_subfile_groups_g, 
+            NULL, NULL, NULL, H5F_ACS_NUM_SUBFILE_GROUPS_ENC, H5F_ACS_NUM_SUBFILE_GROUPS_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the Subfiling Communicator */
+    if(H5P_register_real(pclass, H5F_ACS_SUBFILE_COMM_NAME, H5F_ACS_SUBFILE_COMM_SIZE, &H5F_def_subfile_comm_g, 
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the Subfiling Info object */
+    if(H5P_register_real(pclass, H5F_ACS_SUBFILE_INFO_NAME, H5F_ACS_SUBFILE_INFO_SIZE, &H5F_def_subfile_info_g, 
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 #endif /* H5_HAVE_PARALLEL */
 
@@ -3775,5 +3806,83 @@ H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_coll_metadata_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_subfiling_access
+ *
+ * Purpose:	Sets subfiled file access with the number of communicators 
+ *              and the communicator for the calling process.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi, February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_subfiling_access(hid_t plist_id, unsigned num_groups, MPI_Comm comm, MPI_Info info)
+{
+    H5P_genplist_t *plist = NULL;       /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "iIuMcMi", plist_id, num_groups, comm, info);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(H5P_set(plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &num_groups) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set number of groups for subfiling")
+
+    if(H5P_set(plist, H5F_ACS_SUBFILE_COMM_NAME, &comm) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile communicator")
+
+    if(H5P_set(plist, H5F_ACS_SUBFILE_INFO_NAME, &info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile info object")
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_subfiling_access() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_subfiling_access
+ *
+ * Purpose:	Retrieves the subfiled access parameters.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mohamad Chaarawi, February 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_subfiling_access(hid_t plist_id, unsigned *num_groups, MPI_Comm *comm, MPI_Info *info)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*Iu*Mc*Mi", plist_id, num_groups, comm, info);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get value(s) */
+    if(num_groups)
+        if(H5P_get(plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, num_groups) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of groups for subfiling")
+    if(comm)
+        if(H5P_get(plist, H5F_ACS_SUBFILE_COMM_NAME, comm) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling communicator")
+    if(info)
+        if(H5P_get(plist, H5F_ACS_SUBFILE_INFO_NAME, info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling info object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_subfiling_access() */
 #endif /* H5_HAVE_PARALLEL */
 

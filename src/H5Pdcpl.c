@@ -120,7 +120,30 @@
 #define H5D_CRT_EXT_FILE_LIST_COPY H5P__dcrt_ext_file_list_copy
 #define H5D_CRT_EXT_FILE_LIST_CMP  H5P__dcrt_ext_file_list_cmp
 #define H5D_CRT_EXT_FILE_LIST_CLOSE H5P__dcrt_ext_file_list_close
+#ifdef H5_HAVE_PARALLEL
+/* Definitions for subfiling selection space ID */
+#define H5D_CRT_SUBFILING_SELECTION_SIZE       	sizeof(hid_t)
+#define H5D_CRT_SUBFILING_SELECTION_DEF        	H5I_INVALID_HID
+#define H5D_CRT_SUBFILING_SELECTION_SET		H5P__subfiling_selection_set
+#define H5D_CRT_SUBFILING_SELECTION_GET		H5P__subfiling_selection_get
+#define H5D_CRT_SUBFILING_SELECTION_ENC		H5P__subfiling_selection_enc
+#define H5D_CRT_SUBFILING_SELECTION_DEC        	H5P__subfiling_selection_dec
+#define H5D_CRT_SUBFILING_SELECTION_DEL		H5P__subfiling_selection_del
+#define H5D_CRT_SUBFILING_SELECTION_COPY       	H5P__subfiling_selection_copy
+#define H5D_CRT_SUBFILING_SELECTION_CLOSE      	H5P__subfiling_selection_close
 
+/* Definitions for subfiling source filename */
+#define H5D_CRT_SUBFILING_FILENAME_SIZE        sizeof(char *)
+#define H5D_CRT_SUBFILING_FILENAME_DEF         NULL /*default is no prefix */
+#define H5D_CRT_SUBFILING_FILENAME_SET         H5P__subfiling_filename_set
+#define H5D_CRT_SUBFILING_FILENAME_GET         H5P__subfiling_filename_get
+#define H5D_CRT_SUBFILING_FILENAME_ENC         H5P__subfiling_filename_enc
+#define H5D_CRT_SUBFILING_FILENAME_DEC         H5P__subfiling_filename_dec
+#define H5D_CRT_SUBFILING_FILENAME_DEL         H5P__subfiling_filename_del
+#define H5D_CRT_SUBFILING_FILENAME_COPY        H5P__subfiling_filename_copy
+#define H5D_CRT_SUBFILING_FILENAME_CMP         H5P__subfiling_filename_cmp
+#define H5D_CRT_SUBFILING_FILENAME_CLOSE       H5P__subfiling_filename_close
+#endif /* H5_HAVE_PARALLEL */
 
 /******************/
 /* Local Typedefs */
@@ -169,7 +192,23 @@ static herr_t H5P__dcrt_ext_file_list_del(hid_t prop_id, const char *name, size_
 static herr_t H5P__dcrt_ext_file_list_copy(const char *name, size_t size, void *value);
 static int H5P__dcrt_ext_file_list_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__dcrt_ext_file_list_close(const char *name, size_t size, void *value);
-
+#ifdef H5_HAVE_PARALLEL
+static herr_t H5P__subfiling_filename_set(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_filename_get(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_filename_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__subfiling_filename_dec(const void **_pp, void *value);
+static herr_t H5P__subfiling_filename_del(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_filename_copy(const char* name, size_t size, void* value);
+static int H5P__subfiling_filename_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__subfiling_filename_close(const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_selection_set(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_selection_get(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_selection_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__subfiling_selection_dec(const void **_pp, void *value);
+static herr_t H5P__subfiling_selection_del(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_selection_copy(const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_selection_close(const char* name, size_t size, void* value);
+#endif /* H5_HAVE_PARALLEL */
 
 /*********************/
 /* Package Variables */
@@ -227,6 +266,10 @@ static H5O_layout_t H5D_def_layout_virtual_g = H5D_DEF_LAYOUT_VIRTUAL;
 static hbool_t H5P_dcrt_def_layout_init_g = FALSE;
 #endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
+#ifdef H5_HAVE_PARALLEL
+static hid_t H5L_def_subfile_selection_id_g = H5D_CRT_SUBFILING_SELECTION_DEF;
+static const char *H5L_def_subfile_name_g = H5D_CRT_SUBFILING_FILENAME_DEF;
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------
@@ -270,6 +313,20 @@ H5P__dcrt_reg_prop(H5P_genclass_t *pclass)
             NULL, H5D_CRT_EXT_FILE_LIST_SET, H5D_CRT_EXT_FILE_LIST_GET, H5D_CRT_EXT_FILE_LIST_ENC, H5D_CRT_EXT_FILE_LIST_DEC,
             H5D_CRT_EXT_FILE_LIST_DEL, H5D_CRT_EXT_FILE_LIST_COPY, H5D_CRT_EXT_FILE_LIST_CMP, H5D_CRT_EXT_FILE_LIST_CLOSE) < 0)
        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+#ifdef H5_HAVE_PARALLEL
+    /* Register property for subfiling filename */
+    if(H5P_register_real(pclass, H5D_CRT_SUBFILING_FILENAME_NAME, H5D_CRT_SUBFILING_FILENAME_SIZE, &H5L_def_subfile_name_g, 
+            NULL, H5D_CRT_SUBFILING_FILENAME_SET, H5D_CRT_SUBFILING_FILENAME_GET, H5D_CRT_SUBFILING_FILENAME_ENC, H5D_CRT_SUBFILING_FILENAME_DEC,
+            H5D_CRT_SUBFILING_FILENAME_DEL, H5D_CRT_SUBFILING_FILENAME_COPY, H5D_CRT_SUBFILING_FILENAME_CMP, H5D_CRT_SUBFILING_FILENAME_CLOSE) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register property for subfiling selection */
+    if(H5P_register_real(pclass, H5D_CRT_SUBFILING_SELECTION_NAME, H5D_CRT_SUBFILING_SELECTION_SIZE, &H5L_def_subfile_selection_id_g, 
+             NULL, H5D_CRT_SUBFILING_SELECTION_SET, H5D_CRT_SUBFILING_SELECTION_GET, H5D_CRT_SUBFILING_SELECTION_ENC, H5D_CRT_SUBFILING_SELECTION_DEC,
+             H5D_CRT_SUBFILING_SELECTION_DEL, H5D_CRT_SUBFILING_SELECTION_COPY, NULL, H5D_CRT_SUBFILING_SELECTION_CLOSE) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3641,3 +3698,705 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_fill_time() */
 
+#ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__subfiling_selection_set
+ *
+ * Purpose:     Copies a dataspace selection when it's set for a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_selection_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    hid_t          space_id;
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Get the FAPL ID */
+    space_id = *(const hid_t *)value;
+
+    /* Duplicate the FAPL, if it's non-default */
+    if(space_id != H5I_INVALID_HID) {
+        H5S_t *space = NULL, *space_copy = NULL;
+
+        if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
+
+        /* Copy dataspace */
+        if(NULL == (space_copy = H5S_copy(space, FALSE, TRUE)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace")
+
+        /* Atomize */
+        if(((*(hid_t *)value) = H5I_register (H5I_DATASPACE, space_copy, FALSE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__subfiling_selection_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__subfiling_selection_get
+ *
+ * Purpose:     Copies the subfiling selection property when it's retrieved 
+ *              from a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_selection_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    hid_t          space_id;
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Get the FAPL ID */
+    space_id = *(const hid_t *)value;
+
+    if(space_id != H5I_INVALID_HID) {
+        H5S_t *space = NULL, *space_copy = NULL;
+
+        if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
+
+        /* Copy dataspace */
+        if(NULL == (space_copy = H5S_copy(space, FALSE, TRUE)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace")
+
+        /* Atomize */
+        if(((*(hid_t *)value) = H5I_register (H5I_DATASPACE, space_copy, FALSE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__subfiling_selection_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__subfiling_selection_enc
+ *
+ * Purpose:        Callback routine which is called whenever the subfiling selection
+ *                 property is encoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_selection_enc(const void *value, void **_pp, size_t *size)
+{
+    const hid_t *space_id = (const hid_t *)value;     /* Property to encode */
+    uint8_t **pp = (uint8_t **)_pp;
+    H5S_t *space;
+    size_t space_size = 0;
+    hbool_t valid_space = FALSE;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check for non-default FAPL */
+    if(*space_id != H5I_INVALID_HID) {
+        if(NULL == (space = (H5S_t *)H5I_object_verify(*space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
+        valid_space = TRUE;
+    } /* end if */
+
+    if(NULL != *pp) {
+        /* Store whether the space is valid */
+        *(*pp)++ = (uint8_t)valid_space;
+    } /* end if */
+
+    /* Encode the dataspace selection if valid */
+    /* (if *pp == NULL, will only compute the size) */
+    if(valid_space) {
+        if(H5S_encode(space, NULL, &space_size) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
+
+        if(*pp) {
+            uint64_t enc_value;
+            unsigned enc_size;
+
+            /* encode the length of the plist */
+            enc_value = (uint64_t)space_size;
+            enc_size = H5VM_limit_enc_size(enc_value);
+            HDassert(enc_size < 256);
+            *(*pp)++ = (uint8_t)enc_size;
+            UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+
+            /* encode the dataspace selection */
+            if(H5S_encode(space, pp, &space_size) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+
+            *pp += space_size;
+        }
+        space_size += (1 + H5VM_limit_enc_size((uint64_t)space_size));
+    } /* end if */
+
+    *size += (1 + space_size);      /* valid flag, plus encoded space size */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__subfiling_selection_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__subfiling_selection_dec
+ *
+ * Purpose:        Callback routine which is called whenever the subfiling
+ *                 selection property is decoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_selection_dec(const void **_pp, void *_value)
+{
+    hid_t *space_id = (hid_t *)_value;        /* The elink FAPL value */
+    const uint8_t **pp = (const uint8_t **)_pp;
+    hbool_t valid_space = FALSE;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(space_id);
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    /* Determine if the FAPL is non-default */
+    valid_space = (hbool_t)*(*pp)++;
+
+    if(valid_space) {
+        H5S_t *space = NULL;
+        size_t space_size = 0;                /* Encoded size of property list */
+        unsigned enc_size;
+        uint64_t enc_value;
+
+        /* Decode the plist length */
+        enc_size = *(*pp)++;
+        HDassert(enc_size < 256);
+        UINT64DECODE_VAR(*pp, enc_value, enc_size);
+        space_size = (size_t)enc_value;
+
+        /* Decode the dataspace */
+        if((space = H5S_decode(pp)) == NULL)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode subfiling dataspace")
+        /* Atomize */
+        if((*space_id = H5I_register (H5I_DATASPACE, space, FALSE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+
+        *pp += space_size;
+    } /* end if */
+    else
+        *space_id = H5I_INVALID_HID;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__subfiling_selection_dec() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:	H5P__subfiling_selection_del
+ *
+ * Purpose:	Close the dataspace selection
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi, March 2016
+ *
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_selection_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    hid_t          space_id;
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Get the FAPL ID */
+    space_id = (*(const hid_t *)value);
+
+    /* Close the FAPL */
+    if(space_id != H5I_INVALID_HID && H5I_dec_ref(space_id) < 0)
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to close atom for subfiling selection")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__subfiling_selection_del() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:	H5P__subfiling_selection_copy
+ *
+ * Purpose:	Copy the subfiling space ID
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi, March 2016
+ *
+ *--------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_selection_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    hid_t          space_id;
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Get the FAPL ID */
+    space_id = (*(const hid_t *)value);
+
+    /* Duplicate the FAPL, if it's non-default */
+    if(space_id != H5I_INVALID_HID) {
+        H5S_t *space = NULL, *space_copy = NULL;
+
+        if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
+
+        /* Copy dataspace */
+        if(NULL == (space_copy = H5S_copy(space, FALSE, TRUE)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace")
+
+        /* Atomize */
+        if(((*(hid_t *)value) = H5I_register (H5I_DATASPACE, space_copy, FALSE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__subfiling_selection_copy() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:	H5P__subfiling_selection_close
+ *
+ * Purpose:	Close the subfiling selection property
+ *
+ * Return:	Success:	Non-negative
+ * 		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi, March 2016
+ *
+ *---------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_selection_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    hid_t		space_id;
+    herr_t     		ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Get the SPACE ID */
+    space_id = (*(const hid_t *)value);
+
+    /* Close the SPACE */
+    if((space_id > H5I_INVALID_HID) && (H5I_dec_ref(space_id) < 0))
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to close atom for subfiling selection space")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__subfiling_selection_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__subfiling_filename_set
+ *
+ * Purpose:     Copies the subfiling filename when it's set in the plist
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_filename_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Copy the subfile name if it is set */
+    if(*(char **)value)
+        *(char **)value = H5MM_xstrdup(*(const char **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__subfiling_filename_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__subfiling_filename_get
+ *
+ * Purpose:     Copies the subfiling filename when it's retrieved from a property list
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_filename_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Copy the filename */
+    if(*(char **)value)
+        *(char **)value = H5MM_xstrdup(*(const char **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__subfiling_filename_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__subfiling_filename_enc
+ *
+ * Purpose:        Callback routine which is called whenever the subfiling
+ *                 file name property is encoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_filename_enc(const void *value, void **_pp, size_t *size)
+{
+    const char *filename = *(const char * const *)value;
+    uint8_t **pp = (uint8_t **)_pp;
+    size_t len = 0;
+    uint64_t enc_value;
+    unsigned enc_size;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    /* calculate prefix length */
+    if(NULL != filename)
+        len = HDstrlen(filename);
+
+    enc_value = (uint64_t)len;
+    enc_size = H5VM_limit_enc_size(enc_value);
+    HDassert(enc_size < 256);
+
+    if(NULL != *pp) {
+        /* encode the length of the filename */
+        *(*pp)++ = (uint8_t)enc_size;
+        UINT64ENCODE_VAR(*pp, enc_value, enc_size);
+
+        /* encode the filename */
+        if(NULL != filename) {
+            HDmemcpy(*(char **)pp, filename, len);
+            *pp += len;
+        } /* end if */
+    } /* end if */
+
+    *size += (1 + enc_size);
+    if(NULL != filename)
+        *size += len;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__subfiling_filename_enc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__subfiling_filename_dec
+ *
+ * Purpose:        Callback routine which is called whenever the subfiling
+ *                 file name property is decoded.
+ *
+ * Return:	   Success:	Non-negative
+ *		   Failure:	Negative
+ *
+ * Programmer:     Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_filename_dec(const void **_pp, void *_value)
+{
+    char **filename = (char **)_value;
+    const uint8_t **pp = (const uint8_t **)_pp;
+    size_t len;
+    uint64_t enc_value;                 /* Decoded property value */
+    unsigned enc_size;                  /* Size of encoded property */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(filename);
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    /* Decode the size */
+    enc_size = *(*pp)++;
+    HDassert(enc_size < 256);
+
+    /* Decode the value */
+    UINT64DECODE_VAR(*pp, enc_value, enc_size);
+    len = (size_t)enc_value;
+
+    if(0 != len) {
+        /* Make a copy of the user's prefix string */
+        if(NULL == (*filename = (char *)H5MM_malloc(len + 1)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix")
+        HDstrncpy(*filename, *(const char **)pp, len);
+        (*filename)[len] = '\0';
+
+        *pp += len;
+    } /* end if */
+    else
+        *filename = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__subfiling_filename_dec() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__subfiling_filename_del
+ *
+ * Purpose:     Frees memory used to store the subfiling filename
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_filename_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(value);
+
+    H5MM_xfree(*(void **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__subfiling_filename_del() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__subfiling_filename_copy
+ *
+ * Purpose:     Creates a copy of the subfiling file name string
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_filename_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(value);
+
+    *(char **)value = H5MM_xstrdup(*(const char **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__subfiling_filename_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__subfiling_filename_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the subfiling
+ *                 filename property is compared.
+ *
+ * Return:         zero if VALUE1 and VALUE2 are equal, non zero otherwise.
+ *
+ * Programmer:     Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__subfiling_filename_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
+{
+    const char *name1 = *(const char * const *)value1;
+    const char *name2 = *(const char * const *)value2;
+    int ret_value = 0;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    if(NULL == name1 && NULL != name2)
+        HGOTO_DONE(1);
+    if(NULL != name1 && NULL == name2)
+        HGOTO_DONE(-1);
+    if(NULL != name1 && NULL != name2)
+        ret_value = HDstrcmp(name1, name2);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__subfiling_filename_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__subfiling_filename_close
+ *
+ * Purpose:     Frees memory used to store the subfiling filename property
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__subfiling_filename_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    HDassert(value);
+
+    H5MM_xfree(*(void **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__subfiling_filename_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_subfiling
+ *
+ * Purpose:	Enable Subfiling when creating a dataset with the subfile name
+ *              and the selection that this process will access.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_subfiling(hid_t plist_id, hid_t space_id, const char *subfile_name)
+{
+    H5P_genplist_t *plist;                      /* Property list pointer */
+    herr_t ret_value = SUCCEED;                 /* return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if(!subfile_name)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "subfile name not provided")
+    if(NULL == H5I_object_verify(space_id, H5I_DATASPACE))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataspace")
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5P_object_verify(plist_id,H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(H5P_set(plist, H5D_CRT_SUBFILING_SELECTION_NAME, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfiling selection")
+
+    if(H5P_set(plist, H5D_CRT_SUBFILING_FILENAME_NAME, &subfile_name) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile name")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_subfiling() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_subfiling
+ *
+ * Purpose:	Get subfiling parameters for the subfile name and the selection.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi, March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_subfiling(hid_t plist_id, hid_t *space_id, char **subfile_name)
+{
+    H5P_genplist_t *plist;  /* Property list pointer */
+    herr_t ret_value = SUCCEED; /* return value          */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(space_id)
+        if(H5P_get(plist, H5D_CRT_SUBFILING_SELECTION_NAME, space_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling selection")
+
+    if(subfile_name) {
+        const char *temp_name;
+
+        /* Get the current prefix */
+        if(H5P_peek(plist, H5D_CRT_SUBFILING_FILENAME_NAME, &temp_name) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external link prefix")
+
+        if(temp_name)
+            *subfile_name = HDstrdup(temp_name);
+    }
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_subfiling() */
+#endif /* H5_HAVE_PARALLEL */
