@@ -3631,13 +3631,13 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
         char   *str_vlen_array_again[VLEN_STR_ARRY_DIM];  /* vlen string array */
         char   str_fixlen[FIXLEN_STR_SIZE];  /* fixed len string */
         int    int_data1;
-        hobj_ref_t objref1;                  /* reference */
+        href_t objref1;                  /* reference */
         char   str_fixlen_repeat[FIXLEN_STR_SIZE];  /* fixed len string */
-        hobj_ref_t objref2;                  /* reference */
+        href_t objref2;                  /* reference */
         char   *str_vlen;  /* vlen string */
         int    int_data2;
         char   *str_vlen_repeat;  /* vlen string */
-        hobj_ref_t objref3;                  /* reference */
+        href_t objref3;                  /* reference */
         int    int_data3;
     } comp9_t;
 
@@ -4142,9 +4142,9 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     did_comp = H5Dcreate2(gid, "Compound_dset9", tid9_comp, sid_comp, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* obj references */
-    status=H5Rcreate(&(comp9_buf.objref1),gid,"Compound_dset2",H5R_OBJECT,(hid_t)-1);
-    status=H5Rcreate(&(comp9_buf.objref2),gid,"Compound_dset3",H5R_OBJECT,(hid_t)-1);
-    status=H5Rcreate(&(comp9_buf.objref3),gid,"Compound_dset4",H5R_OBJECT,(hid_t)-1);
+    comp9_buf.objref1 = H5Rcreate_object(gid, "Compound_dset2");
+    comp9_buf.objref2 = H5Rcreate_object(gid, "Compound_dset3");
+    comp9_buf.objref3 = H5Rcreate_object(gid, "Compound_dset4");
 
     status = H5Dwrite(did_comp, tid9_comp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &comp9_buf);
     if (status < 0)
@@ -4156,6 +4156,9 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
 
 
     H5Dclose(did_comp);
+    H5Rdestroy(comp9_buf.objref1);
+    H5Rdestroy(comp9_buf.objref2);
+    H5Rdestroy(comp9_buf.objref3);
 
     did_comp=0;
 out:
@@ -5262,7 +5265,7 @@ void write_attr_in(hid_t loc_id,
     char       *buf1a[2];                             /* VL string */
     char       buf2[2]= {1,2};                 /* bitfield, opaque */
     s_t        buf3[2]= {{1,2.0F},{3,4.0F}};         /* compound */
-    hobj_ref_t buf4[2];                        /* reference */
+    href_t     buf4[2];                        /* reference */
     e_t        buf45[2]= {RED,RED};            /* enum */
     hvl_t      buf5[2];                        /* vlen */
     hsize_t    dimarray[1]={3};                /* array dimension */
@@ -5276,7 +5279,7 @@ void write_attr_in(hid_t loc_id,
     char       *buf12a[3][2];                                                           /* VL string */
     char       buf22[3][2]= {{1,2},{3,4},{5,6}};                                        /* bitfield, opaque */
     s_t        buf32[6]= {{1,2.0F},{3,4.0F},{5,6.0F},{7,8.0F},{9,10.0F},{11,12.0F}};    /* compound */
-    hobj_ref_t buf42[3][2];                                                             /* reference */
+    href_t     buf42[3][2];                                                             /* reference */
     e_t        buf452[3][2];                                                            /* enum */
     hvl_t      buf52[3][2];                                                             /* vlen */
     int        buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}}; /* array */
@@ -5292,7 +5295,7 @@ void write_attr_in(hid_t loc_id,
     char       *buf13a[4][3][2];   /* VL string */
     char       buf23[4][3][2];    /* bitfield, opaque */
     s_t        buf33[4][3][2];    /* compound */
-    hobj_ref_t buf43[4][3][2];    /* reference */
+    href_t     buf43[4][3][2];    /* reference */
     e_t        buf453[4][3][2];   /* enum */
     hvl_t      buf53[4][3][2];    /* vlen */
     int        buf63[24][3];      /* array */
@@ -5431,9 +5434,11 @@ void write_attr_in(hid_t loc_id,
     /* Create references to dataset */
     if (dset_name)
     {
-        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,(hid_t)-1);
-        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+        buf4[0] = H5Rcreate_object(fid, dset_name);
+        buf4[1] = H5Rcreate_object(fid, dset_name);
         write_attr(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
+        H5Rdestroy(buf4[0]);
+        H5Rdestroy(buf4[1]);
     }
 
     /*-------------------------------------------------------------------------
@@ -5713,10 +5718,15 @@ void write_attr_in(hid_t loc_id,
     {
         for (i = 0; i < 3; i++) {
             for (j = 0; j < 2; j++) {
-                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+                buf42[i][j] = H5Rcreate_object(fid, dset_name);
             }
         }
         write_attr(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 2; j++) {
+                H5Rdestroy(buf42[i][j]);
+            }
+        }
     }
 
     /*-------------------------------------------------------------------------
@@ -6109,10 +6119,16 @@ void write_attr_in(hid_t loc_id,
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 3; j++) {
                 for (k = 0; k < 2; k++)
-                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+                    buf43[i][j][k] = H5Rcreate_object(fid, dset_name);
             }
         }
         write_attr(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
+        for (i = 0; i < 4; i++) {
+            for (j = 0; j < 3; j++) {
+                for (k = 0; k < 2; k++)
+                    H5Rdestroy(buf43[i][j][k]);
+            }
+        }
     }
 
     /*-------------------------------------------------------------------------
@@ -6319,7 +6335,7 @@ void write_dset_in(hid_t loc_id,
     char       *buf1a[2];                      /* VL string */
     char       buf2[2]= {1,2};                 /* bitfield, opaque */
     s_t        buf3[2]= {{1,2.0F},{3,4.0F}};   /* compound */
-    hobj_ref_t buf4[2];                        /* reference */
+    href_t     buf4[2];                        /* reference */
     e_t        buf45[2]= {RED,GREEN};          /* enum */
     hvl_t      buf5[2];                        /* vlen */
     hsize_t    dimarray[1]={3};                /* array dimension */
@@ -6333,7 +6349,7 @@ void write_dset_in(hid_t loc_id,
     char       *buf12a[3][2];                                        /* VL string */
     char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
     s_t        buf32[6]= {{1,2.0F},{3,4.0F},{5,6.0F},{7,8.0F},{9,10.0F},{11,12.0F}};   /* compound */
-    hobj_ref_t buf42[3][2];                                          /* reference */
+    href_t     buf42[3][2];                                          /* reference */
     hvl_t      buf52[3][2];                                          /* vlen */
     int        buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};  /* array */
     int        buf72[3][2]= {{1,2},{3,4},{5,6}};                     /* integer */
@@ -6348,7 +6364,7 @@ void write_dset_in(hid_t loc_id,
     char       *buf13a[4][3][2];  /* VL string */
     char       buf23[4][3][2];    /* bitfield, opaque */
     s_t        buf33[4][3][2];    /* compound */
-    hobj_ref_t buf43[4][3][2];    /* reference */
+    href_t     buf43[4][3][2];    /* reference */
     hvl_t      buf53[4][3][2];    /* vlen */
     int        buf63[24][3];      /* array */
     int        buf73[4][3][2];    /* integer */
@@ -6475,9 +6491,11 @@ void write_dset_in(hid_t loc_id,
     /* Create references to dataset */
     if (dset_name)
     {
-        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,(hid_t)-1);
-        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+        buf4[0] = H5Rcreate_object(fid, dset_name);
+        buf4[1] = H5Rcreate_object(fid, dset_name);
         write_dset(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
+        H5Rdestroy(buf4[0]);
+        H5Rdestroy(buf4[1]);
     }
 
     /*-------------------------------------------------------------------------
@@ -6690,10 +6708,15 @@ void write_dset_in(hid_t loc_id,
     {
         for (i = 0; i < 3; i++) {
             for (j = 0; j < 2; j++) {
-                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+                buf42[i][j] = H5Rcreate_object(fid, dset_name);
             }
         }
         write_dset(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 2; j++) {
+                H5Rdestroy(buf42[i][j]);
+            }
+        }
     }
 
     /*-------------------------------------------------------------------------
@@ -6901,10 +6924,16 @@ void write_dset_in(hid_t loc_id,
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 3; j++) {
                 for (k = 0; k < 2; k++)
-                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+                    buf43[i][j][k] = H5Rcreate_object(fid, dset_name);
             }
         }
         write_dset(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
+        for (i = 0; i < 4; i++) {
+            for (j = 0; j < 3; j++) {
+                for (k = 0; k < 2; k++)
+                    H5Rdestroy(buf43[i][j][k]);
+            }
+        }
     }
 
     /*-------------------------------------------------------------------------
@@ -7019,7 +7048,7 @@ void gen_datareg(hid_t fid,
     hid_t           did2;              /* dataset ID   */
     hid_t           sid2;              /* dataspace ID  */
     hsize_t         dims2[] = {2};     /* 2 references */
-    hdset_reg_ref_t *rbuf;             /* buffer for write the references  */
+    href_t         *rbuf;             /* buffer for write the references  */
     hsize_t         start[10];         /* starting location of hyperslab */
     hsize_t         count[10];         /* element count of hyperslab */
     hsize_t         coord[5][2];       /* coordinates for point selection */
@@ -7027,7 +7056,7 @@ void gen_datareg(hid_t fid,
     int             i;
 
     /* allocate the buffer for write the references */
-    rbuf = (hdset_reg_ref_t *)HDcalloc((size_t)2, sizeof(hdset_reg_ref_t));
+    rbuf = (href_t *)HDcalloc((size_t)2, sizeof(href_t));
 
     /* allocate the buffer for write the data dataset */
     buf = (int *)HDmalloc(10 * 10 * sizeof(int));
@@ -7043,7 +7072,7 @@ void gen_datareg(hid_t fid,
 
     /* create the reference dataset */
     sid2   = H5Screate_simple(1, dims2, NULL);
-    did2   = H5Dcreate2(fid, "refreg", H5T_STD_REF_DSETREG, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did2   = H5Dcreate2(fid, "refreg", H5T_STD_REF_REG, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* create the references */
     /* select hyperslab for first reference */
@@ -7060,8 +7089,8 @@ void gen_datareg(hid_t fid,
     H5Sget_select_npoints(sid1);
 
     /* store first dataset region */
-    status = H5Rcreate(&rbuf[0], fid, "dsetref", H5R_DATASET_REGION, sid1);
-    HDassert(status >= 0);
+    rbuf[0] = H5Rcreate_region(fid, "dsetref", sid1);
+    HDassert(rbuf[0]);
 
     /* select sequence of five points for second reference */
     coord[0][0]=6; coord[0][1]=9;
@@ -7079,10 +7108,11 @@ void gen_datareg(hid_t fid,
     H5Sget_select_npoints(sid1);
 
     /* store second dataset region */
-    H5Rcreate(&rbuf[1],fid,"dsetref",H5R_DATASET_REGION,sid1);
+    rbuf[1] = H5Rcreate_region(fid, "dsetref", sid1);
+    HDassert(rbuf[1]);
 
     /* write */
-    status = H5Dwrite(did2,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
+    status = H5Dwrite(did2, H5T_STD_REF_REG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf);
     HDassert(status >= 0);
 
     /* close, free memory buffers */
@@ -7093,6 +7123,10 @@ void gen_datareg(hid_t fid,
     status = H5Dclose(did2);
     HDassert(status >= 0);
     status = H5Sclose(sid2);
+    HDassert(status >= 0);
+    status = H5Rdestroy(rbuf[0]);
+    HDassert(status >= 0);
+    status = H5Rdestroy(rbuf[1]);
     HDassert(status >= 0);
 
     HDfree(rbuf);

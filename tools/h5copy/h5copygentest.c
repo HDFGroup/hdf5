@@ -420,7 +420,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     /*---------------------
      * create obj references to the previously created objects.
      * Passing -1 as reference is an object.*/
-    hobj_ref_t or_data[2];  /* write buffer */
+    href_t or_data[2] = {NULL, NULL};  /* write buffer */
     herr_t ret = SUCCEED;
 
     /*--------------
@@ -463,15 +463,15 @@ static herr_t gen_obj_ref(hid_t loc_id)
     }
     H5Gclose(oid);
 
-    status = H5Rcreate (&or_data[0], loc_id, OBJ_REF_DS, H5R_OBJECT, (hid_t)-1);
-    if (status < 0)
+    or_data[0] = H5Rcreate_object (loc_id, OBJ_REF_DS);
+    if (!or_data[0])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
         goto out;
     }
-    status = H5Rcreate (&or_data[1], loc_id, OBJ_REF_GRP, H5R_OBJECT, (hid_t)-1);
-    if (status < 0)
+    or_data[1] = H5Rcreate_object (loc_id, OBJ_REF_GRP);
+    if (!or_data[1])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -507,6 +507,10 @@ out:
         H5Dclose(oid);
     if(sid > 0)
         H5Sclose(sid);
+    if (or_data[0])
+        H5Rdestroy(or_data[0]);
+    if (or_data[1])
+        H5Rdestroy(or_data[1]);
 
     return ret;
 }
@@ -527,7 +531,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     char  data[3][16] = {"The quick brown", "fox jumps over ", "the 5 lazy dogs"};
     hsize_t dims2[2] = {3,16};
     hsize_t coords[4][2] = { {0,1}, {2,11}, {1,0}, {2,4} };
-    hdset_reg_ref_t  rr_data[2];
+    href_t  rr_data[2] = {NULL, NULL};
     hsize_t start[2] = {0,0};
     hsize_t stride[2] = {2,11};
     hsize_t count[2] = {2,2};
@@ -570,8 +574,8 @@ static herr_t gen_region_ref(hid_t loc_id)
     }
 
     /* create region reference from elements space */
-    status = H5Rcreate (&rr_data[0], loc_id, REG_REF_DS2, H5R_DATASET_REGION, sid);
-    if (status < 0)
+    rr_data[0] = H5Rcreate_region (loc_id, REG_REF_DS2, sid);
+    if (!rr_data[0])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -588,8 +592,8 @@ static herr_t gen_region_ref(hid_t loc_id)
     }
 
     /* create region reference from hyperslab space */
-    status = H5Rcreate (&rr_data[1], loc_id, REG_REF_DS2, H5R_DATASET_REGION, sid);
-    if (status < 0)
+    rr_data[1] = H5Rcreate_region (loc_id, REG_REF_DS2, sid);
+    if (!rr_data[1])
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
         ret = FAIL;
@@ -608,7 +612,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     }
 
     /* create region reference dataset */
-    oid1 = H5Dcreate2 (loc_id, REG_REF_DS1, H5T_STD_REF_DSETREG, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
+    oid1 = H5Dcreate2 (loc_id, REG_REF_DS1, H5T_STD_REF_REG, sid, H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT);
     if (oid1 < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Dcreate2 failed.\n", FUNC, __LINE__);
@@ -617,7 +621,7 @@ static herr_t gen_region_ref(hid_t loc_id)
     }
 
     /* write data as region references */
-    status = H5Dwrite (oid1, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rr_data);
+    status = H5Dwrite (oid1, H5T_STD_REF_REG, H5S_ALL, H5S_ALL, H5P_DEFAULT, rr_data);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Dwrite failed.\n", FUNC, __LINE__);
@@ -632,6 +636,10 @@ out:
         H5Dclose (oid2);
     if (sid > 0)
         H5Sclose (sid);
+    if (rr_data[0])
+        H5Rdestroy(rr_data[0]);
+    if (rr_data[1])
+        H5Rdestroy(rr_data[1]);
 
     return ret;
 }

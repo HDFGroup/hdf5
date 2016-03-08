@@ -138,8 +138,8 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
     hvl_t       *buf_vlen_i=NULL;
 	char        (*buf_str)[FIXED_LEN];
 	char        **buf_vlen_s=NULL;
-	hobj_ref_t  buf_ref[2];
-	hdset_reg_ref_t buf_reg_ref[2];
+	href_t  buf_ref[2];
+	href_t buf_reg_ref[2];
     size_t      offset, len;
     herr_t      status;
     char        *names[NTYPES] = { "int", "ulong", "float", "double", "fixed string", 
@@ -395,8 +395,8 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
 		H5Dclose(did);	
 		
 		/* 11 add object refs */
-		H5Rcreate(&buf_ref[0],gid1, ".", H5R_OBJECT, (hid_t)-1); 
-		H5Rcreate(&buf_ref[1],gid1, tmp_name3, H5R_OBJECT, (hid_t)-1); 
+		buf_ref[0] = H5Rcreate_object(gid1, ".");
+		buf_ref[1] = H5Rcreate_object(gid1, tmp_name3);
 	    sprintf(name, "%05d obj refs", j);
         did = H5Dcreate (gid1, name, H5T_STD_REF_OBJ, sid_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Dwrite (did, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_ref);		
@@ -405,15 +405,15 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
 
 		/* 12 add region refs */
 		H5Sselect_elements (sid_2d, H5S_SELECT_SET, 4, coords[0]);
-		H5Rcreate(&buf_reg_ref[0],gid1, tmp_name1, H5R_DATASET_REGION, sid_2d); 
+		buf_reg_ref[0] = H5Rcreate_region(gid1, tmp_name1, sid_2d);
 		H5Sselect_none(sid_2d);
 		count = dims[0]/2+1;
 		H5Sselect_hyperslab (sid_1d, H5S_SELECT_SET, &start, &stride, &count,NULL);
-		H5Rcreate(&buf_reg_ref[1],gid1, tmp_name2, H5R_DATASET_REGION, sid_1d); 
+		buf_reg_ref[1] = H5Rcreate_region(gid1, tmp_name2, sid_1d);
 		H5Sselect_none(sid_1d);
 	    sprintf(name, "%05d region refs", j);
-        did = H5Dcreate (gid1, name, H5T_STD_REF_DSETREG, sid_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        H5Dwrite (did, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_reg_ref);		
+        did = H5Dcreate (gid1, name, H5T_STD_REF_REG, sid_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        H5Dwrite (did, H5T_STD_REF_REG, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_reg_ref);
 		if (!j) add_attrs(did, j); 
 		H5Dclose(did);
 	}
@@ -433,6 +433,10 @@ herr_t create_perf_test_file(const char *fname, int ngrps, int ndsets,
     H5Sclose (sid_large);
     H5Sclose (sid_null);
     H5Sclose (sid_scalar);
+    H5Rdestroy (buf_ref[0]);
+    H5Rdestroy (buf_ref[1]);
+    H5Rdestroy (buf_reg_ref[0]);
+    H5Rdestroy (buf_reg_ref[1]);
     H5Fclose (fid);
 
     for (i=0; i<dims[0]; i++) {
@@ -485,7 +489,7 @@ int add_attrs(hid_t oid, int idx)
     int i0, i1, i2, j, nattrs=0;
 	hid_t aid, tid, tid1, sid;
     hvl_t               i_vlen[4];
-	hobj_ref_t          ref;
+	href_t          ref;
 	zipcode_t            cmp_data[4];
     unsigned int        i = 0xffffffff;
     long long           l = -2147483647;
@@ -533,7 +537,7 @@ int add_attrs(hid_t oid, int idx)
 
 	/* 4 single point */
 	sid = H5Screate_simple (1, dims1, NULL);
-    H5Rcreate(&ref, oid, ".", H5R_OBJECT, (hid_t)-1);
+    ref = H5Rcreate_object(oid, ".");
 	sprintf(name, "%05d single float", idx);
     nattrs += add_attr(oid, name, H5T_NATIVE_FLOAT, sid, &f);	
 	sprintf(name, "%05d single double", idx);
@@ -541,6 +545,7 @@ int add_attrs(hid_t oid, int idx)
 	sprintf(name, "%05d single obj_ref", idx);
     nattrs += add_attr(oid, name, H5T_STD_REF_OBJ, sid, &ref);	
 	H5Sclose(sid);
+	H5Rdestroy(ref);
 	
 	/* 7 fixed length 1D array */
 	sid = H5Screate_simple (1, dims1, NULL);

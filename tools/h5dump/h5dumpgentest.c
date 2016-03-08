@@ -2018,17 +2018,13 @@ static void gent_objref(void)
     hid_t  sid1;       /* Dataspace ID   */
     hid_t  tid1;       /* Datatype ID   */
     hsize_t  dims1[] = {SPACE1_DIM1};
-    hobj_ref_t *wbuf,      /* buffer to write to disk */
-    *rbuf,       /* buffer read from disk */
-    *tbuf;       /* temp. buffer read from disk */
+    href_t *wbuf;      /* buffer to write to disk */
     uint32_t   *tu32;      /* Temporary pointer to uint32 data */
     int        i;          /* counting variables */
     const char *write_comment = "Foo!"; /* Comments for group */
 
     /* Allocate write & read buffers */
-    wbuf = (hobj_ref_t*) HDmalloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
-    rbuf = (hobj_ref_t*) HDmalloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
-    tbuf = (hobj_ref_t*) HDmalloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
+    wbuf = (href_t*) HDmalloc(sizeof(href_t) * SPACE1_DIM1);
 
     /* Create file */
     fid1 = H5Fcreate(FILE16, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2083,16 +2079,16 @@ static void gent_objref(void)
     dataset = H5Dcreate2(fid1, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create reference to dataset */
-    H5Rcreate(&wbuf[0], fid1, "/Group1/Dataset1", H5R_OBJECT, (hid_t)-1);
+    wbuf[0] = H5Rcreate_object(fid1, "/Group1/Dataset1");
 
     /* Create reference to dataset */
-    H5Rcreate(&wbuf[1], fid1, "/Group1/Dataset2", H5R_OBJECT, (hid_t)-1);
+    wbuf[1] = H5Rcreate_object(fid1, "/Group1/Dataset2");
 
     /* Create reference to group */
-    H5Rcreate(&wbuf[2], fid1, "/Group1", H5R_OBJECT, (hid_t)-1);
+    wbuf[2] = H5Rcreate_object(fid1, "/Group1");
 
     /* Create reference to named datatype */
-    H5Rcreate(&wbuf[3], fid1, "/Group1/Datatype1", H5R_OBJECT, (hid_t)-1);
+    wbuf[3] = H5Rcreate_object(fid1, "/Group1/Datatype1");
 
     /* Write selection to disk */
     H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
@@ -2103,13 +2099,15 @@ static void gent_objref(void)
     /* Close Dataset */
     H5Dclose(dataset);
 
+    /* Destroy references */
+    for (i = 0; i < SPACE1_DIM1; i++)
+        H5Rdestroy(wbuf[i]);
+
     /* Close file */
     H5Fclose(fid1);
 
     /* Free memory buffers */
     HDfree(wbuf);
-    HDfree(rbuf);
-    HDfree(tbuf);
 }
 
 static void gent_datareg(void)
@@ -2128,18 +2126,14 @@ static void gent_datareg(void)
     hsize_t  count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t  block[SPACE2_RANK];     /* Block size of hyperslab */
     hsize_t  coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hdset_reg_ref_t      *wbuf,      /* buffer to write to disk */
-    *rbuf;       /* buffer read from disk */
-    uint8_t    *dwbuf,      /* Buffer for writing numeric data to disk */
-    *drbuf;      /* Buffer for reading numeric data from disk */
+    href_t   *wbuf;      /* buffer to write to disk */
+    uint8_t    *dwbuf;      /* Buffer for writing numeric data to disk */
     uint8_t    *tu8;        /* Temporary pointer to uint8 data */
     int        i;          /* counting variables */
 
     /* Allocate write & read buffers */
-    wbuf = (hdset_reg_ref_t*) HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf = (hdset_reg_ref_t*) HDmalloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
+    wbuf = (href_t*) HDcalloc(sizeof(href_t), SPACE1_DIM1);
     dwbuf = (uint8_t*) HDmalloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
-    drbuf = (uint8_t*) HDcalloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
 
     /* Create file */
     fid1 = H5Fcreate(FILE17, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2163,7 +2157,7 @@ static void gent_datareg(void)
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
 
     /* Create a dataset */
-    dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF_DSETREG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset1 = H5Dcreate2(fid1, "Dataset1", H5T_STD_REF_REG, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create references */
 
@@ -2177,7 +2171,7 @@ static void gent_datareg(void)
     H5Sget_select_npoints(sid2);
 
     /* Store first dataset region */
-    H5Rcreate(&wbuf[0], fid1, "/Dataset2", H5R_DATASET_REGION, sid2);
+    wbuf[0] = H5Rcreate_region(fid1, "/Dataset2", sid2);
 
     /* Select sequence of ten points for second reference */
     coord1[0][0]=6; coord1[0][1]=9;
@@ -2195,10 +2189,10 @@ static void gent_datareg(void)
     H5Sget_select_npoints(sid2);
 
     /* Store second dataset region */
-    H5Rcreate(&wbuf[1],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);
+    wbuf[1] = H5Rcreate_region(fid1, "/Dataset2", sid2);
 
     /* Write selection to disk */
-    H5Dwrite(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
+    H5Dwrite(dset1, H5T_STD_REF_REG, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
 
     /* Close disk dataspace */
     H5Sclose(sid1);
@@ -2209,14 +2203,16 @@ static void gent_datareg(void)
     /* Close uint8 dataset dataspace */
     H5Sclose(sid2);
 
+    /* Destroy references */
+    for (i = 0; i < SPACE1_DIM1; i++)
+        H5Rdestroy(wbuf[i]);
+
     /* Close file */
     H5Fclose(fid1);
 
     /* Free memory buffers */
     HDfree(wbuf);
-    HDfree(rbuf);
     HDfree(dwbuf);
-    HDfree(drbuf);
 }
 
 static void gent_attrreg(void)
@@ -2237,18 +2233,14 @@ static void gent_attrreg(void)
     hsize_t  count[SPACE2_RANK];     /* Element count of hyperslab */
     hsize_t  block[SPACE2_RANK];     /* Block size of hyperslab */
     hsize_t  coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hdset_reg_ref_t      *wbuf;      /* buffer to write to disk */
-    hdset_reg_ref_t      *rbuf;      /* buffer read from disk */
+    href_t      *wbuf;      /* buffer to write to disk */
     uint8_t    *dwbuf;      /* Buffer for writing numeric data to disk */
-    uint8_t    *drbuf;      /* Buffer for reading numeric data from disk */
     uint8_t    *tu8;        /* Temporary pointer to uint8 data */
     int        i;           /* counting variables */
 
     /* Allocate write & read buffers */
-    wbuf = (hdset_reg_ref_t*) HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
-    rbuf = (hdset_reg_ref_t*) HDmalloc(sizeof(hdset_reg_ref_t)*SPACE1_DIM1);
+    wbuf = (href_t*) HDcalloc(sizeof(href_t), SPACE1_DIM1);
     dwbuf = (uint8_t*) HDmalloc(sizeof(uint8_t)*SPACE2_DIM1*SPACE2_DIM2);
-    drbuf = (uint8_t*) HDcalloc(sizeof(uint8_t),SPACE2_DIM1*SPACE2_DIM2);
 
     /* Create file */
     fid1 = H5Fcreate(FILE64, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -2289,7 +2281,7 @@ static void gent_attrreg(void)
     H5Sget_select_npoints(sid2);
 
     /* Store first dataset region */
-    H5Rcreate(&wbuf[0], fid1, "/Dataset2", H5R_DATASET_REGION, sid2);
+    wbuf[0] = H5Rcreate_region(fid1, "/Dataset2", sid2);
 
     /* Select sequence of ten points for second reference */
     coord1[0][0]=6; coord1[0][1]=9;
@@ -2307,15 +2299,15 @@ static void gent_attrreg(void)
     H5Sget_select_npoints(sid2);
 
     /* Store second dataset region */
-    H5Rcreate(&wbuf[1],fid1,"/Dataset2",H5R_DATASET_REGION,sid2);
+    wbuf[1] = H5Rcreate_region(fid1, "/Dataset2", sid2);
 
     /* Create dataspace for the attribute */
     sid3 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
 
     /* Create the attribute and write the region references to it. */
-    attr1 = H5Acreate2 (dset1, "Attribute1", H5T_STD_REF_DSETREG, sid3, H5P_DEFAULT,
+    attr1 = H5Acreate2 (dset1, "Attribute1", H5T_STD_REF_REG, sid3, H5P_DEFAULT,
             H5P_DEFAULT);
-    H5Awrite (attr1, H5T_STD_REF_DSETREG, wbuf);
+    H5Awrite (attr1, H5T_STD_REF_REG, wbuf);
 
     /* Close attribute dataspace */
     H5Sclose(sid3);
@@ -2329,14 +2321,16 @@ static void gent_attrreg(void)
     /* Close uint8 dataset dataspace */
     H5Sclose(sid2);
 
+    /* Destroy references */
+    for (i = 0; i < SPACE1_DIM1; i++)
+        H5Rdestroy(wbuf[i]);
+
     /* Close file */
     H5Fclose(fid1);
 
     /* Free memory buffers */
     HDfree(wbuf);
-    HDfree(rbuf);
     HDfree(dwbuf);
-    HDfree(drbuf);
 }
 
 /*taken from Elena's compound test file*/
@@ -2925,7 +2919,7 @@ static void gent_array1_big(void)
     hsize_t  stride[SPACE1_RANK];    /* Stride of hyperslab */
     hsize_t  count[SPACE1_RANK];     /* Element count of hyperslab */
     hsize_t  block[SPACE1_RANK];     /* Block size of hyperslab */
-    hdset_reg_ref_t   *wbuf;         /* buffer to write to disk */
+    href_t   *wbuf;         /* buffer to write to disk */
 
     start[0] = 0;
     stride[0] = 1;
@@ -2933,7 +2927,7 @@ static void gent_array1_big(void)
     block[0] = 1;
 
     /* Allocate write & read buffers */
-    wbuf = (hdset_reg_ref_t*) HDcalloc(sizeof(hdset_reg_ref_t), SPACE1_DIM1);
+    wbuf = (href_t*) HDcalloc(sizeof(href_t), SPACE1_DIM1);
     wdata = (int *)HDmalloc(sizeof(int) * (size_t)(SPACE_ARRAY1BIG_DIM * ARRAY1BIG_DIM));
 
     /* Allocate and initialize array data to write */
@@ -2967,7 +2961,7 @@ static void gent_array1_big(void)
     sid2 = H5Screate_simple(SPACE1_RANK, dims2, NULL);
 
     /* Create a dataset */
-    dset2 = H5Dcreate2(fid1, "Dataset2", H5T_STD_REF_DSETREG, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset2 = H5Dcreate2(fid1, "Dataset2", H5T_STD_REF_REG, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create references */
     H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, stride, count, block);
@@ -2975,10 +2969,10 @@ static void gent_array1_big(void)
     H5Sget_select_npoints(sid1);
 
     /* Create Dataset1 region */
-    H5Rcreate(&wbuf[0], fid1, "/Dataset1", H5R_DATASET_REGION, sid1);
+    wbuf[0] = H5Rcreate_region(fid1, "/Dataset1", sid1);
 
     /* Write selection to disk */
-    H5Dwrite(dset2,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
+    H5Dwrite(dset2, H5T_STD_REF_REG, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -2986,6 +2980,8 @@ static void gent_array1_big(void)
     ret = H5Tclose(tid1);
     HDassert(ret >= 0);
     ret = H5Sclose(sid1);
+    HDassert(ret >= 0);
+    ret = H5Rdestroy(wbuf[0]);
     HDassert(ret >= 0);
     ret = H5Fclose(fid1);
     HDassert(ret >= 0);
@@ -3873,7 +3869,7 @@ static void write_attr_in(hid_t loc_id,
     char       buf1[2][3]= {"ab","de"};        /* string */
     char       buf2[2]= {1,2};                 /* bitfield, opaque */
     s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
-    hobj_ref_t buf4[2];                        /* reference */
+    href_t     buf4[2];                        /* reference */
     hvl_t      buf5[2];                        /* vlen */
     hsize_t    dimarray[1]={3};                /* array dimension */
     int        buf6[2][3]= {{1,2,3},{4,5,6}};  /* array */
@@ -3885,7 +3881,7 @@ static void write_attr_in(hid_t loc_id,
     char       buf12[6][3]= {"ab","cd","ef","gh","ij","kl"};         /* string */
     char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
     s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
-    hobj_ref_t buf42[3][2];                                          /* reference */
+    href_t     buf42[3][2];                                          /* reference */
     hvl_t      buf52[3][2];                                          /* vlen */
     int        buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};  /* array */
     int        buf72[3][2]= {{1,2},{3,4},{5,6}};                     /* integer */
@@ -3898,7 +3894,7 @@ static void write_attr_in(hid_t loc_id,
             "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
     char       buf23[4][3][2];    /* bitfield, opaque */
     s_t        buf33[4][3][2];    /* compound */
-    hobj_ref_t buf43[4][3][2];    /* reference */
+    href_t     buf43[4][3][2];    /* reference */
     hvl_t      buf53[4][3][2];    /* vlen */
     int        buf63[24][3];      /* array */
     int        buf73[4][3][2];    /* integer */
@@ -3953,9 +3949,11 @@ static void write_attr_in(hid_t loc_id,
     /* Create references to dataset */
     if(dset_name)
     {
-        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,(hid_t)-1);
-        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+        buf4[0] = H5Rcreate_object(fid, dset_name);
+        buf4[1] = H5Rcreate_object(fid, dset_name);
         write_attr(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
+        H5Rdestroy(buf4[0]);
+        H5Rdestroy(buf4[1]);
     }
 
     /*-------------------------------------------------------------------------
@@ -4060,10 +4058,15 @@ static void write_attr_in(hid_t loc_id,
     {
         for(i = 0; i < 3; i++) {
             for(j = 0; j < 2; j++) {
-                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+                buf42[i][j] = H5Rcreate_object(fid, dset_name);
             }
         }
         write_attr(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
+        for(i = 0; i < 3; i++) {
+            for(j = 0; j < 2; j++) {
+                H5Rdestroy(buf42[i][j]);
+            }
+        }
     }
 
     /*-------------------------------------------------------------------------
@@ -4191,10 +4194,16 @@ static void write_attr_in(hid_t loc_id,
         for(i = 0; i < 4; i++) {
             for(j = 0; j < 3; j++) {
                 for(k = 0; k < 2; k++)
-                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+                    buf43[i][j][k] = H5Rcreate_object(fid, dset_name);
             }
         }
         write_attr(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
+        for(i = 0; i < 4; i++) {
+            for(j = 0; j < 3; j++) {
+                for(k = 0; k < 2; k++)
+                    H5Rdestroy(buf43[i][j][k]);
+            }
+        }
     }
 
     /*-------------------------------------------------------------------------
@@ -4315,7 +4324,7 @@ static void write_dset_in(hid_t loc_id,
     char       buf1[2][3]= {"ab","de"};        /* string */
     char       buf2[2]= {1,2};                 /* bitfield, opaque */
     s_t        buf3[2]= {{1,2},{3,4}};         /* compound */
-    hobj_ref_t buf4[2];                        /* reference */
+    href_t     buf4[2];                        /* reference */
     hvl_t      buf5[2];                        /* vlen */
     hsize_t    dimarray[1]={3};                /* array dimension */
     int        buf6[2][3]= {{1,2,3},{4,5,6}};  /* array */
@@ -4327,7 +4336,7 @@ static void write_dset_in(hid_t loc_id,
     char       buf12[6][3]= {"ab","cd","ef","gh","ij","kl"};         /* string */
     char       buf22[3][2]= {{1,2},{3,4},{5,6}};                     /* bitfield, opaque */
     s_t        buf32[6]= {{1,2},{3,4},{5,6},{7,8},{9,10},{11,12}};   /* compound */
-    hobj_ref_t buf42[3][2];                                          /* reference */
+    href_t     buf42[3][2];                                          /* reference */
     hvl_t      buf52[3][2];                                          /* vlen */
     int        buf62[6][3]= {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};  /* array */
     int        buf72[3][2]= {{1,2},{3,4},{5,6}};                     /* integer */
@@ -4340,7 +4349,7 @@ static void write_dset_in(hid_t loc_id,
             "IJ","KL","MN","PQ","RS","TU","VW","XZ"};  /* string */
     char       buf23[4][3][2];    /* bitfield, opaque */
     s_t        buf33[4][3][2];    /* compound */
-    hobj_ref_t buf43[4][3][2];    /* reference */
+    href_t     buf43[4][3][2];    /* reference */
     hvl_t      buf53[4][3][2];    /* vlen */
     int        buf63[24][3];      /* array */
     int        buf73[4][3][2];    /* integer */
@@ -4395,9 +4404,11 @@ static void write_dset_in(hid_t loc_id,
     /* Create references to dataset */
     if(dset_name)
     {
-        status=H5Rcreate(&buf4[0],fid,dset_name,H5R_OBJECT,(hid_t)-1);
-        status=H5Rcreate(&buf4[1],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+        buf4[0] = H5Rcreate_object(fid, dset_name);
+        buf4[1] = H5Rcreate_object(fid, dset_name);
         write_dset(loc_id,1,dims,"reference",H5T_STD_REF_OBJ,buf4);
+        H5Rdestroy(buf4[0]);
+        H5Rdestroy(buf4[1]);
     }
 
     /*-------------------------------------------------------------------------
@@ -4502,10 +4513,15 @@ static void write_dset_in(hid_t loc_id,
     {
         for(i = 0; i < 3; i++) {
             for(j = 0; j < 2; j++) {
-                status=H5Rcreate(&buf42[i][j],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+                buf42[i][j] = H5Rcreate_object(fid, dset_name);
             }
         }
         write_dset(loc_id,2,dims2,"reference2D",H5T_STD_REF_OBJ,buf42);
+        for(i = 0; i < 3; i++) {
+            for(j = 0; j < 2; j++) {
+                H5Rdestroy(buf42[i][j]);
+            }
+        }
     }
 
     /*-------------------------------------------------------------------------
@@ -4645,10 +4661,16 @@ static void write_dset_in(hid_t loc_id,
         for(i = 0; i < 4; i++) {
             for(j = 0; j < 3; j++) {
                 for(k = 0; k < 2; k++)
-                    status=H5Rcreate(&buf43[i][j][k],fid,dset_name,H5R_OBJECT,(hid_t)-1);
+                    buf43[i][j][k] = H5Rcreate_object(fid, dset_name);
             }
         }
         write_dset(loc_id,3,dims3,"reference3D",H5T_STD_REF_OBJ,buf43);
+        for(i = 0; i < 4; i++) {
+            for(j = 0; j < 3; j++) {
+                for(k = 0; k < 2; k++)
+                    H5Rdestroy(buf43[i][j][k]);
+            }
+        }
     }
 
     /*-------------------------------------------------------------------------
