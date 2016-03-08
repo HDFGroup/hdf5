@@ -3282,16 +3282,12 @@ H5C_protect(H5F_t *		f,
 
         hit = FALSE;
 
-        thing = H5C_load_entry(f, dxpl_id, 
+        if(NULL == (thing = H5C_load_entry(f, dxpl_id, 
 #ifdef H5_HAVE_PARALLEL
-                               coll_access, 
+                                           coll_access, 
 #endif /* H5_HAVE_PARALLEL */
-                               type, addr, udata);
-
-        if ( thing == NULL ) {
-
+                                           type, addr, udata)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't load entry")
-        }
 
         entry_ptr = (H5C_cache_entry_t *)thing;
         entry_ptr->ring  = ring;

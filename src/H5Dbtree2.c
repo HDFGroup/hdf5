@@ -89,7 +89,7 @@ typedef struct H5D_bt2_ud_t {
 static void *H5D__bt2_crt_context(void *udata);
 static herr_t H5D__bt2_dst_context(void *ctx);
 static herr_t H5D__bt2_store(void *native, const void *udata);
-static herr_t H5D__bt2_compare(const void *rec1, const void *rec2);
+static herr_t H5D__bt2_compare(const void *rec1, const void *rec2, int *result);
 
 /* v2 B-tree class for indexing non-filtered chunked datasets */
 static herr_t H5D__bt2_unfilt_encode(uint8_t *raw, const void *native, void *ctx);
@@ -350,12 +350,12 @@ H5D__bt2_store(void *record, const void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__bt2_compare(const void *_udata, const void *_rec2)
+H5D__bt2_compare(const void *_udata, const void *_rec2, int *result)
 {
     const H5D_bt2_ud_t *udata = (const H5D_bt2_ud_t *)_udata;	/* User data */
     const H5D_chunk_rec_t *rec1 = &(udata->rec);	/* The search record */
     const H5D_chunk_rec_t *rec2 = (const H5D_chunk_rec_t *)_rec2;	/* The native record */
-    herr_t ret_value = FAIL; 	/* Return value */
+    herr_t ret_value = SUCCEED; 	/* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -364,7 +364,7 @@ H5D__bt2_compare(const void *_udata, const void *_rec2)
     HDassert(rec2);
 
     /* Compare the offsets but ignore the other fields */
-    ret_value = H5VM_vector_cmp_u(udata->ndims, rec1->scaled, rec2->scaled);
+    *result = H5VM_vector_cmp_u(udata->ndims, rec1->scaled, rec2->scaled);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__bt2_compare() */
