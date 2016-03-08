@@ -2069,7 +2069,7 @@ H5LT_find_attribute( hid_t loc_id, const char* attr_name )
 herr_t
 H5LT_find_attribute_ff( hid_t loc_id, const char* attr_name, hid_t rc_id, hid_t estack_id)
 {
-  return H5Aiterate_ff(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, find_attr, (void *)attr_name, rc_id, estack_id);
+  return H5Aiterate_ff(loc_id, H5_INDEX_NAME, H5_ITER_NATIVE, NULL, find_attr, (void *)attr_name, rc_id, estack_id);
 }
 
 
