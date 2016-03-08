@@ -222,7 +222,7 @@ h5libsettings=../src/libhdf5.settings
 PURPOSE
 
 # Figure out library version numbers from the header file.
-h5vers_interface=`grep '#define LT_VERS_INTERFACE' ../../hdf5/src/H5public.h | sed -e s/[^0-9]//g`
+h5vers_interface=`grep '#define LT_VERS_INTERFACE' $srcdir/../src/H5public.h | sed -e s/[^0-9]//g`
 #echo h5vers_interface=$h5vers_interface
 h5vers_revision=`grep '#define LT_VERS_REVISION' $srcdir/../src/H5public.h | sed -e s/[^0-9]//g`
 #echo h5vers_revision=$h5vers_revision
