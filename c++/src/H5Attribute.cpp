@@ -60,9 +60,8 @@ Attribute::Attribute() : AbstractDs(), IdComponent(), id(H5I_INVALID_HID) {}
 ///\param	original  - IN: Original Attribute object to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute::Attribute(const Attribute& original) : AbstractDs(), IdComponent()
+Attribute::Attribute(const Attribute& original) : AbstractDs(), IdComponent(), id(original.id)
 {
-    id = original.getId();
     incRefCount(); // increment number of references to this id
 }
 
@@ -74,9 +73,8 @@ Attribute::Attribute(const Attribute& original) : AbstractDs(), IdComponent()
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute::Attribute(const hid_t existing_id) : AbstractDs(), IdComponent()
+Attribute::Attribute(const hid_t existing_id) : AbstractDs(), IdComponent(), id(existing_id)
 {
-    id = existing_id;
     incRefCount(); // increment number of references to this id
 }
 
@@ -453,17 +451,18 @@ ssize_t Attribute::getName(H5std_string& attr_name, size_t len) const
 }
 
 //--------------------------------------------------------------------------
-// Function:    Attribute::getName
-///\brief       This function is replaced by the previous function, which
-///		provides more convenient prototype.  It will be removed
-///		in future release.
-///\param       len  -  IN: Desired length of the name
-///\param       attr_name - OUT: Buffer for the name string
-///\return      Actual length of the attribute name
-///\exception   H5::AttributeIException
-// Programmer   Binh-Minh Ribler - Nov, 2001
+// Function:	Attribute::getName
+// Purpose	This function is replaced by the previous function, which
+//		provides more convenient prototype.  It will be removed
+//		in future release.
+// Param	len  -  IN: Desired length of the name
+// Param	attr_name - OUT: Buffer for the name string
+// Return	Actual length of the attribute name
+// Exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - Nov, 2001
 // Modification
 //		Modified to call its replacement. -BMR, 2014/04/16
+//		Removed from documentation. -BMR, 2016/03/07
 //--------------------------------------------------------------------------
 ssize_t Attribute::getName( size_t len, H5std_string& attr_name ) const
 {

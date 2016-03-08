@@ -330,16 +330,18 @@ void FileAccPropList::setSplit(const FileAccPropList& meta_plist, const FileAccP
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::setSplit
-///\brief	This is an overloaded member function, kept for backward
-///		compatibility.  It differs from the above function in that it
-///		misses const's.  This wrapper will be removed in future release.
-///\param	meta_plist  - IN: File access plist for the metadata file
-///\param	raw_plist   - IN: File access plist for the raw data file
-///\param	meta_ext    - IN: Metadata filename extension as \c char*
-///\param	raw_ext     - IN: Raw data filename extension as \c char*
-///\exception	H5::PropListIException
+// Purpose	This is an overloaded member function, kept for backward
+//		compatibility.  It differs from the above function in that it
+//		misses const's.  This wrapper will be removed in future release.
+// Param 	meta_plist  - IN: File access plist for the metadata file
+// Param 	raw_plist   - IN: File access plist for the raw data file
+// Param 	meta_ext    - IN: Metadata filename extension as \c char*
+// Param 	raw_ext     - IN: Raw data filename extension as \c char*
+// Exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
-// Note:	Retiring April, 2014
+// Modification
+//		Planned for removal. -BMR, 2014/04/16
+//		Removed from documentation. -BMR, 2016/03/07
 //--------------------------------------------------------------------------
 void FileAccPropList::setSplit(FileAccPropList& meta_plist, FileAccPropList& raw_plist, const char* meta_ext, const char* raw_ext ) const
 {
@@ -364,16 +366,17 @@ void FileAccPropList::setSplit(const FileAccPropList& meta_plist, const FileAccP
 
 //--------------------------------------------------------------------------
 // Function:	FileAccPropList::setSplit
-///\brief	This is an overloaded member function, kept for backward
-///		compatibility.  It differs from the above function in that it
-///		misses const's.  This wrapper will be removed in future release.
-///\param	meta_plist  - IN: File access plist for the metadata file
-///\param	raw_plist   - IN: File access plist for the raw data file
-///\param	meta_ext    - IN: Metadata filename extension as \c string
-///\param	raw_ext     - IN: Raw data filename extension as \c string
-///\exception	H5::PropListIException
-// Programmer:  Binh-Minh Ribler - April, 2004
-// Note:	Retiring April, 2014
+// Purpose	This is an overloaded member function, kept for backward
+//		compatibility.  It differs from the above function in that it
+//		misses const's.  This wrapper will be removed in future release.
+// Param 	meta_plist  - IN: File access plist for the metadata file
+// Param 	raw_plist   - IN: File access plist for the raw data file
+// Param 	meta_ext    - IN: Metadata filename extension as \c char*
+// Param 	raw_ext     - IN: Raw data filename extension as \c char*
+// Exception	H5::PropListIException
+// Modification
+//		Planned for removal. -BMR, 2014/04/16
+//		Removed from documentation. -BMR, 2016/03/07
 //--------------------------------------------------------------------------
 void FileAccPropList::setSplit(FileAccPropList& meta_plist, FileAccPropList& raw_plist, const H5std_string& meta_ext, const H5std_string& raw_ext ) const
 {
