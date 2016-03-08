@@ -246,10 +246,10 @@ test_simple_io( H5File& file)
 	DataSet dataset (file.createDataSet (DSET_SIMPLE_IO_NAME, PredType::NATIVE_INT, space));
 
 	// Write the data to the dataset
-	dataset.write ((void*) points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset.write (static_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Read the dataset back
-	dataset.read ((void*) check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset.read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i = 0; i < 100; i++)
@@ -395,10 +395,10 @@ test_tconv( H5File& file)
 	DataSet dataset (file.createDataSet (DSET_TCONV_NAME, PredType::STD_I32LE, space));
 
 	// Write the data to the dataset
-	dataset.write ((void*) out, PredType::STD_I32LE);
+	dataset.write (static_cast<void*>(out), PredType::STD_I32LE);
 
 	// Read data with byte order conversion
-	dataset.read ((void*) in, PredType::STD_I32BE);
+	dataset.read (static_cast<void*>(in), PredType::STD_I32BE);
 
 	// Check
 	for (int i = 0; i < 1000000; i++) {
@@ -501,7 +501,7 @@ test_compression(H5File& file)
     for (i = n = 0; i < 100; i++)
     {
 	for (j = 0; j < 200; j++) {
-	    points[i][j] = (int)n++;
+	    points[i][j] = static_cast<int>(n++);
 	}
     }
     char* tconv_buf = new char [1000];
@@ -539,15 +539,15 @@ test_compression(H5File& file)
 	*/
 	SUBTEST("Compression (uninitialized read)");
 
-	dataset->read ((void*) check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	for (i=0; i<size[0]; i++) {
 	    for (j=0; j<size[1]; j++) {
 		if (0!=check[i][j]) {
 		    H5_FAILED();
 		    cerr << "    Read a non-zero value." << endl;
-		    cerr << "    At index " << (unsigned long)i << "," <<
-		   (unsigned long)j << endl;
+		    cerr << "    At index " << static_cast<unsigned long>(i) << "," <<
+		   static_cast<unsigned long>(j) << endl;
 		    throw Exception("test_compression", "Failed in uninitialized read");
 		}
 	    }
@@ -565,11 +565,11 @@ test_compression(H5File& file)
 	{
 	    for (j=0; j<size[1]; j++)
 	    {
-		points[i][j] = (int)n++;
+		points[i][j] = static_cast<int>(n++);
 	    }
 	}
 
-	dataset->write ((void*) points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->write (static_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	PASSED();
 
@@ -580,7 +580,7 @@ test_compression(H5File& file)
 	SUBTEST("Compression (read)");
 
 	// Read the dataset back
-	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
@@ -609,10 +609,10 @@ test_compression(H5File& file)
 	    	points[i][j] = rand ();
 	    }
 	}
-	dataset->write ((void*)points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->write (static_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Read the dataset back and check it
-	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
@@ -637,7 +637,7 @@ test_compression(H5File& file)
 	delete dataset;
 
 	dataset = new DataSet (file.openDataSet (DSET_COMPRESS_NAME));
-	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
@@ -667,8 +667,8 @@ test_compression(H5File& file)
 	    }
 	}
 	space1.selectHyperslab( H5S_SELECT_SET, hs_size, hs_offset );
-	dataset->write ((void*)points, PredType::NATIVE_INT, space1, space1, xfer);
-	dataset->read ((void*)check, PredType::NATIVE_INT, space1, space1, xfer);
+	dataset->write (static_cast<void*>(points), PredType::NATIVE_INT, space1, space1, xfer);
+	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, space1, space1, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i=0; i<hs_size[0]; i++) {
@@ -677,11 +677,11 @@ test_compression(H5File& file)
 		check[hs_offset[0]+i][hs_offset[1]+j]) {
 		H5_FAILED();
 		cerr << "    Read different values than written.\n" << endl;
-		cerr << "    At index " << (unsigned long)(hs_offset[0]+i) <<
-		   "," << (unsigned long)(hs_offset[1]+j) << endl;
+		cerr << "    At index " << static_cast<unsigned long>((hs_offset[0]+i)) <<
+		   "," << static_cast<unsigned long>((hs_offset[1]+j)) << endl;
 
-		cerr << "    At original: " << (int)points[hs_offset[0]+i][hs_offset[1]+j] << endl;
-		cerr << "    At returned: " << (int)check[hs_offset[0]+i][hs_offset[1]+j] << endl;
+		cerr << "    At original: " << static_cast<int>(points[hs_offset[0]+i][hs_offset[1]+j]) << endl;
+		cerr << "    At returned: " << static_cast<int>(check[hs_offset[0]+i][hs_offset[1]+j]) << endl;
 		throw Exception("test_compression", "Failed in partial I/O");
 	    }
 	} // for j
@@ -714,8 +714,8 @@ test_compression(H5File& file)
 	DataSpace space2 (2, size, NULL);
 	dataset = new DataSet (file.createDataSet (DSET_BOGUS_NAME, PredType::NATIVE_INT, space2, dscreatplist));
 
-	dataset->write ((void*)points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
-	dataset->read ((void*)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->write (static_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
@@ -812,8 +812,8 @@ test_multiopen (H5File& file)
 	space->getSimpleExtentDims (tmp_size);
 	if (cur_size[0]!=tmp_size[0])
 	{
-	    cerr << "    Got " << (int)tmp_size[0] << " instead of "
-		    << (int)cur_size[0] << "!" << endl;
+	    cerr << "    Got " << static_cast<int>(tmp_size[0]) << " instead of "
+		    << static_cast<int>(cur_size[0]) << "!" << endl;
 	    throw Exception("test_multiopen", "Failed in multi-open with extending");
 	}
 
@@ -897,7 +897,7 @@ test_types(H5File& file)
 
 	    // Fill buffer
 	    for (i=0; i<sizeof buf; i++)
-	    	buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+	    	buf[i] = static_cast<unsigned char>(0xff) ^ static_cast<unsigned char>(i);
 
 	    // Write data from buf using all default dataspaces and property list
 	    dset->write (buf, type);
@@ -926,7 +926,7 @@ test_types(H5File& file)
 
 	    // Fill buffer
 	    for (i=0; i<sizeof(buf); i++)
-		buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+		buf[i] = static_cast<unsigned char>(0xff) ^ static_cast<unsigned char>(i);
 
 	    // Write data from buf using all default dataspaces and property
 	    // list; if writing fails, deallocate dset and return.
@@ -959,7 +959,7 @@ test_types(H5File& file)
 
 	    // Fill buffer
 	    for (i=0; i<sizeof buf; i++)
-		buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+		buf[i] = static_cast<unsigned char>(0xff) ^ static_cast<unsigned char>(i);
 
 	    // Write data from buf using all default dataspaces and property
 	    // list; if writing fails, deallocate dset and return.
@@ -992,7 +992,7 @@ test_types(H5File& file)
 
 	    // Fill buffer
 	    for (i=0; i<sizeof(buf); i++)
-		buf[i] = (unsigned char)0xff ^ (unsigned char)i;
+		buf[i] = static_cast<unsigned char>(0xff) ^ static_cast<unsigned char>(i);
 
 	    // Write data from buf using all default dataspaces and property
 	    // list; if writing fails, deallocate dset and return.

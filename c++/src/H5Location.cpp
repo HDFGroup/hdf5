@@ -190,7 +190,7 @@ Attribute H5Location::openAttribute( const H5std_string& name ) const
 Attribute H5Location::openAttribute( const unsigned int idx ) const
 {
    hid_t attr_id = H5Aopen_by_idx(getId(), ".", H5_INDEX_CRT_ORDER,
-			H5_ITER_INC, (hsize_t)idx, H5P_DEFAULT, H5P_DEFAULT);
+		H5_ITER_INC, static_cast<hsize_t>(idx), H5P_DEFAULT, H5P_DEFAULT);
    if( attr_id > 0 )
    {
 	Attribute attr;
@@ -232,7 +232,7 @@ int H5Location::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_
    // call the C library routine H5Aiterate2 to iterate the attributes
    hsize_t idx = _idx ? (hsize_t)*_idx : 0;
    int ret_value = H5Aiterate2(getId(), H5_INDEX_NAME, H5_ITER_INC, &idx,
-			userAttrOpWrpr, (void *) userData);
+			userAttrOpWrpr, static_cast<void *>(userData));
 
    // release memory
    delete userData;
@@ -240,7 +240,7 @@ int H5Location::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_
    if( ret_value >= 0 ) {
       /* Pass back update index value to calling code */
       if (_idx)
-	 *_idx = (unsigned)idx;
+	 *_idx = static_cast<unsigned>(idx);
 
       return( ret_value );
    }
@@ -262,7 +262,7 @@ int H5Location::getNumAttrs() const
    if(H5Oget_info(getId(), &oinfo) < 0)
       throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
    else
-      return( (int)oinfo.num_attrs );
+      return(static_cast<int>(oinfo.num_attrs));
 }
 
 //--------------------------------------------------------------------------
@@ -517,7 +517,7 @@ ssize_t H5Location::getComment(const char* name, size_t buf_size, char* comment)
     }
     // If the comment is longer than the provided buffer size, the C library
     // will not null terminate it
-    if ((size_t)comment_len >= buf_size)
+    if (static_cast<size_t>(comment_len) >= buf_size)
 	comment[buf_size-1] = '\0';
 
     // Return the actual comment length, which might be different from buf_size

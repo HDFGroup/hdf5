@@ -58,10 +58,10 @@ StrType::StrType( const PredType& pred_type ) : AtomType()
 
 //--------------------------------------------------------------------------
 // Function:	StrType overloaded constructor
-///\brief	Creates a string datatype with a specified length
-///\param	pred_type - IN: String predefined type to replicate.
-///\param	size	  - IN: Length of the new string type
-///\exception	H5::DataTypeIException
+// Purpose	Creates a string datatype with a specified length
+// Param 	pred_type - IN: String predefined type to replicate.
+// Param 	size	  - IN: Length of the new string type
+// Exception	H5::DataTypeIException
 // Description
 // 		The 1st argument could have been skipped, but this
 // 		constructor will collide with the one that takes an
@@ -71,10 +71,13 @@ StrType::StrType( const PredType& pred_type ) : AtomType()
 //		avoid the clashing problem, that doesn't eliminate the
 //		the 1st argument but it's simpler for the user to type
 //		a '0' than PredType::C_S1.  - Dec 2, 2005
-///\note
-///		The use of this constructor can be shortened by using
-///		its overloaded below as StrType(0, size).
+// Note
+//		The use of this constructor can be shortened by using
+//		its overloaded below as StrType(0, size).
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		Planned for removal. -BMR, 2005/12/02
+//		Removed from documentation. -BMR, 2016/03/07
 //--------------------------------------------------------------------------
 StrType::StrType( const PredType& pred_type, const size_t& size ) : AtomType()
 {
@@ -96,8 +99,8 @@ StrType::StrType( const PredType& pred_type, const size_t& size ) : AtomType()
 ///		previous constructor, such as:
 ///		StrType atype(0, size) instead of
 ///		StrType atype(PredType::C_S1, size)
-///\note
-///		This constructor may replace the previous one in the future.
+// Note
+//		This constructor replaced the previous one.
 // Programmer	Binh-Minh Ribler - Nov 28, 2005
 //--------------------------------------------------------------------------
 StrType::StrType( const int dummy, const size_t& size ) : AtomType()

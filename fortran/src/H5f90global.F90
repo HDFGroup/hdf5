@@ -1008,7 +1008,6 @@ CONTAINS
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: f_string
     CHARACTER(KIND=C_CHAR, LEN=*), INTENT(OUT) :: c_string
-    INTEGER(SIZE_T) :: c_len, f_len
 
     c_string = TRIM(f_string)//C_NULL_CHAR
 

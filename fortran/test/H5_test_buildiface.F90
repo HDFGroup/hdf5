@@ -60,38 +60,7 @@ PROGRAM H5_test_buildiface
   H5_H5CONFIG_F_IKIND
 
   INTEGER :: i, j, k
-  INTEGER :: ji, jr, jd
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-  REAL(KIND=C_LONG_DOUBLE) :: c_longdble
-#endif
-  REAL(KIND=C_DOUBLE) :: c_dble
-  REAL(KIND=C_FLOAT) :: c_flt
-  INTEGER :: sizeof_var
   CHARACTER(LEN=2) :: chr2
-! subroutine rank of array being passed in
-  CHARACTER(LEN=2), DIMENSION(1:8), PARAMETER :: chr_rank=(/"_0","_1","_2","_3","_4","_5","_6","_7"/)
-! rank definitions
-  CHARACTER(LEN=70), DIMENSION(1:8), PARAMETER :: rank_dim_line=(/ &
-       '                                                                    ', &
-       ', DIMENSION(dims(1))                                                ', &
-       ', DIMENSION(dims(1),dims(2))                                        ', &
-       ', DIMENSION(dims(1),dims(2),dims(3))                                ', &
-       ', DIMENSION(dims(1),dims(2),dims(3),dims(4))                        ', &
-       ', DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5))                ', &
-       ', DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6))        ', &
-       ', DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7))' &
-            /)
-! pointer to the buffer
-  CHARACTER(LEN=37), DIMENSION(1:8), PARAMETER :: f_ptr_line=(/ &
-       '    f_ptr = C_LOC(buf)               ', &
-       '    f_ptr = C_LOC(buf(1))            ', &
-       '    f_ptr = C_LOC(buf(1,1))          ', &
-       '    f_ptr = C_LOC(buf(1,1,1))        ', &
-       '    f_ptr = C_LOC(buf(1,1,1,1))      ', &
-       '    f_ptr = C_LOC(buf(1,1,1,1,1))    ', &
-       '    f_ptr = C_LOC(buf(1,1,1,1,1,1))  ', &
-       '    f_ptr = C_LOC(buf(1,1,1,1,1,1,1))' &
-            /)
 
 ! Generate Fortran Check routines for the tests KIND interfaces.
 

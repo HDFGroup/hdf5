@@ -62,7 +62,7 @@ SUBROUTINE test_get_file_image(total_error)
   INTEGER(hid_t) :: dset_id = -1  ! Dataset identifier
   INTEGER(hid_t) :: space_id = -1 ! Dataspace identifier
   INTEGER(hsize_t), DIMENSION(1:2) :: dims  ! Dataset dimensions
-  INTEGER(size_t) :: itmp_a, itmp_b ! General purpose integers
+  INTEGER(size_t) :: itmp_a ! General purpose integer
   INTEGER(size_t) :: image_size     ! Size of image
   TYPE(C_PTR) :: f_ptr            ! Pointer
   INTEGER(hid_t) :: fapl          ! File access property

@@ -16,7 +16,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -38,7 +38,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -60,7 +60,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -82,7 +82,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -104,7 +104,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -126,7 +126,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -148,7 +148,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR

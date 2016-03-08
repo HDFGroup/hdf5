@@ -4336,6 +4336,7 @@ H5Pset_subfiling(hid_t plist_id, hid_t space_id, const char *subfile_name)
     herr_t ret_value = SUCCEED;                 /* return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ii*s", plist_id, space_id, subfile_name);
 
     /* Check arguments */
     if(!subfile_name)
@@ -4376,6 +4377,7 @@ H5Pget_subfiling(hid_t plist_id, hid_t *space_id, char **subfile_name)
     herr_t ret_value = SUCCEED; /* return value          */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*i**s", plist_id, space_id, subfile_name);
 
     /* Get the property list structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))

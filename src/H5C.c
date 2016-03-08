@@ -8130,12 +8130,12 @@ done:
  * Function:    H5C_load_entry
  *
  * Purpose:     Attempt to load the entry at the specified disk address
- *		and with the specified type into memory.  If successful.
- *		return the in memory address of the entry.  Return NULL
- *		on failure.
+ *              and with the specified type into memory.  If successful.
+ *              return the in memory address of the entry.  Return NULL
+ *              on failure.
  *
- *		Note that this function simply loads the entry into
- *		core.  It does not insert it into the cache.
+ *              Note that this function simply loads the entry into
+ *              core.  It does not insert it into the cache.
  *
  * Return:      Non-NULL on success / NULL on failure.
  *
@@ -8144,35 +8144,35 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5C_load_entry(H5F_t *             f,
-               hid_t               dxpl_id,
+H5C_load_entry(H5F_t *              f,
+                hid_t               dxpl_id,
 #ifdef H5_HAVE_PARALLEL
-               hbool_t             coll_access,
+                hbool_t             coll_access,
 #endif /* H5_HAVE_PARALLEL */
-               const H5C_class_t * type,
-               haddr_t             addr,
-               void *              udata)
+                const H5C_class_t * type,
+                haddr_t             addr,
+                void *              udata)
 {
-    hbool_t		dirty = FALSE;  /* Flag indicating whether thing was dirtied during deserialize */
-    hbool_t		compressed = FALSE; /* flag indicating whether thing */
- 					/* will be run through filters on    */
-                                        /* on read and write.  Usually FALSE */
-					/* set to true if appropriate.       */
-    size_t		compressed_size = 0; /* entry compressed size if     */
-                                        /* known -- otherwise uncompressed.  */
-				        /* Zero indicates compression not    */
-                                        /* enabled.                          */
-    void *		image = NULL;   /* Buffer for disk image */
-    void *		thing = NULL;   /* Pointer to thing loaded */
-    H5C_cache_entry_t *	entry;          /* Alias for thing loaded, as cache entry */
-    size_t              len;            /* Size of image in file */
-    unsigned            u;              /* Local index variable */
+    hbool_t     dirty = FALSE;          /* Flag indicating whether thing was dirtied during deserialize */
+    hbool_t     compressed = FALSE;     /* flag indicating whether thing            */
+                                        /* will be run through filters on           */
+                                        /* on read and write.  Usually FALSE        */
+                                        /* set to true if appropriate.              */
+    size_t      compressed_size = 0;    /* entry compressed size if                 */
+                                        /* known -- otherwise uncompressed.         */
+                                        /* Zero indicates compression not           */
+                                        /* enabled.                                 */
+    void *      image = NULL;           /* Buffer for disk image                    */
+    void *      thing = NULL;           /* Pointer to thing loaded                  */
+    H5C_cache_entry_t *entry = NULL;    /* Alias for thing loaded, as cache entry   */
+    size_t      len;                    /* Size of image in file                    */
+    unsigned    u;                      /* Local index variable                     */
 #ifdef H5_HAVE_PARALLEL
-    int                 mpi_rank = 0;   /* MPI process rank */
-    MPI_Comm            comm = MPI_COMM_NULL; /* File MPI Communicator */
-    int                 mpi_code;       /* MPI error code */
+    int         mpi_rank = 0;           /* MPI process rank                         */
+    MPI_Comm    comm = MPI_COMM_NULL;   /* File MPI Communicator                    */
+    int         mpi_code;               /* MPI error code                           */
 #endif /* H5_HAVE_PARALLEL */
-    void *		ret_value = NULL;       /* Return value */
+    void *      ret_value = NULL;       /* Return value                             */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -8211,74 +8211,15 @@ H5C_load_entry(H5F_t *             f,
     /* Check for possible speculative read off the end of the file */
     if(type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG) {
 
-/* Quincey has added patches for eoa calculations -- leave the original
- * code around until we see the effect of these patches.
- *                                         JRM -- 1/1/15
- */
-#if 0 /* original code */ /* JRM */
-	/* the original version of this code has several problems:
-         *
-         * First, the sblock is not available until the sblock 
-         * has been read in, which causes a seg fault.  This is 
-         * dealt with easily enough by testing to see if 
-         * f->shared->sblock is NULL, and calling H5FD_get_base_addr()
-         * to obtain the base addr when it is.
-         *
-         * The second issue is more subtle.  H5F_get_eoa() calls 
-         * H5FD_get_eoa().  However, this function returns the EOA as 
-         * a relative address -- i.e. relative to the base address.
-         * This means that the base addr + addr < eoa sanity check will
-         * fail whenever the super block is not at address 0 when 
-         * reading in the first chunk of the super block.
-         * 
-         * To address these issues, I have rewritten the code to 
-         * simply verify that the address plus length is less than 
-         * the eoa.  I think this is sufficient, but further testing
-         * should tell me if it isn't.
-         *                                      JRM -- 8/29/14
-         */
-        haddr_t eoa;                /* End-of-allocation in the file */
-        haddr_t base_addr;          /* Base address of file data */
-
-        /* Get the file's end-of-allocation value */
-        eoa = H5F_get_eoa(f, type->mem_type);
-        HDassert(H5F_addr_defined(eoa));
-
-        /* Get the file's base address */
-	if ( f->shared->sblock ) 
-
-            base_addr = H5F_BASE_ADDR(f);
-
-	else { /* sblock not loaded yet -- use file driver info */
-
-	    HDassert(f->shared->lf);
-	    base_addr = H5FD_get_base_addr(f->shared->lf);
-
-	}
-        HDassert(H5F_addr_defined(base_addr));
-
-        /* Check for bad address in general */
-        if((addr + base_addr) > eoa)
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, \
-	                "address of object past end of allocation")
-
-        /* Check if the amount of data to read will be past the eoa */
-        if((addr + base_addr + len) > eoa)
-            /* Trim down the length of the metadata */
-            len = (size_t)(eoa - (addr + base_addr));
-
-#else /* modified code */ /* JRM */
-
         haddr_t eoa;                /* End-of-allocation in the file */
         H5FD_mem_t  cooked_type;
 
-	/* if type == H5FD_MEM_GHEAP, H5F_block_read() forces 
+        /* if type == H5FD_MEM_GHEAP, H5F_block_read() forces 
          * type to H5FD_MEM_DRAW via its call to H5F__accum_read().
          * Thus we do the same for purposes of computing the eoa
          * for sanity checks.
          */
-        cooked_type = 
-           (type->mem_type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type->mem_type;
+        cooked_type = (type->mem_type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type->mem_type;
 
         /* Get the file's end-of-allocation value */
         eoa = H5F_get_eoa(f, cooked_type);
@@ -8287,27 +8228,23 @@ H5C_load_entry(H5F_t *             f,
 
         /* Check for bad address in general */
         if ( H5F_addr_gt(addr, eoa) )
-
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, \
-	                "address of object past end of allocation")
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "address of object past end of allocation")
 
         /* Check if the amount of data to read will be past the eoa */
         if( H5F_addr_gt((addr + len), eoa) ) {
 
             /* Trim down the length of the metadata */
-
             /* Note that for some cache clients, this will cause an 
-             * assertion failure.		JRM -- 8/29/14
+             * assertion failure.   JRM -- 8/29/14
              */
             len = (size_t)(eoa - addr);
-        }
+        } /* end if */
 
         if ( len <= 0 )
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, \
-	                "len not positive after adjustment for EOA.")
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "len not positive after adjustment for EOA.")
 
-#endif /* modified code */ /* JRM */
-    }
+    } /* end if */
+
     /* Allocate the buffer for reading the on-disk entry image */
     if(NULL == (image = H5MM_malloc(len + H5C_IMAGE_EXTRA_SPACE)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for on disk image buffer.")
@@ -8330,14 +8267,17 @@ H5C_load_entry(H5F_t *             f,
 #ifdef H5_HAVE_PARALLEL
         if(!coll_access || 0 == mpi_rank) {
 #endif /* H5_HAVE_PARALLEL */
+
             if(H5F_block_read(f, type->mem_type, addr, len, dxpl_id, image) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
 
 #ifdef H5_HAVE_PARALLEL
         } /* end if */
+
         /* if the collective metadata read optimization is turned on,
-           bcast the metadata read from process 0 to all ranks in the file
-           communicator */
+         * bcast the metadata read from process 0 to all ranks in the file
+         * communicator
+         */
         if(coll_access) {
             int buf_size;
 
@@ -8356,7 +8296,7 @@ H5C_load_entry(H5F_t *             f,
     if(type->image_len) {
         size_t	new_len;        /* New size of on-disk image */
 
-	/* set magic and type field in *entry_ptr.  While the image_len 
+        /* set magic and type field in *entry_ptr.  While the image_len 
          * callback shouldn't touch the cache specific fields, it may check 
          * these fields to ensure that it it has received the expected 
          * value.
@@ -8368,22 +8308,22 @@ H5C_load_entry(H5F_t *             f,
         entry->magic = H5C__H5C_CACHE_ENTRY_T_MAGIC;
         entry->type  = type;
 
-	/* verify that compressed and compressed_len are initialized */
+        /* verify that compressed and compressed_len are initialized */
         HDassert(compressed == FALSE);
         HDassert(compressed_size == 0);
 
         /* Get the actual image size for the thing */
         if(type->image_len(thing, &new_len, &compressed, &compressed_size) < 0)
-	    HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image length")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image length")
 
-	if(new_len == 0)
-	    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "image length is 0")
+        if(new_len == 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "image length is 0")
 
         HDassert(((type->flags & H5C__CLASS_COMPRESSED_FLAG) != 0) ||
                  ((compressed == FALSE) && (compressed_size == 0)));
         HDassert((compressed == TRUE) || (compressed_size == 0));
 
-	if(new_len != len) {
+        if(new_len != len) {
 
             if(type->flags & H5C__CLASS_COMPRESSED_FLAG) {
 
@@ -8395,12 +8335,12 @@ H5C_load_entry(H5F_t *             f,
                  * size -- which must equal len.
                  *
                  * We can't verify the uncompressed size, but we can 
-		 * verify the rest with the following assertions.
+                 * verify the rest with the following assertions.
                  */
-		HDassert(compressed);
+                HDassert(compressed);
                 HDassert(compressed_size == len);
 
-		/* new_len should contain the uncompressed size.  Set len
+                /* new_len should contain the uncompressed size.  Set len
                  * equal to new_len, so that the cache will use the 
                  * uncompressed size for purposes of space allocation, etc.
                  */
@@ -8410,11 +8350,11 @@ H5C_load_entry(H5F_t *             f,
 
                 void *new_image;       /* Buffer for disk image */
 
-		/* compressed must be FALSE, and compressed_size 
+                /* compressed must be FALSE, and compressed_size 
                  * must be zero.
                  */
-		HDassert(!compressed);
-		HDassert(compressed_size == 0);
+                HDassert(!compressed);
+                HDassert(compressed_size == 0);
 
                 /* Adjust the size of the image to match new_len */
                 if(NULL == (new_image = H5MM_realloc(image, 
@@ -8425,9 +8365,7 @@ H5C_load_entry(H5F_t *             f,
                 image = new_image;
 
 #if H5C_DO_MEMORY_SANITY_CHECKS
-
                 HDmemcpy(((uint8_t *)image) + new_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
-
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
                 /* If the thing's image needs to be bigger for a speculatively
@@ -8452,6 +8390,7 @@ H5C_load_entry(H5F_t *             f,
 #ifdef H5_HAVE_PARALLEL
                     if(!coll_access || 0 == mpi_rank) {
 #endif /* H5_HAVE_PARALLEL */
+
                     /* Go get the on-disk image again */
                     if(H5F_block_read(f, type->mem_type, addr, 
                                       new_len, dxpl_id, image) < 0)
@@ -8472,13 +8411,12 @@ H5C_load_entry(H5F_t *             f,
 #endif /* H5_HAVE_PARALLEL */
 
                     /* Deserialize on-disk image into native memory form again */
-                    if(NULL == (thing = type->deserialize(image, new_len, 
-                                                          udata, &dirty)))
+                    if(NULL == (thing = type->deserialize(image, new_len, udata, &dirty)))
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't deserialize image")
 
 #ifndef NDEBUG
-    		    {
-			/* new_compressed and new_compressed_size must be 
+                    {
+                        /* new_compressed and new_compressed_size must be 
                          * initialize to FALSE / 0 respectively, as clients
                          * that don't use compression may ignore these two 
                          * parameters.
@@ -8500,7 +8438,7 @@ H5C_load_entry(H5F_t *             f,
                         HDassert(new_new_len == new_len);
                         HDassert(!new_compressed);
                         HDassert(new_compressed_size == 0);
-    		    }
+                    } /* end block */
 #endif /* NDEBUG */
                 } /* end if (new_len > len) */
 
@@ -8512,7 +8450,7 @@ H5C_load_entry(H5F_t *             f,
                 HGOTO_ERROR(H5E_CACHE, H5E_UNSUPPORTED, NULL, \
                      "size of non-speculative, non-compressed object changed")
             }
-	} /* end if (new_len != len) */
+        } /* end if (new_len != len) */
     } /* end if */
 
     entry = (H5C_cache_entry_t *)thing;
@@ -8564,10 +8502,10 @@ H5C_load_entry(H5F_t *             f,
     entry->flush_in_progress    = FALSE;
     entry->destroy_in_progress  = FALSE;
 
-    entry->ring			= H5C_RING_UNDEFINED;
+    entry->ring                 = H5C_RING_UNDEFINED;
 
     /* Initialize flush dependency height fields */
-    entry->flush_dep_parent = NULL;
+    entry->flush_dep_parent     = NULL;
     for(u = 0; u < H5C__NUM_FLUSH_DEP_HEIGHTS; u++)
         entry->child_flush_dep_height_rc[u] = 0;
     entry->flush_dep_height = 0;
@@ -8592,13 +8530,9 @@ H5C_load_entry(H5F_t *             f,
 done:
     /* Cleanup on error */
     if(NULL == ret_value) {
-
         /* Release resources */
-        if ( thing && type->free_icr(thing) < 0 )
-
-            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, \
-                        "free_icr callback failed")
-
+        if(thing && type->free_icr(thing) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "free_icr callback failed")
         if(image)
             image = H5MM_xfree(image);
     } /* end if */
