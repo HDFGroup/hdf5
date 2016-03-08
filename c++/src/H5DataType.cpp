@@ -362,10 +362,10 @@ void DataType::commit(H5Location& loc, const H5std_string& name)
 bool DataType::committed() const
 {
    // Call C function to determine if a datatype is a named one
-   htri_t committed = H5Tcommitted( id );
-   if( committed > 0 )
+   htri_t is_committed = H5Tcommitted( id );
+   if (is_committed > 0)
       return true;
-   else if( committed == 0 )
+   else if (is_committed == 0)
       return false;
    else
    {

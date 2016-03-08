@@ -58,18 +58,19 @@ SKIP() {
 
 # Print warning message of version mismatch.
 WarnMesg(){
-    echo "Warning! ***HDF5 library version mismatched error***"
-    echo "The HDF5 header files used to compile this application do not match"
-    echo "the version used by the HDF5 library to which this application is linked."
+    echo "Warning! ***HDF5 interface incompatibility detected***"
+    echo "The HDF5 header files used to compile this application are not compatible "
+    echo "with the HDF5 library to which this application is linked."
     echo "Data corruption or segmentation faults may occur if the application continues."
     echo "This can happen when an application was compiled by one version of HDF5 but"
     echo "linked with a different version of static or shared HDF5 library."
     echo "You should recompile the application or check your shared library related"
     echo "settings such as 'LD_LIBRARY_PATH'."
+
     echo "You can, at your own risk, disable this warning by setting the environment"
     echo "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'."
     echo "Setting it to 2 or higher will suppress the warning messages totally."
-    echo "Headers are $xxh5versmajor.$xxh5versminor.$xxh5versrelease, library is $h5versmajor.$h5versminor.$h5versrelease"
+    echo "Headers are $xxh5vers_interface_age.$xxh5vers_age.$xxh5vers_revision, library is $h5vers_interface_age.$h5vers_age.$h5vers_revision"
     test -n "$H5_HAVE_EMBEDDED_LIBINFO" && cat $h5libsettings
     echo "Bye..."
 }
@@ -77,17 +78,18 @@ WarnMesg(){
 
 # Print warning message2 of version mismatch.
 WarnMesg2(){
-    echo "Warning! ***HDF5 library version mismatched error***"
-    echo "The HDF5 header files used to compile this application do not match"
-    echo "the version used by the HDF5 library to which this application is linked."
+    echo "Warning! ***HDF5 interface incompatibility detected***"
+    echo "The HDF5 header files used to compile this application are not compatible "
+    echo "with the HDF5 library to which this application is linked."
     echo "Data corruption or segmentation faults may occur if the application continues."
     echo "This can happen when an application was compiled by one version of HDF5 but"
     echo "linked with a different version of static or shared HDF5 library."
     echo "You should recompile the application or check your shared library related"
     echo "settings such as 'LD_LIBRARY_PATH'."
+
     echo "'HDF5_DISABLE_VERSION_CHECK' environment variable is set to 1, application will"
     echo "continue at your own risk."
-    echo "Headers are $xxh5versmajor.$xxh5versminor.$xxh5versrelease, library is $h5versmajor.$h5versminor.$h5versrelease"
+    echo "Headers are $xxh5vers_interface_age.$xxh5vers_age.$xxh5vers_revision, library is $h5vers_interface_age.$h5vers_age.$h5vers_revision"
     test -n "$H5_HAVE_EMBEDDED_LIBINFO" && cat $h5libsettings
 }
   
@@ -127,9 +129,10 @@ TESTING() {
 
     h5DisableVersion="$1"
     wrongversionnumbers="$2"
-    xxh5versmajor=$h5versmajor
-    xxh5versminor=$h5versminor
-    xxh5versrelease=$h5versrelease
+    xxh5vers_interface=$h5vers_interface
+    xxh5vers_age=$h5vers_age
+    xxh5vers_revision=$h5vers_revision
+    xxh5vers_interface_age=`expr $xxh5vers_interface - $xxh5vers_age`
 
     if [ "$h5DisableVersion" = unset ]; then
 	envcmd=""		# noop
@@ -145,13 +148,14 @@ TESTING() {
 	arguments=-t"$wrongversionnumbers"
 	# calculate mismatched version numbers by listing.
 	case $wrongversionnumbers in
-	    "M")    xxh5versmajor=`expr $h5versmajor + 1`
+	    "I")    xxh5vers_interface=`expr $h5vers_interface + 1`
 		    ;;
-	    "m")    xxh5versminor=`expr $h5versminor + 1`
+	    "A")    xxh5vers_age=`expr $h5vers_age + 1`
 		    ;;
-	    "r")    xxh5versrelease=`expr $h5versrelease + 1`
+	    "R")    xxh5vers_revision=`expr $h5vers_revision + 1`
 		    ;;
 	esac
+	xxh5vers_interface_age=`expr $xxh5vers_interface - $xxh5vers_age`
 	case "$h5DisableVersion" in
 	    1)
 		# W2/OK: Different Warning, exit 0.
@@ -218,15 +222,22 @@ h5libsettings=../src/libhdf5.settings
 PURPOSE
 
 # Figure out library version numbers from the header file.
-h5versmajor=`grep '#define H5_VERS_MAJOR' $srcdir/../src/H5public.h | cut -f2` 
-h5versminor=`grep '#define H5_VERS_MINOR' $srcdir/../src/H5public.h | cut -f2` 
-h5versrelease=`grep '#define H5_VERS_RELEASE' $srcdir/../src/H5public.h | cut -f2` 
-DEBUGPRINT $h5versmajor.$h5versminor.$h5versrelease
-case "$h5versmajor$h5versminor$h5versrelease" in
+h5vers_interface=`grep '#define LT_VERS_INTERFACE' $srcdir/../src/H5public.h | sed -e s/[^0-9]//g`
+#echo h5vers_interface=$h5vers_interface
+h5vers_revision=`grep '#define LT_VERS_REVISION' $srcdir/../src/H5public.h | sed -e s/[^0-9]//g`
+#echo h5vers_revision=$h5vers_revision
+h5vers_age=`grep '#define LT_VERS_AGE' $srcdir/../src/H5public.h | sed -e s/[^0-9]//g`
+#echo h5vers_age=$h5vers_age
+h5vers_interface_age=`expr $h5vers_interface - $h5vers_age`
+#h5vers_interface=`grep '#define LT_VERS_INTERFACE' $srcdir/../src/H5public.h | cut -f2` 
+#h5vers_revision=`grep '#define LT_VERS_REVISION' $srcdir/../src/H5public.h | cut -f2` 
+#h5vers_age=`grep '#define LT_VERS_AGE' $srcdir/../src/H5public.h | cut -f2` 
+DEBUGPRINT $h5vers_interface.$h5vers_revision.$h5vers_age
+case "$h5vers_interface$h5vers_revision$h5vers_age" in
     [0-9]*)     # good. noop.
         ;;
     *)
-        echo "Illegal library version numbers($h5versmajor.$h5versminor.$h5versrelease)"
+        echo "Illegal library version numbers($h5vers_interface.$h5vers_revision.$h5vers_age)"
         echo "Test aborted"
         exit 1
         ;;
@@ -241,13 +252,13 @@ fi
 
 # Three Categories of tests:
 # Normal: where the version numbers all matched (wrong_version == none).
-# Mismatched version numbers (could be Major or minor version
-#	or release numbers or a combination of all three.)
+# Mismatched version numbers (could be Interface or Age versions;
+#       revision makes no differences in link compatibility check.)
 # Test all the above with different values of the environment variable,
 # HDF5_DISABLE_VERSION_CHECK, as unset, "", -1, 0, 1, 2, 3
 
 for val_disable_version_check in unset "" -1 0 1 2 3; do
-    for wrong_version in none M m r; do
+    for wrong_version in none I A; do
 	TESTING "$val_disable_version_check" "$wrong_version"
     done
 done

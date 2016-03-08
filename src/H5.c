@@ -720,6 +720,9 @@ done:
 } /* end H5get_libversion() */
 
 
+/* Depreciated by H5check_interface_compatibility. Need to keep it around
+ * because Fortran API calls it. Will be retired later.
+ */
 /*-------------------------------------------------------------------------
  * Function:	H5check_version
  *
@@ -848,6 +851,133 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
 		     H5_VERS_SUBRELEASE, H5_VERS_INFO);
 	} /* end if */
     }
+
+done:
+    FUNC_LEAVE_API_NOFS(ret_value)
+} /* end H5check_version() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5check_interface_compatibility
+ *
+ * Purpose:	Verifies that the arguments are compatible with the link library. 
+ *		This function is intended to be called from user to verify that
+ *		the versions of header files compiled into the application
+ *		is compatible with the version of the link hdf5 library.
+ *
+ * Return:	Success:	SUCCEED
+ *
+ *		Failure:	abort()
+ *				The value of the environment variable,
+ *				HDF5_DISABLE_VERSION_CHECK, could affect
+ *				how failure is handles. See Code below.
+ *
+ * Algorithm:	{provided by Mike McGreevy}
+ *		How to determine if two libraries, given their interface, revision,
+ *		and age, are compatible? Let's say you have:
+ *
+ *		interface, revision, age --> compiled HDF5
+ *		INTERFACE, REVISION, AGE --> linked HDF5 library
+ *		Then:
+ *		if ((INTERFACE-AGE) != (interface-age))
+ *		    not compatible
+ *		else
+ *		    if (age <= AGE)
+ *			compatible
+ *		    else
+ *			not compatible
+ *		    endif
+ *              endif
+ *		[Note: revision/REVISION do not affect compatibility]
+ *
+ * Programmer:	Albert Cheng
+ *              Feb 21, 2016
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+#define INTERFACE_INCOMPATIBLE_WARNING \
+"Warning! ***HDF5 interface incompatibility detected***\n" \
+"The HDF5 header files used to compile this application are not compatible \n" \
+"with the HDF5 library to which this application is linked.\n" \
+"Data corruption or segmentation faults may occur if the application continues.\n" \
+"This can happen when an application was compiled by one version of HDF5 but\n" \
+"linked with a different version of static or shared HDF5 library.\n" \
+"You should recompile the application or check your shared library related\n" \
+"settings such as 'LD_LIBRARY_PATH'.\n"
+
+herr_t
+H5check_interface_compatibility(unsigned interface, unsigned age, unsigned revision)
+{
+    char	lib_str[256];
+    static int	checked = 0;            /* If we've already checked the version info */
+    static unsigned int	disable_version_check = 0;      /* Set if the version check should be disabled */
+    static const char *interface_incompatible_warning = INTERFACE_INCOMPATIBLE_WARNING;
+    const char *s;  /* Environment string for disabling version check */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API_NOINIT_NOERR_NOFS
+    H5TRACE3("e", "IuIuIu", interface, age, revision);
+
+    assert(interface >= age);
+    assert(LT_VERS_INTERFACE >= LT_VERS_AGE);
+
+    /* Optimization: Don't check again, if we already have */
+    if (checked)
+	HGOTO_DONE(SUCCEED)
+    else
+	/* Indicate that the version check has been performed */
+	checked++;
+
+    /* check version compatibility */
+    if (((LT_VERS_INTERFACE - LT_VERS_AGE) == (interface - age)) &&\
+        (LT_VERS_AGE >= age))
+	HGOTO_DONE(SUCCEED)
+    /* else NOT COMPATIBLE */
+
+    /* Allow different handling of not compatible */
+    s = HDgetenv ("HDF5_DISABLE_VERSION_CHECK");
+    if (s && HDisdigit(*s))
+	disable_version_check = (unsigned int)HDstrtol (s, NULL, 0);
+
+    /* check the version of the link library */
+    switch (disable_version_check) {
+    case 0:
+	/* print a message and abort */
+	HDfprintf(stderr, "%s%s", interface_incompatible_warning,
+		 "You can, at your own risk, disable this warning by setting the environment\n"
+		 "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
+		 "Setting it to 2 or higher will suppress the warning messages totally.\n");
+	/* Mention the versions we are referring to */
+	HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
+		 (interface-age), age, revision,
+		 ((unsigned)LT_VERS_INTERFACE-(unsigned)LT_VERS_AGE), (unsigned)LT_VERS_AGE, (unsigned)LT_VERS_REVISION);
+	/* Show library settings if available */
+	HDfprintf (stderr, "%s", H5libhdf5_settings);
+
+	/* Bail out now. */
+	HDfputs ("Bye...\n", stderr);
+	HDabort ();
+    case 1:
+	/* continue with a warning */
+	/* Note that the warning message is embedded in the format string.*/
+	HDfprintf (stderr,
+		 "%s'HDF5_DISABLE_VERSION_CHECK' "
+		 "environment variable is set to %d, application will\n"
+		 "continue at your own risk.\n",
+		 interface_incompatible_warning, disable_version_check);
+	/* Mention the versions we are referring to */
+	HDfprintf (stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n",
+		 (interface-age), age, revision,
+		 ((unsigned)LT_VERS_INTERFACE-(unsigned)LT_VERS_AGE), (unsigned)LT_VERS_AGE, (unsigned)LT_VERS_REVISION);
+	/* Show library settings if available */
+	HDfprintf (stderr, "%s", H5libhdf5_settings);
+	break;
+    default:
+	/* 2 or higher: continue silently */
+	break;
+    } /* end switch */
 
 done:
     FUNC_LEAVE_API_NOFS(ret_value)

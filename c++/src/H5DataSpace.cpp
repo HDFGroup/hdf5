@@ -352,7 +352,7 @@ void DataSpace::extentCopy (const DataSpace& dest_space) const
 //--------------------------------------------------------------------------
 void DataSpace::extentCopy( DataSpace& dest_space ) const
 {
-    extentCopy((const DataSpace)dest_space);
+    extentCopy(dest_space);
 }
 
 //--------------------------------------------------------------------------

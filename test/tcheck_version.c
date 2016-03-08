@@ -39,9 +39,9 @@ void parse(int ac, char **av);
 void abort_intercept (int H5_ATTR_UNUSED sig);
 
 /* global variables */
-unsigned	major = H5_VERS_MAJOR;
-unsigned	minor = H5_VERS_MINOR;
-unsigned	release = H5_VERS_RELEASE;
+unsigned	interface = LT_VERS_INTERFACE;
+unsigned	revision = LT_VERS_REVISION;
+unsigned	age = LT_VERS_AGE;
 
 void
 showhelp(void)
@@ -50,9 +50,9 @@ showhelp(void)
     printf("\t-h\tShow this page and version information\n");
     printf("\t-t<vers>: Test by changing (adding 1 to) the <vers> to trigger\n");
     printf("\t\t  the warning. <vers> can be:\n");
-    printf("\t\t\tM for Major version number (%d)\n", H5_VERS_MAJOR);
-    printf("\t\t\tm for Minor version number (%d)\n", H5_VERS_MINOR);
-    printf("\t\t\tr for Release number (%d)\n", H5_VERS_RELEASE);
+    printf("\t\t\tI for Interface number (%d)\n", LT_VERS_INTERFACE);
+    printf("\t\t\tA for Age number (%d)\n", LT_VERS_AGE);
+    printf("\t\t\tR for Revision number (%d)\n", LT_VERS_REVISION);
 }
 
 
@@ -70,14 +70,14 @@ parse(int ac, char **av)
 	    switch(*(++pt)) {
 		case 't': 	/* option -t */
 		    switch(*(++pt)) {
-			case 'M':
-			    major++;
+			case 'I':
+			    interface++;
 			    break;
-			case 'm':
-			    minor++;
+			case 'R':
+			    revision++;
 			    break;
-			case 'r':
-			    release++;
+			case 'A':
+			    age++;
 			    break;
 			default:
 			    fprintf(stderr, "Unknown -v parameter (%s). Aborted.\n", *av);
@@ -115,7 +115,7 @@ main(int ac, char **av)
 {
     parse(ac, av);
     HDsignal(SIGABRT, &abort_intercept);
-    H5check_version(major, minor, release);
+    H5check_interface_compatibility(interface, age, revision);
     HDsignal(SIGABRT, SIG_DFL);
     return 0;
 }

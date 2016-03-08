@@ -345,7 +345,7 @@ void FileAccPropList::setSplit(const FileAccPropList& meta_plist, const FileAccP
 //--------------------------------------------------------------------------
 void FileAccPropList::setSplit(FileAccPropList& meta_plist, FileAccPropList& raw_plist, const char* meta_ext, const char* raw_ext ) const
 {
-    setSplit((const FileAccPropList)meta_plist, (const FileAccPropList)raw_plist, meta_ext, raw_ext);
+    setSplit(meta_plist, raw_plist, meta_ext, raw_ext);
 }
 
 //--------------------------------------------------------------------------
@@ -380,7 +380,7 @@ void FileAccPropList::setSplit(const FileAccPropList& meta_plist, const FileAccP
 //--------------------------------------------------------------------------
 void FileAccPropList::setSplit(FileAccPropList& meta_plist, FileAccPropList& raw_plist, const H5std_string& meta_ext, const H5std_string& raw_ext ) const
 {
-   setSplit((const FileAccPropList)meta_plist, (const FileAccPropList)raw_plist, meta_ext.c_str(), raw_ext.c_str() );
+   setSplit(meta_plist, raw_plist, meta_ext.c_str(), raw_ext.c_str() );
 }
 
 // Stream Virtual File Driver had been removed from the main library.

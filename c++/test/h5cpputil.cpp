@@ -195,7 +195,7 @@ void verify_val(const char* x, const char* value, const char* where, int line, c
         cerr << "*** UNEXPECTED VALUE from " << where << " should be "
              << value << ", but is " << x << " at line " << line
              << " in " << file_name << endl;
-        IncTestNumErrs();
+        //IncTestNumErrs();
         throw TestFailedException(where, "");
     }
 }

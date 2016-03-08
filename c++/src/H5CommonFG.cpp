@@ -68,21 +68,21 @@ using namespace std;
 ///		then a default size is chosen.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group CommonFG::createGroup( const char* name, size_t size_hint ) const
+     Group CommonFG::createGroup( const char* name, size_t size_hint ) const
 {
-   // Group creation property list for size_hint
-   hid_t gcpl_id = 0;
+    // Group creation property list for size hint
+    hid_t gcpl_id = 0;
 
-   // Set the local heap size hint
-   if(!(size_hint == (size_t)-1 || size_hint == 0)) {
-
+    // Set the local heap size hint
+    if (size_hint > 0)
+    {
        // If the creation of the property list failed, throw an exception
-       if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
+       if ((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
           throwException("createGroup", "H5Pcreate failed");
 
-       if( H5Pset_local_heap_size_hint(gcpl_id, size_hint) < 0) {
+       if (H5Pset_local_heap_size_hint(gcpl_id, size_hint) < 0) {
           H5Pclose(gcpl_id);
-          throwException("createGroup", "H5Pset_local_heap_size failed");
+          throwException("createGroup", "H5Pset_local_heap_size_hint failed");
        }
     }
 
@@ -269,6 +269,9 @@ void CommonFG::link( H5L_type_t link_type, const char* curr_name, const char* ne
             ret_value = H5Lcreate_soft( curr_name, getLocId(), new_name, H5P_DEFAULT, H5P_DEFAULT );
             break;
 
+	case H5L_TYPE_ERROR:
+	case H5L_TYPE_EXTERNAL:
+	case H5L_TYPE_MAX:
         default:
             throwException("link", "unknown link type");
             break;
@@ -510,7 +513,7 @@ void CommonFG::mount(const char* name, const H5File& child, const PropList& plis
 //--------------------------------------------------------------------------
 void CommonFG::mount(const char* name, H5File& child, PropList& plist) const
 {
-   mount(name, (const H5File)child, (const PropList)plist);
+   mount(name, child, plist);
 }
 
 //--------------------------------------------------------------------------
@@ -536,7 +539,7 @@ void CommonFG::mount(const H5std_string& name, const H5File& child, const PropLi
 //--------------------------------------------------------------------------
 void CommonFG::mount(const H5std_string& name, H5File& child, PropList& plist) const
 {
-   mount(name.c_str(), (const H5File)child, (const PropList)plist);
+   mount(name.c_str(), child, plist);
 }
 
 //--------------------------------------------------------------------------
@@ -1040,6 +1043,8 @@ H5O_type_t CommonFG::childObjType(const char* objname) const
 	case H5O_TYPE_NAMED_DATATYPE:
 	    objtype = objinfo.type;
 	    break;
+	case H5O_TYPE_UNKNOWN:
+	case H5O_TYPE_NTYPES:
 	default:
 	    throwException("childObjType", "Unknown type of object");
       }
@@ -1113,6 +1118,8 @@ H5O_type_t CommonFG::childObjType(hsize_t index, H5_index_t index_type, H5_iter_
 	case H5O_TYPE_NAMED_DATATYPE:
 	    objtype = objinfo.type;
 	    break;
+	case H5O_TYPE_UNKNOWN:
+	case H5O_TYPE_NTYPES:
 	default:
 	    throwException("childObjType", "Unknown type of object");
       }
@@ -1201,21 +1208,13 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx) const
 ///\return	Object type
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2010
+// Modification
+//		Modified to use the other function. -BMR, 2016/03/07
 //--------------------------------------------------------------------------
 H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, char* type_name) const
 {
-   H5G_obj_t obj_type = H5Gget_objtype_by_idx(getLocId(), idx);
-   switch (obj_type)
-   {
-	case H5G_LINK: HDstrcpy(type_name, "symbolic link"); break;
-	case H5G_GROUP: HDstrcpy(type_name, "group"); break;
-	case H5G_DATASET: HDstrcpy(type_name, "dataset"); break;
-	case H5G_TYPE: HDstrcpy(type_name, "datatype"); break;
-	case H5G_UNKNOWN:
-	default:
-	   throwException("getObjTypeByIdx", "H5Gget_objtype_by_idx failed");
-   }
-   return (obj_type);
+    H5std_string stype_name(type_name);
+    return(getObjTypeByIdx(idx, stype_name));
 }
 //--------------------------------------------------------------------------
 // Function:	CommonFG::getObjTypeByIdx
@@ -1230,18 +1229,22 @@ H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, char* type_name) const
 //--------------------------------------------------------------------------
 H5G_obj_t CommonFG::getObjTypeByIdx(hsize_t idx, H5std_string& type_name) const
 {
-   H5G_obj_t obj_type = H5Gget_objtype_by_idx(getLocId(), idx);
-   switch (obj_type)
-   {
-	case H5G_LINK: type_name = H5std_string("symbolic link"); break;
-	case H5G_GROUP: type_name = H5std_string("group"); break;
-	case H5G_DATASET: type_name = H5std_string("dataset"); break;
-	case H5G_TYPE: type_name = H5std_string("datatype"); break;
-	case H5G_UNKNOWN:
-	default:
-	   throwException("getObjTypeByIdx", "H5Gget_objtype_by_idx failed");
-   }
-   return (obj_type);
+    H5G_obj_t obj_type = H5Gget_objtype_by_idx(getLocId(), idx);
+    switch (obj_type)
+    {
+        case H5G_LINK: type_name = H5std_string("symbolic link"); break;
+        case H5G_GROUP: type_name = H5std_string("group"); break;
+        case H5G_DATASET: type_name = H5std_string("dataset"); break;
+        case H5G_TYPE: type_name = H5std_string("datatype"); break;
+        case H5G_UNKNOWN:
+	case H5G_UDLINK:
+	case H5G_RESERVED_5:
+	case H5G_RESERVED_6:
+	case H5G_RESERVED_7:
+        default:
+           throwException("getObjTypeByIdx", "H5Gget_objtype_by_idx failed");
+    }
+    return (obj_type);
 }
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
