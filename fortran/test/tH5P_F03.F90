@@ -110,7 +110,6 @@ SUBROUTINE test_create(total_error)
   INTEGER :: error
   INTEGER(SIZE_T) :: h5off
   TYPE(C_PTR) :: f_ptr
-  LOGICAL :: differ1, differ2
   CHARACTER(LEN=1) :: cfill
   INTEGER :: ifill
   REAL :: rfill
@@ -679,14 +678,13 @@ SUBROUTINE test_vds(total_error)
   INTEGER(hsize_t), DIMENSION(1:2,1:3) :: vdsdims_out_correct
 
   INTEGER(hsize_t), DIMENSION(1:3) :: start_out, &  !Hyperslab PARAMETER out 
-                 stride_out, count_out, count_correct, block_out
+                 stride_out, count_out, block_out
   INTEGER(hsize_t), DIMENSION(1:3,1:PLANE_STRIDE) :: start_correct
 
   INTEGER :: i, j
   INTEGER :: layout                     ! Storage layout
   INTEGER(size_t) :: num_map            ! Number of mappings 
   INTEGER(size_t) :: len                ! Length of the string also a RETURN value 
-  CHARACTER(LEN=180) :: filename
   ! Different sized character buffers
   CHARACTER(len=LEN(SRC_FILE(1))-3)  :: SRC_FILE_LEN_TINY
   CHARACTER(len=LEN(SRC_FILE(1))-1)  :: SRC_FILE_LEN_SMALL
@@ -700,7 +698,6 @@ SUBROUTINE test_vds(total_error)
   INTEGER :: s_type, virtual_view
   INTEGER :: type1, type2
 
-  CHARACTER(LEN=180) :: dsetname
   INTEGER, DIMENSION(DIM0_1*DIM1*DIM2), TARGET :: wdata
   TYPE(C_PTR) :: f_ptr
   INTEGER(SIZE_T) :: nsize

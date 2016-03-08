@@ -52,7 +52,7 @@ FILE * fort_header;
 void writeTypedef(const char* c_typedef, const char* c_type, int size);
 void writeTypedefDefault(const char* c_typedef, int size);
 void writeToFiles(const char* c_typedef, const char* fortran_type, const char* c_type, int size, int kind);
-void writeToFilesChr(const char* c_typedef, const char* fortran_type, const char* c_type, int size, char* kind);
+void writeToFilesChr(const char* c_typedef, const char* fortran_type, const char* c_type, int size, const char* kind);
 
 static void
 initCfile(void)
@@ -140,7 +140,7 @@ void writeToFiles(const char* c_typedef, const char* fortran_type, const char* c
   fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %u\n", fortran_type, kind);
   fprintf(c_header, "typedef c_%s_%d %s;\n", c_typedef, size, c_type);
 }
-void writeToFilesChr(const char* c_typedef, const char* fortran_type, const char* c_type, int size, char* kind)
+void writeToFilesChr(const char* c_typedef, const char* fortran_type, const char* c_type, int size, const char* kind)
 {
   fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %s\n", fortran_type, kind);
   fprintf(c_header, "typedef c_%s_%d %s;\n", c_typedef, size, c_type);

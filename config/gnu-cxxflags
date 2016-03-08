@@ -175,8 +175,9 @@ case "$cxx_vendor-$cxx_version" in
     # in -Wall
     H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning appears to be reliable now...
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
+    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
     H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
@@ -243,8 +244,9 @@ case "$cxx_vendor-$cxx_version" in
     # in -Wall
     H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning appears to be reliable now...
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
+    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc 3.3* case
     H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
@@ -306,8 +308,9 @@ case "$cxx_vendor-$cxx_version" in
     # in -Wall
     H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning appears to be reliable now...
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
+    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
     H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
@@ -365,8 +368,8 @@ case "$cxx_vendor-$cxx_version" in
     # in -Wall
     H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning appears to be reliable now...
-    # (this warning was removed in gcc 4.5+)
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
     #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
@@ -424,8 +427,8 @@ case "$cxx_vendor-$cxx_version" in
     # in -Wall
     H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning appears to be reliable now...
-    # (this warning was removed in gcc 4.5+)
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
     #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
@@ -480,8 +483,8 @@ case "$cxx_vendor-$cxx_version" in
     # in -Wall
     H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning appears to be reliable now...
-    # (this warning was removed in gcc 4.5+)
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
     #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
@@ -533,8 +536,9 @@ case "$cxx_vendor-$cxx_version" in
     # in -Wall
     H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning appears to be reliable now...
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
+    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
     H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
@@ -582,8 +586,9 @@ case "$cxx_vendor-$cxx_version" in
     # in -Wall
     H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning appears to be reliable now...
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
+    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
     H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
@@ -628,8 +633,9 @@ case "$cxx_vendor-$cxx_version" in
     # in -Wall
     H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning does not appear to be reliable yet...
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
+    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
     H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
@@ -668,8 +674,9 @@ case "$cxx_vendor-$cxx_version" in
     # in -Wall
     H5_CXXFLAGS="$H5_CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning does not appear to be reliable yet...
-    H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
+    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
     H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
@@ -705,8 +712,9 @@ case "$cxx_vendor-$cxx_version" in
     # usage in the library.
     #CXXFLAGS="$CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CXXFLAGS="$CXXFLAGS -Wunreachable-code"
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
+    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
     H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
@@ -739,8 +747,9 @@ case "$cxx_vendor-$cxx_version" in
     # usage in the library.
     #CXXFLAGS="$CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CXXFLAGS="$CXXFLAGS -Wunreachable-code"
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
+    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append warning flags from gcc-3.3* case
     H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
@@ -770,8 +779,9 @@ case "$cxx_vendor-$cxx_version" in
     # usage in the library.
     #CXXFLAGS="$CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CXXFLAGS="$CXXFLAGS -Wunreachable-code"
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
+    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
 
     # Append more extra warning flags that only gcc3.3+ know about
     H5_CXXFLAGS="$H5_CXXFLAGS -Wendif-labels"
@@ -795,8 +805,9 @@ case "$cxx_vendor-$cxx_version" in
     # usage in the library.
     #CXXFLAGS="$CXXFLAGS -Wformat=2"
 
-    # The "unreachable code" warning does not appear to be reliable yet...
-    #CXXFLAGS="$CXXFLAGS -Wunreachable-code"
+    # The "unreachable code" flag generates many spurious C++ warnings.
+    # We'll disable it for now.
+    #H5_CXXFLAGS="$H5_CXXFLAGS -Wunreachable-code"
     ;;
 
   g++-3*)
