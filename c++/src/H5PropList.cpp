@@ -592,7 +592,7 @@ void PropList::setProperty(const char* name, void* value) const
 //--------------------------------------------------------------------------
 void PropList::setProperty(const char* name, const char* charptr) const
 {
-   herr_t ret_value = H5Pset(id, name, (void*) charptr);
+   herr_t ret_value = H5Pset(id, name, (void*)charptr);
    if (ret_value < 0)
    {
       throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");

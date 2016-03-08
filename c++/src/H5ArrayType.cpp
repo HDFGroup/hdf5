@@ -54,11 +54,8 @@ ArrayType::ArrayType( const hid_t existing_id ) : DataType( existing_id )
 ///\brief	Copy constructor: makes a copy of the original ArrayType object.
 // Programmer	Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-ArrayType::ArrayType( const ArrayType& original ) : DataType( original )
+ArrayType::ArrayType( const ArrayType& original ) : DataType( original ), rank(original.rank)
 {
-    // Copy the rank of the original array
-    rank = original.rank;
-
     // Allocate space then copy the dimensions from the original array
     dimensions = new hsize_t[rank];
     for (int i = 0; i < rank; i++)
