@@ -336,7 +336,6 @@ hsize_t DataSet::getVlenBufSize(const DataType& type, const DataSpace& space ) c
 hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
 {
     return(getVlenBufSize(type, space));
-    //return(getVlenBufSize(static_cast<const DataType&>(type), static_cast<const DataSpace&>(space)));
 }
 
 //--------------------------------------------------------------------------
