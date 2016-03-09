@@ -48,7 +48,6 @@
 #define H5D_CRT_ALLOC_TIME_STATE_NAME "alloc_time_state" /* Space allocation time state */
 #define H5D_CRT_EXT_FILE_LIST_NAME "efl"                /* External file list */
 #ifdef H5_HAVE_PARALLEL
-#define H5D_CRT_SUBFILING_FILENAME_NAME "subfile_name"  /* name of the subfile is dataset is subfiled */
 #define H5D_CRT_SUBFILING_SELECTION_NAME "subfile_selection" /* dataspace selection of subfiled dataset */
 #endif /* H5_HAVE_PARALLEL */
 

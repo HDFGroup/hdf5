@@ -275,7 +275,9 @@ struct H5F_file_t {
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5UC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
+#ifdef H5_HAVE_PARALLEL
     unsigned num_subfiles;      /* number of subfiles that this file has */
+#endif /* H5_HAVE_PARALLEL */
 
     /* File space allocation information */
     H5F_file_space_type_t fs_strategy;	/* File space handling strategy		*/
@@ -316,6 +318,7 @@ struct H5F_t {
     H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
     hbool_t             coll_md_write;  /* Do all metadata writes collectively */
     unsigned            subfiling_num_groups; /* Number of process groups accessing the file's subfiles */
+    char                *subfiling_filename; /* name of the subfile this process is accessing */
     MPI_Comm            subfiling_comm; /* the subfiling communicator for the process accessing the subfile */
     MPI_Info            subfiling_info; /* the info object for the process accessing the subfile */
 #endif /* H5_HAVE_PARALLEL */

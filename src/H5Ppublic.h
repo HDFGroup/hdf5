@@ -360,8 +360,10 @@ H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective
 H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
 H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
 H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
-H5_DLL herr_t H5Pset_subfiling_access(hid_t plist_id, unsigned num_groups, MPI_Comm comm, MPI_Info info);
-H5_DLL herr_t H5Pget_subfiling_access(hid_t plist_id, unsigned *num_groups, MPI_Comm *comm, MPI_Info *info);
+H5_DLL herr_t H5Pset_subfiling_access(hid_t plist_id, unsigned num_groups, const char *subfile_name, 
+    MPI_Comm comm, MPI_Info info);
+H5_DLL herr_t H5Pget_subfiling_access(hid_t plist_id, unsigned *num_groups, char **subfile_name, 
+    MPI_Comm *comm, MPI_Info *info);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Dataset creation property list (DCPL) routines */
@@ -401,8 +403,8 @@ H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
 H5_DLL herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t
 	*fill_time/*out*/);
 #ifdef H5_HAVE_PARALLEL
-H5_DLL herr_t H5Pset_subfiling(hid_t plist_id, hid_t space_id, const char *subfile_name);
-H5_DLL herr_t H5Pget_subfiling(hid_t plist_id, hid_t *space_id, char **subfile_name);
+H5_DLL herr_t H5Pset_subfiling(hid_t plist_id, hid_t space_id);
+H5_DLL herr_t H5Pget_subfiling(hid_t plist_id, hid_t *space_id);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Dataset access property list (DAPL) routines */

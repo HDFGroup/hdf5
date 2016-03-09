@@ -177,12 +177,16 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
     if(H5P_set(new_plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
+
+    /* Set subfiling properties */
     if(H5P_set(new_plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &(f->subfiling_num_groups)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of groups for subfiling")
     if(H5P_set(new_plist, H5F_ACS_SUBFILE_COMM_NAME, &(f->subfiling_comm)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling communicator")
     if(H5P_set(new_plist, H5F_ACS_SUBFILE_INFO_NAME, &(f->subfiling_info)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling info object")
+    if(H5P_set(new_plist, H5F_ACS_SUBFILING_FILENAME_NAME, &(f->subfiling_filename)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile name")
 #endif /* H5_HAVE_PARALLEL */
 
     /* Prepare the driver property */
@@ -660,18 +664,25 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata write flag")
         if(H5P_get(plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &(f->subfiling_num_groups)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of groups for subfiling")
-        {
+        if(f->subfiling_num_groups != 0){
             MPI_Comm comm;
             MPI_Info info;
+            const char *temp_name;
 
+            /* get the communicator */
             if(H5P_get(plist, H5F_ACS_SUBFILE_COMM_NAME, &comm) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get subfiling communicator")
+            /* get the info object */
             if(H5P_get(plist, H5F_ACS_SUBFILE_INFO_NAME, &info) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get subfiling info object")
-
             /* Duplicate communicator and Info object. */
             if(FAIL == H5FD_mpi_comm_info_dup(comm, info, &(f->subfiling_comm), &(f->subfiling_info)))
                 HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
+
+            /* Get the subfile name */
+            if(H5P_peek(plist, H5F_ACS_SUBFILING_FILENAME_NAME, &temp_name) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get the subfile name")
+            f->subfiling_filename = HDstrdup(temp_name);
         }
 #endif /* H5_HAVE_PARALLEL */
 

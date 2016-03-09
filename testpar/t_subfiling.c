@@ -79,8 +79,9 @@ subfiling_api(void)
     ret = H5Pset_num_subfiles(fcpl_id, (unsigned)mpi_size);
     VRFY((ret == 0), "");
 
+    sprintf(subfile_name, "subfile_%d", mpi_rank);
     /* set number of process groups to be equal to the mpi size */
-    ret = H5Pset_subfiling_access(fapl_id, (unsigned)mpi_size, MPI_COMM_SELF, MPI_INFO_NULL);
+    ret = H5Pset_subfiling_access(fapl_id, (unsigned)mpi_size, subfile_name, MPI_COMM_SELF, MPI_INFO_NULL);
     VRFY((ret == 0), "");
 
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
@@ -99,16 +100,19 @@ subfiling_api(void)
         MPI_Comm get_comm;
         MPI_Info get_info;
         int comm_size;
+        char *temp_name = NULL;
 
-        ret = H5Pget_subfiling_access(fapl_id, &num_groups, &get_comm, &get_info);
+        ret = H5Pget_subfiling_access(fapl_id, &num_groups, &temp_name, &get_comm, &get_info);
         VRFY((ret == 0), "");
 
         VRFY((num_groups == (unsigned)mpi_size), "number of subfiling groups verified");
+        VRFY((strcmp(temp_name, subfile_name) == 0), "Subfile name verification succeeded");
 
         MPI_Comm_size(get_comm, &comm_size);
         VRFY((comm_size == 1), "subfiling communicator verified");
 
         MPI_Comm_free(&get_comm);
+        HDfree(temp_name);
     }
 
     fcpl_id = H5Fget_create_plist(fid);
@@ -152,8 +156,7 @@ subfiling_api(void)
     VRFY((dcpl_id >= 0), "");
 
     /* Set the selection that this process will access the dataset with */
-    sprintf(subfile_name, "subfile_%d", mpi_rank);
-    ret = H5Pset_subfiling(dcpl_id, sid, subfile_name);
+    ret = H5Pset_subfiling(dcpl_id, sid);
     VRFY((ret == 0), "");
 
     /* create the dataset with the subfiling dcpl settings */
@@ -162,18 +165,15 @@ subfiling_api(void)
 
     {
         hid_t temp_sid;
-        char *temp_name = NULL;
 
-        ret = H5Pget_subfiling(dcpl_id, &temp_sid, &temp_name);
+        ret = H5Pget_subfiling(dcpl_id, &temp_sid);
         VRFY((ret == 0), "");
 
-        VRFY((strcmp(temp_name, subfile_name) == 0), "Subfile name verification succeeded");
         VRFY((H5Sget_select_npoints(sid) == H5Sget_select_npoints(temp_sid)), "Subfiling selection verified");
         VRFY((H5Sget_simple_extent_ndims(sid) == H5Sget_simple_extent_ndims(temp_sid)), "Subfiling selection verified");
 
         ret = H5Sclose(temp_sid);
         VRFY((ret == 0), "");
-        HDfree(temp_name);
     }
     ret = H5Pclose(dcpl_id);
     VRFY((ret == 0), "");

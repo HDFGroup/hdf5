@@ -1142,6 +1142,10 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     if(NULL == (new_dset->shared = H5D__new(dcpl_id, TRUE, has_vl_type)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
+    /* check for subfiling and set virtual layout if subfiling is requested */
+            //if(H5D__subfiling_init(file, new_dset->dcpl_id) < 0)
+            //HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't subfile dataset")
+
     /* Copy & initialize datatype for dataset */
     if(H5D__init_type(file, new_dset, type_id, type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't copy datatype")
@@ -3190,4 +3194,55 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_type() */
+#if 0
+//#ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__subfiling_init
+ *
+ * Purpose:     Change the layout properties of the dataset to virtual if 
+ *              subfiling is enabled.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi; March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__subfiling_init(H5F_t *file, hid_t dcpl_id)
+{
+    hid_t space_id = H5I_INVALID_HID;
+    const char *subfile_name = NULL;
+    H5P_genplist_t *plist; /* Property list pointer */
+    herr_t ret_value = SUCCEED;
 
+    FUNC_ENTER_STATIC
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* get the subfile selection of calling process */
+    if(H5P_get(plist, H5D_CRT_SUBFILING_SELECTION_NAME, &space_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling selection")
+
+    /* If subfiling is enabled */
+    if(space_id != H5I_INVALID_HID) {
+        /* Get the subfile name */
+        if(H5P_peek(plist, H5D_CRT_SUBFILING_FILENAME_NAME, &subfile_name) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get the subfile name")
+        if(subfile_name == NULL)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Subfile name is not set")
+
+        if(0 == file->shared->num_subfiles)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Number of subfiles is not set on file creation")
+        if(MPI_COMM_NULL == file->subfiling_comm)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Subfiling communicator is not set for file access")
+
+    }
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__subfiling_init() */
+#endif /* H5_HAVE_PARALLEL */
