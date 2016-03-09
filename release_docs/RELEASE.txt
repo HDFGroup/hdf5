@@ -416,7 +416,7 @@ New Features
 
     High-Level APIs:
     ------
-     - New public functions in Packet Table API
+     - New public functions in the C Packet Table API
 
       Two accessor functions were added per HDFFV-8623/patch 003.
             /* Returns the ID of the dataset associated with the packet table  */
@@ -425,6 +425,28 @@ New Features
             /* Returns the ID of the datatype the packet table uses */
             hid_t H5PTget_type(hid_t table_id);
                                                (BMR, 2016/03/04, HDFFV-8623)
+
+     - New public functions in the C++ Packet Table API
+
+      Two accessor wrappers to class PacketTable, per HDFFV-8623/patch 004.
+            /* Returns the ID of the dataset associated with the packet table  */
+            hid_t PacketTable::GetDataset()
+
+            /* Returns the ID of the datatype the packet table uses */
+            hid_t PacketTable::GetDataset()
+                                               (BMR, 2016/03/04, HDFFV-8623)
+
+     - Member functions having "char*" as an argument
+
+      Overloaded functions were added to provide "const char*" argument, the
+      existing version will be deprecated.
+                                               (BMR, 2016/03/04)
+
+     - Commented out functions are renewed
+
+      The old function VL_PacketTable::FreeReadBuff that had been ifdef'ed out
+      now became PacketTable::FreeBuff()
+                                               (BMR, 2016/03/04, HDFFV-442)
 
      - A new API function H5DOwrite_chunk.  It writes a data chunk directly
             into a file bypassing hyperslab selection, data conversion, and
