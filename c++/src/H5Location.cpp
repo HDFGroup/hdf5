@@ -50,7 +50,7 @@ extern "C" herr_t userAttrOpWrpr(hid_t loc_id, const char *attr_name,
 #ifdef NO_STATIC_CAST
    UserData4Aiterate* myData = (UserData4Aiterate *) op_data;
 #else
-   UserData4Aiterate* myData = static_cast <UserData4Aiterate *> (op_data);
+   UserData4Aiterate* myData = reinterpret_cast<UserData4Aiterate *> (op_data);
 #endif
    myData->op( *myData->location, s_attr_name, myData->opData );
    return 0;
@@ -232,7 +232,7 @@ int H5Location::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_
    // call the C library routine H5Aiterate2 to iterate the attributes
    hsize_t idx = _idx ? (hsize_t)*_idx : 0;
    int ret_value = H5Aiterate2(getId(), H5_INDEX_NAME, H5_ITER_INC, &idx,
-			userAttrOpWrpr, static_cast<void *>(userData));
+			userAttrOpWrpr, reinterpret_cast<void *>(userData));
 
    // release memory
    delete userData;
