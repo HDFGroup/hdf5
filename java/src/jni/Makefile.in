@@ -28,7 +28,7 @@
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
-# HDF5 Library Makefile(.in)
+# HDF5 Java native interface (JNI) Library Makefile(.in)
 #
 
 VPATH = @srcdir@
@@ -105,11 +105,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = h5watch$(EXEEXT)
-noinst_PROGRAMS = swmr_check_compat_vfd$(EXEEXT) \
-	h5watchgentest$(EXEEXT) extend_dset$(EXEEXT)
-TESTS = $(TEST_SCRIPT)
-subdir = hl/tools/h5watch
+TESTS =
+subdir = java/src/jni
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 	$(top_srcdir)/m4/aclocal_fc.m4 \
@@ -135,34 +132,51 @@ DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/H5config.h \
 	$(top_builddir)/fortran/src/H5config_f.inc
-CONFIG_CLEAN_FILES = testh5watch.sh
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)"
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
-extend_dset_SOURCES = extend_dset.c
-extend_dset_OBJECTS = extend_dset.$(OBJEXT)
-extend_dset_LDADD = $(LDADD)
-extend_dset_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__installdirs = "$(DESTDIR)$(libdir)"
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libhdf5_java_la_DEPENDENCIES = $(LIBHDF5)
+am_libhdf5_java_la_OBJECTS = exceptionImp.lo h5Constants.lo \
+	nativeData.lo h5util.lo h5Imp.lo h5aImp.lo h5dImp.lo h5eImp.lo \
+	h5fImp.lo h5gImp.lo h5iImp.lo h5lImp.lo h5oImp.lo h5pImp.lo \
+	h5plImp.lo h5rImp.lo h5sImp.lo h5tImp.lo h5zImp.lo
+libhdf5_java_la_OBJECTS = $(am_libhdf5_java_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-h5watch_SOURCES = h5watch.c
-h5watch_OBJECTS = h5watch.$(OBJEXT)
-h5watch_LDADD = $(LDADD)
-h5watch_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
-h5watch_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(h5watch_LDFLAGS) $(LDFLAGS) -o $@
-h5watchgentest_SOURCES = h5watchgentest.c
-h5watchgentest_OBJECTS = h5watchgentest.$(OBJEXT)
-h5watchgentest_LDADD = $(LDADD)
-h5watchgentest_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
-swmr_check_compat_vfd_SOURCES = swmr_check_compat_vfd.c
-swmr_check_compat_vfd_OBJECTS = swmr_check_compat_vfd.$(OBJEXT)
-swmr_check_compat_vfd_LDADD = $(LDADD)
-swmr_check_compat_vfd_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TOOLS) \
-	$(LIBHDF5)
+libhdf5_java_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(AM_CFLAGS) $(CFLAGS) $(libhdf5_java_la_LDFLAGS) $(LDFLAGS) \
+	-o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -197,10 +211,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = extend_dset.c h5watch.c h5watchgentest.c \
-	swmr_check_compat_vfd.c
-DIST_SOURCES = extend_dset.c h5watch.c h5watchgentest.c \
-	swmr_check_compat_vfd.c
+SOURCES = $(libhdf5_java_la_SOURCES)
+DIST_SOURCES = $(libhdf5_java_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -247,33 +259,6 @@ am__tty_colors = { \
     std='[m'; \
   fi; \
 }
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
 am__recheck_rx = ^[ 	]*:recheck:[ 	]*
 am__global_test_result_rx = ^[ 	]*:global-test-result:[ 	]*
 am__copy_in_global_log_rx = ^[ 	]*:copy-in-global-log:[ 	]*
@@ -425,10 +410,10 @@ am__set_b = \
     *) \
       b='$*';; \
   esac
-am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/testh5watch.sh.in \
-	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/test-driver \
-	$(top_srcdir)/config/commence.am \
-	$(top_srcdir)/config/conclude.am
+am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/bin/depcomp \
+	$(top_srcdir)/bin/test-driver $(top_srcdir)/config/commence.am \
+	$(top_srcdir)/config/conclude.am \
+	$(top_srcdir)/config/lt_vers.am
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
@@ -441,9 +426,9 @@ AMTAR = @AMTAR@
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
 AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
 
-# Include src and tools/lib directories
+# Include src directory and JNI flags
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
-	-I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
+	-I$(top_srcdir)/java/src/jni $(JNIFLAGS)
 AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
@@ -744,21 +729,33 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
-#
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *.h5
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 
-# These are our main targets, the tools
-TEST_SCRIPT = testh5watch.sh
-check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = swmr_check_compat_vfd$(EXEEXT) extend_dset$(EXEEXT) h5watch$(EXEEXT)
+# Add libtool shared library version numbers to the HDF5 library
+# See libtool versioning documentation online.
+# After making changes, run bin/reconfigure to update other configure related
+# files like Makefile.in.
+LT_VERS_INTERFACE = 100
+LT_VERS_REVISION = 0
+LT_VERS_AGE = 0
 
-# Add h5watch specific linker flags here
-h5watch_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+# Mark this directory as part of the JNI API
+JAVA_API = yes
 
-# Programs all depend on the hdf5 library, the tools library, and the HL
-# library.
-LDADD = $(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
-DISTCLEANFILES = testh5watch.sh
+# This is our main target
+lib_LTLIBRARIES = libhdf5_java.la
+
+# Add libtool numbers to the HDF5 Java (JNI) library (from config/lt_vers.am)
+libhdf5_java_la_LDFLAGS = -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
+
+# Source files for the library
+libhdf5_java_la_SOURCES = exceptionImp.c h5Constants.c nativeData.c h5util.c h5Imp.c \
+	h5aImp.c h5dImp.c h5eImp.c h5fImp.c h5gImp.c h5iImp.c h5lImp.c h5oImp.c    \
+	h5pImp.c h5plImp.c h5rImp.c h5sImp.c h5tImp.c h5zImp.c
+
+
+# HDF5 Java (JNI) library depends on HDF5 Library.
+libhdf5_java_la_LIBADD = $(LIBHDF5)
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -783,7 +780,7 @@ all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .log .o .obj .sh .sh$(EXEEXT) .trs
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/lt_vers.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -792,9 +789,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign hl/tools/h5watch/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign java/src/jni/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign hl/tools/h5watch/Makefile
+	  $(AUTOMAKE) --foreign java/src/jni/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -803,7 +800,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \
 	esac;
-$(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__empty):
+$(top_srcdir)/config/commence.am $(top_srcdir)/config/lt_vers.am $(top_srcdir)/config/conclude.am $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
@@ -813,82 +810,44 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-testh5watch.sh: $(top_builddir)/config.status $(srcdir)/testh5watch.sh.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-install-binPROGRAMS: $(bin_PROGRAMS)
+
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
-	fi; \
-	for p in $$list; do echo "$$p $$p"; done | \
-	sed 's/$(EXEEXT)$$//' | \
-	while read p p1; do if test -f $$p \
-	 || test -f $$p1 \
-	  ; then echo "$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n;h' \
-	    -e 's|.*|.|' \
-	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
-	sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
-	    else { print "f", $$3 "/" $$4, $$1; } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	    test -z "$$files" || { \
-	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
-	    } \
-	; done
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(libdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(libdir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
+	}
 
-uninstall-binPROGRAMS:
+uninstall-libLTLIBRARIES:
 	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
-	      -e 's/$$/$(EXEEXT)/' \
-	`; \
-	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(bindir)" && rm -f $$files
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
+	done
 
-clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
-	echo " rm -f" $$list; \
-	rm -f $$list || exit $$?; \
-	test -n "$(EXEEXT)" || exit 0; \
-	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
-	echo " rm -f" $$list; \
-	rm -f $$list
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
 
-clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
-	echo " rm -f" $$list; \
-	rm -f $$list || exit $$?; \
-	test -n "$(EXEEXT)" || exit 0; \
-	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
-	echo " rm -f" $$list; \
-	rm -f $$list
-
-extend_dset$(EXEEXT): $(extend_dset_OBJECTS) $(extend_dset_DEPENDENCIES) $(EXTRA_extend_dset_DEPENDENCIES) 
-	@rm -f extend_dset$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(extend_dset_OBJECTS) $(extend_dset_LDADD) $(LIBS)
-
-h5watch$(EXEEXT): $(h5watch_OBJECTS) $(h5watch_DEPENDENCIES) $(EXTRA_h5watch_DEPENDENCIES) 
-	@rm -f h5watch$(EXEEXT)
-	$(AM_V_CCLD)$(h5watch_LINK) $(h5watch_OBJECTS) $(h5watch_LDADD) $(LIBS)
-
-h5watchgentest$(EXEEXT): $(h5watchgentest_OBJECTS) $(h5watchgentest_DEPENDENCIES) $(EXTRA_h5watchgentest_DEPENDENCIES) 
-	@rm -f h5watchgentest$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(h5watchgentest_OBJECTS) $(h5watchgentest_LDADD) $(LIBS)
-
-swmr_check_compat_vfd$(EXEEXT): $(swmr_check_compat_vfd_OBJECTS) $(swmr_check_compat_vfd_DEPENDENCIES) $(EXTRA_swmr_check_compat_vfd_DEPENDENCIES) 
-	@rm -f swmr_check_compat_vfd$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(swmr_check_compat_vfd_OBJECTS) $(swmr_check_compat_vfd_LDADD) $(LIBS)
+libhdf5_java.la: $(libhdf5_java_la_OBJECTS) $(libhdf5_java_la_DEPENDENCIES) $(EXTRA_libhdf5_java_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libhdf5_java_la_LINK) -rpath $(libdir) $(libhdf5_java_la_OBJECTS) $(libhdf5_java_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -896,10 +855,25 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extend_dset.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5watch.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5watchgentest.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/swmr_check_compat_vfd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exceptionImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5Constants.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5Imp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5aImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5dImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5eImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5fImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5gImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5iImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5lImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5oImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5pImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5plImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5rImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5sImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5tImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5util.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5zImp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nativeData.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1099,7 +1073,7 @@ $(TEST_SUITE_LOG): $(TEST_LOGS)
 	  echo "$$col$$br$$std";					\
 	fi;								\
 	$$success || exit 1
-recheck: all $(check_SCRIPTS)
+recheck: all 
 	@test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 	@set +e; $(am__set_TESTS_bases); \
 	bases=`for i in $$bases; do echo $$i; done \
@@ -1156,12 +1130,11 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS) all-local
+all-am: Makefile $(LTLIBRARIES) all-local
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1193,15 +1166,14 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1227,7 +1199,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am: install-libLTLIBRARIES
 
 install-html: install-html-am
 
@@ -1267,25 +1239,25 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-libLTLIBRARIES
 
 .MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
-	check-am clean clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstPROGRAMS cscopelist-am ctags ctags-am distclean \
+	check-am clean clean-generic clean-libLTLIBRARIES \
+	clean-libtool cscopelist-am ctags ctags-am distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-binPROGRAMS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am \
+	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
 	install-ps install-ps-am install-strip installcheck \
 	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
 	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am \
-	uninstall-binPROGRAMS
+	uninstall-libLTLIBRARIES
 
 .PRECIOUS: Makefile
 
@@ -1300,6 +1272,19 @@ uninstall-am: uninstall-binPROGRAMS
 
 help:
 	@$(top_srcdir)/bin/makehelp
+
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.

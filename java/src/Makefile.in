@@ -28,8 +28,13 @@
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
-# Tools HDF5 Makefile(.in)
+# 
+# This makefile mostly just reinvokes make in the various subdirectories
+# but does so in the correct order.  You can alternatively invoke make from
+# each subdirectory manually.
 #
+# HDF5 Java native interface (JNI) Library Makefile(.in)
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -104,8 +109,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-TESTS =
-subdir = hl/tools
+subdir = java/src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 	$(top_srcdir)/m4/aclocal_fc.m4 \
@@ -160,55 +164,9 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
-  distclean-recursive maintainer-clean-recursive
-am__recursive_targets = \
-  $(RECURSIVE_TARGETS) \
-  $(RECURSIVE_CLEAN_TARGETS) \
-  $(am__extra_recursive_targets)
-AM_RECURSIVE_TARGETS = $(am__recursive_targets:-recursive=) TAGS CTAGS \
-	check recheck distdir
-am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
-# Read a list of newline-separated strings from the standard input,
-# and print each of them once, without duplicates.  Input order is
-# *not* preserved.
-am__uniquify_input = $(AWK) '\
-  BEGIN { nonempty = 0; } \
-  { items[$$0] = 1; nonempty = 1; } \
-  END { if (nonempty) { for (i in items) print i; }; } \
-'
-# Make sure the list of sources is unique.  This is necessary because,
-# e.g., the same source file might be shared among _SOURCES variables
-# for different programs/libraries.
-am__define_uniq_tagged_files = \
-  list='$(am__tagged_files)'; \
-  unique=`for i in $$list; do \
-    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-  done | $(am__uniquify_input)`
-ETAGS = etags
-CTAGS = ctags
-am__tty_colors_dummy = \
-  mgn= red= grn= lgn= blu= brg= std=; \
-  am__color_tests=no
-am__tty_colors = { \
-  $(am__tty_colors_dummy); \
-  if test "X$(AM_COLOR_TESTS)" = Xno; then \
-    am__color_tests=no; \
-  elif test "X$(AM_COLOR_TESTS)" = Xalways; then \
-    am__color_tests=yes; \
-  elif test "X$$TERM" != Xdumb && { test -t 1; } 2>/dev/null; then \
-    am__color_tests=yes; \
-  fi; \
-  if test $$am__color_tests = yes; then \
-    red='[0;31m'; \
-    grn='[0;32m'; \
-    lgn='[1;32m'; \
-    blu='[1;34m'; \
-    mgn='[0;35m'; \
-    brg='[1m'; \
-    std='[m'; \
-  fi; \
-}
+am__installdirs = "$(DESTDIR)$(hdf5_javadir)" \
+	"$(DESTDIR)$(hdf5_javadir)"
+am__java_sources = $(hdf5_java_JAVA)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -236,160 +194,37 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__recheck_rx = ^[ 	]*:recheck:[ 	]*
-am__global_test_result_rx = ^[ 	]*:global-test-result:[ 	]*
-am__copy_in_global_log_rx = ^[ 	]*:copy-in-global-log:[ 	]*
-# A command that, given a newline-separated list of test names on the
-# standard input, print the name of the tests that are to be re-run
-# upon "make recheck".
-am__list_recheck_tests = $(AWK) '{ \
-  recheck = 1; \
-  while ((rc = (getline line < ($$0 ".trs"))) != 0) \
-    { \
-      if (rc < 0) \
-        { \
-          if ((getline line2 < ($$0 ".log")) < 0) \
-	    recheck = 0; \
-          break; \
-        } \
-      else if (line ~ /$(am__recheck_rx)[nN][Oo]/) \
-        { \
-          recheck = 0; \
-          break; \
-        } \
-      else if (line ~ /$(am__recheck_rx)[yY][eE][sS]/) \
-        { \
-          break; \
-        } \
-    }; \
-  if (recheck) \
-    print $$0; \
-  close ($$0 ".trs"); \
-  close ($$0 ".log"); \
-}'
-# A command that, given a newline-separated list of test names on the
-# standard input, create the global log from their .trs and .log files.
-am__create_global_log = $(AWK) ' \
-function fatal(msg) \
-{ \
-  print "fatal: making $@: " msg | "cat >&2"; \
-  exit 1; \
-} \
-function rst_section(header) \
-{ \
-  print header; \
-  len = length(header); \
-  for (i = 1; i <= len; i = i + 1) \
-    printf "="; \
-  printf "\n\n"; \
-} \
-{ \
-  copy_in_global_log = 1; \
-  global_test_result = "RUN"; \
-  while ((rc = (getline line < ($$0 ".trs"))) != 0) \
-    { \
-      if (rc < 0) \
-         fatal("failed to read from " $$0 ".trs"); \
-      if (line ~ /$(am__global_test_result_rx)/) \
-        { \
-          sub("$(am__global_test_result_rx)", "", line); \
-          sub("[ 	]*$$", "", line); \
-          global_test_result = line; \
-        } \
-      else if (line ~ /$(am__copy_in_global_log_rx)[nN][oO]/) \
-        copy_in_global_log = 0; \
-    }; \
-  if (copy_in_global_log) \
-    { \
-      rst_section(global_test_result ": " $$0); \
-      while ((rc = (getline line < ($$0 ".log"))) != 0) \
-      { \
-        if (rc < 0) \
-          fatal("failed to read from " $$0 ".log"); \
-        print line; \
-      }; \
-      printf "\n"; \
-    }; \
-  close ($$0 ".trs"); \
-  close ($$0 ".log"); \
-}'
-# Restructured Text title.
-am__rst_title = { sed 's/.*/   &   /;h;s/./=/g;p;x;s/ *$$//;p;g' && echo; }
-# Solaris 10 'make', and several other traditional 'make' implementations,
-# pass "-e" to $(SHELL), and POSIX 2008 even requires this.  Work around it
-# by disabling -e (using the XSI extension "set +e") if it's set.
-am__sh_e_setup = case $$- in *e*) set +e;; esac
-# Default flags passed to test drivers.
-am__common_driver_flags = \
-  --color-tests "$$am__color_tests" \
-  --enable-hard-errors "$$am__enable_hard_errors" \
-  --expect-failure "$$am__expect_failure"
-# To be inserted before the command running the test.  Creates the
-# directory for the log if needed.  Stores in $dir the directory
-# containing $f, in $tst the test, in $log the log.  Executes the
-# developer- defined test setup AM_TESTS_ENVIRONMENT (if any), and
-# passes TESTS_ENVIRONMENT.  Set up options for the wrapper that
-# will run the test scripts (or their associated LOG_COMPILER, if
-# thy have one).
-am__check_pre = \
-$(am__sh_e_setup);					\
-$(am__vpath_adj_setup) $(am__vpath_adj)			\
-$(am__tty_colors);					\
-srcdir=$(srcdir); export srcdir;			\
-case "$@" in						\
-  */*) am__odir=`echo "./$@" | sed 's|/[^/]*$$||'`;;	\
-    *) am__odir=.;; 					\
-esac;							\
-test "x$$am__odir" = x"." || test -d "$$am__odir" 	\
-  || $(MKDIR_P) "$$am__odir" || exit $$?;		\
-if test -f "./$$f"; then dir=./;			\
-elif test -f "$$f"; then dir=;				\
-else dir="$(srcdir)/"; fi;				\
-tst=$$dir$$f; log='$@'; 				\
-if test -n '$(DISABLE_HARD_ERRORS)'; then		\
-  am__enable_hard_errors=no; 				\
-else							\
-  am__enable_hard_errors=yes; 				\
-fi; 							\
-case " $(XFAIL_TESTS) " in				\
-  *[\ \	]$$f[\ \	]* | *[\ \	]$$dir$$f[\ \	]*) \
-    am__expect_failure=yes;;				\
-  *)							\
-    am__expect_failure=no;;				\
-esac; 							\
-$(AM_TESTS_ENVIRONMENT) $(TESTS_ENVIRONMENT)
-# A shell command to get the names of the tests scripts with any registered
-# extension removed (i.e., equivalently, the names of the test logs, with
-# the '.log' extension removed).  The result is saved in the shell variable
-# '$bases'.  This honors runtime overriding of TESTS and TEST_LOGS.  Sadly,
-# we cannot use something simpler, involving e.g., "$(TEST_LOGS:.log=)",
-# since that might cause problem with VPATH rewrites for suffix-less tests.
-# See also 'test-harness-vpath-rewrite.sh' and 'test-trs-basic.sh'.
-am__set_TESTS_bases = \
-  bases='$(TEST_LOGS)'; \
-  bases=`for i in $$bases; do echo $$i; done | sed 's/\.log$$//'`; \
-  bases=`echo $$bases`
-RECHECK_LOGS = $(TEST_LOGS)
-TEST_SUITE_LOG = test-suite.log
-am__test_logs1 = $(TESTS:=.log)
-am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
-TEST_LOGS = $(am__test_logs2:.sh.log=.log)
-SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
-SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
-am__set_b = \
-  case '$@' in \
-    */*) \
-      case '$*' in \
-        */*) b='$*';; \
-          *) b=`echo '$@' | sed 's/\.log$$//'`; \
-       esac;; \
-    *) \
-      b='$*';; \
-  esac
+DATA = $(hdf5_java_DATA)
+RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
+  distclean-recursive maintainer-clean-recursive
+am__recursive_targets = \
+  $(RECURSIVE_TARGETS) \
+  $(RECURSIVE_CLEAN_TARGETS) \
+  $(am__extra_recursive_targets)
+AM_RECURSIVE_TARGETS = $(am__recursive_targets:-recursive=) TAGS CTAGS \
+	distdir
+am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
+# Read a list of newline-separated strings from the standard input,
+# and print each of them once, without duplicates.  Input order is
+# *not* preserved.
+am__uniquify_input = $(AWK) '\
+  BEGIN { nonempty = 0; } \
+  { items[$$0] = 1; nonempty = 1; } \
+  END { if (nonempty) { for (i in items) print i; }; } \
+'
+# Make sure the list of sources is unique.  This is necessary because,
+# e.g., the same source file might be shared among _SOURCES variables
+# for different programs/libraries.
+am__define_uniq_tagged_files = \
+  list='$(am__tagged_files)'; \
+  unique=`for i in $$list; do \
+    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
+  done | $(am__uniquify_input)`
+ETAGS = etags
+CTAGS = ctags
 DIST_SUBDIRS = $(SUBDIRS)
-am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/bin/test-driver \
-	$(top_srcdir)/config/commence.am \
-	$(top_srcdir)/config/conclude.am COPYING
+am__DIST_COMMON = $(srcdir)/Makefile.in \
+	$(top_srcdir)/config/commence.am
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -430,7 +265,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@
 AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
-AM_JAVACFLAGS = @AM_JAVACFLAGS@
+AM_JAVACFLAGS = $(H5_JAVACFLAGS) -deprecation
 AM_JAVAFLAGS = @AM_JAVAFLAGS@
 AM_JNIFLAGS = @AM_JNIFLAGS@
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@
@@ -728,35 +563,92 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chklog files are output from those tests.
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
-CONFIG = ordered
 
-# All subdirectories
-SUBDIRS = gif2h5 h5watch
+# Mark this directory as part of the JNI API
+JAVA_API = yes
+SUBDIRS = jni
+JAVAROOT = .classes
+jarfile = jar$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).jar
+hdf5_javadir = $(libdir)
+pkgpath = hdf/hdf5lib
+CLASSPATH_ENV = CLASSPATH=.:$(top_srcdir)/java/lib/slf4j-api-1.7.5.jar:$$CLASSPATH
+hdf5_java_JAVA = \
+	${pkgpath}/callbacks/Callbacks.java \
+	${pkgpath}/callbacks/H5A_iterate_cb.java \
+	${pkgpath}/callbacks/H5A_iterate_t.java \
+	${pkgpath}/callbacks/H5D_append_cb.java \
+	${pkgpath}/callbacks/H5D_append_t.java \
+	${pkgpath}/callbacks/H5D_iterate_cb.java \
+	${pkgpath}/callbacks/H5D_iterate_t.java \
+	${pkgpath}/callbacks/H5E_walk_cb.java \
+	${pkgpath}/callbacks/H5E_walk_t.java \
+	${pkgpath}/callbacks/H5L_iterate_cb.java \
+	${pkgpath}/callbacks/H5L_iterate_t.java \
+	${pkgpath}/callbacks/H5O_iterate_cb.java \
+	${pkgpath}/callbacks/H5O_iterate_t.java \
+    ${pkgpath}/callbacks/H5P_cls_close_func_cb.java \
+    ${pkgpath}/callbacks/H5P_cls_close_func_t.java \
+    ${pkgpath}/callbacks/H5P_cls_copy_func_cb.java \
+    ${pkgpath}/callbacks/H5P_cls_copy_func_t.java \
+    ${pkgpath}/callbacks/H5P_cls_create_func_cb.java \
+    ${pkgpath}/callbacks/H5P_cls_create_func_t.java \
+    ${pkgpath}/callbacks/H5P_prp_close_func_cb.java \
+    ${pkgpath}/callbacks/H5P_prp_compare_func_cb.java \
+    ${pkgpath}/callbacks/H5P_prp_copy_func_cb.java \
+    ${pkgpath}/callbacks/H5P_prp_create_func_cb.java \
+    ${pkgpath}/callbacks/H5P_prp_delete_func_cb.java \
+    ${pkgpath}/callbacks/H5P_prp_get_func_cb.java \
+    ${pkgpath}/callbacks/H5P_prp_set_func_cb.java \
+ 	${pkgpath}/callbacks/H5P_iterate_cb.java \
+	${pkgpath}/callbacks/H5P_iterate_t.java \
+	${pkgpath}/exceptions/HDF5AtomException.java  \
+	${pkgpath}/exceptions/HDF5AttributeException.java  \
+	${pkgpath}/exceptions/HDF5BtreeException.java  \
+	${pkgpath}/exceptions/HDF5DataFiltersException.java  \
+	${pkgpath}/exceptions/HDF5DataStorageException.java  \
+	${pkgpath}/exceptions/HDF5DatasetInterfaceException.java  \
+	${pkgpath}/exceptions/HDF5DataspaceInterfaceException.java  \
+	${pkgpath}/exceptions/HDF5DatatypeInterfaceException.java  \
+	${pkgpath}/exceptions/HDF5Exception.java  \
+	${pkgpath}/exceptions/HDF5ExternalFileListException.java  \
+	${pkgpath}/exceptions/HDF5FileInterfaceException.java  \
+	${pkgpath}/exceptions/HDF5FunctionArgumentException.java  \
+	${pkgpath}/exceptions/HDF5FunctionEntryExitException.java  \
+	${pkgpath}/exceptions/HDF5HeapException.java  \
+	${pkgpath}/exceptions/HDF5InternalErrorException.java  \
+	${pkgpath}/exceptions/HDF5JavaException.java  \
+	${pkgpath}/exceptions/HDF5LibraryException.java  \
+	${pkgpath}/exceptions/HDF5LowLevelIOException.java  \
+	${pkgpath}/exceptions/HDF5MetaDataCacheException.java  \
+	${pkgpath}/exceptions/HDF5ObjectHeaderException.java  \
+	${pkgpath}/exceptions/HDF5PropertyListInterfaceException.java  \
+	${pkgpath}/exceptions/HDF5ReferenceException.java  \
+	${pkgpath}/exceptions/HDF5ResourceUnavailableException.java  \
+	${pkgpath}/exceptions/HDF5SymbolTableException.java \
+	${pkgpath}/structs/H5_ih_info_t.java \
+	${pkgpath}/structs/H5A_info_t.java \
+	${pkgpath}/structs/H5E_error2_t.java \
+	${pkgpath}/structs/H5F_info2_t.java \
+	${pkgpath}/structs/H5G_info_t.java \
+	${pkgpath}/structs/H5L_info_t.java \
+	${pkgpath}/structs/H5O_info_t.java \
+	${pkgpath}/structs/H5O_hdr_info_t.java \
+	${pkgpath}/structs/H5AC_cache_config_t.java \
+	${pkgpath}/H5.java  \
+	${pkgpath}/HDF5Constants.java  \
+	${pkgpath}/HDF5GroupInfo.java  \
+	${pkgpath}/HDFArray.java  \
+	${pkgpath}/HDFNativeData.java
 
-# Automake needs to be taught how to build lib, progs, and tests targets.
-# These will be filled in automatically for the most part (e.g.,
-# lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
-# EXTRA_TEST variables are supplied to allow the user to force targets to
-# be built at certain times. 
-LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
-      $(noinst_LTLIBRARIES) $(check_LIBRARIES) $(check_LTLIBRARIES) $(EXTRA_LIB)
-
-PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
-        $(EXTRA_PROG)
-
-chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
-TEST_EXTENSIONS = .sh
-SH_LOG_COMPILER = $(SHELL)
-AM_SH_LOG_FLAGS = 
-TEST_PROG_CHKEXE = $(TEST_PROG:=.chkexe_)
-TEST_PROG_PARA_CHKEXE = $(TEST_PROG_PARA:=.chkexe_)
-TEST_SCRIPT_CHKSH = $(TEST_SCRIPT:=.chkexe_)
-TEST_SCRIPT_PARA_CHKSH = $(TEST_SCRIPT_PARA:=.chkexe_)
+hdf5_java_DATA = $(jarfile)
+WINDOWTITLE = 'HDF5 Java'
+DOCTITLE = '<h1>HDF5 Java Wrapper</h1>'
+SRCDIR = '$(pkgpath)'
+CLEANFILES = classhdf5_java.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/callbacks/*.class $(JAVAROOT)/$(pkgpath)/exceptions/*.class $(JAVAROOT)/$(pkgpath)/structs/*.class $(JAVAROOT)/$(pkgpath)/*.class
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .log .sh .sh$(EXEEXT) .trs
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/config/commence.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -765,9 +657,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign hl/tools/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign java/src/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign hl/tools/Makefile
+	  $(AUTOMAKE) --foreign java/src/Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -776,7 +668,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \
 	esac;
-$(top_srcdir)/config/commence.am $(top_srcdir)/config/conclude.am $(am__empty):
+$(top_srcdir)/config/commence.am $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
@@ -792,6 +684,56 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+
+classhdf5_java.stamp: $(am__java_sources)
+	@list1='$?'; list2=; if test -n "$$list1"; then \
+	  for p in $$list1; do \
+	    if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
+	    list2="$$list2 $$d$$p"; \
+	  done; \
+	  echo '$(CLASSPATH_ENV) $(JAVAC) -d $(JAVAROOT) $(AM_JAVACFLAGS) $(JAVACFLAGS) '"$$list2"; \
+	  $(CLASSPATH_ENV) $(JAVAC) -d $(JAVAROOT) $(AM_JAVACFLAGS) $(JAVACFLAGS) $$list2; \
+	else :; fi
+	echo timestamp > $@
+install-hdf5_javaJAVA: classhdf5_java.stamp
+	@$(NORMAL_INSTALL)
+	@test -n "$(hdf5_java_JAVA)" && test -n "$(hdf5_javadir)" || exit 0; \
+	echo " $(MKDIR_P) '$(DESTDIR)$(hdf5_javadir)'"; \
+	$(MKDIR_P) "$(DESTDIR)$(hdf5_javadir)"; \
+	set x *.class; shift; test "$$1" != "*.class" || exit 0; \
+	echo " $(INSTALL_DATA)" "$$@" "'$(DESTDIR)$(hdf5_javadir)/$$p'"; \
+	$(INSTALL_DATA) "$$@" "$(DESTDIR)$(hdf5_javadir)"
+
+uninstall-hdf5_javaJAVA:
+	@$(NORMAL_UNINSTALL)
+	@test -n "$(hdf5_java_JAVA)" && test -n "$(hdf5_javadir)" || exit 0; \
+	set x *.class; shift; test "$$1" != "*.class" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(hdf5_javadir)' && rm -f" "$$@" ")"; \
+	cd "$(DESTDIR)$(hdf5_javadir)" && rm -f "$$@"
+
+clean-hdf5_javaJAVA:
+	-rm -f *.class classhdf5_java.stamp
+install-hdf5_javaDATA: $(hdf5_java_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(hdf5_java_DATA)'; test -n "$(hdf5_javadir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(hdf5_javadir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(hdf5_javadir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(hdf5_javadir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(hdf5_javadir)" || exit $$?; \
+	done
+
+uninstall-hdf5_javaDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(hdf5_java_DATA)'; test -n "$(hdf5_javadir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(hdf5_javadir)'; $(am__uninstall_files_from_dir)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.
@@ -892,151 +834,6 @@ cscopelist-am: $(am__tagged_files)
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
-# Recover from deleted '.trs' file; this should ensure that
-# "rm -f foo.log; make foo.trs" re-run 'foo.test', and re-create
-# both 'foo.log' and 'foo.trs'.  Break the recipe in two subshells
-# to avoid problems with "make -n".
-.log.trs:
-	rm -f $< $@
-	$(MAKE) $(AM_MAKEFLAGS) $<
-
-# Leading 'am--fnord' is there to ensure the list of targets does not
-# expand to empty, as could happen e.g. with make check TESTS=''.
-am--fnord $(TEST_LOGS) $(TEST_LOGS:.log=.trs): $(am__force_recheck)
-am--force-recheck:
-	@:
-
-$(TEST_SUITE_LOG): $(TEST_LOGS)
-	@$(am__set_TESTS_bases); \
-	am__f_ok () { test -f "$$1" && test -r "$$1"; }; \
-	redo_bases=`for i in $$bases; do \
-	              am__f_ok $$i.trs && am__f_ok $$i.log || echo $$i; \
-	            done`; \
-	if test -n "$$redo_bases"; then \
-	  redo_logs=`for i in $$redo_bases; do echo $$i.log; done`; \
-	  redo_results=`for i in $$redo_bases; do echo $$i.trs; done`; \
-	  if $(am__make_dryrun); then :; else \
-	    rm -f $$redo_logs && rm -f $$redo_results || exit 1; \
-	  fi; \
-	fi; \
-	if test -n "$$am__remaking_logs"; then \
-	  echo "fatal: making $(TEST_SUITE_LOG): possible infinite" \
-	       "recursion detected" >&2; \
-	elif test -n "$$redo_logs"; then \
-	  am__remaking_logs=yes $(MAKE) $(AM_MAKEFLAGS) $$redo_logs; \
-	fi; \
-	if $(am__make_dryrun); then :; else \
-	  st=0;  \
-	  errmsg="fatal: making $(TEST_SUITE_LOG): failed to create"; \
-	  for i in $$redo_bases; do \
-	    test -f $$i.trs && test -r $$i.trs \
-	      || { echo "$$errmsg $$i.trs" >&2; st=1; }; \
-	    test -f $$i.log && test -r $$i.log \
-	      || { echo "$$errmsg $$i.log" >&2; st=1; }; \
-	  done; \
-	  test $$st -eq 0 || exit 1; \
-	fi
-	@$(am__sh_e_setup); $(am__tty_colors); $(am__set_TESTS_bases); \
-	ws='[ 	]'; \
-	results=`for b in $$bases; do echo $$b.trs; done`; \
-	test -n "$$results" || results=/dev/null; \
-	all=`  grep "^$$ws*:test-result:"           $$results | wc -l`; \
-	pass=` grep "^$$ws*:test-result:$$ws*PASS"  $$results | wc -l`; \
-	fail=` grep "^$$ws*:test-result:$$ws*FAIL"  $$results | wc -l`; \
-	skip=` grep "^$$ws*:test-result:$$ws*SKIP"  $$results | wc -l`; \
-	xfail=`grep "^$$ws*:test-result:$$ws*XFAIL" $$results | wc -l`; \
-	xpass=`grep "^$$ws*:test-result:$$ws*XPASS" $$results | wc -l`; \
-	error=`grep "^$$ws*:test-result:$$ws*ERROR" $$results | wc -l`; \
-	if test `expr $$fail + $$xpass + $$error` -eq 0; then \
-	  success=true; \
-	else \
-	  success=false; \
-	fi; \
-	br='==================='; br=$$br$$br$$br$$br; \
-	result_count () \
-	{ \
-	    if test x"$$1" = x"--maybe-color"; then \
-	      maybe_colorize=yes; \
-	    elif test x"$$1" = x"--no-color"; then \
-	      maybe_colorize=no; \
-	    else \
-	      echo "$@: invalid 'result_count' usage" >&2; exit 4; \
-	    fi; \
-	    shift; \
-	    desc=$$1 count=$$2; \
-	    if test $$maybe_colorize = yes && test $$count -gt 0; then \
-	      color_start=$$3 color_end=$$std; \
-	    else \
-	      color_start= color_end=; \
-	    fi; \
-	    echo "$${color_start}# $$desc $$count$${color_end}"; \
-	}; \
-	create_testsuite_report () \
-	{ \
-	  result_count $$1 "TOTAL:" $$all   "$$brg"; \
-	  result_count $$1 "PASS: " $$pass  "$$grn"; \
-	  result_count $$1 "SKIP: " $$skip  "$$blu"; \
-	  result_count $$1 "XFAIL:" $$xfail "$$lgn"; \
-	  result_count $$1 "FAIL: " $$fail  "$$red"; \
-	  result_count $$1 "XPASS:" $$xpass "$$red"; \
-	  result_count $$1 "ERROR:" $$error "$$mgn"; \
-	}; \
-	{								\
-	  echo "$(PACKAGE_STRING): $(subdir)/$(TEST_SUITE_LOG)" |	\
-	    $(am__rst_title);						\
-	  create_testsuite_report --no-color;				\
-	  echo;								\
-	  echo ".. contents:: :depth: 2";				\
-	  echo;								\
-	  for b in $$bases; do echo $$b; done				\
-	    | $(am__create_global_log);					\
-	} >$(TEST_SUITE_LOG).tmp || exit 1;				\
-	mv $(TEST_SUITE_LOG).tmp $(TEST_SUITE_LOG);			\
-	if $$success; then						\
-	  col="$$grn";							\
-	 else								\
-	  col="$$red";							\
-	  test x"$$VERBOSE" = x || cat $(TEST_SUITE_LOG);		\
-	fi;								\
-	echo "$${col}$$br$${std}"; 					\
-	echo "$${col}Testsuite summary for $(PACKAGE_STRING)$${std}";	\
-	echo "$${col}$$br$${std}"; 					\
-	create_testsuite_report --maybe-color;				\
-	echo "$$col$$br$$std";						\
-	if $$success; then :; else					\
-	  echo "$${col}See $(subdir)/$(TEST_SUITE_LOG)$${std}";		\
-	  if test -n "$(PACKAGE_BUGREPORT)"; then			\
-	    echo "$${col}Please report to $(PACKAGE_BUGREPORT)$${std}";	\
-	  fi;								\
-	  echo "$$col$$br$$std";					\
-	fi;								\
-	$$success || exit 1
-recheck: all 
-	@test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
-	@set +e; $(am__set_TESTS_bases); \
-	bases=`for i in $$bases; do echo $$i; done \
-	         | $(am__list_recheck_tests)` || exit 1; \
-	log_list=`for i in $$bases; do echo $$i.log; done`; \
-	log_list=`echo $$log_list`; \
-	$(MAKE) $(AM_MAKEFLAGS) $(TEST_SUITE_LOG) \
-	        am__force_recheck=am--force-recheck \
-	        TEST_LOGS="$$log_list"; \
-	exit $$?
-.sh.log:
-	@p='$<'; \
-	$(am__set_b); \
-	$(am__check_pre) $(SH_LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_SH_LOG_DRIVER_FLAGS) $(SH_LOG_DRIVER_FLAGS) -- $(SH_LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-@am__EXEEXT_TRUE@.sh$(EXEEXT).log:
-@am__EXEEXT_TRUE@	@p='$<'; \
-@am__EXEEXT_TRUE@	$(am__set_b); \
-@am__EXEEXT_TRUE@	$(am__check_pre) $(SH_LOG_DRIVER) --test-name "$$f" \
-@am__EXEEXT_TRUE@	--log-file $$b.log --trs-file $$b.trs \
-@am__EXEEXT_TRUE@	$(am__common_driver_flags) $(AM_SH_LOG_DRIVER_FLAGS) $(SH_LOG_DRIVER_FLAGS) -- $(SH_LOG_COMPILE) \
-@am__EXEEXT_TRUE@	"$$tst" $(AM_TESTS_FD_REDIRECT)
-
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
@@ -1093,11 +890,13 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
-all-am: Makefile all-local
+all-am: Makefile classhdf5_java.stamp $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
+	for dir in "$(DESTDIR)$(hdf5_javadir)" "$(DESTDIR)$(hdf5_javadir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
 install: install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
@@ -1118,11 +917,9 @@ install-strip:
 	    "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'" install; \
 	fi
 mostlyclean-generic:
-	-test -z "$(TEST_LOGS)" || rm -f $(TEST_LOGS)
-	-test -z "$(TEST_LOGS:.log=.trs)" || rm -f $(TEST_LOGS:.log=.trs)
-	-test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -1131,9 +928,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-clean: clean-recursive
-
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-hdf5_javaJAVA clean-libtool \
+	mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f Makefile
@@ -1151,7 +947,7 @@ info: info-recursive
 
 info-am:
 
-install-data-am:
+install-data-am: install-hdf5_javaDATA install-hdf5_javaJAVA
 
 install-dvi: install-dvi-recursive
 
@@ -1185,8 +981,7 @@ maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-recursive
 
-mostlyclean-am: mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-local
+mostlyclean-am: mostlyclean-generic mostlyclean-libtool
 
 pdf: pdf-recursive
 
@@ -1196,23 +991,24 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-hdf5_javaDATA uninstall-hdf5_javaJAVA
 
-.MAKE: $(am__recursive_targets) check-am install-am install-strip
+.MAKE: $(am__recursive_targets) install-am install-strip
 
-.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am all-local \
-	check check-TESTS check-am clean clean-generic clean-libtool \
+.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am check \
+	check-am clean clean-generic clean-hdf5_javaJAVA clean-libtool \
 	cscopelist-am ctags ctags-am distclean distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
 	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
+	install-exec-am install-hdf5_javaDATA install-hdf5_javaJAVA \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool mostlyclean-local pdf pdf-am ps ps-am \
-	recheck tags tags-am uninstall uninstall-am
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
+	uninstall-am uninstall-hdf5_javaDATA uninstall-hdf5_javaJAVA
 
 .PRECIOUS: Makefile
 
@@ -1228,200 +1024,26 @@ uninstall-am:
 help:
 	@$(top_srcdir)/bin/makehelp
 
-# lib/progs/tests targets recurse into subdirectories. build-* targets
-# build files in this directory.
-build-lib: $(LIB)
-build-progs: $(LIB) $(PROGS)
-build-tests: $(LIB) $(PROGS) $(chk_TESTS)
+classes:
+	$(MKDIR_P) $(@D)/$(JAVAROOT)
 
-# General rule for recursive building targets.
-# BUILT_SOURCES contain targets that need to be built before anything else
-# in the directory (e.g., for Fortran type detection)
-lib progs tests check-s check-p :: $(BUILT_SOURCES)
-	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
-	@for d in X $(SUBDIRS); do                                             \
-	    if test $$d != X && test $$d != .; then                           \
-	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
-	    fi;                                                               \
-	done
+$(jarfile): classhdf5_java.stamp classes docs
+	$(JAR) cvf $@ -C $(JAVAROOT)/ $(pkgpath)
 
-# General rule for recursive cleaning targets.  Like the rule above,
-# but doesn't require building BUILT_SOURCES.
-check-clean ::
-	@$(MAKE) $(AM_MAKEFLAGS) build-$@ || exit 1;
-	@for d in X $(SUBDIRS); do                                             \
-	    if test $$d != X && test $$d != .; then                           \
-	        (set -x; cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;     \
-	    fi;                                                               \
-	done
+.PHONY: docs classes
 
-# Tell Automake to build tests when the user types `make all' (this is
-# not its default behavior).  Also build EXTRA_LIB and EXTRA_PROG since
-# Automake won't build them automatically, either.
-all-local: $(EXTRA_LIB) $(EXTRA_PROG) $(chk_TESTS)
+docs:
+	$(JAVADOC) -sourcepath $(srcdir) -d javadoc -use -splitIndex -windowtitle $(WINDOWTITLE) -doctitle $(DOCTITLE) -J-Xmx180m -verbose -classpath $(CLASSPATH_ENV) hdf.hdf5lib
 
-# make install-doc doesn't do anything outside of doc directory, but
-# Makefiles should recognize it.
-# UPDATE: docs no longer reside in this build tree, so this target
-# is depreciated.
-install-doc uninstall-doc:
-	@echo "Nothing to be done."
+clean:
+	rm -rf $(JAVAROOT)
+	rm -f $(jarfile)
+	rm -f classhdf5_java.stamp
 
-# clean up files generated by tests so they can be re-run.
-build-check-clean:
-	$(RM) -rf $(CHECK_CLEANFILES)
+# Clean examples when check-clean is invoked
+check-clean :: ;
 
-# run check-clean whenever mostlyclean is run
-mostlyclean-local: build-check-clean
-
-# check-install is just a synonym for installcheck
-check-install: installcheck
-
-# Run each test in order, passing $(TEST_FLAGS) to the program.
-# Since tests are done in a shell loop, "make -i" does apply inside it.
-# Set HDF5_Make_Ignore to a non-blank string to ignore errors inside the loop.
-# The timestamps give a rough idea how much time the tests use.
-#
-# Note that targets in chk_TESTS (defined above) will be built when the user
-# types 'make tests' or 'make check', but only programs in TEST_PROG,
-# TEST_PROG_PARA, or TEST_SCRIPT will actually be executed.
-check-TESTS: test
-
-test _test:
-	@$(MAKE) build-check-s
-	@$(MAKE) build-check-p
-
-# Actual execution of check-s.
-build-check-s: $(LIB) $(PROGS) $(chk_TESTS)
-	@if test -n "$(TEST_PROG)$(TEST_SCRIPT)"; then      \
-	   echo "===Serial tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="; \
-	fi
-	@$(MAKE) $(AM_MAKEFLAGS) _exec_check-s
-	@if test -n "$(TEST_PROG)$(TEST_SCRIPT)"; then      \
-	    echo "===Serial tests in `echo ${PWD} | sed -e s:.*/::` ended `date`===";\
-	fi
-
-_exec_check-s: $(TEST_PROG_CHKEXE) $(TEST_SCRIPT_CHKSH)
-
-# The dummy.chkexe here prevents the target from being
-# empty if there are no tests in the current directory.
-# $${log} is the log file.
-# $${tname} is the name of test.
-$(TEST_PROG_CHKEXE) $(TEST_PROG_PARA_CHKEXE) dummy.chkexe_:
-	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummy.chkexe_"; then \
-	   tname=$(@:.chkexe_=)$(EXEEXT);\
-	   log=$(@:.chkexe_=.chklog); \
-	   echo "============================"; \
-	   if $(top_srcdir)/bin/newer $(@:.chkexe_=.chkexe) $${tname}; then \
-	      echo "No need to test $${tname} again."; \
-	   else \
-	      echo "============================" > $${log}; \
-	      if test "X$(FORTRAN_API)" = "Xyes"; then \
-	         echo "Fortran API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "Fortran API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      elif test "X$(CXX_API)" = "Xyes"; then \
-	         echo "C++ API: Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "C++ API: $(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log};\
-	      else \
-	         echo "Testing $(HDF5_DRIVER) $${tname} $(TEST_FLAGS)"; \
-	         echo "$(HDF5_DRIVER) $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      fi; \
-	      echo "============================" >> $${log}; \
-	      srcdir="$(srcdir)" \
-	         $(TIME) $(RUNEXEC) ./$${tname} $(TEST_FLAGS) >> $${log} 2>&1 \
-	         && touch $(@:.chkexe_=.chkexe) || \
-	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
-	         (cat $${log} && false) || exit 1; \
-	      echo "" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
-	      echo "============================" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
-	      cat $${log}; \
-	   fi; \
-	fi
-
-# The dummysh.chkexe here prevents the target from being
-# empty if there are no tests in the current directory.
-# $${log} is the log file.
-# $${tname} is the name of test.
-$(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
-	@if test "X$@" != "X.chkexe_" && test "X$@" != "Xdummysh.chkexe_"; then \
-	   cmd=$(@:.chkexe_=);\
-	   tname=`basename $$cmd`;\
-	   chkname=`basename $(@:.chkexe_=.chkexe)`;\
-	   log=`basename $(@:.chkexe_=.chklog)`; \
-	   echo "============================"; \
-	   if $(top_srcdir)/bin/newer $${chkname} $$cmd $(SCRIPT_DEPEND); then \
-	      echo "No need to test $${tname} again."; \
-	   else \
-	      echo "============================" > $${log}; \
-	      if test "X$(FORTRAN_API)" = "Xyes"; then \
-	         echo "Fortran API: Testing $${tname} $(TEST_FLAGS)"; \
-	         echo "Fortran API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      elif test "X$(CXX_API)" = "Xyes"; then \
-	         echo "C++ API: Testing $${tname} $(TEST_FLAGS)"; \
-	         echo "C++ API: $${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      else \
-	         echo "Testing $${tname} $(TEST_FLAGS)"; \
-	         echo "$${tname} $(TEST_FLAGS) Test Log" >> $${log}; \
-	      fi; \
-	      echo "============================" >> $${log}; \
-	      RUNSERIAL="$(RUNSERIAL)" RUNPARALLEL="$(RUNPARALLEL)"           \
-	      srcdir="$(srcdir)" \
-	         $(TIME) $(SHELL) $$cmd $(TEST_FLAGS) >> $${log} 2>&1 \
-	         && touch $${chkname} || \
-	         (test $$HDF5_Make_Ignore && echo "*** Error ignored") || \
-	         (cat $${log} && false) || exit 1; \
-	      echo "" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)" >> $${log}; \
-	      echo "============================" >> $${log}; \
-	      echo "Finished testing $${tname} $(TEST_FLAGS)"; \
-	      cat $${log}; \
-	   fi; \
-	   echo "============================"; \
-	fi
-
-# Actual execution of check-p.
-build-check-p: $(LIB) $(PROGS) $(chk_TESTS)
-	@if test -n "$(TEST_PROG_PARA)$(TEST_SCRIPT_PARA)"; then      \
-	   echo "===Parallel tests in `echo ${PWD} | sed -e s:.*/::` begin `date`==="; \
-	fi
-	@if test -n "$(TEST_PROG_PARA)"; then                                \
-	    echo "**** Hint ****";                                            \
-	    echo "Parallel test files reside in the current directory"        \
-	         "by default.";                                               \
-	    echo "Set HDF5_PARAPREFIX to use another directory. E.g.,";       \
-	    echo "    HDF5_PARAPREFIX=/PFS/user/me";                          \
-	    echo "    export HDF5_PARAPREFIX";                                \
-	    echo "    make check";                                            \
-	    echo "**** end of Hint ****";                                     \
-	fi
-	@for test in $(TEST_PROG_PARA) dummy; do                             \
-	   if test $$test != dummy; then                                      \
-	      $(MAKE) $(AM_MAKEFLAGS) $$test.chkexe_ \
-	      RUNEXEC="$(RUNPARALLEL)" || exit 1; \
-	   fi;                                                                \
-	done
-	@for test in $(TEST_SCRIPT_PARA) dummy; do                           \
-	  if test $$test != dummy; then                                      \
-	    $(MAKE) $(AM_MAKEFLAGS) $$test.chkexe_ || exit 1; \
-	  fi;                                                                 \
-	done
-	@if test -n "$(TEST_PROG_PARA)$(TEST_SCRIPT_PARA)"; then      \
-	    echo "===Parallel tests in `echo ${PWD} | sed -e s:.*/::` ended `date`===";\
-	fi
-
-# Run test with different Virtual File Driver
-check-vfd: $(LIB) $(PROGS) $(chk_TESTS)
-	@for vfd in $(VFD_LIST) dummy; do                                     \
-	    if test $$vfd != dummy; then                                      \
-	        echo "============================";                          \
-	        echo "Testing Virtual File Driver $$vfd";                     \
-	        echo "============================";                          \
-	        $(MAKE) $(AM_MAKEFLAGS) check-clean || exit 1;                \
-	        HDF5_DRIVER=$$vfd $(MAKE) $(AM_MAKEFLAGS) check || exit 1;    \
-	    fi;                                                               \
-	done
+#include $(top_srcdir)/config/conclude.am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
