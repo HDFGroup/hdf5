@@ -415,25 +415,57 @@ New Features
 
 
     High-Level APIs:
-    ------
-     - New public functions in the C Packet Table API
+    ---------------
 
-      Two accessor functions were added per HDFFV-8623/patch 003.
-            /* Returns the ID of the dataset associated with the packet table  */
-            hid_t H5PTget_dataset(hid_t table_id);
+     C Packet Table API
+     ------------------ 
+     - Replacement of a public function
 
-            /* Returns the ID of the datatype the packet table uses */
-            hid_t H5PTget_type(hid_t table_id);
+      The existing function H5PTcreate_fl limits applications to deflate
+      compression only.  The public function H5PTcreate is added to replace
+      H5PTcreate_fl.  H5PTcreate takes a property list ID to provide
+      flexibility on creation properties.
+
+	hid_t H5PTcreate(hid_t loc_id, const char *dset_name,
+                         hid_t dtype_id, hsize_t chunk_size, hid_t plist_id);
                                                (BMR, 2016/03/04, HDFFV-8623)
 
-     - New public functions in the C++ Packet Table API
+     - New public functions
+
+      Two accessor functions were added per HDFFV-8623/patch 003.
+	/* Returns the ID of the dataset associated with the packet table  */
+	   hid_t H5PTget_dataset(hid_t table_id);
+
+	/* Returns the ID of the datatype the packet table uses */
+	   hid_t H5PTget_type(hid_t table_id);
+                                               (BMR, 2016/03/04, HDFFV-8623)
+
+     - Regarding #ifdef VLPT_REMOVED
+
+      The #ifdef VLPT_REMOVED blocks are removed from the PT library source
+      except the following cases:
+      + H5PTis_varlen() is made available again.
+      + H5PTfree_vlen_readbuff() now became H5PTfree_vlen_buff()
+                                               (BMR, 2016/03/04, HDFFV-442)
+
+     C++ Packet Table API
+     -------------------- 
+     - New constructor
+
+      An overloaded constructor is added to FL_PacketTable and takes a property
+      list ID to provide flexibility on creation properties.
+
+	FL_PacketTable(hid_t fileID, hid_t plist_id, const char* name, hid_t dtypeID, hsize_t chunkSize);
+                                               (BMR, 2016/03/08, HDFFV-8623)
+
+     - New public functions
 
       Two accessor wrappers to class PacketTable, per HDFFV-8623/patch 004.
-            /* Returns the ID of the dataset associated with the packet table  */
-            hid_t PacketTable::GetDataset()
+	/* Returns the ID of the dataset associated with the packet table  */
+	   hid_t PacketTable::GetDataset()
 
-            /* Returns the ID of the datatype the packet table uses */
-            hid_t PacketTable::GetDataset()
+	/* Returns the ID of the datatype the packet table uses */
+	   hid_t PacketTable::GetDataset()
                                                (BMR, 2016/03/04, HDFFV-8623)
 
      - Member functions having "char*" as an argument
@@ -442,12 +474,18 @@ New Features
       existing version will be deprecated.
                                                (BMR, 2016/03/04)
 
-     - Commented out functions are renewed
+     - Regarding #ifdef VLPT_REMOVED
 
-      The old function VL_PacketTable::FreeReadBuff that had been ifdef'ed out
-      now became PacketTable::FreeBuff()
+      The #ifdef VLPT_REMOVED blocks are removed from the PT library source
+      except the following cases:
+	+ VL_PacketTable::IsVariableLength() is moved to PacketTable
+	+ VL_PacketTable::FreeReadBuff() now became PacketTable::FreeBuff()
+
                                                (BMR, 2016/03/04, HDFFV-442)
 
+
+     Internal header file
+     -------------------- 
      - A new API function H5DOwrite_chunk.  It writes a data chunk directly
             into a file bypassing hyperslab selection, data conversion, and
             filter pipeline.  The user must be careful with the function and
