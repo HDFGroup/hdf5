@@ -41,10 +41,18 @@
 #define H5P_CLASS(P)        (H5P_get_class(P))
 #endif /* H5P_MODULE */
 
+#define H5_COLL_MD_READ_FLAG_NAME "collective_metadata_read"
+
 
 /****************************/
 /* Library Private Typedefs */
 /****************************/
+
+typedef enum H5P_coll_md_read_flag_t {
+    H5P_FORCE_FALSE             = -1,
+    H5P_USER_FALSE              = 0,
+    H5P_USER_TRUE               = 1
+} H5P_coll_md_read_flag_t;
 
 /* Forward declarations (for prototypes & type definitions) */
 struct H5O_fill_t;
@@ -134,7 +142,6 @@ H5_DLLVAR const struct H5P_libclass_t H5P_CLS_DACC[1];  /* Dataset access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_GACC[1];  /* Group access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_TACC[1];  /* Named datatype access */
 H5_DLLVAR const struct H5P_libclass_t H5P_CLS_FACC[1];  /* File access */
-
 
 /******************************/
 /* Library Private Prototypes */

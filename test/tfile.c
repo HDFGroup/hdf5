@@ -53,6 +53,9 @@
 #define FILE1	"tfile1.h5"
 #define SFILE1	"sys_file1"
 
+#define REOPEN_FILE "tfile_reopen.h5"
+#define REOPEN_DSET "dset"
+
 #define F2_USERBLOCK_SIZE  (hsize_t)512
 #define F2_OFFSET_SIZE	   8
 #define F2_LENGTH_SIZE	   8
@@ -535,6 +538,59 @@ test_file_open(void)
     ret = H5Pclose(fapl_id);
     CHECK(ret, FAIL, "H5Pclose");
 }   /* test_file_open() */
+
+/****************************************************************
+**
+**  test_file_reopen(): File reopen test routine.
+**
+****************************************************************/
+static void
+test_file_reopen(void)
+{
+    hid_t   fid = -1;           /* file ID from initial open            */
+    hid_t   rfid = -1;          /* file ID from reopen                  */
+    hid_t   did = -1;           /* dataset ID (both opens)              */
+    hid_t   sid = -1;           /* dataspace ID for dataset creation    */
+    hsize_t dims = 6;           /* dataspace size                       */
+    herr_t  ret;                /* Generic return value                 */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing File Re-opening\n"));
+
+    /* Create file via first ID */
+    fid = H5Fcreate(REOPEN_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(fid, "H5Fcreate");
+
+    /* Create a dataset in the file */
+    sid = H5Screate_simple(1, &dims, &dims);
+    CHECK_I(sid, "H5Screate_simple")
+    did = H5Dcreate2(fid, REOPEN_DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(did, "H5Dcreate2");
+
+    /* Close dataset and dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Reopen the file with a different file ID */
+    rfid = H5Freopen(fid);
+    CHECK_I(rfid, "H5Freopen");
+
+    /* Reopen the dataset through the reopen file ID */
+    did = H5Dopen2(rfid, REOPEN_DSET, H5P_DEFAULT);
+    CHECK_I(did, "H5Dopen2");
+
+    /* Close and clean up */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(rfid);
+    CHECK(ret, FAIL, "H5Fclose");
+    HDremove(REOPEN_FILE);
+
+}   /* test_file_reopen() */
 
 /****************************************************************
 **
@@ -3969,8 +4025,9 @@ test_file(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File I/O\n"));
 
-    test_file_create();		/* Test file creation(also creation templates)*/
-    test_file_open();		/* Test file opening */
+    test_file_create();         /* Test file creation(also creation templates)*/
+    test_file_open();           /* Test file opening */
+    test_file_reopen();         /* Test file reopening */
     test_file_close();          /* Test file close behavior */
     test_get_file_id();         /* Test H5Iget_file_id */
     test_get_obj_ids();         /* Test H5Fget_obj_ids for Jira Issue 8528 */

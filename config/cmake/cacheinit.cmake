@@ -6,6 +6,8 @@
 
 set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
 
+set (HDF5_GENERATE_HEADERS ON CACHE BOOL "Rebuild Generated Files" FORCE)
+
 set (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
 
 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)

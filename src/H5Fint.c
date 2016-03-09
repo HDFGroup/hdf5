@@ -184,6 +184,12 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         efc_size = H5F_efc_max_nfiles(f->shared->efc);
     if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set elink file cache size")
+#ifdef H5_HAVE_PARALLEL
+    if(H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
+    if(H5P_set(new_plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
+#endif /* H5_HAVE_PARALLEL */
 
     /* Prepare the driver property */
     driver_prop.driver_id = f->shared->lf->driver_id;
@@ -660,6 +666,12 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(efc_size > 0)
             if(NULL == (f->shared->efc = H5F_efc_create(efc_size)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create external file cache")
+#ifdef H5_HAVE_PARALLEL
+        if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata read flag")
+        if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata write flag")
+#endif /* H5_HAVE_PARALLEL */
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -1260,7 +1272,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             /* Flush the superblock */
             if(H5F_super_dirty(file) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, NULL, "unable to mark superblock as dirty")
-            if(H5F_flush_tagged_metadata(file, (haddr_t)0, H5AC_dxpl_id) < 0)
+            if(H5F_flush_tagged_metadata(file, (haddr_t)0, H5AC_ind_read_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "unable to flush superblock")
 
 	    /* Remove the file lock for SWMR_WRITE */
@@ -1592,7 +1604,7 @@ H5F_try_close(H5F_t *f)
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
      * struct reaches zero then destroy it also.
      */
-    if(H5F_dest(f, H5AC_dxpl_id, TRUE) < 0)
+    if(H5F_dest(f, H5AC_ind_read_dxpl_id, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
 done:
@@ -2421,4 +2433,34 @@ H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_eoa() */
+
+#ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_coll_md_read
+ *
+ * Purpose:     Set the coll_md_read field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              2/10/16
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(f);
+
+    f->coll_md_read = cmr;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* H5F_set_coll_md_read() */
+#endif /* H5_HAVE_PARALLEL */
 

@@ -112,10 +112,9 @@ H5FL_BLK_DEFINE_STATIC(meta_accum);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_read(const H5F_io_info_t *fio_info, H5FD_mem_t type, haddr_t addr,
+H5F__accum_read(const H5F_io_info_t *fio_info, H5FD_mem_t map_type, haddr_t addr,
     size_t size, void *buf/*out*/)
 {
-    H5FD_mem_t  map_type;               /* Mapped memory type */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -124,9 +123,6 @@ H5F__accum_read(const H5F_io_info_t *fio_info, H5FD_mem_t type, haddr_t addr,
     HDassert(fio_info->f);
     HDassert(fio_info->dxpl);
     HDassert(buf);
-
-    /* Treat global heap as raw data */
-    map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
 
     /* Check if this information is in the metadata accumulator */
     if((fio_info->f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && map_type != H5FD_MEM_DRAW) {
@@ -426,10 +422,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__accum_write(const H5F_io_info_t *fio_info, H5FD_mem_t type, haddr_t addr,
+H5F__accum_write(const H5F_io_info_t *fio_info, H5FD_mem_t map_type, haddr_t addr,
     size_t size, const void *buf)
 {
-    H5FD_mem_t  map_type;               /* Mapped memory type */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -439,9 +434,6 @@ H5F__accum_write(const H5F_io_info_t *fio_info, H5FD_mem_t type, haddr_t addr,
     HDassert(H5F_INTENT(fio_info->f) & H5F_ACC_RDWR);
     HDassert(fio_info->dxpl);
     HDassert(buf);
-
-    /* Treat global heap as raw data */
-    map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
 
     /* Check for accumulating metadata */
     if((fio_info->f->shared->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && map_type != H5FD_MEM_DRAW) {

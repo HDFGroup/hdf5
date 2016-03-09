@@ -1,4 +1,4 @@
-!****h* ROBODoc/HDF5
+!****h* ROBODoc/THDF5
 !
 ! NAME
 !  MODULE THDF5

@@ -77,7 +77,7 @@ main(void)
 	    FAIL_STACK_ERROR
 
     /* Should read in [1024, 2024] with buf data */
-    if(H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, rbuf) < 0)
+    if(H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5AC_ind_read_dxpl_id, rbuf) < 0)
 	    FAIL_STACK_ERROR;
 
     /* Verify the data read is correct */

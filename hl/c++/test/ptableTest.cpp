@@ -15,9 +15,11 @@
 
 /* ptableTest.cpp */
 
+#include <iostream>
 #include "ptableTest.h"
 
 using namespace H5;
+using namespace std;
 
 #define TEST_FILE "packettest.h5"
 
@@ -74,7 +76,7 @@ int main(void)
       return -1;
 }
 
-
+const char* BASICTEST_PT("/basicTest");
 int BasicTest()
 {
     herr_t err;
@@ -82,9 +84,9 @@ int BasicTest()
     hsize_t count;
     int error;
 
-    TESTING("basic funtionality")
+    TESTING("basic functionality")
 
-    FL_PacketTable wrapper(fileID, "/basicTest", H5T_NATIVE_INT, 1);
+    FL_PacketTable wrapper(fileID, H5P_DEFAULT, BASICTEST_PT, H5T_NATIVE_INT, 1);
     if(! wrapper.IsValid())
       goto out;
 
@@ -131,6 +133,7 @@ out:
     return 1;
 }
 
+const char* CMPDTEST_PT("/compoundTest");
 int TestCompoundDatatype()
 {
     hid_t dtypeID;
@@ -153,8 +156,8 @@ int TestCompoundDatatype()
     H5Tinsert(dtypeID, "charlie", HOFFSET( compoundType, c ), H5T_NATIVE_SHORT);
     H5Tinsert(dtypeID, "ebert", HOFFSET( compoundType, e ), H5T_NATIVE_INT);
 
-    /* Create packet table.  Explicitly specify no compression */
-    FL_PacketTable wrapper(fileID, "/compoundTest", dtypeID, 1, -1);
+    /* Create packet table using default property list. */
+    FL_PacketTable wrapper(fileID, H5P_DEFAULT, CMPDTEST_PT, dtypeID, 1);
 
     if(! wrapper.IsValid())
       goto out;
@@ -198,6 +201,7 @@ out:
     return 1;
 }
 
+const char* GETNEXT_PT("/TestGetNext");
 int TestGetNext()
 {
     int error;
@@ -208,7 +212,7 @@ int TestGetNext()
     TESTING("GetNextPacket")
 
     /* Create a dataset */
-    FL_PacketTable wrapper(fileID, "/TestGetNext", H5T_NATIVE_INT, 500);
+    FL_PacketTable wrapper(fileID, H5P_DEFAULT, GETNEXT_PT, H5T_NATIVE_INT, 500);
 
     if(! wrapper.IsValid())
       goto out;
@@ -260,18 +264,27 @@ out:
     return 1;
 }
 
+const char* COMPRESS_PT("/compressTest");
 int TestCompress()
 {
-
-	unsigned int flags = 0;
+    unsigned int flags = 0;
     unsigned int config = 0;
     size_t cd_nelemts = 0;
 
     TESTING("compression")
 #ifdef H5_HAVE_FILTER_DEFLATE
     try {
+	/* Prepare property list to set compression, randomly use deflate */
+	DSetCreatPropList dscreatplist;
+	dscreatplist.setDeflate(6);
+
         /* Create packet table with compression. */
-        FL_PacketTable wrapper(fileID, "/compressTest", H5T_NATIVE_CHAR, 100, 8);
+        FL_PacketTable wrapper(fileID, dscreatplist.getId(), COMPRESS_PT, H5T_NATIVE_CHAR, 100);
+
+	/* Close the property list */
+	dscreatplist.close();
+
+	/* Verify that the deflate filter is set */
 
         /* Create an HDF5 C++ file object */
         H5File file;
@@ -279,11 +292,14 @@ int TestCompress()
 
         /* Make sure that the deflate filter is set by opening the packet table
          * as a dataset and getting its creation property list */
-        DataSet dsetID = file.openDataSet("/compressTest");
+        DataSet dset = file.openDataSet(COMPRESS_PT);
 
-        DSetCreatPropList dcplID = dsetID.getCreatePlist();
+        DSetCreatPropList dcpl = dset.getCreatePlist();
 
-        dcplID.getFilterById(H5Z_FILTER_DEFLATE, flags, cd_nelemts, NULL, 0, NULL, config);
+	char filter_name[8];
+        dcpl.getFilterById(H5Z_FILTER_DEFLATE, flags, cd_nelemts, NULL, 8, filter_name, config);
+	if (HDstrncmp(filter_name, "deflate", 7) != 0)
+	    H5_FAILED()
     } catch (Exception e) {
       H5_FAILED();
       return 1;
@@ -296,6 +312,7 @@ int TestCompress()
     return 0;
 }
 
+const char* PT_TESTGETPT = "/TestGetPacket";
 int TestGetPacket()
 {
     int record;
@@ -304,7 +321,7 @@ int TestGetPacket()
     TESTING("GetPacket")
 
     /* Create a dataset.  Explicitly specify no compression */
-    FL_PacketTable wrapper(fileID, "/TestGetPacket", H5T_NATIVE_INT, 1, -1);
+    FL_PacketTable wrapper(fileID, H5P_DEFAULT, PT_TESTGETPT, H5T_NATIVE_INT, 1);
 
     if(! wrapper.IsValid())
       goto out;
@@ -334,12 +351,14 @@ out:
     return 1;
 }
 
+const char* PT_TESTERROR = "/TestErrors";
+
 int TestErrors()
 {
     TESTING("error conditions")
 
     /* Create a dataset */
-    FL_PacketTable wrapper(fileID, "/TestErrors", H5T_NATIVE_INT, 1);
+    FL_PacketTable wrapper(fileID, H5P_DEFAULT, PT_TESTERROR, H5T_NATIVE_INT, 1);
 
     if(! wrapper.IsValid())
       goto out;
@@ -443,6 +462,8 @@ out:
     return 1;
 }
 
+const char* PT_SYSTEMTST1 = "/SystemTest1";
+const char* PT_SYSTEMTST2 = "/SystemTest2";
 int SystemTest()
 {
     TESTING("multiple datatypes")
@@ -485,8 +506,8 @@ int SystemTest()
     ct2[0].g.e = 3000;
 
     /* Create the packet table datasets.  Make one of them compressed. */
-    FL_PacketTable wrapper1(fileID, "/SystemTest1", dtypeID1, 1);
-    FL_PacketTable wrapper2(fileID, "/SystemTest2", dtypeID2, 1, 5);
+    FL_PacketTable wrapper1(fileID, H5P_DEFAULT, PT_SYSTEMTST1, dtypeID1, 1);
+    FL_PacketTable wrapper2(fileID, H5P_DEFAULT, PT_SYSTEMTST2, dtypeID2, 1);
 
     if(! wrapper1.IsValid())
       goto out;

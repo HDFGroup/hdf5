@@ -530,7 +530,6 @@ CONTAINS
     INTEGER(hid_t) :: file, fcpl, dataset, space
     INTEGER :: i, j, n, ios
     INTEGER(hsize_t), DIMENSION(1:2) ::	dims
-    INTEGER :: f
     INTEGER(haddr_t) :: offset
     INTEGER, DIMENSION(1:dset_dim1,1:dset_dim2), TARGET :: rdata, data_in
     INTEGER :: error

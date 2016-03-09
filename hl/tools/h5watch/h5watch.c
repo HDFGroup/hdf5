@@ -830,8 +830,8 @@ main(int argc, const char *argv[])
     void               *edata;
     H5E_auto2_t         func;
     char	*x;
-    hid_t	fid = -1;
-    hid_t	fapl = -1;
+    hid_t       fid = -1;
+    hid_t       fapl = -1;
 
     /* Set up tool name and exit status */
     h5tools_setprogname(PROGRAMNAME);

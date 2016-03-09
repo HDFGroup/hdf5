@@ -324,12 +324,12 @@ H5O__proxy_notify(H5AC_notify_action_t action, void *_thing)
 
             /* Create flush dependencies on all other object header chunks */
             for(u = 1; u < proxy->oh->nchunks; u++) {
-                if(NULL == (chk_proxy = H5O_chunk_protect(proxy->f, H5AC_dxpl_id, proxy->oh, u)))
+                if(NULL == (chk_proxy = H5O_chunk_protect(proxy->f, H5AC_ind_read_dxpl_id, proxy->oh, u)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
 /* same as before, but looks backward...need to check into that..(proxy, chk_proxy) */
                 if(H5O__proxy_depend_core(chk_proxy, proxy) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
-                if(H5O_chunk_unprotect(proxy->f, H5AC_dxpl_id, chk_proxy, FALSE) < 0)
+                if(H5O_chunk_unprotect(proxy->f, H5AC_ind_read_dxpl_id, chk_proxy, FALSE) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
                 chk_proxy = NULL;
             } /* end for */
@@ -372,7 +372,7 @@ H5O__proxy_notify(H5AC_notify_action_t action, void *_thing)
 done:
     if(chk_proxy) {
         HDassert(ret_value < 0);
-        if(H5O_chunk_unprotect(proxy->f, H5AC_dxpl_id, chk_proxy, FALSE) < 0)
+        if(H5O_chunk_unprotect(proxy->f, H5AC_ind_read_dxpl_id, chk_proxy, FALSE) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
     } /* end if */
 

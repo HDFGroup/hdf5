@@ -1095,7 +1095,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
                 if(chk_proxy->cont_chunkno == 0)
                     parent = chk_proxy->oh;
                 else {
-                    if(NULL == (cont_chk_proxy = H5O_chunk_protect(chk_proxy->f, H5AC_dxpl_id, chk_proxy->oh, chk_proxy->cont_chunkno)))
+                    if(NULL == (cont_chk_proxy = H5O_chunk_protect(chk_proxy->f, H5AC_ind_read_dxpl_id, chk_proxy->oh, chk_proxy->cont_chunkno)))
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
                     parent = cont_chk_proxy;
                 } /* end else */
@@ -1122,7 +1122,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 
                 /* Add flush dependency on object header proxy, if proxy exists */
                 if(chk_proxy->oh->proxy_present)
-                    if(H5O__proxy_depend(chk_proxy->f, H5AC_dxpl_id, chk_proxy->oh, chk_proxy) < 0)
+                    if(H5O__proxy_depend(chk_proxy->f, H5AC_ind_read_dxpl_id, chk_proxy->oh, chk_proxy) < 0)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "can't create flush dependency on object header proxy")
 
 	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
@@ -1151,7 +1151,7 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 
 done:
     if(cont_chk_proxy)
-        if(H5O_chunk_unprotect(chk_proxy->f, H5AC_dxpl_id, cont_chk_proxy, FALSE) < 0)
+        if(H5O_chunk_unprotect(chk_proxy->f, H5AC_ind_read_dxpl_id, cont_chk_proxy, FALSE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1419,10 +1419,6 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
         else
             id = *chunk_image++;
 
-        /* Check for unknown message ID getting encoded in file */
-        if(id >= H5O_UNKNOWN_ID)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "'unknown' message ID encoded in file?!?")
-
         /* Message size */
         UINT16DECODE(chunk_image, mesg_size);
         HDassert(mesg_size == H5O_ALIGN_OH(oh, mesg_size));
@@ -1492,8 +1488,13 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
             /* Point unknown messages at 'unknown' message class */
             /* (Usually from future versions of the library) */
-            if(id >= NELMTS(H5O_msg_class_g) || NULL == H5O_msg_class_g[id]) {
-                H5O_unknown_t *unknown;     /* Pointer to "unknown" message info */
+	    if(id >= H5O_UNKNOWN_ID ||
+#ifdef H5O_ENABLE_BOGUS
+	       id == H5O_BOGUS_VALID_ID ||
+#endif
+	       NULL == H5O_msg_class_g[id]) {
+
+		H5O_unknown_t *unknown;     /* Pointer to "unknown" message info */
 
                 /* Allocate "unknown" message info */
                 if(NULL == (unknown = H5FL_MALLOC(H5O_unknown_t)))

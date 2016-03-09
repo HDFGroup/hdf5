@@ -161,7 +161,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
      *  name, but it's going to be hard to unwind all the special cases on
      *  failure, so just check first, for now - QAK)
      */
-    if((exists = H5O_attr_exists(loc->oloc, name, H5AC_dxpl_id)) < 0)
+    if((exists = H5O_attr_exists(loc->oloc, name, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "error checking attributes")
     else if(exists > 0)
         HGOTO_ERROR(H5E_ATTR, H5E_ALREADYEXISTS, NULL, "attribute already exists")
@@ -2105,7 +2105,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
 
             HDmemcpy(attr_dst->shared->data, buf, attr_dst->shared->data_size);
 
-            if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
+            if(H5D_vlen_reclaim(tid_mem, buf_space, dxpl_id, reclaim_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "unable to reclaim variable-length data")
         }  /* end if */
         else {
@@ -2396,7 +2396,7 @@ H5A_rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_nam
         H5G_loc_reset(&obj_loc);
 
         /* Find the object's location */
-        if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, H5AC_dxpl_id) < 0)
+        if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
         loc_found = TRUE;
 

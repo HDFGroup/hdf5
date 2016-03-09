@@ -387,8 +387,8 @@ H5_DLL herr_t H5B2__node_size(H5B2_hdr_t *hdr, hid_t dxpl_id,
     hsize_t *op_data);
 
 /* Routines for locating records */
-H5_DLL int H5B2__locate_record(const H5B2_class_t *type, unsigned nrec,
-    size_t *rec_off, const uint8_t *native, const void *udata, unsigned *idx);
+H5_DLL herr_t H5B2__locate_record(const H5B2_class_t *type, unsigned nrec,
+    size_t *rec_off, const uint8_t *native, const void *udata, unsigned *idx, int *result);
 H5_DLL herr_t H5B2__neighbor_internal(H5B2_hdr_t *hdr, hid_t dxpl_id,
     uint16_t depth, H5B2_node_ptr_t *curr_node_ptr, void *neighbor_loc,
     H5B2_compare_t comp, void *parent, void *udata, H5B2_found_t op,

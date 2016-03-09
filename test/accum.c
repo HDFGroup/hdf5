@@ -63,8 +63,8 @@ unsigned test_swmr_write_big(hbool_t newest_format);
 void accum_printf(void);
 
 /* Private Test H5Faccum Function Wrappers */
-#define accum_write(a,s,b) H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5P_DATASET_XFER_DEFAULT, (b))
-#define accum_read(a,s,b)  H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5P_DATASET_XFER_DEFAULT, (b))
+#define accum_write(a,s,b) H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5AC_ind_read_dxpl_id, (b))
+#define accum_read(a,s,b)  H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5AC_ind_read_dxpl_id, (b))
 #define accum_free(fio_info,a,s)  H5F__accum_free(fio_info, H5FD_MEM_DEFAULT, (haddr_t)(a), (hsize_t)(s))
 #define accum_flush(fio_info)   H5F__accum_flush(fio_info)
 #define accum_reset(fio_info)   H5F__accum_reset(fio_info, TRUE)
@@ -109,7 +109,7 @@ main(void)
 
     /* Set up I/O info for operation */
     fio_info.f = f;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(H5P_DATASET_XFER_DEFAULT))) FAIL_STACK_ERROR
+    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id))) FAIL_STACK_ERROR
 
     /* Reset metadata accumulator for the file */
     if(accum_reset(&fio_info) < 0) FAIL_STACK_ERROR
@@ -1877,7 +1877,7 @@ test_swmr_write_big(hbool_t newest_format)
 
     /* Set up I/O info for operation */
     fio_info.f = rf;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(H5P_DATASET_XFER_DEFAULT)))
+    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
         FAIL_STACK_ERROR
 
     /* We'll be writing lots of garbage data, so extend the
@@ -1903,10 +1903,10 @@ test_swmr_write_big(hbool_t newest_format)
         wbuf[u] = (uint8_t)u;
 
     /* Write [1024, 1024] bytes with wbuf */
-    if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, wbuf) < 0)
+    if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5AC_ind_read_dxpl_id, wbuf) < 0)
 	    FAIL_STACK_ERROR;
     /* Read the data */
-    if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, rbuf) < 0)
+    if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5AC_ind_read_dxpl_id, rbuf) < 0)
 	    FAIL_STACK_ERROR;
     /* Verify the data read is correct */
     if(HDmemcmp(wbuf, rbuf, (size_t)1024) != 0)
@@ -1924,10 +1924,10 @@ test_swmr_write_big(hbool_t newest_format)
         wbuf2[u] = (uint8_t)(u + 1);
 
     /* Write [1024,1024] with wbuf--all 1s */
-    if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, wbuf) < 0)
+    if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5AC_ind_read_dxpl_id, wbuf) < 0)
 	    FAIL_STACK_ERROR;
     /* Read the data */
-    if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5P_DATASET_XFER_DEFAULT, rbuf) < 0)
+    if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)1024, (size_t)1024, H5AC_ind_read_dxpl_id, rbuf) < 0)
 	    FAIL_STACK_ERROR;
     /* Verify the data read is correct */
     if(HDmemcmp(wbuf, rbuf, (size_t)1024) != 0)
@@ -1935,10 +1935,10 @@ test_swmr_write_big(hbool_t newest_format)
     /* The data stays in the accumulator */
 
     /* Write a large piece of metadata [2048, BIG_BUF_SIZE] with wbuf2 */
-    if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)2048, (size_t)BIG_BUF_SIZE, H5P_DATASET_XFER_DEFAULT, wbuf2) < 0)
+    if(H5F_block_write(rf, H5FD_MEM_DEFAULT, (haddr_t)2048, (size_t)BIG_BUF_SIZE, H5AC_ind_read_dxpl_id, wbuf2) < 0)
 	    FAIL_STACK_ERROR;
     /* Read the data */
-    if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)2048, (size_t)BIG_BUF_SIZE, H5P_DATASET_XFER_DEFAULT, rbuf) < 0)
+    if(H5F_block_read(rf, H5FD_MEM_DEFAULT, (haddr_t)2048, (size_t)BIG_BUF_SIZE, H5AC_ind_read_dxpl_id, rbuf) < 0)
 	    FAIL_STACK_ERROR;
     /* Verify the data read is correct */
     if(HDmemcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0)

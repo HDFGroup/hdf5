@@ -418,7 +418,6 @@ SUBROUTINE test_dataset3D()
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
   INTEGER, PARAMETER :: int_kind_32 = SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
   INTEGER(int_kind_32), DIMENSION(DIM1,DIM2,DIM3), TARGET :: dset_data_i32, data_out_i32
-  INTEGER(HID_T) :: dset_id32     ! Dataset identifier
   CHARACTER(LEN=7), PARAMETER :: dsetname16a = "dset16a"     ! Dataset name
   CHARACTER(LEN=7), PARAMETER :: dsetname16b = "dset16b"     ! Dataset name
   CHARACTER(LEN=7), PARAMETER :: dsetname16c = "dset16c"     ! Dataset name
@@ -760,7 +759,6 @@ SUBROUTINE test_datasetND(rank)
   INTEGER          :: type_class
   INTEGER(SIZE_T)  :: type_size
   CHARACTER(LEN=1) :: ichr1
-  CHARACTER(LEN=3) :: ichr3
   TYPE(C_PTR) :: f_ptr
   INTEGER(HID_T) :: type_id
 

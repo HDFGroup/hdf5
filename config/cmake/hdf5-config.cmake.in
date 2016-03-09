@@ -14,6 +14,7 @@ set (${HDF5_PACKAGE_NAME}_VALID_COMPONENTS
     HL
     CXX_HL
     Fortran_HL
+    Java
     Tools
 )
 
@@ -23,6 +24,7 @@ set (${HDF5_PACKAGE_NAME}_VALID_COMPONENTS
 set (${HDF5_PACKAGE_NAME}_ENABLE_PARALLEL @HDF5_ENABLE_PARALLEL@)
 set (${HDF5_PACKAGE_NAME}_BUILD_FORTRAN   @HDF5_BUILD_FORTRAN@)
 set (${HDF5_PACKAGE_NAME}_BUILD_CPP_LIB   @HDF5_BUILD_CPP_LIB@)
+set (${HDF5_PACKAGE_NAME}_BUILD_JAVA      @HDF5_BUILD_JAVA@)
 set (${HDF5_PACKAGE_NAME}_BUILD_TOOLS     @HDF5_BUILD_TOOLS@)
 set (${HDF5_PACKAGE_NAME}_BUILD_HL_LIB    @HDF5_BUILD_HL_LIB@)
 set (${HDF5_PACKAGE_NAME}_ENABLE_Z_LIB_SUPPORT @HDF5_ENABLE_Z_LIB_SUPPORT@)
@@ -39,6 +41,16 @@ if (${HDF5_PACKAGE_NAME}_ENABLE_PARALLEL)
   set (${HDF5_PACKAGE_NAME}_MPI_C_INCLUDE_PATH "@MPI_C_INCLUDE_PATH@")
   set (${HDF5_PACKAGE_NAME}_MPI_C_LIBRARIES    "@MPI_C_LIBRARIES@")
 endif ()
+
+if (${HDF5_PACKAGE_NAME}_BUILD_JAVA)
+  set (${HDF5_PACKAGE_NAME}_JAVA_INCLUDE_DIRS
+      @PACKAGE_CURRENT_BUILD_DIR@/lib/jarhdf5-@HDF5_VERSION_STRING@.jar
+      @PACKAGE_CURRENT_BUILD_DIR@/lib/slf4j-api-1.7.5.jar
+      @PACKAGE_CURRENT_BUILD_DIR@/lib/slf4j-nop-1.7.5.jar
+  )
+  set (${HDF5_PACKAGE_NAME}_JAVA_LIBRARY "@PACKAGE_CURRENT_BUILD_DIR@/lib")
+  set (${HDF5_PACKAGE_NAME}_JAVA_LIBRARIES "${${HDF5_PACKAGE_NAME}_JAVA_LIBRARY}")
+endif()
 
 #-----------------------------------------------------------------------------
 # Directories
@@ -123,6 +135,8 @@ foreach (libtype IN LISTS ${HDF5_PACKAGE_NAME}_LIB_TYPE)
       set (hdf5_comp "hdf5_hl")
     elseif (${comp} STREQUAL "CXX_HL")
       set (hdf5_comp "hdf5_hl_cpp")
+    elseif (${comp} STREQUAL "Java")
+      set (hdf5_comp "hdf5_java")
     elseif (${comp} STREQUAL "Tools")
       set (hdf5_comp "hdf5_tools")
     elseif (${comp} STREQUAL "Fortran")

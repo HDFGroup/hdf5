@@ -84,9 +84,24 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Library Private Variables */
 /*****************************/
 
-/* Default dataset transfer property list for metadata I/O calls */
-hid_t H5AC_dxpl_id = (-1);
+/* Default dataset transfer property list for metadata I/O calls (coll write, ind read) */
+hid_t H5AC_ind_read_dxpl_id = (-1);
+#ifdef H5_HAVE_PARALLEL
+/* collective metadata read property */
+hid_t H5AC_coll_read_dxpl_id = (-1);
+#endif /* H5_HAVE_PARALLEL */
+
+/* DXPL to be used in operations that will not result in I/O calls */
+hid_t H5AC_noio_dxpl_id = (-1);
+
+/* Default DXPL to be used for raw data I/O operations when one is not
+   provided by the user (fill values in H5Dcreate) */
+hid_t H5AC_rawdata_dxpl_id = (-1);
+
+#ifdef H5_HAVE_PARALLEL
+/* Environment variable for collective API sanity checks */
 hbool_t H5_coll_api_sanity_check_g = false;
+#endif /* H5_HAVE_PARALLEL */
 
 /*******************/
 /* Local Variables */
@@ -168,15 +183,18 @@ done:
 herr_t
 H5AC__init_package(void)
 {
+    H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
+#ifdef H5_HAVE_PARALLEL
+    H5P_coll_md_read_flag_t coll_meta_read;
+#endif /* H5_HAVE_PARALLEL */
+#ifdef H5_DEBUG_BUILD
+    H5FD_dxpl_type_t  dxpl_type;    /* Property indicating the type of the internal dxpl */
+#endif /* H5_DEBUG_BUILD */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
 
 #ifdef H5_HAVE_PARALLEL
-    /* Get an ID for the metadata (H5AC) dxpl */
-    if((H5AC_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
-
     /* check whether to enable strict collective function calling
        sanity checks using MPI barriers */
     {
@@ -187,9 +205,78 @@ H5AC__init_package(void)
             H5_coll_api_sanity_check_g = (hbool_t)HDstrtol(s, NULL, 0);
         }
     }
-#else /* H5_HAVE_PARALLEL */
-    H5AC_dxpl_id = H5P_DATASET_XFER_DEFAULT;
 #endif /* H5_HAVE_PARALLEL */
+
+#if defined(H5_HAVE_PARALLEL) || defined(H5_DEBUG_BUILD)
+    /* Get an ID for the internal independent metadata dxpl */
+    if((H5AC_ind_read_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
+
+    /* Get an ID for the no I/O internal dxpl */
+    if((H5AC_noio_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
+
+    /* Get an ID for the raw data (H5AC) dxpl */
+    if((H5AC_rawdata_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
+
+    /* if this is a debug build, set the dxpl type flag on the
+       independent metadata dxpl and create the noio and raw data internal dxpls */
+#ifdef H5_DEBUG_BUILD
+    /* Get the property list object */
+    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+    /* Insert the dxpl type property  */
+    dxpl_type = H5FD_METADATA_DXPL;
+    if(H5P_set(xfer_plist, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set dxpl type property")
+
+    /* Get the property list object */
+    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_noio_dxpl_id)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+    /* Insert the dxpl type property  */
+    dxpl_type = H5FD_NOIO_DXPL;
+    if(H5P_set(xfer_plist, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set dxpl type property")
+
+    /* Get the property list object */
+    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+    /* Insert the dxpl type property  */
+    dxpl_type = H5FD_RAWDATA_DXPL;
+    if(H5P_set(xfer_plist, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set dxpl type property")
+#endif /* H5_DEBUG_BUILD */
+
+    /* if this is a parallel build, create an internal dxpl for
+       collective metadata reads */
+#ifdef H5_HAVE_PARALLEL
+    /* Get an ID for H5AC_coll_read_dxpl_id */
+    if((H5AC_coll_read_dxpl_id = H5P_create_id(H5P_CLS_DATASET_XFER_g, FALSE)) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
+    /* Get the property list object */
+    if (NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(H5AC_coll_read_dxpl_id)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+    /* set 'collective metadata read' property */
+    coll_meta_read = H5P_USER_TRUE;
+    if(H5P_set(xfer_plist, H5_COLL_MD_READ_FLAG_NAME, &coll_meta_read) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set collective metadata read flag")
+
+    /* if we have a debug build, set the dxpl type to metadata on the
+       collective metadata dxpl */
+#ifdef H5_DEBUG_BUILD
+    /* set metadata dxpl type */
+    dxpl_type = H5FD_METADATA_DXPL;
+    if(H5P_set(xfer_plist, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set dxpl type property")
+#endif /* H5_DEBUG_BUILD */
+#endif /* H5_HAVE_PARALLEL */
+
+#else /* defined(H5_HAVE_PARALLEL) || defined(H5_DEBUG_BUILD) */
+    H5AC_ind_read_dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    H5AC_noio_dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    H5AC_rawdata_dxpl_id = H5P_DATASET_XFER_DEFAULT;
+#endif /* defined(H5_HAVE_PARALLEL) || defined(H5_DEBUG_BUILD) */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -218,19 +305,34 @@ H5AC_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_PKG_INIT_VAR) {
+        if(H5AC_ind_read_dxpl_id > 0 || H5AC_noio_dxpl_id > 0 || H5AC_rawdata_dxpl_id > 0
 #ifdef H5_HAVE_PARALLEL
-        if(H5AC_dxpl_id > 0) {
+           || H5AC_coll_read_dxpl_id > 0
+#endif /* H5_HAVE_PARALLEL */
+           ) {
+#if defined(H5_HAVE_PARALLEL) || defined(H5_DEBUG_BUILD)
             /* Indicate more work to do */
             n = 1; /* H5I */
 
-            /* Close H5AC dxpl */
-            if(H5I_dec_ref(H5AC_dxpl_id) < 0)
-                H5E_clear_stack(NULL); /*ignore error*/
-        } /* end if */
+            /* Close H5AC dxpls */
+            if(H5I_dec_ref(H5AC_ind_read_dxpl_id) < 0 ||
+               H5I_dec_ref(H5AC_noio_dxpl_id) < 0 ||
+               H5I_dec_ref(H5AC_rawdata_dxpl_id) < 0
+#ifdef H5_HAVE_PARALLEL
+               || H5I_dec_ref(H5AC_coll_read_dxpl_id) < 0
 #endif /* H5_HAVE_PARALLEL */
+               )
+                H5E_clear_stack(NULL); /*ignore error*/
+#endif /* defined(H5_HAVE_PARALLEL) || defined(H5_DEBUG_BUILD) */
 
-        /* Reset static IDs */
-        H5AC_dxpl_id = (-1);
+            /* Reset static IDs */
+            H5AC_ind_read_dxpl_id = (-1);
+            H5AC_noio_dxpl_id = (-1);
+            H5AC_rawdata_dxpl_id = (-1);
+#ifdef H5_HAVE_PARALLEL
+            H5AC_coll_read_dxpl_id = (-1);
+#endif /* H5_HAVE_PARALLEL */
+        } /* end if */
 
         /* Reset interface initialization flag */
         if(0 == n)
@@ -458,6 +560,10 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
     } /* end if */
 
 #ifdef H5_HAVE_PARALLEL
+    /* destroying the cache, so clear all collective entries */
+    if(H5C_clear_coll_entries(f->shared->cache, 0) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
+
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
     if(aux_ptr)
         /* Sanity check */
@@ -658,6 +764,10 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id)
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
+    /* flushing the cache, so clear all collective entries */
+    if(H5C_clear_coll_entries(f->shared->cache, 0) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
+
     /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
     if(H5AC__flush_entries(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush.")
@@ -834,7 +944,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 
         /* Check if we should try to flush */
         if(aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold)
-            if(H5AC__run_sync_point(f, H5AC_dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
+            if(H5AC__run_sync_point(f, dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't run sync point.")
     } /* end if */
 }
@@ -947,7 +1057,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t new_addr)
+H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, 
+                haddr_t new_addr, hid_t dxpl_id)
 {
 #if H5AC__TRACE_FILE_ENABLED
     char          	trace[128] = "";
@@ -997,7 +1108,7 @@ H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t ne
 #ifdef H5_HAVE_PARALLEL
     /* Check if we should try to flush */
     if(NULL != aux_ptr && aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold)
-        if(H5AC__run_sync_point(f, H5AC_dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
+        if(H5AC__run_sync_point(f, dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't run sync point.")
 #endif /* H5_HAVE_PARALLEL */
 
@@ -1602,7 +1713,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 #ifdef H5_HAVE_PARALLEL
     /* Check if we should try to flush */
     if((aux_ptr != NULL) && (aux_ptr->dirty_bytes >= aux_ptr->dirty_bytes_threshold))
-        if(H5AC__run_sync_point(f, H5AC_dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
+        if(H5AC__run_sync_point(f, dxpl_id, H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't run sync point.")
 #endif /* H5_HAVE_PARALLEL */
 

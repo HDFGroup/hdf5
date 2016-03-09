@@ -357,6 +357,12 @@ H5_DLL herr_t H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *
 H5_DLL herr_t H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func, void **udata);
 H5_DLL herr_t H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location, hbool_t start_on_access);
 H5_DLL herr_t H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location, size_t *location_size, hbool_t *start_on_access);
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective);
+H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
+H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
+H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Dataset creation property list (DCPL) routines */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
@@ -412,6 +418,8 @@ H5_DLL herr_t H5Pset_append_flush(hid_t plist_id, unsigned ndims,
     const hsize_t boundary[], H5D_append_cb_t func, void *udata);
 H5_DLL herr_t H5Pget_append_flush(hid_t plist_id, unsigned dims,
     hsize_t boundary[], H5D_append_cb_t *func, void **udata);
+H5_DLL herr_t H5Pset_efile_prefix(hid_t dapl_id, const char* prefix);
+H5_DLL ssize_t H5Pget_efile_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
 
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);

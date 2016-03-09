@@ -252,7 +252,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     H5G_loc_t           loc;                    /* Object location */
     H5T_t		*type;                  /* Datatype to use for attribute */
     H5S_t		*space;                 /* Dataspace to use for attribute */
-    hid_t               dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t               dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -336,7 +336,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hbool_t             loc_found = FALSE;      /* Entry at 'obj_name' found */
     H5T_t		*type;                  /* Datatype to use for attribute */
     H5S_t		*space;                 /* Dataspace to use for attribute */
-    hid_t               dxpl_id;                /* dxpl used by library */
+    hid_t               dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t		ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -365,7 +365,6 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     H5G_loc_reset(&obj_loc);
 
     /* Verify access property list and get correct dxpl */
-    dxpl_id = H5AC_dxpl_id;
     if(H5P_verify_apl_and_dxpl(&aapl_id, H5P_CLS_AACC, &dxpl_id, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
@@ -416,7 +415,7 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 {
     H5G_loc_t    	loc;            /* Object location */
     H5A_t               *attr = NULL;   /* Attribute opened */
-    hid_t               dxpl_id  = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t               dxpl_id  = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t		ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -483,7 +482,7 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 {
     H5G_loc_t    	loc;            /* Object location */
     H5A_t               *attr = NULL;   /* Attribute opened */
-    hid_t               dxpl_id  = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t               dxpl_id  = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t		ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -556,7 +555,7 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 {
     H5A_t       *attr = NULL;   /* Attribute opened */
     H5G_loc_t	loc;	        /* Object location */
-    hid_t       dxpl_id  = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t       dxpl_id  = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -623,7 +622,7 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
 {
     H5A_t *attr;                /* Attribute object for ID */
     H5T_t *mem_type;            /* Memory datatype */
-    hid_t  dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t  dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t  aapl_id = H5P_DEFAULT;  /* temp access plist */
     herr_t ret_value;           /* Return value */
 
@@ -643,7 +642,7 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Go write the actual data to the attribute */
-    if((ret_value = H5A__write(attr, mem_type, buf, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5A__write(attr, mem_type, buf, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "unable to write attribute")
 
 done:
@@ -672,7 +671,7 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
 {
     H5A_t *attr;                /* Attribute object for ID */
     H5T_t *mem_type;            /* Memory datatype */
-    hid_t  dxpl_id = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t  dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t  aapl_id = H5P_DEFAULT;  /* temp access plist */
     herr_t ret_value;           /* Return value */
 
@@ -692,7 +691,7 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Go write the actual data to the attribute */
-    if((ret_value = H5A__read(attr, mem_type, buf, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5A__read(attr, mem_type, buf, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "unable to read attribute")
 
 done:
@@ -905,7 +904,7 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 {
     H5G_loc_t   loc;            /* Object location */
     H5A_t	*attr = NULL;   /* Attribute object for name */
-    hid_t       dxpl_id  = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t       dxpl_id  = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     ssize_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1043,7 +1042,7 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 {
     H5G_loc_t   loc;                    /* Object location */
     H5A_t	*attr = NULL;           /* Attribute object for name */
-    hid_t       dxpl_id  = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t       dxpl_id  = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1102,7 +1101,7 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 {
     H5G_loc_t   loc;                    /* Object location */
     H5A_t	*attr = NULL;           /* Attribute object for name */
-    hid_t       dxpl_id  = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t       dxpl_id  = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1173,13 +1172,13 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
 
     /* Avoid thrashing things if the names are the same */
     if(HDstrcmp(old_name, new_name)) {
-        H5G_loc_t	loc;	                /* Object location */
+        H5G_loc_t loc;                /* Object location */
   
         if(H5G_loc(loc_id, & loc) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
         /* Call private attribute rename routine */
-        if(H5O_attr_rename(loc.oloc, H5AC_dxpl_id, old_name, new_name) < 0)
+        if(H5O_attr_rename(loc.oloc, H5AC_ind_read_dxpl_id, old_name, new_name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't rename attribute")
     } /* end if */
 
@@ -1205,7 +1204,6 @@ herr_t
 H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
     const char *new_attr_name, hid_t lapl_id)
 {
-    hid_t       dxpl_id = H5AC_dxpl_id; /* dxpl used by the library */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1222,13 +1220,14 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
     if(!new_attr_name || !*new_attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new attribute name")
 
-    /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
-
     /* Avoid thrashing things if the names are the same */
     if(HDstrcmp(old_attr_name, new_attr_name)) {
         H5G_loc_t loc;                /* Object location */
+        hid_t dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by the library */
+
+        /* Verify access property list and get correct dxpl */
+        if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
         if(H5G_loc(loc_id, & loc) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
@@ -1310,7 +1309,7 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
 
     /* Call attribute iteration routine */
     last_attr = start_idx = (idx ? *idx : 0);
-    if((ret_value = H5O_attr_iterate(loc_id, H5AC_dxpl_id, idx_type, order, start_idx, &last_attr, &attr_op, op_data)) < 0)
+    if((ret_value = H5O_attr_iterate(loc_id, H5AC_ind_read_dxpl_id, idx_type, order, start_idx, &last_attr, &attr_op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
     /* Set the last attribute information */
@@ -1379,7 +1378,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5A_attr_iter_op_t attr_op; /* Attribute operator */
     hsize_t	start_idx;      /* Index of attribute to start iterating at */
     hsize_t	last_attr;      /* Index of last attribute examined */
-    hid_t       dxpl_id  = H5AC_dxpl_id; /* dxpl used by library */
+    hid_t       dxpl_id  = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t	ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1474,7 +1473,7 @@ H5Adelete(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Delete the attribute from the location */
-    if(H5O_attr_remove(loc.oloc, name, H5AC_dxpl_id) < 0)
+    if(H5O_attr_remove(loc.oloc, name, H5AC_ind_read_dxpl_id) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
 
 done:
@@ -1507,7 +1506,7 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
-    hid_t       dxpl_id;                /* dxpl used by library */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1524,7 +1523,6 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
     /* Verify access property list and get correct dxpl */
-    dxpl_id = H5AC_dxpl_id;
     if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
@@ -1584,7 +1582,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     H5G_name_t  obj_path;            	/* Opened object group hier. path */
     H5O_loc_t   obj_oloc;            	/* Opened object object location */
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
-    hid_t       dxpl_id;                /* dxpl used by library */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1603,7 +1601,6 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
 
     /* Verify access property list and get correct dxpl */
-    dxpl_id = H5AC_dxpl_id;
     if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
@@ -1698,7 +1695,7 @@ H5Aexists(hid_t obj_id, const char *attr_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
 
     /* Check if the attribute exists */
-    if((ret_value = H5O_attr_exists(loc.oloc, attr_name, H5AC_dxpl_id)) < 0)
+    if((ret_value = H5O_attr_exists(loc.oloc, attr_name, H5AC_ind_read_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
 done:
@@ -1724,7 +1721,7 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hid_t lapl_id)
 {
     H5G_loc_t   loc;                    /* Object location */
-    hid_t       dxpl_id = H5AC_dxpl_id;     /* dxpl used by library */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;     /* dxpl used by library */
     htri_t	ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)

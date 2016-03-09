@@ -134,7 +134,7 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
 
     /* Fill the selection in the memory buffer */
-    if(H5D__fill(fill, fill_type, buf, buf_type, space, H5AC_dxpl_id) < 0)
+    if(H5D__fill(fill, fill_type, buf, buf_type, space, H5AC_noio_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, FAIL, "filling selection failed")
 
 done:
@@ -172,7 +172,7 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5D__fill(const void *fill, const H5T_t *fill_type, void *buf,
-    const H5T_t *buf_type, const H5S_t *space, hid_t dxpl_id)
+          const H5T_t *buf_type, const H5S_t *space, hid_t dxpl_id)
 {
     H5WB_t  *elem_wb = NULL;    /* Wrapped buffer for element data */
     uint8_t elem_buf[H5T_ELEM_BUF_SIZE]; /* Buffer for element data */
@@ -565,7 +565,7 @@ done:
  */
 herr_t
 H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts, hid_t dxpl_id)
-{
+{    
     herr_t	ret_value = SUCCEED;	/* Return value */
     void * buf = NULL;              /* Temporary fill buffer */
 

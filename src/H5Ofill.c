@@ -527,7 +527,7 @@ H5O_fill_copy(const void *_src, void *_dst)
             H5T_path_t *tpath;      /* Conversion information */
 
             /* Set up type conversion function */
-            if(NULL == (tpath = H5T_path_find(src->type, dst->type, NULL, NULL, H5AC_dxpl_id, FALSE)))
+            if(NULL == (tpath = H5T_path_find(src->type, dst->type, NULL, NULL, H5AC_noio_dxpl_id, FALSE)))
                 HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, NULL, "unable to convert between src and dst data types")
 
             /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
@@ -555,7 +555,7 @@ H5O_fill_copy(const void *_src, void *_dst)
                 } /* end if */
 
                 /* Convert fill value */
-                if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, dst->buf, bkg_buf, H5AC_dxpl_id) < 0) {
+                if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, dst->buf, bkg_buf, H5AC_noio_dxpl_id) < 0) {
                     H5I_dec_ref(src_id);
                     H5I_dec_ref(dst_id);
                     if(bkg_buf)
@@ -709,7 +709,7 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create scalar dataspace")
 
             /* Reclaim any variable length components of the fill value */
-            if(H5D_vlen_reclaim(fill_type_id, fill_space, H5P_DATASET_XFER_DEFAULT, fill->buf) < 0) {
+            if(H5D_vlen_reclaim(fill_type_id, fill_space, H5AC_noio_dxpl_id, fill->buf) < 0) {
                 H5S_close(fill_space);
                 HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "unable to reclaim variable-length fill value data")
             } /* end if */

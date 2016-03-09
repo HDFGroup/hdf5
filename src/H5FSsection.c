@@ -1421,7 +1421,7 @@ done:
 
 #ifdef H5FS_DEBUG_ASSERT
 if(!(flags & (H5FS_ADD_DESERIALIZING | H5FS_ADD_SKIP_VALID)))
-    H5FS_assert(fspace);
+    H5FS_assert(fspace, dxpl_id);
 #endif /* H5FS_DEBUG_ASSERT */
 #ifdef H5FS_SINFO_DEBUG
 HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
@@ -1840,7 +1840,7 @@ done:
         HDONE_ERROR(H5E_FSPACE, H5E_CANTRELEASE, FAIL, "can't release section info")
 
 #ifdef H5FS_DEBUG_ASSERT
-    H5FS_assert(fspace);
+    H5FS_assert(fspace, dxpl_id);
 #endif /* H5FS_DEBUG_ASSERT */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_sect_find() */
@@ -2198,7 +2198,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_sect_assert(const H5FS_t *fspace)
+H5FS_sect_assert(const H5FS_t *fspace, hid_t dxpl_id)
 {
     hsize_t separate_obj;       /* The number of separate objects managed */
 
@@ -2270,7 +2270,7 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a, sect->type = %u\n", "H
                         HDassert(H5F_addr_defined(sect->addr));
                         HDassert(fspace_node->sect_size == sect->size);
                         if(cls->valid)
-                            (*cls->valid)(cls, sect);
+                            (*cls->valid)(cls, sect, dxpl_id);
 
                         /* Add to correct count */
                         if(cls->flags & H5FS_CLS_GHOST_OBJ)

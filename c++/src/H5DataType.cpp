@@ -69,9 +69,8 @@ DataType::DataType() : H5Object(), id(H5I_INVALID_HID) {}
 //		Removed second argument, "predefined", after changing to the
 //		new ref counting mechanism that relies on C's ref counting.
 //--------------------------------------------------------------------------
-DataType::DataType(const hid_t existing_id) : H5Object()
+DataType::DataType(const hid_t existing_id) : H5Object(), id(existing_id)
 {
-    id = existing_id;
     incRefCount(); // increment number of references to this id
 }
 
@@ -136,9 +135,8 @@ DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, 
 ///\brief	Copy constructor: makes a copy of the original DataType object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType(const DataType& original) : H5Object()
+DataType::DataType(const DataType& original) : H5Object(), id(original.id)
 {
-    id = original.getId();
     incRefCount(); // increment number of references to this id
 }
 
@@ -306,13 +304,16 @@ void DataType::commit(const H5Location& loc, const char* name)
 
 //--------------------------------------------------------------------------
 // Function:	DataType::commit
-///\brief	This is an overloaded member function, kept for backward
-///		compatibility.  It differs from the above function in that it
-///		misses const's.  This wrapper will be removed in future release.
-///\param	loc - IN: A location (file, dataset, datatype, or group)
-///\param	name - IN: Name of the datatype
-///\exception	H5::DataTypeIException
+// Purpose	This is an overloaded member function, kept for backward
+//		compatibility.  It differs from the above function in that it
+//		misses const's.  This wrapper will be removed in future release.
+// Param	loc - IN: A location (file, dataset, datatype, or group)
+// Param 	name - IN: Name of the datatype
+// Exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - Jan, 2007
+// Modification
+//		Planned for removal. -BMR, 2014/04/16
+//		Removed from documentation. -BMR, 2016/03/07
 //--------------------------------------------------------------------------
 void DataType::commit(H5Location& loc, const char* name)
 {
@@ -333,13 +334,16 @@ void DataType::commit(const H5Location& loc, const H5std_string& name)
 
 //--------------------------------------------------------------------------
 // Function:	DataType::commit
-///\brief	This is an overloaded member function, kept for backward
-///		compatibility.  It differs from the above function in that it
-///		misses const's.  This wrapper will be removed in future release.
-///\param	loc - IN: A location (file, dataset, datatype, or group)
-///\param	name - IN: Name of the datatype
-///\exception	H5::DataTypeIException
+// Purpose	This is an overloaded member function, kept for backward
+//		compatibility.  It differs from the above function in that it
+//		misses const's.  This wrapper will be removed in future release.
+// Param 	loc - IN: A location (file, dataset, datatype, or group)
+// Param 	name - IN: Name of the datatype
+// Exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - Jan, 2007
+// Modification
+//		Planned for removal. -BMR, 2014/04/16
+//		Removed from documentation. -BMR, 2016/03/07
 //--------------------------------------------------------------------------
 void DataType::commit(H5Location& loc, const H5std_string& name)
 {
@@ -358,10 +362,10 @@ void DataType::commit(H5Location& loc, const H5std_string& name)
 bool DataType::committed() const
 {
    // Call C function to determine if a datatype is a named one
-   htri_t committed = H5Tcommitted( id );
-   if( committed > 0 )
+   htri_t is_committed = H5Tcommitted( id );
+   if (is_committed > 0)
       return true;
-   else if( committed == 0 )
+   else if (is_committed == 0)
       return false;
    else
    {

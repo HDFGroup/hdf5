@@ -1189,6 +1189,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsetbuf
     #define HDsetbuf(F,S)    setbuf(F,S)
 #endif /* HDsetbuf */
+#ifndef HDsetenv
+    #define HDsetenv(N,V,O)    setenv(N,V,O)
+#endif /* HDsetenv */
 #ifndef HDsetgid
     #define HDsetgid(G)    setgid(G)
 #endif /* HDsetgid */
@@ -1673,7 +1676,10 @@ typedef struct H5_debug_t {
     H5_debug_open_stream_t *open_stream; /* Stack of open output streams */
 } H5_debug_t;
 
+#ifdef H5_HAVE_PARALLEL
 extern hbool_t H5_coll_api_sanity_check_g;
+#endif /* H5_HAVE_PARALLEL */
+
 extern H5_debug_t    H5_debug_g;
 #define H5DEBUG(X)    (H5_debug_g.pkg[H5_PKG_##X].stream)
 /* Do not use const else AIX strings does not show it. */
@@ -2557,7 +2563,8 @@ H5_DLL uint32_t H5_hash_string(const char *str);
 H5_DLL time_t H5_make_time(struct tm *tm);
 
 /* Functions for building paths, etc. */
-H5_DLL herr_t   H5_build_extpath(const char *, char ** /*out*/ );
+H5_DLL herr_t   H5_build_extpath(const char *name, char **extpath /*out*/);
+H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
 
 /* Functions for debugging */
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,

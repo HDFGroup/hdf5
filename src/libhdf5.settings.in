@@ -60,6 +60,9 @@ Languages:
 @BUILD_CXX_CONDITIONAL_TRUE@             Shared C++ Library: @enable_shared@
 @BUILD_CXX_CONDITIONAL_TRUE@             Static C++ Library: @enable_static@
 
+                            JAVA: @HDF_JAVA@
+@BUILD_JAVA_CONDITIONAL_TRUE@                   JAVA Compiler: @JAVA_VERSION@
+
 Features:
 ---------
                   Parallel HDF5: @PARALLEL@

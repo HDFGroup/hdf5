@@ -3210,7 +3210,7 @@ setup_cache(size_t max_cache_size,
 
     if ( pass ) { /* allocate space for test entries */
 
-        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5P_DATASET_XFER_DEFAULT,
+        actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id,
 			              (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
 
 	if ( actual_base_addr == HADDR_UNDEF ) {
@@ -3295,7 +3295,7 @@ takedown_cache(H5F_t * file_ptr,
 
         flush_cache(file_ptr, TRUE, FALSE, FALSE);
 
-        H5C_dest(file_ptr, H5P_DATASET_XFER_DEFAULT);
+        H5C_dest(file_ptr, H5AC_ind_read_dxpl_id);
 
 	if ( saved_cache != NULL ) {
 
@@ -3320,7 +3320,7 @@ takedown_cache(H5F_t * file_ptr,
                 HDassert ( file_ptr );
             }
 
-            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5P_DATASET_XFER_DEFAULT, saved_actual_base_addr,
+            H5MF_xfree(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id, saved_actual_base_addr,
                                           (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
             saved_actual_base_addr = HADDR_UNDEF;
         }
@@ -3409,7 +3409,7 @@ expunge_entry(H5F_t * file_ptr,
         HDassert( ! ( entry_ptr->header.is_pinned ) );
 	HDassert( ! ( entry_ptr->is_pinned ) );
 
-        result = H5C_expunge_entry(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
                 &(types[type]), entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if ( result < 0 ) {
@@ -3461,11 +3461,11 @@ flush_cache(H5F_t * file_ptr,
         cache_ptr = file_ptr->shared->cache;
 
         if(destroy_entries)
-            result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
+            result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id,
                                      H5C__FLUSH_INVALIDATE_FLAG);
 
         else
-            result = H5C_flush_cache(file_ptr, H5P_DATASET_XFER_DEFAULT,
+            result = H5C_flush_cache(file_ptr, H5AC_ind_read_dxpl_id,
                                      H5C__NO_FLAGS_SET);
 
         if(dump_stats)
@@ -3600,7 +3600,7 @@ insert_entry(H5F_t * file_ptr,
 {
     H5C_t * cache_ptr;
     herr_t result;
-    hid_t xfer = H5AC_dxpl_id;
+    hid_t xfer = H5AC_ind_read_dxpl_id;
     hbool_t insert_pinned;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -3616,7 +3616,7 @@ insert_entry(H5F_t * file_ptr,
 
         base_addr = entries[type];
         entry_ptr = &(base_addr[idx]);
-	baddrs = base_addrs[type];
+        baddrs = base_addrs[type];
 
         HDassert( entry_ptr->index == idx );
         HDassert( entry_ptr->type == type );
@@ -3625,16 +3625,16 @@ insert_entry(H5F_t * file_ptr,
         HDassert( entry_ptr->flush_dep_npar == 0 );
         HDassert( entry_ptr->flush_dep_nchd == 0 );
 
-	insert_pinned = (hbool_t)((flags & H5C__PIN_ENTRY_FLAG) != 0 );
+        insert_pinned = (hbool_t)((flags & H5C__PIN_ENTRY_FLAG) != 0 );
 
-	entry_ptr->is_dirty = TRUE;
+        entry_ptr->is_dirty = TRUE;
 
-	/* Set the base address of the entry type into the property list as tag */
-	/* Use to cork entries for the object */
-	if(H5AC_tag(xfer, baddrs, NULL) < 0) {
-	    pass = FALSE;
-	    failure_mssg = "error in H5P_set().";
-	}
+        /* Set the base address of the entry type into the property list as tag */
+        /* Use to cork entries for the object */
+        if(H5AC_tag(xfer, baddrs, NULL) < 0) {
+            pass = FALSE;
+            failure_mssg = "error in H5P_set().";
+        }
 
         result = H5C_insert_entry(file_ptr, xfer,
 	        &(types[type]), entry_ptr->addr, (void *)entry_ptr, flags);
@@ -3663,25 +3663,25 @@ insert_entry(H5F_t * file_ptr,
                       "entry_ptr->addr != entry_ptr->header.addr = %d\n",
                        (int)(entry_ptr->addr != entry_ptr->header.addr));
 #endif
-        }
-	HDassert(entry_ptr->cache_ptr == NULL);
+        } /* end if */
+        HDassert(entry_ptr->cache_ptr == NULL);
 
         entry_ptr->file_ptr = file_ptr;
         entry_ptr->cache_ptr = cache_ptr;
 
-	if(insert_pinned)
-	    HDassert(entry_ptr->header.is_pinned);
-	else
-	    HDassert(!(entry_ptr->header.is_pinned));
+        if(insert_pinned)
+            HDassert(entry_ptr->header.is_pinned);
+        else
+            HDassert(!(entry_ptr->header.is_pinned));
         entry_ptr->is_pinned = insert_pinned;
         entry_ptr->pinned_from_client = insert_pinned;
 
-	if(entry_ptr->header.is_corked)
-	    entry_ptr->is_corked = TRUE;
+        if(entry_ptr->header.is_corked)
+            entry_ptr->is_corked = TRUE;
 
         HDassert( entry_ptr->header.is_dirty );
         HDassert( ((entry_ptr->header).type)->id == type );
-    }
+    } /* end if */
 
     return;
 
@@ -3887,7 +3887,7 @@ protect_entry(H5F_t * file_ptr,
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
     haddr_t baddrs;
-    hid_t xfer = H5AC_dxpl_id;
+    hid_t xfer = H5AC_ind_read_dxpl_id;
     H5C_cache_entry_t * cache_entry_ptr;
 
     if ( pass ) {
@@ -3900,19 +3900,19 @@ protect_entry(H5F_t * file_ptr,
 
         base_addr = entries[type];
         entry_ptr = &(base_addr[idx]);
-	baddrs = base_addrs[type];
+        baddrs = base_addrs[type];
 
         HDassert( entry_ptr->index == idx );
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
         HDassert( !(entry_ptr->is_protected) );
 
-	/* Set the base address of the entry type into the property list as tag */
-	/* Use to cork entries for the object */
-	if(H5AC_tag(xfer, baddrs, NULL) < 0) {
-	    pass = FALSE;
-	    failure_mssg = "error in H5P_set().";
-	}
+        /* Set the base address of the entry type into the property list as tag */
+        /* Use to cork entries for the object */
+        if(H5AC_tag(xfer, baddrs, NULL) < 0) {
+            pass = FALSE;
+            failure_mssg = "error in H5P_set().";
+        }
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, xfer,
                 &(types[type]), entry_ptr->addr, &entry_ptr->addr, 
@@ -3945,10 +3945,10 @@ protect_entry(H5F_t * file_ptr,
             HDfprintf(stdout,
                       "entry_ptr->addr = %d, entry_ptr->header.addr = %d\n",
                       (int)(entry_ptr->addr), (int)(entry_ptr->header.addr));
-	    HDfprintf(stdout, 
-                   "entry_ptr->verify_ct = %d, entry_ptr->max_verify_ct = %d\n",
-		   entry_ptr->verify_ct, entry_ptr->max_verify_ct);
-	    H5Eprint2(H5E_DEFAULT, stdout);
+            HDfprintf(stdout, 
+                    "entry_ptr->verify_ct = %d, entry_ptr->max_verify_ct = %d\n",
+                    entry_ptr->verify_ct, entry_ptr->max_verify_ct);
+            H5Eprint2(H5E_DEFAULT, stdout);
 #endif
             pass = FALSE;
             failure_mssg = "error in H5C_protect().";
@@ -4019,7 +4019,7 @@ protect_entry_ro(H5F_t * file_ptr,
 		  ( ( entry_ptr->is_read_only ) &&
 		    ( entry_ptr->ro_ref_count > 0 ) ) );
 
-        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
                 &(types[type]), entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
 
         if ( ( cache_entry_ptr != (void *)entry_ptr ) ||
@@ -4236,7 +4236,7 @@ unprotect_entry(H5F_t * file_ptr,
                 mark_flush_dep_dirty(entry_ptr);
         } /* end if */
 
-        result = H5C_unprotect(file_ptr, H5P_DATASET_XFER_DEFAULT,
+        result = H5C_unprotect(file_ptr, H5AC_ind_read_dxpl_id,
                     entry_ptr->addr, (void *)entry_ptr, flags);
 
         if ( ( result < 0 ) ||

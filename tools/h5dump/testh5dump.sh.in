@@ -133,6 +133,7 @@ $SRC_H5DUMP_TESTFILES/tgrp_comments.h5
 $SRC_H5DUMP_TESTFILES/thlink.h5
 $SRC_H5DUMP_TESTFILES/thyperslab.h5
 $SRC_H5DUMP_TESTFILES/tintsattrs.h5
+$SRC_H5DUMP_TESTFILES/tints4dims.h5
 $SRC_H5DUMP_TESTFILES/tlarge_objname.h5
 #$SRC_H5DUMP_TESTFILES/tldouble.h5
 $SRC_H5DUMP_TESTFILES/tlonglinks.h5
@@ -265,6 +266,12 @@ $SRC_H5DUMP_TESTFILES/tindicessub2.ddl
 $SRC_H5DUMP_TESTFILES/tindicessub3.ddl
 $SRC_H5DUMP_TESTFILES/tindicessub4.ddl
 $SRC_H5DUMP_TESTFILES/tindicesyes.ddl
+$SRC_H5DUMP_TESTFILES/tints4dims.ddl
+$SRC_H5DUMP_TESTFILES/tints4dimsBlock2.ddl
+$SRC_H5DUMP_TESTFILES/tints4dimsBlockEq.ddl
+$SRC_H5DUMP_TESTFILES/tints4dimsCount2.ddl
+$SRC_H5DUMP_TESTFILES/tints4dimsCountEq.ddl
+$SRC_H5DUMP_TESTFILES/tints4dimsStride2.ddl
 $SRC_H5DUMP_TESTFILES/tintsattrs.ddl
 $SRC_H5DUMP_TESTFILES/tlarge_objname.ddl
 #$SRC_H5DUMP_TESTFILES/tldouble.ddl
@@ -1105,6 +1112,12 @@ TOOLTEST tall-4s.ddl --enable-error-stack --dataset=/g1/g1.1/dset1.1.1 --start=1
 TOOLTEST tall-5s.ddl --enable-error-stack -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5
 TOOLTEST tdset-3s.ddl --enable-error-stack -d "/dset1[1,1;;;]" tdset.h5
 TOOLTEST tno-subset.ddl --enable-error-stack --no-compact-subset -d "AHFINDERDIRECT::ah_centroid_t[0] it=0 tl=0" tno-subset.h5
+
+TOOLTEST tints4dimsCount2.ddl --enable-error-stack -d FourDimInts -s 0,0,0,0 -c 2,2,2,2 tints4dims.h5
+TOOLTEST tints4dimsBlock2.ddl --enable-error-stack -d FourDimInts -s 0,0,0,0 -c 1,1,1,1 -k 2,2,2,2 tints4dims.h5
+TOOLTEST tints4dimsStride2.ddl --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,2,2 -c 2,2,2,2 tints4dims.h5
+TOOLTEST tints4dimsCountEq.ddl --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,1,1 -k 1,2,1,1 -c 2,2,4,4 tints4dims.h5
+TOOLTEST tints4dimsBlockEq.ddl --enable-error-stack -d FourDimInts -s 0,0,0,0 -S 2,2,1,1 -c 2,2,1,1 -k 1,2,4,4 tints4dims.h5
 
 # test printing characters in ASCII instead of decimal
 TOOLTEST tchar1.ddl --enable-error-stack -r tchar.h5

@@ -104,9 +104,8 @@ PropList::PropList() : IdComponent(), id(H5P_DEFAULT) {}
 ///\param	original - IN: The original property list to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PropList::PropList(const PropList& original) : IdComponent()
+PropList::PropList(const PropList& original) : IdComponent(), id(original.id)
 {
-    id = original.getId();
     incRefCount(); // increment number of references to this id
 }
 
@@ -593,7 +592,7 @@ void PropList::setProperty(const char* name, void* value) const
 //--------------------------------------------------------------------------
 void PropList::setProperty(const char* name, const char* charptr) const
 {
-   herr_t ret_value = H5Pset(id, name, (void*) charptr);
+   herr_t ret_value = H5Pset(id, name, (void*)charptr);
    if (ret_value < 0)
    {
       throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");

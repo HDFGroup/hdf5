@@ -74,7 +74,7 @@ static herr_t H5HF__huge_bt2_dst_context(void *ctx);
 
 /* Callbacks for indirect objects */
 static herr_t H5HF__huge_bt2_indir_store(void *native, const void *udata);
-static herr_t H5HF__huge_bt2_indir_compare(const void *rec1, const void *rec2);
+static herr_t H5HF__huge_bt2_indir_compare(const void *rec1, const void *rec2, int *result);
 static herr_t H5HF__huge_bt2_indir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF__huge_bt2_indir_decode(const uint8_t *raw, void *native,
@@ -84,7 +84,7 @@ static herr_t H5HF__huge_bt2_indir_debug(FILE *stream, int indent, int fwidth,
 
 /* Callbacks for filtered indirect objects */
 static herr_t H5HF__huge_bt2_filt_indir_store(void *native, const void *udata);
-static herr_t H5HF__huge_bt2_filt_indir_compare(const void *rec1, const void *rec2);
+static herr_t H5HF__huge_bt2_filt_indir_compare(const void *rec1, const void *rec2, int *result);
 static herr_t H5HF__huge_bt2_filt_indir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF__huge_bt2_filt_indir_decode(const uint8_t *raw, void *native,
@@ -94,7 +94,7 @@ static herr_t H5HF__huge_bt2_filt_indir_debug(FILE *stream, int indent, int fwid
 
 /* Callbacks for direct objects */
 static herr_t H5HF__huge_bt2_dir_store(void *native, const void *udata);
-static herr_t H5HF__huge_bt2_dir_compare(const void *rec1, const void *rec2);
+static herr_t H5HF__huge_bt2_dir_compare(const void *rec1, const void *rec2, int *result);
 static herr_t H5HF__huge_bt2_dir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF__huge_bt2_dir_decode(const uint8_t *raw, void *native,
@@ -104,7 +104,7 @@ static herr_t H5HF__huge_bt2_dir_debug(FILE *stream, int indent, int fwidth,
 
 /* Callbacks for filtered direct objects */
 static herr_t H5HF__huge_bt2_filt_dir_store(void *native, const void *udata);
-static herr_t H5HF__huge_bt2_filt_dir_compare(const void *rec1, const void *rec2);
+static herr_t H5HF__huge_bt2_filt_dir_compare(const void *rec1, const void *rec2, int *result);
 static herr_t H5HF__huge_bt2_filt_dir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF__huge_bt2_filt_dir_decode(const uint8_t *raw, void *native,
@@ -358,11 +358,14 @@ H5HF__huge_bt2_indir_store(void *nrecord, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__huge_bt2_indir_compare(const void *_rec1, const void *_rec2)
+H5HF__huge_bt2_indir_compare(const void *_rec1, const void *_rec2, int *result)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    FUNC_LEAVE_NOAPI((herr_t)(((const H5HF_huge_bt2_indir_rec_t *)_rec1)->id - ((const H5HF_huge_bt2_indir_rec_t *)_rec2)->id))
+    *result = (int)(((const H5HF_huge_bt2_indir_rec_t *)_rec1)->id - 
+                    ((const H5HF_huge_bt2_indir_rec_t *)_rec2)->id);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_indir_compare() */
 
 
@@ -558,11 +561,14 @@ H5HF__huge_bt2_filt_indir_store(void *nrecord, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__huge_bt2_filt_indir_compare(const void *_rec1, const void *_rec2)
+H5HF__huge_bt2_filt_indir_compare(const void *_rec1, const void *_rec2, int *result)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    FUNC_LEAVE_NOAPI((herr_t)(((const H5HF_huge_bt2_filt_indir_rec_t *)_rec1)->id - ((const H5HF_huge_bt2_filt_indir_rec_t *)_rec2)->id))
+    *result = (int)(((const H5HF_huge_bt2_filt_indir_rec_t *)_rec1)->id - 
+                    ((const H5HF_huge_bt2_filt_indir_rec_t *)_rec2)->id);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_filt_indir_compare() */
 
 
@@ -737,26 +743,25 @@ H5HF__huge_bt2_dir_store(void *nrecord, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__huge_bt2_dir_compare(const void *_rec1, const void *_rec2)
+H5HF__huge_bt2_dir_compare(const void *_rec1, const void *_rec2, int *result)
 {
     const H5HF_huge_bt2_dir_rec_t *rec1 = (const H5HF_huge_bt2_dir_rec_t *)_rec1;
     const H5HF_huge_bt2_dir_rec_t *rec2 = (const H5HF_huge_bt2_dir_rec_t *)_rec2;
-    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
     if(rec1->addr < rec2->addr)
-        ret_value = -1;
+        *result = -1;
     else if(rec1->addr > rec2->addr)
-        ret_value = 1;
+        *result = 1;
     else if(rec1->len < rec2->len)
-        ret_value = -1;
+        *result = -1;
     else if(rec1->len > rec2->len)
-        ret_value = 1;
+        *result = 1;
     else
-        ret_value = 0;
+        *result = 0;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_dir_compare() */
 
 
@@ -950,26 +955,25 @@ H5HF__huge_bt2_filt_dir_store(void *nrecord, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__huge_bt2_filt_dir_compare(const void *_rec1, const void *_rec2)
+H5HF__huge_bt2_filt_dir_compare(const void *_rec1, const void *_rec2, int *result)
 {
     const H5HF_huge_bt2_filt_dir_rec_t *rec1 = (const H5HF_huge_bt2_filt_dir_rec_t *)_rec1;
     const H5HF_huge_bt2_filt_dir_rec_t *rec2 = (const H5HF_huge_bt2_filt_dir_rec_t *)_rec2;
-    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
     if(rec1->addr < rec2->addr)
-        ret_value = -1;
+        *result = -1;
     else if(rec1->addr > rec2->addr)
-        ret_value = 1;
+        *result = 1;
     else if(rec1->len < rec2->len)
-        ret_value = -1;
+        *result = -1;
     else if(rec1->len > rec2->len)
-        ret_value = 1;
+        *result = 1;
     else
-        ret_value = 0;
+        *result = 0;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_filt_dir_compare() */
 
 

@@ -31,6 +31,9 @@ class H5_DLLCPP ArrayType : public DataType {
 	// specified base type.
 	ArrayType(const DataType& base_type, int ndims, const hsize_t* dims);
 
+	// Assignment operator
+	ArrayType& operator=(const ArrayType& rhs);
+
 	// Stores the rank and dimensions in memory.
 	void setArrayInfo();
 

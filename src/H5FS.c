@@ -1263,7 +1263,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FS_assert(const H5FS_t *fspace)
+H5FS_assert(const H5FS_t *fspace, hid_t dxpl_id)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 #ifdef QAK
@@ -1273,7 +1273,7 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS_assert", fspace->t
     /* Checks for section info, if it's available */
     if(fspace->sinfo) {
         /* Sanity check sections */
-        H5FS_sect_assert(fspace);
+        H5FS_sect_assert(fspace, dxpl_id);
 
         /* General assumptions about the section size counts */
         HDassert(fspace->sinfo->tot_size_count >= fspace->sinfo->serial_size_count);

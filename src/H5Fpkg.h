@@ -352,6 +352,10 @@ struct H5F_t {
     hbool_t             closing;        /* File is in the process of being closed */
     struct H5F_t        *parent;        /* Parent file that this file is mounted to */
     unsigned            nmounts;        /* Number of children mounted to this file */
+#ifdef H5_HAVE_PARALLEL
+    H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
+    hbool_t             coll_md_write;  /* Do all metadata writes collectively */
+#endif /* H5_HAVE_PARALLEL */
 };
 
 
@@ -396,7 +400,7 @@ H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
 
 /* Superblock extension related routines */
 H5_DLL herr_t H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr);
-H5_DLL herr_t H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, void *mesg, unsigned id, hbool_t may_create);
+H5_DLL herr_t H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, unsigned id, void *mesg, hbool_t may_create);
 H5_DLL herr_t H5F_super_ext_remove_msg(H5F_t *f, hid_t dxpl_id, unsigned id);
 H5_DLL herr_t H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hid_t dxpl_id,
     hbool_t was_created);

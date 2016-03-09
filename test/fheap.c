@@ -1872,7 +1872,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
      */
     TESTING("fractal heap creation");
 
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -1896,11 +1896,11 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
         TEST_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
 
     /* Delete heap */
-    if(H5HF_delete(f, H5P_DATASET_XFER_DEFAULT, fh_addr) < 0)
+    if(H5HF_delete(f, H5AC_ind_read_dxpl_id, fh_addr) < 0)
         FAIL_STACK_ERROR
 
     /* Close the file */
@@ -1923,7 +1923,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
 error:
     H5E_BEGIN_TRY {
         if(fh)
-            H5HF_close(fh, H5P_DATASET_XFER_DEFAULT);
+            H5HF_close(fh, H5AC_ind_read_dxpl_id);
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
@@ -1991,7 +1991,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
     TESTING("create, close & reopen fractal heap");
 
     /* Create heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -2006,7 +2006,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
         TEST_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
 
     /* Check for closing & re-opening the file */
@@ -2030,7 +2030,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
     } /* end if */
 
     /* Re-open the heap */
-    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Query the creation parameters */
@@ -2041,12 +2041,12 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
         TEST_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
     fh = NULL;
 
     /* Delete heap */
-    if(H5HF_delete(f, H5P_DATASET_XFER_DEFAULT, fh_addr) < 0)
+    if(H5HF_delete(f, H5AC_ind_read_dxpl_id, fh_addr) < 0)
         FAIL_STACK_ERROR
 
     /* Close the file */
@@ -2069,7 +2069,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
 error:
     H5E_BEGIN_TRY {
         if(fh)
-            H5HF_close(fh, H5P_DATASET_XFER_DEFAULT);
+            H5HF_close(fh, H5AC_ind_read_dxpl_id);
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
@@ -2139,7 +2139,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UN
     TESTING("open fractal heap twice");
 
     /* Create heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -2154,7 +2154,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UN
         TEST_ERROR
 
     /* Open the heap again, through the first file handle */
-    if(NULL == (fh2 = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh2 = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
@@ -2165,12 +2165,12 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UN
         TEST_ERROR
 
     /* Close the second fractal heap wrapper */
-    if(H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh2, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
     fh2 = NULL;
 
     /* Check for closing & re-opening the heap & file */
-    if(reopen_file(&file, &f, filename, fapl, H5P_DATASET_XFER_DEFAULT, &fh, fh_addr, tparam) < 0)
+    if(reopen_file(&file, &f, filename, fapl, H5AC_ind_read_dxpl_id, &fh, fh_addr, tparam) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -2186,7 +2186,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UN
         FAIL_STACK_ERROR
 
     /* Open the fractal heap through the second file handle */
-    if(NULL == (fh2 = H5HF_open(f2, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh2 = H5HF_open(f2, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
@@ -2197,7 +2197,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UN
         TEST_ERROR
 
     /* Close the first fractal heap wrapper */
-    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
     fh = NULL;
 
@@ -2209,12 +2209,12 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UN
         FAIL_STACK_ERROR
 
     /* Close the second fractal heap wrapper */
-    if(H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh2, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
     fh2 = NULL;
 
     /* Delete heap */
-    if(H5HF_delete(f2, H5P_DATASET_XFER_DEFAULT, fh_addr) < 0)
+    if(H5HF_delete(f2, H5AC_ind_read_dxpl_id, fh_addr) < 0)
         FAIL_STACK_ERROR
 
     /* Close the second file */
@@ -2237,9 +2237,9 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UN
 error:
     H5E_BEGIN_TRY {
         if(fh)
-            H5HF_close(fh, H5P_DATASET_XFER_DEFAULT);
+            H5HF_close(fh, H5AC_ind_read_dxpl_id);
         if(fh2)
-            H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT);
+            H5HF_close(fh2, H5AC_ind_read_dxpl_id);
 	H5Fclose(file);
 	H5Fclose(file2);
     } H5E_END_TRY;
@@ -2307,7 +2307,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_U
     TESTING("deleting open fractal heap");
 
     /* Create heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -2322,11 +2322,11 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_U
         TEST_ERROR
 
     /* Open the heap again */
-    if(NULL == (fh2 = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh2 = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Request that the heap be deleted */
-    if(H5HF_delete(f, H5P_DATASET_XFER_DEFAULT, fh_addr) < 0)
+    if(H5HF_delete(f, H5AC_ind_read_dxpl_id, fh_addr) < 0)
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
@@ -2337,24 +2337,24 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_U
         TEST_ERROR
 
     /* Close the second fractal heap wrapper */
-    if(H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh2, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
     fh2 = NULL;
 
     /* Try re-opening the heap again (should fail, as heap will be deleted) */
     H5E_BEGIN_TRY {
-        fh2 = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr);
+        fh2 = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr);
     } H5E_END_TRY;
     if(fh2) {
         /* Close opened heap */
-        H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT);
+        H5HF_close(fh2, H5AC_ind_read_dxpl_id);
 
         /* Indicate error */
         TEST_ERROR
     } /* end if */
 
     /* Close the first fractal heap wrapper */
-    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
     fh = NULL;
 
@@ -2380,11 +2380,11 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_U
 
     /* Try re-opening the heap again (should fail, as heap is now deleted) */
     H5E_BEGIN_TRY {
-        fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr);
+        fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr);
     } H5E_END_TRY;
     if(fh) {
         /* Close opened heap */
-        H5HF_close(fh, H5P_DATASET_XFER_DEFAULT);
+        H5HF_close(fh, H5AC_ind_read_dxpl_id);
 
         /* Indicate error */
         TEST_ERROR
@@ -2410,9 +2410,9 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_U
 error:
     H5E_BEGIN_TRY {
         if(fh)
-            H5HF_close(fh, H5P_DATASET_XFER_DEFAULT);
+            H5HF_close(fh, H5AC_ind_read_dxpl_id);
         if(fh2)
-            H5HF_close(fh2, H5P_DATASET_XFER_DEFAULT);
+            H5HF_close(fh2, H5AC_ind_read_dxpl_id);
 	H5Fclose(file);
     } H5E_END_TRY;
     return(1);
@@ -2436,7 +2436,7 @@ static unsigned
 test_id_limits(hid_t fapl, H5HF_create_t *cparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -2781,7 +2781,7 @@ static unsigned
 test_filtered_create(hid_t fapl, H5HF_create_t *cparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -2849,7 +2849,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Re-open the heap */
-    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Query the heap creation parameters */
@@ -2860,7 +2860,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
 
 
@@ -2904,7 +2904,7 @@ static unsigned
 test_size(hid_t fapl, H5HF_create_t *cparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -3005,7 +3005,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam)
         TEST_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
 
 
@@ -3049,7 +3049,7 @@ test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam)
 {
     hid_t       file1 = -1;             /* File ID */
     hid_t       file2 = -2;             /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char        filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t       *f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -3143,7 +3143,7 @@ test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* Close the fractal heap */
-    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
 
 
@@ -3185,7 +3185,7 @@ static unsigned
 test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -3297,7 +3297,7 @@ static unsigned
 test_man_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -3398,7 +3398,7 @@ static unsigned
 test_man_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -3494,7 +3494,7 @@ static unsigned
 test_man_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -3593,7 +3593,7 @@ static unsigned
 test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -3618,7 +3618,7 @@ test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -3699,7 +3699,7 @@ static unsigned
 test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -3724,7 +3724,7 @@ test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -3806,7 +3806,7 @@ static unsigned
 test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -3831,7 +3831,7 @@ test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -3917,7 +3917,7 @@ static unsigned
 test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -3942,7 +3942,7 @@ test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -4013,7 +4013,7 @@ static unsigned
 test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -4038,7 +4038,7 @@ test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -4116,7 +4116,7 @@ static unsigned
 test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -4141,7 +4141,7 @@ test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -4217,7 +4217,7 @@ static unsigned
 test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -4242,7 +4242,7 @@ test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -4327,7 +4327,7 @@ static unsigned
 test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -4353,7 +4353,7 @@ test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -4425,7 +4425,7 @@ static unsigned
 test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -4450,7 +4450,7 @@ test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -4521,7 +4521,7 @@ static unsigned
 test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -4546,7 +4546,7 @@ test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -4623,7 +4623,7 @@ static unsigned
 test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -4648,7 +4648,7 @@ test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhe
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -4733,7 +4733,7 @@ static unsigned
 test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -4758,7 +4758,7 @@ test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -4836,7 +4836,7 @@ static unsigned
 test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -4861,7 +4861,7 @@ test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -4947,7 +4947,7 @@ static unsigned
 test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -4972,7 +4972,7 @@ test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -5055,7 +5055,7 @@ static unsigned
 test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -5076,7 +5076,7 @@ test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_te
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -5153,7 +5153,7 @@ static unsigned
 test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -5178,7 +5178,7 @@ test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -5262,7 +5262,7 @@ static unsigned
 test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -5287,7 +5287,7 @@ test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_te
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -5365,7 +5365,7 @@ static unsigned
 test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -5390,7 +5390,7 @@ test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -5475,7 +5475,7 @@ static unsigned
 test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -5500,7 +5500,7 @@ test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -5586,7 +5586,7 @@ static unsigned
 test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -5611,7 +5611,7 @@ test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -5693,7 +5693,7 @@ static unsigned
 test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -5718,7 +5718,7 @@ test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -5801,7 +5801,7 @@ static unsigned
 test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -5826,7 +5826,7 @@ test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -5916,7 +5916,7 @@ static unsigned
 test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -5941,7 +5941,7 @@ test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -6036,7 +6036,7 @@ static unsigned
 test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -6061,7 +6061,7 @@ test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -6148,7 +6148,7 @@ static unsigned
 test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -6173,7 +6173,7 @@ test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -6263,7 +6263,7 @@ static unsigned
 test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -6288,7 +6288,7 @@ test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         STACK_ERROR
 
     /* Create absolute heap */
-    if(NULL == (fh = H5HF_create(f, H5P_DATASET_XFER_DEFAULT, cparam)))
+    if(NULL == (fh = H5HF_create(f, H5AC_ind_read_dxpl_id, cparam)))
         FAIL_STACK_ERROR
     if(H5HF_get_id_len(fh, &id_len) < 0)
         FAIL_STACK_ERROR
@@ -6392,7 +6392,7 @@ static unsigned
 test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -6546,7 +6546,7 @@ static unsigned
 test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -6709,7 +6709,7 @@ static unsigned
 test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -6902,7 +6902,7 @@ static unsigned
 test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -7070,7 +7070,7 @@ static unsigned
 test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -7313,7 +7313,7 @@ static unsigned
 test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -7614,7 +7614,7 @@ static unsigned
 test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -7729,7 +7729,7 @@ static unsigned
 test_man_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -7803,7 +7803,7 @@ static unsigned
 test_man_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -7892,7 +7892,7 @@ static unsigned
 test_man_remove_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -7963,7 +7963,7 @@ static unsigned
 test_man_remove_first_two_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -8036,7 +8036,7 @@ static unsigned
 test_man_remove_first_four_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -8113,7 +8113,7 @@ static unsigned
 test_man_remove_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -8184,7 +8184,7 @@ static unsigned
 test_man_remove_2nd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -8259,7 +8259,7 @@ static unsigned
 test_man_remove_3rd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -8343,7 +8343,7 @@ static unsigned
 test_man_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -8421,7 +8421,7 @@ static unsigned
 test_man_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -8520,7 +8520,7 @@ static unsigned
 test_man_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -8630,7 +8630,7 @@ static unsigned
 test_man_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -8727,7 +8727,7 @@ static unsigned
 test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -8872,7 +8872,7 @@ static unsigned
 test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -9038,7 +9038,7 @@ static unsigned
 test_man_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -9165,7 +9165,7 @@ static unsigned
 test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -9292,7 +9292,7 @@ static unsigned
 test_man_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -9416,7 +9416,7 @@ static unsigned
 test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -9545,7 +9545,7 @@ static unsigned
 test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -9691,7 +9691,7 @@ static unsigned
 test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -9861,7 +9861,7 @@ static unsigned
 test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -10015,7 +10015,7 @@ static unsigned
 test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -10195,7 +10195,7 @@ static unsigned
 test_man_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -10324,7 +10324,7 @@ static unsigned
 test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -10462,7 +10462,7 @@ static unsigned
 test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -10614,7 +10614,7 @@ static unsigned
 test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -10777,7 +10777,7 @@ static unsigned
 test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -10940,7 +10940,7 @@ static unsigned
 test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -11107,7 +11107,7 @@ static unsigned
 test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -11269,7 +11269,7 @@ static unsigned
 test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -11449,7 +11449,7 @@ static unsigned
 test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -11664,7 +11664,7 @@ static unsigned
 test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -11861,7 +11861,7 @@ static unsigned
 test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -12089,7 +12089,7 @@ static unsigned
 test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -12221,7 +12221,7 @@ static unsigned
 test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -12393,7 +12393,7 @@ static unsigned
 test_man_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -12507,7 +12507,7 @@ static unsigned
 test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -12622,7 +12622,7 @@ static unsigned
 test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -12775,7 +12775,7 @@ static unsigned
 test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -13008,7 +13008,7 @@ static unsigned
 test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -13316,7 +13316,7 @@ static unsigned
 test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -13742,7 +13742,7 @@ static unsigned
 test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -13847,7 +13847,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
         STACK_ERROR
 
     /* Re-open the heap */
-    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 #endif /* QAK */
 /* QAK */
@@ -13958,7 +13958,7 @@ static unsigned
 test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -14111,7 +14111,7 @@ static unsigned
 test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -14345,7 +14345,7 @@ static unsigned
 test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -14956,7 +14956,7 @@ static unsigned
 test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -15027,7 +15027,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         FAIL_STACK_ERROR
 
     /* Re-open the heap */
-    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Check up on heap... */
@@ -15068,7 +15068,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     } /* end if */
 
     /* Close the fractal heap */
-    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
     fh = NULL;
 
@@ -15132,7 +15132,7 @@ static unsigned
 test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -15213,7 +15213,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
         FAIL_STACK_ERROR
 
     /* Re-open the heap */
-    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Check up on heap... */
@@ -15277,7 +15277,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Re-open the heap */
-            if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+            if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
                 FAIL_STACK_ERROR
 
             /* Remove object #2 from heap */
@@ -15313,7 +15313,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Re-open the heap */
-            if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+            if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
                 FAIL_STACK_ERROR
 
             /* Check up on heap... */
@@ -15350,7 +15350,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Re-open the heap */
-            if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+            if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
                 FAIL_STACK_ERROR
 
             /* Remove object #1 from heap */
@@ -15386,7 +15386,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
                 FAIL_STACK_ERROR
 
             /* Re-open the heap */
-            if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+            if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
                 FAIL_STACK_ERROR
 
             /* Check up on heap... */
@@ -15397,7 +15397,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     } /* end if */
 
     /* Close the fractal heap */
-    if(H5HF_close(fh, H5P_DATASET_XFER_DEFAULT) < 0)
+    if(H5HF_close(fh, H5AC_ind_read_dxpl_id) < 0)
         FAIL_STACK_ERROR
     fh = NULL;
 
@@ -15467,7 +15467,7 @@ static unsigned
 test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -15671,7 +15671,7 @@ static unsigned
 test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -15897,7 +15897,7 @@ static unsigned
 test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -16027,7 +16027,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Re-open the heap */
-    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Initialize data to overwrite with */
@@ -16094,7 +16094,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Re-open the heap */
-    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Verify changed objects */
@@ -16174,7 +16174,7 @@ static unsigned
 test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 {
     hid_t	file = -1;              /* File ID */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;     /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;     /* DXPL to use */
     char	filename[FHEAP_FILENAME_LEN];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
@@ -16259,7 +16259,7 @@ test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Re-open the heap */
-    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Remove one of the objects */
@@ -16289,7 +16289,7 @@ test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Re-open the heap */
-    if(NULL == (fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
+    if(NULL == (fh = H5HF_open(f, H5AC_ind_read_dxpl_id, fh_addr)))
         FAIL_STACK_ERROR
 
     /* Insert another object */
