@@ -94,9 +94,7 @@ static void test_array_compound_array()
             for(idxk = 0; idxk < ARRAY1_DIM1; idxk++)
 	    {
                 float temp = idxi * 10.0 + idxj * 2.5 + idxk;
-                //wdata[idxi][idxj].f[idxk]=(float)(idxi * 10.0F + idxj * 2.5F + idxk);
                 wdata[idxi][idxj].f[idxk] = temp;
-                //wdata[idxi][idxj].f[idxk] = static_cast<float>(temp);
 	    }
         } // end for
 

@@ -246,10 +246,10 @@ test_simple_io( H5File& file)
 	DataSet dataset (file.createDataSet (DSET_SIMPLE_IO_NAME, PredType::NATIVE_INT, space));
 
 	// Write the data to the dataset
-	dataset.write (static_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset.write(reinterpret_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Read the dataset back
-	dataset.read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset.read (reinterpret_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i = 0; i < 100; i++)
@@ -395,10 +395,10 @@ test_tconv( H5File& file)
 	DataSet dataset (file.createDataSet (DSET_TCONV_NAME, PredType::STD_I32LE, space));
 
 	// Write the data to the dataset
-	dataset.write (static_cast<void*>(out), PredType::STD_I32LE);
+	dataset.write (reinterpret_cast<void*>(out), PredType::STD_I32LE);
 
 	// Read data with byte order conversion
-	dataset.read (static_cast<void*>(in), PredType::STD_I32BE);
+	dataset.read (reinterpret_cast<void*>(in), PredType::STD_I32BE);
 
 	// Check
 	for (int i = 0; i < 1000000; i++) {
@@ -539,7 +539,7 @@ test_compression(H5File& file)
 	*/
 	SUBTEST("Compression (uninitialized read)");
 
-	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->read (reinterpret_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	for (i=0; i<size[0]; i++) {
 	    for (j=0; j<size[1]; j++) {
@@ -569,7 +569,7 @@ test_compression(H5File& file)
 	    }
 	}
 
-	dataset->write (static_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->write (reinterpret_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	PASSED();
 
@@ -580,7 +580,7 @@ test_compression(H5File& file)
 	SUBTEST("Compression (read)");
 
 	// Read the dataset back
-	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->read (reinterpret_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
@@ -609,10 +609,10 @@ test_compression(H5File& file)
 	    	points[i][j] = rand ();
 	    }
 	}
-	dataset->write (static_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->write (reinterpret_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Read the dataset back and check it
-	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->read (reinterpret_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
@@ -637,7 +637,7 @@ test_compression(H5File& file)
 	delete dataset;
 
 	dataset = new DataSet (file.openDataSet (DSET_COMPRESS_NAME));
-	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->read (reinterpret_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
@@ -667,8 +667,8 @@ test_compression(H5File& file)
 	    }
 	}
 	space1.selectHyperslab( H5S_SELECT_SET, hs_size, hs_offset );
-	dataset->write (static_cast<void*>(points), PredType::NATIVE_INT, space1, space1, xfer);
-	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, space1, space1, xfer);
+	dataset->write (reinterpret_cast<void*>(points), PredType::NATIVE_INT, space1, space1, xfer);
+	dataset->read (reinterpret_cast<void*>(check), PredType::NATIVE_INT, space1, space1, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i=0; i<hs_size[0]; i++) {
@@ -714,8 +714,8 @@ test_compression(H5File& file)
 	DataSpace space2 (2, size, NULL);
 	dataset = new DataSet (file.createDataSet (DSET_BOGUS_NAME, PredType::NATIVE_INT, space2, dscreatplist));
 
-	dataset->write (static_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
-	dataset->read (static_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->write (reinterpret_cast<void*>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+	dataset->read (reinterpret_cast<void*>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
 
 	// Check that the values read are the same as the values written
 	for (i = 0; i < size[0]; i++)
