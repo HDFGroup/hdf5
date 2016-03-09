@@ -2824,8 +2824,63 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native void H5Fclear_elink_file_cache(long file_id) throws HDF5LibraryException;
 
+    /**
+     * H5Fstart_swmr_write will activate SWMR writing mode for a file associated with file_id. This routine will
+     * prepare and ensure the file is safe for SWMR writing.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Fstart_swmr_write(long file_id) throws HDF5LibraryException;
+
+    /**
+     * H5Fstart_mdc_logging starts logging metadata cache events if logging was previously enabled.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Fstart_mdc_logging(long file_id) throws HDF5LibraryException;
+
+    /**
+     * H5Fstop_mdc_logging stops logging metadata cache events if logging was previously enabled and is currently ongoing.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Fstop_mdc_logging(long file_id) throws HDF5LibraryException;
+
+    /**
+     * H5Fget_mdc_logging_status gets the current metadata cache logging status.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     *
+     * @param mdc_logging_status, the status
+     *             mdc_logging_status[0] = is_enabled, whether logging is enabled
+     *             mdc_logging_status[1] = is_currently_logging, whether events are currently being logged
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - mdc_logging_status is null.
+     **/
+    public synchronized static native void H5Fget_mdc_logging_status(long file_id, boolean[] mdc_logging_status)
+            throws HDF5LibraryException, NullPointerException;
+
+
+
     // /////// unimplemented ////////
     // ssize_t H5Fget_file_image(hid_t file_id, void * buf_ptr, size_t buf_len);
+    // herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
     // ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects, H5F_sect_info_t *sect_info/*out*/);
 
     // /**
@@ -5579,6 +5634,45 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Pset_elink_file_cache_size(long fapl_id, int efc_size)
             throws HDF5LibraryException;
 
+    /**
+     * H5Pset_mdc_log_options sets metadata cache logging options.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     * @param is_enabled
+     *            IN: Whether logging is enabled.
+     * @param location
+     *            IN: Location of log in UTF-8/ASCII (file path/name) (On Windows, this must be ASCII).
+     * @param start_on_access
+     *            IN: Whether the logging begins as soon as the file is opened or created.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - location is null.
+     *
+     **/
+    public synchronized static native void H5Pset_mdc_log_options(long fapl_id, boolean is_enabled, String location, boolean start_on_access)
+            throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * H5Pget_mdc_log_options gets metadata cache logging options.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     * @param mdc_log_options, the options
+     *             mdc_logging_options[0] = is_enabled, whether logging is enabled
+     *             mdc_logging_options[1] = start_on_access, whether the logging begins as soon as the file is opened or created
+     *
+     * @return the location of log in UTF-8/ASCII (file path/name) (On Windows, this must be ASCII).
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native String H5Pget_mdc_log_options(long fapl_id, boolean[] mdc_log_options)
+            throws HDF5LibraryException;
+
     // Dataset creation property list (DCPL) routines //
 
     /**
@@ -6106,6 +6200,11 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library
      **/
     public synchronized static native long H5Pget_virtual_printf_gap(long dapl_id) throws HDF5LibraryException;
+
+    // public synchronized static native void H5Pset_append_flush(long plist_id, int ndims, long[] boundary, H5D_append_cb func, H5D_append_t udata) throws HDF5LibraryException;
+
+    // public synchronized static native void H5Pget_append_flush(long plist_id, int dims, long[] boundary, H5D_append_cb func, H5D_append_t udata) throws HDF5LibraryException;
+
 
     // Dataset xfer property list (DXPL) routines //
 

@@ -498,9 +498,9 @@ JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Tis_1variable_1str
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Tget_native_type
- * Signature: (JI)J
+ * Signature: (JI)I
  */
-JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Tget_1native_1type
+JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5__1H5Tget_1native_1type
   (JNIEnv *, jclass, jlong, jint);
 
 /*

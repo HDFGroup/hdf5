@@ -2670,6 +2670,8 @@
 ./java/src/hdf/hdf5lib/callbacks/H5A_iterate_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5D_iterate_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5D_iterate_t.java
+./java/src/hdf/hdf5lib/callbacks/H5D_append_cb.java
+./java/src/hdf/hdf5lib/callbacks/H5D_append_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5E_walk_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5E_walk_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5L_iterate_cb.java
@@ -2872,6 +2874,7 @@
 ./java/test/TestH5Fparams.java
 ./java/test/TestH5Fbasic.java
 ./java/test/TestH5F.java
+./java/test/TestH5Fswmr.java
 ./java/test/TestH5Gbasic.java
 ./java/test/TestH5G.java
 ./java/test/TestH5Giterate.java

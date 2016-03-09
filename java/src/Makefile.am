@@ -47,6 +47,8 @@ hdf5_java_JAVA =  \
 	${pkgpath}/callbacks/Callbacks.java \
 	${pkgpath}/callbacks/H5A_iterate_cb.java \
 	${pkgpath}/callbacks/H5A_iterate_t.java \
+	${pkgpath}/callbacks/H5D_append_cb.java \
+	${pkgpath}/callbacks/H5D_append_t.java \
 	${pkgpath}/callbacks/H5D_iterate_cb.java \
 	${pkgpath}/callbacks/H5D_iterate_t.java \
 	${pkgpath}/callbacks/H5E_walk_cb.java \
