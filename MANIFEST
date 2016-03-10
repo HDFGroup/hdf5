@@ -2617,11 +2617,14 @@
 # java
 ./java/COPYING
 ./java/Makefile.am
+./java/Makefile.in
 ./java/CMakeLists.txt
 
 ./java/src/Makefile.am
+./java/src/Makefile.in
 ./java/src/CMakeLists.txt
 ./java/src/jni/Makefile.am
+./java/src/jni/Makefile.in
 ./java/src/jni/CMakeLists.txt
 ./java/src/jni/exceptionImp.c
 ./java/src/jni/exceptionImp.h
@@ -2736,9 +2739,11 @@
 ./java/src/hdf/hdf5lib/HDFNativeData.java
 
 ./java/examples/Makefile.am
+./java/examples/Makefile.in
 ./java/examples/CMakeLists.txt
 
 ./java/examples/intro/Makefile.am
+./java/examples/intro/Makefile.in
 ./java/examples/intro/CMakeLists.txt
 ./java/examples/intro/runExample.sh.in
 ./java/examples/intro/H5_CreateAttribute.java
@@ -2750,6 +2755,7 @@
 ./java/examples/intro/H5_ReadWrite.java
 
 ./java/examples/groups/Makefile.am
+./java/examples/groups/Makefile.in
 ./java/examples/groups/CMakeLists.txt
 ./java/examples/groups/runExample.sh.in
 ./java/examples/groups/H5Ex_G_Create.java
@@ -2764,6 +2770,7 @@
 ./java/examples/groups/h5ex_g_visit.h5
 
 ./java/examples/datasets/Makefile.am
+./java/examples/datasets/Makefile.in
 ./java/examples/datasets/CMakeLists.txt
 ./java/examples/datasets/runExample.sh.in
 ./java/examples/datasets/H5Ex_D_Alloc.java
@@ -2786,6 +2793,7 @@
 ./java/examples/datasets/H5Ex_D_Soint.java
 
 ./java/examples/datatypes/Makefile.am
+./java/examples/datatypes/Makefile.in
 ./java/examples/datatypes/CMakeLists.txt
 ./java/examples/datatypes/runExample.sh.in
 ./java/examples/datatypes/H5Ex_T_Array.java
@@ -2859,6 +2867,7 @@
 ./java/examples/testfiles/examples.datatypes.H5Ex_T_VLString.txt
 
 ./java/test/Makefile.am
+./java/test/Makefile.in
 ./java/test/CMakeLists.txt
 ./java/test/junit.sh.in
 ./java/test/JUnit-interface.txt
