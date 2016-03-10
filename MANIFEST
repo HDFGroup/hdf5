@@ -425,7 +425,7 @@
 
 ./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
-./release_docs/HISTORY-1_9.txt
+./release_docs/HISTORY-1_8_0-1_10_0.txt
 ./release_docs/INSTALL
 ./release_docs/INSTALL_CMake.txt
 ./release_docs/INSTALL_Cygwin.txt
