@@ -321,6 +321,7 @@ struct H5F_t {
     char                *subfiling_filename; /* name of the subfile this process is accessing */
     MPI_Comm            subfiling_comm; /* the subfiling communicator for the process accessing the subfile */
     MPI_Info            subfiling_info; /* the info object for the process accessing the subfile */
+    H5F_t               *subfile;
 #endif /* H5_HAVE_PARALLEL */
 };
 

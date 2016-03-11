@@ -76,7 +76,7 @@ typedef struct H5F_olist_t {
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
     const char *name, char ** /*out*/ actual_name);/* Declare a free list to manage the H5F_t struct */
-
+static herr_t H5F__open_subfile(H5F_t *file, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id);
 
 /*********************/
 /* Package Variables */
@@ -1148,6 +1148,12 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if(H5F_build_actual_name(file, a_plist, name, &file->actual_name) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build actual name")
 
+    /* create or open the subfile if subfiling is enabled */
+    if(H5F__open_subfile(file, flags, fcpl_id, fapl_id, dxpl_id) < 0)
+        {
+            H5Eprint2(H5E_DEFAULT, stderr);
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create sub-file")
+                }
     /* Success */
     ret_value = file;
 
@@ -1288,6 +1294,13 @@ H5F_close(H5F_t *f)
 
     /* Reset the file ID for this file */
     f->file_id = -1;
+
+#ifdef H5_HAVE_PARALLEL
+    /* if subfiling is enabled, close the subfile */
+    if(f->subfile)
+        if(H5F_try_close(f->subfile) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close subfile")
+#endif /* H5_HAVE_PARALLEL */
 
     /* Attempt to close the file/mount hierarchy */
     if(H5F_try_close(f) < 0)
@@ -2176,5 +2189,73 @@ H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* H5F_set_coll_md_read() */
-#endif /* H5_HAVE_PARALLEL */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__open_subfile
+ *
+ * Purpose:     Create the subfile for the calling process
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi; March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__open_subfile(H5F_t *file, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
+{
+    H5P_genplist_t *plist;
+    const char *subfile_name = NULL;
+    hid_t subfile_fapl_id = H5I_INVALID_HID;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Get the property list structure */
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* get the subfile selection of calling process */
+    if(H5P_peek(plist, H5F_ACS_SUBFILING_FILENAME_NAME, &subfile_name) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling selection")
+
+    if(subfile_name) {
+        H5P_genplist_t *new_plist;
+        MPI_Comm subfile_comm;
+        MPI_Info subfile_info;
+        H5FD_mpio_fapl_t fa;
+
+        /* copy the fapl id of the main file to create the subfile with */
+        if((subfile_fapl_id = H5P_create_id(H5P_CLS_FILE_ACCESS_g, FALSE)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list")
+
+        /* retrieve the communicator and the info object to create the subfile with */
+        if(H5P_get(plist, H5F_ACS_SUBFILE_COMM_NAME, &subfile_comm) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling communicator")
+        if(H5P_get(plist, H5F_ACS_SUBFILE_INFO_NAME, &subfile_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling info object")
+
+        /* Get the property list structure */
+        if(NULL == (new_plist = H5P_object_verify(subfile_fapl_id, H5P_FILE_ACCESS)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        /* Initialize driver specific properties */
+        fa.comm = subfile_comm;
+        fa.info = subfile_info;
+        if(H5P_set_driver(new_plist, H5FD_MPIO, &fa) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get driver info")
+
+        /* create the subfile */
+        if(NULL == (file->subfile = H5F_open(subfile_name, flags, fcpl_id, subfile_fapl_id, dxpl_id)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create sub-file")
+    }
+
+done:
+    if(subfile_fapl_id != H5I_INVALID_HID && H5I_dec_ref(subfile_fapl_id) < 0)
+        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "unable to decrement ref count on property list")
+        
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__open_subfile() */
+#endif /* H5_HAVE_PARALLEL */

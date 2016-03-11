@@ -79,22 +79,31 @@ subfiling_api(void)
     ret = H5Pset_num_subfiles(fcpl_id, (unsigned)mpi_size);
     VRFY((ret == 0), "");
 
-    sprintf(subfile_name, "subfile_%d", mpi_rank);
+    sprintf(subfile_name, "subfile_%d.h5", mpi_rank);
     /* set number of process groups to be equal to the mpi size */
-    ret = H5Pset_subfiling_access(fapl_id, (unsigned)mpi_size, subfile_name, MPI_COMM_SELF, MPI_INFO_NULL);
-    VRFY((ret == 0), "");
+    ret = H5Pset_subfiling_access(fapl_id, (unsigned)mpi_size, subfile_name, 
+                                  MPI_COMM_SELF, MPI_INFO_NULL);
+    VRFY((ret == 0), "H5Pset_subfiling_access succeeded");
 
+    /* create the file. This should also create the subfiles */
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
+    /* close the file and re-open it to make sure the creation parameters are preserved */
+    ret = H5Fclose(fid);
+    VRFY((ret == 0), "");
+    fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+    VRFY((fid >= 0), "H5Fopen succeeded");
+
+    /* close the access and creation plists and reopen them to check the property values */
     ret = H5Pclose(fapl_id);
     VRFY((ret == 0), "");
     ret = H5Pclose(fcpl_id);
     VRFY((ret == 0), "");
 
+    /* check the file access properties */
     fapl_id = H5Fget_access_plist(fid);
     VRFY((fapl_id >= 0), "");
-
     {
         unsigned num_groups;
         MPI_Comm get_comm;
@@ -115,6 +124,7 @@ subfiling_api(void)
         HDfree(temp_name);
     }
 
+    /* check the file creation properties */
     fcpl_id = H5Fget_create_plist(fid);
     VRFY((fcpl_id >= 0), "");
     {
@@ -163,6 +173,7 @@ subfiling_api(void)
     did = H5Dcreate2(fid, DATASET1, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
     VRFY((did >= 0), "");
 
+    /* check the dataset creation properties for this process */
     {
         hid_t temp_sid;
 
@@ -175,6 +186,7 @@ subfiling_api(void)
         ret = H5Sclose(temp_sid);
         VRFY((ret == 0), "");
     }
+
     ret = H5Pclose(dcpl_id);
     VRFY((ret == 0), "");
 
