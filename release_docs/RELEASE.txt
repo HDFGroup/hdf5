@@ -5,11 +5,11 @@ HDF5 version 1.10.0-pre1 currently under development
 INTRODUCTION
 
 This document describes the differences between HDF5-1.8.* and
-HDF5 1.10.0-alpha1 release, and contains information on the platforms
-tested and known problems in HDF5-1.10.0-alpha1.
+HDF5 1.10.0 release, and contains information on the platforms
+tested and known problems in HDF5-1.10.0.
 
 
-Links to HDF5 1.10.0-alpha* source code can be found on The HDF Group's
+Links to HDF5 1.10.0 source code can be found on The HDF Group's
 development FTP server at the following location:
      http://www.hdfgroup.org/HDF5/release/obtain5110.html
 User documentation be accessed directly at this location:
@@ -34,7 +34,7 @@ CONTENTS
 
 New Features
 ============
-This alpha1 release supports the following features:
+This release supports the following features:
 
     Parallel Library:
     -----------------
@@ -115,7 +115,7 @@ This alpha1 release supports the following features:
     -------------
     See http://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesSwmrDocs.html#Tools
 
-Issues Addressed in this Release 
+Issues Addressed in this Release since alpha0 
 ================================
     - h5format_convert tool didn't downgrade version of the superblock. Fixed. See
       Known Problems section.  EIP 2016-01-11.
