@@ -138,10 +138,10 @@ They are built with the configure process unless specified otherwise.
     (NASA G-ADA)                  xlC/xlC_r 10.1.0.5
                                   xlf90/xlf90_r 12.1.0.6
 
-    Linux 2.6.32-573.3.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 2.6.32-573.18.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (platypus)                       Version 4.4.7 20120313
-                                     Version 4.8.4, Version 5.2.0
+    (mayll/platypus)                 Version 4.4.7 20120313 (Red Hat 4.4.7-16)
+                                     Version 4.9.3, Version 5.2.0
                                   PGI C, Fortran, C++ for 64-bit target on
                                   x86-64;
                                       Version 15.7-0
@@ -156,10 +156,10 @@ They are built with the configure process unless specified otherwise.
                                   IBM XL C/C++ V13.1
                                   IBM XL Fortran V15.1
 
-    Linux 3.10.0-229.14.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 3.10.0-327.10.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (kituo/moohan)                  Version 4.8.3 20140911 (Red Hat 4.8.3-9)
-                                    Version 5.2.0
+    (kituo/moohan)                  Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+                                    Version 4.9.3, Version 5.2.0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 15.0.3.187 Build 20150407
@@ -195,6 +195,10 @@ They are built with the configure process unless specified otherwise.
 
     Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.0 from Xcode 7.0.0
     64-bit    			  gfortran GNU Fortran (GCC) 4.9.2
+    (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
+
+    Mac OS X El Capitan 10.11.3     Apple clang/clang++ version 7.0.2 from Xcode 7.0.2
+    64-bit    			  gfortran GNU Fortran (GCC) 5.2.0
     (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
 
 
