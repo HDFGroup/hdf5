@@ -228,7 +228,7 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
         } else if(bw < H5_TB) {
             sprintf(buf, "%05.4f", bw / H5_GB);
             HDstrcpy(buf+5, " GB/s");
-        } else if(bw < H5_EB) {
+        } else if(bw < H5_PB) {
             sprintf(buf, "%05.4f", bw / H5_TB);
             HDstrcpy(buf+5, " TB/s");
         } else {
