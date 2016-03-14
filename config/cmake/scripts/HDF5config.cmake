@@ -1,13 +1,13 @@
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
 ### BUILD_GENERATOR required [Unix, VS2015, VS201564, VS2013, VS201364, VS2012, VS201264] ###
-### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf519.log        ###
+### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf5.log          ###
 #############################################################################################
 
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 ############################################################################
 # Usage:
-#     ctest -S HDF518config.cmake,OPTION=VALUE -C Release -VV -O test.log
+#     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log
 # where valid options for OPTION are:
 #     BUILD_GENERATOR - The cmake build generator:
 #            Unix    * Unix Makefiles
@@ -23,20 +23,22 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 #     CTEST_SOURCE_NAME  -  source folder
 #     STATIC_LIBRARIES  -  Build/use static libraries
 #     FORTRAN_LIBRARIES -  Build/use fortran libraries
+#     JAVA_LIBRARIES -  Build/use java libraries
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
-set(CTEST_SOURCE_VERSION 1.9)
-set(CTEST_SOURCE_VERSEXT "")
+set(CTEST_SOURCE_VERSION 1.10.0)
+set(CTEST_SOURCE_VERSEXT "-pre1")
 
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
-#INSTALLDIR - HDF5-1.9 root folder
+#INSTALLDIR - HDF5-1.10.0 root folder
 #CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF5-1.9
+#CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
 #STATIC_LIBRARIES - Default is YES
 #FORTRAN_LIBRARIES - Default is NO
+#JAVA_LIBRARIES - Default is NO
 #NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
 if(DEFINED CTEST_SCRIPT_ARG)
     # transform ctest script arguments of the form
@@ -88,9 +90,18 @@ if(NOT DEFINED CTEST_SOURCE_NAME)
 endif()
 if(NOT DEFINED STATIC_LIBRARIES)
     set(STATICLIBRARIES "YES")
+else()
+    set(STATICLIBRARIES "NO")
 endif()
 if(NOT DEFINED FORTRAN_LIBRARIES)
     set(FORTRANLIBRARIES "NO")
+else()
+    set(FORTRANLIBRARIES "YES")
+endif()
+if(NOT DEFINED JAVA_LIBRARIES)
+    set(JAVALIBRARIES "NO")
+else()
+    set(JAVALIBRARIES "YES")
 endif()
 
 set(CTEST_BINARY_NAME "build")
@@ -199,6 +210,12 @@ if(${FORTRANLIBRARIES})
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
 else()
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+endif()
+####      java       ####
+if(${JAVALIBRARIES})
+  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_JAVA:BOOL=ON")
+else()
+  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_JAVA:BOOL=OFF")
 endif()
 
 ### disable test program builds
