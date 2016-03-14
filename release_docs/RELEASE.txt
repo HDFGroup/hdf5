@@ -36,6 +36,48 @@ New Features
 ============
 This release supports the following features:
 
+    Configuration
+    -------------
+
+    - Autotools configuration has been extensively reworked
+
+    The autotools configuration options have been updated to allow more fine-
+    grained control of the build options and to correct some bugs. See
+    configure --help for comprehensive information on each option.
+
+    Specific changes:
+
+    * --enable-debug and --enable-production are no longer accepted. Use
+      --enable-build-mode=(debug | production) instead. These set appropriate
+      defaults for the other configuration options (symbols, optimization,
+      etc.). These defaults can be overridden by the user.
+
+    * Extra debug output messages are no longer enabled with
+      --enable-debug=<package list>. Use --enable-internal-debug=<pkg list>
+      instead.
+
+    * A new --enable-symbols option allows symbols to be generated
+      independently of the build mode.
+
+    * A new --enable-asserts option sets/unsets NDEBUG. This is independent of
+      the build mode. This also enables some extra low-overhead debug checks
+      in the library.
+
+    * A new --enable-profiling option sets profiling flags. This is
+      independent of the build mode.
+
+    * A new --enable-optimization option sets the optimization level. This is
+      independent of the build mode.
+
+    * Many of these options can take a flags string that will be used to
+      build the library. This can be useful for specifying custom optimization
+      flags (e.g., -Os, -Ofast), etc.
+
+    * gnu C++ and Fortran use configure sub-files that update the build flags
+      and turn on warnings. The increase in warnings when building these
+      wrapper libraries is due to these flag changes, not a decrease in code
+      quality.
+
     Parallel Library:
     -----------------
     - Collective Metadata I/O
