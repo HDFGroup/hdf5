@@ -7,7 +7,7 @@
 cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 ############################################################################
 # Usage:
-#     ctest -S HDF518config.cmake,OPTION=VALUE -C Release -VV -O test.log
+#     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log
 # where valid options for OPTION are:
 #     BUILD_GENERATOR - The cmake build generator:
 #            Unix    * Unix Makefiles
