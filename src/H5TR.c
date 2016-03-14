@@ -290,28 +290,29 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5TRcreate(hid_t file_id, hid_t rc_id, uint64_t trans_num)
+H5TRcreate(hid_t obj_id, hid_t rc_id, uint64_t trans_num)
 {
-    H5VL_object_t *file = NULL;
+    H5VL_object_t *obj = NULL;
     H5TR_t *tr = NULL;
     H5RC_t *rc = NULL;
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("i", "iiIl", file_id, rc_id, trans_num);
+    H5TRACE3("i", "iiIl", obj_id, rc_id, trans_num);
 
-    /* get the file object */
-    if(NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    /* get the location object */
+    if(NULL == (obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
     /* get the Read Context object */
     if(NULL == (rc = (H5RC_t *)H5I_object_verify(rc_id, H5I_RC)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a read context ID")
 
     /* create a new transaction object */
-    if(NULL == (tr = H5TR_create(file->vol_obj, rc, trans_num)))
+    if(NULL == (tr = H5TR_create(obj->vol_obj, rc, trans_num)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create transaction object")
 
-    tr->vol_cls = file->vol_info->vol_cls;
+    tr->vol_cls = obj->vol_info->vol_cls;
 
     /* Get an atom for the TR */
     if((ret_value = H5I_register(H5I_TR, tr, TRUE)) < 0)
@@ -336,8 +337,9 @@ done:
  *-------------------------------------------------------------------------
  */
 H5TR_t *
-H5TR_create(void *file, H5RC_t *rc, uint64_t trans_num)
+H5TR_create(void *_obj, H5RC_t *rc, uint64_t trans_num)
 {
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     H5TR_t *tr = NULL;
     H5TR_t *ret_value = NULL;          /* Return value */
 
@@ -347,7 +349,7 @@ H5TR_create(void *file, H5RC_t *rc, uint64_t trans_num)
     if(NULL == (tr = H5FL_CALLOC(H5TR_t)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate top transaction structure")
 
-    tr->file = (H5VL_iod_file_t *)file;
+    tr->file = obj->file;
     tr->c_version = rc->c_version;
     tr->trans_num = trans_num;
 

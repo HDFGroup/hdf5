@@ -278,24 +278,24 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5RCcreate(hid_t file_id, uint64_t c_version)
+H5RCcreate(hid_t obj_id, uint64_t c_version)
 {
-    H5VL_object_t *file = NULL;
+    H5VL_object_t *obj = NULL;
     H5RC_t *rc = NULL;
     hid_t ret_value;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("i", "iIl", file_id, c_version);
+    H5TRACE2("i", "iIl", obj_id, c_version);
 
-    /* get the file object */
-    if(NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    /* get the location object */
+    if(NULL == (obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* create a new read context object */
-    if(NULL == (rc = H5RC_create(file->vol_obj, c_version)))
+    if(NULL == (rc = H5RC_create(obj->vol_obj, c_version)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context")
 
-    rc->vol_cls = file->vol_info->vol_cls;
+    rc->vol_cls = obj->vol_info->vol_cls;
 
     /* Get an atom for the RC */
     if((ret_value = H5I_register(H5I_RC, rc, TRUE)) < 0)
@@ -320,8 +320,9 @@ done:
  *-------------------------------------------------------------------------
  */
 H5RC_t *
-H5RC_create(void *file, uint64_t c_version)
+H5RC_create(void *_obj, uint64_t c_version)
 {
+    H5VL_iod_object_t *obj = (H5VL_iod_object_t *)_obj;
     H5RC_t *rc = NULL;
     H5RC_t *ret_value = NULL;          /* Return value */
 
@@ -331,7 +332,7 @@ H5RC_create(void *file, uint64_t c_version)
     if(NULL == (rc = H5FL_CALLOC(H5RC_t)))
 	HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate read context structure")
 
-    rc->file = (H5VL_iod_file_t *)file;
+    rc->file = obj->file;
     rc->c_version = c_version;
 
     rc->req_info.request = NULL;
@@ -386,10 +387,10 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5RCacquire(hid_t file_id, uint64_t *c_version, 
+H5RCacquire(hid_t obj_id, uint64_t *c_version, 
             hid_t rcapl_id, hid_t estack_id)
 {
-    H5VL_object_t *file = NULL;
+    H5VL_object_t *obj = NULL;
     H5RC_t *rc = NULL;
     H5_priv_request_t  *request = NULL; /* private request struct inserted in event queue */
     void **req = NULL; /* pointer to plugin generate requests (Stays NULL if plugin does not support async */
@@ -397,11 +398,11 @@ H5RCacquire(hid_t file_id, uint64_t *c_version,
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("i", "i*Ilii", file_id, c_version, rcapl_id, estack_id);
+    H5TRACE4("i", "i*Ilii", obj_id, c_version, rcapl_id, estack_id);
 
-    /* get the file object */
-    if(NULL == (file = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    /* get the location object */
+    if(NULL == (obj = H5VL_get_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get correct property list */
     if(H5P_DEFAULT == rcapl_id)
@@ -413,10 +414,10 @@ H5RCacquire(hid_t file_id, uint64_t *c_version,
     /* create a new read context object with the provided container
        version. The container version associated with the RC object
        might be changed if the version is not available for read. */
-    if(NULL == (rc = H5RC_create(file->vol_obj, *c_version)))
+    if(NULL == (rc = H5RC_create(obj->vol_obj, *c_version)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context")
 
-    rc->vol_cls = file->vol_info->vol_cls;
+    rc->vol_cls = obj->vol_info->vol_cls;
 
     /* Get an atom for the RC*/
     if((rc_id = H5I_register(H5I_RC, rc, TRUE)) < 0)
@@ -430,7 +431,7 @@ H5RCacquire(hid_t file_id, uint64_t *c_version,
         request->vol_cls = rc->vol_cls;
     }
 
-    if(H5VL_iod_rc_acquire((H5VL_iod_file_t *)file->vol_obj, rc, c_version, rcapl_id, req) < 0)
+    if(H5VL_iod_rc_acquire(obj->vol_obj, rc, c_version, rcapl_id, req) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to request a read context on container");
 
     if(request && *req)

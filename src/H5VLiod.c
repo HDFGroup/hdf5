@@ -9002,7 +9002,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5VL_iod_rc_acquire(H5VL_iod_file_t *file, H5RC_t *rc, uint64_t *c_version,
+H5VL_iod_rc_acquire(H5VL_iod_object_t *obj, H5RC_t *rc, uint64_t *c_version,
                     hid_t rcapl_id, void **req)
 {
     rc_acquire_in_t input;
@@ -9012,7 +9012,7 @@ H5VL_iod_rc_acquire(H5VL_iod_file_t *file, H5RC_t *rc, uint64_t *c_version,
     FUNC_ENTER_NOAPI_NOINIT
 
     /* set the input structure for the HG encode routine */
-    input.coh = file->remote_file.coh;
+    input.coh = obj->file->remote_file.coh;
     input.c_version = *c_version;
     input.rcapl_id = rcapl_id;
 
@@ -9029,7 +9029,7 @@ H5VL_iod_rc_acquire(H5VL_iod_file_t *file, H5RC_t *rc, uint64_t *c_version,
 #endif
 
     if(H5VL__iod_create_and_forward(H5VL_RC_ACQUIRE_ID, HG_RC_ACQUIRE, 
-                                    (H5VL_iod_object_t *)file, 0, 0, NULL,
+                                    obj, 0, 0, NULL,
                                     NULL, &input, &rc_info->result, rc_info, req) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "failed to create and ship VOL op");
 

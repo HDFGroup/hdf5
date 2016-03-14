@@ -54,9 +54,9 @@ extern "C" {
 /*********************/
 
 /* API wrappers */
-H5_DLL hid_t H5RCcreate(hid_t file_id, uint64_t container_version);
+H5_DLL hid_t H5RCcreate(hid_t obj_id, uint64_t container_version);
 H5_DLL herr_t H5RCget_version(hid_t rcxt_id, uint64_t *c_version);
-H5_DLL hid_t H5RCacquire(hid_t file_id, /*IN/OUT*/ uint64_t *container_version, 
+H5_DLL hid_t H5RCacquire(hid_t obj_id, /*IN/OUT*/ uint64_t *container_version, 
                          hid_t rcapl_id, hid_t estack_id);
 H5_DLL herr_t H5RCrelease(hid_t rcxt_id , hid_t estack_id);
 H5_DLL herr_t H5RCpersist(hid_t rcxt_id, hid_t estack_id);
