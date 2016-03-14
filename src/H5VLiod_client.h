@@ -529,7 +529,7 @@ H5_DLL void * H5VL_iod_obj_open_token(const void *token, H5TR_t *tr,
 H5_DLL herr_t H5VL_iod_get_token(void *obj, void *token, size_t *token_size);
 
 /* private routines for RC */
-H5_DLL herr_t H5VL_iod_rc_acquire(H5VL_iod_file_t *file, H5RC_t *rc, 
+H5_DLL herr_t H5VL_iod_rc_acquire(H5VL_iod_object_t *obj, H5RC_t *rc, 
                                   uint64_t *c_version, hid_t rcapl_id, void **req);
 H5_DLL herr_t H5VL_iod_rc_release(H5RC_t *rc, void **req);
 H5_DLL herr_t H5VL_iod_rc_persist(H5RC_t *rc, void **req);
