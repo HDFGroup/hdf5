@@ -35,6 +35,10 @@ H5_HLDLL herr_t  H5DSattach_scale( hid_t did,
                         hid_t dsid,
                         unsigned int idx);
 
+
+H5_HLDLL herr_t  H5DSattach_scale_ff(hid_t did,hid_t dsid,
+			   unsigned int idx, hid_t rc_id, hid_t tr_id,  hid_t estack_id);
+
 H5_HLDLL herr_t  H5DSdetach_scale( hid_t did,
                         hid_t dsid,
                         unsigned int idx);
@@ -43,7 +47,7 @@ H5_HLDLL herr_t  H5DSset_scale( hid_t dsid,
                      const char *dimname);
 
 H5_HLDLL herr_t H5DSset_scale_ff(hid_t dsid,
-				 const char *dimname, hid_t rc_id, hid_t tr_id, hid_t estack_id);
+				 const char *dimname, uint64_t version, hid_t rc_id, hid_t tr_id, hid_t estack_id);
 
 H5_HLDLL int H5DSget_num_scales( hid_t did,
                        unsigned int dim);
@@ -62,6 +66,8 @@ H5_HLDLL ssize_t H5DSget_scale_name( hid_t did,
                            size_t size);
 
 H5_HLDLL htri_t H5DSis_scale( hid_t did);
+
+H5_HLDLL htri_t H5DSis_scale_ff( hid_t did, hid_t rc_id, hid_t estack_id);
 
 H5_HLDLL herr_t  H5DSiterate_scales( hid_t did,
                           unsigned int dim,

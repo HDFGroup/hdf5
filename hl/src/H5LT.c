@@ -3758,17 +3758,15 @@ out:
 */
 herr_t H5LT_set_attribute_string_ff(hid_t dset_id,
                                  const char *name,
-                                 const char *buf, hid_t rc_id, hid_t tr_id, hid_t estack_id  )
+				    const char *buf, hid_t rc_id, hid_t tr_id, hid_t estack_id, int has_attr  )
 {
     hid_t   tid;
     hid_t   sid = -1;
     hid_t   aid = -1;
-    int     has_attr;
     size_t  size;
 
-    /* verify if the attribute already exists */
-    has_attr = H5LT_find_attribute_ff(dset_id,name, rc_id, estack_id);
 
+    printf("a \n");
     /* the attribute already exists, delete it */
     if(has_attr == 1)
       if(H5Adelete_ff(dset_id, name, tr_id, estack_id) < 0)
@@ -3782,7 +3780,7 @@ herr_t H5LT_set_attribute_string_ff(hid_t dset_id,
         return FAIL;
 
     size = HDstrlen(buf) + 1; /* extra null term */
-
+    printf("b \n");
     if(H5Tset_size(tid,(size_t)size) < 0)
         goto out;
 
@@ -3792,17 +3790,17 @@ herr_t H5LT_set_attribute_string_ff(hid_t dset_id,
     if((sid = H5Screate(H5S_SCALAR)) < 0)
         goto out;
 
-
+    printf("c \n");
     /*-------------------------------------------------------------------------
     * create and write the attribute
     *-------------------------------------------------------------------------
     */
     if((aid = H5Acreate_ff(dset_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, tr_id, estack_id)) < 0)
         goto out;
-
+printf("d \n");
     if(H5Awrite_ff(aid, tid, buf, tr_id, estack_id) < 0)
         goto out;
-
+printf("c \n");
     if(H5Aclose_ff(aid, estack_id) < 0)
         goto out;
 

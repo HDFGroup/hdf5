@@ -45,7 +45,7 @@ H5_HLDLL herr_t  H5LT_set_attribute_string( hid_t dset_id,
 
 H5_HLDLL herr_t H5LT_set_attribute_string_ff(hid_t dset_id,
                                  const char *name,
-					     const char *buf, hid_t rc_id, hid_t tr_id, hid_t estack_id  );
+					     const char *buf, hid_t rc_id, hid_t tr_id, hid_t estack_id, int has_attr  );
 
 H5_HLDLL herr_t H5LT_find_attribute( hid_t loc_id, const char *name );
 

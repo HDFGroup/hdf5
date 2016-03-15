@@ -47,7 +47,7 @@
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Qprivate.h"		/* Query        			*/
 #include "H5Tpkg.h"             /* Datatype access			*/
-#include "H5VLprivate.h"	/* VOL plugins				*/
+
 #include "H5VLiod.h"		/* IOD plugin - tmp      		*/
 #include "H5VLiod_client.h"	/* Client IOD - tmp			*/
 #include "H5VLiod_server.h"	/* Server IOD - tmp			*/
@@ -57,7 +57,7 @@
 /****************/
 /* Local Macros */
 /****************/
-
+H5FL_EXTERN(H5RC_t);
 
 /******************/
 /* Local Typedefs */
@@ -284,9 +284,22 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
     if(rcxt_id) {
         H5RC_t *rc = NULL;
 
+
+    /* allocate read context struct */
+    if(NULL == (rc = H5FL_CALLOC(H5RC_t)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate read context structure")
+
+    rc->file = file;
+    rc->c_version = IOD_TID_UNKNOWN;
+
+    rc->req_info.request = NULL;
+    rc->req_info.head = NULL;
+    rc->req_info.tail = NULL;
+    rc->req_info.num_req = 0;
+
         /* create a new read context object (if user requested it) */
-        if(NULL == (rc = H5RC_create(file, IOD_TID_UNKNOWN)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context");
+        /*if(NULL == (rc = H5RC_create(file, IOD_TID_UNKNOWN)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "unable to create read context");*/
 
         rc->vol_cls = vol_info->vol_cls;
 

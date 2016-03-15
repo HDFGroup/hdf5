@@ -945,6 +945,16 @@ H5VL_iod_server_attr_exists_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
             HGOTO_ERROR_FF(iod_ret, "can't open scratch pad");
     }
     else {
+
+        /* if attribute KV does not exist, return false*/
+        if(IOD_OBJ_INVALID == input->loc_attrkv_id) {
+	  printf("invalid \n");
+	  //ret = FALSE;
+	  //HGOTO_DONE(SUCCEED);
+        }
+
+
+
         /* open the attribute KV  */
         iod_ret = iod_obj_open_read(coh, input->loc_attrkv_id, rtid, NULL, &attr_kv_oh, NULL);
         if(iod_ret < 0)
