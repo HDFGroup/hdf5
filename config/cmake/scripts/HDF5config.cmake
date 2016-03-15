@@ -213,9 +213,9 @@ else()
 endif()
 ####      java       ####
 if(${JAVALIBRARIES})
-  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_JAVA:BOOL=ON")
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
 else()
-  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_JAVA:BOOL=OFF")
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
 endif()
 
 ### disable test program builds
