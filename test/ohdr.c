@@ -19,7 +19,6 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 #include "H5Iprivate.h"
-
 /*
  * This file needs to access private datatypes from the H5O package.
  * This file also needs to access the object header testing code.
@@ -471,7 +470,18 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
     hid_t fid_bogus = -1;	/* bogus file ID */
     hid_t gid_bogus = -1;	/* bogus group ID */
     hid_t loc_bogus = -1;	/* location: bogus file or group ID */
-    const char *testfile = H5_get_srcdir_filename(FILE_BOGUS);
+    char testfile[256];
+
+    /* create a different name for a local copy of the data file to be 
+       opened with rd/wr file permissions in case build and test are 
+       done in the source directory. */
+    HDstrncpy(testfile, FILE_BOGUS, strlen(FILE_BOGUS));
+    testfile[strlen(FILE_BOGUS)]='\0';
+    HDstrncat(testfile, ".copy", 5);
+
+    /* Make a copy of the data file from svn. */
+    if(h5_make_local_copy(FILE_BOGUS, testfile) < 0)
+      FAIL_STACK_ERROR
 
     TESTING("object with unknown header message and no flags set");
 
