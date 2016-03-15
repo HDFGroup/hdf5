@@ -32,6 +32,7 @@ LS='ls'
 AWK='awk'
 
 nerrors=0
+verbose=yes
 
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
