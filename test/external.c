@@ -27,6 +27,7 @@ const char *FILENAME[] = {
     "extern_3",
     "extern_4",
     "extern_dir/file_1",
+    "extern_5",
     NULL
 };
 
@@ -825,6 +826,7 @@ test_read_file_set(hid_t fapl)
 
  error:
     H5E_BEGIN_TRY {
+        H5Gclose(grp);
         H5Dclose(dset);
         H5Pclose(dcpl);
         H5Sclose(space);
@@ -1407,13 +1409,110 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    test_h5d_get_access_plist
  *
- * Purpose:	Runs external dataset tests.
+ * Purpose:     Ensure that H5Dget_access_plist returns correct values.
  *
- * Return:	Success:	exit(0)
+ * Return:      Success:    0
+ *              Failure:    1
  *
- *		Failure:	exit(non-zero)
+ * Programmer:  Dana Robinson
+ *              March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_h5d_get_access_plist(hid_t fapl_id)
+{
+    hid_t	fid = -1;           /* file to write to                     */
+    hid_t	dcpl_id = -1;       /* dataset creation properties          */
+    hid_t	dapl_id = -1;       /* dataset access properties            */
+    hid_t	sid = -1;           /* data space                           */
+    hid_t	did = -1;           /* dataset                              */
+    hsize_t dims = 0;           /* dataset size                         */
+    char    *buffer = NULL;     /* saved prefix name from dapl          */
+    char	filename[1024];     /* file names                           */
+
+    TESTING("H5Dget_access_plist() returns correct prefix");
+
+    if(HDsetenv("HDF5_EXTFILE_PREFIX", "", 1) < 0)
+        TEST_ERROR
+
+    /* Reset the raw data files */
+    if(reset_raw_data_files() < 0)
+        TEST_ERROR
+
+    /* Create the file */
+    h5_fixname(FILENAME[5], fapl_id, filename, sizeof(filename));
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create the dcpl and set external storage */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_external(dcpl_id, "extern_1r.raw", (off_t)0, (hsize_t)0) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create the dapl and set the prefix */
+    if((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_efile_prefix(dapl_id, "someprefix") < 0)
+        FAIL_STACK_ERROR
+
+    /* Create the dataset */
+    if((sid = H5Screate_simple(1, &dims, NULL)) < 0)
+        FAIL_STACK_ERROR
+    if((did = H5Dcreate2(fid, "dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, dapl_id)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dapl */
+    if(H5Pclose(dapl_id) < 0)
+        FAIL_STACK_ERROR
+    dapl_id = -1;
+
+    /* Get a data access property list from the dataset */
+    if((dapl_id = H5Dget_access_plist(did)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check the value for the external prefix */
+    if((buffer = (char *)HDcalloc((size_t)64, sizeof(char))) == NULL)
+        TEST_ERROR
+    if(H5Pget_efile_prefix(dapl_id, buffer, (size_t)64) < 0)
+        FAIL_STACK_ERROR
+    if(HDstrcmp(buffer, "someprefix") != 0)
+        FAIL_PUTS_ERROR("external file prefix from dapl incorrect");
+
+    /* Close everything */
+    HDfree(buffer);
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl_id) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dapl_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    if(buffer)
+        HDfree(buffer);
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+        H5Pclose(dcpl_id);
+        H5Pclose(dapl_id);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_h5d_get_access_plist() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    main
+ *
+ * Purpose:     Runs external dataset tests.
+ *
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
@@ -1443,17 +1542,21 @@ main(void)
     if(H5Pset_libver_bounds(fapl_id_new, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         FAIL_STACK_ERROR
 
+    /* The file format doesn't matter for this test */
+    nerrors += test_h5d_get_access_plist(fapl_id_new);
+    HDputs("");
+
     /* Test with old & new format groups */
     for(latest_format = FALSE; latest_format <= TRUE; latest_format++) {
         hid_t current_fapl_id = -1;
 
         /* Set the fapl for different file formats */
         if(latest_format) {
-            puts("\nTesting with the latest file format:");
+            HDputs("\nTesting with the latest file format:");
             current_fapl_id = fapl_id_new;
         } /* end if */
         else {
-            puts("Testing with the default file format:");
+            HDputs("Testing with the default file format:");
             current_fapl_id = fapl_id_old;
         } /* end else */
 
@@ -1526,7 +1629,7 @@ error:
         H5Gclose(gid);
     } H5E_END_TRY;
     nerrors = MAX(1, nerrors);
-    printf ("%d TEST%s FAILED.\n", nerrors, 1==nerrors?"":"s");
+    printf("%d TEST%s FAILED.\n", nerrors, 1 == nerrors ? "" : "s");
     return EXIT_FAILURE;
 } /* end main() */
 
