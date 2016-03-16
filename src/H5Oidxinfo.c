@@ -317,9 +317,9 @@ H5O_idxinfo_delete(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t *open_oh, void 
     /* call plugin index remove callback */
     if (NULL == (idx_class = H5X_registered(mesg->plugin_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
-    if (NULL == idx_class->remove)
+    if (NULL == idx_class->idx_class.data_class.remove)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin remove callback is not defined");
-    if (FAIL == idx_class->remove(file_id, mesg->metadata_size, mesg->metadata))
+    if (FAIL == idx_class->idx_class.data_class.remove(file_id, mesg->metadata_size, mesg->metadata))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot remove index");
 
 done:

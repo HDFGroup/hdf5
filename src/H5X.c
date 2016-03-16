@@ -503,9 +503,9 @@ H5X_create(hid_t dset_id, unsigned plugin_id, hid_t xcpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
     /* Call create of the plugin */
-    if (NULL == idx_class->create)
+    if (NULL == idx_class->idx_class.data_class.create)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin create callback is not defined");
-    if (NULL == (idx_handle = idx_class->create(dset_id, xcpl_id, xapl_id,
+    if (NULL == (idx_handle = idx_class->idx_class.data_class.create(dset_id, xcpl_id, xapl_id,
             &metadata_size, &metadata)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot create new plugin index");
 

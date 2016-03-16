@@ -239,8 +239,8 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         void *idx_handle = dset->shared->idx_handle;
         hid_t xxpl_id = H5P_INDEX_XFER_DEFAULT;
 
-        if (idx_class->pre_update &&
-                (FAIL == idx_class->pre_update(idx_handle, file_space_id, xxpl_id)))
+        if (idx_class->idx_class.data_class.pre_update &&
+                (FAIL == idx_class->idx_class.data_class.pre_update(idx_handle, file_space_id, xxpl_id)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "cannot do an index pre-update");
     }
 
@@ -284,19 +284,19 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         void *idx_handle = dset->shared->idx_handle;
         hid_t xxpl_id = H5P_INDEX_XFER_DEFAULT;
 
-        if (idx_class->post_update &&
-                (FAIL == idx_class->post_update(idx_handle, buf, file_space_id, xxpl_id)))
+        if (idx_class->idx_class.data_class.post_update &&
+                (FAIL == idx_class->idx_class.data_class.post_update(idx_handle, buf, file_space_id, xxpl_id)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "cannot do an index post-update");
 
         /* Calling post_update rebuilds the index and index metadata may need
          * to be refreshed.
          */
-        if (idx_class->refresh) {
+        if (idx_class->idx_class.data_class.refresh) {
             H5O_idxinfo_t idx_info;
             void *metadata;
             size_t metadata_size;
 
-            if (FAIL == idx_class->refresh(idx_handle, &metadata_size, &metadata))
+            if (FAIL == idx_class->idx_class.data_class.refresh(idx_handle, &metadata_size, &metadata))
                 HGOTO_ERROR(H5E_INDEX, H5E_CANTUPDATE, FAIL, "cannot do an index refresh");
 
             /* Write the index header message */

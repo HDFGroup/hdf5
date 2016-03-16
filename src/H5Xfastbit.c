@@ -192,7 +192,8 @@ const H5X_class_t H5X_FASTBIT[1] = {{
     H5X_CLASS_T_VERS,               /* (From the H5Xpublic.h header file) */
     H5X_PLUGIN_FASTBIT,             /* (Or whatever number is assigned) */
     "FASTBIT index plugin",         /* Whatever name desired */
-    H5X_TYPE_DATA_ELEM,             /* This plugin operates on dataset elements */
+    H5X_TYPE_DATA,                  /* This plugin operates on dataset elements */
+    {
     H5X_fastbit_create,             /* create */
     H5X_fastbit_remove,             /* remove */
     H5X_fastbit_open,               /* open */
@@ -203,6 +204,7 @@ const H5X_class_t H5X_FASTBIT[1] = {{
     H5X_fastbit_refresh,            /* refresh */
     NULL,                           /* copy */
     H5X_fastbit_get_size            /* get_size */
+    }
 }};
 
 /*-------------------------------------------------------------------------
