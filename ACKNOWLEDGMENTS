@@ -10,6 +10,8 @@ Threading library included in the 1.8.6 release.
 John A. Biddiscombe, Mike Jackson, and Sean McBride for contributing and
 testing CMake code included in the HDF5 1.8.5 distribution.
 
+Jason Newton, for contributing code used to improve the C/C++ Packet Table.
+
 The HDF5 community for helping shape the development of HDF5 by contributing
 bug reports and patches, joining in on forum discussions, and continually
 supporting our software.
