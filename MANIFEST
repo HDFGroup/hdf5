@@ -28,7 +28,6 @@
 ./Makefile.dist
 ./Makefile.am
 ./README.txt
-./BRANCH.txt
 ./acsite.m4
 ./autogen.sh
 ./configure.ac
