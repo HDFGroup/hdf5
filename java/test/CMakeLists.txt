@@ -66,6 +66,7 @@ set_target_properties (${HDF5_JAVA_TEST_LIB_TARGET} PROPERTIES FOLDER test/java)
 set (HDF_JAVA_TEST_FILES
       h5ex_g_iterate.hdf
       JUnit-interface.txt
+      JUnit-interface.ert
 )
 
 foreach (h5_file ${HDF_JAVA_TEST_FILES})
@@ -106,6 +107,7 @@ add_test (
         -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
         -D "TEST_FOLDER=${HDF5_BINARY_DIR}/java/test"
         -D "TEST_OUTPUT=JUnit-interface.out"
+        -D "TEST_ERRREF=JUnit-interface.ert"
 #        -D "TEST_LOG_LEVEL=trace"
         -D "TEST_EXPECT=0"
         -D "TEST_MASK_ERROR=TRUE"

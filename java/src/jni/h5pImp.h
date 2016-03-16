@@ -579,9 +579,9 @@ JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Pset
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Pexist
- * Signature: (JLjava/lang/String;)J
+ * Signature: (JLjava/lang/String;)Z
  */
-JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Pexist
+JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5Pexist
 (JNIEnv *, jclass, jlong, jstring);
 
 /*

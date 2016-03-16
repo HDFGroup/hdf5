@@ -284,7 +284,7 @@ public class TestH5Plist {
     // Test basic generic property list code. Tests adding properties to generic classes.
     @Test
     public void testH5P_genprop_basic_class_prop() {
-        int         status = -1;
+        boolean     status = false;
         long        size = -1;        // Generic Property size
         long        nprops = -1;      // Generic Property class number
 
@@ -306,7 +306,7 @@ public class TestH5Plist {
             err.printStackTrace();
             fail("H5Pexist plist_class_id: " + err);
         }
-        assertTrue("H5Pexist plist_class_id "+PROP1_NAME, status == 0);
+        assertFalse("H5Pexist plist_class_id "+PROP1_NAME, status);
 
         // Insert first property into class (with no callbacks)
         try {
@@ -337,7 +337,7 @@ public class TestH5Plist {
             err.printStackTrace();
             fail("H5Pexist plist_class_id: " + err);
         }
-        assertTrue("H5Pexist plist_class_id "+PROP1_NAME, status == 1);
+        assertTrue("H5Pexist plist_class_id "+PROP1_NAME, status);
 
         // Check the size of the first property
         try {
@@ -388,7 +388,7 @@ public class TestH5Plist {
             err.printStackTrace();
             fail("H5Pexist plist_class_id: " + err);
         }
-        assertTrue("H5Pexist plist_class_id "+PROP2_NAME, status == 1);
+        assertTrue("H5Pexist plist_class_id "+PROP2_NAME, status);
 
         // Check the size of the second property
         try {
@@ -429,7 +429,7 @@ public class TestH5Plist {
             err.printStackTrace();
             fail("H5Pexist plist_class_id: " + err);
         }
-        assertTrue("H5Pexist plist_class_id "+PROP3_NAME, status == 1);
+        assertTrue("H5Pexist plist_class_id "+PROP3_NAME, status);
 
         // Check the size of the third property
         try {
@@ -635,7 +635,7 @@ public class TestH5Plist {
     //      removing properties from them.
     @Test
     public void testH5P_genprop_basic_list_prop() {
-        int         status = -1;
+        boolean     status = false;
         long        lid1 = -1;        // Generic Property list ID
         long        nprops = -1;      // Number of properties in class
 
@@ -725,7 +725,7 @@ public class TestH5Plist {
                 err.printStackTrace();
                 fail("H5Pexist plist_class_id: " + err);
             }
-            assertTrue("H5Pexist lid1 "+PROP1_NAME, status == 1);
+            assertTrue("H5Pexist lid1 "+PROP1_NAME, status);
             try {
                 status = H5.H5Pexist(lid1, PROP2_NAME);
             }
@@ -733,7 +733,7 @@ public class TestH5Plist {
                 err.printStackTrace();
                 fail("H5Pexist plist_class_id: " + err);
             }
-            assertTrue("H5Pexist lid1 "+PROP2_NAME, status == 1);
+            assertTrue("H5Pexist lid1 "+PROP2_NAME, status);
             try {
                 status = H5.H5Pexist(lid1, PROP3_NAME);
             }
@@ -741,7 +741,7 @@ public class TestH5Plist {
                 err.printStackTrace();
                 fail("H5Pexist plist_class_id: " + err);
             }
-            assertTrue("H5Pexist lid1 "+PROP3_NAME, status == 1);
+            assertTrue("H5Pexist lid1 "+PROP3_NAME, status);
             try {
                 status = H5.H5Pexist(lid1, PROP4_NAME);
             }
@@ -749,7 +749,7 @@ public class TestH5Plist {
                 err.printStackTrace();
                 fail("H5Pexist plist_class_id: " + err);
             }
-            assertTrue("H5Pexist lid1 "+PROP4_NAME, status == 1);
+            assertTrue("H5Pexist lid1 "+PROP4_NAME, status);
 
         }
         finally {
