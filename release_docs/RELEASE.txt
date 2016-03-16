@@ -112,7 +112,7 @@ This release supports the following features:
     the data. An HDF5 virtual dataset (VDS) is an HDF5 dataset that is composed of 
     source HDF5 datasets in a predefined mapping. VDS can be used with the SWMR 
     feature. For documentation check 
-    https://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesSwmrDocs.html
+    https://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesVirtualDatasetDocs.html
 
     - Persistent Free File Space Tracking
 
@@ -148,7 +148,7 @@ This release supports the following features:
 
     The function appends data to a dataset along a specified dimension.
 
-    Java warpper library
+    Java wrapper library
     --------------------
 
     Java HDF5 JNI library has been integrated into the HDF5 repo, the configure 
@@ -181,7 +181,7 @@ Issues Addressed in this Release since alpha1
        when a dataset access property list was obtained from the dataset identifier. Fixed. 
        (DER and NAF 2016-03-14 HDFFV-9716)
 
-     - h5dump segfaulted when porvided with invalid arguments or when optional aruments are last option
+     - h5dump segfaulted when provided with invalid arguments or when optional aruments are last option
        on command line. 
        
        When h5dump was provided with the name of a non existing file or when optional arguments were the
@@ -365,13 +365,11 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP x86_64 GNU/Linux
     (platypus)
 
-    Mac OS X El Capitan 10.11     Apple clang/clang++ version 7.0.0 from Xcode 7.0.1
-    64-bit    			  gfortran GNU Fortran (GCC) 5.2.0
-    (VM)
-
     Windows 7                     Visual Studio 2008  (cmake)
 
     Windows 7 x64                 Visual Studio 2008  (cmake)
+
+    Windows 7 x64                 Visual Studio 2010  (cmake) with SWMR using GPFS
 
     Windows 10                    Visual Studio 2013 w/ Intel Fortran 15 (cmake)
 
