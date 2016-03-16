@@ -148,6 +148,16 @@ This release supports the following features:
 
     The function appends data to a dataset along a specified dimension.
 
+    Java warpper library
+    --------------------
+
+    Java HDF5 JNI library has been integrated into the HDF5 repo, the configure 
+    option is "--enable-java" and the CMake option is HDF5_BUILD_JAVA:BOOL=ON.
+    The package hierarchy has changed from the HDF5 1.8 JNI, which was 
+    "ncsa.hdf.hdflib.hdf5", to HDF5 1.10, "hdf.hdflib.hdf5".
+
+    Also there are a number of new APIs added, including those for VDS and SWMR.
+
     Other important changes:
     -----------------------
 
@@ -157,10 +167,55 @@ This release supports the following features:
     -------------
     See http://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesSwmrDocs.html#Tools
 
+
+Issues Addressed in this Release since alpha1
+=============================================
+
+     - Wrong settings returned for a dataset access property list.  
+ 
+       One couldn't get the correct access property setting with the following functions calls
+       H5Pget_virtual_printf_gap
+       H5Pget_virtual_view
+       H5Pget_efile_prefix
+
+       when a dataset access property list was obtained from the dataset identifier. Fixed. 
+       (DER and NAF 2016-03-14 HDFFV-9716)
+
+     - h5dump segfaulted when porvided with invalid arguments or when optional aruments are last option
+       on command line. 
+       
+       When h5dump was provided with the name of a non existing file or when optional arguments were the
+       last option on the command line, h5dump failed. Fixed.
+       (ADB 2016-02-28 HDFFV-9639, HDFFV-9684)
+
+     - HDF5 library segfaults on a corrupted file.
+
+       The HDF5 library didn't propagate an error when encounting a corruped metadata in an HDF5 file.
+       The issue was fixed for a specific filei porvided by a user. If you still see the problem, 
+       please contact help@hdfgroup.org 
+       (MC 2016-02-18 HDFFV-9670)
+
+     - When the latest file format is used, and when a chunked dataset is created with a datatype with the size 
+       bigger than a chunk size, the data cannot be read back. 
+       
+       The issue was reported for the chunked datasets with a string datatype, and was confirmed for other i
+       datatypes with the sizes bigger than the chunk size in bytes. Fixed.
+       (JM 2016-02-13 HDFFV-9672)
+       
+     - Control over the location of the external files
+
+       New API H5Pset_efile_prefix was added to specify locations of the external files.
+       This enhancements was contributed by Steffen Kieß.
+       (DER 2016-02-04 HDFFV-8740)
+  
+
+
+     
 Issues Addressed in this Release since alpha0 
-================================
+=============================================
     - h5format_convert tool didn't downgrade version of the superblock. Fixed. See
-      Known Problems section.  EIP 2016-01-11.
+      Known Problems section.  
+      (EIP 2016-01-11)
 
     - It was reported that alpha0 crashed when used with multiple threads. 
       The issue exists in the HDF5 library versions 1.8 and 1.9. 
@@ -169,7 +224,8 @@ Issues Addressed in this Release since alpha0
       file pointer becomes invalid. Alpha1 release contains the fixes for the specific 
       use case as decribed in HDFFV-9643.
       We will keep working on identifying other paths in the library with similar problem
-      and fixing the issue.  EIP 2016-01-15
+      and fixing the issue.  
+      (EIP 2016-01-15)
 
 Supported Platforms
 ===================
