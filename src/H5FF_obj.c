@@ -113,6 +113,59 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Oopen_ff() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Oopen_by_addr_ff
+ *
+ * Purpose:	Opens an object within an HDF5 file given its physical address.
+ *
+ *              This function opens an object in the same way that H5Gopen2,
+ *              H5Topen2, and H5Dopen2 do. However, H5Oopen doesn't require
+ *              the type of object to be known beforehand. This can be
+ *              useful in user-defined links, for instance, when only a
+ *              path is known.
+ *
+ *              The opened object should be closed again with H5Oclose
+ *              or H5Gclose, H5Tclose, or H5Dclose.
+ *
+ * Return:	Success:	An open object identifier
+ *		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, hid_t rcxt_id)
+{
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
+    H5I_type_t  opened_type;
+    H5VL_object_t    *opened_obj = NULL;
+    hid_t       ret_value = FAIL;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* get the file object */
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    if(obj->vol_info->vol_cls->value != H5_VOL_IOD)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "only IOD plugin supports H5Oopen_by_addr_ff()")
+
+    /* Open the object through the VOL */
+    if(NULL == (opened_obj = (H5VL_object_t *)H5VL_iod_object_open_by_addr(obj->vol_obj, 
+                                                                           (iod_obj_id_t)addr, 
+                                                                           rcxt_id, &opened_type, 
+                                                                           H5_REQUEST_NULL)))
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+    if((ret_value = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize object handle")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oopen_by_addr_ff() */
+
 /*-------------------------------------------------------------------------
  * Function:	H5Oget_token
  *

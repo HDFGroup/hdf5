@@ -23,7 +23,7 @@
 
 /* Private headers needed by this file */
 #include "H5private.h"		/* Generic Functions			*/
-
+#include "H5VLiod.h"            /* Iod VOL plugin			*/
 
 /**************************/
 /* Library Private Macros */
@@ -55,6 +55,8 @@
 /******************************/
 /* Library Private Prototypes */
 /******************************/
+void *H5VL_iod_object_open_by_addr(void *_obj, iod_obj_id_t iod_id, hid_t rcxt_id, 
+                                   H5I_type_t *opened_type, void **req);
 
 #endif /* _H5FFprivate_H */
 

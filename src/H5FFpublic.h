@@ -89,6 +89,14 @@ typedef herr_t (*H5A_operator_ff_t)(hid_t location_id, const char *attr_name, co
 /* Prototype for H5Ovisit_ff/H5Ovisit_by_name_ff() operator */
 typedef herr_t (*H5O_iterate_ff_t)(hid_t obj, const char *name, const H5O_ff_info_t *info,
                                    void *op_data, hid_t rcxt_id);
+#if 0
+/* Prototype for H5Literate_ff/H5Literate_by_name_ff() operator */
+typedef herr_t (*H5L_iterate_ff_t)(hid_t obj, const char *name, const H5L_ff_info_t *info,
+                                   void *op_data, hid_t rcxt_id);
+
+herr_t H5Literate_ff(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
+                     H5L_iterate_ff_t op, void *op_data, hid_t rcxt_id, hid_t estack_id);
+#endif
 
 /* API wrappers */
 H5_DLL hid_t H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl,
@@ -177,8 +185,8 @@ H5_DLL herr_t H5Lget_info_ff(hid_t link_loc_id, const char *link_name, H5L_ff_in
 H5_DLL herr_t H5Lget_val_ff(hid_t link_loc_id, const char *link_name, void *linkval_buff, 
                             size_t size, hid_t lapl_id, hid_t rcxt_id, hid_t estack_id);
 
-H5_DLL hid_t H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id,
-                        hid_t rcxt_id);
+H5_DLL hid_t H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id);
+H5_DLL hid_t H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, hid_t rcxt_id);
 H5_DLL herr_t H5Oget_token(hid_t obj_id, void *token, size_t *token_size);
 H5_DLL hid_t H5Oopen_by_token(const void *token, hid_t trans_id, hid_t estack_id);
 H5_DLL herr_t H5Olink_ff(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,

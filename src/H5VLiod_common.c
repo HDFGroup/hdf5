@@ -1332,6 +1332,8 @@ EFF__mercury_register_callbacks(void)
                                                     H5VL_iod_server_object_open_by_token);
     H5VL_OBJECT_OPEN_ID   = MERCURY_REGISTER("object_open", object_op_in_t, object_open_out_t,
                                              H5VL_iod_server_object_open);
+    H5VL_OBJECT_OPEN_BY_ADDR_ID = MERCURY_REGISTER("object_open_by_addr", object_op_in_t, object_open_out_t,
+                                             H5VL_iod_server_object_open_by_addr);
     //H5VL_OBJECT_COPY_ID   = MERCURY_REGISTER("object_copy", object_copy_in_t, ret_t);
     H5VL_OBJECT_EXISTS_ID = MERCURY_REGISTER("object_exists", object_op_in_t, htri_t,
                                              H5VL_iod_server_object_exists);

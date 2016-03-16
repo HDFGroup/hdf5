@@ -1674,6 +1674,7 @@ H5VL_iod_request_complete(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
             break;
         }
     case HG_OBJECT_OPEN:
+    case HG_OBJECT_OPEN_BY_ADDR:
         {
             H5VL_iod_remote_object_t *obj = (H5VL_iod_remote_object_t *)req->data;
 
@@ -2368,6 +2369,7 @@ H5VL_iod_request_cancel(H5VL_iod_file_t *file, H5VL_iod_request_t *req)
         }
     case HG_OBJECT_OPEN_BY_TOKEN:
     case HG_OBJECT_OPEN:
+    case HG_OBJECT_OPEN_BY_ADDR:
     case HG_LINK_GET_INFO:
     case HG_OBJECT_GET_INFO:
     case HG_OBJECT_VISIT:

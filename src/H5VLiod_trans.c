@@ -75,6 +75,7 @@ H5VL_iod_server_rcxt_acquire_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
 #if H5_EFF_DEBUG
         fprintf(stderr, "Exact Acquire Read Context %"PRIu64"\n", input->c_version);
 #endif
+        fprintf(stderr, "Exact Acquire Read Context %"PRIu64"\n", input->c_version);
         if((ret = iod_trans_start(coh, &c_version, NULL, 0, IOD_TRANS_R, NULL)) < 0) {
             HGOTO_ERROR_FF(ret, "can't acquire read context");
         }

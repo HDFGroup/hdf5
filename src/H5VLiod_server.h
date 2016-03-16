@@ -326,6 +326,10 @@ H5_DLL void H5VL_iod_server_object_open_cb(AXE_engine_t axe_engine,
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
+H5_DLL void H5VL_iod_server_object_open_by_addr_cb(AXE_engine_t axe_engine,  
+                                                   size_t num_n_parents, AXE_task_t n_parents[], 
+                                                   size_t num_s_parents, AXE_task_t s_parents[], 
+                                                   void *op_data);
 H5_DLL void H5VL_iod_server_object_copy_cb(AXE_engine_t axe_engine, 
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 

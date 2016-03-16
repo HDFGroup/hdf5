@@ -67,7 +67,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5FD.c H5FDcore.c  \
         H5FDfamily.c H5FDint.c H5FDlog.c \
         H5FDmulti.c H5FDsec2.c H5FDspace.c H5FDstdio.c \
-        H5FF.c H5FF_attr.c H5FF_obj.c H5FF_ref.c H5ES.c H5RC.c H5TR.c H5M.c H5AS.c H5V.c\
+        H5FF.c H5FF_attr.c H5FF_obj.c H5FF_links.c H5FF_ref.c H5ES.c H5RC.c H5TR.c H5M.c H5AS.c H5V.c\
         H5FL.c H5FO.c H5FS.c H5FScache.c H5FSdbg.c H5FSsection.c H5FSstat.c H5FStest.c \
         H5G.c H5Gbtree2.c H5Gcache.c \
         H5Gcompact.c H5Gdense.c H5Gdeprec.c H5Gent.c \
