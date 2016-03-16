@@ -4360,13 +4360,12 @@ public class H5 implements java.io.Serializable {
      *            IN: Identifier for the property to query
      * @param name
      *            IN: Name of property to check for
-     * @return a positive value if the property exists in the property object; zero if the property does not exist; a
-     *         negative value if failed
+     * @return a true value if the property exists in the property object; false if the property does not exist;
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      */
-    public synchronized static native int H5Pexist(long plid, String name) throws HDF5LibraryException;
+    public synchronized static native boolean H5Pexist(long plid, String name) throws HDF5LibraryException;
 
     /**
      * H5Pget_size retrieves the size of a property's value in bytes
