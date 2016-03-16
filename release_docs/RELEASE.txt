@@ -6,7 +6,7 @@ INTRODUCTION
 
 This document describes the differences between HDF5-1.8.* and
 HDF5 1.10.0 release, and contains information on the platforms
-tested and known problems in HDF5-1.10.0.
+tested.
 
 
 Links to HDF5 1.10.0 source code can be found on The HDF Group's
@@ -310,7 +310,6 @@ Issues Addressed in this Release since alpha1
      - Control over the location of the external files
 
        New API H5Pset_efile_prefix was added to specify locations of the external files.
-       This enhancements was contributed by Steffen Kieß.
        (DER 2016-02-04 HDFFV-8740)
   
 
@@ -318,15 +317,14 @@ Issues Addressed in this Release since alpha1
      
 Issues Addressed in this Release since alpha0 
 =============================================
-    - h5format_convert tool didn't downgrade version of the superblock. Fixed. See
-      Known Problems section.  
+    - h5format_convert tool didn't downgrade version of the superblock. Fixed. 
       (EIP 2016-01-11)
 
     - It was reported that alpha0 crashed when used with multiple threads. 
       The issue exists in the HDF5 library versions 1.8 and 1.9. 
       The problem is related to a shared file pointer used in the misc. data 
       structures. The thread-safe library exposed paths in the library where 
-      file pointer becomes invalid. Alpha1 release contains the fixes for the specific 
+      file pointer became invalid. Alpha1 release contains the fixes for the specific 
       use case as decribed in HDFFV-9643.
       We will keep working on identifying other paths in the library with similar problem
       and fixing the issue.  
@@ -508,10 +506,13 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
-WARNINGS: This section is under contsruction. It will be updated for the first HDF5 1.10.0-beta
-release. 
+The problems reported for alpha releases were adressed in the HDF5 1.10.0-pre1 release.
 
-  - h5format_convert only works with the files that contain chunked datasets.
-  - h5repack tool fails to downgrade object layout message to make file 
-    1.8 compatible.
+There are no known problems for the newly released features listed in the "New Features"
+section of this document. 
+
+We didn't verify that the known problems listed in the RELEASE.txt version HDF5 1.8.16 are
+still valid. This section will be updated for the final release of HDF5 1.10.0.
+
+
 

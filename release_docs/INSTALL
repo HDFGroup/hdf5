@@ -466,11 +466,13 @@ CONTENTS
             http://www.hdfgroup.org/HDF5/doc/TechNotes/ThreadSafeLibrary.html
 
 4.3.12. Backward compatibility
-        The 1.8 version of the HDF5 Library can be configured to operate
+        The 1.10 version of the HDF5 Library can be configured to operate
         identically to the v1.6 library with the 
             --with-default-api-version=v16
+        and to the v1.8 library with the
+            --with-default-api-version=v18
         configure flag. This allows existing code to be compiled with the
-        v1.8 library without requiring immediate changes to the application 
+        v1.10 library without requiring immediate changes to the application 
         source code.  For addtional configuration options and other details, 
         see "API Compatibility Macros in HDF5":
 
