@@ -57,7 +57,8 @@ This release supports the following features:
       instead.
 
     * A new --enable-symbols option allows symbols to be generated
-      independently of the build mode.
+      independently of the build mode. --disable-symbols can be used to strip
+      symbols from the binary.
 
     * A new --enable-asserts option sets/unsets NDEBUG. This is independent of
       the build mode. This also enables some extra low-overhead debug checks
@@ -77,6 +78,24 @@ This release supports the following features:
       and turn on warnings. The increase in warnings when building these
       wrapper libraries is due to these flag changes, not a decrease in code
       quality.
+
+    * The option to clear file buffers has been removed. Any buffer that will
+      eventually be written to disk will now always be memset to zero. This
+      prevents the previous contents of the buffer from being written to the
+      disk if the buffer contents are not completely overwritten, which has
+      security implications.
+
+    - LFS changes
+
+    The way the autotools handle large file support (LFS) has been overhauled
+    in this release.
+
+    * We assume ftello and fseeko exist
+
+    * We no longer explicitly use the *64 I/O functions. Instead we rely on a
+      mapping provided by _FILE_OFFSET_BITS or its equivalent.
+
+    * _LARGEFILE(64)_SOURCE is no longer exported via AM_CPPFLAGS.
 
     Parallel Library:
     -----------------
@@ -178,7 +197,7 @@ Issues Addressed in this Release since alpha1
        H5Pget_virtual_view
        H5Pget_efile_prefix
 
-       when a dataset access property list was obtained from the dataset identifier. Fixed. 
+       when a dataset access property list was obtained from H5Dget_access_plist(). Fixed. 
        (DER and NAF 2016-03-14 HDFFV-9716)
 
      - h5dump segfaulted when provided with invalid arguments or when optional aruments are last option
