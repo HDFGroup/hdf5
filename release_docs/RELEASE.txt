@@ -191,7 +191,8 @@ This release supports the following features:
 
 	hid_t H5PTcreate(hid_t loc_id, const char *dset_name,
                          hid_t dtype_id, hsize_t chunk_size, hid_t plist_id);
-                                               (BMR, 2016/03/04, HDFFV-8623)
+
+       (BMR, 2016/03/04, HDFFV-8623)
 
      - New public functions
 
@@ -201,7 +202,8 @@ This release supports the following features:
 
 	/* Returns the ID of the datatype the packet table uses */
 	   hid_t H5PTget_type(hid_t table_id);
-                                               (BMR, 2016/03/04, HDFFV-8623)
+
+      (BMR, 2016/03/04, HDFFV-8623)
 
      - Regarding #ifdef VLPT_REMOVED
 
@@ -209,7 +211,8 @@ This release supports the following features:
       except the following cases:
       + H5PTis_varlen() is made available again.
       + H5PTfree_vlen_readbuff() now became H5PTfree_vlen_buff()
-                                               (BMR, 2016/03/04, HDFFV-442)
+
+      (BMR, 2016/03/04, HDFFV-442)
 
      C++ Packet Table API
      -------------------- 
@@ -220,7 +223,7 @@ This release supports the following features:
 
 	FL_PacketTable(hid_t fileID, hid_t plist_id, const char* name, hid_t dtypeID, hsize_t chunkSize);
 
-       (BMR, 2016/03/08, HDFFV-8623)
+      (BMR, 2016/03/08, HDFFV-8623)
 
      - New public functions
 
