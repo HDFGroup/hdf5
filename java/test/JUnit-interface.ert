@@ -1,0 +1,2 @@
+[main] INFO hdf.hdf5lib.H5 - HDF5 library: hdf5_java
+[main] INFO hdf.hdf5lib.H5 -  successfully loaded from java.library.path

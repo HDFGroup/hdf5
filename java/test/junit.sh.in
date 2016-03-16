@@ -237,7 +237,6 @@ sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     $actual_ext > $actual
-cat $actual_err >> $actual
 
 if $CMP $expect $actual; then
    echo " PASSED"

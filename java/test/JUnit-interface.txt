@@ -648,5 +648,3 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #002: (file name) line (number) in H5P_isa_class(): not a property list
     major: Invalid arguments to routine
     minor: Inappropriate type
-[main] INFO hdf.hdf5lib.H5 - HDF5 library: hdf5_java
-[main] INFO hdf.hdf5lib.H5 -  successfully loaded from java.library.path
