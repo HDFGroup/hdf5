@@ -993,7 +993,7 @@ H5R__equal(href_t _ref1, href_t _ref2)
         case H5R_EXT_ATTR:
             if (ref1->ref.serial.buf_size != ref2->ref.serial.buf_size)
                 HGOTO_DONE(FALSE);
-            if (0 != HDstrcmp(ref1->ref.serial.buf, ref2->ref.serial.buf))
+            if (0 != HDmemcmp(ref1->ref.serial.buf, ref2->ref.serial.buf, ref1->ref.serial.buf_size))
                 HGOTO_DONE(FALSE);
             break;
         default:
