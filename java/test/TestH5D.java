@@ -42,6 +42,7 @@ public class TestH5D {
     private static final int DIM_Y = 6;
     private static final int RANK = 2;
     long H5fid = -1;
+    long H5faplid = -1;
     long H5dsid = -1;
     long H5dtid = -1;
     long H5did = -1;
@@ -105,6 +106,39 @@ public class TestH5D {
             fail("H5.H5Dcreate: " + err);
         }
         assertTrue("TestH5D._createPDataset.H5Dcreate: ", H5did0 >= 0);
+    }
+
+    private final void _createChunkDataset(long fid, long dsid, String name, long dapl) {
+
+        try {
+            H5dcpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+        }
+        catch (Exception err) {
+            err.printStackTrace();
+            fail("H5.H5Pcreate: " + err);
+        }
+        assertTrue("testH5D._createChunkDataset: H5.H5Pcreate: ", H5dcpl_id >= 0);
+
+        // Set the chunking.
+        long[] chunk_dim = {4, 4};
+
+        try {
+            H5.H5Pset_chunk(H5dcpl_id, RANK, chunk_dim);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            H5did = H5.H5Dcreate(fid, name,
+                        HDF5Constants.H5T_STD_I32BE, dsid,
+                        HDF5Constants.H5P_DEFAULT, H5dcpl_id, dapl);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5.H5Dcreate: " + err);
+        }
+        assertTrue("TestH5D._createChunkDataset.H5Dcreate: ", H5did >= 0);
     }
 
     private final void _createDataset(long fid, long dsid, String name, long dapl) {
@@ -198,8 +232,9 @@ public class TestH5D {
        System.out.print(testname.getMethodName());
 
         try {
+            H5faplid = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
             H5fid = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC,
-                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                    HDF5Constants.H5P_DEFAULT, H5faplid);
             H5dsid = H5.H5Screate_simple(RANK, H5dims, null);
         }
         catch (Throwable err) {
@@ -224,6 +259,8 @@ public class TestH5D {
             try {H5.H5Tclose(H5dtid);} catch (Exception ex) {}
         if (H5dsid > 0)
             try {H5.H5Sclose(H5dsid);} catch (Exception ex) {}
+        if (H5faplid >= 0)
+            try {H5.H5Pclose(H5faplid);} catch (Exception ex) {}
         if (H5fid > 0)
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
 
@@ -354,8 +391,15 @@ public class TestH5D {
     @Test
     public void testH5Dget_access_plist() {
         long dapl_id = -1;
-        int pequal = -1;
         long test_dapl_id = -1;
+        int[] mdc_nelmts1 = {0};
+        int[] mdc_nelmts2 = {0};
+        long[] rdcc_nelmts1 = {0};
+        long[] rdcc_nelmts2 = {0};
+        long[] rdcc_nbytes1 = {0};
+        long[] rdcc_nbytes2 = {0};
+        double[] rdcc_w01 = {0};
+        double[] rdcc_w02 = {0};
 
         try {
             test_dapl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_ACCESS);
@@ -366,12 +410,20 @@ public class TestH5D {
         }
         assertTrue("testH5Dget_access_plist: test_dapl_id: ", test_dapl_id >= 0);
 
-        _createDataset(H5fid, H5dsid, "dset", test_dapl_id);
+        try {
+            H5.H5Pget_cache(H5faplid, mdc_nelmts1, rdcc_nelmts1, rdcc_nbytes1, rdcc_w01);
+        }
+        catch (Exception err) {
+            err.printStackTrace();
+            fail("testH5Dget_access_plist: H5.H5Pget_cache: " + err);
+        }
+
+        _createChunkDataset(H5fid, H5dsid, "dset", test_dapl_id);
 
         try {
             dapl_id = H5.H5Dget_access_plist(H5did);
             assertTrue("testH5Dget_access_plist: dapl_id: ", dapl_id >= 0);
-            pequal = H5.H5Pequal(dapl_id, test_dapl_id);
+            H5.H5Pget_chunk_cache(dapl_id, rdcc_nelmts2, rdcc_nbytes2, rdcc_w02);
         }
         catch (Exception err) {
             err.printStackTrace();
@@ -393,7 +445,7 @@ public class TestH5D {
         catch (Exception err) {
             err.printStackTrace();
         }
-        assertTrue("testH5Dget_access_plist: ", pequal > 0);
+        assertTrue("testH5Dget_access_plist: ", rdcc_nelmts2==rdcc_nelmts2 && rdcc_nbytes2==rdcc_nbytes2);
     }
 
     @Test
