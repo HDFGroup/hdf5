@@ -1,4 +1,4 @@
-HDF5 version 1.10.0-pre1 currently under development
+HDF5 version 1.10.0-pre1 released on 2016-03-16
 ================================================================================
 
 
@@ -38,6 +38,14 @@ This release supports the following features:
 
     Configuration
     -------------
+    - API compatibility with HDF5 1.8 flag was added
+   
+    The 1.10 version of the HDF5 Library can be configured to operate identically
+    to the v1.8 library with the --with-default-api-version=v18 configure flag. 
+    This allows existing code to be compiled with the v1.10 library without 
+    requiring immediate changes to the application source code.  For addtional 
+    configuration options and other details, see "API Compatibility Macros in HDF5":
+    http://www.hdfgroup.org/HDF5/doc/RM/APICompatMacros.html 
 
     - Autotools configuration has been extensively reworked
 
