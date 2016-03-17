@@ -167,6 +167,105 @@ done:
 } /* end H5Oopen_by_addr_ff() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Oget_addr_ff
+ *
+ * Purpose: Retrieves the IOD id that has been allocated to a dataset.
+ *
+ * Return:	Success:	Non-negative with the link value in BUF.
+ * 		Failure:	Negative
+ *
+ * Programmer:	Mohamad Chaarawi
+ *              March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5Oget_addr_ff(hid_t object_id, haddr_ff_t *addr)
+{
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
+    herr_t ret_value = SUCCEED;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    switch(H5I_get_type(object_id)) {
+        case H5I_GROUP:
+        {
+            H5VL_iod_group_t *vol_obj = NULL;
+
+            if(NULL == (obj = (H5VL_object_t *)H5I_object(object_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid object ID");
+
+            vol_obj = (H5VL_iod_group_t *)obj->vol_obj;
+
+            *addr = vol_obj->remote_group.iod_id;
+            break;
+        }
+        case H5I_DATASET:
+        {
+            H5VL_iod_dset_t *vol_obj = NULL;
+
+            if(NULL == (obj = (H5VL_object_t *)H5I_object(object_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid object ID");
+
+            vol_obj = (H5VL_iod_dset_t *)obj->vol_obj;
+
+            *addr = vol_obj->remote_dset.iod_id;
+            break;
+        }
+        case H5I_MAP:
+        {
+            H5VL_iod_map_t *vol_obj = NULL;
+
+            if(NULL == (obj = (H5VL_object_t *)H5I_object(object_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid object ID");
+
+            vol_obj = (H5VL_iod_map_t *)obj->vol_obj;
+
+            *addr = vol_obj->remote_map.iod_id;
+            break;
+        }
+        case H5I_DATATYPE:
+        {
+            H5T_t *dt = NULL;
+
+            if(NULL == (dt = (H5T_t *)H5I_object(object_id)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid datatype ID");
+
+            if (NULL != dt->vol_obj) {
+                H5VL_iod_dtype_t *vol_obj = (H5VL_iod_dtype_t *)dt->vol_obj;
+
+                *addr = vol_obj->remote_dtype.iod_id;
+            }
+            break;
+        }
+        case H5I_UNINIT:
+        case H5I_BADID:
+        case H5I_FILE:
+        case H5I_DATASPACE:
+        case H5I_ATTR:
+        case H5I_REFERENCE:
+        case H5I_VFL:
+        case H5I_VOL:
+        case H5I_ES:
+        case H5I_RC:
+        case H5I_TR:
+        case H5I_QUERY:
+        case H5I_VIEW:
+        case H5I_GENPROP_CLS:
+        case H5I_GENPROP_LST:
+        case H5I_ERROR_CLASS:
+        case H5I_ERROR_MSG:
+        case H5I_ERROR_STACK:
+        case H5I_NTYPES:
+        default:
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FAIL, "not a valid file object ID (dataset, group, or datatype)")
+        break;
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Oget_addr_ff() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5Oget_token
  *
  * Purpose: This function retrieves a token representing an object in

@@ -208,6 +208,7 @@ H5_DLL herr_t H5Oget_info_ff(hid_t object_id, H5O_ff_info_t *object_info,
 H5_DLL herr_t H5Oget_info_by_name_ff(hid_t loc_id, const char *object_name, 
                                      H5O_ff_info_t *object_info, hid_t lapl_id, 
                                      hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Oget_addr_ff(hid_t object_id, haddr_ff_t *addr);
 H5_DLL herr_t H5Ovisit_ff(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
                           H5O_iterate_ff_t op, void *op_data, hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Ovisit_by_name_ff(hid_t loc_id, const char *obj_name,

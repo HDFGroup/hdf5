@@ -34,11 +34,13 @@ int main(int argc, char **argv) {
     char file_name[50];
     hid_t file_id;
     hid_t gid;
-    hid_t did, map;
+    hid_t did, did31, map;
     hid_t sid, dtid;
     hid_t tid1, tid2, rid1, rid2;
     hid_t fapl_id, dxpl_id;
     hid_t e_stack;
+    H5O_ff_info_t oinfo;
+    haddr_ff_t dset_addr;
     htri_t exists = -1;
 
     const unsigned int nelem=60;
@@ -110,7 +112,7 @@ int main(int argc, char **argv) {
     if(0 == my_rank) {
         hid_t rid_temp;
         hid_t anon_did;
-        hid_t gid2,gid3,gid11,did11,did21,did31,map111;
+        hid_t gid2,gid3,gid11,did11,did21,map111;
         version = 1;
         rid1 = H5RCacquire(file_id, &version, H5P_DEFAULT, H5_EVENT_STACK_NULL);
         assert(1 == version);
@@ -143,8 +145,13 @@ int main(int argc, char **argv) {
                            H5P_DEFAULT, tid1, e_stack);
         assert(did21 >= 0);
         did31 = H5Dcreate_ff(gid3, "D3", dtid, sid, H5P_DEFAULT, H5P_DEFAULT, 
-                           H5P_DEFAULT, tid1, e_stack);
+                           H5P_DEFAULT, tid1, H5_EVENT_STACK_NULL);
         assert(did31 >= 0);
+        ret = H5Oget_addr_ff(did31, &dset_addr);
+        assert(0 == ret);
+        fprintf(stderr, 
+                "DATASET %s addr: %"PRIx64"\n", "D3", dset_addr);
+
         map111 = H5Mcreate_ff(gid11, "MAP1", H5T_STD_I32LE, H5T_STD_I32LE, 
                            H5P_DEFAULT,H5P_DEFAULT,H5P_DEFAULT, tid1, e_stack);
         assert(map111 >= 0);
@@ -237,12 +244,29 @@ int main(int argc, char **argv) {
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
     assert(3 == version);
 
+    /* Process 0 bcasts dset31 address to others */
+    MPI_Bcast(&dset_addr, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
+
     /* other processes just create a read context object; no need to
        acquire it */
     if(0 != my_rank) {
         rid2 = H5RCcreate(file_id, version);
         assert(rid2 > 0);
     }
+
+    fprintf(stderr, "H5Open_by_addr_ff OID: %"PRIx64"\n", dset_addr);
+    did31 = H5Oopen_by_addr_ff(file_id, dset_addr, rid2);
+    assert(did31 >= 0);
+
+    {
+        hid_t sid_temp;
+
+        sid_temp = H5Dget_space(did31);
+        assert(H5Sget_simple_extent_npoints(sid) == H5Sget_simple_extent_npoints(sid_temp));
+        H5Sclose(sid_temp);
+    }
+
+    assert(H5Dclose_ff(did31, e_stack) == 0);
 
     gid = H5Oopen_ff(file_id, "G1", H5P_DEFAULT, rid2);
     assert(gid);
@@ -256,7 +280,6 @@ int main(int argc, char **argv) {
     {
         ssize_t ret_size = 0;
         char *comment = NULL;
-        H5O_ff_info_t oinfo;
 
         ret = H5Oget_comment_ff(gid, NULL, 0, &ret_size, rid2, H5_EVENT_STACK_NULL);
         assert(ret == 0);
