@@ -2,7 +2,7 @@ Acknowledgments
 ----------------
 
 We would like to thank the following people who provided code contributions
-to the HDF5 1.10.0 and eralier eleases:
+to the HDF5 1.10.0 and earlier releases:
 
 Steffen Kieß, for contributing code used to specify locations of the external
 files included in the 1.10.0 release. 
@@ -15,7 +15,6 @@ Threading library included in the 1.8.6 release.
 
 John A. Biddiscombe, Mike Jackson, and Sean McBride for contributing and
 testing CMake code included in the HDF5 1.8.5 distribution.
-
 
 The HDF5 community for helping shape the development of HDF5 by contributing
 bug reports and patches, joining in on forum discussions, and continually
