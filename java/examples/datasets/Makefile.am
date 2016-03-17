@@ -23,7 +23,7 @@ include $(top_srcdir)/config/commence.am
 # Mark this directory as part of the JNI API
 JAVA_API=yes
 
-JAVAROOT = .classes
+JAVAROOT = $(top_builddir)/.classes
 
 classes:
 	$(MKDIR_P) $(@D)/$(JAVAROOT)

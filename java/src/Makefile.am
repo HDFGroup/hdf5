@@ -30,7 +30,7 @@ JAVA_API=yes
 
 SUBDIRS=jni
 
-JAVAROOT = .classes
+JAVAROOT = $(top_builddir)/.classes
 
 classes:
 	$(MKDIR_P) $(@D)/$(JAVAROOT)
