@@ -216,7 +216,7 @@ This release supports the following features:
      - Regarding #ifdef VLPT_REMOVED
 
       The #ifdef VLPT_REMOVED blocks are removed from the PT library source
-      except the following cases:
+      except the following functions:
       + H5PTis_varlen() is made available again.
       + H5PTfree_vlen_readbuff() now became H5PTfree_vlen_buff()
 
@@ -235,26 +235,26 @@ This release supports the following features:
 
      - New public functions
 
-      Two accessor wrappers to class PacketTable, per HDFFV-8623/patch 004.
+      Two accessor wrappers are added to class PacketTable, per HDFFV-8623/patch 004.
 	/* Returns the ID of the dataset associated with the packet table  */
 	   hid_t PacketTable::GetDataset()
 
-	/* Returns the ID of the datatype the packet table uses */
-	   hid_t PacketTable::GetDataset()
+	/* Returns the ID of the datatype that the packet table uses */
+	   hid_t PacketTable::GetDatatype()
 
-        (BMR, 2016/03/04, HDFFV-8623)
+      (BMR, 2016/03/04, HDFFV-8623)
 
      - Member functions having "char*" as an argument
 
       Overloaded functions were added to provide "const char*" argument, the
-      existing version will be deprecated.
+      existing version will be deprecated in future releases.
 
-        (BMR, 2016/03/04)
+      (BMR, 2016/03/04)
 
      - Regarding #ifdef VLPT_REMOVED
 
       The #ifdef VLPT_REMOVED blocks are removed from the PT library source
-      except the following cases:
+      except the following functions:
 	+ VL_PacketTable::IsVariableLength() is moved to PacketTable
 	+ VL_PacketTable::FreeReadBuff() now became PacketTable::FreeBuff()
 
