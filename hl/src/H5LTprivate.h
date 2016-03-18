@@ -42,14 +42,7 @@ H5_HLDLL herr_t  H5LT_set_attribute_string( hid_t dset_id,
                                  const char *name,
                                  const char *buf );
 
-
-H5_HLDLL herr_t H5LT_set_attribute_string_ff(hid_t dset_id,
-                                 const char *name,
-					     const char *buf, hid_t rc_id, hid_t tr_id, hid_t estack_id, int has_attr  );
-
-H5_HLDLL herr_t H5LT_find_attribute( hid_t loc_id, const char *name );
-
-H5_HLDLL herr_t H5LT_find_attribute_ff( hid_t loc_id, const char* attr_name, hid_t rc_id, hid_t estack_id);
+H5_HLDLL herr_t  H5LT_find_attribute( hid_t loc_id, const char *name );
 
 
 H5_HLDLL char* H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang,
