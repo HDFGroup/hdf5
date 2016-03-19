@@ -89,14 +89,10 @@ typedef herr_t (*H5A_operator_ff_t)(hid_t location_id, const char *attr_name, co
 /* Prototype for H5Ovisit_ff/H5Ovisit_by_name_ff() operator */
 typedef herr_t (*H5O_iterate_ff_t)(hid_t obj, const char *name, const H5O_ff_info_t *info,
                                    void *op_data, hid_t rcxt_id);
-#if 0
+
 /* Prototype for H5Literate_ff/H5Literate_by_name_ff() operator */
 typedef herr_t (*H5L_iterate_ff_t)(hid_t obj, const char *name, const H5L_ff_info_t *info,
                                    void *op_data, hid_t rcxt_id);
-
-herr_t H5Literate_ff(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
-                     H5L_iterate_ff_t op, void *op_data, hid_t rcxt_id, hid_t estack_id);
-#endif
 
 /* API wrappers */
 H5_DLL hid_t H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl,
@@ -184,6 +180,16 @@ H5_DLL herr_t H5Lget_info_ff(hid_t link_loc_id, const char *link_name, H5L_ff_in
                              hid_t lapl_id, hid_t rcxt_id, hid_t estack_id);
 H5_DLL herr_t H5Lget_val_ff(hid_t link_loc_id, const char *link_name, void *linkval_buff, 
                             size_t size, hid_t lapl_id, hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Literate_ff(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
+                            H5L_iterate_ff_t op, void *op_data, hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Literate_by_name_ff(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+                                    H5_iter_order_t order, hsize_t *idx, H5L_iterate_ff_t op, void *op_data, 
+                                    hid_t lapl_id, hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Lvisit_ff(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
+                          H5L_iterate_ff_t op, void *op_data, hid_t rcxt_id, hid_t estack_id);
+H5_DLL herr_t H5Lvisit_by_name_ff(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+                                  H5_iter_order_t order, H5L_iterate_ff_t op, void *op_data, 
+                                  hid_t lapl_id, hid_t rcxt_id, hid_t estack_id);
 
 H5_DLL hid_t H5Oopen_ff(hid_t loc_id, const char *name, hid_t lapl_id, hid_t rcxt_id);
 H5_DLL hid_t H5Oopen_by_addr_ff(hid_t loc_id, haddr_ff_t addr, hid_t rcxt_id);

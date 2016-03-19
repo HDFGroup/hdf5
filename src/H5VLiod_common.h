@@ -74,11 +74,11 @@ extern hg_id_t H5VL_DTYPE_OPEN_ID;
 extern hg_id_t H5VL_DTYPE_CLOSE_ID;
 extern hg_id_t H5VL_LINK_CREATE_ID;
 extern hg_id_t H5VL_LINK_MOVE_ID;
-//extern hg_id_t H5VL_LINK_ITERATE_ID;
 extern hg_id_t H5VL_LINK_EXISTS_ID;
 extern hg_id_t H5VL_LINK_GET_INFO_ID;
 extern hg_id_t H5VL_LINK_GET_VAL_ID;
 extern hg_id_t H5VL_LINK_REMOVE_ID;
+extern hg_id_t H5VL_LINK_ITERATE_ID;
 extern hg_id_t H5VL_OBJECT_OPEN_BY_TOKEN_ID;
 extern hg_id_t H5VL_OBJECT_OPEN_ID;
 extern hg_id_t H5VL_OBJECT_OPEN_BY_ADDR_ID;
@@ -205,6 +205,13 @@ typedef struct obj_iterate_t {
     H5O_ff_info_t *oinfos;
 } obj_iterate_t;
 
+typedef struct link_iterate_t {
+    int32_t ret;
+    uint32_t num_objs;
+    const char **paths;
+    H5L_ff_info_t *linfos;
+} link_iterate_t;
+
 typedef struct attr_iterate_t {
     int32_t ret;
     uint32_t num_attrs;
@@ -283,7 +290,7 @@ H5_DLL int H5VL_iod_server_link_exists(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_get_info(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_get_val(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_link_remove(hg_handle_t handle);
-//H5_DLL int H5VL_iod_server_link_iterate(hg_handle_t handle);
+H5_DLL int H5VL_iod_server_link_iterate(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_open_by_token(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_open(hg_handle_t handle);
 H5_DLL int H5VL_iod_server_object_open_by_addr(hg_handle_t handle);
@@ -333,6 +340,7 @@ H5_DLL int hg_proc_region_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_obj_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_attr_info_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_obj_iterate_t(hg_proc_t proc, void *data);
+H5_DLL int hg_proc_link_iterate_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_attr_iterate_t(hg_proc_t proc, void *data);
 H5_DLL int hg_proc_dset_multi_io_list_t(hg_proc_t proc, void *data);
 
@@ -790,7 +798,10 @@ MERCURY_GEN_PROC(link_op_in_t,
                  ((uint64_t)(trans_num))
                  ((iod_handle_t)(coh))
                  ((iod_handles_t)(loc_oh)) 
-                 ((iod_obj_id_t)(loc_id)) 
+                 ((iod_obj_id_t)(loc_id))
+                 ((iod_obj_id_t)(loc_mdkv_id))
+                 ((iod_obj_id_t)(loc_attrkv_id))
+                 ((hbool_t)(recursive))
                  ((hg_const_string_t)(path)))
 MERCURY_GEN_PROC(link_get_val_in_t, 
                  ((axe_t)(axe_info))

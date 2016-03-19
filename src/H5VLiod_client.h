@@ -65,11 +65,11 @@ typedef enum H5RQ_type_t {
     HG_DTYPE_CLOSE,
     HG_LINK_CREATE,
     HG_LINK_MOVE,
-    //HG_LINK_ITERATE,
     HG_LINK_EXISTS,
     HG_LINK_GET_INFO,
     HG_LINK_GET_VAL,
     HG_LINK_REMOVE,
+    HG_LINK_ITERATE,
     HG_MAP_CREATE,
     HG_MAP_OPEN,
     HG_MAP_SET,
@@ -443,6 +443,17 @@ typedef struct H5VL_iod_attr_iter_info_t {
     hid_t loc_id;
     attr_iterate_t *output;
 } H5VL_iod_attr_iter_info_t;
+
+typedef struct H5VL_iod_link_iter_info_t {
+    H5_index_t idx_type;
+    H5_iter_order_t order;
+    hsize_t *idx;
+    H5L_iterate_ff_t op;
+    void *op_data;
+    hid_t rcxt_id;
+    hid_t loc_id;
+    link_iterate_t *output;
+} H5VL_iod_link_iter_info_t;
 
 #ifdef H5_HAVE_INDEXING
 /* information about a dataset write request */

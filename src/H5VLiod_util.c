@@ -22,9 +22,6 @@
 
 #ifdef H5_HAVE_EFF
 
-static H5I_type_t H5VL__iod_get_h5_obj_type(iod_obj_id_t oid, iod_handle_t coh, 
-                                            iod_trans_id_t rtid, uint32_t cs_scope);
-
 /*
  * Programmer:  Mohamad Chaarawi <chaarawi@hdfgroup.gov>
  *              February, 2013
@@ -1323,7 +1320,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static H5I_type_t 
+H5I_type_t 
 H5VL__iod_get_h5_obj_type(iod_obj_id_t oid, iod_handle_t coh, iod_trans_id_t rtid, uint32_t cs_scope)
 {
     iod_handle_t mdkv_oh, oh;

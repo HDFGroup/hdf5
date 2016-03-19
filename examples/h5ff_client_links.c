@@ -9,6 +9,37 @@
 #include "mpi.h"
 #include "hdf5.h"
 
+static herr_t
+iterate_cb(hid_t oid, const char *name,
+           const H5L_ff_info_t *linfo, void *udata, hid_t rcxt_id)
+{
+    hid_t obj_id;
+
+    printf("----------------------------------------\n");
+    printf("Link Name %s\n", name);
+
+    switch(linfo->type) {
+    case H5L_TYPE_HARD:
+        fprintf(stderr, "HARD LINK with IOD ID %"PRIx64"\n", linfo->u.address);
+        break;
+    case H5L_TYPE_SOFT:
+        fprintf(stderr, "SOFT LINK with value size: %zu\n", linfo->u.val_size);
+        break;
+    default:
+        fprintf(stderr, "Unexpected result from lget_info\n");
+        exit(1);
+    }
+
+    if(linfo->type == H5L_TYPE_HARD && strcmp(name, ".") != 0) {
+        obj_id = H5Oopen_ff(oid, name, H5P_DEFAULT, rcxt_id);
+        assert(obj_id > 0);
+
+        assert(H5Oclose_ff(obj_id, H5_EVENT_STACK_NULL) == 0);
+    }
+    printf("----------------------------------------\n");
+    return 0;
+}
+
 int main(int argc, char **argv) {
     char file_name[50];
     hid_t file_id;
@@ -224,12 +255,25 @@ int main(int argc, char **argv) {
         assert(rid3 > 0);
     }
 
+    printf("H5Lvisit on /: \n");
+    ret = H5Lvisit_ff(file_id, 0, H5_ITER_NATIVE, iterate_cb, NULL, rid2, H5_EVENT_STACK_NULL);
+    assert(ret == 0);
+
+    printf("H5Literate on /: \n");
+    ret = H5Literate_ff(file_id, 0, H5_ITER_NATIVE, NULL, iterate_cb, NULL, rid2, H5_EVENT_STACK_NULL);
+    assert(ret == 0);
+
     /* Try and open the dataset. This is asynchronous. */
     did2 = H5Dopen_ff(file_id,"G4/G5/newD1", H5P_DEFAULT, rid3, e_stack);
     assert(did2);
 
     gid4 = H5Gopen_ff(file_id, "G4", H5P_DEFAULT, rid3, e_stack);
     assert(gid4);
+
+    printf("H5Literate_by_name on : /G1/G2/G3\n");
+    ret = H5Literate_by_name_ff(file_id, "/G1/G2/G3", 0, H5_ITER_NATIVE, NULL, iterate_cb, NULL, 
+                                H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
+    assert(ret == 0);
 
     {
         H5L_ff_info_t linfo;

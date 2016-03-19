@@ -317,6 +317,10 @@ H5_DLL void H5VL_iod_server_link_remove_cb(AXE_engine_t axe_engine,
                                            size_t num_n_parents, AXE_task_t n_parents[], 
                                            size_t num_s_parents, AXE_task_t s_parents[], 
                                            void *op_data);
+H5_DLL void H5VL_iod_server_link_iterate_cb(AXE_engine_t axe_engine, 
+                                            size_t num_n_parents, AXE_task_t n_parents[], 
+                                            size_t num_s_parents, AXE_task_t s_parents[], 
+                                            void *op_data);
 
 H5_DLL void H5VL_iod_server_object_open_by_token_cb(AXE_engine_t axe_engine, 
                                                     size_t num_n_parents, AXE_task_t n_parents[], 
@@ -453,7 +457,8 @@ H5_DLL herr_t H5VL_iod_server_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod
 H5_DLL herr_t H5VL_iod_server_visit(iod_handle_t coh, iod_obj_id_t obj_id, iod_handle_t obj_oh, 
                                     const char *path, uint32_t cs_scope, iod_trans_id_t rtid, 
                                     H5VL_visit_op_t op, void *op_data);
-
+H5_DLL H5I_type_t H5VL__iod_get_h5_obj_type(iod_obj_id_t oid, iod_handle_t coh, 
+                                            iod_trans_id_t rtid, uint32_t cs_scope);
 H5_DLL herr_t H5VL__iod_get_query_data_cb(void *elem, hid_t type_id, unsigned ndim, 
                                           const hsize_t *point, void *_udata);
 

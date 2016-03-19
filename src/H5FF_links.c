@@ -767,7 +767,7 @@ H5Lget_val_ff(hid_t loc_id, const char *name, void *buf, size_t size,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lget_val_ff() */
-#if 0
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Literate
@@ -786,7 +786,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Literate_ff(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
+H5Literate_ff(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
             H5L_iterate_ff_t op, void *op_data, hid_t rcxt_id, hid_t H5_ATTR_UNUSED estack_id)
 {
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
@@ -806,10 +806,10 @@ H5Literate_ff(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(obj_id);
+    loc_params.obj_type = H5I_get_type(loc_id);
 
     /* get the location object */
-    if(NULL == (obj = H5VL_get_object(obj_id)))
+    if(NULL == (obj = H5VL_get_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* store the transaction ID in the dxpl */
@@ -819,9 +819,9 @@ H5Literate_ff(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
     /* iterate over the objects through the VOL */
-    if((ret_value = H5VL_object_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                         H5VL_OBJECT_ITERATE, dxpl_id, H5_REQUEST_NULL, 
-                                         idx_type, order, op, op_data)) < 0)
+    if((ret_value = H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls,
+                                         H5VL_LINK_ITER, dxpl_id, H5_REQUEST_NULL, FALSE,
+                                         idx_type, order, idx, op, op_data)) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -847,6 +847,135 @@ done:
  */
 herr_t
 H5Literate_by_name_ff(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+                      H5_iter_order_t order, hsize_t *idx, H5L_iterate_ff_t op, void *op_data, 
+                      hid_t lapl_id, hid_t rcxt_id, hid_t H5_ATTR_UNUSED estack_id)
+{
+    H5VL_object_t    *obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t loc_params; 
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    herr_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(!obj_name || !*obj_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order != H5_ITER_NATIVE)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Only H5_ITER_NATIVE iteration order is supported")
+    if(!op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
+    if(H5P_DEFAULT == lapl_id)
+        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    loc_params.type = H5VL_OBJECT_BY_NAME;
+    loc_params.loc_data.loc_by_name.name = obj_name;
+    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the location object */
+    if(NULL == (obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
+    /* iterate over the links through the VOL */
+    if((ret_value = H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                       H5VL_LINK_ITER, dxpl_id, H5_REQUEST_NULL, 
+                                       FALSE, idx_type, order, idx, op, op_data)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Literate_by_name_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Lvisit
+ *
+ * Purpose:	FFwd version of H5Lvisit. 
+ *              For now iteration is done in native order.
+ *
+ * Return:	Success:	The return value of the first operator that
+ *				returns non-zero, or zero if all members were
+ *				processed with no operator returning non-zero.
+ *
+ *		Failure:	Negative if something goes wrong within the
+ *				library, or the negative value returned by one
+ *				of the operators.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Lvisit_ff(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order,
+            H5L_iterate_ff_t op, void *op_data, hid_t rcxt_id, hid_t H5_ATTR_UNUSED estack_id)
+{
+    H5VL_object_t    *obj = NULL;        /* object token of loc_id */
+    H5VL_loc_params_t loc_params;
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    herr_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check args */
+    if(idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
+    if(order != H5_ITER_NATIVE)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Only H5_ITER_NATIVE iteration order is supported")
+    if(!op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the location object */
+    if(NULL == (obj = H5VL_get_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
+    /* iterate over the links through the VOL */
+    if((ret_value = H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                       H5VL_LINK_ITER, dxpl_id, H5_REQUEST_NULL, 
+                                       TRUE, idx_type, order, NULL, op, op_data)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visit failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Lvisit_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Lvisit_by_name_ff
+ *
+ * Purpose:	FFwd version of H5Lvisit_by_name. 
+ *              For now iteration is done in native order.
+ *
+ * Return:	Success:	The return value of the first operator that
+ *				returns non-zero, or zero if all members were
+ *				processed with no operator returning non-zero.
+ *
+ *		Failure:	Negative if something goes wrong within the
+ *				library, or the negative value returned by one
+ *				of the operators.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Lvisit_by_name_ff(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
                     H5_iter_order_t order, H5L_iterate_ff_t op, void *op_data, 
                     hid_t lapl_id, hid_t rcxt_id, hid_t H5_ATTR_UNUSED estack_id)
 {
@@ -888,13 +1017,12 @@ H5Literate_by_name_ff(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
 
-    /* iterate over the objects through the VOL */
-    if((ret_value = H5VL_object_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                         H5VL_OBJECT_ITERATE, dxpl_id, H5_REQUEST_NULL, 
-                                         idx_type, order, op, op_data)) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "link iteration failed")
+    /* iterate over the links through the VOL */
+    if((ret_value = H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                       H5VL_LINK_ITER, dxpl_id, H5_REQUEST_NULL, 
+                                       TRUE, idx_type, order, NULL, op, op_data)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visit failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Literate_by_name_ff() */
-#endif
+} /* end H5Lvisit_by_name_ff() */

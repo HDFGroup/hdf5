@@ -1208,6 +1208,92 @@ int hg_proc_obj_iterate_t(hg_proc_t proc, void *data)
     return ret;
 }
 
+int hg_proc_link_iterate_t(hg_proc_t proc, void *data)
+{
+    int ret = HG_SUCCESS;
+    unsigned i;
+    hg_proc_op_t op;
+    link_iterate_t *iterate_str = (link_iterate_t *) data;
+
+    ret = hg_proc_int32_t(proc, &iterate_str->ret);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+
+    ret = hg_proc_uint32_t(proc, &iterate_str->num_objs);
+    if (ret != HG_SUCCESS) {
+        HG_ERROR_DEFAULT("Proc error");
+        ret = HG_FAIL;
+        return ret;
+    }
+    op = hg_proc_get_op(proc);
+
+    switch(op) {
+    case HG_ENCODE:
+        for(i=0 ; i<iterate_str->num_objs ; i++) {
+            ret = hg_proc_hg_const_string_t(proc, &(iterate_str->paths[i]));
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+            ret = hg_proc_linfo_t(proc, &iterate_str->linfos[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_DECODE:
+        if(iterate_str->num_objs) {
+            iterate_str->linfos = (H5O_ff_info_t *)calloc(iterate_str->num_objs, sizeof(H5O_ff_info_t));
+            iterate_str->paths = (const char **)calloc(iterate_str->num_objs, sizeof(char *));
+        }
+        for(i=0 ; i<iterate_str->num_objs ; i++) {
+            ret = hg_proc_hg_const_string_t(proc, &(iterate_str->paths[i]));
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+            ret = hg_proc_linfo_t(proc, &iterate_str->linfos[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        break;
+    case HG_FREE:
+        for(i=0 ; i<iterate_str->num_objs ; i++) {
+            ret = hg_proc_hg_const_string_t(proc, &(iterate_str->paths[i]));
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+            ret = hg_proc_linfo_t(proc, &iterate_str->linfos[i]);
+            if (ret != HG_SUCCESS) {
+                HG_ERROR_DEFAULT("Proc error");
+                ret = HG_FAIL;
+                return ret;
+            }
+        }
+        if(iterate_str->num_objs) {
+            free(iterate_str->paths);
+            free(iterate_str->linfos);
+        }
+        break;
+    default:
+        return HG_FAIL;
+    }
+
+    return ret;
+}
+
 int hg_proc_attr_iterate_t(hg_proc_t proc, void *data)
 {
     int ret = HG_SUCCESS;

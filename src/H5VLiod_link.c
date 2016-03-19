@@ -24,6 +24,9 @@
  * Purpose:	The IOD plugin server side link routines.
  */
 
+static herr_t H5VL__iod_link_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_handle_t obj_oh, 
+    const char *path, uint32_t cs_scope, iod_trans_id_t rtid, hbool_t recursive, void *udata);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5VL_iod_server_link_create_cb
@@ -930,5 +933,217 @@ done:
     }
         
 } /* end H5VL_iod_server_link_remove_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5VL_iod_server_link_iterate_cb
+ *
+ * Purpose:     iterates through all the objects under a group and 
+ *              gathers their paths and info.
+ *
+ * Return:	Success:	SUCCEED 
+ *		Failure:	Negative
+ *
+ * Programmer:  Mohamad Chaarawi
+ *              December, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL_iod_server_link_iterate_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine, 
+                                 size_t H5_ATTR_UNUSED num_n_parents, AXE_task_t H5_ATTR_UNUSED n_parents[], 
+                                 size_t H5_ATTR_UNUSED num_s_parents, AXE_task_t H5_ATTR_UNUSED s_parents[], 
+                                 void *_op_data)
+{
+    op_data_t *op_data = (op_data_t *)_op_data;
+    link_op_in_t *input = (link_op_in_t *)op_data->input;
+    link_iterate_t output;
+    iod_handle_t coh = input->coh;
+    iod_handles_t loc_oh = input->loc_oh;
+    iod_obj_id_t loc_id = input->loc_id;
+    iod_trans_id_t rtid = input->rcxt_num;
+    uint32_t cs_scope = input->cs_scope;
+    iod_handles_t obj_oh;
+    iod_obj_id_t obj_id;
+    const char *loc_name = input->path;
+    htri_t ret = -1;
+    herr_t ret_value = SUCCEED;
+
+#if H5_EFF_DEBUG
+    fprintf(stderr, "Start link iterate on %s (OH %"PRIu64" ID %"PRIx64")\n", 
+            loc_name, input->loc_oh.rd_oh.cookie, input->loc_id);
+#endif
+
+    /* Traverse Path and open object */
+    ret = H5VL_iod_server_open_path(coh, loc_id, loc_oh, loc_name, rtid, 
+                                    cs_scope, &obj_id, &obj_oh);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "can't open object");
+
+    output.num_objs = 0;
+    output.paths = NULL;
+    output.linfos = NULL;
+
+    ret = H5VL__iod_link_iterate(coh, obj_id, obj_oh.rd_oh, ".", cs_scope, rtid, input->recursive, &output);
+    if(ret != SUCCEED)
+        HGOTO_ERROR_FF(ret, "iterate objects failed");
+    {
+        int i ;
+        for(i=0 ; i<output.num_objs; i++)
+            printf("%d: type = %d\n", i, output.linfos[i].type);
+    }
+
+    if(loc_oh.rd_oh.cookie != obj_oh.rd_oh.cookie && 
+       iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't close object");
+
+done:
+    output.ret = ret_value;
+
+#if H5_EFF_DEBUG
+    fprintf(stderr, "Done with Link Iterate, sending response to client\n");
+#endif
+
+    HG_Handler_start_output(op_data->hg_handle, &output);
+
+    HG_Handler_free_input(op_data->hg_handle, input);
+    HG_Handler_free(op_data->hg_handle);
+
+    free(output.paths);
+    free(output.linfos);
+
+    input = (link_op_in_t *)H5MM_xfree(input);
+    op_data = (op_data_t *)H5MM_xfree(op_data);
+
+} /* end H5VL_iod_server_link_iterate_cb() */
+
+static herr_t 
+H5VL__iod_link_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_handle_t obj_oh, const char *path,
+                      uint32_t cs_scope, iod_trans_id_t rtid, hbool_t recursive, void *udata)
+{
+    link_iterate_t *out = (link_iterate_t *)udata;
+    H5I_type_t obj_type;
+    iod_ret_t ret = 0;
+    herr_t ret_value = SUCCEED;
+
+    /* Get the object type. */
+    if((obj_type = H5VL__iod_get_h5_obj_type(obj_id, coh, rtid, cs_scope)) < 0)
+        HGOTO_ERROR_FF(FAIL, "can't get object type");
+
+    /* if this is a group, iterate through links in that group */
+    if(H5I_GROUP == obj_type || H5I_FILE == obj_type) {
+        int num_entries = 0;
+        int cur_idx, u = 0;
+
+        ret = iod_kv_get_num(obj_oh, rtid, &num_entries, NULL);
+        if(ret != 0)
+            HGOTO_ERROR_FF(FAIL, "can't get number of KV entries");
+
+        if(0 != num_entries) {
+            int i;
+            iod_kv_params_t *kvs = NULL;
+            iod_kv_t *kv = NULL;
+            iod_checksum_t *oid_cs = NULL;
+            iod_ret_t *oid_ret = NULL;
+
+            /* add the current object to the output */
+            cur_idx = out->num_objs;
+            out->num_objs = out->num_objs + num_entries;
+            out->paths = (const char **)realloc(out->paths, sizeof(char *) * out->num_objs);
+            out->linfos = (H5L_ff_info_t *)realloc(out->linfos, sizeof(H5L_ff_info_t) * out->num_objs);
+
+            kvs = (iod_kv_params_t *)malloc(sizeof(iod_kv_params_t) * (size_t)num_entries);
+            kv = (iod_kv_t *)malloc(sizeof(iod_kv_t) * (size_t)num_entries);
+            oid_cs = (iod_checksum_t *)malloc(sizeof(iod_checksum_t) * (size_t)num_entries);
+            oid_ret = (iod_ret_t *)malloc(sizeof(iod_ret_t) * (size_t)num_entries);
+
+            for(i=0 ; i<num_entries ; i++) {
+                kv[i].key = malloc(IOD_KV_KEY_MAXLEN);
+                kv[i].key_len = IOD_KV_KEY_MAXLEN;
+                kvs[i].kv = &kv[i];
+                kvs[i].cs = &oid_cs[i];
+                kvs[i].ret = &oid_ret[i];
+            }
+
+            ret = iod_kv_list_key(obj_oh, rtid, NULL, 0, &num_entries, kvs, NULL);
+            if(ret != 0)
+                HGOTO_ERROR_FF(FAIL, "can't get list of keys");
+
+            u=cur_idx;
+
+            for(i=0 ; i<num_entries ; i++) {
+                H5VL_iod_link_t value;
+                iod_handle_t oh;
+                char cur_path[IOD_KV_KEY_MAXLEN];
+
+                /* lookup object in the current group */
+                ret = H5VL_iod_get_metadata(obj_oh, rtid, H5VL_IOD_LINK, 
+                                            (char *)(kv[i].key), cs_scope, NULL, &value);
+                if(SUCCEED != ret)
+                    HGOTO_ERROR_FF(ret, "failed to retrieve link value");
+
+                if(strcmp(path, ".")) {
+                    sprintf(cur_path, "%s/%s", path, ((char *)kv[i].key));
+                    out->paths[u] = strdup(cur_path);
+                }
+                else
+                    out->paths[u] = strdup((char *)(kv[i].key));
+
+                /* setup link info */
+                out->linfos[u].type = value.link_type;
+                out->linfos[u].cset = 0;
+                switch (out->linfos[u].type) {
+                case H5L_TYPE_HARD:
+                    out->linfos[u].u.address = value.u.iod_id;
+                    break;
+                case H5L_TYPE_SOFT:
+                    out->linfos[u].u.val_size = strlen(value.u.symbolic_name) + 1;
+                    break;
+                case H5L_TYPE_ERROR:
+                case H5L_TYPE_EXTERNAL:
+                case H5L_TYPE_MAX:
+                default:
+                    HGOTO_ERROR_FF(FAIL, "unsuppored link type");
+                }
+
+                if(recursive) {
+                    ret = iod_obj_open_read(coh, value.u.iod_id, rtid, NULL, &oh, NULL);
+                    if(ret < 0)
+                        HGOTO_ERROR_FF(ret, "can't open object for read");
+
+                    if(strcmp(path, "."))
+                        sprintf(cur_path, "%s/%s", path, ((char *)kv[i].key));
+                    else
+                        sprintf(cur_path, "%s", ((char *)kv[i].key));
+
+                    if(recursive) {
+                        ret = H5VL__iod_link_iterate(coh, value.u.iod_id, oh, cur_path, cs_scope, 
+                                                     rtid, recursive, udata);
+                        if(ret != SUCCEED)
+                            HGOTO_ERROR_FF(ret, "visit objects failed");
+                    }
+
+                    if(iod_obj_close(oh, NULL, NULL) < 0)
+                        HGOTO_ERROR_FF(FAIL, "can't close object");
+                }
+                u++;
+            }
+
+            for(i=0 ; i<num_entries ; i++) {
+                free(kv[i].key);
+            }
+
+            free(kv);
+            free(oid_cs);
+            free(oid_ret);
+            free(kvs);
+        }
+    }
+
+    ret_value = ret;
+
+done:
+    return ret_value;
+} /* H5VL__iod_link_iterate */
 
 #endif /* H5_HAVE_EFF */

@@ -1323,7 +1323,8 @@ EFF__mercury_register_callbacks(void)
                                              H5VL_iod_server_link_get_info);
     H5VL_LINK_GET_VAL_ID  = MERCURY_REGISTER("link_get_val", link_get_val_in_t, 
                                              link_get_val_out_t, H5VL_iod_server_link_get_val);
-    //H5VL_LINK_ITERATE_ID = MERCURY_REGISTER("link_iterate", link_op_in_t, ret_t);
+    H5VL_LINK_ITERATE_ID = MERCURY_REGISTER("link_iterate", link_op_in_t, link_iterate_t,  
+                                            H5VL_iod_server_link_iterate);
     H5VL_LINK_REMOVE_ID  = MERCURY_REGISTER("link_remove", link_op_in_t, ret_t,
                                             H5VL_iod_server_link_remove);
 
