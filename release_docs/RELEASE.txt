@@ -512,15 +512,92 @@ The following platforms are not supported but have been tested for this release.
                                   g++ (GCC) 4.9.2 20141030 (Cray Inc.)
 
 
-Known Problems
-==============
-The problems reported for alpha releases were adressed in the HDF5 1.10.0-pre1 release.
+Known Problems and Limitations
+==============================
+Please contact help@hdfgroup.org if an issue found is not listed here.
 
-There are no known problems for the newly released features listed in the "New Features"
-section of this document. 
 
-We didn't verify that the known problems listed in the RELEASE.txt version HDF5 1.8.16 are
-still valid. This section will be updated for the final release of HDF5 1.10.0.
+ - SWMR feature
+   SWMR feature will work only if an HDF5 file uner SWMR access resides on 
+   the file systems that obey POSIX write() semantics. SWMR will not work on 
+   the network file systems (e.g., NFS, SMB/Windows file shares), since 
+   those systems do not guarantee write odering. SWMR regression tests will 
+   fail if run on a network file system.
+   (EIP - 2016-03-20)
+
+ - VDS feature
+   Currently, the path to a VDS source file is interpreted as relative to the
+   directory where the executable program runs and not to the HDF5 file with 
+   the VDS dataset unless a full path to the source file is specified during 
+   the mapping. 
+   (EIP - 2016-03-20 - HDFFV-9724)
+
+ - On Windows platforms in debug configurations, the VFD flush1 tests will 
+   fail with the split and multi VFD drivers. These tests will display a 
+   modal debug dialog which must be answered or wait for the test timeout 
+   to expire.
+   (ADB - 2014/06/23 - HDFFV-8851)
+
+ - CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
+   catches some undefined behavior in the alignment algorithm of the macro
+   DETECT_I in H5detect.c.  Since the algorithm is trying to detect the 
+   alignment of integers, ideally the flag -fcatch-undefined-behavior
+   shouldn't to be used for H5detect.c. 
+   (SLU - 2013/10/16 - HDFFV-8147)
+   
+- The STDIO VFD does not work on some architectures, possibly due to 32/64
+  bit or large file issues.  The basic STDIO VFD test is known to fail on
+  64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
+  10.7.0.  The STDIO VFD test has been disabled while we investigate and
+  a fix should appear in a future release.
+  (DER - 2011/10/14 - HDFFV-8235)
+
+- h5diff can report inconsistent results when comparing datasets of enum type
+  that contain invalid values.  This is due to how enum types are handled in
+  the library and will be addressed in a future release.
+  (DER - 2011/10/14 - HDFFV-7527)
+
+- The links test can fail under the stdio VFD due to some issues with external
+  links.  This will be investigated and fixed in a future release.
+  (DER - 2011/10/14 - HDFFV-7768)
+
+- After the shared library support was fixed for some bugs, it was discovered
+  that "make prefix=XXX install" no longer works for shared libraries. It
+  still works correctly for static libraries. Therefore, if you want to
+  install the HDF5 shared libraries in a location such as /usr/local/hdf5,
+  you need to specify the location via the --prefix option during configure
+  time. E.g, ./configure --prefix=/usr/local/hdf5 ...
+  (AKC - 2011/05/07 - HDFFV-7583)
+
+- The parallel test, t_shapesame, in testpar/, may run for a long time and may
+  be terminated by the alarm signal.  If that happens, one can increase the
+  alarm seconds (default is 1200 seconds = 20 minutes) by setting the
+  environment variable, $HDF5_ALARM_SECONDS, to a larger value such as 3600
+  (60 minutes).  Note that the t_shapesame test may fail in some systems
+  (see the "While working on the 1.8.6 release..." problem below).  If
+  it does, it will waste more time if $HDF5_ALARM_SECONDS is set
+  to a larger value.
+  (AKC - 2011/05/07)
+
+- Shared Fortran libraries are not working on AIX. While they are
+  generated when --enable-shared is specified, the Fortran and HL/Fortran
+  tests fail. HL and C++ shared libraries should now be working as intended,
+  however.
+  (MAM - 2011/04/20)
+
+- While working on the 1.8.6 release of HDF5, a bug was discovered that can
+  occur when reading from a dataset in parallel shortly after it has been
+  written to collectively. The issue was exposed by a new test in the parallel
+  HDF5 test suite, but had existed before that. We believe the problem lies
+  with certain MPI implementations and/or file systems.
+
+  We have provided a pure MPI test program, as well as a standalone HDF5
+  program, that can be used to determine if this is an issue on your system.
+  They should be run across multiple nodes with a varying number of processes.
+  These programs can be found at:
+  http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
+  (NAF - 2011/01/19)
+
 
 
 
