@@ -2,18 +2,22 @@ HDF5 version 1.10.0-pre2 currently under development
 ================================================================================
 
 
+
 INTRODUCTION
 
 This document describes the differences between HDF5-1.8.* and
 HDF5 1.10.0 release, and contains information on the platforms
 tested.
 
-
 Links to HDF5 1.10.0 source code can be found on The HDF Group's
 development FTP server at the following location:
-     http://www.hdfgroup.org/HDF5/release/obtain5110.html
+
+    http://www.hdfgroup.org/HDF5/release/obtain5110.html
+
 User documentation be accessed directly at this location:
-     http://www.hdfgroup.org/HDF5/docNewFeatures/
+
+    http://www.hdfgroup.org/HDF5/docNewFeatures/
+
 For more information, see the HDF5 home page:
 
     http://www.hdfgroup.org/HDF5/
@@ -23,6 +27,7 @@ If you have any questions or comments, please send them to the HDF Help Desk:
     help@hdfgroup.org
 
 
+
 CONTENTS
 
 - New Features
@@ -30,6 +35,7 @@ CONTENTS
 - Tested Configuration Features Summary
 - More Tested Platforms
 - Known Problems
+
 
 
 New Features
@@ -257,86 +263,123 @@ This release supports the following features:
       except the following functions:
 	+ VL_PacketTable::IsVariableLength() is moved to PacketTable
 	+ VL_PacketTable::FreeReadBuff() now became PacketTable::FreeBuff()
-
-        (BMR, 2016/03/04, HDFFV-442)
-
-
-    Java wrapper library
+      
+      (BMR, 2016/03/04, HDFFV-442)
+      
+      
+      
+    Java Wrapper Library
     --------------------
-
-    Java HDF5 JNI library has been integrated into the HDF5 repo, the configure 
-    option is "--enable-java" and the CMake option is HDF5_BUILD_JAVA:BOOL=ON.
-    The package hierarchy has changed from the HDF5 1.8 JNI, which was 
-    "ncsa.hdf.hdflib.hdf5", to HDF5 1.10, "hdf.hdflib.hdf5".
-
-    Also there are a number of new APIs added, including those for VDS and SWMR.
-
-    Other important changes:
+    
+    The Java HDF5 JNI library has been integrated into the HDF5 repository. 
+    The configure option is "--enable-java" and the CMake option is 
+    HDF5_BUILD_JAVA:BOOL=ON. The package hierarchy has changed from the 
+    HDF5 1.8 JNI, which was "ncsa.hdf.hdflib.hdf5", to HDF5 1.10, 
+    "hdf.hdflib.hdf5".
+    
+    A number of new APIs were added including some for VDS and SWMR.
+    
+    
+    
+    Other Important Changes
     -----------------------
-
-    hid_t type was changed from 32-bit to a 64-bit value.
+    
+    The hid_t type was changed from 32-bit to a 64-bit value.
+    
+    
     
     Documentation
     -------------
     See http://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesSwmrDocs.html#Tools
-
-
-Issues Addressed in this Release since alpha1
+    
+    
+    
+Issues Addressed in this Release Since alpha1
 =============================================
 
-     - Wrong settings returned for a dataset access property list.  
- 
-       One couldn't get the correct access property setting with the following functions calls
-       H5Pget_virtual_printf_gap
-       H5Pget_virtual_view
-       H5Pget_efile_prefix
-
-       when a dataset access property list was obtained from H5Dget_access_plist(). Fixed. 
-       (DER and NAF 2016-03-14 HDFFV-9716)
-
-     - h5dump segfaulted when provided with invalid arguments or when optional aruments are last option
-       on command line. 
+     - H5Pget_virtual_printf_gap, H5Pget_virtual_view, H5Pget_efile_prefix
        
-       When h5dump was provided with the name of a non existing file or when optional arguments were the
-       last option on the command line, h5dump failed. Fixed.
-       (ADB 2016-02-28 HDFFV-9639, HDFFV-9684)
+       The correct access property list settings from the 
+       H5Pget_virtual_printf_gap, H5Pget_virtual_view, and 
+       H5Pget_efile_prefix function calls could not be retrieved 
+       using H5Dget_access_plist().
+       
+       Fixed. 
+       
+       (DER and NAF - 2016/03/14, HDFFV-9716)
 
-     - HDF5 library segfaults on a corrupted file.
+     - h5dump 
+       
+       When h5dump was provided with the name of a non-existing file or 
+       when optional arguments were the last option on the command line, 
+       h5dump would segfault. 
+       
+       Fixed.
+       
+       (ADB 2016/02/28 HDFFV-9639, HDFFV-9684)
 
-       The HDF5 library didn't propagate an error when encounting a corruped metadata in an HDF5 file.
-       The issue was fixed for a specific filei porvided by a user. If you still see the problem, 
+     - No Error Message for Corrupt Metadata
+
+       The HDF5 Library did not propagate an error when it encountered 
+       corrupt metadata in an HDF5 file. The issue was fixed for a 
+       specific file provided by a user. If you still see the problem, 
        please contact help@hdfgroup.org 
-       (MC 2016-02-18 HDFFV-9670)
-
-     - When the latest file format is used, and when a chunked dataset is created with a datatype with the size 
-       bigger than a chunk size, the data cannot be read back. 
        
-       The issue was reported for the chunked datasets with a string datatype, and was confirmed for other i
-       datatypes with the sizes bigger than the chunk size in bytes. Fixed.
-       (JM 2016-02-13 HDFFV-9672)
+       Fixed.
        
-     - Control over the location of the external files
+       (MC - 2016/02/18, HDFFV-9670)
 
-       New API H5Pset_efile_prefix was added to specify locations of the external files.
-       (DER 2016-02-04 HDFFV-8740)
-  
+     - Problem Reading Chunked Datasets with a String Datatype Larger 
+       Than the Chunk Size in Bytes
+       
+       When the latest file format was used and when a chunked dataset 
+       was created with a datatype with the size bigger than a chunk 
+       size, the data could not be read back. The issue was reported 
+       for chunked datasets with a string datatype and was confirmed 
+       for other datatypes with the sizes bigger than the chunk size in 
+       bytes. 
+       
+       Fixed.
+       
+       (JM - 2016/02/13, HDFFV-9672)
+       
+     - Control over the Location of External Files
+       
+       Users were unable to specify the locations of external files.
+       
+       Two APIs - H5Pget_efile_prefix and H5Pset_efile_prefix - were 
+       added so that users could specify the locations of external files.
+       
+       (DER - 2016/02/04, HDFFV-8740)
 
 
-     
-Issues Addressed in this Release since alpha0 
+
+Issues Addressed in this Release Since alpha0 
 =============================================
-    - h5format_convert tool didn't downgrade version of the superblock. Fixed. 
-      (EIP 2016-01-11)
+    - h5format_convert
+      
+      The h5format_convert tool did not downgrade the version of the 
+      superblock. 
+      
+      Fixed. The tool now will downgrade the version of the superblock.
+      
+      (EIP 2016/01/11)
 
-    - It was reported that alpha0 crashed when used with multiple threads. 
-      The issue exists in the HDF5 library versions 1.8 and 1.9. 
-      The problem is related to a shared file pointer used in the misc. data 
-      structures. The thread-safe library exposed paths in the library where 
-      file pointer became invalid. Alpha1 release contains the fixes for the specific 
-      use case as decribed in HDFFV-9643.
-      We will keep working on identifying other paths in the library with similar problem
-      and fixing the issue.  
-      (EIP 2016-01-15)
+    - Crashes with multiple threads: invalid pointers
+      
+      It was reported that alpha0 crashed when used with multiple 
+      threads. The issue exists in the HDF5 Library versions 1.8 and 
+      1.9. The problem is related to a shared file pointer used in some 
+      miscellaneous data structures. The thread-safe library exposed 
+      paths in the library where a file pointer became invalid. 
+      
+      The alpha1 release contains the fixes for the specific use case 
+      as described in HDFFV-9643. We will keep working on identifying 
+      and fixing other paths in the library with similar problems.  
+      
+      (EIP - 2016/01/15, HDFFV-9643)
+
+
 
 Supported Platforms
 ===================
@@ -411,6 +454,7 @@ They are built with the configure process unless specified otherwise.
     (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
 
 
+
 Tested Configuration Features Summary
 =====================================
 
@@ -468,6 +512,7 @@ Compiler versions for each platform are listed in the preceding
 "Supported Platforms" table.
 
 
+
 More Tested Platforms
 =====================
 The following platforms are not supported but have been tested for this release.
@@ -512,13 +557,14 @@ The following platforms are not supported but have been tested for this release.
                                   g++ (GCC) 4.9.2 20141030 (Cray Inc.)
 
 
+
 Known Problems and Limitations
 ==============================
 Please contact help@hdfgroup.org if an issue found is not listed here.
 
  - The VDS/SWMR test will fail with a segmentation fault if the library
    is built with --enable-using-memchecker.
-   (DER - 2016-03-21)
+   (DER - 2016/03/21)
 
  - SWMR feature
    SWMR feature will work only if an HDF5 file uner SWMR access resides on 
@@ -526,14 +572,14 @@ Please contact help@hdfgroup.org if an issue found is not listed here.
    the network file systems (e.g., NFS, SMB/Windows file shares), since 
    those systems do not guarantee write odering. SWMR regression tests will 
    fail if run on a network file system.
-   (EIP - 2016-03-20)
+   (EIP - 2016/03/20)
 
  - VDS feature
    Currently, the path to a VDS source file is interpreted as relative to the
    directory where the executable program runs and not to the HDF5 file with 
    the VDS dataset unless a full path to the source file is specified during 
    the mapping. 
-   (EIP - 2016-03-20 - HDFFV-9724)
+   (EIP - 2016/03/20 - HDFFV-9724)
 
  - On Windows platforms in debug configurations, the VFD flush1 tests will 
    fail with the split and multi VFD drivers. These tests will display a 
