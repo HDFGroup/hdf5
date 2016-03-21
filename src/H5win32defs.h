@@ -65,6 +65,8 @@ typedef __int64             h5_stat_size_t;
  */
 #define HDmemset(X,C,Z)     memset((void*)(X),C,Z)
 
+#endif /* H5_HAVE_VISUAL_STUDIO */
+
 struct timezone {
     int tz_minuteswest;
     int tz_dsttime;
@@ -89,8 +91,6 @@ extern "C" {
 #define HDgetlogin()        Wgetlogin()
 #define HDsnprintf          c99_snprintf /*varargs*/
 #define HDvsnprintf         c99_vsnprintf /*varargs*/
-
-#endif /* H5_HAVE_VISUAL_STUDIO */
 
 /* Non-POSIX functions */
 
