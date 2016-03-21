@@ -516,6 +516,9 @@ Known Problems and Limitations
 ==============================
 Please contact help@hdfgroup.org if an issue found is not listed here.
 
+ - The VDS/SWMR test will fail with a segmentation fault if the library
+   is built with --enable-using-memchecker.
+   (DER - 2016-03-21)
 
  - SWMR feature
    SWMR feature will work only if an HDF5 file uner SWMR access resides on 
