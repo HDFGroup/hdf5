@@ -15,8 +15,8 @@ iterate_cb(hid_t oid, const char *name,
 {
     hid_t obj_id;
 
-    printf("----------------------------------------\n");
-    printf("Link Name %s\n", name);
+    fprintf(stderr, "----------------------------------------\n");
+    fprintf(stderr, "Link Name %s\n", name);
 
     switch(linfo->type) {
     case H5L_TYPE_HARD:
@@ -36,7 +36,7 @@ iterate_cb(hid_t oid, const char *name,
 
         assert(H5Oclose_ff(obj_id, H5_EVENT_STACK_NULL) == 0);
     }
-    printf("----------------------------------------\n");
+    fprintf(stderr, "----------------------------------------\n");
     return 0;
 }
 
@@ -208,8 +208,11 @@ int main(int argc, char **argv) {
         } H5E_END_TRY;
         assert(did2 < 0);
 
-        /* release container version 1. This is async. */
+        /* release container version 2. This is async. */
         ret = H5RCrelease(rid2, e_stack);
+        assert(0 == ret);
+        /* release container version 1. This is async. */
+        ret = H5RCrelease(rid1, e_stack);
         assert(0 == ret);
 
         /* wait on all requests and print completion status */
@@ -232,10 +235,6 @@ int main(int argc, char **argv) {
         assert(H5Dclose_ff(did3, e_stack) == 0);
         version = 3;
 
-        /* release container version 1. This is async. */
-        ret = H5RCrelease(rid1, e_stack);
-        assert(0 == ret);
-
         /* wait on all requests and print completion status */
         H5ESget_count(e_stack, &num_events);
         H5ESwait_all(e_stack, &status);
@@ -244,7 +243,7 @@ int main(int argc, char **argv) {
         assert(status == H5ES_STATUS_SUCCEED);
     }
 
-    /* Leader tells other procs that container version 2 is acquired */
+    /* Leader tells other procs that container version 3 is acquired */
     MPI_Bcast(&version, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
     /* other processes just create a read context object; no need to
@@ -255,12 +254,17 @@ int main(int argc, char **argv) {
         assert(rid3 > 0);
     }
 
-    printf("H5Lvisit on /: \n");
-    ret = H5Lvisit_ff(file_id, 0, H5_ITER_NATIVE, iterate_cb, NULL, rid2, H5_EVENT_STACK_NULL);
+    fprintf(stderr, "H5Lvisit on /: \n");
+    ret = H5Lvisit_ff(file_id, 0, H5_ITER_NATIVE, iterate_cb, NULL, rid3, H5_EVENT_STACK_NULL);
     assert(ret == 0);
-
-    printf("H5Literate on /: \n");
-    ret = H5Literate_ff(file_id, 0, H5_ITER_NATIVE, NULL, iterate_cb, NULL, rid2, H5_EVENT_STACK_NULL);
+    MPI_Barrier(MPI_COMM_WORLD);
+    fprintf(stderr, "H5Literate on /: \n");
+    ret = H5Literate_ff(file_id, 0, H5_ITER_NATIVE, NULL, iterate_cb, NULL, rid3, H5_EVENT_STACK_NULL);
+    assert(ret == 0);
+    MPI_Barrier(MPI_COMM_WORLD);
+    fprintf(stderr, "H5Literate_by_name on : /G1/G2/G3\n");
+    ret = H5Literate_by_name_ff(file_id, "/G1/G2/G3", 0, H5_ITER_NATIVE, NULL, iterate_cb, NULL, 
+                                H5P_DEFAULT, rid3, H5_EVENT_STACK_NULL);
     assert(ret == 0);
 
     /* Try and open the dataset. This is asynchronous. */
@@ -269,11 +273,6 @@ int main(int argc, char **argv) {
 
     gid4 = H5Gopen_ff(file_id, "G4", H5P_DEFAULT, rid3, e_stack);
     assert(gid4);
-
-    printf("H5Literate_by_name on : /G1/G2/G3\n");
-    ret = H5Literate_by_name_ff(file_id, "/G1/G2/G3", 0, H5_ITER_NATIVE, NULL, iterate_cb, NULL, 
-                                H5P_DEFAULT, rid2, H5_EVENT_STACK_NULL);
-    assert(ret == 0);
 
     {
         H5L_ff_info_t linfo;

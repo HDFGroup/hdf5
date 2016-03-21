@@ -987,11 +987,6 @@ H5VL_iod_server_link_iterate_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
     ret = H5VL__iod_link_iterate(coh, obj_id, obj_oh.rd_oh, ".", cs_scope, rtid, input->recursive, &output);
     if(ret != SUCCEED)
         HGOTO_ERROR_FF(ret, "iterate objects failed");
-    {
-        int i ;
-        for(i=0 ; i<output.num_objs; i++)
-            printf("%d: type = %d\n", i, output.linfos[i].type);
-    }
 
     if(loc_oh.rd_oh.cookie != obj_oh.rd_oh.cookie && 
        iod_obj_close(obj_oh.rd_oh, NULL, NULL) < 0)
@@ -1106,7 +1101,7 @@ H5VL__iod_link_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_handle_t obj_o
                     HGOTO_ERROR_FF(FAIL, "unsuppored link type");
                 }
 
-                if(recursive) {
+                if(recursive && H5L_TYPE_HARD == out->linfos[u].type) {
                     ret = iod_obj_open_read(coh, value.u.iod_id, rtid, NULL, &oh, NULL);
                     if(ret < 0)
                         HGOTO_ERROR_FF(ret, "can't open object for read");
@@ -1116,12 +1111,10 @@ H5VL__iod_link_iterate(iod_handle_t coh, iod_obj_id_t obj_id, iod_handle_t obj_o
                     else
                         sprintf(cur_path, "%s", ((char *)kv[i].key));
 
-                    if(recursive) {
-                        ret = H5VL__iod_link_iterate(coh, value.u.iod_id, oh, cur_path, cs_scope, 
-                                                     rtid, recursive, udata);
-                        if(ret != SUCCEED)
-                            HGOTO_ERROR_FF(ret, "visit objects failed");
-                    }
+                    ret = H5VL__iod_link_iterate(coh, value.u.iod_id, oh, cur_path, cs_scope, 
+                                                 rtid, recursive, udata);
+                    if(ret != SUCCEED)
+                        HGOTO_ERROR_FF(ret, "visit objects failed");
 
                     if(iod_obj_close(oh, NULL, NULL) < 0)
                         HGOTO_ERROR_FF(FAIL, "can't close object");
