@@ -275,7 +275,47 @@ CONTENTS
 
             $ CC=/usr/local/mpi/bin/mpicc ./configure
 
-4.3.3. Configuring for 64-bit support
+4.3.3. Debug vs. production builds
+
+        The HDF5 library can be built in either debug or production mode.
+        The primary difference between these in HDF5 1.10.0 is that each
+        mode specifies different default values for other configure options
+        such as --enable-symbols.
+
+        To build in debug mode:
+
+            $ ./configure --enable-build-mode=debug
+
+        To build in production mode:
+
+            $ ./configure --enable-build-mode=production
+
+        To build in clean mode:
+
+            $ ./configure --enable-build-mode=clean
+
+        "Clean mode" is a minimalist configuration. e.g., no symbols, no
+        optimization, etc.
+
+        Previously, --enable-debug and --enable-production were used to
+        configure the build mode. Since the new options have somewhat
+        different semantics from these original options, these older
+        options have been deprecated and will cause the configuration
+        step to abort if used.
+
+        Release branches and distributions (e.g, HDF5 1.10.0) are set to
+        build in production mode by default. All other branches and
+        distributions (e.g., trunk, snapshots, HDF5 1.10 development branch)
+        will build in debug mode by default.
+
+        Assertions and other low-overhead sanity checks are controlled
+        separately via the --enable-asserts option (which itself primarily
+        controls the NDEBUG setting). This is enabled by default in debug
+        builds but can be configured independently of the build type.
+
+            $ ./configure --enable-asserts
+
+4.3.4. Configuring for 64-bit support
         Several machine architectures support 32-bit or 64-bit binaries.
         The options below describe how to enable support for different options.
 
@@ -299,38 +339,72 @@ CONTENTS
             $ CFLAGS=-q64 FCFLAGS=-q64 AR='ar -X 64'\
               ./configure --enable-fortran
 
-4.3.4. Additional compilation flags
+        Configure should automatically enable large file system (LFS) support
+        for autotools builds regardless of platform and architecture. If
+        this is not true for a platform, please contact the HDF Group
+        help desk at help@hdfgroup.org.
+
+4.3.5. Additional compilation flags
         If addtional flags must be passed to the compilation commands,
         specify those flags with the CFLAGS variable. For instance,
-        to enable symbolic debugging of a production version of HDF5, one
-        might say:
+        to use pipes instead of temporary files when compiling, you
+        can enter:
 
-            $ CFLAGS=-g ./configure --enable-production
+            $ CFLAGS=-pipe ./configure
 
-4.3.5. Compiling HDF5 wrapper libraries
-        One can optionally build the Fortran and/or C++ interfaces to the
-        HDF5 C library. By default, both options are disabled. To build
-        them, specify `--enable-fortran' and `--enable-cxx', respectively.
+4.3.6. Compiling HDF5 wrapper libraries
+        One can optionally build the Fortran, C++, and/or Java JNI interfaces
+        to the HDF5 C library. By default, all of these options are disabled.
+        To build them, specify --enable-fortran, --enable-cxx, and/or
+        --enable-java, respectively.
 
             $ ./configure --enable-fortran
             $ ./configure --enable-cxx
+            $ ./configure --enable-java
         
-        Configuration will halt if a working Fortran 90 or 95 compiler or
-        C++ compiler is not found. Currently, the Fortran configure tests
-        for these compilers in order: f90, pgf90, f95. To use an
-        alternate compiler specify it with the FC variable:
+        Configuration will halt if a working Fortran 2003, C++, or
+        Java compiler is not found. To use an alternate Fortran compiler,
+        specify it with the FC variable:
 
             $ FC=/usr/local/bin/g95 ./configure --enable-fortran
 
-        Note: The Fortran and C++ interfaces are not supported on all the
+        CXX can similarly be used to specify an alternative C++ compiler.
+
+        The libraries are compiled with flags and settings that are
+        distinct from the HDF5 library. These settings are specified in
+        platform- and compiler-specific configuration files in the config/
+        directory in the source tree. An exception to this is when a custom
+        string is used to specify profiling, symbols, and/or optimization
+        options. These flags will be used everywhere.
+
+        Note: The Fortran, C++, and Java interfaces are not supported on all
               platforms the main HDF5 Library supports. Also, the Fortran
-              interface supports parallel HDF5 while the C++ interface does
-              not.
+              interface supports parallel HDF5 while the C++ and Java
+              interfaces do not. None of the interfaces supports 
+              thread-safety.
 
         Note: See sections 4.7 and 4.8 for building the Fortran library with
-              Intel or PGI compilers. 
+              Intel or PGI compilers.
 
-4.3.6. Specifying other programs
+        A high-level wrapper library that contains some convenience and
+        special-purpose functions and tools can also be built with the
+        library. By default, this library is normally built along with
+        the C library. The high-level library is not supported when the
+        thread-safe HDF5 library is built, however, and will either have
+        to be explicitly disabled or the --enable-unsupported configure
+        option will have to be used.
+
+            $ ./configure --enable-threadsafe --disable-hl
+
+                OR
+
+            $ ./configure --enable-threadsafe --enable-unsupported
+
+        This is admittedly a little awkward but it avoids the more common
+        case of users having to specify --enable-hl for all builds if we
+        disabled building the high-level library by default.
+
+4.3.7. Specifying other programs
         The build system has been tuned for use with GNU make but also 
         works with other versions of make.  If the `make' command runs a
         non-GNU version but a GNU version is available under a different
@@ -364,7 +438,7 @@ CONTENTS
                because the HDF5 makefiles also use the install program to
                change file ownership and/or access permissions.
 
-4.3.7. Specifying other libraries and headers
+4.3.8. Specifying other libraries and headers
         Configure searches the standard places (those places known by the
         systems compiler) for include files and header files. However,
         additional directories can be specified by using the CPPFLAGS
@@ -394,7 +468,7 @@ CONTENTS
 
             $ ./configure --with-szlib=/Szip_Install_Directory
 
-4.3.8. Static versus shared linking
+4.3.9. Static versus shared linking
         The build process will create static libraries on all systems and
         shared libraries on systems that support dynamic linking to a
         sufficient degree. Either form of the library may be suppressed by
@@ -410,62 +484,168 @@ CONTENTS
 
             $ ./configure --enable-static-exec
 
-4.3.9. Optimization versus symbolic debugging
+4.3.10. Symbolic debugging and profiling
         The library can be compiled to provide symbolic debugging support
-        so it can be debugged with gdb, dbx, ddd, etc., or it can be
-        compiled with various optimizations. To compile for symbolic
-        debugging (the default for snapshots), say `--disable-production';
-        to compile with optimizations (the default for supported public
-        releases), say `--enable-production'. On some systems the library
-        can also be compiled for profiling with gprof by saying
-        `--enable-production=profile'.
+        so it can be debugged with gdb, dbx, ddd, etc. To compile for
+        symbolic, use --enable-symbols:
 
-            $ ./configure --disable-production         #symbolic debugging
-            $ ./configure --enable-production          #optimized code
-            $ ./configure --enable-production=profile  #for use with gprof
+            $ ./configure --enable-symbols
+
+        The --enable-symbols option can optionally take a flags string
+        which the library will use to build the library and wrappers.
+        This can be used to enable special settings like -ggdb to be
+        used:
+
+            $ ./configure --enable-symbols=-ggdb
+
+        In most cases, when symbols are not enabled the option to
+        strip all symbols (e.g., -s w/ gcc) will be added to the
+        compiler/linker flags.
 
         Regardless of whether support for symbolic debugging is enabled,
         the library can also perform runtime debugging of certain packages 
         (such as type conversion execution times and extensive invariant 
-        condition checking). To enable this debugging, supply a
-        comma-separated list of package names to to the `--enable-debug'
-        switch.  See "Debugging HDF5 Applications" for a list of package 
-        names:
+        condition checking). These checks are generally more intensive
+        than the simple asserts and low-overhead checks enabled by
+        --enable-asserts. Note that some of these checks can significantly
+        slow down the library.
+        
+        To enable this debugging, supply a comma-separated list of package
+        names to to the --enable-internal-debug option.
 
-            http://www.hdfgroup.org/HDF5/doc/H5.user/Debugging.html
+        Current packages that can perform extra checks:
 
-        Debugging can be disabled by saying `--disable-debug'. 
-        The default debugging level for snapshots is a subset of the
-        available packages; the default for supported releases is no
-        debugging (debugging can incur a significant runtime penalty).
+            AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z
 
-            $ ./configure --enable-debug=s,t  #debug only H5S and H5T
-            $ ./configure --enable-debug      #debug normal packages
-            $ ./configure --enable-debug=all  #debug all packages
-            $ ./configure --disable-debug     #no debugging
+        Any subset can be specified:
 
-        HDF5 can also print a trace of all API function calls, their 
-        arguments, and the return values. To enable or disable the
-        ability to trace the API say `--enable-trace' (the default for
-        snapthots) or `--disable-trace' (the default for public releases). 
+            $ ./configure --enable-internal-debug="B,B2,EA,FA"
+
+        Not all packages will generate special debug checks. Configure
+        simply defines an H5<pkg>_DEBUG symbol for each package in the
+        list so there is no harm in specifying arbitrary packages. The
+        string "all" can be used to specify "all reasonable" packages,
+        though even this excludes a few packages (e.g.: B) that have
+        severe run-time penalties.
+
+        In general, the internal debug option is intended for HDF Group
+        use and, outside of the default settings, will not be of
+        interest the the average user.
+
+        The HDF5 library can also print a trace of all API function calls,
+        their arguments, and the return values. To enable or disable the
+        ability to trace the API use --enable-trace (the default for
+        debug mode) or --disable-trace (the default for production mode). 
         The tracing must also be enabled at runtime to see any output 
         (see "Debugging HDF5 Applications," reference above).
 
-4.3.10. Parallel versus serial library
+        Profiling can be enabled with --enable-profiling. This will set
+        appropriate flags for a common profiler for the platform (usually
+        gprof). Other flags can be specified via a custom string passed
+        to the option:
+
+            $ ./configure --enable-profiling        # default profiler
+            $ ./configure --enable-profiling=-p     # use prof w/ gcc
+
+        The profiling option is independent of the build mode. In particular,
+        note that enabling profiling will NOT automatically enable debugging
+        since it can be useful to profile a production library, even
+        if the output will be limited.
+
+        The custom strings can be more complicated than a single
+        argument:
+
+            $ ./configure --enable-profiling="-pg --coverage"
+
+        Do note that when a custom string is specified, it will *replace*
+        the flags that would normally be set for that option. It is NOT
+        concatenated. This is true of all configure options that can
+        accept a custom string.
+
+        If using Valgrind or some other memory sanity checker, you will
+        want to build the library with --enable-using-memchecker. This
+        will disable a feature of the HDF5 library that recycles
+        certain memory blocks without a trip to the system's allocator.
+        This can confuse memory checkers and hide problems.
+
+            $ ./configure --enable-using-memchecker
+
+        The library also includes its own memory sanity checker. It is not
+        as involved as Valgrind and is mainly for library developers
+        but may be of some use to users trying to track down memory leaks.
+        It can be enabled with --enable-memory-alloc-sanity-check and
+        is separate from --enable-using-memchecker.
+
+            $ ./configure --enable-memory-alloc-sanity-check
+
+        Both of these options can slow down the library and cause
+        increased memory usage.
+
+4.3.11  Optimization
+        Various levels of compiler optimization can be specified at
+        compile time using --enable-optimization. This option can
+        take several strings:
+
+            high        Aggressive optimization (-O3, etc.)
+
+            debug       Optimizations that do not detract significantly
+                        from the debugging experience (-Og, etc.)
+
+            none        No optimizations (typically -O0)
+
+        Example:
+
+            $ ./configure --enable-optimization=high
+
+        The exact options used will vary with compiler and platform and can
+        be seen in the library settings file created during the configure
+        step.
+
+        Additionally, a custom string can be provided, such as "-Ofast":
+
+            $ ./configure --enable-optimization=-Ofast
+
+
+        Setting the optimization level to be high, debug, or none will
+        set appropriate options for the language wrappers as well if they
+        are being built (due to compiler quirks, these may be different
+        than those used for the main library). If a custom string string
+        has been provided, however, it will be used for both the HDF5
+        library and the language wrappers.
+
+4.3.12. Parallel versus serial library
         The HDF5 Library can be configured to use MPI and MPI-IO for
         parallelism on a distributed multi-processor system.  Read the
         file INSTALL_parallel for detailed explanations.
 
-4.3.11. Threadsafe capability
-        The HDF5 Library can be configured to be thread-safe (on a very
-        large scale) with the `--enable-threadsafe' flag to the configure
-        script.  Some platforms may also require the '-with-pthread=INC,LIB'
-        (or '--with-pthread=DIR') flag to the configure script.
+4.3.13. Threadsafe capability
+        The HDF5 Library can be configured to be thread-safe with the
+        `--enable-threadsafe' flag to the configure script.  Some platforms
+        may also require the '-with-pthread=INC,LIB' (or 
+        '--with-pthread=DIR') flag to the configure script, though this
+        is normally not necessary. 
+
+        In HDF5 1.10.0, the thread-safety code uses pthreads on POSIX systems
+        and Win32 threads on Windows systems.
+        
+        Thread-safety is currently implemented via a global library mutex,
+        effectively serializing library access. Please be aware of the
+        potential performance implications. The library is currently NOT
+        threaded internally though we do use thread-local storage to keep
+        track of things like per-thread function stacks for debugging.
+
+        Note that building the thread-safe library with the high-level
+        library and/or language wrappers (Fortran, etc.) is not officially
+        supported since we've never investigated the thread-safety of
+        these high-level or wrapper libraries and there is no testing.
+        However, this can be enabled with --enable-unsupported if you
+        are willing to take the risk of using it.
+
         For further details, see "HDF5 Thread Safe Library":
 
             http://www.hdfgroup.org/HDF5/doc/TechNotes/ThreadSafeLibrary.html
 
-4.3.12. Backward compatibility
+4.3.14. Backward compatibility
         The 1.10 version of the HDF5 Library can be configured to operate
         identically to the v1.6 library with the 
             --with-default-api-version=v16
