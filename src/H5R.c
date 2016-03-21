@@ -1745,10 +1745,11 @@ H5R__get_obj_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, href_t _ref,
 
             /* Get the path name length */
             UINT16DECODE(p, pathname_len);
-            copy_len = MIN(pathname_len, size - 1);
+            copy_len = pathname_len;
 
             /* Get the path name */
             if (name) {
+                copy_len = MIN(copy_len, size - 1);
                 HDmemcpy(name, p, copy_len);
                 name[copy_len] = '\0';
             }
@@ -1884,10 +1885,11 @@ H5R__get_attr_name(H5F_t *f, href_t _ref, char *name, size_t size)
     /* Get the attribute name length */
     UINT16DECODE(p, attr_name_len);
     HDassert(attr_name_len < H5R_MAX_ATTR_REF_NAME_LEN);
-    copy_len = MIN(attr_name_len, size - 1);
+    copy_len = attr_name_len;
 
     /* Get the attribute name */
     if (name) {
+        copy_len = MIN(copy_len, size - 1);
         HDmemcpy(name, p, copy_len);
         name[copy_len] = '\0';
     }
@@ -1969,10 +1971,11 @@ H5R__get_file_name(href_t _ref, char *name, size_t size)
             /* Get the file name length */
             p = (const uint8_t *)ref->ref.serial.buf;
             UINT16DECODE(p, filename_len);
-            copy_len = MIN(filename_len, size - 1);
+            copy_len = filename_len;
 
             /* Get the attribute name */
             if (name) {
+                copy_len = MIN(copy_len, size - 1);
                 HDmemcpy(name, p, copy_len);
                 name[copy_len] = '\0';
             }
