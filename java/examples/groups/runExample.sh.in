@@ -151,16 +151,8 @@ COPY_DATAFILES_TO_BLDDIR()
 
 CLEAN_DATAFILES_AND_BLDDIR()
 {
-    # skip rm if srcdir is same as destdir
-    # this occurs when build/test performed in source dir and
-    # make cp fail
-    SDIR=`$DIRNAME $HDFTEST_HOME/../testfiles/examples.groups.H5Ex_G_Create.txt`
-    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-    INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
-    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        $RM $BLDDIR/*.txt
-        $RM $BLDDIR/*.out
-    fi
+        $RM $BLDDIR/examples.groups.H5Ex_G_*.txt
+        $RM $BLDDIR/H5Ex_G_*.out
 }
 
 COPY_REFFILES="$LIST_REF_FILES"
