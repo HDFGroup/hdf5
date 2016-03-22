@@ -33027,6 +33027,9 @@ fi
 ac_config_files="$ac_config_files src/libhdf5.settings Makefile src/Makefile test/Makefile test/testcheck_version.sh test/testerror.sh test/testflushrefresh.sh test/H5srcdir_str.h test/testlibinfo.sh test/testlinks_env.sh test/testswmr.sh test/test_plugin.sh test/test_usecases.sh test/testvdsswmr.sh testpar/Makefile tools/Makefile tools/h5dump/Makefile tools/h5dump/testh5dump.sh tools/h5dump/testh5dumppbits.sh tools/h5dump/testh5dumpvds.sh tools/h5dump/testh5dumpxml.sh tools/h5ls/testh5ls.sh tools/h5ls/testh5lsvds.sh tools/h5import/Makefile tools/h5import/h5importtestutil.sh tools/h5diff/Makefile tools/h5diff/testh5diff.sh tools/h5diff/testph5diff.sh tools/h5jam/Makefile tools/h5jam/testh5jam.sh tools/h5repack/Makefile tools/h5repack/h5repack.sh tools/h5repack/h5repack_plugin.sh tools/h5ls/Makefile tools/h5copy/Makefile tools/h5copy/testh5copy.sh tools/lib/Makefile tools/misc/Makefile tools/misc/h5cc tools/misc/testh5clear.sh tools/misc/testh5mkgrp.sh tools/misc/testh5repart.sh tools/misc/vds/Makefile tools/h5stat/testh5stat.sh tools/h5stat/Makefile tools/h5format_convert/Makefile tools/h5format_convert/testh5fc.sh tools/perform/Makefile examples/Makefile examples/run-c-ex.sh examples/testh5cc.sh c++/Makefile c++/src/Makefile c++/src/h5c++ c++/test/Makefile c++/test/H5srcdir_str.h c++/examples/Makefile c++/examples/run-c++-ex.sh c++/examples/testh5c++.sh fortran/Makefile fortran/src/h5fc fortran/src/Makefile fortran/src/H5fort_type_defines.h fortran/test/Makefile fortran/testpar/Makefile fortran/examples/Makefile fortran/examples/run-fortran-ex.sh fortran/examples/testh5fc.sh java/Makefile java/src/Makefile java/src/jni/Makefile java/test/Makefile java/test/junit.sh java/examples/Makefile java/examples/intro/Makefile java/examples/intro/runExample.sh java/examples/datasets/Makefile java/examples/datasets/runExample.sh java/examples/datatypes/Makefile java/examples/datatypes/runExample.sh java/examples/groups/Makefile java/examples/groups/runExample.sh hl/Makefile hl/src/Makefile hl/test/Makefile hl/test/H5srcdir_str.h hl/tools/Makefile hl/tools/gif2h5/Makefile hl/tools/gif2h5/h52giftest.sh hl/tools/h5watch/Makefile hl/tools/h5watch/testh5watch.sh hl/examples/Makefile hl/examples/run-hlc-ex.sh hl/c++/Makefile hl/c++/src/Makefile hl/c++/test/Makefile hl/c++/examples/Makefile hl/c++/examples/run-hlc++-ex.sh hl/fortran/Makefile hl/fortran/src/Makefile hl/fortran/test/Makefile hl/fortran/examples/Makefile hl/fortran/examples/run-hlfortran-ex.sh"
 
 
+ac_config_commands="$ac_config_commands .classes"
+
+
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -34264,6 +34267,12 @@ fi
 ac_aux_dir='$ac_aux_dir'
 
 
+$MKDIR_P java/src/.classes;
+                $MKDIR_P java/test/.classes;
+                $MKDIR_P java/examples/intro/.classes;
+                $MKDIR_P java/examples/datasets/.classes;
+                $MKDIR_P java/examples/datatypes/.classes;
+                $MKDIR_P java/examples/groups/.classes
 
 _ACEOF
 
@@ -34381,6 +34390,7 @@ do
     "hl/fortran/test/Makefile") CONFIG_FILES="$CONFIG_FILES hl/fortran/test/Makefile" ;;
     "hl/fortran/examples/Makefile") CONFIG_FILES="$CONFIG_FILES hl/fortran/examples/Makefile" ;;
     "hl/fortran/examples/run-hlfortran-ex.sh") CONFIG_FILES="$CONFIG_FILES hl/fortran/examples/run-hlfortran-ex.sh" ;;
+    ".classes") CONFIG_COMMANDS="$CONFIG_COMMANDS .classes" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

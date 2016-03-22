@@ -3594,6 +3594,13 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/fortran/examples/Makefile
                  hl/fortran/examples/run-hlfortran-ex.sh])
 
+AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
+                $MKDIR_P java/test/.classes;
+                $MKDIR_P java/examples/intro/.classes;
+                $MKDIR_P java/examples/datasets/.classes;
+                $MKDIR_P java/examples/datatypes/.classes;
+                $MKDIR_P java/examples/groups/.classes])
+
 AC_OUTPUT
 
 chmod 755 tools/misc/h5cc
