@@ -119,7 +119,7 @@ CLEAN_LIBFILES_AND_BLDLIBDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=`$DIRNAME $tstfile`
+    SDIR=`$DIRNAME $HDFLIB_HOME/slf4j-api-1.7.5.jar`
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
@@ -159,16 +159,8 @@ COPY_DATAFILES_TO_BLDDIR()
 
 CLEAN_DATAFILES_AND_BLDDIR()
 {
-    # skip rm if srcdir is same as destdir
-    # this occurs when build/test performed in source dir and
-    # make cp fail
-    SDIR=`$DIRNAME $tstfile`
-    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-    INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
-    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        $RM $BLDDIR/*.txt
-        $RM $BLDDIR/*.out
-    fi
+        $RM $BLDDIR/examples.datasets.H5Ex_D_*.txt
+        $RM $BLDDIR/H5Ex_D_*.out
 }
 
 # Print a line-line message left justified in a field of 70 characters
