@@ -560,15 +560,31 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems and Limitations
 ==============================
-Please contact help@hdfgroup.org if an issue found is not listed here.
+This section contains the list of known problems and limitations introduced
+in this release of HDF5.
+
+Note: this list is not exhaustive of all known issues discovered in HDF5
+software to date. For a list of significant problems and known workarounds
+identified in past releases, please refer to:
+
+https://www.hdfgroup.org/HDF5/release/known_problems/
+
+The HDF Group also maintains a JIRA issue-tracking database which is used to
+capture all known issues which are too numerous to reasonably list in this
+document. The HDF Group is taking steps to make our JIRA issue database
+open to the public, and this section will refer to that database in a future
+release. In the meantime, please contact help@hdfgroup.org if you come across
+an issue not listed here or at the link above, and we will provide any
+information about known workarounds that we have or add it to our list of 
+known issues if it is a new issue.
 
  - The flush/refresh test occasionally fails on OS X platforms. This is
    being investigated and may be a problem with SWMR on HFS+.
-   (DER - 2016/03/22)
+   (DER - 2016/03/22 - HDFFV-9731)
 
  - The VDS/SWMR test will fail with a segmentation fault if the library
    is built with --enable-using-memchecker.
-   (DER - 2016/03/21)
+   (DER - 2016/03/21 - HDFFV-9732)
 
  - SWMR feature
    The SWMR feature will only work if an HDF5 file under SWMR access resides
@@ -579,7 +595,7 @@ Please contact help@hdfgroup.org if an issue found is not listed here.
    is currently not tested on Windows though it can be tested manually
    (some of the SWMR test programs are built by CMake) and there are no
    obvious reasons for it to not work on NTFS or GPFS.
-   (EIP - 2016/03/20)
+   (EIP - 2016/03/20 - HDFFV-9733)
 
  - VDS feature
    Currently, the path to a VDS source file is interpreted as relative to the
@@ -587,73 +603,3 @@ Please contact help@hdfgroup.org if an issue found is not listed here.
    the VDS dataset unless a full path to the source file is specified during 
    the mapping. 
    (EIP - 2016/03/20 - HDFFV-9724)
-
- - On Windows platforms in debug configurations, the VFD flush1 tests will 
-   fail with the split and multi VFD drivers. These tests will display a 
-   modal debug dialog which must be answered or wait for the test timeout 
-   to expire.
-   (ADB - 2014/06/23 - HDFFV-8851)
-
- - CLANG compiler with the options -fcatch-undefined-behavior and -ftrapv
-   catches some undefined behavior in the alignment algorithm of the macro
-   DETECT_I in H5detect.c.  Since the algorithm is trying to detect the 
-   alignment of integers, ideally the flag -fcatch-undefined-behavior
-   shouldn't to be used for H5detect.c. 
-   (SLU - 2013/10/16 - HDFFV-8147)
-   
-- The STDIO VFD does not work on some architectures, possibly due to 32/64
-  bit or large file issues.  The basic STDIO VFD test is known to fail on
-  64-bit SunOS 5.10 on SPARC when built with -m64 and 32-bit OS X/Darwin
-  10.7.0.  The STDIO VFD test has been disabled while we investigate and
-  a fix should appear in a future release.
-  (DER - 2011/10/14 - HDFFV-8235)
-
-- h5diff can report inconsistent results when comparing datasets of enum type
-  that contain invalid values.  This is due to how enum types are handled in
-  the library and will be addressed in a future release.
-  (DER - 2011/10/14 - HDFFV-7527)
-
-- The links test can fail under the stdio VFD due to some issues with external
-  links.  This will be investigated and fixed in a future release.
-  (DER - 2011/10/14 - HDFFV-7768)
-
-- After the shared library support was fixed for some bugs, it was discovered
-  that "make prefix=XXX install" no longer works for shared libraries. It
-  still works correctly for static libraries. Therefore, if you want to
-  install the HDF5 shared libraries in a location such as /usr/local/hdf5,
-  you need to specify the location via the --prefix option during configure
-  time. E.g, ./configure --prefix=/usr/local/hdf5 ...
-  (AKC - 2011/05/07 - HDFFV-7583)
-
-- The parallel test, t_shapesame, in testpar/, may run for a long time and may
-  be terminated by the alarm signal.  If that happens, one can increase the
-  alarm seconds (default is 1200 seconds = 20 minutes) by setting the
-  environment variable, $HDF5_ALARM_SECONDS, to a larger value such as 3600
-  (60 minutes).  Note that the t_shapesame test may fail in some systems
-  (see the "While working on the 1.8.6 release..." problem below).  If
-  it does, it will waste more time if $HDF5_ALARM_SECONDS is set
-  to a larger value.
-  (AKC - 2011/05/07)
-
-- Shared Fortran libraries are not working on AIX. While they are
-  generated when --enable-shared is specified, the Fortran and HL/Fortran
-  tests fail. HL and C++ shared libraries should now be working as intended,
-  however.
-  (MAM - 2011/04/20)
-
-- While working on the 1.8.6 release of HDF5, a bug was discovered that can
-  occur when reading from a dataset in parallel shortly after it has been
-  written to collectively. The issue was exposed by a new test in the parallel
-  HDF5 test suite, but had existed before that. We believe the problem lies
-  with certain MPI implementations and/or file systems.
-
-  We have provided a pure MPI test program, as well as a standalone HDF5
-  program, that can be used to determine if this is an issue on your system.
-  They should be run across multiple nodes with a varying number of processes.
-  These programs can be found at:
-  http://www.hdfgroup.org/ftp/HDF5/examples/known_problems/
-  (NAF - 2011/01/19)
-
-
-
-
