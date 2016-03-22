@@ -1613,7 +1613,7 @@ Optional Features:
                           Clean turns nothing on and disables optimization
                           (i.e.: a 'clean slate' configuration). All these
                           settings can be overridden by using specific
-                          configure flags. [default=debug]
+                          configure flags. [default=production]
   --enable-dependency-tracking
                           do not reject slow dependency extractors
   --disable-dependency-tracking
@@ -4122,7 +4122,7 @@ fi
 ## Set the default
 ## Depends on branch, set via script at branch creation time
 if test "X-$BUILD_MODE" = X- ; then
-    BUILD_MODE=debug
+    BUILD_MODE=production
 fi
 
 ## Allow this variable to be substituted in

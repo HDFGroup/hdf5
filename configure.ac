@@ -301,14 +301,14 @@ AC_ARG_ENABLE([build-mode],
                                (i.e.: a 'clean slate' configuration).
                                All these settings can be overridden by using
                                specific configure flags.
-                               [default=debug]
+                               [default=production]
                                ])],
               [BUILD_MODE=$enableval])
 
 ## Set the default
 ## Depends on branch, set via script at branch creation time
 if test "X-$BUILD_MODE" = X- ; then
-    BUILD_MODE=debug
+    BUILD_MODE=production
 fi
 
 ## Allow this variable to be substituted in
