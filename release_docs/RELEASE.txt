@@ -562,6 +562,10 @@ Known Problems and Limitations
 ==============================
 Please contact help@hdfgroup.org if an issue found is not listed here.
 
+ - The flush/refresh test occasionally fails on OS X platforms. This is
+   being investigated and may be a problem with SWMR on HFS+.
+   (DER - 2016/03/22)
+
  - The VDS/SWMR test will fail with a segmentation fault if the library
    is built with --enable-using-memchecker.
    (DER - 2016/03/21)
