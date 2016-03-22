@@ -210,11 +210,11 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDgetgrgid(G)           getgrgid(G)
 #define HDgetgrnam(S)           getgrnam(S)
 #define HDgetgroups(Z,G)        getgroups(Z,G)
-#ifdef H5_HAVE_VISUAL_STUDIO
+#ifdef H5_HAVE_WIN32_API
 #define HDgetlogin()            Wgetlogin()
-#else /* H5_HAVE_VISUAL_STUDIO */
+#else /* H5_HAVE_WIN32_API */
 #define HDgetlogin()            getlogin()
-#endif /* H5_HAVE_VISUAL_STUDIO */
+#endif /* H5_HAVE_WIN32_API */
 #define HDgetpgrp()             getpgrp()
 #define HDgetpid()              getpid()
 #define HDgetppid()             getppid()
@@ -222,12 +222,12 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #define HDgetpwuid(U)           getpwuid(U)
 #define HDgetrusage(X,S)        getrusage(X,S)
 #define HDgets(S)               gets(S)
-#ifdef H5_HAVE_VISUAL_STUDIO
+#ifdef H5_HAVE_WIN32_API
     H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
 #define HDgettimeofday(V,Z) Wgettimeofday(V,Z)
-#else /* H5_HAVE_VISUAL_STUDIO */
+#else /* H5_HAVE_WIN32_API */
 #define HDgettimeofday(S,P)     gettimeofday(S,P)
-#endif /* H5_HAVE_VISUAL_STUDIO */
+#endif /* H5_HAVE_WIN32_API */
 #define HDgetuid()              getuid()
 #define HDgmtime(T)             gmtime(T)
 #define HDisalnum(C)            isalnum((int)(C)) /*cast for solaris warning*/
