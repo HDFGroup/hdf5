@@ -2437,6 +2437,15 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
+## The --enable-parallel flag is not compatible with --enable-java.
+## If the user tried to specify both flags, throw an error, unless
+## they also provided the --enable-unsupported flag.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_JAVA}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-java and --enable-parallel flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
 ## --enable-parallel is also incompatible with --enable-threadsafe, unless
 ## --enable-unsupported has been specified on the configure line.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
