@@ -92,7 +92,7 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             # make cp fail
             SDIR=`$DIRNAME $tstfile`
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
                 $CP -f $tstfile $BLDLIBDIR
                 if [ $? -ne 0 ]; then
@@ -113,7 +113,7 @@ CLEAN_LIBFILES_AND_BLDLIBDIR()
     # make cp fail
     SDIR=`$DIRNAME $tstfile`
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
         $RM $BLDLIBDIR
     fi
@@ -135,7 +135,7 @@ COPY_DATAFILES_TO_BLDDIR()
             # make cp fail
             SDIR=`$DIRNAME $tstfile`
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
                 $CP -f $tstfile $BLDDIR
                 if [ $? -ne 0 ]; then
@@ -156,7 +156,7 @@ CLEAN_DATAFILES_AND_BLDDIR()
     # make cp fail
     SDIR=`$DIRNAME $tstfile`
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
         $RM $BLDDIR/*.txt
         $RM $BLDDIR/*.out
@@ -179,7 +179,7 @@ COPY_REFFILES_TO_BLDREFDIR()
             # make cp fail
             SDIR=`$DIRNAME $tstfile`
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDREFDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
                 $CP -f $tstfile $BLDREFDIR
                 if [ $? -ne 0 ]; then
@@ -200,7 +200,7 @@ CLEAN_REFFILES_AND_BLDREFDIR()
     # make cp fail
     SDIR=`$DIRNAME $tstfile`
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $BLDREFDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
         $RM $BLDREFDIR
     fi
