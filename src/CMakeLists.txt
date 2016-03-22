@@ -780,7 +780,6 @@ set (H5_GENERATED_HEADERS
 )
 
 option (HDF5_GENERATE_HEADERS "Rebuild Generated Files" OFF)
-mark_as_advanced (HDF5_GENERATE_HEADERS)
 if (HDF5_GENERATE_HEADERS)
   set_source_files_properties(${H5_GENERATED_HEADERS} PROPERTIES GENERATED TRUE)
   find_package (Perl)
