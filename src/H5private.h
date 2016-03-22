@@ -538,20 +538,21 @@
  *       It's the developer's responsibility not to pass in the value 0, which
  *       may cause the equation to fail.
  */
-#define H5_FLT_ABS_EQUAL(X,Y)       (HDfabsf(X-Y) < FLT_EPSILON)
-#define H5_DBL_ABS_EQUAL(X,Y)       (HDfabs (X-Y) < DBL_EPSILON)
-#define H5_LDBL_ABS_EQUAL(X,Y)      (HDfabsl(X-Y) < LDBL_EPSILON)
+#define H5_FLT_ABS_EQUAL(X,Y)       (HDfabsf((X)-(Y)) < FLT_EPSILON)
+#define H5_DBL_ABS_EQUAL(X,Y)       (HDfabs ((X)-(Y)) < DBL_EPSILON)
+#define H5_LDBL_ABS_EQUAL(X,Y)      (HDfabsl((X)-(Y)) < LDBL_EPSILON)
 
-#define H5_FLT_REL_EQUAL(X,Y,M)     (HDfabsf((Y-X) / X) < M)
-#define H5_DBL_REL_EQUAL(X,Y,M)     (HDfabs ((Y-X) / X) < M)
-#define H5_LDBL_REL_EQUAL(X,Y,M)    (HDfabsl((Y-X) / X) < M)
+#define H5_FLT_REL_EQUAL(X,Y,M)     (HDfabsf(((Y)-(X)) / (X)) < (M))
+#define H5_DBL_REL_EQUAL(X,Y,M)     (HDfabs (((Y)-(X)) / (X)) < (M))
+#define H5_LDBL_REL_EQUAL(X,Y,M)    (HDfabsl(((Y)-(X)) / (X)) < (M))
 
-/* KiB, MiB, GiB, TiB, EiB - Used in profiling and timing code */
+/* KiB, MiB, GiB, TiB, PiB, EiB - Used in profiling and timing code */
 #define H5_KB (1024.0F)
 #define H5_MB (1024.0F * 1024.0F)
 #define H5_GB (1024.0F * 1024.0F * 1024.0F)
 #define H5_TB (1024.0F * 1024.0F * 1024.0F * 1024.0F)
-#define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
+#define H5_PB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
+#define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
 
 #ifndef H5_HAVE_FLOCK
 /* flock() operations. Used in the source so we have to define them when
