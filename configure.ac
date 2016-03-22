@@ -1575,7 +1575,7 @@ AC_ARG_ENABLE([threadsafe],
                               [default=no]])],
               [THREADSAFE=$enableval])
 
-## The high-level, C++, and Fortran interfaces are not compatible
+## The high-level, C++, Fortran and Java interfaces are not compatible
 ## with the thread-safety option because the lock is not hoisted
 ## into the higher-level API calls.
 
@@ -1604,6 +1604,14 @@ fi
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
     AC_MSG_ERROR([--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
+## --enable-threadsafe is also incompatible with --enable-java unless
+## --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_JAVA}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-java and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
   fi
 fi
 
