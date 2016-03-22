@@ -22,7 +22,7 @@ For more information, see the HDF5 home page:
 
     http://www.hdfgroup.org/HDF5/
 
-If you have any questions or comments, please send them to the HDF 
+If you have any questions or comments, please send them to the HDF
 Help Desk:
 
     help@hdfgroup.org
@@ -46,337 +46,337 @@ This release supports the following features:
     Configuration
     -------------
     - API Compatibility with HDF5 1.8 Flag Was Added
-      
-      The 1.10 version of the HDF5 Library can be configured to operate 
-      identically to the 1.8 library with the --with-default-api-version=v18 
-      configure flag. This allows existing code to be compiled with the 1.10 
-      library without requiring immediate changes to the application source 
-      code. For addtional configuration options and other details, see 
-      "API Compatibility Macros in HDF5" at 
+
+      The 1.10 version of the HDF5 Library can be configured to operate
+      identically to the 1.8 library with the --with-default-api-version=v18
+      configure flag. This allows existing code to be compiled with the 1.10
+      library without requiring immediate changes to the application source
+      code. For addtional configuration options and other details, see
+      "API Compatibility Macros in HDF5" at
       http://www.hdfgroup.org/HDF5/doc/RM/APICompatMacros.html.
-      
+
     - Autotools Configuration Has Been Extensively Reworked
-      
-      The autotools configuration options have been updated to allow more 
-      fine-grained control of the build options and to correct some bugs. 
+
+      The autotools configuration options have been updated to allow more
+      fine-grained control of the build options and to correct some bugs.
       See configure --help for comprehensive information on each option.
-      
+
       Specific changes:
-      
-      * --enable-debug and --enable-production are no longer accepted. 
-        Use --enable-build-mode=(debug | production) instead. These set 
-        appropriate defaults for symbols, optimizations, and other 
-        configuration options. These defaults can be overridden by the 
+
+      * --enable-debug and --enable-production are no longer accepted.
+        Use --enable-build-mode=(debug | production) instead. These set
+        appropriate defaults for symbols, optimizations, and other
+        configuration options. These defaults can be overridden by the
         user.
-        
-      * Extra debug output messages are no longer enabled with 
-        --enable-debug=<package list>. Use --enable-internal-debug=<pkg list> 
+
+      * Extra debug output messages are no longer enabled with
+        --enable-debug=<package list>. Use --enable-internal-debug=<pkg list>
         instead.
-        
-      * A new --enable-symbols option allows symbols to be generated 
-        independently of the build mode. --disable-symbols can be used 
+
+      * A new --enable-symbols option allows symbols to be generated
+        independently of the build mode. --disable-symbols can be used
         to strip symbols from the binary.
-        
-      * A new --enable-asserts option sets/unsets NDEBUG. This is 
-        independent of the build mode. This also enables some extra 
+
+      * A new --enable-asserts option sets/unsets NDEBUG. This is
+        independent of the build mode. This also enables some extra
         low-overhead debug checks in the library.
-        
-      * A new --enable-profiling option sets profiling flags. This is 
+
+      * A new --enable-profiling option sets profiling flags. This is
         independent of the build mode.
-        
-      * A new --enable-optimization option sets the optimization level. 
+
+      * A new --enable-optimization option sets the optimization level.
         This is independent of the build mode.
-        
-      * Many of these options can take a flags string that will be used 
-        to build the library. This can be useful for specifying custom 
+
+      * Many of these options can take a flags string that will be used
+        to build the library. This can be useful for specifying custom
         optimization flags such as -Os and -Ofast.
-        
-      * gnu C++ and Fortran use configure sub-files that update the 
-        build flags and turn on warnings. The increase in warnings when 
-        building these wrapper libraries is due to these flag changes 
+
+      * gnu C++ and Fortran use configure sub-files that update the
+        build flags and turn on warnings. The increase in warnings when
+        building these wrapper libraries is due to these flag changes
         and not to a decrease in code quality.
-        
-      * The option to clear file buffers has been removed. Any buffer that 
-        will eventually be written to disk will now always be memset 
-        to zero. This prevents the previous contents of the buffer from 
-        being written to the disk if the buffer contents are not 
+
+      * The option to clear file buffers has been removed. Any buffer that
+        will eventually be written to disk will now always be memset
+        to zero. This prevents the previous contents of the buffer from
+        being written to the disk if the buffer contents are not
         completely overwritten, which has security implications.
-        
+
     - LFS Changes
-      
-      The way the autotools handle large file support (LFS) has been 
+
+      The way the autotools handle large file support (LFS) has been
       overhauled in this release.
-      
+
       * We assume ftello and fseeko exist
-        
-      * We no longer explicitly use the *64 I/O functions. Instead, we 
+
+      * We no longer explicitly use the *64 I/O functions. Instead, we
         rely on a mapping provided by _FILE_OFFSET_BITS or its equivalent.
-        
+
       * _LARGEFILE(64)_SOURCE is no longer exported via AM_CPPFLAGS.
-        
-        
-        
+
+
+
     Parallel Library
     -----------------
     - Collective Metadata I/O
-      
-      Calls for HDF5 metadata can result in many small reads and writes. 
-      On metadata reads, collective metadata I/O can improve performance 
-      by allowing the library to perform optimizations when reading the 
-      metadata by having one rank read the data and broadcasting it to 
+
+      Calls for HDF5 metadata can result in many small reads and writes.
+      On metadata reads, collective metadata I/O can improve performance
+      by allowing the library to perform optimizations when reading the
+      metadata by having one rank read the data and broadcasting it to
       all other ranks.
-      
-      Collective metadata I/O improves metadata write performance through 
-      the construction of an MPI derived datatype that is then written 
-      collectively in a single call. For more information, see 
+
+      Collective metadata I/O improves metadata write performance through
+      the construction of an MPI derived datatype that is then written
+      collectively in a single call. For more information, see
       https://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesCollectiveMetadataIoDocs.html.
-      
-      
-      
+
+
+
     Library
     --------
     - Concurrent Access to HDF5 Files - Single Writer/ Multple Reader (SWMR)
-      
-      The Single Writer/ Multiple Reader or SWMR feature enables users to 
-      read data concurrently while writing it. Communications between the 
-      processes and file locking are not required. The processes can run 
-      on the same or on different platforms as long as they share a common 
-      file system that is POSIX compliant. For more information, see the 
-      Single-Writer/Multiple-Reader (SWMR) documentation at 
+
+      The Single Writer/ Multiple Reader or SWMR feature enables users to
+      read data concurrently while writing it. Communications between the
+      processes and file locking are not required. The processes can run
+      on the same or on different platforms as long as they share a common
+      file system that is POSIX compliant. For more information, see the
+      Single-Writer/Multiple-Reader (SWMR) documentation at
       https://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesSwmrDocs.html.
-      
+
     - Virtual Dataset (VDS)
-      
-      The VDS feature enables data to be accessed across HDF5 files 
-      using standard HDF5 objects such as groups and datasets without 
-      rewriting or rearranging the data. An HDF5 virtual dataset (VDS) 
-      is an HDF5 dataset that is composed of source HDF5 datasets in 
-      a predefined mapping. VDS can be used with the SWMR feature. For 
-      documentation, check 
+
+      The VDS feature enables data to be accessed across HDF5 files
+      using standard HDF5 objects such as groups and datasets without
+      rewriting or rearranging the data. An HDF5 virtual dataset (VDS)
+      is an HDF5 dataset that is composed of source HDF5 datasets in
+      a predefined mapping. VDS can be used with the SWMR feature. For
+      documentation, check
       https://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesVirtualDatasetDocs.html.
-      
+
     - Persistent Free File Space Tracking
-      
-      Usage patterns when working with an HDF5 file sometimes result in 
-      wasted space within the file. This can also impair access times 
-      when working with the resulting files. The new file space management 
-      feature provides strategies for managing space in a file to improve 
-      performance in both of these areas. For more information, see 
-      http://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesFileSpaceMgmtDocs.html. 
-      
-      
-      
+
+      Usage patterns when working with an HDF5 file sometimes result in
+      wasted space within the file. This can also impair access times
+      when working with the resulting files. The new file space management
+      feature provides strategies for managing space in a file to improve
+      performance in both of these areas. For more information, see
+      http://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesFileSpaceMgmtDocs.html.
+
+
+
     C++ Library
     ------------
     - New Member Function Added to H5::ArrayType
-      
-      The assignment operator ArrayType::operator= was added because 
+
+      The assignment operator ArrayType::operator= was added because
       ArrayType has pointers to data members.
-      
+
       (BMR - 2016/03/07, HDFFV-9562)
-      
-      
-      
+
+
+
     Tools
     ------
-    - h5watch 
-      
-      The h5watch tool allows users to output new records appended to 
-      a dataset under SWMR access as it grows. The functionality is 
-      similar to the Unix user command "tail" with the follow option, 
-      which outputs appended data as the file grows. For more 
-      information, see 
+    - h5watch
+
+      The h5watch tool allows users to output new records appended to
+      a dataset under SWMR access as it grows. The functionality is
+      similar to the Unix user command "tail" with the follow option,
+      which outputs appended data as the file grows. For more
+      information, see
       http://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesSwmrDocs.html#Tools.
-      
+
     - h5format_convert
-      
-      The h5format_convert tool allows users to convert the indexing 
-      type of a chunked dataset made with a 1.10.x version of the HDF5 
-      Library when the latest file format is used to the 1.8.x version 1 B-tree indexing 
-      type. For example, datasets created using SWMR access, can be 
-      converted to be accessed by the HDF5 1.18 library and tools. The 
-      tool does not rewrite raw data, but it does rewrite HDF5 metadata. 
-      
-      
-      
+
+      The h5format_convert tool allows users to convert the indexing
+      type of a chunked dataset made with a 1.10.x version of the HDF5
+      Library when the latest file format is used to the 1.8.x version 1 B-tree indexing
+      type. For example, datasets created using SWMR access, can be
+      converted to be accessed by the HDF5 1.18 library and tools. The
+      tool does not rewrite raw data, but it does rewrite HDF5 metadata.
+
+
+
     High-Level APIs
     ----------------
     - H5DOappend
-      
+
       The function appends data to a dataset along a specified dimension.
-      
-      
+
+
     C Packet Table API
-    ------------------ 
+    ------------------
     - Replacement of a Public Function with H5PTcreate
-      
-      The existing function H5PTcreate_fl limits applications so they 
-      can use the deflate compression only. The public function 
-      H5PTcreate has been added to replace H5PTcreate_fl. H5PTcreate 
-      takes a property list identifier to provide flexibility on 
-      creation properties. 
-      
+
+      The existing function H5PTcreate_fl limits applications so they
+      can use the deflate compression only. The public function
+      H5PTcreate has been added to replace H5PTcreate_fl. H5PTcreate
+      takes a property list identifier to provide flexibility on
+      creation properties.
+
       (BMR - 2016/03/04, HDFFV-8623)
-      
+
     - New Public Functions: H5PTget_dataset and H5PTget_type
-      
-      Two accessor functions have been added. H5PTget_dataset returns 
-      the identifier of the dataset associated a packet table, and 
-      H5PTget_type returns the identifier of the datatype used by 
+
+      Two accessor functions have been added. H5PTget_dataset returns
+      the identifier of the dataset associated a packet table, and
+      H5PTget_type returns the identifier of the datatype used by
       a packet table.
-      
+
       (BMR, 2016/03/04, HDFFV-8623)
-      
+
     - Regarding #ifdef VLPT_REMOVED
-      
-      The #ifdef VLPT_REMOVED blocks have been removed from the packet 
+
+      The #ifdef VLPT_REMOVED blocks have been removed from the packet
       table (PT) library source except for the following functions:
         + H5PTis_varlen() has been made available again
         + H5PTfree_vlen_readbuff() is now H5PTfree_vlen_buff()
-      
+
       (BMR - 2016/03/04, HDFFV-442)
-      
+
     C++ Packet Table API
-    -------------------- 
+    --------------------
     - New Constructor Added to FL_PacketTable
-      
-      An overloaded constructor has been added to FL_PacketTable and 
-      takes a property list identifier to provide flexibility on 
+
+      An overloaded constructor has been added to FL_PacketTable and
+      takes a property list identifier to provide flexibility on
       creation properties.
-      
+
       (BMR - 2016/03/08, HDFFV-8623)
-      
+
     - New Public Functions
-      
-      Two accessor wrappers are added to class PacketTable. 
-      PacketTable::GetDataset() returns the identifier of the dataset 
-      associated with the packet table, and PacketTable::GetDatatype() 
+
+      Two accessor wrappers are added to class PacketTable.
+      PacketTable::GetDataset() returns the identifier of the dataset
+      associated with the packet table, and PacketTable::GetDatatype()
       returns the identifier of the datatype that the packet table uses.
-      
+
       (BMR - 2016/03/04, HDFFV-8623)
-      
-    - Member Functions with "char*" as an Argument 
-      
-      Overloaded functions were added to provide the "const char*" 
-      argument; the existing version will be deprecated in future 
+
+    - Member Functions with "char*" as an Argument
+
+      Overloaded functions were added to provide the "const char*"
+      argument; the existing version will be deprecated in future
       releases.
-      
+
       (BMR - 2016/03/04, HDFFV-8623)
-      
+
     - Regarding #ifdef VLPT_REMOVED
-      
-      The #ifdef VLPT_REMOVED blocks have been removed from the packet 
+
+      The #ifdef VLPT_REMOVED blocks have been removed from the packet
       table library source code except for the following functions:
         + VL_PacketTable::IsVariableLength() was moved to PacketTable
         + VL_PacketTable::FreeReadBuff() is now PacketTable::FreeBuff()
-      
+
       (BMR - 2016/03/04, HDFFV-442)
-      
-      
-      
+
+
+
     Java Wrapper Library
     --------------------
-    
-    The Java HDF5 JNI library has been integrated into the HDF5 repository. 
-    The configure option is "--enable-java", and the CMake option is 
-    HDF5_BUILD_JAVA:BOOL=ON. The package hierarchy has changed from the 
-    HDF5 1.8 JNI, which was "ncsa.hdf.hdflib.hdf5", to HDF5 1.10, 
+
+    The Java HDF5 JNI library has been integrated into the HDF5 repository.
+    The configure option is "--enable-java", and the CMake option is
+    HDF5_BUILD_JAVA:BOOL=ON. The package hierarchy has changed from the
+    HDF5 1.8 JNI, which was "ncsa.hdf.hdflib.hdf5", to HDF5 1.10,
     "hdf.hdflib.hdf5".
-    
+
     A number of new APIs were added including some for VDS and SWMR.
-    
-    
-    
+
+
+
     Other Important Changes
     -----------------------
-    
+
     The hid_t type was changed from 32-bit to a 64-bit value.
-    
-    
-    
+
+
+
 Issues Addressed in this Release Since alpha1
 =============================================
 
      - H5Pget_virtual_printf_gap, H5Pget_virtual_view, H5Pget_efile_prefix
-       
-       The correct access property list settings from the 
-       H5Pget_virtual_printf_gap, H5Pget_virtual_view, and 
-       H5Pget_efile_prefix function calls could not be retrieved 
+
+       The correct access property list settings from the
+       H5Pget_virtual_printf_gap, H5Pget_virtual_view, and
+       H5Pget_efile_prefix function calls could not be retrieved
        using H5Dget_access_plist().
-       
-       Fixed. 
-       
+
+       Fixed.
+
        (DER and NAF - 2016/03/14, HDFFV-9716)
 
-     - h5dump 
-       
-       When h5dump was provided with the name of a non-existing file or 
-       when optional arguments were the last option on the command line, 
-       h5dump would segfault. 
-       
+     - h5dump
+
+       When h5dump was provided with the name of a non-existing file or
+       when optional arguments were the last option on the command line,
+       h5dump would segfault.
+
        Fixed.
-       
+
        (ADB 2016/02/28 HDFFV-9639, HDFFV-9684)
 
      - No Error Message for Corrupt Metadata
 
-       The HDF5 Library did not propagate an error when it encountered 
-       corrupt metadata in an HDF5 file. The issue was fixed for a 
-       specific file provided by a user. If you still see the problem, 
-       please contact help@hdfgroup.org 
-       
+       The HDF5 Library did not propagate an error when it encountered
+       corrupt metadata in an HDF5 file. The issue was fixed for a
+       specific file provided by a user. If you still see the problem,
+       please contact help@hdfgroup.org
+
        Fixed.
-       
+
        (MC - 2016/02/18, HDFFV-9670)
 
-     - Problem Reading Chunked Datasets with a String Datatype Larger 
+     - Problem Reading Chunked Datasets with a String Datatype Larger
        Than the Chunk Size in Bytes
-       
-       When the latest file format was used and when a chunked dataset 
-       was created with a datatype with the size bigger than a chunk 
-       size, the data could not be read back. The issue was reported 
-       for chunked datasets with a string datatype and was confirmed 
-       for other datatypes with the sizes bigger than the chunk size in 
-       bytes. 
-       
+
+       When the latest file format was used and when a chunked dataset
+       was created with a datatype with the size bigger than a chunk
+       size, the data could not be read back. The issue was reported
+       for chunked datasets with a string datatype and was confirmed
+       for other datatypes with the sizes bigger than the chunk size in
+       bytes.
+
        Fixed.
-       
+
        (JM - 2016/02/13, HDFFV-9672)
-       
+
      - Control over the Location of External Files
-       
+
        Users were unable to specify the locations of external files.
-       
-       Two APIs - H5Pget_efile_prefix and H5Pset_efile_prefix - were 
+
+       Two APIs - H5Pget_efile_prefix and H5Pset_efile_prefix - were
        added so that users could specify the locations of external files.
-       
+
        (DER - 2016/02/04, HDFFV-8740)
 
 
 
-Issues Addressed in this Release Since alpha0 
+Issues Addressed in this Release Since alpha0
 =============================================
     - h5format_convert
-      
-      The h5format_convert tool did not downgrade the version of the 
-      superblock. 
-      
+
+      The h5format_convert tool did not downgrade the version of the
+      superblock.
+
       Fixed. The tool now will downgrade the version of the superblock.
-      
+
       (EIP 2016/01/11)
 
     - Crashes with multiple threads: invalid pointers
-      
-      It was reported that alpha0 crashed when used with multiple 
-      threads. The issue exists in the HDF5 Library versions 1.8 and 
-      1.9. The problem is related to a shared file pointer used in some 
-      miscellaneous data structures. The thread-safe library exposed 
-      paths in the library where a file pointer became invalid. 
-      
-      The alpha1 release contains the fixes for the specific use case 
-      as described in HDFFV-9643. We will keep working on identifying 
-      and fixing other paths in the library with similar problems.  
-      
+
+      It was reported that alpha0 crashed when used with multiple
+      threads. The issue exists in the HDF5 Library versions 1.8 and
+      1.9. The problem is related to a shared file pointer used in some
+      miscellaneous data structures. The thread-safe library exposed
+      paths in the library where a file pointer became invalid.
+
+      The alpha1 release contains the fixes for the specific use case
+      as described in HDFFV-9643. We will keep working on identifying
+      and fixing other paths in the library with similar problems.
+
       (EIP - 2016/01/15, HDFFV-9643)
 
 
@@ -438,19 +438,19 @@ They are built with the configure process unless specified otherwise.
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
 
     Mac OS X Mt. Lion 10.8.5      Apple clang/clang++ version 5.1 from Xcode 5.1
-    64-bit    			  gfortran GNU Fortran (GCC) 4.8.2
+    64-bit                  gfortran GNU Fortran (GCC) 4.8.2
     (swallow/kite)                Intel icc/icpc/ifort version 15.0.3
 
     Mac OS X Mavericks 10.9.5     Apple clang/clang++ version 6.0 from Xcode 6.2.0
-    64-bit    			  gfortran GNU Fortran (GCC) 4.9.2
+    64-bit                  gfortran GNU Fortran (GCC) 4.9.2
     (wren/quail)                  Intel icc/icpc/ifort version 15.0.3
 
     Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.0 from Xcode 7.0.0
-    64-bit    			  gfortran GNU Fortran (GCC) 4.9.2
+    64-bit                  gfortran GNU Fortran (GCC) 4.9.2
     (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
 
     Mac OS X El Capitan 10.11.3     Apple clang/clang++ version 7.0.2 from Xcode 7.0.2
-    64-bit    			  gfortran GNU Fortran (GCC) 5.2.0
+    64-bit                  gfortran GNU Fortran (GCC) 5.2.0
     (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
 
 
@@ -575,8 +575,14 @@ document. The HDF Group is taking steps to make our JIRA issue database
 open to the public, and this section will refer to that database in a future
 release. In the meantime, please contact help@hdfgroup.org if you come across
 an issue not listed here or at the link above, and we will provide any
-information about known workarounds that we have or add it to our list of 
+information about known workarounds that we have or add it to our list of
 known issues if it is a new issue.
+
+ - The JUnit-interface test may fail on Solaris platforms. The result of
+   a test for verifying the content of the error stack to stdout is
+   in a different order on Solaris then other platforms. Use make -i option
+   to test beyond the java/test folder.
+   (ADB - 2016/03/22 - HDFFV-9734)
 
  - The flush/refresh test occasionally fails on OS X platforms. This is
    being investigated and may be a problem with SWMR on HFS+.
@@ -599,7 +605,7 @@ known issues if it is a new issue.
 
  - VDS feature
    Currently, the path to a VDS source file is interpreted as relative to the
-   directory where the executable program runs and not to the HDF5 file with 
-   the VDS dataset unless a full path to the source file is specified during 
-   the mapping. 
+   directory where the executable program runs and not to the HDF5 file with
+   the VDS dataset unless a full path to the source file is specified during
+   the mapping.
    (EIP - 2016/03/20 - HDFFV-9724)
