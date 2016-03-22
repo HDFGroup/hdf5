@@ -128,3 +128,4 @@ add_test (
         -D "TEST_REFERENCE=JUnit-interface.txt"
         -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
 )
+set_tests_properties (JUnit-interface PROPERTIES DEPENDS "JUnit-interface-clearall-objects")
