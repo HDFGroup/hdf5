@@ -33,7 +33,7 @@ SUBDIRS=jni
 JAVAROOT = .classes
 
 classes:
-	$(MKDIR_P) $(@D)/$(JAVAROOT)
+	test -d $(@D)/$(JAVAROOT) || $(MKDIR_P) $(@D)/$(JAVAROOT)
 
 jarfile = jar$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).jar
 hdf5_javadir = $(libdir)
@@ -128,7 +128,7 @@ docs:
 CLEANFILES = classhdf5_java.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/callbacks/*.class $(JAVAROOT)/$(pkgpath)/exceptions/*.class $(JAVAROOT)/$(pkgpath)/structs/*.class $(JAVAROOT)/$(pkgpath)/*.class
 
 clean:
-	rm -rf $(JAVAROOT)
+	rm -rf $(JAVAROOT)/*
 	rm -f $(jarfile)
 	rm -f classhdf5_java.stamp
 

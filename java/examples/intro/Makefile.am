@@ -26,7 +26,7 @@ JAVA_API=yes
 JAVAROOT = .classes
 
 classes:
-	$(MKDIR_P) $(@D)/$(JAVAROOT)
+	test -d $(@D)/$(JAVAROOT) || $(MKDIR_P) $(@D)/$(JAVAROOT)
 
 pkgpath = examples/intro
 hdfjarfile = jar$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).jar
@@ -60,7 +60,7 @@ TEST_SCRIPT = $(check_SCRIPTS)
 CLEANFILES = classnoinst.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/*.class runExample.sh
 
 clean:
-	rm -rf $(JAVAROOT)
+	rm -rf $(JAVAROOT)/*
 	rm -f $(jarfile)
 	rm -f classnoinst.stamp
 

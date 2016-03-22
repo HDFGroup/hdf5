@@ -1025,7 +1025,7 @@ help:
 	@$(top_srcdir)/bin/makehelp
 
 classes:
-	$(MKDIR_P) $(@D)/$(JAVAROOT)
+	test -d $(@D)/$(JAVAROOT) || $(MKDIR_P) $(@D)/$(JAVAROOT)
 
 $(jarfile): classhdf5_java.stamp classes docs
 	$(JAR) cvf $@ -C $(JAVAROOT)/ $(pkgpath)
@@ -1036,7 +1036,7 @@ docs:
 	$(JAVADOC) -sourcepath $(srcdir) -d javadoc -use -splitIndex -windowtitle $(WINDOWTITLE) -doctitle $(DOCTITLE) -J-Xmx180m -verbose -overview $(top_srcdir)/java/src/hdf/overview.html -classpath $(CLASSPATH_ENV) hdf.hdf5lib
 
 clean:
-	rm -rf $(JAVAROOT)
+	rm -rf $(JAVAROOT)/*
 	rm -f $(jarfile)
 	rm -f classhdf5_java.stamp
 
