@@ -858,10 +858,10 @@ esac
 ## Check if they would like the Java native interface (JNI) compiled
 ##
 
-## This needs to be exposed for the library info file even if JAVA is disabled.
+## This needs to be exposed for the library info file even if Java is disabled.
 AC_SUBST([HDF_JAVA])
 
-## Default is no JAVA
+## Default is no Java
 HDF_JAVA=no
 
 AC_SUBST([H5_CLASSPATH]) H5_CLASSPATH=""
@@ -1578,7 +1578,7 @@ AC_ARG_ENABLE([threadsafe],
                               [default=no]])],
               [THREADSAFE=$enableval])
 
-## The high-level, C++, and Fortran interfaces are not compatible
+## The high-level, C++, Fortran and Java interfaces are not compatible
 ## with the thread-safety option because the lock is not hoisted
 ## into the higher-level API calls.
 
@@ -1607,6 +1607,14 @@ fi
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
     AC_MSG_ERROR([--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
+## --enable-threadsafe is also incompatible with --enable-java unless
+## --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_JAVA}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-java and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
   fi
 fi
 
@@ -2432,6 +2440,15 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
+## The --enable-parallel flag is not compatible with --enable-java.
+## If the user tried to specify both flags, throw an error, unless
+## they also provided the --enable-unsupported flag.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_JAVA}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-java and --enable-parallel flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
 ## --enable-parallel is also incompatible with --enable-threadsafe, unless
 ## --enable-unsupported has been specified on the configure line.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
@@ -3177,7 +3194,7 @@ fi
 java_version_info=`$JAVA -version 2>&1 |\
   grep 'version' | sed -e 's/version "//' | sed -e 's/"//'`
 if test -n "$java_version_info"; then
-  JAVA_VERSION="$JAVA_VERSION ( $java_version_info)"
+  JAVA_VERSION="$JAVA_VERSION ($java_version_info)"
 fi
 
 ## ----------------------------------------------------------------------
