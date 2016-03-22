@@ -61,8 +61,8 @@ $top_builddir/java/src/jni/.libs/libhdf5_java.*
 $top_builddir/java/src/$JARFILE
 "
 LIST_DATA_FILES="
-$HDFTEST_HOME/h5ex_g_iterate.hdf
 $HDFTEST_HOME/JUnit-interface.txt
+$HDFTEST_HOME/JUnit-interface.ert
 "
 
 expect="JUnit-interface.txt"
@@ -144,23 +144,16 @@ COPY_DATAFILES_TO_BLDDIR()
             fi
         fi
     done
+    $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterate.hdf
 }
 
 CLEAN_DATAFILES_AND_BLDDIR()
 {
-    # skip rm if srcdir is same as destdir
-    # this occurs when build/test performed in source dir and
-    # make cp fail
-    SDIR=`$DIRNAME $HDFTEST_HOME/h5ex_g_iterate.hdf`
-    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-    INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
-    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        $RM $BLDDIR/*.hdf
-        $RM $BLDDIR/*.out
-        $RM $BLDDIR/*.err
-        $RM $BLDDIR/*.ext
-        $RM $BLDDIR/*.txt
-    fi
+        $RM $BLDDIR/h5ex_g_iterate.hdf
+        $RM $BLDDIR/JUnit-interface.out
+        $RM $BLDDIR/JUnit-interface.err
+        $RM $BLDDIR/JUnit-interface.ext
+        $RM $BLDDIR/JUnit-interface.txt
 }
 
 # Print a line-line message left justified in a field of 70 characters

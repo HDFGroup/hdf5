@@ -63,7 +63,6 @@ add_dependencies (${HDF5_JAVA_TEST_LIB_TARGET} ${HDF5_JAVA_HDF5_LIB_TARGET})
 set_target_properties (${HDF5_JAVA_TEST_LIB_TARGET} PROPERTIES FOLDER test/java)
 
 set (HDF_JAVA_TEST_FILES
-      h5ex_g_iterate.hdf
       JUnit-interface.txt
       JUnit-interface.ert
 )
@@ -78,6 +77,13 @@ foreach (h5_file ${HDF_JAVA_TEST_FILES})
       ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/${h5_file} ${dest}
   )
 endforeach (h5_file ${HDF_JAVA_TEST_FILES})
+
+add_custom_command (
+    TARGET     ${HDF5_JAVA_TEST_LIB_TARGET}
+    POST_BUILD
+    COMMAND    ${CMAKE_COMMAND}
+    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/h5ex_g_iterate.orig ${PROJECT_BINARY_DIR}/h5ex_g_iterate.hdf
+)
 
 if (WIN32)
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
@@ -95,6 +101,14 @@ set (testfilter "OK (598 tests)")
 if (CMAKE_BUILD_TYPE MATCHES Debug)
   set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
 endif(CMAKE_BUILD_TYPE MATCHES Debug)
+
+add_test (
+  NAME JJUnit-interface-clearall-objects
+  COMMAND    ${CMAKE_COMMAND}
+      -E remove
+      JUnit-interface.out
+      JUnit-interface.out.err
+)
 
 add_test (
     NAME JUnit-interface
