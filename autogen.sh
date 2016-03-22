@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/sh
 #
 # Copyright by The HDF Group.                                              
 # All rights reserved.                                                     
@@ -110,8 +110,10 @@ while getopts "$optspec" optchar; do
         verbose=true
         ;;
     *)
-        if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
-            echo "Non-option argument: '-${OPTARG}'" >&2
+        if [ "$OPTERR" != 1 ] || case $optspec in :*) ;; *) false; esac; then
+            echo "ERROR: non-option argument: '-${OPTARG}'" >&2
+            echo "Quitting"
+            exit 1
         fi
         ;;
     esac
