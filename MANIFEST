@@ -2691,7 +2691,7 @@
 ./java/test/junit.sh.in
 ./java/test/JUnit-interface.txt
 ./java/test/JUnit-interface.ert
-./java/test/h5ex_g_iterate.hdf
+./java/test/h5ex_g_iterate.orig
 ./java/test/TestH5.java
 ./java/test/TestH5A.java
 ./java/test/TestH5Dparams.java
