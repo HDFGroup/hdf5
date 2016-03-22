@@ -855,10 +855,10 @@ esac
 ## Check if they would like the Java native interface (JNI) compiled
 ##
 
-## This needs to be exposed for the library info file even if JAVA is disabled.
+## This needs to be exposed for the library info file even if Java is disabled.
 AC_SUBST([HDF_JAVA])
 
-## Default is no JAVA
+## Default is no Java
 HDF_JAVA=no
 
 AC_SUBST([H5_CLASSPATH]) H5_CLASSPATH=""
@@ -3174,7 +3174,7 @@ fi
 java_version_info=`$JAVA -version 2>&1 |\
   grep 'version' | sed -e 's/version "//' | sed -e 's/"//'`
 if test -n "$java_version_info"; then
-  JAVA_VERSION="$JAVA_VERSION ( $java_version_info)"
+  JAVA_VERSION="$JAVA_VERSION ($java_version_info)"
 fi
 
 ## ----------------------------------------------------------------------
