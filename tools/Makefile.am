@@ -25,6 +25,6 @@ CONFIG=ordered
 
 # All subdirectories
 SUBDIRS=lib h5diff h5ls h5dump misc h5import h5repack h5jam h5copy h5stat \
-    perform
+	perform
 
 include $(top_srcdir)/config/conclude.am

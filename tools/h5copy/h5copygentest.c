@@ -644,7 +644,7 @@ out:
  *------------------------------------------------------------------------*/
 static void Test_Obj_Copy(void)
 {
-    hid_t fid=0;
+    hid_t fid = -1;		        /* File id */
 
     /* Create source file */
     fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);

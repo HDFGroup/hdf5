@@ -360,7 +360,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
 			has_i_o = 1;
 			break;
 
-			/* -o for backward compability */
+		/* -o for backward compability */
 		case 'o':
 			outfile = opt_arg;
 			has_i_o = 1;

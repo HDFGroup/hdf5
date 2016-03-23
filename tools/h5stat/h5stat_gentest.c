@@ -43,7 +43,6 @@
 /*
  * Generate HDF5 file with latest format with
  * NUM_GRPS groups and NUM_ATTRS attributes for the dataset
- *
  */
 static void 
 gen_newgrat_file(const char *fname)
@@ -111,6 +110,10 @@ gen_newgrat_file(const char *fname)
     } /* end for */
 
     /* Close dataset, dataspace, datatype, file */
+    if(H5Pclose(fapl) < 0)
+	goto error;
+    if(H5Pclose(fcpl) < 0)
+	goto error;
     if(H5Dclose(did) < 0)
 	goto error;
     if(H5Sclose(sid) < 0)
@@ -122,6 +125,8 @@ gen_newgrat_file(const char *fname)
 
 error:
     H5E_BEGIN_TRY {
+	H5Pclose(fapl);
+	H5Pclose(fcpl);
 	H5Aclose(attr_id);
         H5Dclose(did);
         H5Tclose(tid);
@@ -129,7 +134,6 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     } H5E_END_TRY;
-
 } /* gen_newgrat_file() */
 
 /*
