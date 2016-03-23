@@ -90,7 +90,7 @@ GROUP "/" {
    }
    DATASET "dset_chunk" {
       DATATYPE  H5T_STD_I32LE
-      DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, H5S_UNLIMITED ) }
+      DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
          CHUNKED ( 20, 10 )
          SIZE 3200 (1.000:1 COMPRESSION)

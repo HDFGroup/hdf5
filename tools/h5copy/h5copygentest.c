@@ -22,6 +22,7 @@
 
 /* HDF file names */
 #define HDF_FILE1                "h5copytst.h5"
+#define HDF_FILE1_NEW            "h5copytst_new.h5"
 #define HDF_FILE2                "h5copy_ref.h5"
 #define HDF_EXT_SRC_FILE         "h5copy_extlinks_src.h5"
 #define HDF_EXT_TRG_FILE         "h5copy_extlinks_trg.h5"
@@ -645,19 +646,40 @@ out:
 static void Test_Obj_Copy(void)
 {
     hid_t fid = -1;		        /* File id */
+    hid_t fapl_new = (-1);	        /* File access property id */
+    unsigned new_format;		/* New format or old format */
 
-    /* Create source file */
-    fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    if (fid < 0)
-    {
-        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", HDF_FILE1);
+    if((fapl_new = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+        fprintf(stderr, "Error: H5Pcreate failed.\n");
+        goto out;
+    }
+    if(H5Pset_libver_bounds(fapl_new, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
+        fprintf(stderr, "Error: H5Pset_libver_bounds failed.\n");
         goto out;
     }
 
-    gent_datasets(fid);
-    gent_empty_group(fid);
-    gent_nested_datasets(fid);
-    gent_nested_group(fid);
+    /* Test with old & new format groups */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+    
+        /* Set the FAPL for the type of format */
+        /* Create source file */
+        if(new_format)
+	    fid = H5Fcreate(HDF_FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_new);
+	else
+	    fid = H5Fcreate(HDF_FILE1_NEW, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+        if(fid < 0) {
+            fprintf(stderr, "Error: H5Fcreate failed.\n");
+            goto out;
+        }
+
+        gent_datasets(fid);
+        gent_empty_group(fid);
+        gent_nested_datasets(fid);
+        gent_nested_group(fid);
+
+        H5Fclose(fid);
+        fid = (-1);
+    } /* end for */
 
 out:
     /*-----------------------------------------------------------------------
@@ -665,6 +687,8 @@ out:
     *------------------------------------------------------------------------*/
     if(fid > 0)
         H5Fclose(fid);
+    if(fapl_new > 0)
+        H5Pclose(fapl_new);
 }
 
 /*-------------------------------------------------------------------------
