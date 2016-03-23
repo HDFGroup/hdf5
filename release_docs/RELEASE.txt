@@ -164,6 +164,12 @@ This release supports the following features:
       performance in both of these areas. For more information, see
       http://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesFileSpaceMgmtDocs.html.
 
+    - Version 3 Metadata Cache
+
+      The version 3 metadata cache moves management of metadata I/O from 
+      the clients to the metadata cache proper.  This change is essential for
+      SWMR and other features that have yet to be released.
+
 
 
     C++ Library
