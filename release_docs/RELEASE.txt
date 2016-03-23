@@ -591,14 +591,23 @@ known issues if it is a new issue.
    (ADB - 2016/03/22, HDFFV-9734)
 
  - The flush/refresh test occasionally fails on OS X platforms. This is
-   being investigated and may be a problem with SWMR on HFS+.
+   being investigated but no fix or workaround is available at this time.
    (DER - 2016/03/22, HDFFV-9731)
 
  - The VDS/SWMR test will fail with a segmentation fault if the library
-   is built with --enable-using-memchecker.
+   is built with --enable-using-memchecker. The is due to a VDS shutdown
+   procedure freeing a shared resource too early when the memory
+   checker changes are built. This problem does not arise when the
+   memory checker changes are not used since the internal library free
+   lists behave differently. The memory checker configure option should
+   normally only be used under special circumstances so this should not
+   affect most users. Users should be aware that the --enable-using-memchecker
+   + VDS combination may cause a segfault, however, so Valgrind et al. may
+   have to be used with an HDF5 library built without the feature if this
+   proves to be a problem.
    (DER - 2016/03/21, HDFFV-9732)
 
- - SWMR feature
+ - SWMR feature limitations
    The SWMR feature will only work if an HDF5 file under SWMR access resides
    on a file system that obeys POSIX write() ordering semantics. Because of
    this, SWMR will not work on  network file systems such as NFS or SMB/Windows
@@ -609,7 +618,7 @@ known issues if it is a new issue.
    obvious reasons for it to not work on NTFS or GPFS.
    (EIP - 2016/03/20, HDFFV-9733)
 
- - VDS feature
+ - VDS feature limitation
    Currently, the path to a VDS source file is interpreted as relative to the
    directory where the executable program runs and not to the HDF5 file with
    the VDS dataset unless a full path to the source file is specified during
