@@ -106,17 +106,19 @@ test_file_properties(void)
     int mpi_size, mpi_rank;
     herr_t ret;                 /* Generic return value */
 
-    filename = GetTestParameters();
+    filename = (const char *)GetTestParameters();
 
     /* set up MPI parameters */
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     /* setup file access plist */
-    fapl_id = H5Pcreate (H5P_FILE_ACCESS);
-    VRFY((fapl_id >= 0), "H5P_FILE_ACCESS");
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id >= 0), "H5Pcreate");
+    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+    VRFY((ret >= 0), "H5Pset_fapl_mpio");
 
-    /* create the file with the SEC2 driver */
+    /* create the file */
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
@@ -207,4 +209,5 @@ test_file_properties(void)
     /* Release file-access plist */
     ret = H5Pclose(fapl_id);
     VRFY((ret >= 0), "H5Pclose succeeded");
-}
+} /* end test_file_properties() */
+

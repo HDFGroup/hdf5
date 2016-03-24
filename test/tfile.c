@@ -3261,8 +3261,10 @@ test_filespace_compatible(void)
 	CHECK(fd_new, FAIL, "HDopen");
 
 	/* Copy data */
-	while((nread = HDread(fd_old, buf, (size_t)READ_OLD_BUFSIZE)) > 0)
-	    HDwrite(fd_new, buf, (size_t)nread);
+	while((nread = HDread(fd_old, buf, (size_t)READ_OLD_BUFSIZE)) > 0) {
+        ssize_t write_err = HDwrite(fd_new, buf, (size_t)nread);
+        CHECK(write_err, -1, "HDwrite");
+    } /* end while */
 
 	/* Close the files */
 	ret = HDclose(fd_old);

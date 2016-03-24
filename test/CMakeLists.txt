@@ -74,7 +74,7 @@ endif (BUILD_SHARED_LIBS)
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/testdir2")
 
   #-----------------------------------------------------------------------------
-  # Define Test Library Sources
+  # Define Plugin Test Sources
   #-----------------------------------------------------------------------------
   set (TEST_PLUGIN_LIBS
       dynlib1

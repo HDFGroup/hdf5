@@ -34,41 +34,67 @@
 #define ARRAY1_DIM1 4
 
 /* 3-D array datatype */
-#define ARRAY2_RANK	3
-#define ARRAY2_DIM1 3
-#define ARRAY2_DIM2 4
-#define ARRAY2_DIM3 5
+#define ARRAY2_RANK     3
+#define ARRAY2_DIM1     3
+#define ARRAY2_DIM2     4
+#define ARRAY2_DIM3     5
 
 /* 2-D array datatype */
-#define ARRAY3_RANK	2
-#define ARRAY3_DIM1 6
-#define ARRAY3_DIM2 3
+#define ARRAY3_RANK     2
+#define ARRAY3_DIM1     6
+#define ARRAY3_DIM2     3
 
 /* 1-D dataset with fixed dimensions */
-#define SPACE1_RANK	1
-#define SPACE1_DIM1	4
+#define SPACE1_RANK     1
+#define SPACE1_DIM1     4
 
-/****************************************************************
-**
-**  test_array_atomic_1d(): Test basic array datatype code.
-**      Tests 1-D array of atomic datatypes
-**
-****************************************************************/
+/* Parameters used with the test_array_bkg() test */
+#define FIELDNAME  "ArrayofStructures"
+#define LENGTH     5
+#define ALEN       10
+#define RANK       1
+#define NMAX       100
+
+/* Struct used with test_array_bkg() test */
+typedef struct
+{
+  int      nsubfields;
+  char     *name[NMAX];
+  size_t   offset[NMAX];
+  hid_t    datatype[NMAX];
+
+} CmpDTSinfo;
+
+/* Forward declarations for custom vlen memory manager functions */
+void *test_array_alloc_custom(size_t size, void *info);
+void test_array_free_custom(void *mem, void *info);
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_atomic_1d
+ *
+ * Purpose:     Test basic array datatype code.
+ *              Tests 1-D array of atomic datatypes.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 test_array_atomic_1d(void)
 {
-    int wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
-    int rdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information read in */
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t		tid1;       /* Datatype ID			*/
-    hsize_t		sdims1[] = {SPACE1_DIM1};
-    hsize_t		tdims1[] = {ARRAY1_DIM1};
-    int         ndims;      /* Array rank for reading */
-    hsize_t		rdims1[H5S_MAX_RANK];    /* Array dimensions for reading */
-    int        i,j;        /* counting variables */
-    herr_t		ret;		/* Generic return value		*/
+    int wdata[SPACE1_DIM1][ARRAY1_DIM1];    /* Information to write         */
+    int rdata[SPACE1_DIM1][ARRAY1_DIM1];    /* Information read in          */
+    hid_t       fid1;                       /* HDF5 File IDs                */
+    hid_t       dataset;                    /* Dataset ID                   */
+    hid_t       sid1;                       /* Dataspace ID                 */
+    hid_t       tid1;                       /* Datatype ID                  */
+    hsize_t     sdims1[] = {SPACE1_DIM1};
+    hsize_t     tdims1[] = {ARRAY1_DIM1};
+    int         ndims;                      /* Array rank for reading       */
+    hsize_t     rdims1[H5S_MAX_RANK];       /* Array dimensions for reading */
+    int         i,j;                        /* counting variables           */
+    herr_t      ret;                        /* Generic return value         */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array of Atomic Datatypes Functionality\n"));
@@ -167,23 +193,28 @@ test_array_atomic_1d(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_array_atomic_1d() */
 
-/****************************************************************
-**
-**  test_array_funcs(): Test some type functions that are and
-**      aren't supposed to work with array type.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_funcs
+ *
+ * Purpose:     Test some type functions that are and aren't supposed to
+ *              work with array type.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 test_array_funcs(void)
 {
-    hid_t		type;       /* Datatype ID */
-    hsize_t		tdims1[] = {ARRAY1_DIM1};
-    size_t              size;
-    H5T_pad_t           inpad;
-    H5T_norm_t          norm;
-    H5T_cset_t          cset;
-    H5T_str_t           strpad;
-    herr_t		ret;	    /* Generic return value */
+    hid_t       type;                       /* Datatype ID                  */
+    hsize_t     tdims1[] = {ARRAY1_DIM1};
+    size_t      size;
+    H5T_pad_t   inpad;
+    H5T_norm_t  norm;
+    H5T_cset_t  cset;
+    H5T_str_t   strpad;
+    herr_t      ret;                        /* Generic return value         */
 
     /* Create a datatype to refer to */
     type = H5Tarray_create2(H5T_IEEE_F32BE, ARRAY1_RANK, tdims1);
@@ -223,29 +254,34 @@ test_array_funcs(void)
     /* Close datatype */
     ret = H5Tclose(type);
     CHECK(ret, FAIL, "H5Tclose");
-} /* end test_array_funcs */
+} /* end test_array_funcs() */
 
-/****************************************************************
-**
-**  test_array_atomic_3d(): Test basic array datatype code.
-**      Tests 3-D array of atomic datatypes
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_atomic_3d
+ *
+ * Purpose:     Test basic array datatype code.
+ *              Tests 3-D array of atomic datatypes.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 test_array_atomic_3d(void)
 {
     int wdata[SPACE1_DIM1][ARRAY2_DIM1][ARRAY2_DIM2][ARRAY2_DIM3];   /* Information to write */
     int rdata[SPACE1_DIM1][ARRAY2_DIM1][ARRAY2_DIM2][ARRAY2_DIM3];   /* Information read in */
-    hid_t		fid;        /* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid;        /* Dataspace ID			*/
-    hid_t		tid;        /* Datatype ID			*/
-    hsize_t		sdims1[] = {SPACE1_DIM1};
-    hsize_t		tdims2[] = {ARRAY2_DIM1,ARRAY2_DIM2,ARRAY2_DIM3};
-    int         ndims;      /* Array rank for reading */
-    hsize_t		rdims2[H5S_MAX_RANK];    /* Array dimensions for reading */
-    int        i,j,k,l;    /* counting variables */
-    herr_t		ret;		/* Generic return value		*/
+    hid_t       fid;                        /* HDF5 File IDs                */
+    hid_t       dataset;                    /* Dataset ID                   */
+    hid_t       sid;                        /* Dataspace ID                 */
+    hid_t       tid;                        /* Datatype ID                  */
+    hsize_t     sdims1[] = {SPACE1_DIM1};
+    hsize_t     tdims2[] = {ARRAY2_DIM1,ARRAY2_DIM2,ARRAY2_DIM3};
+    int         ndims;                      /* Array rank for reading       */
+    hsize_t     rdims2[H5S_MAX_RANK];       /* Array dimensions for reading */
+    int         i,j,k,l;                    /* counting variables           */
+    herr_t      ret;                        /* Generic return value         */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 3-D Array of Atomic Datatypes Functionality\n"));
@@ -349,31 +385,36 @@ test_array_atomic_3d(void)
 
 } /* end test_array_atomic_3d() */
 
-/****************************************************************
-**
-**  test_array_array_atomic(): Test basic array datatype code.
-**      Tests 1-D array 2-D arrays of atomic datatypes
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_array_atomic
+ *
+ * Purpose:     Test basic array datatype code.
+ *              Tests 1-D array 2-D arrays of atomic datatypes.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 test_array_array_atomic(void)
 {
     int wdata[SPACE1_DIM1][ARRAY1_DIM1][ARRAY3_DIM1][ARRAY3_DIM2];   /* Information to write */
     int rdata[SPACE1_DIM1][ARRAY1_DIM1][ARRAY3_DIM1][ARRAY3_DIM2];   /* Information read in */
-    hid_t		fid;        /* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid;        /* Dataspace ID			*/
-    hid_t		tid1;       /* 1-D array Datatype ID */
-    hid_t		tid2;       /* 2-D array Datatype ID */
-    hsize_t		sdims1[] = {SPACE1_DIM1};
-    hsize_t		tdims1[] = {ARRAY1_DIM1};
-    hsize_t		tdims2[] = {ARRAY3_DIM1,ARRAY3_DIM2};
-    int         ndims1;     /* Array rank for reading */
-    int         ndims2;     /* Array rank for reading */
-    hsize_t		rdims1[H5S_MAX_RANK];    /* Array dimensions for reading */
-    hsize_t		rdims2[H5S_MAX_RANK];    /* Array dimensions for reading */
-    int        i,j,k,l;    /* counting variables */
-    herr_t		ret;		/* Generic return value		*/
+    hid_t       fid;                        /* HDF5 File IDs                */
+    hid_t       dataset;                    /* Dataset ID                   */
+    hid_t       sid;                        /* Dataspace ID                 */
+    hid_t       tid1;                       /* 1-D array Datatype ID        */
+    hid_t       tid2;                       /* 2-D array Datatype ID        */
+    hsize_t     sdims1[] = {SPACE1_DIM1};
+    hsize_t     tdims1[] = {ARRAY1_DIM1};
+    hsize_t     tdims2[] = {ARRAY3_DIM1,ARRAY3_DIM2};
+    int         ndims1;                     /* Array rank for reading       */
+    int         ndims2;                     /* Array rank for reading       */
+    hsize_t     rdims1[H5S_MAX_RANK];       /* Array dimensions for reading */
+    hsize_t     rdims2[H5S_MAX_RANK];       /* Array dimensions for reading */
+    int         i,j,k,l;                    /* counting variables           */
+    herr_t      ret;                        /* Generic return value         */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array 2-D Arrays of Atomic Datatypes Functionality\n"));
@@ -503,12 +544,17 @@ test_array_array_atomic(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_array_array_atomic() */
 
-/****************************************************************
-**
-**  test_array_compound_atomic(): Test basic array datatype code.
-**      Tests 1-D array of compound datatypes (with no array fields)
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_compound_atomic
+ *
+ * Purpose:     Test basic array datatype code.
+ *              Tests 1-D array of compound datatypes (with no array fields).
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 test_array_compound_atomic(void)
 {
@@ -516,23 +562,24 @@ test_array_compound_atomic(void)
         int i;
         float f;
     } s1_t;
-    s1_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
-    s1_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information read in */
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t		tid1;       /* Array Datatype ID			*/
-    hid_t		tid2;       /* Compound Datatype ID			*/
-    hsize_t		sdims1[] = {SPACE1_DIM1};
-    hsize_t		tdims1[] = {ARRAY1_DIM1};
-    int         ndims;      /* Array rank for reading */
-    hsize_t		rdims1[H5S_MAX_RANK];    /* Array dimensions for reading */
-    int         nmemb;      /* Number of compound members */
-    char       *mname;      /* Name of compound field */
-    size_t      off;        /* Offset of compound field */
-    hid_t       mtid;       /* Datatype ID for field */
-    int        i,j;        /* counting variables */
-    herr_t		ret;		/* Generic return value		*/
+
+    s1_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write         */
+    s1_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information read in          */
+    hid_t       fid1;                       /* HDF5 File IDs                */
+    hid_t       dataset;                    /* Dataset ID                   */
+    hid_t       sid1;                       /* Dataspace ID                 */
+    hid_t       tid1;                       /* Array Datatype ID            */
+    hid_t       tid2;                       /* Compound Datatype ID         */
+    hsize_t     sdims1[] = {SPACE1_DIM1};
+    hsize_t     tdims1[] = {ARRAY1_DIM1};
+    int         ndims;                      /* Array rank for reading       */
+    hsize_t     rdims1[H5S_MAX_RANK];       /* Array dimensions for reading */
+    int         nmemb;                      /* Number of compound members   */
+    char       *mname;                      /* Name of compound field       */
+    size_t      off;                        /* Offset of compound field     */
+    hid_t       mtid;                       /* Datatype ID for field        */
+    int         i,j;                        /* counting variables           */
+    herr_t      ret;                        /* Generic return value         */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array of Compound Atomic Datatypes Functionality\n"));
@@ -704,12 +751,17 @@ test_array_compound_atomic(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_array_compound_atomic() */
 
-/****************************************************************
-**
-**  test_array_compound_array(): Test basic array datatype code.
-**      Tests 1-D array of compound datatypes (with array fields)
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_compound_array
+ *
+ * Purpose:     Test basic array datatype code.
+ *              Tests 1-D array of compound datatypes (with array fields).
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 test_array_compound_array(void)
 {
@@ -717,25 +769,26 @@ test_array_compound_array(void)
         int i;
         float f[ARRAY1_DIM1];
     } s1_t;
-    s1_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
-    s1_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information read in */
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t		tid1;       /* Array Datatype ID	*/
-    hid_t		tid2;       /* Compound Datatype ID	*/
-    hid_t		tid3;       /* Nested Array Datatype ID	*/
-    hsize_t		sdims1[] = {SPACE1_DIM1};
-    hsize_t		tdims1[] = {ARRAY1_DIM1};
-    int         ndims;      /* Array rank for reading */
-    hsize_t		rdims1[H5S_MAX_RANK];    /* Array dimensions for reading */
-    int         nmemb;      /* Number of compound members */
-    char       *mname;      /* Name of compound field */
-    size_t      off;        /* Offset of compound field */
-    hid_t       mtid;       /* Datatype ID for field */
-    H5T_class_t mclass;     /* Datatype class for field */
-    int        i,j,k;      /* counting variables */
-    herr_t		ret;		/* Generic return value		*/
+
+    s1_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write         */
+    s1_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information read in          */
+    hid_t       fid1;                       /* HDF5 File IDs                */
+    hid_t       dataset;                    /* Dataset ID                   */
+    hid_t       sid1;                       /* Dataspace ID                 */
+    hid_t       tid1;                       /* Array Datatype ID            */
+    hid_t       tid2;                       /* Compound Datatype ID         */
+    hid_t       tid3;                       /* Nested Array Datatype ID     */
+    hsize_t     sdims1[] = {SPACE1_DIM1};
+    hsize_t     tdims1[] = {ARRAY1_DIM1};
+    int         ndims;                      /* Array rank for reading       */
+    hsize_t     rdims1[H5S_MAX_RANK];       /* Array dimensions for reading */
+    int         nmemb;                      /* Number of compound members   */
+    char       *mname;                      /* Name of compound field       */
+    size_t      off;                        /* Offset of compound field     */
+    hid_t       mtid;                       /* Datatype ID for field        */
+    H5T_class_t mclass;                     /* Datatype class for field     */
+    int         i,j,k;                      /* counting variables           */
+    herr_t      ret;                        /* Generic return value         */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array of Compound Array Datatypes Functionality\n"));
@@ -949,9 +1002,6 @@ test_array_compound_array(void)
 
 } /* end test_array_compound_array() */
 
-void *test_array_alloc_custom(size_t size, void *info);
-void test_array_free_custom(void *mem, void *info);
-
 /****************************************************************
 **
 **  test_array_alloc_custom(): Test VL datatype custom memory
@@ -960,11 +1010,29 @@ void test_array_free_custom(void *mem, void *info);
 **      allocated.
 **
 ****************************************************************/
-void *test_array_alloc_custom(size_t size, void *info)
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_alloc_custom
+ *
+ * Purpose:     Memory allocator for testing VL datatype custom memory
+ *              allocation routines.
+ *
+ *              This routine just uses malloc to allocate the memory and
+ *              increments the amount of memory allocated.
+ *
+ * Return:
+ *
+ *  Success:    A memory buffer
+ *  Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+test_array_alloc_custom(size_t size, void *info)
 {
-    void *ret_value = NULL;             /* Pointer to return */
-    size_t *mem_used = (size_t *)info;  /* Get the pointer to the memory used */
-    size_t extra;                       /* Extra space needed */
+    void   *ret_value = NULL;               /* Pointer to return            */
+    size_t *mem_used = (size_t *)info;      /* Pointer to the memory used   */
+    size_t  extra;                          /* Extra space needed           */
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
@@ -976,23 +1044,31 @@ void *test_array_alloc_custom(size_t size, void *info)
         *(size_t *)ret_value = size;
         *mem_used += size;
     } /* end if */
+
     ret_value = ((unsigned char *)ret_value) + extra;
     return ret_value;
-}
+} /* end test_array_alloc_custom() */
 
-/****************************************************************
-**
-**  test_array_free_custom(): Test VL datatype custom memory
-**      allocation routines.  This routine just uses free to
-**      release the memory and decrements the amount of memory
-**      allocated.
-**
-****************************************************************/
-void test_array_free_custom(void *_mem, void *info)
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_free_custom
+ *
+ * Purpose:     Memory free function for testing VL datatype custom memory
+ *              allocation routines.
+ *
+ *              This routine just uses free to free the memory and
+ *              decrements the amount of memory allocated.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+test_array_free_custom(void *_mem, void *info)
 {
-    unsigned char *mem = NULL;
-    size_t *mem_used = (size_t *)info;  /* Get the pointer to the memory used */
-    size_t extra;                       /* Extra space needed */
+    unsigned char *mem = NULL;          /* Pointer to mem to be freed   */
+    size_t *mem_used = (size_t *)info;  /* Pointer to the memory used   */
+    size_t extra;                       /* Extra space needed           */
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
@@ -1005,35 +1081,42 @@ void test_array_free_custom(void *_mem, void *info)
         *mem_used -= *(size_t *)mem;
         HDfree(mem);
     } /* end if */
-}
 
-/****************************************************************
-**
-**  test_array_vlen_atomic(): Test basic array datatype code.
-**      Tests 1-D array of atomic VL datatypes
-**
-****************************************************************/
+    return;
+} /* end test_array_free_custom() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_vlen_atomic
+ *
+ * Purpose:     Test basic array datatype code.
+ *              Tests 1-D array of atomic VL datatypes.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 test_array_vlen_atomic(void)
 {
-    hvl_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
-    hvl_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information read in */
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t		tid1;       /* Array Datatype ID			*/
-    hid_t		tid2;       /* VL Datatype ID       */
-    hid_t		tid3;       /* Atomic Datatype ID   */
-    hsize_t		sdims1[] = {SPACE1_DIM1};
-    hsize_t		tdims1[] = {ARRAY1_DIM1};
-    int         ndims;      /* Array rank for reading */
-    hsize_t		rdims1[H5S_MAX_RANK];    /* Array dimensions for reading */
-    H5T_class_t mclass;     /* Datatype class for VL */
-    hid_t       xfer_pid;   /* Dataset transfer property list ID */
-    hsize_t     size;       /* Number of bytes which will be used */
-    size_t      mem_used=0; /* Memory used during allocation */
-    int         i,j,k;      /* counting variables */
-    herr_t		ret;		/* Generic return value		*/
+    hvl_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write        */
+    hvl_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information read in         */
+    hid_t       fid1;                   /* HDF5 File IDs                    */
+    hid_t       dataset;                /* Dataset ID                       */
+    hid_t       sid1;                   /* Dataspace ID                     */
+    hid_t       tid1;                   /* Array Datatype ID                */
+    hid_t       tid2;                   /* VL Datatype ID                   */
+    hid_t       tid3;                   /* Atomic Datatype ID               */
+    hsize_t     sdims1[] = {SPACE1_DIM1};
+    hsize_t     tdims1[] = {ARRAY1_DIM1};
+    int         ndims;                  /* Array rank for reading           */
+    hsize_t     rdims1[H5S_MAX_RANK];   /* Array dimensions for reading     */
+    H5T_class_t mclass;                 /* Datatype class for VL            */
+    hid_t       xfer_pid;               /* Dataset transfer property list ID    */
+    hsize_t     size;                   /* Number of bytes which will be used   */
+    size_t      mem_used=0;             /* Memory used during allocation    */
+    int         i,j,k;                  /* counting variables               */
+    herr_t      ret;                    /* Generic return value             */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array of Atomic Variable-Length Datatypes Functionality\n"));
@@ -1217,34 +1300,39 @@ test_array_vlen_atomic(void)
 
 } /* end test_array_vlen_atomic() */
 
-/****************************************************************
-**
-**  test_array_vlen_array(): Test basic array datatype code.
-**      Tests 1-D array of 1-D array VL datatypes
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_vlen_array
+ *
+ * Purpose:     Test basic array datatype code.
+ *              Tests 1-D array of 1-D array VL datatypes.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 test_array_vlen_array(void)
 {
-    hvl_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write */
-    hvl_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information read in */
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		sid1;       /* Dataspace ID			*/
-    hid_t		tid1;       /* Array Datatype ID			*/
-    hid_t		tid2;       /* VL Datatype ID       */
-    hid_t		tid3;       /* Nested Array Datatype ID   */
-    hid_t		tid4;       /* Atomic Datatype ID   */
-    hsize_t		sdims1[] = {SPACE1_DIM1};
-    hsize_t		tdims1[] = {ARRAY1_DIM1};
-    int         ndims;      /* Array rank for reading */
-    hsize_t		rdims1[H5S_MAX_RANK];    /* Array dimensions for reading */
-    H5T_class_t mclass;     /* Datatype class for VL */
-    hid_t       xfer_pid;   /* Dataset transfer property list ID */
-    hsize_t     size;       /* Number of bytes which will be used */
-    size_t      mem_used=0; /* Memory used during allocation */
-    int         i,j,k,l;    /* Index variables */
-    herr_t		ret;		/* Generic return value		*/
+    hvl_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information to write        */
+    hvl_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   /* Information read in         */
+    hid_t       fid1;                   /* HDF5 File IDs                    */
+    hid_t       dataset;                /* Dataset ID                       */
+    hid_t       sid1;                   /* Dataspace ID                     */
+    hid_t       tid1;                   /* Array Datatype ID                */
+    hid_t       tid2;                   /* VL Datatype ID                   */
+    hid_t       tid3;                   /* Nested Array Datatype ID         */
+    hid_t       tid4;                   /* Atomic Datatype ID               */
+    hsize_t     sdims1[] = {SPACE1_DIM1};
+    hsize_t     tdims1[] = {ARRAY1_DIM1};
+    int         ndims;                  /* Array rank for reading           */
+    hsize_t     rdims1[H5S_MAX_RANK];   /* Array dimensions for reading     */
+    H5T_class_t mclass;                 /* Datatype class for VL            */
+    hid_t       xfer_pid;               /* Dataset transfer property list ID    */
+    hsize_t     size;                   /* Number of bytes which will be used   */
+    size_t      mem_used=0;             /* Memory used during allocation    */
+    int         i,j,k,l;                /* Index variables                  */
+    herr_t      ret;                    /* Generic return value             */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing 1-D Array of 1-D Array Variable-Length Datatypes Functionality\n"));
@@ -1467,28 +1555,18 @@ test_array_vlen_array(void)
 
 } /* end test_array_vlen_array() */
 
-#define FIELDNAME  "ArrayofStructures"
-#define LENGTH     5
-#define ALEN       10
-#define RANK       1
-#define NMAX       100
-
-typedef struct
-{
-  int      nsubfields;
-  char     *name[NMAX];
-  size_t   offset[NMAX];
-  hid_t    datatype[NMAX];
-
-} CmpDTSinfo;
-
-/****************************************************************
-**
-**  test_array_bkg(): Test basic array datatype code.
-**      Tests reading compound datatype with array fields and
-**          writing partial fields.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array_bkg
+ *
+ * Purpose:     Test basic array datatype code.
+ *              Tests reading compound datatype with array fields and
+ *              writing partial fields.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 test_array_bkg(void)
 {
@@ -1531,10 +1609,10 @@ test_array_bkg(void)
     CHECK(dtsinfo, NULL, "HDmalloc");
     HDmemset(dtsinfo, 0, sizeof(CmpDTSinfo));
     for (i = 0; i < LENGTH; i++) {
-		for (j = 0; j < ALEN; j++) {
-			cf[i].a[j] = 100 * (i + 1) + j;
-			cf[i].b[j] = 100.0F * ((float)i + 1.0F) + 0.01F * (float)j;
-			cf[i].c[j] = (double)(100.0F * ((float)i + 1.0F) + 0.02F * (float)j);
+        for (j = 0; j < ALEN; j++) {
+            cf[i].a[j] = 100 * (i + 1) + j;
+            cf[i].b[j] = 100.0F * ((float)i + 1.0F) + 0.01F * (float)j;
+            cf[i].c[j] = (double)(100.0F * ((float)i + 1.0F) + 0.02F * (float)j);
         } /* end for */
     } /* end for */
 
@@ -1745,7 +1823,7 @@ test_array_bkg(void)
 
     /* Reset the data to read in */
     /* ------------------------- */
-    memset(cfr, 0, sizeof(CmpField)*LENGTH);
+    HDmemset(cfr, 0, sizeof(CmpField)*LENGTH);
 
     status = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, cfr);
     CHECK(status, FAIL, "H5Dread");
@@ -2064,17 +2142,22 @@ test_compat(void)
         /* Close the file */
         ret = H5Fclose(fid1);
         CHECK_I(ret, "H5Fclose");
-    }
+    } /* end if */
     else
         printf("***cannot open the pre-created compound datatype test file (%s)\n",testfile);
 
 } /* end test_compat() */
 
-/****************************************************************
-**
-**  test_array(): Main array datatype testing routine.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_array
+ *
+ * Purpose:     Main array datatype testing routine.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
 void
 test_array(void)
 {
@@ -2082,33 +2165,32 @@ test_array(void)
     MESSAGE(5, ("Testing Array Datatypes\n"));
 
     /* These tests use the same file... */
-    test_array_atomic_1d();     /* Test 1-D array of atomic datatypes */
-    test_array_atomic_3d();     /* Test 3-D array of atomic datatypes */
-    test_array_array_atomic();  /* Test 1-D array of 2-D arrays of atomic datatypes */
-    test_array_compound_atomic();   /* Test 1-D array of compound datatypes (with no array fields) */
-    test_array_compound_array();    /* Test 1-D array of compound datatypes (with array fields) */
-    test_array_vlen_atomic();   /* Test 1-D array of atomic VL datatypes */
-    test_array_vlen_array();    /* Test 1-D array of 1-D array VL datatypes */
-    test_array_funcs();         /* Test type functions with array types */
+    test_array_atomic_1d();         /* Test 1-D array of atomic datatypes                                   */
+    test_array_atomic_3d();         /* Test 3-D array of atomic datatypes                                   */
+    test_array_array_atomic();      /* Test 1-D array of 2-D arrays of atomic datatypes                     */
+    test_array_compound_atomic();   /* Test 1-D array of compound datatypes (with no array fields)          */
+    test_array_compound_array();    /* Test 1-D array of compound datatypes (with array fields)             */
+    test_array_vlen_atomic();       /* Test 1-D array of atomic VL datatypes                                */
+    test_array_vlen_array();        /* Test 1-D array of 1-D array VL datatypes                             */
+    test_array_funcs();             /* Test type functions with array types                                 */
 
-    test_array_bkg();           /* Read compound datatype with array fields and background fields read */
+    test_array_bkg();               /* Read compound datatype with array fields and background fields read  */
 
     /* This test uses a custom file */
-    test_compat();              /* Test compatibility changes for compound datatype fields */
-}   /* test_array() */
+    test_compat();                  /* Test compatibility changes for compound datatype fields              */
+
+}   /* end test_array() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	cleanup_array
+ * Function:    cleanup_array
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose:     Cleanup temporary test files
  *
- * Return:	none
+ * Return:      void
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              June 8, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2116,5 +2198,5 @@ void
 cleanup_array(void)
 {
     remove(FILENAME);
-}
+} /* end cleanup_array() */
 
