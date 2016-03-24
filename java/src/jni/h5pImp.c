@@ -2965,16 +2965,10 @@ Java_hdf_hdf5lib_H5_H5Pset_1elink_1acc_1flags(JNIEnv *env, jclass clss, jlong la
 {
     herr_t retVal = -1;
 
-    if (((unsigned) flags != H5F_ACC_RDWR) &&
-            ((unsigned) flags != H5F_ACC_RDONLY) &&
-            ((unsigned) flags != H5F_ACC_DEFAULT)) {
-        h5badArgument(env, "H5Pset_elink_acc_flags: invalid flags value");
-    } /* end if */
-    else {
-        retVal = H5Pset_elink_acc_flags((hid_t)lapl_id, (unsigned)flags);
-        if (retVal < 0)
-            h5libraryError(env);
-    } /* end else */
+    retVal = H5Pset_elink_acc_flags((hid_t)lapl_id, (unsigned)flags);
+    if (retVal < 0)
+        h5libraryError(env);
+
     return (jint) retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1elink_1acc_1flags */
 
