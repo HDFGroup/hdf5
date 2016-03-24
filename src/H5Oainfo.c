@@ -324,7 +324,9 @@ H5O_ainfo_free(void *mesg)
 /*-------------------------------------------------------------------------
  * Function:    H5O_ainfo_delete
  *
- * Purpose:     Free file space referenced by message
+ * Purpose:     Free file space referenced by message.  Note that open_oh
+ *              *must* be non-NULL - this means that calls to
+ *              H5O_msg_delete must include an oh if the type is ainfo.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -334,7 +336,7 @@ H5O_ainfo_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
+H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 {
     H5O_ainfo_t *ainfo = (H5O_ainfo_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -344,6 +346,7 @@ H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh, void *_
     /* check args */
     HDassert(f);
     HDassert(ainfo);
+    HDassert(open_oh);
 
     /* If the object is using "dense" attribute storage, delete it */
     if(H5F_addr_defined(ainfo->fheap_addr)) {
