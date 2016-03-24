@@ -220,14 +220,14 @@ H5_DLL herr_t H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id,
     const H5O_ainfo_t *ainfo, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t skip, hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op,
     void *op_data);
-H5_DLL herr_t H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
-    const char *name);
-H5_DLL herr_t H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
-    H5_index_t idx_type, H5_iter_order_t order, hsize_t n);
+H5_DLL herr_t H5A_dense_remove(H5F_t *f, hid_t dxpl_id,
+    const H5O_ainfo_t *ainfo, const char *name);
+H5_DLL herr_t H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id,
+    const H5O_ainfo_t *ainfo, H5_index_t idx_type, H5_iter_order_t order,
+    hsize_t n);
 H5_DLL htri_t H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     const char *name);
 H5_DLL herr_t H5A_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo);
-
 
 /* Attribute table operations */
 H5_DLL herr_t H5A_compact_build_table(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
@@ -266,7 +266,6 @@ H5_DLL herr_t H5A_attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t *me
     H5O_loc_t *dst_oloc, const H5A_t *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
 H5_DLL herr_t H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t * ainfo_src,
     H5O_loc_t *dst_oloc, H5O_ainfo_t *ainfo_dst, hid_t dxpl_id, H5O_copy_t *cpy_info);
-
 
 /* Testing functions */
 #ifdef H5A_TESTING

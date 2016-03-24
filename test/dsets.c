@@ -20,37 +20,34 @@
  * Purpose:	Tests the dataset interface (H5D)
  */
 
-#include <stdlib.h>
-#include <time.h>
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
+#define H5D_TESTING
 
-/*
- * This file needs to access private information from the H5Z package.
- */
-#define H5Z_FRIEND
-
+#define H5Z_FRIEND		/*suppress error about including H5Zpkg	  */
 
 #include "h5test.h"
 #include "H5srcdir.h"
+#include "H5Dpkg.h"
 #include "H5Zpkg.h"
 #ifdef H5_HAVE_SZLIB_H
 #   include "szlib.h"
 #endif
 
 const char *FILENAME[] = {
-    "dataset",
-    "compact_dataset",
-    "dset_offset",
-    "max_compact_dataset",
-    "simple",
-    "set_local",
-    "random_chunks",
-    "huge_chunks",
-    "chunk_cache",
-    "big_chunk",
-    "chunk_expand",
-    "copy_dcpl_newfile",
-    "layout_extend",
-    "zero_chunk",
+    "dataset", 		/* 0 */
+    "compact_dataset",	/* 1 */
+    "dset_offset",	/* 2 */
+    "max_compact_dataset",	/* 3 */
+    "simple",		/* 4 */
+    "set_local",	/* 5 */
+    "random_chunks",	/* 6 */
+    "huge_chunks",	/* 7 */
+    "chunk_cache",	/* 8 */
+    "big_chunk",	/* 9 */
+    "chunk_expand",	/* 10 */
+    "copy_dcpl_newfile",/* 11 */
+    "layout_extend",    /* 12 */
+    "zero_chunk",	/* 13 */
     NULL
 };
 #define FILENAME_BUF_SIZE       1024

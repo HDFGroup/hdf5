@@ -23,10 +23,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dpkg.h"		/* Datasets 				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5HLprivate.h"	/* Local heaps				*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Dpkg.h"             /* Datasets                                 */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5HLprivate.h"        /* Local heaps                              */
 
 
 /****************/
@@ -61,15 +61,15 @@
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__layout_set_io_ops
+ * Function:    H5D__layout_set_io_ops
  *
- * Purpose:	Set the I/O operation function pointers for a dataset,
+ * Purpose:     Set the I/O operation function pointers for a dataset,
  *              according to the dataset's layout
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March 20, 2008
+ * Programmer:  Quincey Koziol
+ *              Thursday, March 20, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -192,15 +192,15 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__layout_oh_create
+ * Function:    H5D__layout_oh_create
  *
- * Purpose:	Create layout/pline/efl information for dataset
+ * Purpose:     Create layout/pline/efl information for dataset
  *
- * Return:	Success:    SUCCEED
- *		Failure:    FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
- * Programmer:	Quincey Koziol
- *		Monday, July 27, 2009
+ * Programmer:  Quincey Koziol
+ *              Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -209,7 +209,7 @@ H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh, H5D_t *dset,
     hid_t dapl_id)
 {
     H5O_layout_t        *layout;        /* Dataset's layout information */
-    const H5O_fill_t	*fill_prop;     /* Pointer to dataset's fill value information */
+    const H5O_fill_t    *fill_prop;     /* Pointer to dataset's fill value information */
     hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -394,6 +394,7 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
     /* Adjust chunk dimensions to omit datatype size (in last dimension) for creation property */
     if(H5D_CHUNKED == dataset->shared->layout.type)
         dataset->shared->layout.u.chunk.ndims--;
+
     /* Copy layout to the DCPL */
     if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &dataset->shared->layout) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout")

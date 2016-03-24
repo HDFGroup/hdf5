@@ -195,7 +195,7 @@ H5F__cache_superblock_deserialize(const void *_image, size_t len, void *_udata,
     H5F_super_t         *sblock = NULL; /* File's superblock */
     H5F_superblock_cache_ud_t *udata = (H5F_superblock_cache_ud_t *)_udata; /* User data */
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
-    size_t              variable_size;  /* Sariable size of superblock */
+    size_t              variable_size;  /* Variable size of superblock */
     unsigned            super_vers;     /* Superblock version */
     uint8_t             sizeof_addr;    /* Size of offsets in the file (in bytes) */
     uint8_t             sizeof_size;    /* Size of lengths in the file (in bytes) */

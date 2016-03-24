@@ -544,8 +544,8 @@ H5_DLL herr_t H5D__check_filters(H5D_t *dataset);
 H5_DLL herr_t H5D__set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 H5_DLL herr_t H5D__get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
 H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset, hid_t dxpl_id);
-H5_DLL herr_t H5D__mark(const H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D__flush_real(H5D_t *dataset, hid_t dxpl_id);
+H5_DLL herr_t H5D__mark(const H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 #ifdef H5_DEBUG_BUILD
 H5_DLL herr_t H5D_set_io_info_dxpls(H5D_io_info_t *io_info, hid_t dxpl_id);
 #endif /* H5_DEBUG_BUILD */

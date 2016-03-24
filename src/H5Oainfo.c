@@ -346,9 +346,11 @@ H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh, void *_
     HDassert(ainfo);
 
     /* If the object is using "dense" attribute storage, delete it */
-    if(H5F_addr_defined(ainfo->fheap_addr))
+    if(H5F_addr_defined(ainfo->fheap_addr)) {
+        /* Delete the attribute */
         if(H5A_dense_delete(f, dxpl_id, ainfo) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense attribute storage")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -428,7 +430,7 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     *ainfo_dst = *ainfo_src;
 
     if(H5F_addr_defined(ainfo_src->fheap_addr)) {
-        /* copy dense attribute */
+        /* Prepare to copy dense attributes - actual copy in post_copy */
 
         /* Set copied metadata tag */
         H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, NULL);

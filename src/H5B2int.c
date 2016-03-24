@@ -148,14 +148,14 @@ H5B2__locate_record(const H5B2_class_t *type, unsigned nrec, size_t *rec_off,
 
     hi = nrec;
     while(lo < hi && *cmp) {
-	my_idx = (lo + hi) / 2;
-	if((type->compare)(udata, native + rec_off[my_idx], cmp) < 0)
+        my_idx = (lo + hi) / 2;
+        if((type->compare)(udata, native + rec_off[my_idx], cmp) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
-	if(*cmp < 0)
-	    hi = my_idx;
-	else
-	    lo = my_idx + 1;
-    }
+        if(*cmp < 0)
+            hi = my_idx;
+        else
+            lo = my_idx + 1;
+    } /* end while */
 
     *idx = my_idx;
 

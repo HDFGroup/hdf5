@@ -535,11 +535,10 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
             /* Unlock current node before failing */
             H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET);
             HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
-        }
+        } /* end if */
 
         if(cmp > 0)
             idx++;
-
         if(cmp != 0) {
             /* Get node pointer for next node to search */
             next_node_ptr=internal->node_ptrs[idx];

@@ -158,7 +158,6 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
 /* Local Variables */
 /*******************/
 
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__cache_get_load_size()

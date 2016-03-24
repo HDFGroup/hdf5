@@ -32,7 +32,7 @@
 #endif /* NOT_YET */
 
 /* Private headers needed by this file */
-#include "H5Fprivate.h"		/* File access				*/
+#include "H5Fprivate.h"             /* File access                  */
 
 
 /**************************/

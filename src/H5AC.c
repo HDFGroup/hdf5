@@ -32,7 +32,7 @@
 /****************/
 
 #include "H5ACmodule.h"         /* This source code file is part of the H5AC module */
-#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND		        /* Suppress error about including H5Fpkg            */
 
 
 /***********/
