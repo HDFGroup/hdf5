@@ -46,19 +46,19 @@
 #define H5D_MINHDR_SIZE 256
 
 /* [Simple] Macro to construct a H5D_io_info_t from it's components */
-#define H5D_BUILD_IO_INFO_WRT(io_info, ds, dxpl_c, dxpl_i, str, buf)    \
+#define H5D_BUILD_IO_INFO_WRT(io_info, ds, dxpl_c, dxpl_m, dxpl_r, str, buf)    \
     (io_info)->dset = ds;                                               \
     (io_info)->dxpl_cache = dxpl_c;                                     \
-    (io_info)->raw_dxpl_id = dxpl_i;                                    \
-    (io_info)->md_dxpl_id = dxpl_i;                                    \
+    (io_info)->raw_dxpl_id = dxpl_r;                                    \
+    (io_info)->md_dxpl_id = dxpl_m;                                     \
     (io_info)->store = str;                                             \
     (io_info)->op_type = H5D_IO_OP_WRITE;                               \
     (io_info)->u.wbuf = buf
-#define H5D_BUILD_IO_INFO_RD(io_info, ds, dxpl_c, dxpl_i, str, buf)     \
+#define H5D_BUILD_IO_INFO_RD(io_info, ds, dxpl_c, dxpl_m, dxpl_r, str, buf) \
     (io_info)->dset = ds;                                               \
     (io_info)->dxpl_cache = dxpl_c;                                     \
-    (io_info)->raw_dxpl_id = dxpl_i;                                    \
-    (io_info)->md_dxpl_id = dxpl_i;                                    \
+    (io_info)->raw_dxpl_id = dxpl_r;                                    \
+    (io_info)->md_dxpl_id = dxpl_m;                                     \
     (io_info)->store = str;                                             \
     (io_info)->op_type = H5D_IO_OP_READ;                                \
     (io_info)->u.rbuf = buf

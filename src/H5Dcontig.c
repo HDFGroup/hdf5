@@ -270,7 +270,7 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
     offset = 0;
 
     /* Simple setup for dataset I/O info struct */
-    H5D_BUILD_IO_INFO_WRT(&ioinfo, dset, dxpl_cache, raw_dxpl_id, &store, fb_info.fill_buf);
+    H5D_BUILD_IO_INFO_WRT(&ioinfo, dset, dxpl_cache, H5AC_ind_read_dxpl_id, raw_dxpl_id, &store, fb_info.fill_buf);
 
     /*
      * Fill the entire current extent with the fill value.  We can do

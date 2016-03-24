@@ -4316,7 +4316,7 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
      * Note that we only need to set scaled once, as the array's address
      * will never change. */
     chk_store.chunk.scaled = scaled;
-    H5D_BUILD_IO_INFO_RD(&chk_io_info, dset, dxpl_cache, dxpl_id, &chk_store, NULL);
+    H5D_BUILD_IO_INFO_RD(&chk_io_info, dset, dxpl_cache, dxpl_id, H5AC_rawdata_dxpl_id, &chk_store, NULL);
     chk_io_info.raw_dxpl_id = H5AC_rawdata_dxpl_id;
 
     /* Compose chunked index info struct */
