@@ -312,6 +312,22 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dset_1extent
 JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Diterate
   (JNIEnv*, jclass, jbyteArray, jlong, jlong, jobject, jobject);
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dflush
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Dflush
+  (JNIEnv*, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Drefresh
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Drefresh
+  (JNIEnv*, jclass, jlong);
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */

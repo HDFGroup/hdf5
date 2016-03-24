@@ -25,6 +25,7 @@ import java.io.File;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
+import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.junit.After;
@@ -496,12 +497,12 @@ public class TestH5P {
         assertEquals(HDF5Constants.H5F_ACC_RDWR, get_flags);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_elink_acc_flags_InvalidFlag1() throws Throwable {
         H5.H5Pset_elink_acc_flags(lapl_id, HDF5Constants.H5F_ACC_TRUNC);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = HDF5FunctionArgumentException.class)
     public void testH5Pset_elink_acc_flags_InvalidFlag2() throws Throwable {
         H5.H5Pset_elink_acc_flags(lapl_id, -1);
     }

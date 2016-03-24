@@ -64,7 +64,6 @@ add_dependencies (${HDF5_JAVA_TEST_LIB_TARGET} ${HDF5_JAVA_HDF5_LIB_TARGET})
 set_target_properties (${HDF5_JAVA_TEST_LIB_TARGET} PROPERTIES FOLDER test/java)
 
 set (HDF_JAVA_TEST_FILES
-      h5ex_g_iterate.hdf
       JUnit-interface.txt
       JUnit-interface.ert
 )
@@ -79,6 +78,13 @@ foreach (h5_file ${HDF_JAVA_TEST_FILES})
       ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/${h5_file} ${dest}
   )
 endforeach (h5_file ${HDF_JAVA_TEST_FILES})
+
+add_custom_command (
+    TARGET     ${HDF5_JAVA_TEST_LIB_TARGET}
+    POST_BUILD
+    COMMAND    ${CMAKE_COMMAND}
+    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/h5ex_g_iterate.orig ${PROJECT_BINARY_DIR}/h5ex_g_iterate.hdf
+)
 
 if (WIN32)
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
@@ -98,6 +104,14 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
 endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 add_test (
+  NAME JUnit-interface-clearall-objects
+  COMMAND    ${CMAKE_COMMAND}
+      -E remove
+      JUnit-interface.out
+      JUnit-interface.out.err
+)
+
+add_test (
     NAME JUnit-interface
     COMMAND "${CMAKE_COMMAND}"
         -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
@@ -107,11 +121,12 @@ add_test (
         -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
         -D "TEST_FOLDER=${HDF5_BINARY_DIR}/java/test"
         -D "TEST_OUTPUT=JUnit-interface.out"
-        -D "TEST_ERRREF=JUnit-interface.ert"
 #        -D "TEST_LOG_LEVEL=trace"
         -D "TEST_EXPECT=0"
+        -D "SKIP_APPEND=1"
         -D "TEST_MASK_ERROR=TRUE"
         -D "TEST_FILTER:STRING=${testfilter}"
         -D "TEST_REFERENCE=JUnit-interface.txt"
         -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
 )
+set_tests_properties (JUnit-interface PROPERTIES DEPENDS "JUnit-interface-clearall-objects")

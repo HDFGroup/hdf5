@@ -2965,16 +2965,10 @@ Java_hdf_hdf5lib_H5_H5Pset_1elink_1acc_1flags(JNIEnv *env, jclass clss, jlong la
 {
     herr_t retVal = -1;
 
-    if (((unsigned) flags != H5F_ACC_RDWR) &&
-            ((unsigned) flags != H5F_ACC_RDONLY) &&
-            ((unsigned) flags != H5F_ACC_DEFAULT)) {
-        h5badArgument(env, "H5Pset_elink_acc_flags: invalid flags value");
-    } /* end if */
-    else {
-        retVal = H5Pset_elink_acc_flags((hid_t)lapl_id, (unsigned)flags);
-        if (retVal < 0)
-            h5libraryError(env);
-    } /* end else */
+    retVal = H5Pset_elink_acc_flags((hid_t)lapl_id, (unsigned)flags);
+    if (retVal < 0)
+        h5libraryError(env);
+
     return (jint) retVal;
 } /* end Java_hdf_hdf5lib_H5_H5Pset_1elink_1acc_1flags */
 
@@ -5500,6 +5494,38 @@ Java_hdf_hdf5lib_H5_H5Piterate(JNIEnv *env, jclass clss, jlong prop_id, jintArra
 
     return status;
 } /* end Java_hdf_hdf5lib_H5_H5Piterate */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_metadata_read_attempts
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1metadata_1read_1attempts(JNIEnv *env, jclass clss, jlong plist_id)
+{
+    unsigned attempts;
+    if (H5Pget_metadata_read_attempts((hid_t)plist_id, &attempts) < 0)
+        h5libraryError(env);
+
+    return (jlong) attempts;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1metadata_1read_1attempts */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_metadata_read_attempts
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1metadata_1read_1attempts(JNIEnv *env, jclass clss, jlong plist_id, jlong attempts)
+{
+     if (attempts <= 0) {
+         h5badArgument(env, "H5Pset_metadata_read_attempts:  attempts <= 0");
+     } /* end if */
+     else {
+        if(H5Pset_metadata_read_attempts((hid_t)plist_id, (unsigned)attempts) < 0)
+            h5libraryError(env);
+     } /* end else */
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1metadata_1read_1attempts */
 
 #ifdef __cplusplus
 } /* end extern "C" */

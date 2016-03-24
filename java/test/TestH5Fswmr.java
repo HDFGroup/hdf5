@@ -81,13 +81,38 @@ public class TestH5Fswmr {
 
     @Test
     public void testH5Fstart_swmr_write() {
-        long plist = -1;
-
         try {
             H5.H5Fstart_swmr_write(H5fid);
         }
         catch (Throwable err) {
             fail("H5.H5Fstart_swmr_write: " + err);
         }
+    }
+
+    @Test
+    public void testH5Fswmr_read_attempts() {
+        long read_attempts = 0;
+
+        try {
+            read_attempts = H5.H5Pget_metadata_read_attempts(H5fapl);
+        }
+        catch (Throwable err) {
+            fail("H5.testH5Fswmr_read_attempts: " + err);
+        }
+        assertTrue(read_attempts == 1);
+
+        try {
+            H5.H5Pset_metadata_read_attempts(H5fapl, 20);
+        }
+        catch (Throwable err) {
+            fail("H5.testH5Fswmr_read_attempts: " + err);
+        }
+        try {
+            read_attempts = H5.H5Pget_metadata_read_attempts(H5fapl);
+        }
+        catch (Throwable err) {
+            fail("H5.testH5Fswmr_read_attempts: " + err);
+        }
+        assertTrue(read_attempts == 20);
     }
 }

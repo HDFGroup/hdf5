@@ -89,6 +89,22 @@ JNIEXPORT jobject JNICALL Java_hdf_hdf5lib_H5_H5Gget_1info_1by_1name
 JNIEXPORT jobject JNICALL Java_hdf_hdf5lib_H5_H5Gget_1info_1by_1idx
   (JNIEnv*, jclass, jlong, jstring, jint, jint, jlong, jlong);
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Gflush
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Gflush
+  (JNIEnv*, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Grefresh
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Grefresh
+  (JNIEnv*, jclass, jlong);
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */

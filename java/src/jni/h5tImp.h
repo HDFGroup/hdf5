@@ -543,6 +543,22 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2
 JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Tconvert
   (JNIEnv *, jclass, jlong, jlong, jlong, jbyteArray, jbyteArray, jlong);
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Tflush
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Tflush
+  (JNIEnv*, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Trefresh
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Trefresh
+  (JNIEnv*, jclass, jlong);
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */

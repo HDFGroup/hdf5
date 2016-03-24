@@ -151,4 +151,14 @@ public class TestH5Oparams {
         H5.H5Oget_comment_by_name(-1, null, -1);
     }
 
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Oflush_invalid() throws Throwable {
+        H5.H5Oflush(-1);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Orefresh_invalid() throws Throwable {
+        H5.H5Orefresh(-1);
+    }
+
 }
