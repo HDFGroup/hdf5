@@ -47,6 +47,15 @@ typedef enum H5Q_type_t {
     H5Q_TYPE_MISC        /* (for combine queries) selects misc objects */
 } H5Q_type_t;
 
+/* Query element */
+typedef union {
+    struct {
+        hid_t type;
+        void *value;
+    } value;
+    char *name;
+} H5Q_elem_t;
+
 /* Query match conditions */
 typedef enum H5Q_match_op_t {
     H5Q_MATCH_EQUAL,        /* equal */

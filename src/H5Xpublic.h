@@ -87,9 +87,9 @@ typedef struct {
         void *metadata);
     herr_t (*close)(void *idx_handle);
     herr_t (*insert_entry)(void *idx_handle, hid_t obj_id, H5Q_type_t key_type,
-        const void *key, size_t key_len, hid_t xxpl_id);
+        H5Q_elem_t *key, hid_t xxpl_id);
     herr_t (*remove_entry)(void *idx_handle, hid_t obj_id, H5Q_type_t key_type,
-        const void *key, size_t key_len, hid_t xxpl_id);
+        H5Q_elem_t *key, hid_t xxpl_id);
     herr_t (*query)(void *idx_handle, hid_t query_id, hid_t xxpl_id,
         size_t *ref_count, href_t *refs[]);
     herr_t (*get_size)(void *idx_handle, hsize_t *idx_size);
