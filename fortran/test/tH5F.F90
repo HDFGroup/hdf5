@@ -194,15 +194,15 @@ CONTAINS
           !
           !test whether files are in hdf5 format
           !
-          CALL h5fis_accessible_f(fix_filename1, status, error)
-               CALL check("h5fis_accessible_f",error,total_error)
+          CALL h5fis_hdf5_f(fix_filename1, status, error)
+               CALL check("h5fis_hdf5_f",error,total_error)
           IF ( .NOT. status ) THEN
               write(*,*) "File ", fix_filename1, " is not in hdf5 format"
               stop
           END IF
 
-          CALL h5fis_accessible_f(fix_filename2, status, error)
-               CALL check("h5fis_accessible_f",error,total_error)
+          CALL h5fis_hdf5_f(fix_filename2, status, error)
+               CALL check("h5fis_hdf5_f",error,total_error)
           IF ( .NOT. status ) THEN
               write(*,*) "File ", fix_filename2, " is not in hdf5 format"
               stop
@@ -355,13 +355,6 @@ CONTAINS
                     dset_data(i,j) = (i-1)*6 + j;
                end do
           end do
-
-          !
-          !Initialize FORTRAN predifined datatypes
-          !
-!          CALL h5init_types_f(error)
-!               CALL check("h5init_types_f",error,total_error)
-
 
           !
           !Create file "reopen.h5" using default properties.
