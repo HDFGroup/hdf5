@@ -66,7 +66,20 @@ New Features
       --enable/disable-verbose to display all cmake process output.
       (AKC, 2015/11/16, HDFFV-8932 and DAILYTEST-195)
 
-     - CMake minimum is now 3.1.0. (ADB 2015/11/14)
+    - CMake minimum is now 3.1.0. (ADB 2015/11/14)
+
+    - Large file system (LFS) support has changed in the autotools
+
+      * We assume that fseeko and ftello exist.
+
+      * The *64 I/O functions and types are no longer explicitly used.
+        We now rely on a mapping provided by _FILE_OFFSET_BITS (or its
+        equivalent).
+
+      * _LARGEFILE(64)_SOURCE is no longer exposed via AM_CPPFLAGS.
+
+      (DER, 2016/03/29, HDFFV-9626)
+
 
     Library
     -------

@@ -911,10 +911,6 @@ fi
 ##
 case "$host_cpu-$host_vendor-$host_os" in
   *linux*)
-    ## Make available various LFS-related routines using the following 
-    ## _LARGEFILE*_SOURCE macros.
-    AM_CPPFLAGS="-D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE $AM_CPPFLAGS"
-
     ## Add POSIX support on Linux systems, so <features.h> defines
     ## __USE_POSIX, which is required to get the prototype for fdopen
     ## defined correctly in <stdio.h>. 
@@ -948,18 +944,6 @@ esac
 ## Note: Both will be restored by the end of configure.
 CPPFLAGS="$H5_CPPFLAGS $AM_CPPFLAGS $CPPFLAGS"
 CFLAGS="$H5_CFLAGS $AM_CFLAGS $CFLAGS"
-
-AC_TRY_COMPILE([#include <sys/types.h>],
-               [off64_t n = 0;],
-               [AC_CHECK_FUNCS([lseek64 fseeko64 ftello64 ftruncate64])],
-               [AC_MSG_RESULT([skipping test for lseek64(), fseeko64 , ftello64, ftruncate64() because off64_t is not defined])])
-AC_CHECK_FUNCS([fseeko ftello])
-AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <sys/stat.h>],
-[struct stat64 sb;],
-[AC_CHECK_FUNCS([stat64 fstat64])],
-[AC_MSG_RESULT([skipping test for stat64() and fstat64()])])
 
 ## ----------------------------------------------------------------------
 ## Data types and their sizes.
@@ -1000,43 +984,42 @@ if test "X$C9x" = "Xyes"; then
 EOF
 fi
 
-AC_CHECK_SIZEOF(        [int8_t], [1])
-AC_CHECK_SIZEOF(       [uint8_t], [1])
-AC_CHECK_SIZEOF(  [int_least8_t], [1])
-AC_CHECK_SIZEOF( [uint_least8_t], [1])
-AC_CHECK_SIZEOF(   [int_fast8_t], [1])
-AC_CHECK_SIZEOF(  [uint_fast8_t], [1])
+AC_CHECK_SIZEOF(        [int8_t])
+AC_CHECK_SIZEOF(       [uint8_t])
+AC_CHECK_SIZEOF(  [int_least8_t])
+AC_CHECK_SIZEOF( [uint_least8_t])
+AC_CHECK_SIZEOF(   [int_fast8_t])
+AC_CHECK_SIZEOF(  [uint_fast8_t])
 
-AC_CHECK_SIZEOF(       [int16_t], [2])
-AC_CHECK_SIZEOF(      [uint16_t], [2])
-AC_CHECK_SIZEOF( [int_least16_t], [2])
-AC_CHECK_SIZEOF([uint_least16_t], [2])
-AC_CHECK_SIZEOF(  [int_fast16_t], [2])
-AC_CHECK_SIZEOF( [uint_fast16_t], [2])
+AC_CHECK_SIZEOF(       [int16_t])
+AC_CHECK_SIZEOF(      [uint16_t])
+AC_CHECK_SIZEOF( [int_least16_t])
+AC_CHECK_SIZEOF([uint_least16_t])
+AC_CHECK_SIZEOF(  [int_fast16_t])
+AC_CHECK_SIZEOF( [uint_fast16_t])
 
-AC_CHECK_SIZEOF(       [int32_t], [4])
-AC_CHECK_SIZEOF(      [uint32_t], [4])
-AC_CHECK_SIZEOF( [int_least32_t], [4])
-AC_CHECK_SIZEOF([uint_least32_t], [4])
-AC_CHECK_SIZEOF(  [int_fast32_t], [4])
-AC_CHECK_SIZEOF( [uint_fast32_t], [4])
+AC_CHECK_SIZEOF(       [int32_t])
+AC_CHECK_SIZEOF(      [uint32_t])
+AC_CHECK_SIZEOF( [int_least32_t])
+AC_CHECK_SIZEOF([uint_least32_t])
+AC_CHECK_SIZEOF(  [int_fast32_t])
+AC_CHECK_SIZEOF( [uint_fast32_t])
 
-AC_CHECK_SIZEOF(       [int64_t], [8])
-AC_CHECK_SIZEOF(      [uint64_t], [8])
-AC_CHECK_SIZEOF( [int_least64_t], [8])
-AC_CHECK_SIZEOF([uint_least64_t], [8])
-AC_CHECK_SIZEOF(  [int_fast64_t], [8])
-AC_CHECK_SIZEOF( [uint_fast64_t], [8])
+AC_CHECK_SIZEOF(       [int64_t])
+AC_CHECK_SIZEOF(      [uint64_t])
+AC_CHECK_SIZEOF( [int_least64_t])
+AC_CHECK_SIZEOF([uint_least64_t])
+AC_CHECK_SIZEOF(  [int_fast64_t])
+AC_CHECK_SIZEOF( [uint_fast64_t])
 
-AC_CHECK_SIZEOF([size_t], [4])
-AC_CHECK_SIZEOF([ssize_t], [4])
-AC_CHECK_SIZEOF([ptrdiff_t], [4])
+AC_CHECK_SIZEOF([size_t])
+AC_CHECK_SIZEOF([ssize_t])
+AC_CHECK_SIZEOF([ptrdiff_t])
 
 cat >>confdefs.h <<\EOF
 #include <sys/types.h> /*for off_t definition*/
 EOF
-AC_CHECK_SIZEOF([off_t], [4])
-AC_CHECK_SIZEOF([off64_t], [8])
+AC_CHECK_SIZEOF([off_t])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE

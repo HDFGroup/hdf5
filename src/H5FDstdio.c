@@ -131,23 +131,14 @@ typedef struct H5FD_stdio_t {
 #endif /* H5_HAVE_MINGW */
 #endif /* H5_HAVE_WIN32_API */
 
-/* Use file_xxx to indicate these are local macros, avoiding confusing 
- * with the global HD_xxx macros. 
- * Assume fseeko, which is POSIX standard, is always supported; 
- * but prefer to use fseeko64 if supported. 
+/* If these functions weren't re-defined for Windows, give them
+ * more platform-independent names.
  */
 #ifndef file_fseek
-    #ifdef H5_HAVE_FSEEKO64
-        #define file_fseek      fseeko64
-        #define file_offset_t   off64_t
-        #define file_ftruncate  ftruncate64
-        #define file_ftell      ftello64
-    #else
-        #define file_fseek      fseeko
-        #define file_offset_t   off_t
-        #define file_ftruncate  ftruncate
-        #define file_ftell      ftello
-    #endif /* H5_HAVE_FSEEKO64 */
+    #define file_fseek      fseeko
+    #define file_offset_t   off_t
+    #define file_ftruncate  ftruncate
+    #define file_ftell      ftello
 #endif /* file_fseek */
 
 /* These macros check for overflow of various quantities.  These macros

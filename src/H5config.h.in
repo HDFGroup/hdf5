@@ -91,24 +91,6 @@
 /* Define to 1 if you have the `frexpl' function. */
 #undef HAVE_FREXPL
 
-/* Define to 1 if you have the `fseeko' function. */
-#undef HAVE_FSEEKO
-
-/* Define to 1 if you have the `fseeko64' function. */
-#undef HAVE_FSEEKO64
-
-/* Define to 1 if you have the `fstat64' function. */
-#undef HAVE_FSTAT64
-
-/* Define to 1 if you have the `ftello' function. */
-#undef HAVE_FTELLO
-
-/* Define to 1 if you have the `ftello64' function. */
-#undef HAVE_FTELLO64
-
-/* Define to 1 if you have the `ftruncate64' function. */
-#undef HAVE_FTRUNCATE64
-
 /* Define if the compiler understands the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION
 
@@ -173,9 +155,6 @@
 /* Define to 1 if you have the `longjmp' function. */
 #undef HAVE_LONGJMP
 
-/* Define to 1 if you have the `lseek64' function. */
-#undef HAVE_LSEEK64
-
 /* Define to 1 if you have the `lstat' function. */
 #undef HAVE_LSTAT
 
@@ -235,9 +214,6 @@
 
 /* Define to 1 if you have the `srandom' function. */
 #undef HAVE_SRANDOM
-
-/* Define to 1 if you have the `stat64' function. */
-#undef HAVE_STAT64
 
 /* Define if `struct stat' has the `st_blocks' field */
 #undef HAVE_STAT_ST_BLOCKS
@@ -459,9 +435,6 @@
 
 /* The size of `long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
-
-/* The size of `off64_t', as computed by sizeof. */
-#undef SIZEOF_OFF64_T
 
 /* The size of `off_t', as computed by sizeof. */
 #undef SIZEOF_OFF_T
