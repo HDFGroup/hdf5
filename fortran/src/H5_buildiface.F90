@@ -397,7 +397,7 @@ PROGRAM H5_buildiface
         WRITE(11,'(A)') '    INTEGER(HID_T)    , INTENT(IN) :: attr_id'
         WRITE(11,'(A)') '    INTEGER(HID_T)    , INTENT(IN) :: memtype_id'
         WRITE(11,'(A)') '    INTEGER(HSIZE_T)  , INTENT(IN), DIMENSION(*) :: dims'
-        WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(INOUT)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
+        WRITE(11,'(A)') '    INTEGER(KIND='//TRIM(ADJUSTL(chr2))//'),INTENT(IN)'//TRIM(rank_dim_line(j))//', TARGET :: buf'
         WRITE(11,'(A)') '    INTEGER           , INTENT(OUT) :: hdferr'
         WRITE(11,'(A)') '    TYPE(C_PTR) :: f_ptr'
         
