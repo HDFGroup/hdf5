@@ -1,26 +1,26 @@
-HDF5 version 1.10.0-pre2 currently under development
+HDF5 version 1.10.0 released on 2016-03-30
 ================================================================================
 
 
 
 INTRODUCTION
 
-This document describes the differences between HDF5-1.8.* and
-HDF5 1.10.0 release, and contains information on the platforms
+This document describes the differences between HDF5-1.8 series and
+HDF5 1.10.0 releases, and contains information on the platforms
 tested.
 
 Links to HDF5 1.10.0 source code can be found on The HDF Group's
 development FTP server at the following location:
 
-    http://www.hdfgroup.org/HDF5/release/obtain5110.html
+    https://www.hdfgroup.org/HDF5/release/obtain5110.html
 
-User documentation be accessed directly at this location:
+User documentation can be accessed directly at this location:
 
-    http://www.hdfgroup.org/HDF5/docNewFeatures/
+    https://www.hdfgroup.org/HDF5/docNewFeatures/
 
 For more information, see the HDF5 home page:
 
-    http://www.hdfgroup.org/HDF5/
+    https://www.hdfgroup.org/HDF5/
 
 If you have any questions or comments, please send them to the HDF
 Help Desk:
@@ -33,9 +33,10 @@ CONTENTS
 
 - New Features
 - Issues Addressed in this Release
+- Supported Platforms
 - Tested Configuration Features Summary
 - More Tested Platforms
-- Known Problems
+- Known Problems and Limitations
 
 
 
@@ -53,7 +54,7 @@ This release supports the following features:
       library without requiring immediate changes to the application source
       code. For addtional configuration options and other details, see
       "API Compatibility Macros in HDF5" at
-      http://www.hdfgroup.org/HDF5/doc/RM/APICompatMacros.html.
+      https://www.hdfgroup.org/HDF5/doc/RM/APICompatMacros.html.
 
     - Autotools Configuration Has Been Extensively Reworked
 
@@ -162,7 +163,7 @@ This release supports the following features:
       when working with the resulting files. The new file space management
       feature provides strategies for managing space in a file to improve
       performance in both of these areas. For more information, see
-      http://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesFileSpaceMgmtDocs.html.
+      https://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesFileSpaceMgmtDocs.html.
 
     - Version 3 Metadata Cache
 
@@ -177,7 +178,7 @@ This release supports the following features:
     - New Member Function Added to H5::ArrayType
 
       The assignment operator ArrayType::operator= was added because
-      ArrayType has pointers to data members.
+      ArrayType has pointer data members.
 
       (BMR - 2016/03/07, HDFFV-9562)
 
@@ -192,7 +193,7 @@ This release supports the following features:
       similar to the Unix user command "tail" with the follow option,
       which outputs appended data as the file grows. For more
       information, see
-      http://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesSwmrDocs.html#Tools.
+      https://www.hdfgroup.org/HDF5/docNewFeatures/NewFeaturesSwmrDocs.html#Tools.
 
     - h5format_convert
 
@@ -227,9 +228,9 @@ This release supports the following features:
     - New Public Functions: H5PTget_dataset and H5PTget_type
 
       Two accessor functions have been added. H5PTget_dataset returns
-      the identifier of the dataset associated a packet table, and
-      H5PTget_type returns the identifier of the datatype used by
-      a packet table.
+      the identifier of the dataset associated with the packet table, 
+      and H5PTget_type returns the identifier of the datatype used by
+      the packet table.
 
       (BMR, 2016/03/04, HDFFV-8623)
 
@@ -624,3 +625,20 @@ known issues if it is a new issue.
    the VDS dataset unless a full path to the source file is specified during
    the mapping.
    (EIP - 2016/03/20, HDFFV-9724)
+
+ - When building HDF5 with Java using CMake and specifying Debug for CMAKE_BUILD_TYPE,
+   there is a missing command argument for the tests of the examples.
+
+   This error can be avoided by not building Java with Debug, HDF5_BUILD_JAVA:BOOL=OFF, 
+   or not building Examples, HDF5_BUILD_EXAMPLES:BOOL=OFF.
+   (LRK - 2016/03/30, HDFFV-9743) 
+
+ - The H5Lexists API changed behavior in HDF5-1.10 when used with a file handle 
+   and root group name ("/"):
+
+   H5Lexists(fileid, "/")
+
+   In HDF5-1.8 it returns false (0) and in HDF5-1.10 it returns true (1). 
+   The documentation will be updated with information regarding this change.
+   (LRK - 2016/03/30, HDFFV-8746)
+
