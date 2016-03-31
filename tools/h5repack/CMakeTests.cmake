@@ -118,7 +118,7 @@
   )
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${h5_file}" NAME)
+    get_filename_component(fname "${h5_file}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
     #message (STATUS " Copying ${h5_file}")
     add_custom_command (

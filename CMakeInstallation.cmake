@@ -530,6 +530,7 @@ The HDF5 data model, file format, API, library, and tools are open and distribut
   )
   cpack_add_component (configinstall
       DISPLAY_NAME "HDF5 CMake files"
+      HIDDEN
       DEPENDS libraries
       GROUP Development
       INSTALL_TYPES Full Developer User
