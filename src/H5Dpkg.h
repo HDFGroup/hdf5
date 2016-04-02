@@ -267,6 +267,7 @@ typedef struct H5D_chunk_ud_t {
     unsigned    idx_hint;               /* Index of chunk in cache, if present */
     H5F_block_t chunk_block;            /* Offset/length of chunk in file */
     unsigned	filter_mask;		/* Excluded filters	*/
+    hbool_t     new_unfilt_chunk;       /* Whether the chunk just became unfiltered */
     hsize_t     chunk_idx;              /* Chunk index for EA, FA indexing */
 } H5D_chunk_ud_t;
 
@@ -615,6 +616,8 @@ H5_DLL herr_t H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *scaled, H5D_chunk_ud_t *udata);
 H5_DLL herr_t H5D__chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes);
 H5_DLL herr_t H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[]);
+H5_DLL herr_t H5D__chunk_update_old_edge_chunks(H5D_t *dset, hid_t dxpl_id,
+    hsize_t old_dim[]);
 H5_DLL herr_t H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id,
     const hsize_t *old_dim);
 #ifdef H5_HAVE_PARALLEL

@@ -124,7 +124,7 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for layout message")
 
     if(mesg->version < H5O_LAYOUT_VERSION_3) {
-        unsigned	ndims;			/* Num dimensions in chunk           */
+        unsigned        ndims;          /* Num dimensions in chunk */
 
         /* Dimensionality */
         ndims = *p++;
@@ -233,26 +233,67 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
                 break;
 
             case H5D_CHUNKED:
-                /* Dimensionality */
-                mesg->u.chunk.ndims = *p++;
-                if(mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is too large")
+                if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                    /* Set the chunked layout flags */
+                    mesg->u.chunk.flags = (uint8_t)0;
 
-                /* B-tree address */
-                H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
+                    /* Dimensionality */
+                    mesg->u.chunk.ndims = *p++;
+                    if(mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is too large")
 
-                /* Chunk dimensions */
-                for(u = 0; u < mesg->u.chunk.ndims; u++)
-                    UINT32DECODE(p, mesg->u.chunk.dim[u]);
+                    /* B-tree address */
+                    H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
 
-                /* Compute chunk size */
-                for(u = 1, mesg->u.chunk.size = mesg->u.chunk.dim[0]; u < mesg->u.chunk.ndims; u++)
-                    mesg->u.chunk.size *= mesg->u.chunk.dim[u];
+                    /* Chunk dimensions */
+                    for(u = 0; u < mesg->u.chunk.ndims; u++)
+                        UINT32DECODE(p, mesg->u.chunk.dim[u]);
 
-                /* Set the chunk operations */
-                /* (Only "btree" indexing type supported with v3 of message format) */
-                mesg->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BTREE;
-                mesg->storage.u.chunk.ops = H5D_COPS_BTREE;
+                    /* Compute chunk size */
+                    for(u = 1, mesg->u.chunk.size = mesg->u.chunk.dim[0]; u < mesg->u.chunk.ndims; u++)
+                        mesg->u.chunk.size *= mesg->u.chunk.dim[u];
+
+                    /* Set the chunk operations */
+                    /* (Only "btree" indexing type supported with v3 of message format) */
+                    mesg->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BTREE;
+                    mesg->storage.u.chunk.ops = H5D_COPS_BTREE;
+                } /* end if */
+                else {
+                    /* Get the chunked layout flags */
+                    mesg->u.chunk.flags = *p++;
+
+                    /* Check for valid flags */
+                    /* (Currently issues an error for all non-zero values,
+                     *      until features are added for the flags)
+                     */
+                    if(mesg->u.chunk.flags & ~H5O_LAYOUT_ALL_CHUNK_FLAGS)
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "bad flag value for message")
+
+                    /* Dimensionality */
+                    mesg->u.chunk.ndims = *p++;
+                    if(mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "dimensionality is too large")
+
+                    /* Encoded # of bytes for each chunk dimension */
+                    mesg->u.chunk.enc_bytes_per_dim = *p++;
+                    if(mesg->u.chunk.enc_bytes_per_dim == 0 || mesg->u.chunk.enc_bytes_per_dim > 8)
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "encoded chunk dimension size is too large")
+
+                    /* Chunk dimensions */
+                    for(u = 0; u < mesg->u.chunk.ndims; u++)
+                        UINT64DECODE_VAR(p, mesg->u.chunk.dim[u], mesg->u.chunk.enc_bytes_per_dim);
+
+                    /* Compute chunk size */
+                    for(u = 1, mesg->u.chunk.size = mesg->u.chunk.dim[0]; u < mesg->u.chunk.ndims; u++)
+                        mesg->u.chunk.size *= mesg->u.chunk.dim[u];
+
+                    /* Set the chunk operations */
+                    mesg->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BTREE;
+                    mesg->storage.u.chunk.ops = H5D_COPS_BTREE;
+
+                    /* Chunk index address */
+                    H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
+                } /* end else */
 
                 /* Set the layout operations */
                 mesg->ops = H5D_LOPS_CHUNK;
@@ -457,8 +498,8 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
     HDassert(p);
 
     /* Message version */
-    *p++ = mesg->type == H5D_VIRTUAL ? (uint8_t)H5O_LAYOUT_VERSION_4
-            : (uint8_t)H5O_LAYOUT_VERSION_3;
+    *p++ = (uint8_t)((mesg->version < H5O_LAYOUT_VERSION_3) ?
+             H5O_LAYOUT_VERSION_3 : mesg->version);
 
     /* Layout class */
     *p++ = mesg->type;
@@ -488,16 +529,41 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
             break;
 
         case H5D_CHUNKED:
-            /* Number of dimensions */
-            HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-            *p++ = (uint8_t)mesg->u.chunk.ndims;
+            if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                /* Number of dimensions */
+                HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                *p++ = (uint8_t)mesg->u.chunk.ndims;
 
-            /* B-tree address */
-            H5F_addr_encode(f, &p, mesg->storage.u.chunk.idx_addr);
+                /* B-tree address */
+                H5F_addr_encode(f, &p, mesg->storage.u.chunk.idx_addr);
 
-            /* Dimension sizes */
-            for(u = 0; u < mesg->u.chunk.ndims; u++)
-                UINT32ENCODE(p, mesg->u.chunk.dim[u]);
+                /* Dimension sizes */
+                for(u = 0; u < mesg->u.chunk.ndims; u++)
+                    UINT32ENCODE(p, mesg->u.chunk.dim[u]);
+            } /* end if */
+            else {
+                /* Chunk feature flags */
+                *p++ = mesg->u.chunk.flags;
+
+                /* Number of dimensions */
+                HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                *p++ = (uint8_t)mesg->u.chunk.ndims;
+
+                /* Encoded # of bytes for each chunk dimension */
+                HDassert(mesg->u.chunk.enc_bytes_per_dim > 0 && mesg->u.chunk.enc_bytes_per_dim <= 8);
+                *p++ = (uint8_t)mesg->u.chunk.enc_bytes_per_dim;
+
+                /* Dimension sizes */
+                for(u = 0; u < mesg->u.chunk.ndims; u++)
+                    UINT64ENCODE_VAR(p, mesg->u.chunk.dim[u], mesg->u.chunk.enc_bytes_per_dim);
+
+                /*
+                 * Implicit index: Address of the chunks
+                 * Single chunk index: address of the single chunk
+                 * Other indexes: chunk index address
+                 */
+                H5F_addr_encode(f, &p, mesg->storage.u.chunk.idx_addr);
+            } /* end else */
             break;
 
         case H5D_VIRTUAL:

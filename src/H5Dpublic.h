@@ -34,6 +34,9 @@
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT      ((size_t) -1)
 #define H5D_CHUNK_CACHE_W0_DEFAULT          (-1.0f)
 
+/* Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts() */
+#define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS      (0x0002u)
+
 /* Property names for H5LTDdirect_chunk_write */   
 #define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME	        "direct_chunk_flag"
 #define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME	"direct_chunk_filters"

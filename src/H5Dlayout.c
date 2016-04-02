@@ -164,15 +164,35 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
             break;
 
         case H5D_CHUNKED:
-            /* Number of dimensions (1 byte) */
-            HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-            ret_value++;
+            if(layout->version < H5O_LAYOUT_VERSION_4) {
+                /* Number of dimensions (1 byte) */
+                HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                ret_value++;
 
-            /* Dimension sizes */
-            ret_value += layout->u.chunk.ndims * 4;
+                /* B-tree address */
+                ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
 
-            /* B-tree address */
-            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+                /* Dimension sizes */
+                ret_value += layout->u.chunk.ndims * 4;
+            } /* end if */
+            else {
+                /* Chunked layout feature flags */
+                ret_value++;
+
+                /* Number of dimensions (1 byte) */
+                HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                ret_value++;
+
+                /* Encoded # of bytes for each chunk dimension */
+                HDassert(layout->u.chunk.enc_bytes_per_dim > 0 && layout->u.chunk.enc_bytes_per_dim <= 8);
+                ret_value++;
+
+                /* Dimension sizes */
+                ret_value += layout->u.chunk.ndims * layout->u.chunk.enc_bytes_per_dim;
+
+                /* B-tree address */
+                ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+            } /* end else */
             break;
 
         case H5D_VIRTUAL:
