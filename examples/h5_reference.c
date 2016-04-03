@@ -38,8 +38,8 @@ main(void) {
    H5O_type_t obj_type;
    herr_t status;
 
-   hobj_ref_t *wbuf; /* buffer to write to disk */
-   hobj_ref_t *rbuf; /* buffer to read from disk */
+   href_t *wbuf; /* buffer to write to disk */
+   href_t *rbuf; /* buffer to read from disk */
 
 
    hsize_t dim_r[1];
@@ -74,15 +74,15 @@ main(void) {
    /*
     *  Allocate write and read buffers.
     */
-   wbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * 2);
-   rbuf = (hobj_ref_t *)malloc(sizeof(hobj_ref_t) * 2);
+   wbuf = (href_t *)malloc(sizeof(href_t) * 2);
+   rbuf = (href_t *)malloc(sizeof(href_t) * 2);
 
    /*
     *  Create references to the group "A" and dataset "B"
     *  and store them in the wbuf.
     */
-   H5Rcreate(&wbuf[0], fid, "A", H5R_OBJECT, (hid_t)-1);
-   H5Rcreate(&wbuf[1], fid, "B", H5R_OBJECT, (hid_t)-1);
+   wbuf[0] = H5Rcreate_object(fid, "A");
+   wbuf[1] = H5Rcreate_object(fid, "B");
 
    /*
     *  Write dataset R using default transfer properties.
@@ -101,6 +101,9 @@ main(void) {
    H5Sclose(sid_r);
    H5Dclose(did_r);
 
+   H5Rdestroy(wbuf[0]);
+   H5Rdestroy(wbuf[1]);
+
    H5Fclose(fid);
 
    /*
@@ -117,18 +120,18 @@ main(void) {
    /*
     * Find the type of referenced objects.
     */
-    status = H5Rget_obj_type2(did_r, H5R_OBJECT, &rbuf[0], &obj_type);
+    status = H5Rget_obj_type(did_r, rbuf[0], &obj_type);
     if(obj_type == H5O_TYPE_GROUP)
         printf("First dereferenced object is a group. \n");
 
-    status = H5Rget_obj_type2(did_r, H5R_OBJECT, &rbuf[1], &obj_type);
+    status = H5Rget_obj_type(did_r, rbuf[1], &obj_type);
     if(obj_type == H5O_TYPE_DATASET)
         printf("Second dereferenced object is a dataset. \n");
 
    /*
     *  Get datatype of the dataset "B"
     */
-   did_b = H5Rdereference2(did_r, H5P_DEFAULT, H5R_OBJECT, &rbuf[1]);
+   did_b = H5Rget_object(did_r, H5P_DEFAULT, rbuf[1]);
    tid_b = H5Dget_type(did_b);
    if(H5Tequal(tid_b, H5T_NATIVE_FLOAT))
      printf("Datatype of the dataset is H5T_NATIVE_FLOAT.\n");
@@ -141,6 +144,8 @@ main(void) {
    H5Dclose(did_b);
    H5Tclose(tid_b);
    H5Fclose(fid);
+   H5Rdestroy(rbuf[0]);
+   H5Rdestroy(rbuf[1]);
    free(rbuf);
    free(wbuf);
 

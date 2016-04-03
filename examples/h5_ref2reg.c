@@ -44,8 +44,8 @@ int main(void)
     int rank = 2;
     int rankr =1;
     herr_t status;
-    hdset_reg_ref_t ref[2];
-    hdset_reg_ref_t ref_out[2];
+    href_t ref[2];
+    href_t ref_out[2];
     int data[2][9] = {{1,1,2,3,3,4,5,5,6},{1,2,2,3,4,4,5,6,6}};
     int data_out[2][9] = {{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0}};
     hsize_t start[2];
@@ -81,7 +81,7 @@ int main(void)
     /*
      * Dataset with references.
      */
-    dsetr_id = H5Dcreate2(file_id, dsetnamer, H5T_STD_REF_DSETREG, spacer_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dsetr_id = H5Dcreate2(file_id, dsetnamer, H5T_STD_REF_REG, spacer_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Create a reference to the hyperslab.
@@ -91,19 +91,19 @@ int main(void)
     count[0] = 2;
     count[1] = 3;
     status = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, NULL, count, NULL);
-    status = H5Rcreate(&ref[0], file_id, dsetnamev, H5R_DATASET_REGION, space_id);
+    ref[0] = H5Rcreate_region(file_id, dsetnamev, space_id);
 
     /*
      * Create a reference to elements selection.
      */
     status = H5Sselect_none(space_id);
     status = H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord);
-    status = H5Rcreate(&ref[1], file_id, dsetnamev, H5R_DATASET_REGION, space_id);
+    ref[1] = H5Rcreate_region(file_id, dsetnamev, space_id);
 
     /*
      * Write dataset with the references.
      */
-    status = H5Dwrite(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref);
+    status = H5Dwrite(dsetr_id, H5T_STD_REF_REG, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref);
 
     /*
      * Close all objects.
@@ -111,6 +111,8 @@ int main(void)
     status = H5Sclose(space_id);
     status = H5Sclose(spacer_id);
     status = H5Dclose(dsetr_id);
+    status = H5Rdestroy(ref[0]);
+    status = H5Rdestroy(ref[1]);
     status = H5Fclose(file_id);
 
     /*
@@ -124,18 +126,18 @@ int main(void)
      */
     dsetr_id = H5Dopen2(file_id, dsetnamer, H5P_DEFAULT);
 
-    status = H5Dread(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL,
+    status = H5Dread(dsetr_id, H5T_STD_REF_REG, H5S_ALL, H5S_ALL,
                    H5P_DEFAULT, ref_out);
 
     /*
      * Dereference the first reference.
      */
-    dsetv_id = H5Rdereference2(dsetr_id, H5P_DEFAULT, H5R_DATASET_REGION, &ref_out[0]);
+    dsetv_id = H5Rget_object(dsetr_id, H5P_DEFAULT, ref_out[0]);
     /*
      * Get name of the dataset the first region reference points to
      * using H5Rget_name
      */
-    name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], (char*)buf1, 10);
+    name_size1 = H5Rget_obj_name(dsetr_id, ref_out[0], (char*)buf1, 10);
     printf(" Dataset's name (returned by H5Rget_name) the reference points to is %s, name length is %d\n", buf1, (int)name_size1);
     /*
      * Get name of the dataset the first region reference points to
@@ -144,7 +146,7 @@ int main(void)
     name_size2 = H5Iget_name(dsetv_id, (char*)buf2, 10);
     printf(" Dataset's name (returned by H5Iget_name) the reference points to is %s, name length is %d\n", buf2, (int)name_size2);
 
-    space_id = H5Rget_region(dsetr_id, H5R_DATASET_REGION,&ref_out[0]);
+    space_id = H5Rget_region(dsetr_id, ref_out[0]);
 
     /*
      * Read and display hyperslab selection from the dataset.
@@ -177,8 +179,8 @@ int main(void)
     /*
      * Dereference the second reference.
      */
-    dsetv_id = H5Rdereference2(dsetr_id, H5P_DEFAULT, H5R_DATASET_REGION, &ref_out[1]);
-    space_id = H5Rget_region(dsetv_id, H5R_DATASET_REGION,&ref_out[1]);
+    dsetv_id = H5Rget_object(dsetr_id, H5P_DEFAULT, ref_out[1]);
+    space_id = H5Rget_region(dsetv_id, ref_out[1]);
 
     /*
      * Read selected data from the dataset.
@@ -201,6 +203,8 @@ int main(void)
     status = H5Sclose(space_id);
     status = H5Dclose(dsetv_id);
     status = H5Dclose(dsetr_id);
+    status = H5Rdestroy(ref_out[0]);
+    status = H5Rdestroy(ref_out[1]);
     status = H5Fclose(file_id);
 
     return 0;
