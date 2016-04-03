@@ -622,6 +622,7 @@ H5_DLL herr_t H5D__chunk_update_old_edge_chunks(H5D_t *dset, hid_t dxpl_id,
     hsize_t old_dim[]);
 H5_DLL herr_t H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id,
     const hsize_t *old_dim);
+H5_DLL herr_t H5D__chunk_set_sizes(H5D_t *dset);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5D__chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[]);
 #endif /* H5_HAVE_PARALLEL */

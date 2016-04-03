@@ -453,9 +453,10 @@ H5D__layout_oh_read(H5D_t *dataset, hid_t dxpl_id, hid_t dapl_id, H5P_genplist_t
     /* Copy layout to the DCPL */
     if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &dataset->shared->layout) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout")
-    /* Adjust chunk dimensions back again (*sigh*) */
-    if(H5D_CHUNKED == dataset->shared->layout.type)
-        dataset->shared->layout.u.chunk.ndims++;
+
+    /* Set chunk sizes */
+    if(H5D__chunk_set_sizes(dataset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to set chunk sizes")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
