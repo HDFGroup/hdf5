@@ -170,7 +170,7 @@ static size_t
 H5T__ref_mem_getsize(const void *_ref)
 {
     const href_t *ref_ptr = (const href_t *)_ref;
-    const struct href_t *ref;
+    const struct href *ref;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -196,7 +196,7 @@ H5T__ref_mem_read(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     void *_ref, void *buf, size_t buf_size)
 {
     const href_t *ref_ptr = (const href_t *)_ref;
-    const struct href_t *ref;
+    const struct href *ref;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -227,7 +227,7 @@ H5T__ref_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
 {
     herr_t ret_value = SUCCEED; /* Return value */
     href_t *ref_ptr = (href_t *)_ref;
-    struct href_t *ref;
+    struct href *ref;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -236,7 +236,7 @@ H5T__ref_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     HDassert(buf);
     HDassert(buf_size);
 
-    if (NULL == (ref = (struct href_t *)H5MM_malloc(sizeof(struct href_t))))
+    if (NULL == (ref = (struct href *)H5MM_malloc(sizeof(struct href))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for reference data")
     if (NULL == (ref->ref.serial.buf = H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for reference data")
@@ -288,7 +288,7 @@ H5T__obj_ref_mem_read(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     void *_ref, void *buf, size_t H5_ATTR_UNUSED buf_size)
 {
     const href_t *ref_ptr = (const href_t *)_ref;
-    const struct href_t *ref;
+    const struct href *ref;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -319,7 +319,7 @@ H5T__obj_ref_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
 {
     herr_t ret_value = SUCCEED; /* Return value */
     href_t *ref_ptr = (href_t *)_ref;
-    struct href_t *ref;
+    struct href *ref;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -328,7 +328,7 @@ H5T__obj_ref_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     HDassert(buf);
     HDassert(buf_size);
 
-    if (NULL == (ref = (struct href_t *)H5MM_malloc(sizeof(struct href_t))))
+    if (NULL == (ref = (struct href *)H5MM_malloc(sizeof(struct href))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for reference data")
 
     /* Copy the data into the newly allocated buffer */

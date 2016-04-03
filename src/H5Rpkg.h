@@ -46,7 +46,7 @@
 /****************************/
 
 /* Internal data structures */
-struct href_t {
+struct href {
     H5R_type_t ref_type;
     union {
         struct {

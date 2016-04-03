@@ -40,7 +40,7 @@ typedef enum {
 } H5R_type_t;
 
 /* Opaque reference type */
-typedef struct href_t *href_t;
+typedef struct href *href_t;
 
 /* NULL reference */
 #define HREF_NULL ((href_t)0)
