@@ -1161,7 +1161,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
 
     /* Initialize file-specific information for object header */
     store_msg_crt_idx = H5F_STORE_MSG_CRT_IDX(f);
-    if(H5F_USE_LATEST_FORMAT(f) || store_msg_crt_idx || (oh_flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED))
+    if(H5F_USE_LATEST_FLAGS(f, H5F_LATEST_OBJ_HEADER) || store_msg_crt_idx || (oh_flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED))
         oh->version = H5O_VERSION_LATEST;
     else
         oh->version = H5O_VERSION_1;

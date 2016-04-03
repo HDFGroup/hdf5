@@ -212,6 +212,41 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__layout_set_latest_version
+ *
+ * Purpose:     Set the encoding for a layout to the latest version.
+ *              Part of the coding in this routine is moved to
+ *              H5D__layout_set_latest_indexing().
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, January 15, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space, 
+    const H5D_dcpl_cache_t *dcpl_cache)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(layout);
+    HDassert(space);
+    HDassert(dcpl_cache);
+
+    /* Set encoding of layout to latest version */
+    layout->version = H5O_LAYOUT_VERSION_LATEST;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__layout_set_latest_version() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__layout_oh_create
  *
  * Purpose:     Create layout/pline/efl information for dataset

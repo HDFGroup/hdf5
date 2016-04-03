@@ -1219,47 +1219,10 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     /* Open the dataset creation property list for the destination dataset */
     if((dcpl2 = H5Dget_create_plist(did2)) < 0) TEST_ERROR
 
-    /* If external file storage is being used, the value stored in the
-     * dcpl will be a heap ID, which is not guaranteed to be the same in
-     * source and destination files.
-     * Instead, compare the actual external file values and then
-     * delete this property from the dcpls before comparing them.
-     */
-    if((ext_count = H5Pget_external_count(dcpl)) < 0) TEST_ERROR
-
-    if(ext_count > 0)
-    {
-        unsigned x;  /* Counter varaible */
-        char name1[NAME_BUF_SIZE];
-        char name2[NAME_BUF_SIZE];
-        off_t offset1=0;
-        off_t offset2=0;
-        hsize_t size1=0;
-        hsize_t size2=0;
-
-        if(H5Pget_external_count(dcpl2) != ext_count) TEST_ERROR
-
-        /* Ensure that all external file information is the same */
-        for(x=0; x < (unsigned) ext_count; ++x)
-        {
-            if(H5Pget_external(dcpl, x, (size_t)NAME_BUF_SIZE, name1, &offset1, &size1) < 0) TEST_ERROR
-            if(H5Pget_external(dcpl2, x, (size_t)NAME_BUF_SIZE, name2, &offset2, &size2) < 0) TEST_ERROR
-
-            if(offset1 != offset2) TEST_ERROR
-            if(size1 != size2) TEST_ERROR
-            if(HDstrcmp(name1, name2) != 0) TEST_ERROR
-        }
-
-        /* Reset external file information from the dcpls */
-        /* (Directly removing default property causes memory leak) */
-        if (H5P_reset_external_file_test(dcpl) < 0) TEST_ERROR
-        if (H5P_reset_external_file_test(dcpl2) < 0) TEST_ERROR
-    }
-
     /* Compare the rest of the dataset creation property lists */
     if(H5Pequal(dcpl, dcpl2) != TRUE) TEST_ERROR
 
-    /* Get the number of filters on dataset */
+    /* Get the number of filters on dataset (for later) */
     if((nfilters = H5Pget_nfilters(dcpl)) < 0) TEST_ERROR
 
     /* close the source dataset creation property list */

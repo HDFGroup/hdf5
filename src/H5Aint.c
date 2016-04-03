@@ -207,7 +207,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
     /* Set the latest format for datatype, if requested */
-    if(H5F_USE_LATEST_FORMAT(loc->oloc->file))
+    if(H5F_USE_LATEST_FLAGS(loc->oloc->file, H5F_LATEST_DATATYPE))
         if(H5T_set_latest_version(attr->shared->dt) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of datatype")
 
@@ -215,7 +215,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     attr->shared->ds = H5S_copy(space, FALSE, TRUE);
 
     /* Set the latest format for dataspace, if requested */
-    if(H5F_USE_LATEST_FORMAT(loc->oloc->file))
+    if(H5F_USE_LATEST_FLAGS(loc->oloc->file, H5F_LATEST_DATASPACE))
         if(H5S_set_latest_version(attr->shared->ds) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of dataspace")
 
@@ -1853,7 +1853,7 @@ herr_t
 H5A_set_version(const H5F_t *f, H5A_t *attr)
 {
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
-    hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
+    hbool_t use_latest_format;          /* Flag indicating the latest attribute version support is enabled */
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1862,8 +1862,8 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
     HDassert(f);
     HDassert(attr);
 
-    /* Get the file's 'use the latest version of the format' flag */
-    use_latest_format = H5F_USE_LATEST_FORMAT(f);
+    /* Get the file's 'use the latest attribute version support' flag */
+    use_latest_format = H5F_USE_LATEST_FLAGS(f, H5F_LATEST_ATTRIBUTE);
 
     /* Check whether datatype and dataspace are shared */
     if(H5O_msg_is_shared(H5O_DTYPE_ID, attr->shared->dt) > 0)
@@ -2354,8 +2354,7 @@ H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainfo
     attr_op.op_type = H5A_ATTR_OP_LIB;
     attr_op.u.lib_op = H5A__dense_post_copy_file_cb;
 
-
-     if(H5A_dense_iterate(src_oloc->file, dxpl_id, (hid_t)0, ainfo_src, H5_INDEX_NAME,
+    if(H5A_dense_iterate(src_oloc->file, dxpl_id, (hid_t)0, ainfo_src, H5_INDEX_NAME,
             H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, &udata) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
