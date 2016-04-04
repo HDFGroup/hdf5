@@ -48,9 +48,6 @@
  * which are compatible with the library to which the application is linked.
  * We're assuming that these constants are used rather early in the hdf5
  * session.
- *
- * Note that H5F_ACC_DEBUG is deprecated (nonfuncational) but retained as a
- * symbol for backward compatibility.
  */
 #define H5F_ACC_RDONLY	(H5CHECK H5OPEN 0x0000u)	/*absence of rdwr => rd-only */
 #define H5F_ACC_RDWR	(H5CHECK H5OPEN 0x0001u)	/*open for read and write    */
