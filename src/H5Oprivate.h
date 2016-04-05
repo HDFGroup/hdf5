@@ -416,12 +416,30 @@ typedef struct H5O_storage_chunk_btree_t {
     H5UC_t     *shared;			/* Ref-counted shared info for B-tree nodes */
 } H5O_storage_chunk_btree_t;
 
+/* Forward declaration of structs used below */
+struct H5EA_t;                          /* Defined in H5EAprivate.h          */
+
+typedef struct H5O_storage_chunk_earray_t {
+    haddr_t	dset_ohdr_addr;		/* File address dataset's object header */
+    struct H5EA_t *ea;                  /* Pointer to extensible index array struct */
+} H5O_storage_chunk_earray_t;
+
+/* Forward declaration of structs used below */
+struct H5B2_t;                          /* Defined in H5B2pkg.h          */
+
+typedef struct H5O_storage_chunk_bt2_t {
+    haddr_t     dset_ohdr_addr;         /* File address dataset's object header */
+    struct H5B2_t *bt2;                 /* Pointer to b-tree 2 struct */
+} H5O_storage_chunk_bt2_t;
+
 typedef struct H5O_storage_chunk_t {
     H5D_chunk_index_t idx_type;		/* Type of chunk index               */
     haddr_t	idx_addr;		/* File address of chunk index       */
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
     union {
         H5O_storage_chunk_btree_t btree;   /* Information for v1 B-tree index   */
+	H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */	
+        H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
     } u;
 } H5O_storage_chunk_t;
 
@@ -516,7 +534,32 @@ typedef struct H5O_storage_t {
     } u;
 } H5O_storage_t;
 
+typedef struct H5O_layout_chunk_earray_t {
+    /* Creation parameters for extensible array data structure */
+    struct {
+        uint8_t max_nelmts_bits;            /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
+        uint8_t idx_blk_elmts;              /* # of elements to store in index block */
+        uint8_t data_blk_min_elmts;         /* Min. # of elements per data block */
+        uint8_t sup_blk_min_data_ptrs;      /* Min. # of data block pointers for a super block */
+        uint8_t max_dblk_page_nelmts_bits;       /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */
+    } cparam;
+
+    unsigned    unlim_dim;              /* Rank of unlimited dimension for dataset */
+    uint32_t    swizzled_dim[H5O_LAYOUT_NDIMS]; /* swizzled chunk dimensions */
+    hsize_t    	swizzled_down_chunks[H5O_LAYOUT_NDIMS];	/* swizzled "down" size of number of chunks in each dimension */
+} H5O_layout_chunk_earray_t;
+
+typedef struct H5O_layout_chunk_bt2_t {
+    /* Creation parameters for v2 B-tree data structure */
+    struct {
+	uint32_t node_size;	/* Size of each node (in bytes) */
+	uint8_t split_percent;	/* % full to split nodes */
+	uint8_t merge_percent; 	/* % full to merge nodes */
+    } cparam;
+} H5O_layout_chunk_bt2_t;
+
 typedef struct H5O_layout_chunk_t {
+    H5D_chunk_index_t idx_type;		/* Type of chunk index               */
     uint8_t     flags;                  /* Chunk layout flags                */
     unsigned	ndims;			/* Num dimensions in chunk           */
     uint32_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
@@ -528,6 +571,10 @@ typedef struct H5O_layout_chunk_t {
     hsize_t     max_chunks[H5O_LAYOUT_NDIMS];      /* # of chunks in each dataset's max. dimension */
     hsize_t    	down_chunks[H5O_LAYOUT_NDIMS];     /* "down" size of number of chunks in each dimension */
     hsize_t    	max_down_chunks[H5O_LAYOUT_NDIMS]; /* "down" size of number of chunks in each max dim */
+    union {
+        H5O_layout_chunk_earray_t earray; /* Information for extensible array index */
+        H5O_layout_chunk_bt2_t btree2; /* Information for v2 B-tree index */
+    } u;
 } H5O_layout_chunk_t;
 
 typedef struct H5O_layout_t {

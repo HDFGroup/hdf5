@@ -103,11 +103,13 @@ IDE_GENERATED_PROPERTIES ("H5CS" "${H5CS_HDRS}" "${H5CS_SRCS}" )
 set (H5D_SRCS
     ${HDF5_SRC_DIR}/H5D.c
     ${HDF5_SRC_DIR}/H5Dbtree.c
+    ${HDF5_SRC_DIR}/H5Dbtree2.c
     ${HDF5_SRC_DIR}/H5Dchunk.c
     ${HDF5_SRC_DIR}/H5Dcompact.c
     ${HDF5_SRC_DIR}/H5Dcontig.c
     ${HDF5_SRC_DIR}/H5Ddbg.c
     ${HDF5_SRC_DIR}/H5Ddeprec.c
+    ${HDF5_SRC_DIR}/H5Dearray.c
     ${HDF5_SRC_DIR}/H5Defl.c
     ${HDF5_SRC_DIR}/H5Dfill.c
     ${HDF5_SRC_DIR}/H5Dint.c

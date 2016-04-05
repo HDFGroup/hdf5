@@ -287,9 +287,52 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
                     for(u = 1, mesg->u.chunk.size = mesg->u.chunk.dim[0]; u < mesg->u.chunk.ndims; u++)
                         mesg->u.chunk.size *= mesg->u.chunk.dim[u];
 
-                    /* Set the chunk operations */
-                    mesg->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BTREE;
-                    mesg->storage.u.chunk.ops = H5D_COPS_BTREE;
+                    /* Chunk index type */
+                    mesg->u.chunk.idx_type = (H5D_chunk_index_t)*p++;
+                    if(mesg->u.chunk.idx_type >= H5D_CHUNK_IDX_NTYPES)
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "unknown chunk index type")
+                    mesg->storage.u.chunk.idx_type = mesg->u.chunk.idx_type;
+
+                    switch(mesg->u.chunk.idx_type) {
+                        case H5D_CHUNK_IDX_BTREE:
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "v1 B-tree index type should never be in a v4 layout message")
+                            break;
+
+                        case H5D_CHUNK_IDX_EARRAY:
+                            /* Extensible array creation parameters */
+                            mesg->u.chunk.u.earray.cparam.max_nelmts_bits = *p++;
+                            if(0 == mesg->u.chunk.u.earray.cparam.max_nelmts_bits)
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid extensible array creation parameter")
+                            mesg->u.chunk.u.earray.cparam.idx_blk_elmts = *p++;
+                            if(0 == mesg->u.chunk.u.earray.cparam.idx_blk_elmts)
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid extensible array creation parameter")
+                            mesg->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs = *p++;
+                            if(0 == mesg->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs)
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid extensible array creation parameter")
+                            mesg->u.chunk.u.earray.cparam.data_blk_min_elmts = *p++;
+                            if(0 == mesg->u.chunk.u.earray.cparam.data_blk_min_elmts)
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid extensible array creation parameter")
+                            mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits = *p++;
+                            if(0 == mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits)
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid extensible array creation parameter")
+
+                            /* Set the chunk operations */
+                            mesg->storage.u.chunk.ops = H5D_COPS_EARRAY;
+                            break;
+
+                        case H5D_CHUNK_IDX_BT2:       /* v2 B-tree index */
+                            UINT32DECODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
+                            mesg->u.chunk.u.btree2.cparam.split_percent = *p++;
+                            mesg->u.chunk.u.btree2.cparam.merge_percent = *p++;
+
+                            /* Set the chunk operations */
+                            mesg->storage.u.chunk.ops = H5D_COPS_BT2;
+                            break;
+
+                        case H5D_CHUNK_IDX_NTYPES:
+                        default:
+                            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "Invalid chunk index type")
+                    } /* end switch */
 
                     /* Chunk index address */
                     H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
@@ -556,6 +599,34 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 /* Dimension sizes */
                 for(u = 0; u < mesg->u.chunk.ndims; u++)
                     UINT64ENCODE_VAR(p, mesg->u.chunk.dim[u], mesg->u.chunk.enc_bytes_per_dim);
+
+                /* Chunk index type */
+                *p++ = (uint8_t)mesg->u.chunk.idx_type;
+
+                switch(mesg->u.chunk.idx_type) {
+                    case H5D_CHUNK_IDX_BTREE:
+                        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "v1 B-tree index type should never be in a v4 layout message")
+                        break;
+
+                    case H5D_CHUNK_IDX_EARRAY:
+                        /* Extensible array creation parameters */
+                        *p++ = mesg->u.chunk.u.earray.cparam.max_nelmts_bits;
+                        *p++ = mesg->u.chunk.u.earray.cparam.idx_blk_elmts;
+                        *p++ = mesg->u.chunk.u.earray.cparam.sup_blk_min_data_ptrs;
+                        *p++ = mesg->u.chunk.u.earray.cparam.data_blk_min_elmts;
+                        *p++ = mesg->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits;
+                        break;
+
+                    case H5D_CHUNK_IDX_BT2:       /* v2 B-tree index */
+                        UINT32ENCODE(p, mesg->u.chunk.u.btree2.cparam.node_size);
+                        *p++ = mesg->u.chunk.u.btree2.cparam.split_percent;
+                        *p++ = mesg->u.chunk.u.btree2.cparam.merge_percent;
+                        break;
+
+                    case H5D_CHUNK_IDX_NTYPES:
+                    default:
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "Invalid chunk index type")
+                } /* end switch */
 
                 /*
                  * Implicit index: Address of the chunks
@@ -1082,20 +1153,32 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const v
             HDfprintf(stream, "}\n");
 
             /* Index information */
-            switch(mesg->storage.u.chunk.idx_type) {
+            switch(mesg->u.chunk.idx_type) {
                 case H5D_CHUNK_IDX_BTREE:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v1 B-tree");
-                    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-                              "B-tree address:", mesg->storage.u.chunk.idx_addr);
+                    break;
+
+                case H5D_CHUNK_IDX_EARRAY:
+                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                              "Index Type:", "Extensible Array");
+                    /* (Should print the extensible array creation parameters) */
+                    break;
+
+                case H5D_CHUNK_IDX_BT2:
+                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                              "Index Type:", "v2 B-tree");
+                    /* (Should print the v2-Btree creation parameters) */
                     break;
 
                 case H5D_CHUNK_IDX_NTYPES:
                 default:
                     HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
-                              "Index Type:", "Unknown", (unsigned)mesg->storage.u.chunk.idx_type);
+                              "Index Type:", "Unknown", (unsigned)mesg->u.chunk.idx_type);
                     break;
             } /* end switch */
+            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+                      "Index address:", mesg->storage.u.chunk.idx_addr);
             break;
 
         case H5D_CONTIGUOUS:

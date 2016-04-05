@@ -6462,15 +6462,24 @@ static herr_t
 test_zero_dims(hid_t file)
 {
     hid_t       s = -1, d = -1, dcpl = -1;
-    hsize_t     dsize = 0, dmax = H5S_UNLIMITED, csize = 5;
+    hsize_t     dzero = 0, dmax = H5S_UNLIMITED, csize = 5;
+    hid_t	fapl;		/* File access property list */
+    H5D_chunk_index_t idx_type; /* Dataset chunk index type */
+    H5F_libver_t low;           /* File format low bound */
     herr_t      ret;
 
     TESTING("I/O on datasets with zero-sized dims");
 
+    /* Get the file's file access property list */
+    if((fapl = H5Fget_access_plist(file)) < 0) FAIL_STACK_ERROR
+
+    /* Get library format */
+    if(H5Pget_libver_bounds(fapl, &low, NULL) < 0) FAIL_STACK_ERROR
+
     /* 
      * One-dimensional dataset 
      */
-    if((s = H5Screate_simple(1, &dsize, &dmax)) < 0) FAIL_STACK_ERROR
+    if((s = H5Screate_simple(1, &dzero, &dmax)) < 0) FAIL_STACK_ERROR
 
     /* Try creating chunked dataset with undefined chunk dimensions */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
@@ -6486,7 +6495,7 @@ test_zero_dims(hid_t file)
 
     /* Try creating chunked dataset with zero-sized chunk dimensions */
     H5E_BEGIN_TRY {
-        ret = H5Pset_chunk(dcpl, 1, &dsize);
+        ret = H5Pset_chunk(dcpl, 1, &dzero);
     } H5E_END_TRY;
     if(ret > 0)
         FAIL_PUTS_ERROR("set zero-sized chunk dimensions")
@@ -6497,6 +6506,16 @@ test_zero_dims(hid_t file)
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
     if(H5Pset_chunk(dcpl, 1, &csize) < 0) FAIL_STACK_ERROR
     if((d = H5Dcreate2(file, ZERODIM_DATASET, H5T_NATIVE_INT, s, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Get the chunk index type */
+    if(H5D__layout_idx_type_test(d, &idx_type) < 0) FAIL_STACK_ERROR
+
+    /* Verify index type */
+    if(low == H5F_LIBVER_LATEST) {
+	if(idx_type != H5D_CHUNK_IDX_EARRAY)
+	    FAIL_PUTS_ERROR("should be using extensible array as index");
+    } else if(idx_type != H5D_CHUNK_IDX_BTREE)
+	FAIL_PUTS_ERROR("should be using v1 B-tree as index");
 
     /* Various no-op writes */
     if(H5Dwrite(d, H5T_NATIVE_INT, s, s, H5P_DEFAULT, (void*)911) < 0) FAIL_STACK_ERROR

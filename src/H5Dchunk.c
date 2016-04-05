@@ -75,7 +75,9 @@
 
 /* Sanity check on chunk index types: commonly used by a lot of routines in this file */
 #define H5D_CHUNK_STORAGE_INDEX_CHK(storage)                                                    \
-    HDassert((H5D_CHUNK_IDX_BTREE == storage->idx_type && H5D_COPS_BTREE == storage->ops));
+    HDassert((H5D_CHUNK_IDX_EARRAY == storage->idx_type && H5D_COPS_EARRAY == storage->ops) ||  \
+             (H5D_CHUNK_IDX_BT2 == storage->idx_type && H5D_COPS_BT2 == storage->ops) ||        \
+             (H5D_CHUNK_IDX_BTREE == storage->idx_type && H5D_COPS_BTREE == storage->ops));
 
 /*
  * Feature: If this constant is defined then every cache preemption and load
@@ -6285,6 +6287,8 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
     /* Actually allocate space for the chunk in the file */
     if(alloc_chunk) {
 	switch(idx_info->storage->idx_type) {
+	    case H5D_CHUNK_IDX_EARRAY:
+            case H5D_CHUNK_IDX_BT2:
 	    case H5D_CHUNK_IDX_BTREE:
                 HDassert(new_chunk->length > 0);
 		H5_CHECK_OVERFLOW(new_chunk->length, /*From: */uint32_t, /*To: */hsize_t);
