@@ -3308,7 +3308,7 @@ test_actual_io_mode(int selection_mode) {
         "reading and writing are the same for actual_chunk_opt_mode");
 
     /* Test values */
-    if(actual_chunk_opt_mode_expected != (unsigned) -1 && actual_io_mode_expected != (unsigned) -1) {
+    if(actual_chunk_opt_mode_expected != (H5D_mpio_actual_chunk_opt_mode_t) -1 && actual_io_mode_expected != (H5D_mpio_actual_io_mode_t) -1) {
         sprintf(message, "Actual Chunk Opt Mode has the correct value for %s.\n",test_name);
         VRFY((actual_chunk_opt_mode_write == actual_chunk_opt_mode_expected), message);
         sprintf(message, "Actual IO Mode has the correct value for %s.\n",test_name);
@@ -4152,16 +4152,20 @@ dataset_atomicity(void)
     MPI_Barrier (comm);
 
     /* make sure setting atomicity fails on a serial file ID */
-    /* open the file collectively */
-    fid=H5Fopen(filename,H5F_ACC_RDWR,H5P_DEFAULT);
-    VRFY((fid >= 0), "H5Fopen succeeed");
+    /* file locking allows only one file open (serial) for writing */
+    if(MAINPROCESS){
+	fid=H5Fopen(filename,H5F_ACC_RDWR,H5P_DEFAULT);
+	VRFY((fid >= 0), "H5Fopen succeeed");
+    }
 
     /* should fail */
     ret = H5Fset_mpi_atomicity (fid , TRUE);
     VRFY((ret == FAIL), "H5Fset_mpi_atomicity failed");
 
-    ret = H5Fclose(fid);
-    VRFY((ret >= 0), "H5Fclose succeeded");
+    if(MAINPROCESS){
+	ret = H5Fclose(fid);
+	VRFY((ret >= 0), "H5Fclose succeeded");
+    }
 
     MPI_Barrier (comm);
 
