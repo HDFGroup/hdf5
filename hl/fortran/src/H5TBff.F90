@@ -365,27 +365,22 @@ CONTAINS
 
   END SUBROUTINE h5tbmake_table_ptr_f
 
-  SUBROUTINE h5tbread_table_f(loc_id,&
-       table_name,&
-       nfields,&
-       dst_size,&
-       dst_offset, &
-       dst_sizes, &
-       dst_buf, &
-       errcode)
+  SUBROUTINE h5tbread_table_f(loc_id, table_name, nfields, dst_size, dst_offset, &
+       dst_sizes, dst_buf, errcode)
 
     USE ISO_C_BINDING
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id                            ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: table_name                        ! name of the dataset
-    INTEGER(hsize_t), INTENT(in) :: nfields                           ! fields
-    INTEGER(size_t),  INTENT(in) :: dst_size                          ! type size
-    INTEGER(size_t),  DIMENSION(1:nfields), INTENT(in) :: dst_offset  ! An array containing the sizes of the fields
+    INTEGER(hid_t),   INTENT(in) :: loc_id                            ! An array containing the sizes of the fields
+    CHARACTER(LEN=*), INTENT(in) :: table_name                        ! The name of the dataset to read
+    INTEGER(hsize_t), INTENT(in) :: nfields                           ! number of fields
+    INTEGER(size_t),  INTENT(in) :: dst_size                          ! The size of the structure type
+    INTEGER(size_t),  DIMENSION(1:nfields), INTENT(in) :: dst_offset  ! An array containing the offsets of the fields
     INTEGER(size_t),  DIMENSION(1:nfields), INTENT(in) :: dst_sizes   ! An array containing the sizes of the fields
-    TYPE(C_PTR), INTENT(OUT) :: dst_buf
-    INTEGER :: errcode                                               ! error code
-    INTEGER(size_t) :: namelen                                       ! name length
-    INTEGER(hsize_t) :: i                                            ! general purpose integer
+    TYPE(C_PTR), INTENT(OUT) :: dst_buf                               ! Buffer with data
+    INTEGER :: errcode                                                ! error code
+
+    INTEGER(size_t) :: namelen                                        ! name length
+    INTEGER(hsize_t) :: i                                             ! general purpose integer
 
     INTERFACE
        INTEGER FUNCTION h5tbread_table_c(loc_id,&
