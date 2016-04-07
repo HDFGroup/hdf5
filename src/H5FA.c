@@ -79,6 +79,8 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  * client class..
  */
 const H5FA_class_t *const H5FA_client_class_g[] = {
+    H5FA_CLS_CHUNK,             /* 0 - H5FA_CLS_CHUNK_ID                */
+    H5FA_CLS_FILT_CHUNK,        /* 1 - H5FA_CLS_FILT_CHUNK_ID           */
     H5FA_CLS_TEST,              /* ? - H5FA_CLS_TEST_ID                 */
 };
 
@@ -739,3 +741,36 @@ CATCH
 
 END_FUNC(PRIV)  /* end H5FA_iterate() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FA_patch_file
+ *
+ * Purpose:     Patch the top-level file pointer contained in fa
+ *              to point to idx_info->f if they are different.
+ *              This is possible because the file pointer in fa can be
+ *              closed out if fa remains open.
+ *
+ * Return:      SUCCEED
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, NOERR,
+herr_t, SUCCEED, -,
+H5FA_patch_file(H5FA_t *fa, H5F_t *f))
+
+    /* Local variables */
+
+#ifdef H5FA_DEBUG
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* H5FA_DEBUG */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fa);
+    HDassert(f);
+
+    if(fa->f != f || fa->hdr->f != f)
+        fa->f = fa->hdr->f = f;
+
+END_FUNC(PRIV)  /* end H5FA_patch_file() */

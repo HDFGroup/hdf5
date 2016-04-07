@@ -510,6 +510,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     fprintf(out, "H5D_CHUNK_IDX_BTREE");
                                     break;
 
+                                case H5D_CHUNK_IDX_FARRAY:
+                                    fprintf(out, "H5D_CHUNK_IDX_FARRAY");
+                                    break;
+
                                 case H5D_CHUNK_IDX_EARRAY:
                                     fprintf(out, "H5D_CHUNK_IDX_EARRAY");
                                     break;

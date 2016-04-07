@@ -298,6 +298,16 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
                             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "v1 B-tree index type should never be in a v4 layout message")
                             break;
 
+                        case H5D_CHUNK_IDX_FARRAY:
+                            /* Fixed array creation parameters */
+                            mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits = *p++;
+                            if(0 == mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits)
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid fixed array creation parameter")
+
+                            /* Set the chunk operations */
+                            mesg->storage.u.chunk.ops = H5D_COPS_FARRAY;
+                            break;
+
                         case H5D_CHUNK_IDX_EARRAY:
                             /* Extensible array creation parameters */
                             mesg->u.chunk.u.earray.cparam.max_nelmts_bits = *p++;
@@ -606,6 +616,11 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 switch(mesg->u.chunk.idx_type) {
                     case H5D_CHUNK_IDX_BTREE:
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "v1 B-tree index type should never be in a v4 layout message")
+                        break;
+
+                    case H5D_CHUNK_IDX_FARRAY:
+                        /* Fixed array creation parameters */
+                        *p++ = mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits;
                         break;
 
                     case H5D_CHUNK_IDX_EARRAY:
@@ -1157,6 +1172,12 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const v
                 case H5D_CHUNK_IDX_BTREE:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v1 B-tree");
+                    break;
+
+                case H5D_CHUNK_IDX_FARRAY:
+                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                              "Index Type:", "Fixed Array");
+                    /* (Should print the fixed array creation parameters) */
                     break;
 
                 case H5D_CHUNK_IDX_EARRAY:

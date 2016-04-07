@@ -417,6 +417,14 @@ typedef struct H5O_storage_chunk_btree_t {
 } H5O_storage_chunk_btree_t;
 
 /* Forward declaration of structs used below */
+struct H5FA_t;                          /* Defined in H5FAprivate.h          */
+
+typedef struct H5O_storage_chunk_farray_t {
+    haddr_t     dset_ohdr_addr;         /* File address dataset's object header */
+    struct H5FA_t *fa;                  /* Pointer to fixed index array struct */
+} H5O_storage_chunk_farray_t;
+
+/* Forward declaration of structs used below */
 struct H5EA_t;                          /* Defined in H5EAprivate.h          */
 
 typedef struct H5O_storage_chunk_earray_t {
@@ -438,8 +446,9 @@ typedef struct H5O_storage_chunk_t {
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked storage operations */
     union {
         H5O_storage_chunk_btree_t btree;   /* Information for v1 B-tree index   */
-	H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */	
+        H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */	
         H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
+        H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
     } u;
 } H5O_storage_chunk_t;
 
@@ -534,6 +543,15 @@ typedef struct H5O_storage_t {
     } u;
 } H5O_storage_t;
 
+typedef struct H5O_layout_chunk_farray_t {
+    /* Creation parameters for fixed array data structure */
+    struct {
+        uint8_t max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in a data block page) - 
+                                               i.e. # of bits needed to store max. # of elements 
+                                               in a data block page */
+    } cparam;
+} H5O_layout_chunk_farray_t;
+
 typedef struct H5O_layout_chunk_earray_t {
     /* Creation parameters for extensible array data structure */
     struct {
@@ -572,6 +590,7 @@ typedef struct H5O_layout_chunk_t {
     hsize_t    	down_chunks[H5O_LAYOUT_NDIMS];     /* "down" size of number of chunks in each dimension */
     hsize_t    	max_down_chunks[H5O_LAYOUT_NDIMS]; /* "down" size of number of chunks in each max dim */
     union {
+        H5O_layout_chunk_farray_t farray; /* Information for fixed array index */
         H5O_layout_chunk_earray_t earray; /* Information for extensible array index */
         H5O_layout_chunk_bt2_t btree2; /* Information for v2 B-tree index */
     } u;

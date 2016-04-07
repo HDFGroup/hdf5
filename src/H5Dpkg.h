@@ -71,6 +71,10 @@
 /* Default creation parameters for chunk index data structures */
 /* See H5O_layout_chunk_t */
 
+/* Fixed array creation values */
+#define H5D_FARRAY_CREATE_PARAM_SIZE		1	/* Size of the creation parameters in bytes */
+#define H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS 	10  	/* i.e. 1024 elements per data block page */
+
 /* Extensible array creation values */
 #define H5D_EARRAY_CREATE_PARAM_SIZE		5	/* Size of the creation parameters in bytes */
 #define H5D_EARRAY_MAX_NELMTS_BITS         	32	/* i.e. 4 giga-elements */
@@ -538,6 +542,7 @@ H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1];
 /* Chunked layout operations */
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_EARRAY[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_FARRAY[1];
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BT2[1];
 
 /* The v2 B-tree class for indexing chunked datasets with >1 unlimited dimensions */

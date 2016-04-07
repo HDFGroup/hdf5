@@ -101,6 +101,10 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_BTREE;
                     break;
 
+                case H5D_CHUNK_IDX_FARRAY:
+                    dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_FARRAY;
+                    break;
+
                 case H5D_CHUNK_IDX_EARRAY:
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_EARRAY;
                     break;
@@ -212,6 +216,11 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                 switch(layout->u.chunk.idx_type) {
                     case H5D_CHUNK_IDX_BTREE:
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, 0, "v1 B-tree index type found for layout message >v3")
+
+                    case H5D_CHUNK_IDX_FARRAY:
+                        /* Fixed array creation parameters */
+                        ret_value += H5D_FARRAY_CREATE_PARAM_SIZE;
+                        break;
 
                     case H5D_CHUNK_IDX_EARRAY:
                         /* Extensible array creation parameters */
@@ -336,10 +345,13 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions")
 
             /* Spin through the max. dimensions, looking for unlimited dimensions */
-            for(u = 0; u < ndims; u++)
+            for(u = 0; u < ndims; u++) {
                 if(max_dims[u] == H5S_UNLIMITED)
                     unlim_count++;
+            } /* end for */
 
+            /* Chunked datasets with unlimited dimension(s) */
+            if(unlim_count) { /* dataset with unlimited dimension(s) must be chunked */
                 if(1 == unlim_count) { /* Chunked dataset with only 1 unlimited dimension */
                     /* Set the chunk index type to an extensible array */
                     layout->u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
@@ -356,7 +368,7 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
                     layout->u.chunk.u.earray.cparam.data_blk_min_elmts = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
                     layout->u.chunk.u.earray.cparam.max_dblk_page_nelmts_bits = H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
                 } /* end if */
-                else {
+                else { /* Chunked dataset with > 1 unlimited dimensions */
                     /* Set the chunk index type to v2 B-tree */
                     layout->u.chunk.idx_type = H5D_CHUNK_IDX_BT2;
                     layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_BT2;
@@ -370,6 +382,19 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
                     layout->u.chunk.u.btree2.cparam.split_percent = H5D_BT2_SPLIT_PERC;
                     layout->u.chunk.u.btree2.cparam.merge_percent =  H5D_BT2_MERGE_PERC;
                 } /* end else */
+            } /* end if */
+            else {
+                /* Set the chunk index type to Fixed Array */
+                layout->u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
+                layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
+                layout->storage.u.chunk.ops = H5D_COPS_FARRAY;
+
+                /* Set the fixed array creation parameters */
+                /* (use hard-coded defaults for now, until we give applications
+                 *          control over this with a property list - QAK)
+                 */
+                layout->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits = H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS;
+            } /* end else */
         } /* end if */
     } /* end if */
 
