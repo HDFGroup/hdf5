@@ -167,6 +167,7 @@ H5_DLL herr_t H5Ddebug(hid_t dset_id);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /* Macros */
+#define H5D_CHUNK_BTREE H5D_CHUNK_IDX_BTREE
 
 
 /* Typedefs */
