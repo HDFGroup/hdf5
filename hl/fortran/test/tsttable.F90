@@ -628,7 +628,7 @@ SUBROUTINE test_table2()
 #endif
 
   dst_offset(1:nfields) = (/ & 
-       H5OFFSETOF(C_LOC(dst_buf(1)), C_LOC(dst_buf(1)%name)), &
+       H5OFFSETOF(C_LOC(dst_buf(1)), C_LOC(dst_buf(1)%name(1:1))), &
        H5OFFSETOF(C_LOC(dst_buf(1)), C_LOC(dst_buf(1)%lati)), &
        H5OFFSETOF(C_LOC(dst_buf(1)), C_LOC(dst_buf(1)%long)), &
        H5OFFSETOF(C_LOC(dst_buf(1)), C_LOC(dst_buf(1)%pressure)), &
