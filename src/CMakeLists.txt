@@ -111,6 +111,7 @@ set (H5D_SRCS
     ${HDF5_SRC_DIR}/H5Ddeprec.c
     ${HDF5_SRC_DIR}/H5Dearray.c
     ${HDF5_SRC_DIR}/H5Defl.c
+    ${HDF5_SRC_DIR}/H5Dfarray.c
     ${HDF5_SRC_DIR}/H5Dfill.c
     ${HDF5_SRC_DIR}/H5Dint.c
     ${HDF5_SRC_DIR}/H5Dio.c
