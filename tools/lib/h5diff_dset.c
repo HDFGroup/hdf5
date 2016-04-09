@@ -71,7 +71,9 @@ hsize_t diff_dataset( hid_t file1_id,
     if((dcpl1 = H5Dget_create_plist(did1)) < 0)
         goto error;
     if((dcpl2 = H5Dget_create_plist(did2)) < 0)
+    {
         goto error;
+    }
 
     /*-------------------------------------------------------------------------
     * check if the dataset creation property list has filters that
@@ -189,10 +191,6 @@ hsize_t diff_datasetid( hid_t did1,
     hid_t      f_tid2=-1;
     hid_t      m_tid1=-1;
     hid_t      m_tid2=-1;
-    hid_t      dcpl1 = -1;
-    hid_t      dcpl2 = -1;
-    H5D_layout_t     stl1 = -1;
-    H5D_layout_t     stl2 = -1;
     size_t     m_size1;
     size_t     m_size2;
     H5T_sign_t sign1;
@@ -262,21 +260,6 @@ hsize_t diff_datasetid( hid_t did1,
         goto error;
     }
 
-
-    /*-------------------------------------------------------------------------
-    * get the storage layout type
-    *-------------------------------------------------------------------------
-    */
-    if((dcpl1 = H5Dget_create_plist(did1)) < 0)
-        goto error;
-    if((dcpl2 = H5Dget_create_plist(did2)) < 0)
-        goto error;
-
-    if((stl1 = H5Pget_layout(dcpl1)) < 0)
-        goto error;
-    if((stl2 = H5Pget_layout(dcpl2)) < 0)
-        goto error;
-
     /*-------------------------------------------------------------------------
     * check for empty datasets
     *-------------------------------------------------------------------------
@@ -288,18 +271,10 @@ hsize_t diff_datasetid( hid_t did1,
 
     if (storage_size1==0 || storage_size2==0)
     {
-        if (stl1==H5D_VIRTUAL || stl2==H5D_VIRTUAL)
-        {
-            if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
-                parallel_print("Warning: <%s> or <%s> is a virtual dataset\n", obj1_name, obj2_name);
-        }
-        else
-        {
-            if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
-                parallel_print("Not comparable: <%s> or <%s> is an empty dataset\n", obj1_name, obj2_name);
-            can_compare=0;
-            options->not_cmp=1;
-        }
+        if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
+            parallel_print("Not comparable: <%s> or <%s> is an empty dataset\n", obj1_name, obj2_name);
+        can_compare=0;
+        options->not_cmp=1;
     }
 
     /*-------------------------------------------------------------------------
@@ -354,7 +329,7 @@ hsize_t diff_datasetid( hid_t did1,
                 parallel_print("Not comparable: <%s> has sign %s ", obj1_name, get_sign(sign1));
                 parallel_print("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
             }
-
+    
             can_compare=0;
             options->not_cmp=1;
         }
@@ -394,7 +369,7 @@ hsize_t diff_datasetid( hid_t did1,
         h5difftrace("upgrade the smaller memory size?\n");
 
         if (FAIL == match_up_memsize (f_tid1, f_tid2,
-                                      &m_tid1, &m_tid2,
+                                      &m_tid1, &m_tid2, 
                                       &m_size1, &m_size2))
             goto error;
 
