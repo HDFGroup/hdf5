@@ -115,16 +115,6 @@
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/plugin_test.h5repack_layout.h5.tst
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/plugin_none.h5repack_layout.UD.h5.tst
-      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/1_vds.h5-vds_dset_compa-v.ddl
-      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/1_vds.h5-vds_dset_conti-v.ddl
-      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/2_vds.h5-vds_null_compa-v.ddl
-      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/2_vds.h5-vds_null_conti-v.ddl
-      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_compa_compa-v.ddl
-      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_compa_conti-v.ddl
-      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_compa-v.ddl
-      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_conti_compa-v.ddl
-      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_conti_conti-v.ddl
-      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_conti-v.ddl
   )
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})

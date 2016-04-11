@@ -150,16 +150,6 @@ $SRC_H5REPACK_TESTFILES/h5repack_layout.h5.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_filters.h5.tst
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
 $SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
-$SRC_H5REPACK_TESTFILES/1_vds.h5-vds_dset_compa-v.ddl
-$SRC_H5REPACK_TESTFILES/1_vds.h5-vds_dset_conti-v.ddl
-$SRC_H5REPACK_TESTFILES/2_vds.h5-vds_null_compa-v.ddl
-$SRC_H5REPACK_TESTFILES/2_vds.h5-vds_null_conti-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa_compa-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa_conti-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti_compa-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti_conti-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti-v.ddl
 "
 
 #
