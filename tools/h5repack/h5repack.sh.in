@@ -1167,14 +1167,16 @@ TOOLTEST_META meta_long h5repack_layout.h5 --metadata_block_size=8192
 #########################################################
 # layout options
 #########################################################
-# skip test because of HDFFV-9756
+# skip tests because of HDFFV-9756
 #VERIFY_LAYOUT_VDS vds_dset_conti 1_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
-SKIP vds_dset_conti 1_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
-VERIFY_LAYOUT_ALL vds_null_conti 2_vds.h5 CONTIGUOUS -l CONTI
+#VERIFY_LAYOUT_ALL vds_null_conti 2_vds.h5 CONTIGUOUS -l CONTI
 # skip test because of HDFFV-9756
 #VERIFY_LAYOUT_VDS vds_dset_compa 1_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
+#VERIFY_LAYOUT_ALL vds_null_compa 2_vds.h5 COMPACT -l COMPA
+SKIP vds_dset_conti 1_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+SKIP vds_null_conti 2_vds.h5 CONTIGUOUS -l CONTI
 SKIP vds_dset_compa 1_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
-VERIFY_LAYOUT_ALL vds_null_compa 2_vds.h5 COMPACT -l COMPA
+SKIP vds_null_compa 2_vds.h5 COMPACT -l COMPA
 
 ################################################################
 # layout conversions
