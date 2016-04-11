@@ -39,6 +39,8 @@ H5DUMP=../h5dump/h5dump         # The h5dump tool name
 H5DUMP_BIN=`pwd`/$H5DUMP        # The path of the h5dump tool binary
 
 RM='rm -rf'
+CMP='cmp'
+DIFF='diff -c'
 GREP='grep'
 CP='cp'
 DIRNAME='dirname'
@@ -148,6 +150,16 @@ $SRC_H5REPACK_TESTFILES/h5repack_layout.h5.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_filters.h5.tst
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
 $SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
+$SRC_H5REPACK_TESTFILES/1_vds.h5-vds_dset_compa-v.ddl
+$SRC_H5REPACK_TESTFILES/1_vds.h5-vds_dset_conti-v.ddl
+$SRC_H5REPACK_TESTFILES/2_vds.h5-vds_null_compa-v.ddl
+$SRC_H5REPACK_TESTFILES/2_vds.h5-vds_null_conti-v.ddl
+$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa_compa-v.ddl
+$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa_conti-v.ddl
+$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa-v.ddl
+$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti_compa-v.ddl
+$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti_conti-v.ddl
+$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti-v.ddl
 "
 
 #
@@ -171,7 +183,7 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-    	        $CP -f $tstfile $TESTDIR
+                $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
 
@@ -188,7 +200,7 @@ CLEAN_TESTFILES_AND_TESTDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=`$DIRNAME $tstfile`
+    SDIR=`$DIRNAME $SRC_H5REPACK_TESTFILES/h5repack-help.txt`
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
@@ -319,6 +331,70 @@ VERIFY_LAYOUT_DSET()
     # clean up tmp files
     rm -f $outfile
     rm -f $layoutfile
+}
+
+#------------------------------------------
+# Verifying layouts of a dataset
+VERIFY_LAYOUT_VDS()
+{
+    layoutfile=layout-$1.$2
+    dset=$3
+    expectlayout=$4
+    infile=$2
+    outfile=out-$1.$2
+
+    expect="$TESTDIR/$2-$1-v.ddl"
+    actual="$TESTDIR/$2-$1-v.out"
+    actual_err="$TESTDIR/$2-$1-v.err"
+
+    shift
+    shift
+    shift
+    shift
+
+    TESTING  $H5REPACK $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    )
+    RET=$?
+    if [ $RET != 0 ] ; then
+        echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
+    else
+        echo " PASSED"
+    fi
+
+    #---------------------------------
+    # check the layout from a dataset
+    VERIFY  "a dataset layout"
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5DUMP_BIN -d $dset -p $outfile
+    ) >$actual 2>$actual_err
+
+    cat $actual_err >> $actual
+
+    if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+     echo " CREATED"
+     cp $actual $expect
+    elif $CMP $expect $actual > /dev/null 2>&1 ; then
+     echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.ddl) differs from actual result (*.out)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && $DIFF $caseless $expect $actual |sed 's/^/    /'
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+     rm -f $actual $actual_err
+    fi
+
+    # clean up tmp files
+    rm -f $outfile
 }
 
 #----------------------------------------
@@ -469,11 +545,11 @@ TOOLTEST1()
     )
     RET=$?
     if [ $RET != 0 ] ; then
-	echo "*FAILED*"
-	nerrors="`expr $nerrors + 1`"
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
     else
-	echo " PASSED"
-	DIFFTEST $infile $outfile
+    echo " PASSED"
+    DIFFTEST $infile $outfile
     fi
     rm -f $outfile
 }
@@ -500,11 +576,11 @@ TOOLTESTV()
     ) >$actual 2>$actual_err
     RET=$?
     if [ $RET != 0 ] ; then
-	echo "*FAILED*"
-	nerrors="`expr $nerrors + 1`"
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
     else
-	echo " PASSED"
-	DIFFTEST $infile $outfile
+    echo " PASSED"
+    DIFFTEST $infile $outfile
     fi
 
     # display output compare
@@ -634,11 +710,11 @@ TOOLTEST_META()
     # verify sizes.
     MESSAGE "Verify the sizes of both output files ($size1 vs $size2)"
     if [ $size1 -lt $size2 ]; then
-    	# pass
-	echo " PASSED"
+        # pass
+    echo " PASSED"
     else
-	#fail
-	echo "*FAILED*"
+    #fail
+    echo "*FAILED*"
         nerrors="`expr $nerrors + 1`"
     fi
 
@@ -711,7 +787,7 @@ USE_FILTER_SZIP_ENCODER=`$RUNSERIAL $H5DETECTSZIP_BIN`
 fi
 
 ##############################################################################
-###			  T H E   T E S T S
+###              T H E   T E S T S
 ##############################################################################
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
@@ -1057,7 +1133,7 @@ TOOLTEST add_alignment $arg
 
 # Check repacking file with old version of layout message (should get upgraded
 #       to new version and be readable, etc.)
-TOOLTEST pgrade_layout h5repack_layouto.h5
+TOOLTEST upgrade_layout h5repack_layouto.h5
 
 # test for datum size > H5TOOLS_MALLOCSIZE
 TOOLTEST gt_mallocsize h5repack_objs.h5 -f GZIP=1
@@ -1091,20 +1167,31 @@ TOOLTEST_META meta_long h5repack_layout.h5 --metadata_block_size=8192
 #########################################################
 # layout options
 #########################################################
-VERIFY_LAYOUT_DSET vds_dset_conti 1_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+# skip test because of HDFFV-9756
+#VERIFY_LAYOUT_VDS vds_dset_conti 1_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+SKIP vds_dset_conti 1_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
 VERIFY_LAYOUT_ALL vds_null_conti 2_vds.h5 CONTIGUOUS -l CONTI
-VERIFY_LAYOUT_DSET vds_dset_compa 1_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
+# skip test because of HDFFV-9756
+#VERIFY_LAYOUT_VDS vds_dset_compa 1_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
+SKIP vds_dset_compa 1_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
 VERIFY_LAYOUT_ALL vds_null_compa 2_vds.h5 COMPACT -l COMPA
 
 ################################################################
 # layout conversions
 ###############################################################
-VERIFY_LAYOUT_DSET vds_compa_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
-VERIFY_LAYOUT_DSET vds_compa_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
-VERIFY_LAYOUT_DSET vds_conti_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
-VERIFY_LAYOUT_DSET vds_conti_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
-VERIFY_LAYOUT_DSET vds_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
-VERIFY_LAYOUT_DSET vds_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+# skip tests because of HDFFV-9756
+#VERIFY_LAYOUT_VDS vds_compa_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+#VERIFY_LAYOUT_VDS vds_compa_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
+#VERIFY_LAYOUT_VDS vds_conti_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
+#VERIFY_LAYOUT_VDS vds_conti_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+#VERIFY_LAYOUT_VDS vds_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
+#VERIFY_LAYOUT_VDS vds_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+SKIP vds_compa_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+SKIP vds_compa_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
+SKIP vds_conti_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
+SKIP vds_conti_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+SKIP vds_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
+SKIP vds_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR
