@@ -148,8 +148,9 @@ test_lite_SOURCES = test_lite.c
 test_lite_OBJECTS = test_lite.$(OBJEXT)
 test_lite_LDADD = $(LDADD)
 test_lite_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
-test_packet_SOURCES = test_packet.c
-test_packet_OBJECTS = test_packet.$(OBJEXT)
+am_test_packet_OBJECTS = test_packet.$(OBJEXT) \
+	test_packet_vlen.$(OBJEXT)
+test_packet_OBJECTS = $(am_test_packet_OBJECTS)
 test_packet_LDADD = $(LDADD)
 test_packet_DEPENDENCIES = $(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 test_table_SOURCES = test_table.c
@@ -191,10 +192,10 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = gen_test_ds.c test_ds.c test_dset_opt.c test_file_image.c \
-	test_image.c test_lite.c test_packet.c test_table.c
+	test_image.c test_lite.c $(test_packet_SOURCES) test_table.c
 DIST_SOURCES = gen_test_ds.c test_ds.c test_dset_opt.c \
-	test_file_image.c test_image.c test_lite.c test_packet.c \
-	test_table.c
+	test_file_image.c test_image.c test_lite.c \
+	$(test_packet_SOURCES) test_table.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -713,6 +714,9 @@ TEST_PROG = test_lite test_image test_file_image test_table test_ds test_packet 
 # --enable-build-all at configure time.
 BUILD_ALL_PROGS = gen_test_ds
 
+# Sources for test_packet executable
+test_packet_SOURCES = test_packet.c test_packet_vlen.c
+
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
 # lib_LIBRARIES are built for lib target), but EXTRA_LIB, EXTRA_PROG, and
@@ -833,6 +837,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_image.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_lite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_packet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_packet_vlen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_table.Po@am__quote@
 
 .c.o:

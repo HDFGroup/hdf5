@@ -48,8 +48,18 @@ HL_ADD_EXE (test_ds)
 HL_ADD_EXE (test_dset_opt)
 HL_ADD_EXE (test_image)
 HL_ADD_EXE (test_lite)
-HL_ADD_EXE (test_packet)
 HL_ADD_EXE (test_table)
+
+# test_packet has two source files
+add_executable (hl_test_packet test_packet.c test_packet_vlen.c)
+TARGET_NAMING (hl_test_packet STATIC)
+TARGET_C_PROPERTIES (hl_test_packet STATIC " " " ")
+target_link_libraries (hl_test_packet
+    ${HDF5_HL_LIB_TARGET}
+    ${HDF5_LIB_TARGET}
+    ${HDF5_TEST_LIB_TARGET}
+)
+set_target_properties (hl_test_packet PROPERTIES FOLDER test/hl)
 
 # --------------------------------------------------------------------
 # This executable is used to generate test files for the test_ds test.
