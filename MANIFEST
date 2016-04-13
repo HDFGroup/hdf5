@@ -2182,6 +2182,7 @@
 ./hl/test/test_image.c
 ./hl/test/test_lite.c
 ./hl/test/test_packet.c
+./hl/test/test_packet_vlen.c
 ./hl/test/test_table.c
 ./hl/test/test_ds_le.h5
 ./hl/test/test_ds_be.h5
