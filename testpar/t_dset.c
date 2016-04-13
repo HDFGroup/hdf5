@@ -457,7 +457,7 @@ dataset_readInd(void)
     VRFY((acc_tpl >= 0), "");
 
     /* open the file collectively */
-    fid=H5Fopen(filename,H5F_ACC_RDONLY,acc_tpl);
+    fid = H5Fopen(filename, H5F_ACC_RDONLY, acc_tpl);
     VRFY((fid >= 0), "");
 
     /* Release file-access template */
@@ -2206,10 +2206,10 @@ extend_writeAll(void)
      VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
-
     /* write data collectively */
     ret = H5Dwrite(dataset1, H5T_NATIVE_INT, mem_dataspace, file_dataspace,
 	    xfer_plist, data_array1);
+    H5Eprint2(H5E_DEFAULT, stderr);
     VRFY((ret >= 0), "H5Dwrite succeeded");
 
     /* release resource */

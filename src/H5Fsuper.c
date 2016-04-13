@@ -115,7 +115,7 @@ H5F_super_ext_create(H5F_t *f, hid_t dxpl_id, H5O_loc_t *ext_ptr)
          * extension.
          */
         H5O_loc_reset(ext_ptr);
-        if(H5O_create(f, dxpl_id, 0, (size_t)1, H5P_GROUP_CREATE_DEFAULT, ext_ptr) < 0)
+        if(H5O_create(f, dxpl_id, (size_t)0, (size_t)1, H5P_GROUP_CREATE_DEFAULT, ext_ptr) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "unable to create superblock extension")
 
         /* Record the address of the superblock extension */
@@ -622,7 +622,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id)
 		f->shared->sblock = sblock;
 #endif /* JRM */
 
-                if(H5F_super_ext_write_msg(f, dxpl_id, &drvinfo, H5O_DRVINFO_ID, FALSE) < 0)
+		if(H5F_super_ext_write_msg(f, dxpl_id, H5O_DRVINFO_ID, &drvinfo, FALSE) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension")
 
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
@@ -959,7 +959,7 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
 	    for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
                 fsinfo.fs_addr[type-1] = HADDR_UNDEF;
 
-            if(H5O_msg_create(&ext_loc, H5O_FSINFO_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &fsinfo, dxpl_id) < 0)
+	    if(H5O_msg_create(&ext_loc, H5O_FSINFO_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &fsinfo, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update free-space info header message")
 	} /* end if */
     } /* end if */
@@ -1197,7 +1197,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, void *mesg, unsigned id, hbool_t may_create)
+H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, unsigned id, void *mesg, hbool_t may_create)
 {
     H5P_genplist_t *dxpl = NULL;        /* DXPL for setting ring */
     H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */

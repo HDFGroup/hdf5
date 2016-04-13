@@ -54,6 +54,7 @@
 #define H5D_ACS_PREEMPT_READ_CHUNKS_NAME    "rdcc_w0"       /* Preemption read chunks first */
 #define H5D_ACS_VDS_VIEW_NAME               "vds_view"      /* VDS view option */
 #define H5D_ACS_VDS_PRINTF_GAP_NAME         "vds_printf_gap" /* VDS printf gap size */
+#define H5D_ACS_EFILE_PREFIX_NAME           "external file prefix" /* External file prefix */
 
 /* ======== Data transfer properties ======== */
 #define H5D_XFER_MAX_TEMP_BUF_NAME      "max_temp_buf"  /* Maximum temp buffer size */

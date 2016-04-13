@@ -103,7 +103,7 @@ static herr_t H5D__virtual_build_source_name(char *source_name,
 static herr_t H5D__virtual_init_all(const H5D_t *dset, hid_t dxpl_id);
 static herr_t H5D__virtual_pre_io(H5D_dset_info_t *dset_info,
     H5O_storage_virtual_t *storage, const H5S_t *file_space,
-    const H5S_t *mem_space, hsize_t *tot_nelmts, hid_t dxpl_id);
+    const H5S_t *mem_space, hsize_t *tot_nelmts, H5D_io_info_t *io_info);
 static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage);
 static herr_t H5D__virtual_read_one(H5D_dset_info_t *dset_info,
     const H5D_type_info_t *type_info, const H5S_t *file_space,
@@ -2079,7 +2079,7 @@ H5D__virtual_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
 static herr_t
 H5D__virtual_pre_io(H5D_dset_info_t *dset_info,
     H5O_storage_virtual_t *storage, const H5S_t *file_space,
-    const H5S_t *mem_space, hsize_t *tot_nelmts, hid_t dxpl_id)
+    const H5S_t *mem_space, hsize_t *tot_nelmts, H5D_io_info_t *io_info)
 {
     const H5D_t *dset = dset_info->dset;     /* Local pointer to dataset info */
     hssize_t    select_nelmts;              /* Number of elements in selection */
@@ -2100,7 +2100,7 @@ H5D__virtual_pre_io(H5D_dset_info_t *dset_info,
 
     /* Initialize layout if necessary */
     if(!storage->init)
-        if(H5D__virtual_init_all(dset, dxpl_id) < 0)
+        if(H5D__virtual_init_all(dset, io_info->md_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize virtual layout")
 
     /* Initialize tot_nelmts */
@@ -2158,7 +2158,7 @@ H5D__virtual_pre_io(H5D_dset_info_t *dset_info,
                      * open the source dataset to patch it */
                     if(storage->list[i].source_space_status != H5O_VIRTUAL_STATUS_CORRECT) {
                         HDassert(!storage->list[i].sub_dset[j].dset);
-                        if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].sub_dset[j], dxpl_id) < 0)
+                        if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].sub_dset[j], io_info->md_dxpl_id) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
                     } /* end if */
 
@@ -2230,7 +2230,7 @@ H5D__virtual_pre_io(H5D_dset_info_t *dset_info,
                         /* Open source dataset */
                         if(!storage->list[i].sub_dset[j].dset)
                             /* Try to open dataset */
-                            if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].sub_dset[j], dxpl_id) < 0)
+                            if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].sub_dset[j], io_info->md_dxpl_id) < 0)
                                 HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
 
                         /* If the source dataset is not open, mark the selected
@@ -2267,7 +2267,7 @@ H5D__virtual_pre_io(H5D_dset_info_t *dset_info,
                     /* Open source dataset */
                     if(!storage->list[i].source_dset.dset) 
                         /* Try to open dataset */
-                        if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].source_dset, dxpl_id) < 0)
+                        if(H5D__virtual_open_source_dset(dset, &storage->list[i], &storage->list[i].source_dset, io_info->md_dxpl_id) < 0)
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open source dataset")
 
                     /* If the source dataset is not open, mark the selected elements
@@ -2389,7 +2389,6 @@ H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_in
         if(H5S_select_project_intersection(source_dset->clipped_virtual_select, source_dset->clipped_source_select, file_space, &projected_src_space) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "can't project virtual intersection onto source space")
 
-
         {
             hid_t file_id;                      /* File ID for operation */
 
@@ -2475,7 +2474,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 #endif /* H5_HAVE_PARALLEL */
 
     /* Prepare for I/O operation */
-    if(H5D__virtual_pre_io(dset_info, storage, file_space, mem_space, &tot_nelmts, io_info->dxpl_id) < 0)
+    if(H5D__virtual_pre_io(dset_info, storage, file_space, mem_space, &tot_nelmts, io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation")
 
     /* Iterate over mappings */
@@ -2489,13 +2488,13 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             for(j = storage->list[i].sub_dset_io_start;
                     j < storage->list[i].sub_dset_io_end; j++)
                 if(H5D__virtual_read_one(dset_info, type_info, file_space, &storage->list[i].sub_dset[j], 
-                                         io_info->dxpl_id) < 0)
+                                         io_info->raw_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset")
         } /* end if */
         else
             /* Read from source dataset */
             if(H5D__virtual_read_one(dset_info, type_info, file_space, &storage->list[i].source_dset, 
-                                     io_info->dxpl_id) < 0)
+                                     io_info->raw_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset")
     } /* end for */
 
@@ -2531,7 +2530,8 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to clip fill selection")
 
             /* Write fill values to memory buffer */
-            if(H5D__fill(dset_info->dset->shared->dcpl_cache.fill.buf, dset_info->dset->shared->type, dset_info->u.rbuf, type_info->mem_type, fill_space, io_info->dxpl_id) < 0)
+            if(H5D__fill(dset_info->dset->shared->dcpl_cache.fill.buf, dset_info->dset->shared->type, dset_info->u.rbuf, 
+                         type_info->mem_type, fill_space, io_info->md_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "filling buf failed")
 
 #ifndef NDEBUG
@@ -2689,7 +2689,7 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
 #endif /* H5_HAVE_PARALLEL */
 
     /* Prepare for I/O operation */
-    if(H5D__virtual_pre_io(dset_info, storage, file_space, mem_space, &tot_nelmts, io_info->dxpl_id) < 0)
+    if(H5D__virtual_pre_io(dset_info, storage, file_space, mem_space, &tot_nelmts, io_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLIP, FAIL, "unable to prepare for I/O operation")
 
     /* Fail if there are unmapped parts of the selection as they would not be
@@ -2708,13 +2708,13 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             for(j = storage->list[i].sub_dset_io_start;
                     j < storage->list[i].sub_dset_io_end; j++)
                 if(H5D__virtual_write_one(dset_info, type_info, file_space, &storage->list[i].sub_dset[j], 
-                                          io_info->dxpl_id) < 0)
+                                          io_info->raw_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset")
         } /* end if */
         else
             /* Write to source dataset */
             if(H5D__virtual_write_one(dset_info, type_info, file_space, &storage->list[i].source_dset,
-                                      io_info->dxpl_id) < 0)
+                                      io_info->raw_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset")
     } /* end for */
 

@@ -97,38 +97,61 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS $arch -std=c99 -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline"
 
     # Production
+    # NDEBUG is handled explicitly by the configure script
     case "$cc_vendor-$cc_version" in
       gcc-[34].*)
-        PROD_CFLAGS="-O3"
+        PROD_CFLAGS=
         ;;
       gcc-5.*)
-        PROD_CFLAGS="-O3 -fstdarg-opt"
+        PROD_CFLAGS="-fstdarg-opt"
         ;;
       *)
-        PROD_CFLAGS="-O -finline-functions"
+        # gcc automatically inlines based on the optimization level
+        # this is just a failsafe
+        PROD_CFLAGS="-finline-functions"
         ;;
     esac
-    PROD_CPPFLAGS=
 
     # Debug
+    # NDEBUG is handled explicitly by the configure script
+    # -g is hanled by the symbols flags
     case "$cc_vendor-$cc_version" in
       gcc-5.*)
-        DEBUG_CFLAGS="-Og -g -ftrapv -fno-common"
+        DEBUG_CFLAGS="-ftrapv -fno-common"
         ;;
       *)
-        DEBUG_CFLAGS="-g"
+        DEBUG_CFLAGS=
         ;;
     esac
-    #DEBUG_CFLAGS="$DEBUG_CFLAGS -fsanitize=undefined"
-    DEBUG_CPPFLAGS=
+    #DEBUG_CFLAGS="-fsanitize=undefined"
+
+    # Symbols
+    NO_SYMBOLS_CFLAGS="-s"
+    SYMBOLS_CFLAGS="-g"
+
+    # Profile
+    PROFILE_CFLAGS="-pg"
+
+    # Optimization
+    case "$cc_vendor-$cc_version" in
+      gcc-[34].*)
+        HIGH_OPT_CFLAGS="-O3"
+        DEBUG_OPT_CFLAGS=
+        ;;
+      gcc-5.*)
+        HIGH_OPT_CFLAGS="-O3"
+        DEBUG_OPT_CFLAGS="-Og"
+        ;;
+      *)
+        HIGH_OPT_CFLAGS="-O"
+        DEBUG_OPT_CFLAGS=
+        ;;
+    esac
+    NO_OPT_CFLAGS="-O0"
 
     # Try out the new "stack protector" feature introduced in gcc 4.1
     # (We should also think about adding some of the other memory protection options)
     #DEBUG_CFLAGS="$DEBUG_CFLAGS -Wstack-protector -fstack-protector-all"
-
-    # Profile
-    PROFILE_CFLAGS="-Og -g -pg"
-    PROFILE_CPPFLAGS=
 
     # Flags are set
     cc_flags_set=yes

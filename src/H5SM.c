@@ -60,7 +60,8 @@ static herr_t H5SM_create_index(H5F_t *f, H5SM_index_header_t *header,
 static herr_t H5SM_delete_index(H5F_t *f, H5SM_index_header_t *header,
                                 hid_t dxpl_id, hbool_t delete_heap);
 static haddr_t H5SM_create_list(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id);
-static size_t H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *empty_pos);
+static herr_t H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, 
+                                size_t *empty_pos, size_t *list_pos);
 static herr_t H5SM_convert_list_to_btree(H5F_t * f, H5SM_index_header_t * header,
                 H5SM_list_t **_list, H5HF_t *fheap, H5O_t *open_oh, hid_t dxpl_id);
 static herr_t H5SM_convert_btree_to_list(H5F_t * f, H5SM_index_header_t * header, hid_t dxpl_id);
@@ -1303,7 +1304,9 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
          * Also record the first empty list position we find in case we need it
          * later.
          */
-        list_pos = H5SM_find_in_list(list, &key, &empty_pos);
+        if(H5SM__find_in_list(list, &key, &empty_pos, &list_pos) < 0)
+	    HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to search for message in list")
+
         if(defer) {
             if(list_pos != UFAIL)
                 found = TRUE;
@@ -1464,10 +1467,15 @@ H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
             /* Insert the new message into the SOHM index */
             if(header->index_type == H5SM_LIST) {
                 /* Index is a list.  Find an empty spot if we haven't already */
-                if(empty_pos == UFAIL)
-                    if((H5SM_find_in_list(list, NULL, &empty_pos) == UFAIL) || empty_pos == UFAIL)
-                        HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to find empty entry in list")
+                if(empty_pos == UFAIL) {
+                    size_t pos;
 
+                    if(H5SM__find_in_list(list, NULL, &empty_pos, &pos) < 0)
+                        HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to search for message in list")
+
+                    if(pos == UFAIL || empty_pos == UFAIL)
+                        HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to find empty entry in list")
+                }
                 /* Insert message into list */
                 HDassert(list->messages[empty_pos].location == H5SM_NO_LOC);
                 HDassert(key.message.location != H5SM_NO_LOC);
@@ -1610,7 +1618,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5SM_find_in_list
+ * Function:    H5SM__find_in_list
  *
  * Purpose:     Find a message's location in a list.  Also find the first
  *              empty location in the list (since if we don't find the
@@ -1630,13 +1638,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static size_t
-H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *empty_pos)
+static herr_t
+H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *empty_pos, size_t *pos)
 {
     size_t x;
-    size_t ret_value = 0;       /* Return value */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC
 
     HDassert(list);
     /* Both key and empty_pos can be NULL, but not both! */
@@ -1650,9 +1658,17 @@ H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *e
      * Also record the first empty position we find.
      */
     for(x = 0; x < list->header->list_max; x++) {
-        if((list->messages[x].location != H5SM_NO_LOC) &&
-                (0 == H5SM__message_compare(key, &(list->messages[x]))))
-            HGOTO_DONE(x)
+        if(list->messages[x].location != H5SM_NO_LOC) {
+            int cmp;
+
+            if(H5SM__message_compare(key, &(list->messages[x]), &cmp) < 0)
+                HGOTO_ERROR(H5E_SOHM, H5E_CANTCOMPARE, FAIL, "can't compare message records")
+
+            if(0 == cmp) {
+                *pos = x;
+                HGOTO_DONE(SUCCEED)
+            }
+        }
         else if(empty_pos && list->messages[x].location == H5SM_NO_LOC) {
             /* Note position */
             *empty_pos = x;
@@ -1663,11 +1679,11 @@ H5SM_find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *e
     } /* end for */
 
     /* If we reached this point, we didn't find the message */
-    ret_value = UFAIL;
+    *pos = UFAIL;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SM_find_in_list */
+} /* end H5SM__find_in_list */
 
 
 /*-------------------------------------------------------------------------
@@ -1834,7 +1850,9 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
         /* Find the message in the list */
-        if((list_pos = H5SM_find_in_list(list, &key, NULL)) == UFAIL)
+        if(H5SM__find_in_list(list, &key, NULL, &list_pos) < 0)
+            HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to search for message in list")
+        if(list_pos == UFAIL)
 	    HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
 
         if(list->messages[list_pos].location == H5SM_IN_HEAP)
@@ -2217,7 +2235,9 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
 	    HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM index")
 
         /* Find the message in the list */
-        if((list_pos = H5SM_find_in_list(list, &key, NULL)) == UFAIL)
+        if(H5SM__find_in_list(list, &key, NULL, &list_pos) < 0)
+            HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to search for message in list")
+        if(list_pos == UFAIL)
 	    HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
 
         /* Copy the message */

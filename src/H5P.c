@@ -639,7 +639,7 @@ done:
  PURPOSE
     Routine to set a property's value in a property list.
  USAGE
-    herr_t H5P_set(plist_id, name, value)
+    herr_t H5Pset(plist_id, name, value)
         hid_t plist_id;         IN: Property list to find property in
         const char *name;       IN: Name of property to set
         void *value;            IN: Pointer to the value for the property

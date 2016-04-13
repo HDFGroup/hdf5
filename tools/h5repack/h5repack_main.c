@@ -360,7 +360,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
 			has_i_o = 1;
 			break;
 
-			/* -o for backward compability */
+		/* -o for backward compability */
 		case 'o':
 			outfile = opt_arg;
 			has_i_o = 1;
@@ -423,19 +423,19 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
 			break;
 
 		case 'L':
-			options->latest = 1;
+			options->latest = TRUE;
 			break;
 
 		case 'c':
 			options->grp_compact = HDatoi( opt_arg );
 			if (options->grp_compact > 0)
-				options->latest = 1; /* must use latest format */
+				options->latest = TRUE; /* must use latest format */
 			break;
 
 		case 'd':
 			options->grp_indexed = HDatoi( opt_arg );
 			if (options->grp_indexed > 0)
-				options->latest = 1; /* must use latest format */
+				options->latest = TRUE; /* must use latest format */
 			break;
 
 		case 's':
@@ -443,7 +443,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
 				int idx = 0;
 				int ssize = 0;
 				char *msgPtr = HDstrchr( opt_arg, ':');
-				options->latest = 1; /* must use latest format */
+				options->latest = TRUE; /* must use latest format */
 				if (msgPtr == NULL) {
 					ssize = HDatoi( opt_arg );
 					for (idx = 0; idx < 5; idx++)
@@ -579,7 +579,7 @@ int main(int argc, const char **argv) {
 	}
 
 	/* initialize options  */
-	h5repack_init(&options, 0, H5F_FILE_SPACE_DEFAULT, (hsize_t) 0);
+	h5repack_init(&options, 0, FALSE, H5F_FILE_SPACE_DEFAULT, (hsize_t) 0);
 
 	if (parse_command_line(argc, argv, &options) < 0)
 		goto done;

@@ -49,7 +49,7 @@ AbstractDs::AbstractDs(){}
 // removal does not raise any problems in 1.10, it will be removed from 1.8 in
 // subsequent releases.
 //--------------------------------------------------------------------------
-AbstractDs::AbstractDs(const hid_t ds_id){}
+// Mar 2016 -BMR, AbstractDs::AbstractDs(const hid_t ds_id){}
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs::getTypeClass

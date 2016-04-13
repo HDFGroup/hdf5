@@ -19,18 +19,18 @@
  * Purpose:     Messages related to data layout.
  */
 
-#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
+#define H5D_FRIEND              /*suppress error about including H5Dpkg	  */
 #include "H5Omodule.h"          /* This source code file is part of the H5O module */
 
 
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Dpkg.h"		/* Dataset functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5MFprivate.h"	/* File space management		*/
-#include "H5MMprivate.h"	/* Memory management			*/
-#include "H5Opkg.h"             /* Object headers			*/
-#include "H5Pprivate.h"		/* Property lists			*/
+#include "H5private.h"          /* Generic Functions                        */
+#include "H5Dpkg.h"             /* Dataset functions                        */
+#include "H5Eprivate.h"         /* Error handling                           */
+#include "H5FLprivate.h"        /* Free Lists                               */
+#include "H5MFprivate.h"        /* File space management                    */
+#include "H5MMprivate.h"        /* Memory management                        */
+#include "H5Opkg.h"             /* Object headers                           */
+#include "H5Pprivate.h"         /* Property lists                           */
 
 
 /* Local macros */
@@ -52,31 +52,31 @@ static herr_t H5O__layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 static void *H5O__layout_copy_file(H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hbool_t *recompute_size, unsigned *mesg_flags,
     H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
-static herr_t H5O__layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream,
-			       int indent, int fwidth);
+static herr_t H5O__layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
+    FILE * stream, int indent, int fwidth);
 
 /* This message derives from H5O message class */
 const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
-    H5O_LAYOUT_ID,          	/*message id number             */
-    "layout",               	/*message name for debugging    */
-    sizeof(H5O_layout_t),   	/*native message size           */
-    0,				/* messages are sharable?       */
-    H5O__layout_decode,      	/*decode message                */
-    H5O__layout_encode,      	/*encode message                */
-    H5O__layout_copy,        	/*copy the native value         */
-    H5O__layout_size,        	/*size of message on disk       */
-    H5O__layout_reset,		/*reset method                  */
-    H5O__layout_free,        	/*free the struct		*/
-    H5O__layout_delete,	        /* file delete method		*/
-    NULL,			/* link method			*/
-    NULL,			/*set share method		*/
-    NULL,		    	/*can share method		*/
-    NULL,			/* pre copy native value to file */
-    H5O__layout_copy_file,	/* copy native value to file    */
-    NULL,		        /* post copy native value to file */
-    NULL,			/* get creation index		*/
-    NULL,			/* set creation index		*/
-    H5O__layout_debug       	/*debug the message             */
+    H5O_LAYOUT_ID,              /* message id number                    */
+    "layout",                   /* message name for debugging           */
+    sizeof(H5O_layout_t),       /* native message size                  */
+    0,                          /* messages are sharable?               */
+    H5O__layout_decode,         /* decode message                       */
+    H5O__layout_encode,         /* encode message                       */
+    H5O__layout_copy,           /* copy the native value                */
+    H5O__layout_size,           /* size of message on disk              */
+    H5O__layout_reset,          /* reset method                         */
+    H5O__layout_free,           /* free the struct                      */
+    H5O__layout_delete,	        /* file delete method                   */
+    NULL,                       /* link method                          */
+    NULL,                       /* set share method                     */
+    NULL,                       /* can share method                     */
+    NULL,                       /* pre copy native value to file        */
+    H5O__layout_copy_file,      /* copy native value to file            */
+    NULL,                       /* post copy native value to file       */
+    NULL,                       /* get creation index                   */
+    NULL,                       /* set creation index                   */
+    H5O__layout_debug           /* debug the message                    */
 }};
 
 
@@ -593,7 +593,7 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 UINT32ENCODE(heap_block_p, chksum)
 
                 /* Insert block into global heap */
-                if(H5HG_insert(f, H5AC_ind_dxpl_id, block_size, heap_block, &((H5O_layout_t *)mesg)->storage.u.virt.serial_list_hobjid) < 0) /* Casting away const OK  --NAF */
+                if(H5HG_insert(f, H5AC_ind_read_dxpl_id, block_size, heap_block, &((H5O_layout_t *)mesg)->storage.u.virt.serial_list_hobjid) < 0) /* Casting away const OK  --NAF */
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to insert virtual dataset heap block")
             } /* end if */
 
@@ -740,14 +740,14 @@ H5O__layout_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const vo
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__layout_reset
+ * Function:    H5O__layout_reset
  *
- * Purpose:	Frees resources within a data type message, but doesn't free
- *		the message itself.
+ * Purpose:     Frees resources within a data type message, but doesn't free
+ *              the message itself.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, September 13, 2002
  *
  *-------------------------------------------------------------------------

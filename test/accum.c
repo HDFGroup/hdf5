@@ -55,8 +55,8 @@ unsigned test_random_write(const H5F_io_info_t *fio_info);
 void accum_printf(void);
 
 /* Private Test H5Faccum Function Wrappers */
-#define accum_write(a,s,b) H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5P_DATASET_XFER_DEFAULT, (b))
-#define accum_read(a,s,b)  H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5P_DATASET_XFER_DEFAULT, (b))
+#define accum_write(a,s,b) H5F_block_write(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5AC_ind_read_dxpl_id, (b))
+#define accum_read(a,s,b)  H5F_block_read(f, H5FD_MEM_DEFAULT, (haddr_t)(a), (size_t)(s), H5AC_ind_read_dxpl_id, (b))
 #define accum_free(fio_info,a,s)  H5F__accum_free(fio_info, H5FD_MEM_DEFAULT, (haddr_t)(a), (hsize_t)(s))
 #define accum_flush(fio_info)   H5F__accum_flush(fio_info)
 #define accum_reset(fio_info)   H5F__accum_reset(fio_info, TRUE)
@@ -101,7 +101,7 @@ main(void)
 
     /* Set up I/O info for operation */
     fio_info.f = f;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(H5P_DATASET_XFER_DEFAULT))) FAIL_STACK_ERROR
+    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id))) FAIL_STACK_ERROR
 
     /* Reset metadata accumulator for the file */
     if(accum_reset(&fio_info) < 0) FAIL_STACK_ERROR

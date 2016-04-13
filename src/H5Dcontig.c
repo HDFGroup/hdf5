@@ -196,8 +196,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
+H5D__contig_fill(const H5D_io_info_t *io_info)
 {
+    const H5D_t *dset = io_info->dset;   /* the dataset pointer */
     H5D_io_info_t ioinfo;       /* Dataset I/O info */
     H5D_dset_info_t dset_info;  /* Dset info */
     H5D_storage_t store;        /* Union of storage info for dataset */
@@ -213,15 +214,17 @@ H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
     hbool_t     blocks_written = FALSE; /* Flag to indicate that chunk was actually written */
     hbool_t     using_mpi = FALSE;      /* Flag to indicate that the file is being accessed with an MPI-capable file driver */
 #endif /* H5_HAVE_PARALLEL */
+    hid_t       md_dxpl_id = io_info->md_dxpl_id;
+    hid_t       raw_dxpl_id = io_info->raw_dxpl_id;
     H5D_fill_buf_info_t fb_info;        /* Dataset's fill buffer info */
     hbool_t     fb_info_init = FALSE;   /* Whether the fill value buffer has been initialized */
-    hid_t       my_dxpl_id;     /* DXPL ID to use for this operation */
     herr_t	ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
-    HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
+    HDassert(TRUE == H5P_isa_class(md_dxpl_id, H5P_DATASET_XFER));
+    HDassert(TRUE == H5P_isa_class(raw_dxpl_id, H5P_DATASET_XFER));
     HDassert(dset && H5D_CONTIGUOUS == dset->shared->layout.type);
     HDassert(H5F_addr_defined(dset->shared->layout.storage.u.contig.addr));
     HDassert(dset->shared->layout.storage.u.contig.size > 0);
@@ -241,20 +244,11 @@ H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
 
         /* Set the MPI-capable file driver flag */
         using_mpi = TRUE;
-
-        /* Use the internal "independent" DXPL */
-        my_dxpl_id = H5AC_ind_dxpl_id;
     } /* end if */
-    else {
-#endif  /* H5_HAVE_PARALLEL */
-        /* Use the DXPL we were given */
-        my_dxpl_id = dxpl_id;
-#ifdef H5_HAVE_PARALLEL
-    } /* end else */
 #endif  /* H5_HAVE_PARALLEL */
 
     /* Fill the DXPL cache values for later use */
-    if(H5D__get_dxpl_cache(my_dxpl_id, &dxpl_cache) < 0)
+    if(H5D__get_dxpl_cache(raw_dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Initialize storage info for this dataset */
@@ -270,7 +264,7 @@ H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
     if(H5D__fill_init(&fb_info, NULL, NULL, NULL, NULL, NULL,
             &dset->shared->dcpl_cache.fill,
             dset->shared->type, dset->shared->type_id, npoints,
-            dxpl_cache->max_temp_buf, my_dxpl_id) < 0)
+            dxpl_cache->max_temp_buf, md_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
     fb_info_init = TRUE;
 
@@ -279,8 +273,10 @@ H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
 
     /* Simple setup for dataset I/O info struct */
     ioinfo.dxpl_cache = dxpl_cache;
-    ioinfo.dxpl_id = my_dxpl_id;
     ioinfo.op_type = H5D_IO_OP_WRITE;
+    ioinfo.md_dxpl_id = H5AC_ind_read_dxpl_id;
+    ioinfo.raw_dxpl_id = raw_dxpl_id;
+
     dset_info.dset = (H5D_t *)dset;
     dset_info.store = &store;
     dset_info.u.wbuf = fb_info.fill_buf;
@@ -304,7 +300,7 @@ H5D__contig_fill(const H5D_t *dset, hid_t dxpl_id)
         /* Check for VL datatype & non-default fill value */
         if(fb_info.has_vlen_fill_type)
             /* Re-fill the buffer to use for this I/O operation */
-            if(H5D__fill_refill_vl(&fb_info, curr_points, my_dxpl_id) < 0)
+            if(H5D__fill_refill_vl(&fb_info, curr_points, md_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
 
 #ifdef H5_HAVE_PARALLEL
@@ -799,6 +795,8 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     HDassert(mem_space);
     HDassert(file_space);
 
+    io_info->dset = io_info->dsets_info[0].dset;
+
     /* Read data */
     if((io_info->io_ops.single_read)(io_info, type_info, nelmts, file_space, mem_space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous read failed")
@@ -835,6 +833,8 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     HDassert(type_info);
     HDassert(mem_space);
     HDassert(file_space);
+
+    io_info->dset = io_info->dsets_info[0].dset;
 
     /* Write data */
     if((io_info->io_ops.single_write)(io_info, type_info, nelmts, file_space, mem_space) < 0)
@@ -1134,7 +1134,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info,
         udata.dset_contig = &(dset_info.dset->shared->cache.contig);
         udata.store_contig = &(dset_info.store->contig);
         udata.rbuf = (unsigned char *)dset_info.u.rbuf;
-        udata.dxpl_id = io_info->dxpl_id;
+        udata.dxpl_id = io_info->raw_dxpl_id;
 
         /* Call generic sequence operation routine */
         if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
@@ -1149,7 +1149,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info,
         udata.file = dset_info.dset->oloc.file;
         udata.dset_addr = dset_info.store->contig.dset_addr;
         udata.rbuf = (unsigned char *)dset_info.u.rbuf;
-        udata.dxpl_id = io_info->dxpl_id;
+        udata.dxpl_id = io_info->raw_dxpl_id;
 
         /* Call generic sequence operation routine */
         if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
@@ -1220,10 +1220,9 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len,
             if(NULL == (dset_contig->sieve_buf = H5FL_BLK_CALLOC(sieve_buf, dset_contig->sieve_buf_size)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
-#ifdef H5_CLEAR_MEMORY
-if(dset_contig->sieve_size > len)
-    HDmemset(dset_contig->sieve_buf + len, 0, (dset_contig->sieve_size - len));
-#endif /* H5_CLEAR_MEMORY */
+            /* Clear memory */
+            if(dset_contig->sieve_size > len)
+                HDmemset(dset_contig->sieve_buf + len, 0, (dset_contig->sieve_size - len));
 
             /* Determine the new sieve buffer size & location */
             dset_contig->sieve_loc = addr;
@@ -1464,7 +1463,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info,
         udata.dset_contig = &(dset_info.dset->shared->cache.contig);
         udata.store_contig = &(dset_info.store->contig);
         udata.wbuf = (const unsigned char *)dset_info.u.wbuf;
-        udata.dxpl_id = io_info->dxpl_id;
+        udata.dxpl_id = io_info->raw_dxpl_id;
 
         /* Call generic sequence operation routine */
         if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
@@ -1479,7 +1478,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info,
         udata.file = dset_info.dset->oloc.file;
         udata.dset_addr = dset_info.store->contig.dset_addr;
         udata.wbuf = (const unsigned char *)dset_info.u.wbuf;
-        udata.dxpl_id = io_info->dxpl_id;
+        udata.dxpl_id = io_info->raw_dxpl_id;
 
         /* Call generic sequence operation routine */
         if((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr,
@@ -1506,7 +1505,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__contig_flush(H5D_t *dset, hid_t dxpl_id)
+H5D__contig_flush(H5D_t *dset, hid_t H5_ATTR_UNUSED dxpl_id)
 {
     herr_t ret_value = SUCCEED;       /* Return value */
 
@@ -1515,8 +1514,9 @@ H5D__contig_flush(H5D_t *dset, hid_t dxpl_id)
     /* Sanity check */
     HDassert(dset);
 
-    /* Flush any data in sieve buffer */
-    if(H5D__flush_sieve_buf(dset, dxpl_id) < 0)
+    /* Flush any data in sieve buffer - use the raw data dxpl since
+       the one passed in is a metadata dxpl. */
+    if(H5D__flush_sieve_buf(dset, H5AC_rawdata_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush sieve buffer")
 
 done:
@@ -1715,8 +1715,8 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
                 dst_nbytes = mem_nbytes = src_nbytes;
         } /* end if */
 
-        /* Read raw data from source file */
-        if(H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, src_nbytes, H5P_DATASET_XFER_DEFAULT, buf) < 0)
+        /* Read raw data from source file - use raw dxpl because passed in one is metadata */
+        if(H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, src_nbytes, H5AC_rawdata_dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read raw data")
 
         /* Perform datatype conversion, if necessary */
@@ -1736,7 +1736,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
             /* Reclaim space from variable length data */
-            if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
+            if(H5D_vlen_reclaim(tid_mem, buf_space, dxpl_id, reclaim_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
 	} /* end if */
         else if(fix_ref) {
@@ -1759,8 +1759,8 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src,
                 HDmemset(buf, 0, src_nbytes);
         } /* end if */
 
-        /* Write raw data to destination file */
-        if(H5F_block_write(f_dst, H5FD_MEM_DRAW, addr_dst, dst_nbytes, H5P_DATASET_XFER_DEFAULT, buf) < 0)
+        /* Write raw data to destination file - use raw dxpl because passed in one is metadata */
+        if(H5F_block_write(f_dst, H5FD_MEM_DRAW, addr_dst, dst_nbytes, H5AC_rawdata_dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data")
 
         /* Adjust loop variables */

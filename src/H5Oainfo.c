@@ -324,7 +324,9 @@ H5O_ainfo_free(void *mesg)
 /*-------------------------------------------------------------------------
  * Function:    H5O_ainfo_delete
  *
- * Purpose:     Free file space referenced by message
+ * Purpose:     Free file space referenced by message.  Note that open_oh
+ *              *must* be non-NULL - this means that calls to
+ *              H5O_msg_delete must include an oh if the type is ainfo.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -334,7 +336,7 @@ H5O_ainfo_free(void *mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
+H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 {
     H5O_ainfo_t *ainfo = (H5O_ainfo_t *)_mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -344,11 +346,14 @@ H5O_ainfo_delete(H5F_t *f, hid_t dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh, void *_
     /* check args */
     HDassert(f);
     HDassert(ainfo);
+    HDassert(open_oh);
 
     /* If the object is using "dense" attribute storage, delete it */
-    if(H5F_addr_defined(ainfo->fheap_addr))
+    if(H5F_addr_defined(ainfo->fheap_addr)) {
+        /* Delete the attribute */
         if(H5A_dense_delete(f, dxpl_id, ainfo) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free dense attribute storage")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -428,7 +433,7 @@ H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
     *ainfo_dst = *ainfo_src;
 
     if(H5F_addr_defined(ainfo_src->fheap_addr)) {
-        /* copy dense attribute */
+        /* Prepare to copy dense attributes - actual copy in post_copy */
 
         /* Set copied metadata tag */
         H5_BEGIN_TAG(dxpl_id, H5AC__COPIED_TAG, NULL);

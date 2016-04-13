@@ -921,7 +921,7 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
         oh->chunk = x;
     } /* end if */
 
-    chunkno = oh->nchunks++;
+    chunkno = (unsigned)oh->nchunks++;
     oh->chunk[chunkno].addr = new_chunk_addr;
     oh->chunk[chunkno].size = size;
     oh->chunk[chunkno].gap = 0;
@@ -966,6 +966,8 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
                     oh->nmesgs--;
                 } /* end if */
                 else {
+                    HDassert(curr_msg->type->id != H5O_CONT_ID);
+
                     /* Copy the raw data */
                     HDmemcpy(p, curr_msg->raw - (size_t)H5O_SIZEOF_MSGHDR_OH(oh),
                         curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
@@ -1544,13 +1546,13 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                 if(H5O_CONT_ID == curr_msg->type->id) {
                     htri_t status;      /* Status from moving messages */
 
-		    if((status = H5O_move_cont(f, dxpl_id, oh, u)) < 0)
-			HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "Error in moving messages into cont message")
-		    else if(status > 0) { /* Message(s) got moved into "continuation" message */
+                    if((status = H5O_move_cont(f, dxpl_id, oh, u)) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "Error in moving messages into cont message")
+                    else if(status > 0) { /* Message(s) got moved into "continuation" message */
                         packed_msg = TRUE;
-			break;
-		    } /* end else-if */
-		} /* end if */
+                        break;
+                    } /* end else-if */
+                } /* end if */
 
                 /* Don't let locked messages be moved into earlier chunk */
                 if(!curr_msg->locked) {

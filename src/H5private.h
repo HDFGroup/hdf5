@@ -538,20 +538,21 @@
  *       It's the developer's responsibility not to pass in the value 0, which
  *       may cause the equation to fail.
  */
-#define H5_FLT_ABS_EQUAL(X,Y)       (HDfabsf(X-Y) < FLT_EPSILON)
-#define H5_DBL_ABS_EQUAL(X,Y)       (HDfabs (X-Y) < DBL_EPSILON)
-#define H5_LDBL_ABS_EQUAL(X,Y)      (HDfabsl(X-Y) < LDBL_EPSILON)
+#define H5_FLT_ABS_EQUAL(X,Y)       (HDfabsf((X)-(Y)) < FLT_EPSILON)
+#define H5_DBL_ABS_EQUAL(X,Y)       (HDfabs ((X)-(Y)) < DBL_EPSILON)
+#define H5_LDBL_ABS_EQUAL(X,Y)      (HDfabsl((X)-(Y)) < LDBL_EPSILON)
 
-#define H5_FLT_REL_EQUAL(X,Y,M)     (HDfabsf((Y-X) / X) < M)
-#define H5_DBL_REL_EQUAL(X,Y,M)     (HDfabs ((Y-X) / X) < M)
-#define H5_LDBL_REL_EQUAL(X,Y,M)    (HDfabsl((Y-X) / X) < M)
+#define H5_FLT_REL_EQUAL(X,Y,M)     (HDfabsf(((Y)-(X)) / (X)) < (M))
+#define H5_DBL_REL_EQUAL(X,Y,M)     (HDfabs (((Y)-(X)) / (X)) < (M))
+#define H5_LDBL_REL_EQUAL(X,Y,M)    (HDfabsl(((Y)-(X)) / (X)) < (M))
 
-/* KiB, MiB, GiB, TiB, EiB - Used in profiling and timing code */
+/* KiB, MiB, GiB, TiB, PiB, EiB - Used in profiling and timing code */
 #define H5_KB (1024.0F)
 #define H5_MB (1024.0F * 1024.0F)
 #define H5_GB (1024.0F * 1024.0F * 1024.0F)
 #define H5_TB (1024.0F * 1024.0F * 1024.0F * 1024.0F)
-#define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
+#define H5_PB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
+#define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
 
 #ifndef H5_HAVE_FLOCK
 /* flock() operations. Used in the source so we have to define them when
@@ -870,58 +871,37 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #endif /* HDfrexpl */
 /* fscanf() variable arguments */
 #ifndef HDfseek
-    #ifdef H5_HAVE_FSEEKO
-             #define HDfseek(F,O,W)  fseeko(F,O,W)
-    #else /* H5_HAVE_FSEEKO */
-             #define HDfseek(F,O,W)  fseek(F,O,W)
-    #endif /* H5_HAVE_FSEEKO */
+    #define HDfseek(F,O,W)  fseeko(F,O,W)
 #endif /* HDfseek */
 #ifndef HDfsetpos
     #define HDfsetpos(F,P)    fsetpos(F,P)
 #endif /* HDfsetpos */
-/* definitions related to the file stat utilities.
- * For Unix, if off_t is not 64bit big, try use the pseudo-standard
- * xxx64 versions if available.
+#ifndef HDfstat
+    #define HDfstat(F,B)        fstat(F,B)
+#endif /* HDfstat */
+#ifndef HDlstat
+    #define HDlstat(S,B)    lstat(S,B)
+#endif /* HDlstat */
+#ifndef HDstat
+    #define HDstat(S,B)    stat(S,B)
+#endif /* HDstat */
+
+#ifndef H5_HAVE_WIN32_API
+/* These definitions differ in Windows and are defined in
+ * H5win32defs for that platform.
  */
-#if !defined(HDfstat) || !defined(HDstat) || !defined(HDlstat)
-    #if H5_SIZEOF_OFF_T!=8 && H5_SIZEOF_OFF64_T==8 && defined(H5_HAVE_STAT64)
-        #ifndef HDfstat
-            #define HDfstat(F,B)        fstat64(F,B)
-        #endif /* HDfstat */
-        #ifndef HDlstat
-            #define HDlstat(S,B)    lstat64(S,B)
-        #endif /* HDlstat */
-        #ifndef HDstat
-            #define HDstat(S,B)    stat64(S,B)
-        #endif /* HDstat */
-        typedef struct stat64       h5_stat_t;
-        typedef off64_t             h5_stat_size_t;
-        #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF64_T
-    #else /* H5_SIZEOF_OFF_T!=8 && ... */
-        #ifndef HDfstat
-            #define HDfstat(F,B)        fstat(F,B)
-        #endif /* HDfstat */
-        #ifndef HDlstat
-            #define HDlstat(S,B)    lstat(S,B)
-        #endif /* HDlstat */
-        #ifndef HDstat
-            #define HDstat(S,B)    stat(S,B)
-        #endif /* HDstat */
-        typedef struct stat         h5_stat_t;
-        typedef off_t               h5_stat_size_t;
-        #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
-    #endif /* H5_SIZEOF_OFF_T!=8 && ... */
-#endif /* !defined(HDfstat) || !defined(HDstat) */
+typedef struct stat         h5_stat_t;
+typedef off_t               h5_stat_size_t;
+#define HDoff_t             off_t
+#endif /* H5_HAVE_WIN32_API */
+
+#define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
 
 #ifndef HDftell
-    #define HDftell(F)    ftell(F)
+    #define HDftell(F)    ftello(F)
 #endif /* HDftell */
 #ifndef HDftruncate
-  #ifdef H5_HAVE_FTRUNCATE64
-    #define HDftruncate(F,L)        ftruncate64(F,L)
-  #else
     #define HDftruncate(F,L)        ftruncate(F,L)
-  #endif
 #endif /* HDftruncate */
 #ifndef HDfwrite
     #define HDfwrite(M,Z,N,F)  fwrite(M,Z,N,F)
@@ -1064,15 +1044,8 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDlongjmp
     #define HDlongjmp(J,N)    longjmp(J,N)
 #endif /* HDlongjmp */
-/* HDlseek and HDoff_t must be defined together for consistency. */
 #ifndef HDlseek
-    #ifdef H5_HAVE_LSEEK64
-        #define HDlseek(F,O,W)  lseek64(F,O,W)
-        #define HDoff_t    off64_t
-    #else
-        #define HDlseek(F,O,W)  lseek(F,O,W)
-  #define HDoff_t    off_t
-    #endif
+    #define HDlseek(F,O,W)  lseek(F,O,W)
 #endif /* HDlseek */
 #ifndef HDmalloc
     #define HDmalloc(Z)    malloc(Z)
@@ -1217,6 +1190,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDsetbuf
     #define HDsetbuf(F,S)    setbuf(F,S)
 #endif /* HDsetbuf */
+#ifndef HDsetenv
+    #define HDsetenv(N,V,O)    setenv(N,V,O)
+#endif /* HDsetenv */
 #ifndef HDsetgid
     #define HDsetgid(G)    setgid(G)
 #endif /* HDsetgid */
@@ -1283,7 +1259,9 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
 #ifndef HDsnprintf
     #define HDsnprintf    snprintf /*varargs*/
 #endif /* HDsnprintf */
-/* sprintf() variable arguments */
+#ifndef HDsprintf
+    #define HDsprintf    sprintf /*varargs*/
+#endif /* HDsprintf */
 #ifndef HDsqrt
     #define HDsqrt(X)    sqrt(X)
 #endif /* HDsqrt */
@@ -1698,6 +1676,10 @@ typedef struct H5_debug_t {
     } pkg[H5_NPKGS];
     H5_debug_open_stream_t *open_stream; /* Stack of open output streams */
 } H5_debug_t;
+
+#ifdef H5_HAVE_PARALLEL
+extern hbool_t H5_coll_api_sanity_check_g;
+#endif /* H5_HAVE_PARALLEL */
 
 extern H5_debug_t    H5_debug_g;
 #define H5DEBUG(X)    (H5_debug_g.pkg[H5_PKG_##X].stream)
@@ -2582,7 +2564,8 @@ H5_DLL uint32_t H5_hash_string(const char *str);
 H5_DLL time_t H5_make_time(struct tm *tm);
 
 /* Functions for building paths, etc. */
-H5_DLL herr_t   H5_build_extpath(const char *, char ** /*out*/ );
+H5_DLL herr_t   H5_build_extpath(const char *name, char **extpath /*out*/);
+H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
 
 /* Functions for debugging */
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,

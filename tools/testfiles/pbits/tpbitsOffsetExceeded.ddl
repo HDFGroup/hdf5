@@ -11,7 +11,7 @@ usage: h5dump [OPTIONS] files
      -o F, --output=F     Output raw data into file F
      -b B, --binary=B     Binary file output, of form B
      -O F, --ddl=F        Output ddl text into file F
-                          Do not use filename F to suppress ddl display
+                          Use blank(empty) filename F to suppress ddl display
 --------------- Object Options ---------------
      -a P, --attribute=P  Print the specified attribute
                           If an attribute name contains a slash (/), escape the
@@ -25,6 +25,8 @@ usage: h5dump [OPTIONS] files
                           P can be the absolute path or just a relative path.
      -A,   --onlyattr     Print the header and value of attributes
                           Optional value 0 suppresses printing attributes.
+     --vds-view-first-missing Set the VDS bounds to first missing mapped elements.
+     --vds-gap-size=N     Set the missing file gap size, N=non-negative integers
 --------------- Object Property Options ---------------
      -i,   --object-ids   Print the object ids
      -p,   --properties   Print dataset filters, storage layout and fill value

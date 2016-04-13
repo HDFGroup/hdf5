@@ -138,7 +138,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Go do the real work for attaching the attribute to the dataset */
-    if(NULL==(attr = H5A_create(&loc, name, type, space, plist_id, H5AC_dxpl_id)))
+    if(NULL==(attr = H5A_create(&loc, name, type, space, plist_id, H5AC_ind_read_dxpl_id)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to create attribute")
 
     /* Register the new attribute and get an ID for it */
@@ -191,7 +191,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Open the attribute on the object header */
-    if(NULL == (attr = H5A_open_by_name(&loc, ".", name, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)))
+    if(NULL == (attr = H5A_open_by_name(&loc, ".", name, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_read_dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute: '%s'", name)
 
     /* Register the attribute and get an ID for it */
@@ -247,7 +247,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
 
     /* Open the attribute in the object header */
-    if(NULL == (attr = H5A_open_by_idx(&loc, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)idx, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id)))
+    if(NULL == (attr = H5A_open_by_idx(&loc, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)idx, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_read_dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
     /* Register the attribute and get an ID for it */
@@ -333,7 +333,7 @@ H5Aget_num_attrs(hid_t loc_id)
     } /*lint !e788 All appropriate cases are covered */
 
     /* Look up the # of attributes for the object */
-    if((ret_value = H5O_attr_count(loc, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5O_attr_count(loc, H5AC_ind_read_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "can't get attribute count for object")
 
 done:
@@ -399,7 +399,7 @@ H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
 
     /* Call attribute iteration routine */
     last_attr = start_idx = (hsize_t)(attr_num ? *attr_num : 0);
-    if((ret_value = H5O_attr_iterate(loc_id, H5AC_ind_dxpl_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, start_idx, &last_attr, &attr_op, op_data)) < 0)
+    if((ret_value = H5O_attr_iterate(loc_id, H5AC_ind_read_dxpl_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, start_idx, &last_attr, &attr_op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
     /* Set the last attribute information */

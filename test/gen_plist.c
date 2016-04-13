@@ -34,7 +34,7 @@ main(void)
     hid_t dapl1;	       	/* dataset access prop. list */
     hid_t dxpl1;	       	/* dataset xfer prop. list */
     hid_t gcpl1;	       	/* group create prop. list */
-    hid_t ocpypl1;		/* object copy prop. list */
+    hid_t ocpypl1;		    /* object copy prop. list */
     hid_t ocpl1;	        /* object create prop. list */
     hid_t lcpl1;	       	/* link create prop. list */
     hid_t lapl1;	       	/* link access prop. list */

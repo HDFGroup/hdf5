@@ -66,6 +66,11 @@ if BUILD_FORTRAN_CONDITIONAL
 else
    FORTRAN_DIR=
 endif
+if BUILD_JAVA_CONDITIONAL
+   JAVA_DIR=java
+else
+   JAVA_DIR=
+endif
 if BUILD_HDF5_HL_CONDITIONAL
    HDF5_HL_DIR =hl
 else
@@ -73,8 +78,8 @@ else
 endif
 
 SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
-          $(HDF5_HL_DIR)
-DIST_SUBDIRS = src test testpar tools . c++ fortran hl examples
+          $(JAVA_DIR) $(HDF5_HL_DIR)
+DIST_SUBDIRS = src test testpar tools . c++ fortran hl examples java
 
 # Some files generated during configure that should be cleaned
 DISTCLEANFILES=config/stamp1 config/stamp2

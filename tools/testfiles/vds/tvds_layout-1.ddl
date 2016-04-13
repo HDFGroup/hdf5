@@ -125,15 +125,9 @@ GROUP "/" {
             }
          }
       }
-      FILTERS {
-         NONE
-      }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
          VALUE  -9
-      }
-      ALLOCATION_TIME {
-         H5D_ALLOC_TIME_INCR
       }
       DATA {
       (0,0,0): 10, 10, 10, 10, 10, 10, 10, 10,

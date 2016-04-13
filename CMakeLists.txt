@@ -121,6 +121,9 @@ set (HDF5_F90_TEST_LIB_CORENAME     "hdf5_test_fortran")
 set (HDF5_F90_C_TEST_LIB_CORENAME   "hdf5_test_f90cstub")
 set (HDF5_HL_F90_LIB_CORENAME       "hdf5_hl_fortran")
 set (HDF5_HL_F90_C_LIB_CORENAME     "hdf5_hl_f90cstub")
+set (HDF5_JAVA_JNI_LIB_CORENAME     "hdf5_java")
+set (HDF5_JAVA_HDF5_LIB_CORENAME    "jarhdf5")
+set (HDF5_JAVA_TEST_LIB_CORENAME    "jartest5")
 
 #-----------------------------------------------------------------------------
 # Set the true names of all the libraries if customized by external project
@@ -137,6 +140,9 @@ set (HDF5_F90_TEST_LIB_NAME     "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_F90_TEST_LIB_
 set (HDF5_F90_C_TEST_LIB_NAME   "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_F90_C_TEST_LIB_CORENAME}")
 set (HDF5_HL_F90_LIB_NAME       "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_HL_F90_LIB_CORENAME}")
 set (HDF5_HL_F90_C_LIB_NAME     "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_HL_F90_C_LIB_CORENAME}")
+set (HDF5_JAVA_JNI_LIB_NAME     "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_JAVA_JNI_LIB_CORENAME}")
+set (HDF5_JAVA_HDF5_LIB_NAME    "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_JAVA_HDF5_LIB_CORENAME}")
+set (HDF5_JAVA_TEST_LIB_NAME    "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_JAVA_TEST_LIB_CORENAME}")
 
 #-----------------------------------------------------------------------------
 # Set the target names of all the libraries
@@ -153,6 +159,9 @@ set (HDF5_F90_TEST_LIB_TARGET     "${HDF5_F90_TEST_LIB_CORENAME}-static")
 set (HDF5_F90_C_TEST_LIB_TARGET   "${HDF5_F90_C_TEST_LIB_CORENAME}-static")
 set (HDF5_HL_F90_LIB_TARGET       "${HDF5_HL_F90_LIB_CORENAME}-static")
 set (HDF5_HL_F90_C_LIB_TARGET     "${HDF5_HL_F90_C_LIB_CORENAME}-static")
+set (HDF5_JAVA_JNI_LIB_TARGET     "${HDF5_JAVA_JNI_LIB_CORENAME}")
+set (HDF5_JAVA_HDF5_LIB_TARGET    "${HDF5_JAVA_HDF5_LIB_CORENAME}")
+set (HDF5_JAVA_TEST_LIB_TARGET    "${HDF5_JAVA_TEST_LIB_CORENAME}")
 set (HDF5_LIBSH_TARGET            "${HDF5_LIB_CORENAME}-shared")
 set (HDF5_TEST_LIBSH_TARGET       "${HDF5_TEST_LIB_CORENAME}-shared")
 set (HDF5_CPP_LIBSH_TARGET        "${HDF5_CPP_LIB_CORENAME}-shared")
@@ -180,20 +189,37 @@ set (HDF5_HL_CPP_SRC_DIR     ${HDF5_SOURCE_DIR}/hl/c++)
 set (HDF5_TOOLS_SRC_DIR      ${HDF5_SOURCE_DIR}/tools)
 set (HDF5_PERFORM_SRC_DIR    ${HDF5_SOURCE_DIR}/tools/perform)
 set (HDF5_F90_SRC_DIR        ${HDF5_SOURCE_DIR}/fortran)
+set (HDF5_JAVA_JNI_SRC_DIR         ${HDF5_SOURCE_DIR}/java/src/jni)
+set (HDF5_JAVA_HDF5_SRC_DIR        ${HDF5_SOURCE_DIR}/java/src/hdf)
+set (HDF5_JAVA_TEST_SRC_DIR        ${HDF5_SOURCE_DIR}/java/test)
+set (HDF5_JAVA_LIB_DIR             ${HDF5_SOURCE_DIR}/java/lib)
+set (HDF5_JAVA_LOGGING_JAR         ${HDF5_SOURCE_DIR}/java/lib/slf4j-api-1.7.5.jar)
+set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-1.7.5.jar)
+set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-1.7.5.jar)
+
+if (APPLE)
+  option (HDF5_BUILD_FRAMEWORKS "TRUE to build as frameworks libraries, FALSE to build according to BUILD_SHARED_LIBS" FALSE)
+endif (APPLE)
 
 if (NOT HDF5_INSTALL_BIN_DIR)
   set (HDF5_INSTALL_BIN_DIR bin)
 endif (NOT HDF5_INSTALL_BIN_DIR)
 if (NOT HDF5_INSTALL_LIB_DIR)
   if (APPLE)
+    if (HDF5_BUILD_FRAMEWORKS)
+      set (HDF5_INSTALL_JAR_DIR ../Java)
+    else (HDF5_BUILD_FRAMEWORKS)
+      set (HDF5_INSTALL_JAR_DIR lib)
+    endif (HDF5_BUILD_FRAMEWORKS)
     set (HDF5_INSTALL_FMWK_DIR ${CMAKE_INSTALL_FRAMEWORK_PREFIX})
+  else (APPLE)
+    set (HDF5_INSTALL_JAR_DIR lib)
   endif (APPLE)
   set (HDF5_INSTALL_LIB_DIR lib)
 endif (NOT HDF5_INSTALL_LIB_DIR)
 if (NOT HDF5_INSTALL_INCLUDE_DIR)
   set (HDF5_INSTALL_INCLUDE_DIR include)
 endif (NOT HDF5_INSTALL_INCLUDE_DIR)
-option (HDF5_BUILD_FRAMEWORKS "TRUE to build as frameworks libraries, FALSE to build according to BUILD_SHARED_LIBS" FALSE)
 if (NOT HDF5_INSTALL_DATA_DIR)
   if (NOT WIN32)
     if (APPLE)
@@ -242,6 +268,83 @@ string (REGEX REPLACE ".*LT_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
     "\\1" H5_SOVERS_RELEASE ${_lt_vers_am_contents})
 MATH (EXPR H5_SOVERS_MAJOR ${H5_SOVERS_INTERFACE}-${H5_SOVERS_RELEASE})
 message (STATUS "SOVERSION: ${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
+string (REGEX MATCH ".*LT_TOOLS_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$" H5_TOOLS_SOVERS_EXISTS ${_lt_vers_am_contents})
+if(H5_TOOLS_SOVERS_EXISTS)
+  string (REGEX REPLACE ".*LT_TOOLS_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_TOOLS_SOVERS_INTERFACE ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_TOOLS_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_TOOLS_SOVERS_MINOR ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_TOOLS_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_TOOLS_SOVERS_RELEASE ${_lt_vers_am_contents})
+  MATH (EXPR H5_TOOLS_SOVERS_MAJOR ${H5_TOOLS_SOVERS_INTERFACE}-${H5_TOOLS_SOVERS_RELEASE})
+  message (STATUS "SOVERSION_TOOLS: ${H5_TOOLS_SOVERS_MAJOR}.${H5_TOOLS_SOVERS_RELEASE}.${H5_TOOLS_SOVERS_MINOR}")
+endif()
+string (REGEX REPLACE ".*LT_CXX_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$" H5_CXX_SOVERS_EXISTS ${_lt_vers_am_contents})
+if(H5_CXX_SOVERS_EXISTS)
+  string (REGEX REPLACE ".*LT_CXX_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_CXX_SOVERS_INTERFACE ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_CXX_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_CXX_SOVERS_MINOR ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_CXX_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_CXX_SOVERS_RELEASE ${_lt_vers_am_contents})
+  MATH (EXPR H5_CXX_SOVERS_MAJOR ${H5_CXX_SOVERS_INTERFACE}-${H5_CXX_SOVERS_RELEASE})
+  message (STATUS "SOVERSION_CXX: ${H5_CXX_SOVERS_MAJOR}.${H5_CXX_SOVERS_RELEASE}.${H5_CXX_SOVERS_MINOR}")
+endif()
+string (REGEX REPLACE ".*LT_F_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$" H5_F_SOVERS_EXISTS ${_lt_vers_am_contents})
+if(H5_F_SOVERS_EXISTS)
+  string (REGEX REPLACE ".*LT_F_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_F_SOVERS_INTERFACE ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_F_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_F_SOVERS_MINOR ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_F_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_F_SOVERS_RELEASE ${_lt_vers_am_contents})
+  MATH (EXPR H5_F_SOVERS_MAJOR ${H5_F_SOVERS_INTERFACE}-${H5_F_SOVERS_RELEASE})
+  message (STATUS "SOVERSION_F: ${H5_F_SOVERS_MAJOR}.${H5_F_SOVERS_RELEASE}.${H5_F_SOVERS_MINOR}")
+endif()
+string (REGEX REPLACE ".*LT_HL_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$" H5_HL_SOVERS_EXISTS ${_lt_vers_am_contents})
+if(H5_HL_SOVERS_EXISTS)
+  string (REGEX REPLACE ".*LT_HL_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_HL_SOVERS_INTERFACE ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_HL_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_HL_SOVERS_MINOR ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_HL_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_HL_SOVERS_RELEASE ${_lt_vers_am_contents})
+  MATH (EXPR H5_HL_SOVERS_MAJOR ${H5_HL_SOVERS_INTERFACE}-${H5_HL_SOVERS_RELEASE})
+  message (STATUS "SOVERSION_HL: ${H5_HL_SOVERS_MAJOR}.${H5_HL_SOVERS_RELEASE}.${H5_HL_SOVERS_MINOR}")
+endif()
+string (REGEX REPLACE ".*LT_HL_CXX_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$" H5_HL_CXX_SOVERS_EXISTS ${_lt_vers_am_contents})
+if(H5_HL_CXX_SOVERS_EXISTS)
+  string (REGEX REPLACE ".*LT_HL_CXX_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_HL_CXX_SOVERS_INTERFACE ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_HL_CXX_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_HL_CXX_SOVERS_MINOR ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_HL_CXX_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_HL_CXX_SOVERS_RELEASE ${_lt_vers_am_contents})
+  MATH (EXPR H5_HL_CXX_SOVERS_MAJOR ${H5_HL_CXX_SOVERS_INTERFACE}-${H5_HL_CXX_SOVERS_RELEASE})
+  message (STATUS "SOVERSION_HL_CXX: ${H5_HL_CXX_SOVERS_MAJOR}.${H5_HL_CXX_SOVERS_RELEASE}.${H5_HL_CXX_SOVERS_MINOR}")
+endif()
+string (REGEX REPLACE ".*LT_HL_F_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$" H5_HL_F_SOVERS_EXISTS ${_lt_vers_am_contents})
+if(H5_HL_F_SOVERS_EXISTS)
+  string (REGEX REPLACE ".*LT_HL_F_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_HL_F_SOVERS_INTERFACE ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_HL_F_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_HL_F_SOVERS_MINOR ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_HL_F_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_HL_F_SOVERS_RELEASE ${_lt_vers_am_contents})
+  MATH (EXPR H5_HL_F_SOVERS_MAJOR ${H5_HL_F_SOVERS_INTERFACE}-${H5_HL_F_SOVERS_RELEASE})
+  message (STATUS "SOVERSION_HL_F: ${H5_HL_F_SOVERS_MAJOR}.${H5_HL_F_SOVERS_RELEASE}.${H5_HL_F_SOVERS_MINOR}")
+endif()
+string (REGEX REPLACE ".*LT_JAVA_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$" H5_JAVA_SOVERS_EXISTS ${_lt_vers_am_contents})
+if(H5_JAVA_SOVERS_EXISTS)
+  string (REGEX REPLACE ".*LT_JAVA_VERS_INTERFACE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_JAVA_SOVERS_INTERFACE ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_JAVA_VERS_REVISION[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_JAVA_SOVERS_MINOR ${_lt_vers_am_contents})
+  string (REGEX REPLACE ".*LT_JAVA_VERS_AGE[ \t]+=[ \t]+([0-9]*).*$"
+      "\\1" H5_JAVA_SOVERS_RELEASE ${_lt_vers_am_contents})
+  MATH (EXPR H5_JAVA_SOVERS_MAJOR ${H5_JAVA_SOVERS_INTERFACE}-${H5_JAVA_SOVERS_RELEASE})
+  message (STATUS "SOVERSION_JAVA: ${H5_JAVA_SOVERS_MAJOR}.${H5_JAVA_SOVERS_RELEASE}.${H5_JAVA_SOVERS_MINOR}")
+endif()
 
 #-----------------------------------------------------------------------------
 # Basic HDF5 stuff here
@@ -257,6 +360,41 @@ else (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
   set (HDF5_PACKAGE_VERSION_STRING "${HDF5_PACKAGE_VERSION}")
 endif (NOT "${H5_VERS_SUBRELEASE}" STREQUAL "")
 set (HDF5_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
+if(H5_TOOLS_SOVERS_EXISTS)
+  set (HDF5_TOOLS_PACKAGE_SOVERSION "${H5_TOOLS_SOVERS_MAJOR}.${H5_TOOLS_SOVERS_RELEASE}.${H5_TOOLS_SOVERS_MINOR}")
+else()
+  set (HDF5_TOOLS_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
+endif()
+if(H5_CXX_SOVERS_EXISTS)
+  set (HDF5_CXX_PACKAGE_SOVERSION "${H5_CXX_SOVERS_MAJOR}.${H5_CXX_SOVERS_RELEASE}.${H5_CXX_SOVERS_MINOR}")
+else()
+  set (HDF5_CXX_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
+endif()
+if(H5_F_SOVERS_EXISTS)
+  set (HDF5_F_PACKAGE_SOVERSION "${H5_F_SOVERS_MAJOR}.${H5_F_SOVERS_RELEASE}.${H5_F_SOVERS_MINOR}")
+else()
+  set (HDF5_F_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
+endif()
+if(H5_HL_SOVERS_EXISTS)
+  set (HDF5_HL_PACKAGE_SOVERSION "${H5_HL_SOVERS_MAJOR}.${H5_HL_SOVERS_RELEASE}.${H5_HL_SOVERS_MINOR}")
+else()
+  set (HDF5_HL_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
+endif()
+if(H5_HL_F_SOVERS_EXISTS)
+  set (HDF5_HL_CXX_PACKAGE_SOVERSION "${H5_HL_CXX_SOVERS_MAJOR}.${H5_HL_CXX_SOVERS_RELEASE}.${H5_HL_CXX_SOVERS_MINOR}")
+else()
+  set (HDF5_HL_CXX_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
+endif()
+if(H5_HL_F_SOVERS_EXISTS)
+  set (HDF5_HL_F_PACKAGE_SOVERSION "${H5_HL_F_SOVERS_MAJOR}.${H5_HL_F_SOVERS_RELEASE}.${H5_HL_F_SOVERS_MINOR}")
+else()
+  set (HDF5_HL_F_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
+endif()
+if(H5_JAVA_SOVERS_EXISTS)
+  set (HDF5_PACKAGE_SOVERSION "${H5_JAVA_SOVERS_MAJOR}.${H5_JAVA_SOVERS_RELEASE}.${H5_JAVA_SOVERS_MINOR}")
+else()
+  set (HDF5_JAVA_PACKAGE_SOVERSION "${H5_SOVERS_MAJOR}.${H5_SOVERS_RELEASE}.${H5_SOVERS_MINOR}")
+endif()
 set (HDF5_PACKAGE_STRING "${HDF5_PACKAGE_NAME} ${HDF5_PACKAGE_VERSION_STRING}")
 set (HDF5_PACKAGE_TARNAME "${HDF5_PACKAGE}${HDF_PACKAGE_EXT}")
 set (HDF5_PACKAGE_URL "http://www.hdfgroup.org")
@@ -285,6 +423,11 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   set (CMAKE_Fortran_MODULE_DIRECTORY
       ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all fortran modules."
   )
+  if (WIN32)
+    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
+  else (WIN32)
+    set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+  endif (WIN32)
 else (NOT HDF5_EXTERNALLY_CONFIGURED)
   # if we are externally configured, but the project uses old cmake scripts
   # this may not be set and utilities like H5detect will fail
@@ -773,11 +916,21 @@ endif (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++"
 # Check if Fortran's default real is double precision. If it is and HL is
 # being built then configure should fail due to bug HDFFV-889.
 #-----------------------------------------------------------------------------
- if (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB )
-   if (NOT FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
-     message (FATAL_ERROR " **** Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use HDF5_BUILD_HL_LIB:BOOL=OFF **** ")
-   endif (NOT FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
- endif (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB )
+if (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB)
+  if (NOT FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
+    message (FATAL_ERROR " **** Fortran high-level routines are not supported when the default REAL is DOUBLE PRECISION, use HDF5_BUILD_HL_LIB:BOOL=OFF **** ")
+  endif (NOT FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
+endif (HDF5_BUILD_FORTRAN AND HDF5_BUILD_HL_LIB)
+
+#-----------------------------------------------------------------------------
+# Option to build HDF5 Java Library
+#-----------------------------------------------------------------------------
+if (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
+  option (HDF5_BUILD_JAVA  "Build Java HDF5 Library" OFF)
+  if (HDF5_BUILD_JAVA)
+    add_subdirectory (${HDF5_SOURCE_DIR}/java ${PROJECT_BINARY_DIR}/java)
+  endif (HDF5_BUILD_JAVA)
+endif (EXISTS "${HDF5_SOURCE_DIR}/java" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/java")
 
 #-----------------------------------------------------------------------------
 # Generate the H5pubconf.h file containing user settings needed by compilation

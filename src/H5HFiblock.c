@@ -315,7 +315,7 @@ H5HF_iblock_decr(H5HF_indirect_t *iblock)
             /* Detach from parent indirect block */
             if(iblock->parent) {
                 /* Detach from parent indirect block */
-                if(H5HF_man_iblock_detach(iblock->parent, H5AC_dxpl_id, iblock->par_entry) < 0)
+                if(H5HF_man_iblock_detach(iblock->parent, H5AC_ind_read_dxpl_id, iblock->par_entry) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't detach from parent indirect block")
                 iblock->parent = NULL;
                 iblock->par_entry = 0;
@@ -339,7 +339,7 @@ H5HF_iblock_decr(H5HF_indirect_t *iblock)
             if (!H5F_IS_TMP_ADDR(hdr->f, iblock_addr))
                 cache_flags |= H5AC__FREE_FILE_SPACE_FLAG;
 
-            if(H5AC_expunge_entry(hdr->f, H5AC_dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, cache_flags) < 0)
+            if(H5AC_expunge_entry(hdr->f, H5AC_ind_read_dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, cache_flags) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove indirect block from cache")
         } /* end if */
     } /* end if */
@@ -630,7 +630,7 @@ H5HF_man_iblock_root_double(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
 
     /* Move object in cache, if it actually was relocated */
     if(H5F_addr_ne(iblock->addr, new_addr)) {
-        if(H5AC_move_entry(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr) < 0)
+        if(H5AC_move_entry(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move fractal heap root indirect block")
         iblock->addr = new_addr;
     } /* end if */
@@ -799,7 +799,7 @@ H5HF_man_iblock_root_halve(H5HF_indirect_t *iblock, hid_t dxpl_id)
 
     /* Move object in cache, if it actually was relocated */
     if(H5F_addr_ne(iblock->addr, new_addr)) {
-        if(H5AC_move_entry(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr) < 0)
+        if(H5AC_move_entry(hdr->f, H5AC_FHEAP_IBLOCK, iblock->addr, new_addr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTSPLIT, FAIL, "unable to move fractal heap root indirect block")
         iblock->addr = new_addr;
     } /* end if */

@@ -174,6 +174,14 @@ PROGRAM fortranlibtest_F03
   CALL test_get_file_image(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing get file image ', total_error)
 
+!     write(*,*)
+!     write(*,*) '========================================='
+!     write(*,*) 'Testing VDS                              '
+!     write(*,*) '========================================='
+
+  ret_total_error = 0
+  CALL test_vds(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing vds ', total_error)
 
   WRITE(*,*)
 

@@ -129,7 +129,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 mdset.h5 compact_dataset.h5 dataset.h5 d
     huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
     copy_dcpl_newfile.h5 extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
-    stab.h5 extern_[1-3].h5 extern_[1-4][ab].raw gheap[0-4].h5 \
+    stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
@@ -149,7 +149,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 mdset.h5 compact_dataset.h5 dataset.h5 d
     new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
-    vds_virt.h5 vds_src_[0-1].h5
+    vds_virt.h5 vds_dapl.h5 vds_src_[0-1].h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

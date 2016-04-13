@@ -4,7 +4,7 @@
 !  Executable: H5_buildiface
 !
 ! FILE
-!  fortran/src/H5_buildiface.f90
+!  fortran/src/H5_buildiface.F90
 !
 ! PURPOSE
 !  This stand alone program is used at build time to generate the module
@@ -60,13 +60,6 @@ PROGRAM H5_buildiface
   H5_H5CONFIG_F_IKIND
 
   INTEGER :: i, j, k
-  INTEGER :: ji, jr, jd
-#ifdef H5_FORTRAN_HAVE_C_LONG_DOUBLE
-  REAL(KIND=C_LONG_DOUBLE) :: c_longdble
-#endif
-  REAL(KIND=C_DOUBLE) :: c_dble
-  REAL(KIND=C_FLOAT) :: c_flt
-  INTEGER :: sizeof_var
   CHARACTER(LEN=2) :: chr2
 ! subroutine rank of array being passed in
   CHARACTER(LEN=2), DIMENSION(1:8), PARAMETER :: chr_rank=(/"_0","_1","_2","_3","_4","_5","_6","_7"/)
@@ -717,45 +710,9 @@ PROGRAM H5_buildiface
      WRITE(11,'(A)') '         file_space_id_default, xfer_prp_default, f_ptr)'
      WRITE(11,'(A)') '  END SUBROUTINE h5dread_ckind_rank'//chr_rank(j)
   ENDDO
-!
+!**********************
 ! h5dwrite_f
-
-!****s* H5D (F03)/h5dwrite_f_F03
-!
-! NAME		
-!  h5dwrite_f_F03
-!
-! PURPOSE
-!  Writes raw data from a dataset into a buffer. 
-!
-! Inputs:
-!  dset_id	 - Identifier of the dataset to write to.
-!  mem_type_id	 - Identifier of the memory datatype.
-!  buf		 - Buffer with data to be written to the file.
-!  
-! Outputs:
-!  hdferr        - Returns 0 if successful and -1 if fails
-!
-! Optional parameters:
-!  mem_space_id	 - Identifier of the memory dataspace.
-!  file_space_id - Identifier of the dataset's dataspace in the file.
-!  xfer_prp	 - Identifier of a transfer property list for this I/O operation.
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  September 17, 2011
-!
-! Fortran2003 Interface:
-!!  SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, hdferr, &
-!!                        mem_space_id, file_space_id, xfer_prp)
-!!    INTEGER(HID_T), INTENT(IN)              :: dset_id
-!!    INTEGER(HID_T), INTENT(IN)              :: mem_type_id
-!!    TYPE(C_PTR)   , INTENT(IN)              :: buf
-!!    INTEGER       , INTENT(OUT)             :: hdferr
-!!    INTEGER(HID_T), INTENT(IN)   , OPTIONAL :: mem_space_id
-!!    INTEGER(HID_T), INTENT(IN)   , OPTIONAL :: file_space_id
-!!    INTEGER(HID_T), INTENT(IN)   , OPTIONAL :: xfer_prp
-!*****
+!**********************
   DO i = 1, num_rkinds
      k = rkind(i)
      WRITE(chr2,'(I2)') k

@@ -58,7 +58,6 @@
 /********************/
 
 
-
 /*********************/
 /* Package Variables */
 /*********************/
@@ -407,7 +406,7 @@ H5Fis_hdf5(const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* call the private is_HDF5 function */
-    if((ret_value = H5F_is_hdf5(name)) < 0)
+    if((ret_value = H5F_is_hdf5(name, H5AC_ind_read_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable open file")
 
 done:
@@ -447,7 +446,7 @@ hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
-    hid_t        dxpl_id = H5AC_dxpl_id; /*dxpl used by library        */
+    hid_t        dxpl_id = H5AC_ind_read_dxpl_id; /*dxpl used by library        */
     hid_t	 ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(FAIL)
@@ -473,7 +472,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id) < 0)
+    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /*
@@ -551,7 +550,7 @@ hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
-    hid_t        dxpl_id = H5AC_dxpl_id; /*dxpl used by library        */
+    hid_t        dxpl_id = H5AC_ind_read_dxpl_id; /*dxpl used by library        */
     hid_t	 ret_value;	        /*return value			*/
 
     FUNC_ENTER_API(FAIL)
@@ -566,7 +565,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
 
     /* Verify access property list and get correct dxpl */
-    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id) < 0)
+    if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Open the file */
@@ -693,12 +692,12 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
         /* Flush other files, depending on scope */
         if(H5F_SCOPE_GLOBAL == scope) {
             /* Call the flush routine for mounted file hierarchies */
-            if(H5F_flush_mounts(f, H5AC_dxpl_id) < 0)
+            if(H5F_flush_mounts(f, H5AC_ind_read_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
         } /* end if */
         else {
             /* Call the flush routine, for this file */
-            if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
+            if(H5F_flush(f, H5AC_ind_read_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
         } /* end else */
     } /* end if */
@@ -753,7 +752,7 @@ H5Fclose(hid_t file_id)
         if((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
         if(nref == 1)
-            if(H5F_flush(f, H5AC_dxpl_id, FALSE) < 0)
+            if(H5F_flush(f, H5AC_ind_read_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
@@ -785,10 +784,6 @@ done:
  * Programmer:	Robb Matzke
  *              Friday, October 16, 1998
  *
- * Modifications:
- *              Quincey Koziol, May 14, 2002
- *              Keep old file's read/write intent in reopened file.
- *
  *-------------------------------------------------------------------------
  */
 hid_t
@@ -803,26 +798,27 @@ H5Freopen(hid_t file_id)
 
     /* Check arguments */
     if(NULL == (old_file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Get a new "top level" file struct, sharing the same "low level" file struct */
     if(NULL == (new_file = H5F_new(old_file->shared, 0, H5P_FILE_CREATE_DEFAULT, H5P_FILE_ACCESS_DEFAULT, NULL)))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
 
     /* Duplicate old file's names */
     new_file->open_name = H5MM_xstrdup(old_file->open_name);
     new_file->actual_name = H5MM_xstrdup(old_file->actual_name);
+    new_file->extpath = H5MM_xstrdup(old_file->extpath);
 
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
 
 done:
     if(ret_value < 0 && new_file)
-	if(H5F_dest(new_file, H5AC_dxpl_id, FALSE) < 0)
-	    HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+        if(H5F_dest(new_file, H5AC_ind_read_dxpl_id, FALSE) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Freopen() */
@@ -901,7 +897,7 @@ H5Fget_freespace(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the actual amount of free space in the file */
-    if(H5MF_get_freespace(file, H5AC_ind_dxpl_id, &tot_space, NULL) < 0)
+    if(H5MF_get_freespace(file, H5AC_ind_read_dxpl_id, &tot_space, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
     ret_value = (hssize_t)tot_space;
@@ -1015,7 +1011,7 @@ H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* call private get_file_image function */
-    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len)) < 0)
+    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len, H5AC_ind_read_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file image")
 
 done:
@@ -1348,16 +1344,16 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
     HDmemset(finfo, 0, sizeof(*finfo));
 
     /* Get the size of the superblock and any superblock extensions */
-    if(H5F__super_size(f, H5AC_ind_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
+    if(H5F__super_size(f, H5AC_ind_read_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
 
     /* Get the size of any persistent free space */
-    if(H5MF_get_freespace(f, H5AC_ind_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
+    if(H5MF_get_freespace(f, H5AC_ind_read_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
 
     /* Check for SOHM info */
     if(H5F_addr_defined(f->shared->sohm_addr))
-        if(H5SM_ih_size(f, H5AC_ind_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
+        if(H5SM_ih_size(f, H5AC_ind_read_dxpl_id, &finfo->sohm.hdr_size, &finfo->sohm.msgs_info) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve SOHM index & heap storage info")
 
     /* Set version # fields */
@@ -1402,7 +1398,7 @@ H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "nsects must be > 0")
 
     /* Go get the free-space section information in the file */
-    if((ret_value = H5MF_get_free_sections(file, H5AC_ind_dxpl_id, type, nsects, sect_info)) < 0)
+    if((ret_value = H5MF_get_free_sections(file, H5AC_ind_read_dxpl_id, type, nsects, sect_info)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
 done:

@@ -54,11 +54,8 @@ ArrayType::ArrayType( const hid_t existing_id ) : DataType( existing_id )
 ///\brief	Copy constructor: makes a copy of the original ArrayType object.
 // Programmer	Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-ArrayType::ArrayType( const ArrayType& original ) : DataType( original )
+ArrayType::ArrayType( const ArrayType& original ) : DataType( original ), rank(original.rank)
 {
-    // Copy the rank of the original array
-    rank = original.rank;
-
     // Allocate space then copy the dimensions from the original array
     dimensions = new hsize_t[rank];
     for (int i = 0; i < rank; i++)
@@ -90,6 +87,44 @@ ArrayType::ArrayType(const DataType& base_type, int ndims, const hsize_t* dims) 
     dimensions = new hsize_t[rank];
     for (int i = 0; i < rank; i++)
 	dimensions[i] = dims[i];
+}
+
+//--------------------------------------------------------------------------
+// Function:	ArrayType::operator=
+///\brief	Assignment operator
+///\param	rhs - IN: Reference to the existing array datatype
+///\return	Reference to ArrayType instance
+///\exception	H5::DataTypeIException
+///		std::bad_alloc
+// Description
+// 		Closes the id on the lhs object first with setId, then copies
+//		each data member from the rhs object.
+// Programmer	Binh-Minh Ribler - Mar 2016
+// Modification
+//--------------------------------------------------------------------------
+ArrayType& ArrayType::operator=(const ArrayType& rhs)
+{
+    if (this != &rhs)
+    {
+        // handling references to this id
+        try {
+            setId(rhs.id);
+            // Note: a = b, so there are two objects with the same hdf5 id
+            // that's why incRefCount is needed, and it is called by setId
+        }
+        catch (Exception close_error) {
+            throw DataTypeIException(inMemFunc("operator="), close_error.getDetailMsg());
+        }
+
+	// Copy the rank of the rhs array
+	rank = rhs.rank;
+
+	// Allocate space then copy the dimensions from the rhs array
+	dimensions = new hsize_t[rank];
+	for (int i = 0; i < rank; i++)
+	    dimensions[i] = rhs.dimensions[i];
+    }
+    return(*this);
 }
 
 //--------------------------------------------------------------------------

@@ -272,6 +272,10 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
 	/* set Parallel access with communicator */
 	ret = H5Pset_fapl_mpio(ret_pl, comm, info);
 	VRFY((ret >= 0), "");
+        ret = H5Pset_all_coll_metadata_ops(ret_pl, TRUE);
+	VRFY((ret >= 0), "");
+        ret = H5Pset_coll_metadata_write(ret_pl, TRUE);
+	VRFY((ret >= 0), "");
 	return(ret_pl);
     }
 
@@ -346,6 +350,9 @@ int main(int argc, char **argv)
 
     AddTest("split", test_split_comm_access, NULL,
 	    "dataset using split communicators", PARATESTFILE);
+
+    AddTest("props", test_file_properties, NULL,
+	    "Coll Metadata file property settings", PARATESTFILE);
 
     AddTest("idsetw", dataset_writeInd, NULL,
 	    "dataset independent write", PARATESTFILE);

@@ -493,8 +493,10 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
      *  find candidates or avoid further searching.
      */
     if(hdr->min_native_rec != NULL) {
-	if((cmp = (hdr->cls->compare)(udata, hdr->min_native_rec)) < 0)
-	    HGOTO_DONE(FALSE) 	/* Less than the least record--not found */ 
+        if((hdr->cls->compare)(udata, hdr->min_native_rec, &cmp) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+        if(cmp < 0)
+            HGOTO_DONE(FALSE) 	/* Less than the least record--not found */ 
 	else if(cmp == 0) { /* Record is found */
 	    if(op && (op)(hdr->min_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
@@ -502,8 +504,10 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
 	} /* end if */
     } /* end if */
     if(hdr->max_native_rec != NULL) {
-	if((cmp = (hdr->cls->compare)(udata, hdr->max_native_rec)) > 0)
-	    HGOTO_DONE(FALSE) 	/* Greater than the greatest record--not found */
+	if((hdr->cls->compare)(udata, hdr->max_native_rec, &cmp) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+        if(cmp > 0)
+            HGOTO_DONE(FALSE) 	/* Less than the least record--not found */ 
 	else if(cmp == 0) { /* Record is found */
 	    if(op && (op)(hdr->max_native_rec, op_data) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
@@ -526,10 +530,15 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate node pointer for child */
-        cmp = H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
+        if(H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, 
+                               udata, &idx, &cmp) < 0) {
+            /* Unlock current node before failing */
+            H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET);
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+        } /* end if */
+
         if(cmp > 0)
             idx++;
-
         if(cmp != 0) {
             /* Get node pointer for next node to search */
             next_node_ptr=internal->node_ptrs[idx];
@@ -589,7 +598,12 @@ H5B2_find(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_found_t op,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
         /* Locate record */
-        cmp = H5B2__locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
+        if(H5B2__locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, 
+                               udata, &idx, &cmp) < 0) {
+            /* unlock current node before failing */
+            H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET);
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+        }
 
         if(cmp != 0) {
             /* Unlock leaf node */
@@ -1117,7 +1131,13 @@ H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
 
         /* Locate node pointer for child */
-        cmp = H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, udata, &idx);
+        if(H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, 
+                               udata, &idx, &cmp) < 0) {
+            /* Unlock current node */
+            H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET);
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+        }
+
         if(cmp > 0)
             idx++;
 
@@ -1189,7 +1209,11 @@ H5B2_modify(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op,
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
         /* Locate record */
-        cmp = H5B2__locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, udata, &idx);
+        if(H5B2__locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, 
+                               udata, &idx, &cmp) < 0) {
+            H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET);
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
+        }
 
         if(cmp != 0) {
             /* Unlock leaf node */

@@ -141,7 +141,7 @@ H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
 
     /* Build and open the new dataset */
-    if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, H5P_LINK_CREATE_DEFAULT, dcpl_id, H5P_DATASET_ACCESS_DEFAULT, H5AC_dxpl_id)))
+    if(NULL == (dset = H5D__create_named(&loc, name, type_id, space, H5P_LINK_CREATE_DEFAULT, dcpl_id, H5P_DATASET_ACCESS_DEFAULT, H5AC_ind_read_dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* Register the new dataset to get an ID for it */
@@ -179,8 +179,6 @@ H5Dopen1(hid_t loc_id, const char *name)
 {
     H5D_t       *dset = NULL;
     H5G_loc_t   loc;                    /* Object location of group */
-    hid_t       dapl_id = H5P_DATASET_ACCESS_DEFAULT; /* dapl to use to open dataset */
-    hid_t       dxpl_id = H5AC_ind_dxpl_id; /* dxpl to use to open datset */
     hid_t       ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -193,7 +191,7 @@ H5Dopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
     /* Open the dataset */
-    if(NULL == (dset = H5D__open_name(&loc, name, dapl_id, dxpl_id)))
+    if(NULL == (dset = H5D__open_name(&loc, name, H5P_DATASET_ACCESS_DEFAULT, H5AC_ind_read_dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
 
     /* Register an atom for the dataset */
@@ -241,7 +239,7 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
 
     /* Increase size */
-    if(H5D__extend(dset, size, H5AC_dxpl_id) < 0)
+    if(H5D__extend(dset, size, H5AC_ind_read_dxpl_id) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset")
 
 done:
@@ -360,10 +358,16 @@ H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
         fill = &dataset->shared->dcpl_cache.fill;
-        if(fill->alloc_time == H5D_ALLOC_TIME_EARLY)
-            if(H5D__alloc_storage(dataset, dxpl_id, H5D_ALLOC_EXTEND, FALSE, old_dims) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
+        if(fill->alloc_time == H5D_ALLOC_TIME_EARLY) {
+            H5D_io_info_t io_info;
 
+            io_info.dset = dataset;
+            io_info.raw_dxpl_id = H5AC_rawdata_dxpl_id;
+            io_info.md_dxpl_id = dxpl_id;
+
+            if(H5D__alloc_storage(&io_info, H5D_ALLOC_EXTEND, FALSE, old_dims) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset with fill value")
+        }
         /* Mark the dataspace as dirty, for later writing to the file */
         if(H5D__mark(dataset, dxpl_id, H5D_MARK_SPACE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")

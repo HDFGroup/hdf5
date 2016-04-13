@@ -79,7 +79,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  * client class..
  */
 const H5FA_class_t *const H5FA_client_class_g[] = {
-    H5FA_CLS_TEST,		/* ? - H5FA_CLS_TEST_ID 		*/
+    H5FA_CLS_TEST,              /* ? - H5FA_CLS_TEST_ID                 */
 };
 
 

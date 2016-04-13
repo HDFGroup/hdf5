@@ -154,22 +154,20 @@ H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
     /* Create it */
     H5_CHECK_OVERFLOW(size, size_t, hsize_t);
     if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_GHEAP, dxpl_id, (hsize_t)size)))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate file space for global heap")
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate file space for global heap")
     if(NULL == (heap = H5FL_MALLOC(H5HG_heap_t)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
     heap->addr = addr;
     heap->size = size;
     heap->shared = H5F_SHARED(f);
 
     if(NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, size)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(heap->chunk, 0, size);
-#endif /* H5_CLEAR_MEMORY */
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
+    HDmemset(heap->chunk, 0, size);
     heap->nalloc = H5HG_NOBJS(f, size);
     heap->nused = 1; /* account for index 0, which is used for the free object */
     if(NULL == (heap->obj = H5FL_SEQ_MALLOC(H5HG_obj_t, heap->nalloc)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
 
     /* Initialize the header */
     HDmemcpy(heap->chunk, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -299,9 +297,9 @@ done:
 static size_t
 H5HG_alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
 {
-    size_t	idx;
-    uint8_t	*p;
-    size_t	need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
+    size_t      idx;
+    uint8_t     *p;
+    size_t      need = H5HG_SIZEOF_OBJHDR(f) + H5HG_ALIGN(size);
     size_t      ret_value = 0;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -360,11 +358,11 @@ H5HG_alloc(H5F_t *f, H5HG_heap_t *heap, size_t size, unsigned *heap_flags_ptr)
 
     /* Fix the free space object */
     if(need == heap->obj[0].size) {
-	/*
-	 * All free space has been exhausted from this collection.
-	 */
-	heap->obj[0].size = 0;
-	heap->obj[0].begin = NULL;
+        /*
+         * All free space has been exhausted from this collection.
+         */
+        heap->obj[0].size = 0;
+        heap->obj[0].begin = NULL;
     } /* end if */
     else if(heap->obj[0].size-need >= H5HG_SIZEOF_OBJHDR (f)) {
 	/*
@@ -452,9 +450,7 @@ H5HG_extend(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t need)
     /* Re-allocate the heap information in memory */
     if(NULL == (new_chunk = H5FL_BLK_REALLOC(gheap_chunk, heap->chunk, (heap->size + need))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "new heap allocation failed")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(new_chunk + heap->size, 0, need);
-#endif /* H5_CLEAR_MEMORY */
+    HDmemset(new_chunk + heap->size, 0, need);
 
     /* Adjust the size of the heap */
     old_size = heap->size;
@@ -789,10 +785,10 @@ done:
 herr_t
 H5HG_remove (H5F_t *f, hid_t dxpl_id, H5HG_t *hobj)
 {
-    H5HG_heap_t	*heap = NULL;
-    uint8_t	*p = NULL, *obj_start = NULL;
-    size_t	need;
-    unsigned	u;
+    H5HG_heap_t *heap = NULL;
+    uint8_t     *p = NULL, *obj_start = NULL;
+    size_t      need;
+    unsigned    u;
     unsigned    flags = H5AC__NO_FLAGS_SET;/* Whether the heap gets deleted */
     herr_t      ret_value = SUCCEED;       /* Return value */
 

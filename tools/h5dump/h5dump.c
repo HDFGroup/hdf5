@@ -71,7 +71,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language cancatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RECM:O*N:";
+static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RECM:O*N:vG:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -190,6 +190,8 @@ static struct long_options l_opts[] = {
     { "no-compact-subset", no_arg, 'C' },
     { "ddl", optional_arg, 'O' },
     { "any_path", require_arg, 'N' },
+    { "vds-view-first-missing", no_arg, 'v' },
+    { "vds-gap-size", require_arg, 'G' },
     { NULL, 0, '\0' }
 };
 
@@ -242,7 +244,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -o F, --output=F     Output raw data into file F\n");
     PRINTVALSTREAM(rawoutstream, "     -b B, --binary=B     Binary file output, of form B\n");
     PRINTVALSTREAM(rawoutstream, "     -O F, --ddl=F        Output ddl text into file F\n");
-    PRINTVALSTREAM(rawoutstream, "                          Do not use filename F to suppress ddl display\n");
+    PRINTVALSTREAM(rawoutstream, "                          Use blank(empty) filename F to suppress ddl display\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Object Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -a P, --attribute=P  Print the specified attribute\n");
     PRINTVALSTREAM(rawoutstream, "                          If an attribute name contains a slash (/), escape the\n");
@@ -256,6 +258,8 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "                          P can be the absolute path or just a relative path.\n");
     PRINTVALSTREAM(rawoutstream, "     -A,   --onlyattr     Print the header and value of attributes\n");
     PRINTVALSTREAM(rawoutstream, "                          Optional value 0 suppresses printing attributes.\n");
+    PRINTVALSTREAM(rawoutstream, "     --vds-view-first-missing Set the VDS bounds to first missing mapped elements.\n");
+    PRINTVALSTREAM(rawoutstream, "     --vds-gap-size=N     Set the missing file gap size, N=non-negative integers\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Object Property Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -i,   --object-ids   Print the object ids\n");
     PRINTVALSTREAM(rawoutstream, "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
@@ -1120,6 +1124,16 @@ parse_start:
                 goto error;
             }
             display_packed_bits = TRUE;
+            break;
+        case 'v':
+            display_vds_first = TRUE;
+            break;
+        case 'G':
+            vds_gap_size = HDatoi(opt_arg);
+            if (vds_gap_size < 0) {
+                usage(h5tools_getprogname());
+                goto error;
+            }
             break;
 
         /** begin XML parameters **/

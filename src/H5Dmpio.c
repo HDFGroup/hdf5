@@ -267,7 +267,7 @@ H5D__mpio_select_read(const H5D_io_info_t *io_info, hsize_t mpi_buf_count,
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
     if(H5F_block_read(file, H5FD_MEM_DRAW, io_info->store_faddr, (size_t)mpi_buf_count, 
-                      io_info->dxpl_id, rbuf) < 0)
+                      io_info->raw_dxpl_id, rbuf) < 0)
        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't finish collective parallel write")
 
 done:
@@ -304,7 +304,7 @@ H5D__mpio_select_write(const H5D_io_info_t *io_info, hsize_t mpi_buf_count,
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
     if(H5F_block_write(file, H5FD_MEM_DRAW, io_info->store_faddr, (size_t)mpi_buf_count, 
-                       io_info->dxpl_id, wbuf) < 0)
+                       io_info->raw_dxpl_id, wbuf) < 0)
        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't finish collective parallel write")
 
 done:
@@ -339,7 +339,7 @@ H5D__piece_io(const hid_t file_id, const size_t count, H5D_io_info_t *io_info)
     HDassert(io_info->using_mpi_vfd);
 
     /* Obtain the data transfer properties */
-    if(NULL == (dx_plist = H5I_object(io_info->dxpl_id)))
+    if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(io_info->raw_dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
     /* Check the optional property list on what to do with collective chunk IO. */
@@ -371,11 +371,11 @@ H5D__piece_io(const hid_t file_id, const size_t count, H5D_io_info_t *io_info)
         int               new_value;
 
         /*** Test collective chunk user-input optimization APIs. ***/
-        check_prop = H5Pexist(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME);
+        check_prop = H5Pexist(io_info->raw_dxpl_id, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME);
         if(check_prop > 0) {
             if(H5D_ONE_LINK_CHUNK_IO == io_option) {
                 new_value = 0;
-                if(H5Pset(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, &new_value) < 0)
+                if(H5Pset(io_info->raw_dxpl_id, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, &new_value) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
             } /* end if */
         } /* end if */
@@ -765,7 +765,7 @@ H5D__final_collective_io(H5D_io_info_t *io_info,
     FUNC_ENTER_STATIC
 
     /* Pass buf type, file type to the file driver.  */
-    if(H5FD_mpi_setup_collective(io_info->dxpl_id, mpi_buf_type, mpi_file_type) < 0)
+    if(H5FD_mpi_setup_collective(io_info->raw_dxpl_id, mpi_buf_type, mpi_file_type) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O properties")
 
     if(io_info->op_type == H5D_IO_OP_WRITE) {

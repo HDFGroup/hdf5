@@ -316,10 +316,8 @@ H5G__cache_node_serialize(const H5F_t *f, void *_image, size_t len,
     if(H5G__ent_encode_vec(f, &image, sym->entry, sym->nsyms) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, FAIL, "can't serialize")
 
-#ifdef H5_CLEAR_MEMORY
     /* Clear rest of symbol table node */
     HDmemset(image, 0, len - (size_t)(image - (uint8_t *)_image));
-#endif /* H5_CLEAR_MEMORY */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

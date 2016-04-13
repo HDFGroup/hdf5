@@ -4,7 +4,7 @@
 !  MODULE H5O
 !
 ! FILE
-!  fortran/src/H5Off.f90
+!  fortran/src/H5Off.F90
 !
 ! PURPOSE
 !  This file contains Fortran interfaces for H5O functions.

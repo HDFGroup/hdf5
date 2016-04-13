@@ -1,4 +1,3 @@
-#
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
@@ -48,5 +47,8 @@ CHECK_CLEANFILES+=combine_tables[1-2].h5 test_ds[1-9].h5 test_ds10.h5 \
 	test_image[1-3].h5 file_img[1-2].h5 test_lite[1-4].h5 test_table.h5 \
 	test_packet_table.h5 test_packet_compress.h5 test_detach.h5 \
         test_dectris.h5
+
+# Sources for test_packet executable
+test_packet_SOURCES=test_packet.c test_packet_vlen.c
 
 include $(top_srcdir)/config/conclude.am

@@ -544,7 +544,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
              */
             if(H5T_convert(type_info->tpath, type_info->src_type_id, type_info->dst_type_id,
                     smine_nelmts, (size_t)0, (size_t)0, type_info->tconv_buf,
-                    type_info->bkg_buf, io_info->dxpl_id) < 0)
+                    type_info->bkg_buf, io_info->md_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
 
             /* Do the data transform after the conversion (since we're using type mem_type) */
@@ -680,7 +680,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
              */
             if(H5T_convert(type_info->tpath, type_info->src_type_id, type_info->dst_type_id,
                     smine_nelmts, (size_t)0, (size_t)0, type_info->tconv_buf,
-                    type_info->bkg_buf, io_info->dxpl_id) < 0)
+                    type_info->bkg_buf, io_info->md_dxpl_id) < 0)
                  HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
         } /* end else */
 
@@ -954,7 +954,7 @@ H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination buffer provided")
 
     /* Fill the DXPL cache values for later use */
-    if(H5D__get_dxpl_cache(H5P_DATASET_XFER_DEFAULT, &dxpl_cache) < 0)
+    if(H5D__get_dxpl_cache(H5AC_noio_dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Get datatype element size */
@@ -1056,7 +1056,7 @@ H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no destination buffer provided")
 
     /* Fill the DXPL cache values for later use */
-    if(H5D__get_dxpl_cache(H5P_DATASET_XFER_DEFAULT, &dxpl_cache) < 0)
+    if(H5D__get_dxpl_cache(H5AC_noio_dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
 
     /* Get datatype element size */

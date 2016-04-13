@@ -87,12 +87,12 @@ main(void)
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
     }
-    if(FAIL == H5HL_create(f, H5P_DATASET_XFER_DEFAULT, (size_t)0, &heap_addr/*out*/)) {
+    if(FAIL == H5HL_create(f, H5AC_ind_read_dxpl_id, (size_t)0, &heap_addr/*out*/)) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
     }
-    if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC__NO_FLAGS_SET))) {
+    if (NULL == (heap = H5HL_protect(f, H5AC_ind_read_dxpl_id, heap_addr, H5AC__NO_FLAGS_SET))) {
         H5_FAILED();
         H5Eprint2(H5E_DEFAULT, stdout);
         goto error;
@@ -104,7 +104,7 @@ main(void)
         if(j > 4)
             buf[j] = '\0';
 
-        if(UFAIL == (obj[i] = H5HL_insert(f, H5P_DATASET_XFER_DEFAULT, heap, strlen(buf) + 1, buf))) {
+        if(UFAIL == (obj[i] = H5HL_insert(f, H5AC_ind_read_dxpl_id, heap, strlen(buf) + 1, buf))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -144,7 +144,7 @@ main(void)
         if(j > 4)
             buf[j] = '\0';
 
-        if (NULL == (heap = H5HL_protect(f, H5P_DATASET_XFER_DEFAULT, heap_addr, H5AC__READ_ONLY_FLAG))) {
+        if (NULL == (heap = H5HL_protect(f, H5AC_ind_read_dxpl_id, heap_addr, H5AC__READ_ONLY_FLAG))) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;

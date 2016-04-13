@@ -4,7 +4,7 @@
 !  MODULE H5F
 !
 ! FILE
-!  H5Fff.f90
+!  H5Fff.F90
 !
 ! PURPOSE
 !  This file contains Fortran interfaces for H5F functions.

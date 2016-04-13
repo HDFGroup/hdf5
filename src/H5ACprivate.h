@@ -181,32 +181,24 @@ typedef H5C_cache_entry_t		H5AC_info_t;
 /* Typedef for metadata cache (defined in H5Cpkg.h) */
 typedef H5C_t	H5AC_t;
 
-/* Metadata specific properties for FAPL */
-/* (Only used for parallel I/O) */
-#ifdef H5_HAVE_PARALLEL
-/* Definitions for "collective metadata write" property */
-#define H5AC_COLLECTIVE_META_WRITE_NAME         "H5AC_collective_metadata_write"
-#define H5AC_COLLECTIVE_META_WRITE_SIZE         sizeof(unsigned)
-#define H5AC_COLLECTIVE_META_WRITE_DEF          0
-#endif /* H5_HAVE_PARALLEL */
-
 #define H5AC_METADATA_TAG_NAME           "H5AC_metadata_tag"
 #define H5AC_METADATA_TAG_SIZE           sizeof(haddr_t)
 #define H5AC_METADATA_TAG_DEF            H5AC__INVALID_TAG
 
 #define H5AC_RING_NAME  "H5AC_ring_type"
 
-/* Dataset transfer property list for flush calls */
-/* (Collective set, "block before metadata write" set and "library internal" set) */
-/* (Global variable declaration, definition is in H5AC.c) */
-extern hid_t H5AC_dxpl_id;
+/* Dataset transfer property lists for metadata calls */
+H5_DLLVAR hid_t H5AC_ind_read_dxpl_id;
+#ifdef H5_HAVE_PARALLEL
+H5_DLLVAR hid_t H5AC_coll_read_dxpl_id;
+#endif /* H5_HAVE_PARALLEL */
 
-/* Dataset transfer property list for independent metadata I/O calls */
-/* (just "library internal" set - i.e. independent transfer mode) */
-/* (Global variable declaration, definition is in H5AC.c) */
-H5_DLLVAR H5P_genplist_t *H5AC_ind_dxpl_g;
-H5_DLLVAR hid_t H5AC_ind_dxpl_id;
+/* DXPL to be used in operations that will not result in I/O calls */
+H5_DLLVAR hid_t H5AC_noio_dxpl_id;
 
+/* DXPL to be used for raw data I/O operations when one is not
+   provided by the user (fill values in H5Dcreate) */
+H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
 
 /* Default cache configuration. */
 
@@ -346,7 +338,7 @@ H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_mark_entry_dirty(void *thing);
 H5_DLL herr_t H5AC_move_entry(H5F_t *f, const H5AC_class_t *type,
-    haddr_t old_addr, haddr_t new_addr);
+    haddr_t old_addr, haddr_t new_addr, hid_t dxpl_id);
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id,
     const H5AC_class_t *type, haddr_t addr, unsigned flags);

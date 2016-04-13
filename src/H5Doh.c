@@ -465,11 +465,11 @@ H5O__dset_flush(H5G_loc_t *obj_loc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
     
     if(H5D__flush_real(dset, dxpl_id) < 0)
-	HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
+        HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
 
 done:
     if(dset && H5D_close(dset) < 0)
-	HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataset")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__dset_flush() */
 
