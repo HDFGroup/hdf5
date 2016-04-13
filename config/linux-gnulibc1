@@ -149,6 +149,7 @@ case $CC in
     *mpicc*)
         cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -v 2>&1 | grep 'version' |\
             sed 's/^[a-z0-9]* for //' |\
+            sed 's/\"/\\\"/g' |\
             sed 's/^\([a-z]* \)/ built with \1/1'`
         cc_version_info=`echo $cc_version_info`
         ;; 
