@@ -530,39 +530,47 @@ H5D__get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id
 
     HDassert(dset);
 
-    /* Get the dataset's dataspace */
-    HDassert(dset->shared->space);
+    /* Check for chunked layout */
+    if(dset->shared->layout.type == H5D_CHUNKED) {
+        /* For chunked layout set the space status by the storage size */
+        /* Get the dataset's dataspace */
+        HDassert(dset->shared->space);
 
-    /* Get the total number of elements in dataset's dataspace */
-    if((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
-    nelmts = (hsize_t)snelmts;
+        /* Get the total number of elements in dataset's dataspace */
+        if((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
+        nelmts = (hsize_t)snelmts;
 
-    /* Get the size of the dataset's datatype */
-    if(0 == (dt_size = H5T_GET_SIZE(dset->shared->type)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype")
+        /* Get the size of the dataset's datatype */
+        if(0 == (dt_size = H5T_GET_SIZE(dset->shared->type)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype")
 
-    /* Compute the maximum size of the dataset in bytes */
-    full_size = nelmts * dt_size;
+        /* Compute the maximum size of the dataset in bytes */
+        full_size = nelmts * dt_size;
 
-    /* Check for overflow during multiplication */
-    if(nelmts != (full_size / dt_size))
-        HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
+        /* Check for overflow during multiplication */
+        if(nelmts != (full_size / dt_size))
+            HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
 
-    /* Difficult to error check, since the error value is 0 and 0 is a valid value... :-/ */
-    if(H5D__get_storage_size(dset, dxpl_id, &space_allocated) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of dataset's storage")
+        /* Difficult to error check, since the error value is 0 and 0 is a valid value... :-/ */
+        if(H5D__get_storage_size(dset, dxpl_id, &space_allocated) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get size of dataset's storage")
 
-    /* Decide on how much of the space is allocated */
-    if(space_allocated == 0)
-        *allocation = H5D_SPACE_STATUS_NOT_ALLOCATED;
-    else if(space_allocated == full_size)
-        *allocation = H5D_SPACE_STATUS_ALLOCATED;
+        /* Decide on how much of the space is allocated */
+        if(space_allocated == 0)
+            *allocation = H5D_SPACE_STATUS_NOT_ALLOCATED;
+        else if(space_allocated == full_size)
+            *allocation = H5D_SPACE_STATUS_ALLOCATED;
+        else 
+            *allocation = H5D_SPACE_STATUS_PART_ALLOCATED;
+    } /* end if */
     else {
-        /* Should only happen for chunked datasets currently */
-        HDassert(dset->shared->layout.type == H5D_CHUNKED);
-
-        *allocation = H5D_SPACE_STATUS_PART_ALLOCATED;
+        /* For non-chunked layouts set space status by result of is_space_alloc
+         * function */
+        if(dset->shared->layout.ops->is_space_alloc(&dset->shared->layout.storage))
+            *allocation = H5D_SPACE_STATUS_ALLOCATED;
+        else
+            *allocation = H5D_SPACE_STATUS_NOT_ALLOCATED;
     } /* end else */
 
 done:

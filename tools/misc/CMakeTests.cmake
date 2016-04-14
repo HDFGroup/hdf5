@@ -4,7 +4,7 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-  
+
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
@@ -39,7 +39,7 @@
         ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file} ${dest}
     )
   endforeach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-  
+
   set (HDF5_MKGRP_TEST_FILES
       #h5mkgrp_help.txt
       #h5mkgrp_version
@@ -90,14 +90,14 @@
       add_test (
           NAME H5MKGRP-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove 
-                  ${resultfile}.h5 
+              -E remove
+                  ${resultfile}.h5
                   ${resultfile}.out
                   ${resultfile}.out.err
       )
       set_tests_properties (H5MKGRP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      
+
     add_test (
         NAME H5MKGRP-${resultfile}
         COMMAND $<TARGET_FILE:h5mkgrp> ${resultoption} ${resultfile}.h5 ${ARGN}
@@ -132,8 +132,8 @@
       add_test (
           NAME H5MKGRP_CMP-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove 
-                  ${resultfile}.h5 
+              -E remove
+                  ${resultfile}.h5
                   ${resultfile}.out
                   ${resultfile}.out.err
       )
@@ -159,11 +159,12 @@
 ##############################################################################
 ##############################################################################
 
+  ###################### H5REPART #########################
   # Remove any output file left over from previous test run
   add_test (
     NAME H5REPART-clearall-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove 
+        -E remove
         fst_family00000.h5
         scd_family00000.h5
         scd_family00001.h5
@@ -175,7 +176,7 @@
     set_tests_properties (H5REPART-clearall-objects PROPERTIES DEPENDS ${last_test})
   endif (NOT "${last_test}" STREQUAL "")
   set (last_test "H5REPART-clearall-objects")
-  
+
   # repartition family member size to 20,000 bytes.
   add_test (NAME H5REPART-h5repart_20K COMMAND $<TARGET_FILE:h5repart> -m 20000 family_file%05d.h5 fst_family%05d.h5)
   set_tests_properties (H5REPART-h5repart_20K PROPERTIES DEPENDS H5REPART-clearall-objects)
@@ -195,50 +196,135 @@
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
         h5repart_test
   )
-  
+
+  ###################### H5CLEAR #########################
+  # Remove any output file left over from previous test run
+  add_test (
+    NAME H5CLEAR-clearall-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        h5clear_sec2_v3.h5
+        h5clear_log_v3.h5
+        h5clear_sec2_v0.h5
+        h5clear_sec2_v2.h5
+  )
+  if (NOT "${last_test}" STREQUAL "")
+    set_tests_properties (H5CLEAR-clearall-objects PROPERTIES DEPENDS ${last_test})
+  endif (NOT "${last_test}" STREQUAL "")
+  set (last_test "H5CLEAR-clearall-objects")
+
+  # create the output files to be used.
+  add_test (NAME H5CLEAR-h5clear_gentest COMMAND $<TARGET_FILE:h5clear_gentest>)
+  set_tests_properties (H5CLEAR-h5clear_gentest PROPERTIES DEPENDS "H5CLEAR-clearall-objects")
+
+  # Initial file open fails
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v3_F COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v3_F PROPERTIES WILL_FAIL "true")
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v3_F PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-sec2_v3 COMMAND $<TARGET_FILE:h5clear> h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-h5clear-sec2_v3 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-sec2_v3_F)
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v3 COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v3 PROPERTIES DEPENDS H5CLEAR-h5clear-sec2_v3)
+
+  # Initial file open fails
+  add_test (NAME H5CLEAR-clear_open_chk-log_v3_F COMMAND $<TARGET_FILE:clear_open_chk> h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-log_v3_F PROPERTIES WILL_FAIL "true")
+  set_tests_properties (H5CLEAR-clear_open_chk-log_v3_F PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-log_v3 COMMAND $<TARGET_FILE:h5clear> h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-h5clear-log_v3 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-log_v3_F)
+  add_test (NAME H5CLEAR-clear_open_chk-log_v3 COMMAND $<TARGET_FILE:clear_open_chk> h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-log_v3 PROPERTIES DEPENDS H5CLEAR-h5clear-log_v3)
+
+  # Initial file open fails
+  add_test (NAME H5CLEAR-clear_open_chk-latest_sec2_v3_F COMMAND $<TARGET_FILE:clear_open_chk> latest_h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_sec2_v3_F PROPERTIES WILL_FAIL "true")
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_sec2_v3_F PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-latest_sec2_v3 COMMAND $<TARGET_FILE:h5clear> latest_h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-h5clear-latest_sec2_v3 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-latest_sec2_v3_F)
+  add_test (NAME H5CLEAR-clear_open_chk-latest_sec2_v3 COMMAND $<TARGET_FILE:clear_open_chk> latest_h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_sec2_v3 PROPERTIES DEPENDS H5CLEAR-h5clear-latest_sec2_v3)
+
+  # Initial file open fails
+  add_test (NAME H5CLEAR-clear_open_chk-latest_log_v3_F COMMAND $<TARGET_FILE:clear_open_chk> h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_log_v3_F PROPERTIES WILL_FAIL "true")
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_log_v3_F PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-latest_log_v3 COMMAND $<TARGET_FILE:h5clear> latest_h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-h5clear-latest_log_v3 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-latest_log_v3_F)
+  add_test (NAME H5CLEAR-clear_open_chk-latest_log_v3 COMMAND $<TARGET_FILE:clear_open_chk> latest_h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_log_v3 PROPERTIES DEPENDS H5CLEAR-h5clear-latest_log_v3)
+
+  #
+  # File open succeeds because the library does not check status_flags for file with < v3 superblock
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v0_P COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v0.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v0_P PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-sec2_v0 COMMAND $<TARGET_FILE:h5clear> h5clear_sec2_v0.h5)
+  set_tests_properties (H5CLEAR-h5clear-sec2_v0 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-sec2_v0_P)
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v0 COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v0.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v0 PROPERTIES DEPENDS H5CLEAR-h5clear-sec2_v0)
+
+  #
+  # File open succeeds because the library does not check status_flags for file with < v3 superblock
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v2_P COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v2.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v2_P PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-sec2_v2 COMMAND $<TARGET_FILE:h5clear> h5clear_sec2_v2.h5)
+  set_tests_properties (H5CLEAR-h5clear-sec2_v2 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-sec2_v2_P)
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v2 COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v2.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v2 PROPERTIES DEPENDS H5CLEAR-h5clear-sec2_v2)
+
+  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
+        h5clear_gentest
+  )
+
+  ###################### H5MKGRP #########################
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (
         NAME H5MKGRP-clearall-objects
         COMMAND    ${CMAKE_COMMAND}
-            -E remove 
+            -E remove
                 h5mkgrp_help.out
                 h5mkgrp_help.out.err
                 h5mkgrp_version.out
                 h5mkgrp_version.out.err
-                h5mkgrp_single.h5 
+                h5mkgrp_single.h5
                 h5mkgrp_single.out
                 h5mkgrp_single.out.err
-                h5mkgrp_single_v.h5 
+                h5mkgrp_single_v.h5
                 h5mkgrp_single_v.out
                 h5mkgrp_single_v.out.err
-                h5mkgrp_single_p.h5 
+                h5mkgrp_single_p.h5
                 h5mkgrp_single_p.out
                 h5mkgrp_single_p.out.err
-                h5mkgrp_single_l.h5 
+                h5mkgrp_single_l.h5
                 h5mkgrp_single_l.out
                 h5mkgrp_single_l.out.err
-                h5mkgrp_several.h5 
+                h5mkgrp_several.h5
                 h5mkgrp_several.out
                 h5mkgrp_several.out.err
-                h5mkgrp_several_v.h5 
+                h5mkgrp_several_v.h5
                 h5mkgrp_several_v.out
                 h5mkgrp_several_v.out.err
-                h5mkgrp_several_p.h5 
+                h5mkgrp_several_p.h5
                 h5mkgrp_several_p.out
                 h5mkgrp_several_p.out.err
-                h5mkgrp_several_l.h5 
+                h5mkgrp_several_l.h5
                 h5mkgrp_several_l.out
                 h5mkgrp_several_l.out.err
-                h5mkgrp_nested_p.h5 
+                h5mkgrp_nested_p.h5
                 h5mkgrp_nested_p.out
                 h5mkgrp_nested_p.out.err
-                h5mkgrp_nested_lp.h5 
+                h5mkgrp_nested_lp.h5
                 h5mkgrp_nested_lp.out
                 h5mkgrp_nested_lp.out.err
-                h5mkgrp_nested_mult_p.h5 
+                h5mkgrp_nested_mult_p.h5
                 h5mkgrp_nested_mult_p.out
                 h5mkgrp_nested_mult_p.out.err
-                h5mkgrp_nested_mult_lp.h5 
+                h5mkgrp_nested_mult_lp.h5
                 h5mkgrp_nested_mult_lp.out
                 h5mkgrp_nested_mult_lp.out.err
     )
@@ -265,7 +351,7 @@
   ADD_H5_TEST (h5mkgrp_several_p 0 "-p" one two)
   ADD_H5_TEST (h5mkgrp_several_l 0 "-l" one two)
 
-  # Create various nested groups 
+  # Create various nested groups
   ADD_H5_TEST (h5mkgrp_nested_p 0 "-p" /one/two)
   ADD_H5_TEST (h5mkgrp_nested_lp 0 "-lp" /one/two)
   ADD_H5_TEST (h5mkgrp_nested_mult_p 0 "-p" /one/two /three/four)

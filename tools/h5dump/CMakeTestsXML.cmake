@@ -128,7 +128,7 @@
   )
 
   foreach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${tst_xml_h5_file}" NAME)
+    get_filename_component(fname "${tst_xml_h5_file}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}")
     #message (STATUS " Copying ${tst_xml_h5_file}")
     add_custom_command (
@@ -140,7 +140,7 @@
   endforeach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
   
   foreach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
-    GET_FILENAME_COMPONENT(fname "${tst_xml_other_file}" NAME)
+    get_filename_component(fname "${tst_xml_other_file}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}")
     #message (STATUS " Copying ${tst_xml_other_file}")
     add_custom_command (

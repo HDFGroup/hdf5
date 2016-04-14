@@ -29,11 +29,9 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 TEST_PROG=h5repart_gentest talign
 TEST_SCRIPT=testh5repart.sh testh5mkgrp.sh testh5clear.sh
 
-
 check_PROGRAMS=$(TEST_PROG) repart_test clear_open_chk
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=h5repart$(EXEEXT) h5mkgrp$(EXEEXT) h5clear$(EXEEXT)
-
 
 # These are our main targets, the tools
 bin_PROGRAMS=h5debug h5repart h5mkgrp h5clear

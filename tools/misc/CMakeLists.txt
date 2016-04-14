@@ -28,10 +28,17 @@ TARGET_C_PROPERTIES (h5mkgrp STATIC " " " ")
 target_link_libraries (h5mkgrp  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5mkgrp PROPERTIES FOLDER tools)
 
+add_executable (h5clear ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5clear.c)
+TARGET_NAMING (h5clear STATIC)
+TARGET_C_PROPERTIES (h5clear STATIC " " " ")
+target_link_libraries (h5clear  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
+set_target_properties (h5clear PROPERTIES FOLDER tools)
+
 set (H5_DEP_EXECUTABLES
     h5debug
     h5repart
     h5mkgrp
+    h5clear
 )
 
 #-----------------------------------------------------------------------------
@@ -62,6 +69,18 @@ if (BUILD_TESTING)
   TARGET_C_PROPERTIES (h5repart_test STATIC " " " ")
   target_link_libraries (h5repart_test ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (h5repart_test PROPERTIES FOLDER tools)
+
+  add_executable (h5clear_gentest ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5clear_gentest.c)
+  TARGET_NAMING (h5clear_gentest STATIC)
+  TARGET_C_PROPERTIES (h5clear_gentest STATIC " " " ")
+  target_link_libraries (h5clear_gentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+  set_target_properties (h5clear_gentest PROPERTIES FOLDER tools)
+
+  add_executable (clear_open_chk ${HDF5_TOOLS_MISC_SOURCE_DIR}/clear_open_chk.c)
+  TARGET_NAMING (clear_open_chk STATIC)
+  TARGET_C_PROPERTIES (clear_open_chk STATIC " " " ")
+  target_link_libraries (clear_open_chk ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+  set_target_properties (clear_open_chk PROPERTIES FOLDER tools)
 
   include (CMakeTests.cmake)
 endif (BUILD_TESTING)

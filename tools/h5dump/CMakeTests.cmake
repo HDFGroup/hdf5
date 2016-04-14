@@ -1141,10 +1141,10 @@
   ADD_H5_TEST_N (tattr-2 0 --enable-error-stack -N /\\\\/attr1 --any_path /attr4 --any_path=/attr5 tattr.h5)
   # test for header and error messages
   ADD_H5ERR_MASK_TEST (tattr-3 1 --enable-error-stack --header -a /attr2 --attribute=/attr tattr.h5)
-  # test for displaying attributes in shared datatype (also in group and dataset)
-  ADD_H5_TEST (tnamed_dtype_attr 0 --enable-error-stack tnamed_dtype_attr.h5)
   # test for displaying at least 9 attributes on root from a be machine
   ADD_H5_TEST (tattr-4_be 0 --enable-error-stack tattr4_be.h5)
+  # test for displaying attributes in shared datatype (also in group and dataset)
+  ADD_H5_TEST (tnamed_dtype_attr 0 --enable-error-stack tnamed_dtype_attr.h5)
 
   # test for displaying soft links and user-defined links
   ADD_H5_TEST (tslink-1 0 --enable-error-stack tslink.h5)
@@ -1423,6 +1423,7 @@
   # test for dataset region references
   ADD_H5_TEST (tdatareg 0 --enable-error-stack tdatareg.h5)
   ADD_H5ERR_MASK_TEST (tdataregR 0 --enable-error-stack -R tdatareg.h5)
+  ADD_H5_TEST (tattrreg 0 --enable-error-stack tattrreg.h5)
   ADD_H5ERR_MASK_TEST (tattrregR 0 -R --enable-error-stack tattrreg.h5)
   ADD_H5_EXPORT_TEST (tbinregR tdatareg.h5 0 --enable-error-stack -d /Dataset1 -s 0 -R -y -o)
 

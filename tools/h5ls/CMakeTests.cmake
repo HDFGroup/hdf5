@@ -31,6 +31,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tudlink.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes1.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset_idx.h5
   )
 
   set (LIST_OTHER_TEST_FILES
@@ -90,13 +91,14 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes1.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes2le.ls
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes2be.ls
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset_idx.ls
   )
 
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   # copy the list of test files
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${listfiles}" NAME)
+    get_filename_component(fname "${listfiles}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
     #message (STATUS " Copying ${listfiles} to ${dest}")
     add_custom_command (
@@ -400,3 +402,8 @@
   else (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tdataregle 0 -v tdatareg.h5)
   endif (H5_WORDS_BIGENDIAN)
+
+# test for file with datasets that use Fixed Array chunk indices
+#echo "***skip testing tdset_idx.h5"
+#ADD_H5_TEST (tdset_idx 0 -w80 -d tdset_idx.h5)
+  

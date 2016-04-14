@@ -121,9 +121,9 @@ gen_newgrat_file(const char *fname)
 	goto error;
     if(H5Dclose(did) < 0)
 	goto error;
-    if(H5Tclose(tid) < 0)
-	goto error;
     if(H5Sclose(sid) < 0)
+	goto error;
+    if(H5Tclose(tid) < 0)
 	goto error;
     if(H5Fclose(fid) < 0)
 	goto error;
@@ -133,14 +133,13 @@ error:
 	H5Pclose(fapl);
 	H5Pclose(fcpl);
 	H5Aclose(attr_id);
+        H5Dclose(did);
         H5Tclose(tid);
         H5Sclose(sid);
         H5Gclose(gid);
-        H5Dclose(did);
         H5Fclose(fid);
     } H5E_END_TRY;
 } /* gen_newgrat_file() */
-
 
 /*
  * Generate an HDF5 file with groups, datasets, attributes for testing the options:

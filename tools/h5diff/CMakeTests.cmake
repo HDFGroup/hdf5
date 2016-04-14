@@ -44,12 +44,17 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_exclude3-1.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_exclude3-2.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_comp_vl_strs.h5
-      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr_v_level1.h5
-      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr_v_level2.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/compounds_array_vlen1.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/compounds_array_vlen2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr_v_level1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr_v_level2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_enum_invalid_values.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/non_comparables1.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/non_comparables2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/tmptest.he5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/tmptest2.he5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/tmpSingleSiteBethe.reference.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/tmpSingleSiteBethe.output.h5
       # tools/testfiles/vds
       ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_a.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_b.h5
@@ -119,6 +124,7 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_26.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_27.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_28.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_30.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_300.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_400.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_401.txt
@@ -255,6 +261,8 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_710.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_80.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_tmp1.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_tmp2.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v1.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v2.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v3.txt
@@ -267,7 +275,7 @@
   # copy test files from source to build dir
   #
   foreach (h5_tstfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${h5_tstfiles}" NAME)
+    get_filename_component(fname "${h5_tstfiles}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
     #message (STATUS " Copying ${fname}")
     add_custom_command (
@@ -930,6 +938,15 @@ ADD_H5_TEST (h5diff_27 1 -v ${FILE3} ${FILE3} t1 t2)
 ADD_H5_TEST (h5diff_28 1 -v ${FILE3} ${FILE3} l1 l2)
 
 # ##############################################################################
+# # Enum value tests (may become more comprehensive in the future)
+# ##############################################################################
+
+# 3.0
+# test enum types which may have invalid values
+ADD_H5_TEST (h5diff_30 1 -v h5diff_enum_invalid_values.h5 h5diff_enum_invalid_values.h5 dset1 dset2)
+
+
+# ##############################################################################
 # # Dataset datatypes
 # ##############################################################################
 
@@ -1073,6 +1090,10 @@ ADD_H5_TEST (h5diff_631 0 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp18 g1/f
 # 7.  attributes
 # ##############################################################################
 ADD_H5_TEST (h5diff_70 1 -v ${FILE5} ${FILE6})
+# temporary test to verify HDF5-8625
+ADD_H5_TEST (h5diff_tmp1 0 tmptest2.he5 tmptest.he5)
+# temporary test to verify HDF5-8639
+ADD_H5_TEST (h5diff_tmp2 1 tmpSingleSiteBethe.output.h5 tmpSingleSiteBethe.reference.h5)
 
 # ##################################################
 #  attrs with verbose option level
@@ -1115,8 +1136,10 @@ ADD_H5_TEST (h5diff_90 0 -v ${FILE2} ${FILE2})
 ADD_H5_TEST (h5diff_100 1 -v ${FILE9} ${FILE10})
 
 # 11. floating point comparison
+# double value
 ADD_H5_TEST (h5diff_101 1 -v ${FILE1} ${FILE1} g1/d1  g1/d2)
 
+# float value
 ADD_H5_TEST (h5diff_102 1 -v ${FILE1} ${FILE1} g1/fp1 g1/fp2)
 
 # with --use-system-epsilon for double value. expect less differences
@@ -1361,7 +1384,7 @@ ADD_H5_TEST (h5diff_517 1 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
 ADD_H5_TEST (h5diff_518 0 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
 
 # ##############################################################################
-# # Exclude path (--exclude-path)
+# # Exclude objects (--exclude-path)
 # ##############################################################################
 #
 # Same structure, same names and different value.

@@ -2347,6 +2347,16 @@
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
+./tools/h5repack/testfiles/1_vds.h5-vds_dset_compa-v.ddl
+./tools/h5repack/testfiles/1_vds.h5-vds_dset_conti-v.ddl
+./tools/h5repack/testfiles/2_vds.h5-vds_null_compa-v.ddl
+./tools/h5repack/testfiles/2_vds.h5-vds_null_conti-v.ddl
+./tools/h5repack/testfiles/4_vds.h5-vds_compa_compa-v.ddl
+./tools/h5repack/testfiles/4_vds.h5-vds_compa_conti-v.ddl
+./tools/h5repack/testfiles/4_vds.h5-vds_compa-v.ddl
+./tools/h5repack/testfiles/4_vds.h5-vds_conti_compa-v.ddl
+./tools/h5repack/testfiles/4_vds.h5-vds_conti_conti-v.ddl
+./tools/h5repack/testfiles/4_vds.h5-vds_conti-v.ddl
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c
