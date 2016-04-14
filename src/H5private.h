@@ -1182,7 +1182,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsnprintf
     #define HDsnprintf    snprintf /*varargs*/
 #endif /* HDsnprintf */
-/* sprintf() variable arguments */
+#ifndef HDsprintf
+    #define HDsprintf    sprintf /*varargs*/
+#endif /* HDsprintf */
 #ifndef HDsqrt
     #define HDsqrt(X)    sqrt(X)
 #endif /* HDsqrt */
