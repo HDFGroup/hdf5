@@ -171,6 +171,7 @@ case $CC in
     *mpicc*)
         cc_version_info=`$CC $CCFLAGS $H5_CCFLAGS -v 2>&1 | grep 'version' |\
             sed 's/^[a-z0-9]* for //' |\
+            sed 's/\"/\\\"/g' |\
             sed 's/^\([a-z]* \)/ built with \1/1'`
         cc_version_info=`echo $cc_version_info`
         ;; 
@@ -199,7 +200,6 @@ case $FC in
     *mpif90*)
         fc_version_info=`$FC $FCFLAGS $H5_FCFLAGS -v 2>&1 | grep 'version' |\
             sed 's/^[a-z0-9]* for //' |\
-            sed 's/\"/\\\"/g' |\
             sed 's/^\([a-z]* \)/ built with \1/1'`
         fc_version_info=`echo $fc_version_info`
         ;;
