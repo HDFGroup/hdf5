@@ -59,7 +59,7 @@ files_have_same_contents(const char *name1, const char *name2)
     int		fd1 = 0, fd2 = 0;
     ssize_t	n1, n2;
     char	buf1[1024], buf2[1024];
-    hbool_t ret = false;            /* not equal until proven otherwise */
+    hbool_t ret = FALSE;            /* not equal until proven otherwise */
 
     if((fd1 = HDopen(name1, O_RDONLY, 0666)) < 0)
         goto out;
@@ -82,7 +82,7 @@ files_have_same_contents(const char *name1, const char *name2)
             break;
 
         if(n1 == 0 && n2 == 0) {
-            ret = true;
+            ret = TRUE;
             break;
         }
 
