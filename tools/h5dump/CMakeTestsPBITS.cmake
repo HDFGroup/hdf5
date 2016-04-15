@@ -86,7 +86,7 @@
   )
 
   foreach (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
-    GET_FILENAME_COMPONENT(fname "${pbits_h5_file}" NAME)
+    get_filename_component(fname "${pbits_h5_file}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}")
     #message (STATUS " Copying ${pbits_h5_file}")
     add_custom_command (
@@ -99,7 +99,7 @@
 
 
   foreach (ddl_pbits ${HDF5_REFERENCE_PBITS})
-    GET_FILENAME_COMPONENT(fname "${ddl_pbits}" NAME)
+    get_filename_component(fname "${ddl_pbits}" NAME)
     set (ddldest "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}")
     #message (STATUS " Copying ${ddl_pbits}")
     add_custom_command (
@@ -111,7 +111,7 @@
   endforeach (ddl_pbits ${HDF5_REFERENCE_PBITS})
 
   foreach (ddl_pbits ${HDF5_ERROR_REFERENCE_PBITS})
-    GET_FILENAME_COMPONENT(fname "${ddl_pbits}" NAME)
+    get_filename_component(fname "${ddl_pbits}" NAME)
     set (ddldest "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}")
     #message (STATUS " Copying ${ddl_pbits}")
     add_custom_command (

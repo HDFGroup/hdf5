@@ -33,6 +33,7 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5B2private.h"        /* v2 B-trees                           */
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5SLprivate.h"	/* Skip lists				*/
@@ -44,7 +45,7 @@
 
 /* Set the minimum object header size to create objects with */
 #define H5D_MINHDR_SIZE 256
-
+#if 0
 /* [Simple] Macro to construct a H5D_io_info_t from it's components */
 #define H5D_BUILD_IO_INFO_WRT(io_info, ds, dxpl_c, dxpl_m, dxpl_r, str, buf)    \
     (io_info)->dset = ds;                                               \
@@ -62,10 +63,32 @@
     (io_info)->store = str;                                             \
     (io_info)->op_type = H5D_IO_OP_READ;                                \
     (io_info)->u.rbuf = buf
+#endif
 
 /* Flags for marking aspects of a dataset dirty */
 #define H5D_MARK_SPACE  0x01
 #define H5D_MARK_LAYOUT  0x02
+
+/* Default creation parameters for chunk index data structures */
+/* See H5O_layout_chunk_t */
+
+/* Fixed array creation values */
+#define H5D_FARRAY_CREATE_PARAM_SIZE		1	/* Size of the creation parameters in bytes */
+#define H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS 	10  	/* i.e. 1024 elements per data block page */
+
+/* Extensible array creation values */
+#define H5D_EARRAY_CREATE_PARAM_SIZE		5	/* Size of the creation parameters in bytes */
+#define H5D_EARRAY_MAX_NELMTS_BITS         	32	/* i.e. 4 giga-elements */
+#define H5D_EARRAY_IDX_BLK_ELMTS           	4
+#define H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS   	4
+#define H5D_EARRAY_DATA_BLK_MIN_ELMTS      	16
+#define H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS 	10 	/* i.e. 1024 elements per data block page */
+
+/* v2 B-tree creation values for raw meta_size */
+#define H5D_BT2_CREATE_PARAM_SIZE	6		/* Size of the creation parameters in bytes */
+#define H5D_BT2_NODE_SIZE       	2048
+#define H5D_BT2_SPLIT_PERC      	100
+#define H5D_BT2_MERGE_PERC      	40
 
 
 /****************************/
@@ -345,6 +368,7 @@ typedef struct H5D_chunk_ud_t {
     unsigned    idx_hint;               /* Index of chunk in cache, if present */
     H5F_block_t chunk_block;            /* Offset/length of chunk in file */
     unsigned	filter_mask;		/* Excluded filters	*/
+    hbool_t     new_unfilt_chunk;       /* Whether the chunk just became unfiltered */
     hsize_t     chunk_idx;              /* Chunk index for EA, FA indexing */
 } H5D_chunk_ud_t;
 
@@ -555,6 +579,13 @@ H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1];
 
 /* Chunked layout operations */
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_EARRAY[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_FARRAY[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BT2[1];
+
+/* The v2 B-tree class for indexing chunked datasets with >1 unlimited dimensions */
+H5_DLLVAR const H5B2_class_t H5D_BT2[1];
+H5_DLLVAR const H5B2_class_t H5D_BT2_FILT[1];
 
 
 /******************************/
@@ -616,6 +647,10 @@ H5_DLL herr_t H5D__scatgath_write(const H5D_io_info_t *io_info,
 H5_DLL herr_t H5D__layout_set_io_ops(const H5D_t *dataset);
 H5_DLL size_t H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout,
     hbool_t include_compact_data);
+H5_DLL herr_t H5D__layout_set_latest_version(H5O_layout_t *layout,
+    const H5S_t *space, const H5D_dcpl_cache_t *dcpl_cache);
+H5_DLL herr_t H5D__layout_set_latest_indexing(H5O_layout_t *layout,
+    const H5S_t *space, const H5D_dcpl_cache_t *dcpl_cache);
 H5_DLL herr_t H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh,
     H5D_t *dset, hid_t dapl_id);
 H5_DLL herr_t H5D__layout_oh_read(H5D_t *dset, hid_t dxpl_id, hid_t dapl_id,
@@ -650,8 +685,11 @@ H5_DLL herr_t H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *scaled, H5D_chunk_ud_t *udata);
 H5_DLL herr_t H5D__chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes);
 H5_DLL herr_t H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[]);
+H5_DLL herr_t H5D__chunk_update_old_edge_chunks(H5D_t *dset, hid_t dxpl_id,
+    hsize_t old_dim[]);
 H5_DLL herr_t H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id,
     const hsize_t *old_dim);
+H5_DLL herr_t H5D__chunk_set_sizes(H5D_t *dset);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5D__chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[]);
 #endif /* H5_HAVE_PARALLEL */
@@ -744,6 +782,7 @@ H5_DLL herr_t H5D__piece_io_term(H5D_io_info_t *io_info, H5D_dset_info_t *di);
 #ifdef H5D_TESTING
 H5_DLL herr_t H5D__layout_version_test(hid_t did, unsigned *version);
 H5_DLL herr_t H5D__layout_contig_size_test(hid_t did, hsize_t *size);
+H5_DLL herr_t H5D__layout_idx_type_test(hid_t did, H5D_chunk_index_t *idx_type);
 H5_DLL herr_t H5D__current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused);
 #endif /* H5D_TESTING */
 

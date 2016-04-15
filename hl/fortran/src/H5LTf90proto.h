@@ -311,6 +311,38 @@ h5tbmake_table_c(size_t_f *namelen1,
 
 HDF5_HL_F90CSTUBDLL
 int_f
+h5tbread_table_c(hid_t_f *loc_id,
+                  _fcd name,
+                  size_t_f *namelen,
+		  hsize_t_f *nfields,
+                  size_t_f *dst_size,
+                  size_t_f *dst_offset,
+                  size_t_f *dst_sizes,
+		 void *dst_buf);
+
+
+HDF5_HL_F90CSTUBDLL
+int_f
+h5tbmake_table_ptr_c(size_t_f *namelen1,
+		     _fcd name1,
+		     hid_t_f *loc_id,
+		     size_t_f *namelen,
+		     _fcd name,
+		     hsize_t_f *nfields,
+		     hsize_t_f *nrecords,
+		     size_t_f *type_size,
+		     size_t_f *field_offset,
+		     hid_t_f *field_types,
+		     hsize_t_f *chunk_size,
+		     void *fill_data,
+		     int_f *compress,
+		     size_t_f *char_len_field_names, /* field_names lenghts */
+		     size_t_f *max_char_size_field_names, /* char len of fields */
+		     char *field_names, /* field_names */
+		     void *data);
+
+HDF5_HL_F90CSTUBDLL
+int_f
 h5tbwrite_field_name_c(hid_t_f *loc_id,
                         size_t_f *namelen,
                         _fcd name,

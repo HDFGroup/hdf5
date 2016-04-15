@@ -268,7 +268,7 @@ struct H5F_file_t {
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     unsigned	gc_ref;		/* Garbage-collect references?		*/
-    hbool_t	latest_format;	/* Always use the latest format?	*/
+    unsigned	latest_flags;	/* The latest version support */
     hbool_t	store_msg_crt_idx;  /* Store creation index for object header messages?	*/
     unsigned	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/

@@ -11,7 +11,7 @@ INCLUDE_DIRECTORIES (
 )
 
 SET_GLOBAL_VARIABLE (HDF5_JAVA_SOURCE_PACKAGES
-    "${HDFJAVA_SOURCE_PACKAGES};hdf.hdf5lib.callbacks;hdf.hdf5lib.exceptions;hdf.hdf5lib.structs;hdf.hdf5lib"
+    "${HDF5_JAVA_SOURCE_PACKAGES};hdf.hdf5lib.callbacks;hdf.hdf5lib.exceptions;hdf.hdf5lib.structs;hdf.hdf5lib"
 )
 
 set (HDF5_JAVA_HDF_HDF5_CALLBACKS_SRCS

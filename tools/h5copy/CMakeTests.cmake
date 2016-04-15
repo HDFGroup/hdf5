@@ -22,7 +22,7 @@
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${listfiles}" NAME)
+    get_filename_component(fname "${listfiles}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
     #message (STATUS " Copying ${listfiles}")
     add_custom_command (

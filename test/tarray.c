@@ -1639,9 +1639,9 @@ test_array_bkg(void)
     for (i = 0; i < dtsinfo->nsubfields; i++)
       dtsinfo->name[i] = (char *)HDcalloc((size_t)20, sizeof(char));
 
-	strcpy(dtsinfo->name[0], "One");
-	strcpy(dtsinfo->name[1], "Two");
-	strcpy(dtsinfo->name[2], "Three");
+    HDstrcpy(dtsinfo->name[0], "One");
+    HDstrcpy(dtsinfo->name[1], "Two");
+    HDstrcpy(dtsinfo->name[2], "Three");
 
 
     /* Create file */
@@ -1859,32 +1859,38 @@ test_array_bkg(void)
     HDfree(dtsinfo);
 } /* end test_array_bkg() */
 
-/****************************************************************
-**
-**  test_compat(): Test array datatype compatibility code.
-**      Reads file containing old version of datatype object header
-**      messages for compound datatypes and verifies reading the older
-**      version of the is working correctly.
-**
-****************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compat
+ *
+ * Purpose:     Test array datatype compatibility code.
+ *
+ *              Reads file containing old version of datatype object header
+ *              messages for compound datatypes and verifies reading the older
+ *              version of the is working correctly.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
 static void
 test_compat(void)
 {
     const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
-    hid_t		fid1;		/* HDF5 File IDs		*/
-    hid_t		dataset;	/* Dataset ID			*/
-    hid_t		tid1;       /* Array Datatype ID			*/
-    hid_t		tid2;       /* Datatype ID          */
-    hsize_t		tdims1[] = {ARRAY1_DIM1};
-    int         ndims;      /* Array rank for reading */
-    hsize_t		rdims1[H5S_MAX_RANK];    /* Array dimensions for reading */
-    H5T_class_t mclass;     /* Datatype class for VL */
-    int         nmemb;      /* Number of compound members */
-    char       *mname;      /* Name of compound field */
-    size_t      off;        /* Offset of compound field */
-    hid_t       mtid;       /* Datatype ID for field */
-    int        i;          /* Index variables */
-    herr_t		ret;		/* Generic return value		*/
+    hid_t       fid1;                   /* HDF5 File IDs                    */
+    hid_t       dataset;                /* Dataset ID                       */
+    hid_t       tid1;                   /* Array Datatype ID                */
+    hid_t       tid2;                   /* Datatype ID                      */
+    hsize_t     tdims1[] = {ARRAY1_DIM1};
+    int         ndims;                  /* Array rank for reading           */
+    hsize_t     rdims1[H5S_MAX_RANK];   /* Array dimensions for reading     */
+    H5T_class_t mclass;                 /* Datatype class for VL            */
+    int         nmemb;                  /* Number of compound members       */
+    char       *mname;                  /* Name of compound field           */
+    size_t      off;                    /* Offset of compound field         */
+    hid_t       mtid;                   /* Datatype ID for field            */
+    int         i;                      /* Index variables                  */
+    herr_t      ret;                    /* Generic return value             */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Array Datatypes Compatibility Functionality\n"));

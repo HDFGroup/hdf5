@@ -46,8 +46,9 @@ const char *FILENAME[] = {
 #define CONFIG_COMPRESS         0x01u
 #define CONFIG_FILL             0x02u
 #define CONFIG_EARLY_ALLOC      0x04u
+#define CONFIG_UNFILT_EDGE      0x08u
 #define CONFIG_ALL              (CONFIG_COMPRESS + CONFIG_FILL                 \
-                                + CONFIG_EARLY_ALLOC)
+                                + CONFIG_EARLY_ALLOC + CONFIG_UNFILT_EDGE)
 #define FILL_VALUE -1
 #define DO_RANKS_PRINT_CONFIG(TEST) {                                          \
     printf("  Config:\n");                                                     \
@@ -56,6 +57,8 @@ const char *FILENAME[] = {
     printf("   Fill value: %s\n", (do_fillvalue ? "yes" : "no"));              \
     printf("   Early allocation: %s\n", (config & CONFIG_EARLY_ALLOC ? "yes"   \
             : "no"));                                                          \
+    printf("   Edge chunk filters: %s\n", (config & CONFIG_UNFILT_EDGE         \
+            ? "disabled" : "enabled"));                                        \
 } /* end DO_RANKS_PRINT_CONFIG */
 
 #define RANK1 1
@@ -85,18 +88,22 @@ static int do_layouts( hid_t fapl );
 static int test_rank1( hid_t fapl,
                        hid_t dcpl,
                        hbool_t do_fill_value,
+                       hbool_t disable_edge_filters,
                        hbool_t set_istore_k);
 static int test_rank2( hid_t fapl,
                        hid_t dcpl,
                        hbool_t do_fill_value,
+                       hbool_t disable_edge_filters,
                        hbool_t set_istore_k);
 static int test_rank3( hid_t fapl,
                        hid_t dcpl,
                        hbool_t do_fill_value,
+                       hbool_t disable_edge_filters,
                        hbool_t set_istore_k);
 static int test_random_rank4( hid_t fapl,
                               hid_t dcpl,
                               hbool_t do_fillvalue,
+                              hbool_t disable_edge_filters,
                               hbool_t do_sparse);
 
 static int test_external( hid_t fapl );
@@ -211,7 +218,8 @@ error:
 static int do_ranks( hid_t fapl )
 {
 
-    hbool_t     do_fillvalue = 0;
+    hbool_t     do_fillvalue = FALSE;
+    hbool_t     disable_edge_filters = FALSE;
     hid_t       dcpl = -1;
     int         fillvalue = FILL_VALUE;
     unsigned    config;
@@ -247,6 +255,11 @@ static int do_ranks( hid_t fapl )
             if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
                 TEST_ERROR
 
+        if(config & CONFIG_UNFILT_EDGE)
+            disable_edge_filters = TRUE;
+        else
+            disable_edge_filters = FALSE;
+
         /* Run tests */
         if(do_fillvalue) {
             unsigned ifset;
@@ -261,25 +274,25 @@ static int do_ranks( hid_t fapl )
                     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
                         TEST_ERROR
 
-                if(test_rank1(fapl, dcpl, do_fillvalue, FALSE) < 0) {
+                if(test_rank1(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 1")
                     printf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET"
                             : "H5D_FILL_TIME_ALLOC"));
                     goto error;
                 } /* end if */
-                if(test_rank2(fapl, dcpl, do_fillvalue, FALSE) < 0) {
+                if(test_rank2(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 2")
                     printf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET"
                             : "H5D_FILL_TIME_ALLOC"));
                     goto error;
                 } /* end if */
-                if(test_rank3(fapl, dcpl, do_fillvalue, FALSE) < 0) {
+                if(test_rank3(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 3")
                     printf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET"
                             : "H5D_FILL_TIME_ALLOC"));
                     goto error;
                 } /* end if */
-                if(test_rank2(fapl, dcpl, do_fillvalue, TRUE) < 0) {
+                if(test_rank2(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 2 with non-default indexed storage B-tree")
                     printf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET"
                             : "H5D_FILL_TIME_ALLOC"));
@@ -293,19 +306,19 @@ static int do_ranks( hid_t fapl )
             if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
                 TEST_ERROR
 
-            if(test_rank1(fapl, dcpl, do_fillvalue, FALSE) < 0) {
+            if(test_rank1(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE) < 0) {
                 DO_RANKS_PRINT_CONFIG("Rank 1")
                 goto error;
             } /* end if */
-            if(test_rank2(fapl, dcpl, do_fillvalue, FALSE) < 0) {
+            if(test_rank2(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE) < 0) {
                 DO_RANKS_PRINT_CONFIG("Rank 2")
                 goto error;
             } /* end if */
-            if(test_rank3(fapl, dcpl, do_fillvalue, FALSE) < 0) {
+            if(test_rank3(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE) < 0) {
                 DO_RANKS_PRINT_CONFIG("Rank 3")
                 goto error;
             } /* end if */
-            if(test_rank2(fapl, dcpl, do_fillvalue, TRUE) < 0) {
+            if(test_rank2(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE) < 0) {
                 DO_RANKS_PRINT_CONFIG("Rank 2 with non-default indexed storage B-tree")
                 goto error;
             } /* end if */
@@ -316,13 +329,13 @@ static int do_ranks( hid_t fapl )
         if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET) < 0)
             TEST_ERROR
 
-        if(test_random_rank4(fapl, dcpl, do_fillvalue, FALSE) < 0) {
+        if(test_random_rank4(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE) < 0) {
             DO_RANKS_PRINT_CONFIG("Randomized rank 4")
             goto error;
         } /* end if */
 
         if(!(config & CONFIG_EARLY_ALLOC))
-            if(test_random_rank4(fapl, dcpl, do_fillvalue, TRUE) < 0) {
+            if(test_random_rank4(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE) < 0) {
                 DO_RANKS_PRINT_CONFIG("Randomized rank 4 with sparse allocation")
                 goto error;
             } /* end if */
@@ -376,6 +389,7 @@ error:
 static int test_rank1( hid_t fapl,
                        hid_t dcpl,
                        hbool_t do_fill_value,
+                       hbool_t disable_edge_filters,
                        hbool_t set_istore_k)
 {
 
@@ -433,6 +447,9 @@ static int test_rank1( hid_t fapl,
         TEST_ERROR
     if(H5Pset_chunk(my_dcpl, RANK1, dims_c) < 0)
         TEST_ERROR
+    if(disable_edge_filters)
+        if(H5Pset_chunk_opts(my_dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR
 
     /*-------------------------------------------------------------------------
      * create, write dataset
@@ -713,6 +730,7 @@ error:
 static int test_rank2( hid_t fapl,
                        hid_t dcpl,
                        hbool_t do_fill_value,
+                       hbool_t disable_edge_filters,
                        hbool_t set_istore_k)
 {
 
@@ -793,6 +811,9 @@ static int test_rank2( hid_t fapl,
     {
         TEST_ERROR
     }
+    if(disable_edge_filters)
+        if(H5Pset_chunk_opts(my_dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR
 
     /*-------------------------------------------------------------------------
     * Procedure 1
@@ -1328,6 +1349,7 @@ error:
 static int test_rank3( hid_t fapl,
                        hid_t dcpl,
                        hbool_t do_fill_value,
+                       hbool_t disable_edge_filters,
                        hbool_t set_istore_k)
 {
 
@@ -1414,6 +1436,9 @@ static int test_rank3( hid_t fapl,
     {
         TEST_ERROR
     }
+    if(disable_edge_filters)
+        if(H5Pset_chunk_opts(my_dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR
 
     /*-------------------------------------------------------------------------
     * create, write array
@@ -2488,7 +2513,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
-    hbool_t do_sparse )
+    hbool_t disable_edge_filters, hbool_t do_sparse )
 {
     hid_t       file = -1;
     hid_t       dset = -1;
@@ -2532,6 +2557,9 @@ static int test_random_rank4( hid_t fapl, hid_t dcpl, hbool_t do_fillvalue,
         TEST_ERROR
     if(H5Pset_chunk(my_dcpl, 4, cdims) < 0)
         TEST_ERROR
+    if(disable_edge_filters)
+        if(H5Pset_chunk_opts(my_dcpl, H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS) < 0)
+            TEST_ERROR
     if((dset = H5Dcreate2(file, "dset", H5T_NATIVE_INT, fspace, H5P_DEFAULT,
             my_dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR

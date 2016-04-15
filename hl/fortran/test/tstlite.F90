@@ -1300,11 +1300,14 @@ SUBROUTINE test_datasets()
   INTEGER(HID_T) :: file_id                            ! File identifier
   INTEGER        :: errcode                            ! Error flag
   INTEGER, PARAMETER :: DIM1 = 10                      ! Dimension of array
+  INTEGER, PARAMETER :: LEN0 = 3
+  INTEGER, PARAMETER :: LEN1 = 12
   CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"   ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"   ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname3 = "dset3"   ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname4 = "dset4"   ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname5 = "dset5"   ! Dataset name
+  CHARACTER(LEN=5), PARAMETER :: dsetname6 = "dset6"   ! Dataset name
   INTEGER(HSIZE_T), DIMENSION(1) :: dims = (/DIM1/)    ! Dataset dimensions
   INTEGER(HSIZE_T), DIMENSION(1) :: dimsr              ! Dataset dimensions
   INTEGER        :: rank = 1                           ! Dataset rank
@@ -1317,7 +1320,7 @@ SUBROUTINE test_datasets()
   REAL, DIMENSION(DIM1) , TARGET            :: bufr3   ! Data buffer
   DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: buf4    ! Data buffer
   DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: bufr4   ! Data buffer
-  INTEGER          :: i, n                             ! general purpose integer
+  INTEGER          :: i, j, n                          ! general purpose integer
   INTEGER          :: has                              ! general purpose integer
   INTEGER          :: type_class
   INTEGER(SIZE_T)  :: type_size
@@ -1325,6 +1328,17 @@ SUBROUTINE test_datasets()
   CHARACTER(LEN=6) :: chr_exact
   CHARACTER(LEN=8) :: chr_lg
   TYPE(C_PTR) :: f_ptr
+
+  ! vl data
+  TYPE vl
+     INTEGER, DIMENSION(:), POINTER :: DATA
+  END TYPE vl
+  TYPE(vl), DIMENSION(:), ALLOCATABLE, TARGET :: ptr
+  TYPE(hvl_t), DIMENSION(1:2), TARGET :: wdata ! Array of vlen structures
+  TYPE(hvl_t), DIMENSION(1:2), TARGET :: rdata ! Pointer to vlen structures
+  INTEGER(hsize_t), DIMENSION(1:1) :: dims_vl = (/2/)
+  INTEGER, DIMENSION(:), POINTER :: ptr_r
+  INTEGER(HID_T) :: type_id 
 
   !
   ! Initialize FORTRAN predefined datatypes.
@@ -1346,6 +1360,28 @@ SUBROUTINE test_datasets()
      buf4(i) = n
      n = n + 1
   END DO
+
+  !
+  ! Initialize variable-length data.  wdata(1) is a countdown of
+  ! length LEN0, wdata(2) is a Fibonacci sequence of length LEN1.
+  !
+  wdata(1)%len = LEN0
+  wdata(2)%len = LEN1
+
+  ALLOCATE( ptr(1:2) )
+  ALLOCATE( ptr(1)%data(1:wdata(1)%len) )
+  ALLOCATE( ptr(2)%data(1:wdata(2)%len) )
+
+  DO i=1, wdata(1)%len
+     ptr(1)%data(i) = wdata(1)%len - i + 1 ! 3 2 1
+  ENDDO
+  wdata(1)%p = C_LOC(ptr(1)%data(1))
+
+  ptr(2)%data(1:2) = 1
+  DO i = 3, wdata(2)%len
+     ptr(2)%data(i) = ptr(2)%data(i-1) + ptr(2)%data(i-2) ! (1 1 2 3 5 8 etc.)
+  ENDDO
+  wdata(2)%p = C_LOC(ptr(2)%data(1))
 
   !-------------------------------------------------------------------------
   ! int
@@ -1430,7 +1466,6 @@ SUBROUTINE test_datasets()
   !CALL h5ltread_dataset_f(file_id, dsetname4, H5T_NATIVE_DOUBLE, f_ptr, errcode)
   CALL h5ltread_dataset_double_f(file_id, dsetname4, bufr4, dims, errcode)
 
-
   !
   ! compare read and write buffers.
   !
@@ -1470,6 +1505,38 @@ SUBROUTINE test_datasets()
      PRINT *,  buf1, ' and ',   buf1r
      STOP
   ENDIF
+
+  CALL passed()
+
+
+  !-------------------------------------------------------------------------
+  ! variable-length dataset
+  !-------------------------------------------------------------------------
+  CALL test_begin(' Make/Read datasets (vl)        ')
+  !
+  ! Create variable-length datatype.
+  !
+  CALL H5Tvlen_create_f(H5T_NATIVE_INTEGER, type_id, errcode)
+
+  f_ptr = C_LOC(wdata(1))
+  CALL h5ltmake_dataset_f(file_id, dsetname6, 1, dims_vl, type_id, f_ptr, errcode)
+
+  ! Read the variable-length datatype
+  f_ptr = C_LOC(rdata(1))
+  CALL h5ltread_dataset_f(file_id, dsetname6, type_id, f_ptr, errcode)
+
+  DO i = 1, INT(dims_vl(1))
+     CALL c_f_pointer(rdata(i)%p, ptr_r, [rdata(i)%len] )
+     DO j = 1, rdata(i)%len
+        IF(ptr_r(j).NE.ptr(i)%data(j))THEN
+           PRINT *, 'Writing/Reading variable-length dataset failed'
+           STOP
+        ENDIF
+     ENDDO
+  ENDDO
+
+  CALL H5Tclose_f(type_id, errcode)
+  DEALLOCATE(ptr)
 
   CALL passed()
 
@@ -1528,7 +1595,6 @@ SUBROUTINE test_datasets()
 
   CALL passed()
 
-
   CALL test_begin(' Get dataset dimensions/info    ')
 
   !-------------------------------------------------------------------------
@@ -1573,6 +1639,8 @@ SUBROUTINE test_datasets()
      STOP
   ENDIF
 
+  CALL passed()
+
   !
   ! Close the file.
   !
@@ -1582,12 +1650,10 @@ SUBROUTINE test_datasets()
   !
   CALL h5close_f(errcode)
 
-  CALL passed()
   !
   ! end function.
   !
 END SUBROUTINE test_datasets
-
 
 
 !-------------------------------------------------------------------------

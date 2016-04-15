@@ -54,6 +54,8 @@ typedef enum H5B2_subid_t {
     H5B2_SOHM_INDEX_ID,         /* B-tree is an index for shared object header messages */
     H5B2_ATTR_DENSE_NAME_ID,    /* B-tree is for indexing 'name' field for "dense" attribute storage on objects */
     H5B2_ATTR_DENSE_CORDER_ID,  /* B-tree is for indexing 'creation order' field for "dense" attribute storage on objects */
+    H5B2_CDSET_ID,              /* B-tree is for non-filtered chunked dataset storage w/ >1 unlim dims */
+    H5B2_CDSET_FILT_ID,         /* B-tree is for filtered chunked dataset storage w/ >1 unlim dims */
     H5B2_TEST2_ID,		/* Another B-tree is for testing (do not use for actual data) */
     H5B2_NUM_BTREE_ID           /* Number of B-tree IDs (must be last)  */
 } H5B2_subid_t;
@@ -151,6 +153,7 @@ H5_DLL herr_t H5B2_size(H5B2_t *bt2, hid_t dxpl_id,
 H5_DLL herr_t H5B2_close(H5B2_t *bt2, hid_t dxpl_id);
 H5_DLL herr_t H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     void *ctx_udata, H5B2_remove_t op, void *op_data);
+H5_DLL herr_t H5B2_patch_file(H5B2_t *fa, H5F_t *f);
 
 /* Statistics routines */
 H5_DLL herr_t H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info);
