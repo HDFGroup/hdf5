@@ -130,7 +130,7 @@
 
     /* GetDatatype
      * Returns the datatype identifier used by the packet table, on success,
-     * or FAIL, on failure.
+     * or H5I_INVALID_HID, on failure.
      * Note: it is best to avoid using this identifier in applications, unless
      * the desired functionality cannot be performed via the packet table ID.
      */
@@ -141,7 +141,7 @@
 
     /* GetDataset
      * Returns the dataset identifier associated with the packet table, on
-     * success, or FAIL, on failure.
+     * success, or H5I_INVALID_HID, on failure.
      * Note: it is best to avoid using this identifier in applications, unless
      * the desired functionality cannot be performed via the packet table ID.
      */
