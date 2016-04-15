@@ -16,8 +16,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5Pdapl.c
- *			October 27, 2008
- *			Neil Fortner <nfortne2@hdfgroup.org>
+ *              October 27, 2008
+ *              Neil Fortner <nfortne2@hdfgroup.org>
  *
  * Purpose:		Dataset access property list class routines
  *
@@ -38,7 +38,8 @@
 #include "H5Eprivate.h"		/* Error handling */
 #include "H5Fprivate.h"		/* Files */
 #include "H5Iprivate.h"		/* IDs */
-#include "H5Ppkg.h"		/* Property lists */
+#include "H5Ppkg.h"         /* Property lists */
+#include "H5MMprivate.h"	/* Memory management */
 
 
 /****************/
@@ -55,6 +56,15 @@
 /* Definition for preemption read chunks first */
 #define H5D_ACS_PREEMPT_READ_CHUNKS_SIZE        sizeof(double)
 #define H5D_ACS_PREEMPT_READ_CHUNKS_DEF         H5D_CHUNK_CACHE_W0_DEFAULT
+/* Definitions for external file prefix */
+#define H5D_ACS_EFILE_PREFIX_SIZE               sizeof(char *)
+#define H5D_ACS_EFILE_PREFIX_DEF                NULL /*default is no prefix */
+#define H5D_ACS_EFILE_PREFIX_SET                H5P__dapl_efile_pref_set
+#define H5D_ACS_EFILE_PREFIX_GET                H5P__dapl_efile_pref_get
+#define H5D_ACS_EFILE_PREFIX_DEL                H5P__dapl_efile_pref_del
+#define H5D_ACS_EFILE_PREFIX_COPY               H5P__dapl_efile_pref_copy
+#define H5D_ACS_EFILE_PREFIX_CMP                H5P__dapl_efile_pref_cmp
+#define H5D_ACS_EFILE_PREFIX_CLOSE              H5P__dapl_efile_pref_close
 
 
 /******************/
@@ -73,6 +83,14 @@
 
 /* Property class callbacks */
 static herr_t H5P__dacc_reg_prop(H5P_genclass_t *pclass);
+
+/* Property list callbacks */
+static herr_t H5P__dapl_efile_pref_set(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__dapl_efile_pref_get(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__dapl_efile_pref_del(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__dapl_efile_pref_copy(const char* name, size_t size, void* value);
+static int H5P__dapl_efile_pref_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__dapl_efile_pref_close(const char* name, size_t size, void* value);
 
 
 /*********************/
@@ -107,6 +125,9 @@ const H5P_libclass_t H5P_CLS_DACC[1] = {{
 /*******************/
 /* Local Variables */
 /*******************/
+
+/* Property value defaults */
+static const char *H5D_def_efile_prefix_g = H5D_ACS_EFILE_PREFIX_DEF; /* Default external file prefix string */
 
 
 
@@ -144,9 +165,166 @@ H5P__dacc_reg_prop(H5P_genclass_t *pclass)
     if(H5P_register_real(pclass, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, H5D_ACS_PREEMPT_READ_CHUNKS_SIZE, &rdcc_w0, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register property for external file prefix */
+    if(H5P_register_real(pclass, H5D_ACS_EFILE_PREFIX_NAME, H5D_ACS_EFILE_PREFIX_SIZE, &H5D_def_efile_prefix_g, 
+            NULL, H5D_ACS_EFILE_PREFIX_SET, H5D_ACS_EFILE_PREFIX_GET,
+            H5D_ACS_EFILE_PREFIX_DEL, H5D_ACS_EFILE_PREFIX_COPY, H5D_ACS_EFILE_PREFIX_CMP, H5D_ACS_EFILE_PREFIX_CLOSE) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dacc_reg_prop() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dapl_efile_pref_set
+ *
+ * Purpose:     Copies an external file prefix property when it's set
+ *              for a property list
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dapl_efile_pref_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Copy the prefix */
+    *(char **)value = H5MM_xstrdup(*(const char **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__dapl_efile_pref_set() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dapl_efile_pref_get
+ *
+ * Purpose:     Copies an external file prefix property when it's retrieved
+ *              from a property list
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dapl_efile_pref_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(value);
+
+    /* Copy the prefix */
+    *(char **)value = H5MM_xstrdup(*(const char **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__dapl_efile_pref_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dapl_efile_pref_del
+ *
+ * Purpose:     Frees memory used to store the external file prefix string
+ *
+ * Return:      SUCCEED (Can't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dapl_efile_pref_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+    size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(value);
+
+    H5MM_xfree(*(void **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__dapl_efile_pref_del() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dapl_efile_pref_copy
+ *
+ * Purpose:     Creates a copy of the external file prefix string
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dapl_efile_pref_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(value);
+
+    *(char **)value = H5MM_xstrdup(*(const char **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__dapl_efile_pref_copy() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:       H5P__dapl_efile_pref_cmp
+ *
+ * Purpose:        Callback routine which is called whenever the efile prefix
+ *                 property in the dataset creation property list is
+ *                 compared.
+ *
+ * Return:         zero if VALUE1 and VALUE2 are equal, non zero otherwise.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5P__dapl_efile_pref_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
+{
+    const char *pref1 = *(const char * const *)value1;
+    const char *pref2 = *(const char * const *)value2;
+    int ret_value = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if(NULL == pref1 && NULL != pref2)
+        HGOTO_DONE(1);
+    if(NULL != pref1 && NULL == pref2)
+        HGOTO_DONE(-1);
+    if(NULL != pref1 && NULL != pref2)
+        ret_value = HDstrcmp(pref1, pref2);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__dapl_efile_pref_cmp() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__dapl_efile_pref_close
+ *
+ * Purpose:     Frees memory used to store the external file prefix string
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__dapl_efile_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(value);
+
+    H5MM_xfree(*(void **)value);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__dapl_efile_pref_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -275,4 +453,96 @@ H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots, size_t *rdcc_nbytes, doub
 done:
     FUNC_LEAVE_API(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_efile_prefix
+ *
+ * Purpose:     Set a prefix to be used for any external files.
+ *
+ *              If the prefix starts with ${ORIGIN}, this will be replaced by
+ *              the absolute path of the directory of the HDF5 file containing
+ *              the dataset.
+ *
+ *              If the prefix is ".", no prefix will be applied.
+ *
+ *              This property can be overwritten by the environment variable
+ *              HDF5_EXTFILE_PREFIX.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_efile_prefix(hid_t plist_id, const char *prefix)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*s", plist_id, prefix);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set prefix */
+    if(H5P_set(plist, H5D_ACS_EFILE_PREFIX_NAME, &prefix) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set prefix info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_efile_prefix() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_efile_prefix
+ *
+ * Purpose:	Gets the prefix to be used for any external files.
+ *
+ *              If the pointer is not NULL, it points to a user-allocated
+ *              buffer.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+ssize_t
+H5Pget_efile_prefix(hid_t plist_id, char *prefix, size_t size)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    char *my_prefix;                    /* Library's copy of the prefix */
+    size_t	len;                    /* Length of prefix string */
+    ssize_t 	ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("Zs", "i*sz", plist_id, prefix, size);
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get the current prefix */
+    /* No error checking possible */
+    my_prefix = (char *)H5P_peek_voidp(plist, H5D_ACS_EFILE_PREFIX_NAME);
+
+    /* Check for prefix being set */
+    if(my_prefix) {
+        /* Copy to user's buffer, if given */
+        len = HDstrlen(my_prefix);
+        if(prefix) {
+            HDstrncpy(prefix, my_prefix, MIN(len + 1, size));
+            if(len >= size)
+                prefix[size - 1] = '\0';
+        } /* end if */
+    } /* end if */
+    else
+        len = 0;
+
+    /* Set return value */
+    ret_value = (ssize_t)len;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_efile_prefix() */
 

@@ -1116,6 +1116,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDsetbuf
     #define HDsetbuf(F,S)    setbuf(F,S)
 #endif /* HDsetbuf */
+#ifndef HDsetenv
+    #define HDsetenv(N,V,O)    setenv(N,V,O)
+#endif /* HDsetenv */
 #ifndef HDsetgid
     #define HDsetgid(G)    setgid(G)
 #endif /* HDsetgid */
@@ -2108,7 +2111,8 @@ H5_DLL uint32_t H5_checksum_metadata(const void *data, size_t len, uint32_t init
 H5_DLL uint32_t H5_hash_string(const char *str);
 
 /* Functions for building paths, etc. */
-H5_DLL herr_t   H5_build_extpath(const char *, char ** /*out*/ );
+H5_DLL herr_t   H5_build_extpath(const char *name, char **extpath /*out*/);
+H5_DLL herr_t   H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
 
 /* Functions for debugging */
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf,

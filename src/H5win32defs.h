@@ -71,23 +71,27 @@ struct timezone {
 };
 
 #ifdef __cplusplus
-        extern "C" {
+extern "C" {
 #endif /* __cplusplus */
-        H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
-        H5_DLL char* Wgetlogin(void);
-        H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
-        H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
+    H5_DLL int Wgettimeofday(struct timeval *tv, struct timezone *tz);
+    H5_DLL int Wsetenv(const char *name, const char *value, int overwrite);
+    H5_DLL char* Wgetlogin(void);
+    H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
+    H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
 #ifdef __cplusplus
-        }
+}
 #endif /* __cplusplus */
+
 #define HDgettimeofday(V,Z) Wgettimeofday(V,Z)
+#define HDsetenv(N,V,O)     Wsetenv(N,V,O)
 #define HDgetlogin()        Wgetlogin()
 #define HDsnprintf          c99_snprintf /*varargs*/
-#define HDvsnprintf         c99_vsnprintf
-#if _MSC_VER >= 1900  // VS 2015
-    // In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
-    // variable declared in time.h. That variable was deprecated and in VS 2015
-    // is removed, with _get_timezone replacing it.
+#define HDvsnprintf         c99_vsnprintf /*varargs*/
+#if _MSC_VER >= 1900  /* VS 2015 */
+    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
+     * variable declared in time.h. That variable was deprecated and in VS 2015
+     * is removed, with _get_timezone replacing it.
+     */
     #define HDget_timezone(V)    _get_timezone(V);
 #endif
 
@@ -102,5 +106,7 @@ struct timezone {
 #ifndef H5_HAVE_MINGW
 #define HDftruncate(F,L)    _chsize_s(F,L)
 #define HDfseek(F,O,W)      _fseeki64(F,O,W)
-#endif
+#endif /* H5_HAVE_MINGW */
+
 #endif /* H5_HAVE_WIN32_API */
+
