@@ -67,12 +67,15 @@ foreach (h5_file ${HDF_JAVA_TEST_FILES})
 endforeach (h5_file ${HDF_JAVA_TEST_FILES})
 
 MACRO (ADD_H5_TEST resultfile resultcode)
+  if (CMAKE_BUILD_TYPE MATCHES Debug)
+    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+  endif(CMAKE_BUILD_TYPE MATCHES Debug)
   add_test (
       NAME JAVA_groups-${resultfile}
       COMMAND "${CMAKE_COMMAND}"
           -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
           -D "TEST_PROGRAM=examples.groups.${resultfile}"
-          -D "TEST_ARGS:STRING=${ARGN}"
+          -D "TEST_ARGS:STRING=${CMD_ARGS}${ARGN}"
           -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${resultfile}_JAR_FILE}"
           -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
           -D "TEST_FOLDER=${HDFJAVA_EXAMPLES_BINARY_DIR}"
