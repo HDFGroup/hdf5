@@ -270,10 +270,7 @@ main(int argc, char *argv[])
     /*
      * Open the file and get the file descriptor.
      */
-    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0) {
-        HDfprintf(stderr, "cannot create dataset transfer property list\n");
-        HDexit(1);
-    } /* end if */
+    dxpl = H5AC_ind_read_dxpl_id;
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         HDfprintf(stderr, "cannot create file access property list\n");
         HDexit(1);
@@ -710,7 +707,6 @@ main(int argc, char *argv[])
         HDexit(5);
     } /* end if */
 
-    H5Pclose(dxpl);
     H5Pclose(fapl);
     H5Fclose(fid);
 
