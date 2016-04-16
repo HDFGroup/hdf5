@@ -1067,7 +1067,7 @@ H5D__earray_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *uda
     } /* end if */
     else {
         /* Calculate the index of this chunk */
-        idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->down_chunks, udata->common.scaled);
+        idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->max_down_chunks, udata->common.scaled);
     } /* end else */
 
     udata->chunk_idx = idx;
@@ -1147,6 +1147,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__earray_idx_resize() */
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5D__earray_idx_iterate_cb
  *
@@ -1193,7 +1194,7 @@ H5D__earray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *
         udata->chunk_rec.scaled[curr_dim]++;
 
         /* Check if we went off the end of the current dimension */
-        if(udata->chunk_rec.scaled[curr_dim] >= udata->common.layout->chunks[curr_dim]) {
+        if(udata->chunk_rec.scaled[curr_dim] >= udata->common.layout->max_chunks[curr_dim]) {
             /* Reset coordinate & move to next faster dimension */
             udata->chunk_rec.scaled[curr_dim] = 0;
             curr_dim--;
@@ -1340,7 +1341,7 @@ H5D__earray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
     } /* end if */
     else {
         /* Calculate the index of this chunk */
-        idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->down_chunks, udata->scaled);
+        idx = H5VM_array_offset_pre((idx_info->layout->ndims - 1), idx_info->layout->max_down_chunks, udata->scaled);
     } /* end else */
 
     /* Check for filters on chunks */

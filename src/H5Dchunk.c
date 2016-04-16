@@ -506,7 +506,10 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims,
     for(u = 0, layout->nchunks = 1, layout->max_nchunks = 1; u < ndims; u++) {
         /* Round up to the next integer # of chunks, to accomodate partial chunks */
 	layout->chunks[u] = ((curr_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
-	layout->max_chunks[u] = ((max_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
+        if(H5S_UNLIMITED == max_dims[u])
+            layout->max_chunks[u] = H5S_UNLIMITED;
+        else
+            layout->max_chunks[u] = ((max_dims[u] + layout->dim[u]) - 1) / layout->dim[u];
 
         /* Accumulate the # of chunks */
 	layout->nchunks *= layout->chunks[u];
@@ -5520,7 +5523,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     } /* end if */
 
     udata_dst.chunk_idx = H5VM_array_offset_pre(udata_dst.common.layout->ndims - 1, 
-			    udata_dst.common.layout->down_chunks, udata_dst.common.scaled);
+			    udata_dst.common.layout->max_down_chunks, udata_dst.common.scaled);
 
     /* Allocate chunk in the file */
     if(H5D__chunk_file_alloc(udata->idx_info_dst, NULL, &udata_dst.chunk_block, &need_insert) < 0)
@@ -5772,6 +5775,8 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src,
     udata.buf_space = buf_space;
     udata.nelmts = nelmts;
     udata.pline = pline;
+    udata.dset_ndims = (unsigned)sndims;
+    udata.dset_dims = curr_dims;
     udata.cpy_info = cpy_info;
 
     /* Iterate over chunks to copy data */

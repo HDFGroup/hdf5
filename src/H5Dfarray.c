@@ -1085,7 +1085,7 @@ H5D__farray_idx_iterate_cb(hsize_t H5_ATTR_UNUSED idx, const void *_elmt, void *
         udata->chunk_rec.scaled[curr_dim]++;
 
         /* Check if we went off the end of the current dimension */
-        if(udata->chunk_rec.scaled[curr_dim] >= udata->common.layout->chunks[curr_dim]) {
+        if(udata->chunk_rec.scaled[curr_dim] >= udata->common.layout->max_chunks[curr_dim]) {
             /* Reset coordinate & move to next faster dimension */
             udata->chunk_rec.scaled[curr_dim] = 0;
             curr_dim--;

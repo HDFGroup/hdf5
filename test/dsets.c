@@ -51,6 +51,7 @@ const char *FILENAME[] = {
     "partial_chunks",   /* 14 */
     "layout_extend",    /* 15 */
     "zero_chunk",	/* 16 */
+    "storage_size",	/* 17 */
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -203,6 +204,14 @@ const char *FILENAME[] = {
 #define BYPASS_DIM               1000
 #define BYPASS_CHUNK_DIM         500
 #define BYPASS_FILL_VALUE        7
+
+/* Parameters for datasets in query storage size tests */
+#define STORAGE_SIZE_DIM1       12
+#define STORAGE_SIZE_DIM2       6
+#define STORAGE_SIZE_MAX_DIM1   100
+#define STORAGE_SIZE_MAX_DIM2   80
+#define STORAGE_SIZE_CHUNK_DIM1 5
+#define STORAGE_SIZE_CHUNK_DIM2 5
 
 /* Shared global arrays */
 #define DSET_DIM1       100
@@ -8652,6 +8661,400 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function: test_storage_size
+ *
+ * Purpose:     Tests results from querying the storage size of a dataset,
+ *              before/after extending the dimensions.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Monday, April 11, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_storage_size(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dcpl = -1, dcpl2 = -1;  /* Dataset creation property list IDs */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hid_t       dsid = -1;      /* Dataset ID */
+    hsize_t     dims[2], max_dims[2]; /* Dataset dimensions */
+    hsize_t     new_dims[2];    /* New dataset dimensions */
+    hsize_t     chunk_dims[2];  /* Chunk dimensions */
+    int         wdata[STORAGE_SIZE_DIM1][STORAGE_SIZE_DIM2];
+    hsize_t     ssize;          /* Dataset storage size */
+
+    TESTING("querying storage size");
+
+    h5_fixname(FILENAME[16], fapl, filename, sizeof filename);
+
+    /* Create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+
+    /* Set chunk size */
+    chunk_dims[0] = STORAGE_SIZE_CHUNK_DIM1;
+    chunk_dims[1] = STORAGE_SIZE_CHUNK_DIM2;
+    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0) FAIL_STACK_ERROR
+
+    /* Copy the DCPL, and set it to early allocation */
+    if((dcpl2 = H5Pcopy(dcpl)) < 0) FAIL_STACK_ERROR
+    if(H5Pset_alloc_time(dcpl2, H5D_ALLOC_TIME_EARLY) < 0) FAIL_STACK_ERROR
+
+    /* Create 2D dataspace, with max dims same as current dimensions */
+    dims[0] = STORAGE_SIZE_DIM1;
+    dims[1] = STORAGE_SIZE_DIM2;
+    max_dims[0] = STORAGE_SIZE_DIM1;
+    max_dims[1] = STORAGE_SIZE_DIM2;
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0) FAIL_STACK_ERROR
+
+    /* Create chunked dataset */
+    if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Initialize buffer to zeroes */
+    HDmemset(wdata, 0, sizeof(wdata));
+
+    /* write elements to dataset */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close dataset & dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+    /* Copy the dataset */
+    if(H5Ocopy(fid, "dset", fid, "dset_copy", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Open the copied dataset */
+    if((dsid = H5Dopen2(fid, "dset_copy", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close copied dataset */
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+
+    /* Create 2D dataspace with max dims > current dims (but not unlimited) */
+    dims[0] = STORAGE_SIZE_DIM1;
+    dims[1] = STORAGE_SIZE_DIM2;
+    max_dims[0] = STORAGE_SIZE_MAX_DIM1;
+    max_dims[1] = STORAGE_SIZE_MAX_DIM2;
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0) FAIL_STACK_ERROR
+
+    /* Create chunked dataset */
+    if((dsid = H5Dcreate2(fid, "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Initialize buffer to zeroes */
+    HDmemset(wdata, 0, sizeof(wdata));
+
+    /* write elements to dataset */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Extend dataset's dimensions */
+    new_dims[0] = STORAGE_SIZE_DIM1 * 2;
+    new_dims[1] = STORAGE_SIZE_DIM2 * 2;
+    if(H5Dset_extent(dsid, new_dims) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close dataset & dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+    /* Copy the dataset */
+    if(H5Ocopy(fid, "dset2", fid, "dset2_copy", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Open the copied dataset */
+    if((dsid = H5Dopen2(fid, "dset2_copy", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close copied dataset */
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+
+    /* Create 2D dataspace with max dims > current dims (but not unlimited) */
+    dims[0] = STORAGE_SIZE_DIM1;
+    dims[1] = STORAGE_SIZE_DIM2;
+    max_dims[0] = STORAGE_SIZE_MAX_DIM1;
+    max_dims[1] = STORAGE_SIZE_MAX_DIM2;
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0) FAIL_STACK_ERROR
+
+    /* Create chunked dataset, w/early allocation */
+    if((dsid = H5Dcreate2(fid, "dset2a", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Initialize buffer to zeroes */
+    HDmemset(wdata, 0, sizeof(wdata));
+
+    /* write elements to dataset */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Extend dataset's dimensions */
+    new_dims[0] = STORAGE_SIZE_DIM1 * 2;
+    new_dims[1] = STORAGE_SIZE_DIM2 * 2;
+    if(H5Dset_extent(dsid, new_dims) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 15 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close dataset & dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+    /* Copy the dataset */
+    if(H5Ocopy(fid, "dset2a", fid, "dset2a_copy", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Open the copied dataset */
+    if((dsid = H5Dopen2(fid, "dset2a_copy", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 15 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close copied dataset */
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+
+    /* Create 2D dataspace with max dims > current dims (and 1 unlimited dim) */
+    dims[0] = STORAGE_SIZE_DIM1;
+    dims[1] = STORAGE_SIZE_DIM2;
+    max_dims[0] = H5S_UNLIMITED;
+    max_dims[1] = STORAGE_SIZE_MAX_DIM2;
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0) FAIL_STACK_ERROR
+
+    /* Create chunked dataset */
+    if((dsid = H5Dcreate2(fid, "dset3", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Initialize buffer to zeroes */
+    HDmemset(wdata, 0, sizeof(wdata));
+
+    /* write elements to dataset */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Extend dataset's dimensions */
+    new_dims[0] = STORAGE_SIZE_DIM1 * 2;
+    new_dims[1] = STORAGE_SIZE_DIM2 * 2;
+    if(H5Dset_extent(dsid, new_dims) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close dataset & dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+    /* Copy the dataset */
+    if(H5Ocopy(fid, "dset3", fid, "dset3_copy", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Open the copied dataset */
+    if((dsid = H5Dopen2(fid, "dset3_copy", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close copied dataset */
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+
+    /* Create 2D dataspace with max dims > current dims (and 1 unlimited dim) */
+    dims[0] = STORAGE_SIZE_DIM1;
+    dims[1] = STORAGE_SIZE_DIM2;
+    max_dims[0] = H5S_UNLIMITED;
+    max_dims[1] = STORAGE_SIZE_MAX_DIM2;
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0) FAIL_STACK_ERROR
+
+    /* Create chunked dataset, w/early allocation */
+    if((dsid = H5Dcreate2(fid, "dset3a", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Initialize buffer to zeroes */
+    HDmemset(wdata, 0, sizeof(wdata));
+
+    /* write elements to dataset */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Extend dataset's dimensions */
+    new_dims[0] = STORAGE_SIZE_DIM1 * 2;
+    new_dims[1] = STORAGE_SIZE_DIM2 * 2;
+    if(H5Dset_extent(dsid, new_dims) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 15 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close dataset & dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+    /* Copy the dataset */
+    if(H5Ocopy(fid, "dset3a", fid, "dset3a_copy", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Open the copied dataset */
+    if((dsid = H5Dopen2(fid, "dset3a_copy", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 15 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close copied dataset */
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+
+    /* Create 2D dataspace with max dims > current dims (and 2 unlimited dims) */
+    dims[0] = STORAGE_SIZE_DIM1;
+    dims[1] = STORAGE_SIZE_DIM2;
+    max_dims[0] = H5S_UNLIMITED;
+    max_dims[1] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0) FAIL_STACK_ERROR
+
+    /* Create chunked dataset */
+    if((dsid = H5Dcreate2(fid, "dset4", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Initialize buffer to zeroes */
+    HDmemset(wdata, 0, sizeof(wdata));
+
+    /* write elements to dataset */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Extend dataset's dimensions */
+    new_dims[0] = STORAGE_SIZE_DIM1 * 2;
+    new_dims[1] = STORAGE_SIZE_DIM2 * 2;
+    if(H5Dset_extent(dsid, new_dims) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close dataset & dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+    /* Copy the dataset */
+    if(H5Ocopy(fid, "dset4", fid, "dset4_copy", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Open the copied dataset */
+    if((dsid = H5Dopen2(fid, "dset4_copy", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close copied dataset */
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+
+    /* Create 2D dataspace with max dims > current dims (and 2 unlimited dims) */
+    dims[0] = STORAGE_SIZE_DIM1;
+    dims[1] = STORAGE_SIZE_DIM2;
+    max_dims[0] = H5S_UNLIMITED;
+    max_dims[1] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0) FAIL_STACK_ERROR
+
+    /* Create chunked dataset, w/early allocation */
+    if((dsid = H5Dcreate2(fid, "dset4a", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl2, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Initialize buffer to zeroes */
+    HDmemset(wdata, 0, sizeof(wdata));
+
+    /* write elements to dataset */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, wdata) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 6 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Extend dataset's dimensions */
+    new_dims[0] = STORAGE_SIZE_DIM1 * 2;
+    new_dims[1] = STORAGE_SIZE_DIM2 * 2;
+    if(H5Dset_extent(dsid, new_dims) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 15 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close dataset & dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+    /* Copy the dataset */
+    if(H5Ocopy(fid, "dset4a", fid, "dset4a_copy", H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Open the copied dataset */
+    if((dsid = H5Dopen2(fid, "dset4a_copy", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Get the storage size */
+    if(0 == (ssize = H5Dget_storage_size(dsid))) FAIL_STACK_ERROR
+    if((sizeof(int) * 15 * STORAGE_SIZE_CHUNK_DIM1 * STORAGE_SIZE_CHUNK_DIM2) != ssize) TEST_ERROR
+
+    /* Close copied dataset */
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+
+    /* Close rest */
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Pclose(dcpl2);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_storage_size() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_scatter
  *
  * Purpose:     Tests H5Dscatter with a variety of different selections
@@ -9803,6 +10206,7 @@ main(void)
         nerrors += (test_unfiltered_edge_chunks(my_fapl) < 0    ? 1 : 0);
         nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
         nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
+        nerrors += (test_storage_size(my_fapl) < 0              ? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;
