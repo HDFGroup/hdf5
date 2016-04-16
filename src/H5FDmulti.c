@@ -899,25 +899,30 @@ H5FD_multi_fapl_copy(const void *_old_fa)
     memcpy(new_fa, old_fa, sizeof(H5FD_multi_fapl_t));
     ALL_MEMBERS(mt) {
 	if (old_fa->memb_fapl[mt]>=0) {
-	    new_fa->memb_fapl[mt] = H5Pcopy(old_fa->memb_fapl[mt]);
-	    if(new_fa->memb_fapl[mt]<0)
+	    if (H5Iinc_ref(old_fa->memb_fapl[mt]) < 0) {
                 nerrors++;
+                break;
+            }
+	    new_fa->memb_fapl[mt] = old_fa->memb_fapl[mt];
 	}
 	if (old_fa->memb_name[mt]) {
 	    new_fa->memb_name[mt] = my_strdup(old_fa->memb_name[mt]);
-	    assert(new_fa->memb_name[mt]);
+            if (NULL == new_fa->memb_name[mt]) {
+                nerrors++;
+                break;
+            }
 	}
     } END_MEMBERS;
 
     if (nerrors) {
         ALL_MEMBERS(mt) {
             if (new_fa->memb_fapl[mt]>=0)
-                (void)H5Pclose(new_fa->memb_fapl[mt]);
+                (void)H5Idec_ref(new_fa->memb_fapl[mt]);
             if (new_fa->memb_name[mt])
                 free(new_fa->memb_name[mt]);
         } END_MEMBERS;
         free(new_fa);
-        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "invalid freespace objects", NULL)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "can't release object on error", NULL)
     }
     return new_fa;
 }
@@ -948,7 +953,7 @@ H5FD_multi_fapl_free(void *_fa)
 
     ALL_MEMBERS(mt) {
 	if (fa->memb_fapl[mt]>=0)
-            if(H5Pclose(fa->memb_fapl[mt])<0)
+            if(H5Idec_ref(fa->memb_fapl[mt])<0)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTCLOSEOBJ, "can't close property list", -1)
 	if (fa->memb_name[mt])
             free(fa->memb_name[mt]);
@@ -1013,9 +1018,8 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
 	file->fa.memb_map[mt] = fa->memb_map[mt];
 	file->fa.memb_addr[mt] = fa->memb_addr[mt];
 	if (fa->memb_fapl[mt]>=0)
-	    file->fa.memb_fapl[mt] = H5Pcopy(fa->memb_fapl[mt]);
-	else
-	    file->fa.memb_fapl[mt] = fa->memb_fapl[mt];
+	    H5Iinc_ref(fa->memb_fapl[mt]);
+        file->fa.memb_fapl[mt] = fa->memb_fapl[mt];
 	if (fa->memb_name[mt])
 	    file->fa.memb_name[mt] = my_strdup(fa->memb_name[mt]);
 	else
@@ -1047,7 +1051,7 @@ error:
     if (file) {
 	ALL_MEMBERS(mt) {
 	    if (file->memb[mt]) (void)H5FDclose(file->memb[mt]);
-	    if (file->fa.memb_fapl[mt]>=0) (void)H5Pclose(file->fa.memb_fapl[mt]);
+	    if (file->fa.memb_fapl[mt]>=0) (void)H5Idec_ref(file->fa.memb_fapl[mt]);
 	    if (file->fa.memb_name[mt]) free(file->fa.memb_name[mt]);
 	} END_MEMBERS;
 	if (file->name) free(file->name);
@@ -1098,7 +1102,7 @@ H5FD_multi_close(H5FD_t *_file)
 
     /* Clean up other stuff */
     ALL_MEMBERS(mt) {
-	if (file->fa.memb_fapl[mt]>=0) (void)H5Pclose(file->fa.memb_fapl[mt]);
+	if (file->fa.memb_fapl[mt]>=0) (void)H5Idec_ref(file->fa.memb_fapl[mt]);
 	if (file->fa.memb_name[mt]) free(file->fa.memb_name[mt]);
     } END_MEMBERS;
     free(file->name);
