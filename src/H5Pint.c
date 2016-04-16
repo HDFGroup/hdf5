@@ -524,7 +524,7 @@ H5P_term_package(void)
             if(nlist == 0 && nclass > 0) {
                 (void)H5I_clear_type(H5I_GENPROP_CLS, FALSE, FALSE);
 
-                /* Reset the default property lists, if they've been closed */
+                /* Reset the default property classes, if they've been closed */
                 if(H5I_nmembers(H5I_GENPROP_CLS) == 0) {
                         H5P_CLS_ROOT_g =
                         H5P_CLS_OBJECT_CREATE_g =
