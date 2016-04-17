@@ -28,7 +28,6 @@
 ./Makefile.dist
 ./Makefile.am
 ./README.txt
-./BRANCH.txt
 ./acsite.m4
 ./autogen.sh
 ./configure.ac
@@ -868,6 +867,8 @@
 ./test/be_extlink2.h5
 ./test/big.c
 ./test/bittests.c
+./test/btree_idx_1_6.h5
+./test/btree_idx_1_8.h5
 ./test/btree2.c
 ./test/cache.c
 ./test/cache_api.c
