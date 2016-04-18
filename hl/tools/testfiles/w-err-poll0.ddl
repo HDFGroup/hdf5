@@ -1,6 +1,3 @@
-#############################
- output for 'h5watch --polling=0 WATCH.h5/DSET_ONE'
-#############################
 Usage: h5watch [OPTIONS] [OBJECT]
 
      OPTIONS

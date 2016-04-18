@@ -13,6 +13,7 @@ set (HL_SRCS
     ${HDF5_HL_SRC_SOURCE_DIR}/H5LTparse.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5PT.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5TB.c
+    ${HDF5_HL_SRC_SOURCE_DIR}/H5LD.c
 )
 
 set (HL_HEADERS
@@ -24,6 +25,7 @@ set (HL_HEADERS
     ${HDF5_HL_SRC_SOURCE_DIR}/H5LTpublic.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5PTpublic.h
     ${HDF5_HL_SRC_SOURCE_DIR}/H5TBpublic.h
+    ${HDF5_HL_SRC_SOURCE_DIR}/H5LDpublic.h
     ${HDF5_HL_SRC_SOURCE_DIR}/hdf5_hl.h
 )
 

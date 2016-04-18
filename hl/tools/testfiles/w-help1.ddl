@@ -1,6 +1,3 @@
-#############################
- output for 'h5watch --help'
-#############################
 Usage: h5watch [OPTIONS] [OBJECT]
 
      OPTIONS

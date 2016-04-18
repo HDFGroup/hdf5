@@ -1,10 +1,10 @@
-HDF5 "out-vds_dset_compa.1_vds.h5" {
+HDF5 "out-vds_dset_chunk20x10x5.1_vds.h5" {
 DATASET "vds_dset" {
    DATATYPE  H5T_STD_I32LE
-   DATASPACE  SIMPLE { ( 5, 18, 8 ) / ( 5, 18, 8 ) }
+   DATASPACE  SIMPLE { ( 5, 18, 8 ) / ( H5S_UNLIMITED, 18, 8 ) }
    STORAGE_LAYOUT {
-      COMPACT
-      SIZE 2880
+      CHUNKED ( 20, 10, 5 )
+      SIZE 16000
    }
    FILTERS {
       NONE
@@ -14,7 +14,7 @@ DATASET "vds_dset" {
       VALUE  -9
    }
    ALLOCATION_TIME {
-      H5D_ALLOC_TIME_EARLY
+      H5D_ALLOC_TIME_INCR
    }
    DATA {
    (0,0,0): 10, 10, 10, 10, 10, 10, 10, 10,

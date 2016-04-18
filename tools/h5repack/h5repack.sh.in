@@ -150,15 +150,10 @@ $SRC_H5REPACK_TESTFILES/h5repack_layout.h5.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_filters.h5.tst
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
 $SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
-$SRC_H5REPACK_TESTFILES/1_vds.h5-vds_dset_compa-v.ddl
-$SRC_H5REPACK_TESTFILES/1_vds.h5-vds_dset_conti-v.ddl
-$SRC_H5REPACK_TESTFILES/2_vds.h5-vds_null_compa-v.ddl
-$SRC_H5REPACK_TESTFILES/2_vds.h5-vds_null_conti-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa_compa-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa_conti-v.ddl
+$SRC_H5REPACK_TESTFILES/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
+$SRC_H5REPACK_TESTFILES/2_vds.h5-vds_chunk3x6x9-v.ddl
+$SRC_H5REPACK_TESTFILES/3_1_vds.h5-vds_chunk2x5x8-v.ddl
 $SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti_compa-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti_conti-v.ddl
 $SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti-v.ddl
 "
 
@@ -1164,21 +1159,12 @@ TOOLTEST_META meta_long h5repack_layout.h5 --metadata_block_size=8192
 
 # VDS tests
 
-#########################################################
-# layout options
-#########################################################
-VERIFY_LAYOUT_VDS vds_dset_conti 1_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
-VERIFY_LAYOUT_ALL vds_null_conti 2_vds.h5 CONTIGUOUS -l CONTI
-VERIFY_LAYOUT_VDS vds_dset_compa 1_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
-VERIFY_LAYOUT_ALL vds_null_compa 2_vds.h5 COMPACT -l COMPA
-
 ################################################################
 # layout conversions
 ###############################################################
-VERIFY_LAYOUT_VDS vds_compa_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
-VERIFY_LAYOUT_VDS vds_compa_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
-VERIFY_LAYOUT_VDS vds_conti_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
-VERIFY_LAYOUT_VDS vds_conti_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+VERIFY_LAYOUT_VDS vds_dset_chunk_20x10x5 1_vds.h5 vds_dset CHUNKED --layout vds_dset:CHUNK=20x10x5
+VERIFY_LAYOUT_VDS vds_chunk2x5x8 3_1_vds.h5 vds_dset CHUNKED -l vds_dset:CHUNK=2x5x8
+VERIFY_LAYOUT_VDS vds_chunk3x6x9 2_vds.h5 vds_dset CHUNKED -l vds_dset:CHUNK=3x6x9
 VERIFY_LAYOUT_VDS vds_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
 VERIFY_LAYOUT_VDS vds_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
 

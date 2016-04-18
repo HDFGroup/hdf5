@@ -731,7 +731,9 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 CONFIG = ordered
 
 # All subdirectories
-SUBDIRS = lib h5diff h5ls h5dump misc h5import h5repack h5jam h5copy h5stat h5format_convert perform
+SUBDIRS = lib h5diff h5ls h5dump misc h5import h5repack h5jam h5copy h5stat \
+	h5format_convert perform
+
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,

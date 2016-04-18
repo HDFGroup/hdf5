@@ -1,6 +1,3 @@
-#############################
- output for 'h5watch --width=30 TEST.h5/DSET_TWO'
-#############################
 Opened "TEST.h5" with sec2 driver.
 Monitoring dataset /DSET_TWO...
 dimension 0: 4->6 (increases)

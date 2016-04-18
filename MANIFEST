@@ -2347,16 +2347,11 @@
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
-./tools/h5repack/testfiles/1_vds.h5-vds_dset_compa-v.ddl
-./tools/h5repack/testfiles/1_vds.h5-vds_dset_conti-v.ddl
-./tools/h5repack/testfiles/2_vds.h5-vds_null_compa-v.ddl
-./tools/h5repack/testfiles/2_vds.h5-vds_null_conti-v.ddl
-./tools/h5repack/testfiles/4_vds.h5-vds_compa_compa-v.ddl
-./tools/h5repack/testfiles/4_vds.h5-vds_compa_conti-v.ddl
-./tools/h5repack/testfiles/4_vds.h5-vds_compa-v.ddl
-./tools/h5repack/testfiles/4_vds.h5-vds_conti_compa-v.ddl
-./tools/h5repack/testfiles/4_vds.h5-vds_conti_conti-v.ddl
+./tools/h5repack/testfiles/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
+./tools/h5repack/testfiles/2_vds.h5-vds_chunk3x6x9-v.ddl
+./tools/h5repack/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl
 ./tools/h5repack/testfiles/4_vds.h5-vds_conti-v.ddl
+./tools/h5repack/testfiles/4_vds.h5-vds_compa-v.ddl
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c
@@ -3028,7 +3023,10 @@
 ./hl/test/CMakeLists.txt
 ./hl/test/CMakeTests.cmake
 ./hl/tools/CMakeLists.txt
-./hl/tools/CMakeTests.cmake
+./hl/tools/gif2h5/CMakeLists.txt
+./hl/tools/gif2h5/CMakeTests.cmake
+./hl/tools/h5watch/CMakeLists.txt
+./hl/tools/h5watch/CMakeTests.cmake
 ./src/CMakeLists.txt
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
