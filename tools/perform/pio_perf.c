@@ -461,28 +461,28 @@ run_test_loop(struct options *opts)
         if (parms.dim2d){
             parms.num_bytes = (off_t)pow((double)(opts->num_bpp*parms.num_procs),2);
             if (parms.interleaved)
-            output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MBs\n",
+            output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MB\n",
                 buf_size, opts->blk_size,
                 ((double)parms.num_dsets * (double)parms.num_bytes)
                 / ONE_MB);
             else
-            output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MBs\n",
+            output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MB\n",
                 opts->blk_size, buf_size,
                 ((double)parms.num_dsets * (double)parms.num_bytes)
                 / ONE_MB);
 
             print_indent(1);
-            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2fx%.2f KBs\n",
+            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2fx%.2f KB\n",
                 parms.num_files, parms.num_dsets, (double)(opts->num_bpp*parms.num_procs)/ONE_KB,
                 (double)(opts->num_bpp*parms.num_procs)/ONE_KB);
         }
         else{
             parms.num_bytes = (off_t)opts->num_bpp*parms.num_procs;
-            output_report("Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
+            output_report("Transfer Buffer Size: %ld bytes, File size: %.2f MB\n",
                 buf_size,((double)parms.num_dsets * (double)parms.num_bytes) / ONE_MB);
 
             print_indent(1);
-            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2f MBs\n",
+            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2f MB\n",
                 parms.num_files, parms.num_dsets, (double)(opts->num_bpp*parms.num_procs)/ONE_MB);
         }
 
