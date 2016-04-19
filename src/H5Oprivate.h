@@ -369,8 +369,10 @@ typedef struct H5O_efl_t {
 
 /* Flags for chunked layout feature encoding */
 #define H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS         0x01
+#define H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER		  0x02
 #define H5O_LAYOUT_ALL_CHUNK_FLAGS                    (                     \
     H5O_LAYOUT_CHUNK_DONT_FILTER_PARTIAL_BOUND_CHUNKS                       \
+    | H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER                             \
     )
 
 /* Initial version of the layout information.  Used when space is allocated */
@@ -432,6 +434,12 @@ typedef struct H5O_storage_chunk_earray_t {
     struct H5EA_t *ea;                  /* Pointer to extensible index array struct */
 } H5O_storage_chunk_earray_t;
 
+/* Filtered info for single chunk index */
+typedef struct H5O_storage_chunk_single_filt_t {
+    uint32_t nbytes;            /* Size of chunk (in file) */
+    uint32_t filter_mask;       /* Excluded filters for chunk */
+} H5O_storage_chunk_single_filt_t;
+
 /* Forward declaration of structs used below */
 struct H5B2_t;                          /* Defined in H5B2pkg.h          */
 
@@ -449,6 +457,7 @@ typedef struct H5O_storage_chunk_t {
         H5O_storage_chunk_bt2_t btree2;    /* Information for v2 B-tree index */	
         H5O_storage_chunk_earray_t earray; /* Information for extensible array index   */
         H5O_storage_chunk_farray_t farray; /* Information for fixed array index   */
+        H5O_storage_chunk_single_filt_t single; /* Information for single chunk w/ filters index */
     } u;
 } H5O_storage_chunk_t;
 

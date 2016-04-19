@@ -522,6 +522,10 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     fprintf(out, "H5D_CHUNK_IDX_BT2");
                                     break;
 
+                                case H5D_CHUNK_IDX_SINGLE:
+                                    fprintf(out, "H5D_CHUNK_IDX_SINGLE");
+                                    break;
+
                                 case H5D_CHUNK_IDX_NTYPES:
                                     fprintf(out, "ERROR: H5D_CHUNK_IDX_NTYPES (invalid value)");
                                     break;

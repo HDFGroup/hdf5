@@ -298,6 +298,16 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
                             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "v1 B-tree index type should never be in a v4 layout message")
                             break;
 
+                        case H5D_CHUNK_IDX_SINGLE:     /* Single Chunk Index */
+                            if(mesg->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
+                                H5F_DECODE_LENGTH(f, p, mesg->storage.u.chunk.u.single.nbytes);
+                                UINT32DECODE(p, mesg->storage.u.chunk.u.single.filter_mask);
+                            } /* end if */
+
+                            /* Set the chunk operations */
+                            mesg->storage.u.chunk.ops = H5D_COPS_SINGLE;
+                            break;
+
                         case H5D_CHUNK_IDX_FARRAY:
                             /* Fixed array creation parameters */
                             mesg->u.chunk.u.farray.cparam.max_dblk_page_nelmts_bits = *p++;
@@ -616,6 +626,14 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 switch(mesg->u.chunk.idx_type) {
                     case H5D_CHUNK_IDX_BTREE:
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "v1 B-tree index type should never be in a v4 layout message")
+                        break;
+
+                    case H5D_CHUNK_IDX_SINGLE:     /* Single Chunk */
+                        /* Filter information */
+                        if(mesg->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
+                            H5F_ENCODE_LENGTH(f, p, mesg->storage.u.chunk.u.single.nbytes);
+                            UINT32ENCODE(p, mesg->storage.u.chunk.u.single.filter_mask);
+                        } /* end if */
                         break;
 
                     case H5D_CHUNK_IDX_FARRAY:
@@ -1172,6 +1190,11 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const v
                 case H5D_CHUNK_IDX_BTREE:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v1 B-tree");
+                    break;
+
+                case H5D_CHUNK_IDX_SINGLE:
+                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                              "Index Type:", "Single Chunk");
                     break;
 
                 case H5D_CHUNK_IDX_FARRAY:
