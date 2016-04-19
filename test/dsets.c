@@ -6704,6 +6704,9 @@ test_missing_chunk(hid_t file)
     /* Get library format */
     if(H5Pget_libver_bounds(fapl, &low, NULL) < 0) TEST_ERROR;
 
+    /* Close FAPL */
+    if(H5Pclose(fapl) < 0) TEST_ERROR
+
     /* Initialize data for 1-D dataset */
     for(u = 0; u < MISSING_CHUNK_DIM; u++) {
         wdata[u] = (int)u;
@@ -6829,6 +6832,8 @@ test_missing_chunk(hid_t file)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+
         H5Pclose(dcpl);
         H5Pclose(dcpl2);
         H5Dclose(d);
