@@ -6519,6 +6519,9 @@ test_zero_dims(hid_t file)
     /* Get library format */
     if(H5Pget_libver_bounds(fapl, &low, NULL) < 0) FAIL_STACK_ERROR
 
+    /* Close FAPL */
+    if(H5Pclose(fapl) < 0) TEST_ERROR
+
     /* 
      * One-dimensional dataset 
      */
@@ -6631,6 +6634,8 @@ test_zero_dims(hid_t file)
 
 error:
     H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+
         H5Pclose(dcpl);
         H5Dclose(d);
         H5Sclose(s);
