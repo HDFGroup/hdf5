@@ -13,7 +13,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /*-------------------------------------------------------------------------
  *
- * Created:    	atomic_reader.c
+ * Created:     atomic_reader.c
  *
  * Purpose:     This is the "reader" part of the standalone test to check
  *              atomic read-write operation on a system.
@@ -28,15 +28,17 @@
 /* Headers */
 /***********/
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
+
+#if !defined(WIN32) && !defined(__MINGW32__)
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /****************/
 /* Local Macros */
@@ -83,23 +85,23 @@ usage(void)
  * Function:    verify
  *
  * Purpose:     To verify that the data read is the pattern expected.
- *		Each integer read should be the same as the index.
- *		When a difference is encountered, the remaining integers 
- *		read should be the same as the previous index.
- *		For example, the pattern expected should be either:
- *		a) 01234567....n-1	
- *		or
- *		b) if at index 4, a difference is encountered,
- *		   the remaining integers should be all "3"s as:
- *			012333333333333
+ *              Each integer read should be the same as the index.
+ *              When a difference is encountered, the remaining integers 
+ *              read should be the same as the previous index.
+ *              For example, the pattern expected should be either:
+ *              a) 01234567....n-1
+ *                  or
+ *              b) if at index 4, a difference is encountered,
+ *                 the remaining integers should be all "3"s as:
+ *                 012333333333333
  *
  * Parameters:  
- *	fd--the file descriptor
- *	k--the number of integers to read
+ *              fd -- the file descriptor
+ *              k -- the number of integers to read
  *
  * Return:      
- *	positive on success
- *	negative on failure
+ *              positive on success
+ *              negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -112,55 +114,57 @@ verify(int fd, unsigned int k)
 
     /* Allocate buffer for data read */
     if((buf = (unsigned int *)malloc(k * sizeof(unsigned int))) == NULL) {
-	printf("READER: error from malloc\n");
-	goto error;
-    }
+        printf("READER: error from malloc\n");
+        goto error;
+    } /* end if */
 
     /* Position the file at the beginning */
     if(lseek(fd, (off_t)0, SEEK_SET) < 0) {
-	printf("READER: error from lseek\n");
-	goto error;
-    }
+        printf("READER: error from lseek\n");
+        goto error;
+    } /* end if */
 
     /* Read the whole file */
     if((bytes_read = read(fd, buf, (k * sizeof(unsigned int)))) < 0) {
-	printf("READER: error from read\n");
-	goto error;
-    }
+        printf("READER: error from read\n");
+        goto error;
+    } /* end if */
 
     /* Verify the bytes read are correct */
     if(bytes_read != (ssize_t)(k*sizeof(unsigned int))) {
-	printf("READER: error from bytes read=%lu\n", (unsigned long)bytes_read);
-	goto error;
-    }
+        printf("READER: error from bytes read=%lu\n", (unsigned long)bytes_read);
+        goto error;
+    } /* end if */
 
     /* Verify data read */
     for(i=0; i < k; i++)  {
-	if(buf[i] != i)
-	    break;
-    }
+        if(buf[i] != i)
+            break;
+    } /* end for */
 
     if(i < k) {
-	/* Compare the beginning and ending sentinel values */
-	if(buf[k-1] != (i-1)) {
-	    printf("FAIL IN READER: ...beginning sentinel value=%u, i=%u\n", (i-1), i);
-	    printf("FAIL IN READER: buf[%u]=%u\n", i-1, buf[i-1]);
-	    printf("FAIL IN READER: buf[%u]=%u\n", i, buf[i]);
-	    printf("FAIL IN READER: buf[%u]=%u\n", i+1, buf[i+1]);
-	    printf("FAIL IN READER: ...ending sentinel value=%u\n", buf[k-1]);
-	    goto error;
-	}
-    }
+        /* Compare the beginning and ending sentinel values */
+        if(buf[k-1] != (i-1)) {
+            printf("FAIL IN READER: ...beginning sentinel value=%u, i=%u\n", (i-1), i);
+            printf("FAIL IN READER: buf[%u]=%u\n", i-1, buf[i-1]);
+            printf("FAIL IN READER: buf[%u]=%u\n", i, buf[i]);
+            printf("FAIL IN READER: buf[%u]=%u\n", i+1, buf[i+1]);
+            printf("FAIL IN READER: ...ending sentinel value=%u\n", buf[k-1]);
+            goto error;
+        } /* end if */
+    } /* end if */
 
     /* Free the buffer */
-    if(buf) free(buf);
-    return(0);
+    if(buf)
+        free(buf);
+    return 0;
 
 error:
     /* Free the buffer */
-    if(buf) free(buf);
-    return(-1);
-} /* verify() */
+    if(buf)
+        free(buf);
+    return -1;
+} /* end verify() */
 
 
 
@@ -170,11 +174,11 @@ error:
  * Purpose:     To print the statistics gathered for re-reads
  *
  * Parameters: 
- *	info--the array storing the statistics for re-reads
- *	lastr--the last read completed
- *	iteration--the current iteration
+ *              info -- the array storing the statistics for re-reads
+ *              lastr -- the last read completed
+ *              iteration -- the current iteration
  *
- * Return:     	void
+ * Return:      void
  *
  *-------------------------------------------------------------------------
  */
@@ -186,7 +190,7 @@ print_info(int *info, unsigned int lastr, unsigned iteration)
     printf("--------statistics for %u reads (iteration %u)--------\n", lastr, iteration);
 
     for(j = 0; j <= READ_TRIES; j++)
-	printf("# of %u re-tries = %u\n", j, info[j]);
+        printf("# of %u re-tries = %u\n", j, info[j]);
 
     printf("--------end statistics for %u reads (iteration %u)--------\n", lastr, iteration);
 } /* print_info() */
@@ -196,12 +200,12 @@ print_info(int *info, unsigned int lastr, unsigned iteration)
  * Function:    main
  *
  * Purpose:     To verify that the data read is the pattern expected.
- *		(1) Make sure the file opens successfully and the # of bytes read is as expected	
- *		(2) Iterate the reader with i iterations 
- *		(3) Read and verify n integers for each iteration
- *		(4) On verification error, re-read the data at most READ_TRIES
- *	  	    times to see if correct data can be obtained
- *		(5) Print out statistics for the number of re-retries for each iteration
+ *              (1) Make sure the file opens successfully and the # of bytes read is as expected	
+ *              (2) Iterate the reader with i iterations 
+ *              (3) Read and verify n integers for each iteration
+ *              (4) On verification error, re-read the data at most READ_TRIES
+ *                  times to see if correct data can be obtained
+ *              (5) Print out statistics for the number of re-retries for each iteration
  *
  * Note:
  *      (a) The # of integers (via -n option) used by the writer and reader should be the same.
@@ -212,27 +216,27 @@ print_info(int *info, unsigned int lastr, unsigned iteration)
  *      2) Use HDF library HD<system calls> instead of the system calls
  *      3) Handle large sized buffer (gigabytes) if needed
  *
- * Return:      Success:       0
- *              Failure:       -1
+ * Return:      Success:    EXIT_SUCCESS
+ *              Failure:    EXIT_FAILURE
  *
  *-------------------------------------------------------------------------
  */
 int
 main(int argc, char *argv[])
 {
-    int fd = -1;			/* file descriptor */
-    unsigned int j=0, i=0, m=0;		/* local index variables */
-    int temp;				/* temporary variable */
-    unsigned int iterations = 0;	/* the input for "-i" */
-    unsigned num = 0;			/* the input for "-n" */
-    int opt = 0;			/* option char */
-    int info[READ_TRIES+1];		/* re-tries statistics */
+    int fd = -1;                    /* file descriptor                      */
+    unsigned int j=0, i=0, m=0;     /* local index variables                */
+    int temp;                       /* temporary variable                   */
+    unsigned int iterations = 0;    /* the input for "-i"                   */
+    unsigned num = 0;               /* the input for "-n"                   */
+    int opt = 0;                    /* option char                          */
+    int info[READ_TRIES+1];         /* re-tries statistics                  */
 
     /* Ensure the expected # of arguments */
     if(argc != 5) {
         usage();
-	exit(-1);
-    }
+        exit(EXIT_FAILURE);
+    } /* end if */
 
     /* Parse command line options */
     while((opt = getopt(argc, argv, "n:i:")) != -1) {
@@ -240,108 +244,120 @@ main(int argc, char *argv[])
             case 'n':
                 if((temp = atoi(optarg)) < 0) {
                     usage();
-		    exit(-1);
-		}
+                    exit(EXIT_FAILURE);
+                } /* end if */
                 num = (unsigned int)temp;
                 break;
             case 'i':
                 if((temp = atoi(optarg)) < 0) {
                     usage();
-		    exit(-1);
-		}
+                    exit(EXIT_FAILURE);
+                } /* end if */
                 iterations = (unsigned int)temp;
                 break;
             default:
                 printf("Invalid option encountered\n");
                 break;
-        }
-    }
+        } /* end switch */
+    } /* end while */
 
     printf("READER: number of integers to read = %u; # of iterations = %d\n", num, iterations);
 
     printf("\n");
-    for(i = 1; i <= iterations; i++) { /* iteration loop */
-	unsigned opens = OPEN_TRIES;
+    for(i = 1; i <= iterations; i++) {
+        unsigned opens = OPEN_TRIES;
 
-	printf("READER: *****start iteration %u*****\n", i);
+        printf("READER: *****start iteration %u*****\n", i);
 
-	/* Ensure open and file size are done properly */
-	while(opens--) { /* open loop */
-	    struct stat sinfo;
+        /* Ensure open and file size are done properly */
+        while(opens--) {
+            struct stat sinfo;
 
-	    memset(&sinfo, 0, sizeof(sinfo));
+            memset(&sinfo, 0, sizeof(sinfo));
 
-	    if((fd = open(FILENAME, O_RDONLY, 0644)) < 0) {
-		printf("READER: error from open--retry open again\n");
-	    } else {
-		printf("READER: open succeed\n");
+            if((fd = open(FILENAME, O_RDONLY, 0644)) < 0) {
+                printf("READER: error from open--retry open again\n");
+            } else {
+                printf("READER: open succeed\n");
 
-		if((fstat(fd, &sinfo) == 0) &&
-		   (sinfo.st_size == (off_t)(num * sizeof(unsigned int)))) {
-		    printf("READER: file size is correct--%u\n", (unsigned int)sinfo.st_size);
-		    break;
-		}
+                if((fstat(fd, &sinfo) == 0) &&
+                        (sinfo.st_size == (off_t)(num * sizeof(unsigned int)))) {
+                    printf("READER: file size is correct--%u\n", (unsigned int)sinfo.st_size);
+                    break;
+                } /* end if */
 
-		printf("READER: error from fstat or file size of %u is incorrect--retry open again\n", (unsigned int)sinfo.st_size);
-		if(close(fd) < 0) {
-		    printf("READER: error from close\n");
-		    return(-1);
-		}
-		fd = -1;
-	    }
+                printf("READER: error from fstat or file size of %u is incorrect--retry open again\n", (unsigned int)sinfo.st_size);
+                if(close(fd) < 0) {
+                    printf("READER: error from close\n");
+                    return EXIT_FAILURE;
+                } /* end if */
+                fd = -1;
+            } /* end else */
 
-	} /* end while */
+        } /* end while */
 
-	if(fd < 0) {
-	    printf("READER: *****open failure/incorrect file size for all %u tries, continue next iteration*****\n\n", OPEN_TRIES);
-	    continue;
-	}
+        if(fd < 0) {
+            printf("READER: *****open failure/incorrect file size for all %u tries, continue next iteration*****\n\n", OPEN_TRIES);
+            continue;
+        } /* end if */
 
-	memset(info, 0, sizeof(info));
+        memset(info, 0, sizeof(info));
 
-	/* Read and verify data */
-	for(j = 1; j <= num; j++) { /* read loop */
+        /* Read and verify data */
+        for(j = 1; j <= num; j++) {
 
-	    printf("READER: doing read %u\n", j);
-	    if(verify(fd, num) < 0) {
-		printf("READER: error from read %u\n", j);
+            printf("READER: doing read %u\n", j);
+            if(verify(fd, num) < 0) {
+                printf("READER: error from read %u\n", j);
 
-		/* Perform re-read to see if correct data is obtained */
-		for(m = 1; m <= READ_TRIES; m++) { /* re-read loop */
-		    printf("READER: ===============going to do re-read try %u\n", m);
-		    if(verify(fd, num) < 0)
-			printf("READER: ===============error from re-read try %u\n", m);
-		    else {
-			++info[m];
-			printf("READER: ===============SUCCESS from re-read try %u\n", m);
-			break;
-		    }
-		} /* end for */
+                /* Perform re-read to see if correct data is obtained */
+                for(m = 1; m <= READ_TRIES; m++) {
+                    printf("READER: ===============going to do re-read try %u\n", m);
+                    if(verify(fd, num) < 0)
+                        printf("READER: ===============error from re-read try %u\n", m);
+                    else {
+                        ++info[m];
+                        printf("READER: ===============SUCCESS from re-read try %u\n", m);
+                        break;
+                    } /* end else */
+                } /* end for */
 
-		if(m > READ_TRIES) {
-		    printf("READER: ===============error from all re-read tries: %u\n", READ_TRIES);
-		    printf("READER:*****ERROR--stop on read %u\n", j);
-		    break;
-		}
-	    } else {
-		++info[0];
-		printf("READER: success from read %u\n", j);
-	    }
+                if(m > READ_TRIES) {
+                    printf("READER: ===============error from all re-read tries: %u\n", READ_TRIES);
+                    printf("READER:*****ERROR--stop on read %u\n", j);
+                    break;
+                } /* end if */
+            } else {
+                ++info[0];
+                printf("READER: success from read %u\n", j);
+            } /* end else */
 
-	} /* end for */
+        } /* end for */
 
-	/* Print the statistics for re-reads */
-	print_info(info, j-1, i);
+        /* Print the statistics for re-reads */
+        print_info(info, j-1, i);
 
-	/* Close the file */
-	if(close(fd) < 0) {
-	    printf("READER: error from close\n");
-	    return(-1);
-	}
+        /* Close the file */
+        if(close(fd) < 0) {
+            printf("READER: error from close\n");
+            return EXIT_FAILURE;
+        } /* end if */
 
-	printf("READER: *****end iteration %u*****\n\n", i);
+        printf("READER: *****end iteration %u*****\n\n", i);
 
     } /* end for */
 
-    return(0);
+    return EXIT_SUCCESS;
 }
+
+#else /* WIN32 / MINGW32 */
+
+int
+main(void)
+{
+    printf("Non-POSIX platform. Exiting.\n");
+    return EXIT_FAILURE;
+} /* end main() */
+
+#endif /* WIN32 / MINGW32 */
+

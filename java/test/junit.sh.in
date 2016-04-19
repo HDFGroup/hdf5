@@ -234,13 +234,18 @@ sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
     -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
     $actual_ext > $actual
 
-if $CMP $expect $actual; then
-    echo " PASSED"
+# SunOS does not support this. Skip it.
+if [ $myos = SunOS ]; then
+    echo " SKIPPED"
 else
-    echo "*FAILED*"
-    echo "    Expected result differs from actual result"
-    nerrors="`expr $nerrors + 1`"
-    test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    if $CMP $expect $actual; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        echo "    Expected result differs from actual result"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
 fi
 
 

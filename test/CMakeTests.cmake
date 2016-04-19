@@ -252,9 +252,9 @@ set (HDF5_REFERENCE_TEST_FILES
     family_v16_00001.h5
     family_v16_00002.h5
     family_v16_00003.h5
+    file_image_core_test.h5
     filespace_1_6.h5
     filespace_1_8.h5
-    file_image_core_test.h5
     fill_old.h5
     filter_error.h5
     group_old.h5
@@ -417,76 +417,282 @@ endif (HDF5_ENABLE_USING_MEMCHECKER)
 ##############################################################################
 ##############################################################################
 
+set (test_CLEANFILES
+    accum.h5
+    cmpd_dset.h5
+    compact_dataset.h5
+    dataset.h5
+    dset_offset.h5
+    max_compact_dataset.h5
+    simple.h5
+    set_local.h5
+    random_chunks.h5
+    huge_chunks.h5
+    chunk_cache.h5
+    big_chunk.h5
+    chunk_fast.h5
+    chunk_expand.h5
+    chunk_fixed.h5
+    copy_dcpl_newfile.h5
+    partial_chunks.h5
+    layout_extend.h5
+    zero_chunk.h5
+    chunk_single.h5
+    swmr_non_latest.h5
+    earray_hdr_fd.h5
+    farray_hdr_fd.h5
+    bt2_hdr_fd.h5
+    storage_size.h5
+    dls_01_strings.h5
+    extend.h5
+    istore.h5
+    extlinks*.h5
+    frspace.h5
+    links*.h5
+    sys_file1
+    tfile*.h5
+    th5s*.h5
+    lheap.h5
+    fheap.h5
+    ohdr.h5
+    stab.h5
+    extern_*.h5
+    extern_*.raw
+    gheap*.h5
+    dt_arith1
+    dt_arith2
+    links.h5
+    links*.h5
+    extlinks16A00000.h5
+    extlinks16A00001.h5
+    extlinks16A00002.h5
+    extlinks16B-b.h5
+    extlinks16B-g.h5
+    extlinks16B-l.h5
+    extlinks16B-r.h5
+    extlinks16B-s.h5
+    extlinks19B00000.h5
+    extlinks19B00001.h5
+    extlinks19B00002.h5
+    extlinks19B00003.h5
+    extlinks19B00004.h5
+    extlinks19B00005.h5
+    extlinks19B00006.h5
+    extlinks19B00007.h5
+    extlinks19B00008.h5
+    extlinks19B00009.h5
+    extlinks19B00010.h5
+    extlinks19B00011.h5
+    extlinks19B00012.h5
+    extlinks19B00013.h5
+    extlinks19B00014.h5
+    extlinks19B00015.h5
+    extlinks19B00016.h5
+    extlinks19B00017.h5
+    extlinks19B00018.h5
+    extlinks19B00019.h5
+    extlinks19B00020.h5
+    extlinks19B00021.h5
+    extlinks19B00022.h5
+    extlinks19B00023.h5
+    extlinks19B00024.h5
+    extlinks19B00025.h5
+    extlinks19B00026.h5
+    extlinks19B00027.h5
+    extlinks19B00028.h5
+    tmp
+    big.data
+    big*.h5
+    stdio.h5
+    sec2.h5
+    dtypes0.h5
+    dtypes1.h5
+    dtypes2.h5
+    dtypes3.h5
+    dtypes4.h5
+    dtypes5.h5
+    dtypes6.h5
+    dtypes7.h5
+    dtypes8.h5
+    dtypes9.h5
+    dtypes10.h5
+    dt_arith1.h5
+    dt_arith2.h5
+    tattr.h5
+    tselect.h5
+    mtime.h5
+    unlink.h5
+    unicode.h5
+    coord.h5
+    fillval_*.h5
+    fillval.raw
+    mount_*.h5
+    testmeta.h5
+    ttime.h5
+    trefer1.h5
+    trefer2.h5
+    trefer3.h5
+    tvltypes.h5
+    tvlstr.h5
+    tvlstr2.h5
+    twriteorder.dat
+    flush.h5
+    enum1.h5
+    titerate.h5
+    ttsafe.h5
+    tarray1.h5
+    tgenprop.h5
+    tmisc*.h5
+    set_extent1.h5
+    set_extent2.h5
+    set_extent3.h5
+    set_extent4.h5
+    set_extent5.h5
+    ext1.bin
+    ext2.bin
+    getname.h5
+    getname1.h5
+    getname2.h5
+    getname3.h5
+    sec2_file.h5
+    direct_file.h5
+    family_file000*.h5
+    new_family_v16_000*.h5
+    multi_file-r.h5
+    multi_file-s.h5
+    core_file
+    plugin.h5
+    new_move_a.h5
+    new_move_b.h5
+    ntypes.h5
+    dangle.h5
+    error_test.h5
+    err_compat.h5
+    dtransform.h5
+    test_filters.h5
+    get_file_name.h5
+    tstint1.h5
+    tstint2.h5
+    unlink_chunked.h5
+    btree2.h5
+    btree2_tmp.h5
+    objcopy_src.h5
+    objcopy_dst.h5
+    objcopy_ext.dat
+    trefer1.h5
+    trefer2.h5
+    app_ref.h5
+    farray.h5
+    farray_tmp.h5
+    earray.h5
+    earray_tmp.h5
+    efc0.h5
+    efc1.h5
+    efc2.h5
+    efc3.h5
+    efc4.h5
+    efc5.h5
+    log_vfd_out.log
+    new_multi_file_v16-r.h5
+    new_multi_file_v16-s.h5
+    split_get_file_image_test-m.h5
+    split_get_file_image_test-r.h5
+    file_image_core_test.h5.copy
+    unregister_filter_1.h5
+    unregister_filter_2.h5
+    vds_virt.h5
+    vds_dapl.h5
+    vds_src_0.h5
+    vds_src_1.h5
+    swmr_data.h5
+    use_use_append_chunk.h5
+    use_append_mchunks.h5
+    use_disable_mdc_flushes.h5
+    flushrefresh.h5
+    flushrefresh_VERIFICATION_START
+    flushrefresh_VERIFICATION_CHECKPOINT1
+    flushrefresh_VERIFICATION_CHECKPOINT2
+    flushrefresh_VERIFICATION_DONE
+    atomic_data
+    accum_swmr_big.h5
+    ohdr_swmr.h5
+    test_swmr*.h5
+    cache_logging.h5
+    cache_logging.out
+    vds_swmr.h5
+    vds_swmr_src_*.h5
+)
+
 # Remove any output file left over from previous test run
 add_test (
     NAME H5TEST-clear-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove
-        dt_arith1.h5
-        dt_arith2.h5
-        dtransform.h5
-        dtypes3.h5
-        dtypes4.h5
-        dtypes5.h5
-        efc0.h5
-        efc1.h5
-        efc2.h5
-        efc3.h5
-        efc4.h5
-        efc5.h5
-        extlinks16A00000.h5
-        extlinks16A00001.h5
-        extlinks16A00002.h5
-        extlinks16B-b.h5
-        extlinks16B-g.h5
-        extlinks16B-l.h5
-        extlinks16B-r.h5
-        extlinks16B-s.h5
-        extlinks19B00000.h5
-        extlinks19B00001.h5
-        extlinks19B00002.h5
-        extlinks19B00003.h5
-        extlinks19B00004.h5
-        extlinks19B00005.h5
-        extlinks19B00006.h5
-        extlinks19B00007.h5
-        extlinks19B00008.h5
-        extlinks19B00009.h5
-        extlinks19B00010.h5
-        extlinks19B00011.h5
-        extlinks19B00012.h5
-        extlinks19B00013.h5
-        extlinks19B00014.h5
-        extlinks19B00015.h5
-        extlinks19B00016.h5
-        extlinks19B00017.h5
-        extlinks19B00018.h5
-        extlinks19B00019.h5
-        extlinks19B00020.h5
-        extlinks19B00021.h5
-        extlinks19B00022.h5
-        extlinks19B00023.h5
-        extlinks19B00024.h5
-        extlinks19B00025.h5
-        extlinks19B00026.h5
-        extlinks19B00027.h5
-        extlinks19B00028.h5
-        fheap.h5
-        log_vfd_out.log
-        new_multi_file_v16-r.h5
-        new_multi_file_v16-s.h5
-        objcopy_ext.dat
-        testmeta.h5
-        tstint1.h5
-        tstint2.h5
-        unregister_filter_1.h5
-        unregister_filter_2.h5
-        vds_1.h5
+        ${test_CLEANFILES}
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 
-foreach (test ${H5_TESTS})
+set (H5TEST_TESTS
+    #testhdf5
+    #cache
+    cache_api
+    cache_tagging
+    lheap
+    ohdr
+    stab
+    gheap
+    farray
+    earray
+    btree2
+    fheap
+    pool
+    accum
+    #hyperslab
+    istore
+    bittests
+    dt_arith
+    dtypes
+    dsets
+    cmpd_dset
+    filter_fail
+    extend
+    external
+    efc
+    objcopy
+    links
+    unlink
+    twriteorder
+    big
+    mtime
+    fillval
+    mount
+    flush1
+    flush2
+    app_ref
+    enum
+    set_extent
+    ttsafe
+    enc_dec_plist
+    enc_dec_plist_cross_platform
+    getname
+    vfd
+    ntypes
+    dangle
+    dtransform
+    reserved
+    cross_read
+    freespace
+    mf
+    vds
+    file_image
+    unregister
+    cache_logging
+    cork
+    swmr
+)
+
+foreach (test ${H5TEST_TESTS})
   if (${test} STREQUAL "big" AND CYGWIN)
     add_test (
         NAME H5TEST-${test}
@@ -500,12 +706,12 @@ foreach (test ${H5_TESTS})
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
       WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
   )
-endforeach (test ${H5_TESTS})
+endforeach (test ${H5TEST_TESTS})
 
 set_tests_properties (H5TEST-flush2 PROPERTIES DEPENDS H5TEST-flush1)
 set_tests_properties (H5TEST-fheap PROPERTIES TIMEOUT 1800)
-set_tests_properties (H5TEST-testmeta PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-big PROPERTIES TIMEOUT 1800)
+set_tests_properties (H5TEST-btree2 PROPERTIES TIMEOUT 1800)
 set_tests_properties (H5TEST-objcopy PROPERTIES TIMEOUT 2400)
 
 if (BUILD_SHARED_LIBS)
@@ -514,70 +720,12 @@ if (BUILD_SHARED_LIBS)
       NAME H5TEST-shared-clear-objects
       COMMAND    ${CMAKE_COMMAND}
           -E remove
-          dt_arith1.h5
-          dt_arith2.h5
-          dtransform.h5
-          dtypes3.h5
-          dtypes4.h5
-          dtypes5.h5
-          efc0.h5
-          efc1.h5
-          efc2.h5
-          efc3.h5
-          efc4.h5
-          efc5.h5
-          extlinks16A00000.h5
-          extlinks16A00001.h5
-          extlinks16A00002.h5
-          extlinks16B-b.h5
-          extlinks16B-g.h5
-          extlinks16B-l.h5
-          extlinks16B-r.h5
-          extlinks16B-s.h5
-          extlinks19B00000.h5
-          extlinks19B00001.h5
-          extlinks19B00002.h5
-          extlinks19B00003.h5
-          extlinks19B00004.h5
-          extlinks19B00005.h5
-          extlinks19B00006.h5
-          extlinks19B00007.h5
-          extlinks19B00008.h5
-          extlinks19B00009.h5
-          extlinks19B00010.h5
-          extlinks19B00011.h5
-          extlinks19B00012.h5
-          extlinks19B00013.h5
-          extlinks19B00014.h5
-          extlinks19B00015.h5
-          extlinks19B00016.h5
-          extlinks19B00017.h5
-          extlinks19B00018.h5
-          extlinks19B00019.h5
-          extlinks19B00020.h5
-          extlinks19B00021.h5
-          extlinks19B00022.h5
-          extlinks19B00023.h5
-          extlinks19B00024.h5
-          extlinks19B00025.h5
-          extlinks19B00026.h5
-          extlinks19B00027.h5
-          extlinks19B00028.h5
-          fheap.h5
-          log_vfd_out.log
-          new_multi_file_v16-r.h5
-          new_multi_file_v16-s.h5
-          objcopy_ext.dat
-          testmeta.h5
-          tstint1.h5
-          tstint2.h5
-          unregister_filter_1.h5
-          unregister_filter_2.h5
+          ${test_CLEANFILES}
       WORKING_DIRECTORY
           ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
   )
 
-  foreach (test ${H5_TESTS})
+  foreach (test ${H5TEST_TESTS})
     if (${test} STREQUAL "big" AND CYGWIN)
       add_test (
           NAME H5TEST-shared-${test}
@@ -591,12 +739,12 @@ if (BUILD_SHARED_LIBS)
         ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
     )
-  endforeach (test ${H5_TESTS})
+  endforeach (test ${H5TEST_TESTS})
 
   set_tests_properties (H5TEST-shared-flush2 PROPERTIES DEPENDS H5TEST-shared-flush1)
   set_tests_properties (H5TEST-shared-fheap PROPERTIES TIMEOUT 1800)
-  set_tests_properties (H5TEST-shared-testmeta PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-big PROPERTIES TIMEOUT 1800)
+  set_tests_properties (H5TEST-shared-btree2 PROPERTIES TIMEOUT 1800)
   set_tests_properties (H5TEST-shared-objcopy PROPERTIES TIMEOUT 2400)
 endif (BUILD_SHARED_LIBS)
 
@@ -624,58 +772,6 @@ if (NOT CYGWIN)
   )
   set_tests_properties (H5TEST-cache PROPERTIES TIMEOUT 2400)
 endif (NOT CYGWIN)
-
-#-- Adding test for cache_api
-add_test (
-    NAME H5TEST-clear-cache_api-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        cache_api_test.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-add_test (NAME H5TEST-cache_api COMMAND $<TARGET_FILE:cache_api>)
-set_tests_properties (H5TEST-cache_api PROPERTIES
-    DEPENDS H5TEST-clear-cache_api-objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-
-#-- Adding test for cache_tagging
-add_test (
-    NAME H5TEST-clear-cache_tagging-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        tagging_test.h5
-        tagging_ext_test.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-add_test (NAME H5TEST-cache_tagging COMMAND $<TARGET_FILE:cache_tagging>)
-set_tests_properties (H5TEST-cache_tagging PROPERTIES
-    DEPENDS H5TEST-clear-cache_tagging-objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-
-#-- Adding test for ttsafe
-add_test (
-    NAME H5TEST-clear-ttsafe-objects
-    COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        ttsafe_error.h5
-        ttsafe_dcreate.h5
-        ttsafe_cancel.h5
-        ttsafe_acreate.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-add_test (NAME H5TEST-ttsafe COMMAND $<TARGET_FILE:ttsafe>)
-set_tests_properties (H5TEST-ttsafe PROPERTIES
-    DEPENDS H5TEST-clear-ttsafe-objects
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
 
 #-- Adding test for err_compat
 if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
@@ -789,58 +885,6 @@ if (BUILD_SHARED_LIBS)
     set_tests_properties (H5TEST-shared-cache PROPERTIES TIMEOUT 2400)
   endif (NOT CYGWIN)
 
-  #-- Adding test for cache_api
-  add_test (
-      NAME H5TEST-shared-clear-cache_api-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          cache_api_test.h5
-      WORKING_DIRECTORY
-          ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-  )
-  add_test (NAME H5TEST-shared-cache_api COMMAND $<TARGET_FILE:cache_api-shared>)
-  set_tests_properties (H5TEST-shared-cache_api PROPERTIES
-      DEPENDS H5TEST-shared-clear-cache_api-objects
-      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-  )
-
-  #-- Adding test for cache_tagging
-  add_test (
-      NAME H5TEST-shared-clear-cache_tagging-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          tagging_test.h5
-          tagging_ext_test.h5
-      WORKING_DIRECTORY
-          ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-  )
-  add_test (NAME H5TEST-shared-cache_tagging COMMAND $<TARGET_FILE:cache_tagging-shared>)
-  set_tests_properties (H5TEST-shared-cache_tagging PROPERTIES
-      DEPENDS H5TEST-shared-clear-cache_tagging-objects
-      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-  )
-
-  #-- Adding test for ttsafe
-  add_test (
-      NAME H5TEST-shared-clear-ttsafe-objects
-      COMMAND    ${CMAKE_COMMAND}
-          -E remove
-          ttsafe_error.h5
-          ttsafe_dcreate.h5
-          ttsafe_cancel.h5
-          ttsafe_acreate.h5
-      WORKING_DIRECTORY
-          ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-  )
-  add_test (NAME H5TEST-shared-ttsafe COMMAND $<TARGET_FILE:ttsafe-shared>)
-  set_tests_properties (H5TEST-shared-ttsafe PROPERTIES
-      DEPENDS H5TEST-shared-clear-ttsafe-objects
-      ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST-shared"
-      WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST-shared
-  )
-
   #-- Adding test for err_compat
   if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
     add_test (
@@ -950,6 +994,14 @@ set_tests_properties (H5PLUGIN-plugin PROPERTIES
 )
 
 ##############################################################################
+###    S W M R  T E S T S
+##############################################################################
+#       testflushrefresh.sh: flushrefresh
+#       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
+#       testswmr.sh: swmr*
+#       testvdsswmr.sh: vds_swmr*
+
+##############################################################################
 ##############################################################################
 ###                         V F D   T E S T S                              ###
 ##############################################################################
@@ -993,7 +1045,7 @@ if (HDF5_TEST_VFD)
       set_extent
       ttsafe
       getname
-      vfd
+#      vfd
       ntypes
       dangle
       dtransform
@@ -1005,11 +1057,11 @@ if (HDF5_TEST_VFD)
       earray
       btree2
       #fheap
-      error_test
-      err_compat
-      tcheck_version
-      testmeta
-      links_env
+#      error_test
+#      err_compat
+      #tcheck_version
+#      testmeta
+#      links_env
       unregister
   )
   if (NOT CYGWIN)
@@ -1177,17 +1229,17 @@ if (HDF5_TEST_VFD)
     set_tests_properties (VFD-${vfdname}-flush1 PROPERTIES TIMEOUT 10)
     set_tests_properties (VFD-${vfdname}-flush2 PROPERTIES TIMEOUT 10)
     set_tests_properties (VFD-${vfdname}-istore PROPERTIES TIMEOUT 1800)
-    if (NOT CYGWIN)
-      set_tests_properties (VFD-${vfdname}-cache PROPERTIES TIMEOUT 1800)
-    endif (NOT CYGWIN)
+#    if (NOT CYGWIN)
+#      set_tests_properties (VFD-${vfdname}-cache PROPERTIES TIMEOUT 1800)
+#    endif (NOT CYGWIN)
     if (BUILD_SHARED_LIBS)
       set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES DEPENDS VFD-${vfdname}-flush1-shared)
       set_tests_properties (VFD-${vfdname}-flush1-shared PROPERTIES TIMEOUT 10)
       set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES TIMEOUT 10)
       set_tests_properties (VFD-${vfdname}-istore-shared PROPERTIES TIMEOUT 1800)
-      if (NOT CYGWIN)
-        set_tests_properties (VFD-${vfdname}-cache-shared PROPERTIES TIMEOUT 1800)
-      endif (NOT CYGWIN)
+#      if (NOT CYGWIN)
+#        set_tests_properties (VFD-${vfdname}-cache-shared PROPERTIES TIMEOUT 1800)
+#      endif (NOT CYGWIN)
     endif (BUILD_SHARED_LIBS)
     if (HDF5_TEST_FHEAP_VFD)
       add_test (
@@ -1256,6 +1308,7 @@ if (HDF5_BUILD_GENERATORS)
       gen_cross
       gen_deflate
       gen_filters
+      gen_idx
       gen_new_array
       gen_new_fill
       gen_new_group

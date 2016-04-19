@@ -4,7 +4,7 @@ PROJECT (HDF5_HL_TOOLS_H5WATCH)
 #-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
-set (H5WATCH_SRCS
+set (H5WATCH_SOURCES
     ${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR}/h5watch
 )
 
@@ -13,7 +13,7 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
 INCLUDE_DIRECTORIES (${HDF5_HL_TOOLS_DIR}/src)
 INCLUDE_DIRECTORIES (${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR})
 
-add_executable (h5watch ${H5WATCH_SRCS})
+add_executable (h5watch ${H5WATCH_SOURCES})
 TARGET_NAMING (h5watch STATIC)
 TARGET_C_PROPERTIES (h5watch STATIC " " " ")
 target_link_libraries (h5watch ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
@@ -21,20 +21,20 @@ set_target_properties (h5watch PROPERTIES FOLDER tools/hl)
 
 if (BUILD_TESTING)
   #-- Add swmr_check_compat_vfd program
-  set (hl_swmr_check_compat_vfd_SRCS
+  set (hl_swmr_check_compat_vfd_SOURCES
       ${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR}/swmr_check_compat_vfd.c
   )
-  add_executable (hl_swmr_check_compat_vfd ${hl_swmr_check_compat_vfd_SRCS})
+  add_executable (hl_swmr_check_compat_vfd ${hl_swmr_check_compat_vfd_SOURCES})
   TARGET_NAMING (hl_swmr_check_compat_vfd STATIC)
   TARGET_C_PROPERTIES (hl_swmr_check_compat_vfd STATIC " " " ")
   target_link_libraries (hl_swmr_check_compat_vfd ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (hl_swmr_check_compat_vfd PROPERTIES FOLDER tools/hl)
 
   #-- Add extend_dset program
-  set (extend_dset_SRCS
+  set (extend_dset_SOURCES
       ${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR}/extend_dset.c
   )
-  add_executable (extend_dset ${extend_dset_SRCS})
+  add_executable (extend_dset ${extend_dset_SOURCES})
   TARGET_NAMING (extend_dset STATIC)
   TARGET_C_PROPERTIES (extend_dset STATIC " " " ")
   target_link_libraries (extend_dset ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})

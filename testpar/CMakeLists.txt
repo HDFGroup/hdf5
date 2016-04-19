@@ -12,7 +12,7 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SRC_DIR}/lib )
 # Define Tests
 #-----------------------------------------------------------------------------
 
-set (testphdf5_SRCS
+set (testphdf5_SOURCES
     ${HDF5_TEST_PAR_SOURCE_DIR}/testphdf5.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_dset.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_file.c
@@ -27,7 +27,7 @@ set (testphdf5_SRCS
 )
 
 #-- Adding test for testhdf5
-add_executable (testphdf5 ${testphdf5_SRCS})
+add_executable (testphdf5 ${testphdf5_SOURCES})
 TARGET_NAMING (testphdf5 STATIC)
 TARGET_C_PROPERTIES (testphdf5 STATIC " " " ")
 target_link_libraries (testphdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})

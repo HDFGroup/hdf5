@@ -10,7 +10,7 @@ INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
 # --------------------------------------------------------------------
 # Add h5Repack executables
 # --------------------------------------------------------------------
-set (REPACK_COMMON_SRCS
+set (REPACK_COMMON_SOURCES
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_copy.c
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_filters.c
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_opttable.c
@@ -20,7 +20,7 @@ set (REPACK_COMMON_SRCS
     ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack.c
 )
 
-add_executable (h5repack ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
+add_executable (h5repack ${REPACK_COMMON_SOURCES} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
 TARGET_NAMING (h5repack STATIC)
 TARGET_C_PROPERTIES (h5repack STATIC " " " ")
 target_link_libraries (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
@@ -38,7 +38,7 @@ if (BUILD_TESTING)
   target_link_libraries (testh5repack_detect_szip ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
   set_target_properties (testh5repack_detect_szip PROPERTIES FOLDER tools)
 
-  add_executable (h5repacktest ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repacktst.c)
+  add_executable (h5repacktest ${REPACK_COMMON_SOURCES} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repacktst.c)
   TARGET_NAMING (h5repacktest STATIC)
   TARGET_C_PROPERTIES (h5repacktest STATIC " " " ")
   target_link_libraries (h5repacktest  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})

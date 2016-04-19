@@ -16,17 +16,20 @@ INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
 #-----------------------------------------------------------------------------
 # Define Test Library Sources
 #-----------------------------------------------------------------------------
-set (TEST_LIB_SRCS
+set (TEST_LIB_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/h5test.c
     ${HDF5_TEST_SOURCE_DIR}/testframe.c
     ${HDF5_TEST_SOURCE_DIR}/cache_common.c
+    ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
 )
 
 set (TEST_LIB_HEADERS
     ${HDF5_TEST_SOURCE_DIR}/h5test.h
+    ${HDF5_TEST_SOURCE_DIR}/cache_common.h
+    ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
 )
 
-add_library (${HDF5_TEST_LIB_TARGET} STATIC ${TEST_LIB_SRCS} ${TEST_LIB_HEADERS})
+add_library (${HDF5_TEST_LIB_TARGET} STATIC ${TEST_LIB_SOURCES} ${TEST_LIB_HEADERS})
 TARGET_C_PROPERTIES (${HDF5_TEST_LIB_TARGET} STATIC " " " ")
 if (MSVC)
   target_link_libraries (${HDF5_TEST_LIB_TARGET} "ws2_32.lib")
@@ -42,7 +45,7 @@ set_target_properties (${HDF5_TEST_LIB_TARGET} PROPERTIES
 )
 
 if (BUILD_SHARED_LIBS)
-  add_library (${HDF5_TEST_LIBSH_TARGET} SHARED ${TEST_LIB_SRCS} ${TEST_LIB_HEADERS})
+  add_library (${HDF5_TEST_LIBSH_TARGET} SHARED ${TEST_LIB_SOURCES} ${TEST_LIB_HEADERS})
   TARGET_C_PROPERTIES (${HDF5_TEST_LIBSH_TARGET} SHARED " " " ")
   if (MSVC)
     target_link_libraries (${HDF5_TEST_LIBSH_TARGET} "ws2_32.lib")
@@ -65,85 +68,6 @@ if (BUILD_SHARED_LIBS)
     )
   endif (HDF5_ENABLE_THREADSAFE)
 endif (BUILD_SHARED_LIBS)
-
-#-----------------------------------------------------------------------------
-# Build SWMR test programs
-#
-# These programs are currently not used in CMake tests but we build them
-# here anyway for manual testing and to ensure that the code compiles
-# on all platforms.
-#-----------------------------------------------------------------------------
-MACRO (ADD_H5_SWMR_EXE file)
-  add_executable (${file}
-    ${HDF5_TEST_SOURCE_DIR}/${file}.c
-    ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
-    ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
-  )
-  TARGET_NAMING (${file} STATIC)
-  TARGET_C_PROPERTIES (${file} STATIC " " " ")
-  target_link_libraries (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
-  set_target_properties (${file} PROPERTIES FOLDER test)
-  if (BUILD_SHARED_LIBS)
-    add_executable (${file}-shared
-      ${HDF5_TEST_SOURCE_DIR}/${file}.c
-      ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
-      ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
-    )
-    TARGET_NAMING (${file}-shared SHARED)
-    TARGET_C_PROPERTIES (${file}-shared SHARED " " " ")
-    target_link_libraries (${file}-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-    set_target_properties (${file}-shared PROPERTIES FOLDER test)
-  endif (BUILD_SHARED_LIBS)
-ENDMACRO (ADD_H5_SWMR_EXE file)
-
-set (H5_SWMR_TESTS
-    swmr_addrem_writer
-    swmr_check_compat_vfd
-    swmr_generator
-    swmr_reader
-    swmr_remove_reader
-    swmr_remove_writer
-    swmr_sparse_reader
-    swmr_sparse_writer
-    swmr_start_write
-    swmr_writer
-)
-
-foreach (test ${H5_SWMR_TESTS})
-  ADD_H5_SWMR_EXE(${test})
-endforeach (test ${H5_SWMR_TESTS})
-
-#-----------------------------------------------------------------------------
-# Build VDS SWMR test programs
-#
-# These programs are currently not used in CMake tests but we build them
-# here anyway for manual testing and to ensure that the code compiles
-# on all platforms.
-#-----------------------------------------------------------------------------
-MACRO (ADD_H5_VDS_SWMR_EXE file)
-  add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
-  TARGET_NAMING (${file} STATIC)
-  TARGET_C_PROPERTIES (${file} STATIC " " " ")
-  target_link_libraries (${file} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
-  set_target_properties (${file} PROPERTIES FOLDER test)
-  if (BUILD_SHARED_LIBS)
-    add_executable (${file}-shared ${HDF5_TEST_SOURCE_DIR}/${file}.c)
-    TARGET_NAMING (${file}-shared SHARED)
-    TARGET_C_PROPERTIES (${file}-shared SHARED " " " ")
-    target_link_libraries (${file}-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-    set_target_properties (${file}-shared PROPERTIES FOLDER test)
-  endif (BUILD_SHARED_LIBS)
-ENDMACRO (ADD_H5_VDS_SWMR_EXE file)
-
-set (H5_VDS_SWMR_TESTS
-    vds_swmr_gen
-    vds_swmr_reader
-    vds_swmr_writer
-)
-
-foreach (test ${H5_VDS_SWMR_TESTS})
-  ADD_H5_VDS_SWMR_EXE(${test})
-endforeach (test ${H5_VDS_SWMR_TESTS})
 
 #-----------------------------------------------------------------------------
 # If plugin library tests can be tested
@@ -215,7 +139,7 @@ endforeach (test ${H5_VDS_SWMR_TESTS})
     )
   endforeach (test_lib ${TEST2_PLUGIN_LIBS})
 
-set (testhdf5_SRCS
+set (testhdf5_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/testhdf5.c
     ${HDF5_TEST_SOURCE_DIR}/tarray.c
     ${HDF5_TEST_SOURCE_DIR}/tattr.c
@@ -244,13 +168,13 @@ set (testhdf5_SRCS
 )
 
 #-- Adding test for testhdf5
-add_executable (testhdf5 ${testhdf5_SRCS})
+add_executable (testhdf5 ${testhdf5_SOURCES})
 TARGET_NAMING (testhdf5 STATIC)
 TARGET_C_PROPERTIES (testhdf5 STATIC " " " ")
 target_link_libraries (testhdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (testhdf5 PROPERTIES FOLDER test)
 if (BUILD_SHARED_LIBS)
-  add_executable (testhdf5-shared ${testhdf5_SRCS})
+  add_executable (testhdf5-shared ${testhdf5_SOURCES})
   TARGET_NAMING (testhdf5-shared SHARED)
   TARGET_C_PROPERTIES (testhdf5-shared SHARED " " " ")
   target_link_libraries (testhdf5-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
@@ -273,21 +197,27 @@ MACRO (ADD_H5_EXE file)
 ENDMACRO (ADD_H5_EXE file)
 
 set (H5_TESTS
-    accum
+    #testhdf5
+    cache
+    cache_api
+    cache_tagging
     lheap
     ohdr
     stab
     gheap
-    cache_logging
-    cork
+    farray
+    earray
+    btree2
+    fheap
     pool
+    accum
+    #hyperslab
     istore
     bittests
     dt_arith
     dtypes
     dsets
     cmpd_dset
-    chunk_info
     filter_fail
     extend
     external
@@ -295,6 +225,7 @@ set (H5_TESTS
     objcopy
     links
     unlink
+    twriteorder
     big
     mtime
     fillval
@@ -304,7 +235,9 @@ set (H5_TESTS
     app_ref
     enum
     set_extent
-    space_overflow
+    #ttsafe
+    enc_dec_plist
+    enc_dec_plist_cross_platform
     getname
     vfd
     ntypes
@@ -315,16 +248,10 @@ set (H5_TESTS
     freespace
     mf
     vds
-    farray
-    earray
-    btree2
-    fheap
-    tcheck_version
-    testmeta
     file_image
-    enc_dec_plist
-    enc_dec_plist_cross_platform
     unregister
+    cache_logging
+    cork
     swmr
 )
 
@@ -332,53 +259,38 @@ foreach (test ${H5_TESTS})
   ADD_H5_EXE(${test})
 endforeach (test ${H5_TESTS})
 
+set (H5_SWMR_TESTS
+    swmr_addrem_writer
+    swmr_check_compat_vfd
+    swmr_generator
+    swmr_reader
+    swmr_remove_reader
+    swmr_remove_writer
+    swmr_sparse_reader
+    swmr_sparse_writer
+    swmr_start_write
+    swmr_writer
+)
+
+foreach (test ${H5_SWMR_TESTS})
+  ADD_H5_EXE(${test})
+endforeach (test ${H5_SWMR_TESTS})
+
+set (H5_VDS_SWMR_TESTS
+    vds_swmr_gen
+    vds_swmr_reader
+    vds_swmr_writer
+)
+
+foreach (test ${H5_VDS_SWMR_TESTS})
+  ADD_H5_EXE(${test})
+endforeach (test ${H5_VDS_SWMR_TESTS})
+
 ##############################################################################
 ##############################################################################
 ###           A D D I T I O N A L   T E S T S                              ###
 ##############################################################################
 ##############################################################################
-
-#-- Adding test for cache
-add_executable (cache ${HDF5_TEST_SOURCE_DIR}/cache.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
-TARGET_NAMING (cache STATIC)
-TARGET_C_PROPERTIES (cache STATIC " " " ")
-target_link_libraries (cache ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-set_target_properties (cache PROPERTIES FOLDER test)
-if (BUILD_SHARED_LIBS)
-  add_executable (cache-shared ${HDF5_TEST_SOURCE_DIR}/cache.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
-  TARGET_NAMING (cache-shared SHARED)
-  TARGET_C_PROPERTIES (cache-shared SHARED " " " ")
-  target_link_libraries (cache-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-  set_target_properties (cache-shared PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
-
-#-- Adding test for cache_api
-add_executable (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
-TARGET_NAMING (cache_api STATIC)
-TARGET_C_PROPERTIES (cache_api STATIC " " " ")
-target_link_libraries (cache_api ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-set_target_properties (cache_api PROPERTIES FOLDER test)
-if (BUILD_SHARED_LIBS)
-  add_executable (cache_api-shared ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
-  TARGET_NAMING (cache_api-shared SHARED)
-  TARGET_C_PROPERTIES (cache_api-shared SHARED " " " ")
-  target_link_libraries (cache_api-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-  set_target_properties (cache_api-shared PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
-
-#-- Adding test for cache_tagging
-add_executable (cache_tagging ${HDF5_TEST_SOURCE_DIR}/cache_tagging.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
-TARGET_NAMING (cache_tagging STATIC)
-TARGET_C_PROPERTIES (cache_tagging STATIC " " " ")
-target_link_libraries (cache_tagging ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-set_target_properties (cache_tagging PROPERTIES FOLDER test)
-if (BUILD_SHARED_LIBS)
-  add_executable (cache_tagging-shared ${HDF5_TEST_SOURCE_DIR}/cache_tagging.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
-  TARGET_NAMING (cache_tagging-shared SHARED)
-  TARGET_C_PROPERTIES (cache_tagging-shared SHARED " " " ")
-  target_link_libraries (cache_tagging-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-  set_target_properties (cache_tagging-shared PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
 
 #-- Adding test for hyperslab
 add_executable (hyperslab ${HDF5_TEST_SOURCE_DIR}/hyperslab.c)
@@ -432,49 +344,24 @@ if (BUILD_SHARED_LIBS)
   endif (HDF5_ENABLE_THREADSAFE)
 endif (BUILD_SHARED_LIBS)
 
-#-- Adding test for err_compat
-if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
-  add_executable (err_compat ${HDF5_TEST_SOURCE_DIR}/err_compat.c)
-  TARGET_NAMING (err_compat STATIC)
-  TARGET_C_PROPERTIES (err_compat STATIC " " " ")
-  target_link_libraries (err_compat ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-  set_target_properties (err_compat PROPERTIES FOLDER test)
-  if (BUILD_SHARED_LIBS)
-    add_executable (err_compat-shared ${HDF5_TEST_SOURCE_DIR}/err_compat.c)
-    TARGET_NAMING (err_compat-shared SHARED)
-    TARGET_C_PROPERTIES (err_compat-shared SHARED " " " ")
-    target_link_libraries (err_compat-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-    set_target_properties (err_compat-shared PROPERTIES FOLDER test)
-  endif (BUILD_SHARED_LIBS)
-endif (HDF5_ENABLE_DEPRECATED_SYMBOLS)
+set (H5_CHECK_TESTS
+    error_test
+    err_compat
+    tcheck_version
+    testmeta
+    #accum_swmr_reader
+    atomic_writer
+    atomic_reader
+    links_env
+    flushrefresh
+    #use_append_chunk
+    #use_append_mchunks
+    #use_disable_mdc_flushes
+)
 
-#-- Adding test for error_test
-add_executable (error_test ${HDF5_TEST_SOURCE_DIR}/error_test.c)
-TARGET_NAMING (error_test STATIC)
-TARGET_C_PROPERTIES (error_test STATIC " " " ")
-target_link_libraries (error_test ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-set_target_properties (error_test PROPERTIES FOLDER test)
-if (BUILD_SHARED_LIBS)
-  add_executable (error_test-shared ${HDF5_TEST_SOURCE_DIR}/error_test.c)
-  TARGET_NAMING (error_test-shared SHARED)
-  TARGET_C_PROPERTIES (error_test-shared SHARED " " " ")
-  target_link_libraries (error_test-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-  set_target_properties (error_test-shared PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
-
-#-- Adding test for links_env
-add_executable (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)
-TARGET_NAMING (links_env STATIC)
-TARGET_C_PROPERTIES (links_env STATIC " " " ")
-target_link_libraries (links_env ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-set_target_properties (links_env PROPERTIES FOLDER test)
-if (BUILD_SHARED_LIBS)
-  add_executable (links_env-shared ${HDF5_TEST_SOURCE_DIR}/links_env.c)
-  TARGET_NAMING (links_env-shared SHARED)
-  TARGET_C_PROPERTIES (links_env-shared SHARED " " " ")
-  target_link_libraries (links_env-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-  set_target_properties (links_env-shared PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
+foreach (test ${H5_CHECK_TESTS})
+  ADD_H5_EXE(${test})
+endforeach (test ${H5_CHECK_TESTS})
 
 #-- Adding test for accum_swmr_reader
 #   This has to be copied to the test directory for execve() to find it
@@ -488,7 +375,7 @@ set_target_properties (accum_swmr_reader PROPERTIES FOLDER test)
 #-- Set accum dependencies
 set_target_properties (accum PROPERTIES DEPENDS accum_swmr_reader)
 if (BUILD_SHARED_LIBS)
-  set_target_properties (accum-shared PROPERTIES DEPENDS accum_swmr_reader-shared)
+  set_target_properties (accum-shared PROPERTIES DEPENDS accum_swmr_reader)
 endif (BUILD_SHARED_LIBS)
 
 #-- Adding test for libinfo
@@ -518,6 +405,51 @@ else (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (plugin STATIC " " " ")
   target_link_libraries (plugin ${HDF5_TEST_PLUGIN_LIB_TARGET})
   set_target_properties (plugin PROPERTIES FOLDER test)
+endif (BUILD_SHARED_LIBS)
+
+##############################################################################
+###    U S E  C A S E S  T E S T S
+##############################################################################
+set (use_append_chunk_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_append_chunk.c ${HDF5_TEST_SOURCE_DIR}/use_common.c)
+add_executable (use_append_chunk ${use_append_chunk_SOURCES})
+TARGET_NAMING (use_append_chunk STATIC)
+TARGET_C_PROPERTIES (use_append_chunk STATIC " " " ")
+target_link_libraries (use_append_chunk ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (use_append_chunk PROPERTIES FOLDER test)
+if (BUILD_SHARED_LIBS)
+  add_executable (use_append_chunk-shared ${use_append_chunk_SOURCES})
+  TARGET_NAMING (use_append_chunk-shared SHARED)
+  TARGET_C_PROPERTIES (use_append_chunk-shared SHARED " " " ")
+  target_link_libraries (use_append_chunk-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (use_append_chunk-shared PROPERTIES FOLDER test)
+endif (BUILD_SHARED_LIBS)
+
+set (use_append_mchunks_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_append_mchunks.c ${HDF5_TEST_SOURCE_DIR}/use_common.c)
+add_executable (use_append_mchunks ${use_append_mchunks_SOURCES})
+TARGET_NAMING (use_append_mchunks STATIC)
+TARGET_C_PROPERTIES (use_append_mchunks STATIC " " " ")
+target_link_libraries (use_append_mchunks ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (use_append_mchunks PROPERTIES FOLDER test)
+if (BUILD_SHARED_LIBS)
+  add_executable (use_append_mchunks-shared ${use_append_mchunks_SOURCES})
+  TARGET_NAMING (use_append_mchunks-shared SHARED)
+  TARGET_C_PROPERTIES (use_append_mchunks-shared SHARED " " " ")
+  target_link_libraries (use_append_mchunks-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (use_append_mchunks-shared PROPERTIES FOLDER test)
+endif (BUILD_SHARED_LIBS)
+
+set (use_disable_mdc_flushes_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_disable_mdc_flushes.c)
+add_executable (use_disable_mdc_flushes ${use_disable_mdc_flushes_SOURCES})
+TARGET_NAMING (use_disable_mdc_flushes STATIC)
+TARGET_C_PROPERTIES (use_disable_mdc_flushes STATIC " " " ")
+target_link_libraries (use_disable_mdc_flushes ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (use_disable_mdc_flushes PROPERTIES FOLDER test)
+if (BUILD_SHARED_LIBS)
+  add_executable (use_disable_mdc_flushes-shared ${use_disable_mdc_flushes_SOURCES})
+  TARGET_NAMING (use_disable_mdc_flushes-shared SHARED)
+  TARGET_C_PROPERTIES (use_disable_mdc_flushes-shared SHARED " " " ")
+  target_link_libraries (use_disable_mdc_flushes-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (use_disable_mdc_flushes-shared PROPERTIES FOLDER test)
 endif (BUILD_SHARED_LIBS)
 
 include (CMakeTests.cmake)

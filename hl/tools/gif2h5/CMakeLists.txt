@@ -4,7 +4,7 @@ PROJECT (HDF5_HL_TOOLS_GIF2H5)
 #-----------------------------------------------------------------------------
 # Define Sources
 #-----------------------------------------------------------------------------
-set (GIF2H5_SRCS
+set (GIF2H5_SOURCES
     ${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/gif.h
     ${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/decompress.c
     ${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/gif2hdf.c
@@ -17,18 +17,18 @@ set (GIF2H5_SRCS
 INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
 INCLUDE_DIRECTORIES (${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR})
 
-add_executable (gif2h5 ${GIF2H5_SRCS})
+add_executable (gif2h5 ${GIF2H5_SOURCES})
 TARGET_NAMING (gif2h5 STATIC)
 TARGET_C_PROPERTIES (gif2h5 STATIC " " " ")
 target_link_libraries (gif2h5 ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (gif2h5 PROPERTIES FOLDER tools/hl)
 
 #-- Add h52gif program
-set (hdf2gif_SRCS
+set (hdf2gif_SOURCES
     ${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/hdf2gif.c
     ${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/hdfgifwr.c
 )
-add_executable (h52gif ${hdf2gif_SRCS})
+add_executable (h52gif ${hdf2gif_SOURCES})
 TARGET_NAMING (h52gif STATIC)
 TARGET_C_PROPERTIES (h52gif STATIC " " " ")
 target_link_libraries (h52gif ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
