@@ -955,8 +955,8 @@ test_write_file_set(hid_t fapl)
     return 1;
 } /* end test_write_file_set() */
 
- 
- /*-------------------------------------------------------------------------
+
+/*-------------------------------------------------------------------------
  * Function:    test_path_absolute
  *
  * Purpose:     Test absolute filenames for external files.
@@ -1407,16 +1407,13 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Runs external dataset tests.
+ * Purpose:     Runs external dataset tests.
  *
- * Return:	Success:	exit(0)
- *
- *		Failure:	exit(non-zero)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:	Robb Matzke
->>>>>>> .merge-right.r29182
  *              Tuesday, March  3, 1998
  *
  *-------------------------------------------------------------------------
