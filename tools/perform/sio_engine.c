@@ -16,17 +16,23 @@
  * Author: Christian Chilan, April 2008
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#ifdef H5_HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
-#include <errno.h>
-
 #include "hdf5.h"
+
+#ifdef H5_STDC_HEADERS
+#   include <errno.h>
+#   include <fcntl.h>
+#   include <stdio.h>
+#   include <stdlib.h>
+#endif
+
+#ifdef H5_HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
+
+#ifdef H5_HAVE_SYS_STAT_H
+#   include <sys/stat.h>
+#endif
 
 #include "sio_perf.h"
 
@@ -255,7 +261,7 @@ done:
         case HDF5:
             if (fd.h5fd != -1)
                 hrc = do_fclose(iot, &fd);
-			break;
+            break;
         default:
             /* unknown request */
             HDassert(0 && "Unknown IO type");
@@ -675,7 +681,7 @@ static herr_t dset_write(int local_dim, file_descr *fd, parameters *parms, void 
                 VRFY((hrc >= 0), "H5Dwrite");
 
                 break;
-				
+
             default:
                 /* unknown request */
                 HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -851,7 +857,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             GOTOERROR(FAIL);
         }
         break;
-		
+
         default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -979,7 +985,7 @@ static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms,
                 }
 #endif
                 break;
-				
+
             default:
                 /* unknown request */
                 HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -1097,7 +1103,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             GOTOERROR(FAIL);
         }
         break;
-		
+
     default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)param->io_type);
@@ -1225,7 +1231,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
 
         fd->h5fd = -1;
         break;
-		
+
     default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
@@ -1297,7 +1303,7 @@ do_cleanupfile(iotype iot, char *filename)
             }
             H5Pclose(fapl);
         break;
-			
+
     default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);

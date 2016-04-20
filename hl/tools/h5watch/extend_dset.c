@@ -235,7 +235,7 @@ extend_dset_two(const char *file, char *dname)
     for(i = 0; i < TWO_NTESTS; i++) {
 
     /* sleep to emulate about 2 seconds of application operation */
-    sleep(2);
+    HDsleep(2);
 
     /* Get current dimension sizes */
         if(H5LDget_dset_dims(did, cur_dims) < 0)
@@ -373,7 +373,7 @@ extend_dset_one(const char *file, char *dname)
     for(i = 0; i < ONE_NTESTS; i++) {
 
     /* sleep to emulate about 2 seconds of application operation */
-    sleep(2);
+    HDsleep(2);
 
     /* Get current dimension sizes */
     if(H5LDget_dset_dims(did, cur_dims) < 0)

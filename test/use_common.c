@@ -12,6 +12,15 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include "h5test.h"
+
+/* This test uses many POSIX things that are not available on
+ * Windows. We're using a check for fork(2) here as a proxy for
+ * all POSIX/Unix/Linux things until this test can be made
+ * more platform-independent.
+ */
+#ifdef H5_HAVE_FORK
+
 #include "use.h"
 
 #define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
@@ -21,18 +30,18 @@
 void
 usage(const char *prog)
 {
-    fprintf(stderr, "usage: %s [OPTIONS]\n", prog);
-    fprintf(stderr, "  OPTIONS\n");
-    fprintf(stderr, "     -h, --help            Print a usage message and exit\n");
-    fprintf(stderr, "     -f FN                 Test file name [default: %s.h5]\n", prog);
-    fprintf(stderr, "     -i N, --iteration=N   Number of iterations to repeat the whole thing. [default: 1]\n");
-    fprintf(stderr, "     -l w|r                launch writer or reader only. [default: launch both]\n");
-    fprintf(stderr, "     -n N, --nplanes=N     Number of planes to write/read. [default: 1000]\n");
-    fprintf(stderr, "     -s N, --swmr=N        Use SWMR mode (0: no, non-0: yes) default is yes\n");
-    fprintf(stderr, "     -z N, --chunksize=N   Chunk size [default: %d]\n", Chunksize_DFT);
-    fprintf(stderr, "     -y N, --chunkplanes=N Number of planes per chunk [default: 1]\n");
-    fprintf(stderr, "\n");
-}
+    HDfprintf(stderr, "usage: %s [OPTIONS]\n", prog);
+    HDfprintf(stderr, "  OPTIONS\n");
+    HDfprintf(stderr, "     -h, --help            Print a usage message and exit\n");
+    HDfprintf(stderr, "     -f FN                 Test file name [default: %s.h5]\n", prog);
+    HDfprintf(stderr, "     -i N, --iteration=N   Number of iterations to repeat the whole thing. [default: 1]\n");
+    HDfprintf(stderr, "     -l w|r                launch writer or reader only. [default: launch both]\n");
+    HDfprintf(stderr, "     -n N, --nplanes=N     Number of planes to write/read. [default: 1000]\n");
+    HDfprintf(stderr, "     -s N, --swmr=N        Use SWMR mode (0: no, non-0: yes) default is yes\n");
+    HDfprintf(stderr, "     -z N, --chunksize=N   Chunk size [default: %d]\n", Chunksize_DFT);
+    HDfprintf(stderr, "     -y N, --chunkplanes=N Number of planes per chunk [default: 1]\n");
+    HDfprintf(stderr, "\n");
+} /* end usage() */
 
 /* Setup Use Case parameters by parsing command line options.
 * Setup default values if not set by options. */
@@ -547,7 +556,7 @@ int read_uc_file(hbool_t towait)
 	    }
 	    nonewplane++;
 	    /* pause for a second */
-	    sleep(1);
+        HDsleep(1);
 	}
 	for (nplane=nplane_old; nplane < dims[0]; nplane++){
 	    /* read planes between last old nplanes and current extent */
@@ -628,4 +637,6 @@ int read_uc_file(hbool_t towait)
     else
 	return 0;
 }
+
+#endif /* H5_HAVE_FORK */
 

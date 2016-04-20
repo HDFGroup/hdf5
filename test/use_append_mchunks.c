@@ -50,9 +50,16 @@
  * 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Created: Albert Cheng, 2013/6/1.
- * Modified:
+/* Created: Albert Cheng, 2013/6/1 */
+
+#include "h5test.h"
+
+/* This test uses many POSIX things that are not available on
+ * Windows. We're using a check for fork(2) here as a proxy for
+ * all POSIX/Unix/Linux things until this test can be made
+ * more platform-independent.
  */
+#ifdef H5_HAVE_FORK
 
 #include "use.h"
 
@@ -205,3 +212,15 @@ done:
 
     return(ret_value);
 }
+
+#else /* H5_HAVE_FORK */
+
+int
+main(void)
+{
+    HDfprintf(stderr, "Non-POSIX platform. Skipping.\n");
+    return EXIT_SUCCESS;
+} /* end main() */
+
+#endif /* H5_HAVE_FORK */
+

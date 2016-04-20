@@ -47,6 +47,7 @@
           red/prefix_target.h5
           u2w/u2w_target.h5
           vds.h5
+          vds-exc.h5
           vds-excalibur.h5
           vds-exclim.h5
           vds-percival.h5
@@ -106,6 +107,19 @@
             soft_link.h5
             subset.h5
             unix2win.h5
+            vds.h5
+            vds-exc.h5
+            vds-excalibur.h5
+            vds-exclim.h5
+            vds-percival.h5
+            vds-percival-unlim.h5
+            vds-percival-unlim-maxmin.h5
+            a.h5
+            b.h5
+            c.h5
+            d.h5
+            vds-simpleIO.h5
+            vds-eiger.h5
             blue/prefix_target.h5
             red/prefix_target.h5
             u2w/u2w_target.h5

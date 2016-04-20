@@ -100,6 +100,7 @@ TOOLTEST() {
 
     if [ $exit_code -eq 0 ];then
 	echo "$RESULT_PASSED"
+	test yes = "$verbose" && sed 's/^/    /' < $actual
     else
 	echo "$RESULT_FAILED"
 	nerrors="`expr $nerrors + 1`"

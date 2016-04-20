@@ -22,8 +22,7 @@
  */
 
 #undef NDEBUG      /*override -DNDEBUG      */
-#include <sys/types.h>
-#include <sys/stat.h>
+
 #include "h5test.h"
 #include "H5srcdir.h"
 

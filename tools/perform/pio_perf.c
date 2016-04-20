@@ -482,7 +482,7 @@ run_test_loop(struct options *opts)
                 buf_size,((double)parms.num_dsets * (double)parms.num_bytes) / ONE_MB);
 
             print_indent(1);
-            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2f MBs\n",
+            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2f MB\n",
                 parms.num_files, parms.num_dsets, (double)(opts->num_bpp*parms.num_procs)/ONE_MB);
         }
 

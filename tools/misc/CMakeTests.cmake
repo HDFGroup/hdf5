@@ -203,10 +203,12 @@
     NAME H5CLEAR-clearall-objects
     COMMAND    ${CMAKE_COMMAND}
         -E remove
-        h5clear_sec2_v3.h5
         h5clear_log_v3.h5
         h5clear_sec2_v0.h5
         h5clear_sec2_v2.h5
+        h5clear_sec2_v3.h5
+        latest_h5clear_log_v3.h5
+        latest_h5clear_sec2_v3.h5
   )
   if (NOT "${last_test}" STREQUAL "")
     set_tests_properties (H5CLEAR-clearall-objects PROPERTIES DEPENDS ${last_test})

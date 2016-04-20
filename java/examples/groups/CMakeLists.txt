@@ -93,20 +93,20 @@ ENDMACRO (ADD_H5_TEST file)
 if (BUILD_TESTING)
   foreach (example ${HDF_JAVA_EXAMPLES})
     add_test (
-        NAME JAVA_groups-${example}-clearall-objects
+        NAME JAVA_groups-${example}-clear-objects
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${example}.out
             ${example}.out.err
     )
     if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (JAVA_groups-${example}-clearall-objects PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (JAVA_groups-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
-    set (last_test "JAVA_groups-${example}-clearall-objects")
+    set (last_test "JAVA_groups-${example}-clear-objects")
     if (NOT ${example} STREQUAL "H5Ex_G_Iterate" AND NOT ${example} STREQUAL "H5Ex_G_Visit")
       if (${example} STREQUAL "H5Ex_G_Compact")
         add_test (
-            NAME JAVA_groups-${example}-clearall-h5s
+            NAME JAVA_groups-${example}-clear-h5s
             COMMAND    ${CMAKE_COMMAND}
                 -E remove
                 ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}1.h5
@@ -114,16 +114,16 @@ if (BUILD_TESTING)
         )
       else (${example} STREQUAL "H5Ex_G_Compact")
         add_test (
-            NAME JAVA_groups-${example}-clearall-h5s
+            NAME JAVA_groups-${example}-clear-h5s
             COMMAND    ${CMAKE_COMMAND}
                 -E remove
                 ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
         )
       endif (${example} STREQUAL "H5Ex_G_Compact")
       if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (JAVA_groups-${example}-clearall-h5s PROPERTIES DEPENDS ${last_test})
+        set_tests_properties (JAVA_groups-${example}-clear-h5s PROPERTIES DEPENDS ${last_test})
       endif (NOT "${last_test}" STREQUAL "")
-      set (last_test "JAVA_groups-${example}-clearall-h5s")
+      set (last_test "JAVA_groups-${example}-clear-h5s")
     endif (NOT ${example} STREQUAL "H5Ex_G_Iterate" AND NOT ${example} STREQUAL "H5Ex_G_Visit")
     add_test (
         NAME JAVA_groups-${example}-copy-objects

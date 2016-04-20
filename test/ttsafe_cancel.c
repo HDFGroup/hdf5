@@ -39,9 +39,9 @@
  * Modification History
  * --------------------
  *
- *	19 May 2000, Bill Wendling
- *	Changed so that it creates its own HDF5 file and removes it at cleanup
- *	time.
+ *    19 May 2000, Bill Wendling
+ *    Changed so that it creates its own HDF5 file and removes it at cleanup
+ *    time.
  *
  ********************************************************************/
 #include "ttsafe.h"
@@ -49,8 +49,8 @@
 #ifdef H5_HAVE_THREADSAFE
 #ifndef H5_HAVE_WIN_THREADS
 
-#define FILENAME	"ttsafe_cancel.h5"
-#define DATASETNAME	"commonname"
+#define FILENAME    "ttsafe_cancel.h5"
+#define DATASETNAME    "commonname"
 
 void *tts_cancel_thread(void *);
 void tts_cancel_barrier(void);
@@ -59,9 +59,9 @@ void cancellation_cleanup(void *);
 
 hid_t cancel_file;
 typedef struct cleanup_struct {
-	hid_t dataset;
-	hid_t datatype;
-	hid_t dataspace;
+    hid_t dataset;
+    hid_t datatype;
+    hid_t dataspace;
 } cancel_cleanup_t;
 
 pthread_t childthread;
@@ -125,7 +125,7 @@ void *tts_cancel_thread(void H5_ATTR_UNUSED *arg)
     int datavalue;
     int buffer;
     hid_t dataspace, datatype, dataset;
-    hsize_t dimsf[1];	/* dataset dimensions */
+    hsize_t dimsf[1];    /* dataset dimensions */
     cancel_cleanup_t *cleanup_structure;
     int ret;
 
@@ -161,7 +161,7 @@ void *tts_cancel_thread(void H5_ATTR_UNUSED *arg)
     ret=H5Diterate(&buffer, H5T_NATIVE_INT, dataspace, tts_cancel_callback, &dataset);
     assert(ret>=0);
 
-    sleep(3);
+    HDsleep(3);
 
     datavalue = 100;
     ret=H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &datavalue);
@@ -183,14 +183,14 @@ void *tts_cancel_thread(void H5_ATTR_UNUSED *arg)
 }
 
 herr_t tts_cancel_callback(void *elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_UNUSED ndim,
-			   const hsize_t H5_ATTR_UNUSED *point, void *operator_data)
+            const hsize_t H5_ATTR_UNUSED *point, void *operator_data)
 {
     int value = *(int *)elem;
     hid_t dataset = *(hid_t *)operator_data;
     int ret;
 
     tts_cancel_barrier();
-    sleep(3);
+    HDsleep(3);
 
     if (value != 1) {
         TestErrPrintf("Error! Element value should be 1 and not %d\n", value);

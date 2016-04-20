@@ -90,7 +90,7 @@ if (BUILD_TESTING)
 
   foreach (example ${HDF_JAVA_EXAMPLES})
     add_test (
-        NAME JAVA_intro-${example}-clearall-objects
+        NAME JAVA_intro-${example}-clear-objects
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
@@ -98,7 +98,7 @@ if (BUILD_TESTING)
             ${example}.out.err
     )
     if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (JAVA_intro-${example}-clearall-objects PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (JAVA_intro-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
     add_test (
         NAME JAVA_intro-${example}-copy-objects
@@ -107,7 +107,7 @@ if (BUILD_TESTING)
             ${HDFJAVA_EXAMPLES_SOURCE_DIR}/testfiles/examples.intro.${example}.txt
             ${HDFJAVA_EXAMPLES_INTRO_BINARY_DIR}/${example}.txt
     )
-    set_tests_properties (JAVA_intro-${example}-copy-objects PROPERTIES DEPENDS JAVA_intro-${example}-clearall-objects)
+    set_tests_properties (JAVA_intro-${example}-copy-objects PROPERTIES DEPENDS JAVA_intro-${example}-clear-objects)
     set (last_test "JAVA_intro-${example}-copy-objects")
     ADD_H5_TEST (${example} 0)
   endforeach (example ${HDF_JAVA_EXAMPLES})
