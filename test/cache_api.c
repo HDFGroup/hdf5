@@ -16,8 +16,8 @@
 /* Programmer:  John Mainzer
  *              11/10/05
  *
- *		This file contains tests for the API calls associated
- *		with the cache implemented in H5C.c
+ *        This file contains tests for the API calls associated
+ *        with the cache implemented in H5C.c
  */
 
 #include "h5test.h"
@@ -26,8 +26,6 @@
 #include "cache_common.h"
 
 /* extern declarations */
-
-extern const char *FILENAME[];
 
 /* global variable declarations: */
 
@@ -53,19 +51,19 @@ static unsigned check_file_mdc_api_errs(void);
 /**************************************************************************/
 
 /*-------------------------------------------------------------------------
- * Function:	check_fapl_mdc_api_calls()
+ * Function:    check_fapl_mdc_api_calls()
  *
- * Purpose:	Verify that the file access property list related
- *		metadata cache related API calls are functioning
- *		correctly.
+ * Purpose:    Verify that the file access property list related
+ *        metadata cache related API calls are functioning
+ *        correctly.
  *
- *		Since we have tested the H5C code elsewhere, it should
- *		be sufficient to verify that the desired configuration
- *		data is getting to the cache.
+ *        Since we have tested the H5C code elsewhere, it should
+ *        be sufficient to verify that the desired configuration
+ *        data is getting to the cache.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/12/04
  *
  *-------------------------------------------------------------------------
@@ -113,8 +111,8 @@ check_fapl_mdc_api_calls(void)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-					H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t scratch;
     H5C_auto_size_ctl_t default_auto_size_ctl;
@@ -133,13 +131,13 @@ check_fapl_mdc_api_calls(void)
 
     if ( pass ) {
 
-	fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
-	if ( fapl_id < 0 ) {
+    if ( fapl_id < 0 ) {
 
-	    pass = FALSE;
+        pass = FALSE;
             failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
-	}
+    }
     }
 
     if ( pass ) {
@@ -151,7 +149,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+        failure_mssg = "H5Pget_mdc_config() failed.\n";
 
         } else if (!CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE)) {
 
@@ -172,7 +170,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pset_mdc_config() failed.\n";
+        failure_mssg = "H5Pset_mdc_config() failed.\n";
         }
     }
 
@@ -185,7 +183,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+        failure_mssg = "H5Pget_mdc_config() failed.\n";
 
         } else if ( ! CACHE_CONFIGS_EQUAL(mod_config, scratch, TRUE, TRUE) ) {
 
@@ -199,7 +197,7 @@ check_fapl_mdc_api_calls(void)
         if ( H5Pclose(fapl_id) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+        failure_mssg = "H5Pclose() failed.\n";
         }
     }
 
@@ -241,11 +239,11 @@ check_fapl_mdc_api_calls(void)
         if ( file_ptr == NULL ) {
 
             pass = FALSE;
-	    failure_mssg = "Can't get file_ptr.\n";
+        failure_mssg = "Can't get file_ptr.\n";
 
-	} else {
+    } else {
 
-	    cache_ptr = file_ptr->shared->cache;
+        cache_ptr = file_ptr->shared->cache;
         }
     }
 
@@ -264,7 +262,7 @@ check_fapl_mdc_api_calls(void)
     /* conpare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! resize_configs_are_equal(&default_auto_size_ctl, \
+    if ( ! resize_configs_are_equal(&default_auto_size_ctl, \
                                         &cache_ptr->resize_ctl, TRUE) ) {
 
 
@@ -297,7 +295,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+        failure_mssg = "H5Pget_mdc_config() failed.\n";
 
         } else if (!CACHE_CONFIGS_EQUAL(default_config, scratch, TRUE, TRUE)) {
 
@@ -307,22 +305,22 @@ check_fapl_mdc_api_calls(void)
         } else if ( H5Pclose(fapl_id) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+        failure_mssg = "H5Pclose() failed.\n";
         }
     }
 
     /* close the file and delete it */
     if ( pass ) {
 
-	if ( H5Fclose(file_id) < 0  ) {
+    if ( H5Fclose(file_id) < 0  ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+        failure_mssg = "H5Fclose() failed.\n";
 
         } else if ( HDremove(filename) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+        failure_mssg = "HDremove() failed.\n";
         }
     }
 
@@ -337,13 +335,13 @@ check_fapl_mdc_api_calls(void)
     /* Create a FAPL */
     if ( pass ) {
 
-	fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
 
-	if ( fapl_id < 0 ) {
+    if ( fapl_id < 0 ) {
 
-	    pass = FALSE;
+        pass = FALSE;
             failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
-	}
+    }
     }
 
     /* Modify the initial mdc configuration in the FAPL. */
@@ -355,7 +353,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pset_mdc_config() failed.\n";
+        failure_mssg = "H5Pset_mdc_config() failed.\n";
         }
     }
 
@@ -390,7 +388,7 @@ check_fapl_mdc_api_calls(void)
         if ( file_ptr == NULL ) {
 
             pass = FALSE;
-	    failure_mssg = "Can't get file_ptr.\n";
+        failure_mssg = "Can't get file_ptr.\n";
 
         } else {
 
@@ -413,7 +411,7 @@ check_fapl_mdc_api_calls(void)
     /* conpare the cache's internal configuration with the expected value */
     if ( pass ) {
 
-	if ( ! resize_configs_are_equal(&mod_auto_size_ctl, \
+    if ( ! resize_configs_are_equal(&mod_auto_size_ctl, \
                                         &cache_ptr->resize_ctl, TRUE) ) {
 
 
@@ -446,7 +444,7 @@ check_fapl_mdc_api_calls(void)
         if ( result < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pget_mdc_config() failed.\n";
+        failure_mssg = "H5Pget_mdc_config() failed.\n";
 
         } else if ( ! CACHE_CONFIGS_EQUAL(mod_config, scratch, TRUE, TRUE) ) {
 
@@ -456,7 +454,7 @@ check_fapl_mdc_api_calls(void)
         } else if ( H5Pclose(test_fapl_id) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+        failure_mssg = "H5Pclose() failed.\n";
         }
     }
 
@@ -466,22 +464,22 @@ check_fapl_mdc_api_calls(void)
         if ( H5Pclose(fapl_id) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Pclose() failed.\n";
+        failure_mssg = "H5Pclose() failed.\n";
         }
     }
 
     /* close the file and delete it */
     if ( pass ) {
 
-	if ( H5Fclose(file_id) < 0  ) {
+    if ( H5Fclose(file_id) < 0  ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+        failure_mssg = "H5Fclose() failed.\n";
 
         } else if ( HDremove(filename) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+        failure_mssg = "HDremove() failed.\n";
         }
     }
 
@@ -497,22 +495,22 @@ check_fapl_mdc_api_calls(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	check_file_mdc_api_calls()
+ * Function:    check_file_mdc_api_calls()
  *
- * Purpose:	Verify that the file related metadata cache API calls are
- *		functioning correctly.
+ * Purpose:    Verify that the file related metadata cache API calls are
+ *        functioning correctly.
  *
- *		Since we have tested the H5C code elsewhere, it should
- *		be sufficient to verify that the desired configuration
- *		data is getting in and out of the cache.  Similarly,
- *		we need only verify that the cache monitoring calls
- *		return the data that the cache thinks they should return.
- *		We shouldn't need to verify data correctness beyond that
- *		point.
+ *        Since we have tested the H5C code elsewhere, it should
+ *        be sufficient to verify that the desired configuration
+ *        data is getting in and out of the cache.  Similarly,
+ *        we need only verify that the cache monitoring calls
+ *        return the data that the cache thinks they should return.
+ *        We shouldn't need to verify data correctness beyond that
+ *        point.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/14/04
  *
  * Modifications:
@@ -563,8 +561,8 @@ check_file_mdc_api_calls(void)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-					H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t mod_config_2 =
     {
@@ -598,8 +596,8 @@ check_file_mdc_api_calls(void)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-					H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t mod_config_3 =
     {
@@ -633,8 +631,8 @@ check_file_mdc_api_calls(void)
       /* hbool_t     apply_empty_reserve    = */ FALSE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t mod_config_4 =
     {
@@ -669,8 +667,8 @@ check_file_mdc_api_calls(void)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.1f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
 
     TESTING("MDC/FILE related API calls");
@@ -813,9 +811,9 @@ check_file_mdc_api_calls(void)
         else {
 
             HDfprintf(stdout, "H5Fget_mdc_size() reports:\n");
-            HDfprintf(stdout, "	max_size: %ld, min_clean_size: %ld\n",
+            HDfprintf(stdout, "    max_size: %ld, min_clean_size: %ld\n",
                       (long)max_size, (long)min_clean_size);
-	    HDfprintf(stdout, "	cur_size: %ld, cur_num_entries: %d\n",
+        HDfprintf(stdout, "    cur_size: %ld, cur_num_entries: %d\n",
                       (long)cur_size, cur_num_entries);
         }
 #endif
@@ -824,15 +822,15 @@ check_file_mdc_api_calls(void)
     /* close the file and delete it */
     if ( pass ) {
 
-	if ( H5Fclose(file_id) < 0  ) {
+    if ( H5Fclose(file_id) < 0  ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+        failure_mssg = "H5Fclose() failed.\n";
 
         } else if ( HDremove(filename) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+        failure_mssg = "HDremove() failed.\n";
         }
     }
 
@@ -848,19 +846,19 @@ check_file_mdc_api_calls(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	mdc_api_call_smoke_check()
+ * Function:    mdc_api_call_smoke_check()
  *
  * Purpose:
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/14/04
  *
  * Modifications:
  *
- * 		JRM -- 7/12/06
- * 		Added progress reporting code.
+ *         JRM -- 7/12/06
+ *         Added progress reporting code.
  *
  *-------------------------------------------------------------------------
  */
@@ -926,8 +924,8 @@ mdc_api_call_smoke_check(int express_test)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t mod_config_2 =
     {
@@ -961,8 +959,8 @@ mdc_api_call_smoke_check(int express_test)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
     H5AC_cache_config_t mod_config_3 =
     {
@@ -996,8 +994,8 @@ mdc_api_call_smoke_check(int express_test)
       /* hbool_t     apply_empty_reserve    = */ TRUE,
       /* double      empty_reserve          = */ 0.05f,
       /* int         dirty_bytes_threshold  = */ (256 * 1024),
-      /* int	    metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+      /* int        metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
     };
 
     TESTING("MDC API smoke check");
@@ -1109,7 +1107,7 @@ mdc_api_call_smoke_check(int express_test)
 
                 sprintf(dset_name, "/dset%03d", i);
                 dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
-				            dataspace_id, H5P_DEFAULT, properties, H5P_DEFAULT);
+                            dataspace_id, H5P_DEFAULT, properties, H5P_DEFAULT);
 
                 if ( dataset_ids[i] < 0 ) {
 
@@ -1499,16 +1497,16 @@ mdc_api_call_smoke_check(int express_test)
     /* close the file and delete it */
     if ( pass ) {
 
-	if ( H5Fclose(file_id) < 0  ) {
+    if ( H5Fclose(file_id) < 0  ) {
 
             pass = FALSE;
-	    failure_mssg = "H5Fclose() failed.\n";
+        failure_mssg = "H5Fclose() failed.\n";
 
         }
         else if ( HDremove(filename) < 0 ) {
 
             pass = FALSE;
-	    failure_mssg = "HDremove() failed.\n";
+        failure_mssg = "HDremove() failed.\n";
         }
     }
 
@@ -1530,7 +1528,7 @@ mdc_api_call_smoke_check(int express_test)
  * Note: It is assumed that boolean parameters are only set to TRUE/FALSE.
  */
 
-#define NUM_INVALID_CONFIGS	36
+#define NUM_INVALID_CONFIGS    36
 
 H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
 {
@@ -1566,8 +1564,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 1 -- open_trace_file == TRUE and empty trace_file_name */
@@ -1601,8 +1599,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 2 -- max_size too big */
@@ -1636,8 +1634,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 3 -- min_size too small */
@@ -1671,8 +1669,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 4 -- min_size > max_size */
@@ -1706,8 +1704,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 5 -- initial size out of range (too big) */
@@ -1741,8 +1739,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 6 -- initial_size out of range (too small) */
@@ -1776,8 +1774,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 7 -- min_clean_fraction too big */
@@ -1811,8 +1809,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 8 -- min_clean_fraction too small */
@@ -1846,8 +1844,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 9 -- epoch_length too small */
@@ -1881,8 +1879,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 10 -- epoch_length too big */
@@ -1916,8 +1914,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 11 -- invalid incr_mode */
@@ -1951,8 +1949,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 12 -- lower_hr_threshold too small */
@@ -1986,8 +1984,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 13 -- lower_hr_threshold too big */
@@ -2021,8 +2019,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 14 -- increment too small */
@@ -2056,8 +2054,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 15 -- invalid flash_incr_mode */
@@ -2091,8 +2089,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 16 -- flash_multiple too small */
@@ -2126,8 +2124,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 17 -- flash_multiple too big */
@@ -2161,8 +2159,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 18 -- flash_threshold too small */
@@ -2196,8 +2194,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 19 -- flash_threshold too big */
@@ -2231,8 +2229,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 20 -- bad decr_mode */
@@ -2266,8 +2264,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 21 -- upper_hr_threshold too big */
@@ -2301,8 +2299,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 22 -- decrement too small */
@@ -2336,8 +2334,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 23 -- decrement too big */
@@ -2371,8 +2369,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 24 -- epochs_before_eviction too small */
@@ -2406,8 +2404,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 25 -- epochs_before_eviction too big */
@@ -2441,8 +2439,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 26 -- empty_reserve too small */
@@ -2476,8 +2474,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ -0.0000000001f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 27 -- empty_reserve too big */
@@ -2511,8 +2509,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ H5_DOUBLE(1.00000000001),
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 28 -- upper_hr_threshold too small */
@@ -2546,8 +2544,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 29 -- upper_hr_threshold too big */
@@ -2581,8 +2579,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 30 -- upper_hr_threshold <= lower_hr_threshold */
@@ -2616,8 +2614,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 31 -- dirty_bytes_threshold too small */
@@ -2651,8 +2649,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (H5C__MIN_MAX_CACHE_SIZE / 2) - 1,
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 32 -- dirty_bytes_threshold too big */
@@ -2686,8 +2684,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (H5C__MAX_MAX_CACHE_SIZE / 4) + 1,
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 33 -- attempt to disable evictions when auto incr enabled */
@@ -2721,8 +2719,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 34 -- attempt to disable evictions when auto decr enabled */
@@ -2756,8 +2754,8 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */
-				      H5AC__DEFAULT_METADATA_WRITE_STRATEGY
+    /* int      metadata_write_strategy = */
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY
   },
   {
     /* 35 -- unknown metadata write strategy */
@@ -2791,20 +2789,20 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1f,
     /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* int	  metadata_write_strategy = */ -1
+    /* int      metadata_write_strategy = */ -1
   }
 };
 
 
 /*-------------------------------------------------------------------------
- * Function:	check_fapl_mdc_api_errs()
+ * Function:    check_fapl_mdc_api_errs()
  *
- * Purpose:	Verify that the FAPL related MDC API calls reject input
- *		errors gracefully.
+ * Purpose:    Verify that the FAPL related MDC API calls reject input
+ *        errors gracefully.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/19/04
  *
  * Modifications:
@@ -2834,8 +2832,8 @@ check_fapl_mdc_api_errs(void)
     if  ( pass ) {
 
         H5E_BEGIN_TRY {
-	    result = H5Pget_mdc_config((hid_t)-1, &scratch);
-	} H5E_END_TRY;
+        result = H5Pget_mdc_config((hid_t)-1, &scratch);
+    } H5E_END_TRY;
 
         if ( result >= 0 ) {
 
@@ -2969,14 +2967,14 @@ check_fapl_mdc_api_errs(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	check_file_mdc_api_errs()
+ * Function:    check_file_mdc_api_errs()
  *
- * Purpose:	Verify that the file related MDC API calls reject input
- *		errors gracefully.
+ * Purpose:    Verify that the file related MDC API calls reject input
+ *        errors gracefully.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              4/19/04
  *
  * Modifications:
@@ -3012,10 +3010,10 @@ check_file_mdc_api_errs(void)
     /* setup the file name */
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: calling h5_fixname().\n", FUNC);
-	}
+        HDfprintf(stdout, "%s: calling h5_fixname().\n", FUNC);
+    }
 
         if ( h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename))
             == NULL ) {
@@ -3027,10 +3025,10 @@ check_file_mdc_api_errs(void)
 
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: calling H5Fcreate().\n", FUNC);
-	}
+        HDfprintf(stdout, "%s: calling H5Fcreate().\n", FUNC);
+    }
 
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -3049,10 +3047,10 @@ check_file_mdc_api_errs(void)
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if  ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 1.\n", FUNC);
-	}
+        HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 1.\n", FUNC);
+    }
 
         H5E_BEGIN_TRY {
             result = H5Fget_mdc_config((hid_t)-1, &scratch);
@@ -3067,10 +3065,10 @@ check_file_mdc_api_errs(void)
 
     if  ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 2.\n", FUNC);
-	}
+        HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 2.\n", FUNC);
+    }
 
         H5E_BEGIN_TRY {
             result = H5Fget_mdc_config(file_id, NULL);
@@ -3086,10 +3084,10 @@ check_file_mdc_api_errs(void)
     scratch.version = -1; /* a convenient, invalid value */
     if  ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 3.\n", FUNC);
-	}
+        HDfprintf(stdout, "%s: testing H5Fget_mdc_config() 3.\n", FUNC);
+    }
 
         H5E_BEGIN_TRY {
             result = H5Fget_mdc_config(file_id, &scratch);
@@ -3108,10 +3106,10 @@ check_file_mdc_api_errs(void)
     scratch.version = H5C__CURR_AUTO_SIZE_CTL_VER;
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 1.\n", FUNC);
-	}
+        HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 1.\n", FUNC);
+    }
 
         H5E_BEGIN_TRY {
             result = H5Fset_mdc_config((hid_t)-1, &default_config);
@@ -3126,10 +3124,10 @@ check_file_mdc_api_errs(void)
 
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 2.\n", FUNC);
-	}
+        HDfprintf(stdout, "%s: testing H5Fset_mdc_config() 2.\n", FUNC);
+    }
 
         H5E_BEGIN_TRY {
             result = H5Fset_mdc_config(file_id, NULL);
@@ -3145,12 +3143,12 @@ check_file_mdc_api_errs(void)
     i = 0;
     while ( ( pass ) && ( i < NUM_INVALID_CONFIGS ) )
     {
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout,
-		    "%s: testing H5Fset_mdc_config() with invalid config %d.\n",
-		    FUNC, i);
-	}
+        HDfprintf(stdout,
+            "%s: testing H5Fset_mdc_config() with invalid config %d.\n",
+            FUNC, i);
+    }
 
         H5E_BEGIN_TRY {
             result = H5Fset_mdc_config(file_id, &(invalid_configs[i]));
@@ -3175,11 +3173,11 @@ check_file_mdc_api_errs(void)
     /* test H5Fget_mdc_hit_rate() */
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 1.\n",
-		      FUNC);
-	}
+        HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 1.\n",
+            FUNC);
+    }
 
         H5E_BEGIN_TRY {
             result = H5Fget_mdc_hit_rate((hid_t)-1, &hit_rate);
@@ -3194,11 +3192,11 @@ check_file_mdc_api_errs(void)
 
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 2.\n",
-		      FUNC);
-	}
+        HDfprintf(stdout, "%s: testing H5Fget_mdc_hit_rate() 2.\n",
+            FUNC);
+    }
 
         H5E_BEGIN_TRY {
             result = H5Fget_mdc_hit_rate(file_id, NULL);
@@ -3215,11 +3213,11 @@ check_file_mdc_api_errs(void)
     /* test H5Freset_mdc_hit_rate_stats() */
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Freset_mdc_hit_rate_stats().\n",
-		      FUNC);
-	}
+        HDfprintf(stdout, "%s: testing H5Freset_mdc_hit_rate_stats().\n",
+            FUNC);
+    }
 
         H5E_BEGIN_TRY {
             result = H5Freset_mdc_hit_rate_stats((hid_t)-1);
@@ -3237,10 +3235,10 @@ check_file_mdc_api_errs(void)
     /* test H5Fget_mdc_size() */
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 1.\n", FUNC);
-	}
+        HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 1.\n", FUNC);
+    }
 
         H5E_BEGIN_TRY {
             result = H5Fget_mdc_size((hid_t)-1, &max_size, &min_clean_size,
@@ -3256,10 +3254,10 @@ check_file_mdc_api_errs(void)
 
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 2.\n", FUNC);
-	}
+        HDfprintf(stdout, "%s: testing H5Fget_mdc_size() 2.\n", FUNC);
+    }
 
         if ( ( H5Fget_mdc_size(file_id, &max_size, NULL, NULL, NULL) < 0 ) ||
              ( H5Fget_mdc_size(file_id, NULL, &min_clean_size,
@@ -3278,10 +3276,10 @@ check_file_mdc_api_errs(void)
     /* close the file and delete it */
     if ( pass ) {
 
-	if ( show_progress ) {
+    if ( show_progress ) {
 
-	    HDfprintf(stdout, "%s: cleaning up from tests.\n", FUNC);
-	}
+        HDfprintf(stdout, "%s: cleaning up from tests.\n", FUNC);
+    }
 
         if ( H5Fclose(file_id) < 0  ) {
 
@@ -3307,15 +3305,15 @@ check_file_mdc_api_errs(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Run tests on the cache code contained in H5C.c
+ * Purpose:    Run tests on the cache code contained in H5C.c
  *
- * Return:	Success:
+ * Return:    Success:
  *
- *		Failure:
+ *        Failure:
  *
- * Programmer:	John Mainzer
+ * Programmer:    John Mainzer
  *              6/24/04
  *
  * Modifications:

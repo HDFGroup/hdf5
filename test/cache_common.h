@@ -539,6 +539,8 @@ struct expected_entry_status
 /* global variable externs: */
 H5TEST_DLLVAR H5C_t * saved_cache;
 
+H5TEST_DLLVAR const char *FILENAME[];
+
 H5TEST_DLLVAR haddr_t saved_actual_base_addr;
 H5TEST_DLLVAR hbool_t write_permitted;
 H5TEST_DLLVAR hbool_t pass; /* set to false on error */
