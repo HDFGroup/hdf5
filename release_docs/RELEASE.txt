@@ -167,7 +167,7 @@ This release supports the following features:
 
     - Version 3 Metadata Cache
 
-      The version 3 metadata cache moves management of metadata I/O from 
+      The version 3 metadata cache moves management of metadata I/O from
       the clients to the metadata cache proper.  This change is essential for
       SWMR and other features that have yet to be released.
 
@@ -228,7 +228,7 @@ This release supports the following features:
     - New Public Functions: H5PTget_dataset and H5PTget_type
 
       Two accessor functions have been added. H5PTget_dataset returns
-      the identifier of the dataset associated with the packet table, 
+      the identifier of the dataset associated with the packet table,
       and H5PTget_type returns the identifier of the datatype used by
       the packet table.
 
@@ -298,6 +298,55 @@ This release supports the following features:
     -----------------------
 
     The hid_t type was changed from 32-bit to a 64-bit value.
+
+
+
+Issues Addressed in this Release Since 1.10.0
+=============================================
+
+     - The JUnit-interface test may fail on Solaris platforms. The result of
+       a test for verifying the content of the error stack to stdout is
+       in a different order on Solaris then other platforms.
+
+       This test is skipped on Solaris
+       (ADB - 2016/04/21, HDFFV-9734)
+
+     - When building HDF5 with Java using CMake and specifying Debug for CMAKE_BUILD_TYPE,
+       there was a missing command argument for the tests of the examples.
+
+       Fixed.
+       (ADB - 2016/04/21, HDFFV-9743)
+
+     - Changed h5diff to print a warning when a dataset is virtual, enabling
+       the data to be compared. In addition h5repack failed to copy the data
+       of a virtual dataset to the new file. Function H5D__get_space_status changed
+       to correctly determine the H5D_space_status_t allocation value.
+
+       CMake added the Fixed Array indexing tests that were only in the autotools
+       test scripts.
+
+       Fixed and tests added for vds issues.
+       (ADB,NAF - 2016/04/21, HDFFV-9756)
+
+     - CMake added the h5format_convert tool and tests that were only in the autotools
+       build and test scripts. The autotools test script was reworked to allow CMake
+       to execute the test suite in parallel.
+
+       Also, h5clear tool and tests were added to the misc folder.
+
+       Fixed.
+       (ADB - 2016/04/21, HDFFV-9766)
+
+     - CMake added the h5watch tool and argument tests that were only in the autotools
+       build and test scripts. The POSIX only tests were not added to CMake.
+
+       CMake HL tools files were refactored to move the CMake test scripts into each tool folder.
+
+       Fixed.
+       (ADB - 2016/04/21, HDFFV-9770)
+
+     - CMake files added missing files to test clear lists, source tags changed
+       from *_SRCS to *_SOURCES and other minor changes that clean up the CMake code.
 
 
 
@@ -585,12 +634,6 @@ an issue not listed here or at the link above, and we will provide any
 information about known workarounds that we have or add it to our list of
 known issues if it is a new issue.
 
- - The JUnit-interface test may fail on Solaris platforms. The result of
-   a test for verifying the content of the error stack to stdout is
-   in a different order on Solaris then other platforms. Use make -i option
-   to test beyond the java/test folder.
-   (ADB - 2016/03/22, HDFFV-9734)
-
  - The flush/refresh test occasionally fails on OS X platforms. This is
    being investigated but no fix or workaround is available at this time.
    (DER - 2016/03/22, HDFFV-9731)
@@ -626,19 +669,12 @@ known issues if it is a new issue.
    the mapping.
    (EIP - 2016/03/20, HDFFV-9724)
 
- - When building HDF5 with Java using CMake and specifying Debug for CMAKE_BUILD_TYPE,
-   there is a missing command argument for the tests of the examples.
-
-   This error can be avoided by not building Java with Debug, HDF5_BUILD_JAVA:BOOL=OFF, 
-   or not building Examples, HDF5_BUILD_EXAMPLES:BOOL=OFF.
-   (LRK - 2016/03/30, HDFFV-9743) 
-
- - The H5Lexists API changed behavior in HDF5-1.10 when used with a file handle 
+ - The H5Lexists API changed behavior in HDF5-1.10 when used with a file handle
    and root group name ("/"):
 
    H5Lexists(fileid, "/")
 
-   In HDF5-1.8 it returns false (0) and in HDF5-1.10 it returns true (1). 
+   In HDF5-1.8 it returns false (0) and in HDF5-1.10 it returns true (1).
    The documentation will be updated with information regarding this change.
    (LRK - 2016/03/30, HDFFV-8746)
 
