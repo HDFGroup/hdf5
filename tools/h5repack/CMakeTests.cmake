@@ -1087,11 +1087,35 @@
 ################################################################
 # layout conversions
 ###############################################################
-  ADD_H5_VERIFY_VDS (vds_dset_chunk20x10x5 "TEST" 0 ${FILEV1} vds_dset CHUNKED -l vds_dset:CHUNK=20x10x5)
-  ADD_H5_VERIFY_VDS (vds_chunk2x5x8 "TEST" 0 ${FILEV3_1} vds_dset CHUNKED -l vds_dset:CHUNK=2x5x8)
-  ADD_H5_VERIFY_VDS (vds_chunk3x6x9 "TEST" 0 ${FILEV2} vds_dset CHUNKED -l vds_dset:CHUNK=3x6x9)
-  ADD_H5_VERIFY_VDS (vds_compa "TEST" 0 ${FILEV4} vds_dset COMPACT -l vds_dset:COMPA)
-  ADD_H5_VERIFY_VDS (vds_conti "TEST" 0 ${FILEV4} vds_dset CONTIGUOUS -l vds_dset:CONTI)
+  set (TESTTYPE "TEST")
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif (NOT USE_FILTER_DEFLATE)
+  ADD_H5_VERIFY_VDS (vds_dset_chunk20x10x5 ${TESTTYPE} 0 ${FILEV1} vds_dset CHUNKED -l vds_dset:CHUNK=20x10x5)
+
+  set (TESTTYPE "TEST")
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif (NOT USE_FILTER_DEFLATE)
+  ADD_H5_VERIFY_VDS (vds_chunk2x5x8 ${TESTTYPE} 0 ${FILEV3_1} vds_dset CHUNKED -l vds_dset:CHUNK=2x5x8)
+
+  set (TESTTYPE "TEST")
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif (NOT USE_FILTER_DEFLATE)
+  ADD_H5_VERIFY_VDS (vds_chunk3x6x9 ${TESTTYPE} 0 ${FILEV2} vds_dset CHUNKED -l vds_dset:CHUNK=3x6x9)
+
+  set (TESTTYPE "TEST")
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif (NOT USE_FILTER_DEFLATE)
+  ADD_H5_VERIFY_VDS (vds_compa ${TESTTYPE} 0 ${FILEV4} vds_dset COMPACT -l vds_dset:COMPA)
+
+  set (TESTTYPE "TEST")
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif (NOT USE_FILTER_DEFLATE)
+  ADD_H5_VERIFY_VDS (vds_conti ${TESTTYPE} 0 ${FILEV4} vds_dset CONTIGUOUS -l vds_dset:CONTI)
 
 ##############################################################################
 ###    P L U G I N  T E S T S

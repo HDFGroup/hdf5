@@ -1162,11 +1162,35 @@ TOOLTEST_META meta_long h5repack_layout.h5 --metadata_block_size=8192
 ################################################################
 # layout conversions
 ###############################################################
-VERIFY_LAYOUT_VDS vds_dset_chunk_20x10x5 1_vds.h5 vds_dset CHUNKED --layout vds_dset:CHUNK=20x10x5
-VERIFY_LAYOUT_VDS vds_chunk2x5x8 3_1_vds.h5 vds_dset CHUNKED -l vds_dset:CHUNK=2x5x8
-VERIFY_LAYOUT_VDS vds_chunk3x6x9 2_vds.h5 vds_dset CHUNKED -l vds_dset:CHUNK=3x6x9
-VERIFY_LAYOUT_VDS vds_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
-VERIFY_LAYOUT_VDS vds_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+if test  $USE_FILTER_DEFLATE != "yes" ; then
+ SKIP vds_dset_chunk_20x10x5
+else
+ VERIFY_LAYOUT_VDS vds_dset_chunk_20x10x5 1_vds.h5 vds_dset CHUNKED --layout vds_dset:CHUNK=20x10x5
+fi
+
+if test  $USE_FILTER_DEFLATE != "yes" ; then
+ SKIP vds_chunk2x5x8
+else
+ VERIFY_LAYOUT_VDS vds_chunk2x5x8 3_1_vds.h5 vds_dset CHUNKED -l vds_dset:CHUNK=2x5x8
+fi
+
+if test  $USE_FILTER_DEFLATE != "yes" ; then
+ SKIP vds_chunk3x6x9
+else
+ VERIFY_LAYOUT_VDS vds_chunk3x6x9 2_vds.h5 vds_dset CHUNKED -l vds_dset:CHUNK=3x6x9
+fi
+
+if test  $USE_FILTER_DEFLATE != "yes" ; then
+ SKIP vds_compa 4_vds.h5
+else
+ VERIFY_LAYOUT_VDS vds_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
+fi
+
+if test  $USE_FILTER_DEFLATE != "yes" ; then
+ SKIP vds_conti 4_vds.h5
+else
+ VERIFY_LAYOUT_VDS vds_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
+fi
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR
