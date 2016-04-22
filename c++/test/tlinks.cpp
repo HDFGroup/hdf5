@@ -415,7 +415,7 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 	verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__);
 
     } // end of try block
-    catch (Exception E)
+    catch (Exception& E)
     {
 	issue_fail_msg("test_basic_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
@@ -441,7 +441,7 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 
 	PASSED();
     } // end of try block
-    catch (Exception E)
+    catch (Exception& E)
     {
 	issue_fail_msg("test_basic_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
@@ -630,7 +630,7 @@ void test_links()
 	/* nerrors += external_reset_register() < 0 ? 1 : 0;
  */
     }
-    catch (Exception E)
+    catch (Exception& E)
     {
 	issue_fail_msg("test_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }

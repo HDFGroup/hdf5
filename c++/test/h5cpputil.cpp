@@ -98,7 +98,7 @@ int test_report( int nerrors, const H5std_string& testname )
 void issue_fail_msg(const char* where, int line, const char* file_name,
 		    const char* message)
 {
-    //if (GetTestVerbosity()>=VERBO_HI)
+    if (GetTestVerbosity()>=VERBO_HI)
     {
 	cerr << endl;
         cerr << ">>> FAILED in " << where << " at line " << line
@@ -121,7 +121,7 @@ void issue_fail_msg(const char* where, int line, const char* file_name,
 void issue_fail_msg(const char* where, int line, const char* file_name,
 		    const char* func_name, const char* message)
 {
-    //if (GetTestVerbosity()>=VERBO_HI)
+    if (GetTestVerbosity()>=VERBO_HI)
     {
 	cerr << endl;
         cerr << ">>> FAILED in " << where << ": " << func_name << endl <<
@@ -156,8 +156,8 @@ int check_values (hsize_t i, hsize_t j, int apoint, int acheck)
     if (apoint != acheck)
     {
 	cerr << "    Read different values than written.\n" << endl;
-	cerr << "    At index " << (unsigned long)i << "," <<
-   	(unsigned long)j << endl;
+	cerr << "    At index " << static_cast<unsigned long>(i) << "," <<
+   	static_cast<unsigned long>(j) << endl;
 	return -1;
     }
     return 0;
@@ -212,10 +212,10 @@ InvalidActionException::InvalidActionException():Exception(){}
 //              which the failure should have occurred but didn't, and a
 //		message explaining why it should fail.
 // Parameters
-//		func_name - IN: Name of the function where failure should occur
-//		message   - IN: Message
+//		func    - IN: Name of the function where failure should occur
+//		message - IN: Message
 //--------------------------------------------------------------------------
-InvalidActionException::InvalidActionException(const H5std_string func_name, const H5std_string message) : Exception(func_name, message) {}
+InvalidActionException::InvalidActionException(const H5std_string func, const H5std_string message) : Exception(func, message) {}
 
 //--------------------------------------------------------------------------
 // Function:    InvalidActionException destructor
@@ -234,10 +234,10 @@ TestFailedException::TestFailedException():Exception(){}
 //              which the failure should have occurred but didn't, and a
 //		message explaining why it should fail.
 // Parameters
-//		func_name - IN: Name of the function where failure should occur
-//		message   - IN: Message
+//		func    - IN: Name of the function where failure should occur
+//		message - IN: Message
 //--------------------------------------------------------------------------
-TestFailedException::TestFailedException(const H5std_string func_name, const H5std_string message) : Exception(func_name, message) {}
+TestFailedException::TestFailedException(const H5std_string func, const H5std_string message) : Exception(func, message) {}
 
 //--------------------------------------------------------------------------
 // Function:    TestFailedException destructor

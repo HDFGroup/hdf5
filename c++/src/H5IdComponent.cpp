@@ -207,7 +207,7 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 	    // Note: a = b, so there are two objects with the same hdf5 id
 	    // that's why incRefCount is needed, and it is called by setId
 	}
-	catch (Exception close_error) {
+	catch (Exception& close_error) {
 	    throw FileIException(inMemFunc("operator="), close_error.getDetailMsg());
 	}
     }

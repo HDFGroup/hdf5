@@ -116,7 +116,7 @@ static void test_file_create()
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File constructor", "Attempted to create an existing file.");
 	}
-	catch( FileIException E ) // catch truncating existing file
+	catch (FileIException& E) // catch truncating existing file
 	{} // do nothing, FAIL expected
 
 	// Close file1
@@ -181,7 +181,7 @@ static void test_file_create()
 	// Close first file
 	delete file1;
     }
-    catch (InvalidActionException E)
+    catch (InvalidActionException& E)
     {
         cerr << " *FAILED*" << endl;
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
@@ -189,7 +189,7 @@ static void test_file_create()
             delete file1;
     }
     // catch all other exceptions
-    catch (Exception E)
+    catch (Exception& E)
     {
 	issue_fail_msg("test_file_create()", __LINE__, __FILE__, E.getCDetailMsg());
         if (file1 != NULL) // clean up
@@ -268,7 +268,7 @@ static void test_file_create()
 	PASSED();
     }
     // catch all exceptions
-    catch (Exception E)
+    catch (Exception& E)
     {
 	issue_fail_msg("test_file_create()", __LINE__, __FILE__, E.getCDetailMsg());
 	if (tmpl1 != NULL)  // clean up
@@ -505,7 +505,8 @@ static void test_file_name()
 	PASSED();
     }   // end of try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
         issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
@@ -551,7 +552,7 @@ static void test_file_attribute()
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File createAttribute", "Attempted to create an existing attribute.");
 	}
-	catch( AttributeIException E ) // catch creating existing attribute
+	catch (AttributeIException& E) // catch creating existing attribute
 	{} // do nothing, FAIL expected
 
 	// Create a new dataset
@@ -618,7 +619,8 @@ static void test_file_attribute()
 	PASSED();
     }   // end of try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
         issue_fail_msg("test_file_attribute()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_file_attribute()
@@ -705,7 +707,8 @@ static void test_libver_bounds_real(
     // Everything should be closed as they go out of scope
     }   // end of try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
         issue_fail_msg("test_libver_bounds_real()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 

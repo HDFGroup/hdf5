@@ -269,7 +269,8 @@ static void test_array_compound_array()
 	file1.close();
         PASSED();
     }   // end of try block
-    catch (Exception E) {
+    catch (Exception& E)
+    {
         issue_fail_msg("test_array_compound_array", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
@@ -343,7 +344,8 @@ static void test_array_assignment()
 
         PASSED();
     }   // end of try block
-    catch (Exception E) {
+    catch (Exception& E)
+    {
         issue_fail_msg("test_array_assignment", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // end test_array_assignment()

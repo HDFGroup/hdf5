@@ -88,7 +88,7 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 {
     try {
 	p_get_file(name, flags, create_plist, access_plist);
-    } catch (FileIException open_file) {
+    } catch (FileIException& open_file) {
 	throw open_file;
     }
 }
@@ -113,7 +113,7 @@ H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPro
 {
     try {
 	p_get_file(name.c_str(), flags, create_plist, access_plist);
-    } catch (FileIException open_file) {
+    } catch (FileIException& open_file) {
 	throw open_file;
     }
 }
@@ -245,7 +245,7 @@ void H5File::openFile(const char* name, unsigned int flags, const FileAccPropLis
     try {
         close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
         throw FileIException("H5File::openFile", close_error.getDetailMsg());
     }
 
@@ -294,7 +294,7 @@ void H5File::reOpen()
     try {
         close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
         throw FileIException("H5File::reOpen", close_error.getDetailMsg());
     }
 
@@ -650,7 +650,7 @@ H5File::~H5File()
 {
     try {
 	close();
-    } catch (Exception close_error) {
+    } catch (Exception& close_error) {
 	cerr << "H5File::~H5File - " << close_error.getDetailMsg() << endl;
     }
 }

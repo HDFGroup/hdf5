@@ -148,7 +148,7 @@ static void test_get_objname()
     }	// try block
 
     // catch all other exceptions
-    catch (Exception E)
+    catch (Exception& E)
     {
 	issue_fail_msg("test_get_objname", __LINE__, __FILE__);
     }
@@ -233,7 +233,7 @@ static void test_get_objname_ontypes()
 	PASSED();
     } // end top try block
 
-    catch (Exception E)
+    catch (Exception& E)
     {
 	issue_fail_msg("test_get_objname_ontypes", __LINE__, __FILE__);
     }
@@ -298,7 +298,7 @@ static void test_get_objtype()
     }	// try block
 
     // catch all other exceptions
-    catch (Exception E)
+    catch (Exception& E)
     {
 	issue_fail_msg("test_get_objtype", __LINE__, __FILE__);
     }

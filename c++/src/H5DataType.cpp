@@ -179,7 +179,7 @@ void DataType::copy( const DataType& like_type )
     try {
 	close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
 	throw DataTypeIException(inMemFunc("copy"), close_error.getDetailMsg());
     }
 
@@ -204,7 +204,7 @@ void DataType::copy(const DataSet& dset)
     try {
 	close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
 	throw DataTypeIException(inMemFunc("copy"), close_error.getDetailMsg());
     }
 
@@ -723,7 +723,7 @@ void DataType::p_setId(const hid_t new_id)
     try {
         close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
         throw DataTypeIException(inMemFunc("p_setId"), close_error.getDetailMsg());
     }
    // reset object's id to the given id
@@ -776,7 +776,7 @@ DataType::~DataType()
     {
 	close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
 	cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;
     }
 }

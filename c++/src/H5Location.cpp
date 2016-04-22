@@ -230,7 +230,7 @@ int H5Location::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_
    userData->location = this;
 
    // call the C library routine H5Aiterate2 to iterate the attributes
-   hsize_t idx = _idx ? (hsize_t)*_idx : 0;
+   hsize_t idx = _idx ? static_cast<hsize_t>(*_idx) : 0;
    int ret_value = H5Aiterate2(getId(), H5_INDEX_NAME, H5_ITER_INC, &idx,
 			userAttrOpWrpr, reinterpret_cast<void *>(userData));
 
@@ -387,7 +387,7 @@ H5std_string H5Location::getFileName() const
    try {
       return(p_get_file_name());
    }
-   catch (LocationException E) {
+   catch (LocationException& E) {
       throw FileIException(inMemFunc("getFileName"), E.getDetailMsg());
    }
 }
@@ -634,7 +634,7 @@ void H5Location::reference(void* ref, const char* name, const DataSpace& dataspa
    try {
       p_reference(ref, name, dataspace.getId(), ref_type);
    }
-   catch (ReferenceException E) {
+   catch (ReferenceException& E) {
       throw ReferenceException(inMemFunc("reference"), E.getDetailMsg());
    }
 }
@@ -660,7 +660,7 @@ void H5Location::reference(void* ref, const H5std_string& name, const DataSpace&
    try {
       p_reference(ref, name.c_str(), dataspace.getId(), ref_type);
    }
-   catch (ReferenceException E) {
+   catch (ReferenceException& E) {
       throw ReferenceException(inMemFunc("reference"), E.getDetailMsg());
    }
 }
@@ -684,7 +684,7 @@ void H5Location::reference(void* ref, const char* name, H5R_type_t ref_type) con
    try {
       p_reference(ref, name, -1, ref_type);
    }
-   catch (ReferenceException E) {
+   catch (ReferenceException& E) {
       throw ReferenceException(inMemFunc("reference"), E.getDetailMsg());
    }
 }
@@ -803,7 +803,7 @@ H5G_obj_t H5Location::getObjType(void *ref, H5R_type_t ref_type) const
    try {
       return(p_get_obj_type(ref, ref_type));
    }
-   catch (ReferenceException E) {
+   catch (ReferenceException& E) {
       throw ReferenceException(inMemFunc("getObjType"), E.getDetailMsg());
    }
 }
@@ -859,7 +859,7 @@ H5O_type_t H5Location::getRefObjType(void *ref, H5R_type_t ref_type) const
    try {
       return(p_get_ref_obj_type(ref, ref_type));
    }
-   catch (ReferenceException E) {
+   catch (ReferenceException& E) {
       throw ReferenceException(inMemFunc("getRefObjType"), E.getDetailMsg());
    }
 }
@@ -924,7 +924,7 @@ DataSpace H5Location::getRegion(void *ref, H5R_type_t ref_type) const
 	f_DataSpace_setId(&dataspace, space_id);
 	return(dataspace);
    }
-   catch (DataSpaceIException E) {
+   catch (DataSpaceIException& E) {
       throw ReferenceException(inMemFunc("getRegion"), E.getDetailMsg());
    }
 }

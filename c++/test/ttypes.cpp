@@ -124,7 +124,8 @@ static void test_classes()
 	}
 	PASSED();
     }   // end of try block
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_classes", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
@@ -180,7 +181,8 @@ static void test_copy()
 
 	PASSED();
     }
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_copy", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
@@ -291,7 +293,8 @@ static void test_query()
 
 	PASSED();
     }   // end of try block
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_query", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_query
@@ -334,7 +337,7 @@ static void test_transient ()
 	    Attribute attr(type.createAttribute("attr1", PredType::NATIVE_INT, space));
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5Object::createAttribute", "Attempted to commit a predefined datatype.");
-	} catch (AttributeIException err) {}  // do nothing, failure expected
+	} catch (AttributeIException& err) {}  // do nothing, failure expected
 
 	// Create a dataset from a transient datatype
 	// type.close(); - put trace in H5Tclose to make sure it's closed
@@ -348,7 +351,7 @@ static void test_transient ()
 
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("PredType::setPrecision", "Dataset datatypes should not be modifiable!");
-	} catch (DataTypeIException err) {}
+	} catch (DataTypeIException& err) {}
 	itype.close();
 
 	// Get a copy of the dataset's datatype by applying DataType::copy()
@@ -369,7 +372,8 @@ static void test_transient ()
 	space.close();
 	PASSED();
     }   // end of try block
-    catch (Exception E) {
+    catch (Exception& E)
+    {
         issue_fail_msg("test_transient", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_transient
@@ -414,7 +418,7 @@ static void test_named ()
 
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("PredType::commit", "Attempted to commit a predefined datatype.");
-	} catch (DataTypeIException err) {}
+	} catch (DataTypeIException& err) {}
 
 	// Copy a predefined datatype and commit the copy.
         IntType itype(PredType::NATIVE_INT);
@@ -433,7 +437,8 @@ static void test_named ()
 	    // no matching prototype
 	    atype.commit(const_grp, "random uchar");
 	}   // end of try block
-	catch (Exception E) {
+	catch (Exception& E)
+        {
 	    issue_fail_msg("test_named", __LINE__, __FILE__, "Commit at const group");
 	}
 
@@ -447,7 +452,7 @@ static void test_named ()
 
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("IntType::setPrecision", "Attempted to modify a committed datatype.");
-	} catch (DataTypeIException err) {}
+	} catch (DataTypeIException& err) {}
 
 	// We should not be able to re-commit a committed type
 	try {
@@ -455,7 +460,7 @@ static void test_named ()
 
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("IntType::commit", "Attempted to re-commit a committed datatype.");
-	} catch (DataTypeIException err) {} // do nothing, failure expected
+	} catch (DataTypeIException& err) {} // do nothing, failure expected
 
 	// It should be possible to define an attribute for the named type
 	Attribute attr1 = itype.createAttribute("attr1", PredType::NATIVE_UCHAR, space);
@@ -529,7 +534,8 @@ static void test_named ()
 	file.close();
 	PASSED();
     }   // end of try block
-    catch (Exception E) {
+    catch (Exception& E)
+    {
         issue_fail_msg("test_named", __LINE__, __FILE__, E.getCDetailMsg());
     }
 

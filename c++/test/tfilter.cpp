@@ -148,7 +148,7 @@ static void test_null_filter()
     } // end of try
 
     // catch all other exceptions
-    catch (Exception E)
+    catch (Exception& E)
     {
         issue_fail_msg("test_null_filter()", __LINE__, __FILE__, E.getCDetailMsg());
     }
@@ -232,7 +232,7 @@ static void test_szip_filter(H5File& file1)
         } // end of try
 
         // catch all other exceptions
-        catch (Exception E)
+        catch (Exception& E)
         {
             issue_fail_msg("test_szip_filter()", __LINE__, __FILE__, E.getCDetailMsg());
         }
@@ -280,7 +280,7 @@ void test_filters()
 	test_null_filter();
 	test_szip_filter(file1);
     }
-    catch (Exception E)
+    catch (Exception& E)
     {
         issue_fail_msg("test_filters()", __LINE__, __FILE__, E.getCDetailMsg());
     }
