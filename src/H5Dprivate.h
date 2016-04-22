@@ -47,9 +47,6 @@
 #define H5D_CRT_FILL_VALUE_NAME    "fill_value"         /* Fill value */
 #define H5D_CRT_ALLOC_TIME_STATE_NAME "alloc_time_state" /* Space allocation time state */
 #define H5D_CRT_EXT_FILE_LIST_NAME "efl"                /* External file list */
-#ifdef H5_HAVE_PARALLEL
-#define H5D_CRT_SUBFILING_SELECTION_NAME "subfile_selection" /* dataspace selection of subfiled dataset */
-#endif /* H5_HAVE_PARALLEL */
 
 /* ========  Dataset access property names ======== */
 #define H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME   "rdcc_nslots"   /* Size of raw data chunk cache(slots) */
@@ -58,6 +55,9 @@
 #define H5D_ACS_VDS_VIEW_NAME               "vds_view"      /* VDS view option */
 #define H5D_ACS_VDS_PRINTF_GAP_NAME         "vds_printf_gap" /* VDS printf gap size */
 #define H5D_ACS_EFILE_PREFIX_NAME           "external file prefix" /* External file prefix */
+#ifdef H5_HAVE_PARALLEL
+#define H5D_ACS_SUBFILING_SELECTION_NAME    "subfile_selection" /* dataspace selection of subfiled dataset */
+#endif /* H5_HAVE_PARALLEL */
 
 /* ======== Data transfer properties ======== */
 #define H5D_XFER_MAX_TEMP_BUF_NAME      "max_temp_buf"  /* Maximum temp buffer size */

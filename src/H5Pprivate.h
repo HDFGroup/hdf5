@@ -56,6 +56,7 @@ typedef enum H5P_coll_md_read_flag_t {
 
 /* Forward declarations (for prototypes & type definitions) */
 struct H5O_fill_t;
+struct H5S_t;
 struct H5T_t;
 
 /* Forward declarations for anonymous H5P objects */
@@ -204,6 +205,7 @@ H5_DLL herr_t H5P_fill_value_defined(H5P_genplist_t *plist,
     H5D_fill_value_t *status);
 H5_DLL herr_t H5P_get_fill_value(H5P_genplist_t *plist, const struct H5T_t *type,
     void *value, hid_t dxpl_id);
-
+H5_DLL herr_t H5P_set_virtual(hid_t dcpl_id, struct H5S_t *vspace, const char *src_file_name,
+    const char *src_dset_name, struct H5S_t *src_space);
 #endif /* _H5Pprivate_H */
 

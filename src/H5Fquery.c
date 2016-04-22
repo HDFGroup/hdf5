@@ -322,6 +322,48 @@ H5F_get_nmounts(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_subfile
+ *
+ * Purpose:	Retrieve the file's subfile
+ *
+ * Return:	'subfile_name' on success/abort on failure (shouldn't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+H5F_t *
+H5F_get_subfile(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->subfile)
+} /* end H5F_get_subfile() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_subfile_name
+ *
+ * Purpose:	Retrieve the file's subfile name
+ *
+ * Return:	'subfile_name' on success/abort on failure (shouldn't fail)
+ *
+ *-------------------------------------------------------------------------
+ */
+const char *
+H5F_get_subfile_name(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->subfile_name)
+} /* end H5F_get_subfile_name() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_get_fcpl
  *
  * Purpose:	Retrieve the value of a file's FCPL.

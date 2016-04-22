@@ -402,10 +402,6 @@ H5_DLL herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t
 H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
 H5_DLL herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t
 	*fill_time/*out*/);
-#ifdef H5_HAVE_PARALLEL
-H5_DLL herr_t H5Pset_subfiling(hid_t plist_id, hid_t space_id);
-H5_DLL herr_t H5Pget_subfiling(hid_t plist_id, hid_t *space_id);
-#endif /* H5_HAVE_PARALLEL */
 
 /* Dataset access property list (DAPL) routines */
 H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots,
@@ -420,6 +416,10 @@ H5_DLL herr_t H5Pset_virtual_printf_gap(hid_t plist_id, hsize_t gap_size);
 H5_DLL herr_t H5Pget_virtual_printf_gap(hid_t plist_id, hsize_t *gap_size);
 H5_DLL herr_t H5Pset_efile_prefix(hid_t dapl_id, const char* prefix);
 H5_DLL ssize_t H5Pget_efile_prefix(hid_t dapl_id, char* prefix /*out*/, size_t size);
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5Pset_subfiling_selection(hid_t plist_id, hid_t space_id);
+H5_DLL herr_t H5Pget_subfiling_selection(hid_t plist_id, hid_t *space_id);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);

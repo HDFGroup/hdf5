@@ -179,13 +179,13 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
 
     /* Set subfiling properties */
-    if(H5P_set(new_plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &(f->subfiling_num_groups)) < 0)
+    if(H5P_set(new_plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &(f->subfile_num_groups)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of groups for subfiling")
-    if(H5P_set(new_plist, H5F_ACS_SUBFILE_COMM_NAME, &(f->subfiling_comm)) < 0)
+    if(H5P_set(new_plist, H5F_ACS_SUBFILE_COMM_NAME, &(f->subfile_comm)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling communicator")
-    if(H5P_set(new_plist, H5F_ACS_SUBFILE_INFO_NAME, &(f->subfiling_info)) < 0)
+    if(H5P_set(new_plist, H5F_ACS_SUBFILE_INFO_NAME, &(f->subfile_info)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling info object")
-    if(H5P_set(new_plist, H5F_ACS_SUBFILING_FILENAME_NAME, &(f->subfiling_filename)) < 0)
+    if(H5P_set(new_plist, H5F_ACS_SUBFILING_FILENAME_NAME, &(f->subfile_name)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile name")
 #endif /* H5_HAVE_PARALLEL */
 
@@ -662,9 +662,13 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata read flag")
         if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata write flag")
-        if(H5P_get(plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &(f->subfiling_num_groups)) < 0)
+        if(H5P_get(plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &(f->subfile_num_groups)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of groups for subfiling")
-        if(f->subfiling_num_groups != 0){
+
+        f->subfile_comm = MPI_COMM_NULL;
+        f->subfile_info = MPI_INFO_NULL;
+
+        if(f->subfile_num_groups != 0){
             MPI_Comm comm;
             MPI_Info info;
             const char *temp_name;
@@ -675,14 +679,15 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             /* get the info object */
             if(H5P_get(plist, H5F_ACS_SUBFILE_INFO_NAME, &info) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get subfiling info object")
-            /* Duplicate communicator and Info object. */
-            if(FAIL == H5FD_mpi_comm_info_dup(comm, info, &(f->subfiling_comm), &(f->subfiling_info)))
-                HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
+            /* Set communicator and Info object. */
+            f->subfile_comm = comm;
+            f->subfile_info = info;
 
             /* Get the subfile name */
             if(H5P_peek(plist, H5F_ACS_SUBFILING_FILENAME_NAME, &temp_name) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get the subfile name")
-            f->subfiling_filename = HDstrdup(temp_name);
+            if(NULL == (f->subfile_name = H5MM_strdup(temp_name)))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't duplicate subfile name")
         }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -907,6 +912,9 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
     }
 
     /* Free the non-shared part of the file */
+#ifdef H5_HAVE_PARALLEL
+    f->subfile_name = (char *)H5MM_xfree(f->subfile_name);
+#endif /* H5_HAVE_PARALLEL */
     f->open_name = (char *)H5MM_xfree(f->open_name);
     f->actual_name = (char *)H5MM_xfree(f->actual_name);
     f->extpath = (char *)H5MM_xfree(f->extpath);
@@ -1150,10 +1158,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
 
     /* create or open the subfile if subfiling is enabled */
     if(H5F__open_subfile(file, flags, fcpl_id, fapl_id, dxpl_id) < 0)
-        {
-            H5Eprint2(H5E_DEFAULT, stderr);
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create sub-file")
-                }
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create sub-file")
+
     /* Success */
     ret_value = file;
 
@@ -1298,8 +1304,8 @@ H5F_close(H5F_t *f)
 #ifdef H5_HAVE_PARALLEL
     /* if subfiling is enabled, close the subfile */
     if(f->subfile)
-        if(H5F_try_close(f->subfile) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close subfile")
+        if(H5I_dec_app_ref(f->subfile->file_id) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 #endif /* H5_HAVE_PARALLEL */
 
     /* Attempt to close the file/mount hierarchy */
@@ -2217,39 +2223,34 @@ H5F__open_subfile(H5F_t *file, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* get the subfile selection of calling process */
+    /* get the subfile name of calling process */
     if(H5P_peek(plist, H5F_ACS_SUBFILING_FILENAME_NAME, &subfile_name) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling selection")
 
     if(subfile_name) {
-        H5P_genplist_t *new_plist;
-        MPI_Comm subfile_comm;
-        MPI_Info subfile_info;
+        H5P_genplist_t *new_plist = NULL;
         H5FD_mpio_fapl_t fa;
 
         /* copy the fapl id of the main file to create the subfile with */
         if((subfile_fapl_id = H5P_create_id(H5P_CLS_FILE_ACCESS_g, FALSE)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list")
 
-        /* retrieve the communicator and the info object to create the subfile with */
-        if(H5P_get(plist, H5F_ACS_SUBFILE_COMM_NAME, &subfile_comm) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling communicator")
-        if(H5P_get(plist, H5F_ACS_SUBFILE_INFO_NAME, &subfile_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling info object")
-
         /* Get the property list structure */
         if(NULL == (new_plist = H5P_object_verify(subfile_fapl_id, H5P_FILE_ACCESS)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
         /* Initialize driver specific properties */
-        fa.comm = subfile_comm;
-        fa.info = subfile_info;
+        fa.comm = file->subfile_comm;
+        fa.info = file->subfile_info;
         if(H5P_set_driver(new_plist, H5FD_MPIO, &fa) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get driver info")
 
         /* create the subfile */
-        if(NULL == (file->subfile = H5F_open(subfile_name, flags, fcpl_id, subfile_fapl_id, dxpl_id)))
+        if(NULL == (file->subfile = H5F_open(subfile_name, flags, H5P_FILE_CREATE_DEFAULT, subfile_fapl_id, dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create sub-file")
+        /* Get an atom for the file */
+        if((file->subfile->file_id = H5I_register(H5I_FILE, file->subfile, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
     }
 
 done:

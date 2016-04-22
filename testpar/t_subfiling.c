@@ -47,7 +47,7 @@ subfiling_api(void)
     hid_t fid;                  /* HDF5 file ID */
     hid_t did;
     hid_t sid;
-    hid_t fcpl_id, fapl_id, dcpl_id;	/* Property Lists */
+    hid_t fcpl_id, fapl_id, dapl_id;	/* Property Lists */
 
     const char *filename;
     char subfile_name[50];
@@ -66,39 +66,35 @@ subfiling_api(void)
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
-    /* create file creation and access property lists */
-    fcpl_id = H5Pcreate(H5P_FILE_CREATE);
-    VRFY((fcpl_id >= 0), "");
+    /* create file access property list */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     VRFY((fapl_id >= 0), "");
 
     ret = H5Pset_fapl_mpio(fapl_id, comm, info);
     VRFY((ret == 0), "");
 
-    /* set number of subfiles to be 1 per mpi rank */
-    ret = H5Pset_num_subfiles(fcpl_id, (unsigned)mpi_size);
-    VRFY((ret == 0), "");
+    /* set subfiling to be 1 file per mpi rank */
 
+    /* set name of subfile */
     sprintf(subfile_name, "subfile_%d.h5", mpi_rank);
+
     /* set number of process groups to be equal to the mpi size */
     ret = H5Pset_subfiling_access(fapl_id, (unsigned)mpi_size, subfile_name, 
                                   MPI_COMM_SELF, MPI_INFO_NULL);
     VRFY((ret == 0), "H5Pset_subfiling_access succeeded");
 
     /* create the file. This should also create the subfiles */
-    fid = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((fid >= 0), "H5Fcreate succeeded");
 
-    /* close the file and re-open it to make sure the creation parameters are preserved */
+    /* close the file and re-open it with the same access property list */
     ret = H5Fclose(fid);
     VRFY((ret == 0), "");
     fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
     VRFY((fid >= 0), "H5Fopen succeeded");
 
-    /* close the access and creation plists and reopen them to check the property values */
+    /* close the access plist and reopen to check the property values */
     ret = H5Pclose(fapl_id);
-    VRFY((ret == 0), "");
-    ret = H5Pclose(fcpl_id);
     VRFY((ret == 0), "");
 
     /* check the file access properties */
@@ -120,25 +116,10 @@ subfiling_api(void)
         MPI_Comm_size(get_comm, &comm_size);
         VRFY((comm_size == 1), "subfiling communicator verified");
 
-        MPI_Comm_free(&get_comm);
         HDfree(temp_name);
     }
 
-    /* check the file creation properties */
-    fcpl_id = H5Fget_create_plist(fid);
-    VRFY((fcpl_id >= 0), "");
-    {
-        unsigned num_subfiles;
-
-        ret = H5Pget_num_subfiles(fcpl_id, &num_subfiles);
-        VRFY((ret == 0), "");
-
-        VRFY((num_subfiles == (unsigned)mpi_size), "number of subfiles verified");
-    }
-
     ret = H5Pclose(fapl_id);
-    VRFY((ret == 0), "");
-    ret = H5Pclose(fcpl_id);
     VRFY((ret == 0), "");
 
     dims[0] = DIMS0 * mpi_size;
@@ -161,23 +142,25 @@ subfiling_api(void)
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret == 0), "H5Sset_hyperslab succeeded");
 
-    /* create the dataset creation property list */
-    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
-    VRFY((dcpl_id >= 0), "");
+    /* create the dataset access property list */
+    dapl_id = H5Pcreate(H5P_DATASET_ACCESS);
+    VRFY((dapl_id >= 0), "");
 
     /* Set the selection that this process will access the dataset with */
-    ret = H5Pset_subfiling(dcpl_id, sid);
+    ret = H5Pset_subfiling_selection(dapl_id, sid);
     VRFY((ret == 0), "");
 
-    /* create the dataset with the subfiling dcpl settings */
-    did = H5Dcreate2(fid, DATASET1, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+    /* create the dataset with the subfiling dapl settings */
+    did = H5Dcreate2(fid, DATASET1, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, dapl_id);
+    if(did < 0)
+        FAIL_STACK_ERROR
     VRFY((did >= 0), "");
 
     /* check the dataset creation properties for this process */
     {
         hid_t temp_sid;
 
-        ret = H5Pget_subfiling(dcpl_id, &temp_sid);
+        ret = H5Pget_subfiling_selection(dapl_id, &temp_sid);
         VRFY((ret == 0), "");
 
         VRFY((H5Sget_select_npoints(sid) == H5Sget_select_npoints(temp_sid)), "Subfiling selection verified");
@@ -187,7 +170,7 @@ subfiling_api(void)
         VRFY((ret == 0), "");
     }
 
-    ret = H5Pclose(dcpl_id);
+    ret = H5Pclose(dapl_id);
     VRFY((ret == 0), "");
 
     ret = H5Dclose(did);
@@ -197,6 +180,10 @@ subfiling_api(void)
     VRFY((ret == 0), "");
 
     MPI_File_delete(subfile_name, MPI_INFO_NULL);
+
+    return;
+error:
+    VRFY((1 == 0), "");
 }
 
 int main(int argc, char **argv)

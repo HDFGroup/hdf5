@@ -286,6 +286,8 @@
 #define H5F_FILE_ID(F)          ((F)->file_id)
 #define H5F_PARENT(F)           ((F)->parent)
 #define H5F_NMOUNTS(F)          ((F)->nmounts)
+#define H5F_SUBFILE(F)          ((F)->subfile)
+#define H5F_SUBFILE_NAME(F)     ((F)->subfile_name)
 #define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)
 #define H5F_GET_FILENO(F,FILENUM) ((FILENUM) = (F)->shared->lf->fileno)
 #define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
@@ -331,6 +333,8 @@
 #define H5F_FILE_ID(F)          (H5F_get_file_id(F))
 #define H5F_PARENT(F)           (H5F_get_parent(F))
 #define H5F_NMOUNTS(F)          (H5F_get_nmounts(F))
+#define H5F_SUBFILE(F)          (H5F_get_subfile(F))
+#define H5F_SUBFILE_NAME(F)     (H5F_get_subfile_name(F))
 #define H5F_DRIVER_ID(F)        (H5F_get_driver_id(F))
 #define H5F_GET_FILENO(F,FILENUM) (H5F_get_fileno((F), &(FILENUM)))
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
@@ -621,6 +625,8 @@ H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
 H5_DLL hid_t H5F_get_file_id(const H5F_t *f);
 H5_DLL H5F_t *H5F_get_parent(const H5F_t *f);
 H5_DLL unsigned H5F_get_nmounts(const H5F_t *f);
+H5_DLL H5F_t *H5F_get_subfile(const H5F_t *f);
+H5_DLL const char *H5F_get_subfile_name(const H5F_t *f);
 H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
 H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);
 H5_DLL herr_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref, size_t *obj_id_count_ptr);

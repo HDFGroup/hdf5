@@ -466,6 +466,8 @@ typedef struct {
     const H5S_t *space;         /* Dataspace for dataset */
     hid_t dcpl_id;              /* Dataset creation property list */
     hid_t dapl_id;              /* Dataset access property list */
+    const char *name;           /* Dataset name */
+    const H5G_loc_t *loc;       /* Dataset location */
 } H5D_obj_create_t;
 
 /* Typedef for filling a buffer with a fill value */
@@ -524,8 +526,8 @@ H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
 /* Package Private Prototypes */
 /******************************/
 
-H5_DLL H5D_t *H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space,
-    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id);
+H5_DLL H5D_t *H5D__create(H5F_t *file, H5G_loc_t *loc, const char *name, hid_t type_id, 
+    const H5S_t *space, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id);
 H5_DLL H5D_t *H5D__create_named(const H5G_loc_t *loc, const char *name,
     hid_t type_id, const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id,
     hid_t dapl_id, hid_t dxpl_id);

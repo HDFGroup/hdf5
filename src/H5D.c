@@ -137,7 +137,6 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     else
         if(TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset create property list ID")
-
     /* Verify access property list and get correct dxpl */
     if(H5P_verify_apl_and_dxpl(&dapl_id, H5P_CLS_DACC, &dxpl_id, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
@@ -223,7 +222,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* build and open the new dataset */
-    if(NULL == (dset = H5D__create(loc.oloc->file, type_id, space, dcpl_id, dapl_id, dxpl_id)))
+    if(NULL == (dset = H5D__create(loc.oloc->file, &loc, NULL, type_id, space, dcpl_id, dapl_id, dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* Register the new dataset to get an ID for it */

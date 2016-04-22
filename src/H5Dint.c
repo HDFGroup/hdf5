@@ -48,6 +48,19 @@ typedef struct {
     hid_t dxpl_id;              /* DXPL for I/O operations */
 } H5D_flush_ud_t;
 
+typedef struct {
+    H5F_t *file;
+    H5D_t *dset;
+    const char *src_dset_name;
+    hid_t type_id;
+    hid_t dcpl_id;
+    hid_t dxpl_id;
+} H5D_subfile_op_t;
+
+typedef struct H5D_subfile_node_t {
+    H5S_t *space;
+    struct H5D_subfile_node_t *next;
+}H5D_subfile_node_t;
 
 /********************/
 /* Local Prototypes */
@@ -68,7 +81,10 @@ static herr_t H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id,
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
     hsize_t old_dim[]);
-
+static herr_t H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, 
+                                  hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id);
+static int H5D__subfiling_init_cb(void *item, void *key, void *_op_data);
+static herr_t H5D__subfiling_dest_cb(void *item, void *key, void *op_data);
 
 /*********************/
 /* Package Variables */
@@ -481,7 +497,9 @@ H5D__create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
     dcrt_info.space = space;
     dcrt_info.dcpl_id = dcpl_id;
     dcrt_info.dapl_id = dapl_id;
-
+    dcrt_info.name = name;
+    dcrt_info.loc = loc;
+    
     /* Set up object creation information */
     ocrt_info.obj_type = H5O_TYPE_DATASET;
     ocrt_info.crt_info = &dcrt_info;
@@ -1089,8 +1107,8 @@ done:
  *-------------------------------------------------------------------------
  */
 H5D_t *
-H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
-    hid_t dapl_id, hid_t dxpl_id)
+H5D__create(H5F_t *file, H5G_loc_t *loc, const char *name, hid_t type_id, const H5S_t *space, 
+            hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id)
 {
     const H5T_t         *type;                  /* Datatype for dataset */
     H5D_t		*new_dset = NULL;
@@ -1129,6 +1147,10 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     if(!H5S_has_extent(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set.")
 
+    /* check for subfiling and set virtual layout if subfiling is requested */
+    if(H5D__subfiling_init(loc, name, type_id, dcpl_id, dapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't subfile dataset")
+
     /* Initialize the dataset object */
     if(NULL == (new_dset = H5FL_CALLOC(H5D_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -1141,10 +1163,6 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     /* Initialize the shared dataset space */
     if(NULL == (new_dset->shared = H5D__new(dcpl_id, TRUE, has_vl_type)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* check for subfiling and set virtual layout if subfiling is requested */
-            //if(H5D__subfiling_init(file, new_dset->dcpl_id) < 0)
-            //HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't subfile dataset")
 
     /* Copy & initialize datatype for dataset */
     if(H5D__init_type(file, new_dset, type_id, type) < 0)
@@ -3194,8 +3212,8 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_type() */
-#if 0
-//#ifdef H5_HAVE_PARALLEL
+
+#ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__subfiling_init
@@ -3211,38 +3229,319 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__subfiling_init(H5F_t *file, hid_t dcpl_id)
+H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t dcpl_id, 
+                    hid_t dapl_id, hid_t dxpl_id)
 {
+    H5F_t *file = loc->oloc->file;
     hid_t space_id = H5I_INVALID_HID;
-    const char *subfile_name = NULL;
     H5P_genplist_t *plist; /* Property list pointer */
+    int *size_array = NULL, *displs = NULL;
+    void *send_buf = NULL, *recv_buf = NULL;
+    char *dset_name = NULL;
+    int mpi_size = 0, mpi_rank, i;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Get the property list structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
+    if(NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* get the subfile selection of calling process */
-    if(H5P_get(plist, H5D_CRT_SUBFILING_SELECTION_NAME, &space_id) < 0)
+    if(H5P_get(plist, H5D_ACS_SUBFILING_SELECTION_NAME, &space_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling selection")
 
     /* If subfiling is enabled */
     if(space_id != H5I_INVALID_HID) {
-        /* Get the subfile name */
-        if(H5P_peek(plist, H5D_CRT_SUBFILING_FILENAME_NAME, &subfile_name) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get the subfile name")
-        if(subfile_name == NULL)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Subfile name is not set")
+        H5S_t *space = NULL;
+        uint8_t *space_p;
+        size_t space_size;
+        int recv_buf_size, temp_size;
+        MPI_Comm mpi_comm;
+        size_t name_len, buf_size;
+        const char *subfile_name = H5F_SUBFILE_NAME(file);
+        H5SL_t *subfile_map = NULL;
+        H5D_subfile_op_t op_data;
+        uint8_t *p; /* pointer used to encode the send buffer */
+        const uint8_t *rp; /* pointer used to decode the recieve buffer */
 
+        if(NULL == name)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't create an anonymous subfiled dataset")
+        if(!H5F_HAS_FEATURE(file, H5FD_FEAT_HAS_MPI))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Subfiling allowed only with MPIO VFD")
+
+        mpi_comm = H5F_mpi_get_comm(file);
+        mpi_size = H5F_mpi_get_size(file);
+        mpi_rank = H5F_mpi_get_rank(file);
+
+        if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataspace")
+
+        /* Create a buffer containing the subfile name and the
+           serialized selection to send to all processes to be able to
+           set the virtual layout */
+
+        /* determine the required buffer size for encoding */
+        name_len = HDstrlen(subfile_name) + (size_t)1;
+        space_size = (size_t)0;
+        space_p = NULL;
+
+        if(H5S_encode(space, &space_p, &space_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
+        buf_size = space_size + name_len;
+
+        /* allocate the buffer to send to all ranks */
+        send_buf = HDmalloc(buf_size);
+
+        /* encode the sub-file name and the space selection */
+        p = (uint8_t *)send_buf;
+        (void)HDmemcpy(p, subfile_name, name_len);
+        p += name_len;
+        if(H5S_encode(space, &p, &space_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
+
+                /*
         if(0 == file->shared->num_subfiles)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Number of subfiles is not set on file creation")
         if(MPI_COMM_NULL == file->subfiling_comm)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Subfiling communicator is not set for file access")
+                */
 
+        if(mpi_size > 1) {
+            H5_CHECKED_ASSIGN(temp_size, int, buf_size, size_t)
+
+            /* distribute all the buffer size that needs to be shared among all processes */
+            size_array = (int *)HDmalloc(sizeof(int) * (size_t)mpi_size);
+            if(MPI_SUCCESS != MPI_Allgather(&temp_size, 1, MPI_INT, size_array, 1, MPI_INT, mpi_comm))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Failed to MPI_Allgather the buffer sizes")
+
+            /* create the displacement array for sharing the actual buffers into 1 large buffer on all ranks */
+            displs = (int *)HDmalloc(sizeof(int) * (size_t)mpi_size);
+            displs[0] = 0;
+            recv_buf_size = size_array[0];
+            for(i=1; i<mpi_size; i++) {
+                displs[i] = displs[i-1] + size_array[i-1];
+                recv_buf_size += size_array[i];
+            }
+
+            /* allocate the large buffer and gather all the send buffers into this large buffer */
+            recv_buf = HDmalloc((size_t)recv_buf_size);
+            if(MPI_SUCCESS != MPI_Allgatherv(send_buf, temp_size, MPI_BYTE, recv_buf, size_array, 
+                                             displs, MPI_BYTE, mpi_comm))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Failed to MPI_Allgather the buffer sizes")
+        }
+        else
+            recv_buf = send_buf;
+
+        /* create a skip list for subfile_name, space selection entries, with the name being the key */
+        if(NULL == (subfile_map = H5SL_create(H5SL_TYPE_STR, NULL)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for subfile entries")
+
+        /* create a name for the source datasets using the entire path of the virtual dataset
+           and substituting '/' with '-' */
+        {
+            char *loc_name = H5RS_get_str(loc->path->full_path_r);
+            size_t u;
+
+            dset_name = (char *)HDmalloc(HDstrlen(loc_name) + HDstrlen(name) + 1);
+
+            HDstrcpy(dset_name, loc_name);
+            HDstrcat(dset_name, name);
+            printf("BEFORE name = %s\n", dset_name);
+            /* replace '/' with '-' */
+
+            for(u=0 ; u<HDstrlen(dset_name); u++) {
+                if(dset_name[u] == '/')
+                    dset_name[u] = '-';
+            }
+            printf("AFTER name = %s\n", dset_name);
+        }
+
+        /* decode all the information in this buffer and populate the skip list */
+        rp = (const uint8_t *)recv_buf;
+        for(i=0; i<mpi_size; i++) {
+            char *temp_name = NULL;
+            H5S_t *temp_space = NULL;
+            H5D_subfile_node_t *node;
+
+            /* Source file name */
+            name_len = HDstrlen((const char *)rp) + 1;
+            if(NULL == (temp_name = (char *)HDmalloc(name_len)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory for source file name")
+            (void)HDmemcpy(temp_name, rp, name_len);
+
+            if(mpi_rank == 0)
+                printf("%d: file name = %s\n", i, temp_name);
+            rp += name_len;
+
+            if(NULL == (temp_space = H5S_decode((const unsigned char **)&rp)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, FAIL, "can't decode space selection")
+
+            node = (H5D_subfile_node_t *)H5MM_malloc(sizeof(H5D_subfile_node_t));
+            node->space = temp_space;
+            node->next = NULL;
+
+            /* Insert space into map skip list */
+            if(H5SL_insert(subfile_map, node, temp_name) < 0) {
+                H5D_subfile_node_t *cur_node;
+
+                if(NULL == (cur_node = (H5D_subfile_node_t *)H5SL_find(subfile_map, temp_name)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert subfile entry in skip list")
+
+                while(1) {
+                    if(NULL == cur_node->next)
+                        break;
+                    cur_node = cur_node->next;
+                }
+                cur_node->next = node;
+            }
+        }
+
+        op_data.file = file;
+        op_data.src_dset_name = dset_name;
+        op_data.type_id = type_id;
+        op_data.dcpl_id = dcpl_id;
+        op_data.dxpl_id = dxpl_id;
+
+        /* iterate throught the skip list and create the virtual layout */
+        ret_value = H5SL_iterate(subfile_map, H5D__subfiling_init_cb, &op_data);
+        if(ret_value != 0)
+            HGOTO_DONE(ret_value);
+
+        H5SL_destroy(subfile_map, H5D__subfiling_dest_cb, NULL);
+        //H5S_close(temp_space);
+        //HDfree(temp_name);
     }
 done:
+    if(size_array) {
+        HDfree(size_array);
+        size_array = NULL;
+    }
+    if(displs) {
+        HDfree(displs);
+        displs = NULL;
+    }
+    if(send_buf) {
+        HDfree(send_buf);
+        send_buf = NULL;
+    }
+    if(mpi_size > 1 && recv_buf) {
+        HDfree(recv_buf);
+        recv_buf = NULL;
+    }
+    if(dset_name) {
+        HDfree(dset_name);
+        dset_name = NULL;
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__subfiling_init() */
+
+static int 
+H5D__subfiling_init_cb(void *item, void *key, void *_op_data)
+{
+    H5D_subfile_op_t *op_data = (H5D_subfile_op_t *)_op_data;
+    H5D_subfile_node_t *head_node = (H5D_subfile_node_t *)item;
+    H5D_subfile_node_t *node;
+    H5F_t *f = op_data->file;
+    char *subfile_name = (char *)key;
+    const char *my_subfile_name = H5F_SUBFILE_NAME(f);
+    H5S_t *src_space = NULL;
+    hsize_t npoints = 0;
+    H5D_t *src_dset = NULL;
+    int ret_value = H5_ITER_CONT;                       /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    printf("Setting layout for subfile %s\n", subfile_name);
+
+    node = head_node;
+    /* iterate over all selections in this node to determine the size
+       of the source dataset for this sub-file */
+    do {
+        npoints += (hsize_t)H5S_GET_SELECT_NPOINTS(node->space);
+        node = node->next;
+    } while(node != NULL);
+
+    /* Create the src dataset space and set the extent */
+    /* MSC - need to handle extendible / chunked datasets */
+    if(NULL == (src_space = H5S_create_simple(1, &npoints, NULL)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
+
+    /* if the node we are iterating over has the same subfile key as
+       the subile for the MPI process, create the source dataset in
+       the subfile */
+    if(strcmp(subfile_name, my_subfile_name) == 0) {
+        H5G_loc_t loc;
+
+        if(H5G_root_loc(H5F_get_subfile(f), &loc) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file")
+
+        if(NULL == (src_dset = H5D__create_named(&loc, op_data->src_dset_name, op_data->type_id, src_space, 
+                                                 H5P_LINK_CREATE_DEFAULT, H5P_DATASET_CREATE_DEFAULT, 
+                                                 H5P_DATASET_ACCESS_DEFAULT, op_data->dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
+    }
+
+    /* iterate over all the selection in the current node and set the
+       virtual layout to the source dataset. */
+    /* MSC - this create a lot of dataset metadata; consider combining
+       all selection from all the nodes and map that into the source
+       dataset */
+    node = head_node;
+    do {
+        hsize_t start = 0, count;
+
+        /* assign x elements of the source dataset to all the selected elements for this process */
+
+        /* how many elements this node is accessing */
+        count = (hsize_t)H5S_GET_SELECT_NPOINTS(node->space);
+
+        /* create a contiguous hyperslab selection in the source
+           dataspace with the number of elements this node is
+           accessing */
+        if(H5S_select_hyperslab(src_space, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to select from src dataspace")
+
+         /* add to the virtual layout */ 
+        if(H5P_set_virtual(op_data->dcpl_id, node->space, subfile_name, op_data->src_dset_name, src_space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set virtual layout")
+        node = node->next;
+        start += count;
+    } while(node != NULL);
+
+done:
+    if(src_dset)
+        if(H5D_close(src_dset) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataset")
+    if(src_space)
+        if(H5S_close(src_space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close source dataspace")
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__subfiling_init_cb */
+
+static herr_t
+H5D__subfiling_dest_cb(void *item, void *key, void H5_ATTR_UNUSED *op_data)
+{
+    H5D_subfile_node_t *node = (H5D_subfile_node_t *)item;
+    char *subfile_name = (char *)key;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    do {
+        H5D_subfile_node_t *prev = node;
+
+        if(H5S_close(node->space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close subfile selection")
+
+        node = node->next;
+        H5MM_xfree(prev);
+    } while(node != NULL);
+
+    HDfree(subfile_name);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__subfiling_dest_cb */
 #endif /* H5_HAVE_PARALLEL */
