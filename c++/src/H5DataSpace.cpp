@@ -340,12 +340,15 @@ void DataSpace::extentCopy (const DataSpace& dest_space) const
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::extentCopy
-///\brief	This is an overloaded member function, kept for backward
-///		compatibility.  It differs from the above function in that it
-///		misses const.  This wrapper will be removed in future release.
-///\param	dest_space  - IN: Dataspace to copy from
-///\exception	H5::DataSpaceIException
+// Purpose	This is an overloaded member function, kept for backward
+//		compatibility.  It differs from the above function in that it
+//		misses const.  This wrapper will be removed in future release.
+// Param	dest_space  - IN: Dataspace to copy from
+// Exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		Modified to call its replacement. -BMR, 2014/04/16
+//		Removed from documentation. -BMR, 2016/03/07
 //--------------------------------------------------------------------------
 void DataSpace::extentCopy( DataSpace& dest_space ) const
 {
