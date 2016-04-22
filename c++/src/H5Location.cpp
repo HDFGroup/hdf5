@@ -232,7 +232,7 @@ int H5Location::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_
    // call the C library routine H5Aiterate2 to iterate the attributes
    hsize_t idx = _idx ? (hsize_t)*_idx : 0;
    int ret_value = H5Aiterate2(getId(), H5_INDEX_NAME, H5_ITER_INC, &idx,
-			userAttrOpWrpr, (void *) userData);
+			userAttrOpWrpr, static_cast<void *>(userData));
 
    // release memory
    delete userData;
