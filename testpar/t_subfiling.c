@@ -36,7 +36,7 @@ hid_t	fapl;				/* file access property list */
 
 #define DATASET1      "Dataset1_subfiled"
 #define RANK          2
-#define DIMS0         60
+#define DIMS0         6
 #define DIMS1         120
 
 void subfiling_api(void);
@@ -46,18 +46,19 @@ subfiling_api(void)
 {
     hid_t fid;                  /* HDF5 file ID */
     hid_t did;
-    hid_t sid;
+    hid_t sid, mem_space_id;
     hid_t fcpl_id, fapl_id, dapl_id;	/* Property Lists */
 
     const char *filename;
     char subfile_name[50];
     hsize_t dims[RANK];   	/* dataset dim sizes */
-    hsize_t start[RANK], count[RANK], stride[RANK], block[RANK];
+    hsize_t npoints, start[RANK], count[RANK], stride[RANK], block[RANK];
 
-    int mpi_size, mpi_rank;
+    int mpi_size, mpi_rank, i;
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
+    int *wbuf;
     herr_t ret;         	/* Generic return value */
 
     filename = (const char *)GetTestParameters();
@@ -123,15 +124,15 @@ subfiling_api(void)
     VRFY((ret == 0), "");
 
     dims[0] = DIMS0 * mpi_size;
-    dims[1] = DIMS1 * mpi_size;
+    dims[1] = DIMS1;
 
     /* create the dataspace for the master dataset */
     sid = H5Screate_simple (2, dims, NULL);
     VRFY((sid >= 0), "");
 
-    start[0] = 0;
-    start[1] = DIMS1 * mpi_rank;
-    block[0] = dims[0];
+    start[0] = DIMS0 * mpi_rank;
+    start[1] = 0;
+    block[0] = DIMS0;
     block[1] = DIMS1;
     count[0] = 1;
     count[1] = 1;
@@ -152,8 +153,6 @@ subfiling_api(void)
 
     /* create the dataset with the subfiling dapl settings */
     did = H5Dcreate2(fid, DATASET1, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, dapl_id);
-    if(did < 0)
-        FAIL_STACK_ERROR
     VRFY((did >= 0), "");
 
     /* check the dataset creation properties for this process */
@@ -173,13 +172,36 @@ subfiling_api(void)
     ret = H5Pclose(dapl_id);
     VRFY((ret == 0), "");
 
+    npoints = DIMS0 * DIMS1;
+    wbuf = (int *)HDmalloc(npoints * sizeof(int));
+
+    for(i=0 ; i<npoints ; i++)
+        wbuf[i] = mpi_rank+1 * 10;
+
+    HDassert(npoints == H5Sget_select_npoints(sid));
+
+    mem_space_id = H5Screate_simple(1, &npoints, NULL);
+    VRFY((mem_space_id >= 0), "");
+
+    ret = H5Dwrite(did, H5T_NATIVE_INT, mem_space_id, sid, H5P_DEFAULT, wbuf);
+    if(ret < 0) FAIL_STACK_ERROR;
+    VRFY((ret == 0), "");
+
     ret = H5Dclose(did);
+    VRFY((ret == 0), "");
+
+    ret = H5Sclose(sid);
+    VRFY((ret == 0), "");
+
+    ret = H5Sclose(mem_space_id);
     VRFY((ret == 0), "");
 
     ret = H5Fclose(fid);
     VRFY((ret == 0), "");
 
-    MPI_File_delete(subfile_name, MPI_INFO_NULL);
+    HDfree(wbuf);
+
+    //MPI_File_delete(subfile_name, MPI_INFO_NULL);
 
     return;
 error:
@@ -264,7 +286,7 @@ int main(int argc, char **argv)
 
 
     /* Clean up test files */
-    h5_clean_files(FILENAME, fapl);
+    //h5_clean_files(FILENAME, fapl);
 
     nerrors += GetTestNumErrs();
 

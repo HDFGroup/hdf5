@@ -3460,6 +3460,7 @@ H5D__subfiling_init_cb(void *item, void *key, void *_op_data)
        of the source dataset for this sub-file */
     do {
         npoints += (hsize_t)H5S_GET_SELECT_NPOINTS(node->space);
+        printf("%s: %d\n", subfile_name, (int) npoints);
         node = node->next;
     } while(node != NULL);
 
