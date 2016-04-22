@@ -178,7 +178,7 @@ static void test_h5s_basic()
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("DataSpace constructor", "Library allowed overwrite of existing dataset");
 	}
-	catch( DataSpaceIException E ) // Simple data space with too many dims
+	catch (DataSpaceIException& E) // Simple data space with too many dims
 	{} // do nothing, exception expected
 
        /*
@@ -204,7 +204,7 @@ static void test_h5s_basic()
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File::openDataSet", "Opening a dataset with higher dimensionality than what the library can handle");
 	}
-	catch( FileIException E ) // catching higher dimensionality dataset
+	catch (FileIException& E) // catching higher dimensionality dataset
 	{} // do nothing, exception expected
 
     // CHECK_I(ret, "H5Fclose");  // leave this here, later, fake a failure

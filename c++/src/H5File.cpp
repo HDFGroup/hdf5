@@ -586,7 +586,7 @@ void H5File::p_setId(const hid_t new_id)
     try {
         close();
     }
-    catch (Exception E) {
+    catch (Exception& E) {
         throw FileIException("H5File::p_setId", E.getDetailMsg());
     }
    // reset object's id to the given id

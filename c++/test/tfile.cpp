@@ -131,7 +131,7 @@ static void test_file_create()
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File constructor", "File already exists.");
 	}
-	catch( FileIException E ) // catching creating existing file
+	catch (FileIException& E) // catching creating existing file
 	{} // do nothing, FAIL expected
 
     	// Test create with H5F_ACC_TRUNC. This will truncate the existing file.
@@ -145,7 +145,7 @@ static void test_file_create()
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File constructor", "H5F_ACC_TRUNC attempt on an opened file.");
 	}
-	catch( FileIException E ) // catching truncating opened file
+	catch (FileIException& E) // catching truncating opened file
 	{} // do nothing, FAIL expected
 
      	// Try with H5F_ACC_EXCL. This should fail too because the file already
@@ -156,7 +156,7 @@ static void test_file_create()
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File constructor", "H5F_ACC_EXCL attempt on an existing file.");
     	}
-	catch( FileIException E ) // catching H5F_ACC_EXCL on existing file
+	catch (FileIException& E) // catching H5F_ACC_EXCL on existing file
 	{} // do nothing, FAIL expected
 
     	// Get the file-creation template
@@ -336,7 +336,7 @@ static void test_file_open()
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File constructor", "Attempt truncating an opened file.");
     	}
-	catch( FileIException E ) // catching H5F_ACC_TRUNC on opened file
+	catch (FileIException& E) // catching H5F_ACC_TRUNC on opened file
 	{} // do nothing, FAIL expected
 
 	// Now, really close the file.
@@ -353,7 +353,8 @@ static void test_file_open()
 	PASSED();
     }   // end of try block
 
-    catch( Exception E ) {
+    catch (Exception& E)
+    {
         issue_fail_msg("test_file_open()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_file_open()
@@ -411,7 +412,8 @@ static void test_file_size()
 	PASSED();
     }   // end of try block
 
-    catch( Exception E ) {
+    catch (Exception& E)
+    {
         issue_fail_msg("test_file_size()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
