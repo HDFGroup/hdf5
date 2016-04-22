@@ -50,8 +50,6 @@ class H5_DLLCPP DataSpace : public IdComponent {
 
 	// Copies the extent of this dataspace.
 	void extentCopy(const DataSpace& dest_space) const;
-	// Kept for backward compatibility only.
-	void extentCopy(DataSpace& dest_space) const;
 
 	// Gets the bounding box containing the current selection.
 	void getSelectBounds( hsize_t* start, hsize_t* end ) const;

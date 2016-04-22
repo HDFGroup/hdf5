@@ -302,6 +302,8 @@ void DataSet::getSpaceStatus(H5D_space_status_t& status) const
 ///\return	Amount of storage
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		Replaced the version without const parameter - Apr, 2014
 //--------------------------------------------------------------------------
 hsize_t DataSet::getVlenBufSize(const DataType& type, const DataSpace& space ) const
 {
@@ -317,23 +319,6 @@ hsize_t DataSet::getVlenBufSize(const DataType& type, const DataSpace& space ) c
       throw DataSetIException("DataSet::getVlenBufSize", "H5Dvlen_get_buf_size failed");
    }
    return( size );
-}
-
-//--------------------------------------------------------------------------
-// Function:	DataSet::getVlenBufSize
-// Purpose	This is an overloaded member function, kept for backward
-//		compatibility.  It differs from the above function in that it
-//		misses const's.  This wrapper will be removed in future release.
-// Return	Amount of storage
-// Exception	H5::DataSetIException
-// Programmer	Binh-Minh Ribler - 2000
-// Modification
-//		Modified to call its replacement. -BMR, 2014/04/16
-//		Removed from documentation. -BMR, 2016/03/07
-//--------------------------------------------------------------------------
-hsize_t DataSet::getVlenBufSize( DataType& type, DataSpace& space ) const
-{
-    return(getVlenBufSize((const DataType)type, (const DataSpace)space));
 }
 
 //--------------------------------------------------------------------------
@@ -603,6 +588,8 @@ void DataSet::extend( const hsize_t* size ) const
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2014
 // Modification
+//		Replaced the version without const parameter - Apr, 2014
+// Modification
 //		Used the non-const version.
 //--------------------------------------------------------------------------
 void DataSet::fillMemBuf(const void *fill, const DataType& fill_type, void *buf, const DataType& buf_type, const DataSpace& space) const
@@ -619,33 +606,14 @@ void DataSet::fillMemBuf(const void *fill, const DataType& fill_type, void *buf,
 
 //--------------------------------------------------------------------------
 // Function:	DataSet::fillMemBuf
-// Purpose	This is an overloaded member function, kept for backward
-//		compatibility.  It differs from the above function in that it
-//		misses const's.  This wrapper will be removed in future release.
-// Param 	fill - IN: Pointer to fill value to use - default NULL
-// Param 	fill_type - IN: Datatype of the fill value
-// Param 	buf - IN/OUT: Memory buffer to fill selection within
-// Param 	buf_type - IN: Datatype of the elements in buffer
-// Param 	space - IN: Dataspace describing memory buffer & containing selection to use
-// Exception	H5::DataSetIException
-// Programmer	Binh-Minh Ribler - 2000
-// Modification
-//		Modified to call its replacement. -BMR, 2014/04/16
-//		Removed from documentation. -BMR, 2016/03/07
-//--------------------------------------------------------------------------
-void DataSet::fillMemBuf(const void *fill, DataType& fill_type, void *buf, DataType& buf_type, DataSpace& space)
-{
-    fillMemBuf(fill, (const DataType)fill_type, buf, (const DataType)buf_type, (const DataSpace)space);
-}
-
-//--------------------------------------------------------------------------
-// Function:	DataSet::fillMemBuf
 ///\brief	Fills a selection in memory with 0.
 ///\param	buf - IN/OUT: Memory buffer to fill selection within
 ///\param	buf_type - IN: Datatype of the elements in buffer
 ///\param	space - IN: Dataspace describing memory buffer & containing selection to use
 ///\exception	H5::DataSetIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		Replaced the version without const parameter - Apr, 2014
 //--------------------------------------------------------------------------
 void DataSet::fillMemBuf(void *buf, const DataType& buf_type, const DataSpace& space) const
 {
@@ -656,25 +624,6 @@ void DataSet::fillMemBuf(void *buf, const DataType& buf_type, const DataSpace& s
     {
 	throw DataSetIException("DataSet::fillMemBuf", "H5Dfill failed");
     }
-}
-
-//--------------------------------------------------------------------------
-// Function:    DataSet::fillMemBuf
-// Purpose	This is an overloaded member function, kept for backward
-//		compatibility.  It differs from the above function in that it
-//		misses const's.  This wrapper will be removed in future release.
-// Param        buf - IN/OUT: Memory buffer to fill selection within
-// Param        buf_type - IN: Datatype of the elements in buffer
-// Param        space - IN: Dataspace describing memory buffer & containing selection to use
-// Exception	H5::DataSetIException
-// Programmer   Binh-Minh Ribler - 2000
-// Modification
-//		Modified to call its replacement. -BMR, 2014/04/16
-//		Removed from documentation. -BMR, 2016/03/07
-//--------------------------------------------------------------------------
-void DataSet::fillMemBuf(void *buf, DataType& buf_type, DataSpace& space)
-{
-    fillMemBuf(buf, (const DataType)buf_type, (const DataSpace)space);
 }
 
 //--------------------------------------------------------------------------

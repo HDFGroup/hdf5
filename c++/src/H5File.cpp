@@ -454,6 +454,8 @@ void H5File::getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const
 ///		the file remains open; it will be invalid if the file is
 ///		closed and reopened or opened during a subsequent session.
 // Programmer   Binh-Minh Ribler - May 2004
+// Modification
+//		Replaced the version without const parameter - Apr, 2014
 //--------------------------------------------------------------------------
 void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 {
@@ -463,25 +465,6 @@ void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
    {
       throw FileIException("H5File::getVFDHandle", "H5Fget_vfd_handle failed");
    }
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5File::getVFDHandle
-// Purpose	This is an overloaded member function, kept for backward
-//		compatibility.  It differs from the above function in that it
-//		misses const's.  This wrapper will be removed in future release.
-// Param 	fapl        - File access property list
-// Param 	file_handle - Pointer to the file handle being used by
-//			      the low-level virtual file driver
-// Exception	H5::FileIException
-// Programmer   Binh-Minh Ribler - May 2004
-// Modification
-//		Planned for removal. -BMR, 2014/04/16
-//		Removed from documentation. -BMR, 2016/03/07
-//--------------------------------------------------------------------------
-void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
-{
-    getVFDHandle((const FileAccPropList)fapl, file_handle);
 }
 
 //--------------------------------------------------------------------------
