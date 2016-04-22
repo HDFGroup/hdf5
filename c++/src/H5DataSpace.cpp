@@ -167,7 +167,7 @@ void DataSpace::copy( const DataSpace& like_space )
       try {
          close();
       }
-      catch (Exception close_error) {
+      catch (Exception& close_error) {
          throw DataSpaceIException("DataSpace::copy", close_error.getDetailMsg());
       }
    }  // end if
@@ -641,7 +641,7 @@ void DataSpace::p_setId(const hid_t new_id)
     try {
         close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
         throw DataSpaceIException(inMemFunc("p_setId"), close_error.getDetailMsg());
     }
    // reset object's id to the given id
@@ -685,7 +685,7 @@ DataSpace::~DataSpace()
 {
     try {
 	close();
-    } catch (Exception close_error) {
+    } catch (Exception& close_error) {
 	cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
     }
 }

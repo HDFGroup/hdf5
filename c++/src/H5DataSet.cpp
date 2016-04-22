@@ -728,7 +728,7 @@ void DataSet::p_setId(const hid_t new_id)
     try {
         close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
         throw DataSetIException(inMemFunc("p_setId"), close_error.getDetailMsg());
     }
    // reset object's id to the given id
@@ -788,7 +788,7 @@ DataSet::~DataSet()
     try {
 	close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
 	cerr << "DataSet::~DataSet - " << close_error.getDetailMsg() << endl;
     }
 }

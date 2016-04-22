@@ -178,7 +178,7 @@ static void test_h5s_basic()
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("DataSpace constructor", "Library allowed overwrite of existing dataset");
 	}
-	catch( DataSpaceIException E ) // Simple data space with too many dims
+	catch (DataSpaceIException& E) // Simple data space with too many dims
 	{} // do nothing, exception expected
 
        /*
@@ -204,7 +204,7 @@ static void test_h5s_basic()
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5File::openDataSet", "Opening a dataset with higher dimensionality than what the library can handle");
 	}
-	catch( FileIException E ) // catching higher dimensionality dataset
+	catch (FileIException& E) // catching higher dimensionality dataset
 	{} // do nothing, exception expected
 
     // CHECK_I(ret, "H5Fclose");  // leave this here, later, fake a failure
@@ -213,13 +213,13 @@ static void test_h5s_basic()
 	PASSED();
     }	// end of try block
 
-    catch (InvalidActionException E)
+    catch (InvalidActionException& E)
     {
         cerr << " FAILED" << endl;
         cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
     }
     // catch all other exceptions
-    catch (Exception E)
+    catch (Exception& E)
     {
         issue_fail_msg("test_h5s_basic()", __LINE__, __FILE__, E.getCDetailMsg());
     }
@@ -283,7 +283,7 @@ static void test_h5s_scalar_write()
 
 	PASSED();
     } // end of try block
-    catch (Exception E)
+    catch (Exception& E)
     {
 	issue_fail_msg("test_h5s_scalar_write()", __LINE__, __FILE__, E.getCDetailMsg());
     }
@@ -343,7 +343,7 @@ static void test_h5s_scalar_read()
 
 	PASSED();
     }   // end of try block
-    catch (Exception E)
+    catch (Exception& E)
     {
 	// all the exceptions caused by negative returned values by C APIs
 	issue_fail_msg("test_h5s_scalar_read()", __LINE__, __FILE__, E.getCDetailMsg());
@@ -399,7 +399,7 @@ static void test_h5s_null()
 
 	PASSED();
     } // end of try block
-    catch (Exception E)
+    catch (Exception& E)
     {
 	issue_fail_msg("test_h5s_null()", __LINE__, __FILE__, E.getCDetailMsg());
     }
@@ -471,7 +471,7 @@ static void test_h5s_compound_scalar_write()
 
 	PASSED();
     }	// end of try block
-    catch (Exception E)
+    catch (Exception& E)
     {
 	// all the exceptions caused by negative returned values by C APIs
 	issue_fail_msg("test_h5s_compound_scalar_write()", __LINE__, __FILE__, E.getCDetailMsg());
@@ -545,7 +545,7 @@ static void test_h5s_compound_scalar_read()
 	} // end if
 	PASSED();
     }   // end of try block
-    catch (Exception E)
+    catch (Exception& E)
     {
 	// all the exceptions caused by negative returned values by C APIs
 	issue_fail_msg("test_h5s_compound_scalar_read()", __LINE__, __FILE__, E.getCDetailMsg());

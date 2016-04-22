@@ -154,7 +154,7 @@ void Group::p_setId(const hid_t new_id)
     try {
         close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
         throw GroupIException("Group::p_setId", close_error.getDetailMsg());
     }
    // reset object's id to the given id
@@ -219,7 +219,7 @@ Group::~Group()
     try {
 	close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
 	cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
 }

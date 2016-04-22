@@ -164,7 +164,7 @@ static void test_attr_basic_write()
 	    // continuation here, that means no exception has been thrown
 	    throw InvalidActionException("H5File::createDataSet", "Library allowed overwrite of existing dataset");
 	}
-	catch (AttributeIException E) // catching invalid creating attribute
+	catch (AttributeIException& E) // catching invalid creating attribute
         {} // do nothing, exception expected
 
 	// Write attribute information
@@ -223,7 +223,7 @@ static void test_attr_basic_write()
             throw InvalidActionException("H5Group::createAttribute",
 			"Attempting to create an existing attribute");
 	}
-        catch (AttributeIException E) // catching invalid creating attribute
+        catch (AttributeIException& E) // catching invalid creating attribute
         {} // do nothing, exception expected
 
 	// Write attribute information
@@ -237,7 +237,8 @@ static void test_attr_basic_write()
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_basic_write()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_basic_write()
@@ -371,7 +372,8 @@ static void test_attr_getname()
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_getname()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_getname()
@@ -481,7 +483,8 @@ static void test_attr_rename()
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_rename()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_rename()
@@ -549,7 +552,8 @@ static void test_attr_basic_read()
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_basic_read()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_basic_read()
@@ -599,7 +603,7 @@ static void test_attr_compound_write()
 	try {
 	    Attribute invalid_attr = dataset.createAttribute (ATTR4_NAME, comp_type, sid2);
 	}
-        catch (AttributeIException E) // catching invalid creating attribute
+        catch (AttributeIException& E) // catching invalid creating attribute
         {} // do nothing, exception expected
 
 	// Write complex attribute data
@@ -608,7 +612,8 @@ static void test_attr_compound_write()
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_compound_write()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_compound_write()
@@ -743,7 +748,8 @@ static void test_attr_compound_read()
 	verify_val(attr_name, ATTR4_NAME, "Attribute::getName", __LINE__, __FILE__);
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_compound_read()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
@@ -758,7 +764,8 @@ static void test_attr_compound_read()
 	PASSED();
     } // end try block
 
-    catch (FileIException E) {
+    catch (FileIException& E)
+    {
 	issue_fail_msg("test_attr_compound_read()", __LINE__, __FILE__, "Unable to truncate file, possibly because some objects are left opened");
     }
 }   // test_attr_compound_read()
@@ -803,7 +810,7 @@ static void test_attr_scalar_write()
 	    // continuation here, that means no exception has been thrown
 	    throw InvalidActionException("H5File::createDataSet", "Library allowed overwrite of existing dataset");
 	}
-	catch (AttributeIException E) // catching invalid creating attribute
+	catch (AttributeIException& E) // catching invalid creating attribute
         {} // do nothing, exception expected
 
 	// Write attribute information
@@ -812,7 +819,8 @@ static void test_attr_scalar_write()
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_scalar_write()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_scalar_write()
@@ -856,7 +864,8 @@ static void test_attr_scalar_read()
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_scalar_read()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_scalar_read()
@@ -919,7 +928,7 @@ static void test_attr_mult_write()
 	    // continuation here, that means no exception has been thrown
 	    throw InvalidActionException("DataSet::createAttribute", "Attempting to create a duplicate attribute");
 	}
-	catch (AttributeIException E) // catching invalid creating attribute
+	catch (AttributeIException& E) // catching invalid creating attribute
         {} // do nothing, exception expected
 
 	// Write 3rd attribute information
@@ -928,7 +937,8 @@ static void test_attr_mult_write()
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_mult_write()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_mult_write()
@@ -1118,7 +1128,8 @@ static void test_attr_mult_read()
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_mult_read()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_mult_read()
@@ -1154,7 +1165,7 @@ static void test_attr_delete()
 
 	// Verify the name of the only file attribute left
 	Attribute fattr = fid1.openAttribute((unsigned)0);
-	H5std_string attr_name = fattr.getName();
+	attr_name = fattr.getName();
 	verify_val(attr_name, FATTR1_NAME, "Attribute::getName", __LINE__, __FILE__);
 	fattr.close();
 	
@@ -1174,7 +1185,7 @@ static void test_attr_delete()
 	    // continuation here, that means no exception has been thrown
 	    throw InvalidActionException("DataSet::removeAttr", "Attempting to remove non-existing attribute");
 	}
-	catch (AttributeIException E) // catching invalid removing attribute
+	catch (AttributeIException& E) // catching invalid removing attribute
         {} // do nothing, exception expected
 
 	// Test deleting dataset's attributes
@@ -1235,7 +1246,8 @@ static void test_attr_delete()
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_delete()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_delete()
@@ -1392,7 +1404,8 @@ static void test_attr_dtype_shared()
 	PASSED();
     }   // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_dtype_shared()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_dtype_shared()
@@ -1516,7 +1529,8 @@ static void test_string_attr()
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_string_attr()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_string_attr()
@@ -1560,10 +1574,12 @@ static void test_attr_exists()
 	PASSED();
     } // end try block
 
-    catch (InvalidActionException E) {
+    catch (InvalidActionException& E)
+    {
 	issue_fail_msg("test_attr_exists()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_exists()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_exists()
@@ -1622,8 +1638,8 @@ static void test_attr_dense_create(FileCreatPropList& fcpl,
 
 	// Retrieve limits for compact/dense attribute storage and verify them
 	dcpl.getAttrPhaseChange(max_compact, min_dense);
-	verify_val(max_compact, 7, "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
-	verify_val(min_dense, 5, "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
+	verify_val(max_compact, static_cast<unsigned>(7), "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
+	verify_val(min_dense, static_cast<unsigned>(5), "DSetCreatPropList::getAttrPhaseChange",__LINE__,__FILE__);
 
 	// Close property list
 	dcpl.close();
@@ -1665,13 +1681,14 @@ static void test_attr_dense_create(FileCreatPropList& fcpl,
 	    // continuation here, that means no exception has been thrown
 	    throw InvalidActionException("DataSet::createAttribute", "Maximum number of attributes has been reached");
 	}
-	catch (AttributeIException E) // catching invalid action
+	catch (AttributeIException& E) // catching invalid action
         {} // do nothing, exception expected
 
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_dense_create()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_dense_create()
@@ -1708,7 +1725,7 @@ static void test_attr_corder_create_basic(FileCreatPropList& fcpl,
 	    // continuation here, that means no exception has been thrown
 	    throw InvalidActionException("DSetCreatPropList::getAttrCrtOrder", "Indexing cannot be set alone, order tracking is required");
 	}
-	catch (PropListIException E) // catching invalid action
+	catch (PropListIException& E) // catching invalid action
         {} // do nothing, exception expected
 
 	// Set attribute creation order tracking & indexing for object then
@@ -1755,7 +1772,8 @@ static void test_attr_corder_create_basic(FileCreatPropList& fcpl,
 	PASSED();
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr_corder_create_basic()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr_corder_create_basic()
@@ -1845,7 +1863,8 @@ void test_attr()
         } // end for
     } // end try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_attr()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_attr()
