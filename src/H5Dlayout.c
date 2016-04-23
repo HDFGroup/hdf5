@@ -101,6 +101,10 @@ H5D__layout_set_io_ops(const H5D_t *dataset)
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_BTREE;
                     break;
 
+                case H5D_CHUNK_IDX_NONE:
+                    dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_NONE;
+                    break;
+
                 case H5D_CHUNK_IDX_SINGLE:
                     dataset->shared->layout.storage.u.chunk.ops = H5D_COPS_SINGLE;
                     break;
@@ -220,6 +224,10 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                 switch(layout->u.chunk.idx_type) {
                     case H5D_CHUNK_IDX_BTREE:
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, 0, "v1 B-tree index type found for layout message >v3")
+
+                    case H5D_CHUNK_IDX_NONE:
+                        /* nothing */
+                        break;
 
                     case H5D_CHUNK_IDX_SINGLE:
                         /* Possible filter information */
@@ -405,6 +413,14 @@ H5D__layout_set_latest_indexing(H5O_layout_t *layout, const H5S_t *space,
                     layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_SINGLE;
                     layout->storage.u.chunk.ops = H5D_COPS_SINGLE;
                 } /* end if */
+                else if(!dcpl_cache->pline.nused && 
+                        dcpl_cache->fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
+
+                    /* Set the chunk index type to "none" Index */
+                    layout->u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
+                    layout->storage.u.chunk.idx_type = H5D_CHUNK_IDX_NONE;
+                    layout->storage.u.chunk.ops = H5D_COPS_NONE;
+                } /* end else-if */
                 else {
                     /* Set the chunk index type to Fixed Array */
                     layout->u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;

@@ -2751,7 +2751,7 @@ test_copy_dataset_chunked(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED3, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the array index type is correct */
-    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_NONE, H5D_CHUNK_IDX_BTREE) != TRUE)
 	TEST_ERROR
 
     /* Check if the datasets are equal */
@@ -3166,7 +3166,7 @@ test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED3, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the array index type is correct */
-    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_NONE, H5D_CHUNK_IDX_BTREE) != TRUE)
 	TEST_ERROR
 
     /* Check if the datasets are equal */
@@ -3501,7 +3501,7 @@ test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED3, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the array index type is correct */
-    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_NONE, H5D_CHUNK_IDX_BTREE) != TRUE)
 	TEST_ERROR
 
     /* Check if the datasets are equal */
@@ -3521,7 +3521,7 @@ test_copy_dataset_chunked_sparse(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED4, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Check if the array index type is correct */
-    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_NONE, H5D_CHUNK_IDX_BTREE) != TRUE)
 	TEST_ERROR
 
     /* Check if the datasets are equal */
@@ -5217,7 +5217,7 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     /* open the destination dataset */
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL2, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_NONE, H5D_CHUNK_IDX_BTREE) != TRUE)
         TEST_ERROR
 
     /* Check if the datasets are equal */
@@ -8429,7 +8429,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     /* open the destination dataset */
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_VL_VL2, H5P_DEFAULT)) < 0) TEST_ERROR
 
-    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_FARRAY, H5D_CHUNK_IDX_BTREE) != TRUE)
+    if(compare_idx_type(src_fapl, did2, H5D_CHUNK_IDX_NONE, H5D_CHUNK_IDX_BTREE) != TRUE)
         TEST_ERROR
 
     /* Check if the datasets are equal */

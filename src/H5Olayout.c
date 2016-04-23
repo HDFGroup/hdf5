@@ -298,6 +298,10 @@ H5O__layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
                             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, NULL, "v1 B-tree index type should never be in a v4 layout message")
                             break;
 
+                        case H5D_CHUNK_IDX_NONE:       /* Implicit Index */
+                            mesg->storage.u.chunk.ops = H5D_COPS_NONE;
+                            break;
+
                         case H5D_CHUNK_IDX_SINGLE:     /* Single Chunk Index */
                             if(mesg->u.chunk.flags & H5O_LAYOUT_CHUNK_SINGLE_INDEX_WITH_FILTER) {
                                 H5F_DECODE_LENGTH(f, p, mesg->storage.u.chunk.u.single.nbytes);
@@ -626,6 +630,9 @@ H5O__layout_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, 
                 switch(mesg->u.chunk.idx_type) {
                     case H5D_CHUNK_IDX_BTREE:
                         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "v1 B-tree index type should never be in a v4 layout message")
+                        break;
+
+                    case H5D_CHUNK_IDX_NONE:       /* Implicit */
                         break;
 
                     case H5D_CHUNK_IDX_SINGLE:     /* Single Chunk */
@@ -1190,6 +1197,11 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const v
                 case H5D_CHUNK_IDX_BTREE:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v1 B-tree");
+                    break;
+
+                case H5D_CHUNK_IDX_NONE:
+                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                              "Index Type:", "Implicit");
                     break;
 
                 case H5D_CHUNK_IDX_SINGLE:
