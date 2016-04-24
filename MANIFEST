@@ -1347,6 +1347,8 @@
 ./tools/h5stat/testfiles/h5stat_filters.h5
 ./tools/h5stat/testfiles/h5stat_help1.ddl
 ./tools/h5stat/testfiles/h5stat_help2.ddl
+./tools/h5stat/testfiles/h5stat_idx.h5
+./tools/h5stat/testfiles/h5stat_idx.ddl
 ./tools/h5stat/testfiles/h5stat_links1.ddl
 ./tools/h5stat/testfiles/h5stat_links2.ddl
 ./tools/h5stat/testfiles/h5stat_links3.ddl
@@ -1487,6 +1489,8 @@
 ./tools/testfiles/tdset-3s.ddl
 ./tools/testfiles/tdset.h5
 ./tools/testfiles/tdset2.h5
+./tools/testfiles/tdset_idx.ls
+./tools/testfiles/tdset_idx.h5
 ./tools/testfiles/tempty.ddl
 ./tools/testfiles/tempty.h5
 ./tools/testfiles/tenum.h5

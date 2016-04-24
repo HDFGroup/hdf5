@@ -98,6 +98,7 @@
 #define FILE66  "packedbits.h5"
 #define FILE67  "zerodim.h5"
 #define FILE68  "charsets.h5"
+#define FILE68a "tdset_idx.h5"
 #define FILE69  "tattrintsize.h5"
 #define FILE70  "tcmpdintsize.h5"
 #define FILE71  "tcmpdattrintsize.h5"
@@ -286,6 +287,16 @@ typedef struct s1_t {
 #define F66_DATASETS64       "DS64BITS"
 #define F66_YDIM64      64
 #define F66_DUMMYDBL        "DummyDBL"
+
+/* Declarations for gent_dataset_idx() for "FILE68a" */
+#define F68a_DSET_FIXED		"dset_fixed"
+#define F68a_DSET_FIXED_FILTER	"dset_filter"
+#define F68a_DSET_BTREE		"dset_btree"
+#define F68a_DIM200		200
+#define F68a_DIM100		100
+#define F68a_DIM20		20
+#define F68a_DIM10		10
+#define F68a_CHUNK		5
 
 /* "FILE70" macros and for FILE71 */
 /* Name of dataset to create in datafile   */
@@ -7020,6 +7031,90 @@ gent_fs_strategy_threshold(void)
     H5Pclose(fcpl);
 }
 
+/*
+ * Create a file with new format:
+ * Create one dataset with (set_chunk, fixed dims, null max. dims) 
+ *	so that Fixed Array indexing will be used.
+ * Create one dataset with (set_chunk, fixed dims, null max. dims, filter) 
+ *	so that Fixed Array indexing will be used.
+ * Create one dataset with (set_chunk, fixed dims, fixed max. dims)
+ *	so that Fixed Array indexing will be used.
+ * 
+ * Modifications:
+ *	Fixed Array indexing will be used for chunked dataset
+ *	with fixed max. dims setting.
+ *
+ */
+static void
+gent_dataset_idx(void)
+{
+    hid_t fid, space, dcpl, fapl;
+    hsize_t dims[2];
+    hsize_t maxdims[2];
+    int buf[20][10];
+    int i, j, ret;
+
+    /* Get a copy of the file aaccess property */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    assert(ret >= 0);
+
+    fid = H5Fcreate(FILE68a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+
+    dims[0] = F68a_CHUNK;
+    dims[1] = F68a_CHUNK;
+
+    /* set chunk */
+    ret = H5Pset_chunk(dcpl, RANK, dims);
+    assert(ret >= 0);
+
+    /* dataset with fixed dimensions */
+    dims[0] = F68a_DIM20; 
+    dims[1] = F68a_DIM10;
+    space = H5Screate_simple(RANK, dims, NULL);
+
+    for(i = 0; i < F68a_DIM20; i++)
+         for(j = 0; j < F68a_DIM10; j++)
+              buf[i][j] = j;
+
+    ret = make_dset(fid, F68a_DSET_FIXED, space, H5T_NATIVE_INT, dcpl, buf);
+    assert(ret >= 0);
+    H5Sclose(space);
+
+    /* dataset with non-fixed dimensions */
+    maxdims[0] = F68a_DIM200; 
+    maxdims[1] = F68a_DIM100;
+    space = H5Screate_simple(RANK, dims, maxdims);
+
+    ret = make_dset(fid, F68a_DSET_BTREE, space, H5T_NATIVE_INT, dcpl, buf);
+    assert(ret >= 0);
+    H5Sclose(space);
+
+#if defined (H5_HAVE_FILTER_DEFLATE)
+
+    /* dataset with fixed dimensions and filters */
+    /* remove the filters from the dcpl */
+    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    assert(ret >= 0);
+
+    /* set deflate data */
+    ret = H5Pset_deflate(dcpl, 9);
+    assert(ret >= 0);
+
+    space = H5Screate_simple(RANK, dims, NULL);
+    ret = make_dset(fid, F68a_DSET_FIXED_FILTER, space, H5T_NATIVE_INT, dcpl, buf);
+    assert(ret >= 0);
+
+    H5Sclose(space);
+#endif
+
+    H5Pclose(dcpl);
+    H5Fclose(fid);
+}
+
 /*-------------------------------------------------------------------------
  * Function:    gent_packedbits
  *
@@ -9830,6 +9925,7 @@ int main(void)
     gent_extlinks();
     gent_fs_strategy_threshold();
     gent_packedbits();
+    gent_dataset_idx();
     gent_attr_intsize();
     gent_charsets();
     gent_compound_intsizes();
