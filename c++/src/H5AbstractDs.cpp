@@ -145,7 +145,6 @@ ArrayType AbstractDs::getArrayType() const
 	// problem described in the JIRA issue HDFFV-7947
 	ArrayType arraytype;
 	f_DataType_setId(&arraytype, p_get_type());
-	arraytype.setArrayInfo();
 	return(arraytype);
    }
    catch (DataSetIException& E) {

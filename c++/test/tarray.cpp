@@ -134,7 +134,6 @@ static void test_array_compound_array()
 
 	// Create a dataset
 	DataSet dataset = file1.createDataSet("Dataset1", arrtype, space);
-	dataset = file1.openDataSet("Dataset1");
 
 	// Write dataset to disk
 	dataset.write(wdata, arrtype);
@@ -351,6 +350,129 @@ static void test_array_assignment()
 } // end test_array_assignment()
 
 
+/*-------------------------------------------------------------------------
+ * Function:    test_array_info
+ *
+ * Purpose:     Tests getting array information using the const methods.
+ *
+ * Return:      None.
+ *
+ * Programmer:  Binh-Minh Ribler
+ *		April, 2016
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_array_info()
+{
+    SUBTEST("ArrayType Const Methods");
+    typedef struct {        // Typedef for compound datatype */
+        int i;
+        float f[ARRAY1_DIM1];
+    } s1_t;
+    s1_t wdata[SPACE1_DIM1][ARRAY1_DIM1];   // Information to write
+    s1_t rdata[SPACE1_DIM1][ARRAY1_DIM1];   // Information read in
+    hsize_t sdims1[] = {SPACE1_DIM1};
+    hsize_t tdims1[] = {ARRAY1_DIM1};
+    int     nmemb;      // Number of compound members
+    int     ii;		// counting variables
+    hsize_t idxi, idxj, idxk; // dimension indicing variables
+    H5T_class_t mclass; // Datatype class for field
+
+    // Initialize array data to write
+    for (idxi =0; idxi < SPACE1_DIM1; idxi++)
+        for (idxj = 0; idxj < ARRAY1_DIM1; idxj++) {
+            wdata[idxi][idxj].i = idxi * 10 + idxj;
+            for(idxk = 0; idxk < ARRAY1_DIM1; idxk++)
+	    {
+                float temp = idxi * 10.0 + idxj * 2.5 + idxk;
+                wdata[idxi][idxj].f[idxk] = temp;
+	    }
+        } // end for
+
+    try {
+	// Create File
+	H5File file1(FILENAME, H5F_ACC_TRUNC);
+
+	// Create dataspace for datasets
+	DataSpace space(SPACE1_RANK, sdims1, NULL);
+
+	/*
+	 * Create some array datatypes, then close the file.
+	 */
+
+	// Create an array of floats datatype
+	ArrayType arrfltype(PredType::NATIVE_FLOAT, ARRAY1_RANK, tdims1);
+
+	// Create an array datatype of the compound datatype
+	ArrayType arrtype(PredType::NATIVE_UINT, ARRAY1_RANK, tdims1);
+
+	// Create a dataset
+	DataSet dataset = file1.createDataSet("Dataset1", arrtype, space);
+
+	// Write dataset to disk
+	dataset.write(wdata, arrtype);
+
+	// Close array of floats field datatype
+	arrfltype.close();
+
+	// Close all
+	dataset.close();
+	arrtype.close();
+	space.close();
+	file1.close();
+
+	// Re-open file
+	file1.openFile(FILENAME, H5F_ACC_RDONLY);
+
+	// Open the dataset
+	dataset = file1.openDataSet("Dataset1");
+
+	/*
+	 * Check the datatype array of compounds
+	 */
+
+	// Verify that it is an array of compounds
+	DataType dstype = dataset.getDataType();
+	mclass = dstype.getClass();
+	verify_val(mclass==H5T_ARRAY, true, "f2_type.getClass", __LINE__, __FILE__);
+
+	dstype.close();
+
+	{ // Let atype_check go out of scope
+	// Get the array datatype, declared as const
+	const ArrayType atype_check = dataset.getArrayType();
+
+	// Check the array rank with the const method
+	int ndims = atype_check.getArrayNDims();
+	verify_val(ndims, ARRAY1_RANK, "atype_check.getArrayNDims", __LINE__, __FILE__);
+
+	// Get the array dimensions with the const method
+	hsize_t rdims1[H5S_MAX_RANK];
+	atype_check.getArrayDims(rdims1);
+
+	// Check the array dimensions
+	for (ii =0; ii <ndims; ii++)
+	    if (rdims1[ii]!=tdims1[ii]) {
+		TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%zd, tdims1[%d]=z%d\n", ii, rdims1[ii], ii, tdims1[ii]);
+            continue;
+        } // end if
+	}
+
+	// Close all
+	dataset.close();
+	file1.close();
+        PASSED();
+    }   // end of try block
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_array_info", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+} // end test_array_info()
+
+
 /****************************************************************
 **
 **  test_array(): Main datatypes testing routine.
@@ -369,6 +491,9 @@ void test_array()
 
     // Test operator= (HDFFV-9562)
     test_array_assignment();
+
+    // Test const functions (HDFFV-9725)
+    test_array_info();
 
 }   // test_array()
 

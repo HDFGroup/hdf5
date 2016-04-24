@@ -249,9 +249,8 @@ DataType CompType::getMemberDataType( unsigned member_num ) const
 ArrayType CompType::getMemberArrayType( unsigned member_num ) const
 {
    try {
-	ArrayType arraytype;
+	ArrayType arraytype(p_get_member_type(member_num));
 	f_DataType_setId(&arraytype, p_get_member_type(member_num));
-	arraytype.setArrayInfo();
 	return(arraytype);
    }
    catch (DataTypeIException& E) {
