@@ -1204,10 +1204,13 @@ H5D__farray_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t
     HDassert(udata);
 
     /* Check if the fixed array is open yet */
-    if(NULL == idx_info->storage->u.farray.fa)
+    if(NULL == idx_info->storage->u.farray.fa) {
         /* Open the fixed array in file */
         if(H5D__farray_idx_open(idx_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open fixed array")
+    } else  /* Patch the top level file pointer contained in fa if needed */
+	if(H5FA_patch_file(idx_info->storage->u.farray.fa, idx_info->f) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch fixed array file pointer")
 
     /* Set convenience pointer to fixed array structure */
     fa = idx_info->storage->u.farray.fa;
@@ -1626,6 +1629,11 @@ H5D__farray_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
     /* Check if the fixed array is open */
     if(idx_info->storage->u.farray.fa) {
+
+	/* Patch the top level file pointer contained in fa if needed */
+	if(H5FA_patch_file(idx_info->storage->u.farray.fa, idx_info->f) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch fixed array file pointer")
+
         /* Close fixed array */
         if(H5FA_close(idx_info->storage->u.farray.fa, idx_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close fixed array")

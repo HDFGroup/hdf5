@@ -939,6 +939,10 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     HDassert(type_info);
     HDassert(dset);
 
+    /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
+    if(H5T_patch_vlen_file(dset->shared->type, dset->oloc.file) < 0 )
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer")
+
     /* Initialize type info safely */
     HDmemset(type_info, 0, sizeof(*type_info));
 
