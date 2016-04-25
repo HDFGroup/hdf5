@@ -251,6 +251,28 @@ void DSetCreatPropList::setSzip(unsigned int options_mask, unsigned int pixels_p
 }
 
 //--------------------------------------------------------------------------
+// Function:	DSetCreatPropList::setNbit
+///\brief	Sets up for the use of the Nbit compression filter.
+///\exception	H5::PropListIException
+///\par Description
+///		The associate C function sets an Nbit compression filter,
+///		H5Z_FILTER_NBIT, for a dataset.  For more information about
+///		Nbit compression, please refer to the C layer Reference
+///		Manual at:
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-setNbit
+// Programmer	Binh-Minh Ribler - Apr, 2016
+//--------------------------------------------------------------------------
+void DSetCreatPropList::setNbit() const
+{
+    herr_t ret_value = H5Pset_nbit(id);
+    if( ret_value < 0 )
+    {
+	throw PropListIException("DSetCreatPropList::setNbit",
+		"H5Pset_nbit failed");
+    }
+}
+
+//--------------------------------------------------------------------------
 // Function:	DSetCreatPropList::setFillValue
 ///\brief	Sets a dataset fill value
 ///\param	fvalue_type - IN: Data type for the value passed via \a value

@@ -63,6 +63,7 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 // H5_ATTR_UNUSED variables caused warning, but taking them out caused failure.
 
+
 /*-------------------------------------------------------------------------
  * Function:	test_create
  *
@@ -82,7 +83,7 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
 static herr_t
 test_create( H5File& file)
 {
-    SUBTEST("create, open, close");
+    SUBTEST("Create, open, close");
 
     // Setting this to NULL for cleaning up in failure situations
     DataSet *dataset = NULL;
@@ -192,6 +193,7 @@ test_create( H5File& file)
     }
 }   // test_create
 
+
 /*-------------------------------------------------------------------------
  * Function:	test_simple_io
  *
@@ -214,7 +216,7 @@ static herr_t
 test_simple_io( H5File& file)
 {
 
-    SUBTEST("simple I/O");
+    SUBTEST("Simple I/O");
 
     int	points[100][200];
     int	check[100][200];
@@ -279,6 +281,7 @@ test_simple_io( H5File& file)
     }
 }   // test_simple_io
 
+
 /*-------------------------------------------------------------------------
  * Function:	test_datasize
  *
@@ -348,6 +351,7 @@ test_datasize(FileAccPropList &fapl)
     }
 }   // test_datasize
 
+
 /*-------------------------------------------------------------------------
  * Function:	test_tconv
  *
@@ -365,7 +369,7 @@ test_datasize(FileAccPropList &fapl)
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_tconv( H5File& file)
+test_tconv(H5File& file)
 {
     // Prepare buffers for input/output
     char	*out=NULL, *in=NULL;
@@ -374,7 +378,7 @@ test_tconv( H5File& file)
     in = new char [4*1000000];
     //assert (in);
 
-    SUBTEST("data type conversion");
+    SUBTEST("Data type conversion");
 
     // Initialize the dataset
     for (int i = 0; i < 1000000; i++) {
@@ -467,6 +471,7 @@ filter_bogus(unsigned int flags, size_t cd_nelmts,
     return nbytes;
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	test_compression
  *
@@ -753,6 +758,123 @@ test_compression(H5File& file)
     }
 }   // test_compression
 
+
+/*-------------------------------------------------------------------------
+ * Function:    test_nbit_methods
+ *
+ * Purpose:     Tests setting nbit compression methods.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        -1
+ *
+ * Programmer:	Binh-Minh Ribler
+ *		Friday, April 22, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5std_string	DSET_NBIT_NAME("nbit_dataset");
+const hsize_t DIM1 = 2;
+const hsize_t DIM2 = 5;
+static herr_t test_nbit_compression(H5File& file)
+{
+    typedef struct {
+        int i;
+        char c;
+        short s;
+    } s1_t;
+
+    const hsize_t size[2] = {DIM1, DIM2};
+    const hsize_t chunk_size[2] = {DIM1, DIM2};
+    s1_t          orig_data[DIM1][DIM2];
+    s1_t          new_data[DIM1][DIM2];
+    hsize_t       i, j;
+
+    SUBTEST("N-bit compression (setup)");
+
+    try
+    {
+	// Define datatypes of members of compound datatype
+	IntType i_type(PredType::NATIVE_INT);
+	IntType c_type(PredType::NATIVE_CHAR);
+	IntType s_type(PredType::NATIVE_SHORT);
+
+	// Create a dataset compound datatype
+	CompType cmpd(sizeof(s1_t));
+	cmpd.insertMember("i", HOFFSET(s1_t, i), i_type);
+	cmpd.insertMember("c", HOFFSET(s1_t, c), c_type);
+	cmpd.insertMember("s", HOFFSET(s1_t, s), s_type);
+
+	// Create a memory compound datatype
+	CompType mem_cmpd(sizeof(s1_t));
+	mem_cmpd.insertMember("i", HOFFSET(s1_t, i), i_type);
+	mem_cmpd.insertMember("c", HOFFSET(s1_t, c), c_type);
+	mem_cmpd.insertMember("s", HOFFSET(s1_t, s), s_type);
+
+	// Set order of dataset compound datatype
+	//cmpd.setOrder(H5T_ORDER_BE); only for atomic type?
+
+	// Create the data space
+	DataSpace space(2, size);
+
+	// Use nbit filter
+	DSetCreatPropList dscreat;
+	dscreat.setChunk(2, chunk_size);
+	dscreat.setNbit();
+
+	// Create the dataset
+	DataSet dataset(file.createDataSet(DSET_NBIT_NAME, cmpd, space, dscreat));
+
+	// Initialize data, assuming size of long long >= size of member datatypes
+	for (i = 0; i < size[0]; i++)
+	    for (j = 0; j < size[1]; j++)
+	    {
+		orig_data[i][j].i = static_cast<int>(i * j);
+		orig_data[i][j].c = static_cast<char>('a' + i);
+		orig_data[i][j].s = static_cast<short>(i + j);
+
+		// Some even-numbered integer values are negative
+		if ((i*size[1]+j+1)%2 == 0) {
+		    orig_data[i][j].i = -orig_data[i][j].i;
+		    orig_data[i][j].s = static_cast<short>(-orig_data[i][j].s);
+		}
+	    }
+
+	// Write to the dataset
+	dataset.write(static_cast<void*>(orig_data), mem_cmpd);
+
+	// Read the dataset back */
+	dataset.read(static_cast<void*>(new_data), mem_cmpd);
+
+	// Check that the values read are the same as the values written.
+	for (i = 0; i < size[0]; i++)
+	    for (j = 0; j < size[1]; j++)
+	    {
+		if((new_data[i][j].i != orig_data[i][j].i) ||
+		   (new_data[i][j].c != orig_data[i][j].c) ||
+		   (new_data[i][j].s != orig_data[i][j].s))
+		{
+		    H5_FAILED();
+		    printf("    Read different values than written.\n");
+		    printf("    At index %lu,%lu\n", static_cast<unsigned long>(i), static_cast<unsigned long>(j));
+		}
+            }
+
+	PASSED();
+	return 0;
+    } // end try block
+
+    // catch all dataset, file, space, and plist exceptions
+    catch (Exception& E)
+    {
+	cerr << " FAILED" << endl;
+	cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
+
+	return -1;
+    }
+} // test_nbit_compression
+
+
 /*-------------------------------------------------------------------------
  * Function:	test_multiopen
  *
@@ -789,7 +911,7 @@ test_multiopen (H5File& file)
 	dcpl.setChunk (1, cur_size);
 
 	// Create a simple data space with unlimited size
-	static hsize_t	max_size[1] = {H5S_UNLIMITED};
+	hsize_t	max_size[1] = {H5S_UNLIMITED};
 	space = new DataSpace (1, cur_size, max_size);
 
 	// Create first dataset
@@ -837,6 +959,7 @@ test_multiopen (H5File& file)
     }
 }   // test_multiopen
 
+
 /*-------------------------------------------------------------------------
  * Function:	test_types
  *
@@ -1029,6 +1152,7 @@ test_types(H5File& file)
     }
 }   // test_types
 
+
 /*-------------------------------------------------------------------------
  * Function:	test_dset
  *
@@ -1077,6 +1201,7 @@ void test_dset()
 	nerrors += test_simple_io(file) < 0 ? 1:0;
 	nerrors += test_tconv(file) < 0 ? 1:0;
 	nerrors += test_compression(file) < 0 ? 1:0;
+	nerrors += test_nbit_compression(file) < 0 ? 1:0;
 	nerrors += test_multiopen (file) < 0 ? 1:0;
 	nerrors += test_types(file) < 0 ? 1:0;
 
