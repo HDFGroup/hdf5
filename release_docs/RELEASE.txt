@@ -179,6 +179,11 @@ Bug Fixes since HDF5-1.8.16
 
       (DER, 2016/01/13, HDFFV-9640)
 
+    - Fixed a library segmentation fault when accessing a corrupted
+      file provided by a user.
+
+      (MSC, 2016/02/19, HDFFV-9670)
+
     Parallel Library
     ----------------
     - None
