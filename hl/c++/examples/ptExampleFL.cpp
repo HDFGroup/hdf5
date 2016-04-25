@@ -24,10 +24,14 @@
  *-------------------------------------------------------------------------
  */
 
+const char* FILE_NAME("PTcppexampleFL.h5");
+const char* PT_NAME("/examplePacketTable");
+
 int main(void)
 {
     herr_t err;     /* Return value from function calls */
     hid_t fileID;   /* HDF5 identifier for file */
+    hid_t plistID;  /* HDF5 identifier for property list to use compression */
     hsize_t count;  /* Number of records in table */
     int x;          /* Temporary counter variable */
 
@@ -43,12 +47,19 @@ int main(void)
     }
 
     /* Create a new HDF5 file */
-    fileID = H5Fcreate("PTcppexampleFL.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fileID = H5Fcreate(FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if(fileID <0)
         fprintf(stderr, "Couldn't create file.\n");
 
-    /* Create a fixed-length packet table with compression level 5. */
-    FL_PacketTable ptable(fileID, "/examplePacketTable", H5T_NATIVE_INT, 100, 5);
+    /* Prepare property list to set compression, randomly use deflate
+       with compression level 5. */
+    plistID = H5Pcreate(H5P_DATASET_CREATE);
+    err = H5Pset_deflate(plistID, 5);
+    if(err < 0)
+        fprintf(stderr, "Error setting compression level.");
+
+    /* Create a fixed-length packet table. */
+    FL_PacketTable ptable(fileID, plistID, PT_NAME, H5T_NATIVE_INT, 100);
     if(! ptable.IsValid())
         fprintf(stderr, "Unable to create packet table.");
 
