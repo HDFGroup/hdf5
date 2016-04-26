@@ -172,9 +172,22 @@
      * the property list to specify compression, the name of the packet table,
      * the ID of the datatype, and the size of a memory chunk used in chunking.
      */
-    FL_PacketTable::FL_PacketTable(hid_t fileID, hid_t plist_id, const char* name, hid_t dtypeID, hsize_t chunkSize)
+    FL_PacketTable::FL_PacketTable(hid_t fileID, const char* name, hid_t dtypeID, hsize_t chunkSize, hid_t plistID)
     {
-        table_id = H5PTcreate(fileID, name, dtypeID, chunkSize, plist_id);
+        table_id = H5PTcreate(fileID, name, dtypeID, chunkSize, plistID);
+    }
+
+    /* Constructor - deprecated
+     * Creates a packet table to store either fixed- or variable-length packets.
+     * Takes the ID of the file the packet table will be created in, the ID of
+     * the property list to specify compression, the name of the packet table,
+     * the ID of the datatype, and the size of a memory chunk used in chunking.
+     * Note: The above constructor has a better prototype, which allows default
+     * values to be used.  This constructor was only released in 1.10.0.
+     */
+    FL_PacketTable::FL_PacketTable(hid_t fileID, hid_t plistID, const char* name, hid_t dtypeID, hsize_t chunkSize)
+    {
+        table_id = H5PTcreate(fileID, name, dtypeID, chunkSize, plistID);
     }
 
     /* Constructor
