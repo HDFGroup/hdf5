@@ -139,17 +139,19 @@ public:
      * the property list to specify compression, the name of the packet table,
      * the ID of the datatype, and the size of a memory chunk used in chunking.
      */
-    FL_PacketTable(hid_t fileID, hid_t plist_id, const char* name, hid_t dtypeID, hsize_t chunkSize);
+    FL_PacketTable(hid_t fileID, const char* name, hid_t dtypeID, hsize_t chunkSize = 0, hid_t plistID = H5P_DEFAULT);
 
-    /* Constructor
+    /* Constructors - deprecated
      * Creates a packet table in which to store fixed length packets.
      * Takes the ID of the file the packet table will be created in, the name of
      * the packet table, the ID of the datatype of the set, the size
      * of a memory chunk used in chunking, and the desired compression level
      * (0-9, or -1 for no compression).
-     * Note: this overload will be deprecated in favor of the constructor above.
+     * Note: these overloaded constructors will be deprecated in favor of the
+     * constructor above.
      */
-    FL_PacketTable(hid_t fileID, char* name, hid_t dtypeID, hsize_t chunkSize, int compression = -1);
+    FL_PacketTable(hid_t fileID, hid_t plist_id, const char* name, hid_t dtypeID, hsize_t chunkSize);
+    FL_PacketTable(hid_t fileID, char* name, hid_t dtypeID, hsize_t chunkSize, int compression = 0);
 
     /* "Open" Constructor
      * Opens an existing fixed-length packet table.

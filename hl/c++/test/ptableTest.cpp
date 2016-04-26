@@ -279,7 +279,7 @@ int TestCompress()
 	dscreatplist.setDeflate(6);
 
         /* Create packet table with compression. */
-        FL_PacketTable wrapper(fileID, dscreatplist.getId(), COMPRESS_PT, H5T_NATIVE_CHAR, 100);
+        FL_PacketTable wrapper(fileID, COMPRESS_PT, H5T_NATIVE_CHAR, 100, dscreatplist.getId());
 
 	/* Close the property list */
 	dscreatplist.close();
@@ -320,8 +320,9 @@ int TestGetPacket()
     int i;
     TESTING("GetPacket")
 
-    /* Create a dataset.  Explicitly specify no compression */
-    FL_PacketTable wrapper(fileID, H5P_DEFAULT, PT_TESTGETPT, H5T_NATIVE_INT, 1);
+    /* Create a dataset.  Does not need to specify property list because
+       there is no compression. */
+    FL_PacketTable wrapper(fileID, PT_TESTGETPT, H5T_NATIVE_INT, 1);
 
     if(! wrapper.IsValid())
       goto error;
@@ -358,7 +359,7 @@ int TestErrors()
     TESTING("error conditions")
 
     /* Create a dataset */
-    FL_PacketTable wrapper(fileID, H5P_DEFAULT, PT_TESTERROR, H5T_NATIVE_INT, 1);
+    FL_PacketTable wrapper(fileID, PT_TESTERROR, H5T_NATIVE_INT, 1);
 
     if(! wrapper.IsValid())
       goto error;
@@ -480,7 +481,7 @@ int SystemTest()
         int e;
     } compoundType;
 
-    dtypeID1 = H5Tcreate( H5T_COMPOUND, sizeof(compoundType));
+    dtypeID1 = H5Tcreate(H5T_COMPOUND, sizeof(compoundType));
 
     H5Tinsert(dtypeID1, "abbey", HOFFSET( compoundType, a ), H5T_NATIVE_SHORT);
     H5Tinsert(dtypeID1, "bert", HOFFSET( compoundType, b ), H5T_NATIVE_SHORT);
@@ -493,7 +494,7 @@ int SystemTest()
         compoundType g;
     } cType2;
 
-    dtypeID2 = H5Tcreate ( H5T_COMPOUND, sizeof(cType2));
+    dtypeID2 = H5Tcreate(H5T_COMPOUND, sizeof(cType2));
 
     H5Tinsert(dtypeID2, "f", HOFFSET( cType2, f ), H5T_NATIVE_CHAR);
     H5Tinsert(dtypeID2, "g", HOFFSET( cType2, g ), dtypeID1);
@@ -505,8 +506,8 @@ int SystemTest()
     ct2[0].g.c = 0;
     ct2[0].g.e = 3000;
 
-    /* Create the packet table datasets.  Make one of them compressed. */
-    FL_PacketTable wrapper1(fileID, H5P_DEFAULT, PT_SYSTEMTST1, dtypeID1, 1);
+    /* Create the packet table datasets.  One used a deprecated constructor */
+    FL_PacketTable wrapper1(fileID, PT_SYSTEMTST1, dtypeID1, 1);
     FL_PacketTable wrapper2(fileID, H5P_DEFAULT, PT_SYSTEMTST2, dtypeID2, 1);
 
     if(! wrapper1.IsValid())
