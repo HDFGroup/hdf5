@@ -1,4 +1,4 @@
-HDF5 version 1.8.17-snap15 currently under development
+HDF5 version 1.8.17-pre1 currently under development
 ================================================================================
 
 INTRODUCTION
