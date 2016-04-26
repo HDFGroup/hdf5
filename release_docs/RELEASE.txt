@@ -304,6 +304,13 @@ This release supports the following features:
 Issues Addressed in this Release Since 1.10.0
 =============================================
 
+     - h5diff would return from a compare attributes abnormally if one of the datatypes
+       was a vlen. This resulted in a memory leak as well as an incorrect report of
+       attribute comparison.
+
+       Fixed.
+       (ADB - 2016/04/26, HDFFV-9784)
+
      - The JUnit-interface test may fail on Solaris platforms. The result of
        a test for verifying the content of the error stack to stdout is
        in a different order on Solaris then other platforms.
