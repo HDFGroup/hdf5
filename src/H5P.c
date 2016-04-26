@@ -665,10 +665,10 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5Pset(hid_t plist_id, const char *name, void *value)
+H5Pset(hid_t plist_id, const char *name, const void *value)
 {
     H5P_genplist_t *plist;      /* Property list to modify */
-    herr_t ret_value=SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*s*x", plist_id, name, value);
@@ -678,11 +678,11 @@ H5Pset(hid_t plist_id, const char *name, void *value)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
-    if(value==NULL)
+    if(value == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalied property value");
 
     /* Go set the value */
-    if(H5P_set(plist,name,value) < 0)
+    if(H5P_set(plist, name, value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to set value in plist");
 
 done:

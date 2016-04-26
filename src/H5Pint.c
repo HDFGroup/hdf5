@@ -2997,7 +2997,7 @@ done:
     herr_t H5P_set(plist, name, value)
         H5P_genplist_t *plist;  IN: Property list to find property in
         const char *name;       IN: Name of property to set
-        void *value;            IN: Pointer to the value for the property
+        const void *value;      IN: Pointer to the value for the property
  RETURNS
     Returns non-negative on success, negative on failure.
  DESCRIPTION
