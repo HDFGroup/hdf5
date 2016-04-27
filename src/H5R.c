@@ -36,6 +36,9 @@
 #include "H5Gprivate.h"     /* Groups               */
 #include "H5Sprivate.h"     /* Dataspaces           */
 
+/* TODO for now */
+#define H5D_FRIEND
+#include "H5Dpkg.h"
 
 /****************/
 /* Local Macros */
@@ -1286,7 +1289,7 @@ H5R__get_object(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, href_t _ref, hbool_t 
             } /* end if */
 
             /* TODO Keep ID of the dataset */
-//                  dset->shared->dset_id = ret_value;
+            dset->shared->dset_id = ret_value;
 
         } /* end case */
         break;
