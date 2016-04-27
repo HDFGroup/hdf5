@@ -193,7 +193,7 @@ const H5X_class_t H5X_FASTBIT[1] = {{
     H5X_PLUGIN_FASTBIT,             /* (Or whatever number is assigned) */
     "FASTBIT index plugin",         /* Whatever name desired */
     H5X_TYPE_DATA,                  /* This plugin operates on dataset elements */
-    {
+    {{
     H5X_fastbit_create,             /* create */
     H5X_fastbit_remove,             /* remove */
     H5X_fastbit_open,               /* open */
@@ -204,7 +204,7 @@ const H5X_class_t H5X_FASTBIT[1] = {{
     H5X_fastbit_refresh,            /* refresh */
     NULL,                           /* copy */
     H5X_fastbit_get_size            /* get_size */
-    }
+    }}
 }};
 
 /*-------------------------------------------------------------------------
@@ -1317,7 +1317,7 @@ H5X_fastbit_post_update(void *idx_handle, const void *data, hid_t dataspace_id,
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "can't create index data from dataset");
 
 done:
-    H5MM_free(buf);
+//    H5MM_free(buf);
     H5X_FASTBIT_LOG_DEBUG("Leave");
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5X_fastbit_post_update() */
