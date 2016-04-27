@@ -154,7 +154,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     dset->shared->dset_id = ret_value;
 
     /* Create index if told to */
-    if(H5X_can_create(ret_value, dcpl_id) < 0)
+    if(H5X_can_create_data(ret_value, dcpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "Index can't be created on this dataset")
 
 done:

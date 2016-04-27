@@ -24,10 +24,11 @@
 #include "H5Fpublic.h"
 
 /* Public headers needed by this file */
-#include "H5FDpublic.h"		/* File drivers				*/
+#include "H5FDpublic.h"         /* File drivers             */
 
 /* Private headers needed by this file */
-#include "H5VMprivate.h"		/* Vectors and arrays */
+#include "H5VMprivate.h"        /* Vectors and arrays       */
+#include "H5Xprivate.h"         /* Index                    */
 
 
 /**************************/
@@ -555,6 +556,8 @@ struct H5UC_t;
 struct H5O_loc_t;
 struct H5HG_heap_t;
 struct H5P_genplist_t;
+struct H5O_idxinfo_t;
+struct H5Q_t;
 
 /* Forward declarations for anonymous H5F objects */
 
@@ -697,6 +700,16 @@ H5_DLL herr_t H5F_cwfs_remove_heap(H5F_file_t *shared, struct H5HG_heap_t *heap)
 
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE * stream, int indent, int fwidth);
+
+/* Index functions */
+H5_DLL herr_t H5F_set_index(H5F_t *f, H5X_class_t *idx_class,
+    void *idx_handle, struct H5O_idxinfo_t *idx_info);
+H5_DLL herr_t H5F_get_index(H5F_t *f, H5X_class_t **idx_class,
+    void **idx_handle, struct H5O_idxinfo_t **idx_info);
+H5_DLL herr_t H5F_remove_index(H5F_t *f, unsigned plugin_id);
+H5_DLL herr_t H5F_get_index_size(H5F_t *f, hsize_t *idx_size);
+H5_DLL herr_t H5F_query(H5F_t *file, const struct H5Q_t *query,
+    size_t *ref_count, href_t *refs[], hid_t xapl_id, hid_t xxpl_id);
 
 #endif /* _H5Fprivate_H */
 

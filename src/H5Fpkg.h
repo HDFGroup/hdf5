@@ -293,6 +293,10 @@ struct H5F_file_t {
 
     /* Metadata accumulator information */
     H5F_meta_accum_t accum;     /* Metadata accumulator info           	*/
+
+    void *idx_handle;               /* Handle for the index     */
+    H5X_class_t *idx_class;         /* Class for the index      */
+    struct H5O_idxinfo_t idx_info;  /* Index information        */
 };
 
 /*

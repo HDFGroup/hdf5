@@ -32,16 +32,18 @@
 #define H5X_CLASS_T_VERS (1)
 
 /* Plugin IDs */
-#define H5X_PLUGIN_ERROR    (-1) /* no plugin             */
-#define H5X_PLUGIN_NONE     0    /* reserved indefinitely */
-#define H5X_PLUGIN_DUMMY    1    /* dummy                 */
-#define H5X_PLUGIN_FASTBIT  2    /* fastbit               */
-#define H5X_PLUGIN_ALACRITY 3    /* alacrity              */
+#define H5X_PLUGIN_ERROR        (-1)    /* no plugin                    */
+#define H5X_PLUGIN_NONE         0       /* reserved indefinitely        */
+#define H5X_PLUGIN_DUMMY        1       /* dummy                        */
+#define H5X_PLUGIN_FASTBIT      2       /* fastbit                      */
+#define H5X_PLUGIN_ALACRITY     3       /* alacrity                     */
 
-#define H5X_PLUGIN_RESERVED 64   /* plugin ids below this value reserved */
+#define H5X_PLUGIN_META_DUMMY   4       /* metadata dummy               */
 
-#define H5X_PLUGIN_MAX      256  /* maximum plugin id     */
-#define H5X_MAX_NPLUGINS    16   /* Maximum number of plugins allowed in a pipeline */
+#define H5X_PLUGIN_RESERVED     64      /* plugin ids below this value reserved */
+
+#define H5X_PLUGIN_MAX          256     /* maximum plugin id            */
+#define H5X_MAX_NPLUGINS        16      /* Maximum number of plugins allowed in a pipeline */
 
 /*******************/
 /* Public Typedefs */

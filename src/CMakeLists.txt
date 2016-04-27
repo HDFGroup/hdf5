@@ -634,6 +634,7 @@ IDE_GENERATED_PROPERTIES ("H5WB" "${H5WB_HDRS}" "${H5WB_SRCS}" )
 set (H5X_SRCS
     ${HDF5_SRC_DIR}/H5X.c
     ${HDF5_SRC_DIR}/H5Xdummy.c
+    ${HDF5_SRC_DIR}/H5Xmeta_dummy.c
     ${HDF5_SRC_DIR}/H5Pxapl.c
     ${HDF5_SRC_DIR}/H5Pxcpl.c
     ${HDF5_SRC_DIR}/H5Pxxpl.c

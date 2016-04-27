@@ -574,6 +574,21 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id)
 		f->shared->fs_addr[u] = fsinfo.fs_addr[u-1];
         } /* end if */
 
+        /* Check for the extension having a 'index info' message */
+        if((status = H5O_msg_exists(&ext_loc, H5O_IDXINFO_ID, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_EXISTS, FAIL, "can't check if message exists");
+        if(status) {
+            H5O_idxinfo_t *idx_info; /* Pointer to dataset's info info */
+            H5X_class_t *idx_class = NULL;
+
+            idx_info = &f->shared->idx_info;
+            if(NULL == H5O_msg_read(&ext_loc, H5O_IDXINFO_ID, idx_info, dxpl_id))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve message");
+            if (NULL == (idx_class = H5X_registered(idx_info->plugin_id)))
+                HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
+            f->shared->idx_class = idx_class;
+        } /* end if */
+
         /* Close superblock extension */
         if(H5F_super_ext_close(f, &ext_loc, dxpl_id, FALSE) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close file's superblock extension")

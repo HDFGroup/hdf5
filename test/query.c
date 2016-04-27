@@ -25,6 +25,8 @@ const char *FILENAME[] = {
     "query1",
     "query2",
     "query3",
+    "query_meta_dummy",
+    "query_fastbit_meta_dummy",
     NULL
 };
 
@@ -32,6 +34,7 @@ const char *FILENAME[] = {
 #define NCOMPONENTS 1
 #define MAX_NAME 64
 #define MULTI_NFILES 3
+#define NLOOP 5
 
 /* Create query */
 static hid_t
@@ -104,17 +107,17 @@ test_query_create_type(H5R_type_t type)
 
     /* Combine queries */
     if (type == H5R_REGION) {
-        printf("Query ((17 < x < 22) AND (link='Pressure') AND (attr='SensorID') AND (attr=2)\n");
+        printf("Query-> (17 < x < 22) AND ((link='Pressure') AND ((attr='SensorID') AND (attr=2)))\n");
         if ((q8 = H5Qcombine(q6, H5Q_COMBINE_AND, q7)) < 0) FAIL_STACK_ERROR;
         if ((q9 = H5Qcombine(q3, H5Q_COMBINE_AND, q8)) < 0) FAIL_STACK_ERROR;
     }
     else if (type == H5R_OBJECT) {
-        printf("Query (link='Pressure') AND (attr='SensorID') AND (attr=2)\n");
+        printf("Query-> (link='Pressure') AND (attr='SensorID') AND (attr=2)\n");
         if ((q8 = H5Qcombine(q6, H5Q_COMBINE_AND, q7)) < 0) FAIL_STACK_ERROR;
         q9 = q8;
     }
     else if (type == H5R_ATTR) {
-        printf("Query (attr='SensorID') AND (attr=2)\n");
+        printf("Query-> (attr='SensorID') AND (attr=2)\n");
         q9 = q6;
     }
 
@@ -289,7 +292,113 @@ error:
 
 /* Create file for view */
 static herr_t
-test_query_create_simple_file(const char *filename, hid_t fapl, unsigned idx_plugin)
+test_query_create_simple_file2(const char *filename, hid_t fapl, unsigned n_objs,
+     unsigned meta_idx_plugin, unsigned data_idx_plugin)
+{
+    hid_t file = H5I_BADID;
+    hid_t aspace = H5I_BADID, dspace = H5I_BADID;
+    hid_t dcpl = H5P_DEFAULT;
+    hsize_t adim[1] = {1};
+    hsize_t dims[2] = {NTUPLES, NCOMPONENTS};
+    int rank = (NCOMPONENTS == 1) ? 1 : 2;
+    float *data = NULL;
+    unsigned int i, j, n;
+
+    (void)meta_idx_plugin; /* TODO not used for now */
+
+    /* Initialize the data. */
+    data = (float *) HDmalloc(sizeof(float) * NCOMPONENTS * NTUPLES);
+    for (i = 0; i < NTUPLES; i++) {
+        for (j = 0; j < NCOMPONENTS; j++) {
+            data[NCOMPONENTS * i + j] = (float) i;
+        }
+    }
+
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create dataspace for datasets */
+    if ((dspace = H5Screate_simple(rank, dims, NULL)) < 0) FAIL_STACK_ERROR;
+    if ((aspace = H5Screate_simple(1, adim, NULL)) < 0) FAIL_STACK_ERROR;
+
+    if (data_idx_plugin && ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)) FAIL_STACK_ERROR;
+    if (data_idx_plugin && (H5Pset_index_plugin(dcpl, data_idx_plugin)) < 0) FAIL_STACK_ERROR;
+
+    for (n = 1; n <= n_objs; n++) {
+        hid_t obj = H5I_BADID;
+        hid_t pres = H5I_BADID;
+        hid_t temp = H5I_BADID;
+        hid_t id_pres = H5I_BADID;
+        hid_t id_temp = H5I_BADID;
+        char obj_name[MAX_NAME];
+
+        printf("Writing object %d...\r", n);
+
+        /* Create simple group and dataset */
+        HDmemset(obj_name, '\0', MAX_NAME);
+        sprintf(obj_name, "Object%d", n);
+        if ((obj = H5Gcreate(file, obj_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR;
+
+        /* Create some datasets and use index if told to */
+        if ((pres = H5Dcreate(obj, "Pressure", H5T_NATIVE_FLOAT, dspace, H5P_DEFAULT,
+                dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+        if ((temp = H5Dcreate(obj, "Temperature", H5T_NATIVE_FLOAT, dspace, H5P_DEFAULT,
+                dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+
+        /* Add attributes to datasets */
+        if ((id_pres = H5Acreate(pres, "SensorID", H5T_NATIVE_INT, aspace, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR;
+        if ((id_temp = H5Acreate(temp, "SensorID", H5T_NATIVE_INT, aspace, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR;
+
+        if (H5Awrite(id_pres, H5T_NATIVE_INT, &n) < 0) FAIL_STACK_ERROR;
+        if (H5Awrite(id_temp, H5T_NATIVE_INT, &n) < 0) FAIL_STACK_ERROR;
+
+        if (H5Aclose(id_pres) < 0) FAIL_STACK_ERROR;
+        if (H5Aclose(id_temp) < 0) FAIL_STACK_ERROR;
+
+        /* Write data */
+        if (H5Dwrite(pres, H5T_NATIVE_FLOAT, H5S_ALL, dspace, H5P_DEFAULT, data) < 0)
+            FAIL_STACK_ERROR;
+        if (H5Dwrite(temp, H5T_NATIVE_FLOAT, H5S_ALL, dspace, H5P_DEFAULT, data) < 0)
+            FAIL_STACK_ERROR;
+
+        if (H5Dclose(pres) < 0) FAIL_STACK_ERROR;
+        if (H5Dclose(temp) < 0) FAIL_STACK_ERROR;
+
+        if (H5Gclose(obj) < 0) FAIL_STACK_ERROR;
+    }
+    printf("\n Done \n");
+
+    if (data_idx_plugin && (H5Pclose(dcpl) < 0)) FAIL_STACK_ERROR;
+
+    /* Close dataspaces */
+    if (H5Sclose(aspace) < 0) FAIL_STACK_ERROR;
+    if (H5Sclose(dspace) < 0) FAIL_STACK_ERROR;
+
+    /* Close file */
+    if (H5Fclose(file) < 0) FAIL_STACK_ERROR;
+
+    HDfree(data);
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Sclose(dspace);
+        H5Sclose(aspace);
+        H5Fclose(file);
+        HDfree(data);
+    } H5E_END_TRY;
+    return -1;
+}
+
+/* Create file for view */
+static herr_t
+test_query_create_simple_file(const char *filename, hid_t fapl,
+     unsigned meta_idx_plugin, unsigned data_idx_plugin)
 {
     hid_t file = H5I_BADID, obj1 = H5I_BADID, obj2 = H5I_BADID, obj3 = H5I_BADID;
     hid_t pres1 = H5I_BADID, pres2 = H5I_BADID, pres3 = H5I_BADID;
@@ -328,8 +437,8 @@ test_query_create_simple_file(const char *filename, hid_t fapl, unsigned idx_plu
     if ((dspace = H5Screate_simple(rank, dims, NULL)) < 0) FAIL_STACK_ERROR;
 
     /* Create some datasets and use index if told to */
-    if (idx_plugin && ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)) FAIL_STACK_ERROR;
-    if (idx_plugin && (H5Pset_index_plugin(dcpl, idx_plugin)) < 0) FAIL_STACK_ERROR;
+    if (data_idx_plugin && ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)) FAIL_STACK_ERROR;
+    if (data_idx_plugin && (H5Pset_index_plugin(dcpl, data_idx_plugin)) < 0) FAIL_STACK_ERROR;
     if ((pres1 = H5Dcreate(obj1, "Pressure", H5T_NATIVE_FLOAT, dspace, H5P_DEFAULT,
             dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
     if ((temp1 = H5Dcreate(obj1, "Temperature", H5T_NATIVE_FLOAT, dspace, H5P_DEFAULT,
@@ -342,7 +451,7 @@ test_query_create_simple_file(const char *filename, hid_t fapl, unsigned idx_plu
             dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
     if ((temp3 = H5Dcreate(obj3, "Temperature", H5T_NATIVE_FLOAT, dspace, H5P_DEFAULT,
             dcpl, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
-    if (idx_plugin && (H5Pclose(dcpl) < 0)) FAIL_STACK_ERROR;
+    if (data_idx_plugin && (H5Pclose(dcpl) < 0)) FAIL_STACK_ERROR;
 
     /* Add attributes to datasets */
     if ((aspace = H5Screate_simple(1, adim, NULL)) < 0) FAIL_STACK_ERROR;
@@ -460,7 +569,7 @@ test_query_read_selection(size_t file_count, const char *filenames[],
     if (0 == (n_refs = (size_t) H5Sget_select_npoints(ref_space))) FAIL_STACK_ERROR;
     printf("Found %zu reference(s)\n", n_refs);
     if (0 == (ref_size = H5Tget_size(ref_type))) FAIL_STACK_ERROR;
-    printf("Reference type size: %zu\n", ref_size);
+//    printf("Reference type size: %zu\n", ref_size);
 
     /* Allocate buffer to hold data */
     ref_buf_size = n_refs * ref_size;
@@ -559,22 +668,32 @@ error:
 }
 
 static herr_t
-test_query_apply_view(const char *filename, hid_t fapl, unsigned idx_plugin)
+test_query_apply_view(const char *filename, hid_t fapl, unsigned n_objs,
+    unsigned meta_idx_plugin, unsigned data_idx_plugin)
 {
     hid_t file = H5I_BADID;
     hid_t view = H5I_BADID;
     hid_t query = H5I_BADID;
     struct timeval t1, t2;
+    struct timeval t_total = {0, 0};
     unsigned result = 0;
+    int i;
 
     printf(" ...\n---\n");
 
     /* Create a simple file for testing queries */
     printf("Creating test file \"%s\"\n", filename);
-    if ((test_query_create_simple_file(filename, fapl, idx_plugin)) < 0) FAIL_STACK_ERROR;
+    if ((test_query_create_simple_file2(filename, fapl, n_objs, meta_idx_plugin,
+            data_idx_plugin)) < 0) FAIL_STACK_ERROR;
 
     /* Open the file in read-only */
-    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR;
+    if (meta_idx_plugin == H5X_PLUGIN_META_DUMMY) {
+        if ((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR;
+        /* Create metadata index */
+        if (H5Xcreate(file, meta_idx_plugin, H5P_DEFAULT) < 0) FAIL_STACK_ERROR;
+    } else {
+        if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR;
+    }
 
     printf("\nRegion query\n");
     printf(  "------------\n");
@@ -582,15 +701,21 @@ test_query_apply_view(const char *filename, hid_t fapl, unsigned idx_plugin)
     /* Test region query */
     if ((query = test_query_create_type(H5R_REGION)) < 0) FAIL_STACK_ERROR;
 
-    HDgettimeofday(&t1, NULL);
+    for (i = 0; i < NLOOP; i++) {
+        HDgettimeofday(&t1, NULL);
+        if ((view = H5Qapply(file, query, &result, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+        HDgettimeofday(&t2, NULL);
 
-    if ((view = H5Qapply(file, query, &result, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+        t_total.tv_sec += (t2.tv_sec - t1.tv_sec);
+        t_total.tv_usec += (t2.tv_usec - t1.tv_usec);
 
-    HDgettimeofday(&t2, NULL);
+        if (i < (NLOOP - 1))
+            if (H5Gclose(view) < 0) FAIL_STACK_ERROR;
+    }
 
     printf("View creation time on region: %lf ms\n",
-            ((float) (t2.tv_sec - t1.tv_sec)) * 1000.0f
-            + ((float) (t2.tv_usec - t1.tv_usec)) / 1000.0f);
+            ((float) t_total.tv_sec) * 1000.0f / NLOOP
+            + ((float) t_total.tv_usec) / (NLOOP * 1000.0f));
 
     if (!(result & H5Q_REF_REG)) FAIL_STACK_ERROR;
     if (test_query_read_selection(1, &filename, &file, view, H5R_REGION) < 0) FAIL_STACK_ERROR;
@@ -603,7 +728,24 @@ test_query_apply_view(const char *filename, hid_t fapl, unsigned idx_plugin)
 
     /* Test object query */
     if ((query = test_query_create_type(H5R_OBJECT)) < 0) FAIL_STACK_ERROR;
-    if ((view = H5Qapply(file, query, &result, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+
+    t_total.tv_sec = 0;
+    t_total.tv_usec = 0;
+    for (i = 0; i < NLOOP; i++) {
+        HDgettimeofday(&t1, NULL);
+        if ((view = H5Qapply(file, query, &result, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+        HDgettimeofday(&t2, NULL);
+
+        t_total.tv_sec += (t2.tv_sec - t1.tv_sec);
+        t_total.tv_usec += (t2.tv_usec - t1.tv_usec);
+
+        if (i < (NLOOP - 1))
+            if (H5Gclose(view) < 0) FAIL_STACK_ERROR;
+    }
+
+    printf("View creation time on object: %lf ms\n",
+            ((float) t_total.tv_sec) * 1000.0f / NLOOP
+            + ((float) t_total.tv_usec) / (NLOOP * 1000.0f));
 
     if (!(result & H5Q_REF_OBJ)) FAIL_STACK_ERROR;
     if (test_query_read_selection(1, &filename, &file, view, H5R_OBJECT) < 0) FAIL_STACK_ERROR;
@@ -616,7 +758,24 @@ test_query_apply_view(const char *filename, hid_t fapl, unsigned idx_plugin)
 
     /* Test attribute query */
     if ((query = test_query_create_type(H5R_ATTR)) < 0) FAIL_STACK_ERROR;
-    if ((view = H5Qapply(file, query, &result, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+
+    t_total.tv_sec = 0;
+    t_total.tv_usec = 0;
+    for (i = 0; i < NLOOP; i++) {
+        HDgettimeofday(&t1, NULL);
+        if ((view = H5Qapply(file, query, &result, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+        HDgettimeofday(&t2, NULL);
+
+        t_total.tv_sec += (t2.tv_sec - t1.tv_sec);
+        t_total.tv_usec += (t2.tv_usec - t1.tv_usec);
+
+        if (i < (NLOOP - 1))
+            if (H5Gclose(view) < 0) FAIL_STACK_ERROR;
+    }
+
+    printf("View creation time on attribute: %lf ms\n",
+            ((float) t_total.tv_sec) * 1000.0f / NLOOP
+            + ((float) t_total.tv_usec) / (NLOOP * 1000.0f));
 
     if (!(result & H5Q_REF_ATTR)) FAIL_STACK_ERROR;
     if (test_query_read_selection(1, &filename, &file, view, H5R_ATTR) < 0) FAIL_STACK_ERROR;
@@ -641,7 +800,8 @@ error:
 }
 
 static herr_t
-test_query_apply_view_multi(const char *filenames[], hid_t fapl, unsigned idx_plugin)
+test_query_apply_view_multi(const char *filenames[], hid_t fapl,
+    unsigned meta_idx_plugin, unsigned data_idx_plugin)
 {
     hid_t files[MULTI_NFILES] = {H5I_BADID, H5I_BADID, H5I_BADID};
     hid_t view = H5I_BADID;
@@ -655,7 +815,8 @@ test_query_apply_view_multi(const char *filenames[], hid_t fapl, unsigned idx_pl
     /* Create simple files for testing queries */
     for (i = 0; i < MULTI_NFILES; i++) {
         printf("Creating test file \"%s\"\n", filenames[i]);
-        if ((test_query_create_simple_file(filenames[i], fapl, idx_plugin)) < 0) FAIL_STACK_ERROR;
+        if ((test_query_create_simple_file(filenames[i], fapl, meta_idx_plugin,
+                data_idx_plugin)) < 0) FAIL_STACK_ERROR;
         /* Open the file in read-only */
         if ((files[i] = H5Fopen(filenames[i], H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR;
     }
@@ -727,15 +888,21 @@ error:
 }
 
 int
-main(void)
+main(int argc, char *argv[])
 {
     char filename[MAX_NAME]; /* file name */
 #ifdef H5_HAVE_FASTBIT
     char filename_fastbit[MAX_NAME];
+    char filename_fastbit_meta_dummy[MAX_NAME];
 #endif
     char **filename_multi = NULL;
+    char filename_meta_dummy[MAX_NAME];
     hid_t query = H5I_BADID, fapl = H5I_BADID;
     int i;
+    unsigned n_objs = 3;
+
+    if (argc > 1)
+        n_objs = (unsigned) atoi(argv[1]);
 
     /* Reset library */
     h5_reset();
@@ -753,6 +920,11 @@ main(void)
     h5_fixname(FILENAME[2], fapl, filename_multi[0], MAX_NAME);
     h5_fixname(FILENAME[3], fapl, filename_multi[1], MAX_NAME);
     h5_fixname(FILENAME[4], fapl, filename_multi[2], MAX_NAME);
+    h5_fixname(FILENAME[5], fapl, filename_meta_dummy, sizeof(filename_meta_dummy));
+#ifdef H5_HAVE_FASTBIT
+    h5_fixname(FILENAME[6], fapl, filename_fastbit_meta_dummy,
+        sizeof(filename_fastbit_meta_dummy));
+#endif
 
     /* Check that no object is left open */
     H5Pset_fclose_degree(fapl, H5F_CLOSE_SEMI);
@@ -783,23 +955,50 @@ main(void)
 
     TESTING("query apply view (no index)");
 
-    if (test_query_apply_view(filename, fapl, H5X_PLUGIN_NONE) < 0) FAIL_STACK_ERROR;
+    if (test_query_apply_view(filename, fapl, n_objs, H5X_PLUGIN_NONE,
+        H5X_PLUGIN_NONE) < 0) FAIL_STACK_ERROR;
 
     PASSED();
 
 #ifdef H5_HAVE_FASTBIT
     TESTING("query apply view (FastBit index)");
 
-    if (test_query_apply_view(filename_fastbit, fapl, H5X_PLUGIN_FASTBIT) < 0) FAIL_STACK_ERROR;
+    if (test_query_apply_view(filename_fastbit, fapl, n_objs, H5X_PLUGIN_NONE,
+        H5X_PLUGIN_FASTBIT) < 0) FAIL_STACK_ERROR;
 
     PASSED();
 #endif
 
     TESTING("query apply view multiple (no index)");
 
-    if (test_query_apply_view_multi(filename_multi, fapl, H5X_PLUGIN_NONE) < 0) FAIL_STACK_ERROR;
+    if (test_query_apply_view_multi(filename_multi, fapl, H5X_PLUGIN_NONE,
+        H5X_PLUGIN_NONE) < 0) FAIL_STACK_ERROR;
 
     PASSED();
+
+    TESTING("query apply view (dummy metadata/no data index)");
+
+    /* Use latest format */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR;
+
+    if (test_query_apply_view(filename_meta_dummy, fapl, n_objs,
+        H5X_PLUGIN_META_DUMMY, H5X_PLUGIN_NONE) < 0) FAIL_STACK_ERROR;
+
+    PASSED();
+
+#ifdef H5_HAVE_FASTBIT
+    TESTING("query apply view (dummy metadata/FastBit index)");
+
+    /* Use latest format */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR;
+
+    if (test_query_apply_view(filename_fastbit_meta_dummy, fapl, n_objs,
+        H5X_PLUGIN_META_DUMMY, H5X_PLUGIN_FASTBIT) < 0) FAIL_STACK_ERROR;
+
+    PASSED();
+#endif
 
     /* Verify symbol table messages are cached */
     if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR

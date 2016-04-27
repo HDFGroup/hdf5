@@ -77,6 +77,8 @@ static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
     const char *name, char ** /*out*/ actual_name);/* Declare a free list to manage the H5F_t struct */
 
+static herr_t H5F_open_index(H5F_t *file, hid_t xapl_id);
+static herr_t H5F_close_index(H5F_t *file);
 
 /*********************/
 /* Package Variables */
@@ -786,7 +788,12 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                 HDONE_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
             f->shared->sblock = NULL;
         } /* end if */
- 
+
+        /* Release index info */
+        if (FAIL == H5O_msg_reset(H5O_IDXINFO_ID, &f->shared->idx_info))
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+
         /* Remove shared file struct from list of open files */
         if(H5F_sfile_remove(f->shared) < 0)
             /* Push error, but keep going*/
@@ -1214,6 +1221,10 @@ H5F_close(H5F_t *f)
     /* Sanity check */
     HDassert(f);
     HDassert(f->file_id > 0);   /* This routine should only be called when a file ID's ref count drops to zero */
+
+    /* Close index object if index is closed */
+    if (f->shared->idx_handle && (FAIL == H5F_close_index(f)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "cannot close index")
 
     /* Perform checks for "semi" file close degree here, since closing the
      * file is not allowed if there are objects still open */
@@ -2090,3 +2101,264 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_eoa() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_index
+ *
+ * Purpose: Set index information.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_index(H5F_t *file, H5X_class_t *idx_class, void *idx_handle,
+    struct H5O_idxinfo_t *idx_info)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+    HDassert(idx_class);
+    HDassert(idx_handle);
+    HDassert(idx_info);
+
+    /* Write the index header message */
+    if(H5F_super_ext_write_msg(file, H5AC_dxpl_id, idx_info, H5O_IDXINFO_ID, TRUE) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension")
+
+    /* Set user data for index */
+    file->shared->idx_class = idx_class;
+    file->shared->idx_handle = idx_handle;
+    if (NULL == H5O_msg_copy(H5O_IDXINFO_ID, idx_info, &file->shared->idx_info))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to update copy message");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_set_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_index
+ *
+ * Purpose: Get index information.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_index(H5F_t *file, H5X_class_t **idx_class, void **idx_handle,
+    struct H5O_idxinfo_t **idx_info)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(file);
+
+    /* Get user data for index */
+    if (idx_class) *idx_class = file->shared->idx_class;
+    if (idx_handle) *idx_handle = file->shared->idx_handle;
+    if (idx_info) *idx_info = &file->shared->idx_info;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_open_index
+ *
+ * Purpose: Open index.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_open_index(H5F_t *file, hid_t xapl_id)
+{
+    hid_t file_id;
+    H5X_class_t *idx_class;
+    void *idx_handle = NULL;
+    size_t metadata_size;
+    void *metadata;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+    file_id = file->file_id;
+    idx_class = file->shared->idx_class;
+    metadata_size = file->shared->idx_info.metadata_size;
+    metadata = file->shared->idx_info.metadata;
+
+    if (NULL == H5I_object_verify(file_id, H5I_FILE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
+    if (NULL == metadata)
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "no index metadata was found");
+    if (NULL == idx_class->idx_class.metadata_class.open)
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin open callback not defined");
+    if (NULL == (idx_handle = idx_class->idx_class.metadata_class.open(file_id, xapl_id, metadata_size, metadata)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
+
+    file->shared->idx_handle = idx_handle;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_open_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_close_index
+ *
+ * Purpose: Close index.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F_close_index(H5F_t *file)
+{
+    H5X_class_t *idx_class;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+    idx_class = file->shared->idx_class;
+    if (NULL == (idx_class->idx_class.metadata_class.close))
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin close callback not defined");
+    if (FAIL == idx_class->idx_class.metadata_class.close(file->shared->idx_handle))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
+
+    file->shared->idx_handle = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_close_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_remove_index
+ *
+ * Purpose: Remove index.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_remove_index(H5F_t *file, unsigned H5_ATTR_UNUSED plugin_id)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+
+    /* First close index if opened */
+    if (file->shared->idx_handle && (FAIL == H5F_close_index(file)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
+
+    /* Remove idx_handle from file */
+    if(H5F_super_ext_remove_msg(file, H5AC_dxpl_id, H5O_IDXINFO_ID) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
+
+    if (FAIL == H5O_msg_reset(H5O_IDXINFO_ID, &file->shared->idx_info))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to free index index");
+
+    file->shared->idx_class = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_remove_index() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_index_size
+ *
+ * Purpose: Get index index.
+ *
+ * Return:  Success:    Non-negative
+ *      Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_index_size(H5F_t *file, hsize_t *idx_size)
+{
+    H5X_class_t *idx_class = NULL;
+    hsize_t actual_size = 0;
+    hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT; /* TODO for now */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+    HDassert(idx_size);
+
+    idx_class = file->shared->idx_class;
+    if (!idx_class)
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "index class not defined");
+    if (NULL == (idx_class->idx_class.metadata_class.get_size))
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin get size callback not defined");
+    if (!file->shared->idx_handle && (FAIL == H5F_open_index(file, xapl_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
+    if (FAIL == idx_class->idx_class.metadata_class.get_size(file->shared->idx_handle, &actual_size))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "cannot get index size");
+
+    *idx_size = actual_size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_index_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_query
+ *
+ * Purpose: Returns a set of object/attribute references that match
+ *          the query.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_query(H5F_t *file, const struct H5Q_t *query,
+    size_t *ref_count, href_t *refs[], hid_t xapl_id, hid_t xxpl_id)
+{
+    H5X_class_t *idx_class;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(file);
+    HDassert(query);
+    HDassert(ref_count);
+    HDassert(refs);
+
+    idx_class = file->shared->idx_class;
+
+    if (!idx_class)
+        HGOTO_DONE(SUCCEED);
+
+    /* Index associated to file so use it */
+    if (NULL == idx_class->idx_class.metadata_class.query)
+        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin query callback not defined");
+
+    /* Open index if not opened yet */
+    if (!file->shared->idx_handle && (FAIL == H5F_open_index(file, xapl_id)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
+
+    /* Call query of index plugin */
+    if (FAIL == idx_class->idx_class.metadata_class.query(
+        file->shared->idx_handle, query->query_id, xxpl_id, ref_count, refs))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPARE, FAIL, "cannot query index");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_query */

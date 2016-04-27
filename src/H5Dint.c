@@ -3161,16 +3161,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_set_index(H5D_t *dset, unsigned count, H5X_class_t **idx_class,
-        void **idx_handle, H5O_idxinfo_t *idx_info)
+H5D_set_index(H5D_t *dset, H5X_class_t *idx_class, void *idx_handle,
+    H5O_idxinfo_t *idx_info)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(dset);
-    /* Do not support more than one index for now */
-    HDassert(count <= 1);
     HDassert(idx_class);
     HDassert(idx_handle);
     HDassert(idx_info);
@@ -3180,8 +3178,8 @@ H5D_set_index(H5D_t *dset, unsigned count, H5X_class_t **idx_class,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update index header message");
 
     /* Set user data for index */
-    dset->shared->idx_class = *idx_class;
-    dset->shared->idx_handle = *idx_handle;
+    dset->shared->idx_class = idx_class;
+    dset->shared->idx_handle = idx_handle;
     if (NULL == H5O_msg_copy(H5O_IDXINFO_ID, idx_info, &dset->shared->idx_info))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to update copy message");
 
@@ -3200,22 +3198,19 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_get_index(H5D_t *dset, unsigned max_count, H5X_class_t **idx_class,
-        void **idx_handle, H5O_idxinfo_t **idx_info, unsigned *actual_count)
+H5D_get_index(H5D_t *dset, H5X_class_t **idx_class, void **idx_handle,
+    H5O_idxinfo_t **idx_info)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(dset);
-    HDassert(max_count);
 
     /* Get user data for index */
     if (idx_class) *idx_class = dset->shared->idx_class;
     if (idx_handle) *idx_handle = dset->shared->idx_handle;
     if (idx_info) *idx_info = &dset->shared->idx_info;
-    /* Just one index for now */
-    if (actual_count) *actual_count = (dset->shared->idx_class) ? 1 : 0;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_get_index() */

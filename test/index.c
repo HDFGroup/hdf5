@@ -28,6 +28,7 @@ const char *FILENAME[] = {
 #define DATASETNAME2 "dataset2"
 
 #define NTUPLES 256
+#define NLOOP 5
 
 static herr_t
 write_dataset(hid_t file, const char *dataset_name, hsize_t ntuples,
@@ -209,6 +210,8 @@ test_query(hid_t file_id, const char *dataset_name)
     float query_lb = 39.1f, query_ub = 42.6f;
     hid_t query = H5I_BADID, query1 = H5I_BADID, query2 = H5I_BADID;
     struct timeval t1, t2;
+    struct timeval t_total = {0, 0};
+    int i;
 
     TESTING("index query");
 
@@ -228,37 +231,39 @@ test_query(hid_t file_id, const char *dataset_name)
     dataset = H5Dopen(file_id, dataset_name, H5P_DEFAULT);
     if (dataset < 0) FAIL_STACK_ERROR;
 
-    gettimeofday(&t1, NULL);
+    for (i = 0; i < NLOOP; i++) {
+        HDgettimeofday(&t1, NULL);
+        if ((space = H5Dquery(dataset, H5S_ALL, query, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+        HDgettimeofday(&t2, NULL);
 
-    if ((space = H5Dquery(dataset, H5S_ALL, query, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
+        /* Bounds should be 40 and 42 */
+        H5Sget_select_bounds(space, start_coord, end_coord);
 
-    gettimeofday(&t2, NULL);
+        /*
+        {
+            hsize_t nelmts;
+            nelmts = (hsize_t) H5Sget_select_npoints(space);
+            printf("\n Created dataspace with %llu elements,"
+                    " bounds = [(%llu, %llu):(%llu, %llu)]\n",
+                    nelmts, start_coord[0], start_coord[1], end_coord[0], end_coord[1]);
+        }
+        */
 
-    /* Bounds should be 40 and 42 */
-    H5Sget_select_bounds(space, start_coord, end_coord);
+        if (start_coord[0] != 40) FAIL_STACK_ERROR;
+    //    if (start_coord[1] != 0) FAIL_STACK_ERROR;
+        if (end_coord[0] != 42) FAIL_STACK_ERROR;
+    //    if (end_coord[1] != 2) FAIL_STACK_ERROR;
 
-    /*
-    {
-        hsize_t nelmts;
-        nelmts = (hsize_t) H5Sget_select_npoints(space);
-        printf("\n Created dataspace with %llu elements,"
-                " bounds = [(%llu, %llu):(%llu, %llu)]\n",
-                nelmts, start_coord[0], start_coord[1], end_coord[0], end_coord[1]);
+        t_total.tv_sec += (t2.tv_sec - t1.tv_sec);
+        t_total.tv_usec += (t2.tv_usec - t1.tv_usec);
+
+        if (H5Sclose(space) < 0) FAIL_STACK_ERROR;
     }
-    */
 
-    if (start_coord[0] != 40) FAIL_STACK_ERROR;
-    if (start_coord[1] != 0) FAIL_STACK_ERROR;
-    if (end_coord[0] != 42) FAIL_STACK_ERROR;
-    if (end_coord[1] != 2) FAIL_STACK_ERROR;
+    printf("Index query time: %lf ms\n",
+            ((float) t_total.tv_sec) * 1000.0f / NLOOP
+            + ((float) t_total.tv_usec) / (NLOOP * 1000.0f));
 
-    /*
-    printf("\n Index query time: %lf ms\n",
-            ((float) (t2.tv_sec - t1.tv_sec)) * 1000.0f
-            + ((float) (t2.tv_usec - t1.tv_usec)) / 1000.0f);
-            */
-
-    if (H5Sclose(space) < 0) FAIL_STACK_ERROR;
     if (H5Dclose(dataset) < 0) FAIL_STACK_ERROR;
     if (H5Qclose(query) < 0) FAIL_STACK_ERROR;
     if (H5Qclose(query2) < 0) FAIL_STACK_ERROR;
@@ -309,25 +314,20 @@ error:
 int
 main(int argc, char **argv)
 {
-    unsigned plugin;
+    unsigned plugin = H5X_PLUGIN_DUMMY;
     char filename[1024]; /* file name */
     hsize_t ntuples = NTUPLES;
-    hsize_t ntuples_multiplier = 1;
-    hsize_t ncomponents = 3;
+    hsize_t ncomponents = 1;
     float *data;
     hid_t file = H5I_BADID, fapl = H5I_BADID;
     hsize_t i, j;
 //    int incr_update;
 
-    if (argc < 2) {
-        printf("Usage: %s <ntuples_multiplier> <plugin_id>\n", argv[0]);
-        exit(0);
+    if (argc > 2) {
+        ntuples = (hsize_t) atoi(argv[1]);
+        plugin = (unsigned) atoi(argv[2]);
+        //    incr_update = atoi(argv[3]);
     }
-
-    ntuples_multiplier = (hsize_t) atoi(argv[1]);
-    ntuples *= ntuples_multiplier;
-    plugin = (unsigned) atoi(argv[2]);
-//    incr_update = atoi(argv[3]);
 
     /* Initialize the data. */
     data = (float *) HDmalloc(sizeof(float) * ncomponents * ntuples);

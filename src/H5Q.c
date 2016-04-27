@@ -180,6 +180,25 @@ struct {                                                                    \
   } while (0)
 #endif
 
+#define H5R_FRIEND
+#include "H5Rpkg.h" /* (Tmp) To re-use H5R__get_obj_name */
+
+#define H5X_DUMMY_MAX_NAME_LEN (64 * 1024)
+static void
+printf_ref(href_t ref)
+{
+    char obj_name[H5X_DUMMY_MAX_NAME_LEN];
+
+    H5R__get_obj_name(NULL, H5P_DEFAULT, H5P_DEFAULT, ref, obj_name, H5X_DUMMY_MAX_NAME_LEN);
+    if (H5Rget_type(ref) == H5R_EXT_ATTR) {
+        char attr_name[H5X_DUMMY_MAX_NAME_LEN];
+        H5R__get_attr_name(NULL, ref, attr_name, H5X_DUMMY_MAX_NAME_LEN);
+        H5Q_LOG_DEBUG("Attribute reference: %s, %s", obj_name, attr_name);
+    } else {
+        H5Q_LOG_DEBUG("Object reference: %s", obj_name);
+    }
+}
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -240,6 +259,8 @@ static herr_t H5Q__apply_attr_name(const H5Q_t *query, hbool_t *result,
 static herr_t H5Q__apply_link_name(const H5Q_t *query, hbool_t *result,
     const char *name);
 
+static herr_t H5Q__apply_index(hid_t loc_id, const H5Q_t *query,
+    H5Q_view_t *view, unsigned *result);
 static herr_t H5Q__apply_iterate(hid_t oid, const char *name,
     const H5O_info_t *oinfo, void *udata);
 static herr_t H5Q__apply_object(hid_t oid, const char *name,
@@ -1880,15 +1901,16 @@ H5G_t *
 H5Q_apply(hid_t loc_id, const H5Q_t *query, unsigned *result,
     hid_t H5_ATTR_UNUSED vcpl_id)
 {
-    H5Q_apply_arg_t args;
     H5Q_view_t view = H5Q_VIEW_INITIALIZER(view); /* Resulting view */
     H5G_t *ret_grp = NULL; /* New group created */
-    H5G_t *ret_value = NULL; /* Return value */
     H5P_genclass_t *pclass = NULL;
     unsigned flags;
-    hid_t fapl_id = FAIL;
-    H5F_t *new_file = NULL;
+    hid_t file_id = FAIL, fapl_id = FAIL;
+    H5F_t *file = NULL, *new_file = NULL;
     H5G_loc_t file_loc;
+    H5X_class_t *idx_class = NULL;
+    H5Q_type_t query_type;
+    H5G_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1898,14 +1920,32 @@ H5Q_apply(hid_t loc_id, const H5Q_t *query, unsigned *result,
     /* First check and optimize query */
     /* TODO */
 
-    /* Create new view and init args */
-    args.query = query;
-    args.result = result;
-    args.view = &view;
+    if (FAIL == (file_id = H5I_get_file_id(loc_id, FALSE)))
+        HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, NULL, "can't get file ID from location");
+    if (NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a file");
+    if (FAIL == H5F_get_index(file, &idx_class, NULL, NULL))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get file index");
+    if (FAIL == H5Q_get_type(query, &query_type))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, NULL, "unable to get query type");
 
-    if (FAIL == H5O_visit(loc_id, ".", H5_INDEX_NAME, H5_ITER_NATIVE, H5Q__apply_iterate,
-            &args, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id))
-        HGOTO_ERROR(H5E_SYM, H5E_BADITER, NULL, "object visitation failed");
+    /* Use metadata index if available instead of visiting all objects */
+    /* TODO for now only use index if query is combined with metadata queries */
+    if (idx_class && (query_type != H5Q_TYPE_DATA_ELEM)) {
+        if (FAIL == H5Q__apply_index(loc_id, query, &view, result))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPARE, NULL, "unable to use metadata index");
+    } else {
+        H5Q_apply_arg_t args;
+
+        /* Create new view and init args */
+        args.query = query;
+        args.result = result;
+        args.view = &view;
+
+        if (FAIL == H5O_visit(loc_id, ".", H5_INDEX_NAME, H5_ITER_NATIVE, H5Q__apply_iterate,
+                &args, H5P_LINK_ACCESS_DEFAULT, H5AC_ind_dxpl_id))
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, NULL, "object visitation failed");
+    }
 
     if (!H5Q_QUEUE_EMPTY(&view.reg_refs))
         H5Q_LOG_DEBUG("Number of reg refs: %zu\n", view.reg_refs.n_elem);
@@ -1977,6 +2017,166 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Q_apply() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Q__apply_index
+ *
+ * Purpose: Private function for H5Q_apply.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5Q__apply_index(hid_t loc_id, const H5Q_t *query, H5Q_view_t *view,
+    unsigned *result)
+{
+    H5F_t *file = NULL;
+    hid_t xapl_id = H5P_INDEX_ACCESS_DEFAULT;
+    hid_t xxpl_id = H5P_INDEX_XFER_DEFAULT;
+    H5Q_type_t query_type;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (NULL == (file = H5I_object_verify(loc_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "loc_id is restricted to dataset");
+
+    if (FAIL == H5Q_get_type(query, &query_type))
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get query type");
+
+    /* TODO for now until we have wildcard support */
+    if (query_type == H5Q_TYPE_DATA_ELEM)
+        HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unsupported query type");
+
+    /* Query is only of the same metadata type (may be combined) */
+    if (query_type != H5Q_TYPE_MISC) {
+        size_t ref_count, i;
+        href_t *refs;
+
+        if (FAIL == H5F_query(file, query, &ref_count, &refs, xapl_id, xxpl_id))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPARE, FAIL, "cannot query index");
+        for (i = 0; i < ref_count; i++) {
+            H5R_type_t ref_type = H5R_get_type(refs[i]);
+
+    //            printf_ref(idx_refs[i]);
+            *result |= (ref_type == H5R_EXT_ATTR) ? H5Q_REF_ATTR : H5Q_REF_OBJ;
+            if (FAIL == H5Q__view_append(view, ref_type, refs[i]))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append object reference to view");
+        }
+        H5MM_free(refs);
+    } else {
+        /* Query is combined */
+        H5Q_combine_op_t op_type;
+
+        if (FAIL == H5Q_get_combine_op(query, &op_type))
+            HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get combine op");
+        if (op_type == H5Q_COMBINE_AND) {
+            H5Q_t *query1, *query2;
+            H5Q_type_t query1_type, query2_type;
+            const H5Q_t *data_query, *metadata_query;
+            size_t ref_count, i;
+            href_t *refs;
+
+            query1 = query->query.combine.l_query;
+            query2 = query->query.combine.r_query;
+
+            if (FAIL == H5Q_get_type(query1, &query1_type))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get query type");
+            if (FAIL == H5Q_get_type(query2, &query2_type))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get query type");
+
+            /* TODO clean that up */
+            if (query1_type == H5Q_TYPE_DATA_ELEM) {
+                data_query = query1;
+                metadata_query = query2;
+            } else if (query2_type == H5Q_TYPE_DATA_ELEM) {
+                data_query = query2;
+                metadata_query = query1;
+            } else {
+                data_query = NULL;
+                metadata_query = query;
+            }
+
+            /* Passing complex queries to plugins would be inefficient so we need to
+             * break queries down so that we only pass "AND combined" queries. This
+             * allows us to use a metadata index plugin on the metadata query part and
+             * a data index plugin on the data query part.
+             */
+            if (FAIL == H5F_query(file, metadata_query, &ref_count, &refs, xapl_id, xxpl_id))
+                HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPARE, FAIL, "cannot query index");
+            for (i = 0; i < ref_count; i++) {
+                if (data_query) {
+                    href_t ref;
+                    hid_t obj_id = FAIL;
+                    H5S_t *dataspace = NULL;
+                    H5D_t *dataset = NULL;
+                    char obj_name[64];
+
+//                    H5I_type_t obj_type;
+//                    if(H5R__get_obj_type(loc.oloc->file, H5AC_ind_dxpl_id, ref, obj_type) < 0)
+//                        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to determine object type")
+                    if((obj_id = H5R__get_object(file, H5P_DATASET_ACCESS_DEFAULT, H5AC_ind_dxpl_id, refs[i], FALSE)) < 0)
+                        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to get_object object")
+
+                    H5R__get_obj_name(file, H5P_DEFAULT, H5P_DEFAULT, refs[i], obj_name, 64);
+
+                    if (NULL == (dataset = (H5D_t *) H5I_object_verify(obj_id, H5I_DATASET)))
+                        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
+
+                    /* Query dataset */
+                    if (NULL == (dataspace = H5D_query(dataset, NULL, data_query, H5P_INDEX_ACCESS_DEFAULT, H5P_INDEX_XFER_DEFAULT)))
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTSELECT, FAIL, "can't query dataset");
+
+                    /* No element matched the query */
+                    if (H5S_SEL_NONE == H5S_get_select_type(dataspace))
+                        HGOTO_DONE(SUCCEED);
+
+                    *result = H5Q_REF_REG;
+
+                    /* Keep dataset region reference */
+                    if (NULL == (ref = H5R_create_ext_region(H5F_OPEN_NAME(file), obj_name, dataspace)))
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get buffer size for region reference");
+                    if (FAIL == H5Q__view_append(view, H5R_EXT_REGION, ref))
+                        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append region reference to view");
+
+                    if (dataspace) H5S_close(dataspace);
+                    if ((obj_id != FAIL) && (FAIL == H5I_dec_app_ref(obj_id)))
+                        HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")
+                    H5Rdestroy(refs[i]);
+                } else {
+                    H5R_type_t ref_type = H5R_get_type(refs[i]);
+                    //            printf_ref(idx_refs[i]);
+                    *result |= (ref_type == H5R_EXT_ATTR) ? H5Q_REF_ATTR : H5Q_REF_OBJ;
+                    if (FAIL == H5Q__view_append(view, ref_type, refs[i]))
+                        HGOTO_ERROR(H5E_QUERY, H5E_CANTAPPEND, FAIL, "can't append object reference to view");
+                }
+            }
+            H5MM_free(refs);
+
+
+            /* Get data part of query */
+        } else {
+            H5Q_view_t view1 = H5Q_VIEW_INITIALIZER(view1), view2 = H5Q_VIEW_INITIALIZER(view2);
+            unsigned result1 = 0, result2 = 0;
+
+            if (FAIL == H5Q__apply_index(loc_id, query->query.combine.l_query, &view1, &result1))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+            if (FAIL == H5Q__apply_index(loc_id, query->query.combine.r_query, &view2, &result2))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
+
+            if (FAIL == H5Q__view_combine(op_type, &view1, &view2, result1, result2,
+                    view, result))
+                HGOTO_ERROR(H5E_QUERY, H5E_CANTMERGE, FAIL, "unable to merge results");
+
+            if (result1) H5Q__view_free(&view1);
+            if (result2) H5Q__view_free(&view2);
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5Q__apply_index() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Q__apply_iterate

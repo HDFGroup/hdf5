@@ -178,11 +178,10 @@ H5_DLL hid_t H5D_get_create_plist(H5D_t *dset);
 H5_DLL hid_t H5D_get_access_plist(H5D_t *dset);
 H5_DLL hid_t H5D_get_space(H5D_t *dset);
 H5_DLL hid_t H5D_get_type(H5D_t *dset);
-H5_DLL herr_t H5D_set_index(H5D_t *dset, unsigned count, H5X_class_t **idx_class,
-        void **idx_handle, H5O_idxinfo_t *idx_info);
-H5_DLL herr_t H5D_get_index(H5D_t *dset, unsigned max_count,
-        H5X_class_t **idx_class, void **idx_handle, H5O_idxinfo_t **idx_info,
-        unsigned *actual_count);
+H5_DLL herr_t H5D_set_index(H5D_t *dset, H5X_class_t *idx_class,
+    void *idx_handle, H5O_idxinfo_t *idx_info);
+H5_DLL herr_t H5D_get_index(H5D_t *dset, H5X_class_t **idx_class,
+    void **idx_handle, H5O_idxinfo_t **idx_info);
 H5_DLL herr_t H5D_remove_index(H5D_t *dset, unsigned plugin_id);
 H5_DLL herr_t H5D_get_index_size(H5D_t *dset, hsize_t *idx_size);
 H5_DLL H5S_t *H5D_query(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query,
