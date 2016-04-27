@@ -62,6 +62,7 @@ H5_DLL herr_t H5Rdestroy(href_t ref);
 
 H5_DLL H5R_type_t H5Rget_type(href_t ref);
 H5_DLL htri_t     H5Requal(href_t ref1, href_t ref2);
+H5_DLL href_t     H5Rcopy(href_t ref);
 
 H5_DLL hid_t      H5Rget_object(hid_t loc_id, hid_t oapl_id, href_t ref);
 H5_DLL hid_t      H5Rget_region2(hid_t loc_id, href_t ref);

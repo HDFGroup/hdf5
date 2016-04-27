@@ -52,6 +52,7 @@
 /********************/
 
 static htri_t H5R__equal(href_t _ref1, href_t _ref2);
+static href_t H5R__copy(href_t _ref);
 static ssize_t H5R__get_file_name(href_t ref, char *name, size_t size);
 
 
@@ -1035,6 +1036,87 @@ H5Requal(href_t ref1, href_t ref2)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Requal() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5R__copy
+ *
+ * Purpose: Copy a reference
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+static href_t
+H5R__copy(href_t _ref)
+{
+    struct href *ref = (struct href *) _ref; /* Reference */
+    struct href *new_ref = NULL;
+    href_t ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(ref);
+
+    /* Allocate the space to store the serialized information */
+    if(NULL == (new_ref = (struct href *)H5MM_malloc(sizeof(struct href))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Cannot allocate memory for reference")
+    new_ref->ref_type = ref->ref_type;
+
+    switch (ref->ref_type) {
+        case H5R_OBJECT:
+            new_ref->ref.addr = ref->ref.addr;
+            break;
+        case H5R_REGION:
+        case H5R_ATTR:
+        case H5R_EXT_OBJECT:
+        case H5R_EXT_REGION:
+        case H5R_EXT_ATTR:
+            if (0 == (new_ref->ref.serial.buf_size = ref->ref.serial.buf_size))
+                HGOTO_ERROR(H5E_REFERENCE, H5E_BADVALUE, NULL, "Invalid reference buffer size")
+            if (NULL == (new_ref->ref.serial.buf = H5MM_malloc(new_ref->ref.serial.buf_size)))
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTALLOC, NULL, "Cannot allocate reference buffer")
+            HDmemcpy(new_ref->ref.serial.buf, ref->ref.serial.buf, ref->ref.serial.buf_size);
+            break;
+        default:
+            HDassert("unknown reference type" && 0);
+            HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, NULL, "internal error (unknown reference type)")
+    }
+
+    ret_value = new_ref;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5R__copy() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Rcopy
+ *
+ * Purpose: Copy a reference
+ *
+ * Return:  Success:    Reference created
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
+H5Rcopy(href_t ref)
+{
+    href_t ret_value;
+
+    FUNC_ENTER_API(NULL)
+
+    /* Check args */
+    if(!ref)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid reference pointer")
+
+    /* Create reference */
+    if (NULL == (ret_value = H5R__copy(ref)))
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, NULL, "cannot copy reference")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Rcopy() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5R__get_object
