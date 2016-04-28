@@ -103,9 +103,82 @@ New Features
     -----
     - None
 
+
     High-Level APIs
     ---------------
-    - None
+
+    C Packet Table API
+    ------------------
+    - Replacement of a Public Function with H5PTcreate
+
+      The existing function H5PTcreate_fl limits applications so they
+      can use the deflate compression only. The public function
+      H5PTcreate has been added to replace H5PTcreate_fl. H5PTcreate
+      takes a property list identifier to provide flexibility on
+      creation properties.
+
+      (BMR - 2016/04/25, HDFFV-8623)
+
+    - New Public Functions: H5PTget_dataset and H5PTget_type
+
+      Two accessor functions have been added. H5PTget_dataset returns
+      the identifier of the dataset associated with the packet table,
+      and H5PTget_type returns the identifier of the datatype used by
+      the packet table.
+
+      (BMR, 2016/04/25, HDFFV-8623)
+
+    - Regarding #ifdef VLPT_REMOVED
+
+      The #ifdef VLPT_REMOVED blocks have been removed from the packet
+      table (PT) library source except for the following functions:
+        + H5PTis_varlen() has been made available again
+        + H5PTfree_vlen_readbuff() is now H5PTfree_vlen_buff()
+
+      (BMR - 2016/04/25, HDFFV-442)
+
+    C++ Packet Table API
+    --------------------
+    - New Constructor in FL_PacketTable
+
+      An overloaded constructor has been added to FL_PacketTable and
+      takes a property list identifier to provide flexibility on
+      creation properties, such as compression.
+
+      FL_PacketTable(hid_t fileID, const char* name, hid_t dtypeID,
+                       hsize_t chunkSize = 0, hid_t plistID = H5P_DEFAULT)
+
+      (BMR - 2016/04/25, HDFFV-8623)
+
+    - New Member Functions in PacketTable
+
+      Two accessor wrappers are added to class PacketTable.
+
+      PacketTable::GetDataset() returns the identifier of the dataset
+      				associated with the packet table
+      PacketTable::GetDatatype() returns the identifier of the datatype
+				that the packet table uses.
+
+      (BMR - 2016/04/25, HDFFV-8623)
+
+    - Member Functions with "char*" as an Argument
+
+      Overloaded functions were added to provide the "const char*"
+      argument; the existing version will be deprecated in future
+      releases.
+
+      (BMR - 2016/04/25, HDFFV-8623)
+
+    - Regarding #ifdef VLPT_REMOVED
+
+      The #ifdef VLPT_REMOVED blocks have been removed from the packet
+      table library source code except for the following functions:
+        + VL_PacketTable::IsVariableLength() was moved to PacketTable
+        + VL_PacketTable::FreeReadBuff() is now PacketTable::FreeBuff()
+
+      (BMR - 2016/04/25, HDFFV-442)
+
+
 
     Fortran API
     -----------
@@ -114,13 +187,24 @@ New Features
 
     C++ API
     -------
-    - New function: ArrayType::setArrayInfo()
+    - New Member Function in DSetCreatPropList
 
-      ArrayType::setArrayInfo() was added to retrieve rank and dimensions of
-      an array and store them in memory for easy access.
+      DSetCreatPropList::setNbit() was added to setup N-bit compression for
+      a dataset.
 
-      (BMR, 2016/01/13, part of fixing a user's problem)
+      (BMR, 2016/04/25)
 
+    - New Overloaded "const" Member Functions in ArrayType
+
+      The two following functions are added:
+	ArrayType::getArrayNDims() const
+	ArrayType::getArrayDims() const
+      to provide const version and the non-const version are marked deprecated.
+      In-memory array information, ArrayType::rank and ArrayType::dimensions,
+      are removed.  This is implementation detail and should not affect
+      applications.
+
+      (BMR, 2016/04/25, HDFFV-9725)
 
 
 Support for New Platforms, Languages, and Compilers
@@ -219,23 +303,25 @@ Bug Fixes since HDF5-1.8.16
       (ADB, 2016/03/07, HDFFV-9241)
 
     Fortran API
-    ------------
+    -----------
     - None
 
     C++ API
-    ------
-    - The member function AbstractDs::getArrayType() caused failure in user's
-      program.
+    -------
+    - Removal of Obsolete Methods
 
-      This problem was caused by missing initialization of the ArrayType's
-      members.  The problem is now fixed.
+      The overloaded methods which had parameters that should be const but were       not are removed.
 
       (BMR, 2016/01/13, User's report)
 
 
     High-Level APIs:
-    ------
-    - None
+    ---------------
+    - Fixed Memory Leak in Packet Table API
+
+      Applied user's patch to fix memory leak in the creation of a packet table.
+
+      (BMR, 2016/04/25, HDFFV-9700)
 
 
     Fortran High-Level APIs:
