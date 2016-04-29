@@ -11,7 +11,7 @@ configure_file (${HDF_RESOURCES_DIR}/H5cxx_config.h.in
 #-----------------------------------------------------------------------------
 # Define cpp Library
 #-----------------------------------------------------------------------------
-set (CPP_SOURCES
+set (CPP_SRCS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5AbstractDs.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5ArrayType.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5AtomType.cpp
@@ -78,7 +78,7 @@ set (CPP_HDRS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5VarLenType.h
 )
 
-add_library (${HDF5_CPP_LIB_TARGET} STATIC ${CPP_SOURCES} ${CPP_HDRS})
+add_library (${HDF5_CPP_LIB_TARGET} STATIC ${CPP_SRCS} ${CPP_HDRS})
 TARGET_C_PROPERTIES (${HDF5_CPP_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_CPP_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_CPP_LIB_TARGET}")
@@ -90,7 +90,7 @@ set_target_properties (${HDF5_CPP_LIB_TARGET} PROPERTIES
 set (install_targets ${HDF5_CPP_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
-  add_library (${HDF5_CPP_LIBSH_TARGET} SHARED ${CPP_SOURCES} ${CPP_HDRS})
+  add_library (${HDF5_CPP_LIBSH_TARGET} SHARED ${CPP_SRCS} ${CPP_HDRS})
   TARGET_C_PROPERTIES (${HDF5_CPP_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_CPP_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_CPP_LIBSH_TARGET}")

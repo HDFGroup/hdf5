@@ -20,19 +20,19 @@
 #include "hdf5.h"
 
 #ifdef H5_STDC_HEADERS
-#   include <errno.h>
-#   include <fcntl.h>
-#   include <stdio.h>
-#   include <stdlib.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
 #endif
 
 #ifdef H5_HAVE_UNISTD_H
-#   include <sys/types.h>
-#   include <unistd.h>
+#include <sys/types.h>
+#include <unistd.h>
 #endif
 
 #ifdef H5_HAVE_SYS_STAT_H
-#   include <sys/stat.h>
+#include <sys/stat.h>
 #endif
 
 #ifdef H5_HAVE_PARALLEL

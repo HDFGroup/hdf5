@@ -167,7 +167,7 @@ This release supports the following features:
 
     - Version 3 Metadata Cache
 
-      The version 3 metadata cache moves management of metadata I/O from
+      The version 3 metadata cache moves management of metadata I/O from 
       the clients to the metadata cache proper.  This change is essential for
       SWMR and other features that have yet to be released.
 
@@ -228,7 +228,7 @@ This release supports the following features:
     - New Public Functions: H5PTget_dataset and H5PTget_type
 
       Two accessor functions have been added. H5PTget_dataset returns
-      the identifier of the dataset associated with the packet table,
+      the identifier of the dataset associated with the packet table, 
       and H5PTget_type returns the identifier of the datatype used by
       the packet table.
 
@@ -351,9 +351,6 @@ Issues Addressed in this Release Since 1.10.0
 
        Fixed.
        (ADB - 2016/04/21, HDFFV-9770)
-
-     - CMake files added missing files to test clear lists, source tags changed
-       from *_SRCS to *_SOURCES and other minor changes that clean up the CMake code.
 
 
 

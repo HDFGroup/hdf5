@@ -28,7 +28,7 @@
 
 #define NLEVELS         5   /* # of datasets in the SWMR test file */
 
-#define NMAPPING        9
+#define NMAPPING        9   
 
 #define FILENAME        "swmr_data.h5"  /* SWMR test file name */
 #define DTYPE_SIZE      150             /* Data size in opaque type */

@@ -30,16 +30,16 @@ if [[ $rc != 0 ]] ; then
     exit 0
 fi
 
-H5WATCH=h5watch                   # The tool name
-H5WATCH_BIN=`pwd`/$H5WATCH        # The path of H5WATCH
-EXTEND_DSET=extend_dset     # Routine to extend the dataset when watching
-EXTEND_BIN=`pwd`/$EXTEND_DSET     # The path of EXTEND_DSET
+H5WATCH=h5watch               	# The tool name
+H5WATCH_BIN=`pwd`/$H5WATCH    	# The path of H5WATCH
+EXTEND_DSET=extend_dset 	# Routine to extend the dataset when watching
+EXTEND_BIN=`pwd`/$EXTEND_DSET 	# The path of EXTEND_DSET
 #
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 #
-GEN_TEST=h5watchgentest              # Generate HDF5 file with various datasets
-GEN_TEST_BIN=`pwd`/$GEN_TEST     # Path of the binary GEN_TEST
+GEN_TEST=h5watchgentest	      	# Generate HDF5 file with various datasets
+GEN_TEST_BIN=`pwd`/$GEN_TEST 	# Path of the binary GEN_TEST
 WATCHFILE=`pwd`/WATCH.h5        # The HDF5 file generated to test h5watch
 TESTFILE=TEST.h5                # The temporary file (a copy of WATCH.h5) used by tests
 #
@@ -50,7 +50,7 @@ MESSAGE_TIMEOUT=300             # Message timeout length in secs
 #
 CMP='cmp -s'
 DIFF='diff -c'
-NLINES=20            # Max. lines of output to display if test fails
+NLINES=20			# Max. lines of output to display if test fails
 #
 # Mac OS: just to make sure echo "backslash backslash" behaves properly
 if test `uname -s` = 'Darwin'; then
@@ -80,9 +80,9 @@ TESTING() {
 # Overall algorithm:
 #
 # Run a test and print PASSED or FAILED
-# If a test did not return with the expected return code,
+# If a test did not return with the expected return code, 
 # increment the `nerrors' global variable and (if $verbose is set) display up to $NLINES
-# lines of the actual output from the test.
+# lines of the actual output from the test.  
 # If the test did return the expected code,
 # compare the actual output with the expected output;
 # If the outputs are the same, print PASSED,
@@ -114,27 +114,27 @@ TOOLTEST() {
     exitcode=$?
     cat $actual_err >> $actual
     if [ $exitcode -ne $retvalexpect ]; then
-    $ECHO "*FAILED*"
-    nerrors="`expr $nerrors + 1`"
-    if [ yes = "$verbose" ]; then
-        $ECHO "test returned with exit code $exitcode"
-        $ECHO "test output: (up to $NLINES lines)"
-        head -$NLINES $actual
-        $ECHO "***end of test output***"
-        $ECHO ""
-    fi
+	$ECHO "*FAILED*"
+	nerrors="`expr $nerrors + 1`"
+	if [ yes = "$verbose" ]; then
+	    $ECHO "test returned with exit code $exitcode"
+	    $ECHO "test output: (up to $NLINES lines)"
+	    head -$NLINES $actual
+	    $ECHO "***end of test output***"
+	    $ECHO ""
+	fi
     elif $CMP $expect $actual; then
         $ECHO " PASSED"
     else
         $ECHO "*FAILED*"
-    $ECHO "    Expected result differs from actual result"
-    nerrors="`expr $nerrors + 1`"
-    test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+	$ECHO "    Expected result differs from actual result"
+	nerrors="`expr $nerrors + 1`"
+	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
     fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-    rm -f $actual $actual_err
+	rm -f $actual $actual_err
     fi
 }
 #
@@ -167,17 +167,17 @@ TEST_WATCH() {
     # Wait for message from "extend_dset" process to start h5watch--
     # To wait for the writer message file or till the maximum # of seconds is reached
     # This performs similar function as the routine h5_wait_message() in test/h5test.c
-    mexist=0                                        # Indicate whether the message file is found
-    t0=`date +%s`                                   # Get current time in seconds
-    difft=0                                         # Initialize the time difference
-    while [ $difft -lt $MESSAGE_TIMEOUT ] ;         # Loop till message times out
+    mexist=0                                    	# Indicate whether the message file is found
+    t0=`date +%s`                               	# Get current time in seconds
+    difft=0                                     	# Initialize the time difference
+    while [ $difft -lt $MESSAGE_TIMEOUT ] ;     	# Loop till message times out
     do
-        t1=`date +%s`                               # Get current time in seconds
-        difft=`expr $t1 - $t0`                      # Calculate the time difference
-        if [ -e $WRITER_MESSAGE ]; then          # If message file is found:
-            mexist=1                                #       indicate the message file is found
-            rm $WRITER_MESSAGE                #       remove the message file
-            break                                   #       get out of the while loop
+        t1=`date +%s`                           	# Get current time in seconds
+        difft=`expr $t1 - $t0`                  	# Calculate the time difference
+        if [ -e $WRITER_MESSAGE ]; then  		# If message file is found:
+            mexist=1                            	#       indicate the message file is found
+            rm $WRITER_MESSAGE				#       remove the message file
+            break                               	#       get out of the while loop
         fi
     done;
     #
@@ -202,8 +202,8 @@ TEST_WATCH() {
         wait $extend_pid                                # Wait for "extend" process to complete
         extend_exit=$?                                  # Collect "extend" process' exit code
         sleep 1                                         # Sleep to make sure output is flushed
-        kill $watch_pid                                  # Kill h5watch
-    wait $watch_pid                    # Wait for "h5watch" process to complete
+        kill $watch_pid                              	# Kill h5watch
+	wait $watch_pid					# Wait for "h5watch" process to complete
         #
         if [ $extend_exit -ne 0 ]; then                 # Error returned from "extend" process
             $ECHO "*FAILED*"
@@ -236,41 +236,41 @@ TEST_WATCH() {
 
 ##############################################################################
 ##############################################################################
-###              T H E   T E S T S                                ###
+###			  T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 #
 #
 #################################################################################################
-#                                                #
-# WATCH.h5: file with various types of datasets for testing--                    #
-#   The following datasets are chunked, H5D_ALLOC_TIME_INCR, max. dimensional setting:        #
-#       DSET_ONE: one-dimensional dataset                            #
-#       DSET_TWO: two-dimensional dataset                            #
-#       DSET_CMPD: one-dimensional dataset with compound type                     #
-#       DSET_CMPD_ESC: one-dimensional dataset with compound type & escape/separator characters    #
-#       DSET_CMPD_TWO: two-dimensional dataset with compound type                 #
-#                                                #
-#   The following datasets are one-dimensional, chunked, max. dimension setting:        #
-#       DSET_ALLOC_EARLY: dataset with H5D_ALLOC_TIME_EARLY                    #
-#       DSET_ALLOC_LATE: dataset H5D_ALLOC_TIME_LATE                        #
-#                                                #
-#   The following datasets are one-dimensional:                            #
-#    DSET_NONE: fixed dimension setting, contiguous, H5D_ALLOC_TIME_LATE            #
-#    DSET_NOMAX: fixed dimension setting, chunked, H5D_ALLOC_TIME_INCR            #
-#                                                 #
+#												#
+# WATCH.h5: file with various types of datasets for testing--					#
+#   The following datasets are chunked, H5D_ALLOC_TIME_INCR, max. dimensional setting:		#
+#   	DSET_ONE: one-dimensional dataset							#
+#   	DSET_TWO: two-dimensional dataset							#
+#   	DSET_CMPD: one-dimensional dataset with compound type 					#
+#   	DSET_CMPD_ESC: one-dimensional dataset with compound type & escape/separator characters	#
+#   	DSET_CMPD_TWO: two-dimensional dataset with compound type 				#
+#												#
+#   The following datasets are one-dimensional, chunked, max. dimension setting:		#
+#   	DSET_ALLOC_EARLY: dataset with H5D_ALLOC_TIME_EARLY					#
+#   	DSET_ALLOC_LATE: dataset H5D_ALLOC_TIME_LATE						#
+#												#
+#   The following datasets are one-dimensional:							#
+#	DSET_NONE: fixed dimension setting, contiguous, H5D_ALLOC_TIME_LATE			#
+#	DSET_NOMAX: fixed dimension setting, chunked, H5D_ALLOC_TIME_INCR			#
+#											 	#
 #################################################################################################
 #
 #
 #################################################################################################
-#                                                #
-# Tests on expected failures:                                    #
-#    Invalid file name                                    #
-#    Unable to find dataset, invalid dataset                            #
-#      DSET_NONE and DSET_NOMAX                                #
-#    Invalid input to options --width and --polling                        #
-#    Invalid field names for -f option                            #
-#                                                #
+#												#
+# Tests on expected failures:									#
+#	Invalid file name									#
+#	Unable to find dataset, invalid dataset							#
+#	  DSET_NONE and DSET_NOMAX								#
+#	Invalid input to options --width and --polling						#
+#	Invalid field names for -f option							#
+#												#
 #################################################################################################
 #
 # Generate file with various types of datasets

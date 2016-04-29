@@ -34,8 +34,8 @@ EXIT_FAILURE=1
 FORMCONV=h5format_convert       # The tool name
 FORMCONV_BIN=`pwd`/$FORMCONV    # The path of the tool binary
 
-CHK_IDX=h5fc_chk_idx        # The program name
-CHK_IDX_BIN=`pwd`/$CHK_IDX        # The program to verify the chunk indexing type is v1 B-tree
+CHK_IDX=h5fc_chk_idx		# The program name
+CHK_IDX_BIN=`pwd`/$CHK_IDX    	# The program to verify the chunk indexing type is v1 B-tree
 
 RM='rm -rf'
 CMP='cmp -s'
@@ -154,10 +154,10 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-                $CP -f $tstfile $TESTDIR
+    	        $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
-
+                
                     # Comment out this to CREATE expected file
                     exit $EXIT_FAILURE
                 fi
@@ -171,13 +171,13 @@ CLEAN_TESTFILES_AND_TESTDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=`$DIRNAME $SRC_H5FORMCONV_TESTFILES/h5fc_help.ddl`
+    SDIR=$SRC_H5FORMCONV_TESTFILES
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
         $RM $TESTDIR
     else
-    $RM $TESTDIR/$TMPFILE
+	$RM $TESTDIR/$TMPFILE
     fi
 }
 
@@ -198,13 +198,13 @@ TESTING() {
 # non-zero value.
 #
 # $1: expected output
-# $2: the test file name
-#    --fname might be empty or fname does not exist
-#    --fname is copied to a temporary file for testing
+# $2: the test file name 
+#	--fname might be empty or fname does not exist
+#	--fname is copied to a temporary file for testing
 # $3 to at most $6--options to the tool such as:
-#     -d dname or --dname=dname
-#     -v or --verbose
-#     -n or --noop
+# 	-d dname or --dname=dname 
+# 	-v or --verbose
+# 	-n or --noop
 TOOLTEST_OUT() {
     # Prepare expected and actual output
     expect="$TESTDIR/$1"
@@ -224,8 +224,8 @@ TOOLTEST_OUT() {
     # Run test.
     TESTING $FORMCONV $3 $4 $5 $6 $2
     (
-    cd $TESTDIR
-    $RUNSERIAL $FORMCONV_BIN $3 $4 $5 $6 $TFILE
+	cd $TESTDIR
+	$RUNSERIAL $FORMCONV_BIN $3 $4 $5 $6 $TFILE
     ) >$actual 2>$actual_err
     cp $actual $actual_sav
     cp $actual_err $actual_err_sav
@@ -236,19 +236,19 @@ TOOLTEST_OUT() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-    $RM $actual $actual_err
-    $RM $actual $actual_err $actual_sav $actual_err_sav
+	$RM $actual $actual_err
+	$RM $actual $actual_err $actual_sav $actual_err_sav
     fi
 }
 
-# To check that the tool exits success, no output
+# To check that the tool exits success, no output 
 # Assume all short options
-# $1 is the test file name
-#    --fname exists
-#    --fname is copied to a temporary file for testing
+# $1 is the test file name 
+#	--fname exists
+#	--fname is copied to a temporary file for testing
 # $2 to at most $4--options to the tool such as:
-#     -d dname
-#     -n
+# 	-d dname
+# 	-n
 TOOLTEST() {
     TESTING $FORMCONV $2 $3 $4 $1
     $RM $TESTDIR/$TMPFILE
@@ -256,9 +256,9 @@ TOOLTEST() {
     $RUNSERIAL $FORMCONV_BIN $2 $3 $4 $TESTDIR/$TMPFILE
     exitcode=$?
     if [ $exitcode -ne 0 ]; then
-    echo "*FAILED*"
-    echo "    The tool exits failure"
-    nerrors="`expr $nerrors + 1`"
+	echo "*FAILED*"
+	echo "    The tool exits failure"
+	nerrors="`expr $nerrors + 1`"
     else
     echo " PASSED"
     fi
@@ -306,11 +306,11 @@ IDX_CHECK() {
     $RUNSERIAL $CHK_IDX_BIN $TESTDIR/$TMPCHKFILE $1
     ret=$?
     if [ $ret -eq 0 ]; then
-    echo " PASSED"
+	echo " PASSED"
     else
-    echo "*FAILED*"
-    echo "    The chunk indexing type is not correct"
-    nerrors="`expr $nerrors + 1`"
+	echo "*FAILED*"
+	echo "    The chunk indexing type is not correct"
+	nerrors="`expr $nerrors + 1`"
     fi
 }
 
@@ -343,7 +343,7 @@ H5DUMP_CHECK() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-    $RM $actual $actual_err
+	$RM $actual $actual_err
     fi
 }
 
@@ -352,12 +352,12 @@ SKIP() {
     TESTING $STAT $@
     echo  " -SKIP-"
 }
-
+  
 
 
 ##############################################################################
 ##############################################################################
-###              T H E   T E S T S                                ###
+###			  T H E   T E S T S                                ###
 ##############################################################################
 ##############################################################################
 # prepare for test
@@ -457,7 +457,7 @@ TOOLTEST h5fc_non_v3.h5 -n
 #
 # No output from tests: just check exit code
 # h5format_convert h5fc_non_v3.h5
-# 1) convert all datasets
+# 1) convert all datasets 
 # 2) verify indexing types
 TOOLTEST_CHK h5fc_non_v3.h5
 IDX_CHECK /DSET_NDATA_EA

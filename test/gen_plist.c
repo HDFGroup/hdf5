@@ -36,21 +36,21 @@ static int encode_plist(hid_t plist_id, int little_endian, int word_length, cons
 int
 main(void)
 {
-    hid_t dcpl1;               /* dataset create prop. list */
-    hid_t dapl1;               /* dataset access prop. list */
-    hid_t dxpl1;               /* dataset xfer prop. list */
-    hid_t gcpl1;               /* group create prop. list */
-    hid_t ocpypl1;            /* object copy prop. list */
-    hid_t ocpl1;            /* object create prop. list */
-    hid_t lcpl1;               /* link create prop. list */
-    hid_t lapl1;               /* link access prop. list */
-    hid_t fapl1;               /* file access prop. list */
-    hid_t fcpl1;               /* file create prop. list */
-    hid_t strcpl1;               /* string create prop. list */
-    hid_t acpl1;               /* attribute create prop. list */
+    hid_t dcpl1;	       	/* dataset create prop. list */
+    hid_t dapl1;	       	/* dataset access prop. list */
+    hid_t dxpl1;	       	/* dataset xfer prop. list */
+    hid_t gcpl1;	       	/* group create prop. list */
+    hid_t ocpypl1;		    /* object copy prop. list */
+    hid_t ocpl1;	        /* object create prop. list */
+    hid_t lcpl1;	       	/* link create prop. list */
+    hid_t lapl1;	       	/* link access prop. list */
+    hid_t fapl1;	       	/* file access prop. list */
+    hid_t fcpl1;	       	/* file create prop. list */
+    hid_t strcpl1;	       	/* string create prop. list */
+    hid_t acpl1;	       	/* attribute create prop. list */
 
     herr_t ret = 0;
-    hsize_t chunk_size = 16384;    /* chunk size */
+    hsize_t chunk_size = 16384;	/* chunk size */ 
     int fill = 2;            /* Fill value */
     hsize_t max_size[1];        /* data space maximum size */
     size_t nslots = 521 * 2;
@@ -95,7 +95,7 @@ main(void)
 
     /* check endianess */
     {
-        short int word = 0x0001;
+        short int word = 0x0000;
         char *byte = (char *) &word;
 
         if(byte[0] == 1)
@@ -133,22 +133,22 @@ main(void)
         assert(ret > 0);
 
     max_size[0] = 100;
-    if((ret = H5Pset_external(dcpl1, "ext1.data", (off_t)0,
+    if((ret = H5Pset_external(dcpl1, "ext1.data", (off_t)0, 
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
         assert(ret > 0);
-    if((ret = H5Pset_external(dcpl1, "ext2.data", (off_t)0,
+    if((ret = H5Pset_external(dcpl1, "ext2.data", (off_t)0, 
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
         assert(ret > 0);
-    if((ret = H5Pset_external(dcpl1, "ext3.data", (off_t)0,
+    if((ret = H5Pset_external(dcpl1, "ext3.data", (off_t)0, 
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
         assert(ret > 0);
-    if((ret = H5Pset_external(dcpl1, "ext4.data", (off_t)0,
+    if((ret = H5Pset_external(dcpl1, "ext4.data", (off_t)0, 
                          (hsize_t)(max_size[0] * sizeof(int)/4))) < 0)
         assert(ret > 0);
 
     if((ret = encode_plist(dcpl1, little_endian, word_length, "testfiles/plist_files/dcpl_")) < 0)
         assert(ret > 0);
-
+        
     /* release resource */
     if((ret = H5Pclose(dcpl1)) < 0)
          assert(ret > 0);
@@ -160,13 +160,13 @@ main(void)
 
     if((ret = encode_plist(dapl1, little_endian, word_length, "testfiles/plist_files/def_dapl_")) < 0)
         assert(ret > 0);
-
+        
     if((ret = H5Pset_chunk_cache(dapl1, nslots, nbytes, w0)) < 0)
         assert(ret > 0);
 
     if((ret = encode_plist(dapl1, little_endian, word_length, "testfiles/plist_files/dapl_")) < 0)
         assert(ret > 0);
-
+        
     /* release resource */
     if((ret = H5Pclose(dapl1)) < 0)
          assert(ret > 0);
@@ -201,7 +201,7 @@ main(void)
 
     if((ret = encode_plist(dxpl1, little_endian, word_length, "testfiles/plist_files/dxpl_")) < 0)
         assert(ret > 0);
-
+        
     /* release resource */
     if((ret = H5Pclose(dxpl1)) < 0)
          assert(ret > 0);
@@ -232,7 +232,7 @@ main(void)
 
     if((ret = encode_plist(gcpl1, little_endian, word_length, "testfiles/plist_files/gcpl_")) < 0)
         assert(ret > 0);
-
+        
     /* release resource */
     if((ret = H5Pclose(gcpl1)) < 0)
          assert(ret > 0);
@@ -249,7 +249,7 @@ main(void)
 
     if((ret = encode_plist(lcpl1, little_endian, word_length, "testfiles/plist_files/lcpl_")) < 0)
         assert(ret > 0);
-
+        
     /* release resource */
     if((ret = H5Pclose(lcpl1)) < 0)
         assert(ret > 0);
@@ -272,7 +272,7 @@ main(void)
 
     if((ret = encode_plist(ocpypl1, little_endian, word_length, "testfiles/plist_files/ocpypl_")) < 0)
         assert(ret > 0);
-
+        
     /* release resource */
     if((ret = H5Pclose(ocpypl1)) < 0)
          assert(ret > 0);
@@ -480,7 +480,7 @@ encode_plist(hid_t plist_id, int little_endian, int word_length, const char *fil
     assert(write_size == (ssize_t)temp_size);
 
     HDclose(fd);
-
+    
     HDfree(temp_buf);
 
     return 1;

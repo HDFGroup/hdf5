@@ -4,7 +4,7 @@ PROJECT (HDF5_HL_SRC)
 #-----------------------------------------------------------------------------
 # List Source files
 #-----------------------------------------------------------------------------
-set (HL_SOURCES
+set (HL_SRCS
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DO.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5DS.c
     ${HDF5_HL_SRC_SOURCE_DIR}/H5IM.c
@@ -29,7 +29,7 @@ set (HL_HEADERS
     ${HDF5_HL_SRC_SOURCE_DIR}/hdf5_hl.h
 )
 
-add_library (${HDF5_HL_LIB_TARGET} STATIC ${HL_SOURCES} ${HL_HEADERS})
+add_library (${HDF5_HL_LIB_TARGET} STATIC ${HL_SRCS} ${HL_HEADERS})
 TARGET_C_PROPERTIES (${HDF5_HL_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${HDF5_HL_LIB_TARGET} ${HDF5_HL_LIB_NAME} STATIC)
@@ -41,7 +41,7 @@ set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF
 set (install_targets ${HDF5_HL_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
-  add_library (${HDF5_HL_LIBSH_TARGET} SHARED ${HL_SOURCES} ${HL_HEADERS})
+  add_library (${HDF5_HL_LIBSH_TARGET} SHARED ${HL_SRCS} ${HL_HEADERS})
   TARGET_C_PROPERTIES (${HDF5_HL_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_HL_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   H5_SET_LIB_OPTIONS (${HDF5_HL_LIBSH_TARGET} ${HDF5_HL_LIB_NAME} SHARED ${HDF5_HL_PACKAGE_SOVERSION})

@@ -16,7 +16,7 @@ INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
 #-----------------------------------------------------------------------------
 # Define Test Library Sources
 #-----------------------------------------------------------------------------
-set (TEST_LIB_SOURCES
+set (TEST_LIB_SRCS
     ${HDF5_TEST_SOURCE_DIR}/h5test.c
     ${HDF5_TEST_SOURCE_DIR}/testframe.c
     ${HDF5_TEST_SOURCE_DIR}/cache_common.c
@@ -29,7 +29,7 @@ set (TEST_LIB_HEADERS
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
 )
 
-add_library (${HDF5_TEST_LIB_TARGET} STATIC ${TEST_LIB_SOURCES} ${TEST_LIB_HEADERS})
+add_library (${HDF5_TEST_LIB_TARGET} STATIC ${TEST_LIB_SRCS} ${TEST_LIB_HEADERS})
 TARGET_C_PROPERTIES (${HDF5_TEST_LIB_TARGET} STATIC " " " ")
 if (MSVC)
   target_link_libraries (${HDF5_TEST_LIB_TARGET} "ws2_32.lib")
@@ -45,7 +45,7 @@ set_target_properties (${HDF5_TEST_LIB_TARGET} PROPERTIES
 )
 
 if (BUILD_SHARED_LIBS)
-  add_library (${HDF5_TEST_LIBSH_TARGET} SHARED ${TEST_LIB_SOURCES} ${TEST_LIB_HEADERS})
+  add_library (${HDF5_TEST_LIBSH_TARGET} SHARED ${TEST_LIB_SRCS} ${TEST_LIB_HEADERS})
   TARGET_C_PROPERTIES (${HDF5_TEST_LIBSH_TARGET} SHARED " " " ")
   if (MSVC)
     target_link_libraries (${HDF5_TEST_LIBSH_TARGET} "ws2_32.lib")
@@ -139,7 +139,7 @@ endif (BUILD_SHARED_LIBS)
     )
   endforeach (test_lib ${TEST2_PLUGIN_LIBS})
 
-set (testhdf5_SOURCES
+set (testhdf5_SRCS
     ${HDF5_TEST_SOURCE_DIR}/testhdf5.c
     ${HDF5_TEST_SOURCE_DIR}/tarray.c
     ${HDF5_TEST_SOURCE_DIR}/tattr.c
@@ -168,13 +168,13 @@ set (testhdf5_SOURCES
 )
 
 #-- Adding test for testhdf5
-add_executable (testhdf5 ${testhdf5_SOURCES})
+add_executable (testhdf5 ${testhdf5_SRCS})
 TARGET_NAMING (testhdf5 STATIC)
 TARGET_C_PROPERTIES (testhdf5 STATIC " " " ")
 target_link_libraries (testhdf5 ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (testhdf5 PROPERTIES FOLDER test)
 if (BUILD_SHARED_LIBS)
-  add_executable (testhdf5-shared ${testhdf5_SOURCES})
+  add_executable (testhdf5-shared ${testhdf5_SRCS})
   TARGET_NAMING (testhdf5-shared SHARED)
   TARGET_C_PROPERTIES (testhdf5-shared SHARED " " " ")
   target_link_libraries (testhdf5-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})

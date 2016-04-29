@@ -63,18 +63,18 @@ INCLUDE_DIRECTORIES (
 #-----------------------------------------------------------------------------
 # hl_f90CStub lib
 #-----------------------------------------------------------------------------
-set (HDF5_HL_F90_C_SOURCES
+set (HDF5_HL_F90_C_SRCS
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5DSfc.c
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTfc.c
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMfc.c
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMcc.c
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5TBfc.c
 )
-set_source_files_properties (${HDF5_HL_F90_C_SOURCES} PROPERTIES LANGUAGE C)
+set_source_files_properties (${HDF5_HL_F90_C_SRCS} PROPERTIES LANGUAGE C)
 
 set (HDF5_HL_F90_HEADERS ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTf90proto.h)
 
-add_library (${HDF5_HL_F90_C_LIB_TARGET} STATIC ${HDF5_HL_F90_C_SOURCES} ${HDF5_HL_F90_HEADERS})
+add_library (${HDF5_HL_F90_C_LIB_TARGET} STATIC ${HDF5_HL_F90_C_SRCS} ${HDF5_HL_F90_HEADERS})
 TARGET_C_PROPERTIES (${HDF5_HL_F90_C_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_F90_C_LIB_TARGET} ${HDF5_HL_LIB_TARGET})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_F90_C_LIB_TARGET}")
@@ -87,7 +87,7 @@ set_target_properties (${HDF5_HL_F90_C_LIB_TARGET} PROPERTIES
 set (install_targets ${HDF5_HL_F90_C_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  add_library (${HDF5_HL_F90_C_LIBSH_TARGET} SHARED ${HDF5_HL_F90_C_SOURCES} ${HDF5_HL_F90_HEADERS})
+  add_library (${HDF5_HL_F90_C_LIBSH_TARGET} SHARED ${HDF5_HL_F90_C_SRCS} ${HDF5_HL_F90_HEADERS})
   TARGET_C_PROPERTIES (${HDF5_HL_F90_C_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_HL_F90_C_LIBSH_TARGET} ${HDF5_F90_C_LIBSH_TARGET} ${HDF5_HL_LIBSH_TARGET})
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_F90_C_LIBSH_TARGET}")
@@ -105,21 +105,21 @@ endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 #-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
-set (HDF5_HL_F90_F_BASE_SOURCES
+set (HDF5_HL_F90_F_BASE_SRCS
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5DSff.F90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5TBff.F90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5LTff.F90
     ${HDF5_HL_F90_SRC_SOURCE_DIR}/H5IMff.F90
 )
-set (HDF5_HL_F90_F_SOURCES
-     ${HDF5_HL_F90_F_BASE_SOURCES}
+set (HDF5_HL_F90_F_SRCS
+     ${HDF5_HL_F90_F_BASE_SRCS}
 
      # generated files
      ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
      ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
 )
 
-set_source_files_properties (${HDF5_HL_F90_F_SOURCES} PROPERTIES LANGUAGE Fortran)
+set_source_files_properties (${HDF5_HL_F90_F_SRCS} PROPERTIES LANGUAGE Fortran)
 
 set_source_files_properties (
     ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
@@ -133,10 +133,10 @@ add_custom_target (H5HLgen ALL
 #v3.2    BYPRODUCT ${HDF5_HL_F90_SRC_BINARY_DIR}/H5LTff_gen.F90
 #v3.2              ${HDF5_HL_F90_SRC_BINARY_DIR}/H5TBff_gen.F90
     WORKING_DIRECTORY ${HDF5_HL_F90_SRC_BINARY_DIR}
-    DEPENDS ${HDF5_HL_F90_F_BASE_SOURCES}
+    DEPENDS ${HDF5_HL_F90_F_BASE_SRCS}
 )
 
-add_library (${HDF5_HL_F90_LIB_TARGET} STATIC ${HDF5_HL_F90_F_SOURCES})
+add_library (${HDF5_HL_F90_LIB_TARGET} STATIC ${HDF5_HL_F90_F_SRCS})
 TARGET_FORTRAN_PROPERTIES (${HDF5_HL_F90_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_HL_F90_LIB_TARGET} ${HDF5_HL_F90_C_LIB_TARGET} ${HDF5_F90_LIB_TARGET})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_F90_LIB_TARGET}")
@@ -155,7 +155,7 @@ endif (WIN32)
 set (install_targets ${install_targets} ${HDF5_HL_F90_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  add_library (${HDF5_HL_F90_LIBSH_TARGET} SHARED ${HDF5_HL_F90_F_SOURCES})
+  add_library (${HDF5_HL_F90_LIBSH_TARGET} SHARED ${HDF5_HL_F90_F_SRCS})
   set (SHARED_LINK_FLAGS " ")
   if (WIN32 AND MSVC)
     set (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_HL_F90_SRC_BINARY_DIR}/hdf5_hl_fortrandll.def")

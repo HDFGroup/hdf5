@@ -77,7 +77,7 @@ const char *FILENAME[] = {
 #define NX     100
 #define NY     1000
 #define NZ     250
-#define CHUNK_NX     1
+#define CHUNK_NX     1 
 #define CHUNK_NY     1000
 #define CHUNK_NZ     250
 
@@ -110,7 +110,7 @@ void reportTime(struct timeval start, double mbytes)
     } /* end if */
 
 /*printf("mbytes=%lf, sec=%lf, usec=%lf\n", mbytes, (double)timeval_diff.tv_sec, (double)timeval_diff.tv_usec);*/
-    printf("MBytes/second: %lf\n", (double)mbytes/((double)timeval_diff.tv_sec+((double)timeval_diff.tv_usec/(double)1000000.0)));
+    printf("MBytes/second: %lf\n", (double)mbytes/((double)timeval_diff.tv_sec+((double)timeval_diff.tv_usec/(double)1000000.0)));        
 }
 
 /*--------------------------------------------------
@@ -123,7 +123,7 @@ int create_file(hid_t fapl_id)
     hid_t       fapl;
     hid_t       cparms;
     hid_t       dataspace, dataset;
-    hsize_t     dims[RANK]  = {NX, NY, NZ};
+    hsize_t     dims[RANK]  = {NX, NY, NZ};        
     hsize_t     chunk_dims[RANK] ={CHUNK_NX, CHUNK_NY, CHUNK_NZ};
     unsigned int         aggression = 9;     /* Compression aggression setting */
     int         ret;
@@ -136,9 +136,9 @@ int create_file(hid_t fapl_id)
     size_t      buf_size = CHUNK_NY*CHUNK_NZ*sizeof(unsigned int);
 
     const Bytef *z_src;
-    Bytef        *z_dst;        /*destination buffer        */
-    uLongf         z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
-    uLong         z_src_nbytes = (uLong)buf_size;
+    Bytef	    *z_dst;		/*destination buffer		*/
+    uLongf	     z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
+    uLong	     z_src_nbytes = (uLong)buf_size;
 
     TESTING("Create a file and dataset");
 
@@ -168,14 +168,14 @@ int create_file(hid_t fapl_id)
      * creation properties.
      */
     if((dataset = H5Dcreate2(file, DIRECT_UNCOMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-            cparms, H5P_DEFAULT)) < 0)
+			cparms, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if(H5Dclose(dataset) < 0)
         TEST_ERROR;
 
     if((dataset = H5Dcreate2(file, REG_NO_COMPRESS_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-            cparms, H5P_DEFAULT)) < 0)
+			cparms, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if(H5Dclose(dataset) < 0)
@@ -186,7 +186,7 @@ int create_file(hid_t fapl_id)
         TEST_ERROR;
 
     if((dataset = H5Dcreate2(file, DIRECT_COMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-            cparms, H5P_DEFAULT)) < 0)
+			cparms, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if(H5Dclose(dataset) < 0)
@@ -194,13 +194,13 @@ int create_file(hid_t fapl_id)
 
 
     if((dataset = H5Dcreate2(file, REG_COMPRESSED_DSET, H5T_NATIVE_INT, dataspace, H5P_DEFAULT,
-            cparms, H5P_DEFAULT)) < 0)
+			cparms, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if(H5Dclose(dataset) < 0)
         TEST_ERROR;
 
-    if(H5Fclose(file) < 0)
+    if(H5Fclose(file) < 0) 
         TEST_ERROR;
 
     if(H5Sclose(dataspace) < 0)
@@ -224,8 +224,8 @@ int create_file(hid_t fapl_id)
 
     /* Initialize data for chunks */
     for(i = 0; i < NX; i++) {
-    p = direct_buf[i] = (unsigned int*)malloc(CHUNK_NY*CHUNK_NZ*sizeof(unsigned int));
-
+	p = direct_buf[i] = (unsigned int*)malloc(CHUNK_NY*CHUNK_NZ*sizeof(unsigned int));
+        
         for(j=0; j < CHUNK_NY*CHUNK_NZ; j++, p++)
             *p = rand() % 65000;
 
@@ -247,10 +247,10 @@ int create_file(hid_t fapl_id)
             fprintf(stderr, "overflow");
             TEST_ERROR;
         } else if(Z_MEM_ERROR == ret) {
-        fprintf(stderr, "deflate memory error");
+	    fprintf(stderr, "deflate memory error");
             TEST_ERROR;
         } else if(Z_OK != ret) {
-        fprintf(stderr, "other deflate error");
+	    fprintf(stderr, "other deflate error");
             TEST_ERROR;
         }
     }
@@ -269,7 +269,7 @@ error:
 }
 
 /*--------------------------------------------------
- *  Benchmark the performance of the new function
+ *  Benchmark the performance of the new function 
  *  with precompressed data.
  *--------------------------------------------------
  */
@@ -285,8 +285,8 @@ test_direct_write_uncompressed_data(hid_t fapl_id)
     unsigned    filter_mask = 0;
     hsize_t     offset[RANK] = {0, 0, 0};
 
-    struct timeval timeval_start;
-
+    struct timeval timeval_start;    
+    
     TESTING("H5DOwrite_chunk for uncompressed data");
 
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -303,8 +303,8 @@ test_direct_write_uncompressed_data(hid_t fapl_id)
         TEST_ERROR;
 
 
-    /* Write the compressed chunk data repeatedly to cover all the chunks in the
-     * dataset, using the direct writing function.     */
+    /* Write the compressed chunk data repeatedly to cover all the chunks in the 
+     * dataset, using the direct writing function.     */ 
     for(i=0; i<NX; i++) {
         status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, CHUNK_NY*CHUNK_NZ*sizeof(unsigned int), direct_buf[i]);
         (offset[0])++;
@@ -317,8 +317,8 @@ test_direct_write_uncompressed_data(hid_t fapl_id)
     H5Pclose(dxpl);
     H5Fclose(file);
 
-    /* Report the performance */
-    reportTime(timeval_start, (double)(NX*NY*NZ*sizeof(unsigned int)/MB));
+    /* Report the performance */ 
+    reportTime(timeval_start, (double)(NX*NY*NZ*sizeof(unsigned int)/MB));    
 
     PASSED();
     return 0;
@@ -334,7 +334,7 @@ error:
 
 
 /*--------------------------------------------------
- *  Benchmark the performance of the new function
+ *  Benchmark the performance of the new function 
  *  with precompressed data.
  *--------------------------------------------------
  */
@@ -350,8 +350,8 @@ test_direct_write_compressed_data(hid_t fapl_id)
     unsigned    filter_mask = 0;
     hsize_t     offset[RANK] = {0, 0, 0};
 
-    struct timeval timeval_start;
-
+    struct timeval timeval_start;    
+    
     TESTING("H5DOwrite_chunk for pre-compressed data");
 
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
@@ -368,8 +368,8 @@ test_direct_write_compressed_data(hid_t fapl_id)
         TEST_ERROR;
 
 
-    /* Write the compressed chunk data repeatedly to cover all the chunks in the
-     * dataset, using the direct writing function.     */
+    /* Write the compressed chunk data repeatedly to cover all the chunks in the 
+     * dataset, using the direct writing function.     */ 
     for(i=0; i<NX; i++) {
         status = H5DOwrite_chunk(dataset, dxpl, filter_mask, offset, data_size[i], outbuf[i]);
         (offset[0])++;
@@ -381,9 +381,9 @@ test_direct_write_compressed_data(hid_t fapl_id)
     H5Dclose(dataset);
     H5Pclose(dxpl);
     H5Fclose(file);
-
-    /* Report the performance */
-    reportTime(timeval_start, (double)(total_size/MB));
+  
+    /* Report the performance */ 
+    reportTime(timeval_start, (double)(total_size/MB));    
 
     PASSED();
     return 0;
@@ -418,7 +418,7 @@ test_compressed_write(hid_t fapl_id)
     hsize_t count[RANK];  /* Block count */
     hsize_t block[RANK];  /* Block sizes */
 
-    struct timeval timeval_start;
+    struct timeval timeval_start;    
 
     TESTING("H5Dwrite with compression enabled");
 
@@ -445,17 +445,17 @@ test_compressed_write(hid_t fapl_id)
     stride[0] = stride[1] = stride[2] = 1;
     count[0]  = count[1]  = count[2] = 1;
     block[0]  = CHUNK_NX; block[1]  = CHUNK_NY; block[2] = CHUNK_NZ;
-
+    
     for(i=0; i<NX; i++) {
         /*
          * Select hyperslab for one chunk in the file
          */
         if((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
             TEST_ERROR;
-        (start[0])++;
+        (start[0])++;        
 
         if((status = H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, dataspace,
-                H5P_DEFAULT, direct_buf[i])) < 0)
+    		      H5P_DEFAULT, direct_buf[i])) < 0)
             TEST_ERROR;
     }
 
@@ -467,10 +467,10 @@ test_compressed_write(hid_t fapl_id)
     H5Sclose(mem_space);
     H5Pclose(dxpl);
     H5Fclose(file);
-
-    /* Report the performance */
-    reportTime(timeval_start, (double)(NX*NY*NZ*sizeof(unsigned int)/MB));
-
+ 
+    /* Report the performance */ 
+    reportTime(timeval_start, (double)(NX*NY*NZ*sizeof(unsigned int)/MB));    
+   
     PASSED();
     return 0;
 
@@ -506,7 +506,7 @@ test_no_compress_write(hid_t fapl_id)
     hsize_t count[RANK];  /* Block count */
     hsize_t block[RANK];  /* Block sizes */
 
-    struct timeval timeval_start;
+    struct timeval timeval_start;    
 
     TESTING("H5Dwrite without compression");
 
@@ -533,17 +533,17 @@ test_no_compress_write(hid_t fapl_id)
     stride[0] = stride[1] = stride[2] = 1;
     count[0]  = count[1]  = count[2] = 1;
     block[0]  = CHUNK_NX; block[1]  = CHUNK_NY; block[2] = CHUNK_NZ;
-
+    
     for(i=0; i<NX; i++) {
         /*
          * Select hyperslab for one chunk in the file
          */
         if((status = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, start, stride, count, block)) < 0)
             TEST_ERROR;
-        (start[0])++;
+        (start[0])++;        
 
         if((status = H5Dwrite(dataset, H5T_NATIVE_INT, mem_space, dataspace,
-                H5P_DEFAULT, direct_buf[i])) < 0)
+    		      H5P_DEFAULT, direct_buf[i])) < 0)
             TEST_ERROR;
     }
 
@@ -555,10 +555,10 @@ test_no_compress_write(hid_t fapl_id)
     H5Sclose(mem_space);
     H5Pclose(dxpl);
     H5Fclose(file);
-
-    /* Report the performance */
-    reportTime(timeval_start, (double)(NX*NY*NZ*sizeof(unsigned int)/MB));
-
+ 
+    /* Report the performance */ 
+    reportTime(timeval_start, (double)(NX*NY*NZ*sizeof(unsigned int)/MB));    
+   
     PASSED();
     return 0;
 
@@ -578,13 +578,13 @@ error:
  *  data to a Unix file
  *--------------------------------------------------
  */
-int
+int 
 test_unix_write(void)
 {
     int file, flag;
-    ssize_t op_size;
+    ssize_t op_size;    
     int i;
-    struct timeval timeval_start;
+    struct timeval timeval_start;    
 
     TESTING("Write compressed data to a Unix file");
 
@@ -597,8 +597,8 @@ test_unix_write(void)
     if ((file=open(FILENAME[1],flag))== -1)
         TEST_ERROR;
 
-    /* Write the compressed chunk data repeatedly to cover all the chunks in the
-     * dataset, using the direct writing function.     */
+    /* Write the compressed chunk data repeatedly to cover all the chunks in the 
+     * dataset, using the direct writing function.     */ 
     for(i=0; i<NX; i++) {
         op_size = write(file, outbuf[i],data_size[i]);
         if (op_size < 0)
@@ -619,14 +619,14 @@ test_unix_write(void)
         TEST_ERROR;
     }
 
-    /* Report the performance */
-    reportTime(timeval_start, (double)(total_size/MB));
+    /* Report the performance */ 
+    reportTime(timeval_start, (double)(total_size/MB));    
 
     PASSED();
     return 0;
 
 error:
-    return 1;
+    return 1; 
 }
 
 /*--------------------------------------------------
@@ -658,7 +658,7 @@ main (void)
         free(outbuf[i]);
         free(direct_buf[i]);
     }
-
+ 
 /*    h5_cleanup(FILENAME, fapl);*/
     return 0;
 }
