@@ -155,9 +155,9 @@ New Features
       Two accessor wrappers are added to class PacketTable.
 
       PacketTable::GetDataset() returns the identifier of the dataset
-      				associated with the packet table
+                    associated with the packet table
       PacketTable::GetDatatype() returns the identifier of the datatype
-				that the packet table uses.
+                that the packet table uses.
 
       (BMR - 2016/04/25, HDFFV-8623)
 
@@ -197,8 +197,8 @@ New Features
     - New Overloaded "const" Member Functions in ArrayType
 
       The two following functions are added:
-	ArrayType::getArrayNDims() const
-	ArrayType::getArrayDims() const
+    ArrayType::getArrayNDims() const
+    ArrayType::getArrayDims() const
       to provide const version and the non-const version are marked deprecated.
       In-memory array information, ArrayType::rank and ArrayType::dimensions,
       are removed.  This is implementation detail and should not affect
@@ -294,13 +294,30 @@ Bug Fixes since HDF5-1.8.16
       When an argument with an optional value was at the end of the command line
       with a value, h5dump would crash. Reworked check for remaining arguments.
 
-      (ADB, 2016/03/07, HDFFV-9570)
+      (ADB, 2016/03/07, HDFFV-9570, HDFFV-9684)
 
     - h5dump issue with default fill value.
 
-      Added all default cases of fill value to display of fill value..
+      Added all default cases of fill value to display of fill value.
 
       (ADB, 2016/03/07, HDFFV-9241)
+
+    - Clarified usage of -O F option in h5dump utility help.
+
+      (ADB, 2016/03/07, HDFFV-9066)
+
+    - h5dump issue with double free fault.
+
+      Added check for filename not null before calling free().
+
+      (ADB, 2016/01/27, HDFFV-9639)
+
+    - VS2015 release changed how timezone was handled.
+
+      Created a function, HDget_timezone, in H5system.c. Replaced timezone variable
+      usage with function call.
+
+      (ADB, 2015/11/02, HDFFV-9550)
 
     Fortran API
     -----------
