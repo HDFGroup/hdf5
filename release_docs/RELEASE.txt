@@ -115,9 +115,10 @@ New Features
       can use the deflate compression only. The public function
       H5PTcreate has been added to replace H5PTcreate_fl. H5PTcreate
       takes a property list identifier to provide flexibility on
-      creation properties.
+      creation properties.  This also removes the following warning:
+      "deprecated conversion from string constant to âchar*â [-Wwrite-strings]"
 
-      (BMR - 2016/04/25, HDFFV-8623)
+      (BMR - 2016/04/25, HDFFV-9708, HDFFV-8615)
 
     - New Public Functions: H5PTget_dataset and H5PTget_type
 
@@ -126,7 +127,7 @@ New Features
       and H5PTget_type returns the identifier of the datatype used by
       the packet table.
 
-      (BMR, 2016/04/25, HDFFV-8623)
+      (BMR, 2016/04/25, HDFFV-8623 patch 3)
 
     - Regarding #ifdef VLPT_REMOVED
 
@@ -148,7 +149,7 @@ New Features
       FL_PacketTable(hid_t fileID, const char* name, hid_t dtypeID,
                        hsize_t chunkSize = 0, hid_t plistID = H5P_DEFAULT)
 
-      (BMR - 2016/04/25, HDFFV-8623)
+      (BMR - 2016/04/25, HDFFV-8623 patch 5)
 
     - New Member Functions in PacketTable
 
@@ -159,15 +160,16 @@ New Features
       PacketTable::GetDatatype() returns the identifier of the datatype
 				that the packet table uses.
 
-      (BMR - 2016/04/25, HDFFV-8623)
+      (BMR - 2016/04/25, HDFFV-8623 patch 4)
 
     - Member Functions with "char*" as an Argument
 
       Overloaded functions were added to provide the "const char*"
       argument; the existing version will be deprecated in future
-      releases.
+      releases.  This also removes the following warning:
+      "deprecated conversion from string constant to âchar*â [-Wwrite-strings]"
 
-      (BMR - 2016/04/25, HDFFV-8623)
+      (BMR - 2016/04/25, HDFFV-8623 patch 1, HDFFV-8615)
 
     - Regarding #ifdef VLPT_REMOVED
 
@@ -192,7 +194,7 @@ New Features
       DSetCreatPropList::setNbit() was added to setup N-bit compression for
       a dataset.
 
-      (BMR, 2016/04/25)
+      (BMR, 2016/04/25, HDFFV-8623 patch 7)
 
     - New Overloaded "const" Member Functions in ArrayType
 
