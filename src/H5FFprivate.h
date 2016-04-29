@@ -55,8 +55,13 @@
 /******************************/
 /* Library Private Prototypes */
 /******************************/
+
+#ifdef H5_HAVE_EFF
+
 void *H5VL_iod_object_open_by_addr(void *_obj, iod_obj_id_t iod_id, hid_t rcxt_id, 
                                    H5I_type_t *opened_type, void **req);
+
+#endif /* H5_HAVE_EFF */
 
 #endif /* _H5FFprivate_H */
 
