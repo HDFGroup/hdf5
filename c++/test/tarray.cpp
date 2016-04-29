@@ -298,8 +298,8 @@ static void test_array_compound_array()
  */
 H5::DataType getArr()
 {
-    hsize_t *dims = new hsize_t; 
-    *dims = 5; 
+    hsize_t *dims = new hsize_t[1]; 
+    dims[0] = 5;
     H5::ArrayType ret; 
     ret = H5::ArrayType(H5::PredType::NATIVE_INT, 1, dims); 
     delete[] dims; 
