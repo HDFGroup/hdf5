@@ -926,6 +926,7 @@ H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefix
     size_t          extpath_len;          /* length of extpath                              */
     size_t          prefix_len;           /* length of prefix                               */
     size_t          extfile_prefix_len;   /* length of expanded prefix                      */
+    hbool_t         free_prefix = FALSE;  /* Did the library allocate memory for prefix?    */
     H5P_genplist_t  *plist = NULL;        /* Property list pointer                          */
     herr_t          ret_value = SUCCEED;  /* Return value                                   */
     
@@ -949,6 +950,7 @@ H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefix
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
         /* No error checking possible here */
         prefix = (char *)H5P_peek_voidp(plist, H5D_ACS_EFILE_PREFIX_NAME);
+        free_prefix = TRUE;
     } /* end if */
 
     /* Prefix has to be checked for NULL / empty string again because the
@@ -979,6 +981,8 @@ H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id, char **extfile_prefix
     } /* end else */
 
 done:
+    if(free_prefix && prefix)
+        H5MM_xfree(prefix);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_build_extfile_prefix() */
 
