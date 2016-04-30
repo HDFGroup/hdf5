@@ -607,7 +607,6 @@ int
 main(void)
 {
     hid_t	fapl = -1, file = -1;
-    hid_t	dset = -1;
     H5F_t	*f = NULL;
     char	filename[1024];
     H5O_hdr_info_t hdr_info;            /* Object info */

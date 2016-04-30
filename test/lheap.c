@@ -100,7 +100,7 @@ main(void)
     for(i = 0; i < NOBJS; i++) {
         sprintf(buf, "%03d-", i);
         for(j = 4; j < i; j++)
-            buf[j] = '0' + j % 10;
+            buf[j] = (char)('0' + j % 10);
         if(j > 4)
             buf[j] = '\0';
 
@@ -140,7 +140,7 @@ main(void)
     for(i = 0; i < NOBJS; i++) {
         sprintf(buf, "%03d-", i);
         for(j = 4; j < i; j++)
-            buf[j] = '0' + j % 10;
+            buf[j] = (char)('0' + j % 10);
         if(j > 4)
             buf[j] = '\0';
 

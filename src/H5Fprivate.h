@@ -508,7 +508,7 @@
 
 /* Size of signature information (on disk) */
 /* (all on-disk signatures should be this length) */
-#define H5_SIZEOF_MAGIC               4
+#define H5_SIZEOF_MAGIC                 4
 
 /* v1 B-tree node signature */
 #define H5B_MAGIC	                "TREE"
@@ -563,9 +563,9 @@
 #define H5F_LATEST_FILL_MSG             0x0008
 #define H5F_LATEST_PLINE_MSG            0x0010
 #define H5F_LATEST_LAYOUT_MSG           0x0020
-#define H5F_LATEST_NO_MOD_TIME_MSG	0x0040
+#define H5F_LATEST_NO_MOD_TIME_MSG      0x0040
 #define H5F_LATEST_STYLE_GROUP          0x0080
-#define H5F_LATEST_OBJ_HEADER		0x0100
+#define H5F_LATEST_OBJ_HEADER           0x0100
 #define H5F_LATEST_SUPERBLOCK           0x0200
 #define H5F_LATEST_ALL_FLAGS            (H5F_LATEST_DATATYPE | H5F_LATEST_DATASPACE | H5F_LATEST_ATTRIBUTE | H5F_LATEST_FILL_MSG | H5F_LATEST_PLINE_MSG | H5F_LATEST_LAYOUT_MSG | H5F_LATEST_NO_MOD_TIME_MSG | H5F_LATEST_STYLE_GROUP | H5F_LATEST_OBJ_HEADER | H5F_LATEST_SUPERBLOCK)
 

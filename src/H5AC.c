@@ -941,7 +941,11 @@ done:
  */
 herr_t
 H5AC_move_entry(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, 
-                haddr_t new_addr, hid_t dxpl_id)
+                haddr_t new_addr, hid_t 
+#ifndef H5_HAVE_PARALLEL
+H5_ATTR_UNUSED
+#endif /* H5_HAVE_PARALLEL */
+                dxpl_id)
 {
 #if H5AC__TRACE_FILE_ENABLED
     char          	trace[128] = "";

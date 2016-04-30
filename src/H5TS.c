@@ -256,7 +256,10 @@ H5TS_cancel_count_inc(void)
     if (!cancel_counter) {
         /*
          * First time thread calls library - create new counter and associate
-         * with key
+         * with key.
+         * 
+         * Don't use H5MM calls here since the destructor has to use HDfree in
+         * order to avoid codestack calls.
          */
         cancel_counter = (H5TS_cancel_t *)HDcalloc(1, sizeof(H5TS_cancel_t));
 
