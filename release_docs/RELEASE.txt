@@ -257,6 +257,11 @@ Bug Fixes since HDF5-1.8.16
 
     Library
     -------
+    - Fixed shared file pointer problem which caused a crash when running a
+      program provided by a user.
+
+      (VC, 2016/04/01, HDFFV-9469)
+
     - Fixed some format string warnings that prevent compiling with
       -Werror=format-security on gcc.
 
