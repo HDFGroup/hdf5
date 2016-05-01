@@ -175,6 +175,9 @@ typedef enum H5F_file_space_type_t {
     H5F_FILE_SPACE_NTYPES	    /* must be last */
 } H5F_file_space_type_t;
 
+/* Callback for H5Pset_object_flush_cb() in a file access property list */
+typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
+
 
 #ifdef __cplusplus
 extern "C" {

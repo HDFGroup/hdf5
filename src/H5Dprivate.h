@@ -54,6 +54,7 @@
 #define H5D_ACS_PREEMPT_READ_CHUNKS_NAME    "rdcc_w0"       /* Preemption read chunks first */
 #define H5D_ACS_VDS_VIEW_NAME               "vds_view"      /* VDS view option */
 #define H5D_ACS_VDS_PRINTF_GAP_NAME         "vds_printf_gap" /* VDS printf gap size */
+#define H5D_ACS_APPEND_FLUSH_NAME    "append_flush"         /* Append flush actions */
 #define H5D_ACS_EFILE_PREFIX_NAME           "external file prefix" /* External file prefix */
 
 /* ======== Data transfer properties ======== */
@@ -150,6 +151,14 @@ typedef struct H5D_copy_file_ud_t {
     struct H5S_extent_t *src_space_extent;     /* Copy of dataspace extent for dataset */
     H5T_t *src_dtype;                   /* Copy of datatype for dataset */
 } H5D_copy_file_ud_t;
+
+/* Structure for dataset append flush property (H5Pset_append_flush) */
+typedef struct H5D_append_flush_t {
+    unsigned ndims;			/* The # of dimensions for "boundary" */
+    hsize_t boundary[H5S_MAX_RANK];	/* The dimension sizes for determining boundary */
+    H5D_append_cb_t func;		/* The callback function */
+    void *udata;			/* User data */
+} H5D_append_flush_t;
 
 
 /*****************************/

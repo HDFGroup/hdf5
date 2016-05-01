@@ -68,7 +68,7 @@ static herr_t H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id,
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
     hsize_t old_dim[]);
-
+static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
 
 /*********************/
 /* Package Variables */
@@ -1247,6 +1247,10 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     /* Indicate that the layout information was initialized */
     layout_init = TRUE;
 
+    /* Set up append flush parameters for the dataset */
+    if(H5D__append_flush_setup(new_dset, dapl_id) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set up flush append property")
+
     /* Set the external file prefix */
     if(H5D_build_extfile_prefix(new_dset, dapl_id, &new_dset->shared->extfile_prefix) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize external file prefix")
@@ -1491,6 +1495,85 @@ done:
 } /* end H5D_open() */
 
 
+/*
+ *-------------------------------------------------------------------------
+ * Function:	H5D__flush_append_setup
+ *
+ * Purpose:	Set the append flush parameters for a dataset
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *		Wednesday, January 8, 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id) 
+{
+    herr_t ret_value = SUCCEED;         /* return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+    HDassert(dset);
+    HDassert(dset->shared);
+
+    /* Set default append flush values */
+    HDmemset(&dset->shared->append_flush,  0, sizeof(dset->shared->append_flush));
+
+    /* If the dataset is chunked and there is a non-default DAPL */
+    if(dapl_id != H5P_DATASET_ACCESS_DEFAULT && dset->shared->layout.type == H5D_CHUNKED) {
+        H5P_genplist_t *dapl;               /* data access property list object pointer */
+
+	/* Get dataset access property list */
+	if(NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
+	    HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for dapl ID");
+
+	/* Check if append flush property exists */
+	if(H5P_exist_plist(dapl, H5D_ACS_APPEND_FLUSH_NAME) > 0) {
+            H5D_append_flush_t info;
+
+	    /* Get append flush property */
+	    if(H5P_get(dapl, H5D_ACS_APPEND_FLUSH_NAME, &info) < 0)
+		HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get append flush info")
+	    if(info.ndims > 0) {
+                hsize_t curr_dims[H5S_MAX_RANK];	/* current dimension sizes */
+                hsize_t max_dims[H5S_MAX_RANK];		/* current dimension sizes */
+                int rank;                       	/* dataspace # of dimensions */
+                unsigned u;     			/* local index variable */
+
+		/* Get dataset rank */
+		if((rank = H5S_get_simple_extent_dims(dset->shared->space, curr_dims, max_dims)) < 0)
+		    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
+		if(info.ndims != (unsigned)rank)
+		    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "boundary dimension rank does not match dataset rank")
+
+		/* Validate boundary sizes */
+		for(u = 0; u < info.ndims; u++)
+		    if(info.boundary[u] != 0) /* when a non-zero boundary is set */
+			/* the dimension is extendible? */
+			if(max_dims[u] != H5S_UNLIMITED && max_dims[u] == curr_dims[u])
+			    break;
+
+                /* At least one boundary dimension is not extendible */
+		if(u != info.ndims)
+		    HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "boundary dimension is not valid")
+
+                /* Copy append flush settings */
+		dset->shared->append_flush.ndims = info.ndims;
+		dset->shared->append_flush.func = info.func;
+		dset->shared->append_flush.udata = info.udata;
+		HDmemcpy(dset->shared->append_flush.boundary, info.boundary, sizeof(info.boundary));
+	    } /* end if */
+	} /* end if */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5D__append_flush_setup() */
+
+
 /*-------------------------------------------------------------------------
  * Function:	H5D__open_oid
  *
@@ -1554,6 +1637,10 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
 
     /* Indicate that the layout information was initialized */
     layout_init = TRUE;
+
+    /* Set up flush append property */
+    if(H5D__append_flush_setup(dataset, dapl_id))
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set up flush append property")
 
     /* Point at dataset's copy, to cache it for later */
     fill_prop = &dataset->shared->dcpl_cache.fill;
@@ -3083,28 +3170,28 @@ H5D_get_access_plist(H5D_t *dset)
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Make a copy of the default dataset access property list */
-    if (NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_ACCESS_ID_g)))
+    if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_ACCESS_ID_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-    if ((new_dapl_id = H5P_copy_plist(old_plist, TRUE)) < 0)
+    if((new_dapl_id = H5P_copy_plist(old_plist, TRUE)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy dataset access property list")
-    if (NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_dapl_id)))
+    if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_dapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
-    /* If the dataset is chunked then copy the rdcc parameters */
-    if (dset->shared->layout.type == H5D_CHUNKED) {
-        if (H5P_set(new_plist, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &(dset->shared->cache.chunk.nslots)) < 0)
+    /* If the dataset is chunked then copy the rdcc & append flush parameters */
+    if(dset->shared->layout.type == H5D_CHUNKED) {
+        if(H5P_set(new_plist, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &(dset->shared->cache.chunk.nslots)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache number of slots")
-        if (H5P_set(new_plist, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(dset->shared->cache.chunk.nbytes_max)) < 0)
+        if(H5P_set(new_plist, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(dset->shared->cache.chunk.nbytes_max)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache byte size")
-        if (H5P_set(new_plist, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &(dset->shared->cache.chunk.w0)) < 0)
+        if(H5P_set(new_plist, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &(dset->shared->cache.chunk.w0)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set preempt read chunks")
+        if(H5P_set(new_plist, H5D_ACS_APPEND_FLUSH_NAME, &dset->shared->append_flush) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set append flush property")
     } /* end if */
 
-    /* Set the VDS view option */
+    /* Set the VDS view & printf gap options */
     if(H5P_set(new_plist, H5D_ACS_VDS_VIEW_NAME, &(dset->shared->layout.storage.u.virt.view)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS view")
-
-    /* Set the VDS printf gap option */
     if(H5P_set(new_plist, H5D_ACS_VDS_PRINTF_GAP_NAME, &(dset->shared->layout.storage.u.virt.printf_gap)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS printf gap")
 

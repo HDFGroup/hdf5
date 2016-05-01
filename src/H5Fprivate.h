@@ -459,6 +459,7 @@
 #define H5F_ACS_MULTI_TYPE_NAME                 "multi_type"    /* Data type in multi file driver */
 #define H5F_ACS_LATEST_FORMAT_NAME              "latest_format" /* 'Use latest format version' flag */
 #define H5F_ACS_WANT_POSIX_FD_NAME              "want_posix_fd" /* Internal: query the file descriptor from the core VFD, instead of the memory address */
+#define H5F_ACS_OBJECT_FLUSH_CB_NAME     	"object_flush_cb" 	 /* Object flush callback */
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
 #define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME       "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
@@ -591,6 +592,12 @@ typedef struct H5F_file_t H5F_file_t;
 /* Block aggregation structure */
 typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
+/* Structure for object flush callback property (H5Pset_object_flush_cb)*/
+typedef struct H5F_object_flush_t {
+    H5F_flush_cb_t func;        /* The callback function */
+    void *udata;                /* User data */
+} H5F_object_flush_t;
+
 /* I/O Info for an operation */
 typedef struct H5F_io_info_t {
     const H5F_t *f;                     /* File object */
@@ -687,6 +694,12 @@ H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 size_t size, hid_t dxpl_id, void *buf/*out*/);
 H5_DLL herr_t H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
                 size_t size, hid_t dxpl_id, const void *buf);
+
+/* Functions that flush or evict */
+H5_DLL herr_t H5F_flush_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id);
+
+/* Routine to invoke callback function upon object flush */
+H5_DLL herr_t H5F_object_flush_cb(H5F_t *f, hid_t obj_id);
 
 /* Address-related functions */
 H5_DLL void H5F_addr_encode(const H5F_t *f, uint8_t **pp, haddr_t addr);

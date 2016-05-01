@@ -199,3 +199,48 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_block_write() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_flush_tagged_metadata
+ *
+ * Purpose:     Flushes metadata with specified tag in the metadata cache 
+ *              to disk.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mike McGreevy
+ *              September 9, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_flush_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
+{
+    H5F_io_info_t fio_info;             /* I/O info for operation */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Use tag to search for and flush associated metadata */
+    if(H5AC_flush_tagged_metadata(f, tag, dxpl_id)<0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
+
+    /* Set up I/O info for operation */
+    fio_info.f = f;
+
+    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    
+
+    /* Flush and reset the accumulator */
+    if(H5F__accum_reset(&fio_info, TRUE) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTRESET, FAIL, "can't reset accumulator")
+
+    /* Flush file buffers to disk. */
+    if(H5FD_flush(f->shared->lf, dxpl_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5F_flush_tagged_metadata */
+

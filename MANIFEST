@@ -722,6 +722,7 @@
 ./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Ofill.c
+./src/H5Oflush.c
 ./src/H5Ofsinfo.c
 ./src/H5Oginfo.c
 ./src/H5Olayout.c
@@ -2386,6 +2387,7 @@
 ./hl/test/test_ds.c
 ./hl/test/test_ds_be.h5
 ./hl/test/test_ds_le.h5
+./hl/test/test_dset_append.c
 ./hl/test/test_dset_opt.c
 ./hl/test/test_file_image.c
 ./hl/test/test_image.c

@@ -293,6 +293,9 @@ struct H5F_file_t {
 
     /* Metadata accumulator information */
     H5F_meta_accum_t accum;     /* Metadata accumulator info           	*/
+
+    /* Object flush info */
+    H5F_object_flush_t 	object_flush;		/* Information for object flush callback */
 };
 
 /*

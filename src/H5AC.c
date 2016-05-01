@@ -67,6 +67,9 @@ static herr_t H5AC__check_if_write_permitted(const H5F_t *f,
     hbool_t *write_permitted_ptr);
 static herr_t H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr,
     H5C_auto_size_ctl_t *int_conf_ptr);
+#if H5AC_DO_TAGGING_SANITY_CHECKS
+static herr_t H5AC__verify_tag(hid_t dxpl_id, const H5AC_class_t * type);
+#endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
 
 
 /*********************/
@@ -824,6 +827,11 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
             flags);
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
+#if H5AC_DO_TAGGING_SANITY_CHECKS
+    if(!H5C_get_ignore_tags(f->shared->cache) && (H5AC__verify_tag(dxpl_id, type) < 0))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Bad tag value")
+#endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
+
     /* Insert entry into metadata cache */
     if(H5C_insert_entry(f, dxpl_id, type, addr, thing, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5C_insert_entry() failed")
@@ -1135,8 +1143,8 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
     size_t		trace_entry_size = 0;
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
-    void *		thing = NULL;           /* Pointer to native data structure for entry */
-    void *		ret_value = NULL;       /* Return value */
+    void *              thing = NULL;           /* Pointer to native data structure for entry */
+    void *              ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1173,6 +1181,11 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
         sprintf(trace, "%s 0x%lx %d 0x%x", FUNC, (unsigned long)addr,
 		(int)(type->id), flags);
 #endif /* H5AC__TRACE_FILE_ENABLED */
+
+#if H5AC_DO_TAGGING_SANITY_CHECKS
+    if(!H5C_get_ignore_tags(f->shared->cache) && (H5AC__verify_tag(dxpl_id, type) < 0))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, NULL, "Bad tag value")
+#endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
 
     if(NULL == (thing = H5C_protect(f, dxpl_id, type, addr, udata, flags)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, "H5C_protect() failed.")
@@ -1776,7 +1789,7 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config
 
     /* Validate external configuration */
     if(H5AC_validate_config(config_ptr) != SUCCEED)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad cache configuration");
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad cache configuration")
 
     if(config_ptr->open_trace_file) {
 	FILE * file_ptr;
@@ -2342,6 +2355,7 @@ done:
 herr_t
 H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag)
 {
+    H5C_tag_t tag;                  /* Tag structure */
     H5P_genplist_t *dxpl;           /* Dataset transfer property list */
     herr_t ret_value = SUCCEED;     /* Return value */
 
@@ -2352,12 +2366,32 @@ H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag)
         HGOTO_ERROR(H5E_CACHE, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get the current tag value and return that (if prev_tag is NOT null) */
-    if(prev_tag)
-        if((H5P_get(dxpl, "H5AC_metadata_tag", prev_tag)) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to query dxpl")
+    if(prev_tag) {
+        if((H5P_get(dxpl, "H5C_tag", &tag)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query dxpl")
+        *prev_tag = tag.value;
+    } /* end if */
 
-    /* Set the provided tag value in the dxpl_id. */
-    if(H5P_set(dxpl, "H5AC_metadata_tag", &metadata_tag) < 0)
+    /* Add metadata_tag to tag structure */
+    tag.value = metadata_tag;
+
+    /* Determine globality of tag */
+    switch(metadata_tag) {
+        case H5AC__SUPERBLOCK_TAG:
+        case H5AC__SOHM_TAG:
+        case H5AC__GLOBALHEAP_TAG:
+            tag.globality = H5C_GLOBALITY_MAJOR;
+            break;
+        case H5AC__FREESPACE_TAG:
+            tag.globality = H5C_GLOBALITY_MINOR;
+            break;
+        default:
+            tag.globality = H5C_GLOBALITY_NONE;
+            break;
+    } /* end switch */
+
+    /* Set the provided tag in the dxpl_id. */
+    if(H5P_set(dxpl, "H5C_tag", &tag) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set property in dxpl")
 
 done:
@@ -2388,11 +2422,89 @@ H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag)
     HDassert(f);
     HDassert(f->shared);
      
-    /* Call cache-level function to retag entries */
-    H5C_retag_copied_metadata(f->shared->cache, metadata_tag);
+    /* Call cache-level function to re-tag entries with the COPIED tag */
+    H5C_retag_entries(f->shared->cache, H5AC__COPIED_TAG, metadata_tag);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5AC_retag_copied_metadata */
+
+
+/*------------------------------------------------------------------------------
+ * Function:    H5AC_flush_tagged_metadata()
+ *
+ * Purpose:     Wrapper for cache level function which flushes all metadata
+ *              that contains the specific tag. 
+ * 
+ * Return:      SUCCEED on success, FAIL otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              May 19, 2010
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_flush_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hid_t dxpl_id)
+{
+    /* Variable Declarations */
+    herr_t ret_value = SUCCEED;
+ 
+    /* Function Enter Macro */   
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Assertions */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Call cache level function to flush metadata entries with specified tag */
+    if(H5C_flush_tagged_entries(f, dxpl_id, metadata_tag) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot flush metadata")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_flush_tagged_metadata */
+
+
+#if H5AC_DO_TAGGING_SANITY_CHECKS
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC__verify_tag
+ *
+ * Purpose:     Performs sanity checking on an entry type and tag value
+ *              stored in a supplied dxpl_id.
+ *
+ * Return:      SUCCEED or FAIL.
+ *
+ * Programmer:  Mike McGreevy
+ *              October 20, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5AC__verify_tag(hid_t dxpl_id, const H5AC_class_t *type)
+{
+    H5P_genplist_t *dxpl;               /* DXPL for operation */
+    H5C_tag_t tag;                      /* Entry tag to validate */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Get the dataset transfer property list */
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* Get the tag from the DXPL */
+    if((H5P_get(dxpl, "H5C_tag", &tag)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value")
+
+    /* Verify legal tag value */
+    if(H5C_verify_tag(type->id, tag.value, tag.globality) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "tag verification failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC__verify_tag */
+#endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
 
 
 /*-------------------------------------------------------------------------

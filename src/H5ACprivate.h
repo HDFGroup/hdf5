@@ -121,6 +121,12 @@ typedef enum {
 #define H5AC__DEFAULT_MAX_CACHE_SIZE	H5C__DEFAULT_MAX_CACHE_SIZE
 #define H5AC__DEFAULT_MIN_CLEAN_SIZE	H5C__DEFAULT_MIN_CLEAN_SIZE
 
+/* Check if we are sanity checking tagging */
+#if H5C_DO_TAGGING_SANITY_CHECKS
+#define H5AC_DO_TAGGING_SANITY_CHECKS 1
+#else
+#define H5AC_DO_TAGGING_SANITY_CHECKS 0
+#endif
 
 /*
  * Class methods pertaining to caching.	 Each type of cached object will
@@ -180,10 +186,6 @@ typedef H5C_cache_entry_t		H5AC_info_t;
 
 /* Typedef for metadata cache (defined in H5Cpkg.h) */
 typedef H5C_t	H5AC_t;
-
-#define H5AC_METADATA_TAG_NAME           "H5AC_metadata_tag"
-#define H5AC_METADATA_TAG_SIZE           sizeof(haddr_t)
-#define H5AC_METADATA_TAG_DEF            H5AC__INVALID_TAG
 
 #define H5AC_RING_NAME  "H5AC_ring_type"
 
@@ -356,6 +358,7 @@ H5_DLL herr_t H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_nam
 
 /* Tag & Ring routines */
 H5_DLL herr_t H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag);
+H5_DLL herr_t H5AC_flush_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hid_t dxpl_id);
 H5_DLL herr_t H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag);
 H5_DLL herr_t H5AC_ignore_tags(const H5F_t *f);
 H5_DLL herr_t H5AC_get_entry_ring(const H5F_t *f, haddr_t addr, H5AC_ring_t *ring);

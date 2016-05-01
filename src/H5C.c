@@ -166,27 +166,17 @@ static herr_t H5C_make_space_in_cache(H5F_t * f,
        	                              size_t  space_needed,
                                       hbool_t write_permitted);
 
-static herr_t H5C_tag_entry(H5C_t * cache_ptr, 
+static herr_t H5C__tag_entry(H5C_t * cache_ptr, 
                             H5C_cache_entry_t * entry_ptr,
                             hid_t dxpl_id);
 
-static herr_t H5C_flush_tagged_entries(H5F_t * f, 
-                                       hid_t dxpl_id, 
-                                       H5C_t * cache_ptr, 
-                                       haddr_t tag);
+static herr_t H5C__mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag);
 
-static herr_t H5C_mark_tagged_entries(H5C_t * cache_ptr, 
-                                      haddr_t tag);
-
-static herr_t H5C_flush_marked_entries(H5F_t * f, 
+static herr_t H5C__flush_marked_entries(H5F_t * f, 
                                        hid_t dxpl_id);
 
 static herr_t H5C__generate_image(const H5F_t *f, H5C_t * cache_ptr, H5C_cache_entry_t *entry_ptr, 
                                   hid_t dxpl_id, int64_t *entry_size_change_ptr);
-
-#if H5C_DO_TAGGING_SANITY_CHECKS
-static herr_t H5C_verify_tag(int id, haddr_t tag);
-#endif
 
 #if H5C_DO_SLIST_SANITY_CHECKS
 static hbool_t H5C_entry_in_skip_list(H5C_t * cache_ptr, 
@@ -1848,7 +1838,7 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->image_up_to_date = FALSE;
 
     /* Apply tag to newly inserted entry */
-    if(H5C_tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)
+    if(H5C__tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Cannot tag metadata entry")
 
     entry_ptr->is_protected = FALSE;
@@ -2777,7 +2767,7 @@ H5C_protect(H5F_t *		f,
 
 #if H5C_DO_TAGGING_SANITY_CHECKS
 {
-        haddr_t     tag = HADDR_UNDEF;
+        H5C_tag_t tag;              /* Tag structure */
 
         /* The entry is already in the cache, but make sure that the tag value 
            being passed in via dxpl is still legal. This will ensure that had
@@ -2786,14 +2776,14 @@ H5C_protect(H5F_t *		f,
            from disk. */
 
         /* Get the tag from the DXPL */
-        if((H5P_get(dxpl, "H5AC_metadata_tag", &tag)) < 0)
+        if((H5P_get(dxpl, "H5C_tag", &tag)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to query property value");
     
         /* Verify tag value */
         if(cache_ptr->ignore_tags != TRUE) {
             /* Verify legal tag value */
-            if((H5C_verify_tag(entry_ptr->type->id, tag)) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "tag verification failed");
+            if(H5C_verify_tag(entry_ptr->type->id, tag.value, tag.globality) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "tag verification failed")
         } /* end if */
 }
 #endif
@@ -2822,7 +2812,7 @@ H5C_protect(H5F_t *		f,
 #endif /* H5_HAVE_PARALLEL */
 
         /* Apply tag to newly protected entry */
-        if(H5C_tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)
+        if(H5C__tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, NULL, "Cannot tag metadata entry")
 
         /* If the entry is very large, and we are configured to allow it,
@@ -7462,7 +7452,8 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
                 HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                 HDassert(entry_ptr->in_slist);
                 HDassert(entry_ptr->is_dirty);
-                HDassert(entry_ptr->ring >= ring);
+                if(!flush_marked_entries || entry_ptr->flush_marker)
+                    HDassert(entry_ptr->ring >= ring);
 
                 /* increment node pointer now, before we delete its target
                  * from the slist.
@@ -7476,7 +7467,8 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
                     HDassert(next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
                     HDassert(next_entry_ptr->is_dirty);
                     HDassert(next_entry_ptr->in_slist);
-                    HDassert(next_entry_ptr->ring >= ring);
+                    if(!flush_marked_entries || next_entry_ptr->flush_marker)
+                        HDassert(next_entry_ptr->ring >= ring);
                     HDassert(entry_ptr != next_entry_ptr);
                 } /* end if */
                 else
@@ -8481,8 +8473,8 @@ H5C_load_entry(H5F_t *              f,
     entry->addr                 = addr;
     entry->size                 = len;
     HDassert(entry->size < H5C_MAX_ENTRY_SIZE);
-    entry->compressed		= compressed;
-    entry->compressed_size	= compressed_size;
+    entry->compressed           = compressed;
+    entry->compressed_size      = compressed_size;
     entry->image_ptr            = image;
     entry->image_up_to_date     = TRUE;
     entry->type                 = type;
@@ -9565,7 +9557,34 @@ H5C_ignore_tags(H5C_t * cache_ptr)
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_tag_entry
+ * Function:    H5C_get_ignore_tags
+ *
+ * Purpose:     Retrieve the 'ignore_tags' field for the cache
+ *
+ * Return:      'ignore_tags' value (can't fail)
+ *
+ * Programmer:  Quincey Koziol
+ *              April 30, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5C_get_ignore_tags(const H5C_t *cache_ptr)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Sanity checks */
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    /* Return ignore tag value */
+    FUNC_LEAVE_NOAPI(cache_ptr->ignore_tags)
+} /* H5C_get_ignore_tags */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C__tag_entry
  *
  * Purpose:     Tags an entry with the provided tag (contained in the dxpl_id).
  *              If sanity checking is enabled, this function will perform 
@@ -9582,13 +9601,13 @@ H5C_ignore_tags(H5C_t * cache_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
+H5C__tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
 {
     H5P_genplist_t *dxpl;       /* dataset transfer property list */
-    haddr_t tag;                /* Tag address */
+    H5C_tag_t tag;              /* Tag structure */
     herr_t ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Assertions */
     HDassert(cache_ptr != NULL);
@@ -9600,13 +9619,13 @@ H5C_tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get the tag from the DXPL */
-    if((H5P_get(dxpl, "H5AC_metadata_tag", &tag)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value")
+    if((H5P_get(dxpl, "H5C_tag", &tag)) < 0)
+	HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value")
 
     if(cache_ptr->ignore_tags != TRUE) {
 #if H5C_DO_TAGGING_SANITY_CHECKS
         /* Perform some sanity checks to ensure that a correct tag is being applied */
-        if(H5C_verify_tag(entry_ptr->type->id, tag) < 0)
+        if(H5C_verify_tag(entry_ptr->type->id, tag.value, tag.globality) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "tag verification failed")
 #endif
     } else {
@@ -9617,70 +9636,30 @@ H5C_tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
            arbitrarily set it to something for the sake of passing the tests. 
            If the tag value is set, then we'll just let it get assigned without
            additional checking for correctness. */
-        if(!tag)
-            tag = H5AC__IGNORE_TAG;
+        if(!tag.value) {
+            tag.value = H5AC__IGNORE_TAG;
+            tag.globality = H5C_GLOBALITY_NONE;
+        } /* end if */
     } /* end if */
 
     /* Apply the tag to the entry */
-    entry_ptr->tag = tag;
+    entry_ptr->tag = tag.value;
+
+    /* Apply the tag globality to the entry */
+    entry_ptr->globality = tag.globality;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_tag_entry */
+} /* H5C__tag_entry */
 
+
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_flush_tagged_entries
+ * Function:    H5C__mark_tagged_entries
  *
- * WARNING:     Not yet tested or used anywhere. (written awhile ago,
- *              will keep it around in anticipation of being used in
- *              subsequent changes to support flushing individual objects).
- *
- * Purpose:     Flushes all entries with the specified tag to disk.
- *
- * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mike McGreevy
- *              August 19, 2010
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, H5C_t * cache_ptr, haddr_t tag)
-{
-    herr_t      ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Assertions */
-    HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
-    HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-
-    /* Mark all entries with specified tag */
-    if(H5C_mark_tagged_entries(cache_ptr, tag) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
-
-    /* Flush all marked entries */
-    if(H5C_flush_marked_entries(f, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_flush_tagged_entries */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C_mark_tagged_entries
- *
- * WARNING:     Not yet tested or used anywhere. (written awhile ago,
- *              will keep it around in anticipation of being used in
- *              subsequent changes to support flushing individual objects).
- *
- * Purpose:     Set the flush marker on entries in the cache that have
- *              the specified tag.
+ * Purpose:     Set the flush marker on dirty entries in the cache that have
+ *              the specified tag, as well as all globally tagged entries.
  *
  * Return:      FAIL if error is detected, SUCCEED otherwise.
  *
@@ -9690,41 +9669,42 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag) 
+H5C__mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag)
 {
-    H5C_cache_entry_t *next_entry_ptr;  /* entry pointer */
-    unsigned u;                         /* Local index variable */
+    unsigned u;                 /* Local index variable */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC
 
-    /* Assertions */
-    HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
-    HDassert(cache_ptr != NULL);
+    /* Sanity check */
+    HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    /* Iterate through entries, marking those with specified tag. */
+    /* Iterate through hash table entries, marking those with specified tag, as
+     * well as any major global entries which should always be flushed
+     * when flushing based on tag value */
     for(u = 0; u < H5C__HASH_TABLE_LEN; u++) {
+        H5C_cache_entry_t *entry_ptr;   /* Entry pointer */
 
-        next_entry_ptr = cache_ptr->index[u];
-        while(next_entry_ptr != NULL) {
-            if(next_entry_ptr->tag == tag)
-                next_entry_ptr->flush_marker = TRUE;
+	entry_ptr = cache_ptr->index[u];
+	while(entry_ptr != NULL) {
+	    if((entry_ptr->tag == tag) || (entry_ptr->globality == H5C_GLOBALITY_MAJOR)) {
+		/* We only want to set the flush marker on entries that
+		 * actually need flushed (i.e., dirty ones) */
+		if(entry_ptr->is_dirty)
+		    entry_ptr->flush_marker = TRUE;
+	    } /* end if */
 
-            next_entry_ptr = next_entry_ptr->ht_next;
-        } /* end while */
-    } /* for */
+	    entry_ptr = entry_ptr->ht_next;
+	} /* end while */
+    } /* end for */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5C_mark_tagged_entries */
+} /* H5C__mark_tagged_entries */
 
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_flush_marked_entries
- *
- * WARNING:     Not yet tested or used anywhere. (written awhile ago,
- *              will keep it around in anticipation of being used in
- *              subsequent changes to support flushing individual objects).
+ * Function:    H5C__flush_marked_entries
  *
  * Purpose:     Flushes all marked entries in the cache.
  *
@@ -9736,14 +9716,13 @@ H5C_mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_flush_marked_entries(H5F_t * f, hid_t dxpl_id)
+H5C__flush_marked_entries(H5F_t * f, hid_t dxpl_id)
 { 
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Assertions */
-    HDassert(0); /* This function is not yet used. We shouldn't be in here yet. */
     HDassert(f != NULL);
 
     /* Flush all marked entries */
@@ -9752,7 +9731,7 @@ H5C_flush_marked_entries(H5F_t * f, hid_t dxpl_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_flush_marked_entries */
+} /* H5C__flush_marked_entries */
 
 #if H5C_DO_TAGGING_SANITY_CHECKS
 
@@ -9769,8 +9748,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5C_verify_tag(int id, haddr_t tag) 
+herr_t
+H5C_verify_tag(int id, haddr_t tag, H5C_tag_globality_t globality)
 {
     herr_t ret_value = SUCCEED;
 
@@ -9784,7 +9763,6 @@ H5C_verify_tag(int id, haddr_t tag)
     else if(tag == H5AC__INVALID_TAG)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "no metadata tag provided")
     else {
-
         /* Perform some sanity checks on tag value. Certain entry
          * types require certain tag values, so check that these
          * constraints are met. */
@@ -9793,37 +9771,45 @@ H5C_verify_tag(int id, haddr_t tag)
         if((id == H5AC_SUPERBLOCK_ID) || (id == H5AC_DRVRINFO_ID)) {
             if(tag != H5AC__SUPERBLOCK_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock not tagged with H5AC__SUPERBLOCK_TAG")
-        }
+            if(globality != H5C_GLOBALITY_MAJOR)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "superblock/driver-info globality not marked with H5C_GLOBALITY_MAJOR")
+        } /* end if */
         else {
             if(tag == H5AC__SUPERBLOCK_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__SUPERBLOCK_TAG applied to non-superblock entry")
-        }
+        } /* end else */
     
         /* Free Space Manager */
         if((id == H5AC_FSPACE_HDR_ID) || (id == H5AC_FSPACE_SINFO_ID)) {
             if(tag != H5AC__FREESPACE_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "freespace entry not tagged with H5AC__FREESPACE_TAG")
-        }
+            if(globality != H5C_GLOBALITY_MINOR)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "freespace entry globality not marked with H5C_GLOBALITY_MINOR")
+        } /* end if */
         else {
             if(tag == H5AC__FREESPACE_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__FREESPACE_TAG applied to non-freespace entry")
-        }
+        } /* end else */
     
         /* SOHM */
         if((id == H5AC_SOHM_TABLE_ID) || (id == H5AC_SOHM_LIST_ID)) { 
             if(tag != H5AC__SOHM_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "sohm entry not tagged with H5AC__SOHM_TAG")
-        }
+            if(globality != H5C_GLOBALITY_MAJOR)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "sohm entry globality not marked with H5C_GLOBALITY_MAJOR")
+        } /* end if */
     
         /* Global Heap */
         if(id == H5AC_GHEAP_ID) {
             if(tag != H5AC__GLOBALHEAP_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "global heap not tagged with H5AC__GLOBALHEAP_TAG")
-        }
+            if(globality != H5C_GLOBALITY_MAJOR)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "global heap entry globality not marked with H5C_GLOBALITY_MAJOR")
+        } /* end if */
         else {
             if(tag == H5AC__GLOBALHEAP_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__GLOBALHEAP_TAG applied to non-globalheap entry")
-        }
+        } /* end else */
     } /* end else */
 
 done:
@@ -9834,11 +9820,53 @@ done:
 
 /*-------------------------------------------------------------------------
  *
- * Function:    H5C_retag_copied_metadata
+ * Function:    H5C_flush_tagged_entries
+ *
+ * Purpose:     Flushes all entries with the specified tag to disk.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              August 19, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag)
+{
+    /* Variable Declarations */
+    H5C_t      *cache_ptr = NULL;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Assertions */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Get cache pointer */
+    cache_ptr = f->shared->cache;
+
+    /* Mark all entries with specified tag */
+    if(H5C__mark_tagged_entries(cache_ptr, tag) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't mark tagged entries")
+
+    /* Flush all marked entries */
+    if(H5C__flush_marked_entries(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush marked entries")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_flush_tagged_entries */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_retag_entries
  *
  * Purpose:     Searches through cache index for all entries with the
- *              H5AC__COPIED_TAG, indicating that it was created as a 
- *              result of an object copy, and applies the provided tag.
+ *              value specified by src_tag and changes it to the value
+ *              specified by dest_tag.
  *
  * Return:      SUCCEED or FAIL.
  *
@@ -9848,30 +9876,29 @@ done:
  *-------------------------------------------------------------------------
  */
 void
-H5C_retag_copied_metadata(H5C_t * cache_ptr, haddr_t metadata_tag) 
+H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag) 
 {
     unsigned u;         /* Local index variable */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    /* Sanity check */
     HDassert(cache_ptr);
 
-    /* Iterate through entries, retagging those with the H5AC__COPIED_TAG tag */
+    /* Iterate through entries, retagging those with the src_tag tag */
     for(u = 0; u < H5C__HASH_TABLE_LEN; u++) {
-        H5C_cache_entry_t *next_entry_ptr;      /* entry pointer */
+        H5C_cache_entry_t *entry_ptr; /* entry pointer */
 
-        next_entry_ptr = cache_ptr->index[u];
-        while(next_entry_ptr != NULL) {
-            if(cache_ptr->index[u] != NULL)
-                if((cache_ptr->index[u])->tag == H5AC__COPIED_TAG)
-                    (cache_ptr->index[u])->tag = metadata_tag;
-
-            next_entry_ptr = next_entry_ptr->ht_next;
-        } /* end while */
+	entry_ptr = cache_ptr->index[u];
+	while(entry_ptr) {
+	    if(entry_ptr->tag == src_tag)
+                entry_ptr->tag = dest_tag;
+	    entry_ptr = entry_ptr->ht_next;
+	} /* end while */
     } /* end for */
 
     FUNC_LEAVE_NOAPI_VOID
-} /* H5C_retag_copied_metadata */
+} /* H5C_retag_entries */
 
 
 /*-------------------------------------------------------------------------
