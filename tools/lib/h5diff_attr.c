@@ -108,17 +108,25 @@ static void table_attrs_free( table_attrs_t *table )
  *------------------------------------------------------------------------*/
 static void table_attr_mark_exist(unsigned *exist, char *name, table_attrs_t *table)
 {
-    size_t new_val;
+    size_t curr_val;
+
+    match_attr_t *new_attrs;
 
     if(table->nattrs == table->size) {
         table->size = MAX(1, table->size * 2);
-        table->attrs = (match_attr_t *)HDrealloc(table->attrs, table->size * sizeof(match_attr_t));
+        new_attrs = (match_attr_t *)HDrealloc(table->attrs, table->size * sizeof(match_attr_t));
+        if(new_attrs)
+            table->attrs = new_attrs;
     } /* end if */
 
-    new_val = table->nattrs++;
-    table->attrs[new_val].exist[0] = exist[0];
-    table->attrs[new_val].exist[1] = exist[1];
-    table->attrs[new_val].name = (char *)HDstrdup(name);
+    if(table->nattrs < table->size) {
+        curr_val = table->nattrs;
+        table->attrs[curr_val].exist[0] = exist[0];
+        table->attrs[curr_val].exist[1] = exist[1];
+        if(name)
+            table->attrs[curr_val].name = (char *)HDstrdup(name);
+        table->nattrs++;
+    }
 }
 
 /*-------------------------------------------------------------------------
@@ -377,21 +385,30 @@ hsize_t diff_attr(hid_t loc1_id,
         if((attr2_id = H5Aopen(loc2_id, name2, H5P_DEFAULT)) < 0)
             goto error;
 
-        /* get the datatypes  */
-        if((ftype1_id = H5Aget_type(attr1_id)) < 0)
-            goto error;
-	vstrtype1 = H5Tis_variable_str(ftype1_id);
-        if((ftype2_id = H5Aget_type(attr2_id)) < 0)
-            goto error;
-	vstrtype2 = H5Tis_variable_str(ftype2_id);
-	/* no compare if either one but not both are variable string type */
-	if (vstrtype1 != vstrtype2){
-	    if ((options->m_verbose||options->m_list_not_cmp))
-		parallel_print("Not comparable: one of attribute <%s/%s> or <%s/%s> is of variable length type\n",
-		    path1, name1, path2, name2);
-	    options->not_cmp = 1;
-	    return 0;
-	}
+            /* get the datatypes  */
+            if ((ftype1_id = H5Aget_type(attr1_id)) < 0)
+                goto error;
+            vstrtype1 = H5Tis_variable_str(ftype1_id);
+            if ((ftype2_id = H5Aget_type(attr2_id)) < 0)
+                goto error;
+            vstrtype2 = H5Tis_variable_str(ftype2_id);
+            /* no compare if either one but not both are variable string type */
+            if (vstrtype1 != vstrtype2) {
+                if ((options->m_verbose || options->m_list_not_cmp))
+                    parallel_print("Not comparable: one of attribute <%s/%s> or <%s/%s> is of variable length type\n",
+                            path1, name1, path2, name2);
+                options->not_cmp = 1;
+                if (H5Tclose(ftype1_id) < 0)
+                    goto error;
+                if (H5Tclose(ftype2_id) < 0)
+                    goto error;
+                if (H5Aclose(attr1_id) < 0)
+                    goto error;
+                if (H5Aclose(attr2_id) < 0)
+                    goto error;
+                continue;
+            }
+
 
         if((mtype1_id = h5tools_get_native_type(ftype1_id))<0)
             goto error;
