@@ -4,22 +4,22 @@ HDF5 version 1.8.17-pre1 currently under development
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.15 and
-HDF5-1.8.16-*, and contains information on the platforms tested and
-known problems in HDF5-1.8.16-*.
+This document describes the differences between HDF5-1.8.16 and
+HDF5-1.8.17-*, and contains information on the platforms tested and
+known problems in HDF5-1.8.17-*.
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.15 source code, documentation, and additional materials
+Links to the HDF5 1.8.17 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.15 release can be obtained from:
+The HDF5 1.8.17 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.15 can be accessed directly at this location:
+User documentation for 1.8.17 can be accessed directly at this location:
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,8 +30,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes
-from Release to Release" document, in the section "Release 1.8.16 (current
-release) versus Release 1.8.15
+from Release to Release" document, in the section "Release 1.8.17 (current
+release) versus Release 1.8.16
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -45,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.15
+- Bug Fixes since HDF5-1.8.16
 - Supported Platforms
 - Supported Configuration Features Summary
 - More Tested Platforms
@@ -211,8 +211,8 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    -
-    -
+    - Mac OS X El Capitan 10.11.4 with compilers Apple clang/clang++ version 7.3.0 from
+    Xcode 7.3, gfortran GNU Fortran (GCC) 5.2.0 and Intel icc/icpc/ifort version 16.0.2
 
 Bug Fixes since HDF5-1.8.16
 ===========================
@@ -254,6 +254,11 @@ Bug Fixes since HDF5-1.8.16
       allocation) is minimal.
 
       (DER, 2016/02/03, HDFFV-9676)
+
+    - Added a patch to remove '"'s from arguments for mpi compilers that were
+      causing errors compiling H5lib_settings.c with SGI MPT.
+
+      (LRK, 2016/04/20, HDFFV-9439)
 
     Library
     -------
@@ -367,10 +372,10 @@ They are built with the configure process unless specified otherwise.
     (NASA G-ADA)                  xlC/xlC_r 10.1.0.5
                                   xlf90/xlf90_r 12.1.0.6
 
-    Linux 2.6.32-573.3.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 2.6.32-573.22.1.el6     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (platypus)                       Version 4.4.7 20120313
-                                     Version 4.8.4, Version 5.2.0
+                                     Version 4.9.3, Version 5.2.0
                                   PGI C, Fortran, C++ for 64-bit target on
                                   x86-64;
                                       Version 15.7-0
@@ -379,15 +384,15 @@ They are built with the configure process unless specified otherwise.
                                      Version 15.0.3.187 Build 20150407
                                   MPICH 3.1.4 compiled with GCC 4.9.3
 
-    Linux 2.6.32-504.8.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
-    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
+    Linux 2.6.32-504.8.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
                                   IBM XL C/C++ V13.1
                                   IBM XL Fortran V15.1
 
     Linux 3.10.0-229.14.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (kituo/moohan)                  Version 4.8.3 20140911 (Red Hat 4.8.3-9)
+    (kituo/moohan)                  Version 4.8.5 20150623 (Red Hat 4.8.5-4)
                                     Version 5.2.0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
@@ -418,13 +423,17 @@ They are built with the configure process unless specified otherwise.
     64-bit                        gfortran GNU Fortran (GCC) 4.8.2
     (swallow/kite)                Intel icc/icpc/ifort version 15.0.3
 
-    Mac OS X Mavericks 10.9.5     Apple clang/clang++ version 6.0 from Xcode 6.2.0
+    Mac OS X Mavericks 10.9.5     Apple clang/clang++ version 6.0 from Xcode 6.2
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2
     (wren/quail)                  Intel icc/icpc/ifort version 15.0.3
 
-    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.0 from Xcode 7.0.0
+    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2
     (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
+
+    Mac OS X El Capitan 10.11.4   Apple clang/clang++ version 7.3.0 from Xcode 7.3
+    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011dev/ox1011test)       Intel icc/icpc/ifort version 16.0.2
 
 
 Tested Configuration Features Summary
@@ -491,10 +500,6 @@ The following platforms are not supported but have been tested for this release.
     Linux 2.6.18-431.11.2.el6     g95 (GCC 4.0.3 (g95 0.94!)
     #1 SMP x86_64 GNU/Linux
     (platypus)
-
-    Mac OS X El Capitan 10.11     Apple clang/clang++ version 7.0.0 from Xcode 7.0.1
-    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
-    (VM)
 
     Windows 7                     Visual Studio 2008  (cmake)
 
