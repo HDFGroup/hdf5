@@ -13,22 +13,37 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * This is the main public HDF5 High Level include file.  Put further
- * information in a particular header file and include that here, don't
- * fill this file with lots of gunk...
+#ifndef _H5LDprivate_H
+#define _H5LDprivate_H
+
+/* High-level library internal header file */
+#include "H5HLprivate2.h"
+#include "H5LDpublic.h"
+
+/* Store information for a field in <list_of_fields> for a compound data type */
+/* 
+ *  Note: This data structure is used by both H5LD.c and hl/tools/h5watch
+ *	  This declaration is repeated in tools/lib/h5tools_str.c 
  */
+typedef struct H5LD_memb_t {
+    size_t tot_offset;
+    size_t last_tsize;
+    hid_t last_tid;
+    char **names;
+} H5LD_memb_t;
 
-#ifndef _HDF5_HL_H
-#define _HDF5_HL_H
-#include "hdf5.h"       /* hdf5 main library */
-#include "H5DOpublic.h" /* dataset optimization */
-#include "H5DSpublic.h" /* dimension scales */
-#include "H5LTpublic.h" /* lite */
-#include "H5IMpublic.h" /* image */
-#include "H5TBpublic.h" /* table */
-#include "H5PTpublic.h" /* packet table */
-#include "H5LDpublic.h" /* lite dataset */
+/* 
+ * Note that these two private routines are called by hl/tools/h5watch.
+ * Have considered the following options:
+ *   1) Repeat the coding in both H5LD.c and h5watch
+ *   2) Make these public routines
+ *   3) Break the rule "to avoid tools calling private routines in the library"
+ * #1: not good for maintenance
+ * #2: these two routines are too specific to be made as public routines
+ * Decide to do #3 at this point of time after some discussion.
+ */
+void H5LD_clean_vector(H5LD_memb_t *listv[]);
+int H5LD_construct_vector(char *fields, H5LD_memb_t *listv[], hid_t par_tid);
 
-#endif /*H5_INCLUDE_HL*/
+#endif /* end _H5LDprivate_H */
 

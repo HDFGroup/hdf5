@@ -2352,6 +2352,9 @@
 ./hl/src/H5IM.c
 ./hl/src/H5IMprivate.h
 ./hl/src/H5IMpublic.h
+./hl/src/H5LD.c
+./hl/src/H5LDprivate.h
+./hl/src/H5LDpublic.h
 ./hl/src/H5LT.c
 ./hl/src/H5LTanalyze.c
 ./hl/src/H5LTanalyze.l
@@ -2378,6 +2381,7 @@
 ./hl/test/dtype_file_readable.txt
 ./hl/test/earth.pal
 ./hl/test/gen_test_ds.c
+./hl/test/gen_test_ld.c
 ./hl/test/h5hltest.h
 ./hl/test/image24pixel.txt
 ./hl/test/image24plane.txt
@@ -2391,6 +2395,8 @@
 ./hl/test/test_dset_opt.c
 ./hl/test/test_file_image.c
 ./hl/test/test_image.c
+./hl/test/test_ld.c
+./hl/test/test_ld.h5
 ./hl/test/test_lite.c
 ./hl/test/test_packet.c
 ./hl/test/test_packet_vlen.c

@@ -13,22 +13,21 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * This is the main public HDF5 High Level include file.  Put further
- * information in a particular header file and include that here, don't
- * fill this file with lots of gunk...
- */
+#ifndef _H5LDpublic_H
+#define _H5LDpublic_H
 
-#ifndef _HDF5_HL_H
-#define _HDF5_HL_H
-#include "hdf5.h"       /* hdf5 main library */
-#include "H5DOpublic.h" /* dataset optimization */
-#include "H5DSpublic.h" /* dimension scales */
-#include "H5LTpublic.h" /* lite */
-#include "H5IMpublic.h" /* image */
-#include "H5TBpublic.h" /* table */
-#include "H5PTpublic.h" /* packet table */
-#include "H5LDpublic.h" /* lite dataset */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif /*H5_INCLUDE_HL*/
+H5_HLDLL herr_t H5LDget_dset_dims(hid_t did, hsize_t *cur_dims);
+H5_HLDLL size_t H5LDget_dset_type_size(hid_t did, const char *fields);
+H5_HLDLL herr_t H5LDget_dset_elmts(hid_t did, const hsize_t *prev_dims,
+    const hsize_t *cur_dims, const char *fields, void *buf);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _H5LDpublic_H */
 

@@ -29,7 +29,7 @@ LDADD=$(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.
 TEST_PROG=test_lite test_image test_file_image test_table test_ds test_packet test_dset_opt \
-	test_dset_append
+	test_ld test_dset_append
 check_PROGRAMS=$(TEST_PROG)
 
 # These programs generate test files for the tests.  They don't need to be
@@ -37,7 +37,7 @@ check_PROGRAMS=$(TEST_PROG)
 # them in a conditional causes automake to generate rules so that they
 # can be built by hand.  They can also be built by specifying
 # --enable-build-all at configure time.
-BUILD_ALL_PROGS=gen_test_ds
+BUILD_ALL_PROGS=gen_test_ds gen_test_ld
 
 if BUILD_ALL_CONDITIONAL
   noinst_PROGRAMS=$(BUILD_ALL_PROGS)
