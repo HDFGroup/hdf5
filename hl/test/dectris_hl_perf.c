@@ -19,17 +19,39 @@
  */
 
 #include "hdf5_hl.h"
+
+#ifdef H5_HAVE_FILTER_DEFLATE
 #include <zlib.h>
+
+#if !defined(WIN32) && !defined(__MINGW32__)
+
 #include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
- 
+
+#ifdef H5_STDC_HEADERS
+#   include <errno.h>
+#   include <fcntl.h>
+#   include <stdio.h>
+#   include <stdlib.h>
+#endif
+
+#ifdef H5_HAVE_UNISTD_H
+#   include <sys/types.h>
+#   include <unistd.h>
+#endif
+
+#ifdef H5_HAVE_SYS_STAT_H
+#   include <sys/stat.h>
+#endif
+
+#if defined(H5_TIME_WITH_SYS_TIME)
+#   include <sys/time.h>
+#   include <time.h>
+#elif defined(H5_HAVE_SYS_TIME_H)
+#   include <sys/time.h>
+#else
+#   include <time.h>
+#endif
+
 const char *FILENAME[] = {
     "dectris_perf",
     "unix.raw",
@@ -640,3 +662,32 @@ main (void)
 /*    h5_cleanup(FILENAME, fapl);*/
     return 0;
 }
+
+#else /* WIN32 / MINGW32 */
+
+int
+main(void)
+{
+    printf("Non-POSIX platform. Exiting.\n");
+    return EXIT_FAILURE;
+} /* end main() */
+
+#endif /* WIN32 / MINGW32 */
+
+#else  /* !H5_HAVE_FILTER_DEFLATE */
+
+/*
+ * Function:    main
+ * Purpose:     Dummy main() function for if HDF5 was configured without
+ *              zlib stuff.
+ * Return:      EXIT_SUCCESS
+ */
+int
+main(void)
+{
+    HDfprintf(stdout, "No compression IO performance because zlib was not configured\n");
+    return EXIT_SUCCESS;
+}
+
+#endif  /* !H5_HAVE_FILTER_DEFLATE */
+
