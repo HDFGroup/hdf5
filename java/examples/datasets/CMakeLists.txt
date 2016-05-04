@@ -62,12 +62,15 @@ foreach (HDFJAVA_JAR ${CMAKE_JAVA_INCLUDE_PATH})
 endforeach (HDFJAVA_JAR)
 
 MACRO (ADD_H5_TEST resultfile resultcode)
+  if (CMAKE_BUILD_TYPE MATCHES Debug)
+    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+  endif(CMAKE_BUILD_TYPE MATCHES Debug)
   add_test (
       NAME JAVA_datasets-${resultfile}
       COMMAND "${CMAKE_COMMAND}"
           -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
           -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${resultfile}_JAR_FILE}"
-          -D "TEST_ARGS:STRING=${ARGN}"
+          -D "TEST_ARGS:STRING=${CMD_ARGS}${ARGN}"
           -D "TEST_PROGRAM=examples.datasets.${resultfile}"
           -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
           -D "TEST_FOLDER=${HDFJAVA_EXAMPLES_BINARY_DIR}"
@@ -96,7 +99,7 @@ if (BUILD_TESTING)
   foreach (example ${HDF_JAVA_EXAMPLES})
     if (${example} STREQUAL "H5Ex_D_External")
       add_test (
-          NAME JAVA_datasets-${example}-clearall-objects
+          NAME JAVA_datasets-${example}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
@@ -106,7 +109,7 @@ if (BUILD_TESTING)
       )
     else (${example} STREQUAL "H5Ex_D_External")
       add_test (
-          NAME JAVA_datasets-${example}-clearall-objects
+          NAME JAVA_datasets-${example}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
@@ -115,7 +118,7 @@ if (BUILD_TESTING)
       )
     endif (${example} STREQUAL "H5Ex_D_External")
     if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (JAVA_datasets-${example}-clearall-objects PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (JAVA_datasets-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
     add_test (
         NAME JAVA_datasets-${example}-copy-objects
@@ -124,7 +127,7 @@ if (BUILD_TESTING)
             ${HDFJAVA_EXAMPLES_SOURCE_DIR}/testfiles/examples.datasets.${example}.txt
             ${HDFJAVA_EXAMPLES_DATASETS_BINARY_DIR}/${example}.txt
     )
-    set_tests_properties (JAVA_datasets-${example}-copy-objects PROPERTIES DEPENDS JAVA_datasets-${example}-clearall-objects)
+    set_tests_properties (JAVA_datasets-${example}-copy-objects PROPERTIES DEPENDS JAVA_datasets-${example}-clear-objects)
     set (last_test "JAVA_datasets-${example}-copy-objects")
     if (${example} STREQUAL "H5Ex_D_Szip")
       if (USE_FILTER_SZIP)

@@ -67,12 +67,15 @@ foreach (h5_file ${HDF_JAVA_TEST_FILES})
 endforeach (h5_file ${HDF_JAVA_TEST_FILES})
 
 MACRO (ADD_H5_TEST resultfile resultcode)
+  if (CMAKE_BUILD_TYPE MATCHES Debug)
+    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+  endif(CMAKE_BUILD_TYPE MATCHES Debug)
   add_test (
       NAME JAVA_groups-${resultfile}
       COMMAND "${CMAKE_COMMAND}"
           -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
           -D "TEST_PROGRAM=examples.groups.${resultfile}"
-          -D "TEST_ARGS:STRING=${ARGN}"
+          -D "TEST_ARGS:STRING=${CMD_ARGS}${ARGN}"
           -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${resultfile}_JAR_FILE}"
           -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
           -D "TEST_FOLDER=${HDFJAVA_EXAMPLES_BINARY_DIR}"
@@ -90,20 +93,20 @@ ENDMACRO (ADD_H5_TEST file)
 if (BUILD_TESTING)
   foreach (example ${HDF_JAVA_EXAMPLES})
     add_test (
-        NAME JAVA_groups-${example}-clearall-objects
+        NAME JAVA_groups-${example}-clear-objects
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${example}.out
             ${example}.out.err
     )
     if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (JAVA_groups-${example}-clearall-objects PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (JAVA_groups-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
-    set (last_test "JAVA_groups-${example}-clearall-objects")
+    set (last_test "JAVA_groups-${example}-clear-objects")
     if (NOT ${example} STREQUAL "H5Ex_G_Iterate" AND NOT ${example} STREQUAL "H5Ex_G_Visit")
       if (${example} STREQUAL "H5Ex_G_Compact")
         add_test (
-            NAME JAVA_groups-${example}-clearall-h5s
+            NAME JAVA_groups-${example}-clear-h5s
             COMMAND    ${CMAKE_COMMAND}
                 -E remove
                 ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}1.h5
@@ -111,16 +114,16 @@ if (BUILD_TESTING)
         )
       else (${example} STREQUAL "H5Ex_G_Compact")
         add_test (
-            NAME JAVA_groups-${example}-clearall-h5s
+            NAME JAVA_groups-${example}-clear-h5s
             COMMAND    ${CMAKE_COMMAND}
                 -E remove
                 ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
         )
       endif (${example} STREQUAL "H5Ex_G_Compact")
       if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (JAVA_groups-${example}-clearall-h5s PROPERTIES DEPENDS ${last_test})
+        set_tests_properties (JAVA_groups-${example}-clear-h5s PROPERTIES DEPENDS ${last_test})
       endif (NOT "${last_test}" STREQUAL "")
-      set (last_test "JAVA_groups-${example}-clearall-h5s")
+      set (last_test "JAVA_groups-${example}-clear-h5s")
     endif (NOT ${example} STREQUAL "H5Ex_G_Iterate" AND NOT ${example} STREQUAL "H5Ex_G_Visit")
     add_test (
         NAME JAVA_groups-${example}-copy-objects
