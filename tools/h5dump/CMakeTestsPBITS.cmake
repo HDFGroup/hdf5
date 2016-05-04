@@ -65,9 +65,9 @@
       tpbitsUnsignedLongLong16.ddl
   )
   set (HDF5_REFERENCE_TEST_PBITS
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/packedbits.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5
+      ${HDF5_TOOLS_DIR}/testfiles/packedbits.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tarray1.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tcompound.h5
   )
   set (HDF5_ERROR_REFERENCE_PBITS
       tnofilename-with-packed-bits.err

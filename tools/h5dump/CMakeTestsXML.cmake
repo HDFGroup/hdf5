@@ -9,122 +9,122 @@
   # copy XML test files from source dir to test dir
   #
   set (HDF5_XML_REFERENCE_TEST_FILES
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray2.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray3.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray6.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray7.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tbitfields.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound2.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_complex.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdatareg.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset2.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tenum.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlink.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfpformat.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/thlink.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop2.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tmany.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-amp.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-apos.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-gt.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-lt.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-quot.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-sp.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnamed_dtype_attr.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestedcomp.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnodata.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tobjref.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/topaque.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes-at.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring-at.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tudlink.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes1.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes2.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes3.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes4.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes5.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tall.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tarray1.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tarray2.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tarray3.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tarray6.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tarray7.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tattr.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tbitfields.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tcompound.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tcompound2.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tdatareg.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tdset.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tdset2.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tempty.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tenum.h5
+      ${HDF5_TOOLS_DIR}/testfiles/textlink.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfpformat.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tgroup.h5
+      ${HDF5_TOOLS_DIR}/testfiles/thlink.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tloop.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tloop2.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tmany.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tname-amp.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tname-apos.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tname-gt.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tname-lt.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tname-quot.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tname-sp.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tnamed_dtype_attr.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tnestedcomp.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tnodata.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tobjref.h5
+      ${HDF5_TOOLS_DIR}/testfiles/topaque.h5
+      ${HDF5_TOOLS_DIR}/testfiles/torderattr.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tref.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tref-escapes.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tref-escapes-at.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tsaf.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tslink.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tstring.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tstring-at.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tstr.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tstr2.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tudlink.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes2.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes3.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes4.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes5.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5
   )
   set (HDF5_XML_REFERENCE_FILES
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tall-2A.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray1.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray3.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray6.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tarray7.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tattr.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tbitfields.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_complex.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdatareg.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-dtd.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-dtd-2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-dtd-uri.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-nons.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-nons-2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-nons-uri.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-ns.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty-ns-2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tenum.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/textlink.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfpformat.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tgroup.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/thlink.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tloop2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tmany.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-amp.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-apos.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnamed_dtype_attr.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-gt.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-lt.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-quot.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tname-sp.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnestedcomp.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tnodata.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tobjref.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/topaque.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr1.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr3.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/torderattr4.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tref-escapes-at.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tsaf.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tslink.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstr2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tstring-at.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tudlink.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes1.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes2.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes3.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes4.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes5.h5.xml
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tall.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tall-2A.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tarray1.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tarray2.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tarray3.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tarray6.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tarray7.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tattr.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tbitfields.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tcompound.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tcompound2.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tdatareg.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tdset.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tdset2.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tempty.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tempty-dtd.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tempty-dtd-2.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tempty-dtd-uri.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tempty-nons.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tempty-nons-2.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tempty-nons-uri.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tempty-ns.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tempty-ns-2.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tenum.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/textlink.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tfpformat.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tgroup.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/thlink.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tloop.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tloop2.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tmany.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tname-amp.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tname-apos.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tnamed_dtype_attr.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tname-gt.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tname-lt.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tname-quot.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tname-sp.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tnestedcomp.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tnodata.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tobjref.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/topaque.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/torderattr1.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/torderattr2.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/torderattr3.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/torderattr4.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tref.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tref-escapes.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tref-escapes-at.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tsaf.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tslink.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tstr.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tstr2.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tstring.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tstring-at.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tudlink.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes2.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes3.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes4.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tvldtypes5.h5.xml
+      ${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5.xml
   )
 
   foreach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
@@ -138,7 +138,7 @@
         ARGS       -E copy_if_different ${tst_xml_h5_file} ${dest}
     )
   endforeach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
-  
+
   foreach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
     get_filename_component(fname "${tst_xml_other_file}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}")
@@ -150,7 +150,7 @@
         ARGS       -E copy_if_different ${tst_xml_other_file} ${dest}
     )
   endforeach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
-  
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -204,16 +204,16 @@
 
 ##############################################################################
 ##############################################################################
-###           T H E   T E S T S                                          HDF5_ENABLE_USING_MEMCHECKER  ###
+###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
-   
+
   if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
     add_test (
       NAME H5DUMP-XML-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
           tall.h5.out
           tall.h5.out.err
           tall-2A.h5.out
@@ -401,7 +401,7 @@
   ADD_XML_H5_TEST (tempty.h5 0 tempty.h5)
   ADD_XML_H5_TEST (tnamed_dtype_attr.h5 0 tnamed_dtype_attr.h5)
   ##Test dataset and attribute of null space.  Commented out:
-  ## wait until the XML schema is updated for null space. 
+  ## wait until the XML schema is updated for null space.
   ##  ADD_XML_H5_TEST (tnullspace.h5 0 tnulspace.h5)
   ## So is dataspace with 0 dimension size.
   ##  ADD_XML_H5_TEST (zerodim.h5 0 zerodim.h5)
@@ -414,7 +414,7 @@
   ADD_XML_H5_TEST (tempty-nons-2.h5 0 --xml-ns=: tempty.h5)
 
   ## Some of these combinations are syntactically correct but
-  ##  the URLs are dummies 
+  ##  the URLs are dummies
   ADD_XML_H5_TEST (tempty-ns.h5 0 -X thing: tempty.h5)
   ADD_XML_H5_TEST (tempty-ns-2.h5 0 --xml-ns=thing: tempty.h5)
   ADD_XML_H5_TEST (tempty-nons-uri.h5 0 --xml-ns=: --xml-dtd=http://somewhere.net tempty.h5)
@@ -431,4 +431,4 @@
 
   # tests for floating point user defined printf format
   ADD_XML_H5_TEST (tfpformat.h5 0 -u -m %.7f tfpformat.h5)
-   
+

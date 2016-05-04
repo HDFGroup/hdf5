@@ -96,7 +96,7 @@ add_custom_command (
 #-----------------------------------------------------------------------------
 # f90CStub lib
 #-----------------------------------------------------------------------------
-set (f90CStub_C_SRCS
+set (f90CStub_C_SOURCES
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90kit.c
     ${HDF5_F90_SRC_SOURCE_DIR}/H5_f.c
@@ -115,14 +115,14 @@ set (f90CStub_C_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zf.c
 )
 
-set_source_files_properties (${f90CStub_C_SRCS} PROPERTIES LANGUAGE C)
+set_source_files_properties (${f90CStub_C_SOURCES} PROPERTIES LANGUAGE C)
 
 set (f90CStub_C_HDRS
     # generated files
     ${HDF5_F90_BINARY_DIR}/H5f90i_gen.h
 )
 
-add_library (${HDF5_F90_C_LIB_TARGET} STATIC ${f90CStub_C_SRCS} ${f90CStub_C_HDRS})
+add_library (${HDF5_F90_C_LIB_TARGET} STATIC ${f90CStub_C_SOURCES} ${f90CStub_C_HDRS})
 TARGET_C_PROPERTIES (${HDF5_F90_C_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET} ${LINK_LIBS})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIB_TARGET}")
@@ -135,7 +135,7 @@ set_target_properties (${HDF5_F90_C_LIB_TARGET} PROPERTIES
 set (install_targets ${HDF5_F90_C_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  add_library (${HDF5_F90_C_LIBSH_TARGET} SHARED ${f90CStub_C_SRCS} ${f90CStub_C_HDRS})
+  add_library (${HDF5_F90_C_LIBSH_TARGET} SHARED ${f90CStub_C_SOURCES} ${f90CStub_C_HDRS})
   TARGET_C_PROPERTIES (${HDF5_F90_C_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_F90_C_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} ${LINK_SHARED_LIBS})
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_F90_C_LIBSH_TARGET}")
@@ -155,7 +155,7 @@ set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90 PROPERTIES GENERA
 #-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
-set (f90_F_BASE_SRCS
+set (f90_F_BASE_SOURCES
     # generated files
     ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
 
@@ -178,8 +178,8 @@ set (f90_F_BASE_SRCS
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zff.F90
 )
 
-set (f90_F_SRCS
-    ${f90_F_BASE_SRCS}
+set (f90_F_SOURCES
+    ${f90_F_BASE_SOURCES}
 
     # generated file
     ${HDF5_F90_BINARY_DIR}/H5_gen.F90
@@ -193,15 +193,15 @@ add_custom_target (H5gen ALL
     COMMAND ${CMD}
 #v3.2    BYPRODUCT ${HDF5_F90_BINARY_DIR}/H5_gen.F90
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-    DEPENDS ${f90_F_BASE_SRCS}
+    DEPENDS ${f90_F_BASE_SOURCES}
 )
 
-set_source_files_properties (${f90_F_SRCS} PROPERTIES LANGUAGE Fortran)
+set_source_files_properties (${f90_F_SOURCES} PROPERTIES LANGUAGE Fortran)
 
 #-----------------------------------------------------------------------------
 # Add Main fortran library
 #-----------------------------------------------------------------------------
-add_library (${HDF5_F90_LIB_TARGET} STATIC ${f90_F_SRCS})
+add_library (${HDF5_F90_LIB_TARGET} STATIC ${f90_F_SOURCES})
 set (SHARED_LINK_FLAGS " ")
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_F90_LIB_TARGET} ${HDF5_F90_C_LIB_TARGET} ${HDF5_LIB_TARGET})
@@ -224,7 +224,7 @@ endif (WIN32)
 set (install_targets ${install_targets} ${HDF5_F90_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  add_library (${HDF5_F90_LIBSH_TARGET} SHARED ${f90_F_SRCS})
+  add_library (${HDF5_F90_LIBSH_TARGET} SHARED ${f90_F_SOURCES})
   set (SHARED_LINK_FLAGS " ")
   if (WIN32 AND MSVC)
     set (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def")

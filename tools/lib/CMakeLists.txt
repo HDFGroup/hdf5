@@ -10,7 +10,7 @@ add_definitions (${HDF_EXTRA_C_FLAGS})
 # Define Sources
 #-----------------------------------------------------------------------------
 
-set (H5_TOOLS_LIB_SRCS
+set (H5_TOOLS_LIB_SOURCES
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff.c
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff_array.c
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff_attr.c
@@ -37,7 +37,7 @@ set (H5_TOOLS_LIB_HDRS
     ${HDF5_TOOLS_LIB_SOURCE_DIR}/h5diff.h
 )
 
-add_library (${HDF5_TOOLS_LIB_TARGET} STATIC ${H5_TOOLS_LIB_SRCS} ${H5_TOOLS_LIB_HDRS})
+add_library (${HDF5_TOOLS_LIB_TARGET} STATIC ${H5_TOOLS_LIB_SOURCES} ${H5_TOOLS_LIB_HDRS})
 TARGET_C_PROPERTIES (${HDF5_TOOLS_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_TOOLS_LIB_TARGET}")
@@ -50,7 +50,7 @@ set_target_properties (${HDF5_TOOLS_LIB_TARGET} PROPERTIES
 set (install_targets ${HDF5_TOOLS_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS)
-  add_library (${HDF5_TOOLS_LIBSH_TARGET} SHARED ${H5_TOOLS_LIB_SRCS} ${H5_TOOLS_LIB_HDRS})
+  add_library (${HDF5_TOOLS_LIBSH_TARGET} SHARED ${H5_TOOLS_LIB_SOURCES} ${H5_TOOLS_LIB_HDRS})
   TARGET_C_PROPERTIES (${HDF5_TOOLS_LIBSH_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_TOOLS_LIBSH_TARGET}")

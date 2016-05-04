@@ -51,29 +51,29 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/non_comparables1.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/non_comparables2.h5
       # tools/testfiles/vds
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_a.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_b.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_c.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_d.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_e.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_f.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_vds.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_a.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_b.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_c.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_d.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_e.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_vds.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/3_1_vds.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/3_2_vds.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/4_0.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/4_1.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/4_2.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/4_vds.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/5_a.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/5_b.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/5_c.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/5_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_a.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_b.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_c.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_d.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_e.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_f.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_a.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_b.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_c.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_d.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_e.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/3_1_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/3_2_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/4_0.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/4_1.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/4_2.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/4_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/5_a.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/5_b.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/5_c.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/5_vds.h5
   )
 
   set (LIST_OTHER_TEST_FILES
