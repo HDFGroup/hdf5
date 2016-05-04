@@ -27,8 +27,6 @@
 
 /* extern declarations */
 
-extern const char *FILENAME[];
-
 /* global variable declarations: */
 
 /* macro definitions */
