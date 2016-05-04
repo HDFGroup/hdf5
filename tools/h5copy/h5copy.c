@@ -23,7 +23,7 @@
 #define PROGRAMNAME "h5copy"
 
 /* command-line options: short and long-named parameters */
-static const char *s_opts = "d:f:hi:o:ps:vV";
+static const char *s_opts = "d:f:hi:o:ps:vVE";
 static struct long_options l_opts[] = {
     { "destination", require_arg, 'd' },
     { "flag", require_arg, 'f' },
@@ -34,6 +34,7 @@ static struct long_options l_opts[] = {
     { "source", require_arg, 's' },
     { "verbose", no_arg, 'v' },
     { "version", no_arg, 'V' },
+    { "enable-error-stack", no_arg, 'E' },
     { NULL, 0, '\0' }
 };
 char         *fname_src = NULL;
@@ -89,45 +90,46 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 static void
-usage (void)
+usage (const char *prog)
 {
-    HDfprintf(stdout, "\
-usage: h5copy [OPTIONS] [OBJECTS...]\n\
-   OBJECTS\n\
-      -i, --input        input file name\n\
-      -o, --output       output file name\n\
-      -s, --source       source object name\n\
-      -d, --destination  destination object name\n\
-   OPTIONS\n\
-      -h, --help         Print a usage message and exit\n\
-      -p, --parents      No error if existing, make parent groups as needed\n\
-      -v, --verbose      Print information about OBJECTS and OPTIONS\n\
-      -V, --version      Print version number and exit\n\
-      -f, --flag         Flag type\n\n\
-      Flag type is one of the following strings:\n\n\
-      shallow     Copy only immediate members for groups\n\n\
-      soft        Expand soft links into new objects\n\n\
-      ext         Expand external links into new objects\n\n\
-      ref         Copy references and any referenced objects, i.e., objects\n\
-                  that the references point to.\n\
-                    Referenced objects are copied in addition to the objects\n\
-                  specified on the command line and reference datasets are\n\
-                  populated with correct reference values. Copies of referenced\n\
-                  datasets outside the copy range specified on the command line\n\
-                  will normally have a different name from the original.\n\
-                    (Default:Without this option, reference value(s) in any\n\
-                  reference datasets are set to NULL and referenced objects are\n\
-                  not copied unless they are otherwise within the copy range\n\
-                  specified on the command line.)\n\n\
-      noattr      Copy object without copying attributes\n\n\
-      allflags    Switches all flags from the default to the non-default setting\n\n\
-      These flag types correspond to the following API symbols\n\n\
-      H5O_COPY_SHALLOW_HIERARCHY_FLAG\n\
-      H5O_COPY_EXPAND_SOFT_LINK_FLAG\n\
-      H5O_COPY_EXPAND_EXT_LINK_FLAG\n\
-      H5O_COPY_EXPAND_REFERENCE_FLAG\n\
-      H5O_COPY_WITHOUT_ATTR_FLAG\n\
-      H5O_COPY_ALL\n");
+    FLUSHSTREAM(rawoutstream);
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "usage: h5copy [OPTIONS] [OBJECTS...]\n");
+    PRINTVALSTREAM(rawoutstream, "   OBJECTS\n");
+    PRINTVALSTREAM(rawoutstream, "      -i, --input        input file name\n");
+    PRINTVALSTREAM(rawoutstream, "      -o, --output       output file name\n");
+    PRINTVALSTREAM(rawoutstream, "      -s, --source       source object name\n");
+    PRINTVALSTREAM(rawoutstream, "      -d, --destination  destination object name\n");
+    PRINTVALSTREAM(rawoutstream, "   OPTIONS\n");
+    PRINTVALSTREAM(rawoutstream, "      -h, --help         Print a usage message and exit\n");
+    PRINTVALSTREAM(rawoutstream, "      -p, --parents      No error if existing, make parent groups as needed\n");
+    PRINTVALSTREAM(rawoutstream, "      -v, --verbose      Print information about OBJECTS and OPTIONS\n");
+    PRINTVALSTREAM(rawoutstream, "      -V, --version      Print version number and exit\n");
+    PRINTVALSTREAM(rawoutstream, "      -f, --flag         Flag type\n\n");
+    PRINTVALSTREAM(rawoutstream, "      Flag type is one of the following strings:\n\n");
+    PRINTVALSTREAM(rawoutstream, "      shallow     Copy only immediate members for groups\n\n");
+    PRINTVALSTREAM(rawoutstream, "      soft        Expand soft links into new objects\n\n");
+    PRINTVALSTREAM(rawoutstream, "      ext         Expand external links into new objects\n\n");
+    PRINTVALSTREAM(rawoutstream, "      ref         Copy references and any referenced objects, i.e., objects\n");
+    PRINTVALSTREAM(rawoutstream, "                  that the references point to.\n");
+    PRINTVALSTREAM(rawoutstream, "                    Referenced objects are copied in addition to the objects\n");
+    PRINTVALSTREAM(rawoutstream, "                  specified on the command line and reference datasets are\n");
+    PRINTVALSTREAM(rawoutstream, "                  populated with correct reference values. Copies of referenced\n");
+    PRINTVALSTREAM(rawoutstream, "                  datasets outside the copy range specified on the command line\n");
+    PRINTVALSTREAM(rawoutstream, "                  will normally have a different name from the original.\n");
+    PRINTVALSTREAM(rawoutstream, "                    (Default:Without this option, reference value(s) in any\n");
+    PRINTVALSTREAM(rawoutstream, "                  reference datasets are set to NULL and referenced objects are\n");
+    PRINTVALSTREAM(rawoutstream, "                  not copied unless they are otherwise within the copy range\n");
+    PRINTVALSTREAM(rawoutstream, "                  specified on the command line.)\n\n");
+    PRINTVALSTREAM(rawoutstream, "      noattr      Copy object without copying attributes\n\n");
+    PRINTVALSTREAM(rawoutstream, "      allflags    Switches all flags from the default to the non-default setting\n\n");
+    PRINTVALSTREAM(rawoutstream, "      These flag types correspond to the following API symbols\n\n");
+    PRINTVALSTREAM(rawoutstream, "      H5O_COPY_SHALLOW_HIERARCHY_FLAG\n");
+    PRINTVALSTREAM(rawoutstream, "      H5O_COPY_EXPAND_SOFT_LINK_FLAG\n");
+    PRINTVALSTREAM(rawoutstream, "      H5O_COPY_EXPAND_EXT_LINK_FLAG\n");
+    PRINTVALSTREAM(rawoutstream, "      H5O_COPY_EXPAND_REFERENCE_FLAG\n");
+    PRINTVALSTREAM(rawoutstream, "      H5O_COPY_WITHOUT_ATTR_FLAG\n");
+    PRINTVALSTREAM(rawoutstream, "      H5O_COPY_ALL\n");
 }
 
 
@@ -215,6 +217,11 @@ static int parse_flag(const char* s_flag, unsigned *flag)
 int
 main (int argc, const char *argv[])
 {
+    int            ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    H5E_auto2_t         func;
+    H5E_auto2_t         tools_func;
+    void               *edata;
+    void               *tools_edata;
     hid_t        fid_src = -1;
     hid_t        fid_dst = -1;
     unsigned     flag = 0;
@@ -229,16 +236,24 @@ main (int argc, const char *argv[])
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* initialize h5tools lib */
+    /* Disable error reporting */
+    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+    /* Initialize h5tools lib */
     h5tools_init();
+
+    /* Disable tools error reporting */
+    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     /* init linkinfo struct */
     HDmemset(&linkinfo, 0, sizeof(h5tool_link_info_t));
 
     /* Check for no command line parameters */
-    if(argc == 1) 
+    if(argc == 1)
     {
-        usage();
+        usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
     } /* end if */
 
@@ -255,14 +270,14 @@ main (int argc, const char *argv[])
             /* validate flag */
             if (parse_flag(opt_arg,&flag)<0)
             {
-                usage();
+                usage(h5tools_getprogname());
                 leave(EXIT_FAILURE);
             }
             str_flag = HDstrdup(opt_arg);
             break;
 
         case 'h':
-            usage();
+            usage(h5tools_getprogname());
             leave(EXIT_SUCCESS);
             break;
 
@@ -291,8 +306,12 @@ main (int argc, const char *argv[])
             verbose = 1;
             break;
 
+        case 'E':
+            enable_error_stack = TRUE;
+            break;
+
         default:
-            usage();
+            usage(h5tools_getprogname());
             leave(EXIT_FAILURE);
         }
     } /* end of while */
@@ -304,29 +323,34 @@ main (int argc, const char *argv[])
     if (fname_src==NULL)
     {
         error_msg("Input file name missing\n");
-        usage();
+        usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
     }
 
     if (fname_dst==NULL)
     {
         error_msg("Output file name missing\n");
-        usage();
+        usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
     }
 
     if (oname_src==NULL)
     {
         error_msg("Source object name missing\n");
-        usage();
+        usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
     }
 
     if (oname_dst==NULL)
     {
         error_msg("Destination object name missing\n");
-        usage();
+        usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
+    }
+
+    if (enable_error_stack) {
+        H5Eset_auto2(H5E_DEFAULT, func, edata);
+        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
     }
 
    /*-------------------------------------------------------------------------
@@ -393,19 +417,19 @@ main (int argc, const char *argv[])
 
     /* create property to pass copy options */
     if ( (ocpl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
 
     /* set options for object copy */
     if (flag)
     {
         if ( H5Pset_copy_object(ocpl_id, flag) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_copy_object failed");
     }
 
     /* Create link creation property list */
     if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) {
         error_msg("Could not create link creation property list\n");
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
     } /* end if */
 
     /* Check for creating intermediate groups */
@@ -413,7 +437,7 @@ main (int argc, const char *argv[])
         /* Set the intermediate group creation property */
         if(H5Pset_create_intermediate_group(lcpl_id, 1) < 0) {
             error_msg("Could not set property for creating parent groups\n");
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_create_intermediate_group failed");
         } /* end if */
 
         /* Display some output if requested */
@@ -424,7 +448,7 @@ main (int argc, const char *argv[])
     {
         size_t        i, len;
 
-        len = HDstrlen(oname_dst);        
+        len = HDstrlen(oname_dst);
 
         /* check if all the parents groups exist. skip root group */
         for (i = 1; i < len; i++)
@@ -440,7 +464,7 @@ main (int argc, const char *argv[])
                 {
                     error_msg("group <%s> doesn't exist. Use -p to create parent groups.\n", str_ptr);
                     HDfree(str_ptr);
-                    goto error;
+                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lexists failed");
                 }
                 HDfree(str_ptr);
             }
@@ -450,17 +474,17 @@ main (int argc, const char *argv[])
    /*-------------------------------------------------------------------------
     * do the copy
     *-------------------------------------------------------------------------*/
- 
+
     if(verbose)
         linkinfo.opt.msg_mode = 1;
- 
+
     li_ret = H5tools_get_symlink_info(fid_src, oname_src, &linkinfo, 1);
     if (li_ret == 0) /* dangling link */
     {
-        if(H5Lcopy(fid_src, oname_src, 
+        if(H5Lcopy(fid_src, oname_src,
                    fid_dst, oname_dst,
                    H5P_DEFAULT, H5P_DEFAULT) < 0)
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lcopy failed");
     }
     else /* valid link */
     {
@@ -470,7 +494,7 @@ main (int argc, const char *argv[])
                   oname_dst,        /* Name of the destination object  */
                   ocpl_id,          /* Object copy property list */
                   lcpl_id)<0)       /* Link creation property list */
-            goto error;
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Ocopy failed");
     }
 
     /* free link info path */
@@ -479,19 +503,19 @@ main (int argc, const char *argv[])
 
     /* close propertis */
     if(H5Pclose(ocpl_id)<0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
     if(H5Pclose(lcpl_id)<0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
 
     /* close files */
     if (H5Fclose(fid_src)<0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fclose failed");
     if (H5Fclose(fid_dst)<0)
-        goto error;
+        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fclose failed");
 
     leave(EXIT_SUCCESS);
 
-error:
+done:
     printf("Error in copy...Exiting\n");
 
     /* free link info path */

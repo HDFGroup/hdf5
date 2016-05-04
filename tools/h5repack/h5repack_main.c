@@ -33,30 +33,31 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:S:T:";
+static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:S:T:E";
 static struct long_options l_opts[] = {
-	{ "help", no_arg, 'h' },
-	{ "version", no_arg, 'V' },
-	{ "verbose", no_arg, 'v' },
-	{ "filter", require_arg, 'f' },
-	{ "layout", require_arg, 'l' },
-	{ "minimum", require_arg, 'm' },
-	{ "file", require_arg, 'e' },
-	{ "native", no_arg, 'n' },
-	{ "latest", no_arg, 'L' },
-	{ "compact", require_arg, 'c' },
-	{ "indexed", require_arg, 'd' },
-	{ "ssize", require_arg, 's' },
-	{ "ublock", require_arg, 'u' },
-	{ "block", require_arg, 'b' },
-	{ "metadata_block_size", require_arg, 'M' },
-	{ "threshold", require_arg, 't' },
-	{ "alignment", require_arg, 'a' },
-	{ "infile", require_arg, 'i' }, /* -i for backward compability */
-	{ "outfile", require_arg, 'o' }, /* -o for backward compability */
-	{ "fs_strategy", require_arg, 'S' },
-	{ "fs_threshold", require_arg, 'T' },
-	{ NULL, 0, '\0' }
+    { "help", no_arg, 'h' },
+    { "version", no_arg, 'V' },
+    { "verbose", no_arg, 'v' },
+    { "filter", require_arg, 'f' },
+    { "layout", require_arg, 'l' },
+    { "minimum", require_arg, 'm' },
+    { "file", require_arg, 'e' },
+    { "native", no_arg, 'n' },
+    { "latest", no_arg, 'L' },
+    { "compact", require_arg, 'c' },
+    { "indexed", require_arg, 'd' },
+    { "ssize", require_arg, 's' },
+    { "ublock", require_arg, 'u' },
+    { "block", require_arg, 'b' },
+    { "metadata_block_size", require_arg, 'M' },
+    { "threshold", require_arg, 't' },
+    { "alignment", require_arg, 'a' },
+    { "infile", require_arg, 'i' }, /* -i for backward compability */
+    { "outfile", require_arg, 'o' }, /* -o for backward compability */
+    { "fs_strategy", require_arg, 'S' },
+    { "fs_threshold", require_arg, 'T' },
+    { "enable-error-stack", no_arg, 'E' },
+    { NULL, 0, '\0' }
 };
 
 /*-------------------------------------------------------------------------
@@ -69,128 +70,132 @@ static struct long_options l_opts[] = {
  *-------------------------------------------------------------------------
  */
 static void usage(const char *prog) {
-	printf("usage: %s [OPTIONS] file1 file2\n", prog);
-	printf("  file1                    Input HDF5 File\n");
-	printf("  file2                    Output HDF5 File\n");
-	printf("  OPTIONS\n");
-	printf("   -h, --help              Print a usage message and exit\n");
-	printf("   -v, --verbose           Verbose mode, print object information\n");
-	printf("   -V, --version           Print version number and exit\n");
-	printf("   -n, --native            Use a native HDF5 type when repacking\n");
-	printf("   -L, --latest            Use latest version of file format\n");
-	printf("   -c L1, --compact=L1     Maximum number of links in header messages\n");
-	printf("   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
-	printf("   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
-	printf("   -m M, --minimum=M       Do not apply the filter to datasets smaller than M\n");
-	printf("   -e E, --file=E          Name of file E with the -f and -l options\n");
-	printf("   -u U, --ublock=U        Name of file U with user block data to be added\n");
-	printf("   -b B, --block=B         Size of user block to be added\n");
-	printf("   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size\n");
-	printf("   -t T, --threshold=T     Threshold value for H5Pset_alignment\n");
-	printf("   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
-	printf("   -f FILT, --filter=FILT  Filter type\n");
-	printf("   -l LAYT, --layout=LAYT  Layout type\n");
-	printf("   -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy\n");
-	printf("   -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold\n");
-	printf("\n");
-	printf("    M - is an integer greater than 1, size of dataset in bytes (default is 0) \n");
-	printf("    E - is a filename.\n");
-	printf("    S - is an integer\n");
-	printf("    U - is a filename.\n");
-	printf("    T - is an integer\n");
-	printf("    A - is an integer greater than zero\n");
-	printf("    B - is the user block size, any value that is 512 or greater and is\n");
-	printf("        a power of 2 (1024 default)\n");
-	printf("    F - is the shared object header message type, any of <dspace|dtype|fill|\n");
-	printf("        pline|attr>. If F is not specified, S applies to all messages\n");
-	printf("\n");
-	printf("    FS_STRGY is the file space management strategy to use for the output file.\n");
-	printf("             It is a string as listed below:\n");
-	printf("        ALL_PERSIST - Use persistent free-space managers, aggregators and virtual file driver\n");
-	printf("                      for file space allocation\n");
-	printf("        ALL - Use non-persistent free-space managers, aggregators and virtual file driver\n");
-	printf("              for file space allocation\n");
-	printf("        AGGR_VFD - Use aggregators and virtual file driver for file space allocation\n");
-	printf("        VFD - Use virtual file driver for file space allocation\n");
-	printf("\n");
-	printf("    FS_THRD is the free-space section threshold to use for the output file.\n");
-	printf("            It is the minimum size (in bytes) of free-space sections to be tracked\n");
-	printf("            by the the library's free-space managers.\n");
-	printf("\n");
-	printf("    FILT - is a string with the format:\n");
-	printf("\n");
-	printf("      <list of objects>:<name of filter>=<filter parameters>\n");
-	printf("\n");
-	printf("      <list of objects> is a comma separated list of object names, meaning apply\n");
-	printf("        compression only to those objects. If no names are specified, the filter\n");
-	printf("        is applied to all objects\n");
-	printf("      <name of filter> can be:\n");
-	printf("        GZIP, to apply the HDF5 GZIP filter (GZIP compression)\n");
-	printf("        SZIP, to apply the HDF5 SZIP filter (SZIP compression)\n");
-	printf("        SHUF, to apply the HDF5 shuffle filter\n");
-	printf("        FLET, to apply the HDF5 checksum filter\n");
-	printf("        NBIT, to apply the HDF5 NBIT filter (NBIT compression)\n");
-	printf("        SOFF, to apply the HDF5 Scale/Offset filter\n");
-	printf("        UD,   to apply a user defined filter\n");
-	printf("        NONE, to remove all filters\n");
-	printf("      <filter parameters> is optional filter parameter information\n");
-	printf("        GZIP=<deflation level> from 1-9\n");
-	printf("        SZIP=<pixels per block,coding> pixels per block is a even number in\n");
-	printf("            2-32 and coding method is either EC or NN\n");
-	printf("        SHUF (no parameter)\n");
-	printf("        FLET (no parameter)\n");
-	printf("        NBIT (no parameter)\n");
-	printf("        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type\n");
-	printf("            is either IN or DS\n");
-	printf("        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>\n");
-	printf("            required values for filter_number,cd_value_count,value_1\n");
-	printf("            optional values for value_2 to value_N\n");
-	printf("        NONE (no parameter)\n");
-	printf("\n");
-	printf("    LAYT - is a string with the format:\n");
-	printf("\n");
-	printf("      <list of objects>:<layout type>=<layout parameters>\n");
-	printf("\n");
-	printf("      <list of objects> is a comma separated list of object names, meaning that\n");
-	printf("        layout information is supplied for those objects. If no names are\n");
-	printf("        specified, the layout type is applied to all objects\n");
-	printf("      <layout type> can be:\n");
-	printf("        CHUNK, to apply chunking layout\n");
-	printf("        COMPA, to apply compact layout\n");
-	printf("        CONTI, to apply contiguous layout\n");
-	printf("      <layout parameters> is optional layout information\n");
-	printf("        CHUNK=DIM[xDIM...xDIM], the chunk size of each dimension\n");
-	printf("        COMPA (no parameter)\n");
-	printf("        CONTI (no parameter)\n");
-	printf("\n");
-	printf("Examples of use:\n");
-	printf("\n");
-	printf("1) h5repack -v -f GZIP=1 file1 file2\n");
-	printf("\n");
-	printf("   GZIP compression with level 1 to all objects\n");
-	printf("\n");
-	printf("2) h5repack -v -f dset1:SZIP=8,NN file1 file2\n");
-	printf("\n");
-	printf("   SZIP compression with 8 pixels per block and NN coding method to object dset1\n");
-	printf("\n");
-	printf("3) h5repack -v -l dset1,dset2:CHUNK=20x10 -f dset3,dset4,dset5:NONE file1 file2\n");
-	printf("\n");
-	printf("   Chunked layout, with a layout size of 20x10, to objects dset1 and dset2\n");
-	printf("   and remove filters to objects dset3, dset4, dset5\n");
-	printf("\n");
-	printf("4) h5repack -L -c 10 -s 20:dtype file1 file2 \n");
-	printf("\n");
-	printf("   Using latest file format with maximum compact group size of 10 and\n");
-	printf("   and minimum shared datatype size of 20\n");
-	printf("\n");
-	printf("5) h5repack -f SHUF -f GZIP=1 file1 file2 \n");
-	printf("\n");
-	printf("   Add both filters SHUF and GZIP in this order to all datasets\n");
-	printf("\n");
-	printf("6) h5repack -f UD=307,1,9 file1 file2 \n");
-	printf("\n");
-	printf("   Add bzip2 filter to all datasets\n");
-	printf("\n");
+    FLUSHSTREAM(rawoutstream);
+    PRINTSTREAM(rawoutstream, "usage: %s [OPTIONS] file1 file2\n", prog);
+    PRINTVALSTREAM(rawoutstream, "  file1                    Input HDF5 File\n");
+    PRINTVALSTREAM(rawoutstream, "  file2                    Output HDF5 File\n");
+    PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
+    PRINTVALSTREAM(rawoutstream, "   -h, --help              Print a usage message and exit\n");
+    PRINTVALSTREAM(rawoutstream, "   -v, --verbose           Verbose mode, print object information\n");
+    PRINTVALSTREAM(rawoutstream, "   -V, --version           Print version number and exit\n");
+    PRINTVALSTREAM(rawoutstream, "   -n, --native            Use a native HDF5 type when repacking\n");
+    PRINTVALSTREAM(rawoutstream, "   -L, --latest            Use latest version of file format\n");
+    PRINTVALSTREAM(rawoutstream, "   -c L1, --compact=L1     Maximum number of links in header messages\n");
+    PRINTVALSTREAM(rawoutstream, "   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
+    PRINTVALSTREAM(rawoutstream, "   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
+    PRINTVALSTREAM(rawoutstream, "   -m M, --minimum=M       Do not apply the filter to datasets smaller than M\n");
+    PRINTVALSTREAM(rawoutstream, "   -e E, --file=E          Name of file E with the -f and -l options\n");
+    PRINTVALSTREAM(rawoutstream, "   -u U, --ublock=U        Name of file U with user block data to be added\n");
+    PRINTVALSTREAM(rawoutstream, "   -b B, --block=B         Size of user block to be added\n");
+    PRINTVALSTREAM(rawoutstream, "   -M A, --metadata_block_size=A  Metadata block size for H5Pset_meta_block_size\n");
+    PRINTVALSTREAM(rawoutstream, "   -t T, --threshold=T     Threshold value for H5Pset_alignment\n");
+    PRINTVALSTREAM(rawoutstream, "   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
+    PRINTVALSTREAM(rawoutstream, "   -f FILT, --filter=FILT  Filter type\n");
+    PRINTVALSTREAM(rawoutstream, "   -l LAYT, --layout=LAYT  Layout type\n");
+    PRINTVALSTREAM(rawoutstream, "   -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy\n");
+    PRINTVALSTREAM(rawoutstream, "   -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "    M - is an integer greater than 1, size of dataset in bytes (default is 0) \n");
+    PRINTVALSTREAM(rawoutstream, "    E - is a filename.\n");
+    PRINTVALSTREAM(rawoutstream, "    S - is an integer\n");
+    PRINTVALSTREAM(rawoutstream, "    U - is a filename.\n");
+    PRINTVALSTREAM(rawoutstream, "    T - is an integer\n");
+    PRINTVALSTREAM(rawoutstream, "    A - is an integer greater than zero\n");
+    PRINTVALSTREAM(rawoutstream, "    B - is the user block size, any value that is 512 or greater and is\n");
+    PRINTVALSTREAM(rawoutstream, "        a power of 2 (1024 default)\n");
+    PRINTVALSTREAM(rawoutstream, "    F - is the shared object header message type, any of <dspace|dtype|fill|\n");
+    PRINTVALSTREAM(rawoutstream, "        pline|attr>. If F is not specified, S applies to all messages\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
+    PRINTVALSTREAM(rawoutstream, "                          occur.\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "    FS_STRGY is the file space management strategy to use for the output file.\n");
+    PRINTVALSTREAM(rawoutstream, "             It is a string as listed below:\n");
+    PRINTVALSTREAM(rawoutstream, "        ALL_PERSIST - Use persistent free-space managers, aggregators and virtual file driver\n");
+    PRINTVALSTREAM(rawoutstream, "                      for file space allocation\n");
+    PRINTVALSTREAM(rawoutstream, "        ALL - Use non-persistent free-space managers, aggregators and virtual file driver\n");
+    PRINTVALSTREAM(rawoutstream, "              for file space allocation\n");
+    PRINTVALSTREAM(rawoutstream, "        AGGR_VFD - Use aggregators and virtual file driver for file space allocation\n");
+    PRINTVALSTREAM(rawoutstream, "        VFD - Use virtual file driver for file space allocation\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "    FS_THRD is the free-space section threshold to use for the output file.\n");
+    PRINTVALSTREAM(rawoutstream, "            It is the minimum size (in bytes) of free-space sections to be tracked\n");
+    PRINTVALSTREAM(rawoutstream, "            by the the library's free-space managers.\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "    FILT - is a string with the format:\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "      <list of objects>:<name of filter>=<filter parameters>\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "      <list of objects> is a comma separated list of object names, meaning apply\n");
+    PRINTVALSTREAM(rawoutstream, "        compression only to those objects. If no names are specified, the filter\n");
+    PRINTVALSTREAM(rawoutstream, "        is applied to all objects\n");
+    PRINTVALSTREAM(rawoutstream, "      <name of filter> can be:\n");
+    PRINTVALSTREAM(rawoutstream, "        GZIP, to apply the HDF5 GZIP filter (GZIP compression)\n");
+    PRINTVALSTREAM(rawoutstream, "        SZIP, to apply the HDF5 SZIP filter (SZIP compression)\n");
+    PRINTVALSTREAM(rawoutstream, "        SHUF, to apply the HDF5 shuffle filter\n");
+    PRINTVALSTREAM(rawoutstream, "        FLET, to apply the HDF5 checksum filter\n");
+    PRINTVALSTREAM(rawoutstream, "        NBIT, to apply the HDF5 NBIT filter (NBIT compression)\n");
+    PRINTVALSTREAM(rawoutstream, "        SOFF, to apply the HDF5 Scale/Offset filter\n");
+    PRINTVALSTREAM(rawoutstream, "        UD,   to apply a user defined filter\n");
+    PRINTVALSTREAM(rawoutstream, "        NONE, to remove all filters\n");
+    PRINTVALSTREAM(rawoutstream, "      <filter parameters> is optional filter parameter information\n");
+    PRINTVALSTREAM(rawoutstream, "        GZIP=<deflation level> from 1-9\n");
+    PRINTVALSTREAM(rawoutstream, "        SZIP=<pixels per block,coding> pixels per block is a even number in\n");
+    PRINTVALSTREAM(rawoutstream, "            2-32 and coding method is either EC or NN\n");
+    PRINTVALSTREAM(rawoutstream, "        SHUF (no parameter)\n");
+    PRINTVALSTREAM(rawoutstream, "        FLET (no parameter)\n");
+    PRINTVALSTREAM(rawoutstream, "        NBIT (no parameter)\n");
+    PRINTVALSTREAM(rawoutstream, "        SOFF=<scale_factor,scale_type> scale_factor is an integer and scale_type\n");
+    PRINTVALSTREAM(rawoutstream, "            is either IN or DS\n");
+    PRINTVALSTREAM(rawoutstream, "        UD=<filter_number,cd_value_count,value_1[,value_2,...,value_N]>\n");
+    PRINTVALSTREAM(rawoutstream, "            required values for filter_number,cd_value_count,value_1\n");
+    PRINTVALSTREAM(rawoutstream, "            optional values for value_2 to value_N\n");
+    PRINTVALSTREAM(rawoutstream, "        NONE (no parameter)\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "    LAYT - is a string with the format:\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "      <list of objects>:<layout type>=<layout parameters>\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "      <list of objects> is a comma separated list of object names, meaning that\n");
+    PRINTVALSTREAM(rawoutstream, "        layout information is supplied for those objects. If no names are\n");
+    PRINTVALSTREAM(rawoutstream, "        specified, the layout type is applied to all objects\n");
+    PRINTVALSTREAM(rawoutstream, "      <layout type> can be:\n");
+    PRINTVALSTREAM(rawoutstream, "        CHUNK, to apply chunking layout\n");
+    PRINTVALSTREAM(rawoutstream, "        COMPA, to apply compact layout\n");
+    PRINTVALSTREAM(rawoutstream, "        CONTI, to apply contiguous layout\n");
+    PRINTVALSTREAM(rawoutstream, "      <layout parameters> is optional layout information\n");
+    PRINTVALSTREAM(rawoutstream, "        CHUNK=DIM[xDIM...xDIM], the chunk size of each dimension\n");
+    PRINTVALSTREAM(rawoutstream, "        COMPA (no parameter)\n");
+    PRINTVALSTREAM(rawoutstream, "        CONTI (no parameter)\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "Examples of use:\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "1) h5repack -v -f GZIP=1 file1 file2\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   GZIP compression with level 1 to all objects\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "2) h5repack -v -f dset1:SZIP=8,NN file1 file2\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   SZIP compression with 8 pixels per block and NN coding method to object dset1\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "3) h5repack -v -l dset1,dset2:CHUNK=20x10 -f dset3,dset4,dset5:NONE file1 file2\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   Chunked layout, with a layout size of 20x10, to objects dset1 and dset2\n");
+    PRINTVALSTREAM(rawoutstream, "   and remove filters to objects dset3, dset4, dset5\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "4) h5repack -L -c 10 -s 20:dtype file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   Using latest file format with maximum compact group size of 10 and\n");
+    PRINTVALSTREAM(rawoutstream, "   and minimum shared datatype size of 20\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "5) h5repack -f SHUF -f GZIP=1 file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   Add both filters SHUF and GZIP in this order to all datasets\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "6) h5repack -f UD=307,1,9 file1 file2 \n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "   Add bzip2 filter to all datasets\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -525,13 +530,17 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
 			options->fs_threshold = (hsize_t) HDatol( opt_arg );
 			break;
 
-		default:
-			break;
-		} /* switch */
+        case 'E':
+            enable_error_stack = TRUE;
+            break;
 
-	} /* while */
+        default:
+            break;
+        } /* switch */
 
-	if (has_i_o == 0) {
+    } /* while */
+
+    if (has_i_o == 0) {
 		/* check for file names to be processed */
 		if (argc <= opt_ind || argv[opt_ind + 1] == NULL) {
 			error_msg("missing file names\n");
@@ -563,50 +572,67 @@ done:
  *-------------------------------------------------------------------------
  */
 int main(int argc, const char **argv) {
+    H5E_auto2_t         func;
+    H5E_auto2_t         tools_func;
+    void               *edata;
+    void               *tools_edata;
 
 	pack_opt_t options; /*the global options */
 
 	h5tools_setprogname(PROGRAMNAME);
 	h5tools_setstatus(EXIT_SUCCESS);
 
-	/* Initialize h5tools lib */
-	h5tools_init();
+    /* Disable error reporting */
+    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
-	/* update hyperslab buffer size from H5TOOLS_BUFSIZE env if exist */
-	if (h5tools_getenv_update_hyperslab_bufsize() < 0) {
-		h5tools_setstatus(EXIT_FAILURE);
-		goto done;
-	}
+    /* Initialize h5tools lib */
+    h5tools_init();
 
-	/* initialize options  */
-	h5repack_init(&options, 0, FALSE, H5F_FILE_SPACE_DEFAULT, (hsize_t) 0);
+    /* Disable tools error reporting */
+    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
+    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
-	if (parse_command_line(argc, argv, &options) < 0)
-		goto done;
+    /* update hyperslab buffer size from H5TOOLS_BUFSIZE env if exist */
+    if (h5tools_getenv_update_hyperslab_bufsize() < 0) {
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
 
-	/* get file names if they were not yet got */
-	if (has_i_o == 0) {
+    /* initialize options  */
+    h5repack_init(&options, 0, FALSE, H5F_FILE_SPACE_DEFAULT, (hsize_t) 0);
 
-		if (argv[opt_ind] != NULL && argv[opt_ind + 1] != NULL) {
-			infile = argv[opt_ind];
-			outfile = argv[opt_ind + 1];
+    if (parse_command_line(argc, argv, &options) < 0)
+        goto done;
 
-			if ( HDstrcmp( infile, outfile ) == 0) {
-				error_msg("file names cannot be the same\n");
-				usage(h5tools_getprogname());
-				h5tools_setstatus(EXIT_FAILURE);
-				goto done;
-			}
-		}
-		else {
-			error_msg("file names missing\n");
-			usage(h5tools_getprogname());
-			h5tools_setstatus(EXIT_FAILURE);
-			goto done;
-		}
-	}
+    /* get file names if they were not yet got */
+    if (has_i_o == 0) {
 
-	/* pack it */
+        if (argv[opt_ind] != NULL && argv[opt_ind + 1] != NULL) {
+            infile = argv[opt_ind];
+            outfile = argv[opt_ind + 1];
+
+            if ( HDstrcmp( infile, outfile ) == 0) {
+                error_msg("file names cannot be the same\n");
+                usage(h5tools_getprogname());
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+            }
+        }
+        else {
+            error_msg("file names missing\n");
+            usage(h5tools_getprogname());
+            h5tools_setstatus(EXIT_FAILURE);
+            goto done;
+        }
+    }
+
+    if (enable_error_stack) {
+        H5Eset_auto2(H5E_DEFAULT, func, edata);
+        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
+    }
+
+    /* pack it */
 	h5tools_setstatus(h5repack(infile, outfile, &options));
 
 done:

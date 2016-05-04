@@ -73,7 +73,6 @@ extern int          display_fi; /*file index */
 extern int          display_ai;  /*array index */
 extern int          display_escape; /*escape non printable characters */
 extern int          display_region; /*print region reference data */
-extern int          enable_error_stack; /* re-enable error stack */
 extern int          disable_compact_subset; /* disable compact form of subset notation */
 extern int          display_packed_bits; /*print 1-8 byte numbers as packed bits*/
 extern int          include_attrs; /* Display attributes */

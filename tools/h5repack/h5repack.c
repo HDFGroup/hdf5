@@ -372,7 +372,8 @@ done:
  */
 int copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
 		trav_table_t *travt, pack_opt_t *options) {
-	hid_t attr_id = -1; /* attr ID */
+    int   ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    hid_t attr_id = -1; /* attr ID */
 	hid_t attr_out = -1; /* attr ID */
 	hid_t space_id = -1; /* space ID */
 	hid_t ftype_id = -1; /* file type ID */
@@ -391,7 +392,7 @@ int copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
 	H5T_class_t type_class = -1;
 
 	if (H5Oget_info(loc_in, &oinfo) < 0)
-		goto error;
+        HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Oget_info failed");
 
 	/*-------------------------------------------------------------------------
 	 * copy all attributes
@@ -401,36 +402,36 @@ int copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
 		/* open attribute */
 		if ((attr_id = H5Aopen_by_idx(loc_in, ".", H5_INDEX_CRT_ORDER,
 				H5_ITER_INC, (hsize_t) u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-			goto error;
+            HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Aopen_by_idx failed");
 
 		/* get name */
 		if (H5Aget_name(attr_id, (size_t) 255, name) < 0)
-			goto error;
+            HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Pclose failed");
 
 		/* get the file datatype  */
 		if ((ftype_id = H5Aget_type(attr_id)) < 0)
-			goto error;
+            HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Aget_type failed");
 
 		/* Check if the datatype is committed */
 		if ((is_named = H5Tcommitted(ftype_id)) < 0)
-			goto error;
-		if (is_named && travt) {
+            HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tcommitted failed");
+        if (is_named && travt) {
 			hid_t fidout;
 
 			/* Create out file id */
 			if ((fidout = H5Iget_file_id(loc_out)) < 0)
-				goto error;
+                HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Iget_file_id failed");
 
 			/* Copy named dt */
 			if ((wtype_id = copy_named_datatype(ftype_id, fidout,
 					named_dt_head_p, travt, options)) < 0) {
 				H5Fclose(fidout);
-				goto error;
-			} /* end if */
+                HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "copy_named_datatype failed");
+            } /* end if */
 
 			if (H5Fclose(fidout) < 0)
-				goto error;
-		} /* end if */
+                HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Fclose failed");
+        } /* end if */
 		else {
 			if (options->use_native == 1)
 				wtype_id = h5tools_get_native_type(ftype_id);
@@ -440,18 +441,18 @@ int copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
 
 		/* get the dataspace handle  */
 		if ((space_id = H5Aget_space(attr_id)) < 0)
-			goto error;
+            HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Aget_space failed");
 
 		/* get dimensions  */
 		if ((rank = H5Sget_simple_extent_dims(space_id, dims, NULL)) < 0)
-			goto error;
+            HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
 
 		nelmts = 1;
 		for (j = 0; j < rank; j++)
 			nelmts *= dims[j];
 
 		if ((msize = H5Tget_size(wtype_id)) == 0)
-			goto error;
+            HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tget_size failed");
 
 		/*-------------------------------------------------------------------------
 		 * object references are a special case. We cannot just copy the buffers,
@@ -495,10 +496,10 @@ int copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
 			buf = (void *) HDmalloc((size_t)(nelmts * msize));
 			if (buf == NULL) {
 				error_msg("h5repack", "cannot read into memory\n");
-				goto error;
-			} /* end if */
+                HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "HDmalloc failed");
+            } /* end if */
 			if (H5Aread(attr_id, wtype_id, buf) < 0)
-				goto error;
+                HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Aread failed");
 
 			/*-------------------------------------------------------------------------
 			 * copy
@@ -507,13 +508,13 @@ int copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
 
 			if ((attr_out = H5Acreate2(loc_out, name, wtype_id, space_id,
 					H5P_DEFAULT, H5P_DEFAULT)) < 0)
-				goto error;
-			if (H5Awrite(attr_out, wtype_id, buf) < 0)
-				goto error;
+                HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Acreate2 failed");
+            if (H5Awrite(attr_out, wtype_id, buf) < 0)
+                HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Awrite failed");
 
 			/*close*/
 			if (H5Aclose(attr_out) < 0)
-				goto error;
+                HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Aclose failed");
 
 			/* Check if we have VL data and string in the attribute's  datatype that must
 			 * be reclaimed */
@@ -532,18 +533,18 @@ int copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
 		 */
 
 		if (H5Tclose(ftype_id) < 0)
-			goto error;
-		if (H5Tclose(wtype_id) < 0)
-			goto error;
-		if (H5Sclose(space_id) < 0)
-			goto error;
-		if (H5Aclose(attr_id) < 0)
-			goto error;
-	} /* u */
+            HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
+        if (H5Tclose(wtype_id) < 0)
+            HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Tclose failed");
+        if (H5Sclose(space_id) < 0)
+            HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Sclose failed");
+        if (H5Aclose(attr_id) < 0)
+            HGOTO_ERROR(H5E_tools_g, H5E_tools_min_id_g, "H5Aclose failed");
+    } /* u */
 
 	return 0;
 
-error:
+done:
 	H5E_BEGIN_TRY
 		{
 			if (buf) {

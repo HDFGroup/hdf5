@@ -51,6 +51,7 @@ int         packed_bits_num;    /* number of packed bits to display */
 int         packed_data_offset; /* offset of packed bits to display */
 int         packed_data_length; /* lengtht of packed bits to display */
 unsigned long long packed_data_mask;  /* mask in which packed bits to display */
+int          enable_error_stack= FALSE; /* re-enable error stack */
 
 /* module-scoped variables */
 static int  h5tools_init_g;     /* if h5tools lib has been initialized */

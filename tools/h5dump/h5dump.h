@@ -74,7 +74,6 @@ int          display_fi        = FALSE; /*file index */
 int          display_ai        = TRUE;  /*array index */
 int          display_escape    = FALSE; /*escape non printable characters */
 int          display_region    = FALSE; /*print region reference data */
-int          enable_error_stack= FALSE; /* re-enable error stack */
 int          disable_compact_subset= FALSE; /* disable compact form of subset notation */
 int          display_packed_bits = FALSE; /*print 1-8 byte numbers as packed bits*/
 int          include_attrs     = TRUE; /* Display attributes */
