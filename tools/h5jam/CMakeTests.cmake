@@ -42,7 +42,7 @@
         ARGS       -E copy_if_different ${HDF5_TOOLS_H5JAM_SOURCE_DIR}/testfiles/${txt_file} ${dest}
     )
   endforeach (txt_file ${HDF5_REFERENCE_TXT_FILES})
-    
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -306,7 +306,7 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5JAM-${testname}_NONE-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove 
+          COMMAND ${CMAKE_COMMAND} -E remove
               ${chkfile} ${chkfile}.cpy.h5
       )
       add_test (
