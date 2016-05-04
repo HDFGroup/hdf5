@@ -13,46 +13,9 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <jni.h>
-/* Header for class hdf_hdf5lib_H5_H5Z */
+package hdf.hdf5lib.callbacks;
 
-#ifndef _Included_hdf_hdf5lib_H5_H5Z
-#define _Included_hdf_hdf5lib_H5_H5Z
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5Zunregister
- * Signature: (I)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zunregister
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5Zfilter_avail
- * Signature: (I)I
- */
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zfilter_1avail
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     hdf_hdf5lib_H5
- * Method:    H5Zget_filter_info
- * Signature: (I)I
- */
-
-JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zget_1filter_1info
-  (JNIEnv *, jclass, jint);
-
-#ifdef __cplusplus
-} /* end extern "C" */
-#endif /* __cplusplus */
-
-#endif /* _Included_hdf_hdf5lib_H5_H5Z */
+//Information class for link callback(for H5Pset/get_append_flush)
+public interface H5D_append_cb extends Callbacks {
+    int callback(long dataset_id, long[] cur_dims, H5D_append_t op_data);
+}

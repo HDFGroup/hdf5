@@ -101,7 +101,8 @@ static jboolean H5JNIErrorClass(JNIEnv *env, const char *message, const char *cl
 
 /* get the major and minor error numbers on the top of the error stack */
 static herr_t
-walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void *_err_nums)
+walk_error_callback
+    (unsigned n, const H5E_error2_t *err_desc, void *_err_nums)
 {
     H5E_num_t *err_nums = (H5E_num_t *)_err_nums;
 
@@ -120,7 +121,8 @@ walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void *_err_nums)
  *
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5error_1off(JNIEnv *env, jclass clss)
+Java_hdf_hdf5lib_H5_H5error_1off
+    (JNIEnv *env, jclass clss)
 {
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     return 0;
@@ -135,8 +137,8 @@ Java_hdf_hdf5lib_H5_H5error_1off(JNIEnv *env, jclass clss)
  *  Call the HDF-5 library to print the HDF-5 error stack to 'file_name'.
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0(
-    JNIEnv *env, jobject obj, jstring file_name)
+Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0
+    (JNIEnv *env, jobject obj, jstring file_name)
 {
     FILE       *stream = NULL;
     const char *file = NULL;
@@ -163,8 +165,8 @@ Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0(
  *  Extract the HDF-5 major error number from the HDF-5 error stack.
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMajorErrorNumber(
-    JNIEnv *env, jobject obj)
+Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMajorErrorNumber
+    (JNIEnv *env, jobject obj)
 {
     H5E_num_t err_nums;
     err_nums.maj_num = 0;
@@ -183,8 +185,8 @@ Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMajorErrorNumber(
  *  Extract the HDF-5 minor error number from the HDF-5 error stack.
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMinorErrorNumber(
-    JNIEnv *env, jobject obj)
+Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMinorErrorNumber
+    (JNIEnv *env, jobject obj)
 {
     H5E_num_t err_nums;
     err_nums.maj_num = 0;
@@ -198,9 +200,9 @@ Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMinorErrorNumber(
 /*
  *  Routine to raise particular Java exceptions from C
  */
-static
-jboolean
-H5JNIErrorClass(JNIEnv *env, const char *message, const char *className)
+static jboolean
+H5JNIErrorClass
+    (JNIEnv *env, const char *message, const char *className)
 {
     char *args[2];
     jstring str = ENVPTR->NewStringUTF(ENVPAR message);
@@ -218,7 +220,8 @@ H5JNIErrorClass(JNIEnv *env, const char *message, const char *className)
  *  exception.
  */
 jboolean
-h5outOfMemory(JNIEnv *env, const char *functName)
+h5outOfMemory
+    (JNIEnv *env, const char *functName)
 {
     return H5JNIErrorClass(env, functName, "java/lang/OutOfMemoryError");
 } /* end h5outOfMemory() */
@@ -233,7 +236,8 @@ h5outOfMemory(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5JNIFatalError(JNIEnv *env, const char *functName)
+h5JNIFatalError
+    (JNIEnv *env, const char *functName)
 {
     return H5JNIErrorClass(env, functName, "java/lang/InternalError");
 } /* end h5JNIFatalError() */
@@ -247,7 +251,8 @@ h5JNIFatalError(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5nullArgument(JNIEnv *env, const char *functName)
+h5nullArgument
+    (JNIEnv *env, const char *functName)
 {
     return H5JNIErrorClass(env, functName, "java/lang/NullPointerException");
 } /* end h5nullArgument() */
@@ -261,7 +266,8 @@ h5nullArgument(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5badArgument(JNIEnv *env, const char *functName)
+h5badArgument
+    (JNIEnv *env, const char *functName)
 {
     return H5JNIErrorClass(env, functName, "java/lang/IllegalArgumentException");
 } /* end h5badArgument() */
@@ -275,7 +281,8 @@ h5badArgument(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5unimplemented(JNIEnv *env, const char *functName)
+h5unimplemented
+    (JNIEnv *env, const char *functName)
 {
     return H5JNIErrorClass(env, functName, "java/lang/UnsupportedOperationException");
 } /* end h5unimplemented() */
@@ -288,7 +295,8 @@ h5unimplemented(JNIEnv *env, const char *functName)
  *  exception.
  */
 jboolean
-h5raiseException(JNIEnv *env, const char *exception, const char *message)
+h5raiseException
+    (JNIEnv *env, const char *exception, const char *message)
 {
     return H5JNIErrorClass(env, message, exception);
 } /* end h5raiseException() */
@@ -305,7 +313,8 @@ h5raiseException(JNIEnv *env, const char *exception, const char *message)
  *  exception.
  */
 jboolean
-h5libraryError(JNIEnv *env)
+h5libraryError
+    (JNIEnv *env)
 {
     char       *args[2];
     const char *exception = NULL;
@@ -358,7 +367,8 @@ h5libraryError(JNIEnv *env)
  *  which goes with an HDF-5 error code.
  */
 static const char *
-defineHDF5LibraryException(hid_t maj_num)
+defineHDF5LibraryException
+    (hid_t maj_num)
 {
     hid_t err_num = maj_num;
 

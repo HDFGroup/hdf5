@@ -28,7 +28,8 @@ extern "C" {
  * Method:    H5PLset_loading_state
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5PLset_1loading_1state
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5PLset_1loading_1state
   (JNIEnv *, jclass, jint);
 
 /*
@@ -36,7 +37,8 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5PLset_1loading_1state
  * Method:    H5PLget_loading_state
  * Signature: (V)I
  */
-JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5PLget_1loading_1state
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5PLget_1loading_1state
   (JNIEnv *, jclass);
 
 #ifdef __cplusplus

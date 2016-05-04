@@ -154,7 +154,8 @@ static herr_t H5DwriteVL_array (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid
  * Signature: (JLjava/lang/String;JJJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Dcreate(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong type_id,
+Java_hdf_hdf5lib_H5__1H5Dcreate
+    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong type_id,
           jlong space_id, jlong create_plist_id)
 {
     hid_t       dset_id = -1;
@@ -178,7 +179,8 @@ Java_hdf_hdf5lib_H5__1H5Dcreate(JNIEnv *env, jclass clss, jlong loc_id, jstring 
  * Signature: (JLjava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Dopen(JNIEnv *env, jclass clss, jlong loc_id, jstring name)
+Java_hdf_hdf5lib_H5__1H5Dopen
+    (JNIEnv *env, jclass clss, jlong loc_id, jstring name)
 {
     hid_t       dset_id = -1;
     const char *fileName;
@@ -200,7 +202,8 @@ Java_hdf_hdf5lib_H5__1H5Dopen(JNIEnv *env, jclass clss, jlong loc_id, jstring na
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Dget_1space(JNIEnv *env, jclass clss, jlong dataset_id)
+Java_hdf_hdf5lib_H5__1H5Dget_1space
+    (JNIEnv *env, jclass clss, jlong dataset_id)
 {
     hid_t retVal = -1;
 
@@ -217,7 +220,8 @@ Java_hdf_hdf5lib_H5__1H5Dget_1space(JNIEnv *env, jclass clss, jlong dataset_id)
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Dget_1type(JNIEnv *env, jclass clss, jlong dataset_id)
+Java_hdf_hdf5lib_H5__1H5Dget_1type
+    (JNIEnv *env, jclass clss, jlong dataset_id)
 {
     hid_t retVal = -1;
 
@@ -234,7 +238,8 @@ Java_hdf_hdf5lib_H5__1H5Dget_1type(JNIEnv *env, jclass clss, jlong dataset_id)
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Dget_1create_1plist(JNIEnv *env, jclass clss, jlong dataset_id)
+Java_hdf_hdf5lib_H5__1H5Dget_1create_1plist
+    (JNIEnv *env, jclass clss, jlong dataset_id)
 {
     hid_t retVal = -1;
 
@@ -246,7 +251,8 @@ Java_hdf_hdf5lib_H5__1H5Dget_1create_1plist(JNIEnv *env, jclass clss, jlong data
 } /* end Java_hdf_hdf5lib_H5__1H5Dget_1create_1plist */
 
 static htri_t
-H5Tdetect_variable_str(hid_t tid) {
+H5Tdetect_variable_str
+    (hid_t tid) {
     htri_t ret_val = 0;
 
     if (H5Tget_class(tid) == H5T_COMPOUND) {
@@ -275,7 +281,8 @@ H5Tdetect_variable_str(hid_t tid) {
  * Signature: (JJJJJ[BZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dread
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jbyteArray buf, jboolean isCriticalPinning)
 {
     herr_t   status;
@@ -330,7 +337,8 @@ Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong me
  * Signature: (JJJJJ[BZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dwrite
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jbyteArray buf, jboolean isCriticalPinning)
 {
     herr_t   status;
@@ -381,7 +389,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong m
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5__1H5Dclose(JNIEnv *env, jclass clss, jlong dataset_id)
+Java_hdf_hdf5lib_H5__1H5Dclose
+    (JNIEnv *env, jclass clss, jlong dataset_id)
 {
     herr_t retVal = -1;
 
@@ -399,7 +408,8 @@ Java_hdf_hdf5lib_H5__1H5Dclose(JNIEnv *env, jclass clss, jlong dataset_id)
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Dget_1storage_1size(JNIEnv *env, jclass clss, jlong dataset_id)
+Java_hdf_hdf5lib_H5_H5Dget_1storage_1size
+    (JNIEnv *env, jclass clss, jlong dataset_id)
 {
     hsize_t retVal = (hsize_t)-1;
 
@@ -419,7 +429,8 @@ Java_hdf_hdf5lib_H5_H5Dget_1storage_1size(JNIEnv *env, jclass clss, jlong datase
  * Signature: (JJJ[B)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dvlen_1reclaim(JNIEnv *env, jclass clss, jlong type_id, jlong space_id,
+Java_hdf_hdf5lib_H5_H5Dvlen_1reclaim
+    (JNIEnv *env, jclass clss, jlong type_id, jlong space_id,
           jlong xfer_plist_id, jbyteArray buf)
 {
     herr_t   status = -1;
@@ -448,23 +459,13 @@ Java_hdf_hdf5lib_H5_H5Dvlen_1reclaim(JNIEnv *env, jclass clss, jlong type_id, jl
 } /* end Java_hdf_hdf5lib_H5_H5Dvlen_1reclaim */
 
 /*
-    ////////////////////////////////////////////////////////////////////
-    //                                                                //
-    //         New APIs for read data from library                    //
-    //  Using H5Dread(..., Object buf) requires function calls        //
-    //  theArray.emptyBytes() and theArray.arrayify(buf), which       //
-    //  triples the actual memory needed by the data set.             //
-    //  Using the following APIs solves the problem.                  //
-    //                                                                //
-    ////////////////////////////////////////////////////////////////////
-*/
-/*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Dread_short
  * Signature: (JJJJJ[SZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dread_1short(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dread_1short
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jshortArray buf, jboolean isCriticalPinning)
 {
     herr_t   status = -1;
@@ -518,7 +519,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1short(JNIEnv *env, jclass clss, jlong dataset_id, j
  * Signature: (JJJJJ[SZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dwrite_1short(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dwrite_1short
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jshortArray buf, jboolean isCriticalPinning)
 {
     herr_t   status = -1;
@@ -569,7 +571,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1short(JNIEnv *env, jclass clss, jlong dataset_id, 
  * Signature: (JJJJJ[IZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dread_1int(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dread_1int
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jintArray buf, jboolean isCriticalPinning)
 {
     herr_t   status = -1;
@@ -623,7 +626,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1int(JNIEnv *env, jclass clss, jlong dataset_id, jlo
  * Signature: (JJJJJ[IZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dwrite_1int(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dwrite_1int
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jintArray buf, jboolean isCriticalPinning)
 {
     herr_t   status = -1;
@@ -674,7 +678,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1int(JNIEnv *env, jclass clss, jlong dataset_id, jl
  * Signature: (JJJJJ[JZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dread_1long(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dread_1long
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jlongArray buf, jboolean isCriticalPinning)
 {
     herr_t   status = -1;
@@ -728,7 +733,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1long(JNIEnv *env, jclass clss, jlong dataset_id, jl
  * Signature: (JJJJJ[JZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dwrite_1long(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dwrite_1long
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jlongArray buf, jboolean isCriticalPinning)
 {
     herr_t   status = -1;
@@ -778,7 +784,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1long(JNIEnv *env, jclass clss, jlong dataset_id, j
  * Signature: (JJJJJ[FZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dread_1float(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dread_1float
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jfloatArray buf, jboolean isCriticalPinning)
 {
     herr_t   status = -1;
@@ -832,7 +839,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1float(JNIEnv *env, jclass clss, jlong dataset_id, j
  * Signature: (JJJJJ[FZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dwrite_1float(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dwrite_1float
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jfloatArray buf, jboolean isCriticalPinning)
 {
     herr_t   status = -1;
@@ -882,7 +890,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1float(JNIEnv *env, jclass clss, jlong dataset_id, 
  * Signature: (JJJJJ[DZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dread_1double(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dread_1double
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jdoubleArray buf, jboolean isCriticalPinning)
 {
     herr_t   status = -1;
@@ -936,7 +945,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1double(JNIEnv *env, jclass clss, jlong dataset_id, 
  * Signature: (JJJJJ[DZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dwrite_1double(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dwrite_1double
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jdoubleArray buf, jboolean isCriticalPinning)
 {
     herr_t   status = -1;
@@ -986,7 +996,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1double(JNIEnv *env, jclass clss, jlong dataset_id,
  * Signature: (JJJJJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dread_1string(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dread_1string
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jobjectArray j_buf)
 {
     herr_t  status = -1;
@@ -1061,7 +1072,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1string(JNIEnv *env, jclass clss, jlong dataset_id, 
  * Signature: (JJJJJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dwrite_1string(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dwrite_1string
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jobjectArray j_buf)
 {
     herr_t  status = -1;
@@ -1128,7 +1140,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1string(JNIEnv *env, jclass clss, jlong dataset_id,
  * Signature: (JJJJJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dread_1VLStrings(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dread_1VLStrings
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
     herr_t  status = -1;
@@ -1153,8 +1166,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1VLStrings(JNIEnv *env, jclass clss, jlong dataset_i
 } /* end Java_hdf_hdf5lib_H5_H5Dread_1VLStrings */
 
 herr_t
-H5DreadVL_str (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t
-        file_sid, hid_t xfer_plist_id, jobjectArray buf)
+H5DreadVL_str
+    (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hid_t xfer_plist_id, jobjectArray buf)
 {
     char  **strs;
     jstring jstr;
@@ -1205,7 +1218,8 @@ H5DreadVL_str (JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t
  * Signature: (JJJJJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dwrite_1VLStrings(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
+Java_hdf_hdf5lib_H5_H5Dwrite_1VLStrings
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
           jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
     herr_t  status = -1;
@@ -1230,8 +1244,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1VLStrings(JNIEnv *env, jclass clss, jlong dataset_
 } /* end Java_hdf_hdf5lib_H5_H5Dwrite_1VLStrings */
 
 herr_t
-H5DwriteVL_str(JNIEnv *env, hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id,
-        hid_t file_space_id, hid_t xfer_plist_id, jobjectArray buf)
+H5DwriteVL_str
+    (JNIEnv *env, hid_t dataset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t xfer_plist_id, jobjectArray buf)
 {
     herr_t  status = -1;
     char  **wdata;
@@ -1288,7 +1302,8 @@ H5DwriteVL_str(JNIEnv *env, hid_t dataset_id, hid_t mem_type_id, hid_t mem_space
  * Signature: (JJJJJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dread_1reg_1ref (JNIEnv *env, jclass clss,
+Java_hdf_hdf5lib_H5_H5Dread_1reg_1ref
+    (JNIEnv *env, jclass clss,
         jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
         jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
@@ -1345,7 +1360,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1reg_1ref (JNIEnv *env, jclass clss,
  * Signature: (JJJJJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dread_1reg_1ref_1data (JNIEnv *env, jclass clss,
+Java_hdf_hdf5lib_H5_H5Dread_1reg_1ref_1data
+    (JNIEnv *env, jclass clss,
         jlong dataset_id, jlong mem_type_id, jlong mem_space_id,
         jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
@@ -1422,7 +1438,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1reg_1ref_1data (JNIEnv *env, jclass clss,
  * Signature: (JLjava/lang/String;JJJJJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Dcreate2(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong type_id,
+Java_hdf_hdf5lib_H5__1H5Dcreate2
+    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong type_id,
           jlong space_id, jlong link_plist_id, jlong create_plist_id, jlong access_plist_id)
 {
     hid_t       dset_id = -1;
@@ -1445,7 +1462,8 @@ Java_hdf_hdf5lib_H5__1H5Dcreate2(JNIEnv *env, jclass clss, jlong loc_id, jstring
  * Signature: (JLjava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Dopen2(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_plist)
+Java_hdf_hdf5lib_H5__1H5Dopen2
+    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_plist)
 {
     hid_t       dset_id;
     const char *fileName;
@@ -1467,7 +1485,8 @@ Java_hdf_hdf5lib_H5__1H5Dopen2(JNIEnv *env, jclass clss, jlong loc_id, jstring n
  * Signature: (JJJJJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Dcreate_1anon(JNIEnv *env, jclass clss, jlong loc_id, jlong type_id, jlong space_id, jlong dcpl_id, jlong dapl_id)
+Java_hdf_hdf5lib_H5__1H5Dcreate_1anon
+    (JNIEnv *env, jclass clss, jlong loc_id, jlong type_id, jlong space_id, jlong dcpl_id, jlong dapl_id)
 {
     hid_t dset_id = -1;
 
@@ -1484,7 +1503,8 @@ Java_hdf_hdf5lib_H5__1H5Dcreate_1anon(JNIEnv *env, jclass clss, jlong loc_id, jl
  * Signature: (J)I;
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dget_1space_1status(JNIEnv *env, jclass clss, jlong loc_id)
+Java_hdf_hdf5lib_H5_H5Dget_1space_1status
+    (JNIEnv *env, jclass clss, jlong loc_id)
 {
     H5D_space_status_t space_status = H5D_SPACE_STATUS_ERROR;
 
@@ -1500,7 +1520,8 @@ Java_hdf_hdf5lib_H5_H5Dget_1space_1status(JNIEnv *env, jclass clss, jlong loc_id
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Dget_1access_1plist(JNIEnv *env, jclass clss, jlong loc_id)
+Java_hdf_hdf5lib_H5_H5Dget_1access_1plist
+    (JNIEnv *env, jclass clss, jlong loc_id)
 {
     hid_t retVal = -1;
 
@@ -1517,7 +1538,8 @@ Java_hdf_hdf5lib_H5_H5Dget_1access_1plist(JNIEnv *env, jclass clss, jlong loc_id
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Dget_1offset(JNIEnv *env, jclass clss, jlong loc_id)
+Java_hdf_hdf5lib_H5_H5Dget_1offset
+    (JNIEnv *env, jclass clss, jlong loc_id)
 {
     haddr_t offset = HADDR_UNDEF;
 
@@ -1534,7 +1556,8 @@ Java_hdf_hdf5lib_H5_H5Dget_1offset(JNIEnv *env, jclass clss, jlong loc_id)
  * Signature: (JJJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Dvlen_1get_1buf_1size(JNIEnv *env, jclass clss, jlong dataset_id, jlong type_id, jlong space_id)
+Java_hdf_hdf5lib_H5_H5Dvlen_1get_1buf_1size
+    (JNIEnv *env, jclass clss, jlong dataset_id, jlong type_id, jlong space_id)
 {
   hsize_t sz = 0;
 
@@ -1550,7 +1573,8 @@ Java_hdf_hdf5lib_H5_H5Dvlen_1get_1buf_1size(JNIEnv *env, jclass clss, jlong data
  * Signature: ([BJ[BJJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Dfill(JNIEnv *env, jclass clss, jbyteArray fill, jlong fill_type_id, jbyteArray buf, jlong buf_type_id, jlong space_id)
+Java_hdf_hdf5lib_H5_H5Dfill
+    (JNIEnv *env, jclass clss, jbyteArray fill, jlong fill_type_id, jbyteArray buf, jlong buf_type_id, jlong space_id)
 {
     herr_t    status;
     jbyte    *fillP;
@@ -1602,7 +1626,8 @@ Java_hdf_hdf5lib_H5_H5Dfill(JNIEnv *env, jclass clss, jbyteArray fill, jlong fil
  * Signature: (J[J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Dset_1extent(JNIEnv *env, jclass clss, jlong loc_id, jlongArray buf)
+Java_hdf_hdf5lib_H5_H5Dset_1extent
+    (JNIEnv *env, jclass clss, jlong loc_id, jlongArray buf)
 {
     herr_t    status;
     hsize_t  *dims;
@@ -1645,7 +1670,8 @@ Java_hdf_hdf5lib_H5_H5Dset_1extent(JNIEnv *env, jclass clss, jlong loc_id, jlong
 } /* end Java_hdf_hdf5lib_H5_H5Dset_1extent */
 
 static herr_t
-H5D_iterate_cb(void* elem, hid_t elem_id, unsigned ndim, const hsize_t *point, void *op_data) {
+H5D_iterate_cb
+    (void* elem, hid_t elem_id, unsigned ndim, const hsize_t *point, void *op_data) {
     JNIEnv    *cbenv;
     jint       status;
     jclass     cls;
@@ -1708,7 +1734,8 @@ H5D_iterate_cb(void* elem, hid_t elem_id, unsigned ndim, const hsize_t *point, v
  * Signature: ([BJJLjava/lang/Object;Ljava/lang/Object;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Diterate(JNIEnv *env, jclass clss, jbyteArray buf, jlong buf_type, jlong space,
+Java_hdf_hdf5lib_H5_H5Diterate
+    (JNIEnv *env, jclass clss, jbyteArray buf, jlong buf_type, jlong space,
           jobject callback_op, jobject op_data)
 {
     herr_t        status = -1;

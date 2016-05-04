@@ -645,7 +645,7 @@ public class H5 implements java.io.Serializable {
      *                - name is null.
      **/
     public synchronized static native int H5Adelete(long loc_id, String name) throws HDF5LibraryException,
-    NullPointerException;
+            NullPointerException;
 
     /**
      * H5Adelete_by_idx removes an attribute, specified by its location in an index, from an object.
@@ -710,7 +710,7 @@ public class H5 implements java.io.Serializable {
      *                - attr_name is null.
      **/
     public synchronized static native boolean H5Aexists(long obj_id, String attr_name) throws HDF5LibraryException,
-    NullPointerException;
+            NullPointerException;
 
     /**
      * H5Aexists_by_name determines whether the attribute attr_name exists on an object. That object is specified by its
@@ -915,7 +915,7 @@ public class H5 implements java.io.Serializable {
      *                - Name is null.
      **/
     public static long H5Aopen(long obj_id, String attr_name, long aapl_id) throws HDF5LibraryException,
-    NullPointerException {
+            NullPointerException {
         long id = _H5Aopen(obj_id, attr_name, aapl_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Aopen add {}", id);
@@ -1043,7 +1043,7 @@ public class H5 implements java.io.Serializable {
      *                - data buffer is null. See public synchronized static native int H5Aread( )
      **/
     public synchronized static int H5Aread(long attr_id, long mem_type_id, Object obj) throws HDF5Exception,
-    NullPointerException {
+            NullPointerException {
         HDFArray theArray = new HDFArray(obj);
         byte[] buf = theArray.emptyBytes();
 
@@ -1507,7 +1507,7 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library.
      **/
     public synchronized static native long H5Dget_storage_size(long dataset_id) throws HDF5LibraryException,
-    IllegalArgumentException;
+            IllegalArgumentException;
 
     /**
      * H5Dget_type returns an identifier for a copy of the datatype for a dataset.
@@ -1732,7 +1732,7 @@ public class H5 implements java.io.Serializable {
             status = H5Dread(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, buf,
                     isCriticalPinning);
             if (status >= 0) {
-                // convert the data into a Java Array */
+                // convert the data into a Java Array
                 obj = theArray.arrayify(buf);
             }
 
@@ -2448,7 +2448,7 @@ public class H5 implements java.io.Serializable {
      *                - name is null.
      **/
     public static long H5Fopen(String name, int flags, long access_id) throws HDF5LibraryException,
-    NullPointerException {
+            NullPointerException {
         long id = _H5Fopen(name, flags, access_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Fopen add {}", id);
@@ -2519,7 +2519,7 @@ public class H5 implements java.io.Serializable {
      *                - name is null.
      **/
     public static long H5Fcreate(String name, int flags, long create_id, long access_id) throws HDF5LibraryException,
-    NullPointerException {
+            NullPointerException {
         long id = _H5Fcreate(name, flags, create_id, access_id);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Fcreate add {}", id);
@@ -3243,7 +3243,7 @@ public class H5 implements java.io.Serializable {
      *                - name is null.
      */
     public synchronized static long H5Gn_members(long loc_id, String name) throws HDF5LibraryException,
-    NullPointerException {
+            NullPointerException {
         long grp_id = H5Gopen(loc_id, name, HDF5Constants.H5P_DEFAULT);
         long n = -1;
 
@@ -4006,8 +4006,6 @@ public class H5 implements java.io.Serializable {
     public synchronized static native String H5Oget_comment_by_name(long loc_id, String name, long lapl_id)
             throws HDF5LibraryException, IllegalArgumentException, NullPointerException;
 
-    // long H5Oget_comment_by_name(int loc_id, String name, String comment, long bufsize, int lapl_id);
-
     /**
      * H5Oset_comment_by_name sets the comment for the specified object.
      *
@@ -4045,7 +4043,7 @@ public class H5 implements java.io.Serializable {
      *                - name is null.
      **/
     public synchronized static native H5O_info_t H5Oget_info(long loc_id) throws HDF5LibraryException,
-    NullPointerException;
+            NullPointerException;
 
     /**
      * H5Oget_info_by_idx retrieves the metadata for an object, identifying the object by an index position.
@@ -4338,6 +4336,20 @@ public class H5 implements java.io.Serializable {
     private synchronized static native long _H5Pcreate(long type) throws HDF5LibraryException;
 
     /**
+     * H5Pget retrieves a copy of the value for a property in a property list (support integer only)
+     *
+     * @param plid
+     *            IN: Identifier of property object to query
+     * @param name
+     *            IN: Name of property to query
+     * @return value for a property if successful; a negative value if failed
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     */
+    public synchronized static native int H5Pget(long plid, String name) throws HDF5LibraryException;
+
+    /**
      * Sets a property list value (support integer only)
      *
      * @param plid
@@ -4416,20 +4428,6 @@ public class H5 implements java.io.Serializable {
      *                - Error from the HDF-5 Library.
      */
     public synchronized static native long H5Pget_class_parent(long plid) throws HDF5LibraryException;
-
-    /**
-     * H5Pget retrieves a copy of the value for a property in a property list (support integer only)
-     *
-     * @param plid
-     *            IN: Identifier of property object to query
-     * @param name
-     *            IN: Name of property to query
-     * @return value for a property if successful; a negative value if failed
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
-     */
-    public synchronized static native int H5Pget(long plid, String name) throws HDF5LibraryException;
 
     /**
      * H5Pequal determines if two property lists or classes are equal
@@ -6106,6 +6104,11 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native long H5Pget_virtual_printf_gap(long dapl_id) throws HDF5LibraryException;
 
+    // public synchronized static native void H5Pset_append_flush(long plist_id, int ndims, long[] boundary, H5D_append_cb func, H5D_append_t udata) throws HDF5LibraryException;
+
+    // public synchronized static native void H5Pget_append_flush(long plist_id, int dims, long[] boundary, H5D_append_cb func, H5D_append_t udata) throws HDF5LibraryException;
+
+
     // Dataset xfer property list (DXPL) routines //
 
     /**
@@ -7184,7 +7187,7 @@ public class H5 implements java.io.Serializable {
      *                - dims or maxdims is null.
      **/
     public static long H5Screate_simple(int rank, long[] dims, long[] maxdims) throws HDF5Exception,
-    NullPointerException {
+            NullPointerException {
         long id = _H5Screate_simple(rank, dims, maxdims);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Screate_simple add {}", id);
@@ -7476,10 +7479,10 @@ public class H5 implements java.io.Serializable {
      *                - offset array is null.
      **/
     public synchronized static native int H5Soffset_simple(long space_id, byte[] offset) throws HDF5LibraryException,
-    NullPointerException;
+            NullPointerException;
 
     public synchronized static int H5Soffset_simple(long space_id, long[] offset) throws HDF5Exception,
-    NullPointerException {
+            NullPointerException {
         if (offset == null) {
             return -1;
         }
@@ -7741,7 +7744,7 @@ public class H5 implements java.io.Serializable {
      *                - dim is null.
      **/
     public static long H5Tarray_create(long base_id, int ndims, long[] dim) throws HDF5LibraryException,
-    NullPointerException {
+            NullPointerException {
         long id = _H5Tarray_create2(base_id, ndims, dim);
         if (id > 0) {
             log.trace("OPEN_IDS: H5Tarray_create add {}", id);
@@ -7983,7 +7986,7 @@ public class H5 implements java.io.Serializable {
      *                - buf is null.
      **/
     public synchronized static native int H5Tencode(long obj_id, byte[] buf, long nalloc) throws HDF5LibraryException,
-    NullPointerException;
+            NullPointerException;
 
     // /**
     // * H5Tencode converts a data type description into binary form in a buffer.
@@ -8057,12 +8060,12 @@ public class H5 implements java.io.Serializable {
      *                - name is null.
      **/
     public static int H5Tenum_insert(long type, String name, int[] value) throws HDF5LibraryException,
-    NullPointerException {
+            NullPointerException {
         return H5Tenum_insert_int(type, name, value);
     }
 
     public static int H5Tenum_insert(long type, String name, int value) throws HDF5LibraryException,
-    NullPointerException {
+            NullPointerException {
         int[] val = { value };
         return H5Tenum_insert_int(type, name, val);
     }
@@ -8112,7 +8115,7 @@ public class H5 implements java.io.Serializable {
      *                - name is null.
      **/
     public static int H5Tenum_nameof(long type, int[] value, String[] name, int size) throws HDF5LibraryException,
-    NullPointerException {
+            NullPointerException {
         return H5Tenum_nameof_int(type, value, name, size);
     }
 
@@ -8153,7 +8156,7 @@ public class H5 implements java.io.Serializable {
      *                - name is null.
      **/
     public static int H5Tenum_valueof(long type, String name, int[] value) throws HDF5LibraryException,
-    NullPointerException {
+            NullPointerException {
         return H5Tenum_valueof_int(type, name, value);
     }
 
@@ -8210,7 +8213,7 @@ public class H5 implements java.io.Serializable {
      *                - dims is null.
      **/
     public synchronized static native int H5Tget_array_dims2(long type_id, long[] dims) throws HDF5LibraryException,
-    NullPointerException;
+            NullPointerException;
 
     /**
      * H5Tget_array_ndims returns the rank, the number of dimensions, of an array datatype object.
@@ -8409,7 +8412,7 @@ public class H5 implements java.io.Serializable {
      *                - fields array is invalid.
      **/
     public synchronized static native void H5Tget_fields(long type_id, long[] fields) throws HDF5LibraryException,
-    NullPointerException, IllegalArgumentException;
+            NullPointerException, IllegalArgumentException;
 
     /**
      * H5Tget_fields retrieves information about the locations of the various bit fields of a floating point datatype.
@@ -8437,12 +8440,12 @@ public class H5 implements java.io.Serializable {
      *                - fields array is invalid.
      **/
     public static int H5Tget_fields(long type_id, int[] fields) throws HDF5LibraryException, NullPointerException,
-    IllegalArgumentException {
+            IllegalArgumentException {
         return H5Tget_fields_int(type_id, fields);
     }
 
     private synchronized static native int H5Tget_fields_int(long type_id, int[] fields) throws HDF5LibraryException,
-    NullPointerException, IllegalArgumentException;
+            NullPointerException, IllegalArgumentException;
 
     /**
      * H5Tset_fields sets the locations and sizes of the various floating point bit fields.
@@ -8640,7 +8643,7 @@ public class H5 implements java.io.Serializable {
      *                - value is null.
      **/
     public static int H5Tget_member_value(long type_id, int membno, int[] value) throws HDF5LibraryException,
-    NullPointerException {
+            NullPointerException {
         return H5Tget_member_value_int(type_id, membno, value);
     }
 
@@ -8821,7 +8824,7 @@ public class H5 implements java.io.Serializable {
      *                - pad is null.
      **/
     public synchronized static native int H5Tget_pad(long type_id, int[] pad) throws HDF5LibraryException,
-    NullPointerException;
+            NullPointerException;
 
     /**
      * H5Tset_pad sets the least and most-significant bits padding types.

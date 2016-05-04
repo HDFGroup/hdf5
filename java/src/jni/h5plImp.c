@@ -36,28 +36,30 @@ extern jobject visit_callback;
  * Method:    H5PLset_loading_state
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5PLset_1loading_1state
-  (JNIEnv *env, jclass clss, jint plugin_flags)
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5PLset_1loading_1state
+    (JNIEnv *env, jclass clss, jint plugin_flags)
 {
     if (H5PLset_loading_state((unsigned int)plugin_flags) < 0) {
         h5libraryError(env);
     }
-}
+} /* end Java_hdf_hdf5lib_H5_H5PLset_1loading_1state */
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5PLget_loading_state
  * Signature: (V)I
  */
-JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5PLget_1loading_1state
-  (JNIEnv *env, jclass clss)
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5PLget_1loading_1state
+    (JNIEnv *env, jclass clss)
 {
     unsigned int plugin_type = 0;
     if (H5PLget_loading_state(&plugin_type) < 0) {
         h5libraryError(env);
     }
     return (jint)plugin_type;
-}
+} /* end Java_hdf_hdf5lib_H5_H5PLget_1loading_1state */
 
 #ifdef __cplusplus
 } /* end extern "C" */
