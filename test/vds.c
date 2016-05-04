@@ -332,6 +332,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
 {
     hid_t       file = -1;      /* File */
     hid_t       dset = -1;      /* Virtual dataset */
+    H5D_space_status_t space_status; /* Dataset space status */
     void        *plist_buf = NULL; /* Serialized property list buffer */
     H5O_info_t  oinfo;          /* Object info struct */
     htri_t      tri_ret;
@@ -350,6 +351,12 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
         if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
             TEST_ERROR
         if((dset = H5Dcreate2(file, "vdset", H5T_NATIVE_INT, vspace, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            TEST_ERROR
+
+        /* Test H5Dget_space_status */
+        if(H5Dget_space_status(dset, &space_status) < 0)
+            TEST_ERROR
+        if(space_status != H5D_SPACE_STATUS_ALLOCATED)
             TEST_ERROR
 
         /* Reopen dataset if requested */
@@ -399,6 +406,12 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
         if(oinfo.meta_size.attr.index_size != (hsize_t)0)
             TEST_ERROR
         if(oinfo.meta_size.attr.index_size != (hsize_t)0)
+            TEST_ERROR
+
+        /* Test H5Dget_space_status */
+        if(H5Dget_space_status(dset, &space_status) < 0)
+            TEST_ERROR
+        if(space_status != H5D_SPACE_STATUS_ALLOCATED)
             TEST_ERROR
 
         /* Close dataset */

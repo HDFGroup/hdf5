@@ -2239,10 +2239,16 @@
 ./tools/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/h5repack-help.txt
-./tools/h5repack/testfiles/h5repack_filters.h5.tst
+./tools/h5repack/testfiles/h5repack_filters.h5-gzip_verbose_filters.tst
+./tools/h5repack/testfiles/h5repack_layout.h5-dset2_chunk_20x10x5.tst
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
+./tools/h5repack/testfiles/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
+./tools/h5repack/testfiles/2_vds.h5-vds_chunk3x6x9-v.ddl
+./tools/h5repack/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl
+./tools/h5repack/testfiles/4_vds.h5-vds_conti-v.ddl
+./tools/h5repack/testfiles/4_vds.h5-vds_compa-v.ddl
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c

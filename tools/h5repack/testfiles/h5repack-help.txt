@@ -33,6 +33,9 @@ usage: h5repack [OPTIONS] file1 file2
     F - is the shared object header message type, any of <dspace|dtype|fill|
         pline|attr>. If F is not specified, S applies to all messages
 
+     --enable-error-stack Prints messages from the HDF5 error stack as they
+                          occur.
+
     FS_STRGY is the file space management strategy to use for the output file.
              It is a string as listed below:
         ALL_PERSIST - Use persistent free-space managers, aggregators and virtual file driver
