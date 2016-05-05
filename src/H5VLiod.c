@@ -5045,7 +5045,7 @@ H5VL_iod_attribute_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_attr_
 
 #if H5_EFF_DEBUG
                 printf("Attribute iterate axe %"PRIu64": %s ID %"PRIu64"\n", 
-                       g_axe_id, input.loc_name, input.loc_id);
+                       g_axe_id, input.path, input.loc_id);
 #endif
 
                 if(NULL == (output = (attr_iterate_t *)H5MM_calloc(sizeof(attr_iterate_t))))
@@ -6104,7 +6104,7 @@ H5VL_iod_link_specific(void *_obj, H5VL_loc_params_t loc_params, H5VL_link_speci
 
 #if H5_EFF_DEBUG
                 printf("Link Iterate axe %"PRIu64": %s ID %"PRIu64"\n", 
-                       g_axe_id, input.loc_name, input.loc_id);
+                       g_axe_id, input.path, input.loc_id);
 #endif
 
                 if(NULL == (output = (link_iterate_t *)H5MM_calloc(sizeof(link_iterate_t))))

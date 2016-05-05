@@ -1036,7 +1036,7 @@ H5VL_iod_server_attr_iterate_cb(AXE_engine_t H5_ATTR_UNUSED axe_engine,
     herr_t ret_value = SUCCEED;
 
 #if H5_EFF_DEBUG
-    fprintf(stderr, "Start attribute Iterate %s/%s on CV %d\n", loc_name, attr_name, (int)rtid);
+    fprintf(stderr, "Start attribute Iterate %s on CV %d\n", loc_name, (int)rtid);
 #endif
 
     /* Open the object where the attribute needs to be checked. */
