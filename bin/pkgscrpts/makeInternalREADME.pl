@@ -16,9 +16,12 @@ The contents of this directory are:
     bin/        - Directory containing HDF5 pre-compiled utilities
     include/    - Directory containing HDF5 include files
     lib/        - Directory containing HDF5 libraries and settings
-    share/      - Directory containing HDF5 C, C++ and Fortran example
-		  program code and scripts to test compile scripts
-                  h5cc, h5c++ and h5fc
+    share/      - Directory containing example code in C, C++, and 
+                  Fortran using HDF5 and HDF5 HL library APIs. The 
+                  shell scripts provided with these examples will 
+                  compile and run them, and will also test the 
+                  h5cc, h5c++, and h5fc compile scripts found
+                  in the installed bin directory.
 
 These binaries were built with the ZLIB and SZIP (version 2.1, Encoder 
 ENABLED) external libraries which are included in the lib directory for 
@@ -42,39 +45,29 @@ to the LD_LIBRARY_PATH variable.
 my $section4 = "We provide scripts for compiling applications with the HDF5 libraries:
 
     bin/h5cc  - for C
-    bin/h5fc  - for F90 (if Fortran 90 is included with the binaries)
-    bin/h5c++ - for C++ (if C++ is included with the binaries)
+    bin/h5fc  - for F90 (if Fortran 90 library is included with the binaries)
+    bin/h5c++ - for C++ (if C++ library is included with the binaries)
 
-After you have installed the binaries to their final destination,
-you can use these scripts (h5cc, h5fc, h5c++) to compile.  However,
-you must first:
-
-  1) Run ./h5redeploy in the bin directory to change site specific paths in the scripts.
-
-  2) Edit each script and update the paths for the external libraries
-     in LDFLAGS and CPPFLAGS.
+After you have installed the binaries to their final destination, you can use 
+these scripts (h5cc, h5fc, h5c++) to compile.  However, you must first run 
+./h5redeploy in the bin directory to change site specific paths in the scripts.
 
 You may also need to change other variables in the scripts, depending
 on how things are set up on your system.  Here are some of the variables
 to check:
 
   prefix      - Path to the HDF5 top level installation directory
-  CCBASE      - Name of the alternative C compiler
-  CLINKERBASE - Name of the alternative linker
+  CCBASE      - Name of the C compiler
+  CLINKERBASE - Name of the linker
   LIBS        - Libraries your application will link with
 
-For further details refer to the INSTALL files in the ./release_docs/
-directory of the HDF5 source code:
-
+For further details refer to the INSTALL files in  
     ftp://ftp.hdfgroup.org/HDF5/current/src/unpacked/release_docs/
+or in the ./release_docs/ directory of the HDF5 source code, which can be found 
+on the HDF Group ftp server at ftp://ftp.hdfgroup.org/HDF5/current/src/.
 
-Source code can be found on the THG ftp server in:
-
-    ftp://ftp.hdfgroup.org/HDF5/current/src/
-
-Please send questions, comments, and suggestions to:
-
-    http://hdfgroup.org/about/contact.html 
+Please send questions, comments, and suggestions to the appropriate 
+contact address from http://www.hdfgroup.org/about/contact.html 
 
 
 ";
@@ -84,6 +77,10 @@ $indirectory = shift;
 my $linktype = "shared";
 if ($indirectory =~ /static/) {
    $linktype = "static";
+}
+my $modestring="";
+if ($indirectory =~ /32/) {
+    $modestring = "in 32 bit mode ";
 }
 
 my $version;
@@ -119,17 +116,19 @@ my @hostnamestring = split / /, $hostnamestring;
 $hostname = $hostnamestring[1];
 #my $size = scalar @hostnamestring;
 if ($hostname =~ /loyalty/) {
-   $platformstring = "\nthat was compiled on: " . $hostnamestring[0]." " . $hostnamestring[2]." " . $hostnamestring[-1] . " ";
+   $platformstring = "\nthat was compiled " . $modestring . "on: " . $hostnamestring[0]." " . $hostnamestring[2]." " . $hostnamestring[-1] . " ";
 }
 elsif ($hostname =~ /freedom/) {
-   $platformstring = "\nthat was compiled on: " . $hostnamestring[0]." " . $hostnamestring[2]." " . $hostnamestring[-1] . " ";
+   $platformstring = "\nthat was compiled " . $modestring . "on: " . $hostnamestring[0]." " . $hostnamestring[2]." " . $hostnamestring[-1] . " ";
 } elsif ($hostname =~ /emu/) {
-   $platformstring = "\nthat was compiled on: " . $hostnamestring[0]." " . $hostnamestring[2] . " " . $hostnamestring[-2] . " ";
+   $platformstring = "\nthat was compiled " . $modestring . "on: " . $hostnamestring[0]." " . $hostnamestring[2] . " " . $hostnamestring[-2] . " ";
+} elsif ($hostname =~ /fred/) {
+   $platformstring = "\nthat was compiled " . $modestring . "on: " . $hostnamestring[0]." " . $hostnamestring[2] . " " . $hostnamestring[-1] . " ";
 } else {
    $_ = $hostnamestring[2];
    my $pos = index $_, '-';
    my $os = substr $_, 0, $pos;
-   $platformstring = "\nthat was compiled on: " . $hostnamestring[0] . " " . $os . " " . $hostnamestring[-2] . " ";
+   $platformstring = "\nthat was compiled " . $modestring . "on: " . $hostnamestring[0] . " " . $os . " " . $hostnamestring[-2] . " ";
 }
 
 
@@ -155,25 +154,31 @@ print OUTFILE $platformstring."\n\n";
 #   print OUTFILE "compilers:\n\n";
 #}
 #else {
-print OUTFILE "\n\nIt includes the C, C++, and F90 APIs, built using the following\n";
+#if ($linktype eq "shared" &&  !($hostname =~ /32/)) {
+#    print OUTFILE "\n\nIt includes the C, C++, F90 and Java APIs, built using the following\n";
+#} else {
+    print OUTFILE "\n\nIt includes the C, C++, and F90 APIs, built using the following\n";
+#}
 print OUTFILE "compilers:\n\n";
 #}
 
 # Only the gcc compiler version is in libhdf5.settings, so for now I looked 
 # up the versions and hardcoded them here.  We will put them in libhdf5.settings
 # for the next release.
-if ($indirectory =~ /gcc482/) {
-   print OUTFILE "\tgcc, g++, and gfortran 4.8.2\n\n";
-   print OUTFILE "\tWarning!\n";
-   print OUTFILE "\tIf the 4.8.2 version is not the system default, the scripts listed below\n";
-   print OUTFILE "\tfor compiling applications will not work unless either the environment\n";
-   print OUTFILE "\tis modified or the full path to the 4.8.2 compiler version is added to\n";
-   print OUTFILE "\tthe scripts in variables CCBASE, CCLINKERBASE for h5cc and corresponding\n";
-   print OUTFILE "\tvariables for other compilers.\n\n";
-} elsif ($hostname =~ /platypus/ || $hostname =~ /ostrich/) {
+if ($indirectory =~ /gnu484/) {
+   print OUTFILE "\tgcc, g++, and gfortran 4.8.4\n\n";
+} elsif ($hostname =~ /jam/ || $hostname =~ /koala/) {
+   print OUTFILE "\tgcc, g++, and gfortran 4.1.2\n\n";
+} elsif ($hostname =~ /platypus/) {
    print OUTFILE "\tgcc, g++, and gfortran 4.4.7\n\n";
+#   if ($linktype eq "shared" &&  !($hostname =~ /32/)) {
+#       print OUTFILE "\tjava 1.8.0_51\n\n";
+#   }
 } elsif ($hostname =~ /moohan/) {
-   print OUTFILE "\tgcc, g++, and gfortran 4.8.3\n\n";
+   print OUTFILE "\tgcc, g++, and gfortran 4.8.5\n\n";
+#   if ($linktype eq "shared" &&  !($hostname =~ /32/)) {
+#       print OUTFILE "\tjava 1.8.0_51\n\n";
+#   }
 } elsif ($hostname =~ /emu/) {
    print OUTFILE "\tSun C and C++ 5.12, Sun Fortran 95 8.6\n\n";
 } elsif ($hostname =~ /loyalty/ || $hostname =~ /freedom/) {
@@ -181,9 +186,11 @@ if ($indirectory =~ /gcc482/) {
 } elsif ($hostname =~ /kite/) {
    print OUTFILE "\tApple clang/clang++ 5.1 from Xcode 5.1 and gfortran 4.8.2\n\n";
 } elsif ($hostname =~ /quail/) {
-   print OUTFILE "\tgcc, g++ 6.0 from Xcode 6.2.0 and gfortran 4.9.2\n\n";
+   print OUTFILE "\tgcc, g++ 6.1 from Xcode 6.2 and gfortran 4.9.2\n\n";
 } elsif ($hostname =~ /osx1010test/) {
-   print OUTFILE "\tgcc, g++ 6.0 from Xcode 7.0.0 and gfortran 4.9.2\n\n";
+   print OUTFILE "\tgcc, g++ 6.1 from Xcode 7.0 and gfortran 4.9.2\n\n";
+} elsif ($hostname =~ /osx1011test/) {
+   print OUTFILE "\tgcc, g++ 7.3 from Xcode 7.3 and gfortran 5.2.0\n\n";
 }
 
 print OUTFILE $section2;
