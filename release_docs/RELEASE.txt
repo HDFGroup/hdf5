@@ -224,6 +224,12 @@ New Features
 
       (BMR, 2016/04/25, HDFFV-9725)
 
+     - New member function added
+
+       The assignment operator ArrayType::operator= is added because ArrayType
+       has pointer data members.
+
+       (BMR, 2016/03/07, HDFFV-9562)
 
 
 Support for New Platforms, Languages, and Compilers
@@ -375,7 +381,7 @@ Bug Fixes since HDF5-1.8.16
       The overloaded methods which had parameters that should be const 
       but were not have been removed.
 
-      (BMR - 2016/01/13, User's report)
+      (BMR - 2016/01/13, HDFFV-9789)
 
 
 
