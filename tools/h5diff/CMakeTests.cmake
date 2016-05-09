@@ -267,7 +267,7 @@
   # copy test files from source to build dir
   #
   foreach (h5_tstfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${h5_tstfiles}" NAME)
+    get_filename_component(fname "${h5_tstfiles}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
     #message (STATUS " Copying ${fname}")
     add_custom_command (
@@ -1115,8 +1115,10 @@ ADD_H5_TEST (h5diff_90 0 -v ${FILE2} ${FILE2})
 ADD_H5_TEST (h5diff_100 1 -v ${FILE9} ${FILE10})
 
 # 11. floating point comparison
+# double value
 ADD_H5_TEST (h5diff_101 1 -v ${FILE1} ${FILE1} g1/d1  g1/d2)
 
+# float value
 ADD_H5_TEST (h5diff_102 1 -v ${FILE1} ${FILE1} g1/fp1 g1/fp2)
 
 # with --use-system-epsilon for double value. expect less differences
@@ -1361,7 +1363,7 @@ ADD_H5_TEST (h5diff_517 1 -v ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
 ADD_H5_TEST (h5diff_518 0 -v --follow-symlinks ${GRP_RECURSE1_EXT} ${GRP_RECURSE2_EXT1} /g1)
 
 # ##############################################################################
-# # Exclude path (--exclude-path)
+# # Exclude objects (--exclude-path)
 # ##############################################################################
 #
 # Same structure, same names and different value.

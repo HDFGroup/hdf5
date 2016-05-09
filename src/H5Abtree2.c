@@ -80,7 +80,7 @@ typedef struct H5A_fh_ud_cmp_t {
 
 /* v2 B-tree driver callbacks for 'creation order' index */
 static herr_t H5A__dense_btree2_corder_store(void *native, const void *udata);
-static herr_t H5A__dense_btree2_corder_compare(const void *rec1, const void *rec2);
+static herr_t H5A__dense_btree2_corder_compare(const void *rec1, const void *rec2, int *result);
 static herr_t H5A__dense_btree2_corder_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5A__dense_btree2_corder_decode(const uint8_t *raw, void *native,
@@ -90,7 +90,7 @@ static herr_t H5A__dense_btree2_corder_debug(FILE *stream, int indent, int fwidt
 
 /* v2 B-tree driver callbacks for 'name' index */
 static herr_t H5A__dense_btree2_name_store(void *native, const void *udata);
-static herr_t H5A__dense_btree2_name_compare(const void *rec1, const void *rec2);
+static herr_t H5A__dense_btree2_name_compare(const void *rec1, const void *rec2, int *result);
 static herr_t H5A__dense_btree2_name_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5A__dense_btree2_name_decode(const uint8_t *raw, void *native,
@@ -116,9 +116,7 @@ const H5B2_class_t H5A_BT2_NAME[1]={{  /* B-tree class information */
     H5A__dense_btree2_name_compare,     /* Record comparison callback */
     H5A__dense_btree2_name_encode,      /* Record encoding callback */
     H5A__dense_btree2_name_decode,      /* Record decoding callback */
-    H5A__dense_btree2_name_debug,       /* Record debugging callback */
-    NULL,                              /* Create debugging context */
-    NULL                               /* Destroy debugging context */
+    H5A__dense_btree2_name_debug        /* Record debugging callback */
 }};
 
 /* v2 B-tree class for indexing 'creation order' field of attributes */
@@ -132,9 +130,7 @@ const H5B2_class_t H5A_BT2_CORDER[1]={{ /* B-tree class information */
     H5A__dense_btree2_corder_compare,   /* Record comparison callback */
     H5A__dense_btree2_corder_encode,    /* Record encoding callback */
     H5A__dense_btree2_corder_decode,    /* Record decoding callback */
-    H5A__dense_btree2_corder_debug,     /* Record debugging callback */
-    NULL,                              /* Create debugging context */
-    NULL                               /* Destroy debugging context */
+    H5A__dense_btree2_corder_debug      /* Record debugging callback */
 }};
 
 
@@ -249,13 +245,13 @@ H5A__dense_btree2_name_store(void *_nrecord, const void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
+H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int *result)
 {
     const H5A_bt2_ud_common_t *bt2_udata = (const H5A_bt2_ud_common_t *)_bt2_udata;
     const H5A_dense_bt2_name_rec_t *bt2_rec = (const H5A_dense_bt2_name_rec_t *)_bt2_rec;
-    herr_t ret_value = FAIL;            /* Return value */
+    herr_t ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(bt2_udata);
@@ -263,13 +259,12 @@ H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
 
     /* Check hash value */
     if(bt2_udata->name_hash < bt2_rec->hash)
-        ret_value = (-1);
+        *result = (-1);
     else if(bt2_udata->name_hash > bt2_rec->hash)
-        ret_value = 1;
+        *result = 1;
     else {
         H5A_fh_ud_cmp_t fh_udata;       /* User data for fractal heap 'op' callback */
         H5HF_t *fheap;                  /* Fractal heap handle to use for finding object */
-        herr_t status;                  /* Status from fractal heap 'op' routine */
 
         /* Sanity check */
         HDassert(bt2_udata->name_hash == bt2_rec->hash);
@@ -294,13 +289,14 @@ H5A__dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec)
         HDassert(fheap);
 
         /* Check if the user's attribute and the B-tree's attribute have the same name */
-        status = H5HF_op(fheap, bt2_udata->dxpl_id, &bt2_rec->id, H5A__dense_fh_name_cmp, &fh_udata);
-        HDassert(status >= 0);
+        if(H5HF_op(fheap, bt2_udata->dxpl_id, &bt2_rec->id, H5A__dense_fh_name_cmp, &fh_udata) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
 
         /* Callback will set comparison value */
-        ret_value = fh_udata.cmp;
+        *result = fh_udata.cmp;
     } /* end else */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5A__dense_btree2_name_compare() */
 
@@ -441,11 +437,10 @@ H5A__dense_btree2_corder_store(void *_nrecord, const void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec)
+H5A__dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec, int *result)
 {
     const H5A_bt2_ud_common_t *bt2_udata = (const H5A_bt2_ud_common_t *)_bt2_udata;
     const H5A_dense_bt2_corder_rec_t *bt2_rec = (const H5A_dense_bt2_corder_rec_t *)_bt2_rec;
-    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -455,13 +450,13 @@ H5A__dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec)
 
     /* Check creation order value */
     if(bt2_udata->corder < bt2_rec->corder)
-        ret_value = -1;
+        *result = -1;
     else if(bt2_udata->corder > bt2_rec->corder)
-        ret_value = 1;
+        *result = 1;
     else
-        ret_value = 0;
+        *result = 0;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A__dense_btree2_corder_compare() */
 
 

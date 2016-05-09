@@ -38,6 +38,7 @@ const char *FILENAME[] = {
     "vds_src_0",
     "vds_src_1",
     "vds%%_src",
+    "vds_dapl",
     NULL
 };
 
@@ -447,7 +448,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl,
     } /* end else */
 
     /* Verify examination DCPL is equal to original DCPL.  Do not compare the
-     * plist to itselt, and do not do the comparison if we reopened the file,
+     * plist to itself, and do not do the comparison if we reopened the file,
      * because in that case the extent of the source dset will not be corrent.
      */
     if((*ex_dcpl != dcpl) && (config != TEST_API_REOPEN_FILE)) {
@@ -11093,13 +11094,156 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_dapl_values
+ *
+ * Purpose:     Ensure that H5Dget_access_plist returns correct values.
+ *
+ * Return:      Success:    0
+ *              Failure:    1
+ *
+ * Programmer:  Dana Robinson
+ *              March 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_dapl_values(hid_t fapl_id)
+{
+    hid_t	fid = -1;           /* file to write to                     */
+    hid_t	dcpl_id = -1;       /* dataset creation properties          */
+    hid_t	dapl_id1 = -1;      /* dataset access properties            */
+    hid_t	dapl_id2 = -1;      /* dataset access properties            */
+    hid_t	vds_sid = -1;       /* vds data space                       */
+    hid_t	src_sid = -1;       /* source data space                    */
+    hid_t	did1 = -1;          /* dataset                              */
+    hid_t	did2 = -1;          /* dataset                              */
+    hsize_t start;              /* hyperslab start                      */
+    hsize_t stride;             /* hyperslab count                      */
+    hsize_t count;              /* hyperslab count                      */
+    hsize_t block;              /* hyperslab count                      */
+    hsize_t dims;               /* dataset size                         */
+    hsize_t max_dims;           /* dataset max size                     */
+    H5D_vds_view_t view;        /* view from dapl                       */
+    hsize_t gap_size;           /* gap size from dapl                   */
+    char    filename[1024];     /* file names                           */
+
+    TESTING("H5Dget_access_plist() returns dapl w/ correct values");
+
+    /* Create the file */
+    h5_fixname(FILENAME[5], fapl_id, filename, sizeof(filename));
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create the dcpl and set up VDS mapping */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    /* source */
+    dims = 42;
+    if((src_sid = H5Screate_simple(1, &dims, NULL)) < 0)
+        FAIL_STACK_ERROR
+    /* vds */
+    dims = 0;
+    max_dims = H5S_UNLIMITED;
+    if((vds_sid = H5Screate_simple(1, &dims, &max_dims)) < 0)
+        FAIL_STACK_ERROR
+    start = 0;
+    stride = 42;
+    count = H5S_UNLIMITED;
+    block = 42;
+    if(H5Sselect_hyperslab(vds_sid, H5S_SELECT_SET, &start, &stride, &count, &block) < 0)
+        FAIL_STACK_ERROR
+    /* map */
+    if(H5Pset_virtual(dcpl_id, vds_sid, "f-%b.h5", "/dset1", src_sid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create the dapls and set values
+     * There are two of them. The reason for this is that the only way
+     * to set the printf gap is to use the default view and using the
+     * default isn't the best way to test setting and getting the view.
+     */
+    /* dapl 1 */
+    if((dapl_id1 = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_virtual_view(dapl_id1, H5D_VDS_FIRST_MISSING) < 0)
+        FAIL_STACK_ERROR
+    /* dapl 2 */
+    if((dapl_id2 = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        FAIL_STACK_ERROR
+    /* default but we set it explicitly to be sure */
+    if(H5Pset_virtual_view(dapl_id2, H5D_VDS_LAST_AVAILABLE) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_virtual_printf_gap(dapl_id2, 123) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create the datasets */
+    if((did1 = H5Dcreate2(fid, "dset1", H5T_NATIVE_INT, vds_sid, H5P_DEFAULT, dcpl_id, dapl_id1)) < 0)
+        FAIL_STACK_ERROR
+    if((did2 = H5Dcreate2(fid, "dset2", H5T_NATIVE_INT, vds_sid, H5P_DEFAULT, dcpl_id, dapl_id2)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dapls */
+    if(H5Pclose(dapl_id1) < 0)
+        FAIL_STACK_ERROR
+    dapl_id1 = -1;
+    if(H5Pclose(dapl_id2) < 0)
+        FAIL_STACK_ERROR
+    dapl_id2 = -1;
+
+    /* Get a data access property lists from the dataset */
+    if((dapl_id1 = H5Dget_access_plist(did1)) < 0)
+        FAIL_STACK_ERROR
+    if((dapl_id2 = H5Dget_access_plist(did2)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check the values from the dapls */
+    /* dapl 1 */
+    if(H5Pget_virtual_view(dapl_id1, &view) < 0)
+        FAIL_STACK_ERROR
+    if(H5D_VDS_FIRST_MISSING != view)
+        TEST_ERROR
+    /* dapl 2 */
+    if(H5Pget_virtual_view(dapl_id2, &view) < 0)
+        FAIL_STACK_ERROR
+    if(H5D_VDS_LAST_AVAILABLE != view)
+        TEST_ERROR
+    if(H5Pget_virtual_printf_gap(dapl_id2, &gap_size) < 0)
+        FAIL_STACK_ERROR
+    if(gap_size != 123)
+
+    /* Close everything */
+    if(H5Sclose(vds_sid) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(src_sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(did1) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(did2) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dapl_id1) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dapl_id2) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl_id) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Dclose(did1);
+        H5Dclose(did2);
+        H5Pclose(dapl_id1);
+        H5Pclose(dapl_id2);
+        H5Pclose(dcpl_id);
+        H5Sclose(vds_sid);
+        H5Sclose(src_sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_dapl_values() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests datasets with virtual layout
  *
- * Return:      Success:        exit(0)
- *
- *              Failure:        exit(1)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Neil Fortner
  *              Tuesday, February 17, 2015
@@ -11119,7 +11263,7 @@ main(void)
     h5_reset();
     fapl = h5_fileaccess();
 
-    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     for(test_api_config = (int)TEST_API_BASIC; test_api_config < (int)TEST_API_NTESTS; test_api_config++)
         nerrors += test_api((test_api_config_t)test_api_config, fapl);
@@ -11131,6 +11275,8 @@ main(void)
         nerrors += test_all(bit_config, fapl);
     } /* end for */
 
+    nerrors += test_dapl_values(fapl);
+
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl) < 0 ? 1 : 0);
 
@@ -11139,12 +11285,12 @@ main(void)
     printf("All virtual dataset tests passed.\n");
     h5_cleanup(FILENAME, fapl);
 
-    return 0;
+    return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
     printf("***** %d VIRTUAL DATASET TEST%s FAILED! *****\n",
             nerrors, 1 == nerrors ? "" : "S");
-    return 1;
+    return EXIT_FAILURE;
 } /* end main() */
 

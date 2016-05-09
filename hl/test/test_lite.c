@@ -2066,6 +2066,15 @@ static int test_valid_path(void)
   /**************************************
    * CHECK ABSOLUTE PATHS 
    **************************************/
+
+  if( (path_valid = H5LTpath_valid(file_id, "/", TRUE)) != TRUE) {
+    goto out;
+  }
+
+  if( (path_valid = H5LTpath_valid(file_id, "/", FALSE)) != TRUE) {
+    goto out;
+  }
+
   if( (path_valid = H5LTpath_valid(file_id, "/G1", TRUE)) != TRUE) {
     goto out;
   }
@@ -2111,6 +2120,20 @@ static int test_valid_path(void)
   /**************************************
    * CHECK RELATIVE PATHS 
    ***************************************/
+
+  if( (group = H5Gopen2(file_id, "/", H5P_DEFAULT)) < 0)
+    goto out;
+  
+  if( (path_valid = H5LTpath_valid(group, "/", TRUE)) != TRUE) {
+    goto out;
+  }
+
+  if( (path_valid = H5LTpath_valid(group, "/", FALSE)) != TRUE) {
+    goto out;
+  }
+
+  if(H5Gclose(group)<0)
+    goto out;
 
   if( (group = H5Gopen2(file_id, "/G1", H5P_DEFAULT)) < 0)
     goto out;

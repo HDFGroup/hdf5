@@ -50,7 +50,6 @@ static herr_t H5SM__bt2_dst_context(void *ctx);
 static herr_t H5SM__bt2_store(void *native, const void *udata);
 static herr_t H5SM__bt2_debug(FILE *stream, int indent, int fwidth,
     const void *record, const void *_udata);
-static void *H5SM__bt2_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 
 /*****************************/
@@ -67,9 +66,7 @@ const H5B2_class_t H5SM_INDEX[1]={{   /* B-tree class information */
     H5SM__message_compare,            /* Record comparison callback */
     H5SM__message_encode,             /* Record encoding callback */
     H5SM__message_decode,             /* Record decoding callback */
-    H5SM__bt2_debug,                  /* Record debugging callback */
-    H5SM__bt2_crt_dbg_context,	      /* Create debugging context */
-    H5SM__bt2_dst_context 	      /* Destroy debugging context */
+    H5SM__bt2_debug                   /* Record debugging callback */
 }};
 
 
@@ -215,45 +212,6 @@ H5SM__bt2_debug(FILE *stream, int indent, int fwidth,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM__bt2_debug */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5SM__bt2_crt_dbg_context
- *
- * Purpose:	Create context for debugging callback
- *
- * Return:	Success:	non-NULL
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, December 1, 2009
- *
- *-------------------------------------------------------------------------
- */
-static void *
-H5SM__bt2_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr)
-{
-    H5SM_bt2_ctx_t *ctx;        /* Callback context structure */
-    void *ret_value = NULL;     /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity check */
-    HDassert(f);
-
-    /* Allocate callback context */
-    if(NULL == (ctx = H5FL_MALLOC(H5SM_bt2_ctx_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate callback context")
-
-    /* Determine the size of addresses & lengths in the file */
-    ctx->sizeof_addr = H5F_SIZEOF_ADDR(f);
-
-    /* Set return value */
-    ret_value = ctx;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5SM__bt2_crt_dbg_context() */
 
 
 /*-------------------------------------------------------------------------

@@ -71,7 +71,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language cancatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RECM:O*N:";
+static const char *s_opts = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RECM:O*N:vG:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -190,6 +190,8 @@ static struct long_options l_opts[] = {
     { "no-compact-subset", no_arg, 'C' },
     { "ddl", optional_arg, 'O' },
     { "any_path", require_arg, 'N' },
+    { "vds-view-first-missing", no_arg, 'v' },
+    { "vds-gap-size", require_arg, 'G' },
     { NULL, 0, '\0' }
 };
 
@@ -242,7 +244,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -o F, --output=F     Output raw data into file F\n");
     PRINTVALSTREAM(rawoutstream, "     -b B, --binary=B     Binary file output, of form B\n");
     PRINTVALSTREAM(rawoutstream, "     -O F, --ddl=F        Output ddl text into file F\n");
-    PRINTVALSTREAM(rawoutstream, "                          Do not use filename F to suppress ddl display\n");
+    PRINTVALSTREAM(rawoutstream, "                          Use blank(empty) filename F to suppress ddl display\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Object Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -a P, --attribute=P  Print the specified attribute\n");
     PRINTVALSTREAM(rawoutstream, "                          If an attribute name contains a slash (/), escape the\n");
@@ -256,6 +258,8 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "                          P can be the absolute path or just a relative path.\n");
     PRINTVALSTREAM(rawoutstream, "     -A,   --onlyattr     Print the header and value of attributes\n");
     PRINTVALSTREAM(rawoutstream, "                          Optional value 0 suppresses printing attributes.\n");
+    PRINTVALSTREAM(rawoutstream, "     --vds-view-first-missing Set the VDS bounds to first missing mapped elements.\n");
+    PRINTVALSTREAM(rawoutstream, "     --vds-gap-size=N     Set the missing file gap size, N=non-negative integers\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Object Property Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, "     -i,   --object-ids   Print the object ids\n");
     PRINTVALSTREAM(rawoutstream, "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
@@ -620,7 +624,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
                 size_count++;
 
             last_digit = 1;
-        } 
+        }
         else {
             last_digit = 0;
         }
@@ -643,7 +647,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
         }
     d->data = p_list;
     d->len = size_count;
-    
+
     return;
 }
 
@@ -705,7 +709,7 @@ parse_subset_params(char *dset)
  *
  * Purpose:     Parse a list of comma or space separated integers and fill
  *              the packed_bits list and counter. The string being passed into this function
- *              should be at the start of the list you want to parse. 
+ *              should be at the start of the list you want to parse.
  *
  * Return:      Success:        SUCCEED
  *
@@ -831,7 +835,7 @@ static void
 free_handler(struct handler_t *hand, int len)
 {
     int i;
-    
+
     if(hand) {
         for (i = 0; i < len; i++) {
             if(hand[i].obj) {
@@ -1121,6 +1125,16 @@ parse_start:
             }
             display_packed_bits = TRUE;
             break;
+        case 'v':
+            display_vds_first = TRUE;
+            break;
+        case 'G':
+            vds_gap_size = HDatoi(opt_arg);
+            if (vds_gap_size < 0) {
+                usage(h5tools_getprogname());
+                goto error;
+            }
+            break;
 
         /** begin XML parameters **/
         case 'x':
@@ -1161,7 +1175,7 @@ parse_start:
             }
             if (HDstrcmp(opt_arg,":") == 0) {
                 xmlnsprefix = "";
-            } 
+            }
             else {
                 xmlnsprefix = opt_arg;
             }
@@ -1187,7 +1201,7 @@ parse_start:
                  * the two.
                  */
                 s = last_dset->subset_info;
-            } 
+            }
             else {
                 last_dset->subset_info = s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
             }
@@ -1358,7 +1372,7 @@ main(int argc, const char *argv[])
     /* Disable tools error reporting */
     H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
     H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
-    
+
     if((hand = parse_command_line(argc, argv))==NULL) {
         goto done;
     }
@@ -1444,12 +1458,12 @@ main(int argc, const char *argv[])
             if (xml_dtd_uri == NULL) {
                 if (useschema) {
                     xml_dtd_uri = DEFAULT_XSD;
-                } 
+                }
                 else {
                     xml_dtd_uri = DEFAULT_DTD;
                     xmlnsprefix = "";
                 }
-            } 
+            }
             else {
                 if (useschema && HDstrcmp(xmlnsprefix,"")) {
                     error_msg("Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
@@ -1486,7 +1500,7 @@ main(int argc, const char *argv[])
         /* start to dump - display file header information */
         if (!doxml) {
             begin_obj(h5tools_dump_header_format->filebegin, fname, h5tools_dump_header_format->fileblockbegin);
-        } 
+        }
         else {
             PRINTVALSTREAM(rawoutstream, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
@@ -1495,7 +1509,7 @@ main(int argc, const char *argv[])
                 if (HDstrcmp(xmlnsprefix,"") == 0) {
                     PRINTSTREAM(rawoutstream, "<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
                             xml_dtd_uri);
-                } 
+                }
                 else {
                     /*  TO DO: make -url option work in this case (may need new option) */
                     char *ns;
@@ -1511,7 +1525,7 @@ main(int argc, const char *argv[])
                             "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\">\n",xmlnsprefix,ns);
                     HDfree(ns);
                 }
-            } 
+            }
             else {
                 PRINTSTREAM(rawoutstream, "<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n", xml_dtd_uri);
                 PRINTVALSTREAM(rawoutstream, "<HDF5-File>\n");
@@ -1570,7 +1584,7 @@ main(int argc, const char *argv[])
         if (!doxml) {
             end_obj(h5tools_dump_header_format->fileend, h5tools_dump_header_format->fileblockend);
             PRINTVALSTREAM(rawoutstream, "\n");
-        } 
+        }
         else {
             PRINTSTREAM(rawoutstream, "</%sHDF5-File>\n", xmlnsprefix);
         }
@@ -1581,13 +1595,17 @@ main(int argc, const char *argv[])
             if (H5Fclose(fid) < 0)
                 h5tools_setstatus(EXIT_FAILURE);
 
-        if(prefix)
+        if(prefix) {
             HDfree(prefix);
-        if(fname)
+            prefix = NULL;
+        }
+        if(fname) {
             HDfree(fname);
+            fname = NULL;
+        }
     } /* end while */
 
-    if(hand) 
+    if(hand)
         free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
@@ -1601,13 +1619,17 @@ done:
     if(fid >=0)
         if (H5Fclose(fid) < 0)
             h5tools_setstatus(EXIT_FAILURE);
-    
-    if(prefix)
-        HDfree(prefix);
-    if(fname)
-        HDfree(fname);
 
-    if(hand) 
+    if(prefix) {
+        HDfree(prefix);
+        prefix = NULL;
+    }
+    if(fname) {
+        HDfree(fname);
+        fname = NULL;
+    }
+
+    if(hand)
         free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
@@ -1660,20 +1682,20 @@ h5_fileaccess(void)
     if (!HDstrcmp(name, "sec2")) {
         /* Unix read() and write() system calls */
         if (H5Pset_fapl_sec2(fapl)<0) return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "stdio")) {
         /* Standard C fread() and fwrite() system calls */
         if (H5Pset_fapl_stdio(fapl)<0) return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "core")) {
         /* In-core temporary file with 1MB increment */
         if (H5Pset_fapl_core(fapl, 1024*1024, FALSE)<0) return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "split")) {
         /* Split meta data and raw data each using default driver */
         if (H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "multi")) {
         /* Multi-file driver, general case of the split driver */
         H5FD_mem_t      memb_map[H5FD_MEM_NTYPES];
@@ -1699,7 +1721,7 @@ h5_fileaccess(void)
 
         if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "family")) {
         hsize_t fam_size = 100*1024*1024; /*100 MB*/
 
@@ -1708,7 +1730,7 @@ h5_fileaccess(void)
             fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024);
         if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "log")) {
         long log_flags = H5FD_LOG_LOC_IO;
 
@@ -1718,12 +1740,12 @@ h5_fileaccess(void)
 
         if (H5Pset_fapl_log(fapl, NULL, (unsigned)log_flags, 0) < 0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "direct")) {
         /* Substitute Direct I/O driver with sec2 driver temporarily because
          * some output has sec2 driver as the standard. */
         if (H5Pset_fapl_sec2(fapl)<0) return -1;
-    } 
+    }
     else {
         /* Unknown driver */
         return -1;

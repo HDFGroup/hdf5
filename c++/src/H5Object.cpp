@@ -109,7 +109,7 @@ H5std_string H5Object::getObjName() const
     H5std_string obj_name(""); // object name to return
 
     // Preliminary call to get the size of the object name
-    ssize_t name_size = H5Iget_name(getId(), NULL, (size_t)0);
+    ssize_t name_size = H5Iget_name(getId(), NULL, static_cast<size_t>(0));
 
     // If H5Iget_name failed, throw exception
     if (name_size < 0)

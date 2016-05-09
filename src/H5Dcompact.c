@@ -440,11 +440,8 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst
     HDassert(storage_src);
     HDassert(f_dst);
     HDassert(storage_dst);
+    HDassert(storage_dst->buf);
     HDassert(dt_src);
-
-    /* Allocate space for destination data */
-    if(NULL == (storage_dst->buf = H5MM_malloc(storage_src->size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory for compact dataset")
 
     /* Create datatype ID for src datatype, so it gets freed */
     if((tid_src = H5I_register(H5I_DATATYPE, dt_src, FALSE)) < 0)
@@ -549,7 +546,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *storage_src, H5F_t *f_dst
 
         HDmemcpy(storage_dst->buf, buf, storage_dst->size);
 
-        if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
+        if(H5D_vlen_reclaim(tid_mem, buf_space, dxpl_id, reclaim_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to reclaim variable-length data")
     } /* end if */
     else if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {

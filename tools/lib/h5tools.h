@@ -510,7 +510,7 @@ typedef struct h5tools_context_t {
     hsize_t size_last_dim;                   /*the size of the last dimension,
                                               *needed so we can break after each
                                               *row */
-    int  indent_level;                 /*the number of times we need some
+    int  indent_level;                /*the number of times we need some
                                        *extra indentation */
     int  default_indent_level;        /*this is used when the indent level gets changed */
     hsize_t acc[H5S_MAX_RANK];        /* accumulator position */

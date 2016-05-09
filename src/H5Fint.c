@@ -134,6 +134,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
     hbool_t driver_prop_copied = FALSE;     /* Whether the driver property has been set up */
     unsigned    efc_size = 0;
+    hbool_t	latest_format = FALSE;	    /* Always use the latest format? */
     hid_t	ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -170,12 +171,20 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't sieve buffer size")
     if(H5P_set(new_plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->sdata_aggr.alloc_size)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size")
-    if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
+    if(f->shared->latest_flags > 0)
+        latest_format = TRUE;
+    if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
     if(f->shared->efc)
         efc_size = H5F_efc_max_nfiles(f->shared->efc);
     if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set elink file cache size")
+#ifdef H5_HAVE_PARALLEL
+    if(H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
+    if(H5P_set(new_plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
+#endif /* H5_HAVE_PARALLEL */
 
     /* Prepare the driver property */
     driver_prop.driver_id = f->shared->lf->driver_id;
@@ -503,32 +512,32 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5F_is_hdf5(const char *name, hid_t fapl_id)
+H5F_is_hdf5(const char *name, hid_t fapl_id, hid_t dxpl_id)
 {
     H5F_t	*file = NULL;           /* Low-level file struct */
     haddr_t     sig_addr;               /* Addess of hdf5 file signature */
+    H5P_genplist_t  *xfer_plist= NULL;  /* Dataset transfer property list object */
     htri_t	ret_value = FAIL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Open the file at the virtual file layer */
-    //if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF)))
-    //HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
-
     /* Open the file  */
     if(NULL == (file = H5F_open(name, H5F_ACC_RDONLY, H5P_FILE_CREATE_DEFAULT,
-                                fapl_id, H5AC_ind_dxpl_id)))
+                                fapl_id, dxpl_id)))
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FALSE, "unable to open file")
 
-    /* The file is an hdf5 file if the hdf5 file signature can be found */
-    if(H5FD_locate_signature(file->shared->lf, H5AC_ind_dxpl_g, &sig_addr) < 0)
+    /* Get the property list object */
+    if(NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+
+    if(H5FD_locate_signature(file->shared->lf, xfer_plist, &sig_addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FALSE, "unable to locate file signature")
+
     ret_value = (HADDR_UNDEF != sig_addr);
 
 done:
     /* Close the file */
     if(file)
-        //if(H5FD_close(file) < 0 && ret_value >= 0)
         if(H5F_close(file) < 0 && ret_value >= 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
@@ -576,6 +585,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
     else {
         H5P_genplist_t *plist;          /* Property list */
         unsigned        efc_size;       /* External file cache size */
+        hbool_t	latest_format;	        /* Always use the latest format?	*/
         size_t u;                       /* Local index variable */
 
         HDassert(lf != NULL);
@@ -631,8 +641,11 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get garbage collect reference")
         if(H5P_get(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &(f->shared->sieve_buf_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get sieve buffer size")
-        if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
+        if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
+	/* For latest format, activate all latest version support */
+	if(latest_format)
+	    f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
         if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &(f->shared->meta_aggr.alloc_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get metadata cache size")
         f->shared->meta_aggr.feature_flag = H5FD_FEAT_AGGREGATE_METADATA;
@@ -644,6 +657,12 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(efc_size > 0)
             if(NULL == (f->shared->efc = H5F_efc_create(efc_size)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create external file cache")
+#ifdef H5_HAVE_PARALLEL
+        if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata read flag")
+        if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata write flag")
+#endif /* H5_HAVE_PARALLEL */
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -1410,7 +1429,7 @@ H5F_try_close(H5F_t *f)
      * shared H5F_file_t struct. If the reference count for the H5F_file_t
      * struct reaches zero then destroy it also.
      */
-    if(H5F_dest(f, H5AC_dxpl_id, TRUE) < 0)
+    if(H5F_dest(f, H5AC_ind_read_dxpl_id, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
 done:
@@ -1998,7 +2017,7 @@ H5F_set_store_msg_crt_idx(H5F_t *f, hbool_t flag)
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
+H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t dxpl_id)
 {
     H5FD_t     *fd_ptr;                 /* file driver */
     haddr_t     eoa;                    /* End of file address */
@@ -2066,6 +2085,7 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
     /* test to see if a buffer was provided -- if not, we are done */
     if(buf_ptr != NULL) {
         size_t	space_needed;		/* size of file image */
+        H5P_genplist_t *xfer_plist= NULL;  /* Dataset transfer property list object */
 
         /* Check for buffer too small */
         if((haddr_t)buf_len < eoa)
@@ -2073,9 +2093,13 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
 
         space_needed = (size_t)eoa;
 
+        /* Get the property list object */
+        if(NULL == (xfer_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get new property list object")
+
         /* read in the file image */
         /* (Note compensation for base address addition in internal routine) */
-        if(H5FD_read(fd_ptr, H5AC_ind_dxpl_g, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
+        if(H5FD_read(fd_ptr, xfer_plist, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "file image read request failed")
     } /* end if */
     
@@ -2144,4 +2168,34 @@ H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_eoa() */
+
+#ifdef H5_HAVE_PARALLEL
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_coll_md_read
+ *
+ * Purpose:     Set the coll_md_read field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              2/10/16
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(f);
+
+    f->coll_md_read = cmr;
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* H5F_set_coll_md_read() */
+#endif /* H5_HAVE_PARALLEL */
 

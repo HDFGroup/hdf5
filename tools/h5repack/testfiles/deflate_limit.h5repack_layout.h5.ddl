@@ -12,7 +12,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -30,7 +30,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -48,7 +48,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -66,7 +66,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -74,7 +74,7 @@ GROUP "/" {
    }
    DATASET "dset_chunk" {
       DATATYPE  H5T_STD_I32LE
-      DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, H5S_UNLIMITED ) }
+      DATASPACE  SIMPLE { ( 40, 20 ) / ( 40, 20 ) }
       STORAGE_LAYOUT {
          CHUNKED ( 20, 10 )
          SIZE 1283 (2.494:1 COMPRESSION)
@@ -84,7 +84,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -102,7 +102,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR
@@ -120,7 +120,7 @@ GROUP "/" {
       }
       FILLVALUE {
          FILL_TIME H5D_FILL_TIME_IFSET
-         VALUE  0
+         VALUE  H5D_FILL_VALUE_DEFAULT
       }
       ALLOCATION_TIME {
          H5D_ALLOC_TIME_INCR

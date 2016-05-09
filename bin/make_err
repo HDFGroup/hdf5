@@ -175,6 +175,12 @@ sub create_public ($) {
     print_warning(*HEADER);
     print_startprotect(*HEADER, $file);
 
+    # Begin extern C block
+    print HEADER "\n";
+    print HEADER "#ifdef __cplusplus\n";
+    print HEADER "extern \"C\" {\n";
+    print HEADER "#endif\n";
+
     # Iterate over all the major errors
     print HEADER "\n/*********************/\n";
     print HEADER   "/* Major error codes */\n";
@@ -201,6 +207,12 @@ sub create_public ($) {
             printf HEADER "H5_DLLVAR hid_t %-20s /* %s */\n","${name}_g;",$minor{$name};
         }
     }
+
+    # End extern C block
+    print HEADER "\n";
+    print HEADER "#ifdef __cplusplus\n";
+    print HEADER "}\n";
+    print HEADER "#endif\n";
 
     print_endprotect(*HEADER, $file);
 

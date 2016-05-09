@@ -277,13 +277,17 @@ if ($LT_VERS && $version_increased) {
 
   local($_) = $contentsy;
 
-  my ($lt_revision) = /^LT_VERS_REVISION\s*=\s*(\d+)/m;
-  my $new_lt_revision = $lt_revision+1;
-  ($contentsy) =~ s/^(LT_VERS_REVISION\s*=\s*)\d+/$1$new_lt_revision/m;
+# As of the HDF5 v1.8.16 release, h5vers should not increment
+# the LT_VERS numbers, so the next 6 lines are commented out.
+# A future version may copy the numbers to H5public.h, so this
+# section is retained for future reference.
+#  my ($lt_revision) = /^LT_VERS_REVISION\s*=\s*(\d+)/m;
+#  my $new_lt_revision = $lt_revision+1;
+#  ($contentsy) =~ s/^(LT_VERS_REVISION\s*=\s*)\d+/$1$new_lt_revision/m;
 
-  open FILE, ">$LT_VERS" or die "$LT_VERS: $!\n";
-  print FILE $contentsy;
-  close FILE;
+#  open FILE, ">$LT_VERS" or die "$LT_VERS: $!\n";
+#  print FILE $contentsy;
+#  close FILE;
 }
 
 # Update the README.txt file

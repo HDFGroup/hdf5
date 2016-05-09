@@ -71,11 +71,10 @@ typedef struct H5HF_huge_bt2_ctx_t {
 /* Common callbacks */
 static void *H5HF__huge_bt2_crt_context(void *udata);
 static herr_t H5HF__huge_bt2_dst_context(void *ctx);
-static void *H5HF__huge_bt2_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 /* Callbacks for indirect objects */
 static herr_t H5HF__huge_bt2_indir_store(void *native, const void *udata);
-static herr_t H5HF__huge_bt2_indir_compare(const void *rec1, const void *rec2);
+static herr_t H5HF__huge_bt2_indir_compare(const void *rec1, const void *rec2, int *result);
 static herr_t H5HF__huge_bt2_indir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF__huge_bt2_indir_decode(const uint8_t *raw, void *native,
@@ -85,7 +84,7 @@ static herr_t H5HF__huge_bt2_indir_debug(FILE *stream, int indent, int fwidth,
 
 /* Callbacks for filtered indirect objects */
 static herr_t H5HF__huge_bt2_filt_indir_store(void *native, const void *udata);
-static herr_t H5HF__huge_bt2_filt_indir_compare(const void *rec1, const void *rec2);
+static herr_t H5HF__huge_bt2_filt_indir_compare(const void *rec1, const void *rec2, int *result);
 static herr_t H5HF__huge_bt2_filt_indir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF__huge_bt2_filt_indir_decode(const uint8_t *raw, void *native,
@@ -95,7 +94,7 @@ static herr_t H5HF__huge_bt2_filt_indir_debug(FILE *stream, int indent, int fwid
 
 /* Callbacks for direct objects */
 static herr_t H5HF__huge_bt2_dir_store(void *native, const void *udata);
-static herr_t H5HF__huge_bt2_dir_compare(const void *rec1, const void *rec2);
+static herr_t H5HF__huge_bt2_dir_compare(const void *rec1, const void *rec2, int *result);
 static herr_t H5HF__huge_bt2_dir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF__huge_bt2_dir_decode(const uint8_t *raw, void *native,
@@ -105,7 +104,7 @@ static herr_t H5HF__huge_bt2_dir_debug(FILE *stream, int indent, int fwidth,
 
 /* Callbacks for filtered direct objects */
 static herr_t H5HF__huge_bt2_filt_dir_store(void *native, const void *udata);
-static herr_t H5HF__huge_bt2_filt_dir_compare(const void *rec1, const void *rec2);
+static herr_t H5HF__huge_bt2_filt_dir_compare(const void *rec1, const void *rec2, int *result);
 static herr_t H5HF__huge_bt2_filt_dir_encode(uint8_t *raw, const void *native,
     void *ctx);
 static herr_t H5HF__huge_bt2_filt_dir_decode(const uint8_t *raw, void *native,
@@ -127,9 +126,7 @@ const H5B2_class_t H5HF_HUGE_BT2_INDIR[1]={{ /* B-tree class information */
     H5HF__huge_bt2_indir_compare,           /* Record comparison callback */
     H5HF__huge_bt2_indir_encode,            /* Record encoding callback */
     H5HF__huge_bt2_indir_decode,            /* Record decoding callback */
-    H5HF__huge_bt2_indir_debug,             /* Record debugging callback */
-    H5HF__huge_bt2_crt_dbg_context,         /* Create debugging context */
-    H5HF__huge_bt2_dst_context              /* Destroy debugging context */
+    H5HF__huge_bt2_indir_debug              /* Record debugging callback */
 }};
 
 /* v2 B-tree class for indirectly accessed, filtered 'huge' objects */
@@ -143,9 +140,7 @@ const H5B2_class_t H5HF_HUGE_BT2_FILT_INDIR[1]={{ /* B-tree class information */
     H5HF__huge_bt2_filt_indir_compare,      /* Record comparison callback */
     H5HF__huge_bt2_filt_indir_encode,       /* Record encoding callback */
     H5HF__huge_bt2_filt_indir_decode,       /* Record decoding callback */
-    H5HF__huge_bt2_filt_indir_debug,        /* Record debugging callback */
-    H5HF__huge_bt2_crt_dbg_context,         /* Create debugging context */
-    H5HF__huge_bt2_dst_context              /* Destroy debugging context */
+    H5HF__huge_bt2_filt_indir_debug         /* Record debugging callback */
 }};
 
 /* v2 B-tree class for directly accessed 'huge' objects */
@@ -159,9 +154,7 @@ const H5B2_class_t H5HF_HUGE_BT2_DIR[1]={{  /* B-tree class information */
     H5HF__huge_bt2_dir_compare,             /* Record comparison callback */
     H5HF__huge_bt2_dir_encode,              /* Record encoding callback */
     H5HF__huge_bt2_dir_decode,              /* Record decoding callback */
-    H5HF__huge_bt2_dir_debug,               /* Record debugging callback */
-    H5HF__huge_bt2_crt_dbg_context,         /* Create debugging context */
-    H5HF__huge_bt2_dst_context              /* Destroy debugging context */
+    H5HF__huge_bt2_dir_debug                /* Record debugging callback */
 }};
 
 /* v2 B-tree class for directly accessed, filtered 'huge' objects */
@@ -175,9 +168,7 @@ const H5B2_class_t H5HF_HUGE_BT2_FILT_DIR[1]={{ /* B-tree class information */
     H5HF__huge_bt2_filt_dir_compare,        /* Record comparison callback */
     H5HF__huge_bt2_filt_dir_encode,         /* Record encoding callback */
     H5HF__huge_bt2_filt_dir_decode,         /* Record decoding callback */
-    H5HF__huge_bt2_filt_dir_debug,          /* Record debugging callback */
-    H5HF__huge_bt2_crt_dbg_context,         /* Create debugging context */
-    H5HF__huge_bt2_dst_context              /* Destroy debugging context */
+    H5HF__huge_bt2_filt_dir_debug           /* Record debugging callback */
 }};
 
 /*****************************/
@@ -267,46 +258,6 @@ H5HF__huge_bt2_dst_context(void *_ctx)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_dst_context() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5HF__huge_bt2_crt_dbg_context
- *
- * Purpose:	Create context for debugging callback
- *
- * Return:	Success:	non-NULL
- *		Failure:	NULL
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, December 1, 2009
- *
- *-------------------------------------------------------------------------
- */
-static void *
-H5HF__huge_bt2_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr)
-{
-    H5HF_huge_bt2_ctx_t *ctx;   /* Callback context structure */
-    void *ret_value = NULL;     /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity check */
-    HDassert(f);
-
-    /* Allocate callback context */
-    if(NULL == (ctx = H5FL_MALLOC(H5HF_huge_bt2_ctx_t)))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate callback context")
-
-    /* Determine the size of addresses & lengths in the file */
-    ctx->sizeof_addr = H5F_SIZEOF_ADDR(f);
-    ctx->sizeof_size = H5F_SIZEOF_SIZE(f);
-
-    /* Set return value */
-    ret_value = ctx;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5HF__huge_bt2_crt_dbg_context() */
 
 
 /*-------------------------------------------------------------------------
@@ -407,11 +358,14 @@ H5HF__huge_bt2_indir_store(void *nrecord, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__huge_bt2_indir_compare(const void *_rec1, const void *_rec2)
+H5HF__huge_bt2_indir_compare(const void *_rec1, const void *_rec2, int *result)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    FUNC_LEAVE_NOAPI((herr_t)(((const H5HF_huge_bt2_indir_rec_t *)_rec1)->id - ((const H5HF_huge_bt2_indir_rec_t *)_rec2)->id))
+    *result = (int)(((const H5HF_huge_bt2_indir_rec_t *)_rec1)->id - 
+                    ((const H5HF_huge_bt2_indir_rec_t *)_rec2)->id);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_indir_compare() */
 
 
@@ -607,11 +561,14 @@ H5HF__huge_bt2_filt_indir_store(void *nrecord, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__huge_bt2_filt_indir_compare(const void *_rec1, const void *_rec2)
+H5HF__huge_bt2_filt_indir_compare(const void *_rec1, const void *_rec2, int *result)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    FUNC_LEAVE_NOAPI((herr_t)(((const H5HF_huge_bt2_filt_indir_rec_t *)_rec1)->id - ((const H5HF_huge_bt2_filt_indir_rec_t *)_rec2)->id))
+    *result = (int)(((const H5HF_huge_bt2_filt_indir_rec_t *)_rec1)->id - 
+                    ((const H5HF_huge_bt2_filt_indir_rec_t *)_rec2)->id);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_filt_indir_compare() */
 
 
@@ -786,26 +743,25 @@ H5HF__huge_bt2_dir_store(void *nrecord, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__huge_bt2_dir_compare(const void *_rec1, const void *_rec2)
+H5HF__huge_bt2_dir_compare(const void *_rec1, const void *_rec2, int *result)
 {
     const H5HF_huge_bt2_dir_rec_t *rec1 = (const H5HF_huge_bt2_dir_rec_t *)_rec1;
     const H5HF_huge_bt2_dir_rec_t *rec2 = (const H5HF_huge_bt2_dir_rec_t *)_rec2;
-    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
     if(rec1->addr < rec2->addr)
-        ret_value = -1;
+        *result = -1;
     else if(rec1->addr > rec2->addr)
-        ret_value = 1;
+        *result = 1;
     else if(rec1->len < rec2->len)
-        ret_value = -1;
+        *result = -1;
     else if(rec1->len > rec2->len)
-        ret_value = 1;
+        *result = 1;
     else
-        ret_value = 0;
+        *result = 0;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_dir_compare() */
 
 
@@ -999,26 +955,25 @@ H5HF__huge_bt2_filt_dir_store(void *nrecord, const void *udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF__huge_bt2_filt_dir_compare(const void *_rec1, const void *_rec2)
+H5HF__huge_bt2_filt_dir_compare(const void *_rec1, const void *_rec2, int *result)
 {
     const H5HF_huge_bt2_filt_dir_rec_t *rec1 = (const H5HF_huge_bt2_filt_dir_rec_t *)_rec1;
     const H5HF_huge_bt2_filt_dir_rec_t *rec2 = (const H5HF_huge_bt2_filt_dir_rec_t *)_rec2;
-    herr_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
     if(rec1->addr < rec2->addr)
-        ret_value = -1;
+        *result = -1;
     else if(rec1->addr > rec2->addr)
-        ret_value = 1;
+        *result = 1;
     else if(rec1->len < rec2->len)
-        ret_value = -1;
+        *result = -1;
     else if(rec1->len > rec2->len)
-        ret_value = 1;
+        *result = 1;
     else
-        ret_value = 0;
+        *result = 0;
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF__huge_bt2_filt_dir_compare() */
 
 

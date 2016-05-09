@@ -38,7 +38,8 @@
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5MFprivate.h"	/* File memory management		*/
-#include "H5VMprivate.h"		/* Vectors and arrays 			*/
+#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5VMprivate.h"	/* Vectors and arrays 			*/
 
 /****************/
 /* Local Macros */
@@ -151,9 +152,7 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
     /* Allocate "page" for node I/O */
     if(NULL == (hdr->page = H5FL_BLK_MALLOC(node_page, hdr->node_size)))
         HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "memory allocation failed")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(hdr->page, 0, hdr->node_size);
-#endif /* H5_CLEAR_MEMORY */
+    HDmemset(hdr->page, 0, hdr->node_size);
 
     /* Allocate array of node info structs */
     if(NULL == (hdr->node_info = H5FL_SEQ_MALLOC(H5B2_node_info_t, (size_t)(hdr->depth + 1))))
@@ -619,14 +618,10 @@ H5B2__hdr_free(H5B2_hdr_t *hdr)
     } /* end if */
 
     /* Release the min & max record info, if set */
-    if(hdr->min_native_rec) {
-	HDfree(hdr->min_native_rec);
-	hdr->min_native_rec = NULL;
-    } /* end if */
-    if(hdr->max_native_rec) {
-	HDfree(hdr->max_native_rec);
-	hdr->max_native_rec = NULL;
-    } /* end if */
+    if(hdr->min_native_rec)
+	hdr->min_native_rec = H5MM_xfree(hdr->min_native_rec);
+    if(hdr->max_native_rec)
+	hdr->max_native_rec = H5MM_xfree(hdr->max_native_rec);
 
     /* Free B-tree header info */
     hdr = H5FL_FREE(H5B2_hdr_t, hdr);

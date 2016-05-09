@@ -1592,11 +1592,8 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     size_t size, void *_buf/*out*/)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
-    H5FD_multi_dxpl_t	dx;
-    htri_t              prop_exists = FALSE;    /* Whether the multi VFD DXPL property already exists */
     H5FD_mem_t		mt, mmt, hi = H5FD_MEM_DEFAULT;
     haddr_t		start_addr = 0;
-    dxpl_id = dxpl_id; /* Suppress compiler warning */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1618,8 +1615,7 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     assert(hi > 0);
 
     /* Read from that member */
-    return H5FDread(file->memb[hi], type, (prop_exists ? dx.memb_dxpl[hi] : H5P_DEFAULT),
-            addr - start_addr, size, _buf);
+    return H5FDread(file->memb[hi], type, dxpl_id, addr - start_addr, size, _buf);
 } /* end H5FD_multi_read() */
 
 
@@ -1644,11 +1640,8 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     size_t size, const void *_buf)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
-    H5FD_multi_dxpl_t	dx;
-    htri_t              prop_exists = FALSE;    /* Whether the multi VFD DXPL property already exists */
     H5FD_mem_t		mt, mmt, hi = H5FD_MEM_DEFAULT;
     haddr_t		start_addr = 0;
-    dxpl_id = dxpl_id; /* Suppress compiler warning */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1670,8 +1663,7 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     assert(hi > 0);
 
     /* Write to that member */
-    return H5FDwrite(file->memb[hi], type, (prop_exists ? dx.memb_dxpl[hi] : H5P_DEFAULT),
-            addr - start_addr, size, _buf);
+    return H5FDwrite(file->memb[hi], type, dxpl_id, addr - start_addr, size, _buf);
 } /* end H5FD_multi_write() */
 
 

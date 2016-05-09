@@ -153,7 +153,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
     /* Create the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, name, 
-                                        plist_id, H5P_DEFAULT, H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                        plist_id, H5P_DEFAULT, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create attribute")
 
     /* Get an atom for the attribute */
@@ -162,7 +162,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close(attr, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_attr_close(attr, obj->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
 
     FUNC_LEAVE_API(ret_value)
@@ -217,7 +217,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
 
     /* Open the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                      name, H5P_DEFAULT, H5AC_ind_dxpl_id, H5_REQUEST_NULL)))
+                                      name, H5P_DEFAULT, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
     /* Get an atom for the attribute */
@@ -226,7 +226,7 @@ H5Aopen_name(hid_t loc_id, const char *name)
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close(attr, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_attr_close(attr, obj->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
 
     FUNC_LEAVE_API(ret_value)
@@ -284,7 +284,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
 
     /* Open the attribute through the VOL */
     if(NULL == (attr = H5VL_attr_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                      NULL, H5P_DEFAULT, H5AC_ind_dxpl_id, H5_REQUEST_NULL)))
+                                      NULL, H5P_DEFAULT, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
     /* Get an atom for the attribute */
@@ -293,7 +293,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
 
 done:
     if (ret_value < 0 && attr)
-        if(H5VL_attr_close(attr, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_attr_close(attr, obj->vol_info->vol_cls, H5AC_ind_read_dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "unable to release attr")
 
     FUNC_LEAVE_API(ret_value)
@@ -337,8 +337,8 @@ H5Aget_num_attrs(hid_t loc_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get the group info through the VOL using the location token */
-    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
-                            H5VL_OBJECT_GET_INFO, loc_params, &oinfo) < 0)
+    if(H5VL_object_optional(obj->vol_obj, obj->vol_info->vol_cls, H5AC_ind_read_dxpl_id, 
+                            H5_REQUEST_NULL, H5VL_OBJECT_GET_INFO, loc_params, &oinfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
     ret_value = oinfo.num_attrs;
@@ -406,7 +406,7 @@ H5Aiterate1(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data)
 
     /* Call attribute iteration routine */
     last_attr = start_idx = (hsize_t)(attr_num ? *attr_num : 0);
-    if((ret_value = H5O_attr_iterate(loc_id, H5AC_ind_dxpl_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, start_idx, &last_attr, &attr_op, op_data)) < 0)
+    if((ret_value = H5O_attr_iterate(loc_id, H5AC_ind_read_dxpl_id, H5_INDEX_CRT_ORDER, H5_ITER_INC, start_idx, &last_attr, &attr_op, op_data)) < 0)
         HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
 
     /* Set the last attribute information */

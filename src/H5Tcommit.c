@@ -106,6 +106,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     H5VL_object_t *new_obj = NULL;      /* VOL object that holds the datatype object and the VOL info */
     H5T_t *type = NULL;                 /* high level datatype object that wraps the VOL object */
     H5VL_object_t *obj = NULL;          /* object token of loc_id */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */ 
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -134,12 +135,9 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
         if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
 
-    /* Get correct property list */
-    if(H5P_DEFAULT == tapl_id)
-        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&tapl_id, H5P_CLS_TACC, &dxpl_id, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -151,7 +149,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
     /* commit the datatype through the VOL */
     if (NULL == (dt = H5VL_datatype_commit(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
                                            name, type_id, lcpl_id, tcpl_id, tapl_id, 
-                                           H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                           dxpl_id, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* setup VOL object */
@@ -277,6 +275,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     H5VL_object_t *new_obj = NULL;      /* VOL object that holds the datatype object and the VOL info */
     H5T_t *type = NULL;                 /* high level datatype object that wraps the VOL object */
     H5VL_object_t *obj = NULL;          /* object token of loc_id */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     H5VL_loc_params_t loc_params;
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -296,12 +295,9 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         if(TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
 
-    /* Get correct property list */
-    if(H5P_DEFAULT == tapl_id)
-        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&tapl_id, H5P_CLS_TACC, &dxpl_id, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -313,7 +309,7 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     /* commite the datatype through the VOL */
     if (NULL == (dt = H5VL_datatype_commit(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
                                            NULL, type_id, H5P_DEFAULT, tcpl_id, tapl_id, 
-                                           H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                           dxpl_id, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* setup VOL object */
@@ -391,7 +387,7 @@ H5T__commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
     loc_init = TRUE;
 
     /* Set the latest format, if requested */
-    if(H5F_USE_LATEST_FORMAT(file))
+    if(H5F_USE_LATEST_FLAGS(file, H5F_LATEST_DATATYPE))
         if(H5T_set_latest_version(type) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
 
@@ -541,8 +537,8 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
     void *vol_dt = NULL;           /* datatype token created by VOL plugin */
     H5VL_object_t *obj = NULL;     /* object token of loc_id */
     H5VL_loc_params_t loc_params;
-    hid_t     dxpl_id = H5AC_ind_dxpl_id; /* dxpl to use to open datatype */
-    hid_t     ret_value = FAIL;    /* Return value */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
+    hid_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("i", "i*si", loc_id, name, tapl_id);
@@ -551,12 +547,9 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
      if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Get correct property list */
-    if(H5P_DEFAULT == tapl_id)
-        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&tapl_id, H5P_CLS_TACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -633,7 +626,7 @@ H5Tget_create_plist(hid_t dtype_id)
 
         /* get the rest of the plist through the VOL */
         if(H5VL_datatype_get(vol_dt->vol_obj, vol_dt->vol_info->vol_cls, H5VL_DATATYPE_GET_TCPL, 
-                             H5AC_ind_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+                             H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get datatype")
     } /* end if */
 
@@ -930,7 +923,7 @@ H5T_construct_datatype(H5VL_object_t *dt_obj)
 
     /* get required buf size for encoding the datatype */
     if(H5VL_datatype_get(dt_obj->vol_obj, dt_obj->vol_info->vol_cls, H5VL_DATATYPE_GET_BINARY, 
-                         H5AC_dxpl_id, H5_REQUEST_NULL, &nalloc, NULL, 0) < 0)
+                         H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &nalloc, NULL, 0) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to get datatype serialized size")
 
     /* allocate buffer to store binary description of the datatype */
@@ -939,7 +932,7 @@ H5T_construct_datatype(H5VL_object_t *dt_obj)
 
     /* get binary description of the datatype */
     if(H5VL_datatype_get(dt_obj->vol_obj, dt_obj->vol_info->vol_cls, H5VL_DATATYPE_GET_BINARY, 
-                         H5AC_dxpl_id, H5_REQUEST_NULL, &nalloc, buf, (size_t)nalloc) < 0)
+                         H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &nalloc, buf, (size_t)nalloc) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to get serialized datatype")
 
     if(NULL == (dt = H5T_decode((const unsigned char *)buf)))
@@ -983,7 +976,7 @@ H5T_close_datatype(void *type)
 
         /* Close the datatype through the VOL*/
         if((ret_value = H5VL_datatype_close(vol_dt->vol_obj, vol_dt->vol_info->vol_cls, 
-                                            H5AC_dxpl_id, H5_REQUEST_NULL)) < 0)
+                                            H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to close datatype")
 
         /* free attribute */

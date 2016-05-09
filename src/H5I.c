@@ -2147,7 +2147,7 @@ H5Iget_name(hid_t id, char *name/*out*/, size_t size)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object location")
 
     /* Call internal group routine to retrieve object's name */
-    if((ret_value = H5G_get_name(&loc, name, size, NULL, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_get_name(&loc, name, size, NULL, H5P_DEFAULT, H5AC_ind_read_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve object name")
 
 done:
@@ -2197,7 +2197,7 @@ H5Iget_file_id(hid_t obj_id)
 
         /* Get the file through the VOL */
         if(H5VL_file_get(obj->vol_obj, obj->vol_info->vol_cls, H5VL_OBJECT_GET_FILE, 
-                         H5AC_dxpl_id, H5_REQUEST_NULL, type, &file) < 0)
+                         H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, type, &file) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to get file")
 
         if (NULL == file)

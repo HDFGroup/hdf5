@@ -1032,7 +1032,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size
         /* Free the temporary arrays we used */
         if(data_xform_prop->dat_val_pointers->num_ptrs > 1)
             for(i=0; i<data_xform_prop->dat_val_pointers->num_ptrs; i++)
-                HDfree(data_xform_prop->dat_val_pointers->ptr_dat_val[i]);
+                H5MM_xfree(data_xform_prop->dat_val_pointers->ptr_dat_val[i]);
     } /* end else */
 
 done:
@@ -1042,7 +1042,7 @@ done:
 	if(data_xform_prop->dat_val_pointers->num_ptrs > 1)
 	    for(i = 0; i < data_xform_prop->dat_val_pointers->num_ptrs; i++)
 		if(data_xform_prop->dat_val_pointers->ptr_dat_val[i])
-		    HDfree(data_xform_prop->dat_val_pointers->ptr_dat_val[i]);
+		    H5MM_xfree(data_xform_prop->dat_val_pointers->ptr_dat_val[i]);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

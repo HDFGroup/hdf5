@@ -23,6 +23,7 @@
  */
 #include "h5test.h"
 #include "H5private.h"
+#include "H5ACprivate.h"
 #include "H5Eprivate.h"
 #include "H5Fprivate.h"
 #include "H5Gprivate.h"
@@ -115,7 +116,7 @@ test_1 (hid_t fapl)
 	size = i + 1;
 	HDmemset(out, 'A' + i % 26, size);
 	H5Eclear2(H5E_DEFAULT);
-	status = H5HG_insert(f, H5P_DATASET_XFER_DEFAULT, size, out, obj + i);
+	status = H5HG_insert(f, H5AC_ind_read_dxpl_id, size, out, obj + i);
 	if(status < 0) {
 	    H5_FAILED();
 	    puts("    Unable to insert object into global heap");
@@ -134,7 +135,7 @@ test_1 (hid_t fapl)
 	size = i + 1;
 	HDmemset(out, 'A' + i % 26, size);
 	H5Eclear2(H5E_DEFAULT);
-	if(NULL == H5HG_read(f, H5P_DATASET_XFER_DEFAULT, obj + i, in, NULL)) {
+	if(NULL == H5HG_read(f, H5AC_ind_read_dxpl_id, obj + i, in, NULL)) {
 	    H5_FAILED();
 	    puts("    Unable to read object");
 	    nerrors++;
@@ -208,7 +209,7 @@ test_2 (hid_t fapl)
 	size = 1024-i;
 	memset (out, 'A'+i%26, size);
 	H5Eclear2(H5E_DEFAULT);
-	if (H5HG_insert (f, H5P_DATASET_XFER_DEFAULT, size, out, obj+i)<0) {
+	if (H5HG_insert (f, H5AC_ind_read_dxpl_id, size, out, obj+i)<0) {
 	    H5_FAILED();
 	    puts("    Unable to insert object into global heap");
 	    nerrors++;
@@ -222,7 +223,7 @@ test_2 (hid_t fapl)
 	size = 1024-i;
 	memset (out, 'A'+i%26, size);
 	H5Eclear2(H5E_DEFAULT);
-	if (NULL==H5HG_read (f, H5P_DATASET_XFER_DEFAULT, obj+i, in, NULL)) {
+	if (NULL==H5HG_read (f, H5AC_ind_read_dxpl_id, obj+i, in, NULL)) {
 	    H5_FAILED();
 	    puts("    Unable to read object");
 	    nerrors++;
@@ -293,7 +294,7 @@ test_3 (hid_t fapl)
 	size = i%30+100;
 	memset (out, 'A'+i%26, size);
 	H5Eclear2(H5E_DEFAULT);
-	status = H5HG_insert (f, H5P_DATASET_XFER_DEFAULT, size, out, obj+i);
+	status = H5HG_insert (f, H5AC_ind_read_dxpl_id, size, out, obj+i);
 	if (status<0) {
 	    H5_FAILED();
 	    puts("    Unable to insert object into global heap");
@@ -303,7 +304,7 @@ test_3 (hid_t fapl)
 
     /* Remove everything */
     for (i=0; i<1024; i++) {
-	status = H5HG_remove (f, H5P_DATASET_XFER_DEFAULT, obj+i);
+	status = H5HG_remove (f, H5AC_ind_read_dxpl_id, obj+i);
 	if (status<0) {
 	    H5_FAILED();
 	    puts("    Unable to remove object");
@@ -372,7 +373,7 @@ test_4 (hid_t fapl)
 	size = i%30+100;
 	memset (out, 'A'+i%26, size);
 	H5Eclear2(H5E_DEFAULT);
-	status = H5HG_insert (f, H5P_DATASET_XFER_DEFAULT, size, out, obj+i);
+	status = H5HG_insert (f, H5AC_ind_read_dxpl_id, size, out, obj+i);
 	if (status<0) {
 	    H5_FAILED();
 	    puts("    Unable to insert object into global heap");
@@ -386,7 +387,7 @@ test_4 (hid_t fapl)
 	 */
 	if (1==i%3) {
 	    H5Eclear2(H5E_DEFAULT);
-	    status = H5HG_remove (f, H5P_DATASET_XFER_DEFAULT, obj+i-1);
+	    status = H5HG_remove (f, H5AC_ind_read_dxpl_id, obj+i-1);
 	    if (status<0) {
 		H5_FAILED();
 		puts("    Unable to remove object");
@@ -462,7 +463,7 @@ test_ooo_indices(hid_t fapl)
          * can be deleted. */
         for(j=1000*((~i&1)); j<1000*((~i&1)+1); j++) {
             H5Eclear2(H5E_DEFAULT);
-            status = H5HG_insert(f, H5P_DATASET_XFER_DEFAULT, sizeof(j), &j, &obj[j]);
+            status = H5HG_insert(f, H5AC_ind_read_dxpl_id, sizeof(j), &j, &obj[j]);
             if (status<0)
                 GHEAP_REPEATED_ERR("    Unable to insert object into global heap")
 
@@ -475,7 +476,7 @@ test_ooo_indices(hid_t fapl)
         if(i>0)
             for(j=1000*(i&1); j<1000*((i&1)+1); j++) {
                 H5Eclear2(H5E_DEFAULT);
-                status = H5HG_remove(f, H5P_DATASET_XFER_DEFAULT, &obj[j]);
+                status = H5HG_remove(f, H5AC_ind_read_dxpl_id, &obj[j]);
                 if (status<0)
                     GHEAP_REPEATED_ERR("    Unable to remove object from global heap");
             } /* end for */
@@ -497,7 +498,7 @@ test_ooo_indices(hid_t fapl)
 
     /* Read the objects to make sure the heap is still readable */
     for(i=0; i<1000; i++) {
-        if(NULL == H5HG_read(f, H5P_DATASET_XFER_DEFAULT, &obj[i], &j, NULL))
+        if(NULL == H5HG_read(f, H5AC_ind_read_dxpl_id, &obj[i], &j, NULL))
             goto error;
         if(i != j) {
             H5_FAILED();

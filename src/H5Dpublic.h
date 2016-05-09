@@ -34,6 +34,9 @@
 #define H5D_CHUNK_CACHE_NBYTES_DEFAULT      ((size_t) -1)
 #define H5D_CHUNK_CACHE_W0_DEFAULT          (-1.0f)
 
+/* Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts() */
+#define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS      (0x0002u)
+
 /* Property names for H5LTDdirect_chunk_write */   
 #define H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_NAME	        "direct_chunk_flag"
 #define H5D_XFER_DIRECT_CHUNK_WRITE_FILTERS_NAME	"direct_chunk_filters"
@@ -57,8 +60,11 @@ typedef enum H5D_layout_t {
 
 /* Types of chunk index data structures */
 typedef enum H5D_chunk_index_t {
-    H5D_CHUNK_IDX_BTREE	= 0,	/* v1 B-tree index		     	*/
-    H5D_CHUNK_IDX_NTYPES        /* this one must be last!		*/
+    H5D_CHUNK_IDX_BTREE	= 0,    /* v1 B-tree index (default)                */
+    H5D_CHUNK_IDX_FARRAY = 3,   /* Fixed array (for 0 unlimited dims)       */
+    H5D_CHUNK_IDX_EARRAY = 4,   /* Extensible array (for 1 unlimited dim)   */
+    H5D_CHUNK_IDX_BT2 = 5,      /* v2 B-tree index (for >1 unlimited dims)  */
+    H5D_CHUNK_IDX_NTYPES        /* This one must be last!                   */
 } H5D_chunk_index_t;
 
 /* Values for the space allocation time property */
@@ -162,6 +168,7 @@ H5_DLL herr_t H5Ddebug(hid_t dset_id);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /* Macros */
+#define H5D_CHUNK_BTREE H5D_CHUNK_IDX_BTREE
 
 
 /* Typedefs */

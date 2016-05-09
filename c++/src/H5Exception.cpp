@@ -47,11 +47,7 @@ Exception::Exception(const H5std_string& func, const H5std_string& message) : de
 ///\param	orig - IN: Exception instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Exception::Exception( const Exception& orig )
-{
-   detail_message = orig.detail_message;
-   func_name = orig.func_name;
-}
+Exception::Exception( const Exception& orig ) : detail_message(orig.detail_message), func_name(orig.func_name) {}
 
 //--------------------------------------------------------------------------
 // Function:	Exception::getMajorString

@@ -47,8 +47,8 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2hdr.c H5B2int.c H5B2stat.c H5B2test.c \
         H5C.c \
         H5CS.c \
-        H5D.c H5Dbtree.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
-        H5Ddeprec.c H5Defl.c H5Dfill.c H5Dint.c \
+        H5D.c H5Dbtree.c H5Dbtree2.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
+        H5Ddeprec.c H5Dearray.c H5Defl.c H5Dfarray.c H5Dfill.c H5Dint.c \
         H5Dio.c H5Dlayout.c \
         H5Doh.c H5Dscatgath.c H5Dselect.c H5Dtest.c H5Dvirtual.c \
         H5E.c H5Edeprec.c H5Eint.c \
@@ -85,8 +85,10 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Olayout.c \
         H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c \
         H5Oname.c H5Onull.c H5Opline.c H5Orefcount.c \
-        H5Osdspace.c H5Oshared.c H5Ostab.c \
-        H5Oshmesg.c H5Otest.c H5Ounknown.c \
+        H5Osdspace.c H5Oshared.c \
+        H5Oshmesg.c \
+        H5Ostab.c \
+        H5Otest.c H5Ounknown.c \
         H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c \
         H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
         H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
@@ -127,7 +129,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5ESpublic.h H5Fpublic.h \
         H5FDpublic.h H5FDcore.h H5FDdirect.h \
-	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
+        H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
         H5VLpublic.h H5VLnative.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \

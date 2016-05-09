@@ -1981,6 +1981,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
         } 
         else if (H5Tget_class(type) == H5T_STRING) {
             status = xml_print_strs(obj_id, ATTRIBUTE_DATA);
+            H5Tclose(type);
         } 
         else {  /* all other data */
             /* VL data special information */
@@ -1991,8 +1992,6 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
             /* Check if we have VL data in the dataset's datatype */
             if (h5tools_detect_vlen(p_type) == TRUE)
                 vl_data = TRUE;
-
-            H5Tclose(type);
 
             space = H5Aget_space(obj_id);
 

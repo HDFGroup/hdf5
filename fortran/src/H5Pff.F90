@@ -42,7 +42,8 @@ MODULE H5P
 
   USE, INTRINSIC :: ISO_C_BINDING
   USE H5GLOBAL
-  
+  USE H5fortkit
+
   INTERFACE h5pset_fapl_multi_f
      MODULE PROCEDURE h5pset_fapl_multi_l
      MODULE PROCEDURE h5pset_fapl_multi_s
@@ -7319,7 +7320,703 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_mpio_actual_io_mode_c(dxpl_id, actual_io_mode)
 
   END SUBROUTINE h5pget_mpio_actual_io_mode_f
+
+!****s* H5P/h5pset_all_coll_metadata_ops_f
+! NAME
+!  h5pset_all_coll_metadata_ops_f
+!
+! PURPOSE
+!  Sets requirement whether HDF5 metadata read operations using the access property 
+!  list are required to be collective or independent. If collective requirement is 
+!  selected, the HDF5 library will optimize the metadata reads improving performance. 
+!  The default setting is independent (false).
+!
+! INPUTS
+!  plist_id       - File access property list identifier.
+!  is_collective  - Indicates if metadata writes are collective or not.
+! OUTPUTS
+!  hdferr         - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Feb, 10 2016
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pset_all_coll_metadata_ops_f(plist_id, is_collective, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+    LOGICAL, INTENT(IN)           :: is_collective
+    INTEGER, INTENT(OUT)          :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_is_collective
+    
+    INTERFACE
+       INTEGER FUNCTION h5pset_all_coll_metadata_ops(plist_id, is_collective) BIND(C, NAME='H5Pset_all_coll_metadata_ops')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T) , INTENT(IN), VALUE :: plist_id
+         LOGICAL(C_BOOL), INTENT(IN), VALUE :: is_collective
+       END FUNCTION h5pset_all_coll_metadata_ops
+    END INTERFACE
+
+    ! Transfer value of Fortran LOGICAL to C c_bool type
+    c_is_collective = is_collective
+    
+    hdferr = INT(H5Pset_all_coll_metadata_ops(plist_id, c_is_collective))
+    
+  END SUBROUTINE h5pset_all_coll_metadata_ops_f
+
+!****s* H5P/h5pget_all_coll_metadata_ops_f 
+! NAME
+!  h5pget_all_coll_metadata_ops_f
+!
+! PURPOSE
+!  Retrieves metadata read mode from the access property list.
+!
+! INPUTS
+!  plist_id        - File access property list identifier.
+! OUTPUTS
+!  is_collective   - Collective access setting.
+!  hdferr          - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Feb, 10 2016
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pget_all_coll_metadata_ops_f(plist_id, is_collective, hdferr)
+    
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+    LOGICAL, INTENT(OUT)          :: is_collective
+    INTEGER, INTENT(OUT)          :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_is_collective
+    
+    INTERFACE
+       INTEGER FUNCTION h5pget_all_coll_metadata_ops(plist_id, is_collective) BIND(C, NAME='H5Pget_all_coll_metadata_ops')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T) , INTENT(IN), VALUE :: plist_id
+         LOGICAL(C_BOOL), INTENT(OUT) :: is_collective
+       END FUNCTION h5pget_all_coll_metadata_ops
+    END INTERFACE
+    
+    hdferr = INT(H5Pget_all_coll_metadata_ops(plist_id, c_is_collective))
+    
+    ! Transfer value of C c_bool type to Fortran LOGICAL 
+    is_collective = c_is_collective
+    
+  END SUBROUTINE h5pget_all_coll_metadata_ops_f
+
+!****s* H5P/h5pset_coll_metadata_write_f
+! NAME
+!  h5pset_coll_metadata_write_f
+!
+! PURPOSE
+!  Sets metadata writes to collective or independent. Default setting is independent (false).
+!
+! INPUTS
+!  fapl_id        - File access property list identifier.
+!  is_collective  - Indicates if metadata writes are collective or not.
+! OUTPUTS
+!  hdferr         - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Feb, 10 2016
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pset_coll_metadata_write_f(plist_id, is_collective, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+    LOGICAL, INTENT(IN)           :: is_collective
+    INTEGER, INTENT(OUT)          :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_is_collective
+    
+    INTERFACE
+       INTEGER FUNCTION h5pset_coll_metadata_write(plist_id, is_collective) BIND(C, NAME='H5Pset_coll_metadata_write')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T) , INTENT(IN), VALUE :: plist_id
+         LOGICAL(C_BOOL), INTENT(IN), VALUE :: is_collective
+       END FUNCTION h5pset_coll_metadata_write
+    END INTERFACE
+    
+    ! Transfer value of Fortran LOGICAL to C c_bool type
+    c_is_collective = is_collective
+    
+    hdferr = INT(H5Pset_coll_metadata_write(plist_id, c_is_collective))
+    
+  END SUBROUTINE h5pset_coll_metadata_write_f
+
+!****s* H5P/h5pget_coll_metadata_write_f
+! NAME
+!  h5pget_coll_metadata_write_f
+!
+! PURPOSE
+!  Retrieves metadata write mode from the file access property list.
+!
+! INPUTS
+!  plist_id        - File access property list identifier.
+! OUTPUTS
+!  is_collective   - Collective access setting.
+!  hdferr          - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Feb, 10 2016
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pget_coll_metadata_write_f(plist_id, is_collective, hdferr)
+    
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: plist_id
+    LOGICAL, INTENT(OUT)          :: is_collective
+    INTEGER, INTENT(OUT)          :: hdferr
+!*****
+    LOGICAL(C_BOOL) :: c_is_collective
+    
+    INTERFACE
+       INTEGER FUNCTION h5pget_coll_metadata_write(plist_id, is_collective) BIND(C, NAME='H5Pget_coll_metadata_write')
+         IMPORT :: HID_T, C_BOOL
+         IMPLICIT NONE
+         INTEGER(HID_T) , INTENT(IN), VALUE :: plist_id
+         LOGICAL(C_BOOL), INTENT(OUT) :: is_collective
+       END FUNCTION h5pget_coll_metadata_write
+    END INTERFACE
+    
+    hdferr = INT(H5Pget_coll_metadata_write(plist_id, c_is_collective))
+    
+    ! Transfer value of C c_bool type to Fortran LOGICAL 
+    is_collective = c_is_collective
+    
+  END SUBROUTINE h5pget_coll_metadata_write_f
+  
 #endif
+
+!
+! V I R T U A L  D A T S E T S
+!
+
+!****s* H5P/h5pset_virtual_view_f
+! NAME
+!  h5pset_virtual_view_f
+!
+! PURPOSE
+!  Sets the view of the virtual dataset (VDS) to include or exclude missing mapped elements.
+!
+! INPUTS
+!   dapl_id - Identifier of the virtual dataset access property list.
+!   view    - Flag specifying the extent of the data to be included in the view.
+!             Valid values are:
+!                H5D_VDS_FIRST_MISSING_F
+!                H5D_VDS_LAST_AVAILABLE_F
+! 
+! OUTPUTS
+!  
+!  hdferr   - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Nov 2, 2015
+!
+!
+! SOURCE
+  SUBROUTINE h5pset_virtual_view_f(dapl_id, view, hdferr)
+    IMPLICIT NONE
+
+    INTEGER(HID_T), INTENT(IN)  :: dapl_id
+    INTEGER       , INTENT(IN)  :: view
+    INTEGER       , INTENT(OUT) :: hdferr
+    
+!*****
+    INTERFACE
+       INTEGER FUNCTION h5pset_virtual_view(dapl_id, view) BIND(C,NAME='H5Pset_virtual_view')
+         IMPORT :: HID_T, ENUM_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
+         INTEGER(ENUM_T), INTENT(IN), VALUE :: view
+       END FUNCTION h5pset_virtual_view
+    END INTERFACE
+
+    hdferr = INT( h5pset_virtual_view(dapl_id, INT(view,ENUM_T)) )
+    
+  END SUBROUTINE h5pset_virtual_view_f
+
+!****s* H5P/h5pget_virtual_view_f
+! NAME
+!  h5pget_virtual_view_f
+!
+! PURPOSE
+!  Retrieves the view of a virtual dataset accessed with dapl_id. 
+!
+! INPUTS
+!  dapl_id - Dataset access property list identifier for the virtual dataset
+!
+! OUTPUTS
+!  view - The flag specifying the view of the virtual dataset.
+!         Valid values are:
+!             H5D_VDS_FIRST_MISSING_F
+!             H5D_VDS_LAST_AVAILABLE_F
+!  hdferr - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Nov 2, 2015
+!
+! SOURCE
+  SUBROUTINE h5pget_virtual_view_f(dapl_id, view, hdferr)
+    IMPLICIT NONE
+
+    INTEGER(HID_T), INTENT(IN)  :: dapl_id
+    INTEGER       , INTENT(INOUT) :: view
+    INTEGER       , INTENT(OUT) :: hdferr
+!*****
+    INTEGER(ENUM_T) :: view_enum
+    INTERFACE
+       INTEGER FUNCTION h5pget_virtual_view(dapl_id, view) BIND(C,NAME='H5Pget_virtual_view')
+         IMPORT :: HID_T, ENUM_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
+         INTEGER(ENUM_T), INTENT(OUT) :: view
+       END FUNCTION h5pget_virtual_view
+    END INTERFACE
+
+    hdferr = INT( h5pget_virtual_view(dapl_id, view_enum) )
+    view = INT(view_enum)
+    
+  END SUBROUTINE h5pget_virtual_view_f
+
+!****s* H5P/h5pset_virtual_printf_gap_f
+! NAME
+!  h5pset_virtual_printf_gap_f
+!
+! PURPOSE
+!  Sets the maximum number of missing source files and/or datasets with the printf-style names 
+!  when getting the extent of an unlimited virtual dataset.  
+!
+! INPUTS
+!  dapl_id  - Dataset access property list identifier for the virtual dataset.
+!  gap_size - Maximum number of files and/or datasets allowed to be missing for determining 
+!             the extent of an unlimited virtual dataset with printf-style mappings.
+!
+! OUTPUTS       
+!  hdferr   - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Nov 2, 2015
+!
+! HISTORY
+!
+! SOURCE 
+  SUBROUTINE h5pset_virtual_printf_gap_f(dapl_id, gap_size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: dapl_id
+    INTEGER(HSIZE_T), INTENT(IN)  :: gap_size
+    INTEGER         , INTENT(OUT) :: hdferr
+!*****
+    INTERFACE
+       INTEGER FUNCTION h5pset_virtual_printf_gap(dapl_id, gap_size) BIND(C,NAME='H5Pset_virtual_printf_gap')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
+         INTEGER(HSIZE_T), INTENT(IN), VALUE :: gap_size
+       END FUNCTION h5pset_virtual_printf_gap
+    END INTERFACE
+
+    hdferr = INT( h5pset_virtual_printf_gap(dapl_id, gap_size) )
+    
+  END SUBROUTINE h5pset_virtual_printf_gap_f
+
+!****s* H5P/h5pget_virtual_printf_gap_f
+! NAME
+!  h5pget_virtual_printf_gap_f
+!
+! PURPOSE
+!  Returns the maximum number of missing source files and/or datasets with the 
+!  printf-style names when getting the extent for an unlimited virtual dataset.
+!
+! INPUTS
+!  dapl_id    - Dataset access property list identifier for the virtual dataset
+!
+! OUTPUTS
+!    gap_size - Maximum number of the files and/or datasets allowed to be missing for 
+!               determining the extent of an unlimited virtual dataset with printf-style mappings. 
+!    hdferr   - Returns 0 if successful and -1 if fails
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Nov 2, 2015
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pget_virtual_printf_gap_f(dapl_id, gap_size, hdferr)
+    IMPLICIT NONE
+    
+    INTEGER(HID_T)  , INTENT(IN)  :: dapl_id
+    INTEGER(HSIZE_T), INTENT(OUT) :: gap_size
+    INTEGER         , INTENT(OUT) :: hdferr
+!*****
+    INTERFACE
+       INTEGER FUNCTION h5pget_virtual_printf_gap(dapl_id, gap_size) BIND(C,NAME='H5Pget_virtual_printf_gap')
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: dapl_id
+         INTEGER(HSIZE_T), INTENT(OUT) :: gap_size
+       END FUNCTION h5pget_virtual_printf_gap
+    END INTERFACE
+
+    hdferr = INT( h5pget_virtual_printf_gap(dapl_id, gap_size) )
+    
+  END SUBROUTINE h5pget_virtual_printf_gap_f
+
+!****s* H5P/h5pset_virtual_f
+! NAME
+!  h5pset_virtual_f
+!
+! PURPOSE
+!  Sets the mapping between virtual and source datasets.
+!
+! INPUTS
+!  dcpl_id      - The identifier of the dataset creation property list that will be 
+!                 used when creating the virtual dataset.
+!  vspace_id    - The dataspace identifier with the selection within the virtual 
+!                 dataset applied, possibly an unlimited selection.
+! src_file_name - The name of the HDF5 file where the source dataset is located.
+! src_dset_name - The path to the HDF5 dataset in the file specified by src_file_name.
+! src_space_id 	- The source dataset’s dataspace identifier with a selection applied, possibly an unlimited selection
+!
+! OUTPUTS
+!  hdferr  - Returns 0 if successful and -1 if fails
+
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Nov 2, 2015
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pset_virtual_f(dcpl_id, vspace_id, src_file_name, src_dset_name, src_space_id, hdferr)
+    IMPLICIT NONE
+    
+    INTEGER(HID_T), INTENT(IN)   :: dcpl_id
+    INTEGER(HID_T), INTENT(IN)   :: vspace_id
+    CHARACTER(LEN=*), INTENT(IN) :: src_file_name
+    CHARACTER(LEN=*), INTENT(IN) :: src_dset_name
+    INTEGER(HID_T), INTENT(IN)   :: src_space_id
+    INTEGER, INTENT(OUT)         :: hdferr
+!*****
+    CHARACTER(LEN=LEN_TRIM(src_file_name)+1,KIND=C_CHAR) :: c_src_file_name
+    CHARACTER(LEN=LEN_TRIM(src_dset_name)+1,KIND=C_CHAR) :: c_src_dset_name
+
+    INTERFACE
+       INTEGER FUNCTION h5pset_virtual(dcpl_id, vspace_id, c_src_file_name, c_src_dset_name, src_space_id) &
+            BIND(C,NAME='H5Pset_virtual')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN), VALUE :: dcpl_id
+         INTEGER(HID_T), INTENT(IN), VALUE :: vspace_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: c_src_file_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: c_src_dset_name
+         INTEGER(HID_T), INTENT(IN), VALUE :: src_space_id
+       END FUNCTION h5pset_virtual
+    END INTERFACE
+
+    c_src_file_name = TRIM(src_file_name)//C_NULL_CHAR
+    c_src_dset_name = TRIM(src_dset_name)//C_NULL_CHAR
+
+    hdferr = h5pset_virtual(dcpl_id, vspace_id, c_src_file_name, c_src_dset_name, src_space_id)
+
+  END SUBROUTINE h5pset_virtual_f
+
+!****s* H5P/h5pget_virtual_count_f
+! NAME
+!  h5pget_virtual_count_f
+!
+! PURPOSE
+!  Gets the number of mappings for the virtual dataset.
+!
+! INPUTS
+!  dcpl_id - The identifier of the virtual dataset creation property list. 
+!
+! OUTPUTS
+!   count   - The number of mappings.
+!   hdferr  - Returns 0 if successful and -1 if fails
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Nov 2, 2015
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pget_virtual_count_f(dcpl_id, count, hdferr)
+
+    IMPLICIT NONE
+    
+    INTEGER(HID_T), INTENT(IN)   :: dcpl_id
+    INTEGER(SIZE_T), INTENT(OUT) :: count
+    INTEGER, INTENT(OUT)         :: hdferr
+!*****
+    INTERFACE
+       INTEGER(HID_T) FUNCTION h5pget_virtual_count(dcpl_id, count) BIND(C,NAME='H5Pget_virtual_count')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
+         INTEGER(SIZE_T), INTENT(OUT) :: count
+       END FUNCTION h5pget_virtual_count
+    END INTERFACE
+    
+    hdferr = INT( h5pget_virtual_count(dcpl_id, count))
+
+  END SUBROUTINE h5pget_virtual_count_f
+
+!****s* H5P/h5pget_virtual_vspace_f
+! NAME
+!  h5pget_virtual_vspace_f
+!
+! PURPOSE
+!  Gets a dataspace identifier for the selection within the virtual dataset used in the mapping.
+!
+! INPUTS
+!  dcpl_id - The identifier of the virtual dataset creation property list.
+!    index - Mapping index.
+!            The value of index is 0 (zero) or greater and less than count (0 ≤ index < count), 
+!            where count is the number of mappings returned by h5pget_virtual_count.
+!
+! OUTPUTS 
+!   hdferr - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Nov 2, 2015
+!
+! HISTORY
+!
+! SOURCE
+  SUBROUTINE h5pget_virtual_vspace_f(dcpl_id, index, ds_id, hdferr)
+    IMPLICIT NONE
+
+    INTEGER(HID_T) , INTENT(IN)  :: dcpl_id
+    INTEGER(SIZE_T), INTENT(IN)  :: index
+    INTEGER(HID_T) , INTENT(OUT) :: ds_id
+    INTEGER, INTENT(OUT)         :: hdferr
+
+!*****
+    INTERFACE
+       INTEGER(HID_T) FUNCTION h5pget_virtual_vspace(dcpl_id, index) BIND(C,NAME='H5Pget_virtual_vspace')
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
+         INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
+         INTEGER(SIZE_T), INTENT(IN), VALUE :: index
+       END FUNCTION h5pget_virtual_vspace
+    END INTERFACE
+    
+    ds_id = h5pget_virtual_vspace(dcpl_id, index)
+    
+    hdferr = 0
+    IF(ds_id.LT.0) hdferr = -1
+
+END SUBROUTINE h5pget_virtual_vspace_f
+
+!****s* H5P/h5pget_virtual_srcspace_f
+! NAME
+!  h5pget_virtual_srcspace_f
+!
+! PURPOSE
+!  Gets a dataspace identifier for the selection within the source dataset used in the mapping.
+!
+! INPUTS
+!   dcpl_id - The identifier of the virtual dataset creation property list.
+!   index   - Mapping index.
+!             The value of index is 0 (zero) or greater and less than count (0 ≤ index < count), 
+!             where count is the number of mappings returned by h5pget_virtual_count.
+!
+!
+! OUTPUTS
+!   ds_id  - dataspace identifier
+!   hdferr - Returns 0 if successful and -1 if fails.
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Nov 2, 2015
+!
+! HISTORY
+!
+! SOURCE
+SUBROUTINE h5pget_virtual_srcspace_f(dcpl_id, index, ds_id, hdferr)
+  IMPLICIT NONE
+
+  INTEGER(HID_T) , INTENT(IN)  :: dcpl_id
+  INTEGER(SIZE_T), INTENT(IN)  :: index
+  INTEGER(HID_T) , INTENT(OUT) :: ds_id
+  INTEGER, INTENT(OUT)         :: hdferr
+
+!*****
+  INTERFACE
+     INTEGER(HID_T) FUNCTION h5pget_virtual_srcspace(dcpl_id, index) BIND(C,NAME='H5Pget_virtual_srcspace')
+       IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
+       INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
+       INTEGER(SIZE_T), INTENT(IN), VALUE :: index
+     END FUNCTION h5pget_virtual_srcspace
+  END INTERFACE
+  
+  ds_id = h5pget_virtual_srcspace(dcpl_id, index)
+
+  hdferr = 0
+  IF(ds_id.LT.0) hdferr = -1
+
+END SUBROUTINE h5pget_virtual_srcspace_f
+
+!****s* H5P/h5pget_virtual_filename_f
+! NAME
+!  h5pget_virtual_filename_f
+!
+! PURPOSE
+!  Gets the filename of a source dataset used in the mapping.
+!
+! INPUTS
+!  dcpl_id - The identifier of the virtual dataset creation property list.
+!  index   - Mapping index.
+!            The value of index is 0 (zero) or greater and less than count (0 ≤ index < count), 
+!            where count is the number of mappings returned by h5pget_virtual_count.
+!  
+! OUTPUTS
+!   name   - A buffer containing the name of the file containing the source dataset.
+!   hdferr - Returns 0 if successful and -1 if fails.
+!
+! Optional parameters:
+!  name_len - The size of name needed to hold the filename. (OUT)
+!
+! AUTHOR
+!  M. Scot Breitenfeld
+!  Nov 2, 2015
+!
+! HISTORY
+!
+! SOURCE
+SUBROUTINE h5pget_virtual_filename_f(dcpl_id, index, name, hdferr, name_len)
+
+  IMPLICIT NONE
+  INTEGER(HID_T)  , INTENT(IN)  :: dcpl_id
+  INTEGER(SIZE_T) , INTENT(IN)  :: index
+  CHARACTER(LEN=*), INTENT(OUT) :: name
+  INTEGER, INTENT(OUT)          :: hdferr
+  INTEGER(SIZE_T), OPTIONAL     :: name_len
+!*****
+
+  CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(1:LEN(name)+1), TARGET :: c_name
+  TYPE(C_PTR) :: f_ptr
+  
+  INTERFACE
+     INTEGER(SIZE_T) FUNCTION h5pget_virtual_filename(dcpl_id, index, name, size) BIND(C, NAME='H5Pget_virtual_filename')
+       IMPORT :: HID_T, SIZE_T, C_PTR, C_CHAR
+         IMPLICIT NONE
+       INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
+       INTEGER(SIZE_T), INTENT(IN), VALUE :: index
+       TYPE(C_PTR), VALUE :: name
+       INTEGER(SIZE_T), INTENT(IN), VALUE :: size
+     END FUNCTION h5pget_virtual_filename
+  END INTERFACE
+
+  hdferr = 0
+  IF(PRESENT(name_len))THEN
+     name_len = INT(h5pget_virtual_filename(dcpl_id, index, C_NULL_PTR, 0_SIZE_T), SIZE_T)
+     IF(name_len.LT.0) hdferr = -1
+  ELSE
+     f_ptr = C_LOC(c_name(1)(1:1))
+
+     IF(INT(h5pget_virtual_filename(dcpl_id, index, f_ptr, INT(LEN(name)+1,SIZE_T)), SIZE_T).LT.0)THEN
+        hdferr = -1
+     ELSE
+        CALL HD5c2fstring(name,c_name,LEN(name))
+     ENDIF
+
+  ENDIF
+
+END SUBROUTINE h5pget_virtual_filename_f
+
+!****s* H5P/h5pget_virtual_dsetname_f
+! NAME
+!  h5pget_virtual_dsetname_f
+!
+! PURPOSE
+!  Gets the name of a source dataset used in the mapping.
+!
+! INPUTS
+!  dcpl_id - The identifier of the virtual dataset creation property list.
+!  index   - Mapping index.
+!            The value of index is 0 (zero) or greater and less than count (0 ≤ index < count), 
+!            where count is the number of mappings returned by h5pget_virtual_count.
+!  
+! OUTPUTS
+!   name   - A buffer containing the name of the source dataset.
+!   hdferr - Returns 0 if successful and -1 if fails.
+!
+! Optional parameters:
+!  name_len - The size of name needed to hold the source dataset name. (OUT)
+!
+! AUTHOR
+!   M. Scot Breitenfeld
+!   January 28, 2016
+!
+! HISTORY
+!
+! SOURCE
+SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
+
+  IMPLICIT NONE
+  INTEGER(HID_T)  , INTENT(IN)  :: dcpl_id
+  INTEGER(SIZE_T) , INTENT(IN)  :: index
+  CHARACTER(LEN=*), INTENT(OUT) :: name
+  INTEGER, INTENT(OUT)          :: hdferr
+  INTEGER(SIZE_T), OPTIONAL     :: name_len
+!*****
+
+  CHARACTER(LEN=1,KIND=C_CHAR), DIMENSION(1:LEN(name)+1), TARGET :: c_name
+  TYPE(C_PTR) :: f_ptr
+  
+  INTERFACE
+     INTEGER(SIZE_T) FUNCTION h5pget_virtual_dsetname(dcpl_id, index, name, size) BIND(C, NAME='H5Pget_virtual_dsetname')
+       IMPORT :: HID_T, SIZE_T, C_PTR, C_CHAR
+         IMPLICIT NONE
+       INTEGER(HID_T) , INTENT(IN), VALUE :: dcpl_id
+       INTEGER(SIZE_T), INTENT(IN), VALUE :: index
+       TYPE(C_PTR), VALUE :: name
+       INTEGER(SIZE_T), INTENT(IN), VALUE :: size
+     END FUNCTION h5pget_virtual_dsetname
+  END INTERFACE
+
+  hdferr = 0
+  IF(PRESENT(name_len))THEN
+     name_len = INT(h5pget_virtual_dsetname(dcpl_id, index, C_NULL_PTR, 0_SIZE_T), SIZE_T)
+     IF(name_len.LT.0) hdferr = -1
+  ELSE
+     f_ptr = C_LOC(c_name(1)(1:1))
+
+     IF(INT(h5pget_virtual_dsetname(dcpl_id, index, f_ptr, INT(LEN(name)+1,SIZE_T)), SIZE_T).LT.0)THEN
+        hdferr = -1
+     ELSE
+        CALL HD5c2fstring(name,c_name,LEN(name))
+     ENDIF
+
+  ENDIF
+
+END SUBROUTINE h5pget_virtual_dsetname_f
+
 
 END MODULE H5P
 

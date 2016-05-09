@@ -44,8 +44,11 @@ const char *FILENAME[] = {
 };
 
 #define INSERT_SPLIT_ROOT_NREC  63
-#define INSERT_MANY             (1000*1000)
-#define FIND_MANY               (INSERT_MANY/100)
+#define INSERT_SPLIT_ROOT_NREC_REC  64
+#define INSERT_MANY             (1000 * 1000)
+#define INSERT_MANY_REC         (2700 * 1000)
+#define FIND_MANY               (INSERT_MANY / 100)
+#define FIND_MANY_REC           (INSERT_MANY_REC / 100)
 #define FIND_NEIGHBOR           2000
 #define DELETE_SMALL            20
 #define DELETE_MEDIUM           200
@@ -71,7 +74,7 @@ typedef struct bt2_test_param_t {
  *-------------------------------------------------------------------------
  */
 static int
-init_cparam(H5B2_create_t *cparam)
+init_cparam(H5B2_create_t *cparam, H5B2_create_t *cparam2)
 {
     /* Wipe out background */
     HDmemset(cparam, 0, sizeof(*cparam));
@@ -82,6 +85,16 @@ init_cparam(H5B2_create_t *cparam)
     cparam->rrec_size = (size_t)8;
     cparam->split_percent = 100;
     cparam->merge_percent = 40;
+
+    /* Wipe out background */
+    HDmemset(cparam2, 0, sizeof(*cparam2));
+
+    /* General parameters */
+    cparam2->cls = H5B2_TEST2;
+    cparam2->node_size = (size_t)1024;
+    cparam2->rrec_size = (size_t)16;
+    cparam2->split_percent = 100;
+    cparam2->merge_percent = 40;
 
     return(0);
 } /* init_cparam() */
@@ -159,6 +172,47 @@ create_btree(H5F_t *f, hid_t dxpl, const H5B2_create_t *cparam,
 error:
     return(-1);
 } /* end create_btree() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	reopen_file
+ *
+ * Purpose:	Re-open the file
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Monday, December 28, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+reopen_file(hid_t *file, H5F_t **f, hid_t fapl)
+{
+    char	filename[1024];         /* Filename to use */
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file to work on */
+    if((*file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (*f = (H5F_t *)H5VL_object(*file)))
+        STACK_ERROR
+
+    /* Ignore metadata tags in the file's cache */
+    if(H5AC_ignore_tags(*f) < 0)
+        STACK_ERROR
+
+    /* Success */
+    return(0);
+
+error:
+    return(-1);
+} /* end create_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -245,11 +299,11 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-check_node_depth(H5B2_t *bt2, hid_t dxpl, hsize_t record, unsigned depth)
+check_node_depth(H5B2_t *bt2, hid_t dxpl, void *record, unsigned depth)
 {
     int         rec_depth;              /* Depth of record in B-tree */
 
-    if((rec_depth = H5B2_get_node_depth_test(bt2, dxpl, &record)) < 0)
+    if((rec_depth = H5B2_get_node_depth_test(bt2, dxpl, record)) < 0)
         FAIL_STACK_ERROR
     if((unsigned)rec_depth != depth)
         TEST_ERROR
@@ -293,7 +347,7 @@ check_node_info(H5B2_t *bt2, hid_t dxpl, hsize_t record,
 
 error:
     return(-1);
-} /* end check_node_depth() */
+} /* end check_node_info() */
 
 
 /*-------------------------------------------------------------------------
@@ -302,7 +356,6 @@ error:
  * Purpose:	v2 B-tree iterator callback
  *
  * Return:	Success:	0
- *
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
@@ -325,12 +378,41 @@ iter_cb(const void *_record, void *_op_data)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	iter_rec_cb
+ *
+ * Purpose:	v2 B-tree iterator callback for H5B2_test_rec_t records
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 25, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+iter_rec_cb(const void *_record, void *_op_data)
+{
+    const H5B2_test_rec_t *record = (const H5B2_test_rec_t *)_record;
+    H5B2_test_rec_t *idx = (H5B2_test_rec_t *)_op_data;
+
+    if(record->key != idx->key)
+        return(H5_ITER_ERROR);
+    if(record->val != idx->val)
+        return(H5_ITER_ERROR);
+
+    idx->key++;
+    idx->val += 2;
+    return(H5_ITER_CONT);
+} /* end iter_rec_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	find_cb
  *
  * Purpose:	v2 B-tree find callback
  *
  * Return:	Success:	TRUE/FALSE
- *
  *		Failure:	FAIL
  *
  * Programmer:	Quincey Koziol
@@ -349,6 +431,33 @@ find_cb(const void *_record, void *_op_data)
 
     return(TRUE);
 } /* end find_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	find_rec_cb
+ *
+ * Purpose:	v2 B-tree find callback for H5B2_test_rec_t records
+ *
+ * Return:	Success:	TRUE/FALSE
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 25, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+find_rec_cb(const void *_record, void *_op_data)
+{
+    const H5B2_test_rec_t *record = (const H5B2_test_rec_t *)_record;
+    H5B2_test_rec_t *search = (H5B2_test_rec_t *)_op_data;
+
+    if(record->key != search->key)
+        return(FALSE);
+
+    search->val = record->val;
+    return(TRUE);
+} /* end find_rec_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -377,6 +486,34 @@ find_dec_cb(const void *_record, void *_op_data)
 
     return(0);
 } /* end find_dec_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	index_rec_cb
+ *
+ * Purpose:	v2 B-tree index callback for H5B2_test_rec_t records
+ *
+ * Return:	Success:	TRUE/FALSE
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 25, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+index_rec_cb(const void *_record, void *_op_data)
+{
+    const H5B2_test_rec_t *record = (const H5B2_test_rec_t *)_record;
+    H5B2_test_rec_t *search = (H5B2_test_rec_t *)_op_data;
+
+    HDassert(record);
+    HDassert(search);
+
+    search->key = record->key;
+    search->val = record->val;
+    return(TRUE);
+} /* end index_rec_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -433,6 +570,57 @@ modify_cb(void *_record, void *_op_data, hbool_t *changed)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	modify_rec_cb
+ *
+ * Purpose:	v2 B-tree modify callback for H5B2_test_rec_t records
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 25, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+modify_rec_cb(void *_record, void *_op_data, hbool_t *changed)
+{
+    H5B2_test_rec_t *record = (H5B2_test_rec_t *)_record;
+    H5B2_test_rec_t *modify = (H5B2_test_rec_t *)_op_data;
+
+    HDassert(record->key == modify->key);
+    record->val = modify->val;
+    *changed = TRUE;
+
+    return(0);
+} /* end modify_rec_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	no_modify_cb
+ *
+ * Purpose:	v2 B-tree modify callback for updates which shouldn't change
+ *		the record (ie. inserting not modifying)
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, December 23, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+no_modify_cb(void H5_ATTR_UNUSED *_record, void H5_ATTR_UNUSED *_op_data,
+    hbool_t *changed)
+{
+    *changed = FALSE;
+
+    return(1);
+} /* end no_modify_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	remove_cb
  *
  * Purpose:	v2 B-tree remove callback
@@ -477,7 +665,7 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -691,7 +879,7 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -725,7 +913,8 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC - 1);
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)33, (unsigned)0) < 0)
+    record = (hsize_t)33;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -742,7 +931,8 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)33, (unsigned)1) < 0)
+    record = (hsize_t)33;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -763,7 +953,8 @@ test_insert_split_root(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC + 2);
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)33, (unsigned)1) < 0)
+    record = (hsize_t)33;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -865,7 +1056,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -897,7 +1088,8 @@ test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)INSERT_SPLIT_ROOT_NREC, (unsigned)1) < 0)
+    record = (hsize_t)INSERT_SPLIT_ROOT_NREC;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -917,7 +1109,8 @@ test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC + (INSERT_SPLIT_ROOT_NREC / 2) + 1);
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)((INSERT_SPLIT_ROOT_NREC / 2) + (INSERT_SPLIT_ROOT_NREC / 4) + 1), (unsigned)1) < 0)
+    record = (hsize_t)((INSERT_SPLIT_ROOT_NREC / 2) + (INSERT_SPLIT_ROOT_NREC / 4) + 1);
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Close the v2 B-tree */
@@ -948,7 +1141,8 @@ test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)(INSERT_SPLIT_ROOT_NREC / 2), (unsigned)1) < 0)
+    record = (hsize_t)(INSERT_SPLIT_ROOT_NREC / 2);
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -967,7 +1161,8 @@ test_insert_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC + (INSERT_SPLIT_ROOT_NREC / 2) + 1;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)((INSERT_SPLIT_ROOT_NREC / 2) + (INSERT_SPLIT_ROOT_NREC / 4) + 1), (unsigned)1) < 0)
+    record = (hsize_t)((INSERT_SPLIT_ROOT_NREC / 2) + (INSERT_SPLIT_ROOT_NREC / 4) + 1);
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Close the v2 B-tree */
@@ -1016,7 +1211,7 @@ test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1049,7 +1244,7 @@ test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = INSERT_SPLIT_ROOT_NREC + (INSERT_SPLIT_ROOT_NREC / 2);
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -1069,10 +1264,10 @@ test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 31;
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 63;
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Close the v2 B-tree */
@@ -1104,7 +1299,7 @@ test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = (INSERT_SPLIT_ROOT_NREC / 2);
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -1123,9 +1318,11 @@ test_insert_level1_side_split(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = 2 * INSERT_SPLIT_ROOT_NREC;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)62, (unsigned)1) < 0)
+    record = 62;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)94, (unsigned)1) < 0)
+    record = 94;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Close the v2 B-tree */
@@ -1176,7 +1373,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1210,7 +1407,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = (2 * INSERT_SPLIT_ROOT_NREC);
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -1230,10 +1427,10 @@ test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = (INSERT_SPLIT_ROOT_NREC / 2);
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = (INSERT_SPLIT_ROOT_NREC + (INSERT_SPLIT_ROOT_NREC / 2) + 1);
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -1252,9 +1449,11 @@ test_insert_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = (2 * INSERT_SPLIT_ROOT_NREC) + (INSERT_SPLIT_ROOT_NREC / 2) + 1;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)52, (unsigned)1) < 0)
+    record = 52;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)105, (unsigned)1) < 0)
+    record = 105;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -1317,7 +1516,7 @@ test_insert_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1351,7 +1550,7 @@ test_insert_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = (2 * INSERT_SPLIT_ROOT_NREC) + (INSERT_SPLIT_ROOT_NREC / 2);
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -1370,11 +1569,14 @@ test_insert_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = 3 * INSERT_SPLIT_ROOT_NREC;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)62, (unsigned)1) < 0)
+    record = 62;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)94, (unsigned)1) < 0)
+    record = 94;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)126, (unsigned)1) < 0)
+    record = 126;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -1433,7 +1635,7 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1472,7 +1674,8 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC * 29) + 1;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)948, (unsigned)2) < 0)
+    record = 948;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -1521,7 +1724,8 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam,
         FAIL_STACK_ERROR
 
     /* Check with B-tree */
-    if(check_node_depth(bt2, dxpl, (hsize_t)948, (unsigned)2) < 0)
+    record = 948;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
 
     /* Attempt to find existant record in internal node of level-2 B-tree */
@@ -1530,7 +1734,8 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam,
         FAIL_STACK_ERROR
 
     /* Check with B-tree */
-    if(check_node_depth(bt2, dxpl, (hsize_t)505, (unsigned)1) < 0)
+    record = 505;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Attempt to find existant record in leaf of level-2 B-tree */
@@ -1539,7 +1744,8 @@ test_insert_make_level2(hid_t fapl, const H5B2_create_t *cparam,
         FAIL_STACK_ERROR
 
     /* Check with B-tree */
-    if(check_node_depth(bt2, dxpl, (hsize_t)555, (unsigned)0) < 0)
+    record = 555;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Attempt to index non-existant record in level-2 B-tree */
@@ -1611,7 +1817,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1650,11 +1856,14 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC * 29) + (INSERT_SPLIT_ROOT_NREC / 2);
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)1008, (unsigned)2) < 0)
+    record = 1008;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)1859, (unsigned)1) < 0)
+    record = 1859;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)1921, (unsigned)0) < 0)
+    record = 1921;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -1671,11 +1880,14 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC * 29) + (INSERT_SPLIT_ROOT_NREC / 2) + 1;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)1008, (unsigned)2) < 0)
+    record = 1008;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)1875, (unsigned)1) < 0)
+    record = 1875;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)1922, (unsigned)0) < 0)
+    record = 1922;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     PASSED();
@@ -1691,11 +1903,14 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC * 29) + (INSERT_SPLIT_ROOT_NREC / 2) + 1;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)1008, (unsigned)2) < 0)
+    record = 1008;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)94, (unsigned)1) < 0)
+    record = 94;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)32, (unsigned)0) < 0)
+    record = 32;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Add more records to left-most leaf, to force a 2->1 split and then a
@@ -1712,11 +1927,14 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC * 30) + 1;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)1008, (unsigned)2) < 0)
+    record = 1008;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)47, (unsigned)1) < 0)
+    record = 47;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)0, (unsigned)0) < 0)
+    record = 0;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     PASSED();
@@ -1732,13 +1950,17 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC * 30) + 1;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)1008, (unsigned)2) < 0) /* Record in root node */
+    record = 1008;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0) /* Record in root node */
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)535, (unsigned)1) < 0) /* Record in middle node before insertion point */
+    record = 535;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0) /* Record in middle node before insertion point */
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)630, (unsigned)1) < 0) /* Record in middle node after insertion point */
+    record = 630;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0) /* Record in middle node after insertion point */
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)568, (unsigned)0) < 0) /* Record in leaf node just after insertion point */
+    record = 568;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0) /* Record in leaf node just after insertion point */
         TEST_ERROR
 
     /* Add more records to middle leaf, to force a split and a 3 node redistribution on middle leaf */
@@ -1753,13 +1975,17 @@ test_insert_level2_leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC * 30) + (INSERT_SPLIT_ROOT_NREC / 2) + 2;
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)1008, (unsigned)2) < 0) /* Record in root node */
+    record = 1008;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0) /* Record in root node */
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)524, (unsigned)1) < 0) /* Record in middle node before insertion point */
+    record = 524;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0) /* Record in middle node before insertion point */
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)577, (unsigned)1) < 0) /* Record in middle node after insertion point */
+    record = 577;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0) /* Record in middle node after insertion point */
         TEST_ERROR
-    if(check_node_depth(bt2, dxpl, (hsize_t)568, (unsigned)0) < 0) /* Record in leaf node just after insertion point */
+    record = 568;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0) /* Record in leaf node just after insertion point */
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -1820,7 +2046,7 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -1859,13 +2085,13 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 946;       /* Record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 1797;       /* Right-most record in right internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 1859;      /* Right-most record in right-most leaf */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -1885,16 +2111,16 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 946;       /* Record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 1828;      /* Next-to-right-most record in right-most internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 1860;      /* Right-most record in right-most internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 1891;      /* Right-most record in right-most leaf */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     PASSED();
@@ -1911,13 +2137,13 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 946;       /* Record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 63;        /* Left-most record in left-most internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 1;        /* Left-most record in left-most leaf */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Add another record to left-most leaf, to force a 1->2 node split on left leaf */
@@ -1931,16 +2157,16 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 946;       /* Record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 63;        /* Left-most record in left-most internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 32;        /* Left-most record in left internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 0;        /* Left-most record in left-most leaf */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     PASSED();
@@ -1957,16 +2183,16 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 946;       /* Record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 504;       /* Record in internal node just before insertion point */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 568;       /* Record in internal node just after insertion point */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 506;       /* Record in leaf node just after insertion point */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Add another record to middle leaf, to force a node split on middle leaf */
@@ -1980,19 +2206,19 @@ test_insert_level2_leaf_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 946;       /* Record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 504;       /* Left-most record of split in left internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 537;       /* Middle record of split in left internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 568;       /* Right-most record of split in left internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 506;       /* Record in leaf node just after insertion point */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -2054,7 +2280,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2089,13 +2315,13 @@ test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 1318;      /* Record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 3114;      /* Right-most record in right internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 3145;      /* Right-most record in right leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -2113,13 +2339,13 @@ test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 1822;      /* Record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 3114;      /* Right-most record in right internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 3146;      /* Right-most record in right leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     PASSED();
@@ -2136,13 +2362,13 @@ test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 1822;      /* Record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 436;      /* Left-most record in left internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 374;      /* Left-most record in left leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Force left-most internal node to redistribute */
@@ -2158,13 +2384,13 @@ test_insert_level2_2internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 1570;      /* Record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 61;      /* Left-most record in left internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 0;      /* Left-most record in left leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -2226,7 +2452,7 @@ test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2261,13 +2487,13 @@ test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 2759;      /* Record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 4555;      /* Right-most record in right internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 4586;      /* Right-most record in right leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -2285,16 +2511,16 @@ test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 2759;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 3704;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 4555;      /* Right-most record in right internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 4387;      /* Right-most record in right leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     PASSED();
@@ -2311,13 +2537,13 @@ test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 2759;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 932;      /* Left-most record in left internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 870;      /* Left-most record in left leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Force left-most internal node to split */
@@ -2333,16 +2559,16 @@ test_insert_level2_2internal_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 870;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 1814;      /* Next-to-left-most record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 61;      /* Left-most record in left internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 0;      /* Left-most record in left leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -2405,7 +2631,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2444,19 +2670,19 @@ test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 3703;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 2267;      /* Record to left of insertion point in middle internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 3199;      /* Record to right of insertion point in middle internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 3137;      /* Record just above insertion point in leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -2476,19 +2702,19 @@ test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 3703;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 3104;      /* Record to left of insertion point in middle internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 3137;      /* Record to right of insertion point in middle internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 3135;      /* Record just above insertion point in leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -2506,21 +2732,21 @@ test_insert_level2_3internal_redistrib(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 1574;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 3104;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
 #ifdef NONE
     record = 2862;      /* Record to left of insertion point in right internal node (now) */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 #endif /* NONE */
     record = 3137;      /* Record to right of insertion point in right internal node (now) */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 3135;      /* Record just above insertion point in leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -2583,7 +2809,7 @@ test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2627,19 +2853,19 @@ test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 3703;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 1952;      /* Record to left of insertion point in middle internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 2884;      /* Record to right of insertion point in middle internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 2822;      /* Record just after insertion point in leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Insert records to fill up middle internal node */
@@ -2655,19 +2881,19 @@ test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 3703;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 2789;      /* Record to left of insertion point in middle internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 2822;      /* Record to right of insertion point in middle internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 2823;      /* Record just above insertion point in leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -2685,24 +2911,24 @@ test_insert_level2_3internal_split(hid_t fapl, const H5B2_create_t *cparam,
     if(check_stats(bt2, &bt2_stat) < 0)
         TEST_ERROR
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 2789;      /* Middle record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     record = 3703;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
 #ifdef NONE
     record = 3049;      /* Record to left of insertion point in middle internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 #endif /* NONE */
     record = 2822;      /* Record to right of insertion point in middle internal node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 2823;      /* Record just above insertion point in leaf node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     /* Check for closing & re-opening the B-tree */
@@ -2763,7 +2989,7 @@ test_insert_lots(hid_t fapl, const H5B2_create_t *cparam,
     hid_t	file = -1;              /* File ID */
     char	filename[1024];         /* Filename to use */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -2975,6 +3201,2019 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_update_basic
+ *
+ * Purpose:	Basic tests for the v2 B-tree update operation
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, December 23, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_update_basic(hid_t fapl, const H5B2_create_t *cparam,
+    const bt2_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
+    H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;             /* Record to insert into tree */
+    H5B2_test_rec_t modify;             /* Modified value */
+    H5B2_test_rec_t find;               /* Record to find */
+    herr_t      ret;                    /* Generic error return value */
+
+    /* Create the file for the test */
+    if(create_file(&file, &f, fapl) < 0)
+        TEST_ERROR
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /*
+     * Test insert record into empty v2 B-tree
+     */
+    TESTING("B-tree update: inserting first record in empty B-tree");
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    record.key = 42;
+    record.val = 72;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /* Attempt to find non-existant record in B-tree with 1 record */
+    /* (Should not be found, but not fail) */
+    find.key = 10;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != FALSE)
+        FAIL_STACK_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Try again with NULL 'op' */
+    /* (Should not be found, but not fail) */
+    if(H5B2_find(bt2, dxpl, &find, NULL, NULL) != FALSE)
+        FAIL_STACK_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Attempt to find existant record in B-tree with 1 record */
+    find.key = 42;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != 72)
+        TEST_ERROR
+
+    /* Try again with NULL 'op' */
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, NULL, NULL) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Attempt to index non-existant record in B-tree with 1 record */
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL)
+        TEST_ERROR
+
+    /* Attempt to index existing record in B-tree with 1 record */
+    find.key = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)0, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 42)
+        TEST_ERROR
+    if(find.val != 72)
+        TEST_ERROR
+
+    PASSED();
+
+
+    /*
+     * Test update only record into v2 B-tree
+     */
+    TESTING("B-tree update: update only record in B-tree");
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    modify.key = 42;
+    modify.val = 43;
+    if(H5B2_update(bt2, dxpl, &modify, modify_rec_cb, &modify) < 0)
+        FAIL_STACK_ERROR
+
+    /* Attempt to find non-existant record in B-tree with 1 record */
+    /* (Should not be found, but not fail) */
+    find.key = 10;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != FALSE)
+        FAIL_STACK_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Try again with NULL 'op' */
+    /* (Should not be found, but not fail) */
+    if(H5B2_find(bt2, dxpl, &find, NULL, NULL) != FALSE)
+        FAIL_STACK_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Attempt to find modified record in B-tree with 1 record */
+    find.key = 42;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != 43)
+        TEST_ERROR
+
+    /* Try again with NULL 'op' */
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, NULL, NULL) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Attempt to index non-existant record in B-tree with 1 record */
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL)
+        TEST_ERROR
+
+    /* Attempt to index existing record in B-tree with 1 record */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)0, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 42)
+        TEST_ERROR
+    if(find.val != 43)
+        TEST_ERROR
+
+    PASSED();
+
+
+    /*
+     * Test inserting more records into v2 B-tree
+     */
+    TESTING("B-tree update: insert several records");
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /*
+     * Test inserting second record into v2 B-tree, before all other records
+     */
+    record.key = 34;
+    record.val = 11;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /*
+     * Test inserting third record into v2 B-tree, after all other records
+     */
+    record.key = 56;
+    record.val = 12;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /*
+     * Test inserting fourth record into v2 B-tree, in the middle of other records
+     */
+    record.key = 38;
+    record.val = 13;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /* Attempt to find non-existant record in level-0 B-tree with several records */
+    /* (Should not be found, but not fail) */
+    find.key = 10;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != FALSE)
+        TEST_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Attempt to find existant record in level-0 B-tree with several records */
+    find.key = 56;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        TEST_ERROR
+    if(find.val != 12)
+        TEST_ERROR
+
+    /* Attempt to index non-existant record in B-tree with several records */
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL)
+        TEST_ERROR
+
+    /* Attempt to index existing record in B-tree with several records */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)0, index_rec_cb, &find) < 0)
+        TEST_ERROR
+    if(find.key != 34)
+        TEST_ERROR
+    if(find.val != 11)
+        TEST_ERROR
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)1, index_rec_cb, &find) < 0)
+        TEST_ERROR
+    if(find.key != 38)
+        TEST_ERROR
+    if(find.val != 13)
+        TEST_ERROR
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)2, index_rec_cb, &find) < 0)
+        TEST_ERROR
+    if(find.key != 42)
+        TEST_ERROR
+    if(find.val != 43)
+        TEST_ERROR
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)3, index_rec_cb, &find) < 0)
+        TEST_ERROR
+    if(find.key != 56)
+        TEST_ERROR
+    if(find.val != 12)
+        TEST_ERROR
+
+    PASSED();
+
+
+    /*
+     * Test updating all existing records in v2 B-tree
+     */
+    TESTING("B-tree update: update several records");
+
+    record.key = 34;
+    modify.key = 34;
+    modify.val = 21;
+    if(H5B2_update(bt2, dxpl, &record, modify_rec_cb, &modify) < 0)
+        FAIL_STACK_ERROR
+    record.key = 38;
+    modify.key = 38;
+    modify.val = 23;
+    if(H5B2_update(bt2, dxpl, &record, modify_rec_cb, &modify) < 0)
+        FAIL_STACK_ERROR
+    record.key = 42;
+    modify.key = 42;
+    modify.val = 24;
+    if(H5B2_update(bt2, dxpl, &record, modify_rec_cb, &modify) < 0)
+        FAIL_STACK_ERROR
+    record.key = 56;
+    modify.key = 56;
+    modify.val = 22;
+    if(H5B2_update(bt2, dxpl, &record, modify_rec_cb, &modify) < 0)
+        FAIL_STACK_ERROR
+
+    /* Attempt to find non-existant record in level-0 B-tree with several records */
+    /* (Should not be found, but not fail) */
+    find.key = 41;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != FALSE)
+        TEST_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Attempt to find existant record in level-0 B-tree with several record */
+    find.key = 56;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        TEST_ERROR
+    if(find.val != 22)
+        TEST_ERROR
+
+    /* Attempt to index non-existant record in B-tree with several records */
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL)
+        TEST_ERROR
+
+    /* Attempt to index existing record in B-tree with several records */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)0, index_rec_cb, &find) < 0)
+        TEST_ERROR
+    if(find.key != 34)
+        TEST_ERROR
+    if(find.val != 21)
+        TEST_ERROR
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)1, index_rec_cb, &find) < 0)
+        TEST_ERROR
+    if(find.key != 38)
+        TEST_ERROR
+    if(find.val != 23)
+        TEST_ERROR
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)2, index_rec_cb, &find) < 0)
+        TEST_ERROR
+    if(find.key != 42)
+        TEST_ERROR
+    if(find.val != 24)
+        TEST_ERROR
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)3, index_rec_cb, &find) < 0)
+        TEST_ERROR
+    if(find.key != 56)
+        TEST_ERROR
+    if(find.val != 22)
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    PASSED();
+
+
+    /* All tests passed */
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        if(bt2)
+            H5B2_close(bt2, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_update_basic() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_update_split_root
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ *              records to split the root node and force the tree to depth 1.
+ *              It also continues to add a few more records to each of the
+ *              left and right leaf nodes after the split
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, December 23, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_update_split_root(hid_t fapl, const H5B2_create_t *cparam,
+    const bt2_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
+    H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;             /* Record to insert into tree */
+    H5B2_test_rec_t modify;             /* Modified value */
+    H5B2_test_rec_t find;               /* Record to find */
+    H5B2_test_rec_t idx;                /* Index within B-tree, for iterator */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    unsigned    u;                      /* Local index variable */
+    herr_t      ret;                    /* Generic error return value */
+
+    /*
+     * Test inserting enough records into v2 B-tree to split the root node
+     */
+    TESTING("B-tree update: split root");
+
+    /* Create the file for the test */
+    if(create_file(&file, &f, fapl) < 0)
+        TEST_ERROR
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /* Insert records to fill root leaf node */
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC_REC - 1); u++) {
+        record.key = u + 2;
+        record.val = u * 2 + 4;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 0;
+    bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC_REC - 1);
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = 33;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Insert record to split root leaf node */
+    record.key = INSERT_SPLIT_ROOT_NREC_REC + 1;
+    record.val = (INSERT_SPLIT_ROOT_NREC_REC - 1) * 2 + 4;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = 33;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx.key = 2;
+    idx.val = 4;
+    if(H5B2_iterate(bt2, dxpl, iter_rec_cb, &idx) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the index is correct */
+    if(idx.key != (INSERT_SPLIT_ROOT_NREC_REC + 2))
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Modify all records */
+    for(u = 0; u < INSERT_SPLIT_ROOT_NREC_REC; u++) {
+        record.key = u + 2;
+        modify.key = u + 2;
+        modify.val = u * 2 + 5;
+        if(H5B2_update(bt2, dxpl, &record, modify_rec_cb, &modify) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = 33;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx.key = 2;
+    idx.val = 5;
+    if(H5B2_iterate(bt2, dxpl, iter_rec_cb, &idx) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the index is correct */
+    if(idx.key != (INSERT_SPLIT_ROOT_NREC_REC + 2))
+        TEST_ERROR
+
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Insert a couple more records, on the left side of the B-tree */
+    record.key = 0;
+    record.val = 1;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+    record.key = 1;
+    record.val = 3;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC_REC + 2);
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = 33;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx.key = 0;
+    idx.val = 1;
+    if(H5B2_iterate(bt2, dxpl, iter_rec_cb, &idx) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the index is correct */
+    if(idx.key != (INSERT_SPLIT_ROOT_NREC_REC + 2))
+        TEST_ERROR
+
+    /* Attempt to find non-existant record in level-1 B-tree */
+    /* (Should not be found, but not fail) */
+    find.key = 800;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != FALSE)
+        TEST_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Attempt to find existant record in root of level-1 B-tree */
+    find.key = 33;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.key != 33)
+        TEST_ERROR
+    if(find.val != 67)
+        TEST_ERROR
+
+    /* Attempt to find existant record in leaf of level-1 B-tree */
+    find.key = 56;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.key != 56)
+        TEST_ERROR
+    if(find.val != 113)
+        TEST_ERROR
+
+    /* Attempt to index non-existant record in level-1 B-tree */
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC + 2), index_rec_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL)
+        TEST_ERROR
+
+    /* Attempt to index existing record in root of level-1 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)33, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 33)
+        TEST_ERROR
+    if(find.val != 67)
+        TEST_ERROR
+
+    /* Attempt to index existing record in left leaf of level-1 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)0, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 0)
+        TEST_ERROR
+    if(find.val != 1)
+        TEST_ERROR
+
+    /* Attempt to index existing record in right leaf of level-1 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)50, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 50)
+        TEST_ERROR
+    if(find.val != 101)
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if(bt2)
+            H5B2_close(bt2, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_update_split_root() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_update_level1_2leaf_redistrib
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ *              records to split the root node and force the tree to depth 1.
+ *              It continues to add a more records to the each of the
+ *              left and right leaf nodes after the split to force a 2 node
+ *              redistribution
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, December 26, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_update_level1_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
+    const bt2_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
+    H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;             /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    unsigned    u;                      /* Local index variable */
+
+    /*
+     * Test inserting many records into v2 B-tree
+     */
+    TESTING("B-tree update: redistribute 2 leaves in level 1 B-tree (l->r)");
+
+    /* Create the file for the test */
+    if(create_file(&file, &f, fapl) < 0)
+        TEST_ERROR
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /* Insert enough records to force root to split into 2 leaves */
+    for(u = 0; u < INSERT_SPLIT_ROOT_NREC_REC; u++) {
+        record.key = u + (INSERT_SPLIT_ROOT_NREC_REC / 2) + 1;
+        record.val = u + (INSERT_SPLIT_ROOT_NREC_REC / 2) + 10;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+
+    /* Force redistribution from left node into right node */
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC_REC / 2) + 1; u++) {
+        record.key = u;
+        record.val = u + 9;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC_REC + (INSERT_SPLIT_ROOT_NREC_REC / 2) + 1);
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = (INSERT_SPLIT_ROOT_NREC_REC / 2) + (INSERT_SPLIT_ROOT_NREC_REC / 4);
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    PASSED();
+
+    /*
+     * Test inserting many records into v2 B-tree
+     */
+    TESTING("B-tree update: redistribute 2 leaves in level 1 B-tree (r->l)");
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /* Insert enough records to force root to split into 2 leaves */
+    for(u = 0; u < INSERT_SPLIT_ROOT_NREC_REC; u++) {
+        record.key = u;
+        record.val = u + 9;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = (INSERT_SPLIT_ROOT_NREC_REC / 2) - 1;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Force redistribution from left node into right node */
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC_REC / 2) + 1; u++) {
+        record.key = u + INSERT_SPLIT_ROOT_NREC_REC;
+        record.val = u + INSERT_SPLIT_ROOT_NREC_REC + 9;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC_REC + (INSERT_SPLIT_ROOT_NREC_REC / 2) + 1;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = (INSERT_SPLIT_ROOT_NREC_REC / 2) + (INSERT_SPLIT_ROOT_NREC_REC / 4) - 1;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if(bt2)
+            H5B2_close(bt2, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_update_level1_2leaf_redistrib() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_update_level1_side_split
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ *              records to split the root node and force the tree to depth 1.
+ *              It continues to add a more records to the each of the
+ *              left and right leaf nodes after the split to force a 2 node
+ *              split, adding another node to the B-tree
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, December 26, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_update_level1_side_split(hid_t fapl, const H5B2_create_t *cparam,
+    const bt2_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
+    H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;             /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    unsigned    u;                      /* Local index variable */
+
+    /*
+     * Test inserting many records into v2 B-tree
+     */
+    TESTING("B-tree update: split side leaf into 2 leaves in level 1 B-tree (l->r)");
+
+    /* Create the file for the test */
+    if(create_file(&file, &f, fapl) < 0)
+        TEST_ERROR
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /* Insert enough records to force root to split into 2 leaves */
+    for(u = 0; u < INSERT_SPLIT_ROOT_NREC_REC; u++) {
+        record.key = u + INSERT_SPLIT_ROOT_NREC_REC;
+        record.val = u + INSERT_SPLIT_ROOT_NREC_REC + 10;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = INSERT_SPLIT_ROOT_NREC_REC + (INSERT_SPLIT_ROOT_NREC_REC / 2) - 1;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Force left node to split */
+    for(u = 0; u < INSERT_SPLIT_ROOT_NREC_REC; u++) {
+        record.key = u;
+        record.val = u + 10;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = 2 * INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = 31;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+    record.key = 64;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    PASSED();
+
+    /*
+     * Test inserting many records into v2 B-tree
+     */
+    TESTING("B-tree update: split side leaf into 2 leaves in level 1 B-tree (r->l)");
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /* Insert enough records to force root to split into 2 leaves */
+    for(u = 0; u < INSERT_SPLIT_ROOT_NREC_REC; u++) {
+        record.key = u;
+        record.val = u + 10;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = (INSERT_SPLIT_ROOT_NREC_REC / 2) - 1;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Force right node to split */
+    for(u = 0; u < INSERT_SPLIT_ROOT_NREC_REC; u++) {
+        record.key = u + INSERT_SPLIT_ROOT_NREC_REC;
+        record.val = u + INSERT_SPLIT_ROOT_NREC_REC + 10;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = 2 * INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = 63;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+    record.key = 95;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if(bt2)
+            H5B2_close(bt2, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_update_level1_side_split() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_update_level1_3leaf_redistrib
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ *              records to split the root node and force the tree to depth 1.
+ *              It continues to add a more records to the each of the
+ *              left and right leaf nodes after the split to force a 2 node
+ *              split, adding another node to the B-tree, then continues to
+ *              add records until a 3 node redistribution occurs
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, December 26, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_update_level1_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cparam,
+    const bt2_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
+    H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;             /* Record to insert into tree */
+    H5B2_test_rec_t idx;                /* Index within B-tree, for iterator */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    unsigned    u;                      /* Local index variable */
+
+    /*
+     * Test inserting many records into v2 B-tree
+     */
+    TESTING("B-tree update: redistribute 3 leaves in level 1 B-tree");
+
+    /* Create the file for the test */
+    if(create_file(&file, &f, fapl) < 0)
+        TEST_ERROR
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /* Insert enough records to force root to split into 2 leaves */
+    for(u = 0; u < INSERT_SPLIT_ROOT_NREC_REC; u++) {
+        record.key = u + (INSERT_SPLIT_ROOT_NREC_REC + (INSERT_SPLIT_ROOT_NREC_REC / 2) + 1);
+        record.val = record.key * 2;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = (2 * INSERT_SPLIT_ROOT_NREC_REC);
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Force left node to split */
+    for(u = 0; u < INSERT_SPLIT_ROOT_NREC_REC; u++) {
+        record.key = u;
+        record.val = record.key * 2;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = 2 * INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = (INSERT_SPLIT_ROOT_NREC_REC / 2) - 1;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+    record.key = INSERT_SPLIT_ROOT_NREC_REC + (INSERT_SPLIT_ROOT_NREC_REC / 2) + 1;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Insert records to force middle node to redistribute */
+    for(u = 0; u < ((INSERT_SPLIT_ROOT_NREC_REC / 2) + 1); u++) {
+        record.key = u + INSERT_SPLIT_ROOT_NREC_REC;
+        record.val = record.key * 2;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = (2 * INSERT_SPLIT_ROOT_NREC_REC) + (INSERT_SPLIT_ROOT_NREC_REC / 2) + 1;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = 52;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+    record.key = 107;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx.key = 0;
+    idx.val = 0;
+    if(H5B2_iterate(bt2, dxpl, iter_rec_cb, &idx) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the index is correct */
+    if(idx.key != ((INSERT_SPLIT_ROOT_NREC_REC * 2) + (INSERT_SPLIT_ROOT_NREC_REC / 2) + 1))
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if(bt2)
+            H5B2_close(bt2, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_update_level1_3leaf_redistrib() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_update_level1_middle_split
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ *              records to split the root node and force the tree to depth 1.
+ *              It continues to add a more records to the each of the
+ *              left and right leaf nodes after the split to force a 2 node
+ *              split, adding another node to the B-tree, then continues to
+ *              add records until a 3 node split occurs
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, December 26, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_update_level1_middle_split(hid_t fapl, const H5B2_create_t *cparam,
+    const bt2_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
+    H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;             /* Record to insert into tree */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    H5B2_test_rec_t idx;                /* Index within B-tree, for iterator */
+    unsigned    u;                      /* Local index variable */
+
+    /*
+     * Test inserting many records into v2 B-tree
+     */
+    TESTING("B-tree update: split middle leaf into 2 leaves in level 1 B-tree");
+
+    /* Create the file for the test */
+    if(create_file(&file, &f, fapl) < 0)
+        TEST_ERROR
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /* Insert enough records to force root to split into 2 leaves */
+    for(u = 0; u < INSERT_SPLIT_ROOT_NREC_REC; u++) {
+        record.key = u + (INSERT_SPLIT_ROOT_NREC_REC * 2);
+        record.val = record.key * 2;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = (2 * INSERT_SPLIT_ROOT_NREC_REC) + (INSERT_SPLIT_ROOT_NREC_REC / 2) - 1;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Force split from left node into right node */
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC_REC * 2); u++) {
+        record.key = u;
+        record.val = record.key * 2;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 1;
+    bt2_stat.nrecords = 3 * INSERT_SPLIT_ROOT_NREC_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = 63;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+    record.key = 95;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+    record.key = 128;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx.key = 0;
+    idx.val = 0;
+    if(H5B2_iterate(bt2, dxpl, iter_rec_cb, &idx) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the index is correct */
+    if(idx.key != (INSERT_SPLIT_ROOT_NREC_REC * 3))
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if(bt2)
+            H5B2_close(bt2, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_update_level1_middle_split() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_update_make_level2
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test inserts enough
+ *              records to make a level 2 B-tree
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, December 26, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_update_make_level2(hid_t fapl, const H5B2_create_t *cparam,
+    const bt2_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
+    H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    H5B2_test_rec_t record;             /* Record to insert into tree */
+    H5B2_test_rec_t find;               /* Record to find */
+    H5B2_test_rec_t idx;                /* Index within B-tree, for iterator */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    unsigned    u;                      /* Local index variable */
+    herr_t      ret;                    /* Generic error return value */
+
+    /*
+     * Test inserting many records into v2 B-tree
+     */
+    TESTING("B-tree update: make level 2 B-tree (l->r)");
+
+    /* Create the file for the test */
+    if(create_file(&file, &f, fapl) < 0)
+        TEST_ERROR
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /* Insert enough records to force root to split into 2 internal nodes */
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC_REC * 9); u++) {
+        record.key = u + 2;  /* Leave a gap for later insertion */
+        record.val = record.key * 2;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+    for(; u < (INSERT_SPLIT_ROOT_NREC_REC * 41); u++) {
+        record.key = u + 4;  /* Leave a gap for later insertion */
+        record.val = record.key * 2;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 2;
+    bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC_REC * 41);
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = 1347;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Add some extra records to left-most leaf */
+    record.key = 0;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+    record.key = 1;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /* Add some extra records to middle leaf */
+    record.key = (INSERT_SPLIT_ROOT_NREC_REC * 9) + 2;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+    record.key = (INSERT_SPLIT_ROOT_NREC_REC * 9) + 3;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx.key = 0;
+    idx.val = 0;
+    if(H5B2_iterate(bt2, dxpl, iter_rec_cb, &idx) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the index is correct */
+    if(idx.key != ((INSERT_SPLIT_ROOT_NREC_REC * 41) + 4))
+        TEST_ERROR
+
+    /* Attempt to find non-existant record in level-2 B-tree */
+    /* (Should not be found, but not fail) */
+    find.key = INSERT_SPLIT_ROOT_NREC_REC * 42;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != FALSE)
+        TEST_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Attempt to find existant record in root of level-2 B-tree */
+    find.key = 1347;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != (1347 * 2))
+        TEST_ERROR
+
+    /* Check with B-tree */
+    record.key = 1347;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
+        TEST_ERROR
+
+    /* Attempt to find existant record in internal node of level-2 B-tree */
+    find.key = 513;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != (513 * 2))
+        TEST_ERROR
+
+    /* Check with B-tree */
+    record.key = 513;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Attempt to find existant record in leaf of level-2 B-tree */
+    find.key = 555;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != (555 * 2))
+        TEST_ERROR
+
+    /* Check with B-tree */
+    record.key = 555;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
+        TEST_ERROR
+
+    /* Attempt to index non-existant record in level-2 B-tree */
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL)
+        TEST_ERROR
+
+    /* Attempt to index existing record in root of level-2 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)1347, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 1347)
+        TEST_ERROR
+    if(find.val != (1347 * 2))
+        TEST_ERROR
+
+    /* Attempt to index existing record in internal node of level-2 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)513, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 513)
+        TEST_ERROR
+    if(find.val != (513 * 2))
+        TEST_ERROR
+
+    /* Attempt to index existing record in leaf of level-2 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)555, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 555)
+        TEST_ERROR
+    if(find.val != (555 * 2))
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    PASSED();
+
+
+    /*
+     * Test inserting many records into v2 B-tree
+     */
+    TESTING("B-tree update: make level 2 B-tree (r->l)");
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /* Insert enough records to force root to split into 2 internal nodes */
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC_REC * 9); u++) {
+        record.key = ((INSERT_SPLIT_ROOT_NREC_REC * 41) + 1) - u;
+        record.val = record.key * 2;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+    for(; u < (INSERT_SPLIT_ROOT_NREC_REC * 41); u++) {
+        record.key = ((INSERT_SPLIT_ROOT_NREC_REC * 41) + 1) - (u +2); /* Leave a gap for later insertion */
+        record.val = record.key * 2;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 2;
+    bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC_REC * 41);
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = 1344;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Add some extra records to right-most leaf */
+    record.key = (INSERT_SPLIT_ROOT_NREC_REC * 41) + 2;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+    record.key = (INSERT_SPLIT_ROOT_NREC_REC * 41) + 3;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /* Add some extra records to middle leaf */
+    record.key = ((INSERT_SPLIT_ROOT_NREC_REC * 41) - (INSERT_SPLIT_ROOT_NREC_REC * 9));
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+    record.key = ((INSERT_SPLIT_ROOT_NREC_REC * 41) - (INSERT_SPLIT_ROOT_NREC_REC * 9)) + 1;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx.key = 0;
+    idx.val = 0;
+    if(H5B2_iterate(bt2, dxpl, iter_rec_cb, &idx) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the index is correct */
+    if(idx.key != ((INSERT_SPLIT_ROOT_NREC_REC * 41) + 4))
+        TEST_ERROR
+
+    /* Attempt to find non-existant record in level-2 B-tree */
+    /* (Should not be found, but not fail) */
+    find.key = INSERT_SPLIT_ROOT_NREC_REC * 42;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != FALSE)
+        TEST_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Attempt to find existant record in root of level-2 B-tree */
+    find.key = 1344;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != (1344 * 2))
+        TEST_ERROR
+
+    /* Check with B-tree */
+    record.key = 1344;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
+        TEST_ERROR
+
+    /* Attempt to find existant record in internal node of level-2 B-tree */
+    find.key = 512;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != (512 * 2))
+        TEST_ERROR
+
+    /* Check with B-tree */
+    record.key = 512;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Attempt to find existant record in leaf of level-2 B-tree */
+    find.key = 555;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != (555 * 2))
+        TEST_ERROR
+
+    /* Check with B-tree */
+    record.key = 555;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
+        TEST_ERROR
+
+    /* Attempt to index non-existant record in level-2 B-tree */
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL)
+        TEST_ERROR
+
+    /* Attempt to index existing record in root of level-2 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)1344, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 1344)
+        TEST_ERROR
+    if(find.val != (1344 * 2))
+        TEST_ERROR
+
+    /* Attempt to index existing record in internal node of level-2 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)512, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 512)
+        TEST_ERROR
+    if(find.val != (512 * 2))
+        TEST_ERROR
+
+    /* Attempt to index existing record in leaf of level-2 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)555, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 555)
+        TEST_ERROR
+    if(find.val != (555 * 2))
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    PASSED();
+
+
+    /*
+     * Test inserting many records into v2 B-tree
+     */
+    TESTING("B-tree update: make level 2 B-tree (l+r->middle)");
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /* Insert enough records to force root to split into 2 internal nodes */
+    for(u = 0; u < (INSERT_SPLIT_ROOT_NREC_REC * 9); u++) {
+        record.key = ((INSERT_SPLIT_ROOT_NREC_REC * 41) + 3) - u;
+        record.val = record.key * 2;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+    for(; u < (INSERT_SPLIT_ROOT_NREC_REC * 41); u++) {
+        record.key = u - ((INSERT_SPLIT_ROOT_NREC_REC * 9) - 2);  /* Leave a gap for later insertion */
+        record.val = record.key * 2;
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 2;
+    bt2_stat.nrecords = (INSERT_SPLIT_ROOT_NREC_REC * 41);
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+    record.key = 1345;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Add some extra records to right-most leaf */
+    record.key = (INSERT_SPLIT_ROOT_NREC_REC * 41) + 4;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+    record.key = (INSERT_SPLIT_ROOT_NREC_REC * 41) + 5;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /* Add some extra records to middle leaf */
+    record.key = ((INSERT_SPLIT_ROOT_NREC_REC * 41) - (INSERT_SPLIT_ROOT_NREC_REC * 9)) + 2;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+    record.key = ((INSERT_SPLIT_ROOT_NREC_REC * 41) - (INSERT_SPLIT_ROOT_NREC_REC * 9)) + 3;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /* Add some extra records to left-most leaf */
+    record.key = 0;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+    record.key = 1;
+    record.val = record.key * 2;
+    if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+        FAIL_STACK_ERROR
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    idx.key = 0;
+    idx.val = 0;
+    if(H5B2_iterate(bt2, dxpl, iter_rec_cb, &idx) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the index is correct */
+    if(idx.key != ((INSERT_SPLIT_ROOT_NREC_REC * 41) + 6))
+        TEST_ERROR
+
+    /* Attempt to find non-existant record in level-2 B-tree */
+    /* (Should not be found, but not fail) */
+    find.key = INSERT_SPLIT_ROOT_NREC_REC * 42;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != FALSE)
+        TEST_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Attempt to find existant record in root of level-2 B-tree */
+    find.key = 1345;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != (1345 * 2))
+        TEST_ERROR
+
+    /* Check with B-tree */
+    record.key = 1345;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
+        TEST_ERROR
+
+    /* Attempt to find existant record in internal node of level-2 B-tree */
+    find.key = 513;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != (513 * 2))
+        TEST_ERROR
+
+    /* Check with B-tree */
+    record.key = 513;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
+        TEST_ERROR
+
+    /* Attempt to find existant record in leaf of level-2 B-tree */
+    find.key = 555;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+        FAIL_STACK_ERROR
+    if(find.val != (555 * 2))
+        TEST_ERROR
+
+    /* Check with B-tree */
+    record.key = 555;
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
+        TEST_ERROR
+
+    /* Attempt to index non-existant record in level-2 B-tree */
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)(INSERT_SPLIT_ROOT_NREC_REC * 42), index_rec_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL)
+        TEST_ERROR
+
+    /* Attempt to index existing record in level-2 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)1345, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 1345)
+        TEST_ERROR
+    if(find.val != (1345 * 2))
+        TEST_ERROR
+
+    /* Attempt to index existing record in internal node of level-2 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)513, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 513)
+        TEST_ERROR
+    if(find.val != (513 * 2))
+        TEST_ERROR
+
+    /* Attempt to index existing record in leaf of level-2 B-tree */
+    find.key = (hsize_t)-1;
+    find.val = (hsize_t)-1;
+    if(H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)555, index_rec_cb, &find) < 0)
+        FAIL_STACK_ERROR
+    if(find.key != 555)
+        TEST_ERROR
+    if(find.val != (555 * 2))
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if(bt2)
+            H5B2_close(bt2, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* test_update_make_level2() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_update_lots
+ *
+ * Purpose:	Basic tests for the B-tree v2 code.  This test inserts many
+ *              records in random order, enough to make at a level 4 B-tree.
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Sunday, December 27, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_update_lots(hid_t fapl, const H5B2_create_t *cparam,
+    const bt2_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
+    H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
+    haddr_t     bt2_addr;               /* Address of B-tree created */
+    time_t      curr_time;              /* Current time, for seeding random number generator */
+    H5B2_test_rec_t *records;           /* Record #'s for random insertion */
+    H5B2_test_rec_t record;             /* Record to insert into tree */
+    H5B2_test_rec_t modify;             /* Modified value */
+    H5B2_test_rec_t find;               /* Record to find */
+    H5B2_test_rec_t iter;               /* Index within B-tree, for iterator */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+    hsize_t     nrec;                   /* Number of records in B-tree */
+    unsigned    u;                      /* Local index variable */
+    herr_t      ret;                    /* Generic error return value */
+
+    /* Initialize random number seed */
+    curr_time = HDtime(NULL);
+#ifdef QAK
+curr_time = 1451342093;
+HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
+#endif /* QAK */
+    HDsrandom((unsigned)curr_time);
+
+    /*
+     * Test inserting many records into v2 B-tree
+     */
+    TESTING("B-tree update: create random level 4 B-tree");
+
+    /* Allocate space for the records */
+    if(NULL == (records = (H5B2_test_rec_t *)HDmalloc(sizeof(H5B2_test_rec_t) * INSERT_MANY_REC)))
+        TEST_ERROR
+
+    /* Initialize record #'s */
+    for(u = 0; u < INSERT_MANY_REC; u++) {
+        records[u].key = u;
+        records[u].val = u * 2;
+    } /* end for */
+
+    /* Shuffle record #'s */
+    for(u = 0; u < INSERT_MANY_REC; u++) {
+        H5B2_test_rec_t temp_rec;       /* Temporary record */
+        unsigned swap_idx;              /* Location to swap with when shuffling */
+
+        swap_idx = ((unsigned)HDrandom() % (INSERT_MANY_REC - u)) + u;
+        temp_rec = records[u];
+        records[u] = records[swap_idx];
+        records[swap_idx] = temp_rec;
+    } /* end for */
+
+    /* Create the file for the test */
+    if(create_file(&file, &f, fapl) < 0)
+        TEST_ERROR
+
+    /* Create the v2 B-tree & get its address */
+    if(create_btree(f, dxpl, cparam, &bt2, &bt2_addr) < 0)
+        TEST_ERROR
+
+    /* Insert random records */
+    for(u = 0; u < INSERT_MANY_REC; u++) {
+        record = records[u];
+        if(H5B2_update(bt2, dxpl, &record, no_modify_cb, NULL) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    bt2_stat.depth = 4;
+    bt2_stat.nrecords = INSERT_MANY_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        STACK_ERROR
+    file = -1;
+
+    /* Re-open the file for the test */
+    if(reopen_file(&file, &f, fapl) < 0)
+        TEST_ERROR
+
+    /* Re-open v2 B-tree */
+    if(NULL == (bt2 = H5B2_open(f, dxpl, bt2_addr, f)))
+        FAIL_STACK_ERROR
+
+    /* Check up on B-tree after re-open */
+    bt2_stat.depth = 4;
+    bt2_stat.nrecords = INSERT_MANY_REC;
+    if(check_stats(bt2, &bt2_stat) < 0)
+        TEST_ERROR
+
+    /* Iterate over B-tree to check records have been inserted correctly */
+    iter.key = 0;
+    iter.val = 0;
+    if(H5B2_iterate(bt2, dxpl, iter_rec_cb, &iter) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the index is correct */
+    if(iter.key != INSERT_MANY_REC)
+        TEST_ERROR
+
+    /* Attempt to find non-existant record in level-4 B-tree */
+    /* (Should not be found, but not fail) */
+    find.key = INSERT_MANY_REC * 2;
+    find.val = (hsize_t)-1;
+    if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != FALSE)
+        TEST_ERROR
+    if(find.val != (hsize_t)-1)
+        TEST_ERROR
+
+    /* Find random records */
+    for(u = 0; u < FIND_MANY_REC; u++) {
+        /* Pick random record */
+        find.key = (hsize_t)(HDrandom() % INSERT_MANY_REC);
+        find.val = (hsize_t)-1;
+
+        /* Attempt to find existant record in level-4 B-tree */
+        if(H5B2_find(bt2, dxpl, &find, find_rec_cb, &find) != TRUE)
+            FAIL_STACK_ERROR
+        if(find.val != (find.key * 2))
+            TEST_ERROR
+    } /* end for */
+
+    /* Attempt to index non-existant record in level-4 B-tree, in increasing & decreasing order */
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(bt2, dxpl, H5_ITER_INC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL)
+        TEST_ERROR
+    H5E_BEGIN_TRY {
+	ret = H5B2_index(bt2, dxpl, H5_ITER_DEC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL);
+    } H5E_END_TRY;
+    /* Should fail */
+    if(ret != FAIL)
+        TEST_ERROR
+
+    /* Find random records */
+    for(u = 0; u < FIND_MANY_REC; u++) {
+        hsize_t idx;    /* Record index */
+
+        /* Pick random record */
+        idx = (hsize_t)(HDrandom() % INSERT_MANY_REC);
+
+        /* Reset find record */
+        find.key = (hsize_t)-1;
+        find.val = (hsize_t)-1;
+
+        /* Attempt to find existant record in level-4 B-tree */
+        /* (in increasing order) */
+        if(H5B2_index(bt2, dxpl, H5_ITER_INC, idx, index_rec_cb, &find) < 0)
+            FAIL_STACK_ERROR
+        if(find.key != idx)
+            TEST_ERROR
+        if(find.val != (find.key * 2))
+            TEST_ERROR
+
+        /* Reset find record */
+        find.key = (hsize_t)-1;
+        find.val = (hsize_t)-1;
+
+        /* Attempt to find existant record in level-4 B-tree */
+        /* (in decreasing order) */
+        if(H5B2_index(bt2, dxpl, H5_ITER_DEC, idx, index_rec_cb, &find) < 0)
+            FAIL_STACK_ERROR
+        if(find.key != (INSERT_MANY_REC - (idx + 1)))
+            TEST_ERROR
+        if(find.val != (find.key * 2))
+            TEST_ERROR
+    } /* end for */
+
+    PASSED();
+
+    TESTING("B-tree update: update record in level 4 B-tree");
+
+    /* Check for closing & re-opening the B-tree */
+    if(reopen_btree(f, dxpl, &bt2, bt2_addr, tparam) < 0)
+        TEST_ERROR
+
+    record.key = INSERT_MANY_REC / 2;
+    modify.key = INSERT_MANY_REC / 2;
+    modify.val = record.key * 3;
+    if(H5B2_update(bt2, dxpl, &record, modify_rec_cb, &modify) < 0)
+        FAIL_STACK_ERROR
+
+    /* Query the number of records in the B-tree */
+    if(H5B2_get_nrec(bt2, &nrec) < 0)
+        FAIL_STACK_ERROR
+
+    /* Make certain that the # of records is correct */
+    if(nrec != INSERT_MANY_REC)
+        TEST_ERROR
+
+    /* Close the v2 B-tree */
+    if(H5B2_close(bt2, dxpl) < 0)
+        FAIL_STACK_ERROR
+    bt2 = NULL;
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    PASSED();
+
+    HDfree(records);
+
+    return 0;
+
+error:
+    HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
+    H5E_BEGIN_TRY {
+        if(bt2)
+            H5B2_close(bt2, dxpl);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    HDfree(records);
+
+    return 1;
+} /* test_update_lots() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_remove_basic
  *
  * Purpose:	Basic tests for the B-tree v2 code
@@ -2993,7 +5232,7 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -3301,7 +5540,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -3373,13 +5612,13 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check up on B-tree */
     record = 62;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 94;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = (INSERT_SPLIT_ROOT_NREC * 2) - 2;
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     rrecord = 0;
@@ -3392,10 +5631,10 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Make certain that the leaf nodes didn't redistribute */
     record = 62;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 94;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Query the number of records in the B-tree */
@@ -3417,7 +5656,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check up on B-tree */
     record = 0;
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     rrecord = 1;
@@ -3430,10 +5669,10 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Make certain that the leaf nodes didn't redistribute */
     record = 62;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 94;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Query the number of records in the B-tree */
@@ -3455,7 +5694,7 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check up on B-tree */
     record = INSERT_SPLIT_ROOT_NREC;
-    if(check_node_depth(bt2, dxpl, record, (unsigned)0) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)0) < 0)
         TEST_ERROR
 
     rrecord = 0;
@@ -3468,10 +5707,10 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Make certain that the leaf nodes didn't redistribute */
     record = 62;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 94;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Query the number of records in the B-tree */
@@ -3524,7 +5763,7 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -3553,10 +5792,10 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 94;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Query the number of records in the B-tree */
@@ -3601,10 +5840,10 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 90;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     PASSED();
@@ -3637,10 +5876,10 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 64;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 90;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     PASSED();
@@ -3673,10 +5912,10 @@ test_remove_level1_redistrib(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 64;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 91;      /* Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
 
     /* Close the v2 B-tree */
@@ -3721,7 +5960,7 @@ test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -3750,7 +5989,7 @@ test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 2;
@@ -3823,7 +6062,7 @@ test_remove_level1_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 2;
@@ -3900,7 +6139,7 @@ test_remove_level1_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -3929,7 +6168,7 @@ test_remove_level1_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 2;
@@ -4026,7 +6265,7 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -4055,13 +6294,13 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left-most record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 125;      /* Center-Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 188;      /* Center-Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 4;
@@ -4101,13 +6340,13 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left-most record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 125;      /* Center-Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 188;      /* Center-Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 4;
@@ -4147,13 +6386,13 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 63;      /* Left-most record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 125;      /* Center-Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 188;      /* Center-Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 4;
@@ -4189,13 +6428,13 @@ test_remove_level1_promote(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 63;      /* Left-most record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 126;      /* Center-Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     record = 188;      /* Center-Right record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 4;
@@ -4253,7 +6492,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -4282,7 +6521,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left-most record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 2;
@@ -4343,7 +6582,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left-most record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 2;
@@ -4401,7 +6640,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -4430,7 +6669,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left-most record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 2;
@@ -4491,7 +6730,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl, const H5B2_create_t *cpar
 
     /* Check record values in root of B-tree */
     record = 39;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 2;
@@ -4549,7 +6788,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -4578,7 +6817,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left-most record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 2;
@@ -4694,7 +6933,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -4723,7 +6962,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 62;      /* Left-most record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)1) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)1) < 0)
         TEST_ERROR
     ninfo.depth = 1;
     ninfo.nrec = 2;
@@ -4839,7 +7078,7 @@ test_remove_level1_collapse(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -4978,7 +7217,7 @@ test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5007,7 +7246,7 @@ test_remove_level2_promote(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     ninfo.depth = 2;
     ninfo.nrec = 2;
@@ -5264,7 +7503,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl, const H5B2_create_t *
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5293,7 +7532,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl, const H5B2_create_t *
 
     /* Check record values in root of B-tree */
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     ninfo.depth = 2;
     ninfo.nrec = 2;
@@ -5414,7 +7653,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl, const H5B2_create_t *
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5443,7 +7682,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl, const H5B2_create_t *
 
     /* Check record values in root of B-tree */
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     ninfo.depth = 2;
     ninfo.nrec = 2;
@@ -5564,7 +7803,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl, const H5B2_create_t *cpar
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5593,7 +7832,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl, const H5B2_create_t *cpar
 
     /* Check record values in root of B-tree */
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     ninfo.depth = 2;
     ninfo.nrec = 2;
@@ -5715,7 +7954,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl, const H5B2_create_t *cpar
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5744,7 +7983,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl, const H5B2_create_t *cpar
 
     /* Check record values in root of B-tree */
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     ninfo.depth = 2;
     ninfo.nrec = 2;
@@ -5866,7 +8105,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -5895,7 +8134,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     ninfo.depth = 2;
     ninfo.nrec = 2;
@@ -5992,7 +8231,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl, const H5B2_create_t *cparam
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6021,7 +8260,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl, const H5B2_create_t *cparam
 
     /* Check record values in root of B-tree */
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     ninfo.depth = 2;
     ninfo.nrec = 2;
@@ -6118,7 +8357,7 @@ test_remove_level2_3internal_merge(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6147,7 +8386,7 @@ test_remove_level2_3internal_merge(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     ninfo.depth = 2;
     ninfo.nrec = 2;
@@ -6244,7 +8483,7 @@ test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6274,7 +8513,7 @@ test_remove_level2_collapse_right(hid_t fapl, const H5B2_create_t *cparam,
 
     /* Check record values in root of B-tree */
     record = 1889;      /* Left record in root node */
-    if(check_node_depth(bt2, dxpl, record, (unsigned)2) < 0)
+    if(check_node_depth(bt2, dxpl, &record, (unsigned)2) < 0)
         TEST_ERROR
     ninfo.depth = 2;
     ninfo.nrec = 2;
@@ -6370,7 +8609,7 @@ gen_l4_btree2(const char *filename, hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     hsize_t     record;                 /* Record to insert into tree */
     unsigned    u;                      /* Local index variable */
@@ -6451,7 +8690,7 @@ test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cpara
     int         fd = -1;                /* File descriptor */
     h5_stat_t	sb;                     /* Stat buffer for file */
     void        *file_data = NULL;      /* Copy of file data */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -6899,7 +9138,7 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7123,7 +9362,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     H5F_t	*f = NULL;              /* Internal file object pointer */
     h5_stat_size_t       empty_size;             /* Size of an empty file */
     h5_stat_size_t       file_size;              /* Size of each file created */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7230,7 +9469,7 @@ test_delete(hid_t fapl, const H5B2_create_t *cparam)
     /*
      * Delete v2 B-tree
      */
-    if(H5B2_delete(f, H5P_DATASET_XFER_DEFAULT, bt2_addr, f, NULL, NULL) < 0)
+    if(H5B2_delete(f, H5AC_ind_read_dxpl_id, bt2_addr, f, NULL, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Close file */
@@ -7393,7 +9632,7 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam,
 {
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
     hsize_t     record;                 /* Record to insert into tree */
@@ -7627,7 +9866,7 @@ test_open_twice_diff(hid_t fapl, const H5B2_create_t *cparam)
     hid_t	file00 = -1;            /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5F_t	*f2 = NULL;             /* Internal file object pointer */
-    hid_t       dxpl = H5P_DATASET_XFER_DEFAULT;        /* DXPL to use */
+    hid_t       dxpl = H5AC_ind_read_dxpl_id;        /* DXPL to use */
     H5B2_t      *bt2 = NULL;            /* v2 B-tree wrapper */
     H5B2_t      *bt2_2 = NULL;          /* Second v2 B-tree wrapper */
     haddr_t     bt2_addr;               /* Address of B-tree created */
@@ -7758,7 +9997,7 @@ error:
 int
 main(void)
 {
-    H5B2_create_t cparam;               /* Creation parameters for v2 B-tree */
+    H5B2_create_t cparam, cparam2;      /* Creation parameters for v2 B-tree */
     bt2_test_param_t tparam;            /* Test parameters for v2 B-tree */
     hid_t	fapl = -1;              /* File access property list for data files */
     unsigned	nerrors = 0;            /* Cumulative error count */
@@ -7778,8 +10017,7 @@ main(void)
         printf("***Express test mode on.  Some tests may be skipped\n");
 
     /* Initialize v2 B-tree creation parameters */
-    init_cparam(&cparam);
-
+    init_cparam(&cparam, &cparam2);
 
     /* Loop over re-opening B-tree during tests */
     for(reopen = FALSE; reopen <= TRUE; reopen++) {
@@ -7793,7 +10031,7 @@ main(void)
         } /* end else */
 
         /* Test B-tree record insertion */
-        /* Iteration, find & index routines tested in these routines as well */
+        /* (Iteration, find & index routines exercised in these routines as well) */
         nerrors += test_insert_basic(fapl, &cparam, &tparam);
         nerrors += test_insert_split_root(fapl, &cparam, &tparam);
         nerrors += test_insert_level1_2leaf_redistrib(fapl, &cparam, &tparam);
@@ -7811,6 +10049,20 @@ main(void)
             printf("***Express test mode on.  test_insert_lots skipped\n");
         else
             nerrors += test_insert_lots(fapl, &cparam, &tparam);
+
+        /* Test B-tree record update (ie. insert/modify) */
+        /* (Iteration, find & index routines exercised in these routines as well) */
+        nerrors += test_update_basic(fapl, &cparam2, &tparam);
+        nerrors += test_update_split_root(fapl, &cparam2, &tparam);
+        nerrors += test_update_level1_2leaf_redistrib(fapl, &cparam2, &tparam);
+        nerrors += test_update_level1_side_split(fapl, &cparam2, &tparam);
+        nerrors += test_update_level1_3leaf_redistrib(fapl, &cparam2, &tparam);
+        nerrors += test_update_level1_middle_split(fapl, &cparam2, &tparam);
+        nerrors += test_update_make_level2(fapl, &cparam2, &tparam);
+        if(ExpressMode > 1)
+            printf("***Express test mode on.  test_update_lots skipped\n");
+        else
+            nerrors += test_update_lots(fapl, &cparam2, &tparam);
 
         /* Test B-tree record removal */
         /* Querying the number of records routine also tested in these routines as well */

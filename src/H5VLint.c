@@ -149,6 +149,7 @@ hid_t
 H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_ref)
 {
     H5VL_object_t *new_obj = NULL;
+    H5T_t *dt = NULL;
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -165,8 +166,6 @@ H5VL_register_id(H5I_type_t type, void *object, H5VL_t *vol_plugin, hbool_t app_
     new_obj->vol_obj = object;
 
     if(H5I_DATATYPE == type) {
-        H5T_t *dt = NULL;
-
         if(NULL == (dt = H5T_construct_datatype(new_obj)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't construct datatype object");
 

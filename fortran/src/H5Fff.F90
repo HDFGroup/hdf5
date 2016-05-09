@@ -485,10 +485,10 @@ CONTAINS
 
   END SUBROUTINE h5fget_access_plist_f
 
-!****s* H5F/h5fis_hdf5_f
+!****s* H5F/h5fis_accessible_f
 !
 ! NAME
-!  h5fis_hdf5_f
+!  h5fis_accessible_f
 !
 ! PURPOSE
 !  Determines whether a file is in the HDF5 format.
@@ -508,33 +508,42 @@ CONTAINS
 !  port).  February 28, 2001
 !
 ! SOURCE
-  SUBROUTINE h5fis_hdf5_f(name, status, hdferr)
+  SUBROUTINE h5fis_accessible_f(name, status, hdferr, access_prp)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
     LOGICAL, INTENT(OUT) :: status         ! Indicates if file
                                            ! is an HDF5 file
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+                                           ! File access property list
+                                           ! identifier
 !*****
+    INTEGER(HID_T) :: access_prp_default
     INTEGER :: namelen ! Length of the name character string
     INTEGER :: flag    ! "TRUE/FALSE" flag from C routine
                        ! to define status value.
 
     INTERFACE
-       INTEGER FUNCTION h5fis_hdf5_c(name, namelen, flag) BIND(C,NAME='h5fis_hdf5_c')
+       INTEGER FUNCTION h5fis_accessible_c(name, namelen, &
+           access_prp_default, flag) BIND(C,NAME='h5fis_accessible_c')
          IMPORT :: C_CHAR
+         IMPORT :: HID_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
          INTEGER :: namelen
          INTEGER :: flag
-       END FUNCTION h5fis_hdf5_c
+         INTEGER(HID_T), INTENT(IN) :: access_prp_default
+       END FUNCTION h5fis_accessible_c
     END INTERFACE
 
+    access_prp_default = H5P_DEFAULT_F
+    IF (PRESENT(access_prp))   access_prp_default   = access_prp
     namelen = LEN_TRIM(name)
-    hdferr = h5fis_hdf5_c(name, namelen, flag)
+    hdferr = h5fis_accessible_c(name, namelen, access_prp_default, flag)
     status = .TRUE.
     IF (flag .EQ. 0) status = .FALSE.
 
-  END SUBROUTINE h5fis_hdf5_f
+  END SUBROUTINE h5fis_accessible_f
 !****s* H5F/h5fclose_f
 !
 ! NAME

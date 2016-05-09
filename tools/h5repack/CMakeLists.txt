@@ -56,12 +56,7 @@ if (BUILD_TESTING)
   add_library (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED dynlib_rpk.c)
   TARGET_C_PROPERTIES (${HDF5_TOOL_PLUGIN_LIB_TARGET} SHARED " " " ")
   target_link_libraries (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-  H5_SET_LIB_OPTIONS (
-      ${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME}
-      SHARED
-      HDF5_TOOL_PLUGIN_LIB_NAME_RELEASE
-      HDF5_TOOL_PLUGIN_LIB_NAME_DEBUG
-  )
+  H5_SET_LIB_OPTIONS (${HDF5_TOOL_PLUGIN_LIB_TARGET} ${HDF5_TOOL_PLUGIN_LIB_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
 
   # make plugins dir
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/plugins")
@@ -72,13 +67,13 @@ if (BUILD_TESTING)
       TARGET     ${HDF5_TOOL_PLUGIN_LIB_TARGET}
       POST_BUILD
       COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different 
+      ARGS       -E copy_if_different
           "$<TARGET_FILE:${HDF5_TOOL_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/plugins/$<TARGET_FILE_NAME:${HDF5_TOOL_PLUGIN_LIB_TARGET}>"
   )
 
   include (CMakeTests.cmake)
-  
+
 endif (BUILD_TESTING)
 
 ##############################################################################

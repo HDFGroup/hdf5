@@ -158,7 +158,6 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
 /* Local Variables */
 /*******************/
 
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__cache_get_load_size()
@@ -1149,10 +1148,6 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
         else
             id = *chunk_image++;
 
-        /* Check for unknown message ID getting encoded in file */
-        if(id >= H5O_UNKNOWN_ID)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "'unknown' message ID encoded in file?!?")
-
         /* Message size */
         UINT16DECODE(chunk_image, mesg_size);
         HDassert(mesg_size == H5O_ALIGN_OH(oh, mesg_size));
@@ -1222,8 +1217,13 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 
             /* Point unknown messages at 'unknown' message class */
             /* (Usually from future versions of the library) */
-            if(id >= NELMTS(H5O_msg_class_g) || NULL == H5O_msg_class_g[id]) {
-                H5O_unknown_t *unknown;     /* Pointer to "unknown" message info */
+	    if(id >= H5O_UNKNOWN_ID ||
+#ifdef H5O_ENABLE_BOGUS
+	       id == H5O_BOGUS_VALID_ID ||
+#endif
+	       NULL == H5O_msg_class_g[id]) {
+
+		H5O_unknown_t *unknown;     /* Pointer to "unknown" message info */
 
                 /* Allocate "unknown" message info */
                 if(NULL == (unknown = H5FL_MALLOC(H5O_unknown_t)))

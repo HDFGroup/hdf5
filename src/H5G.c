@@ -292,6 +292,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
     H5VL_object_t *obj = NULL;          /* object token of loc_id */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t *plist;              /* Property list pointer */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t ret_value;                    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -315,12 +316,9 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
         if(TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group create property list")
 
-    /* Check the group access property list */
-    if(H5P_DEFAULT == gapl_id)
-        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&gapl_id, H5P_CLS_GACC, &dxpl_id, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* Get the plist structure */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
@@ -338,7 +336,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
 
     /* Create the group through the VOL */
     if(NULL == (grp = H5VL_group_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, name, 
-                                        gcpl_id, gapl_id, H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                        gcpl_id, gapl_id, dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
@@ -347,7 +345,7 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate2() */
@@ -394,6 +392,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     void *grp = NULL;                   /* group token from VOL plugin */
     H5VL_object_t *obj = NULL;          /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t ret_value;                    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -406,12 +405,9 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
         if(TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group create property list")
 
-    /* Check the group access property list */
-    if(H5P_DEFAULT == gapl_id)
-        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&gapl_id, H5P_CLS_GACC, &dxpl_id, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -422,7 +418,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 
     /* Create the group through the VOL */
     if(NULL == (grp = H5VL_group_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, NULL, 
-                                        gcpl_id, gapl_id, H5AC_dxpl_id, H5_REQUEST_NULL)))
+                                        gcpl_id, gapl_id, dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
 
     /* Get an atom for the group */
@@ -431,7 +427,7 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, obj->vol_info->vol_cls, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gcreate_anon() */
@@ -460,6 +456,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
     void *grp = NULL;                   /* group token from VOL plugin */
     H5VL_object_t *obj = NULL;          /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t ret_value;                    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -469,12 +466,9 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
 
-    /* Check the group access property list */
-    if(H5P_DEFAULT == gapl_id)
-        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not group access property list")
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&gapl_id, H5P_CLS_GACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -485,7 +479,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 
     /* Create the group through the VOL */
     if(NULL == (grp = H5VL_group_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                      name, gapl_id, H5AC_ind_dxpl_id, H5_REQUEST_NULL)))
+                                      name, gapl_id, dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Get an atom for the group */
@@ -494,7 +488,7 @@ H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 
 done:
     if (ret_value < 0 && grp)
-        if(H5VL_group_close (grp, obj->vol_info->vol_cls, H5AC_ind_dxpl_id, H5_REQUEST_NULL) < 0)
+        if(H5VL_group_close (grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
     FUNC_LEAVE_API(ret_value)
 } /* end H5Gopen2() */
@@ -530,7 +524,7 @@ H5Gget_create_plist(hid_t grp_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     if(H5VL_group_get(grp->vol_obj, grp->vol_info->vol_cls, H5VL_GROUP_GET_GCPL, 
-                      H5AC_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+                      H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group creation properties")
 
 done:
@@ -578,7 +572,7 @@ H5Gget_info(hid_t loc_id, H5G_info_t *grp_info)
 
     /* Get the group info through the VOL using the location token */
     if((ret_value = H5VL_group_get(obj->vol_obj, obj->vol_info->vol_cls, H5VL_GROUP_GET_INFO, 
-                                   H5AC_ind_dxpl_id, H5_REQUEST_NULL, loc_params, grp_info)) < 0)
+                                   H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, loc_params, grp_info)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -605,6 +599,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
 {
     H5VL_object_t       *obj;
     H5VL_loc_params_t loc_params;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -615,11 +610,10 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
     if(!grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = name;
@@ -632,7 +626,7 @@ H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *grp_info,
 
     /* Get the group info through the VOL using the location token */
     if((ret_value = H5VL_group_get(obj->vol_obj, obj->vol_info->vol_cls, H5VL_GROUP_GET_INFO, 
-                                   H5AC_ind_dxpl_id, H5_REQUEST_NULL, loc_params, grp_info)) < 0)
+                                   dxpl_id, H5_REQUEST_NULL, loc_params, grp_info)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -660,6 +654,7 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 {
     H5VL_object_t       *obj;
     H5VL_loc_params_t loc_params;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -675,11 +670,10 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!grp_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no info struct")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name = group_name;
@@ -694,9 +688,8 @@ H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Get the group info through the VOL using the location token */
-    if((ret_value = H5VL_group_get(obj->vol_obj, obj->vol_info->vol_cls, 
-                                   H5VL_GROUP_GET_INFO, H5AC_ind_dxpl_id, 
-                                   H5_REQUEST_NULL, loc_params, grp_info)) < 0)
+    if((ret_value = H5VL_group_get(obj->vol_obj, obj->vol_info->vol_cls, H5VL_GROUP_GET_INFO, 
+                                   dxpl_id, H5_REQUEST_NULL, loc_params, grp_info)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -765,7 +758,7 @@ H5G_close_group(void *_grp)
 
     /* Close the group through the VOL*/
     if((ret_value = H5VL_group_close(grp->vol_obj, grp->vol_info->vol_cls,
-                                     H5AC_dxpl_id, H5_REQUEST_NULL)) < 0)
+                                     H5AC_ind_read_dxpl_id, H5_REQUEST_NULL)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close group")
 
     /* free group */

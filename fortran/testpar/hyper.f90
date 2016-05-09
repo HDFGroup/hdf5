@@ -14,9 +14,9 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 
-!//////////////////////////////////////////////////////////
+!
 ! writes/reads dataset by hyperslabs
-!//////////////////////////////////////////////////////////
+!
 
 SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   USE HDF5
@@ -52,14 +52,15 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   CHARACTER(len=80) :: filename                     ! filename
   INTEGER        :: i
   INTEGER        :: actual_io_mode                  ! The type of I/O performed by this process
-
-  !//////////////////////////////////////////////////////////
+  LOGICAL        :: is_coll
+  LOGICAL        :: is_coll_true = .TRUE.
+  !
   ! initialize the array data between the processes (3)
   ! for the 12 size array we get
   ! p0 = 1,2,3,4
   ! p1 = 5,6,7,8
   ! p2 = 9,10,11,12
-  !//////////////////////////////////////////////////////////
+  !
 
   ALLOCATE(wbuf(0:length-1),stat=hdferror)
   IF (hdferror /= 0) THEN
@@ -81,17 +82,16 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
      wbuf(i) = i
   ENDDO
 
-  !//////////////////////////////////////////////////////////
+  !
   ! HDF5 I/O
-  !//////////////////////////////////////////////////////////
+  !
 
   dims(1)  = length
   cdims(1) = length/mpi_size     ! define chunks as the number of processes
 
-  !//////////////////////////////////////////////////////////
+  !
   ! setup file access property list with parallel I/O access
-  !//////////////////////////////////////////////////////////
-
+  !
   CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
   CALL check("h5pcreate_f", hdferror, nerrors)
 
@@ -106,14 +106,67 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
      nerrors = nerrors + 1
   ENDIF
 
-  !//////////////////////////////////////////////////////////
+  !
   ! create the file collectively
-  !//////////////////////////////////////////////////////////
-
+  !
   CALL h5_fixname_f("parf1", filename, fapl_id, hdferror)
 
-  CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, hdferror, access_prp = fapl_id)
-  CALL check("h5fcreate_f", hdferror, nerrors)
+  IF(do_collective)THEN
+     ! verify settings for file access properties
+
+     ! Collective metadata writes
+     CALL h5pget_coll_metadata_write_f(fapl_id, is_coll, hdferror)
+     CALL check("h5pget_coll_metadata_write_f", hdferror, nerrors)
+     IF(is_coll .NEQV. .FALSE.)THEN
+        PRINT*, "Incorrect property setting for coll metadata writes"
+        nerrors = nerrors + 1
+     ENDIF
+
+     ! Collective metadata read API calling requirement
+     CALL h5pget_all_coll_metadata_ops_f(fapl_id, is_coll, hdferror)
+     CALL check("h5pget_all_coll_metadata_ops_f", hdferror, nerrors)
+     IF(is_coll .NEQV. .FALSE.)THEN
+        PRINT*, "Incorrect property setting for coll metadata API calls requirement"
+        nerrors = nerrors + 1
+     ENDIF
+
+     ! Collective metadata writes
+     CALL h5pset_coll_metadata_write_f(fapl_id, .TRUE., hdferror)
+     CALL check("h5pset_coll_metadata_write_f", hdferror, nerrors)
+     ! Collective metadata READ API calling requirement
+     CALL h5pset_all_coll_metadata_ops_f(fapl_id, is_coll_true, hdferror)
+     CALL check("h5pset_all_coll_metadata_ops_f", hdferror, nerrors)
+   
+     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, hdferror, access_prp = fapl_id)
+     CALL check("h5fcreate_f", hdferror, nerrors)
+
+     ! close fapl and retrieve it from file
+     CALL h5pclose_f(fapl_id, hdferror)
+     CALL check("h5pclose_f", hdferror, nerrors)
+     CALL h5fget_access_plist_f(file_id, fapl_id, hdferror)
+     CALL check("h5fget_access_plist_f", hdferror, nerrors)
+    
+     ! verify settings for file access properties
+
+     ! Collective metadata writes
+     CALL h5pget_coll_metadata_write_f(fapl_id, is_coll, hdferror)
+     CALL check("h5pget_coll_metadata_write_f", hdferror, nerrors)
+     IF(is_coll .NEQV. .TRUE.)THEN
+        PRINT*, "Incorrect property setting for coll metadata writes"
+        nerrors = nerrors + 1
+     ENDIF
+
+     ! Collective metadata read API calling requirement
+     CALL h5pget_all_coll_metadata_ops_f(fapl_id, is_coll, hdferror)
+     CALL check("h5pget_all_coll_metadata_ops_f", hdferror, nerrors)
+     IF(is_coll .NEQV. .TRUE.)THEN
+        PRINT*, "Incorrect property setting for coll metadata API calls requirement"
+        nerrors = nerrors + 1
+     ENDIF
+  ELSE
+     CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, hdferror, access_prp = fapl_id)
+     CALL check("h5fcreate_f", hdferror, nerrors)
+  ENDIF
 
   CALL h5screate_simple_f(1, dims, fspace_id, hdferror)
   CALL check("h5screate_simple_f", hdferror, nerrors)
@@ -121,9 +174,9 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   CALL h5screate_simple_f(1, dims, mspace_id, hdferror)
   CALL check("h5screate_simple_f", hdferror, nerrors)
 
-  !//////////////////////////////////////////////////////////
+  !
   ! modify dataset creation properties to enable chunking
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl_id, hdferror)
   CALL check("h5pcreate_f", hdferror, nerrors)
@@ -133,38 +186,38 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
      CALL check("h5pset_chunk_f", hdferror, nerrors)
   ENDIF
 
-  !//////////////////////////////////////////////////////////
+  !
   ! create the dataset
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5dcreate_f(file_id, "dset", H5T_NATIVE_INTEGER, fspace_id, dset_id, hdferror, dcpl_id)
   CALL check("h5dcreate_f", hdferror, nerrors)
 
-  !//////////////////////////////////////////////////////////
+  !
   ! define hyperslab
-  !//////////////////////////////////////////////////////////
+  !
 
   counti(1) = icount
   start(1)  = istart
 
-  !//////////////////////////////////////////////////////////
+  !
   ! select hyperslab in memory
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5sselect_hyperslab_f(mspace_id, H5S_SELECT_SET_F, start, counti, hdferror)
   CALL check("h5sselect_hyperslab_f", hdferror, nerrors)
 
-  !//////////////////////////////////////////////////////////
+  !
   ! select hyperslab in the file
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5sselect_hyperslab_f(fspace_id, H5S_SELECT_SET_F, start, counti, hdferror)
   CALL check("h5sselect_hyperslab_f", hdferror, nerrors)
 
 
-  !//////////////////////////////////////////////////////////
+  !
   ! create a property list for collective dataset write
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5pcreate_f(H5P_DATASET_XFER_F, dxpl_id, hdferror)
   CALL check("h5pcreate_f", hdferror, nerrors)
@@ -174,9 +227,9 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
      CALL check("h5pset_dxpl_mpio_f", hdferror, nerrors)
   ENDIF
 
-  !//////////////////////////////////////////////////////////
+  !
   ! write dataset
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5dwrite_f(dset_id,H5T_NATIVE_INTEGER,wbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
   CALL check("h5dwrite_f", hdferror, nerrors)
@@ -200,9 +253,9 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
      ENDIF
   ENDIF
 
-  !//////////////////////////////////////////////////////////
+  !
   ! close HDF5 I/O
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5pclose_f(fapl_id, hdferror)
   CALL check("h5pclose_f", hdferror, nerrors)
@@ -225,9 +278,9 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   CALL h5fclose_f(file_id, hdferror)
   CALL check("h5fclose_f", hdferror, nerrors)
 
-  !//////////////////////////////////////////////////////////
+  !
   ! reopen file with read access
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
   CALL check("h5pcreate_f", hdferror, nerrors)
@@ -247,23 +300,23 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   CALL h5dopen_f(file_id, "dset", dset_id, hdferror)
   CALL check("h5pcreate_f", hdferror, nerrors)
 
-  !//////////////////////////////////////////////////////////
+  !
   ! select hyperslab in memory
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5sselect_hyperslab_f(mspace_id, H5S_SELECT_SET_F, start, counti, hdferror)
   CALL check("h5pcreate_f", hdferror, nerrors)
 
-  !//////////////////////////////////////////////////////////
+  !
   ! select hyperslab in the file
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5sselect_hyperslab_f(fspace_id, H5S_SELECT_SET_F, start, counti, hdferror)
   CALL check("h5pcreate_f", hdferror, nerrors)
 
-  !//////////////////////////////////////////////////////////
+  !
   ! create a property list for collective dataset read
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5pcreate_f(H5P_DATASET_XFER_F, dxpl_id, hdferror)
   CALL check("h5pcreate_f", hdferror, nerrors)
@@ -273,16 +326,16 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
      CALL check("h5pcreate_f", hdferror, nerrors)
   ENDIF
 
-  !//////////////////////////////////////////////////////////
+  !
   ! read dataset
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5dread_f(dset_id,H5T_NATIVE_INTEGER,rbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
   CALL check("h5pcreate_f", hdferror, nerrors)
 
-  !//////////////////////////////////////////////////////////
+  !
   ! close HDF5 I/O
-  !//////////////////////////////////////////////////////////
+  !
 
   CALL h5pclose_f(fapl_id, hdferror)
   CALL check("h5pcreate_f", hdferror, nerrors)
@@ -302,9 +355,9 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   CALL h5fclose_f(file_id, hdferror)
   CALL check("h5pcreate_f", hdferror, nerrors)
 
-  !//////////////////////////////////////////////////////////
+  !
   ! compare read and write data. each process compares a subset of the array
-  !//////////////////////////////////////////////////////////
+  !
 
   DO i = istart, iend-1
      IF( wbuf(i) /= rbuf(i)) THEN

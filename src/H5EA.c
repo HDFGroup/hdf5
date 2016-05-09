@@ -88,6 +88,8 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  * client class..
  */
 const H5EA_class_t *const H5EA_client_class_g[] = {
+    H5EA_CLS_CHUNK,		/* 0 - H5EA_CLS_CHUNK_ID 		*/
+    H5EA_CLS_FILT_CHUNK,	/* 1 - H5EA_CLS_FILT_CHUNK_ID 		*/
     H5EA_CLS_TEST,		/* ? - H5EA_CLS_TEST_ID			*/
 };
 
@@ -104,6 +106,8 @@ const H5EA_class_t *const H5EA_client_class_g[] = {
 /* Declare a free list to manage the H5EA_t struct */
 H5FL_DEFINE_STATIC(H5EA_t);
 
+/* Declare a PQ free list to manage the element */
+H5FL_BLK_DEFINE(ea_native_elmt);
 
 
 /*-------------------------------------------------------------------------
@@ -877,116 +881,6 @@ END_FUNC(PRIV)  /* end H5EA_undepend() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_support
- *
- * Purpose:	Create a child flush dependency on the array metadata that
- *              contains the element for an array index.
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		May 21 2009
- *
- *-------------------------------------------------------------------------
- */
-BEGIN_FUNC(PRIV, ERR,
-herr_t, SUCCEED, FAIL,
-H5EA_support(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, H5AC_info_t *child_entry))
-
-    /* Local variables */
-    void *thing = NULL;                 /* Pointer to the array metadata containing the array index we are interested in */
-    uint8_t *thing_elmt_buf;            /* Pointer to the element buffer for the array metadata */
-    hsize_t thing_elmt_idx;             /* Index of the element in the element buffer for the array metadata */
-    H5EA__unprotect_func_t thing_unprot_func;   /* Function pointer for unprotecting the array metadata */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
-#endif /* QAK */
-
-    /*
-     * Check arguments.
-     */
-    HDassert(ea);
-
-    /* Look up the array metadata containing the element we want to set */
-    if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC__NO_FLAGS_SET, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
-
-    /* Sanity check */
-    HDassert(thing);
-    HDassert(thing_elmt_buf);
-    HDassert(thing_unprot_func);
-
-    /* Set up flush dependency between child_entry and metadata array 'thing' */
-    if(H5EA__create_flush_depend((H5AC_info_t *)thing, child_entry) < 0)
-        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on array metadata")
-
-CATCH
-    /* Release resources */
-    if(thing && (thing_unprot_func)(thing, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
-        H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array metadata")
-
-END_FUNC(PRIV)  /* end H5EA_support() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5EA_unsupport
- *
- * Purpose:	Remove a flush dependency on the array metadata that contains
- *              the element for an array index.
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		May 21 2009
- *
- *-------------------------------------------------------------------------
- */
-BEGIN_FUNC(PRIV, ERR,
-herr_t, SUCCEED, FAIL,
-H5EA_unsupport(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, H5AC_info_t *child_entry))
-
-    /* Local variables */
-    void *thing = NULL;                 /* Pointer to the array metadata containing the array index we are interested in */
-    uint8_t *thing_elmt_buf;            /* Pointer to the element buffer for the array metadata */
-    hsize_t thing_elmt_idx;             /* Index of the element in the element buffer for the array metadata */
-    H5EA__unprotect_func_t thing_unprot_func;   /* Function pointer for unprotecting the array metadata */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
-#endif /* QAK */
-
-    /*
-     * Check arguments.
-     */
-    HDassert(ea);
-
-    /* Look up the array metadata containing the element we want to set */
-    if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC__READ_ONLY_FLAG, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
-
-    /* Sanity check */
-    HDassert(thing);
-    HDassert(thing_elmt_buf);
-    HDassert(thing_unprot_func);
-
-    /* Remove flush dependency between child_entry and metadata array 'thing' */
-    if(H5EA__destroy_flush_depend((H5AC_info_t *)thing, child_entry) < 0)
-        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency on array metadata")
-
-CATCH
-    /* Release resources */
-    if(thing && (thing_unprot_func)(thing, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
-        H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array metadata")
-
-END_FUNC(PRIV)  /* end H5EA_unsupport() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5EA_close
  *
  * Purpose:	Close an extensible array
@@ -1141,4 +1035,88 @@ CATCH
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
 
 END_FUNC(PRIV)  /* end H5EA_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5EA_iterate
+ *
+ * Purpose:	Iterate over the elements of an extensible array
+ *		(copied and modified from FA_iterate() in H5FA.c)
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Vailin Choi; Feb 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA_iterate(H5EA_t *ea, hid_t dxpl_id, H5EA_operator_t op, void *udata))
+
+    /* Local variables */
+    uint8_t     *elmt = NULL;
+    hsize_t     u;
+
+    /*
+     * Check arguments.
+     */
+    HDassert(ea);
+    HDassert(op);
+    HDassert(udata);
+
+    /* Allocate space for a native array element */
+    if(NULL == (elmt = H5FL_BLK_MALLOC(ea_native_elmt, ea->hdr->cparam.cls->nat_elmt_size)))
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array element")
+
+    /* Iterate over all elements in array */
+    for(u = 0; u < ea->hdr->stats.stored.max_idx_set; u++) {
+        int cb_ret;     /* Return value from callback */
+
+        /* Get array element */
+        if(H5EA_get(ea, dxpl_id, u, elmt) < 0)
+            H5E_THROW(H5E_CANTGET, "unable to delete fixed array")
+
+        /* Make callback */
+        if((cb_ret = (*op)(u, elmt, udata)) < 0) {
+            H5E_PRINTF(H5E_BADITER, "iterator function failed");
+            H5_LEAVE(cb_ret)
+        } /* end if */
+    } /* end for */
+
+CATCH
+
+    if(elmt)
+        elmt = H5FL_BLK_FREE(ea_native_elmt, elmt);
+
+END_FUNC(PRIV)  /* end H5EA_iterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5EA_patch_file
+ *
+ * Purpose:     Patch the top-level file pointer contained in ea
+ *              to point to idx_info->f if they are different.
+ *              This is possible because the file pointer in ea can be
+ *              closed out if ea remains open.
+ *
+ * Return:      SUCCEED
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, NOERR,
+herr_t, SUCCEED, -,
+H5EA_patch_file(H5EA_t *ea, H5F_t *f))
+
+    /* Local variables */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(ea);
+    HDassert(f);
+
+    if(ea->f != f || ea->hdr->f != f)
+        ea->f = ea->hdr->f = f;
+
+END_FUNC(PRIV)  /* end H5EA_patch_file() */
 

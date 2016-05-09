@@ -110,7 +110,7 @@ MODULE H5LT_CONST
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the
                                                                      ! the buffer:
                                                                      ! R=Real, D=DOUBLE, I=Interger
-       INTEGER(size_t) :: SizeOf_buf                                 ! Sizeof the buf datatype
+       INTEGER(size_t), INTENT(in) :: SizeOf_buf                     ! Sizeof the buf data type
      END FUNCTION h5ltget_attribute_c
   END INTERFACE
 
@@ -1059,14 +1059,16 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
     TYPE(C_PTR) :: buf                                 ! data buffer
-    CHARACTER(LEN=*), INTENT(in) :: buf_type           !
+    CHARACTER(LEN=*), INTENT(in) :: buf_type           ! valid data types are:
+                                                       !   CHARACTER, INTEGER or REAL
+                                                       !   NOTE: only the first character matters and is case insensitive 
     INTEGER(size_t),  INTENT(in) :: size               ! size of attribute array
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
-    INTEGER(size_t) :: attrlen                                 ! name length 
+    INTEGER(size_t),  INTENT(in) :: SizeOf_buf_type    ! size of buf's data type 
+    INTEGER, INTENT(out) :: errcode                    ! error code
 
-    CHARACTER(KIND=C_CHAR) :: buf_type_uppercase  
-    INTEGER(size_t) :: SizeOf_buf_type
+    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(size_t) :: attrlen                         ! name length 
+    CHARACTER(KIND=C_CHAR) :: buf_type_uppercase 
 
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
@@ -1316,13 +1318,15 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
     CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    INTEGER, INTENT(out) :: errcode                    ! error code
-    CHARACTER(LEN=*), INTENT(in) :: buf_type
-    TYPE(C_PTR) :: buf! data buffer
+    TYPE(C_PTR) :: buf                                 ! data buffer
+    CHARACTER(LEN=*), INTENT(in) :: buf_type           ! valid data types are:
+                                                       ! CHARACTER, INTEGER or REAL
+                                                       ! NOTE: only the first character matters and is case insensitive
+    INTEGER(size_t), INTENT(in) :: SizeOf_buf_type     ! size of buf's data type
+    INTEGER, INTENT(out) :: errcode                    ! error code 
     INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length
+    INTEGER(size_t) :: attrlen                         ! attr length
     CHARACTER(KIND=C_CHAR) :: buf_type_uppercase
-    INTEGER(size_t) :: SizeOf_buf_type
 
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)

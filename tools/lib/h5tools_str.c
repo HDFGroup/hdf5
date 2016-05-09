@@ -267,6 +267,9 @@ h5tools_str_fmt(h5tools_str_t *str/*in,out*/, size_t start, const char *fmt)
 {
     char _temp[1024], *temp = _temp;
 
+    HDassert(str);
+    HDassert(fmt);
+
     /* If the format string is simply "%s" then don't bother doing anything */
     if (!HDstrcmp(fmt, "%s"))
         return str->s;

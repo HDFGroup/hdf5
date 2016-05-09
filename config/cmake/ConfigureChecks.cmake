@@ -3,16 +3,10 @@
 #-----------------------------------------------------------------------------
 set (HDF_PREFIX "H5")
 include (${HDF_RESOURCES_EXT_DIR}/ConfigureChecks.cmake)
-include (${CMAKE_ROOT}/Modules/TestForSTDNamespace.cmake)
 
-#-----------------------------------------------------------------------------
-# Option to Clear File Buffers before write --enable-clear-file-buffers
-#-----------------------------------------------------------------------------
-option (HDF5_Enable_Clear_File_Buffers "Securely clear file buffers before writing to file" ON)
-if (HDF5_Enable_Clear_File_Buffers)
-  set (H5_CLEAR_MEMORY 1)
-endif (HDF5_Enable_Clear_File_Buffers)
-MARK_AS_ADVANCED (HDF5_Enable_Clear_File_Buffers)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  set (H5_USING_MEMCHECKER 1)
+endif (HDF5_ENABLE_USING_MEMCHECKER)
 
 #-----------------------------------------------------------------------------
 # Option for --enable-strict-format-checks

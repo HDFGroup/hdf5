@@ -465,7 +465,7 @@ H5T_vlen_seq_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, co
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data")
           } /* end if */
         else {  /* Default to system malloc */
-            if(NULL==(vl.p=H5MM_malloc(len)))
+            if(NULL == (vl.p = HDmalloc(len)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data")
           } /* end else */
 
@@ -691,7 +691,7 @@ H5T_vlen_str_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, co
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data")
       } /* end if */
     else {  /* Default to system malloc */
-        if(NULL==(t = (char *)H5MM_malloc((seq_len+1)*base_size)))
+        if(NULL == (t = (char *)HDmalloc((seq_len + 1) * base_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for VL data")
       } /* end else */
 
@@ -1073,14 +1073,14 @@ H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, voi
                     if(free_func != NULL)
                         (*free_func)(vl->p, free_info);
                     else
-                        H5MM_xfree(vl->p);
+                        HDfree(vl->p);
                 } /* end if */
             } else if(dt->shared->u.vlen.type == H5T_VLEN_STRING) {
                 /* Free the VL string */
                 if(free_func != NULL)
                     (*free_func)(*(char **)elem, free_info);
                 else
-                    H5MM_xfree(*(char **)elem);
+                    HDfree(*(char **)elem);
             } else {
                 HDassert(0 && "Invalid VL type");
             } /* end else */

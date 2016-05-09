@@ -161,7 +161,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
      *  name, but it's going to be hard to unwind all the special cases on
      *  failure, so just check first, for now - QAK)
      */
-    if((exists = H5O_attr_exists(loc->oloc, name, H5AC_ind_dxpl_id)) < 0)
+    if((exists = H5O_attr_exists(loc->oloc, name, dxpl_id)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "error checking attributes")
     else if(exists > 0)
         HGOTO_ERROR(H5E_ATTR, H5E_ALREADYEXISTS, NULL, "attribute already exists")
@@ -207,7 +207,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
 
     /* Set the latest format for datatype, if requested */
-    if(H5F_USE_LATEST_FORMAT(loc->oloc->file))
+    if(H5F_USE_LATEST_FLAGS(loc->oloc->file, H5F_LATEST_DATATYPE))
         if(H5T_set_latest_version(attr->shared->dt) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of datatype")
 
@@ -215,7 +215,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     attr->shared->ds = H5S_copy(space, FALSE, TRUE);
 
     /* Set the latest format for dataspace, if requested */
-    if(H5F_USE_LATEST_FORMAT(loc->oloc->file))
+    if(H5F_USE_LATEST_FLAGS(loc->oloc->file, H5F_LATEST_DATASPACE))
         if(H5S_set_latest_version(attr->shared->ds) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of dataspace")
 
@@ -796,7 +796,7 @@ H5A_get_type(H5A_t *attr)
 
     /* Patch the datatype's "top level" file pointer */
     if(H5T_patch_file(attr->shared->dt, attr->oloc.file) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to patch datatype's file pointer")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to patch datatype's file pointer")
 
     /*
      * Copy the attribute's datatype.  If the type is a named type then
@@ -1870,7 +1870,7 @@ herr_t
 H5A_set_version(const H5F_t *f, H5A_t *attr)
 {
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
-    hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
+    hbool_t use_latest_format;          /* Flag indicating the latest attribute version support is enabled */
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1879,8 +1879,8 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
     HDassert(f);
     HDassert(attr);
 
-    /* Get the file's 'use the latest version of the format' flag */
-    use_latest_format = H5F_USE_LATEST_FORMAT(f);
+    /* Get the file's 'use the latest attribute version support' flag */
+    use_latest_format = H5F_USE_LATEST_FLAGS(f, H5F_LATEST_ATTRIBUTE);
 
     /* Check whether datatype and dataspace are shared */
     if(H5O_msg_is_shared(H5O_DTYPE_ID, attr->shared->dt) > 0)
@@ -2122,7 +2122,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
 
             HDmemcpy(attr_dst->shared->data, buf, attr_dst->shared->data_size);
 
-            if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
+            if(H5D_vlen_reclaim(tid_mem, buf_space, dxpl_id, reclaim_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "unable to reclaim variable-length data")
         }  /* end if */
         else {
@@ -2371,8 +2371,7 @@ H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainfo
     attr_op.op_type = H5A_ATTR_OP_LIB;
     attr_op.u.lib_op = H5A__dense_post_copy_file_cb;
 
-
-     if(H5A_dense_iterate(src_oloc->file, dxpl_id, (hid_t)0, ainfo_src, H5_INDEX_NAME,
+    if(H5A_dense_iterate(src_oloc->file, dxpl_id, (hid_t)0, ainfo_src, H5_INDEX_NAME,
             H5_ITER_NATIVE, (hsize_t)0, NULL, &attr_op, &udata) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
@@ -2414,7 +2413,7 @@ H5A_rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_nam
         H5G_loc_reset(&obj_loc);
 
         /* Find the object's location */
-        if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, H5AC_ind_dxpl_id) < 0)
+        if(H5G_loc_find(&loc, obj_name, &obj_loc/*out*/, lapl_id, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
         loc_found = TRUE;
 
@@ -2446,7 +2445,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t H5A_iterate(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type, 
-                   H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data)
+                   H5_iter_order_t order, hsize_t *idx, H5A_operator2_t op, void *op_data, hid_t dxpl_id)
 {
     H5G_loc_t	loc;	        /* Object location */
     H5G_loc_t   obj_loc;        /* Location used to open group */
@@ -2475,25 +2474,22 @@ herr_t H5A_iterate(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type,
     last_attr = start_idx = (idx ? *idx : 0);
 
     /* Iterate over the attributess */
-    if(loc_params.type == H5VL_OBJECT_BY_SELF) {
-        if((obj_loc_id = H5VL_native_register(loc_params.obj_type, obj, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register object")
-    }
-    else if(loc_params.type == H5VL_OBJECT_BY_NAME) { 
+    if(loc_params.type == H5VL_OBJECT_BY_SELF || loc_params.type == H5VL_OBJECT_BY_NAME) {
+        hid_t lapl_id = (loc_params.type == H5VL_OBJECT_BY_SELF ? H5P_LINK_ACCESS_DEFAULT : loc_params.loc_data.loc_by_name.lapl_id);
+
         /* Set up opened group location to fill in */
         obj_loc.oloc = &obj_oloc;
         obj_loc.path = &obj_path;
         H5G_loc_reset(&obj_loc);
 
         /* Find the object's location */
-        if(H5G_loc_find(&loc, loc_params.loc_data.loc_by_name.name, &obj_loc/*out*/, 
-                        loc_params.loc_data.loc_by_name.lapl_id, H5AC_ind_dxpl_id) < 0)
+        if(H5G_loc_find(&loc, (loc_params.type == H5VL_OBJECT_BY_SELF ? "." : loc_params.loc_data.loc_by_name.name), 
+                        &obj_loc, lapl_id, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found");
         loc_found = TRUE;
 
         /* Open the object */
-        if((obj_loc_id = H5O_open_by_loc(&obj_loc, loc_params.loc_data.loc_by_name.lapl_id, 
-                                         H5AC_ind_dxpl_id, TRUE)) < 0)
+        if((obj_loc_id = H5O_open_by_loc(&obj_loc, lapl_id, dxpl_id, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object");
 
         /* get the native object from the ID created by the object header and create 
@@ -2510,7 +2506,7 @@ herr_t H5A_iterate(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type,
     }
 
     /* Do the real iteration */
-    if((ret_value = H5O_attr_iterate(obj_loc_id, H5AC_ind_dxpl_id, idx_type, order, 
+    if((ret_value = H5O_attr_iterate(obj_loc_id, dxpl_id, idx_type, order, 
                                      start_idx, &last_attr, &attr_op, op_data)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error iterating over attributes");
 
@@ -2520,13 +2516,7 @@ herr_t H5A_iterate(void *obj, H5VL_loc_params_t loc_params, H5_index_t idx_type,
 
 done:
     /* Release resources */
-    if(loc_params.type == H5VL_OBJECT_BY_SELF) {
-        if(H5VL_native_unregister(obj_loc_id) < 0)
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to decrement vol plugin ref count")
-        if(obj_loc_id >= 0 && NULL == H5I_remove(obj_loc_id))
-            HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to free identifier");
-    }
-    else if(loc_params.type == H5VL_OBJECT_BY_NAME) {
+    if(loc_params.type == H5VL_OBJECT_BY_SELF || loc_params.type == H5VL_OBJECT_BY_NAME) {
         if(obj_loc_id >= 0) {
             if(H5I_dec_app_ref(obj_loc_id) < 0)
                 HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "unable to close temporary object");
@@ -2556,7 +2546,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t 
-H5A_delete(void *obj, H5VL_loc_params_t loc_params, const char *attr_name)
+H5A_delete(void *obj, H5VL_loc_params_t loc_params, const char *attr_name, hid_t dxpl_id)
 {
     H5G_loc_t   loc;                    /* Object location */
     H5G_loc_t   obj_loc;                /* Location used to open group */
@@ -2573,7 +2563,7 @@ H5A_delete(void *obj, H5VL_loc_params_t loc_params, const char *attr_name)
 
     if(H5VL_OBJECT_BY_SELF == loc_params.type) { /* H5Adelete */
         /* Delete the attribute from the location */
-        if(H5O_attr_remove(loc.oloc, attr_name, H5AC_dxpl_id) < 0)
+        if(H5O_attr_remove(loc.oloc, attr_name, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
     }
     else if(H5VL_OBJECT_BY_NAME == loc_params.type) { /* H5Adelete_by_name */
@@ -2584,12 +2574,12 @@ H5A_delete(void *obj, H5VL_loc_params_t loc_params, const char *attr_name)
 
         /* Find the object's location */
         if(H5G_loc_find(&loc, loc_params.loc_data.loc_by_name.name, &obj_loc/*out*/, 
-                        loc_params.loc_data.loc_by_name.lapl_id, H5AC_ind_dxpl_id) < 0)
+                        loc_params.loc_data.loc_by_name.lapl_id, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
         loc_found = TRUE;
 
         /* Delete the attribute from the location */
-        if(H5O_attr_remove(obj_loc.oloc, attr_name, H5AC_dxpl_id) < 0)
+        if(H5O_attr_remove(obj_loc.oloc, attr_name, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
     }
     else if(H5VL_OBJECT_BY_IDX == loc_params.type) { /* H5Adelete_by_idx */
@@ -2600,14 +2590,14 @@ H5A_delete(void *obj, H5VL_loc_params_t loc_params, const char *attr_name)
 
         /* Find the object's location */
         if(H5G_loc_find(&loc, loc_params.loc_data.loc_by_idx.name, &obj_loc/*out*/, 
-                        loc_params.loc_data.loc_by_idx.lapl_id, H5AC_ind_dxpl_id) < 0)
+                        loc_params.loc_data.loc_by_idx.lapl_id, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "object not found")
         loc_found = TRUE;
 
         /* Delete the attribute from the location */
         if(H5O_attr_remove_by_idx(obj_loc.oloc, loc_params.loc_data.loc_by_idx.idx_type, 
                                   loc_params.loc_data.loc_by_idx.order, 
-                                  loc_params.loc_data.loc_by_idx.n, H5AC_dxpl_id) < 0)
+                                  loc_params.loc_data.loc_by_idx.n, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")
     }
     else {

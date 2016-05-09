@@ -41,8 +41,8 @@
 /**************************/
 
 /* Cache configuration settings */
-#define H5C__MAX_NUM_TYPE_IDS	28
-#define H5C__PREFIX_LEN		32
+#define H5C__MAX_NUM_TYPE_IDS   28
+#define H5C__PREFIX_LEN         32
 
 /* This sanity checking constant was picked out of the air.  Increase
  * or decrease it if appropriate.  Its purposes is to detect corrupt
@@ -1383,13 +1383,10 @@ typedef int H5C_ring_t;
  *		flushed from the cache until all other entries without
  *              the flush_me_last flag set have been flushed.
  *
- * flush_me_collectively:  Boolean flag indicating that this entry needs
- *              to be flushed collectively when in a parallel situation.
- * 
  *		Note: 
  *		
- *		At this time, the flush_me_last and flush_me_collectively
- *              flags will only be applied to one entry, the superblock,
+ *		At this time, the flush_me_last 
+ *              flag will only be applied to one entry, the superblock,
  *              and the code utilizing these flags is protected with HDasserts
  *              to enforce this. This restraint can certainly be relaxed in
  *              the future if the the need for multiple entries getting flushed
@@ -1609,9 +1606,9 @@ typedef struct H5C_cache_entry_t {
     hbool_t			flush_marker;
     hbool_t                     flush_me_last;
 #ifdef H5_HAVE_PARALLEL
-    hbool_t                     flush_me_collectively;
     hbool_t			clear_on_unprotect;
     hbool_t			flush_immediately;
+    hbool_t			coll_access;
 #endif /* H5_HAVE_PARALLEL */
     hbool_t			flush_in_progress;
     hbool_t			destroy_in_progress;
@@ -1635,6 +1632,10 @@ typedef struct H5C_cache_entry_t {
     struct H5C_cache_entry_t  *	prev;
     struct H5C_cache_entry_t  *	aux_next;
     struct H5C_cache_entry_t  *	aux_prev;
+#ifdef H5_HAVE_PARALLEL
+    struct H5C_cache_entry_t  *	coll_next;
+    struct H5C_cache_entry_t  *	coll_prev;
+#endif /* H5_HAVE_PARALLEL */
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     /* cache entry stats fields */
@@ -2000,6 +2001,7 @@ H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,
     int mpi_rank, int mpi_size);
 H5_DLL herr_t H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_clear_coll_entries(H5C_t * cache_ptr, hbool_t partial);
 H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, int32_t ce_array_len,
     haddr_t *ce_array_ptr);
 #endif /* H5_HAVE_PARALLEL */

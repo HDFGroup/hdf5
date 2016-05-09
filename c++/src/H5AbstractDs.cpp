@@ -49,7 +49,7 @@ AbstractDs::AbstractDs(){}
 // removal does not raise any problems in 1.10, it will be removed from 1.8 in
 // subsequent releases.
 //--------------------------------------------------------------------------
-AbstractDs::AbstractDs(const hid_t ds_id){}
+// Mar 2016 -BMR, AbstractDs::AbstractDs(const hid_t ds_id){}
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs::getTypeClass
@@ -141,8 +141,11 @@ ArrayType AbstractDs::getArrayType() const
    // depending on which object invokes getArrayType.  Then, create and
    // return the ArrayType object
    try {
+	// Create ArrayType and set values this way to work around the
+	// problem described in the JIRA issue HDFFV-7947
 	ArrayType arraytype;
 	f_DataType_setId(&arraytype, p_get_type());
+	arraytype.setArrayInfo();
 	return(arraytype);
    }
    catch (DataSetIException E) {

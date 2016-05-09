@@ -37,13 +37,6 @@
 #include "H5RSprivate.h"        /* Reference-counted strings            */
 
 /*
- * Define this to enable debugging.
- */
-#ifdef NDEBUG
-#  undef H5G_DEBUG
-#endif
-
-/*
  * The disk size for a symbol table entry...
  */
 #define H5G_SIZEOF_SCRATCH      16

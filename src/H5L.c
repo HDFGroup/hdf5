@@ -82,6 +82,17 @@ typedef struct {
     hid_t dxpl_id;                      /* Dataset transfer property list */
 } H5L_trav_mv2_t;
 
+/* User data for path traversal routine for checking if a link exists */
+typedef struct {
+    /* Down */
+    char *sep;                          /* Pointer to next separator in the string */
+    hid_t lapl_id;                      /* Link access property list */
+    hid_t dxpl_id;                      /* Dataset transfer property list */
+
+    /* Up */
+    hbool_t exists;                     /* Whether the link exists or not */
+} H5L_trav_le_t;
+
 /* User data for path traversal routine for getting link value */
 typedef struct {
     size_t size;                        /* Size of user buffer */
@@ -123,7 +134,10 @@ static herr_t H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
 static herr_t H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
-static herr_t H5L_exists_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
+static herr_t H5L__exists_final_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
+    const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+    H5G_own_loc_t *own_loc/*out*/);
+static herr_t H5L__exists_inter_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
     const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/);
 static herr_t H5L_get_info_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
@@ -275,6 +289,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5VL_loc_params_t loc_params1;
     H5VL_object_t    *obj2 = NULL;        /* object token of dst_id */
     H5VL_loc_params_t loc_params2;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;         /* dxpl used by library */
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -294,9 +309,12 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* Check the link create property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    /* Check the link access property list */
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id,
+                               ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id),
+                               TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* set location paramter for source object */
     loc_params1.type = H5VL_OBJECT_BY_NAME;
@@ -330,7 +348,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(H5VL_link_move((obj1 ? obj1->vol_obj : NULL), loc_params1, 
                       (obj2 ? obj2->vol_obj : NULL), loc_params2, 
                       (obj1 ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
-                      lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+                      lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -360,6 +378,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5VL_loc_params_t loc_params1;
     H5VL_object_t    *obj2 = NULL;        /* object token of dst_id */
     H5VL_loc_params_t loc_params2;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;         /* dxpl used by library */
     herr_t      ret_value=SUCCEED;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -379,9 +398,12 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     /* Check the link create property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    /* Check the link access property list */
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id,
+                               ((src_loc_id != H5L_SAME_LOC) ? src_loc_id : dst_loc_id),
+                               TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     /* set location paramter for source object */
     loc_params1.type = H5VL_OBJECT_BY_NAME;
@@ -415,7 +437,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     if(H5VL_link_copy((obj1 ? obj1->vol_obj : NULL), loc_params1, 
                       (obj2 ? obj2->vol_obj : NULL), loc_params2, 
                       (obj1 ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
-                      lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+                      lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 done:
     FUNC_LEAVE_API(ret_value)
@@ -447,6 +469,7 @@ H5Lcreate_soft(const char *link_target,
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t *plist;      /* Property list pointer */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -465,9 +488,10 @@ H5Lcreate_soft(const char *link_target,
     /* Check the group access property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    /* Check the link access property list */
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, link_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = link_name;
@@ -488,7 +512,7 @@ H5Lcreate_soft(const char *link_target,
 
     /* Create the link through the VOL */
     if(H5VL_link_create(H5VL_LINK_CREATE_SOFT, obj->vol_obj, loc_params, obj->vol_info->vol_cls,
-                        lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+                        lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -521,6 +545,7 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
     H5P_genplist_t *plist;      /* Property list pointer */
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t   ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -540,9 +565,10 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     /* Check the link create property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    /* Check the link access property list */
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, cur_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params1.type = H5VL_OBJECT_BY_NAME;
     loc_params1.obj_type = H5I_get_type(cur_loc_id);
@@ -583,7 +609,7 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     /* Create the link through the VOL */
     if(H5VL_link_create(H5VL_LINK_CREATE_HARD, (obj2 ? (obj2->vol_obj) : NULL), loc_params2, 
                         (obj1!=NULL ? obj1->vol_info->vol_cls : obj2->vol_info->vol_cls),
-                        lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+                        lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -622,6 +648,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
     H5P_genplist_t *plist;      /* Property list pointer */
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;         /* dxpl used by library */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -637,9 +664,10 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     /* Check the group access property list */
     if(H5P_DEFAULT == lcpl_id)
         lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    /* Check the link access property list */
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, link_loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.loc_data.loc_by_name.name = link_name;
@@ -664,7 +692,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
 
     /* Create the link through the VOL */
     if(H5VL_link_create(H5VL_LINK_CREATE_UD, obj->vol_obj, loc_params, obj->vol_info->vol_cls,
-                        lcpl_id, lapl_id, H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+                        lcpl_id, lapl_id, dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create link")
 
 done:
@@ -694,6 +722,7 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 {
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -702,6 +731,10 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
     /* Check arguments */
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -714,7 +747,7 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
 
     /* Delete the link through the VOL */
     if(H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_DELETE, 
-                          H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+                          dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
@@ -747,6 +780,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
 {
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -759,11 +793,10 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, TRUE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name = group_name;
@@ -779,7 +812,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
 
     /* Delete the link through the VOL */
     if(H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_DELETE, 
-                          H5AC_dxpl_id, H5_REQUEST_NULL) < 0)
+                          dxpl_id, H5_REQUEST_NULL) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link")
 
 done:
@@ -812,6 +845,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
 {
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -820,11 +854,10 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
     /* Check arguments */
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -837,7 +870,7 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf/*out*/, size_t size,
 
     /* Get the link info through the VOL */
     if(H5VL_link_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_GET_VAL, 
-                     H5AC_ind_dxpl_id, H5_REQUEST_NULL, buf, size) < 0)
+                     dxpl_id, H5_REQUEST_NULL, buf, size) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
@@ -870,6 +903,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 {
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -883,11 +917,10 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name = group_name;
@@ -903,7 +936,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
     /* Get the link info through the VOL */
     if(H5VL_link_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_GET_VAL, 
-                     H5AC_ind_dxpl_id, H5_REQUEST_NULL, buf, size) < 0)
+                     dxpl_id, H5_REQUEST_NULL, buf, size) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link value")
 
 done:
@@ -929,6 +962,7 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 {
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;         /* dxpl used by library */
     htri_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -937,11 +971,10 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
     /* Check arguments */
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -954,7 +987,7 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 
     /* check link existence through the VOL */
     if(H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_EXISTS,
-                          H5AC_ind_dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
+                          dxpl_id, H5_REQUEST_NULL, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -982,6 +1015,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
 {
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;         /* dxpl used by library */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -989,11 +1023,10 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
 
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -1006,7 +1039,7 @@ H5Lget_info(hid_t loc_id, const char *name, H5L_info_t *linfo /*out*/,
 
     /* Get the link info through the VOL */
     if(H5VL_link_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_GET_INFO, 
-                     H5AC_ind_dxpl_id, H5_REQUEST_NULL, linfo) < 0)
+                     dxpl_id, H5_REQUEST_NULL, linfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -1035,6 +1068,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
 {
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t  dxpl_id = H5AC_ind_read_dxpl_id;  /* dxpl used by library */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1048,11 +1082,10 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name = group_name;
@@ -1068,7 +1101,7 @@ H5Lget_info_by_idx(hid_t loc_id, const char *group_name,
 
     /* Get the link info through the VOL */
     if(H5VL_link_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_GET_INFO,
-                     H5AC_ind_dxpl_id, H5_REQUEST_NULL, linfo) < 0)
+                     dxpl_id, H5_REQUEST_NULL, linfo) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link info")
 
 done:
@@ -1227,6 +1260,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
 {
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t   dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     ssize_t ret_value;          /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1240,11 +1274,10 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index type specified")
     if(order <= H5_ITER_UNKNOWN || order >= H5_ITER_N)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name = group_name;
@@ -1260,7 +1293,7 @@ H5Lget_name_by_idx(hid_t loc_id, const char *group_name,
 
     /* Get the link info through the VOL */
     if(H5VL_link_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_GET_NAME, 
-                     H5AC_ind_dxpl_id, H5_REQUEST_NULL, name, size, &ret_value) < 0)
+                     dxpl_id, H5_REQUEST_NULL, name, size, &ret_value) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get link name")
 
 done:
@@ -1322,7 +1355,7 @@ H5Literate(hid_t id, H5_index_t idx_type, H5_iter_order_t order,
 
     /* iterate over the links through the VOL */
     if((ret_value = H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_ITER,
-                                       H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
+                                       H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, 
                                        FALSE, idx_type, order, idx_p, op, op_data)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
@@ -1360,6 +1393,7 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
 {
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id;         /* dxpl used by library */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1375,11 +1409,10 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!op)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -1392,8 +1425,7 @@ H5Literate_by_name(hid_t loc_id, const char *group_name,
 
     /* iterate over the links through the VOL */
     if((ret_value = H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_ITER,
-                                       H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
-                                       FALSE, idx_type, order, idx_p, op, op_data)) < 0)
+                                       dxpl_id, H5_REQUEST_NULL, FALSE, idx_type, order, idx_p, op, op_data)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -1462,7 +1494,7 @@ H5Lvisit(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order,
 
     /* iterate over the links through the VOL */
     if((ret_value = H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_ITER,
-                                       H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
+                                       H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, 
                                        TRUE, idx_type, order, NULL, op, op_data)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visit failed")
 
@@ -1505,6 +1537,7 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 {
     H5VL_object_t    *obj = NULL;        /* object token of loc_id */
     H5VL_loc_params_t loc_params;
+    hid_t       dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1520,11 +1553,10 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
     if(!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no callback operator specified")
-    if(H5P_DEFAULT == lapl_id)
-        lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(lapl_id, H5P_LINK_ACCESS))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not link access property list ID")
+
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&lapl_id, H5P_CLS_LACC, &dxpl_id, loc_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
 
     loc_params.type = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type = H5I_get_type(loc_id);
@@ -1537,7 +1569,7 @@ H5Lvisit_by_name(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 
     /* visit the links through the VOL */
     if((ret_value = H5VL_link_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_LINK_ITER,
-                                       H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
+                                       dxpl_id, H5_REQUEST_NULL, 
                                        TRUE, idx_type, order, NULL, op, op_data)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "link visit failed")
 
@@ -2934,9 +2966,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_exists_cb
+ * Function:	H5L__exists_final_cb
  *
- * Purpose:	Callback for checking whether a link exists
+ * Purpose:	Callback for checking whether a link exists, as the final
+ *              component of a path
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -2946,29 +2979,161 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5L_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+H5L__exists_final_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
     const H5O_link_t *lnk, H5G_loc_t H5_ATTR_UNUSED *obj_loc, void *_udata/*in,out*/,
     H5G_own_loc_t *own_loc/*out*/)
 {
-    hbool_t *udata = (hbool_t *)_udata;   /* User data passed in */
+    H5L_trav_le_t *udata = (H5L_trav_le_t *)_udata;   /* User data passed in */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check if the name in this group resolved to a valid link */
-    *udata = (hbool_t)(lnk != NULL);
+    udata->exists = (hbool_t)(lnk != NULL);
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
     *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5L_exists_cb() */
+} /* end H5L__exists_final_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L__exists_inter_cb
+ *
+ * Purpose:	Callback for checking whether a link exists, as an intermediate
+ *              component of a path
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, December 31 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5L__exists_inter_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED *name,
+    const H5O_link_t *lnk, H5G_loc_t *obj_loc, void *_udata/*in,out*/,
+    H5G_own_loc_t *own_loc/*out*/)
+{
+    H5L_trav_le_t *udata = (H5L_trav_le_t *)_udata;   /* User data passed in */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check if the name in this group resolved to a valid link */
+    if(lnk != NULL) {
+        /* Check for more components to the path */
+        if(udata->sep) {
+            H5G_traverse_t cb_func;     /* Callback function for tranversal */
+            char *next;                 /* Pointer to next component name */
+
+            /* Look for another separator */
+            next = udata->sep;
+            if(NULL == (udata->sep = HDstrchr(udata->sep, '/')))
+                cb_func = H5L__exists_final_cb;
+            else {
+                /* Chew through adjacent separators, if present */
+                do {
+                    *udata->sep = '\0';
+                    udata->sep++;
+                } while('/' == *udata->sep);
+                cb_func = H5L__exists_inter_cb;
+            } /* end else */
+            if(H5G_traverse(obj_loc, next, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, cb_func, udata, udata->lapl_id, udata->dxpl_id) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine if link exists")
+        } /* end if */
+        else
+            udata->exists = TRUE;
+    } /* end if */
+    else
+        udata->exists = FALSE;
+
+    /* Indicate that this callback didn't take ownership of the group *
+     * location for the object */
+    *own_loc = H5G_OWN_NONE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5L__exists_inter_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5L_exists_tolerant
+ *
+ * Purpose:	Returns whether a link exists in a group
+ *
+ * Note:	Same as H5L_exists, except that missing links are reported
+ *		as 'FALSE' instead of causing failures
+ *
+ * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, December 31 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
+{
+    H5L_trav_le_t udata;        /* User data for traversal */
+    H5G_traverse_t cb_func;     /* Callback function for tranversal */
+    char *name_copy = NULL;     /* Duplicate of name */
+    char *name_trav;            /* Name to traverse */
+    htri_t ret_value = FAIL;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(loc);
+    HDassert(name);
+
+    /* Copy the name and skip leading '/'s */
+    name_trav = name_copy = H5MM_strdup(name);
+    while('/' == *name_trav)
+        name_trav++;
+
+    /* A path of "/" will always exist in a file */
+    if('\0' == *name_trav)
+        HGOTO_DONE(TRUE)
+
+    /* Set up user data & correct callback */
+    udata.lapl_id = lapl_id;
+    udata.dxpl_id = dxpl_id;
+    udata.exists = FALSE;
+    if(NULL == (udata.sep = HDstrchr(name_trav, '/')))
+        cb_func = H5L__exists_final_cb;
+    else {
+        /* Chew through adjacent separators, if present */
+        do {
+            *udata.sep = '\0';
+            udata.sep++;
+        } while('/' == *udata.sep);
+        cb_func = H5L__exists_inter_cb;
+    } /* end else */
+
+    /* Traverse the group hierarchy to locate the link to check */
+    if(H5G_traverse(loc, name_trav, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, cb_func, &udata, lapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine if link exists")
+
+    /* Set return value */
+    ret_value = (htri_t)udata.exists;
+
+done:
+    /* Release duplicated string */
+    H5MM_xfree(name_copy);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5L_exists_tolerant() */
 
 
 /*-------------------------------------------------------------------------
  * Function:	H5L_exists
  *
  * Purpose:	Returns whether a link exists in a group
+ *
+ * Note:	Same as H5L_exists_tolerant, except that missing links are reported
+ *		as failures
  *
  * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
@@ -2980,17 +3145,22 @@ H5L_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc/*in*/, const char H5_ATTR_UNUSED
 htri_t
 H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 {
-    hbool_t exists = FALSE;     /* Whether the link exists in the group */
+    H5L_trav_le_t udata;        /* User data for traversal */
     htri_t ret_value = FAIL;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* A path of "/" will always exist in a file */
+    if(0 == HDstrcmp(name, "/"))
+        HGOTO_DONE(TRUE)
+
     /* Traverse the group hierarchy to locate the object to get info about */
-    if(H5G_traverse(loc, name, H5G_TARGET_SLINK|H5G_TARGET_UDLINK, H5L_exists_cb, &exists, lapl_id, dxpl_id) < 0)
+    udata.exists = FALSE;
+    if(H5G_traverse(loc, name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__exists_final_cb, &udata, lapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "path doesn't exist")
 
     /* Set return value */
-    ret_value = (htri_t)exists;
+    ret_value = (htri_t)udata.exists;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3400,7 +3570,7 @@ herr_t H5L_iterate(void *obj, H5VL_loc_params_t loc_params, hbool_t recursive,
                    H5L_iterate_t op, void *op_data, hid_t dxpl_id)
 {
     H5G_loc_t	loc;
-    herr_t ret_value;           /* Return value */
+    herr_t ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

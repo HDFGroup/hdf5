@@ -22,6 +22,11 @@
       tvds_layout-3_2.ddl
       tvds_layout-4.ddl
       tvds_layout-5.ddl
+      vds-first.ddl
+      vds-gap1.ddl
+      vds-gap2.ddl
+      vds_layout-eiger.ddl
+      vds_layout-maxmin.ddl
   )
   set (HDF5_REFERENCE_TEST_VDS
       1_a.h5
@@ -47,12 +52,20 @@
       5_b.h5
       5_c.h5
       5_vds.h5
+      a.h5
+      b.h5
+      c.h5
+      d.h5
+      vds-percival-unlim-maxmin.h5
+      f-0.h5
+      f-3.h5
+      vds-eiger.h5
   )
   set (HDF5_ERROR_REFERENCE_VDS
   )
 
   foreach (vds_h5_file ${HDF5_REFERENCE_TEST_VDS})
-    GET_FILENAME_COMPONENT(fname "${vds_h5_file}" NAME)
+    get_filename_component(fname "${vds_h5_file}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}")
     #message (STATUS " Copying ${vds_h5_file}")
     add_custom_command (
@@ -65,7 +78,7 @@
 
 
   foreach (ddl_vds ${HDF5_REFERENCE_VDS})
-    GET_FILENAME_COMPONENT(fname "${ddl_vds}" NAME)
+    get_filename_component(fname "${ddl_vds}" NAME)
     set (ddldest "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}")
     #message (STATUS " Copying ${ddl_vds}")
     add_custom_command (
@@ -77,7 +90,7 @@
   endforeach (ddl_vds ${HDF5_REFERENCE_VDS})
 
   foreach (ddl_vds ${HDF5_ERROR_REFERENCE_VDS})
-    GET_FILENAME_COMPONENT(fname "${ddl_vds}" NAME)
+    get_filename_component(fname "${ddl_vds}" NAME)
     set (ddldest "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}")
     #message (STATUS " Copying ${ddl_vds}")
     add_custom_command (
@@ -98,7 +111,7 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfilesvds")
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif (NOT ${resultcode} STREQUAL "0")
@@ -131,7 +144,7 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> -p ${ARGN})
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfilesvds")
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif (NOT ${resultcode} STREQUAL "0")
@@ -184,6 +197,12 @@
           tvds-4.out.err
           tvds-5.out
           tvds-5.out.err
+          vds-first.out
+          vds-first.out.err
+          vds-gap1.out
+          vds-gap1.out.err
+          vds-gap2.out
+          vds-gap2.out.err
           tvds_layout-1.out
           tvds_layout-1.out.err
           tvds_layout-2.out
@@ -196,6 +215,10 @@
           tvds_layout-4.out.err
           tvds_layout-5.out
           tvds_layout-5.out.err
+          vds_layout-eiger.out
+          vds_layout-eiger.out.err
+          vds_layout-maxmin.out
+          vds_layout-maxmin.out.err
     )
     set_tests_properties (H5DUMP_VDS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
     if (NOT "${last_vds_test}" STREQUAL "")
@@ -225,6 +248,9 @@
     ADD_H5_VDS_TEST (tvds-3_2 0 --enable-error-stack 3_2_vds.h5)
     ADD_H5_VDS_TEST (tvds-4 0 --enable-error-stack 4_vds.h5)
     ADD_H5_VDS_TEST (tvds-5 0 --enable-error-stack 5_vds.h5)
+    ADD_H5_VDS_TEST (vds-first 0 --vds-view-first-missing --enable-error-stack vds-percival-unlim-maxmin.h5)
+    ADD_H5_VDS_TEST (vds-gap1 0 -d /VDS-Eiger --vds-gap-size=1 --enable-error-stack vds-eiger.h5)
+    ADD_H5_VDS_TEST (vds-gap2 0 --vds-gap-size=2 --enable-error-stack vds-eiger.h5)
   endif (USE_FILTER_DEFLATE)
 
   # Layout read
@@ -235,4 +261,6 @@
     ADD_H5_VDS_LAYOUT (tvds_layout-3_2 0 --enable-error-stack 3_2_vds.h5)
     ADD_H5_VDS_LAYOUT (tvds_layout-4 0 --enable-error-stack 4_vds.h5)
     ADD_H5_VDS_LAYOUT (tvds_layout-5 0 --enable-error-stack 5_vds.h5)
+    ADD_H5_VDS_LAYOUT (vds_layout-eiger 0 --enable-error-stack vds-eiger.h5)
+    ADD_H5_VDS_LAYOUT (vds_layout-maxmin 0 --enable-error-stack vds-percival-unlim-maxmin.h5)
   endif (USE_FILTER_DEFLATE)

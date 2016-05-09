@@ -153,10 +153,10 @@ H5G__stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint, hid_t 
 
     /* Create the B-tree */
     if(H5B_create(f, dxpl_id, H5B_SNODE, NULL, &(stab->btree_addr)/*out*/) < 0)
-	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create B-tree")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create B-tree")
 
     /* Create symbol table private heap */
-    if(FAIL == H5HL_create(f, dxpl_id, size_hint, &(stab->heap_addr)/*out*/))
+    if(H5HL_create(f, dxpl_id, size_hint, &(stab->heap_addr)/*out*/) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create heap")
 
     /* Pin the heap down in memory */

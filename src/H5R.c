@@ -395,7 +395,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
 
     /* create the ref through the VOL */
     if((ret_value = H5VL_object_specific(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_REF_CREATE, 
-                                         H5AC_dxpl_id, H5_REQUEST_NULL, 
+                                         H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, 
                                          ref, name, ref_type, space_id)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
@@ -541,12 +541,6 @@ H5R_dereference(H5F_t *file, hid_t oapl_id, hid_t dxpl_id, H5R_type_t ref_type, 
             {
                 H5D_t *dset;                /* Pointer to dataset to open */
 
-                /* Get correct property list */
-                if(H5P_DEFAULT == oapl_id)
-                    oapl_id = H5P_DATASET_ACCESS_DEFAULT;
-                else if(TRUE != H5P_isa_class(oapl_id, H5P_DATASET_ACCESS))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
-
                 /* Open the dataset */
                 if(NULL == (dset = H5D_open(&loc, oapl_id, dxpl_id)))
                     HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
@@ -604,6 +598,7 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     H5I_type_t opened_type;
     void *opened_obj = NULL;
     H5VL_loc_params_t loc_params;
+    hid_t dxpl_id = H5AC_ind_read_dxpl_id; /* dxpl used by library */
     hid_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
@@ -617,6 +612,10 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     if(_ref == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference pointer")
 
+    /* Verify access property list and get correct dxpl */
+    if(H5P_verify_apl_and_dxpl(&oapl_id, H5P_CLS_DACC, &dxpl_id, obj_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "can't set access and transfer property lists")
+
     /* get the vol object */
     if(NULL == (obj = H5VL_get_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
@@ -628,8 +627,8 @@ H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_r
     loc_params.obj_type = H5I_get_type(obj_id);
 
     /* Open the object through the VOL */
-    if(NULL == (opened_obj = H5VL_object_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, &opened_type, 
-                                              H5AC_ind_dxpl_id, H5_REQUEST_NULL)))
+    if(NULL == (opened_obj = H5VL_object_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                              &opened_type, dxpl_id, H5_REQUEST_NULL)))
 	HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable to dereference object")
 
     if((ret_value = H5VL_register_id(opened_type, opened_obj, obj->vol_info, TRUE)) < 0)
@@ -757,7 +756,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 
     /* Get the space id through the VOL */
     if(H5VL_object_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_REF_GET_REGION, 
-                       H5AC_ind_dxpl_id, H5_REQUEST_NULL, &ret_value, ref_type, ref) < 0)
+                       H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, &ret_value, ref_type, ref) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -900,7 +899,7 @@ H5Rget_obj_type2(hid_t id, H5R_type_t ref_type, const void *ref,
 
     /* get the object type through the VOL */
     if((ret_value = H5VL_object_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
-                                    H5VL_REF_GET_TYPE, H5AC_ind_dxpl_id, 
+                                    H5VL_REF_GET_TYPE, H5AC_ind_read_dxpl_id, 
                                     H5_REQUEST_NULL, obj_type, ref_type, ref)) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 
@@ -1073,7 +1072,7 @@ H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name,
 
     /* get the object type through the VOL */
     if(H5VL_object_get(obj->vol_obj, loc_params, obj->vol_info->vol_cls, H5VL_REF_GET_NAME, 
-                       H5AC_ind_dxpl_id, H5_REQUEST_NULL, 
+                       H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, 
                        &ret_value, name, size, ref_type, _ref) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, FAIL, "unable to get group info")
 done:

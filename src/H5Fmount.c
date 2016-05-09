@@ -476,7 +476,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
     if (obj->vol_info->vol_cls->value != file->vol_info->vol_cls->value)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Can't mount file onto object from different VOL plugin")
 
-    if(H5VL_file_specific(obj->vol_obj, obj->vol_info->vol_cls, H5VL_FILE_MOUNT, H5AC_dxpl_id, 
+    if(H5VL_file_specific(obj->vol_obj, obj->vol_info->vol_cls, H5VL_FILE_MOUNT, H5AC_ind_read_dxpl_id, 
                           H5_REQUEST_NULL, type, name, file->vol_obj, plist_id) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
@@ -527,8 +527,8 @@ H5Funmount(hid_t loc_id, const char *name)
     if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
 
-    if(H5VL_file_specific(obj->vol_obj, obj->vol_info->vol_cls, H5VL_FILE_UNMOUNT, H5AC_dxpl_id, 
-                          H5_REQUEST_NULL, type, name) < 0)
+    if(H5VL_file_specific(obj->vol_obj, obj->vol_info->vol_cls, H5VL_FILE_UNMOUNT, 
+                          H5AC_ind_read_dxpl_id, H5_REQUEST_NULL, type, name) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
 done:

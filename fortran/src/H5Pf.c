@@ -5273,7 +5273,7 @@ h5pget_file_image_c(hid_t_f *fapl_id, void **buf_ptr, size_t_f *buf_len_ptr)
   *buf_len_ptr=(size_t_f)c_buf_len_ptr;
 
   ret_value = 0;
-  if(c_buf_ptr) HDfree(c_buf_ptr);
+  if(c_buf_ptr) H5free_memory(c_buf_ptr);
 
   return ret_value;
 }
