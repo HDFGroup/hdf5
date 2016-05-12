@@ -617,10 +617,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   FORTRAN_SIZEOF_LONG_DOUBLE=${ac_cv_sizeof_long_double}
   AC_DEFINE_UNQUOTED([FORTRAN_SIZEOF_LONG_DOUBLE], ["${ac_cv_sizeof_long_double}"], [Determine the size of C long double])
 
-
   dnl get the largest sizeof for REAL kinds
-  max_real_fortran_sizeof="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -ne 's/.*,\([[0-9]]*\)\}/\1/p'`"
-  max_real_fortran_kind="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | sed -ne 's/.*,\([[0-9]]*\)\}/\1/p'`"
+  max_real_fortran_sizeof="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -ne 's/.*,\([[0-9]]*\)}/\1/p'`"
+  max_real_fortran_kind="`echo $PAC_FC_ALL_REAL_KINDS | sed -ne 's/.*,\([[0-9]]*\)}/\1/p'`"
 
   dnl remove the invalid kind from the list
   if test "$ac_cv_sizeof___float128" != 0;then
@@ -636,6 +635,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
           ])
       PAC_FC_ALL_REAL_KINDS="`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/,[[0-9]]\+}/}/g'`"
       PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/,[[0-9]]\+}/}/g'`"
+
     fi
   fi
   AC_MSG_CHECKING([for Fortran interoperable KINDS with C])
