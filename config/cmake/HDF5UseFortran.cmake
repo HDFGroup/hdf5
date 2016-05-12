@@ -140,55 +140,64 @@ endif(FORTRAN_HAVE_STORAGE_SIZE)
 #-----------------------------------------------------------------------------
 
 FORTRAN_RUN("REAL and INTEGER KINDs"
-  "  
-       PROGRAM main
+  "      
+         PROGRAM main
            IMPLICIT NONE
-           INTEGER :: ik, k, lastkind, max_decimal_prec
-	   INTEGER :: num_rkinds, num_ikinds
-           num_ikinds = 0
-           lastkind=SELECTED_INT_KIND(1)
+           INTEGER :: ik, jk, k, max_decimal_prec
+           INTEGER :: num_rkinds = 1, num_ikinds = 1
+           INTEGER, DIMENSION(1:10) :: list_ikinds = -1
+           INTEGER, DIMENSION(1:10) :: list_rkinds = -1
+
            ! Find integer KINDs
-           DO ik=2,36
-                k = SELECTED_INT_KIND(ik)
-                IF (k .NE. lastkind) THEN
-	             num_ikinds = num_ikinds + 1	
-                     WRITE(*,'(I0)',ADVANCE='NO') lastkind
-                     lastkind = k
-             	     IF(k.GT.0) WRITE(*,'(A)',ADVANCE='NO') ','	
-                ENDIF
-                IF (k .LE. 0) EXIT
+           list_ikinds(num_ikinds)=SELECTED_INT_KIND(1)
+           DO ik = 2, 36
+              k = SELECTED_INT_KIND(ik)
+              IF(k.LT.0) EXIT
+              IF(k.GT.list_ikinds(num_ikinds))THEN
+                 num_ikinds = num_ikinds + 1
+                 list_ikinds(num_ikinds) = k
+              ENDIF
            ENDDO
-      	   IF (lastkind.NE.-1) THEN
-	      num_ikinds = num_ikinds + 1	
-              WRITE(*,'(I0)') lastkind
-	   ELSE
-              WRITE(*,'()')
-           ENDIF
+
+           DO k = 1, num_ikinds
+              WRITE(*,'(I0)', ADVANCE='NO') list_ikinds(k)
+              IF(k.NE.num_ikinds)THEN
+                 WRITE(*,'(A)',ADVANCE='NO') ','
+              ELSE
+                 WRITE(*,'()')
+              ENDIF
+           ENDDO
+
            ! Find real KINDs
-           num_rkinds = 0
-           lastkind=SELECTED_REAL_KIND(1)
-	   max_decimal_prec = 1
-           DO ik=2,36
-                k = SELECTED_REAL_KIND(ik)
-                IF (k .NE. lastkind) THEN
-                     num_rkinds = num_rkinds + 1
-                     WRITE(*,'(I0)',ADVANCE='NO') lastkind
-                     lastkind = k
-             	     IF(k.GT.0) WRITE(*,'(A)',ADVANCE='NO') ','
-	             max_decimal_prec = ik
-                ENDIF
-                IF (k .LE. 0) EXIT
+           list_rkinds(num_rkinds)=SELECTED_REAL_KIND(1)
+           max_decimal_prec = 1
+
+           prec: DO ik = 2, 36
+              exp: DO jk = 1, 17000
+                 k = SELECTED_REAL_KIND(ik,jk)
+                 IF(k.LT.0) EXIT exp
+                 IF(k.GT.list_rkinds(num_rkinds))THEN
+                    num_rkinds = num_rkinds + 1
+                    list_rkinds(num_rkinds) = k
+                 ENDIF
+                 max_decimal_prec = ik
+              ENDDO exp
+           ENDDO prec
+
+           DO k = 1, num_rkinds
+              WRITE(*,'(I0)', ADVANCE='NO') list_rkinds(k)
+              IF(k.NE.num_rkinds)THEN
+                 WRITE(*,'(A)',ADVANCE='NO') ','
+              ELSE
+                 WRITE(*,'()')
+              ENDIF
            ENDDO
-           IF (lastkind.NE.-1)THEN
-	       num_rkinds = num_rkinds + 1
-               WRITE(*,'(I0)') lastkind
-	   ELSE
-              WRITE(*,'()')
-           ENDIF
-	   WRITE(*,'(I0)') max_decimal_prec
-	   WRITE(*,'(I0)') num_ikinds
-	   WRITE(*,'(I0)') num_rkinds
-       END
+
+           WRITE(*,'(I0)') max_decimal_prec
+           WRITE(*,'(I0)') num_ikinds
+           WRITE(*,'(I0)') num_rkinds
+    
+         END PROGRAM main
   "
   XX
   YY
