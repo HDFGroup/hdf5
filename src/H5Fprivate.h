@@ -484,6 +484,7 @@
 #define HDF5_SUPERBLOCK_VERSION_1	1	/* Version with non-default B-tree 'K' value */
 #define HDF5_SUPERBLOCK_VERSION_2	2	/* Revised version with superblock extension and checksum */
 #define HDF5_SUPERBLOCK_VERSION_LATEST	HDF5_SUPERBLOCK_VERSION_2	/* The maximum super block format    */
+#define HDF5_SUPERBLOCK_VERSION_V18_LATEST HDF5_SUPERBLOCK_VERSION_2    /* The latest superblock version for v18 */
 #define HDF5_FREESPACE_VERSION	        0	/* of the Free-Space Info	  */
 #define HDF5_OBJECTDIR_VERSION	        0	/* of the Object Directory format */
 #define HDF5_SHAREDHEADER_VERSION       0	/* of the Shared-Header Info	  */

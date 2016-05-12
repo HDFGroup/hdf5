@@ -583,6 +583,9 @@ H5_DLL herr_t H5D__mark(const H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D_set_io_info_dxpls(H5D_io_info_t *io_info, hid_t dxpl_id);
 #endif /* H5_DEBUG_BUILD */
 
+/* To convert a dataset's chunk indexing type to v1 B-tree */
+H5_DLL herr_t H5D__format_convert(H5D_t *dataset, hid_t dxpl_id);
+
 /* Internal I/O routines */
 H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id,
     const H5S_t *mem_space, const H5S_t *file_space, hid_t dset_xfer_plist,
@@ -675,6 +678,7 @@ H5_DLL herr_t H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t
 #ifdef H5D_CHUNK_DEBUG
 H5_DLL herr_t H5D__chunk_stats(const H5D_t *dset, hbool_t headers);
 #endif /* H5D_CHUNK_DEBUG */
+H5_DLL herr_t H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info, H5D_chk_idx_info_t *new_idx_info);
 
 /* Functions that operate on compact dataset storage */
 H5_DLL herr_t H5D__compact_fill(const H5D_t *dset, hid_t dxpl_id);

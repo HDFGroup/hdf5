@@ -3544,6 +3544,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/misc/vds/Makefile
                  tools/h5stat/testh5stat.sh
                  tools/h5stat/Makefile
+                 tools/h5format_convert/Makefile
+                 tools/h5format_convert/testh5fc.sh
                  tools/perform/Makefile
                  examples/Makefile
                  examples/run-c-ex.sh
