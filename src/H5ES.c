@@ -413,6 +413,7 @@ H5ES_wait_all(H5ES_t *e_stack, H5ES_status_t *_status)
     FUNC_ENTER_NOAPI_NOINIT
 
     if(e_stack->size == 0) {
+        *_status = H5ES_STATUS_SUCCEED;
         HGOTO_DONE(SUCCEED);
     }
 
