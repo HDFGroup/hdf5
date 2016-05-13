@@ -97,6 +97,12 @@ typedef struct {
     herr_t (*get_size)(void *idx_handle, hsize_t *idx_size);
 } H5X_metadata_class_t;
 
+typedef union {
+    /* Union of callback index structures */
+    H5X_data_class_t data_class;
+    H5X_metadata_class_t metadata_class;
+} H5X_idx_class_t;
+
 typedef struct {
     unsigned version;     /* Version number of the index plugin class struct */
                           /* (Should always be set to H5X_CLASS_VERSION, which
@@ -106,11 +112,7 @@ typedef struct {
     H5X_type_t type;      /* Type of data indexed by this plugin */
 
     /* Callbacks */
-    union {
-        /* Union of callback index structures */
-        H5X_data_class_t data_class;
-        H5X_metadata_class_t metadata_class;
-    } idx_class;
+    H5X_idx_class_t *idx_class; /* Callback index class */
 } H5X_class_t;
 
 /********************/

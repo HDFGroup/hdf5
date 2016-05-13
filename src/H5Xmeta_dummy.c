@@ -259,12 +259,7 @@ static herr_t H5X__dummy_query(void *idx_handle, hid_t query_id, hid_t xxpl_id,
 /*******************/
 
 /* Dummy index class */
-const H5X_class_t H5X_META_DUMMY[1] = {{
-    H5X_CLASS_T_VERS,           /* (From the H5Xpublic.h header file) */
-    H5X_PLUGIN_META_DUMMY,      /* (Or whatever number is assigned) */
-    "dummy index plugin",       /* Whatever name desired */
-    H5X_TYPE_METADATA,          /* This plugin operates on metadata */
-    {{
+static H5X_idx_class_t idx_class = {.metadata_class = {
     H5X__dummy_create,          /* create */
     H5X__dummy_remove,          /* remove */
     H5X__dummy_open,            /* open */
@@ -273,7 +268,14 @@ const H5X_class_t H5X_META_DUMMY[1] = {{
     H5X__dummy_remove_entry,    /* remove_entry */
     H5X__dummy_query,           /* query */
     NULL                        /* get_size */
-    }}
+}};
+
+const H5X_class_t H5X_META_DUMMY[1] = {{
+    H5X_CLASS_T_VERS,           /* (From the H5Xpublic.h header file) */
+    H5X_PLUGIN_META_DUMMY,      /* (Or whatever number is assigned) */
+    "dummy index plugin",       /* Whatever name desired */
+    H5X_TYPE_METADATA,          /* This plugin operates on metadata */
+    &idx_class                  /* Index class */
 }};
 
 static void

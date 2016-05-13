@@ -543,9 +543,9 @@ H5X_create_data(hid_t loc_id, H5X_class_t *idx_class, hid_t xcpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
 
     /* Call create of the plugin */
-    if (NULL == idx_class->idx_class.data_class.create)
+    if (NULL == idx_class->idx_class->data_class.create)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin create callback is not defined");
-    if (NULL == (idx_handle = idx_class->idx_class.data_class.create(loc_id, xcpl_id, xapl_id,
+    if (NULL == (idx_handle = idx_class->idx_class->data_class.create(loc_id, xcpl_id, xapl_id,
             &metadata_size, &metadata)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot create new plugin index");
 
@@ -590,9 +590,9 @@ H5X_create_metadata(hid_t loc_id, H5X_class_t *idx_class, hid_t xcpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
 
     /* Call create of the plugin */
-    if (NULL == idx_class->idx_class.metadata_class.create)
+    if (NULL == idx_class->idx_class->metadata_class.create)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin create callback is not defined");
-    if (NULL == (idx_handle = idx_class->idx_class.metadata_class.create(loc_id, xcpl_id, xapl_id,
+    if (NULL == (idx_handle = idx_class->idx_class->metadata_class.create(loc_id, xcpl_id, xapl_id,
             &metadata_size, &metadata)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot create new plugin index");
 

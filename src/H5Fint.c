@@ -2199,9 +2199,9 @@ H5F_open_index(H5F_t *file, hid_t xapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file");
     if (NULL == metadata)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "no index metadata was found");
-    if (NULL == idx_class->idx_class.metadata_class.open)
+    if (NULL == idx_class->idx_class->metadata_class.open)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin open callback not defined");
-    if (NULL == (idx_handle = idx_class->idx_class.metadata_class.open(file_id, xapl_id, metadata_size, metadata)))
+    if (NULL == (idx_handle = idx_class->idx_class->metadata_class.open(file_id, xapl_id, metadata_size, metadata)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
 
     file->shared->idx_handle = idx_handle;
@@ -2231,9 +2231,9 @@ H5F_close_index(H5F_t *file)
     HDassert(file);
 
     idx_class = file->shared->idx_class;
-    if (NULL == (idx_class->idx_class.metadata_class.close))
+    if (NULL == (idx_class->idx_class->metadata_class.close))
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin close callback not defined");
-    if (FAIL == idx_class->idx_class.metadata_class.close(file->shared->idx_handle))
+    if (FAIL == idx_class->idx_class->metadata_class.close(file->shared->idx_handle))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
 
     file->shared->idx_handle = NULL;
@@ -2304,11 +2304,11 @@ H5F_get_index_size(H5F_t *file, hsize_t *idx_size)
     idx_class = file->shared->idx_class;
     if (!idx_class)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "index class not defined");
-    if (NULL == (idx_class->idx_class.metadata_class.get_size))
+    if (NULL == (idx_class->idx_class->metadata_class.get_size))
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin get size callback not defined");
     if (!file->shared->idx_handle && (FAIL == H5F_open_index(file, xapl_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
-    if (FAIL == idx_class->idx_class.metadata_class.get_size(file->shared->idx_handle, &actual_size))
+    if (FAIL == idx_class->idx_class->metadata_class.get_size(file->shared->idx_handle, &actual_size))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "cannot get index size");
 
     *idx_size = actual_size;
@@ -2347,7 +2347,7 @@ H5F_query(H5F_t *file, const struct H5Q_t *query,
         HGOTO_DONE(SUCCEED);
 
     /* Index associated to file so use it */
-    if (NULL == idx_class->idx_class.metadata_class.query)
+    if (NULL == idx_class->idx_class->metadata_class.query)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin query callback not defined");
 
     /* Open index if not opened yet */
@@ -2355,7 +2355,7 @@ H5F_query(H5F_t *file, const struct H5Q_t *query,
         HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
 
     /* Call query of index plugin */
-    if (FAIL == idx_class->idx_class.metadata_class.query(
+    if (FAIL == idx_class->idx_class->metadata_class.query(
         file->shared->idx_handle, query->query_id, xxpl_id, ref_count, refs))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPARE, FAIL, "cannot query index");
 

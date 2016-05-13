@@ -3248,9 +3248,9 @@ H5D_open_index(H5D_t *dset, hid_t xapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset");
     if (NULL == metadata)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "no index metadata was found");
-    if (NULL == idx_class->idx_class.data_class.open)
+    if (NULL == idx_class->idx_class->data_class.open)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin open callback not defined");
-    if (NULL == (idx_handle = idx_class->idx_class.data_class.open(dset_id, xapl_id, metadata_size, metadata)))
+    if (NULL == (idx_handle = idx_class->idx_class->data_class.open(dset_id, xapl_id, metadata_size, metadata)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
 
     dset->shared->idx_handle = idx_handle;
@@ -3280,9 +3280,9 @@ H5D_close_index(H5D_t *dset)
     HDassert(dset);
 
     idx_class = dset->shared->idx_class;
-    if (NULL == (idx_class->idx_class.data_class.close))
+    if (NULL == (idx_class->idx_class->data_class.close))
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin close callback not defined");
-    if (FAIL == idx_class->idx_class.data_class.close(dset->shared->idx_handle))
+    if (FAIL == idx_class->idx_class->data_class.close(dset->shared->idx_handle))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCLOSEOBJ, FAIL, "cannot close index");
 
     dset->shared->idx_handle = NULL;
@@ -3352,11 +3352,11 @@ herr_t H5D_get_index_size(H5D_t *dset, hsize_t *idx_size)
     idx_class = dset->shared->idx_class;
     if (!idx_class)
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "index class not defined");
-    if (NULL == (idx_class->idx_class.data_class.get_size))
+    if (NULL == (idx_class->idx_class->data_class.get_size))
         HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin get size callback not defined");
     if (!dset->shared->idx_handle && (FAIL == H5D_open_index(dset, xapl_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTOPENOBJ, FAIL, "cannot open index");
-    if (FAIL == idx_class->idx_class.data_class.get_size(dset->shared->idx_handle, &actual_size))
+    if (FAIL == idx_class->idx_class->data_class.get_size(dset->shared->idx_handle, &actual_size))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "cannot get index size");
 
     *idx_size = actual_size;
@@ -3464,7 +3464,7 @@ H5D__query_singleton(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query,
 
     if (idx_class) {
         /* Index associated to dataset so use it */
-        if (NULL == idx_class->idx_class.data_class.query)
+        if (NULL == idx_class->idx_class->data_class.query)
             HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, NULL, "plugin query callback not defined");
 
         /* Open index if not opened yet */
@@ -3476,7 +3476,7 @@ H5D__query_singleton(H5D_t *dset, const H5S_t *file_space, const H5Q_t *query,
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to register dataspace");
 
         /* Call plugin query */
-        if (FAIL == (space_id = idx_class->idx_class.data_class.query(dset->shared->idx_handle, file_space_id, query->query_id, xxpl_id)))
+        if (FAIL == (space_id = idx_class->idx_class->data_class.query(dset->shared->idx_handle, file_space_id, query->query_id, xxpl_id)))
             HGOTO_ERROR(H5E_INDEX, H5E_CANTSELECT, NULL, "cannot query index");
         if (NULL == (ret_value = (H5S_t *) H5I_object_verify(space_id, H5I_DATASPACE)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a dataspace");

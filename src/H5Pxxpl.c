@@ -104,7 +104,7 @@ const H5P_libclass_t H5P_CLS_XXFR[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__xxfr_reg_prop(H5P_genclass_t *pclass)
+H5P__xxfr_reg_prop(H5P_genclass_t H5_ATTR_UNUSED *pclass)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

@@ -86,8 +86,9 @@ const H5O_msg_class_t H5O_MSG_IDXINFO[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_idxinfo_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
-    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
+H5O_idxinfo_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
+    unsigned H5_ATTR_UNUSED *ioflags, const uint8_t *p)
 {
     H5O_idxinfo_t *mesg;
     void *ret_value = NULL; /* Return value */
@@ -134,8 +135,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_idxinfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
-        const void *_mesg)
+H5O_idxinfo_encode(H5F_t H5_ATTR_UNUSED *f,
+    hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_idxinfo_t *mesg = (const H5O_idxinfo_t *) _mesg;
 
@@ -213,7 +214,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_idxinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O_idxinfo_size(const H5F_t H5_ATTR_UNUSED *f,
+    hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_idxinfo_t *mesg = (const H5O_idxinfo_t *) _mesg;
     size_t ret_value = 0;
@@ -243,7 +245,7 @@ H5O_idxinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_s
 static herr_t
 H5O_idxinfo_reset(void *_mesg)
 {
-    H5O_idxinfo_t             *mesg = (H5O_idxinfo_t *) _mesg;
+    H5O_idxinfo_t *mesg = (H5O_idxinfo_t *) _mesg;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -298,7 +300,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_idxinfo_delete(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t *open_oh, void *_mesg)
+H5O_idxinfo_delete(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
 {
     hid_t file_id;
     H5O_idxinfo_t *mesg = (H5O_idxinfo_t *) _mesg;
@@ -317,10 +320,17 @@ H5O_idxinfo_delete(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t *open_oh, void 
     /* call plugin index remove callback */
     if (NULL == (idx_class = H5X_registered(mesg->plugin_id)))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTGET, FAIL, "can't get index plugin class");
-    if (NULL == idx_class->idx_class.data_class.remove)
-        HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin remove callback is not defined");
-    if (FAIL == idx_class->idx_class.data_class.remove(file_id, mesg->metadata_size, mesg->metadata))
-        HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot remove index");
+    if (idx_class->type == H5X_TYPE_DATA) {
+        if (NULL == idx_class->idx_class->data_class.remove)
+            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin remove callback is not defined");
+        if (FAIL == idx_class->idx_class->data_class.remove(file_id, mesg->metadata_size, mesg->metadata))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot remove index");
+    } else {
+        if (NULL == idx_class->idx_class->metadata_class.remove)
+            HGOTO_ERROR(H5E_INDEX, H5E_BADVALUE, FAIL, "plugin remove callback is not defined");
+        if (FAIL == idx_class->idx_class->metadata_class.remove(file_id, mesg->metadata_size, mesg->metadata))
+            HGOTO_ERROR(H5E_INDEX, H5E_CANTCREATE, FAIL, "cannot remove index");
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -336,8 +346,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_idxinfo_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_mesg, FILE *stream,
-	       int indent, int fwidth)
+H5O_idxinfo_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    const void *_mesg, FILE *stream, int indent, int fwidth)
 {
     const H5O_idxinfo_t	*mesg = (const H5O_idxinfo_t *)_mesg;
 
