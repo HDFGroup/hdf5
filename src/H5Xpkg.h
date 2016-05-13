@@ -42,8 +42,15 @@ H5_DLLVAR const H5X_class_t H5X_FASTBIT[1];
 #endif
 
 /*
- * Dummy plugin meta
+ * Dummy metadata plugin
  */
 H5_DLLVAR const H5X_class_t H5X_META_DUMMY[1];
+
+/*
+ * DB metadata plugin
+ */
+#ifdef H5_HAVE_DB
+H5_DLLVAR const H5X_class_t H5X_META_DB[1];
+#endif
 
 #endif /* _H5Xpkg_H */

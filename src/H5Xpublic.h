@@ -39,6 +39,7 @@
 #define H5X_PLUGIN_ALACRITY     3       /* alacrity                     */
 
 #define H5X_PLUGIN_META_DUMMY   4       /* metadata dummy               */
+#define H5X_PLUGIN_META_DB      5       /* metadata db                  */
 
 #define H5X_PLUGIN_RESERVED     64      /* plugin ids below this value reserved */
 

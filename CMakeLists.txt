@@ -514,6 +514,20 @@ if (HDF5_ENABLE_FASTBIT_SUPPORT)
   endif (FASTBIT_FOUND)
 endif (HDF5_ENABLE_FASTBIT_SUPPORT)
 
+#-----------------------------------------------------------------------------
+# Option to use Berkeley DB
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_DB_SUPPORT "Enable Berkeley DB for indexing." OFF)
+if (HDF5_ENABLE_DB_SUPPORT)
+  find_package (DB)
+  if (DB_FOUND)
+    set (H5_HAVE_DB 1)
+    include_directories (${DB_INCLUDE_DIR})
+    set (LINK_LIBS ${LINK_LIBS} ${DB_LIBRARIES})
+    set (LINK_SHARED_LIBS ${LINK_SHARED_LIBS} ${DB_LIBRARIES})
+  endif (DB_FOUND)
+endif (HDF5_ENABLE_DB_SUPPORT)
+
 set (DEFAULT_API_VERSION "v110")
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API
