@@ -2113,3 +2113,146 @@ H5Rget_file_name(href_t _ref, char *name, size_t size)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Rget_file_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Rencode
+ *
+ * Purpose: Given a reference, serialize it into a buffer.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Rencode(href_t ref, void *buf, size_t *nalloc)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check argument and retrieve object */
+    if(nalloc == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL pointer for buffer size")
+
+    /* Go encode the datatype */
+    if(H5R_encode(ref, (unsigned char *)buf, nalloc) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, "can't encode reference")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Rencode() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5R_encode
+ *
+ * Purpose: Private function for H5Rencode.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5R_encode(href_t _ref, unsigned char *buf, size_t *nalloc)
+{
+    struct href *ref = (struct href *) _ref; /* Reference */
+    size_t ref_buf_size, buf_size;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(ref);
+    HDassert(nalloc);
+
+    ref_buf_size = (ref->ref_type == H5R_OBJECT) ? sizeof(ref->ref.addr) : ref->ref.serial.buf_size;
+    buf_size = ref_buf_size + sizeof(uint64_t) + 1;
+
+    /* Don't encode if buffer size isn't big enough or buffer is empty */
+    if(buf && *nalloc >= buf_size) {
+        const void *ref_buf = (ref->ref_type == H5R_OBJECT) ? &ref->ref.addr : ref->ref.serial.buf;
+
+        /* Encode the type of the information */
+        *buf++ = ref->ref_type;
+
+        /* Encode buffer size */
+        UINT64ENCODE(buf, ref_buf_size);
+
+        /* Encode into user's buffer */
+        HDmemcpy(buf, ref_buf, ref_buf_size);
+    } /* end if */
+
+    *nalloc = buf_size;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5R_encode() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Rdecode
+ *
+ * Purpose: Deserialize a reference.
+ *
+ * Return:  Success:    Reference
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
+H5Rdecode(const void *buf)
+{
+    href_t ret_value; /* Return value */
+
+    FUNC_ENTER_API(NULL)
+
+    /* Check args */
+    if(buf == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "empty buffer")
+
+    /* Create datatype by decoding buffer */
+    if(NULL == (ret_value = H5R_decode((const unsigned char *)buf)))
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, NULL, "can't decode reference")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Rdecode() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5R_decode
+ *
+ * Purpose: Private function for H5Rdecode.
+ *
+ * Return:  Success:    Pointer to the decoded reference
+ *          Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+href_t
+H5R_decode(const unsigned char *buf)
+{
+    struct href *ret_value = NULL;
+    size_t buf_size;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(buf);
+
+    if(NULL == (ret_value = (struct href *)H5MM_malloc(sizeof(struct href))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Cannot allocate memory for reference")
+
+    ret_value->ref_type = (H5R_type_t)*buf++;
+    if(ret_value->ref_type <= H5R_BADTYPE || ret_value->ref_type >= H5R_MAXTYPE)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid reference type");
+
+    UINT64DECODE(buf, buf_size);
+    if (!buf_size)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid reference size");
+    if (ret_value->ref_type == H5R_OBJECT)
+        HDmemcpy(ret_value->ref.addr, buf, buf_size);
+    else {
+        ret_value->ref.serial.buf_size = buf_size;
+        if(NULL == (ret_value->ref.serial.buf = H5MM_malloc(buf_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "Cannot allocate memory for reference")
+        HDmemcpy(ret_value->ref.serial.buf, buf, buf_size);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5R_decode() */

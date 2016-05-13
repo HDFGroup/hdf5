@@ -73,6 +73,8 @@ H5_DLL ssize_t    H5Rget_obj_name(hid_t loc_id, href_t ref, char *name/*out*/, s
 H5_DLL ssize_t    H5Rget_attr_name(hid_t loc_id, href_t ref, char *name/*out*/, size_t size);
 H5_DLL ssize_t    H5Rget_file_name(href_t ref, char *name/*out*/, size_t size);
 
+H5_DLL herr_t H5Rencode(href_t ref, void *buf, size_t *nalloc);
+H5_DLL href_t H5Rdecode(const void *buf);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
