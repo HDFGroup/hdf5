@@ -170,7 +170,7 @@ static size_t
 H5T__ref_mem_getsize(const void *_ref)
 {
     const href_t *ref_ptr = (const href_t *)_ref;
-    const struct href *ref;
+    const struct href *ref = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -523,7 +523,7 @@ H5T__obj_ref_disk_read(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
  */
 static herr_t
 H5T__obj_ref_disk_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
-    void *_ref, void *buf, void H5_ATTR_UNUSED *_bg, size_t buf_size,
+    void *_ref, void *buf, void H5_ATTR_UNUSED *_bg, size_t H5_ATTR_UNUSED buf_size,
     H5R_type_t H5_ATTR_UNUSED ref_type)
 {
     herr_t ret_value = SUCCEED; /* Return value */
