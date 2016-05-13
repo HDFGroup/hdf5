@@ -6719,6 +6719,12 @@ H5VL_iod_get_token(void *_obj, void *token, size_t *token_size)
 
     *token_size = sizeof(iod_obj_id_t)*3 + sizeof(H5I_type_t);
 
+    /* MSC - If location object not opened yet, wait for it. */
+    if(obj->request && obj->request->state == H5VL_IOD_PENDING) {
+        if(H5VL_iod_request_wait(obj->file, obj->request) < 0)
+            HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, NULL, "can't wait on HG request");
+    }
+
     switch(obj_type) {
         case H5I_GROUP:
             {

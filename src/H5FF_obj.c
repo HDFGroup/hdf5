@@ -196,6 +196,11 @@ herr_t H5Oget_addr_ff(hid_t object_id, haddr_ff_t *addr)
 
             vol_obj = (H5VL_iod_group_t *)obj->vol_obj;
 
+            if(vol_obj->common.request && vol_obj->common.request->state == H5VL_IOD_PENDING) {
+                if(H5VL_iod_request_wait(vol_obj->common.file, vol_obj->common.request) < 0)
+                    HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+            }
+
             *addr = vol_obj->remote_group.iod_id;
             break;
         }
@@ -207,6 +212,11 @@ herr_t H5Oget_addr_ff(hid_t object_id, haddr_ff_t *addr)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid object ID");
 
             vol_obj = (H5VL_iod_dset_t *)obj->vol_obj;
+
+            if(vol_obj->common.request && vol_obj->common.request->state == H5VL_IOD_PENDING) {
+                if(H5VL_iod_request_wait(vol_obj->common.file, vol_obj->common.request) < 0)
+                    HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+            }
 
             *addr = vol_obj->remote_dset.iod_id;
             break;
@@ -220,6 +230,11 @@ herr_t H5Oget_addr_ff(hid_t object_id, haddr_ff_t *addr)
 
             vol_obj = (H5VL_iod_map_t *)obj->vol_obj;
 
+            if(vol_obj->common.request && vol_obj->common.request->state == H5VL_IOD_PENDING) {
+                if(H5VL_iod_request_wait(vol_obj->common.file, vol_obj->common.request) < 0)
+                    HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+            }
+
             *addr = vol_obj->remote_map.iod_id;
             break;
         }
@@ -232,6 +247,11 @@ herr_t H5Oget_addr_ff(hid_t object_id, haddr_ff_t *addr)
 
             if (NULL != dt->vol_obj) {
                 H5VL_iod_dtype_t *vol_obj = (H5VL_iod_dtype_t *)dt->vol_obj;
+
+                if(vol_obj->common.request && vol_obj->common.request->state == H5VL_IOD_PENDING) {
+                    if(H5VL_iod_request_wait(vol_obj->common.file, vol_obj->common.request) < 0)
+                        HGOTO_ERROR(H5E_DATASET,  H5E_CANTGET, FAIL, "can't wait on HG request");
+                }
 
                 *addr = vol_obj->remote_dtype.iod_id;
             }
