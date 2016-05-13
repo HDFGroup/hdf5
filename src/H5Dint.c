@@ -82,7 +82,7 @@ static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
     hsize_t old_dim[]);
 static herr_t H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, 
-                                  hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id);
+                                  hid_t *dcpl_id, hid_t dapl_id, hid_t dxpl_id);
 static int H5D__subfiling_init_cb(void *item, void *key, void *_op_data);
 static herr_t H5D__subfiling_dest_cb(void *item, void *key, void *op_data);
 
@@ -1108,7 +1108,7 @@ done:
  */
 H5D_t *
 H5D__create(H5F_t *file, H5G_loc_t *loc, const char *name, hid_t type_id, const H5S_t *space, 
-            hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id)
+            hid_t _dcpl_id, hid_t dapl_id, hid_t dxpl_id)
 {
     const H5T_t         *type;                  /* Datatype for dataset */
     H5D_t		*new_dset = NULL;
@@ -1120,6 +1120,7 @@ H5D__create(H5F_t *file, H5G_loc_t *loc, const char *name, hid_t type_id, const 
     hbool_t             pline_copied = FALSE;   /* Flag to indicate that pipeline message was copied */
     hbool_t             efl_copied = FALSE;     /* Flag to indicate that external file list message was copied */
     H5G_loc_t           dset_loc;               /* Dataset location */
+    hid_t               dcpl_id = _dcpl_id;     /* Dataset creating property list */
     H5D_t		*ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1148,7 +1149,7 @@ H5D__create(H5F_t *file, H5G_loc_t *loc, const char *name, hid_t type_id, const 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set.")
 
     /* check for subfiling and set virtual layout if subfiling is requested */
-    if(H5D__subfiling_init(loc, name, type_id, dcpl_id, dapl_id, dxpl_id) < 0)
+    if(H5D__subfiling_init(loc, name, type_id, &dcpl_id, dapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't subfile dataset")
 
     /* Initialize the dataset object */
@@ -1274,6 +1275,8 @@ H5D__create(H5F_t *file, H5G_loc_t *loc, const char *name, hid_t type_id, const 
     ret_value = new_dset;
 
 done:
+    if(dcpl_id != _dcpl_id && H5I_dec_ref(dcpl_id))
+        HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement refcount on copied dcpl_id");
     if(!ret_value && new_dset && new_dset->shared) {
         if(new_dset->shared) {
             if(layout_init)
@@ -3229,7 +3232,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t dcpl_id, 
+H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id, 
                     hid_t dapl_id, hid_t dxpl_id)
 {
     H5F_t *file = loc->oloc->file;
@@ -3262,8 +3265,16 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t dcpl_id,
         const char *subfile_name = H5F_SUBFILE_NAME(file);
         H5SL_t *subfile_map = NULL;
         H5D_subfile_op_t op_data;
+        H5P_genplist_t *dcpl; /* Property list pointer */
         uint8_t *p; /* pointer used to encode the send buffer */
         const uint8_t *rp; /* pointer used to decode the recieve buffer */
+
+        /* Get the property list structure */
+        if(NULL == (dcpl = (H5P_genplist_t *)H5I_object(*dcpl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for dcpl id")
+
+        if((*dcpl_id = H5P_copy_plist(dcpl, FALSE)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't copy DCPL")
 
         if(NULL == name)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't create an anonymous subfiled dataset")
@@ -3400,7 +3411,7 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t dcpl_id,
         op_data.file = file;
         op_data.src_dset_name = dset_name;
         op_data.type_id = type_id;
-        op_data.dcpl_id = dcpl_id;
+        op_data.dcpl_id = *dcpl_id;
         op_data.dxpl_id = dxpl_id;
 
         /* iterate throught the skip list and create the virtual layout */

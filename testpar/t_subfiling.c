@@ -77,7 +77,7 @@ subfiling_api(void)
     /* set subfiling to be 1 file per mpi rank */
 
     /* set name of subfile */
-    sprintf(subfile_name, "subfile_%d.h5", mpi_rank);
+    sprintf(subfile_name, "Subfile_%d.h5", mpi_rank);
 
     /* set number of process groups to be equal to the mpi size */
     ret = H5Pset_subfiling_access(fapl_id, (unsigned)mpi_size, subfile_name, 
