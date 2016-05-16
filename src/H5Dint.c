@@ -3460,6 +3460,7 @@ H5D__subfiling_init_cb(void *item, void *key, void *_op_data)
     H5S_t *src_space = NULL;
     hsize_t npoints = 0;
     H5D_t *src_dset = NULL;
+    hsize_t start;
     int ret_value = H5_ITER_CONT;                       /* Return value */
 
     FUNC_ENTER_STATIC
@@ -3502,7 +3503,7 @@ H5D__subfiling_init_cb(void *item, void *key, void *_op_data)
        dataset */
     node = head_node;
     do {
-        hsize_t start = 0, count;
+        hsize_t count;
 
         /* assign x elements of the source dataset to all the selected elements for this process */
 

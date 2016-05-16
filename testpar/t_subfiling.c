@@ -39,26 +39,29 @@ hid_t	fapl;				/* file access property list */
 #define DIMS0         6
 #define DIMS1         120
 
-void subfiling_api(void);
+void subf_api(void);
+void subf_fpp_w(void);
+void subf_fpp_r(void);
+void subf_2_w(void);
+void subf_2_r(void);
 
 void
-subfiling_api(void)
+subf_api(void)
 {
     hid_t fid;                  /* HDF5 file ID */
     hid_t did;
-    hid_t sid, mem_space_id;
-    hid_t fcpl_id, fapl_id, dapl_id;	/* Property Lists */
+    hid_t sid;
+    hid_t fapl_id, dapl_id;	/* Property Lists */
 
     const char *filename;
     char subfile_name[50];
     hsize_t dims[RANK];   	/* dataset dim sizes */
-    hsize_t npoints, start[RANK], count[RANK], stride[RANK], block[RANK];
+    hsize_t start[RANK], count[RANK], stride[RANK], block[RANK];
 
-    int mpi_size, mpi_rank, i;
+    int mpi_size, mpi_rank;
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Info info = MPI_INFO_NULL;
 
-    int *wbuf;
     herr_t ret;         	/* Generic return value */
 
     filename = (const char *)GetTestParameters();
@@ -172,11 +175,110 @@ subfiling_api(void)
     ret = H5Pclose(dapl_id);
     VRFY((ret == 0), "");
 
+    ret = H5Dclose(did);
+    VRFY((ret == 0), "");
+
+    ret = H5Sclose(sid);
+    VRFY((ret == 0), "");
+
+    ret = H5Fclose(fid);
+    VRFY((ret == 0), "");
+
+    MPI_File_delete(subfile_name, MPI_INFO_NULL);
+
+    return;
+} /* subf_api */
+
+void
+subf_fpp_w(void)
+{
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t did;
+    hid_t sid, mem_space_id;
+    hid_t fapl_id, dapl_id;	/* Property Lists */
+
+    const char *filename;
+    char subfile_name[50];
+    hsize_t dims[RANK];   	/* dataset dim sizes */
+    hsize_t npoints, start[RANK], count[RANK], stride[RANK], block[RANK];
+
+    int mpi_size, mpi_rank, i;
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+
+    int *wbuf;
+    herr_t ret;         	/* Generic return value */
+
+    filename = (const char *)GetTestParameters();
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* create file access property list */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id >= 0), "");
+
+    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+    VRFY((ret == 0), "");
+
+    /* set subfiling to be 1 file per mpi rank */
+
+    /* set name of subfile */
+    sprintf(subfile_name, "Subfile_%d.h5", mpi_rank);
+
+    /* set number of process groups to be equal to the mpi size */
+    ret = H5Pset_subfiling_access(fapl_id, (unsigned)mpi_size, subfile_name, 
+                                  MPI_COMM_SELF, MPI_INFO_NULL);
+    VRFY((ret == 0), "H5Pset_subfiling_access succeeded");
+
+    /* create the file. This should also create the subfiles */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
+
+    ret = H5Pclose(fapl_id);
+    VRFY((ret == 0), "");
+
+    dims[0] = DIMS0 * mpi_size;
+    dims[1] = DIMS1;
+
+    /* create the dataspace for the master dataset */
+    sid = H5Screate_simple (2, dims, NULL);
+    VRFY((sid >= 0), "");
+
+    start[0] = DIMS0 * mpi_rank;
+    start[1] = 0;
+    block[0] = DIMS0;
+    block[1] = DIMS1;
+    count[0] = 1;
+    count[1] = 1;
+    stride[0] = 1;
+    stride[1] = 1;
+
+    /* set the selection for this dataset that this process will write to */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret == 0), "H5Sset_hyperslab succeeded");
+
+    /* create the dataset access property list */
+    dapl_id = H5Pcreate(H5P_DATASET_ACCESS);
+    VRFY((dapl_id >= 0), "");
+
+    /* Set the selection that this process will access the dataset with */
+    ret = H5Pset_subfiling_selection(dapl_id, sid);
+    VRFY((ret == 0), "");
+
+    /* create the dataset with the subfiling dapl settings */
+    did = H5Dcreate2(fid, DATASET1, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, dapl_id);
+    VRFY((did >= 0), "");
+
+    ret = H5Pclose(dapl_id);
+    VRFY((ret == 0), "");
+
     npoints = DIMS0 * DIMS1;
     wbuf = (int *)HDmalloc(npoints * sizeof(int));
 
     for(i=0 ; i<npoints ; i++)
-        wbuf[i] = mpi_rank+1 * 10;
+        wbuf[i] = (mpi_rank+1) * 10;
 
     HDassert(npoints == H5Sget_select_npoints(sid));
 
@@ -201,12 +303,351 @@ subfiling_api(void)
 
     HDfree(wbuf);
 
-    //MPI_File_delete(subfile_name, MPI_INFO_NULL);
+    return;
+error:
+    VRFY((1 == 0), "");
+} /* subf_fpp_w */
+
+void
+subf_fpp_r(void)
+{
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t did;
+    hid_t sid, mem_space_id;
+    hid_t fapl_id;      	/* Property Lists */
+
+    const char *filename;
+    char subfile_name[50];
+    hsize_t npoints, start[RANK], count[RANK], stride[RANK], block[RANK];
+
+    int mpi_size, mpi_rank, i;
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+
+    int *rbuf;
+    herr_t ret;         	/* Generic return value */
+
+    filename = (const char *)GetTestParameters();
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* create file access property list */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id >= 0), "");
+
+    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+    VRFY((ret == 0), "");
+
+    /* set subfiling to be 1 file per mpi rank */
+
+    /* set name of subfile */
+    sprintf(subfile_name, "Subfile_%d.h5", mpi_rank);
+
+    /* set number of process groups to be equal to the mpi size */
+    ret = H5Pset_subfiling_access(fapl_id, (unsigned)mpi_size, subfile_name, 
+                                  MPI_COMM_SELF, MPI_INFO_NULL);
+    VRFY((ret == 0), "H5Pset_subfiling_access succeeded");
+
+    /* open the file */
+    fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
+    VRFY((fid >= 0), "H5Fopen succeeded");
+
+    ret = H5Pclose(fapl_id);
+    VRFY((ret == 0), "");
+
+    /* create the dataset with the subfiling dapl settings */
+    did = H5Dopen2(fid, DATASET1, H5P_DEFAULT);
+    VRFY((did >= 0), "");
+
+    /* create the dataspace for the master dataset */
+    sid = H5Dget_space(did);
+    VRFY((sid >= 0), "");
+
+    start[0] = DIMS0 * mpi_rank;
+    start[1] = 0;
+    block[0] = DIMS0;
+    block[1] = DIMS1;
+    count[0] = 1;
+    count[1] = 1;
+    stride[0] = 1;
+    stride[1] = 1;
+
+    /* set the selection for this dataset that this process will write to */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret == 0), "H5Sset_hyperslab succeeded");
+
+    npoints = DIMS0 * DIMS1;
+    rbuf = (int *)HDmalloc(npoints * sizeof(int));
+
+    mem_space_id = H5Screate_simple(1, &npoints, NULL);
+    VRFY((mem_space_id >= 0), "");
+
+    ret = H5Dread(did, H5T_NATIVE_INT, mem_space_id, sid, H5P_DEFAULT, rbuf);
+    if(ret < 0) FAIL_STACK_ERROR;
+    VRFY((ret == 0), "");
+
+    for(i=0 ; i<npoints ; i++)
+        VRFY((rbuf[i] == (mpi_rank+1) * 10), "Data read verified");
+
+    ret = H5Dclose(did);
+    VRFY((ret == 0), "");
+
+    ret = H5Sclose(sid);
+    VRFY((ret == 0), "");
+
+    ret = H5Sclose(mem_space_id);
+    VRFY((ret == 0), "");
+
+    ret = H5Fclose(fid);
+    VRFY((ret == 0), "");
+
+    HDfree(rbuf);
+
+    MPI_File_delete(subfile_name, MPI_INFO_NULL);
 
     return;
 error:
     VRFY((1 == 0), "");
-}
+} /* subf_fpp_r */
+
+void
+subf_2_w(void)
+{
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t did;
+    hid_t sid, mem_space_id;
+    hid_t fapl_id, dapl_id;	/* Property Lists */
+
+    const char *filename;
+    char subfile_name[50];
+    hsize_t dims[RANK];   	/* dataset dim sizes */
+    hsize_t npoints, start[RANK], count[RANK], stride[RANK], block[RANK];
+
+    int mpi_size, mpi_rank, mrc, color, i;
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+
+    int *wbuf;
+    herr_t ret;         	/* Generic return value */
+
+    filename = (const char *)GetTestParameters();
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* create file access property list */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id >= 0), "");
+
+    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+    VRFY((ret == 0), "");
+
+    /* set subfiling to be to 2 files */
+
+    /* set name of subfile */
+    sprintf(subfile_name, "Subfile_%d.h5", mpi_rank%2);
+
+    /* splits processes into 2 groups */
+    color = mpi_rank % 2;
+    mrc = MPI_Comm_split (MPI_COMM_WORLD, color, mpi_rank, &comm);
+    VRFY((mrc==MPI_SUCCESS), "Comm_split succeeded");
+
+    /* set number of process groups to 2 */
+    ret = H5Pset_subfiling_access(fapl_id, 2, subfile_name, comm, MPI_INFO_NULL);
+    VRFY((ret == 0), "H5Pset_subfiling_access succeeded");
+
+    /* create the file. This should also create the subfiles */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
+
+    ret = H5Pclose(fapl_id);
+    VRFY((ret == 0), "");
+
+    dims[0] = DIMS0 * mpi_size;
+    dims[1] = DIMS1;
+
+    /* create the dataspace for the master dataset */
+    sid = H5Screate_simple (2, dims, NULL);
+    VRFY((sid >= 0), "");
+
+    start[0] = DIMS0 * mpi_rank;
+    start[1] = 0;
+    block[0] = DIMS0;
+    block[1] = DIMS1;
+    count[0] = 1;
+    count[1] = 1;
+    stride[0] = 1;
+    stride[1] = 1;
+
+    /* set the selection for this dataset that this process will write to */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret == 0), "H5Sset_hyperslab succeeded");
+
+    /* create the dataset access property list */
+    dapl_id = H5Pcreate(H5P_DATASET_ACCESS);
+    VRFY((dapl_id >= 0), "");
+
+    /* Set the selection that this process will access the dataset with */
+    ret = H5Pset_subfiling_selection(dapl_id, sid);
+    VRFY((ret == 0), "");
+
+    /* create the dataset with the subfiling dapl settings */
+    did = H5Dcreate2(fid, DATASET1, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, dapl_id);
+    VRFY((did >= 0), "");
+
+    ret = H5Pclose(dapl_id);
+    VRFY((ret == 0), "");
+
+    npoints = DIMS0 * DIMS1;
+    wbuf = (int *)HDmalloc(npoints * sizeof(int));
+
+    for(i=0 ; i<npoints ; i++)
+        wbuf[i] = (mpi_rank+1) * 10;
+
+    HDassert(npoints == H5Sget_select_npoints(sid));
+
+    mem_space_id = H5Screate_simple(1, &npoints, NULL);
+    VRFY((mem_space_id >= 0), "");
+
+    ret = H5Dwrite(did, H5T_NATIVE_INT, mem_space_id, sid, H5P_DEFAULT, wbuf);
+    if(ret < 0) FAIL_STACK_ERROR;
+    VRFY((ret == 0), "");
+
+    ret = H5Dclose(did);
+    VRFY((ret == 0), "");
+
+    ret = H5Sclose(sid);
+    VRFY((ret == 0), "");
+
+    ret = H5Sclose(mem_space_id);
+    VRFY((ret == 0), "");
+
+    ret = H5Fclose(fid);
+    VRFY((ret == 0), "");
+
+    HDfree(wbuf);
+
+    mrc = MPI_Comm_free(&comm);
+    VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
+
+    return;
+error:
+    VRFY((1 == 0), "");
+} /* subf_2_w */
+
+void
+subf_2_r(void)
+{
+    hid_t fid;                  /* HDF5 file ID */
+    hid_t did;
+    hid_t sid, mem_space_id;
+    hid_t fapl_id;      	/* Property Lists */
+
+    const char *filename;
+    char subfile_name[50];
+    hsize_t npoints, start[RANK], count[RANK], stride[RANK], block[RANK];
+
+    int mpi_size, mpi_rank, mrc, color, i;
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Info info = MPI_INFO_NULL;
+
+    int *rbuf;
+    herr_t ret;         	/* Generic return value */
+
+    filename = (const char *)GetTestParameters();
+
+    /* set up MPI parameters */
+    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+
+    /* create file access property list */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id >= 0), "");
+
+    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+    VRFY((ret == 0), "");
+
+    /* set subfiling to be to 2 files */
+
+    /* set name of subfile */
+    sprintf(subfile_name, "Subfile_%d.h5", mpi_rank%2);
+
+    /* splits processes into 2 groups */
+    color = mpi_rank % 2;
+    mrc = MPI_Comm_split (MPI_COMM_WORLD, color, mpi_rank, &comm);
+    VRFY((mrc==MPI_SUCCESS), "Comm_split succeeded");
+
+    /* set number of process groups to 2 */
+    ret = H5Pset_subfiling_access(fapl_id, 2, subfile_name, comm, MPI_INFO_NULL);
+    VRFY((ret == 0), "H5Pset_subfiling_access succeeded");
+
+    /* open the file */
+    fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
+    VRFY((fid >= 0), "H5Fopen succeeded");
+
+    ret = H5Pclose(fapl_id);
+    VRFY((ret == 0), "");
+
+    /* create the dataset with the subfiling dapl settings */
+    did = H5Dopen2(fid, DATASET1, H5P_DEFAULT);
+    VRFY((did >= 0), "");
+
+    /* create the dataspace for the master dataset */
+    sid = H5Dget_space(did);
+    VRFY((sid >= 0), "");
+
+    start[0] = DIMS0 * mpi_rank;
+    start[1] = 0;
+    block[0] = DIMS0;
+    block[1] = DIMS1;
+    count[0] = 1;
+    count[1] = 1;
+    stride[0] = 1;
+    stride[1] = 1;
+
+    /* set the selection for this dataset that this process will write to */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret == 0), "H5Sset_hyperslab succeeded");
+
+    npoints = DIMS0 * DIMS1;
+    rbuf = (int *)HDmalloc(npoints * sizeof(int));
+
+    mem_space_id = H5Screate_simple(1, &npoints, NULL);
+    VRFY((mem_space_id >= 0), "");
+
+    ret = H5Dread(did, H5T_NATIVE_INT, mem_space_id, sid, H5P_DEFAULT, rbuf);
+    if(ret < 0) FAIL_STACK_ERROR;
+    VRFY((ret == 0), "");
+
+    for(i=0 ; i<npoints ; i++)
+        VRFY((rbuf[i] == (mpi_rank+1) * 10), "Data read verified");
+
+    ret = H5Dclose(did);
+    VRFY((ret == 0), "");
+
+    ret = H5Sclose(sid);
+    VRFY((ret == 0), "");
+
+    ret = H5Sclose(mem_space_id);
+    VRFY((ret == 0), "");
+
+    ret = H5Fclose(fid);
+    VRFY((ret == 0), "");
+
+    HDfree(rbuf);
+
+    mrc = MPI_Comm_free(&comm);
+    VRFY((mrc==MPI_SUCCESS), "MPI_Comm_free");
+
+    MPI_File_delete(subfile_name, MPI_INFO_NULL);
+
+    return;
+error:
+    VRFY((1 == 0), "");
+} /* subf_2_r */
 
 int main(int argc, char **argv)
 {
@@ -260,7 +701,13 @@ int main(int argc, char **argv)
 	    printf("    %s\n", filenames[i]);
     }
 
-    AddTest("subfiling_api", subfiling_api, NULL, "test subfiling API", PARATESTFILE);
+    AddTest("subf_api", subf_api, NULL, "test subfiling API", PARATESTFILE);
+    AddTest("subf_fpp_w", subf_fpp_w, NULL, "test subfiling I/O (file per proc) - Write", PARATESTFILE);
+    AddTest("subf_fpp_r", subf_fpp_r, NULL, "test subfiling I/O (file per proc)- Read", PARATESTFILE);
+    if(mpi_size > 1) {
+        AddTest("subf_2_w", subf_2_w, NULL, "test subfiling I/O to 2 files - Write", PARATESTFILE);
+        AddTest("subf_2_r", subf_2_r, NULL, "test subfiling I/O to 2 files - Read", PARATESTFILE);
+    }
 
     /* Display testing information */
     TestInfo(argv[0]);

@@ -231,9 +231,9 @@ H5MM_sanity_check_all(void)
 void
 H5MM_final_sanity_check(void)
 {
-    printf("MM Bytes = %llu\n", H5MM_curr_alloc_bytes_s);
-    printf("MM count = %llu\n", H5MM_curr_alloc_blocks_count_s);
-    printf("MM address = %p\n", H5MM_block_head_s.next);
+    //printf("MM Bytes = %llu\n", H5MM_curr_alloc_bytes_s);
+    //printf("MM count = %llu\n", H5MM_curr_alloc_blocks_count_s);
+    //printf("MM address = %p\n", H5MM_block_head_s.next);
     //HDassert(0 == H5MM_curr_alloc_bytes_s);
     //HDassert(0 == H5MM_curr_alloc_blocks_count_s);
     //HDassert(H5MM_block_head_s.next == &H5MM_block_head_s);
