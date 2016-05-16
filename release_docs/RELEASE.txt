@@ -1,4 +1,4 @@
-HDF5 version 1.10.0 released on 2016-03-30
+HDF5 version 1.10.0-patch1 released on 2016-05-16
 ================================================================================
 
 
@@ -466,7 +466,7 @@ They are built with the configure process unless specified otherwise.
     (NASA G-ADA)                  xlC/xlC_r 10.1.0.5
                                   xlf90/xlf90_r 12.1.0.6
 
-    Linux 2.6.32-573.18.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 2.6.32-573.22.1.el6     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (mayll/platypus)                 Version 4.4.7 20120313 (Red Hat 4.4.7-16)
                                      Version 4.9.3, Version 5.2.0
@@ -478,7 +478,7 @@ They are built with the configure process unless specified otherwise.
                                      Version 15.0.3.187 Build 20150407
                                   MPICH 3.1.4 compiled with GCC 4.9.3
 
-    Linux 2.6.32-504.8.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
+    Linux 2.6.32-573.18.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
     #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
     (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
                                   IBM XL C/C++ V13.1
@@ -514,19 +514,19 @@ They are built with the configure process unless specified otherwise.
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
 
     Mac OS X Mt. Lion 10.8.5      Apple clang/clang++ version 5.1 from Xcode 5.1
-    64-bit                  gfortran GNU Fortran (GCC) 4.8.2
+    64-bit                        gfortran GNU Fortran (GCC) 4.8.2
     (swallow/kite)                Intel icc/icpc/ifort version 15.0.3
 
-    Mac OS X Mavericks 10.9.5     Apple clang/clang++ version 6.0 from Xcode 6.2.0
-    64-bit                  gfortran GNU Fortran (GCC) 4.9.2
+    Mac OS X Mavericks 10.9.5     Apple clang/clang++ version 6.0 from Xcode 6.2
+    64-bit                        gfortran GNU Fortran (GCC) 4.9.2
     (wren/quail)                  Intel icc/icpc/ifort version 15.0.3
 
-    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.0 from Xcode 7.0.0
-    64-bit                  gfortran GNU Fortran (GCC) 4.9.2
+    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.0 from Xcode 7.0
+    64-bit                        gfortran GNU Fortran (GCC) 4.9.2
     (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
 
-    Mac OS X El Capitan 10.11.3     Apple clang/clang++ version 7.0.2 from Xcode 7.0.2
-    64-bit                  gfortran GNU Fortran (GCC) 5.2.0
+    Mac OS X El Capitan 10.11.4   Apple clang/clang++ version 7.3.0 from Xcode 7.3
+    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
     (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
 
 
