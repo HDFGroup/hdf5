@@ -352,6 +352,19 @@ Issues Addressed in this Release Since 1.10.0
        Fixed.
        (ADB - 2016/04/21, HDFFV-9770)
 
+     - Configure fails to detect valid real KINDs on FreeBSD 9.3 (i386) with Fortran enabled.
+
+       Fixed. Added the exponential option to SELECTED_REAL_KIND to distinguish 
+       KINDs of same precision
+
+       (MSB - 2016/05/14,HDFFV-9912)
+
+     - Configure fails in sed command on FreeBSD 9.3 (i386) with Fortran enabled.
+  
+       Fixed.
+
+       (MSB - 2016/05/14,HDFFV-9912)
+
 
 
 Issues Addressed in this Release Since alpha1
