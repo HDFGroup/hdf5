@@ -363,6 +363,11 @@ Issues Addressed in this Release Since 1.10.0
        Fixed.
        (MSB - 2016/05/14,HDFFV-9912)
 
+     - Compile time error in H5f90global.F90 with IBM XL Fortran 14.1.0.13 on BG/Q with Fortran
+       enabled.
+    
+       Fixed.
+       (MSB - 2016/05/16,HDFFV-9917)
 
 
 Issues Addressed in this Release Since alpha1
