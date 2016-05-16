@@ -356,13 +356,11 @@ Issues Addressed in this Release Since 1.10.0
 
        Fixed. Added the exponential option to SELECTED_REAL_KIND to distinguish 
        KINDs of same precision
-
        (MSB - 2016/05/14,HDFFV-9912)
 
      - Configure fails in sed command on FreeBSD 9.3 (i386) with Fortran enabled.
   
        Fixed.
-
        (MSB - 2016/05/14,HDFFV-9912)
 
 
