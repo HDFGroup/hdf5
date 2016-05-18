@@ -30,9 +30,9 @@
  * PURPOSE
  *  Call H5Screate_simple to create a dataspace
  * INPUTS
- *  rank - number of dimensions of dataspace
- *  dims - array of the size of each dimension
-                maxdims - an array of the maximum size of each dimension
+ *  rank     - number of dimensions of dataspace
+ *  dims     - array of the size of each dimension
+ *  maxdims  - an array of the maximum size of each dimension
  * OUTPUTS
  *  space_id - identifier of the created dataspace
  * RETURNS
@@ -110,7 +110,7 @@ h5sclose_c ( hid_t_f *space_id )
  * INPUTS
  *  classtype - type of the dataspace class
  * OUTPUTS
- *  space_id - identifier of the created dataspace
+ *  space_id  - identifier of the created dataspace
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -142,7 +142,7 @@ h5screate_c ( int_f *classtype, hid_t_f *space_id )
  * PURPOSE
  *  Call H5Scopy to copy dataspace
  * INPUTS
- *  space_id - identifier of the dataspace to be copied
+ *  space_id     - identifier of the dataspace to be copied
  * OUTPUTS
  *  new_space_id - identifier of the new datspace
  * RETURNS
@@ -179,10 +179,10 @@ h5scopy_c( hid_t_f *space_id , hid_t_f *new_space_id)
  *  get the the number of hyperslab blocks in
  *  the current dataspace selection if successful
  * INPUTS
- *  space_id - identifier of the dataspace
+ *  space_id   - identifier of the dataspace
  * OUTPUTS
  *  num_blocks -  number of hyperslab blocks in
- *  the current dataspace selection
+ *                the current dataspace selection
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -217,10 +217,10 @@ h5sget_select_hyper_nblocks_c( hid_t_f *space_id , hssize_t_f * num_blocks)
  *  get the the number of element points in
  *  the current dataspace selection if successful
  * INPUTS
- *  space_id - identifier of the dataspace
+ *  space_id   - identifier of the dataspace
  * OUTPUTS
  *  num_points -  number of element points in
- *  the current dataspace selection
+ *                the current dataspace selection
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -259,10 +259,10 @@ h5sget_select_elem_npoints_c( hid_t_f *space_id , hssize_t_f * num_points)
  *  blocks are inserted, the buffer
  *  will contain only as many blocks as fit.
  * INPUTS
- *  space_id - identifier of the dataspace
+ *  space_id   - identifier of the dataspace
  *  startblock - Hyperslab block to start with
  *  num_blocks -  number of hyperslab blocks in
- *  the current dataspace selection
+ *                the current dataspace selection
  * OUTPUTS
  *  buf - List of hyperslab blocks selected
  * RETURNS
@@ -312,9 +312,9 @@ h5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
   for (i=0; i < c_num_blocks; i++) {
     for (j=0; j < rank; j++) {
       for (k=0; k < rank; k++) {
-	int t= (m + rank - k - 1);
-	buf[n] = (hsize_t_f)c_buf[t]+1;
-	n = n + 1;
+        int t= (m + rank - k - 1);
+        buf[n] = (hsize_t_f)c_buf[t]+1;
+        n = n + 1;
       }
       m = m + rank;
     }
@@ -336,8 +336,8 @@ h5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f *startblock,
  *  space_id - identifier of the dataspace
  * OUTPUTS
  *  start -  Starting coordinates of the bounding box
- *  end -  Ending coordinates of the bounding box,
- *  i.e., the coordinates of the diagonally opposite corne
+ *  end   -  Ending coordinates of the bounding box,
+ *           i.e., the coordinates of the diagonally opposite corne
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -390,9 +390,9 @@ done:
  *  points are inserted, the buffer
  *  will contain only as many points as fit.
  * INPUTS
- *  space_id - identifier of the dataspace
+ *  space_id   - identifier of the dataspace
  *  startpoint - Element point to start with
- *  numpoints -  Number of element points to get
+ *  numpoints  -  Number of element points to get
  * OUTPUTS
  *  buf - List of element points selected
  * RETURNS
@@ -516,8 +516,8 @@ h5sselect_none_c ( hid_t_f *space_id )
  * INPUTS
  *  space_id - identifier of the dataspace
  * OUTPUTS
- *  flag - 0 if not valid selection, 1 if is valid selection,
- *  and negative on failure.
+ *  flag     - 0 if not valid selection, 1 if is valid selection,
+ *             and negative on failure.
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -552,7 +552,7 @@ h5sselect_valid_c ( hid_t_f *space_id , int_f *flag )
  * INPUTS
  *  space_id - identifier of the dataspace
  * OUTPUTS
- *  npoints - number of points in a dataspace
+ *  npoints  - number of points in a dataspace
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -587,7 +587,7 @@ h5sget_simple_extent_npoints_c ( hid_t_f *space_id , hsize_t_f *npoints )
  * INPUTS
  *  space_id - identifier of the dataspace
  * OUTPUTS
- *  npoints - number of points in a dataspace selection
+ *  npoints  - number of points in a dataspace selection
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -655,7 +655,7 @@ h5sget_simple_extent_ndims_c ( hid_t_f *space_id , int_f *ndims )
  *  Call H5Sget_simple_extent_type to determine the class type
  *  of a dataspace
  * INPUTS
- *  space_id - identifier of the dataspace
+ *  space_id  - identifier of the dataspace
  * OUTPUTS
  *  classtype - class type; possible values are:
  *              H5S_SCALAR_F (0), H5S_SIMPLE_F (1), H5S_NULL_F (2)
@@ -697,7 +697,7 @@ h5sget_simple_extent_type_c ( hid_t_f *space_id , int_f *classtype)
  *  dataspace
  * INPUTS
  *  space_id - identifier of the dataspace
- *  offset - offset array
+ *  offset   - offset array
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -743,8 +743,8 @@ done:
  *  Call H5Sset_extent_simple to set or reset size of
  *  existing  dataspace
  * INPUTS
- *  space_id - identifier of the dataspace
- *  rank - dataspace rank
+ *  space_id     - identifier of the dataspace
+ *  rank         - dataspace rank
  *  current_size - array with the new dimension sizes
  *  maximum_size - aray with maximum sizes of dimensions
  * RETURNS
@@ -791,7 +791,7 @@ done:
  * INPUTS
  *  space_id - identifier of the dataspace
  * OUTPUTS
- *  dims - array with the dimension sizes
+ *  dims    - array with the dimension sizes
  *  maxdims - aray with maximum sizes of dimensions
  * RETURNS
  *  number of dataspace dimensions (rank) on success, -1 on failure
@@ -845,8 +845,8 @@ done:
  * INPUTS
  *  space_id - identifier of the dataspace
  * OUTPUTS
- *  flag - 0 if not simple, 1 if is simple,
- *  and negative on failure.
+ *  flag     - 0 if not simple, 1 if is simple,
+ *             and negative on failure.
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -879,7 +879,7 @@ h5sis_simple_c ( hid_t_f *space_id , int_f *flag )
  * PURPOSE
  *  Call H5Sextent_copy to copy an extent of dataspace
  * INPUTS
- *  dest_space_id - identifier of the destination dataspace
+ *  dest_space_id   - identifier of the destination dataspace
  *  source_space_id - identifier of the source dataspace
  * RETURNS
  *  0 on success, -1 on failure
@@ -945,12 +945,12 @@ h5sset_extent_none_c ( hid_t_f *space_id )
  * INPUTS
  *  space_id - identifier of the dataspace
  *  operator - defines how the new selection is combined
- *  with the previous one; current values are
- *              H5S_SELECT_SET_F (0) and H5S_SELECT_OR_F (1)
- *  start - offset of start of hyperslab
- *  count - number of blocks included in the hyperslab
- *  stride - hyperslab stride (interval between blocks)
- *  block - size of block in the hyperslab
+ *             with the previous one; current values are
+ *             H5S_SELECT_SET_F (0) and H5S_SELECT_OR_F (1)
+ *  start    - offset of start of hyperslab
+ *  count    - number of blocks included in the hyperslab
+ *  stride   - hyperslab stride (interval between blocks)
+ *  block    - size of block in the hyperslab
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -1006,10 +1006,10 @@ done:
  * INPUTS
  *  space_id - identifier of the dataspace
  *  operator - defines how the new selection is combined
- *  start - offset of start of hyperslab
- *  count - number of blocks included in the hyperslab
- *  stride - hyperslab stride (interval between blocks)
- *  block - size of block in the hyperslab
+ *  start    - offset of start of hyperslab
+ *  count    - number of blocks included in the hyperslab
+ *  stride   - hyperslab stride (interval between blocks)
+ *  block    - size of block in the hyperslab
  * OUTPUTS
  *  hyper_id - identifier for the new dataspace
  * RETURNS
@@ -1087,10 +1087,10 @@ DONE:
  *  Call H5Scombine_ select
  * INPUTS
  *  space1_id - identifier of the first dataspace
- *  operator - defines how the new selection is combined
+ *  operator  - defines how the new selection is combined
  *  space2_id - identifier of the second dataspace
  * OUTPUTS
- *  ds_id   - identifier for the new dataspace
+ *  ds_id     - identifier for the new dataspace
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -1199,12 +1199,12 @@ h5sget_select_type_c ( hid_t_f *space_id , int_f *type)
  * PURPOSE
  *  Call H5Sselect_elements to select elements of a dataspace
  * INPUTS
- *  space_id - identifier of the dataspace
- *  operator - defines how the new selection is combined
- *  with the previous one; current values are
- *              H5S_SELECT_SET_F (0)
+ *  space_id  - identifier of the dataspace
+ *  operator  - defines how the new selection is combined
+ *             with the previous one; current values are
+ *                 H5S_SELECT_SET_F (0)
  *  nelements - number of elements in the selection
- *  coord - arrays with the elements coordinates
+ *  coord     - arrays with the elements coordinates
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -1238,7 +1238,7 @@ h5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsiz
   if(!c_coord) return ret_value;
   for (i=0; i< (size_t)*nelements; i++) {
       for (j = 0; j < rank; j++) {
-	c_coord[(size_t)j+i*(size_t)rank] = (hsize_t)coord[(size_t)j + i*(size_t)rank];
+        c_coord[(size_t)j+i*(size_t)rank] = (hsize_t)coord[(size_t)j + i*(size_t)rank];
       }
   }
 
@@ -1255,12 +1255,9 @@ h5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsiz
  * PURPOSE
  *  Call H5Sdecode
  * INPUTS
- *
- *		buf     - Buffer for the data space object to be decoded.
+ *  buf    - Buffer for the data space object to be decoded.
  * OUTPUTS
- *
  *  obj_id  - Object_id (non-negative)
- *
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR
@@ -1301,9 +1298,8 @@ h5sdecode_c ( _fcd buf, hid_t_f *obj_id )
  * PURPOSE
  *  Call H5Sencode
  * INPUTS
- *
  *  obj_id - Identifier of the object to be encoded.
- *		 buf - Buffer for the object to be encoded into.
+ *  buf    - Buffer for the object to be encoded into.
  *  nalloc - The size of the allocated buffer.
  * RETURNS
  *  0 on success, -1 on failure
@@ -1370,11 +1366,9 @@ h5sencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc )
  * PURPOSE
  *  Call H5Sextent_equal
  * INPUTS
- *
- *		space1_id - First dataspace identifier.
+ *  space1_id - First dataspace identifier.
  *  space2_id - Second dataspace identifier.
  * OUTPUTS
- *
  *  equal - TRUE if equal, FALSE if unequal.
  * RETURNS
  *  0 on success, -1 on failure
