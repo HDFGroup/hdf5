@@ -358,6 +358,10 @@ Issues Addressed in this Release Since 1.10.0
        KINDs of same precision
        (MSB - 2016/05/14,HDFFV-9912)
 
+
+     - Corrected the f90 H5AWRITE_F integer interface's buf to be INTENT(IN).
+       (MSB - 2016/05/14) 
+
      - Configure fails in sed command on FreeBSD 9.3 (i386) with Fortran enabled.
   
        Fixed.
@@ -368,6 +372,11 @@ Issues Addressed in this Release Since 1.10.0
     
        Fixed.
        (MSB - 2016/05/16,HDFFV-9917)
+
+     - A cmake build with Fortran enabled does not install module h5fortkit
+
+       Fixed. 
+       (MSB - 2016/05/23,HDFFV-9923)
 
 
 Issues Addressed in this Release Since alpha1
