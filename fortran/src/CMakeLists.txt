@@ -271,6 +271,7 @@ install (
 set (mod_files
     ${MOD_BUILD_DIR}/h5fortran_types.mod
     ${MOD_BUILD_DIR}/hdf5.mod
+    ${MOD_BUILD_DIR}/h5fortkit.mod
     ${MOD_BUILD_DIR}/h5global.mod
     ${MOD_BUILD_DIR}/h5a.mod
     ${MOD_BUILD_DIR}/h5d.mod
@@ -301,6 +302,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   set (modsh_files
       ${MODSH_BUILD_DIR}/h5fortran_types.mod
       ${MODSH_BUILD_DIR}/hdf5.mod
+      ${MODSH_BUILD_DIR}/h5fortkit.mod
       ${MODSH_BUILD_DIR}/h5global.mod
       ${MODSH_BUILD_DIR}/h5a.mod
       ${MODSH_BUILD_DIR}/h5d.mod
