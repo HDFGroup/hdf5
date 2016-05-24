@@ -34,15 +34,10 @@
 /* private function declarations: */
 
 static hbool_t check_fapl_mdc_api_calls(void);
-
 static hbool_t check_file_mdc_api_calls(void);
-
 static hbool_t mdc_api_call_smoke_check(int express_test);
-
 static H5AC_cache_config_t * init_invalid_configs(void);
-
 static hbool_t check_fapl_mdc_api_errs(void);
-
 static hbool_t check_file_mdc_api_errs(void);
 
 
@@ -498,7 +493,7 @@ check_fapl_mdc_api_calls(void)
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
     }
 
-    return !pass;
+    return pass;
 
 } /* check_fapl_mdc_api_calls() */
 
@@ -854,7 +849,7 @@ check_file_mdc_api_calls(void)
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
     }
 
-    return !pass;
+    return pass;
 
 } /* check_file_mdc_api_calls() */
 
@@ -1013,16 +1008,16 @@ mdc_api_call_smoke_check(int express_test)
 
     TESTING("MDC API smoke check");
 
+    pass = TRUE;
+
     if ( express_test > 0 ) {
 
         SKIPPED();
 
         HDfprintf(stdout, "     Long tests disabled.\n");
 
-        return 0;
+        return pass;
     }
-
-    pass = TRUE;
 
     /* Open a file with the default FAPL.  Verify that the cache is
      * configured as per the default both by looking at its internal
@@ -1537,7 +1532,7 @@ mdc_api_call_smoke_check(int express_test)
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
     }
 
-    return !pass;
+    return pass;
 
 } /* mdc_api_call_smoke_check() */
 
@@ -1910,7 +1905,7 @@ check_fapl_mdc_api_errs(void)
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
     }
 
-    return !pass;
+    return pass;
 
 } /* check_fapl_mdc_api_errs() */
 
@@ -2253,7 +2248,7 @@ check_file_mdc_api_errs(void)
         HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
     }
 
-    return !pass;
+    return pass;
 
 } /* check_file_mdc_api_errs() */
 
@@ -2297,26 +2292,30 @@ main(void)
         return EXIT_FAILURE;
     }
 
-#if 1
-    if(!check_fapl_mdc_api_calls())
+    if ( !check_fapl_mdc_api_calls() ) {
+
         nerrs += 1;
-#endif
-#if 1
-    if(!check_file_mdc_api_calls())
+    }
+
+    if ( !check_file_mdc_api_calls() ) {
+
         nerrs += 1;
-#endif
-#if 1
-    if(!mdc_api_call_smoke_check(express_test))
+    }
+
+    if ( !mdc_api_call_smoke_check(express_test) ) {
+
         nerrs += 1;
-#endif
-#if 1
-    if(!check_fapl_mdc_api_errs())
+    }
+
+    if ( !check_fapl_mdc_api_errs() ) {
+
         nerrs += 1;
-#endif
-#if 1
-    if(!check_file_mdc_api_errs())
+    }
+
+    if ( !check_file_mdc_api_errs() ) {
+
         nerrs += 1;
-#endif
+    }
 
     if ( invalid_configs ) {
 
