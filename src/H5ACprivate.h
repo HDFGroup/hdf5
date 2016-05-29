@@ -365,6 +365,7 @@ H5_DLL herr_t H5AC_get_entry_ring(const H5F_t *f, haddr_t addr, H5AC_ring_t *rin
 H5_DLL herr_t H5AC_set_ring(hid_t dxpl_id, H5AC_ring_t ring, H5P_genplist_t **dxpl,
     H5AC_ring_t *orig_ring);
 H5_DLL herr_t H5AC_reset_ring(H5P_genplist_t *dxpl, H5AC_ring_t orig_ring);
+H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);

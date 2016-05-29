@@ -9902,6 +9902,59 @@ H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag)
 
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_expunge_tag_type_metadata
+ *
+ * Purpose:     Search and expunge from the cache entries associated
+ *              with 'tag' and type id.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Vailin Choi; May 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags)
+{
+    unsigned u;                 	/* Local index variable */
+    H5C_t *cache_ptr = NULL;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+    HDassert(f->shared->cache->magic == H5C__H5C_T_MAGIC);
+
+    /* Get cache pointer */
+    cache_ptr = f->shared->cache;
+
+    /* Iterate through hash table entries, expunge those with specified tag and type id */
+    for(u = 0; u < H5C__HASH_TABLE_LEN; u++) {
+        H5C_cache_entry_t *entry_ptr;   /* Entry pointer */
+
+	entry_ptr = cache_ptr->index[u];
+	while(entry_ptr != NULL) {
+	    /* Found one with the same tag and type id */
+	    if(entry_ptr->tag == tag && entry_ptr->type->id == type_id) {
+
+		if(H5C_expunge_entry(f, dxpl_id, entry_ptr->type, entry_ptr->addr, flags) < 0)
+		    HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "H5C_expunge_entry() failed.")
+	    } /* end if */
+
+	    entry_ptr = entry_ptr->ht_next;
+	} /* end while */
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_expunge_tag_type_metadata */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_get_entry_ring
  *
  * Purpose:     Given a file address, retrieve the ring for an entry at that

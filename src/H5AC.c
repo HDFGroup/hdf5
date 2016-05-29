@@ -2464,6 +2464,41 @@ done:
 } /* H5AC_flush_tagged_metadata */
 
 
+
+/*------------------------------------------------------------------------------
+ * Function:    H5AC_expunge_tag_type_metadata()
+ *
+ * Purpose:     Wrapper for cache level function which expunge entries with
+ *              a specific tag and type id.
+ * 
+ * Return:      SUCCEED on success, FAIL otherwise.
+ *
+ * Programmer:  Vailin Choi; May 2016
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags)
+{
+    /* Variable Declarations */
+    herr_t ret_value = SUCCEED;
+ 
+    /* Function Enter Macro */   
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Assertions */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Call cache level function to expunge entries with specified tag and type id */
+    if(H5C_expunge_tag_type_metadata(f, dxpl_id, tag, type_id, flags)<0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot expunge tagged type entries")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_expunge_tag_type_metadata*/
+
 #if H5AC_DO_TAGGING_SANITY_CHECKS
 
 /*-------------------------------------------------------------------------

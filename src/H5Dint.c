@@ -2848,10 +2848,12 @@ done:
 herr_t
 H5D__format_convert(H5D_t *dataset, hid_t dxpl_id)
 {
-    H5O_t *oh = NULL;                   	/* Pointer to dataset's object header */
     H5D_chk_idx_info_t new_idx_info;    	/* Index info for the new layout */
     H5D_chk_idx_info_t idx_info;        	/* Index info for the current layout */
     H5O_layout_t newlayout;			/* The new layout */
+    hbool_t init_new_index = FALSE;		/* Indicate that the new chunk index is initialized */
+    hbool_t delete_old_layout = FALSE;		/* Indicate that the old layout message is deleted */
+    hbool_t add_new_layout = FALSE;		/* Indicate that the new layout message is added */
     herr_t ret_value = SUCCEED;         	/* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, dataset->oloc.addr, FAIL)
@@ -2888,37 +2890,42 @@ H5D__format_convert(H5D_t *dataset, hid_t dxpl_id)
 	    new_idx_info.storage = &newlayout.storage.u.chunk;
 
 	    /* Initialize version 1 B-tree */
-	    if(newlayout.storage.u.chunk.ops->init && (newlayout.storage.u.chunk.ops->init)(&new_idx_info, dataset->shared->space, dataset->oloc.addr) < 0)
+	    if(new_idx_info.storage->ops->init && 
+              (new_idx_info.storage->ops->init)(&new_idx_info, dataset->shared->space, dataset->oloc.addr) < 0)
 		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information")
-    
+	    init_new_index = TRUE;
+
 	    /* If the current chunk index exists */
-	    if(H5F_addr_defined(dataset->shared->layout.storage.u.chunk.idx_addr)) {
+	    if(H5F_addr_defined(idx_info.storage->idx_addr)) {
+
 		/* Create v1 B-tree chunk index */
-		if((newlayout.storage.u.chunk.ops->create)(&new_idx_info) < 0)
+		if((new_idx_info.storage->ops->create)(&new_idx_info) < 0)
 		    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create chunk index")
 
 		/* Iterate over the chunks in the current index and insert the chunk addresses 
 		 * into the version 1 B-tree chunk index */
 		if(H5D__chunk_format_convert(dataset, &idx_info, &new_idx_info) < 0)
-		    HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate over chunk index to chunk info")
+		    HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to iterate/convert chunk index")
 	    } /* end if */
 
-	    /* Release the old (i.e. current) chunk index */
-	    if(dataset->shared->layout.storage.u.chunk.ops->dest && (dataset->shared->layout.storage.u.chunk.ops->dest)(&idx_info) < 0)
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
-
-	    /* Delete the "layout" message */
-	    if(H5O_msg_remove(&dataset->oloc, H5O_LAYOUT_ID, H5O_ALL, TRUE, dxpl_id) < 0)
+	    /* Delete the old "current" layout message */
+	    if(H5O_msg_remove(&dataset->oloc, H5O_LAYOUT_ID, H5O_ALL, FALSE, dxpl_id) < 0)
 		HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete layout message")
 
-	    HDmemcpy(&dataset->shared->layout, &newlayout, sizeof(H5O_layout_t));
-
-	    if(NULL == (oh = H5O_pin(&dataset->oloc, dxpl_id)))
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+	    delete_old_layout = TRUE;
 
 	    /* Append the new layout message to the object header */
-	    if(H5O_msg_append_oh(dataset->oloc.file, dxpl_id, oh, H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &newlayout) < 0)
-		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update old fill value header message")
+	    if(H5O_msg_create(&dataset->oloc, H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &newlayout, dxpl_id) < 0)
+		HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout header message")
+
+	    add_new_layout = TRUE;
+
+	    /* Release the old (current) chunk index */
+	    if(idx_info.storage->ops->dest && (idx_info.storage->ops->dest)(&idx_info) < 0)
+		HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
+
+	    /* Copy the new layout to the dataset's layout */
+	    HDmemcpy(&dataset->shared->layout, &newlayout, sizeof(H5O_layout_t));
 
 	    break;
 
@@ -2935,17 +2942,41 @@ H5D__format_convert(H5D_t *dataset, hid_t dxpl_id)
 
         case H5D_LAYOUT_ERROR:
         case H5D_NLAYOUTS:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset layout type")
-            
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset layout type")
+
 	default: 
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown dataset layout type")
     } /* end switch */
 
 done:
-    /* Release pointer to object header */
-    if(oh != NULL)
-        if(H5O_unpin(oh) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+    if(ret_value < 0 && dataset->shared->layout.type == H5D_CHUNKED) {
+	/* Remove new layout message */
+	if(add_new_layout)
+	    if(H5O_msg_remove(&dataset->oloc, H5O_LAYOUT_ID, H5O_ALL, FALSE, dxpl_id) < 0)
+		HDONE_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete layout message")
+
+	/* Add back old layout message */
+	if(delete_old_layout)
+	    if(H5O_msg_create(&dataset->oloc, H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &dataset->shared->layout, dxpl_id) < 0)
+		HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to add layout header message")
+
+	/* Clean up v1 b-tree chunk index */
+	if(init_new_index) {
+	    if(H5F_addr_defined(new_idx_info.storage->idx_addr)) {
+		/* Check for valid address i.e. tag */
+		if(!H5F_addr_defined(dataset->oloc.addr))
+		    HDONE_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "address undefined")
+
+		/* Expunge from cache all v1 B-tree type entries associated with tag */
+		if(H5AC_expunge_tag_type_metadata(dataset->oloc.file, dxpl_id, dataset->oloc.addr, H5AC_BT_ID, H5AC__NO_FLAGS_SET))
+		    HDONE_ERROR(H5E_DATASET, H5E_CANTEXPUNGE, FAIL, "unable to expunge index metadata")
+	    } /* end if */
+
+	    /* Delete v1 B-tree chunk index */
+	    if(new_idx_info.storage->ops->dest && (new_idx_info.storage->ops->dest)(&new_idx_info) < 0)
+		HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to release chunk index info")
+	} /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5D__format_convert() */

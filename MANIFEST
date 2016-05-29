@@ -1247,6 +1247,7 @@
 ./tools/h5format_convert/h5format_convert.c
 ./tools/h5format_convert/testfiles/h5fc_v_n_all.ddl
 ./tools/h5format_convert/testfiles/h5fc_v_bt1.ddl
+./tools/h5format_convert/testfiles/h5fc_v_err.ddl
 ./tools/h5format_convert/testfiles/h5fc_v_non_chunked.ddl
 ./tools/h5format_convert/testfiles/h5fc_d_file.ddl
 ./tools/h5format_convert/testfiles/h5fc_v_ndata_bt1.ddl
@@ -1259,6 +1260,7 @@
 ./tools/h5format_convert/testfiles/h5fc_nonexistfile.ddl
 ./tools/h5format_convert/testfiles/h5fc_non_v3.h5
 ./tools/h5format_convert/testfiles/h5fc_edge_v3.h5
+./tools/h5format_convert/testfiles/h5fc_err_level.h5
 ./tools/h5format_convert/testfiles/h5fc_ext1_f.h5
 ./tools/h5format_convert/testfiles/h5fc_ext1_i.h5
 ./tools/h5format_convert/testfiles/h5fc_ext1_s.h5

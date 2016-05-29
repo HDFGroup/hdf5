@@ -312,6 +312,11 @@ H5B__serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
 
     /* node type and level */
     *image++ = (uint8_t)shared->type->id;
+
+    /* 2^8 limit: only 1 byte is used to store node level */
+    if(bt->level >= HDpow(2, LEVEL_BITS))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTENCODE, FAIL, "unable to encode node level")
+
     H5_CHECK_OVERFLOW(bt->level, unsigned, uint8_t);
     *image++ = (uint8_t)bt->level;
 

@@ -1970,6 +1970,7 @@ H5_DLL herr_t H5C_expunge_entry(H5F_t *f, hid_t dxpl_id,
     const H5C_class_t *type, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag); 
+H5_DLL herr_t H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
 #if H5C_DO_TAGGING_SANITY_CHECKS
 herr_t H5C_verify_tag(int id, haddr_t tag, H5C_tag_globality_t globality);
 #endif

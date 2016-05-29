@@ -99,6 +99,7 @@ $SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_if.h5
 $SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_is.h5
 $SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_sf.h5
 $SRC_H5FORMCONV_TESTFILES/old_h5fc_ext3_isf.h5
+$SRC_H5FORMCONV_TESTFILES/h5fc_err_level.h5
 "
 
 LIST_OTHER_TEST_FILES="
@@ -128,6 +129,7 @@ $SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_if.ddl
 $SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_is.ddl
 $SRC_H5FORMCONV_TESTFILES/old_h5fc_ext2_sf.ddl
 $SRC_H5FORMCONV_TESTFILES/old_h5fc_ext3_isf.ddl
+$SRC_H5FORMCONV_TESTFILES/h5fc_v_err.ddl
 "
 
 #
@@ -366,6 +368,11 @@ TOOLTEST_OUT h5fc_v_all.ddl old_h5fc_ext_none.h5 -v
 # h5format_convert -v -n h5fc_non_v3.h5 (verbose, noop, all datasets)
 TOOLTEST_OUT h5fc_v_n_1d.ddl h5fc_ext_none.h5 -d /DSET_EA -v -n
 TOOLTEST_OUT h5fc_v_n_all.ddl h5fc_non_v3.h5 -v -n
+#
+#
+#
+# h5format_convert -v h5fc_err_level.h5 (error encountered in converting the dataset)
+TOOLTEST_OUT h5fc_v_err.ddl h5fc_err_level.h5 -v
 #
 #
 #

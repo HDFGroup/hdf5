@@ -28,6 +28,7 @@
 
 #define NON_V3_FILE		"h5fc_non_v3.h5"
 #define EDGE_V3_FILE		"h5fc_edge_v3.h5"
+#define ERR_LEVEL_FILE		"h5fc_err_level.h5"
 
 const char *FILENAME[] = {
     "h5fc_ext1_i.h5",	/* 0 */
@@ -56,8 +57,13 @@ const char *FILENAME[] = {
 #define DSET_NDATA_NONE		"DSET_NDATA_NONE"
 
 #define DSET_EDGE		"DSET_EDGE"
+#define DSET_ERR		"DSET_ERR"
 
 #define ISTORE_IK  64
+#define ISTORE_ERR 1 
+
+#define NUM 500
+
 
 /*
  * Function: gen_non() 
@@ -378,6 +384,146 @@ error:
 
 
 /*
+ * Function: gen_err_level() 
+ *
+ * Generate a file to test the situtation described in HDFFV-9434:
+ *	Exceed the limit of v1-btree level
+ *
+ *	Create a file with H5Pset_istore_k(fcpl, 1).
+ *	Create a chunked dataset with extensible array chunk index and 
+ *	appends many chunks to the dataset.
+ *
+ *	When h5format_convert tries to convert the dataset with
+ *	extensive array index in the file to v1-btree chunk index, 
+ *	it will insert the dataset chunks to the v1-btree chunk index.
+ *	The tree will split quickly due to the 'K' value of 1 and the 
+ *	tree level will eventually hit the maximum: 2^8(256).
+ */
+static void
+gen_err_level(const char *fname)
+{
+    hid_t fid = -1;	    	/* file ID */
+    hid_t fapl = -1;	       	/* file access property list */
+    hid_t fcpl = -1;	       	/* file creation property list */
+    hid_t sid = -1;       	/* dataspace id */
+    hid_t dcpl = -1;		/* dataset creation property list */
+    hid_t did = -1;		/* dataset ID */
+    hid_t fsid = -1;		/* file dataspace ID */
+    hid_t msid = -1;		/* memory dataspace ID */
+    unsigned char *buf = NULL;	/* buffer for data */
+    hsize_t dims[2] = {0, 1};			/* dataset dimension sizes */
+    hsize_t max_dims[2] = {1, H5S_UNLIMITED};	/* dataset maximum dimension sizes */
+    hsize_t chunk_dims[2] = {1, 1};		/* chunk dimension sizes */
+    int	n = 0;			/* local index variable */
+
+    /* Create a new format file */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        goto error;
+
+    /* Set 'K' value to 1 in file creation property list */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        goto error;
+    if(H5Pset_istore_k(fcpl, ISTORE_ERR) < 0)
+        goto error;
+
+    /* Initialize data buffer */
+    buf = (unsigned char *)HDmalloc(NUM * sizeof(unsigned char *));
+    HDmemset(buf, 42, NUM * sizeof(unsigned char));
+
+    /* Create the test file */
+    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+        goto error;
+
+    /* Create a chunked dataset with extensible array chunk index */
+    if((sid = H5Screate_simple(2, dims, max_dims)) < 0)
+        goto error;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+        goto error;
+    if((did = H5Dcreate2(fid, DSET_ERR, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Closing */
+    if(H5Pclose(dcpl) < 0)
+        goto error;
+    if(H5Sclose(sid) < 0)
+        goto error;
+    if(H5Dclose(did) < 0)
+        goto error;
+    if(H5Fclose(fid) < 0)
+        goto error;
+
+    /* Re-open the file */
+    if((fid = H5Fopen(fname, H5F_ACC_RDWR, fapl)) < 0)
+        goto error;
+
+    /* Open the dataset */
+    if((did = H5Dopen2(fid, DSET_ERR, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Loop through appending 1 element at a time */
+    for(n = 0; n < NUM; n++) {
+	hsize_t start[2] = {0, 0};
+	hsize_t count[2] = {1, 1};
+	hsize_t extent[2] = {0, 0};
+
+	start[0] = 0;
+	start[1] = n;
+	extent[0] = 1;
+	extent[1] = n+1;
+
+	/* Set current dimension sizes for the dataset */
+	if(H5Dset_extent(did, extent) < 0)
+	    goto error;
+
+	/* Set up memory dataspace */
+	if((msid = H5Screate_simple(2, count, NULL)) < 0)
+	    goto error;
+
+	/* Get file dataspace */
+	if((fsid = H5Dget_space(did)) < 0)
+	    goto error;
+
+	if((H5Sselect_hyperslab(fsid, H5S_SELECT_SET, start, NULL, count, NULL)) < 0)
+	    goto error;
+
+	/* Write to the dataset */
+	if(H5Dwrite(did, H5T_NATIVE_UCHAR, msid, fsid, H5P_DEFAULT, buf) < 0)
+	    goto error;
+
+	if(H5Sclose(fsid) < 0)
+	    goto error;
+	if(H5Sclose(msid) < 0)
+	    goto error;
+    }
+
+    /* Closing */
+    if(H5Dclose(did) < 0)
+	goto error;
+    if(H5Fclose(fid) < 0)
+	goto error;
+    if(H5Pclose(fapl) < 0)
+	goto error;
+    if(buf) free(buf);
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Sclose(msid);
+        H5Sclose(fsid);
+        H5Fclose(fid);
+        H5Pclose(fapl);
+        H5Pclose(fcpl);
+    } H5E_END_TRY;
+
+} /* gen_err_level() */
+
+/*
  * Function: gen_ext() 
  *
  * Create a file with/without latest format with:
@@ -641,6 +787,9 @@ int main(void)
 
     /* Generate a new format file with a no-filter-edge-chunk dataset */
     gen_edge(EDGE_V3_FILE);
+
+    /* Generate a new format file with 'K' value of 1 in H5Pset_istore_k() */
+    gen_err_level(ERR_LEVEL_FILE);
 
     /* Generate old/new format file with/without messages in the superblock extension */
     for(latest = FALSE; latest <= TRUE; latest++) {
