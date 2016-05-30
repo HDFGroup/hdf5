@@ -2182,7 +2182,7 @@ test_file_double_dataset_open(void)
 **
 *****************************************************************/
 static void
-test_file_double_file_dataset_open(hbool_t new)
+test_file_double_file_dataset_open(hbool_t new_format)
 {
     hid_t fapl = -1;				/* File access property list */
     hid_t dcpl = -1;				/* Dataset creation property list */
@@ -2211,10 +2211,10 @@ test_file_double_file_dataset_open(hbool_t new)
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
 
-    if(new) {
-	ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
-	CHECK(ret, FAIL, "H5Pset_libver_bounds");
-    }
+    if(new_format) {
+        ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+        CHECK(ret, FAIL, "H5Pset_libver_bounds");
+    } /* end if */
 
     /* Create the test file */
     fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
