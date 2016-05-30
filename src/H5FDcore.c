@@ -296,7 +296,7 @@ if(was_adjusted)
             item->start = start;
             item->end = end;
             if(H5SL_insert(file->dirty_list, item, &item->start) < 0)
-                HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, FAIL, "can't insert new dirty region: (%llu, %llu)\n", start, end)
+                HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, FAIL, "can't insert new dirty region: (%llu, %llu)\n", (unsigned long long)start, (unsigned long long)end)
         }
         else {
             /* Store the new item endpoint if it's bigger */
@@ -755,11 +755,11 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
             /* Allocate memory for the file's data, using the file image callback if available. */
             if(file->fi_callbacks.image_malloc) {
                 if(NULL == (file->mem = (unsigned char*)file->fi_callbacks.image_malloc(size, H5FD_FILE_IMAGE_OP_FILE_OPEN, file->fi_callbacks.udata)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "image malloc callback failed")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "image malloc callback failed")
             } /* end if */
             else {
                 if(NULL == (file->mem = (unsigned char*)H5MM_malloc(size)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "unable to allocate memory block")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate memory block")
             } /* end else */
 
             /* Set up data structures */
@@ -1288,11 +1288,11 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         /* (Re)allocate memory for the file buffer, using callbacks if available */
         if(file->fi_callbacks.image_realloc) {
             if(NULL == (x = (unsigned char *)file->fi_callbacks.image_realloc(file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata)))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate memory block of %llu bytes with callback", (unsigned long long)new_eof)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate memory block of %llu bytes with callback", (unsigned long long)new_eof)
         } /* end if */
         else {
             if(NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof)
         } /* end else */
 
         HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
@@ -1307,7 +1307,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         haddr_t end = addr + (haddr_t)size - 1;
 
         if(H5FD__core_add_dirty_region(file, start, end) != SUCCEED)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINSERT, FAIL, "unable to add core VFD dirty region during write call - addresses: start=%llu end=%llu", start, end)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINSERT, FAIL, "unable to add core VFD dirty region during write call - addresses: start=%llu end=%llu", (unsigned long long)start, (unsigned long long)end)
     }
 
     /* Write from BUF to memory */
@@ -1460,11 +1460,11 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
             /* (Re)allocate memory for the file buffer, using callback if available */
             if(file->fi_callbacks.image_realloc) {
                 if(NULL == (x = (unsigned char *)file->fi_callbacks.image_realloc(file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata)))
-                  HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate memory block with callback")
+                  HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate memory block with callback")
             } /* end if */
             else {
                 if(NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate memory block")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate memory block")
             } /* end else */
 
             if(file->eof < new_eof)

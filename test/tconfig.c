@@ -43,7 +43,7 @@
 #define vrfy_macrosize(type, macro, macroname) \
     if (sizeof(type) != macro) \
 	TestErrPrintf("Error: sizeof(%s) is %d but %s is %d\n", \
-	    #type, sizeof(type), macroname, macro);
+	    #type, (int)sizeof(type), macroname, (int)macro);
 
 /* local routine prototypes */
 void test_config_ctypes(void);

@@ -4507,10 +4507,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 printf(" %29lu\n", *((unsigned long*)hw));
                 break;
             case INT_LLONG:
-                printf(" %29"H5_PRINTF_LL_WIDTH"d\n", *((long long*)hw));
+                HDfprintf(stdout, " %29"H5_PRINTF_LL_WIDTH"d\n", *((long long*)hw));
                 break;
             case INT_ULLONG:
-                printf(" %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long long*)hw));
+                HDfprintf(stdout, " %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long long*)hw));
                 break;
             case FLT_FLOAT:
                 printf(" %29f\n", (double)*((float*)hw));
@@ -5181,36 +5181,36 @@ main(void)
     /* Do the tests */
 
     /* Test H5Tcompiler_conv() for querying hard conversion. */
-    nerrors += test_hard_query();
+    nerrors += (unsigned long)test_hard_query();
 
     /* Test user-define, query functions and software conversion
      * for user-defined floating-point types */
-    nerrors += test_derived_flt();
+    nerrors += (unsigned long)test_derived_flt();
 
     /* Test user-define, query functions and software conversion
      * for user-defined integer types */
-    nerrors += test_derived_integer();
+    nerrors += (unsigned long)test_derived_integer();
 
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();
 
     /* Test degenerate cases */
-    nerrors += run_fp_tests("noop");
+    nerrors += (unsigned long)run_fp_tests("noop");
 
     /* Test hardware floating-point conversion functions */
-    nerrors += run_fp_tests("hard");
+    nerrors += (unsigned long)run_fp_tests("hard");
 
     /* Test hardware integer conversion functions */
-    nerrors += run_integer_tests("hard");
+    nerrors += (unsigned long)run_integer_tests("hard");
 
     /* Test hardware integer-float conversion functions */
-    nerrors += run_int_fp_conv("hard");
+    nerrors += (unsigned long)run_int_fp_conv("hard");
 
     /* Test hardware float-integer conversion functions */
-    nerrors += run_fp_int_conv("hard");
+    nerrors += (unsigned long)run_fp_int_conv("hard");
 
     /* Test a few special values for hardware float-integer conversions */
-    nerrors += test_particular_fp_integer();
+    nerrors += (unsigned long)test_particular_fp_integer();
 
     /*----------------------------------------------------------------------
      * Software tests
@@ -5224,17 +5224,17 @@ main(void)
     reset_hdf5();
 
     /* Test software floating-point conversion functions */
-    nerrors += run_fp_tests("soft");
+    nerrors += (unsigned long)run_fp_tests("soft");
 
     /* Test software integer conversion functions */
-    nerrors += test_conv_int_2();
-    nerrors += run_integer_tests("soft");
+    nerrors += (unsigned long)test_conv_int_2();
+    nerrors += (unsigned long)run_integer_tests("soft");
 
     /* Test software float-integer conversion functions */
-    nerrors += run_fp_int_conv("soft");
+    nerrors += (unsigned long)run_fp_int_conv("soft");
 
     /* Test software integer-float conversion functions */
-    nerrors += run_int_fp_conv("soft");
+    nerrors += (unsigned long)run_int_fp_conv("soft");
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
