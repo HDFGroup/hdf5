@@ -268,21 +268,21 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t len,
 
     /* Check for data block */
     if(H5F_addr_defined(hdr->dblk_addr)) {
-	H5FA_dblock_t  dblock;  	/* Fake data block for computing size */
-	size_t	dblk_page_nelmts;	/* # of elements per data block page */
+        H5FA_dblock_t  dblock;  	/* Fake data block for computing size */
+        size_t	dblk_page_nelmts;	/* # of elements per data block page */
 
-	/* Set up fake data block for computing size on disk */
-	dblock.hdr = hdr;
-	dblock.dblk_page_init_size = 0;
-	dblock.npages = 0;
-	dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
-	if(hdr->cparam.nelmts > dblk_page_nelmts) {
-	    dblock.npages = (size_t)(((hdr->cparam.nelmts + dblk_page_nelmts) - 1) / dblk_page_nelmts);
-	    dblock.dblk_page_init_size = (dblock.npages + 7) / 8;
-	} /* end if */
+        /* Set up fake data block for computing size on disk */
+        dblock.hdr = hdr;
+        dblock.dblk_page_init_size = 0;
+        dblock.npages = 0;
+        dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
+        if(hdr->cparam.nelmts > dblk_page_nelmts) {
+            dblock.npages = (size_t)(((hdr->cparam.nelmts + dblk_page_nelmts) - 1) / dblk_page_nelmts);
+            dblock.dblk_page_init_size = (dblock.npages + 7) / 8;
+        } /* end if */
 
         /* Compute Fixed Array data block size for hdr statistics */
-	hdr->stats.dblk_size = (size_t)H5FA_DBLOCK_SIZE(&dblock);
+        hdr->stats.dblk_size = (size_t)H5FA_DBLOCK_SIZE(&dblock);
     } /* end if */
 
     /* Sanity check */
@@ -305,7 +305,7 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t len,
 
     /* Finish initializing fixed array header */
     if(H5FA__hdr_init(hdr, udata->ctx_udata) < 0)
-	H5E_THROW(H5E_CANTINIT, "initialization failed for fixed array header")
+        H5E_THROW(H5E_CANTINIT, "initialization failed for fixed array header")
     HDassert(hdr->size == len);
 
     /* Set return value */
@@ -460,9 +460,9 @@ herr_t, SUCCEED, -,
 H5FA__cache_dblock_get_load_size(const void *_udata, size_t *image_len))
 
     /* Local variables */
-    const H5FA_dblock_cache_ud_t *udata = (const H5FA_dblock_cache_ud_t *)_udata;      /* User data */
-    H5FA_dblock_t dblock;           /* Fake data block for computing size */
-    size_t	dblk_page_nelmts;	/* # of elements per data block page */
+    H5FA_dblock_cache_ud_t *udata = (H5FA_dblock_cache_ud_t *)_udata;      /* User data */
+    H5FA_dblock_t dblock;           			/* Fake data block for computing size */
+    size_t dblk_page_nelmts;				/* # of elements per data block page */
 
     /* Check arguments */
     HDassert(udata);
@@ -840,7 +840,7 @@ H5FA__cache_dblk_page_deserialize(const void *_image, size_t len,
     void *_udata, hbool_t H5_ATTR_UNUSED *dirty))
 
     /* Local variables */
-    H5FA_dblk_page_t	*dblk_page = NULL; /* Data block page info */
+    H5FA_dblk_page_t    *dblk_page = NULL; /* Data block page info */
     H5FA_dblk_page_cache_ud_t *udata = (H5FA_dblk_page_cache_ud_t *)_udata; /* User data for loading data block page */
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
@@ -854,7 +854,7 @@ H5FA__cache_dblk_page_deserialize(const void *_image, size_t len,
 
     /* Allocate the fixed array data block page */
     if(NULL == (dblk_page = H5FA__dblk_page_alloc(udata->hdr, udata->nelmts)))
-	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block page")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array data block page")
 
     /* Set the fixed array data block's information */
     dblk_page->addr = udata->dblk_page_addr;
