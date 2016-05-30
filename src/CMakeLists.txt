@@ -84,6 +84,7 @@ IDE_GENERATED_PROPERTIES ("H5B2" "${H5B2_HDRS}" "${H5B2_SOURCES}" )
 set (H5C_SOURCES
     ${HDF5_SRC_DIR}/H5C.c
     ${HDF5_SRC_DIR}/H5Cmpio.c
+    ${HDF5_SRC_DIR}/H5Cquery.c
 )
 set (H5C_HDRS
     ${HDF5_SRC_DIR}/H5Cpkg.h
