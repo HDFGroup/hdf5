@@ -62,17 +62,17 @@ hbool_t try_core_file_driver = FALSE;
 hbool_t core_file_driver_failed = FALSE;
 const char *failure_mssg = NULL;
 
-static test_entry_t pico_entries[NUM_PICO_ENTRIES], orig_pico_entries[NUM_PICO_ENTRIES];
-static test_entry_t nano_entries[NUM_NANO_ENTRIES], orig_nano_entries[NUM_NANO_ENTRIES];
-static test_entry_t micro_entries[NUM_MICRO_ENTRIES], orig_micro_entries[NUM_MICRO_ENTRIES];
-static test_entry_t tiny_entries[NUM_TINY_ENTRIES], orig_tiny_entries[NUM_TINY_ENTRIES];
-static test_entry_t small_entries[NUM_SMALL_ENTRIES], orig_small_entries[NUM_SMALL_ENTRIES];
-static test_entry_t medium_entries[NUM_MEDIUM_ENTRIES], orig_medium_entries[NUM_MEDIUM_ENTRIES];
-static test_entry_t large_entries[NUM_LARGE_ENTRIES], orig_large_entries[NUM_LARGE_ENTRIES];
-static test_entry_t huge_entries[NUM_HUGE_ENTRIES], orig_huge_entries[NUM_HUGE_ENTRIES];
-static test_entry_t monster_entries[NUM_MONSTER_ENTRIES], orig_monster_entries[NUM_MONSTER_ENTRIES];
-static test_entry_t variable_entries[NUM_VARIABLE_ENTRIES], orig_variable_entries[NUM_VARIABLE_ENTRIES];
-static test_entry_t notify_entries[NUM_NOTIFY_ENTRIES], orig_notify_entries[NUM_NOTIFY_ENTRIES];
+static test_entry_t *pico_entries = NULL,      *orig_pico_entries = NULL;
+static test_entry_t *nano_entries = NULL,      *orig_nano_entries = NULL;
+static test_entry_t *micro_entries = NULL,     *orig_micro_entries = NULL;
+static test_entry_t *tiny_entries = NULL,      *orig_tiny_entries = NULL;
+static test_entry_t *small_entries = NULL,     *orig_small_entries = NULL;
+static test_entry_t *medium_entries = NULL,    *orig_medium_entries = NULL;
+static test_entry_t *large_entries = NULL,     *orig_large_entries = NULL;
+static test_entry_t *huge_entries = NULL,      *orig_huge_entries = NULL;
+static test_entry_t *monster_entries = NULL,   *orig_monster_entries = NULL;
+static test_entry_t *variable_entries = NULL,  *orig_variable_entries = NULL;
+static test_entry_t *notify_entries = NULL,    *orig_notify_entries = NULL;
 
 hbool_t orig_entry_arrays_init = FALSE;
 
@@ -225,36 +225,9 @@ static herr_t free_icr(test_entry_t *entry, int32_t entry_type);
 static void execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr,
     struct flush_op *op_ptr, unsigned *flags_ptr);
 
+test_entry_t *entries[NUMBER_OF_ENTRY_TYPES];
 
-test_entry_t *entries[NUMBER_OF_ENTRY_TYPES] =
-{
-    pico_entries,
-    nano_entries,
-    micro_entries,
-    tiny_entries,
-    small_entries,
-    medium_entries,
-    large_entries,
-    huge_entries,
-    monster_entries,
-    variable_entries,
-    notify_entries
-};
-
-test_entry_t *orig_entries[NUMBER_OF_ENTRY_TYPES] =
-{
-    orig_pico_entries,
-    orig_nano_entries,
-    orig_micro_entries,
-    orig_tiny_entries,
-    orig_small_entries,
-    orig_medium_entries,
-    orig_large_entries,
-    orig_huge_entries,
-    orig_monster_entries,
-    orig_variable_entries,
-    orig_notify_entries
-};
+test_entry_t *orig_entries[NUMBER_OF_ENTRY_TYPES];
 
 const int32_t max_indices[NUMBER_OF_ENTRY_TYPES] =
 {
@@ -1707,8 +1680,13 @@ add_flush_op(int target_type,
 	      ( type == VARIABLE_ENTRY_TYPE ) );
     HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
     HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
-    HDassert( ( flag == TRUE ) || ( flag == FALSE ) );
     HDassert( new_size <= VARIABLE_ENTRY_SIZE );
+#ifndef H5_HAVE_STDBOOL_H
+    /* Check for TRUE or FALSE if we're using an integer type instead
+     * of a real Boolean type.
+     */
+    HDassert( ( flag == TRUE ) || ( flag == FALSE ) );
+#endif /* H5_HAVE_STDBOOL_H */
 
     if ( pass ) {
 
@@ -1934,8 +1912,13 @@ execute_flush_op(H5F_t * file_ptr,
               ( op_ptr->type < NUMBER_OF_ENTRY_TYPES ) );
     HDassert( ( 0 <= op_ptr->idx ) &&
               ( op_ptr->idx <= max_indices[op_ptr->type] ) );
-    HDassert( ( op_ptr->flag == FALSE ) || ( op_ptr->flag == TRUE ) );
     HDassert( flags_ptr != NULL );
+#ifndef H5_HAVE_STDBOOL_H
+    /* Check for TRUE or FALSE if we're using an integer type instead
+     * of a real Boolean type.
+     */
+    HDassert( ( op_ptr->flag == FALSE ) || ( op_ptr->flag == TRUE ) );
+#endif /* H5_HAVE_STDBOOL_H */
 
     if ( pass ) {
 
@@ -2095,6 +2078,188 @@ entry_in_cache(H5C_t * cache_ptr,
     return(in_cache);
 
 } /* entry_in_cache() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    create_entry_arrays
+ *
+ * Purpose:     Create the entry arrays, both regular and original.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:	Dana Robinson
+ *              Spring 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+create_entry_arrays(void)
+
+{
+    /* pico entries */
+    if(NULL == (pico_entries = (test_entry_t *)HDcalloc(NUM_PICO_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+    if(NULL == (orig_pico_entries = (test_entry_t *)HDcalloc(NUM_PICO_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+
+    /* nano entries */
+    if(NULL == (nano_entries = (test_entry_t *)HDcalloc(NUM_NANO_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+    if(NULL == (orig_nano_entries = (test_entry_t *)HDcalloc(NUM_NANO_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+
+    /* micro entries */
+    if(NULL == (micro_entries = (test_entry_t *)HDcalloc(NUM_MICRO_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+    if(NULL == (orig_micro_entries = (test_entry_t *)HDcalloc(NUM_MICRO_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+
+    /* tiny entries */
+    if(NULL == (tiny_entries = (test_entry_t *)HDcalloc(NUM_TINY_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+    if(NULL == (orig_tiny_entries = (test_entry_t *)HDcalloc(NUM_TINY_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+
+    /* small entries */
+    if(NULL == (small_entries = (test_entry_t *)HDcalloc(NUM_SMALL_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+    if(NULL == (orig_small_entries = (test_entry_t *)HDcalloc(NUM_SMALL_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+
+    /* medium entries */
+    if(NULL == (medium_entries = (test_entry_t *)HDcalloc(NUM_MEDIUM_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+    if(NULL == (orig_medium_entries = (test_entry_t *)HDcalloc(NUM_MEDIUM_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+
+    /* large entries */
+    if(NULL == (large_entries = (test_entry_t *)HDcalloc(NUM_LARGE_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+    if(NULL == (orig_large_entries = (test_entry_t *)HDcalloc(NUM_LARGE_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+
+    /* huge entries */
+    if(NULL == (huge_entries = (test_entry_t *)HDcalloc(NUM_HUGE_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+    if(NULL == (orig_huge_entries = (test_entry_t *)HDcalloc(NUM_HUGE_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+
+    /* monster entries */
+    if(NULL == (monster_entries = (test_entry_t *)HDcalloc(NUM_MONSTER_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+    if(NULL == (orig_monster_entries = (test_entry_t *)HDcalloc(NUM_MONSTER_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+
+    /* variable entries */
+    if(NULL == (variable_entries = (test_entry_t *)HDcalloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+    if(NULL == (orig_variable_entries = (test_entry_t *)HDcalloc(NUM_VARIABLE_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+
+    /* notify entries */
+    if(NULL == (notify_entries = (test_entry_t *)HDcalloc(NUM_NOTIFY_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+    if(NULL == (orig_notify_entries = (test_entry_t *)HDcalloc(NUM_NOTIFY_ENTRIES, sizeof(test_entry_t))))
+        goto error;
+
+    entries[0] = pico_entries;
+    entries[1] = nano_entries;
+    entries[2] = micro_entries;
+    entries[3] = tiny_entries;
+    entries[4] = small_entries;
+    entries[5] = medium_entries;
+    entries[6] = large_entries;
+    entries[7] = huge_entries;
+    entries[8] = monster_entries;
+    entries[9] = variable_entries;
+    entries[10] = notify_entries;
+
+    orig_entries[0] = orig_pico_entries;
+    orig_entries[1] = orig_nano_entries;
+    orig_entries[2] = orig_micro_entries;
+    orig_entries[3] = orig_tiny_entries;
+    orig_entries[4] = orig_small_entries;
+    orig_entries[5] = orig_medium_entries;
+    orig_entries[6] = orig_large_entries;
+    orig_entries[7] = orig_huge_entries;
+    orig_entries[8] = orig_monster_entries;
+    orig_entries[9] = orig_variable_entries;
+    orig_entries[10] = orig_notify_entries;
+
+    return SUCCEED;
+
+error:
+    free_entry_arrays();
+    return FAIL;
+
+} /* create_entry_arrays() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    free_entry_arrays
+ *
+ * Purpose:     Free the entry arrays, both regular and original.
+ *
+ * Return:      void
+ *
+ * Programmer:	Dana Robinson
+ *              Spring 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+free_entry_arrays(void)
+
+{
+    /* pico entries */
+    HDfree(pico_entries);
+    HDfree(orig_pico_entries);
+
+    /* nano entries */
+    HDfree(nano_entries);
+    HDfree(orig_nano_entries);
+
+    /* micro entries */
+    HDfree(micro_entries);
+    HDfree(orig_micro_entries);
+
+    /* tiny entries */
+    HDfree(tiny_entries);
+    HDfree(orig_tiny_entries);
+
+    /* small entries */
+    HDfree(small_entries);
+    HDfree(orig_small_entries);
+
+    /* medium entries */
+    HDfree(medium_entries);
+    HDfree(orig_medium_entries);
+
+    /* large entries */
+    HDfree(large_entries);
+    HDfree(orig_large_entries);
+
+    /* huge entries */
+    HDfree(huge_entries);
+    HDfree(orig_huge_entries);
+
+    /* monster entries */
+    HDfree(monster_entries);
+    HDfree(orig_monster_entries);
+
+    /* variable entries */
+    HDfree(variable_entries);
+    HDfree(orig_variable_entries);
+
+    /* notify entries */
+    HDfree(notify_entries);
+    HDfree(orig_notify_entries);
+
+    return;
+
+} /* free_entry_arrays() */
 
 
 /*-------------------------------------------------------------------------

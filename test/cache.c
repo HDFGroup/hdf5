@@ -9146,23 +9146,29 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
              ( check[i].entry_type >= NUMBER_OF_ENTRY_TYPES ) ||
              ( check[i].entry_index < 0 ) ||
              ( check[i].entry_index > max_indices[check[i].entry_type] ) ||
-             ( check[i].expected_size <= (size_t)0 ) ||
-	     ( ( check[i].in_cache != TRUE ) &&
-	       ( check[i].in_cache != FALSE ) ) ||
-	     ( ( check[i].at_main_addr != TRUE ) &&
-	       ( check[i].at_main_addr != FALSE ) ) ||
-	     ( ( check[i].is_dirty != TRUE ) &&
-	       ( check[i].is_dirty != FALSE ) ) ||
-	     ( ( check[i].is_protected != TRUE ) &&
-	       ( check[i].is_protected != FALSE ) ) ||
-	     ( ( check[i].is_pinned != TRUE ) &&
-	       ( check[i].is_pinned != FALSE ) ) ||
-	     ( ( check[i].expected_deserialized != TRUE ) &&
-	       ( check[i].expected_deserialized != FALSE ) ) ||
-	     ( ( check[i].expected_serialized != TRUE ) &&
-	       ( check[i].expected_serialized != FALSE ) ) ||
-	     ( ( check[i].expected_destroyed != TRUE ) &&
-	       ( check[i].expected_destroyed != FALSE ) ) ) {
+#ifndef H5_HAVE_STDBOOL_H
+                /* Check for nonsense values if hbool_t is an integral
+                 * type instead of a real Boolean.
+                 */
+	         ( ( check[i].in_cache != TRUE ) &&
+	           ( check[i].in_cache != FALSE ) ) ||
+	         ( ( check[i].at_main_addr != TRUE ) &&
+	           ( check[i].at_main_addr != FALSE ) ) ||
+	         ( ( check[i].is_dirty != TRUE ) &&
+	           ( check[i].is_dirty != FALSE ) ) ||
+	         ( ( check[i].is_protected != TRUE ) &&
+	           ( check[i].is_protected != FALSE ) ) ||
+	         ( ( check[i].is_pinned != TRUE ) &&
+	           ( check[i].is_pinned != FALSE ) ) ||
+	         ( ( check[i].expected_deserialized != TRUE ) &&
+	           ( check[i].expected_deserialized != FALSE ) ) ||
+	         ( ( check[i].expected_serialized != TRUE ) &&
+	           ( check[i].expected_serialized != FALSE ) ) ||
+	         ( ( check[i].expected_destroyed != TRUE ) &&
+	           ( check[i].expected_destroyed != FALSE ) ) ||
+#endif /* H5_HAVE_STDBOOL_H */
+             ( check[i].expected_size <= (size_t)0 )
+         ) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
@@ -35044,18 +35050,12 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Run tests on the cache code contained in H5C.c
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
- * Return:	Success:
- *
- *		Failure:
- *
- * Programmer:	John Mainzer
+ * Programmer:  John Mainzer
  *              6/24/04
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -35074,6 +35074,12 @@ main(void)
     printf("Internal cache tests\n");
     printf("        express_test = %d\n", express_test);
     printf("=========================================\n");
+
+    if ( create_entry_arrays() < 0 ) {
+
+        printf("ERROR: Unable to create entries arrays. Aborting.\n");
+        return EXIT_FAILURE;
+    } /* end if */
 
     nerrs += smoke_check_1(express_test);
     nerrs += smoke_check_2(express_test);
@@ -35127,6 +35133,13 @@ main(void)
     nerrs += check_entry_deletions_during_scans();
     nerrs += check_stats();
 
-    return(nerrs > 0);
+    /* can't fail, returns void */
+    free_entry_arrays();
+
+    if ( nerrs > 0 )
+        return EXIT_FAILURE;
+    else
+        return EXIT_SUCCESS;
+
 } /* main() */
 

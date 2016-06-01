@@ -9293,7 +9293,7 @@ H5C__mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag)
 {
     unsigned u;                 /* Local index variable */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(cache_ptr);

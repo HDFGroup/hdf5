@@ -1649,8 +1649,8 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     hid_t aid = -1;                         /* Attribute Identifier */
     hid_t sid = -1;                         /* Dataset Identifier */
     int verbose = FALSE;                    /* verbose file outout */
-    int data[DIMS][DIMS];                   /* data buffer */
-    int i,j,k = 0;                           /* iterators */
+    int *data = NULL;                       /* data buffer */
+    int i,j,k = 0;                          /* iterators */
     haddr_t root_tag = 0;
     haddr_t sbe_tag = 0;
     haddr_t g_tag = 0;
@@ -1663,6 +1663,9 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* Allocate array */
+    if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -1696,10 +1699,10 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     if ( (aid = H5Acreate2(gid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
  
     /* fill out data buffer */
-    for(i=0;i<DIMS;i++) {
-        for(j=0;j<DIMS;j++) {
+    for(i = 0; i < DIMS; i++) {
+        for(j = 0; j < DIMS; j++) {
 
-            data[i][j] = k++;
+            data[(DIMS * i) + j] = k++;
         } /* end for */
     } /* end for */
 
@@ -1788,10 +1791,14 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
+    HDfree(data);
+
     PASSED();
     return 0;
 
 error:
+    if(data)
+        HDfree(data);
     return 1;
 } /* check_attribute_rename_tags */
 
@@ -1822,8 +1829,8 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     hid_t aid = -1;                         /* Attribute Identifier */
     hid_t sid = -1;                         /* Dataset Identifier */
     int verbose = FALSE;                    /* verbose file outout */
-    int data[DIMS][DIMS];                   /* data buffer */
-    int i,j,k = 0;                           /* iterators */
+    int *data = NULL;                       /* data buffer */
+    int i,j,k = 0;                          /* iterators */
     haddr_t root_tag = 0;
     haddr_t sbe_tag = 0;
     haddr_t g_tag = 0;
@@ -1836,6 +1843,9 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* Allocate array */
+    if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -1869,10 +1879,10 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     if ( (aid = H5Acreate2(gid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
  
     /* fill out data buffer */
-    for(i=0;i<DIMS;i++) {
-        for(j=0;j<DIMS;j++) {
+    for(i = 0;i < DIMS; i++) {
+        for(j = 0;j < DIMS; j++) {
 
-            data[i][j] = k++;
+            data[(DIMS * i) + j] = k++;
         } /* end for */
     } /* end for */
 
@@ -1936,10 +1946,14 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
+    HDfree(data);
+
     PASSED();
     return 0;
 
 error:
+    if(data)
+        HDfree(data);
     return 1;
 } /* check_attribute_delete_tags */
 
@@ -2378,10 +2392,10 @@ check_dataset_write_tags(hid_t fcpl, int type)
     haddr_t root_tag = 0;
     haddr_t sbe_tag = 0;
     haddr_t d_tag = 0;
-    hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
+    hsize_t dims1[2] = {DIMS, DIMS};        /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
-    int i,j,k = 0;           /* iterators */
-    int data[DIMS][DIMS];
+    int i,j,k = 0;                          /* iterators */
+    int *data = NULL;                       /* data buffer */
 
     /* Testing Macro */
     TESTING("tag application during dataset write");
@@ -2389,6 +2403,9 @@ check_dataset_write_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* Allocate array */
+    if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -2442,10 +2459,10 @@ check_dataset_write_tags(hid_t fcpl, int type)
     /* ============================== */
 
     /* fill out data buffer */
-    for(i=0;i<DIMS;i++) {
-        for(j=0;j<DIMS;j++) {
+    for(i = 0;i < DIMS; i++) {
+        for(j = 0;j < DIMS; j++) {
 
-            data[i][j] = k++;
+            data[(DIMS *i) + j] = k++;
         } /* end for */
     } /* end for */
 
@@ -2480,10 +2497,14 @@ check_dataset_write_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
+    HDfree(data);
+
     PASSED();
     return 0;
 
 error:
+    if(data)
+        HDfree(data);
     return 1;
 } /* check_dataset_write_tags */
 
@@ -2512,8 +2533,8 @@ check_attribute_write_tags(hid_t fcpl, int type)
     hid_t aid = -1;                         /* Attribute Identifier */
     hid_t sid = -1;                         /* Dataset Identifier */
     int verbose = FALSE;                    /* verbose file outout */
-    int data[DIMS][DIMS];                   /* data buffer */
-    int i,j,k = 0;                           /* iterators */
+    int *data = NULL;                       /* data buffer */
+    int i,j,k = 0;                          /* iterators */
     haddr_t root_tag = 0;
     haddr_t sbe_tag = 0;
     haddr_t g_tag = 0;
@@ -2526,6 +2547,9 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* Allocate array */
+    if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create a test file with provided fcpl_t */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -2574,10 +2598,10 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* =========================== */
 
     /* fill out data buffer */
-    for(i=0;i<DIMS;i++) {
-        for(j=0;j<DIMS;j++) {
+    for(i = 0; i < DIMS; i++) {
+        for(j = 0;j < DIMS; j++) {
 
-            data[i][j] = k++;
+            data[(DIMS * i) + j] = k++;
         } /* end for */
     } /* end for */
 
@@ -2635,10 +2659,14 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
+    HDfree(data);
+
     PASSED();
     return 0;
 
 error:
+    if(data)
+        HDfree(data);
     return 1;
 } /* check_attribute_write_tags */
 
@@ -2672,10 +2700,10 @@ check_dataset_read_tags(hid_t fcpl, int type)
     haddr_t root_tag = 0;
     haddr_t sbe_tag = 0;
     haddr_t d_tag = 0;
-    hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
+    hsize_t dims1[2] = {DIMS, DIMS};        /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
-    int i,j,k = 0;           /* iterators */
-    int data[DIMS][DIMS];
+    int i,j,k = 0;                          /* iterators */
+    int *data = NULL;                       /* data buffer */
 
     /* Testing Macro */
     TESTING("tag application during dataset read");
@@ -2683,6 +2711,9 @@ check_dataset_read_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* Allocate array */
+    if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -2723,10 +2754,10 @@ check_dataset_read_tags(hid_t fcpl, int type)
     if ( get_new_object_header_tag(fid, &d_tag) < 0 ) TEST_ERROR;
 
     /* fill out data buffer */
-    for(i=0;i<DIMS;i++) {
-        for(j=0;j<DIMS;j++) {
+    for(i = 0; i < DIMS; i++) {
+        for(j = 0; j < DIMS; j++) {
 
-            data[i][j] = k++;
+            data[(DIMS * i) + j] = k++;
         } /* end for */
     } /* end for */
 
@@ -2773,10 +2804,14 @@ check_dataset_read_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
+    HDfree(data);
+
     PASSED();
     return 0;
 
 error:
+    if(data)
+        HDfree(data);
     return 1;
 } /* check_dataset_read_tags */
 
@@ -2810,10 +2845,10 @@ check_dataset_size_retrieval(hid_t fcpl, int type)
     haddr_t root_tag = 0;
     haddr_t sbe_tag = 0;
     haddr_t d_tag = 0;
-    hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
+    hsize_t dims1[2] = {DIMS, DIMS};        /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
-    int i,j,k = 0;           /* iterators */
-    int data[DIMS][DIMS];
+    int i,j,k = 0;                          /* iterators */
+    int *data = NULL;                       /* data buffer */
     hsize_t dsize = 0;
 
     /* Testing Macro */
@@ -2822,6 +2857,9 @@ check_dataset_size_retrieval(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* Allocate array */
+    if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -2862,10 +2900,10 @@ check_dataset_size_retrieval(hid_t fcpl, int type)
     if ( get_new_object_header_tag(fid, &d_tag) < 0 ) TEST_ERROR;
 
     /* fill out data buffer */
-    for(i=0;i<DIMS;i++) {
-        for(j=0;j<DIMS;j++) {
+    for(i = 0; i < DIMS; i++) {
+        for(j = 0; j < DIMS; j++) {
 
-            data[i][j] = k++;
+            data[(DIMS * i) + j] = k++;
         } /* end for */
     } /* end for */
 
@@ -2912,10 +2950,14 @@ check_dataset_size_retrieval(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
+    HDfree(data);
+
     PASSED();
     return 0;
 
 error:
+    if(data)
+        HDfree(data);
     return 1;
 } /* check_dataset_size_retrieval */
 
@@ -2950,11 +2992,11 @@ check_dataset_extend_tags(hid_t fcpl, int type)
     haddr_t root_tag = 0;
     haddr_t sbe_tag = 0;
     haddr_t d_tag = 0;
-    hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
+    hsize_t dims1[2] = {DIMS, DIMS};        /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
-    int i,j,k = 0;           /* iterators */
-    int data[DIMS][DIMS];
-    hsize_t newdims[2] = {DIMS*2, DIMS};  /* dimensions */
+    int i,j,k = 0;                          /* iterators */
+    int *data = NULL;                       /* data buffer */
+    hsize_t newdims[2] = {DIMS*2, DIMS};    /* dimensions */
 
     /* Testing Macro */
     TESTING("tag application during dataset extend");
@@ -2962,6 +3004,9 @@ check_dataset_extend_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* Allocate array */
+    if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -3002,10 +3047,10 @@ check_dataset_extend_tags(hid_t fcpl, int type)
     if ( get_new_object_header_tag(fid, &d_tag) < 0 ) TEST_ERROR;
 
     /* fill out data buffer */
-    for(i=0;i<DIMS;i++) {
-        for(j=0;j<DIMS;j++) {
+    for(i = 0; i < DIMS; i++) {
+        for(j = 0; j < DIMS; j++) {
 
-            data[i][j] = k++;
+            data[(DIMS * i) + j] = k++;
         } /* end for */
     } /* end for */
 
@@ -3052,10 +3097,14 @@ check_dataset_extend_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
+    HDfree(data);
+
     PASSED();
     return 0;
 
 error:
+    if(data)
+        HDfree(data);
     return 1;
 } /* check_dataset_extend_tags */
 
@@ -3324,10 +3373,10 @@ check_link_removal_tags(hid_t fcpl, int type)
     haddr_t sbe_tag = 0;
     haddr_t d_tag = 0;
     haddr_t g_tag = 0;
-    hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
+    hsize_t dims1[2] = {DIMS, DIMS};        /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
-    int i,j,k = 0;           /* iterators */
-    int data[DIMS][DIMS];
+    int i,j,k = 0;                          /* iterators */
+    int *data = NULL;                       /* data buffer */
 
     /* Testing Macro */
     TESTING("tag application during link removal");
@@ -3335,6 +3384,9 @@ check_link_removal_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* Allocate array */
+    if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -3384,10 +3436,10 @@ check_link_removal_tags(hid_t fcpl, int type)
     if ( get_new_object_header_tag(fid, &d_tag) < 0 ) TEST_ERROR;
 
     /* fill out data buffer */
-    for(i=0;i<DIMS;i++) {
-        for(j=0;j<DIMS;j++) {
+    for(i = 0; i < DIMS; i++) {
+        for(j = 0; j < DIMS; j++) {
 
-            data[i][j] = k++;
+            data[(DIMS * i) + j] = k++;
         } /* end for */
     } /* end for */
 
@@ -3444,10 +3496,14 @@ check_link_removal_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
+    HDfree(data);
+
     PASSED();
     return 0;
 
 error:
+    if(data)
+        HDfree(data);
     return 1;
 } /* check_link_removal_tags */
 
@@ -3484,10 +3540,10 @@ check_link_getname_tags(hid_t fcpl, int type)
     haddr_t sbe_tag = 0;
     haddr_t d_tag = 0;
     haddr_t g_tag = 0;
-    hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
+    hsize_t dims1[2] = {DIMS, DIMS};        /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
-    int i,j,k = 0;           /* iterators */
-    int data[DIMS][DIMS];
+    int i,j,k = 0;                          /* iterators */
+    int *data = NULL;                       /* data buffer */
 
     /* Testing Macro */
     TESTING("tag application during link name retrieval");
@@ -3495,6 +3551,9 @@ check_link_getname_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* Allocate array */
+    if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
 
     /* Create file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0 ) TEST_ERROR;
@@ -3544,10 +3603,10 @@ check_link_getname_tags(hid_t fcpl, int type)
     if ( get_new_object_header_tag(fid, &d_tag) < 0 ) TEST_ERROR;
 
     /* fill out data buffer */
-    for(i=0;i<DIMS;i++) {
-        for(j=0;j<DIMS;j++) {
+    for(i = 0; i < DIMS; i++) {
+        for(j = 0; j < DIMS; j++) {
 
-            data[i][j] = k++;
+            data[(DIMS * i) + j] = k++;
         } /* end for */
     } /* end for */
 
@@ -3596,10 +3655,14 @@ check_link_getname_tags(hid_t fcpl, int type)
     /* Finished Test. Print status and return. */
     /* ========================================== */
 
+    HDfree(data);
+
     PASSED();
     return 0;
 
 error:
+    if(data)
+        HDfree(data);
     return 1;
 } /* check_link_getname_tags */
 
