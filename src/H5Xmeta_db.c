@@ -33,9 +33,6 @@
 #include "H5Sprivate.h"
 /* TODO using private headers but could use public ones */
 
-//#define H5Q_FRIEND
-//#include "H5Qpkg.h" /* To re-use H5Q_QUEUE */
-
 #define H5R_FRIEND
 #include "H5Rpkg.h" /* (Tmp) To re-use H5R__get_obj_name */
 
@@ -214,7 +211,7 @@ static herr_t H5X__db_metadata_write(H5X_db_t *db,
     size_t *plugin_metadata_size, void **plugin_metadata);
 static herr_t H5X__db_metadata_read(size_t plugin_metadata_size,
     void *plugin_metadata, H5X_db_t *metadata);
-static herr_t H5X__db_metadata_query(H5X_db_t *db, hid_t query_id,
+static herr_t H5X__db_query_components(H5X_db_t *db, hid_t query_id,
     H5X_db_head_t *result);
 static herr_t H5X__db_query_singleton(H5X_db_t *db, hid_t query_id,
     H5X_db_head_t *result);
@@ -282,7 +279,7 @@ print_ref(href_t ref)
         H5X_DB_LOG_DEBUG("Object reference: %s", obj_name);
     }
 } /* print_ref */
-#endif
+#endif /* H5X_DB_DEBUG */
 
 static herr_t
 H5X__db_index(hid_t oid, const char *name, const H5O_info_t *oinfo, void *udata)
@@ -840,14 +837,22 @@ H5X__db_stat(H5X_db_t *db)
         struct stat st;
         int db_ret;
 
+        /* Flush the database to disk so that we get a valid file size */
+        if ((db_ret = dbs[i]->sync(dbs[i], 0)) != 0) {
+            dbs[i]->err(dbs[i], db_ret, "DB->sync");
+        }
+
         /* Get the database statistics and print the total number of records. */
         if ((db_ret = dbs[i]->stat(dbs[i], NULL, &statp, 0)) != 0) {
             dbs[i]->err(dbs[i], db_ret, "DB->stat");
         }
+//        if ((db_ret = dbs[i]->stat_print(dbs[i], 0)) != 0) {
+//            dbs[i]->err(dbs[i], db_ret, "DB->stat_print");
+//        }
         HDstat(db_filenames[i], &st);
 
         H5X_DB_LOG_DEBUG("Database contains %lu records for %s", (u_long)statp->bt_ndata, db_names[i]);
-        H5X_DB_LOG_DEBUG("Current database size on disk: %lu MB", st.st_size / (1024 * 1024));
+        H5X_DB_LOG_DEBUG("Current database size on disk: %lf MB", (float)st.st_size / (float)(1024 * 1024));
 
         HDfree(statp);
     }
@@ -1203,9 +1208,10 @@ H5X__db_remove_entry(void H5_ATTR_UNUSED *idx_handle, hid_t H5_ATTR_UNUSED obj_i
     H5X_DB_LOG_DEBUG("Calling H5X__db_remove_entry");
 
     /* TODO Does not do anything */
+    /*/!\ Calling db->del removes all duplicates that match the same key */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5X__db_insert_entry() */
+} /* end H5X__db_remove_entry() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5X_db_query
@@ -1233,7 +1239,7 @@ H5X__db_query(void *idx_handle, hid_t query_id, hid_t H5_ATTR_UNUSED xxpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL index handle");
 
     /* We assume here that the queries passed only operate on metadata */
-    if (FAIL == H5X__db_metadata_query(db, query_id, &query_result))
+    if (FAIL == H5X__db_query_components(db, query_id, &query_result))
         HGOTO_ERROR(H5E_INDEX, H5E_CANTCOMPARE, FAIL, "can't query metadata");
 
     H5X_DB_LOG_DEBUG("###########################");
@@ -1269,7 +1275,7 @@ done:
 } /* end H5X_db_query() */
 
 static herr_t
-H5X__db_metadata_query(H5X_db_t *db, hid_t query_id, H5X_db_head_t *result)
+H5X__db_query_components(H5X_db_t *db, hid_t query_id, H5X_db_head_t *result)
 {
     H5Q_type_t query_type;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1293,7 +1299,7 @@ H5X__db_metadata_query(H5X_db_t *db, hid_t query_id, H5X_db_head_t *result)
         if (FAIL == H5Qget_components(query_id, &sub_query1_id, &sub_query2_id))
             HGOTO_ERROR(H5E_QUERY, H5E_CANTGET, FAIL, "unable to get components");
 
-        if (FAIL == H5X__db_metadata_query(db, sub_query1_id, &result1))
+        if (FAIL == H5X__db_query_components(db, sub_query1_id, &result1))
             HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
 
 //        H5X_DB_LOG_DEBUG("###########################");
@@ -1305,7 +1311,7 @@ H5X__db_metadata_query(H5X_db_t *db, hid_t query_id, H5X_db_head_t *result)
 //        }
 //        H5X_DB_LOG_DEBUG("###########################");
 
-        if (FAIL == H5X__db_metadata_query(db, sub_query2_id, &result2))
+        if (FAIL == H5X__db_query_components(db, sub_query2_id, &result2))
             HGOTO_ERROR(H5E_QUERY, H5E_CANTCOMPARE, FAIL, "unable to apply query");
 
 //        H5X_DB_LOG_DEBUG("###########################");
@@ -1341,7 +1347,7 @@ H5X__db_metadata_query(H5X_db_t *db, hid_t query_id, H5X_db_head_t *result)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5X__db_metadata_query */
+} /* end H5X__db_query_components */
 
 static herr_t
 H5X__db_query_singleton(H5X_db_t *db, hid_t query_id, H5X_db_head_t *result)
