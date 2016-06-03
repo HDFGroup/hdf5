@@ -801,6 +801,7 @@ EFF_init(MPI_Comm comm, MPI_Info H5_ATTR_UNUSED info)
 
     /* initialize Mercury stuff */
     //network_class = NA_MPI_Init(NULL, 0);
+    NA_MPI_Set_init_intra_comm(comm);
     network_class = NA_Initialize("tcp@mpi://0.0.0.0:0", 0);
 
     if (HG_SUCCESS != HG_Init(network_class)) {
