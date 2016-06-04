@@ -9558,6 +9558,8 @@ H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id,
 
 	entry_ptr = cache_ptr->index[u];
 	while(entry_ptr != NULL) {
+	    H5C_cache_entry_t *next_entry_ptr = entry_ptr->ht_next;
+
 	    /* Found one with the same tag and type id */
 	    if(entry_ptr->tag == tag && entry_ptr->type->id == type_id) {
 
@@ -9565,7 +9567,7 @@ H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id,
 		    HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "H5C_expunge_entry() failed.")
 	    } /* end if */
 
-	    entry_ptr = entry_ptr->ht_next;
+	    entry_ptr = next_entry_ptr;
 	} /* end while */
     } /* end for */
 
