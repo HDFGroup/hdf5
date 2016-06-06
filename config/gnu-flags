@@ -350,7 +350,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
 
     # Append more extra warning flags that only gcc 4.2+ know about
     # (none, or incorporated in -Wall / -Wextra now)
@@ -418,7 +418,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
 
     # Append more extra warning flags that only gcc 4.2+ know about
     # (none, or incorporated in -Wall / -Wextra now)
@@ -484,7 +484,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
 
     # Append more extra warning flags that only gcc 4.2+ know about
     # (none, or incorporated in -Wall / -Wextra now)
@@ -543,7 +543,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
 
     # Append more extra warning flags that only gcc 4.2+ know about
     # (none, or incorporated in -Wall / -Wextra now)
@@ -599,7 +599,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
 
     # Append more extra warning flags that only gcc 4.2+ know about
     # (none, or incorporated in -Wall / -Wextra now)
@@ -651,7 +651,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
 
     # Append more extra warning flags that only gcc 4.2+ know about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
@@ -700,7 +700,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized -Wvolatile-register-var"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var"
 
     # Append more extra warning flags that only gcc 4.2+ know about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
@@ -746,7 +746,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized -Wvolatile-register-var"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var"
 
     # Append more extra warning flags that only gcc 4.2+ know about
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
@@ -786,7 +786,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Wnonnull -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized -Wvolatile-register-var"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wvolatile-register-var"
     ;;
 
   gcc-4.0*)
