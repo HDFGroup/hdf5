@@ -70,6 +70,8 @@ static herr_t H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr,
 #if H5AC_DO_TAGGING_SANITY_CHECKS
 static herr_t H5AC__verify_tag(hid_t dxpl_id, const H5AC_class_t * type);
 #endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
+static herr_t H5AC__open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name);
+static herr_t H5AC__close_trace_file(H5AC_t *cache_ptr);
 
 
 /*********************/
@@ -540,8 +542,8 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
 #endif /* H5AC_DUMP_STATS_ON_CLOSE */
 
 #if H5AC__TRACE_FILE_ENABLED
-    if(H5AC_close_trace_file(f->shared->cache) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_close_trace_file() failed.")
+    if(H5AC__close_trace_file(f->shared->cache) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC__close_trace_file() failed.")
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #ifdef H5_HAVE_PARALLEL
@@ -1803,11 +1805,11 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config
 
     /* Close & reopen trace file, if requested */
     if(config_ptr->close_trace_file)
-	if(H5AC_close_trace_file(cache_ptr) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_close_trace_file() failed.")
+	if(H5AC__close_trace_file(cache_ptr) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC__close_trace_file() failed.")
     if(config_ptr->open_trace_file)
-        if(H5AC_open_trace_file(cache_ptr, config_ptr->trace_file_name) < 0)
-	    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "H5AC_open_trace_file() failed.")
+        if(H5AC__open_trace_file(cache_ptr, config_ptr->trace_file_name) < 0)
+	    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "H5AC__open_trace_file() failed.")
 
     /* Convert external configuration to internal representation */
     if(H5AC__ext_config_2_int_config(config_ptr, &internal_config) < 0)
@@ -1957,7 +1959,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_close_trace_file()
+ * Function:    H5AC__close_trace_file()
  *
  * Purpose:     If a trace file is open, stop logging calls to the cache,
  *              and close the file.
@@ -1972,13 +1974,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5AC_close_trace_file(H5AC_t *cache_ptr)
+static herr_t
+H5AC__close_trace_file(H5AC_t *cache_ptr)
 {
     FILE *   trace_file_ptr = NULL;
     herr_t   ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     if(cache_ptr == NULL)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "NULL cache_ptr on entry.")
@@ -1996,11 +1998,11 @@ H5AC_close_trace_file(H5AC_t *cache_ptr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_close_trace_file() */
+} /* H5AC__close_trace_file() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC_open_trace_file()
+ * Function:    H5AC__open_trace_file()
  *
  * Purpose:     Open a trace file, and start logging calls to the cache.
  *
@@ -2015,14 +2017,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name)
+static herr_t
+H5AC__open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name)
 {
     char     file_name[H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 2];
     FILE *   file_ptr = NULL;
     herr_t   ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     HDassert(cache_ptr);
 
@@ -2068,7 +2070,7 @@ H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_open_trace_file() */
+} /* H5AC__open_trace_file() */
 
 
 /*************************************************************************/
