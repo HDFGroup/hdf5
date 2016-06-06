@@ -183,7 +183,7 @@ H5HG_create(H5F_t *f, hid_t dxpl_id, size_t size)
      * which was always at least H5HG_ALIGNMENT aligned then we could just
      * align the pointer, but this might not be the case.
      */
-    n = H5HG_ALIGN(p - heap->chunk) - (size_t)(p - heap->chunk);
+    n = (size_t)H5HG_ALIGN(p - heap->chunk) - (size_t)(p - heap->chunk);
 #ifdef OLD_WAY
 /* Don't bother zeroing out the rest of the info in the heap -QAK */
     HDmemset(p, 0, n);

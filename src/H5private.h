@@ -1515,7 +1515,7 @@ extern char *strdup(const char *s);
 #define H5_CHECK_OVERFLOW(var, vartype, casttype) \
 {                                                 \
     casttype _tmp_overflow = (casttype)(var);     \
-    assert((var) == (vartype)_tmp_overflow);      \
+    HDassert((var) == (vartype)_tmp_overflow);      \
 }
 #else /* NDEBUG */
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)
@@ -1529,7 +1529,7 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_src == (srctype)_tmp_dst);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1540,8 +1540,8 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_src >= 0);   \
-    assert(_tmp_src == _tmp_dst);   \
+    HDassert(_tmp_src >= 0);   \
+    HDassert(_tmp_src == _tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1552,8 +1552,8 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_dst >= 0);   \
-    assert(_tmp_src == (srctype)_tmp_dst);   \
+    HDassert(_tmp_dst >= 0);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1561,8 +1561,8 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_src >= 0);   \
-    assert(_tmp_src == (srctype)_tmp_dst);   \
+    HDassert(_tmp_src >= 0);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 

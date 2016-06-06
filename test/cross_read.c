@@ -64,9 +64,9 @@ const char *FILENAME[] = {
 
 
 /*-------------------------------------------------------------------------
- * Function:    open_dataset
+ * Function:    check_data_i
  *
- * Purpose:     Read and compare the data from a dataset.
+ * Purpose:     Read and compare the integer data from a dataset.
  *
  * Return:      Success:        0
  *              Failure:        1
@@ -74,112 +74,143 @@ const char *FILENAME[] = {
  * Programmer:  Raymond Lu
  *              17 May 2011
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static int check_data(const char *dsetname, hid_t fid, hbool_t floating_number)
+static int
+check_data_i(const char *dsetname, hid_t fid)
 {
-    hid_t       dataset;         /* handles */
-    double      data_in[NX+1][NY]; /* input buffer */
-    double      data_out[NX+1][NY]; /* output buffer */
-    long long   int_data_in[NX+1][NY]; /* input buffer */
-    long long   int_data_out[NX+1][NY]; /* output buffer */
-    int         i, j;
-    unsigned 	nerrors = 0;
+    hid_t       did = -1;               /* dataset ID                       */
+    long long   data_in[NX+1][NY];      /* input buffer                     */
+    long long   data_out[NX+1][NY];     /* output buffer                    */
+    int         i, j;                   /* iterators                        */
+    int         nerrors = 0;            /* # errors in dataset values       */
 
-    /* 
-     * Open the regular dataset.
-     */
-    if((dataset = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
+    /* Open the dataset. */
+    if((did = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
 
-    /*
-     * Data and output buffer initialization.
-     */
-    for (j = 0; j < NX; j++) {
-        for (i = 0; i < NY; i++) {
-            data_in[j][i] = ((double)(i + j + 1))/3;
-            data_out[j][i] = 0.0F;
+    /* Initialization. */
+    /* Input (last row is different) */
+    for(i = 0; i < NX; i++)
+        for(j = 0; j < NY; j++)
+            data_in[i][j] = i + j;
+    for(i = 0; i < NY; i++)
+        data_in[NX][i] = -2;
+    /* Output */
+    HDmemset(data_out, 0, (NX+1) * NY * sizeof(long long));
 
-            int_data_in[j][i] = i + j;
-            int_data_out[j][i] = 0;
-        }
-    }
-    for (i = 0; i < NY; i++) {
-        data_in[NX][i] = -2.2F;
-        data_out[NX][i] = 0.0F;
-
-        int_data_in[NX][i] = -2;
-        int_data_out[NX][i] = 0;
-    }
-
-    /*
-     * Read data from hyperslab in the file into the hyperslab in
+    /* Read data from hyperslab in the file into the hyperslab in
      * memory and display.
      */
-    if(floating_number) {
-	if(H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-		data_out) < 0)
-	    TEST_ERROR;
+    if(H5Dread(did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_out) < 0)
+        FAIL_STACK_ERROR;
 
-	/* Check results */
-	for (j=0; j<(NX+1); j++) {
-	    for (i=0; i<NY; i++) {
-		if (!H5_DBL_REL_EQUAL(data_out[j][i], data_in[j][i], 0.001F)) {
-		    if (!nerrors++) {
-			H5_FAILED();
-			printf("element [%d][%d] is %g but should have been %g\n",
-			       j, i, data_out[j][i], data_in[j][i]);
-		    }
-		}
-	    }
-	}
-    } else {
-	if(H5Dread(dataset, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-		int_data_out) < 0)
-	    TEST_ERROR;
+    /* Check results */
+    for(i = 0; i < (NX + 1); i++)
+        for(j = 0; j < NY; j++)
+            if(data_out[i][j] != data_in[i][j])
+                if(!nerrors++) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %lld but should have been %lld\n",
+                            (int)i, (int)j, data_out[i][j], data_in[i][j]);
+                } /* end if */
 
-	/* Check results */
-	for (j=0; j<(NX+1); j++) {
-	    for (i=0; i<NY; i++) {
-		if (int_data_out[j][i] != int_data_in[j][i]) {
-		    if (!nerrors++) {
-			H5_FAILED();
-			printf("element [%d][%d] is %d but should have been %d\n",
-			       j, i, (int)int_data_out[j][i],
-			       (int)int_data_in[j][i]);
-		    }
-		}
-	    }
-	}
-    }
-
-    /*
-     * Close/release resources.
-     */
-    if(H5Dclose(dataset) < 0)
-        TEST_ERROR
+    /* Close/release resources. */
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR
 
     /* Failure */
-    if (nerrors) {
-        printf("total of %d errors out of %d elements\n", nerrors, NX*NY);
+    if(nerrors) {
+        printf("total of %d errors out of %d elements\n", nerrors, (int)(NX*NY));
         return 1;
-    }
+    } /* end if */
 
     PASSED();
     return 0;
 
 error:
     H5E_BEGIN_TRY {
-        H5Dclose(dataset);
+        H5Dclose(did);
     } H5E_END_TRY;
     return 1;
-}
+} /* end check_data_i() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    open_dataset
+ * Function:    check_data_f
+ *
+ * Purpose:     Read and compare the floating-point data from a dataset.
+ *
+ * Return:      Success:        0
+ *              Failure:        1
+ *
+ * Programmer:  Raymond Lu
+ *              17 May 2011
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+check_data_f(const char *dsetname, hid_t fid)
+{
+    hid_t       did = -1;               /* dataset ID                       */
+    double      data_in[NX+1][NY];      /* input buffer                     */
+    double      data_out[NX+1][NY];     /* output buffer                    */
+    int         i, j;                   /* iterators                        */
+    int         nerrors = 0;            /* # of errors in dataset values    */
+
+    /* Open the dataset. */
+    if((did = H5Dopen2(fid, dsetname, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Initialization. */
+    /* Input (last row is different) */
+    for(i = 0; i < NX; i++)
+        for(j = 0; j < NY; j++)
+            data_in[i][j] = ((double)(i + j + 1)) / (double)3.0F;
+    for(i = 0; i < NY; i++)
+        data_in[NX][i] = -2.2F;
+    /* Output */
+    HDmemset(data_out, 0, (NX+1) * NY * sizeof(double));
+
+    /* Read data from hyperslab in the file into the hyperslab in
+     * memory and display.
+     */
+    if(H5Dread(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_out) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Check results */
+    for(i = 0; i < (NX + 1); i++)
+        for(j = 0; j < NY; j++)
+            if(!H5_DBL_REL_EQUAL(data_out[i][j], data_in[i][j], (double)0.001F))
+                if(!nerrors++) {
+                    H5_FAILED();
+                    printf("element [%d][%d] is %g but should have been %g\n",
+                        (int)i, (int)j, data_out[i][j], data_in[i][j]);
+                } /* end if */
+
+    /* Close/release resources. */
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR
+
+    /* Failure */
+    if(nerrors) {
+        printf("total of %d errors out of %d elements\n", nerrors, (int)(NX*NY));
+        return 1;
+    } /* end if */
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+    } H5E_END_TRY;
+    return 1;
+} /* end check_data_f() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    check_file
  *
  * Purpose:     Handle each dataset from the data file.
  *
@@ -189,125 +220,122 @@ error:
  * Programmer:  Raymond Lu
  *              21 January 2011
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static int open_dataset(char *fname)
+static int
+check_file(char *filename)
 {
-    const char *pathname = H5_get_srcdir_filename(fname); /* Corrected test file name */
-    hid_t       file;         /* handles */
-    unsigned 	nerrors = 0;
-    const char  *not_supported= "    filter is not enabled.";
+    const char *pathname = H5_get_srcdir_filename(filename);    /* Corrected test file name     */
+    hid_t       fid = -1;                                       /* file ID                      */
+    int         nerrors = 0;                                    /* # of datasets with errors    */
+    const char  *not_supported= "    filter is not enabled.";   /* no filter message            */
 
-    /*
-     * Open the file.
-     */
-    if((file = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
+    /* Open the file. */
+    if((fid = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
 
     TESTING("regular dataset of LE DOUBLE");
-    nerrors += check_data(DATASETNAME, file, TRUE);
+    nerrors += check_data_f(DATASETNAME, fid);
 
     TESTING("regular dataset of BE DOUBLE");
-    nerrors += check_data(DATASETNAME1, file, TRUE);
+    nerrors += check_data_f(DATASETNAME1, fid);
 
     TESTING("dataset of LE FLOAT with scale-offset filter");
-    nerrors += check_data(DATASETNAME2, file, TRUE);
+    nerrors += check_data_f(DATASETNAME2, fid);
  
     TESTING("dataset of BE FLOAT with scale-offset filter");
-    nerrors += check_data(DATASETNAME3, file, TRUE);
+    nerrors += check_data_f(DATASETNAME3, fid);
 
     TESTING("dataset of LE DOUBLE with scale-offset filter");
-    nerrors += check_data(DATASETNAME4, file, TRUE);
+    nerrors += check_data_f(DATASETNAME4, fid);
  
     TESTING("dataset of BE DOUBLE with scale-offset filter");
-    nerrors += check_data(DATASETNAME5, file, TRUE);
+    nerrors += check_data_f(DATASETNAME5, fid);
  
     TESTING("dataset of LE CHAR with scale-offset filter");
-    nerrors += check_data(DATASETNAME6, file, FALSE);
+    nerrors += check_data_i(DATASETNAME6, fid);
  
     TESTING("dataset of BE CHAR with scale-offset filter");
-    nerrors += check_data(DATASETNAME7, file, FALSE);
+    nerrors += check_data_i(DATASETNAME7, fid);
  
     TESTING("dataset of LE SHORT with scale-offset filter");
-    nerrors += check_data(DATASETNAME8, file, FALSE);
+    nerrors += check_data_i(DATASETNAME8, fid);
  
     TESTING("dataset of BE SHORT with scale-offset filter");
-    nerrors += check_data(DATASETNAME9, file, FALSE);
+    nerrors += check_data_i(DATASETNAME9, fid);
 
     TESTING("dataset of LE INT with scale-offset filter");
-    nerrors += check_data(DATASETNAME10, file, FALSE);
+    nerrors += check_data_i(DATASETNAME10, fid);
  
     TESTING("dataset of BE INT with scale-offset filter");
-    nerrors += check_data(DATASETNAME11, file, FALSE);
+    nerrors += check_data_i(DATASETNAME11, fid);
 
     TESTING("dataset of LE LONG LONG with scale-offset filter");
-    nerrors += check_data(DATASETNAME12, file, FALSE);
+    nerrors += check_data_i(DATASETNAME12, fid);
  
     TESTING("dataset of BE LONG LONG with scale-offset filter");
-    nerrors += check_data(DATASETNAME13, file, FALSE);
+    nerrors += check_data_i(DATASETNAME13, fid);
 
     TESTING("dataset of LE FLOAT with Fletcher32 filter");
-    nerrors += check_data(DATASETNAME14, file, TRUE);
+    nerrors += check_data_f(DATASETNAME14, fid);
  
     TESTING("dataset of BE FLOAT with Fletcher32 filter");
-    nerrors += check_data(DATASETNAME15, file, TRUE);
+    nerrors += check_data_f(DATASETNAME15, fid);
  
     TESTING("dataset of LE FLOAT with Deflate filter");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    nerrors += check_data(DATASETNAME16, file, TRUE);
+    nerrors += check_data_f(DATASETNAME16, fid);
 #else /*H5_HAVE_FILTER_DEFLATE*/
     SKIPPED();
-    puts(not_supported);
+    HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_DEFLATE*/
 
     TESTING("dataset of BE FLOAT with Deflate filter");
 #ifdef H5_HAVE_FILTER_DEFLATE
-    nerrors += check_data(DATASETNAME17, file, TRUE);
+    nerrors += check_data_f(DATASETNAME17, fid);
 #else /*H5_HAVE_FILTER_DEFLATE*/
     SKIPPED();
-    puts(not_supported);
+    HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_DEFLATE*/
 
     TESTING("dataset of LE FLOAT with Szip filter");
 #ifdef H5_HAVE_FILTER_SZIP
-    nerrors += check_data(DATASETNAME18, file, TRUE);
+    nerrors += check_data_f(DATASETNAME18, fid);
 #else /*H5_HAVE_FILTER_SZIP*/
     SKIPPED();
-    puts(not_supported);
+    HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_SZIP*/
 
     TESTING("dataset of BE FLOAT with Szip filter");
 #ifdef H5_HAVE_FILTER_SZIP
-    nerrors += check_data(DATASETNAME19, file, TRUE);
+    nerrors += check_data_f(DATASETNAME19, fid);
 #else /*H5_HAVE_FILTER_SZIP*/
     SKIPPED();
-    puts(not_supported);
+    HDputs(not_supported);
 #endif /*H5_HAVE_FILTER_SZIP*/
 
     TESTING("dataset of LE FLOAT with Shuffle filter");
-    nerrors += check_data(DATASETNAME20, file, TRUE);
+    nerrors += check_data_f(DATASETNAME20, fid);
 
     TESTING("dataset of BE FLOAT with Shuffle filter");
-    nerrors += check_data(DATASETNAME21, file, TRUE);
+    nerrors += check_data_f(DATASETNAME21, fid);
 
     TESTING("dataset of LE FLOAT with Nbit filter");
-    nerrors += check_data(DATASETNAME22, file, TRUE);
+    nerrors += check_data_f(DATASETNAME22, fid);
 
     TESTING("dataset of BE FLOAT with Nbit filter");
-    nerrors += check_data(DATASETNAME23, file, TRUE);
+    nerrors += check_data_f(DATASETNAME23, fid);
 
-    if(H5Fclose(file))
-        TEST_ERROR
-    return 0;
+    if(H5Fclose(fid))
+        FAIL_STACK_ERROR
+    return nerrors;
 
 error:
     H5E_BEGIN_TRY {
-        H5Fclose(file);
+        H5Fclose(fid);
     } H5E_END_TRY;
     return nerrors;
-}
+} /* end check_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -315,35 +343,37 @@ error:
  *
  * Purpose:     Tests reading files created on LE and BE systems.
  *
- * Return:      Success:        exit(0)
- *              Failure:        exit(1)
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Raymond Lu
  *              Thursday, March 23, 2006
  *
  *-------------------------------------------------------------------------
  */
-int main(void)
+int
+main(void)
 {
     char        filename[1024];
-    unsigned 	nerrors = 0;
+    int         nerrors = 0;
 
     h5_reset();
 
-    puts("Testing reading data created on Linux");
-    h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof filename);
-    nerrors += open_dataset(filename);
+    HDputs("\n");
+    HDputs("Testing reading data created on Linux");
+    h5_fixname(FILENAME[1], H5P_DEFAULT, filename, sizeof(filename));
+    nerrors += check_file(filename);
 
-    puts("Testing reading data created on Solaris");
-    h5_fixname(FILENAME[2], H5P_DEFAULT, filename, sizeof filename);
-    nerrors += open_dataset(filename);
+    HDputs("\n");
+    HDputs("Testing reading data created on Solaris");
+    h5_fixname(FILENAME[2], H5P_DEFAULT, filename, sizeof(filename));
+    nerrors += check_file(filename);
 
-    if (nerrors) {
-        printf("***** %u FAILURE%s! *****\n",
-               nerrors, 1==nerrors?"":"S");
-        HDexit(1);
-    }
+    if(nerrors) {
+        printf("***** %d FAILURE%s! *****\n", nerrors, 1 == nerrors ? "" : "S");
+        return EXIT_FAILURE;
+    } /* end if */
 
     printf("All data type tests passed.\n");
-    return 0;
-}
+    return EXIT_SUCCESS;
+} /* end main() */
+

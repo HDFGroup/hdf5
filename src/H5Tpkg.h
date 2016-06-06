@@ -1288,8 +1288,8 @@ H5_DLL void H5T__bit_set_d(uint8_t *buf, size_t offset, size_t size,
 			   uint64_t val);
 H5_DLL ssize_t H5T__bit_find(uint8_t *buf, size_t offset, size_t size,
 			     H5T_sdir_t direction, hbool_t value);
-H5_DLL htri_t H5T__bit_inc(uint8_t *buf, size_t start, size_t size);
-H5_DLL htri_t H5T__bit_dec(uint8_t *buf, size_t start, size_t size);
+H5_DLL hbool_t H5T__bit_inc(uint8_t *buf, size_t start, size_t size);
+H5_DLL hbool_t H5T__bit_dec(uint8_t *buf, size_t start, size_t size);
 H5_DLL void H5T__bit_neg(uint8_t *buf, size_t start, size_t size);
 
 /* VL functions */

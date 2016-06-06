@@ -1286,12 +1286,12 @@ done:
 void *
 H5SL_remove_first(H5SL_t *slist)
 {
-    void *ret_value = NULL;                     /* Return value */
-    H5SL_node_t *head = slist->header;          /* Skip list header */
-    H5SL_node_t *tmp = slist->header->forward[0]; /* Temporary node pointer */
-    H5SL_node_t *next;                          /* Next node to search for */
-    size_t      level = slist->curr_level;      /* Skip list level */
-    size_t      i;                              /* Index */
+    void        *ret_value = NULL;                  /* Return value             */
+    H5SL_node_t *head = slist->header;              /* Skip list header         */
+    H5SL_node_t *tmp = slist->header->forward[0];   /* Temporary node pointer   */
+    H5SL_node_t *next;                              /* Next node to search for  */
+    size_t      level;                              /* Skip list level          */
+    size_t      i;                                  /* Index                    */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1300,6 +1300,10 @@ H5SL_remove_first(H5SL_t *slist)
 
     /* Not currently supported */
     HDassert(!slist->safe_iterating);
+
+    /* Assign level */
+    H5_CHECK_OVERFLOW(slist->curr_level, int, size_t);
+    level = (size_t)slist->curr_level;
 
     /* Check internal consistency */
     /* (Pre-condition) */

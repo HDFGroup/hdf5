@@ -401,7 +401,7 @@ create_scale_offset_dsets_char(hid_t fid, hid_t fsid, hid_t msid)
      */
     for (j = 0; j < NX; j++) {
         for (i = 0; i < NY; i++)
-            data[j][i] = i + j;
+            data[j][i] = (char)(i + j);
     }
     /*
      * 0 1 2 3 4 5
@@ -500,7 +500,7 @@ create_scale_offset_dsets_short(hid_t fid, hid_t fsid, hid_t msid)
      */
     for (j = 0; j < NX; j++) {
         for (i = 0; i < NY; i++)
-            data[j][i] = i + j;
+            data[j][i] = (short)(i + j);
     }
     /*
      * 0 1 2 3 4 5

@@ -146,7 +146,7 @@ typedef struct {
     unsigned ncalled;           /* # of times callback is entered */
     unsigned nskipped;          /* # of attributes skipped */
     int stop;                   /* # of iterations to stop after */
-    int64_t curr;               /* Current creation order value */
+    hsize_t curr;               /* Current creation order value */
     size_t max_visit;           /* Size of "visited attribute" flag array */
     hbool_t *visited;           /* Pointer to array of "visited attribute" flags */
 } attr_iter_info_t;
@@ -522,7 +522,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(!H5_DBL_ABS_EQUAL(rdata,0.0F))
+    if(!H5_DBL_ABS_EQUAL(rdata, H5_DOUBLE(0.0)))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,(double)0.0F);
 
     ret=H5Fflush(fil, H5F_SCOPE_GLOBAL);
@@ -531,7 +531,7 @@ test_attr_flush(hid_t fapl)
     ret=H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if(!H5_DBL_ABS_EQUAL(rdata,0.0F))
+    if(!H5_DBL_ABS_EQUAL(rdata, H5_DOUBLE(0.0)))
         TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n",rdata,(double)0.0F);
 
     ret=H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
@@ -780,7 +780,7 @@ test_attr_compound_read(hid_t fapl)
     size_t  offset;     /* Attribute datatype field offset */
     hid_t   field;      /* Attribute field datatype */
     struct attr4_struct read_data4[ATTR4_DIM1][ATTR4_DIM2]; /* Buffer for reading 4th attribute */
-    size_t  name_len;   /* Length of attribute name */
+    ssize_t  name_len;  /* Length of attribute name */
     H5O_info_t oinfo;   /* Object info */
     int     i, j;       /* Local index variables */
     herr_t  ret;	/* Generic return value	*/
@@ -1187,7 +1187,7 @@ test_attr_mult_read(hid_t fapl)
     int     read_data1[ATTR1_DIM1] = {0}; /* Buffer for reading 1st attribute */
     int     read_data2[ATTR2_DIM1][ATTR2_DIM2] = {{0}}; /* Buffer for reading 2nd attribute */
     double  read_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {{{0}}}; /* Buffer for reading 3rd attribute */
-    size_t  name_len;   /* Length of attribute name */
+    ssize_t  name_len;  /* Length of attribute name */
     H5O_info_t oinfo;   /* Object info */
     int     i, j, k;    /* Local index values */
     herr_t  ret;	/* Generic return value */
@@ -1510,7 +1510,7 @@ test_attr_delete(hid_t fapl)
     hid_t   dataset;	/* Dataset ID			*/
     hid_t   attr;       /* Attribute ID			*/
     char    attr_name[ATTR_NAME_LEN]; /* Buffer for attribute names */
-    size_t  name_len;   /* Length of attribute name     */
+    ssize_t name_len;   /* Length of attribute name     */
     H5O_info_t oinfo;   /* Object info                  */
     herr_t  ret;	/* Generic return value		*/
 
@@ -2078,7 +2078,7 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
 
     /* Re-open all the attributes by index and verify the data */
     for(u = 0; u < max_attr; u++) {
-        size_t name_len;                /* Length of attribute name */
+        ssize_t name_len;               /* Length of attribute name */
         char check_name[ATTR_NAME_LEN]; /* Buffer for checking attribute names */
 
         /* Open attribute */
@@ -5560,7 +5560,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
 
     /* Verify the name for new link, in increasing creation order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    ret = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+    ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
     if(HDstrcmp(attrname, tmpname))
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
@@ -5585,7 +5585,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
 
         /* Verify the name for new link, in increasing native order */
         HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-        ret = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+        ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Aget_name_by_idx");
         if(HDstrcmp(attrname, tmpname))
             TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
@@ -5606,7 +5606,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
 
     /* Verify the name for new link, in increasing creation order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    ret = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+    ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
     if(HDstrcmp(attrname, tmpname))
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
@@ -5626,7 +5626,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
 
     /* Verify the name for new link, in increasing name order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    ret = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+    ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
     if(HDstrcmp(attrname, tmpname))
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
@@ -5651,7 +5651,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n,
 
     /* Verify the name for new link, in increasing name order */
     HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-    ret = H5Aget_name_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+    ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
     if(HDstrcmp(attrname, tmpname))
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
@@ -5760,7 +5760,7 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
             /* Check for query on non-existant attribute */
             ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &ainfo, H5P_DEFAULT);
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-            ret = H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             VERIFY(ret, FAIL, "H5Aget_name_by_idx");
 
             /* Create attributes, up to limit of compact form */
@@ -5797,7 +5797,7 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
             ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &ainfo, H5P_DEFAULT);
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-            ret = H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             VERIFY(ret, FAIL, "H5Aget_name_by_idx");
 
             /* Create more attributes, to push into dense form */
@@ -5847,7 +5847,7 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
             ret = H5Aget_info_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &ainfo, H5P_DEFAULT);
             VERIFY(ret, FAIL, "H5Aget_info_by_idx");
-            ret = H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+            ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             VERIFY(ret, FAIL, "H5Aget_name_by_idx");
         } /* end for */
 
@@ -6074,7 +6074,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 
                         /* Verify the name for first attribute in appropriate order */
                         HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                        ret = H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                        ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
                         if(order == H5_ITER_INC)
                             sprintf(attrname, "attr %02u", (u + 1));
                         else
@@ -6199,7 +6199,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 
                         /* Verify the name for first attribute in appropriate order */
                         HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                        ret = H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                        ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
                         if(order == H5_ITER_INC)
                             sprintf(attrname, "attr %02u", (u + 1));
                         else
@@ -6310,7 +6310,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 
                         /* Verify the name for first attribute in appropriate order */
                         HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                        ret = H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                        ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)u, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
                         if(order == H5_ITER_INC)
                             sprintf(attrname, "attr %02u", ((u * 2) + 1));
                         else
@@ -6359,7 +6359,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 
                         /* Verify the name for first attribute in appropriate order */
                         HDmemset(tmpname, 0, (size_t)NAME_BUF_SIZE);
-                        ret = H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
+                        ret = (herr_t)H5Aget_name_by_idx(my_dataset, ".", idx_type, order, (hsize_t)0, tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
                         if(order == H5_ITER_INC)
                             sprintf(attrname, "attr %02u", ((u * 2) + 3));
                         else
@@ -9864,7 +9864,7 @@ test_attr_bug3(hid_t fcpl, hid_t fapl)
             wdata1[u][v] = (int)((u * dims1[1]) + v);
     for(u = 0; u < dims2[0]; u++)
         for(v = 0; v < dims2[1]; v++)
-            wdata2[u][v] = (int)((u * dims2[1]) + v);
+            wdata2[u][v] = (unsigned)((u * dims2[1]) + v);
 
     /* Write data to the attributes */
     ret = H5Awrite(aid1, H5T_NATIVE_INT, wdata1);

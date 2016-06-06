@@ -4032,7 +4032,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
     size_t	mpos;			/*offset to useful mant is src	*/
     uint64_t    sign;                   /*source sign bit value         */
     size_t	mrsh;			/*amount to right shift mantissa*/
-    hbool_t	carry = 0;		/*carry after rounding mantissa	*/
+    hbool_t carry = FALSE;		/*carry after rounding mantissa	*/
     size_t	i;			/*miscellaneous counters	*/
     size_t	implied;		/*destination implied bits	*/
     hbool_t     denormalized = FALSE;   /*is either source or destination denormalized?*/
@@ -4408,7 +4408,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         /* Don't do rounding if exponent is 111...110 and mantissa is 111...11.
                          * To do rounding and increment exponent in this case will create an infinity value.*/
                         if((H5T__bit_find(s, mpos + (size_t)bitno, msize - (size_t)bitno, H5T_BIT_LSB, FALSE) >= 0 || expo < expo_max - 1)) {
-                            carry = (hbool_t)H5T__bit_inc(s, mpos + (size_t)bitno - 1, 1 + msize - (size_t)bitno);
+                            carry = H5T__bit_inc(s, mpos + (size_t)bitno - 1, 1 + msize - (size_t)bitno);
                             if(carry)
                                 implied = 2;
                         }
@@ -4417,7 +4417,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                         H5T__bit_inc(s, mpos + (size_t)bitno - 1, 1 + msize - (size_t)bitno);
                 }
                 else
-                    carry=0;
+                    carry = FALSE;
 
                 /*
                  * Write the mantissa to the destination
@@ -4480,7 +4480,7 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                     }
                 }
                 /*reset CARRY*/
-                carry = 0;
+                carry = FALSE;
 
                 H5_CHECK_OVERFLOW(expo,hssize_t,hsize_t);
                 H5T__bit_set_d(d, dst.u.f.epos, dst.u.f.esize, (hsize_t)expo);
