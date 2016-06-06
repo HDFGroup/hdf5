@@ -172,8 +172,7 @@ static herr_t H5C__tag_entry(H5C_t * cache_ptr,
 
 static herr_t H5C__mark_tagged_entries(H5C_t * cache_ptr, haddr_t tag);
 
-static herr_t H5C__flush_marked_entries(H5F_t * f, 
-                                       hid_t dxpl_id);
+static herr_t H5C__flush_marked_entries(H5F_t * f, hid_t dxpl_id);
 
 static herr_t H5C__generate_image(const H5F_t *f, H5C_t * cache_ptr, H5C_cache_entry_t *entry_ptr, 
                                   hid_t dxpl_id, int64_t *entry_size_change_ptr);
