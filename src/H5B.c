@@ -1053,6 +1053,7 @@ H5B__insert_helper(H5F_t *f, hid_t dxpl_id, H5B_ins_ud_t *bt_ud,
     /*
      * Handle changes/additions to children
      */
+    HDassert(!(bt->level == 0) != !(child_bt_ud.bt));
     if(H5B_INS_CHANGE == my_ins) {
 	/*
 	 * The insertion simply changed the address for the child.
@@ -1432,9 +1433,9 @@ H5B__remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *typ
                 bt->nchildren = 0;
 
                 /* Delete the node from disk (via the metadata cache) */
-                bt_flags |= H5AC__DIRTIED_FLAG;
+		bt_flags |= H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
                 H5_CHECK_OVERFLOW(shared->sizeof_rnode, size_t, hsize_t);
-                if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, bt_flags | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0) {
+                if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, bt_flags | H5AC__DELETED_FLAG) < 0) {
                     bt = NULL;
                     bt_flags = H5AC__NO_FLAGS_SET;
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, H5B_INS_ERROR, "unable to free B-tree node")
