@@ -739,7 +739,7 @@ H5TEST_DLL void unprotect_entry(H5F_t * file_ptr,
 H5TEST_DLL void verify_clean(void);
 
 H5TEST_DLL void verify_entry_status(H5C_t * cache_ptr,
-                int tag,
+		         int tag,
                          int num_entries,
                          struct expected_entry_status expected[]);
 
