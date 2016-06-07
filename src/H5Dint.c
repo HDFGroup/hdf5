@@ -3406,11 +3406,6 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
                 }
                 cur_node->next = node;
             }
-
-            if(temp_name) {
-                HDfree(temp_name);
-                temp_name = NULL;
-            }
         }
 
         op_data.file = file;
