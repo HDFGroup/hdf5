@@ -127,8 +127,8 @@ const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
     H5D__virtual_read,
     H5D__virtual_write,
 #ifdef H5_HAVE_PARALLEL
-    NULL,
-    NULL,
+    H5D__virtual_read,
+    H5D__virtual_write,
 #endif /* H5_HAVE_PARALLEL */
     NULL,
     NULL,

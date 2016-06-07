@@ -704,6 +704,14 @@ H5_DLL herr_t H5D__chunk_collective_write(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_chunk_map_t *fm);
 
+/* MPI-IO functions to handle VDS/Subfile collective IO */
+H5_DLL herr_t H5D__virtual_collective_read(H5D_io_info_t *io_info,
+    const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
+    const H5S_t *mem_space, H5D_chunk_map_t *fm);
+H5_DLL herr_t H5D__virtual_collective_write(H5D_io_info_t *io_info,
+    const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
+    const H5S_t *mem_space, H5D_chunk_map_t *fm);
+
 /* MPI-IO function to check if a direct I/O transfer is possible between
  * memory and the file */
 H5_DLL htri_t H5D__mpio_opt_possible(const H5D_io_info_t *io_info,

@@ -194,7 +194,8 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
 
     /* Dataset storage must be contiguous or chunked */
     if(!(io_info->dset->shared->layout.type == H5D_CONTIGUOUS ||
-            io_info->dset->shared->layout.type == H5D_CHUNKED))
+         io_info->dset->shared->layout.type == H5D_CHUNKED ||
+         io_info->dset->shared->layout.type == H5D_VIRTUAL))
         local_cause |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
 
     /* check if external-file storage is used */
@@ -1626,6 +1627,108 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__sort_chunk() */
+#if 0
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_collective_read
+ *
+ * Purpose:     Reads directly from virtual data in file into application
+ *              memory using collective I/O.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, March  4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__virtual_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+    H5D_chunk_map_t H5_ATTR_UNUSED *fm)
+{
+    H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_VIRTUAL_COLLECTIVE;
+    H5P_genplist_t *dx_plist;           /* Pointer to DXPL */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(H5FD_MPIO == H5F_DRIVER_ID(io_info->dset->oloc.file));
+    HDassert(TRUE == H5P_isa_class(io_info->raw_dxpl_id, H5P_DATASET_XFER));
+
+    /* Call generic internal collective I/O routine */
+    if(H5D__inter_collective_io(io_info, type_info, file_space, mem_space) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't finish shared collective MPI-IO")
+
+    /* Obtain the data transfer properties */
+    if(NULL == (dx_plist = H5I_object(io_info->raw_dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+
+    /* Set the actual I/O mode property. internal_collective_io will not break to
+     * independent I/O, so we set it here.
+     */
+    if(H5P_set(dx_plist, H5D_MPIO_ACTUAL_IO_MODE_NAME, &actual_io_mode) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set actual io mode property")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_collective_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_collective_write
+ *
+ * Purpose:     Write directly to virtual data in file from application
+ *              memory using collective I/O.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, March  4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__virtual_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+    hsize_t H5_ATTR_UNUSED nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+    H5D_chunk_map_t H5_ATTR_UNUSED *fm)
+{
+    H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_VIRTUAL_COLLECTIVE;
+    H5P_genplist_t *dx_plist;           /* Pointer to DXPL */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(io_info);
+    HDassert(io_info->u.wbuf);
+    HDassert(type_info);
+    HDassert(mem_space);
+    HDassert(file_space);
+    HDassert(H5FD_MPIO == H5F_DRIVER_ID(io_info->dset->oloc.file));
+
+    storage = &io_info->dset->shared->layout.storage.u.virt;
+    HDassert((storage->view == H5D_VDS_FIRST_MISSING) || (storage->view == H5D_VDS_LAST_AVAILABLE));
+
+    /* Call generic internal collective I/O routine */
+    if(H5D__inter_collective_io(io_info, type_info, file_space, mem_space) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "couldn't finish shared collective MPI-IO")
+
+    /* Obtain the data transfer properties */
+    if(NULL == (dx_plist = H5I_object(io_info->raw_dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+
+    /* Set the actual I/O mode property. internal_collective_io will not break to
+     * independent I/O, so we set it here.
+     */
+    if(H5P_set(dx_plist, H5D_MPIO_ACTUAL_IO_MODE_NAME, &actual_io_mode) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "couldn't set actual io mode property")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__virtual_collective_write() */
+#endif
 
 
 /*-------------------------------------------------------------------------

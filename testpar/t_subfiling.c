@@ -418,7 +418,7 @@ subf_2_w(void)
     hid_t fid;                  /* HDF5 file ID */
     hid_t did;
     hid_t sid, mem_space_id;
-    hid_t fapl_id, dapl_id;	/* Property Lists */
+    hid_t fapl_id, dapl_id, dxpl_id;	/* Property Lists */
 
     const char *filename;
     char subfile_name[50];
@@ -512,8 +512,18 @@ subf_2_w(void)
     mem_space_id = H5Screate_simple(1, &npoints, NULL);
     VRFY((mem_space_id >= 0), "");
 
-    ret = H5Dwrite(did, H5T_NATIVE_INT, mem_space_id, sid, H5P_DEFAULT, wbuf);
+    /* Create dataset transfer property list */
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id > 0), "H5Pcreate succeeded");
+
+    ret = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+
+    ret = H5Dwrite(did, H5T_NATIVE_INT, mem_space_id, sid, dxpl_id, wbuf);
     if(ret < 0) FAIL_STACK_ERROR;
+    VRFY((ret == 0), "");
+
+    ret = H5Pclose(dxpl_id);
     VRFY((ret == 0), "");
 
     ret = H5Dclose(did);
@@ -543,7 +553,7 @@ subf_2_r(void)
 {
     hid_t fid;                  /* HDF5 file ID */
     hid_t did;
-    hid_t sid, mem_space_id;
+    hid_t sid, mem_space_id, dxpl_id;
     hid_t fapl_id;      	/* Property Lists */
 
     const char *filename;
@@ -618,8 +628,18 @@ subf_2_r(void)
     mem_space_id = H5Screate_simple(1, &npoints, NULL);
     VRFY((mem_space_id >= 0), "");
 
-    ret = H5Dread(did, H5T_NATIVE_INT, mem_space_id, sid, H5P_DEFAULT, rbuf);
+    /* Create dataset transfer property list */
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id > 0), "H5Pcreate succeeded");
+
+    ret = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+
+    ret = H5Dread(did, H5T_NATIVE_INT, mem_space_id, sid, dxpl_id, rbuf);
     if(ret < 0) FAIL_STACK_ERROR;
+    VRFY((ret == 0), "");
+
+    ret = H5Pclose(dxpl_id);
     VRFY((ret == 0), "");
 
     for(i=0 ; i<npoints ; i++)
@@ -733,7 +753,7 @@ int main(int argc, char **argv)
 
 
     /* Clean up test files */
-    //h5_clean_files(FILENAME, fapl);
+    h5_clean_files(FILENAME, fapl);
 
     nerrors += GetTestNumErrs();
 

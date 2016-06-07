@@ -1735,6 +1735,14 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     if(H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode)<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode")
 
+    if(type == H5FD_MEM_DRAW) {
+        if(xfer_mode == H5FD_MPIO_COLLECTIVE)
+            printf("COLLECTIVE\n");
+        else {
+            printf("INDEPENDENT\n");
+        }
+    }
+
     /*
      * Set up for a fancy xfer using complex types, or single byte block. We
      * wouldn't need to rely on the use_view field if MPI semantics allowed

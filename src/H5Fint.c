@@ -2210,7 +2210,7 @@ H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__open_subfile(H5F_t *file, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
+H5F__open_subfile(H5F_t *file, unsigned flags, hid_t H5_ATTR_UNUSED fcpl_id, hid_t fapl_id, hid_t dxpl_id)
 {
     H5P_genplist_t *plist;
     const char *subfile_name = NULL;
