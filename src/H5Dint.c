@@ -3358,14 +3358,12 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
 
             HDstrcpy(dset_name, loc_name);
             HDstrcat(dset_name, name);
-            printf("BEFORE name = %s\n", dset_name);
-            /* replace '/' with '-' */
 
+            /* replace '/' with '-' */
             for(u=0 ; u<HDstrlen(dset_name); u++) {
                 if(dset_name[u] == '/')
                     dset_name[u] = '-';
             }
-            printf("AFTER name = %s\n", dset_name);
         }
 
         /* decode all the information in this buffer and populate the skip list */
@@ -3381,8 +3379,6 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory for source file name")
             (void)HDmemcpy(temp_name, rp, name_len);
 
-            if(mpi_rank == 0)
-                printf("%d: file name = %s\n", i, temp_name);
             rp += name_len;
 
             if(NULL == (temp_space = H5S_decode((const unsigned char **)&rp)))
@@ -3463,14 +3459,11 @@ H5D__subfiling_init_cb(void *item, void *key, void *_op_data)
 
     FUNC_ENTER_STATIC
 
-    printf("Setting layout for subfile %s\n", subfile_name);
-
     node = head_node;
     /* iterate over all selections in this node to determine the size
        of the source dataset for this sub-file */
     do {
         npoints += (hsize_t)H5S_GET_SELECT_NPOINTS(node->space);
-        printf("%s: %d\n", subfile_name, (int) npoints);
         node = node->next;
     } while(node != NULL);
 
