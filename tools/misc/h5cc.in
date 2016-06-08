@@ -216,7 +216,7 @@ for arg in $@ ; do
       compile_args="$compile_args $arg"
 
       if test "x$do_link" = "xyes" -a -n "$output_file"; then
-        compile_args="$compile_args -o $outputfile"
+        compile_args="$compile_args -o $output_file"
       fi
 
       do_link="no"
