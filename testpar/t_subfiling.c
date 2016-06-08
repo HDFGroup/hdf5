@@ -426,7 +426,7 @@ subf_2_w(void)
     hsize_t npoints, start[RANK], count[RANK], stride[RANK], block[RANK];
 
     int mpi_size, mpi_rank, mrc, color, i;
-    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Comm comm;
     MPI_Info info = MPI_INFO_NULL;
 
     int *wbuf;
@@ -435,23 +435,23 @@ subf_2_w(void)
     filename = (const char *)GetTestParameters();
 
     /* set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     /* create file access property list */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     VRFY((fapl_id >= 0), "");
 
-    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+    ret = H5Pset_fapl_mpio(fapl_id, MPI_COMM_WORLD, info);
     VRFY((ret == 0), "");
 
     /* set subfiling to be to 2 files */
+    color = mpi_rank % 2;
 
     /* set name of subfile */
-    sprintf(subfile_name, "Subfile_%d.h5", mpi_rank%2);
+    sprintf(subfile_name, "Subfile_%d.h5", color);
 
     /* splits processes into 2 groups */
-    color = mpi_rank % 2;
     mrc = MPI_Comm_split (MPI_COMM_WORLD, color, mpi_rank, &comm);
     VRFY((mrc==MPI_SUCCESS), "Comm_split succeeded");
 

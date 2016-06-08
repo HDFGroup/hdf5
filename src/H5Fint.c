@@ -2246,7 +2246,8 @@ H5F__open_subfile(H5F_t *file, unsigned flags, hid_t H5_ATTR_UNUSED fcpl_id, hid
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get driver info")
 
         /* create the subfile */
-        if(NULL == (file->subfile = H5F_open(subfile_name, flags, H5P_FILE_CREATE_DEFAULT, subfile_fapl_id, dxpl_id)))
+        if(NULL == (file->subfile = H5F_open(subfile_name, flags, H5P_FILE_CREATE_DEFAULT, 
+                                             subfile_fapl_id, dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create sub-file")
         /* Get an atom for the file */
         if((file->subfile->file_id = H5I_register(H5I_FILE, file->subfile, TRUE)) < 0)

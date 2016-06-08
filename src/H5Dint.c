@@ -3420,8 +3420,6 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
             HGOTO_DONE(ret_value);
 
         H5SL_destroy(subfile_map, H5D__subfiling_dest_cb, NULL);
-        //H5S_close(temp_space);
-        //HDfree(temp_name);
     }
 done:
     if(size_array) {
@@ -3460,7 +3458,7 @@ H5D__subfiling_init_cb(void *item, void *key, void *_op_data)
     H5S_t *src_space = NULL;
     hsize_t npoints = 0;
     H5D_t *src_dset = NULL;
-    hsize_t start;
+    hsize_t start = 0;
     int ret_value = H5_ITER_CONT;                       /* Return value */
 
     FUNC_ENTER_STATIC

@@ -770,7 +770,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
         if(H5F_HAS_FEATURE(vdset->oloc.file, H5FD_FEAT_HAS_MPI)) {
             src_file = H5F_SUBFILE(vdset->oloc.file);
             if(NULL == src_file)
-                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "VDS is not supported with the MPIO VFD") 
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "VDS is not supported with the MPIO VFD")
         }
         else
 #endif /* H5_HAVE_PARALLEL */
