@@ -2418,17 +2418,21 @@ done:
 herr_t
 H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag) 
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
      
     /* Call cache-level function to re-tag entries with the COPIED tag */
-    H5C_retag_entries(f->shared->cache, H5AC__COPIED_TAG, metadata_tag);
+    if(H5C_retag_entries(f->shared->cache, H5AC__COPIED_TAG, metadata_tag) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "Can't retag metadata")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* H5AC_retag_copied_metadata */
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_retag_copied_metadata() */
 
 
 /*------------------------------------------------------------------------------
