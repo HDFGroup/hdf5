@@ -3411,11 +3411,11 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
         op_data.dxpl_id = dxpl_id;
 
         /* iterate throught the skip list and create the virtual layout */
-        ret_value = H5SL_iterate(subfile_map, H5D__subfiling_init_cb, &op_data);
-        if(ret_value != 0)
-            HGOTO_DONE(ret_value);
+        if(H5SL_iterate(subfile_map, H5D__subfiling_init_cb, &op_data) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "can't iterate over skip list elements")
 
-        H5SL_destroy(subfile_map, H5D__subfiling_dest_cb, NULL);
+        if(H5SL_destroy(subfile_map, H5D__subfiling_dest_cb, NULL) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "failed to destroy subfile skip list")
     }
 done:
     if(size_array) {
