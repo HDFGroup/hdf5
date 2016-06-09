@@ -419,12 +419,12 @@ AC_RUN_IFELSE([
 	AC_MSG_RESULT([$PAC_FC_MAX_REAL_PRECISION])
     else
         AC_MSG_RESULT([Error])
-        AC_MSG_WARN([No output from test program!])
+        AC_MSG_ERROR([No output from Fortran test program!])
     fi
     rm -f pac_fconftest.out
 ],[
     AC_MSG_RESULT([Error])
-    AC_MSG_WARN([Failed to run program to determine available KINDs])
+    AC_MSG_ERROR([Failed to run Fortran program to determine available KINDs])
 ],[])
 
 AC_LANG_POP([Fortran])
@@ -454,11 +454,11 @@ for kind in `echo $pac_validIntKinds | sed -e 's/,/ /g'`; do
                 sizes="`cat pac_fconftest.out`"
                 pack_int_sizeof="$pack_int_sizeof $sizes,"
             else
-                AC_MSG_WARN([No output from test program!])
+                AC_MSG_ERROR([No output from Fortran test program!])
             fi
             rm -f pac_fconftest.out
         ],[
-            AC_MSG_WARN([Fortran program fails to build or run!])
+            AC_MSG_ERROR([Fortran program fails to build or run!])
         ],[
             pack_int_sizeof="$2"
         ])
@@ -492,11 +492,11 @@ for kind in `echo  $pac_validRealKinds | sed -e 's/,/ /g'`; do
                 sizes="`cat pac_fconftest.out`"
                 pack_real_sizeof="$pack_real_sizeof $sizes,"
             else
-                AC_MSG_WARN([No output from test program!])
+                AC_MSG_ERROR([No output from Fortran test program!])
             fi
             rm -f pac_fconftest.out
         ],[
-            AC_MSG_WARN([Fortran program fails to build or run!])
+            AC_MSG_ERROR([Fortran program fails to build or run!])
         ],[
             pack_real_sizeof="$2"
         ])
@@ -540,11 +540,11 @@ rm -f pac_fconftest.out
                 PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '5p' pac_fconftest.out`"
                 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '6p' pac_fconftest.out`"
             else
-                AC_MSG_WARN([No output from test program!])
+                AC_MSG_ERROR([No output from Fortran test program!])
             fi
             rm -f pac_fconftest.out
         ],[
-            AC_MSG_WARN([Fortran program fails to build or run!])
+            AC_MSG_ERROR([Fortran program fails to build or run!])
         ],[
             pack_int_sizeof="$2"
         ])
@@ -588,7 +588,7 @@ rm -f pac_Cconftest.out
 	        LDBL_DIG="`sed -n '1p' pac_Cconftest.out`" 
 	        FLT128_DIG="`sed -n '2p' pac_Cconftest.out`"
             else
-                AC_MSG_WARN([No output from test program!])
+                AC_MSG_ERROR([No output from Fortran decimal precision program!])
             fi
             rm -f pac_Cconftest.out
         ],[

@@ -217,6 +217,17 @@ list(GET PROG_OUTPUT 0 pac_validIntKinds)
 list(GET PROG_OUTPUT 1 pac_validRealKinds)
 list(GET PROG_OUTPUT 2 H5_PAC_FC_MAX_REAL_PRECISION)
 
+# If the lists are empty then something went wrong.
+if( NOT pac_validIntKinds)
+    message (FATAL_ERROR "Failed to find available INTEGER KINDs for Fortran")
+endif()
+if( NOT pac_validRealKinds)
+    message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
+endif()
+if( NOT H5_PAC_FC_MAX_REAL_PRECISION)
+    message (FATAL_ERROR "No output from Fortran decimal precision program")
+endif()
+
 set(PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
 set(PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
 
@@ -257,6 +268,11 @@ foreach( KIND ${VAR} )
   string(REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set(pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
 endforeach(KIND)
+
+if (pack_int_sizeof STREQUAL "")
+   message (FATAL_ERROR "Failed to find available INTEGER KINDs for Fortran")
+endif()
+
 string(STRIP ${pack_int_sizeof} pack_int_sizeof)
 
 
@@ -297,6 +313,11 @@ foreach( KIND ${VAR} )
   string(REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set(pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
 endforeach(KIND)
+
+if (pack_int_sizeof STREQUAL "")
+   message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
+endif()
+
 string(STRIP ${pack_real_sizeof} pack_real_sizeof)
 
 #Remove trailing comma
@@ -356,6 +377,26 @@ list(GET PROG_OUTPUT 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
 list(GET PROG_OUTPUT 3 PAC_FORTRAN_NATIVE_REAL_KIND)
 list(GET PROG_OUTPUT 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
 list(GET PROG_OUTPUT 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
+
+if (NOT PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
+   message (FATAL_ERROR "Failed to find SIZEOF NATIVE INTEGER KINDs for Fortran")
+endif()
+if (NOT PAC_FORTRAN_NATIVE_REAL_SIZEOF)
+   message (FATAL_ERROR "Failed to find SIZEOF NATIVE REAL KINDs for Fortran")
+endif()
+if (NOT PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
+   message (FATAL_ERROR "Failed to find SIZEOF NATIVE DOUBLE KINDs for Fortran")
+endif()
+if (NOT PAC_FORTRAN_NATIVE_INTEGER_KIND)
+   message (FATAL_ERROR "Failed to find KIND of NATIVE INTEGER for Fortran")
+endif()
+if (NOT PAC_FORTRAN_NATIVE_REAL_KIND)
+   message (FATAL_ERROR "Failed to find KIND of NATIVE REAL for Fortran")
+endif()
+if (NOT PAC_FORTRAN_NATIVE_DOUBLE_KIND)
+   message (FATAL_ERROR "Failed to find KIND of NATIVE DOUBLE for Fortran")
+endif()
+
 
 set(FORTRAN_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
 #set(H5_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
