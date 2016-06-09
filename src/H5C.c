@@ -7512,6 +7512,13 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
                             entry_size_change = 0;
 #endif /* H5C_DO_SANITY_CHECKS */
 
+#ifdef H5_HAVE_PARALLEL
+                            if(TRUE == entry_ptr->coll_access) {
+                                entry_ptr->coll_access = FALSE;
+                                H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
+                            } /* end if */
+#endif
+
                             if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, flags, entry_size_change_ptr, NULL) < 0)
                                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "dirty pinned entry flush failed.")
 
@@ -7557,6 +7564,14 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
                             flushed_entries_size += (int64_t)entry_ptr->size;
                             entry_size_change = 0;
 #endif /* H5C_DO_SANITY_CHECKS */
+
+#ifdef H5_HAVE_PARALLEL
+                            if(TRUE == entry_ptr->coll_access) {
+                                entry_ptr->coll_access = FALSE;
+                                H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
+                            } /* end if */
+#endif
+
                             if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, flags, entry_size_change_ptr, NULL) < 0)
                                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry.")
 
