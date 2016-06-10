@@ -3378,7 +3378,6 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
             if(NULL == (temp_name = (char *)HDmalloc(name_len)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory for source file name")
             (void)HDmemcpy(temp_name, rp, name_len);
-
             rp += name_len;
 
             if(NULL == (temp_space = H5S_decode((const unsigned char **)&rp)))
@@ -3401,6 +3400,10 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
                     cur_node = cur_node->next;
                 }
                 cur_node->next = node;
+
+                /* release the key here since it's not inserted in the skip list */
+                HDfree(temp_name);
+                temp_name = NULL;
             }
         }
 
