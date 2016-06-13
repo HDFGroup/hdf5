@@ -25,13 +25,13 @@
 /****************/
 /* Local Macros */
 /****************/
-#define NREF_TYPES 3
+#define NTYPES 4
 #define NTUPLES 1024*4
 #define NCOMPONENTS 1
 
 #define MAX_NAME 64
 #define MULTI_NFILES 3
-#define NLOOP 5
+#define NLOOP 100
 
 /******************/
 /* Local Typedefs */
@@ -46,7 +46,7 @@ struct test_case {
 /* Local Prototypes */
 /********************/
 static hid_t test_query_create(void);
-static hid_t test_query_create_type(H5R_type_t type);
+static hid_t test_query_create_type(H5R_type_t type, hbool_t compound);
 static herr_t test_query_close(hid_t query);
 static herr_t test_query_apply_elem(hid_t query, hbool_t *result, hid_t type_id,
     const void *value);
@@ -114,7 +114,7 @@ error:
 
 /* Create query for type of reference */
 static hid_t
-test_query_create_type(H5R_type_t type)
+test_query_create_type(H5R_type_t type, hbool_t compound)
 {
     int min = 17;
     int max = 22;
@@ -152,8 +152,13 @@ test_query_create_type(H5R_type_t type)
         q9 = q8;
     }
     else if (type == H5R_ATTR) {
-        printf("Query-> (attr=2)\n");
-        q9 = q5;
+        if (compound) {
+            printf("Query-> (attr='SensorID') AND (attr=2)\n");
+            q9 = q6;
+        } else {
+            printf("Query-> (attr=2)\n");
+            q9 = q5;
+        }
     }
 
     return q9;
@@ -574,9 +579,11 @@ static herr_t
 test_query_apply_view(const char *filename, hid_t fapl, unsigned n_objs,
     unsigned meta_idx_plugin, unsigned data_idx_plugin)
 {
-    H5R_type_t ref_types[NREF_TYPES] = { H5R_REGION, H5R_OBJECT, H5R_ATTR };
-    unsigned ref_masks[NREF_TYPES] = {H5Q_REF_REG, H5Q_REF_OBJ, H5Q_REF_ATTR };
-    const char *ref_names[NREF_TYPES] = { "regions", "objects", "attributes" };
+    H5R_type_t ref_types[NTYPES] = { H5R_REGION, H5R_OBJECT, H5R_ATTR, H5R_ATTR };
+    unsigned ref_masks[NTYPES] = { H5Q_REF_REG, H5Q_REF_OBJ, H5Q_REF_ATTR, H5Q_REF_ATTR };
+    const char *ref_names[NTYPES] = { "regions (compound)",
+        "objects (compound)", "attributes (compound)", "attributes (simple)" };
+    hbool_t compound[NTYPES] = { TRUE, TRUE, TRUE, FALSE };
     hid_t file = H5I_BADID;
     hid_t view = H5I_BADID;
     hid_t query = H5I_BADID;
@@ -598,17 +605,17 @@ test_query_apply_view(const char *filename, hid_t fapl, unsigned n_objs,
         if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR;
     }
 
-    for (i = 0; i < NREF_TYPES; i++) {
+    for (i = 1; i < NTYPES; i++) {
         struct timeval t1, t2;
         struct timeval t_total = {0, 0};
         int loop;
         unsigned result = 0;
 
         printf("\nQuery on %s\n", ref_names[i]);
-        printf(  "------------\n");
+        printf("%s\n", "--------------------------------------------------------------------------------");
 
         /* Test query */
-        if ((query = test_query_create_type(ref_types[i])) < 0) FAIL_STACK_ERROR;
+        if ((query = test_query_create_type(ref_types[i], compound[i])) < 0) FAIL_STACK_ERROR;
 
         for (loop = 0; loop < NLOOP; loop++) {
             HDgettimeofday(&t1, NULL);
@@ -678,7 +685,7 @@ test_query_apply_view_multi(const char *filenames[], hid_t fapl, unsigned n_objs
     printf(  "------------\n");
 
     /* Test region query */
-    if ((query = test_query_create_type(H5R_REGION)) < 0) FAIL_STACK_ERROR;
+    if ((query = test_query_create_type(H5R_REGION, TRUE)) < 0) FAIL_STACK_ERROR;
 
     HDgettimeofday(&t1, NULL);
 
@@ -700,7 +707,7 @@ test_query_apply_view_multi(const char *filenames[], hid_t fapl, unsigned n_objs
     printf(  "------------\n");
 
     /* Test object query */
-    if ((query = test_query_create_type(H5R_OBJECT)) < 0) FAIL_STACK_ERROR;
+    if ((query = test_query_create_type(H5R_OBJECT, TRUE)) < 0) FAIL_STACK_ERROR;
     if ((view = H5Qapply_multi(MULTI_NFILES, files, query, &result, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
 
     if (!(result & H5Q_REF_OBJ)) FAIL_STACK_ERROR;
@@ -713,7 +720,7 @@ test_query_apply_view_multi(const char *filenames[], hid_t fapl, unsigned n_objs
     printf(  "---------------\n");
 
     /* Test attribute query */
-    if ((query = test_query_create_type(H5R_ATTR)) < 0) FAIL_STACK_ERROR;
+    if ((query = test_query_create_type(H5R_ATTR, TRUE)) < 0) FAIL_STACK_ERROR;
     if ((view = H5Qapply_multi(MULTI_NFILES, files, query, &result, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR;
 
     if (!(result & H5Q_REF_ATTR)) FAIL_STACK_ERROR;
