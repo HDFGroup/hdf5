@@ -42,4 +42,6 @@ H5_DLL H5R_type_t H5R_get_type(href_t ref);
 H5_DLL herr_t H5R_encode(href_t ref, unsigned char *buf, size_t *nalloc);
 H5_DLL href_t H5R_decode(const unsigned char *buf);
 
+H5_DLL herr_t H5R_cast(href_t _ref, H5R_type_t ref_type);
+
 #endif  /* _H5Rprivate_H */

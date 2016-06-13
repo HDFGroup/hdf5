@@ -2256,3 +2256,42 @@ H5R_decode(const unsigned char *buf)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R_decode() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5R_cast
+ *
+ * Purpose: Cast reference to parent type.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5R_cast(href_t _ref, H5R_type_t ref_type)
+{
+    struct href *ref = (struct href *)_ref;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(ref);
+
+    switch (ref->ref_type) {
+        case H5R_EXT_REGION:
+        case H5R_EXT_ATTR:
+            if (ref_type < ref->ref_type && ref_type > H5R_ATTR)
+                /* Safe to cast */
+                ref->ref_type = ref_type;
+            break;
+        case H5R_EXT_OBJECT:
+        case H5R_OBJECT:
+        case H5R_REGION:
+        case H5R_ATTR:
+        default:
+            HDassert("unknown reference type" && 0);
+            HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5R_cast() */
