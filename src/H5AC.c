@@ -741,6 +741,7 @@ H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
     hbool_t	is_dirty;               /* Entry @ addr is in the cache and dirty */
     hbool_t	is_protected;           /* Entry @ addr is in the cache and protected */
     hbool_t	is_pinned;              /* Entry @ addr is in the cache and pinned */
+    hbool_t	is_corked;
     hbool_t	is_flush_dep_child;     /* Entry @ addr is in the cache and is a flush dependency child */
     hbool_t	is_flush_dep_parent;    /* Entry @ addr is in the cache and is a flush dependency parent */
     herr_t      ret_value = SUCCEED;      /* Return value */
@@ -751,7 +752,7 @@ H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry.")
 
     if(H5C_get_entry_status(f, addr, NULL, &in_cache, &is_dirty,
-            &is_protected, &is_pinned, &is_flush_dep_parent, &is_flush_dep_child) < 0)
+            &is_protected, &is_pinned, &is_corked, &is_flush_dep_parent, &is_flush_dep_child) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_status() failed.")
 
     if(in_cache) {
@@ -762,6 +763,8 @@ H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
 	    *status |= H5AC_ES__IS_PROTECTED;
 	if(is_pinned)
 	    *status |= H5AC_ES__IS_PINNED;
+	if(is_corked)
+	    *status |= H5AC_ES__IS_CORKED;
 	if(is_flush_dep_parent)
 	    *status |= H5AC_ES__IS_FLUSH_DEP_PARENT;
 	if(is_flush_dep_child)
@@ -2504,6 +2507,42 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC_expunge_tag_type_metadata*/
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_cork
+ *
+ * Purpose:     To cork/uncork/get cork status for an object
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; Jan 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+    HDassert(H5F_addr_defined(obj_addr));
+    HDassert(action == H5AC__SET_CORK || action == H5AC__UNCORK || action == H5AC__GET_CORKED);
+
+    if(action == H5AC__GET_CORKED)
+	HDassert(corked);
+
+    if(H5C_cork(f->shared->cache, obj_addr, action, corked) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Cannot perform the cork action")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_cork() */
 
 #if H5AC_DO_TAGGING_SANITY_CHECKS
 

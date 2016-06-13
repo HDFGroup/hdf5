@@ -229,6 +229,7 @@ H5C_get_entry_status(const H5F_t *f,
                      hbool_t * is_dirty_ptr,
                      hbool_t * is_protected_ptr,
 		     hbool_t * is_pinned_ptr,
+		     hbool_t * is_corked_ptr,
 		     hbool_t * is_flush_dep_parent_ptr,
                      hbool_t * is_flush_dep_child_ptr)
 {
@@ -273,6 +274,8 @@ H5C_get_entry_status(const H5F_t *f,
             *is_protected_ptr = entry_ptr->is_protected;
         if(is_pinned_ptr != NULL)
             *is_pinned_ptr = entry_ptr->is_pinned;
+        if(is_corked_ptr != NULL)
+            *is_corked_ptr = entry_ptr->is_corked;
         if(is_flush_dep_parent_ptr != NULL)
             *is_flush_dep_parent_ptr = (entry_ptr->flush_dep_height > 0);
         if(is_flush_dep_child_ptr != NULL)

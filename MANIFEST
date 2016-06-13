@@ -496,6 +496,7 @@
 ./src/H5Cpublic.h
 ./src/H5Cquery.c
 ./src/H5Ctag.c
+./src/H5Ctest.c
 ./src/H5CS.c
 ./src/H5CSprivate.h
 ./src/H5D.c
@@ -882,6 +883,7 @@
 ./test/cache_common.h
 ./test/cache_tagging.c
 ./test/cmpd_dset.c
+./test/cork.c
 ./test/corrupt_stab_msg.h5
 ./test/cross_read.c
 ./test/dangle.c

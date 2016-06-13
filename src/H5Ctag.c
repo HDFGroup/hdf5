@@ -54,9 +54,6 @@
 /* Local Typedefs */
 /******************/
 
-/* Define cache entry iteration callback type */
-typedef int (*H5C_tag_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
-
 /* Typedef for tagged entry iterator callback context - retag tagged entries */
 typedef struct {
     haddr_t dest_tag;                   /* New tag value for matching entries */
@@ -70,13 +67,16 @@ typedef struct {
     unsigned flags;                     /* Flags for expunging entry */
 } H5C_tag_iter_ettm_ctx_t;
 
+/* Typedef for tagged entry iterator callback context - mark corked */
+typedef struct {
+    hbool_t cork_val;                   /* Corked value */
+} H5C_tag_iter_cork_ctx_t;
+
 
 /********************/
 /* Local Prototypes */
 /********************/
 static herr_t H5C__mark_tagged_entries(H5C_t *cache_ptr, haddr_t tag);
-static int H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
-    H5C_tag_iter_cb_t cb, void *cb_ctx);
 
 
 /*********************/
@@ -244,7 +244,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static int
+int
 H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
     H5C_tag_iter_cb_t cb, void *cb_ctx)
 {
@@ -252,7 +252,7 @@ H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
     int ret_value = H5_ITER_CONT;       /* Return value */
 
     /* Function enter macro */
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(cache != NULL);
@@ -629,4 +629,74 @@ H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_expunge_tag_type_metadata() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__mark_tagged_entries_cork_cb
+ *		
+ * Purpose:     The "is_corked" field to "val" for en entry
+ *
+ * Return:      H5_ITER_ERROR if error is detected, H5_ITER_CONT otherwise.
+ *
+ * Programmer:  Vailin Choi
+ *		January 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5C__mark_tagged_entries_cork_cb(H5C_cache_entry_t *entry, void *_ctx)
+{
+    H5C_tag_iter_cork_ctx_t *ctx = (H5C_tag_iter_cork_ctx_t *)_ctx; /* Get pointer to iterator context */
+
+    /* Function enter macro */
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Santify checks */
+    HDassert(entry);
+    HDassert(ctx);
+
+    /* Set the entry's "corked" field to "val" */
+    entry->is_corked = ctx->cork_val;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5C__mark_tagged_entries_cork_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__mark_tagged_entries_cork
+ *		
+ * Purpose:     To set the "is_corked" field to "val" for entries in cache 
+ *		with the entry's tag equals to "obj_addr".
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Vailin Choi
+ *		January 2014
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5C__mark_tagged_entries_cork(H5C_t *cache, haddr_t obj_addr, hbool_t val)
+{
+    H5C_tag_iter_cork_ctx_t ctx;        /* Context for iterator callback */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    /* Function enter macro */
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDassert(cache);
+    HDassert(cache->magic == H5C__H5C_T_MAGIC);
+
+    /* Construct context for iterator callbacks */
+    ctx.cork_val = val;
+
+    /* Iterate through entries, find each entry with the specified tag */
+    /* and set the entry's "corked" field to "val" */
+    if(H5C__iter_tagged_entries(cache, obj_addr, FALSE, H5C__mark_tagged_entries_cork_cb, &ctx) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__mark_tagged_entries_cork() */
 

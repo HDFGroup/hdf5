@@ -87,6 +87,7 @@ set (H5C_SOURCES
     ${HDF5_SRC_DIR}/H5Cmpio.c
     ${HDF5_SRC_DIR}/H5Cquery.c
     ${HDF5_SRC_DIR}/H5Ctag.c
+    ${HDF5_SRC_DIR}/H5Ctest.c
 )
 set (H5C_HDRS
     ${HDF5_SRC_DIR}/H5Cpkg.h

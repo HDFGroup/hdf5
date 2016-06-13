@@ -1776,6 +1776,7 @@ herr_t
 H5D_close(H5D_t *dataset)
 {
     hbool_t free_failed = FALSE;
+    hbool_t corked;			/* Whether the dataset is corked or not */
     herr_t ret_value = SUCCEED;      	/* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1884,6 +1885,13 @@ H5D_close(H5D_t *dataset)
                     (H5O_msg_reset(H5O_LAYOUT_ID, &dataset->shared->layout) < 0) ||
                     (H5O_msg_reset(H5O_FILL_ID, &dataset->shared->dcpl_cache.fill) < 0) ||
                     (H5O_msg_reset(H5O_EFL_ID, &dataset->shared->dcpl_cache.efl) < 0);
+
+	/* Uncork cache entries with object address tag */
+	if(H5AC_cork(dataset->oloc.file, dataset->oloc.addr, H5AC__GET_CORKED, &corked) < 0)
+	    HDONE_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve an object's cork status")
+	if(corked)
+	    if(H5AC_cork(dataset->oloc.file, dataset->oloc.addr, H5AC__UNCORK, NULL) < 0)
+		HDONE_ERROR(H5E_DATASET, H5E_CANTUNCORK, FAIL, "unable to uncork an object")
 
         /*
          * Release datatype, dataspace and creation property list -- there isn't

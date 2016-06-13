@@ -3482,6 +3482,11 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  * 		to the slist since the last time this field was set to
  * 		zero.  Note that this value can be negative.
  *
+ * cork_list_ptr: A skip list to track object addresses that are corked.
+ *                When an entry is inserted or protected in the cache,
+ *                the entry's associated object address (tag field) is
+ *                checked against this skip list.  If found, the entry
+ *                is corked.
  *
  * When a cache entry is protected, it must be removed from the LRU
  * list(s) as it cannot be either flushed or evicted until it is unprotected.
@@ -4111,6 +4116,8 @@ struct H5C_t {
     int64_t			slist_size_increase;
 #endif /* H5C_DO_SANITY_CHECKS */
 
+    H5SL_t *                    cork_list_ptr; /* list of corked object addresses */
+
     /* Fields for tracking protected entries */
     int32_t                     pl_len;
     size_t                      pl_size;
@@ -4260,6 +4267,9 @@ typedef struct H5C_collective_write_t {
 } H5C_collective_write_t;
 #endif /* H5_HAVE_PARALLEL */
 
+/* Define typedef for tagged cache entry iteration callbacks */
+typedef int (*H5C_tag_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
+
 
 /*****************************/
 /* Package Private Variables */
@@ -4277,12 +4287,19 @@ H5_DLLVAR const H5C_class_t H5C__epoch_marker_class;
 H5_DLL herr_t H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id,
     H5C_cache_entry_t *entry_ptr, unsigned flags, int64_t *entry_size_change_ptr, H5SL_t *collective_write_list);
 H5_DLL herr_t H5C__flush_marked_entries(H5F_t * f, hid_t dxpl_id);
+H5_DLL int H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
+    H5C_tag_iter_cb_t cb, void *cb_ctx);
 
 /* Routines for operating on entry tags */
 H5_DLL herr_t H5C__tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr,
     hid_t dxpl_id);
 H5_DLL herr_t H5C__mark_tagged_entries_cork(H5C_t *cache_ptr, haddr_t obj_addr,
     hbool_t val);
+
+/* Testing functions */
+#ifdef H5C_TESTING
+H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, haddr_t tag, hbool_t status);
+#endif /* H5C_TESTING */
 
 #endif /* _H5Cpkg_H */
 

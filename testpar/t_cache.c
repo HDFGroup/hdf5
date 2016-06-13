@@ -3053,7 +3053,7 @@ expunge_entry(H5F_t * file_ptr,
 	HDassert( ! ((entry_ptr->header).is_dirty) );
 
 	result = H5C_get_entry_status(file_ptr, entry_ptr->base_addr,
-				      NULL, &in_cache, NULL, NULL, NULL, NULL, NULL);
+				      NULL, &in_cache, NULL, NULL, NULL, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -3125,7 +3125,7 @@ insert_entry(H5C_t * cache_ptr,
         entry_ptr->dirty = TRUE;
 
         result = H5AC_insert_entry(file_ptr, H5AC_ind_read_dxpl_id, &(types[0]),
-               entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
+                entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.type != &(types[0]) ) ||

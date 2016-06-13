@@ -232,6 +232,11 @@
 #define H5C_DO_EXTREME_SANITY_CHECKS	0
 #endif /* NDEBUG */
 
+/* Cork actions: cork/uncork/get cork status of an object */
+#define H5C__SET_CORK                  0x1
+#define H5C__UNCORK                    0x2
+#define H5C__GET_CORKED                0x4
+
 /* Note: The memory sanity checks aren't going to work until I/O filters are
  *      changed to call a particular alloc/free routine for their buffers,
  *      because the H5AC__SERIALIZE_RESIZED_FLAG set by the fractal heap
@@ -1290,6 +1295,9 @@ typedef int H5C_ring_t;
  *		The name is not particularly descriptive, but is retained
  *		to avoid changes in existing code.
  *
+ * is_corked:	Boolean flag indicating whether the cache entry associated
+ *		with an object is corked or not corked.
+ *
  * is_dirty:	Boolean flag indicating whether the contents of the cache
  *		entry has been modified since the last time it was written
  *		to disk.
@@ -1614,6 +1622,7 @@ typedef struct H5C_cache_entry_t {
     const H5C_class_t	      *	type;
     haddr_t		        tag;
     H5C_tag_globality_t		globality;
+    hbool_t			is_corked;
     hbool_t			is_dirty;
     hbool_t			dirtied;
     hbool_t			is_protected;
@@ -1983,7 +1992,7 @@ H5_DLL herr_t H5C_get_cache_size(H5C_t *cache_ptr, size_t *max_size_ptr,
 H5_DLL herr_t H5C_get_cache_hit_rate(H5C_t *cache_ptr, double *hit_rate_ptr);
 H5_DLL herr_t H5C_get_entry_status(const H5F_t *f, haddr_t addr,
     size_t *size_ptr, hbool_t *in_cache_ptr, hbool_t *is_dirty_ptr,
-    hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr,
+    hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr, hbool_t *is_corked_ptr,
     hbool_t *is_flush_dep_parent_ptr, hbool_t *is_flush_dep_child_ptr);
 H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictions_enabled_ptr);
 H5_DLL void * H5C_get_aux_ptr(const H5C_t *cache_ptr);
@@ -2017,6 +2026,7 @@ H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr,
 H5_DLL herr_t H5C_ignore_tags(H5C_t *cache_ptr);
 H5_DLL hbool_t H5C_get_ignore_tags(const H5C_t *cache_ptr);
 H5_DLL herr_t H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
+H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
 
 #ifdef H5_HAVE_PARALLEL

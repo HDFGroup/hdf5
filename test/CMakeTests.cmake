@@ -647,6 +647,7 @@ set (H5TEST_TESTS
     vds
     file_image
     unregister
+    cork
 )
 
 foreach (test ${H5TEST_TESTS})
@@ -959,7 +960,7 @@ if (HDF5_TEST_VFD)
       farray
       earray
       btree2
-      #fheap
+#      fheap
       hyperslab
       istore
       bittests

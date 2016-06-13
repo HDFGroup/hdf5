@@ -247,6 +247,7 @@ set (H5_TESTS
     vds
     file_image
     unregister
+    cork
 )
 
 foreach (test ${H5_TESTS})

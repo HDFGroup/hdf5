@@ -138,6 +138,11 @@ typedef enum {
 #define H5AC__SERIALIZE_MOVED_FLAG	H5C__SERIALIZE_MOVED_FLAG
 #define H5AC__SERIALIZE_COMPRESSED_FLAG	H5C__SERIALIZE_COMPRESSED_FLAG
 
+/* Cork actions: cork/uncork/get cork status of an object */
+#define H5AC__SET_CORK             	H5C__SET_CORK
+#define H5AC__UNCORK             	H5C__UNCORK
+#define H5AC__GET_CORKED             	H5C__GET_CORKED
+
 /* Aliases for the "ring" type and values */
 typedef H5C_ring_t       H5AC_ring_t;
 #define H5AC_RING_INV    H5C_RING_UNDEFINED
@@ -318,6 +323,7 @@ H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
 #define H5AC_ES__IS_PINNED	0x0008
 #define H5AC_ES__IS_FLUSH_DEP_PARENT	0x0010
 #define H5AC_ES__IS_FLUSH_DEP_CHILD	0x0020
+#define H5AC_ES__IS_CORKED	0x0040
 
 
 /* external function declarations: */
@@ -359,6 +365,7 @@ H5_DLL herr_t H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag);
 H5_DLL herr_t H5AC_flush_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hid_t dxpl_id);
 H5_DLL herr_t H5AC_retag_copied_metadata(const H5F_t *f, haddr_t metadata_tag);
 H5_DLL herr_t H5AC_ignore_tags(const H5F_t *f);
+H5_DLL herr_t H5AC_cork(H5F_t *f, haddr_t obj_addr, unsigned action, hbool_t *corked);
 H5_DLL herr_t H5AC_get_entry_ring(const H5F_t *f, haddr_t addr, H5AC_ring_t *ring);
 H5_DLL herr_t H5AC_set_ring(hid_t dxpl_id, H5AC_ring_t ring, H5P_genplist_t **dxpl,
     H5AC_ring_t *orig_ring);

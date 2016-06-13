@@ -472,6 +472,7 @@ done:
 herr_t
 H5G_close(H5G_t *grp)
 {
+    hbool_t	corked;			/* Whether the group is corked or not */
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -484,6 +485,13 @@ H5G_close(H5G_t *grp)
 
     if(0 == grp->shared->fo_count) {
         HDassert(grp != H5G_rootof(H5G_fileof(grp)));
+
+	/* Uncork cache entries with object address tag */
+        if(H5AC_cork(grp->oloc.file, grp->oloc.addr, H5AC__GET_CORKED, &corked) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to retrieve an object's cork status")
+        if(corked)
+            if(H5AC_cork(grp->oloc.file, grp->oloc.addr, H5AC__UNCORK, NULL) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTUNCORK, FAIL, "unable to uncork an object")
 
         /* Remove the group from the list of opened objects in the file */
         if(H5FO_top_decr(grp->oloc.file, grp->oloc.addr) < 0)
