@@ -135,8 +135,13 @@ synchronize (void)
 #if defined(H5_HAVE_WIN32_API) && ! defined(__CYGWIN__)
     _flushall();
 #else
-    HDsystem("sync");
-    HDsystem("df >/dev/null");
+    int status;
+
+    status = HDsystem("sync");
+    HDassert(status >= 0);
+
+    status = HDsystem("df >/dev/null");
+    HDassert(status >= 0);
 #endif
 #endif
 }

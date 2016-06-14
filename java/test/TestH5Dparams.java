@@ -131,4 +131,14 @@ public class TestH5Dparams {
         H5.H5Dget_storage_size(-1);
     }
 
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Dflush_invalid() throws Throwable {
+        H5.H5Dflush(-1);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Drefresh_invalid() throws Throwable {
+        H5.H5Drefresh(-1);
+    }
+
 }

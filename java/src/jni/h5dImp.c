@@ -1779,6 +1779,33 @@ Java_hdf_hdf5lib_H5_H5Diterate
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Diterate */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Dflush
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Dflush
+	(JNIEnv *env, jclass clss, jlong loc_id)
+{
+    if (H5Dflush((hid_t)loc_id) < 0)
+        h5libraryError(env);
+}
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Drefresh
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Drefresh
+	(JNIEnv *env, jclass clss, jlong loc_id)
+{
+    if (H5Drefresh((hid_t)loc_id) < 0)
+        h5libraryError(env);
+}
+
+
 
 #ifdef __cplusplus
 } /* end extern "C" */

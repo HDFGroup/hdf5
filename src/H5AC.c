@@ -2473,6 +2473,40 @@ done:
 } /* H5AC_flush_tagged_metadata */
 
 
+/*------------------------------------------------------------------------------
+ * Function:    H5AC_evict_tagged_metadata()
+ *
+ * Purpose:     Wrapper for cache level function which flushes all metadata
+ *              that contains the specific tag. 
+ * 
+ * Return:      SUCCEED on success, FAIL otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              May 19, 2010
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_evict_tagged_metadata(H5F_t * f, haddr_t metadata_tag, hid_t dxpl_id)
+{
+    /* Variable Declarations */
+    herr_t ret_value = SUCCEED;
+ 
+    /* Function Enter Macro */   
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Assertions */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Call cache level function to evict metadata entries with specified tag */
+    if(H5C_evict_tagged_entries(f, dxpl_id, metadata_tag) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot evict metadata")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_evict_tagged_metadata() */
+
 
 /*------------------------------------------------------------------------------
  * Function:    H5AC_expunge_tag_type_metadata()

@@ -4764,7 +4764,7 @@ void pause_proc(void)
 	    }
 	    printf("waiting(%ds) for file %s ...\n", time_int, greenlight);
 	    fflush(stdout);
-        HDsleep(time_int);
+            HDsleep(time_int);
 	}
     MPI_Barrier(MPI_COMM_WORLD);
 }

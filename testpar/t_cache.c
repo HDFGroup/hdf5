@@ -7163,10 +7163,6 @@ smoke_check_6(int metadata_write_strategy)
     hbool_t success = TRUE;
     int i;
     int max_nerrors;
-    int min_count;
-    int max_count;
-    int min_idx;
-    int max_idx;
     hid_t fid = -1;
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;
@@ -7224,9 +7220,6 @@ smoke_check_6(int metadata_write_strategy)
                           world_mpi_rank, FUNC);
             }
         }
-
-        min_count = 100 / ((file_mpi_rank + 1) * (file_mpi_rank + 1));
-        max_count = min_count + 50;
 
         temp = virt_num_data_entries;
         virt_num_data_entries = NUM_DATA_ENTRIES;

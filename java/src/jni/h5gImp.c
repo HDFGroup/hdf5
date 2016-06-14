@@ -260,6 +260,33 @@ Java_hdf_hdf5lib_H5_H5Gget_1info_1by_1idx
     return create_H5G_info_t(env, group_info);
 } /* end Java_hdf_hdf5lib_H5_H5Gget_1info_1by_1idx */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Gflush
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Gflush
+	(JNIEnv *env, jclass clss, jlong loc_id)
+{
+    if (H5Gflush((hid_t)loc_id) < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Gflush */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Grefresh
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Grefresh
+	(JNIEnv *env, jclass clss, jlong loc_id)
+{
+    if (H5Grefresh((hid_t)loc_id) < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Grefresh */
+
+
 
 #ifdef __cplusplus
 } /* end extern "C" */

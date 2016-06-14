@@ -244,3 +244,41 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5F_flush_tagged_metadata */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_evict_tagged_metadata
+ *
+ * Purpose:     Evicts metadata from the cache with specified tag.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:	Mike McGreevy
+ *              September 9, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Unpin the superblock, as this will be marked for eviction and it can't 
+        be pinned. */
+    if(H5AC_unpin_entry(f->shared->sblock) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
+    f->shared->sblock = NULL;
+
+    /* Evict the object's metadata */
+    if(H5AC_evict_tagged_metadata(f, tag, dxpl_id)<0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict tagged metadata")
+
+    /* Re-read the superblock. */
+    if(H5F__super_read(f, dxpl_id, FALSE) < 0)
+	HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "unable to read superblock")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5F_evict_tagged_metadata */
+

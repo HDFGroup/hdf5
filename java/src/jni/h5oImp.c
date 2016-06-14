@@ -779,6 +779,33 @@ Java_hdf_hdf5lib_H5__1H5Oopen_1by_1idx
     return (jlong)retVal;
 } /* end Java_hdf_hdf5lib_H5__1H5Oopen_1by_1idx */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Oflush
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Oflush
+	(JNIEnv *env, jclass clss, jlong loc_id)
+{
+    if (H5Oflush((hid_t)loc_id) < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Oflush */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Orefresh
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Orefresh
+	(JNIEnv *env, jclass clss, jlong loc_id)
+{
+    if (H5Orefresh((hid_t)loc_id) < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Orefresh */
+
+
 
 #ifdef __cplusplus
 } /* end extern "C" */

@@ -394,6 +394,12 @@ typedef struct H5D_chunk_cached_t {
     unsigned	filter_mask;			/*excluded filters	*/
 } H5D_chunk_cached_t;
 
+/* List of files held open during refresh operations */
+typedef struct H5D_virtual_held_file_t {
+    H5F_t *file;                                /* Pointer to file held open */
+    struct H5D_virtual_held_file_t *next;       /* Pointer to next node in list */
+} H5D_virtual_held_file_t;
+
 /* The raw data chunk cache */
 struct H5D_rdcc_ent_t;  /* Forward declaration of struct used below */
 typedef struct H5D_rdcc_t {
@@ -579,6 +585,7 @@ H5_DLL herr_t H5D__get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
 H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL herr_t H5D__flush_real(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL herr_t H5D__mark(const H5D_t *dataset, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5D__refresh(hid_t dset_id, H5D_t *dataset, hid_t dxpl_id);
 #ifdef H5_DEBUG_BUILD
 H5_DLL herr_t H5D_set_io_info_dxpls(H5D_io_info_t *io_info, hid_t dxpl_id);
 #endif /* H5_DEBUG_BUILD */
@@ -696,6 +703,9 @@ H5_DLL herr_t H5D__virtual_copy(H5F_t *f_src, H5O_layout_t *layout_dst,
 H5_DLL herr_t H5D__virtual_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id);
 H5_DLL hbool_t H5D__virtual_is_space_alloc(const H5O_storage_t *storage);
+H5_DLL herr_t H5D__virtual_hold_source_dset_files(const H5D_t *dset, H5D_virtual_held_file_t **head);
+H5_DLL herr_t H5D__virtual_refresh_source_dsets(H5D_t *dset, hid_t dxpl_id);
+H5_DLL herr_t H5D__virtual_release_source_dset_files(H5D_virtual_held_file_t *head);
 
 /* Functions that operate on EFL (External File List)*/
 H5_DLL hbool_t H5D__efl_is_space_alloc(const H5O_storage_t *storage);

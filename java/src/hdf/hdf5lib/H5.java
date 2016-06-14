@@ -2072,6 +2072,31 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Dwrite_VLStrings(long dataset_id, long mem_type_id, long mem_space_id,
             long file_space_id, long xfer_plist_id, Object[] buf) throws HDF5LibraryException, NullPointerException;
 
+    /**
+     * H5Dflush causes all buffers associated with a dataset to be immediately flushed to disk without removing the
+     * data from the cache.
+     *
+     * @param dset_id
+     *            IN: Identifier of the dataset to be flushed.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Dflush(long dset_id) throws HDF5LibraryException;
+
+    /**
+     * H5Drefresh causes all buffers associated with a dataset to be cleared and immediately re-loaded with updated
+     * contents from disk. This function essentially closes the dataset, evicts all metadata associated with it
+     * from the cache, and then re-opens the dataset. The reopened dataset is automatically re-registered with the same ID.
+     *
+     * @param dset_id
+     *            IN: Identifier of the dataset to be refreshed.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Drefresh(long dset_id) throws HDF5LibraryException;
+
     // /////// unimplemented ////////
     // H5_DLL herr_t H5Ddebug(hid_t dset_id);
     // herr_t H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id,
@@ -3289,6 +3314,32 @@ public class H5 implements java.io.Serializable {
     private synchronized static native long _H5Gopen2(long loc_id, String name, long gapl_id)
             throws HDF5LibraryException, NullPointerException;
 
+    /**
+     * H5Gflush causes all buffers associated with a group to be immediately flushed to disk without
+     * removing the data from the cache.
+     *
+     * @param group_id
+     *            IN: Identifier of the group to be flushed.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Gflush(long group_id) throws HDF5LibraryException;
+
+    /**
+     * H5Grefresh causes all buffers associated with a group to be cleared and immediately re-loaded
+     * with updated contents from disk. This function essentially closes the group, evicts all metadata
+     * associated with it from the cache, and then re-opens the group. The reopened group is automatically
+     * re-registered with the same ID.
+     *
+     * @param group_id
+     *            IN: Identifier of the group to be refreshed.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Grefresh(long group_id) throws HDF5LibraryException;
+
     // ////////////////////////////////////////////////////////////
     // //
     // H5I: HDF5 1.8 Identifier Interface API Functions //
@@ -4289,6 +4340,34 @@ public class H5 implements java.io.Serializable {
 
     public synchronized static native long _H5Oopen_by_idx(long loc_id, String group_name,
             int idx_type, int order, long n, long lapl_id) throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * H5Oflush causes all buffers associated with an object to be immediately flushed to disk without removing
+     * the data from the cache. object_id can be any named object associated with an HDF5 file including a
+     * dataset, a group, or a committed datatype.
+     *
+     * @param object_id
+     *            IN: Identifier of the object to be flushed.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Oflush(long object_id) throws HDF5LibraryException;
+
+    /**
+     * H5Orefresh causes all buffers associated with an object to be cleared and immediately re-loaded with
+     * updated contents from disk. This function essentially closes the object, evicts all metadata associated
+     * with it from the cache, and then re-opens the object. The reopened object is automatically re-registered
+     * with the same ID. object_id can be any named object associated with an HDF5 file including a
+     * dataset, a group, or a committed datatype.
+     *
+     * @param object_id
+     *            IN: Identifier of the object to be refreshed.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Orefresh(long object_id) throws HDF5LibraryException;
 
     // /////// unimplemented ////////
 
@@ -9154,6 +9233,32 @@ public class H5 implements java.io.Serializable {
     }
 
     private synchronized static native long _H5Tvlen_create(long base_id) throws HDF5LibraryException;
+
+    /**
+     * H5Tflush causes all buffers associated with a committed datatype to be immediately flushed to disk
+     * without removing the data from the cache.
+     *
+     * @param dtype_id
+     *            IN: Identifier of the committed datatype to be flushed.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Tflush(long dtype_id) throws HDF5LibraryException;
+
+    /**
+     * H5Trefresh causes all buffers associated with a committed datatype to be cleared and immediately
+     * re-loaded with updated contents from disk. This function essentially closes the datatype, evicts
+     * all metadata associated with it from the cache, and then re-opens the datatype. The reopened datatype
+     * is automatically re-registered with the same ID.
+     *
+     * @param dtype_id
+     *            IN: Identifier of the committed datatype to be refreshed.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Trefresh(long dtype_id) throws HDF5LibraryException;
 
     // /////// unimplemented ////////
 

@@ -402,8 +402,15 @@ typedef struct H5AC_aux_t
     void	(* sync_point_done)(int num_writes, 
                                     haddr_t * written_entries_tbl);
 } H5AC_aux_t; /* struct H5AC_aux_t */
+#endif /* H5_HAVE_PARALLEL */
 
-/* Package scoped functions */
+
+/******************************/
+/* Package Private Prototypes */
+/******************************/
+
+#ifdef H5_HAVE_PARALLEL
+/* Parallel I/O routines */
 H5_DLL herr_t H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr,
@@ -417,7 +424,6 @@ H5_DLL herr_t H5AC__set_sync_point_done_callback(H5C_t *cache_ptr,
     void (*sync_point_done)(int num_writes, haddr_t *written_entries_tbl));
 H5_DLL herr_t H5AC__set_write_done_callback(H5C_t * cache_ptr,
     void (* write_done)(void));
-
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* _H5ACpkg_H */

@@ -386,4 +386,14 @@ public class TestH5Tparams {
         H5.H5Tget_native_type(-1);
     }
 
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Tflush_invalid() throws Throwable {
+        H5.H5Tflush(-1);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Trefresh_invalid() throws Throwable {
+        H5.H5Trefresh(-1);
+    }
+
 }

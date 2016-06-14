@@ -239,7 +239,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__super_read(H5F_t *f, hid_t dxpl_id)
+H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
 {
     H5P_genplist_t     *dxpl = NULL;        /* DXPL object */
     H5AC_ring_t         ring, orig_ring = H5AC_RING_INV;
@@ -400,12 +400,24 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id)
      * possible is if the first file of a family of files was opened
      * individually.
      */
-    if(HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine file size")
+    /* Can skip this test when it is not the initial file open--
+     * H5F_super_read() call from H5F_evict_tagged_metadata() for
+     * refreshing object.
+     * When flushing file buffers and fractal heap is involved,
+     * the library will allocate actual space for tmp addresses
+     * via the file layer.  The aggregator allocates a block,
+     * thus the eoa might be greater than eof.
+     * Note: the aggregator is changed again after being reset
+     * earlier before H5AC_flush due to allocation of tmp addresses.
+     */
+    if(initial_read) {
+        if(HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine file size")
 
-    /* (Account for the stored EOA being absolute offset -QAK) */
-    if((eof + sblock->base_addr) < udata.stored_eof)
-        HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, FAIL, "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eoa = %llu", (unsigned long long)eof, (unsigned long long)sblock->base_addr, (unsigned long long)udata.stored_eof)
+        /* (Account for the stored EOA being absolute offset -QAK) */
+        if((eof + sblock->base_addr) < udata.stored_eof)
+            HGOTO_ERROR(H5E_FILE, H5E_TRUNCATED, FAIL, "truncated file: eof = %llu, sblock->base_addr = %llu, stored_eof = %llu", (unsigned long long)eof, (unsigned long long)sblock->base_addr, (unsigned long long)udata.stored_eof)
+    } /* end if */
 
     /*
      * Tell the file driver how much address space has already been

@@ -54,6 +54,14 @@
 /* Local Typedefs */
 /******************/
 
+/* Typedef for tagged entry iterator callback context - evict tagged entries */
+typedef struct {
+    H5F_t * f;                          /* File pointer for evicting entry */
+    hid_t dxpl_id;                      /* DXPL for evicting entry */
+    hbool_t evicted_entries_last_pass;  /* Flag to indicate that an entry was evicted when iterating over cache */
+    hbool_t pinned_entries_need_evicted;        /* Flag to indicate that a pinned entry was attempted to be evicted */
+} H5C_tag_iter_evict_ctx_t;
+
 /* Typedef for tagged entry iterator callback context - retag tagged entries */
 typedef struct {
     haddr_t dest_tag;                   /* New tag value for matching entries */
@@ -281,6 +289,109 @@ H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__iter_tagged_entries() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C__evict_tagged_entries_cb
+ *
+ * Purpose:     Callback for evicting tagged entries
+ *
+ * Return:      H5_ITER_ERROR if error is detected, H5_ITER_CONT otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              August 19, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5C__evict_tagged_entries_cb(H5C_cache_entry_t *entry, void *_ctx)
+{
+    H5C_tag_iter_evict_ctx_t *ctx = (H5C_tag_iter_evict_ctx_t *)_ctx; /* Get pointer to iterator context */
+    int ret_value = H5_ITER_CONT;       /* Return value */
+
+    /* Function enter macro */
+    FUNC_ENTER_STATIC
+
+    /* Santify checks */
+    HDassert(entry);
+    HDassert(ctx);
+
+    /* Attempt to evict entry */
+    if(entry->is_protected)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, H5_ITER_ERROR, "Cannot evict protected entry")
+    else if(entry->is_dirty)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, H5_ITER_ERROR, "Cannot evict dirty entry")
+    else if(entry->is_pinned)
+        /* Can't evict at this time, but let's note that we hit a pinned
+            entry and we'll loop back around again (as evicting other
+            entries will hopefully unpin this entry) */
+        ctx->pinned_entries_need_evicted = TRUE;
+    else
+        /* Evict the Entry */
+        if(H5C__flush_single_entry(ctx->f, ctx->dxpl_id, entry, H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, H5_ITER_ERROR, "Entry eviction failed.")
+    ctx->evicted_entries_last_pass = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__evict_tagged_entries_cb() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_evict_tagged_entries
+ *
+ * Purpose:     Evicts all entries with the specified tag from cache
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Mike McGreevy
+ *              August 19, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag)
+{
+    H5C_t *cache;                   /* Pointer to cache structure */
+    H5C_tag_iter_evict_ctx_t ctx;   /* Context for iterator callback */
+    herr_t ret_value = SUCCEED;     /* Return value */
+
+    /* Function enter macro */
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    cache = f->shared->cache;   /* Get cache pointer */
+    HDassert(cache != NULL);
+    HDassert(cache->magic == H5C__H5C_T_MAGIC);
+
+    /* Construct context for iterator callbacks */
+    ctx.f = f;
+    ctx.dxpl_id = dxpl_id;
+
+    /* Start evicting entries */
+    do {
+	/* Reset pinned/evicted tracking flags */
+	ctx.pinned_entries_need_evicted = FALSE;
+	ctx.evicted_entries_last_pass = FALSE;
+
+	/* Iterate through entries in the cache */
+        if(H5C__iter_tagged_entries(cache, tag, TRUE, H5C__evict_tagged_entries_cb, &ctx) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed")
+
+    /* Keep doing this until we have stopped evicted entries */
+    } while(TRUE == ctx.evicted_entries_last_pass);
+
+    /* Fail if we have finished evicting entries and pinned entries still need evicted */
+    if(ctx.pinned_entries_need_evicted)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Pinned entries still need evicted?!")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_evict_tagged_entries() */
 
 
 /*-------------------------------------------------------------------------

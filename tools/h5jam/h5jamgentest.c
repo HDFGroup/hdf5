@@ -275,20 +275,23 @@ gent_ub(const char * filename, size_t ub_size, size_t ub_fill)
   /* If a user block is being used, write to it here */
   if(ub_size > 0)
   {
-        HDassert(ub_size <= BUF_SIZE);
+    ssize_t nbytes;
 
-  fd = HDopen(filename, O_RDWR, 0);
-        HDassert(fd >= 0);
+    HDassert(ub_size <= BUF_SIZE);
 
-  /* fill buf with pattern */
-  HDmemset(buf, '\0', ub_size);
-  bp = buf;
-  for (u = 0; u < ub_fill; u++)
-            *bp++ = pattern[u % 10];
+    fd = HDopen(filename, O_RDWR, 0);
+    HDassert(fd >= 0);
 
-  HDwrite(fd, buf, ub_size);
+    /* fill buf with pattern */
+    HDmemset(buf, '\0', ub_size);
+    bp = buf;
+    for (u = 0; u < ub_fill; u++)
+      *bp++ = pattern[u % 10];
 
-  HDclose(fd);
+    nbytes = HDwrite(fd, buf, ub_size);
+    HDassert(nbytes >= 0);
+
+    HDclose(fd);
   }
 }
 
@@ -299,6 +302,7 @@ create_textfile(const char *name, size_t size)
     int fd;
     size_t i;
     char *bp;
+    ssize_t nbytes;
 
     fd = HDcreat(name,0777);
     HDassert(fd >= 0);
@@ -310,7 +314,8 @@ create_textfile(const char *name, size_t size)
     for(i = 0; i < size; i++)
         *bp++ = pattern[i % 10];
 
-    HDwrite(fd, buf, size);
+    nbytes = HDwrite(fd, buf, size);
+    HDassert(nbytes >= 0);
 
     HDfree(buf);
 

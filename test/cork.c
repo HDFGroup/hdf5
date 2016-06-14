@@ -1859,6 +1859,10 @@ test_dset_cork(hbool_t new_format)
     if(H5Dwrite(did1, tid1, sid, sid, H5P_DEFAULT, data) < 0)
         TEST_ERROR
 
+    /* Flush the dataset */
+    if(H5Oflush(did1) < 0)
+        TEST_ERROR
+
     /* Check cork status of the dataset */
     if(H5Oare_mdc_flushes_disabled(did1, &corked) < 0)
         TEST_ERROR
@@ -1917,6 +1921,10 @@ test_dset_cork(hbool_t new_format)
 
     /* Write to the dataset */
     if(H5Dwrite(did1, tid1, sid, sid, H5P_DEFAULT, data) < 0)
+        TEST_ERROR
+
+    /* Refresh the dataset */
+    if(H5Drefresh(did1) < 0)
         TEST_ERROR
 
     /* Check cork status of the dataset */

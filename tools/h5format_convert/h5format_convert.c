@@ -79,11 +79,11 @@ static void usage(const char *prog)
 {
     HDfprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
     HDfprintf(stdout, "  OPTIONS\n");
-    HDfprintf(stdout, "   -h, --help				Print a usage message and exit\n");
-    HDfprintf(stdout, "   -V, --version			Print version number and exit\n");
-    HDfprintf(stdout, "   -v, --verbose			Turn on verbose mode\n");
-    HDfprintf(stdout, "   -d dname, --dname=dataset_name	Pathname for the dataset\n");
-    HDfprintf(stdout, "   -n, --noop				Perform all the steps except the actual conversion\n");
+    HDfprintf(stdout, "   -h, --help                Print a usage message and exit\n");
+    HDfprintf(stdout, "   -V, --version             Print version number and exit\n");
+    HDfprintf(stdout, "   -v, --verbose             Turn on verbose mode\n");
+    HDfprintf(stdout, "   -d dname, --dname=dataset_name    Pathname for the dataset\n");
+    HDfprintf(stdout, "   -n, --noop                Perform all the steps except the actual conversion\n");
     HDfprintf(stdout, "\n");
     HDfprintf(stdout, "Examples of use:\n");
     HDfprintf(stdout, "\n");
