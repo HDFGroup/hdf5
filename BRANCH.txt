@@ -1,0 +1,8 @@
+evict_on_close
+
+This branch is for the development of the "evict on close" feature
+which will cause the library to evict all cached information
+on object close.
+
+Dana Robinson is in charge of the branch, which follows the trunk.
+It will be deleted when the feature is merged to the trunk.
