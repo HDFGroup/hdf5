@@ -954,6 +954,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     H5FD_class_t       *drvr;               /*file driver class info        */
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
+    hbool_t             evict_on_close;     /* evict on close value from plist  */
     H5F_t              *ret_value = NULL;   /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1116,6 +1117,21 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
         if(fc_degree != H5F_CLOSE_DEFAULT && fc_degree != shared->fc_degree)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file close degree doesn't match")
+    } /* end if */
+
+    /* Record the evict-on-close MDC behavior.  If it's the first time opening
+     * the file, set it to access property list value; if it's the second time
+     * or later, verify that the access property list value matches the value
+     * in shared file structure.
+     */
+    if(H5P_get(a_plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get evict on close value")
+
+    if(shared->nrefs == 1) {
+        shared->evict_on_close = evict_on_close;
+    } else if(shared->nrefs > 1) {
+        if(shared->evict_on_close != evict_on_close)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file evict-on-close value doesn't match")
     } /* end if */
 
     /* Formulate the absolute path for later search of target file for external links */

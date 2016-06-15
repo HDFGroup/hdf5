@@ -900,6 +900,7 @@
 ./test/enc_dec_plist.c
 ./test/enc_dec_plist_cross_platform.c
 ./test/enum.c
+./test/evict_on_close.c
 ./test/extend.c
 ./test/external.c
 ./test/error_test.c

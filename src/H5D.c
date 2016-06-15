@@ -324,21 +324,43 @@ done:
 herr_t
 H5Dclose(hid_t dset_id)
 {
-    herr_t       ret_value = SUCCEED;   /* Return value */
+    H5D_t   *dset = NULL;           /* Dataset                          */
+    H5F_t   *file = NULL;           /* File                             */
+    hbool_t evict = FALSE;          /* Evict metadata on close?         */
+    haddr_t tag = HADDR_UNDEF;      /* Metadata tag for evictions       */
+    herr_t  ret_value = SUCCEED;    /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
     /* Check args */
-    if(NULL == H5I_object_verify(dset_id, H5I_DATASET))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Check if this is the last object reference and we'll be evicting
+     * on close. We need to cache this info since it will be gone after the
+     * decrement call frees the struct.
+     */
+    file = dset->oloc.file;
+    if(1 == dset->shared->fo_count && H5F_EVICT_ON_CLOSE(file)) {
+        evict = TRUE;
+        tag = dset->oloc.addr;
+    } /* end if */
 
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
      * reaches zero.  
      */
     if(H5I_dec_app_ref_always_close(dset_id) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
+
+    /* Clean up metadata in the metadata cache if evicting on close */
+    if(evict && H5F_SHARED(file)) {
+        if(H5F_flush_tagged_metadata(file, tag, H5AC_ind_read_dxpl_id) < 0) 
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
+        if(H5F_evict_tagged_metadata(file, tag, H5AC_ind_read_dxpl_id) < 0) 
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict tagged metadata")
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
