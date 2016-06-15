@@ -1383,7 +1383,7 @@ END SUBROUTINE delete_by_idx
 ! * Purpose:     Support routine for link_info_by_idx, to verify the link
 ! *              info is correct for a link
 ! *
-! * Note:	This routine assumes that the links have been inserted in the
+! * Note:	 This routine assumes that the links have been inserted in the
 ! *              group in alphabetical order.
 ! *
 ! * Return:      Success:        0

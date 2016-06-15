@@ -57,7 +57,8 @@ SUBROUTINE test_get_file_image(total_error)
   CHARACTER(kind=c_char), ALLOCATABLE, DIMENSION(:), TARGET :: image_ptr ! Image from h5fget_file_image_f
 
   INTEGER, DIMENSION(1:100), TARGET :: data ! Write data
-  INTEGER :: i, file_sz
+  INTEGER :: file_sz
+  INTEGER(size_t) :: i
   INTEGER(hid_t) :: file_id = -1  ! File identifier
   INTEGER(hid_t) :: dset_id = -1  ! Dataset identifier
   INTEGER(hid_t) :: space_id = -1 ! Dataspace identifier
@@ -92,7 +93,7 @@ SUBROUTINE test_get_file_image(total_error)
 
   ! Write some data to the data set 
   DO i = 1, 100
-     data(i) = i
+     data(i) = INT(i)
   ENDDO
   
   f_ptr = C_LOC(data(1))
