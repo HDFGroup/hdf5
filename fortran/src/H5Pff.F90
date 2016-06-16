@@ -6260,7 +6260,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
                                           ! of fillvalue datatype
                                           ! (in memory)
-    CHARACTER(LEN=*), INTENT(IN), TARGET :: fillvalue ! Fillvalue
+    CHARACTER(LEN=1), INTENT(IN), TARGET :: fillvalue ! Fillvalue
     INTEGER, INTENT(OUT) :: hdferr             ! Error code
     TYPE(C_PTR) :: f_ptr                       ! C address
 
