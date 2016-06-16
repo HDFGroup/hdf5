@@ -6264,7 +6264,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER, INTENT(OUT) :: hdferr             ! Error code
     TYPE(C_PTR) :: f_ptr                       ! C address
 
-    f_ptr = C_LOC(fillvalue)
+    f_ptr = C_LOC(fillvalue(1:1))
     hdferr = h5pset_fill_value_c(prp_id, type_id, f_ptr)
 
   END SUBROUTINE h5pset_fill_value_char
@@ -6286,7 +6286,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     ! To resolve Issue #1 outlined in the preamble of this file we
     ! need to pack the character string into an array.
 
-    chr_len = LEN(fillvalue)
+    chr_len = LEN(fillvalue(1:1))
     ALLOCATE(chr(1:chr_len), STAT=hdferr)
     IF (hdferr .NE. 0) THEN
        hdferr = -1
