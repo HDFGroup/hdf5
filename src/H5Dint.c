@@ -3258,8 +3258,7 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
     if(space_id != H5I_INVALID_HID) {
         H5S_t *space = NULL;
         uint8_t *space_p;
-        size_t space_size;
-        int recv_buf_size, temp_size;
+        size_t space_size, recv_buf_size;
         MPI_Comm mpi_comm;
         size_t name_len, buf_size;
         const char *subfile_name = H5F_SUBFILE_NAME(file);
@@ -3319,6 +3318,8 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
                 */
 
         if(mpi_size > 1) {
+            int temp_size;
+
             H5_CHECKED_ASSIGN(temp_size, int, buf_size, size_t)
 
             /* distribute all the buffer size that needs to be shared among all processes */
@@ -3336,7 +3337,7 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
             }
 
             /* allocate the large buffer and gather all the send buffers into this large buffer */
-            recv_buf = HDmalloc((size_t)recv_buf_size);
+            recv_buf = HDmalloc(recv_buf_size);
             if(MPI_SUCCESS != MPI_Allgatherv(send_buf, temp_size, MPI_BYTE, recv_buf, size_array, 
                                              displs, MPI_BYTE, mpi_comm))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Failed to MPI_Allgather the buffer sizes")
