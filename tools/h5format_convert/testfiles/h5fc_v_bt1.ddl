@@ -1,5 +1,5 @@
 Process command line options
-Open the file tmp.h5
+Open the file outtmp.h5
 Going to process dataset: /GROUP/DSET_BT2...
 Open the dataset
 Retrieve the dataset's layout
