@@ -623,7 +623,7 @@ test_api(test_api_config_t config, hid_t fapl)
         TEST_ERROR
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)213) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)349) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
@@ -1030,7 +1030,7 @@ test_api(test_api_config_t config, hid_t fapl)
     } /* end if */
 
     /* Get examination DCPL */
-    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)697) < 0)
+    if(test_api_get_ex_dcpl(config, fapl, dcpl, &ex_dcpl, vspace[0], filename, (hsize_t)877) < 0)
         TEST_ERROR
 
     /* Test H5Pget_virtual_count */
