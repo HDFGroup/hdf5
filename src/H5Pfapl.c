@@ -183,7 +183,7 @@
 #define H5F_ACS_OBJECT_FLUSH_CB_DEF             {NULL, NULL}
 /* Definition for evict on close property */
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE                sizeof(hbool_t)
-#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF                 TRUE
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF                 FALSE
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC                 H5P__encode_hbool_t
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC                 H5P__decode_hbool_t
 #ifdef H5_HAVE_PARALLEL

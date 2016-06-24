@@ -356,10 +356,16 @@ H5Dclose(hid_t dset_id)
 
     /* Clean up metadata in the metadata cache if evicting on close */
     if(evict && H5F_SHARED(file)) {
-        if(H5F_flush_tagged_metadata(file, tag, H5AC_ind_read_dxpl_id) < 0) 
+//        printf("DUMPING CACHE - BEFORE FLUSH\n");
+//        H5AC_dump_cache(file);
+        if(H5AC_flush_tagged_metadata(file, tag, H5AC_ind_read_dxpl_id) < 0) 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
-        if(H5F_evict_tagged_metadata(file, tag, H5AC_ind_read_dxpl_id) < 0) 
+//        printf("DUMPING CACHE - BETWEEN FLUSH AND EVICT\n");
+//        H5AC_dump_cache(file);
+        if(H5AC_evict_tagged_metadata(file, tag, FALSE, H5AC_ind_read_dxpl_id) < 0) 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict tagged metadata")
+//        printf("DUMPING CACHE - AFTER EVICT\n");
+//        H5AC_dump_cache(file);
     } /* end if */
 
 done:

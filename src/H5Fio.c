@@ -271,7 +271,7 @@ H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
     f->shared->sblock = NULL;
 
     /* Evict the object's metadata */
-    if(H5AC_evict_tagged_metadata(f, tag, dxpl_id)<0)
+    if(H5AC_evict_tagged_metadata(f, tag, TRUE, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict tagged metadata")
 
     /* Re-read the superblock. */

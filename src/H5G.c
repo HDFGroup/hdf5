@@ -722,7 +722,7 @@ H5Gclose(hid_t group_id)
 
     /* Check args */
     if(NULL == H5I_object_verify(group_id,H5I_GROUP))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /*
      * Decrement the counter on the group atom.	 It will be freed if the count

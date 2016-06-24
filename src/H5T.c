@@ -1712,21 +1712,21 @@ done:
 herr_t
 H5Tclose(hid_t type_id)
 {
-    H5T_t	*dt;                    /* Pointer to datatype to close */
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    H5T_t       *dt;                    /* Pointer to datatype to close */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", type_id);
 
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     if(H5T_STATE_IMMUTABLE == dt->shared->state)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable datatype")
 
     /* When the reference count reaches zero the resources are freed */
     if(H5I_dec_app_ref(type_id) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
 
 done:
     FUNC_LEAVE_API(ret_value)

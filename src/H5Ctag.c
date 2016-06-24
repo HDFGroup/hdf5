@@ -352,7 +352,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag)
+H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag, hbool_t match_global)
 {
     H5C_t *cache;                   /* Pointer to cache structure */
     H5C_tag_iter_evict_ctx_t ctx;   /* Context for iterator callback */
@@ -379,8 +379,8 @@ H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag)
 	ctx.evicted_entries_last_pass = FALSE;
 
 	/* Iterate through entries in the cache */
-        if(H5C__iter_tagged_entries(cache, tag, TRUE, H5C__evict_tagged_entries_cb, &ctx) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed")
+        if(H5C__iter_tagged_entries(cache, tag, match_global, H5C__evict_tagged_entries_cb, &ctx) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, match_global, "Iteration of tagged entries failed")
 
     /* Keep doing this until we have stopped evicted entries */
     } while(TRUE == ctx.evicted_entries_last_pass);
