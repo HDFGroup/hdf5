@@ -308,44 +308,30 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dclose
+ * Function:    H5Dclose
  *
- * Purpose:	Closes access to a dataset (DATASET_ID) and releases
- *		resources used by it. It is illegal to subsequently use that
- *		same dataset ID in calls to other dataset functions.
+ * Purpose:     Closes access to a dataset (DATASET_ID) and releases
+ *              resources used by it. It is illegal to subsequently use that
+ *              same dataset ID in calls to other dataset functions.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Thursday, December  4, 1997
+ * Programmer:  Robb Matzke
+ *              Thursday, December  4, 1997
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Dclose(hid_t dset_id)
 {
-    H5D_t   *dset = NULL;           /* Dataset                          */
-    H5F_t   *file = NULL;           /* File                             */
-    hbool_t evict = FALSE;          /* Evict metadata on close?         */
-    haddr_t tag = HADDR_UNDEF;      /* Metadata tag for evictions       */
     herr_t  ret_value = SUCCEED;    /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", dset_id);
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if(NULL == H5I_object_verify(dset_id, H5I_DATASET))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-
-    /* Check if this is the last object reference and we'll be evicting
-     * on close. We need to cache this info since it will be gone after the
-     * decrement call frees the struct.
-     */
-    file = dset->oloc.file;
-    if(1 == dset->shared->fo_count && H5F_EVICT_ON_CLOSE(file)) {
-        evict = TRUE;
-        tag = dset->oloc.addr;
-    } /* end if */
 
     /*
      * Decrement the counter on the dataset.  It will be freed if the count
@@ -353,20 +339,6 @@ H5Dclose(hid_t dset_id)
      */
     if(H5I_dec_app_ref_always_close(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
-
-    /* Clean up metadata in the metadata cache if evicting on close */
-    if(evict && H5F_SHARED(file)) {
-//        printf("DUMPING CACHE - BEFORE FLUSH\n");
-//        H5AC_dump_cache(file);
-        if(H5AC_flush_tagged_metadata(file, tag, H5AC_ind_read_dxpl_id) < 0) 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
-//        printf("DUMPING CACHE - BETWEEN FLUSH AND EVICT\n");
-//        H5AC_dump_cache(file);
-        if(H5AC_evict_tagged_metadata(file, tag, FALSE, H5AC_ind_read_dxpl_id) < 0) 
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict tagged metadata")
-//        printf("DUMPING CACHE - AFTER EVICT\n");
-//        H5AC_dump_cache(file);
-    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
