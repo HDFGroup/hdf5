@@ -1696,21 +1696,49 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Tclose
+ * Function:    H5Tclose
  *
- * Purpose:	Frees a datatype and all associated memory.
+ * Purpose:     Frees a datatype and all associated memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
- *		Tuesday, December  9, 1997
- *
- * Modifications:
+ * Programmer:  Robb Matzke
+ *              Tuesday, December  9, 1997
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Tclose(hid_t type_id)
+{
+    herr_t  ret_value = SUCCEED;    /* Return value                     */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", type_id);
+
+    /* Call internal function */
+    if(H5T_close_id(type_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Tclose() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_close_id
+ *
+ * Purpose:     Internal function to free a datatype and all associated
+ *              memory.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Summer 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_close_id(hid_t type_id)
 {
     H5T_t   *dt;                    /* Pointer to datatype to close     */
     H5F_t   *file = NULL;           /* File                             */
@@ -1718,8 +1746,7 @@ H5Tclose(hid_t type_id)
     haddr_t tag = HADDR_UNDEF;      /* Metadata tag for evictions       */
     herr_t  ret_value = SUCCEED;    /* Return value                     */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "i", type_id);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check args */
     if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -1756,8 +1783,8 @@ H5Tclose(hid_t type_id)
     } /* end if */
 
 done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Tclose() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_close_id() */
 
 
 /*-------------------------------------------------------------------------
