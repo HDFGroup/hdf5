@@ -2228,16 +2228,39 @@ H5F__open_subfile(H5F_t *file, unsigned flags, hid_t H5_ATTR_UNUSED fcpl_id, hid
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling selection")
 
     if(subfile_name) {
-        H5P_genplist_t *new_plist = NULL;
-        H5FD_mpio_fapl_t fa;
+        H5P_genplist_t *new_plist = NULL, *old_plist = NULL;
+        H5FD_mpio_fapl_t fa, *old_fa = NULL;
+
+        if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
         /* copy the fapl id of the main file to create the subfile with */
-        if((subfile_fapl_id = H5P_create_id(H5P_CLS_FILE_ACCESS_g, FALSE)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list")
+        if((subfile_fapl_id = H5P_copy_plist(old_plist, TRUE)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list");
 
         /* Get the property list structure */
         if(NULL == (new_plist = H5P_object_verify(subfile_fapl_id, H5P_FILE_ACCESS)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+        /* reset subfiling properties */
+        {
+            unsigned num_groups = 0;
+            const char *subfile_name = NULL;
+            MPI_Comm comm = MPI_COMM_NULL;
+            MPI_Info info = MPI_INFO_NULL;
+
+            if(H5P_set(new_plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &num_groups) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set number of groups for subfiling")
+
+            if(H5P_set(new_plist, H5F_ACS_SUBFILING_FILENAME_NAME, &subfile_name) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile name")
+
+            if(H5P_set(new_plist, H5F_ACS_SUBFILE_COMM_NAME, &comm) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile communicator")
+
+            if(H5P_set(new_plist, H5F_ACS_SUBFILE_INFO_NAME, &info) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile info object")
+        }
 
         /* Initialize driver specific properties */
         fa.comm = file->subfile_comm;
