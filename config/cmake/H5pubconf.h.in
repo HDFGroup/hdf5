@@ -236,6 +236,9 @@
 /* Define if we have support for Berkeley DB */
 #cmakedefine H5_HAVE_DB @H5_HAVE_DB@
 
+/* Define if we have support for MDHIM */
+#cmakedefine H5_HAVE_MDHIM @H5_HAVE_MDHIM@
+
 /* Define to 1 if you have the <pthread.h> header file. */
 #cmakedefine H5_HAVE_PTHREAD_H @H5_HAVE_PTHREAD_H@
 

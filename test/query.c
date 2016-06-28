@@ -22,6 +22,10 @@
 /***********/
 #include "h5test.h"
 
+#ifdef H5_HAVE_MDHIM
+#include <mpi.h>
+#endif
+
 /****************/
 /* Local Macros */
 /****************/
@@ -68,7 +72,7 @@ static herr_t test_query_apply_view_multi(const char *filenames[], hid_t fapl,
 /*******************/
 /* Must match H5Xpublic.h */
 static const char *plugin_names[] = { "none", "dummy" ,"fastbit", "alacrity",
-    "dummy", "db" };
+    "dummy", "db", "mdhim" };
 
 
 /* Create query */
@@ -605,7 +609,7 @@ test_query_apply_view(const char *filename, hid_t fapl, unsigned n_objs,
         if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR;
     }
 
-    for (i = 1; i < NTYPES; i++) {
+    for (i = 0; i < NTYPES; i++) {
         struct timeval t1, t2;
         struct timeval t_total = {0, 0};
         int loop;
@@ -757,6 +761,9 @@ main(int argc, char *argv[])
     unsigned meta_idx_plugin = H5X_PLUGIN_NONE;
     unsigned data_idx_plugin = H5X_PLUGIN_NONE;
     unsigned n_tests = 1; /* TODO for now */
+#ifdef H5_HAVE_MDHIM
+    int provided;
+#endif
 
     /* For manual tests and benchmarks */
     /* TODO enable verbose mode */
@@ -766,6 +773,19 @@ main(int argc, char *argv[])
         meta_idx_plugin = (unsigned) atoi(argv[2]);
     if (argc > 3)
         data_idx_plugin = (unsigned) atoi(argv[3]);
+#ifdef H5_HAVE_MDHIM
+    if (meta_idx_plugin == H5X_PLUGIN_META_MDHIM) {
+        if (MPI_SUCCESS != MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE,
+            &provided)) {
+            fprintf(stderr, "Error initializing MPI with threads\n");
+            goto error;
+        }
+        if (provided != MPI_THREAD_MULTIPLE) {
+            fprintf(stderr, "Not able to enable MPI_THREAD_MULTIPLE mode\n");
+            goto error;
+        }
+    }
+#endif
 
     /* Reset library */
     h5_reset();
@@ -834,6 +854,14 @@ main(int argc, char *argv[])
 //    HDremove(filename);
     HDfree(FILENAME[0]);
     HDfree(FILENAME);
+
+#ifdef H5_HAVE_MDHIM
+    if ((meta_idx_plugin == H5X_PLUGIN_META_MDHIM) &&
+        (MPI_SUCCESS != MPI_Finalize())) {
+        fprintf(stderr, "Error finalizing MPI\n");
+        goto error;
+    }
+#endif
 
     return 0;
 

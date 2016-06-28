@@ -53,4 +53,11 @@ H5_DLLVAR const H5X_class_t H5X_META_DUMMY[1];
 H5_DLLVAR const H5X_class_t H5X_META_DB[1];
 #endif
 
+/*
+ * MDHIM metadata plugin
+ */
+#ifdef H5_HAVE_MDHIM
+H5_DLLVAR const H5X_class_t H5X_META_MDHIM[1];
+#endif
+
 #endif /* _H5Xpkg_H */

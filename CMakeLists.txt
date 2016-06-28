@@ -528,6 +528,22 @@ if (HDF5_ENABLE_DB_SUPPORT)
   endif (DB_FOUND)
 endif (HDF5_ENABLE_DB_SUPPORT)
 
+#-----------------------------------------------------------------------------
+# Option to use MDHIM
+#-----------------------------------------------------------------------------
+if (H5_HAVE_PARALLEL)
+  option (HDF5_ENABLE_MDHIM_SUPPORT "Enable MDHIM for indexing." OFF)
+  if (HDF5_ENABLE_MDHIM_SUPPORT)
+    find_package (MDHIM)
+    if (MDHIM_FOUND)
+      set (H5_HAVE_MDHIM 1)
+      include_directories (${MDHIM_INCLUDE_DIR})
+      set (LINK_LIBS ${LINK_LIBS} ${MDHIM_LIBRARIES})
+      set (LINK_SHARED_LIBS ${LINK_SHARED_LIBS} ${MDHIM_LIBRARIES})
+    endif (MDHIM_FOUND)
+  endif (HDF5_ENABLE_MDHIM_SUPPORT)
+endif (H5_HAVE_PARALLEL)
+
 set (DEFAULT_API_VERSION "v110")
 #-----------------------------------------------------------------------------
 # Option to use 1.6.x API

@@ -145,6 +145,10 @@ H5X__init_package(void)
     if (H5X_register(H5X_META_DB) < 0)
         HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register Berkeley DB index plugin");
 #endif
+#ifdef H5_HAVE_MDHIM
+    if (H5X_register(H5X_META_MDHIM) < 0)
+        HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register MDHIM index plugin");
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
