@@ -30,7 +30,8 @@
  *  2) when diff was found (normal mode)
  *-------------------------------------------------------------------------
  */
-int print_objname (diff_opt_t * options, hsize_t nfound)
+H5_ATTR_PURE int
+print_objname (diff_opt_t * options, hsize_t nfound)
 {
     return ((options->m_verbose || nfound) && !options->m_quiet) ? 1 : 0;
 }

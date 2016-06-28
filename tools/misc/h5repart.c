@@ -252,9 +252,9 @@ main (int argc, char *argv[])
     } /* end while */
 
     /* allocate names */
-    if(NULL == (src_name = HDcalloc((size_t)NAMELEN, sizeof(char))))
+    if(NULL == (src_name = (char *)HDcalloc((size_t)NAMELEN, sizeof(char))))
         exit(EXIT_FAILURE);
-    if(NULL == (dst_name = HDcalloc((size_t)NAMELEN, sizeof(char))))
+    if(NULL == (dst_name = (char *)HDcalloc((size_t)NAMELEN, sizeof(char))))
         exit(EXIT_FAILURE);
 
     /*

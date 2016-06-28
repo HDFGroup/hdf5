@@ -2630,7 +2630,7 @@ test_select_hyper_checker_board_dr__select_checker_board(hid_t tgt_n_cube_sid,
 **	a selected or an unselected checker.
 **
 ****************************************************************/
-static hbool_t
+H5_ATTR_PURE static hbool_t
 test_select_hyper_checker_board_dr__verify_data(uint16_t * buf_ptr,
     unsigned rank, unsigned edge_size, unsigned checker_edge_size,
     uint16_t first_expected_val, hbool_t buf_starts_in_checker)

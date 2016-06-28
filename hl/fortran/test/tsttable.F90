@@ -18,29 +18,33 @@
 !
 #include <H5config_f.inc>
 
-PROGRAM table_test
+MODULE TSTTABLE
 
-  USE H5TB ! module of H5TB
-  USE HDF5 ! module of HDF5 library
+CONTAINS
 
-  IMPLICIT NONE
-  INTEGER :: errcode = 0
+!-------------------------------------------------------------------------
+! test_begin
+!-------------------------------------------------------------------------
 
-  !
-  ! Initialize FORTRAN predefined datatypes.
-  !
-  CALL h5open_f(errcode)
+SUBROUTINE test_begin(string)
+  CHARACTER(LEN=*), INTENT(IN) :: string
+  WRITE(*, fmt = '(A)', ADVANCE = 'no') string
+END SUBROUTINE test_begin
 
-  CALL test_table1()
-  CALL test_table2()
+!-------------------------------------------------------------------------
+! passed
+!-------------------------------------------------------------------------
 
-  !
-  ! Close FORTRAN predefined datatypes.
-  !
-  CALL h5close_f(errcode)
+SUBROUTINE passed()
+  WRITE(*, fmt = '(T12,A6)')  'PASSED'
+END SUBROUTINE passed
 
-END PROGRAM table_test
+END MODULE TSTTABLE
 
+
+MODULE TSTTABLE_TESTS
+
+CONTAINS
 
 !-------------------------------------------------------------------------
 ! test_table1
@@ -50,6 +54,7 @@ SUBROUTINE test_table1()
 
   USE H5TB ! module of H5TB
   USE HDF5 ! module of HDF5 library
+  USE TSTTABLE ! module for testing table support routines
 
   IMPLICIT NONE
   
@@ -536,6 +541,7 @@ SUBROUTINE test_table2()
 
   USE H5TB ! module of H5TB
   USE HDF5 ! module of HDF5 library
+  USE TSTTABLE ! module for testing table support routines
 
   IMPLICIT NONE
   
@@ -574,7 +580,6 @@ SUBROUTINE test_table2()
   INTEGER(hsize_t), PARAMETER :: chunk_size = 10
   TYPE(particle_t), DIMENSION(1:nrecords), TARGET :: fill_data
   INTEGER :: compress
-  INTEGER :: status
   INTEGER :: i
   INTEGER(SIZE_T) :: dst_size
   TYPE(particle_t), DIMENSION(1:nrecords), TARGET :: dst_buf
@@ -711,22 +716,31 @@ SUBROUTINE test_table2()
 
 END SUBROUTINE test_table2
 
+END MODULE TSTTABLE_TESTS
 
-!-------------------------------------------------------------------------
-! test_begin
-!-------------------------------------------------------------------------
 
-SUBROUTINE test_begin(string)
-  CHARACTER(LEN=*), INTENT(IN) :: string
-  WRITE(*, fmt = '(A)', ADVANCE = 'no') string
-END SUBROUTINE test_begin
+PROGRAM table_test
 
-!-------------------------------------------------------------------------
-! passed
-!-------------------------------------------------------------------------
+  USE H5TB ! module of H5TB
+  USE HDF5 ! module of HDF5 library
+  USE TSTTABLE_TESTS ! module for testing table routines
 
-SUBROUTINE passed()
-  WRITE(*, fmt = '(T12,A6)')  'PASSED'
-END SUBROUTINE passed
+  IMPLICIT NONE
+  INTEGER :: errcode = 0
+
+  !
+  ! Initialize FORTRAN predefined datatypes.
+  !
+  CALL h5open_f(errcode)
+
+  CALL test_table1()
+  CALL test_table2()
+
+  !
+  ! Close FORTRAN predefined datatypes.
+  !
+  CALL h5close_f(errcode)
+
+END PROGRAM table_test
 
 

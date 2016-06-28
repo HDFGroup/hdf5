@@ -194,28 +194,21 @@ H5_GCC_DIAG_ON(long-long)
 /*
  * File addresses have their own types.
  */
-#if H5_SIZEOF_INT64_T>=8
-    typedef uint64_t                haddr_t;
-#   define HADDR_UNDEF              ((haddr_t)(int64_t)(-1))
-#   define H5_SIZEOF_HADDR_T        H5_SIZEOF_INT64_T
-#   ifdef H5_HAVE_PARALLEL
-#       define HADDR_AS_MPI_TYPE    MPI_LONG_LONG_INT
-#   endif  /* H5_HAVE_PARALLEL */
-#elif H5_SIZEOF_INT>=8
+#if H5_SIZEOF_INT >= 8
     typedef unsigned                haddr_t;
 #   define HADDR_UNDEF              ((haddr_t)(-1))
 #   define H5_SIZEOF_HADDR_T        H5_SIZEOF_INT
 #   ifdef H5_HAVE_PARALLEL
 #       define HADDR_AS_MPI_TYPE    MPI_UNSIGNED
 #   endif  /* H5_HAVE_PARALLEL */
-#elif H5_SIZEOF_LONG>=8
+#elif H5_SIZEOF_LONG >= 8
     typedef unsigned long           haddr_t;
 #   define HADDR_UNDEF              ((haddr_t)(long)(-1))
 #   define H5_SIZEOF_HADDR_T        H5_SIZEOF_LONG
 #   ifdef H5_HAVE_PARALLEL
 #       define HADDR_AS_MPI_TYPE    MPI_UNSIGNED_LONG
 #   endif  /* H5_HAVE_PARALLEL */
-#elif H5_SIZEOF_LONG_LONG>=8
+#elif H5_SIZEOF_LONG_LONG >= 8
     typedef unsigned long long      haddr_t;
 #   define HADDR_UNDEF              ((haddr_t)(long long)(-1))
 #   define H5_SIZEOF_HADDR_T        H5_SIZEOF_LONG_LONG
@@ -225,11 +218,11 @@ H5_GCC_DIAG_ON(long-long)
 #else
 #   error "nothing appropriate for haddr_t"
 #endif
-#if H5_SIZEOF_HADDR_T ==H5_SIZEOF_INT
+#if H5_SIZEOF_HADDR_T == H5_SIZEOF_INT
 #   define H5_PRINTF_HADDR_FMT  "%u"
-#elif H5_SIZEOF_HADDR_T ==H5_SIZEOF_LONG
+#elif H5_SIZEOF_HADDR_T == H5_SIZEOF_LONG
 #   define H5_PRINTF_HADDR_FMT  "%lu"
-#elif H5_SIZEOF_HADDR_T ==H5_SIZEOF_LONG_LONG
+#elif H5_SIZEOF_HADDR_T == H5_SIZEOF_LONG_LONG
 #   define H5_PRINTF_HADDR_FMT  "%" H5_PRINTF_LL_WIDTH "u"
 #else
 #   error "nothing appropriate for H5_PRINTF_HADDR_FMT"

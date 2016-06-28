@@ -173,7 +173,7 @@ static herr_t H5FD_stdio_read(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr_
                 size_t size, void *buf);
 static herr_t H5FD_stdio_write(H5FD_t *lf, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
                 size_t size, const void *buf);
-static herr_t H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_stdio_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD_stdio_lock(H5FD_t *_file, hbool_t rw);
 static herr_t H5FD_stdio_unlock(H5FD_t *_file);
@@ -955,7 +955,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_stdio_flush(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, unsigned closing)
+H5FD_stdio_flush(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t closing)
 {
     H5FD_stdio_t  *file = (H5FD_stdio_t*)_file;
     static const char *func = "H5FD_stdio_flush";  /* Function Name for error reporting */

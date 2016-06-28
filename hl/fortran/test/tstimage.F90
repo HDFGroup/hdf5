@@ -17,12 +17,34 @@
 ! This file contains the FORTRAN90 tests for H5LT
 !
 
-program image_test
+MODULE TSTIMAGE
 
-call make_image1()
+CONTAINS
 
-end program image_test
+!-------------------------------------------------------------------------
+! test_begin
+!-------------------------------------------------------------------------
 
+subroutine test_begin(string)
+character(len=*), intent(in) :: string
+write(*, fmt = '(14a)', advance = 'no') string
+write(*, fmt = '(40x,a)', advance = 'no') ' '
+end subroutine test_begin
+
+!-------------------------------------------------------------------------
+! passed
+!-------------------------------------------------------------------------
+
+subroutine passed()
+write(*, fmt = '(6a)')  'PASSED'
+end subroutine passed
+
+END MODULE TSTIMAGE
+
+
+MODULE TSTIMAGE_TESTS
+
+CONTAINS
 
 !-------------------------------------------------------------------------
 ! make_image1
@@ -32,6 +54,7 @@ subroutine make_image1()
 
 use h5im ! module of H5IM
 use hdf5 ! module of HDF5 library
+USE TSTIMAGE ! module for testing image support routines
 
 implicit none
 
@@ -320,20 +343,17 @@ call h5close_f(errcode)
 !
 end subroutine make_image1
 
-!-------------------------------------------------------------------------
-! test_begin
-!-------------------------------------------------------------------------
+END MODULE TSTIMAGE_TESTS
 
-subroutine test_begin(string)
-character(len=*), intent(in) :: string
-write(*, fmt = '(14a)', advance = 'no') string
-write(*, fmt = '(40x,a)', advance = 'no') ' '
-end subroutine test_begin
 
-!-------------------------------------------------------------------------
-! passed
-!-------------------------------------------------------------------------
+program image_test
 
-subroutine passed()
-write(*, fmt = '(6a)')  'PASSED'
-end subroutine passed
+USE TSTIMAGE_TESTS ! module for testing dataset routines
+
+IMPLICIT NONE
+
+call make_image1()
+
+end program image_test
+
+

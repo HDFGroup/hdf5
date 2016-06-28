@@ -6237,7 +6237,7 @@ check_and_validate_cache_size(hid_t file_id,
 
 } /* check_and_validate_cache_size() */
 
-hbool_t
+H5_ATTR_PURE hbool_t
 resize_configs_are_equal(const H5C_auto_size_ctl_t *a,
     const H5C_auto_size_ctl_t *b,
     hbool_t compare_init)

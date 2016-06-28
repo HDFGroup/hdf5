@@ -34,7 +34,7 @@
 #include "h5trav.h"
 
 /* global variables */
-int   h5tools_nCols = 80;
+unsigned h5tools_nCols = 80;
 /* ``get_option'' variables */
 int         opt_err = 1;    /*get_option prints errors if this is on */
 int         opt_ind = 1;    /*token pointer                          */
@@ -57,7 +57,7 @@ hsize_t H5TOOLS_BUFSIZE = ( 32 * 1024 * 1024);  /* 32 MB */
 /* ``parallel_print'' variables */
 unsigned char  g_Parallel = 0;  /*0 for serial, 1 for parallel */
 char     outBuff[OUTBUFF_SIZE];
-int      outBuffOffset;
+unsigned outBuffOffset;
 FILE*    overflow_file = NULL;
 
 /* local functions */
@@ -89,11 +89,11 @@ void parallel_print(const char* format, ...)
         HDvprintf(format, ap);
     else {
         if(overflow_file == NULL) /*no overflow has occurred yet */ {
-            bytes_written = HDvsnprintf(outBuff+outBuffOffset, OUTBUFF_SIZE-outBuffOffset, format, ap);
+            bytes_written = HDvsnprintf(outBuff + outBuffOffset, OUTBUFF_SIZE - outBuffOffset, format, ap);
             HDva_end(ap);
             HDva_start(ap, format);
 
-            if((bytes_written < 0) || (bytes_written >= (OUTBUFF_SIZE - outBuffOffset))) {
+            if((bytes_written < 0) || ((unsigned)bytes_written >= (OUTBUFF_SIZE - outBuffOffset))) {
                 /* Terminate the outbuff at the end of the previous output */
                 outBuff[outBuffOffset] = '\0';
 
@@ -104,7 +104,7 @@ void parallel_print(const char* format, ...)
                     bytes_written = HDvfprintf(overflow_file, format, ap);
             }
             else
-                outBuffOffset += bytes_written;
+                outBuffOffset += (unsigned)bytes_written;
         }
         else
             bytes_written = HDvfprintf(overflow_file, format, ap);
@@ -376,7 +376,7 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
  *-------------------------------------------------------------------------
  */
 void
-indentation(int x)
+indentation(unsigned x)
 {
     if (x < h5tools_nCols) {
         while (x-- > 0)
@@ -408,7 +408,7 @@ print_version(const char *progname)
 {
     PRINTSTREAM(rawoutstream, "%s: Version %u.%u.%u%s%s\n",
            progname, H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE,
-           ((char *)H5_VERS_SUBRELEASE)[0] ? "-" : "", H5_VERS_SUBRELEASE);
+           ((const char *)H5_VERS_SUBRELEASE)[0] ? "-" : "", H5_VERS_SUBRELEASE);
 }
 
 
@@ -532,7 +532,7 @@ dump_tables(find_objs_t *info)
  *
  *-------------------------------------------------------------------------
  */
-obj_t *
+H5_ATTR_PURE obj_t *
 search_obj(table_t *table, haddr_t objno)
 {
     unsigned u;
@@ -680,7 +680,7 @@ init_objs(hid_t fid, find_objs_t *info, table_t **group_table,
 static void
 add_obj(table_t *table, haddr_t objno, const char *objname, hbool_t record)
 {
-    unsigned u;
+    size_t u;
 
     /* See if we need to make table larger */
     if(table->nobjs == table->size) {
@@ -883,12 +883,14 @@ void h5tools_setstatus(int D_status)
     h5tools_d_status = D_status;
 }
 
-const char*h5tools_getprogname(void)
+H5_ATTR_PURE const char *
+h5tools_getprogname(void)
 {
    return h5tools_progname;
 }
 
-int h5tools_getstatus(void)
+H5_ATTR_PURE int
+h5tools_getstatus(void)
 {
    return h5tools_d_status;
 }
@@ -912,7 +914,6 @@ int h5tools_getenv_update_hyperslab_bufsize(void)
         hyperslab_bufsize_mb = HDstrtol(env_str, (char**)NULL, 10);
         if (errno != 0 || hyperslab_bufsize_mb <= 0)
         {
-
             /* TODO: later when pubilshed
             HDfprintf(rawerrorstream,"Error: Invalid environment variable \"H5TOOLS_BUFSIZE\" : %s\n", env_str);
             */
@@ -922,13 +923,14 @@ int h5tools_getenv_update_hyperslab_bufsize(void)
 
 
         /* convert MB to byte */
-        H5TOOLS_BUFSIZE = hyperslab_bufsize_mb * 1024 * 1024;
+        H5TOOLS_BUFSIZE = (hsize_t)hyperslab_bufsize_mb * 1024 * 1024;
 
         H5TOOLS_MALLOCSIZE = MAX(H5TOOLS_BUFSIZE, H5TOOLS_MALLOCSIZE);
     }
 
-
     return (1);
+
 error:
     return (-1);
 }
+

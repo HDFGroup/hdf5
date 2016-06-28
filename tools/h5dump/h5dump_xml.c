@@ -156,7 +156,7 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -332,9 +332,8 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_
                         H5Dclose(obj);
                         goto done;
                     } 
-                    else {
+                    else
                         found_obj->displayed = TRUE;
-                    }
                 } /* end if */
 
                 dump_function_table->dump_dataset_function(obj, name, NULL);
@@ -756,7 +755,7 @@ xml_escape_the_string(const char *str, int slen)
     if (slen < 0)
         len = HDstrlen(str);
     else
-        len = slen;
+        len = (size_t)slen;
 
     extra = 0;
 
@@ -878,7 +877,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -954,340 +953,480 @@ xml_print_datatype(hid_t type, unsigned in_group)
         }
     } 
     else {
-
         switch (H5Tget_class(type)) {
-        case H5T_INTEGER:
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+            case H5T_INTEGER:
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level++;
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level++;
 
-            /* <hdf5:IntegerType ByteOrder="bo" Sign="torf" Size="bytes"/> */
-            ord = H5Tget_order(type);
-            sgn = H5Tget_sign(type);
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sIntegerType ByteOrder=\"",xmlnsprefix);
-            switch (ord) {
-                case H5T_ORDER_LE:
-                    h5tools_str_append(&buffer, "LE");
-                    break;
-                case H5T_ORDER_BE:
-                    h5tools_str_append(&buffer, "BE");
-                    break;
-                case H5T_ORDER_VAX:
-                case H5T_ORDER_MIXED:
-                case H5T_ORDER_NONE:
-                case H5T_ORDER_ERROR:
-                default:
-                    h5tools_str_append(&buffer, "ERROR_UNKNOWN");
-                    break;
-            } /* end switch */
-            
-            h5tools_str_append(&buffer, "\" Sign=\"");
-            
-            switch (sgn) {
-                case H5T_SGN_NONE:
-                    h5tools_str_append(&buffer, "false");
-                    break;
-                case H5T_SGN_2:
-                    h5tools_str_append(&buffer, "true");
-                    break;
-                case H5T_SGN_ERROR:
-                case H5T_NSGN:
-                default:
-                    h5tools_str_append(&buffer, "ERROR_UNKNOWN");
-                    break;
-            } /* end switch */
-            
-            h5tools_str_append(&buffer, "\" Size=\"");
-            sz = H5Tget_size(type);
-            h5tools_str_append(&buffer, "%lu", (unsigned long)sz);
-            h5tools_str_append(&buffer, "\" />");
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            break;
-
-        case H5T_FLOAT:
-            /* <hdf5:FloatType ByteOrder="bo" Size="bytes"
-               SignBitLocation="bytes"
-               ExponentBits="eb" ExponentLocation="el"
-               MantissaBits="mb" MantissaLocation="ml" /> */
-            ord = H5Tget_order(type);
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level++;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sFloatType ByteOrder=\"",xmlnsprefix);
-            
-            switch (ord) {
-                case H5T_ORDER_LE:
-                    h5tools_str_append(&buffer, "LE");
-                    break;
-                case H5T_ORDER_BE:
-                    h5tools_str_append(&buffer, "BE");
-                    break;
-                case H5T_ORDER_VAX:
-                    h5tools_str_append(&buffer, "VAX");
-                    break;
-                case H5T_ORDER_MIXED:
-                case H5T_ORDER_NONE:
-                case H5T_ORDER_ERROR:
-                default:
-                    h5tools_str_append(&buffer, "ERROR_UNKNOWN");
-            } /* end switch */
-            
-            h5tools_str_append(&buffer, "\" Size=\"");
-            sz = H5Tget_size(type);
-            h5tools_str_append(&buffer, "%lu", (unsigned long)sz);
-            H5Tget_fields(type, &spos, &epos, &esize, &mpos, &msize);
-            h5tools_str_append(&buffer, "\" SignBitLocation=\"%lu\" ", (unsigned long)spos);
-            h5tools_str_append(&buffer, "ExponentBits=\"%lu\" ExponentLocation=\"%lu\" ", (unsigned long)esize, (unsigned long)epos);
-            h5tools_str_append(&buffer, "MantissaBits=\"%lu\" MantissaLocation=\"%lu\" />", (unsigned long)msize, (unsigned long)mpos);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            break;
-
-        case H5T_TIME:
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level++;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sTimeType />",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            h5tools_str_append(&buffer, "<!-- H5T_TIME: not yet implemented -->");
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            break;
-
-        case H5T_STRING:
-            /* <hdf5:StringType Cset="cs" StrSize="chars" StrPad="pad" /> */
-            size = H5Tget_size(type);
-            str_pad = H5Tget_strpad(type);
-            cset = H5Tget_cset(type);
-            is_vlstr = H5Tis_variable_str(type);
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-
-            ctx.indent_level++;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sStringType Cset=\"",xmlnsprefix);
-            if (cset == H5T_CSET_ASCII) {
-                h5tools_str_append(&buffer, "H5T_CSET_ASCII\" ");
-            } 
-            else {
-                h5tools_str_append(&buffer, "unknown_cset\" ");
-            }
-            if(is_vlstr)
-                h5tools_str_append(&buffer, "StrSize=\"H5T_VARIABLE\" StrPad=\"");
-            else
-                h5tools_str_append(&buffer, "StrSize=\"%d\" StrPad=\"", (int) size);
-            if (str_pad == H5T_STR_NULLTERM) {
-                h5tools_str_append(&buffer, "H5T_STR_NULLTERM\"/>");
-            } 
-            else if (str_pad == H5T_STR_NULLPAD) {
-                h5tools_str_append(&buffer, "H5T_STR_NULLPAD\"/>");
-            } 
-            else if (str_pad == H5T_STR_SPACEPAD) {
-                h5tools_str_append(&buffer, "H5T_STR_SPACEPAD\"/>");
-            } 
-            else {
-                h5tools_str_append(&buffer, "H5T_STR_ERROR\"/>");
-            }
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            break;
-
-        case H5T_BITFIELD:
-            /* <hdf5:BitfieldType ByteOrder="bo" Size="bytes"/> */
-            ord = H5Tget_order(type);
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level++;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sBitfieldType ByteOrder=\"",xmlnsprefix);
-            
-            switch (ord) {
-                case H5T_ORDER_LE:
-                    h5tools_str_append(&buffer, "LE");
-                    break;
-                case H5T_ORDER_BE:
-                    h5tools_str_append(&buffer, "BE");
-                    break;
-                case H5T_ORDER_VAX:
-                case H5T_ORDER_MIXED:
-                case H5T_ORDER_NONE:
-                case H5T_ORDER_ERROR:
-                default:
-                    h5tools_str_append(&buffer, "ERROR_UNKNOWN");
-            } /* end switch */
-            
-            size = H5Tget_size(type);
-            h5tools_str_append(&buffer, "\" Size=\"%lu\"/>", (unsigned long)size);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            break;
-
-        case H5T_OPAQUE:
-            /* <hdf5:OpaqueType Tag="tag" Size="bytes" /> */
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level++;
-            mname = H5Tget_tag(type);
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sOpaqueType Tag=\"%s\" ",xmlnsprefix, mname);
-            H5free_memory(mname);
-            size = H5Tget_size(type);
-            h5tools_str_append(&buffer, "Size=\"%lu\"/>", (unsigned long)size);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            break;
-
-        case H5T_COMPOUND:
-            /* recursively describe the components of a compound datatype */
-
-            /* type of a dataset */
-            nmembers = H5Tget_nmembers(type);
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sCompoundType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-
-            /* List each member Field of the type */
-            /*   <hdf5:Field FieldName="name" > */
-            /*   <hdf5:DataType > */
-            ctx.indent_level++;
-            dump_indent += COL;
-            for (i = 0; i < nmembers; i++) {
-                char *t_fname;
-
-                mname = H5Tget_member_name(type, i);
-                mtype = H5Tget_member_type(type, i);
-                t_fname = xml_escape_the_name(mname);
+                /* <hdf5:IntegerType ByteOrder="bo" Sign="torf" Size="bytes"/> */
+                ord = H5Tget_order(type);
+                sgn = H5Tget_sign(type);
 
                 ctx.need_prefix = TRUE;
                 h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                 /* Render the element */
                 h5tools_str_reset(&buffer);
-                h5tools_str_append(&buffer, "<%sField FieldName=\"%s\">",xmlnsprefix, t_fname);
+                h5tools_str_append(&buffer, "<%sIntegerType ByteOrder=\"",xmlnsprefix);
+                switch (ord) {
+                    case H5T_ORDER_LE:
+                        h5tools_str_append(&buffer, "LE");
+                        break;
+                    case H5T_ORDER_BE:
+                        h5tools_str_append(&buffer, "BE");
+                        break;
+                    case H5T_ORDER_VAX:
+                    case H5T_ORDER_MIXED:
+                    case H5T_ORDER_NONE:
+                    case H5T_ORDER_ERROR:
+                    default:
+                        h5tools_str_append(&buffer, "ERROR_UNKNOWN");
+                        break;
+                } /* end switch */
+                
+                h5tools_str_append(&buffer, "\" Sign=\"");
+                
+                switch (sgn) {
+                    case H5T_SGN_NONE:
+                        h5tools_str_append(&buffer, "false");
+                        break;
+                    case H5T_SGN_2:
+                        h5tools_str_append(&buffer, "true");
+                        break;
+                    case H5T_SGN_ERROR:
+                    case H5T_NSGN:
+                    default:
+                        h5tools_str_append(&buffer, "ERROR_UNKNOWN");
+                        break;
+                } /* end switch */
+                
+                h5tools_str_append(&buffer, "\" Size=\"");
+                sz = H5Tget_size(type);
+                h5tools_str_append(&buffer, "%lu", (unsigned long)sz);
+                h5tools_str_append(&buffer, "\" />");
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level--;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                break;
+
+            case H5T_FLOAT:
+                /* <hdf5:FloatType ByteOrder="bo" Size="bytes"
+                   SignBitLocation="bytes"
+                   ExponentBits="eb" ExponentLocation="el"
+                   MantissaBits="mb" MantissaLocation="ml" /> */
+                ord = H5Tget_order(type);
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level++;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sFloatType ByteOrder=\"",xmlnsprefix);
+                
+                switch (ord) {
+                    case H5T_ORDER_LE:
+                        h5tools_str_append(&buffer, "LE");
+                        break;
+                    case H5T_ORDER_BE:
+                        h5tools_str_append(&buffer, "BE");
+                        break;
+                    case H5T_ORDER_VAX:
+                        h5tools_str_append(&buffer, "VAX");
+                        break;
+                    case H5T_ORDER_MIXED:
+                    case H5T_ORDER_NONE:
+                    case H5T_ORDER_ERROR:
+                    default:
+                        h5tools_str_append(&buffer, "ERROR_UNKNOWN");
+                } /* end switch */
+                
+                h5tools_str_append(&buffer, "\" Size=\"");
+                sz = H5Tget_size(type);
+                h5tools_str_append(&buffer, "%lu", (unsigned long)sz);
+                H5Tget_fields(type, &spos, &epos, &esize, &mpos, &msize);
+                h5tools_str_append(&buffer, "\" SignBitLocation=\"%lu\" ", (unsigned long)spos);
+                h5tools_str_append(&buffer, "ExponentBits=\"%lu\" ExponentLocation=\"%lu\" ", (unsigned long)esize, (unsigned long)epos);
+                h5tools_str_append(&buffer, "MantissaBits=\"%lu\" MantissaLocation=\"%lu\" />", (unsigned long)msize, (unsigned long)mpos);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level--;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                break;
+
+            case H5T_TIME:
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level++;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sTimeType />",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                h5tools_str_append(&buffer, "<!-- H5T_TIME: not yet implemented -->");
+                ctx.indent_level--;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                break;
+
+            case H5T_STRING:
+                /* <hdf5:StringType Cset="cs" StrSize="chars" StrPad="pad" /> */
+                size = H5Tget_size(type);
+                str_pad = H5Tget_strpad(type);
+                cset = H5Tget_cset(type);
+                is_vlstr = H5Tis_variable_str(type);
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
 
+                ctx.indent_level++;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sStringType Cset=\"",xmlnsprefix);
+
+                if (cset == H5T_CSET_ASCII)
+                    h5tools_str_append(&buffer, "H5T_CSET_ASCII\" ");
+                else
+                    h5tools_str_append(&buffer, "unknown_cset\" ");
+
+                if(is_vlstr)
+                    h5tools_str_append(&buffer, "StrSize=\"H5T_VARIABLE\" StrPad=\"");
+                else
+                    h5tools_str_append(&buffer, "StrSize=\"%d\" StrPad=\"", (int) size);
+
+                if (str_pad == H5T_STR_NULLTERM)
+                    h5tools_str_append(&buffer, "H5T_STR_NULLTERM\"/>");
+                else if (str_pad == H5T_STR_NULLPAD)
+                    h5tools_str_append(&buffer, "H5T_STR_NULLPAD\"/>");
+                else if (str_pad == H5T_STR_SPACEPAD)
+                    h5tools_str_append(&buffer, "H5T_STR_SPACEPAD\"/>");
+                else
+                    h5tools_str_append(&buffer, "H5T_STR_ERROR\"/>");
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level--;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                break;
+
+            case H5T_BITFIELD:
+                /* <hdf5:BitfieldType ByteOrder="bo" Size="bytes"/> */
+                ord = H5Tget_order(type);
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level++;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sBitfieldType ByteOrder=\"",xmlnsprefix);
+                
+                switch (ord) {
+                    case H5T_ORDER_LE:
+                        h5tools_str_append(&buffer, "LE");
+                        break;
+                    case H5T_ORDER_BE:
+                        h5tools_str_append(&buffer, "BE");
+                        break;
+                    case H5T_ORDER_VAX:
+                    case H5T_ORDER_MIXED:
+                    case H5T_ORDER_NONE:
+                    case H5T_ORDER_ERROR:
+                    default:
+                        h5tools_str_append(&buffer, "ERROR_UNKNOWN");
+                } /* end switch */
+                
+                size = H5Tget_size(type);
+                h5tools_str_append(&buffer, "\" Size=\"%lu\"/>", (unsigned long)size);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level--;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                break;
+
+            case H5T_OPAQUE:
+                /* <hdf5:OpaqueType Tag="tag" Size="bytes" /> */
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level++;
+                mname = H5Tget_tag(type);
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sOpaqueType Tag=\"%s\" ",xmlnsprefix, mname);
                 H5free_memory(mname);
-                HDfree(t_fname);
+                size = H5Tget_size(type);
+                h5tools_str_append(&buffer, "Size=\"%lu\"/>", (unsigned long)size);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level--;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                break;
+
+            case H5T_COMPOUND:
+                /* recursively describe the components of a compound datatype */
+
+                /* type of a dataset */
+                nmembers = (unsigned)H5Tget_nmembers(type);
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sCompoundType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+
+                /* List each member Field of the type */
+                /*   <hdf5:Field FieldName="name" > */
+                /*   <hdf5:DataType > */
+                ctx.indent_level++;
+                dump_indent += COL;
+                for (i = 0; i < nmembers; i++) {
+                    char *t_fname;
+
+                    mname = H5Tget_member_name(type, i);
+                    mtype = H5Tget_member_type(type, i);
+                    t_fname = xml_escape_the_name(mname);
+
+                    ctx.need_prefix = TRUE;
+                    h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                    /* Render the element */
+                    h5tools_str_reset(&buffer);
+                    h5tools_str_append(&buffer, "<%sField FieldName=\"%s\">",xmlnsprefix, t_fname);
+                    h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+
+                    H5free_memory(mname);
+                    HDfree(t_fname);
+                    dump_indent += COL;
+                    ctx.indent_level++;
+
+                    ctx.need_prefix = TRUE;
+                    h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                    /* Render the element */
+                    h5tools_str_reset(&buffer);
+                    h5tools_str_append(&buffer, "<%sDataType>",xmlnsprefix);
+                    h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                    ctx.indent_level++;
+                    dump_indent += COL;
+                    xml_print_datatype(mtype,0);
+                    dump_indent -= COL;
+                    ctx.indent_level--;
+
+                    ctx.need_prefix = TRUE;
+                    h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                    /* Render the element */
+                    h5tools_str_reset(&buffer);
+                    h5tools_str_append(&buffer, "</%sDataType>",xmlnsprefix);
+                    h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                    dump_indent -= COL;
+                    ctx.indent_level--;
+
+                    ctx.need_prefix = TRUE;
+                    h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                    /* Render the element */
+                    h5tools_str_reset(&buffer);
+                    h5tools_str_append(&buffer, "</%sField>",xmlnsprefix);
+                    h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                }
+                dump_indent -= COL;
+                ctx.indent_level--;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sCompoundType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                break;
+
+            case H5T_REFERENCE:
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level++;
+                /*  Only Object references supported at this time */
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sReferenceType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level++;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sObjectReferenceType />",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level--;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sReferenceType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                ctx.indent_level--;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                break;
+
+            case H5T_ENUM:
+                /*  <hdf5:EnumType Nelems="ne" > list Name, values of enum */
+                nmembs = H5Tget_nmembers(type);
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                dump_indent += COL;
+                ctx.indent_level++;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sEnumType Nelems=\"%d\">",xmlnsprefix, nmembs);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                xml_print_enum(type);
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sEnumType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                dump_indent -= COL;
+                ctx.indent_level--;
+
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                break;
+
+            case H5T_VLEN:
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sVLType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                super = H5Tget_super(type);
                 dump_indent += COL;
                 ctx.indent_level++;
 
@@ -1298,9 +1437,9 @@ xml_print_datatype(hid_t type, unsigned in_group)
                 h5tools_str_reset(&buffer);
                 h5tools_str_append(&buffer, "<%sDataType>",xmlnsprefix);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-                ctx.indent_level++;
                 dump_indent += COL;
-                xml_print_datatype(mtype,0);
+                ctx.indent_level++;
+                xml_print_datatype(super,0);
                 dump_indent -= COL;
                 ctx.indent_level--;
 
@@ -1319,238 +1458,94 @@ xml_print_datatype(hid_t type, unsigned in_group)
 
                 /* Render the element */
                 h5tools_str_reset(&buffer);
-                h5tools_str_append(&buffer, "</%sField>",xmlnsprefix);
+                h5tools_str_append(&buffer, "</%sVLType>",xmlnsprefix);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            }
-            dump_indent -= COL;
-            ctx.indent_level--;
+                H5Tclose(super);
 
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+                break;
 
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sCompoundType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            break;
+            case H5T_ARRAY:
+                /* Get array base type */
+                super = H5Tget_super(type);
 
-        case H5T_REFERENCE:
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level++;
-            /*  Only Object references supported at this time */
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sReferenceType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level++;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sObjectReferenceType />",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sReferenceType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            break;
-
-        case H5T_ENUM:
-            /*  <hdf5:EnumType Nelems="ne" > list Name, values of enum */
-            nmembs = H5Tget_nmembers(type);
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            dump_indent += COL;
-            ctx.indent_level++;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sEnumType Nelems=\"%d\">",xmlnsprefix, nmembs);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            xml_print_enum(type);
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sEnumType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            dump_indent -= COL;
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sAtomicType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            break;
-
-        case H5T_VLEN:
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sVLType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            super = H5Tget_super(type);
-            dump_indent += COL;
-            ctx.indent_level++;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sDataType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            dump_indent += COL;
-            ctx.indent_level++;
-            xml_print_datatype(super,0);
-            dump_indent -= COL;
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sDataType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            dump_indent -= COL;
-            ctx.indent_level--;
-
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sVLType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            H5Tclose(super);
-
-            break;
-
-        case H5T_ARRAY:
-            /* Get array base type */
-            super = H5Tget_super(type);
-
-            /* Print lead-in */
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
-
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sArrayType Ndims=\"",xmlnsprefix);
-            ndims = H5Tget_array_ndims(type);
-            h5tools_str_append(&buffer, "%u\">", ndims);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-
-            /* Get array information */
-            H5Tget_array_dims2(type, dims);
-
-            /* list of dimensions */
-            ctx.indent_level++;
-            for (i = 0; i < ndims; i++) {
+                /* Print lead-in */
                 ctx.need_prefix = TRUE;
                 h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
                 /* Render the element */
                 h5tools_str_reset(&buffer);
-                h5tools_str_append(&buffer, "<%sArrayDimension DimSize=\"%u\"/>", xmlnsprefix, (int) dims[i]);
+                h5tools_str_append(&buffer, "<%sArrayType Ndims=\"",xmlnsprefix);
+                ndims = (unsigned)H5Tget_array_ndims(type);
+                h5tools_str_append(&buffer, "%u\">", ndims);
                 h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            }
-            ctx.indent_level--;
 
-            dump_indent += COL;
-            ctx.indent_level++;
+                /* Get array information */
+                H5Tget_array_dims2(type, dims);
 
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+                /* list of dimensions */
+                ctx.indent_level++;
+                for (i = 0; i < ndims; i++) {
+                    ctx.need_prefix = TRUE;
+                    h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<%sDataType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            dump_indent += COL;
-            ctx.indent_level++;
-            xml_print_datatype(super,0);
-            dump_indent -= COL;
-            ctx.indent_level--;
+                    /* Render the element */
+                    h5tools_str_reset(&buffer);
+                    h5tools_str_append(&buffer, "<%sArrayDimension DimSize=\"%u\"/>", xmlnsprefix, (int) dims[i]);
+                    h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                }
+                ctx.indent_level--;
 
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+                dump_indent += COL;
+                ctx.indent_level++;
 
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sDataType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            dump_indent -= COL;
-            ctx.indent_level--;
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<%sDataType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                dump_indent += COL;
+                ctx.indent_level++;
+                xml_print_datatype(super,0);
+                dump_indent -= COL;
+                ctx.indent_level--;
 
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "</%sArrayType>",xmlnsprefix);
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            /* Close array base type */
-            H5Tclose(super);
-            break;
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
 
-        case H5T_NO_CLASS:
-        case H5T_NCLASSES:
-            HDassert(0);
-            /* fall through */
-        default:
-            ctx.need_prefix = TRUE;
-            h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sDataType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                dump_indent -= COL;
+                ctx.indent_level--;
 
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_append(&buffer, "<!-- unknown datatype -->");
-            h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
-            h5tools_setstatus(EXIT_FAILURE);
-            break;
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "</%sArrayType>",xmlnsprefix);
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                /* Close array base type */
+                H5Tclose(super);
+                break;
+
+            case H5T_NO_CLASS:
+            case H5T_NCLASSES:
+                HDassert(0);
+                /* fall through */
+            default:
+                ctx.need_prefix = TRUE;
+                h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
+
+                /* Render the element */
+                h5tools_str_reset(&buffer);
+                h5tools_str_append(&buffer, "<!-- unknown datatype -->");
+                h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
+                h5tools_setstatus(EXIT_FAILURE);
+                break;
         }
     } /* end else */
 
@@ -1583,7 +1578,7 @@ xml_dump_datatype(hid_t type)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -1593,7 +1588,7 @@ xml_dump_datatype(hid_t type)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -1722,7 +1717,7 @@ xml_dump_dataspace(hid_t space)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -1732,7 +1727,7 @@ xml_dump_dataspace(hid_t space)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -1898,7 +1893,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
     h5tool_format_t     string_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     /* Print all the values. */
@@ -1912,7 +1907,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -1951,12 +1946,10 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED * sset,
 
     if (obj_data == DATASET_DATA) {
         type = H5Dget_type(obj_id);
-        if (H5Tget_class(type) == H5T_REFERENCE) {
+        if (H5Tget_class(type) == H5T_REFERENCE)
             status = xml_print_refs(obj_id, DATASET_DATA);
-        } 
-        else if (H5Tget_class(type) == H5T_STRING) {
+        else if (H5Tget_class(type) == H5T_STRING)
             status = xml_print_strs(obj_id, DATASET_DATA);
-        } 
         else {
             h5tools_context_t datactx;
             HDmemset(&datactx, 0, sizeof(datactx));
@@ -2096,7 +2089,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -2106,7 +2099,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -2426,7 +2419,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -2436,7 +2429,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -2651,7 +2644,7 @@ xml_dump_group(hid_t gid, const char *name)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -2661,7 +2654,7 @@ xml_dump_group(hid_t gid, const char *name)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -3007,14 +3000,13 @@ xml_print_refs(hid_t did, int source)
         if ((tsiz = H5Tget_size(type)) == 0)
             goto error;
 
-        buf = (char *) HDcalloc((size_t)(ssiz * tsiz), sizeof(char));
+        buf = (char *) HDcalloc((size_t)ssiz, tsiz);
         if (buf == NULL)
             goto error;
         e = H5Dread(did, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
         /* need to check result here */
-        if (e < 0) {
+        if (e < 0)
             goto error;
-        }
     }
     else if (source == ATTRIBUTE_DATA) {
         space = H5Aget_space(did);
@@ -3023,15 +3015,13 @@ xml_print_refs(hid_t did, int source)
         if ((tsiz = H5Tget_size(type)) == 0)
             goto error;
 
-        buf = (char *) HDcalloc((size_t)(ssiz * tsiz), sizeof(char));
-        if (buf == NULL) {
+        buf = (char *) HDcalloc((size_t)ssiz, tsiz);
+        if (buf == NULL)
             goto error;
-        }
         e = H5Aread(did, H5T_STD_REF_OBJ, buf);
         /* need to check the result here */
-        if (e < 0) {
+        if (e < 0)
             goto error;
-        }
     }
 
     refbuf = (hobj_ref_t *) buf;
@@ -3040,7 +3030,7 @@ xml_print_refs(hid_t did, int source)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -3050,7 +3040,7 @@ xml_print_refs(hid_t did, int source)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -3130,7 +3120,7 @@ xml_print_strs(hid_t did, int source)
     hssize_t    ssiz    = -1;
     htri_t      is_vlstr = FALSE;
     size_t      tsiz    = 0;
-    size_t      i;
+    hsize_t     i;
     size_t      str_size = 0;
     char       *bp = NULL;
     char       *onestring = NULL;
@@ -3141,20 +3131,16 @@ xml_print_strs(hid_t did, int source)
     h5tool_format_t   string_dataformat;
     hsize_t     curr_pos = 0;        /* total data element position   */
 
-    if (source == DATASET_DATA) {
+    if (source == DATASET_DATA)
         type = H5Dget_type(did);
-    }
-    else if (source == ATTRIBUTE_DATA) {
+    else if (source == ATTRIBUTE_DATA)
         type = H5Aget_type(did);
-    }
-    else {
+    else
         /* return an error */
         return FAIL;
-    }
-    if (H5Tget_class(type) != H5T_STRING) {
+    if (H5Tget_class(type) != H5T_STRING)
         /* return an error */
         goto error;
-    }
     /* Check if we have VL data in the dataset's datatype */
     is_vlstr = H5Tis_variable_str(type);
 
@@ -3165,14 +3151,13 @@ xml_print_strs(hid_t did, int source)
         if((tsiz = H5Tget_size(type)) == 0)
             goto error;
 
-        buf = HDmalloc((size_t)(ssiz * tsiz));
+        buf = HDmalloc((size_t)ssiz * tsiz);
         if (buf == NULL)
             goto error;
 
         e = H5Dread(did, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
-        if (e < 0) {
+        if (e < 0)
             goto error;
-        }
     }
     else if (source == ATTRIBUTE_DATA) {
         space = H5Aget_space(did);
@@ -3181,14 +3166,13 @@ xml_print_strs(hid_t did, int source)
         if((tsiz = H5Tget_size(type)) == 0)
             goto error;
 
-        buf = HDmalloc((size_t)(ssiz * tsiz));
+        buf = HDmalloc((size_t)ssiz * tsiz);
         if (buf == NULL)
             goto error;
 
         e = H5Aread(did, type, buf);
-        if (e < 0) {
+        if (e < 0)
             goto error;
-        }
     }
 
     bp = (char*) buf;
@@ -3199,7 +3183,7 @@ xml_print_strs(hid_t did, int source)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -3209,7 +3193,7 @@ xml_print_strs(hid_t did, int source)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -3219,11 +3203,11 @@ xml_print_strs(hid_t did, int source)
     string_dataformat.do_escape = display_escape;
     outputformat = &string_dataformat;
 
-    for (i = 0; i < ssiz; i++) {
+    for (i = 0; i < (hsize_t)ssiz; i++) {
         if (is_vlstr) {
             onestring = *(char **) bp;
             if (onestring)
-                str_size = (size_t) HDstrlen(onestring);
+                str_size = HDstrlen(onestring);
         }
         else {
             HDstrncpy(onestring, bp, tsiz);
@@ -3240,7 +3224,7 @@ xml_print_strs(hid_t did, int source)
             h5tools_render_element(rawoutstream, outputformat, &ctx, &buffer, &curr_pos, (size_t)outputformat->line_ncols, (hsize_t)0, (hsize_t)0);
         }
         else {
-            char *t_onestring = xml_escape_the_string(onestring, (int) str_size);
+            char *t_onestring = xml_escape_the_string(onestring, (int)str_size);
             if (t_onestring) {
                 ctx.need_prefix = TRUE;
                 h5tools_simple_prefix(rawoutstream, outputformat, &ctx, (hsize_t)0, 0);
@@ -3315,7 +3299,7 @@ check_filters(hid_t dcpl)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -3325,7 +3309,7 @@ check_filters(hid_t dcpl)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -3455,7 +3439,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -3465,7 +3449,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -3825,7 +3809,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * s
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
 
     t_name = xml_escape_the_name(name);
@@ -3839,7 +3823,7 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED * s
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }
@@ -4419,7 +4403,7 @@ xml_print_enum(hid_t type)
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
 
     HDmemset(&ctx, 0, sizeof(ctx));
-    ctx.indent_level = dump_indent/COL;
+    ctx.indent_level = dump_indent / COL;
     ctx.cur_column = dump_indent;
     
     string_dataformat = *outputformat;
@@ -4429,7 +4413,7 @@ xml_print_enum(hid_t type)
         string_dataformat.fmt_float = fp_format;
     }
 
-    if (h5tools_nCols==0) {
+    if (h5tools_nCols == 0) {
         string_dataformat.line_ncols = 65535;
         string_dataformat.line_per_line = 1;
     }

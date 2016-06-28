@@ -498,7 +498,7 @@ get_del_string(const fheap_test_param_t *tparam)
  *
  *-------------------------------------------------------------------------
  */
-static size_t
+H5_ATTR_PURE static size_t
 get_fill_size(const fheap_test_param_t *tparam)
 {
     switch(tparam->fill) {

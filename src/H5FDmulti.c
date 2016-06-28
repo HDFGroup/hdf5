@@ -133,7 +133,7 @@ static herr_t H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, had
 			      size_t size, void *_buf/*out*/);
 static herr_t H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			       size_t size, const void *_buf);
-static herr_t H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD_multi_lock(H5FD_t *_file, hbool_t rw);
 static herr_t H5FD_multi_unlock(H5FD_t *_file);
@@ -1686,7 +1686,7 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
+H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
     H5FD_mem_t		mt;

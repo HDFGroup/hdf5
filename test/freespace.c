@@ -221,7 +221,7 @@ TEST_sect_init_cls(H5FS_section_class_t *cls, void *_udata)
  * Check if the two sections can be merged:
  * 	true if second section adjoins the first section
  */
-static herr_t
+H5_ATTR_PURE static herr_t
 TEST_sect_can_merge(const H5FS_section_info_t *_sect1,
     const H5FS_section_info_t *_sect2, void H5_ATTR_UNUSED *_udata)
 {

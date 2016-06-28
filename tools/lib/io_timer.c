@@ -222,7 +222,7 @@ set_time(io_time_t *pt, timer_type t, int start_stop)
  * Programmer:  Bill Wendling, 01. October 2001
  * Modifications:
  */
-double
+H5_ATTR_PURE double
 get_time(io_time_t *pt, timer_type t)
 {
     return pt->total_time[t];

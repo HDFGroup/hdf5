@@ -90,7 +90,7 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 static void
-usage (const char *prog)
+usage (void)
 {
     FLUSHSTREAM(rawoutstream);
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -253,7 +253,7 @@ main (int argc, const char *argv[])
     /* Check for no command line parameters */
     if(argc == 1)
     {
-        usage(h5tools_getprogname());
+        usage();
         leave(EXIT_FAILURE);
     } /* end if */
 
@@ -270,14 +270,14 @@ main (int argc, const char *argv[])
             /* validate flag */
             if (parse_flag(opt_arg,&flag)<0)
             {
-                usage(h5tools_getprogname());
+                usage();
                 leave(EXIT_FAILURE);
             }
             str_flag = HDstrdup(opt_arg);
             break;
 
         case 'h':
-            usage(h5tools_getprogname());
+            usage();
             leave(EXIT_SUCCESS);
             break;
 
@@ -311,7 +311,7 @@ main (int argc, const char *argv[])
             break;
 
         default:
-            usage(h5tools_getprogname());
+            usage();
             leave(EXIT_FAILURE);
         }
     } /* end of while */
@@ -323,28 +323,28 @@ main (int argc, const char *argv[])
     if (fname_src==NULL)
     {
         error_msg("Input file name missing\n");
-        usage(h5tools_getprogname());
+        usage();
         leave(EXIT_FAILURE);
     }
 
     if (fname_dst==NULL)
     {
         error_msg("Output file name missing\n");
-        usage(h5tools_getprogname());
+        usage();
         leave(EXIT_FAILURE);
     }
 
     if (oname_src==NULL)
     {
         error_msg("Source object name missing\n");
-        usage(h5tools_getprogname());
+        usage();
         leave(EXIT_FAILURE);
     }
 
     if (oname_dst==NULL)
     {
         error_msg("Destination object name missing\n");
-        usage(h5tools_getprogname());
+        usage();
         leave(EXIT_FAILURE);
     }
 
