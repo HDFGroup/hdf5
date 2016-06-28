@@ -1793,7 +1793,7 @@ H5X__db_query_singleton(H5X_db_t *db, hid_t query_id, H5X_db_head_t *result)
         if (NULL == (entry = (H5X_db_entry_t *) H5MM_malloc(sizeof(H5X_db_entry_t))))
             HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate ref entry");
         entry->ref = NULL;
-        if (NULL == (entry->ref = H5R_decode(pkey.data)))
+        if (NULL == (entry->ref = H5Rdecode(pkey.data)))
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "can't decode reference");
 
         H5Q_QUEUE_INSERT_TAIL(result, entry, entry);
@@ -2029,7 +2029,7 @@ H5X__db_query_combine(H5X_db_t *db, hid_t query_id, H5X_db_head_t *result)
         if (NULL == (entry = (H5X_db_entry_t *) H5MM_malloc(sizeof(H5X_db_entry_t))))
             HGOTO_ERROR(H5E_QUERY, H5E_CANTALLOC, FAIL, "can't allocate ref entry");
         entry->ref = NULL;
-        if (NULL == (entry->ref = H5R_decode(join_key.data)))
+        if (NULL == (entry->ref = H5Rdecode(join_key.data)))
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "can't decode reference");
         /* If the result is an object reference, simply cast the reference */
         if (obj_ref && FAIL == H5R_cast(entry->ref, H5R_EXT_OBJECT))
