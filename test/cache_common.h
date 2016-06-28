@@ -152,6 +152,9 @@
 					 * cache entry.
 					 */
 
+#define MAX_FLUSH_DEP_PARS      8       /* Maximum number of flush dependency
+                                         * parents in the test */
+
 typedef struct flush_op
 {
     int			op_code;	/* integer op code indicating the
@@ -340,13 +343,11 @@ typedef struct test_entry_t
     hbool_t 		  expunged;     /* entry has been expunged since the 
                                          * last time it was reset.
                                          */
-    int                   flush_dep_par_type; /* Entry type of flush dependency parent */
-    int                   flush_dep_par_idx; /* Index of flush dependency parent */
-    uint64_t              child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
-                                        /* flush dependency heights of flush
-                                         * dependency children
-                                         */
-    unsigned              flush_dep_height; /* flush dependency height of entry */
+    int                   flush_dep_par_type[MAX_FLUSH_DEP_PARS]; /* Entry types of flush dependency parents */
+    int                   flush_dep_par_idx[MAX_FLUSH_DEP_PARS]; /* Indices of flush dependency parents */
+    unsigned              flush_dep_npar; /* Number of flush dependency parents */
+    unsigned              flush_dep_nchd; /* Number of flush dependency children */
+    unsigned              flush_dep_ndirty_chd; /* Number of dirty flush dependency children (including granchildren, etc.) */
     hbool_t		  pinned_from_client;	/* entry was pinned by client call */
     hbool_t		  pinned_from_cache;	/* entry was pinned by cache internally */
     unsigned              flush_order;    /* Order that entry was flushed in */
@@ -520,13 +521,11 @@ struct expected_entry_status
     hbool_t		deserialized;
     hbool_t		serialized;
     hbool_t		destroyed;
-    int                 flush_dep_par_type; /* Entry type of flush dependency parent */
-    int                 flush_dep_par_idx; /* Index of flush dependency parent */
-    uint64_t            child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
-                                        /* flush dependency heights of flush
-                                         * dependency children
-                                         */
-    unsigned            flush_dep_height; /* flush dependency height of entry */
+    int                 flush_dep_par_type[MAX_FLUSH_DEP_PARS]; /* Entry types of flush dependency parents */
+    int                 flush_dep_par_idx[MAX_FLUSH_DEP_PARS]; /* Indices of flush dependency parents */
+    unsigned            flush_dep_npar; /* Number of flush dependency parents */
+    unsigned            flush_dep_nchd; /* Number of flush dependency children */
+    unsigned            flush_dep_ndirty_chd; /* Number of dirty flush dependency children */
     int                 flush_order;    /* flush order of entry */
     unsigned char	is_corked;	/* cork status of entry */
 };

@@ -277,9 +277,9 @@ H5C_get_entry_status(const H5F_t *f,
         if(is_corked_ptr != NULL)
             *is_corked_ptr = entry_ptr->is_corked;
         if(is_flush_dep_parent_ptr != NULL)
-            *is_flush_dep_parent_ptr = (entry_ptr->flush_dep_height > 0);
+            *is_flush_dep_parent_ptr = (entry_ptr->flush_dep_nchildren > 0);
         if(is_flush_dep_child_ptr != NULL)
-            *is_flush_dep_child_ptr = (entry_ptr->flush_dep_parent != NULL);
+            *is_flush_dep_child_ptr = (entry_ptr->flush_dep_nparents > 0);
     } /* end else */
 
 done:
