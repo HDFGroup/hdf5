@@ -45,7 +45,7 @@
 #define NAME_OFFSET 6         /* offset for "name<num>" */
 
 /* pre-condition: num must be a non-negative number */
-static unsigned
+H5_ATTR_PURE static unsigned
 num_digits(int num)
 {
     unsigned u;

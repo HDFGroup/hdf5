@@ -18,19 +18,33 @@
 !
 #include <H5config_f.inc>
 
-PROGRAM lite_test
-  
-  CALL test_dataset1D()
-  CALL test_dataset2D()
-  CALL test_dataset3D()
-  CALL test_datasetND(4)
-  CALL test_datasetND(5)
-  CALL test_datasetND(6)
-  CALL test_datasetND(7)
-  CALL test_datasets()
-  CALL test_attributes()
+MODULE TSTLITE
 
-END PROGRAM lite_test
+CONTAINS
+
+!-------------------------------------------------------------------------
+! test_begin
+!-------------------------------------------------------------------------
+
+SUBROUTINE test_begin(string)
+  CHARACTER(LEN=*), INTENT(IN) :: string
+  WRITE(*, fmt = '(14a)', advance = 'no') string
+  WRITE(*, fmt = '(40x,a)', advance = 'no') ' '
+END SUBROUTINE test_begin
+
+!-------------------------------------------------------------------------
+! passed
+!-------------------------------------------------------------------------
+
+SUBROUTINE passed()
+  WRITE(*, fmt = '(6a)')  'PASSED'
+END SUBROUTINE passed
+
+END MODULE TSTLITE
+
+MODULE TSTLITE_TESTS
+
+CONTAINS
 
 
 !-------------------------------------------------------------------------
@@ -42,6 +56,7 @@ SUBROUTINE test_dataset1D()
   USE, INTRINSIC :: ISO_C_BINDING
   USE H5LT ! module of H5LT
   USE HDF5 ! module of HDF5 library
+  USE TSTLITE ! module for testing lite support routines
   
   IMPLICIT NONE
   
@@ -191,6 +206,7 @@ SUBROUTINE test_dataset2D()
   USE, INTRINSIC :: ISO_C_BINDING
   USE H5LT ! module of H5LT
   USE HDF5 ! module of HDF5 library
+  USE TSTLITE ! module for testing lite support routines
 
   IMPLICIT NONE
 
@@ -387,6 +403,7 @@ SUBROUTINE test_dataset3D()
   USE, INTRINSIC :: ISO_C_BINDING
   USE H5LT ! module of H5LT
   USE HDF5 ! module of HDF5 library
+  USE TSTLITE ! module for testing lite support routines
 
   IMPLICIT NONE
 
@@ -702,6 +719,7 @@ SUBROUTINE test_datasetND(rank)
   USE, INTRINSIC :: ISO_C_BINDING
   USE H5LT ! module of H5LT
   USE HDF5 ! module of HDF5 library
+  USE TSTLITE ! module for testing lite support routines
 
   IMPLICIT NONE
 
@@ -1293,6 +1311,7 @@ SUBROUTINE test_datasets()
   USE, INTRINSIC :: ISO_C_BINDING
   USE H5LT ! module of H5LT
   USE HDF5 ! module of HDF5 library
+  USE TSTLITE ! module for testing lite support routines
 
   IMPLICIT NONE
 
@@ -1302,7 +1321,6 @@ SUBROUTINE test_datasets()
   INTEGER, PARAMETER :: DIM1 = 10                      ! Dimension of array
   INTEGER, PARAMETER :: LEN0 = 3
   INTEGER, PARAMETER :: LEN1 = 12
-  CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"   ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname2 = "dset2"   ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname3 = "dset3"   ! Dataset name
   CHARACTER(LEN=5), PARAMETER :: dsetname4 = "dset4"   ! Dataset name
@@ -1665,21 +1683,21 @@ SUBROUTINE test_attributes()
   USE, INTRINSIC :: ISO_C_BINDING
   USE H5LT ! module of H5LT
   USE HDF5 ! module of HDF5 library
+  USE TSTLITE ! module for testing lite support routines
 
   IMPLICIT NONE
 
   CHARACTER(len=9), PARAMETER :: filename = "dsetf5.h5"! File name
-  CHARACTER(len=9), PARAMETER :: filename1 ="tattr.h5" ! C written attribute file
+!!$  CHARACTER(len=9), PARAMETER :: filename1 ="tattr.h5" ! C written attribute file
   INTEGER(HID_T) :: file_id                            ! File identifier
   !  INTEGER(HID_T) :: file_id1
   INTEGER, PARAMETER :: DIM1 = 10                     ! Dimension of array
-  CHARACTER(LEN=5), PARAMETER :: attrname1 = "attr1"   ! Attribute name
   CHARACTER(LEN=5), PARAMETER :: attrname2 = "attr2"   ! Attribute name
   CHARACTER(LEN=5), PARAMETER :: attrname3 = "attr3"   ! Attribute name
   CHARACTER(LEN=5), PARAMETER :: attrname4 = "attr4"   ! Attribute name
   CHARACTER(LEN=5), PARAMETER :: attrname5 = "attr5"   ! Attribute name
   CHARACTER(LEN=8), PARAMETER :: buf1 = "mystring"     ! Data buffer
-  CHARACTER(LEN=16), PARAMETER :: buf_c = "string attribute"
+!!$  CHARACTER(LEN=16), PARAMETER :: buf_c = "string attribute"
   CHARACTER(LEN=8)                  :: bufr1           ! Data buffer
   CHARACTER(LEN=10)                 :: bufr1_lg        ! Data buffer
   !  CHARACTER(LEN=16)                 :: bufr_c          ! Data buffer
@@ -1969,20 +1987,24 @@ SUBROUTINE test_attributes()
   !
 END SUBROUTINE test_attributes
 
-!-------------------------------------------------------------------------
-! test_begin
-!-------------------------------------------------------------------------
+END MODULE TSTLITE_TESTS
 
-SUBROUTINE test_begin(string)
-  CHARACTER(LEN=*), INTENT(IN) :: string
-  WRITE(*, fmt = '(14a)', advance = 'no') string
-  WRITE(*, fmt = '(40x,a)', advance = 'no') ' '
-END SUBROUTINE test_begin
+PROGRAM lite_test
+  
+  USE TSTLITE_TESTS ! module for testing lite routines
+  
+  IMPLICIT NONE
+  
+  CALL test_dataset1D()
+  CALL test_dataset2D()
+  CALL test_dataset3D()
+  CALL test_datasetND(4)
+  CALL test_datasetND(5)
+  CALL test_datasetND(6)
+  CALL test_datasetND(7)
+  CALL test_datasets()
+  CALL test_attributes()
 
-!-------------------------------------------------------------------------
-! passed
-!-------------------------------------------------------------------------
+END PROGRAM lite_test
 
-SUBROUTINE passed()
-  WRITE(*, fmt = '(6a)')  'PASSED'
-END SUBROUTINE passed
+

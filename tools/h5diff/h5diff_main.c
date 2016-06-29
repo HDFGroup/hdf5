@@ -136,7 +136,8 @@ int main(int argc, const char *argv[])
  *
  *-------------------------------------------------------------------------
  */
-void h5diff_exit(int status)
+void
+h5diff_exit(int status)
 {
     exit(status);
 }

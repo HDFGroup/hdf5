@@ -247,7 +247,7 @@ test_checksum(void)
  *
  *-------------------------------------------------------------------------
  */
-void
+H5_ATTR_PURE void
 cleanup_checksum(void)
 {
     /* no file to clean */

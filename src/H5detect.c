@@ -1177,7 +1177,7 @@ imp_bit(unsigned int n, int *perm, void *_a, void *_b, const unsigned char *pad_
  *
  *-------------------------------------------------------------------------
  */
-static unsigned int
+H5_ATTR_PURE static unsigned int
 find_bias(unsigned int epos, unsigned int esize, int *perm, void *_a)
 {
     unsigned char *a = (unsigned char *) _a;

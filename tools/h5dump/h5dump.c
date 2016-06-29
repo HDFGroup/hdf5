@@ -438,7 +438,7 @@ table_list_add(hid_t oid, unsigned long file_no)
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
+H5_ATTR_PURE ssize_t
 table_list_visited(unsigned long file_no)
 {
     size_t u;           /* Local index variable */
@@ -625,9 +625,8 @@ parse_hsize_list(const char *h_list, subset_d *d)
 
             last_digit = 1;
         }
-        else {
+        else
             last_digit = 0;
-        }
 
     if (size_count == 0)
         /* there aren't any integers to read */
@@ -639,7 +638,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
         if(HDisdigit(*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)HDatof(ptr);
+            p_list[i++] = (hsize_t)HDatoll(ptr);
 
             while (HDisdigit(*ptr))
                 /* scroll to end of integer */
@@ -647,8 +646,6 @@ parse_hsize_list(const char *h_list, subset_d *d)
         }
     d->data = p_list;
     d->len = size_count;
-
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -671,7 +668,7 @@ static struct subset_t *
 parse_subset_params(char *dset)
 {
     struct subset_t *s = NULL;
-    register char   *brace;
+    char   *brace;
 
     if (!disable_compact_subset && ((brace = HDstrrchr(dset, '[')) != NULL)) {
         *brace++ = '\0';
@@ -715,14 +712,15 @@ parse_subset_params(char *dset)
  *
  *              Failure:        FAIL
  *
- *
  *-------------------------------------------------------------------------
  */
 static int
 parse_mask_list(const char *h_list)
 {
-    int                offset_value;
-    int                length_value;
+    int                soffset_value;
+    unsigned           offset_value;
+    int                slength_value;
+    unsigned           length_value;
     unsigned long long temp_mask;
     const char        *ptr = NULL;
 
@@ -740,10 +738,11 @@ parse_mask_list(const char *h_list)
             error_msg("Bad mask list(%s)\n", h_list);
             return FAIL;
         }
-        offset_value = HDatoi(ptr);
-        if (offset_value < 0 || offset_value >= PACKED_BITS_SIZE_MAX) {
-            error_msg("Packed Bit offset value(%d) must be between 0 and %d\n",
-                    offset_value, PACKED_BITS_SIZE_MAX - 1);
+        soffset_value = HDatoi(ptr);
+        offset_value = (unsigned)soffset_value;
+        if (soffset_value < 0 || offset_value >= PACKED_BITS_SIZE_MAX) {
+            error_msg("Packed Bit offset value(%d) must be between 0 and %u\n",
+                    soffset_value, (unsigned)(PACKED_BITS_SIZE_MAX - 1));
             return FAIL;
         }
 
@@ -761,14 +760,15 @@ parse_mask_list(const char *h_list)
             error_msg("Bad mask list(%s)\n", h_list);
             return FAIL;
         }
-        length_value = HDatoi(ptr);
-        if (length_value <= 0) {
-            error_msg("Packed Bit length value(%d) must be positive.\n", length_value);
+        slength_value = HDatoi(ptr);
+        if (slength_value <= 0) {
+            error_msg("Packed Bit length value(%d) must be positive.\n", slength_value);
             return FAIL;
         }
-        if ((offset_value + length_value) > PACKED_BITS_SIZE_MAX){
-            error_msg("Packed Bit offset+length value(%d) too large. Max is %d\n",
-                       offset_value+length_value, PACKED_BITS_SIZE_MAX);
+        length_value = (unsigned)slength_value;
+        if ((offset_value + length_value) > PACKED_BITS_SIZE_MAX) {
+            error_msg("Packed Bit offset+length value(%u) too large. Max is %u\n",
+                       offset_value+length_value, (unsigned)PACKED_BITS_SIZE_MAX);
             return FAIL;
         }
 
@@ -787,8 +787,8 @@ parse_mask_list(const char *h_list)
         /* create the bit mask by left shift 1's by length, then negate it. */
         /* After packed_mask is calculated, packed_length is not needed but  */
         /* keep it for debug purpose. */
-        temp_mask = ~0L;
-        if(length_value<8*sizeof(unsigned long long)) {
+        temp_mask = ~0ULL;
+        if(length_value < (int)(8 *sizeof(unsigned long long))) {
             temp_mask = temp_mask << length_value;
             packed_mask[packed_bits_num] = ~temp_mask;
         }
@@ -960,11 +960,15 @@ parse_start:
             goto done;
             break;
         case 'w':
-            h5tools_nCols = HDatoi(opt_arg);
-            if (h5tools_nCols <= 0) {
-                h5tools_nCols = 65535;
+            {
+                int sh5tools_nCols = HDatoi(opt_arg);
+
+                if (sh5tools_nCols <= 0)
+                    h5tools_nCols = 65535;
+                else
+                    h5tools_nCols = (unsigned)sh5tools_nCols;
+                last_was_dset = FALSE;
             }
-            last_was_dset = FALSE;
             break;
         case 'N':
             display_all = 0;
@@ -1173,12 +1177,10 @@ parse_start:
                 usage(h5tools_getprogname());
                 goto error;
             }
-            if (HDstrcmp(opt_arg,":") == 0) {
+            if (HDstrcmp(opt_arg,":") == 0)
                 xmlnsprefix = "";
-            }
-            else {
+            else
                 xmlnsprefix = opt_arg;
-            }
             h5tools_nCols = 0;
             break;
         /** end XML parameters **/
@@ -1716,7 +1718,7 @@ h5_fileaccess(void)
             memb_map[mt] = mt;
             sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
-            memb_addr[mt] = MAX(mt-1,0)*(HADDR_MAX/10);
+            memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         }
 
         if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)

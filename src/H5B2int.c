@@ -3612,7 +3612,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+H5_ATTR_PURE static herr_t
 H5B2__assert_leaf(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf)
 {
     /* General sanity checking on node */
@@ -3635,7 +3635,7 @@ H5B2__assert_leaf(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+H5_ATTR_PURE static herr_t
 H5B2__assert_leaf2(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf, const H5B2_leaf_t H5_ATTR_UNUSED *leaf2)
 {
     /* General sanity checking on node */
@@ -3658,7 +3658,7 @@ H5B2__assert_leaf2(const H5B2_hdr_t *hdr, const H5B2_leaf_t *leaf, const H5B2_le
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+H5_ATTR_PURE static herr_t
 H5B2__assert_internal(hsize_t parent_all_nrec, const H5B2_hdr_t *hdr, const H5B2_internal_t *internal)
 {
     hsize_t tot_all_nrec;       /* Total number of records at or below this node */
@@ -3699,7 +3699,7 @@ H5B2__assert_internal(hsize_t parent_all_nrec, const H5B2_hdr_t *hdr, const H5B2
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+H5_ATTR_PURE static herr_t
 H5B2__assert_internal2(hsize_t parent_all_nrec, const H5B2_hdr_t *hdr, const H5B2_internal_t *internal, const H5B2_internal_t *internal2)
 {
     hsize_t tot_all_nrec;       /* Total number of records at or below this node */

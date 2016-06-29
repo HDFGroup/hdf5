@@ -104,7 +104,7 @@ parse(int ac, char **av)
  * some systems may produce extra messages and/or produce core dump.
  * This tries to eliminate those side effects.
  */
-void
+H5_ATTR_NORETURN void
 abort_intercept (int H5_ATTR_UNUSED sig)
 {
     HDexit(6);

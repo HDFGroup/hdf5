@@ -3090,8 +3090,10 @@ H5T__create(H5T_class_t type, size_t size)
                     subtype = H5T_NATIVE_INT_g;
                 else if(sizeof(long) == size)
                     subtype = H5T_NATIVE_LONG_g;
+#if H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG
                 else if(sizeof(long long) == size)
                     subtype = H5T_NATIVE_LLONG_g;
+#endif /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
                 else
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "no applicable native integer type")
                 if(NULL == (dt = H5T__alloc()))

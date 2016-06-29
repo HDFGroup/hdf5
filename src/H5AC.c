@@ -183,13 +183,13 @@ done:
 herr_t
 H5AC__init_package(void)
 {
+#ifdef H5_DEBUG_BUILD
     H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
+    H5FD_dxpl_type_t  dxpl_type;    /* Property indicating the type of the internal dxpl */
+#endif /* H5_DEBUG_BUILD */
 #ifdef H5_HAVE_PARALLEL
     H5P_coll_md_read_flag_t coll_meta_read;
 #endif /* H5_HAVE_PARALLEL */
-#ifdef H5_DEBUG_BUILD
-    H5FD_dxpl_type_t  dxpl_type;    /* Property indicating the type of the internal dxpl */
-#endif /* H5_DEBUG_BUILD */
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -201,9 +201,8 @@ H5AC__init_package(void)
         const char *s;  /* String for environment variables */
 
         s = HDgetenv("H5_COLL_API_SANITY_CHECK");
-        if(s && HDisdigit(*s)) {
+        if(s && HDisdigit(*s))
             H5_coll_api_sanity_check_g = (hbool_t)HDstrtol(s, NULL, 0);
-        }
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -278,7 +277,9 @@ H5AC__init_package(void)
     H5AC_rawdata_dxpl_id = H5P_DATASET_XFER_DEFAULT;
 #endif /* defined(H5_HAVE_PARALLEL) || defined(H5_DEBUG_BUILD) */
 
+#if defined(H5_DEBUG_BUILD) | defined(H5_HAVE_PARALLEL)
 done:
+#endif /* defined(H5_DEBUG_BUILD) | defined(H5_HAVE_PARALLEL) */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC__init_package() */
 
@@ -2074,113 +2075,6 @@ H5AC__open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC__open_trace_file() */
-
-
-/*************************************************************************/
-/*************************** Debugging Functions: ************************/
-/*************************************************************************/
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5AC_get_entry_ptr_from_addr()
- *
- * Purpose:     Debugging function that attempts to look up an entry in the
- *              cache by its file address, and if found, returns a pointer
- *              to the entry in *entry_ptr_ptr.  If the entry is not in the
- *              cache, *entry_ptr_ptr is set to NULL.
- *
- *              WARNING: This call should be used only in debugging
- *                       routines, and it should be avoided when
- *                       possible.
- *
- *                       Further, if we ever multi-thread the cache,
- *                       this routine will have to be either discarded
- *                       or heavily re-worked.
- *
- *                       Finally, keep in mind that the entry whose
- *                       pointer is obtained in this fashion may not
- *                       be in a stable state.
- *
- *              Note that this function is only defined if NDEBUG
- *              is not defined.
- *
- *              As heavy use of this function is almost certainly a
- *              bad idea, the metadata cache tracks the number of
- *              successful calls to this function, and (if 
- *              H5C_DO_SANITY_CHECKS is defined) displays any
- *              non-zero count on cache shutdown.
- *
- *		This function is just a wrapper that calls the H5C 
- *		version of the function.
- *
- * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  John Mainzer, 5/30/14
- *
- *-------------------------------------------------------------------------
- */
-#ifndef NDEBUG
-herr_t
-H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr, void **entry_ptr_ptr)
-{
-    herr_t              ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(H5C_get_entry_ptr_from_addr(f, addr, entry_ptr_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_ptr_from_addr() failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_get_entry_ptr_from_addr() */
-#endif /* NDEBUG */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5AC_verify_entry_type()
- *
- * Purpose:     Debugging function that attempts to look up an entry in the
- *              cache by its file address, and if found, test to see if its
- *              type field contains the expected value.
- *
- *              If the specified entry is in cache, *in_cache_ptr is set
- *              to TRUE, and *type_ok_ptr is set to TRUE or FALSE
- *              depending on whether the entries type field matches the
- *              expected_type parameter
- *
- *              If the target entry is not in cache, *in_cache_ptr is
- *              set to FALSE, and *type_ok_ptr is undefined.
- *
- *              Note that this function is only defined if NDEBUG
- *              is not defined.
- *
- *		This function is just a wrapper that calls the H5C 
- *		version of the function.
- *
- * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  John Mainzer, 5/30/14
- *
- *-------------------------------------------------------------------------
- */
-#ifndef NDEBUG
-herr_t
-H5AC_verify_entry_type(const H5F_t *f, haddr_t addr, const H5AC_class_t *expected_type,
-    hbool_t *in_cache_ptr, hbool_t *type_ok_ptr)
-{
-    herr_t              ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    if(H5C_verify_entry_type(f, addr, expected_type, in_cache_ptr, type_ok_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_verify_entry_type() failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC_verify_entry_type() */
-#endif /* NDEBUG */
-
 
 
 /*************************************************************************/

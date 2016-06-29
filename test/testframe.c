@@ -365,7 +365,7 @@ void TestCleanup(void)
 /*
  * Retrieve the verbosity level for the testing framework
  */
-int GetTestVerbosity(void)
+H5_ATTR_PURE int GetTestVerbosity(void)
 {
     return(TestVerbosity);
 }
@@ -452,7 +452,7 @@ int SetTestExpress(int newval)
  * Retrieve Summary request value.
  *     0 means no summary, 1 means yes.
  */
-int GetTestSummary(void)
+H5_ATTR_PURE int GetTestSummary(void)
 {
     return(Summary);
 }
@@ -461,7 +461,7 @@ int GetTestSummary(void)
  * Retrieve Cleanup request value.
  *     0 means no Cleanup, 1 means yes.
  */
-int GetTestCleanup(void)
+H5_ATTR_PURE int GetTestCleanup(void)
 {
     return(CleanUp);
 }
@@ -498,7 +498,7 @@ void ParseTestVerbosity(char *argv)
 /*
  * Retrieve the number of testing errors for the testing framework
  */
-int GetTestNumErrs(void)
+H5_ATTR_PURE int GetTestNumErrs(void)
 {
     return(num_errs);
 }
@@ -516,7 +516,7 @@ void IncTestNumErrs(void)
 /*
  * Retrieve the current Test Parameters pointer.
  */
-const void *GetTestParameters(void)
+H5_ATTR_PURE const void *GetTestParameters(void)
 {
     return(Test_parameters);
 }

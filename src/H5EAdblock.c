@@ -169,10 +169,6 @@ H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     H5EA_dblock_t *dblock = NULL;       /* Extensible array data block */
     haddr_t dblock_addr;                /* Extensible array data block address */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called, hdr->dblk_page_nelmts = %Zu, nelmts = %Zu\n", FUNC, hdr->dblk_page_nelmts, nelmts);
-#endif /* QAK */
-
     /* Sanity check */
     HDassert(hdr);
     HDassert(stats_changed);
@@ -184,15 +180,9 @@ HDfprintf(stderr, "%s: Called, hdr->dblk_page_nelmts = %Zu, nelmts = %Zu\n", FUN
 
     /* Set size of data block on disk */
     dblock->size = H5EA_DBLOCK_SIZE(dblock);
-#ifdef QAK
-HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
-#endif /* QAK */
 
     /* Set offset of block in array's address space */
     dblock->block_off = dblk_off;
-#ifdef QAK
-HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
-#endif /* QAK */
 
     /* Allocate space for the data block on disk */
     if(HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
@@ -262,25 +252,12 @@ H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx))
     HDassert(hdr);
     HDassert(idx >= hdr->cparam.idx_blk_elmts);
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Entering - idx = %Hu\n", FUNC, idx);
-#endif /* QAK */
     /* Adjust index for elements in index block */
     idx -= hdr->cparam.idx_blk_elmts;
-#ifdef QAK
-HDfprintf(stderr, "%s: after adjusting for index block elements, idx = %Hu\n", FUNC, idx);
-#endif /* QAK */
 
     /* Determine the superblock information for the index */
     H5_CHECK_OVERFLOW(idx, /*From:*/hsize_t, /*To:*/uint64_t);
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->cparam.data_blk_min_elmts = %u\n", FUNC, (unsigned)hdr->cparam.data_blk_min_elmts);
-#endif /* QAK */
     sblk_idx = H5VM_log2_gen((uint64_t)((idx / hdr->cparam.data_blk_min_elmts) + 1));
-#ifdef QAK
-HDfprintf(stderr, "%s: sblk_idx = %u\n", FUNC, sblk_idx);
-HDfprintf(stderr, "%s: hdr->sblk_info[%u] = {%Hu, %Zu, %Hu, %Hu}\n", FUNC, sblk_idx, hdr->sblk_info[sblk_idx].ndblks, hdr->sblk_info[sblk_idx].dblk_nelmts, hdr->sblk_info[sblk_idx].start_idx, hdr->sblk_info[sblk_idx].start_dblk);
-#endif /* QAK */
 
     /* Set return value */
     ret_value = sblk_idx;
@@ -308,10 +285,6 @@ H5EA__dblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
 
     /* Local variables */
     H5EA_dblock_cache_ud_t udata;      /* Information needed for loading data block */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
 
     /* Sanity check */
     HDassert(hdr);
@@ -355,10 +328,6 @@ H5EA__dblock_unprotect(H5EA_dblock_t *dblock, hid_t dxpl_id, unsigned cache_flag
 
     /* Local variables */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
     /* Sanity check */
     HDassert(dblock);
 
@@ -392,10 +361,6 @@ H5EA__dblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     /* Local variables */
     H5EA_dblock_t *dblock = NULL;       /* Pointer to data block */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
     /* Sanity check */
     HDassert(hdr);
     HDassert(parent);
@@ -420,16 +385,10 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
         /* Iterate over pages in data block */
         for(u = 0; u < npages; u++) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Expunging data block page from cache\n", FUNC);
-#endif /* QAK */
             /* Evict the data block page from the metadata cache */
             /* (OK to call if it doesn't exist in the cache) */
             if(H5AC_expunge_entry(hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page_addr, H5AC__NO_FLAGS_SET) < 0)
                 H5E_THROW(H5E_CANTEXPUNGE, "unable to remove array data block page from metadata cache")
-#ifdef QAK
-HDfprintf(stderr, "%s: Done expunging data block page from cache\n", FUNC);
-#endif /* QAK */
 
             /* Advance to next page address */
             dblk_page_addr += dblk_page_size;
@@ -463,6 +422,7 @@ H5EA__dblock_dest(H5EA_dblock_t *dblock))
 
     /* Sanity check */
     HDassert(dblock);
+    HDassert(!dblock->has_hdr_depend);
 
     /* Check if shared header field has been initialized */
     if(dblock->hdr) {

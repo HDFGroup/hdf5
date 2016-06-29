@@ -156,10 +156,6 @@ H5EA__dblk_page_create(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_sblock_t *parent,
     /* Local variables */
     H5EA_dblk_page_t *dblk_page = NULL;      /* Extensible array data block page */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called, addr = %a\n", FUNC, addr);
-#endif /* QAK */
-
     /* Sanity check */
     HDassert(hdr);
 
@@ -170,9 +166,6 @@ HDfprintf(stderr, "%s: Called, addr = %a\n", FUNC, addr);
     /* Set info about data block page on disk */
     dblk_page->addr = addr;
     dblk_page->size = H5EA_DBLK_PAGE_SIZE(hdr);
-#ifdef QAK
-HDfprintf(stderr, "%s: dblk_page->size = %Zu\n", FUNC, dblk_page->size);
-#endif /* QAK */
 
     /* Clear any elements in data block page to fill value */
     if((hdr->cparam.cls->fill)(dblk_page->elmts, (size_t)hdr->dblk_page_nelmts) < 0)
@@ -214,10 +207,6 @@ H5EA__dblk_page_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_sblock_t *parent,
 
     /* Local variables */
     H5EA_dblk_page_cache_ud_t udata;      /* Information needed for loading data block page */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
 
     /* Sanity check */
     HDassert(hdr);
@@ -261,10 +250,6 @@ H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page, hid_t dxpl_id,
 
     /* Local variables */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
     /* Sanity check */
     HDassert(dblk_page);
 
@@ -296,6 +281,7 @@ H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page))
 
     /* Sanity check */
     HDassert(dblk_page);
+    HDassert(!dblk_page->has_hdr_depend);
 
     /* Check if header field has been initialized */
     if(dblk_page->hdr) {

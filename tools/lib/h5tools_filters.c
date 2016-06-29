@@ -147,58 +147,65 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
  *
  *-------------------------------------------------------------------------
  */
-int h5tools_can_encode(H5Z_filter_t filtn) {
-	switch (filtn) {
+int
+h5tools_can_encode(H5Z_filter_t filtn) {
+    switch (filtn) {
 	/* user defined filter     */
 	default:
-		return 0;
+            return 0;
 
 	case H5Z_FILTER_DEFLATE:
 #ifndef H5_HAVE_FILTER_DEFLATE
-		return 0;
+            return 0;
 #endif
-		break;
+            break;
+
 	case H5Z_FILTER_SZIP:
 #ifndef H5_HAVE_FILTER_SZIP
-		return 0;
+            return 0;
 #else
 	{
-		unsigned int filter_config_flags;
+            unsigned int filter_config_flags;
 
-		if (H5Zget_filter_info(filtn, &filter_config_flags) < 0)
-			return -1;
-		if ((filter_config_flags
-				& (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 0) {
-			/* filter present but neither encode nor decode is supported (???) */
-			return -1;
-		} 
-		else if ((filter_config_flags
-				& (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == H5Z_FILTER_CONFIG_DECODE_ENABLED) {
-			/* decoder only: read but not write */
-			return 0;
-		} 
-		else if ((filter_config_flags
-				& (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == H5Z_FILTER_CONFIG_ENCODE_ENABLED) {
-			/* encoder only: write but not read (???) */
-			return -1;
-		} 
-		else if ((filter_config_flags
-				& (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED))
-				== (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) {
-			return 1;
-		}
+            if (H5Zget_filter_info(filtn, &filter_config_flags) < 0)
+                return -1;
+            if ((filter_config_flags
+                    & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == 0) {
+                /* filter present but neither encode nor decode is supported (???) */
+                return -1;
+            } 
+            else if ((filter_config_flags
+                        & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == H5Z_FILTER_CONFIG_DECODE_ENABLED) {
+                /* decoder only: read but not write */
+                return 0;
+            } 
+            else if ((filter_config_flags
+                        & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) == H5Z_FILTER_CONFIG_ENCODE_ENABLED) {
+                /* encoder only: write but not read (???) */
+                return -1;
+            } 
+            else if ((filter_config_flags
+                        & (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED))
+                        == (H5Z_FILTER_CONFIG_ENCODE_ENABLED | H5Z_FILTER_CONFIG_DECODE_ENABLED)) {
+                return 1;
+            }
 	}
 #endif
-		break;
-	case H5Z_FILTER_SHUFFLE:
-		break;
-	case H5Z_FILTER_FLETCHER32:
-		break;
-	case H5Z_FILTER_NBIT:
-		break;
-	case H5Z_FILTER_SCALEOFFSET:
-		break;
-	}/*switch*/
+            break;
 
-	return 1;
+	case H5Z_FILTER_SHUFFLE:
+            break;
+
+	case H5Z_FILTER_FLETCHER32:
+            break;
+
+	case H5Z_FILTER_NBIT:
+            break;
+
+	case H5Z_FILTER_SCALEOFFSET:
+            break;
+    }/*switch*/
+
+    return 1;
 }
+

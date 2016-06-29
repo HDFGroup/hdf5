@@ -380,7 +380,6 @@ CONTAINS
     INTEGER :: errcode                                                ! error code
 
     INTEGER(size_t) :: namelen                                        ! name length
-    INTEGER(hsize_t) :: i                                             ! general purpose integer
 
     INTERFACE
        INTEGER FUNCTION h5tbread_table_c(loc_id,&
