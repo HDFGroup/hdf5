@@ -183,8 +183,10 @@ done:
 herr_t
 H5AC__init_package(void)
 {
-#ifdef H5_DEBUG_BUILD
+#if defined H5_DEBUG_BUILD | defined H5_HAVE_PARALLEL
     H5P_genplist_t  *xfer_plist;    /* Dataset transfer property list object */
+#endif /* defined H5_DEBUG_BUILD | defined H5_HAVE_PARALLEL */
+#ifdef H5_DEBUG_BUILD
     H5FD_dxpl_type_t  dxpl_type;    /* Property indicating the type of the internal dxpl */
 #endif /* H5_DEBUG_BUILD */
 #ifdef H5_HAVE_PARALLEL
