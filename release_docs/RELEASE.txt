@@ -526,6 +526,11 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a memory bug that could occur when a message was improperly marked
+        as sharable on disk.
+
+        (NAF, 2016/07/01, HDFFV-9950)
+
       - Incorrect usage of list in CMake COMPILE_DEFINITIONS set_property
 
         The CMake command, set_property with COMPILE_DEFINITIONS property
