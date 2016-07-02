@@ -5495,3 +5495,75 @@ H5T_patch_vlen_file(H5T_t *dt, H5F_t *f)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T_patch_vlen_file() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Tflush
+ *
+ * Purpose:     Flushes all buffers associated with a named datatype to disk.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              May 19, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tflush(hid_t type_id)
+{
+    H5T_t *dt; /* Datatype for this operation */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", type_id);
+    
+    /* Check args */
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(!H5T_is_named(dt))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
+
+    /* To flush metadata and invoke flush callback if there is */
+    if(H5O_flush_common(&dt->oloc, type_id, H5AC_ind_read_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype and object flush callback")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Tflush */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Trefresh
+ *
+ * Purpose:     Refreshes all buffers associated with a named datatype.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              July 21, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Trefresh(hid_t type_id)
+{
+    H5T_t * dt = NULL;
+    herr_t ret_value = SUCCEED; /* return value */
+    
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", type_id);
+
+    /* Check args */
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(!H5T_is_named(dt))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
+
+    /* Call private function to refresh datatype object */
+    if ((H5O_refresh_metadata(type_id, dt->oloc, H5AC_ind_read_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "unable to refresh datatype")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Trefresh */
+
