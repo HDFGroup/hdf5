@@ -638,6 +638,11 @@ H5D__init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
         if((dset->shared->type = H5T_copy(type, H5T_COPY_ALL)) == NULL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy datatype")
 
+	/* Convert a datatype (if committed) to a transient type if the committed datatype's file
+	   location is different from the file location where the dataset will be created */
+        if(H5T_convert_committed_datatype(dset->shared->type, file) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't get shared datatype info")
+
         /* Mark any datatypes as being on disk now */
         if(H5T_set_loc(dset->shared->type, file, H5T_LOC_DISK) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't set datatype location")
