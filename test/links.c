@@ -7303,6 +7303,282 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    external_link_with_committed_datatype
+ *
+ * Purpose:     Test to verify the problem described in HDFFV-9940 is resolved.
+ *              (A) Attach an attribute to an externally linked group in the target file.
+ *              The attribute's datatype is a committed datatype to the root group
+ *              in the main file.
+ *              (B) Create a dataset to an externally group in the target file.
+ *              The dataset's datatype is a committed datatype to the root group
+ *              in the main file.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  This is copied and modified from the customer's test program that
+ *              exposed the problem.
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_link_with_committed_datatype(hid_t fapl, hbool_t new_format)
+{
+    hid_t       fid1 = -1, fid2 = -1;		/* File IDs */
+    hid_t 	gid1 = -1, gid2 = -1;		/* Group IDs */
+    hid_t       tid = -1;                    	/* Datatype ID */
+    hid_t       sid = -1;                   	/* Dataspace ID */
+    hid_t       sid2 = -1;                   	/* Dataspace ID */
+    hid_t       aid = -1;                   	/* Attribute ID */
+    hid_t       atid = -1;                   	/* Attribute's datatype ID */
+    hid_t       did = -1;                   	/* Dataset ID */
+    hid_t       dtid = -1;                   	/* Dataset's datatype ID */
+    hid_t	dcpl = -1;			/* Dataset creation property list */
+    int		wdata = 99;			/* Attribute data written */
+    int		rdata = 0;			/* Attribute data read */
+    int		wbuf[60];			/* Data buffer for writing */
+    int		rbuf[60];			/* Data buffer for reading */
+    int		i;				/* Local index variable */
+    char        filename1[NAME_BUF_SIZE];	/* File name for main file */
+    char        filename2[NAME_BUF_SIZE];	/* File name for target file */
+    hsize_t     dims[2] = {5, 12};		/* Dimension sizes */
+    hsize_t     chunks[2] = {3, 7};		/* Chunk sizes */
+
+    if(new_format)
+        TESTING("attach committed datatype to external group's attribute/dataset(w/new group format)")
+    else
+        TESTING("attach committed datatype to external group's attribute/dataset")
+
+    /* Set up filenames */
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+
+
+    /* Main file */
+    if((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create external link from main file to target file */
+    if(H5Lcreate_external(filename2, "target_group", fid1, "link_to_2", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Create target file */
+    if((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR
+    /* Create group in target file */
+    if((gid2 = H5Gcreate2(fid2, "target_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the group */
+    if(H5Gclose(gid2) < 0)
+        FAIL_STACK_ERROR
+    /* Close the file */
+    if(H5Fclose(fid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the group which is externally linked to target file */
+    if((gid1 = H5Gopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a copy of integer datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Commit the datatype to the main file root group */
+    if(H5Tcommit2(fid1, "myDatatype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create dataspace */
+    if((sid = H5Screate(H5S_SCALAR)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Attach an attribute with the committed datatype to the group */
+    if((aid = H5Acreate2(gid1, "myAttribute", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Write data to the attribute */
+    if(H5Awrite(aid, tid, &wdata) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the attribute's datatype */
+    if((atid = H5Aget_type(aid)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the datatype is not committed */
+    if(H5Tcommitted(atid) == TRUE)
+        FAIL_STACK_ERROR
+
+    /* Close the attribute */
+    if(H5Aclose(aid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a chunked dataset */
+    if((sid2 = H5Screate_simple(2, dims, NULL)) < 0)
+        FAIL_STACK_ERROR
+
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_chunk(dcpl, 2, chunks) < 0)
+        FAIL_STACK_ERROR
+
+    /* Initialize data buffers */
+    for(i = 0; i < 60; i++) {
+	wbuf[i] = i;
+	rbuf[i] = 0;
+    }
+
+    /* Create a dataset with the committed datatype in the group */
+    if((did = H5Dcreate2(gid1, "myDataset", tid, sid2, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Write to the dataset */
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the dataset's datatype */
+    if((dtid = H5Dget_type(did)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the datatype is not committed */
+    if(H5Tcommitted(dtid) == TRUE)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset creation property list */
+    if(H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataspaces */
+    if(H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Sclose(sid2) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the datatypes */
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(atid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(dtid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the group */
+    if(H5Gclose(gid1) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid1) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Open the mainfile */
+    if((fid1 = H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the committed datatype in the mainfile */
+    if((tid = H5Topen(fid1, "myDatatype", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the datatype is committed */
+    if(H5Tcommitted(tid) == FALSE)
+        FAIL_STACK_ERROR
+
+    /* Open the group which is externally linked to target file */
+    if((gid1 = H5Gopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the attribute attached to the group */
+    if((aid = H5Aopen(gid1, "myAttribute", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the attribute's datatype */
+    if((atid = H5Aget_type(aid)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the attribute's datatype is not committed */
+    if(H5Tcommitted(atid) == TRUE)
+        FAIL_STACK_ERROR
+
+    /* Close the attribute */
+    if(H5Aclose(aid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Delete the attribute */
+    if(H5Adelete(gid1, "myAttribute") < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the dataset in the group */
+    if((did = H5Dopen2(gid1, "myDataset", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the dataset's datatype */
+    if((dtid = H5Dget_type(did)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the dataset's datatype is not committed */
+    if(H5Tcommitted(dtid) == TRUE)
+        FAIL_STACK_ERROR
+
+    /* Read the dataset */
+    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Compare the data read should be the same as wbuf */
+    if(HDmemcmp(wbuf, rbuf, sizeof(wbuf)) != 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the group */
+    if(H5Gclose(gid1) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the datatypes */
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(atid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(dtid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid1) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid2);
+        H5Fclose(fid1);
+        H5Gclose(gid1);
+        H5Gclose(gid2);
+
+        H5Aclose(aid);
+        H5Dclose(did);
+
+        H5Sclose(sid);
+        H5Sclose(sid2);
+
+        H5Tclose(tid);
+        H5Aclose(atid);
+        H5Aclose(dtid);
+
+	H5Pclose(dcpl);
+    } H5E_END_TRY
+
+    return -1;
+} /* end external_link_with_committed_datatype() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    ud_hard_links
  *
  * Purpose:     Check that the functionality of hard links can be duplicated
@@ -14624,6 +14900,7 @@ main(void)
             nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
+	    nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
         } /* end for */
 
         /* These tests assume that external links are a form of UD links,

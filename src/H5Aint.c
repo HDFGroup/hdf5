@@ -202,6 +202,11 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     if(NULL == (attr->shared->dt = H5T_copy(type, H5T_COPY_ALL)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't get shared datatype info")
 
+    /* Convert a datatype (if committed) to a transient type if the committed datatype's file
+       location is different from the file location where the attribute will be created */
+    if(H5T_convert_committed_datatype(attr->shared->dt, loc->oloc->file) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't get shared datatype info")
+
     /* Mark datatype as being on disk now */
     if(H5T_set_loc(attr->shared->dt, loc->oloc->file, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid datatype location")
