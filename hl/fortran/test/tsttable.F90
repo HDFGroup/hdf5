@@ -44,6 +44,9 @@ END MODULE TSTTABLE
 
 MODULE TSTTABLE_TESTS
 
+  USE TH5_MISC_GEN
+  IMPLICIT NONE
+
 CONTAINS
 
 !-------------------------------------------------------------------------
@@ -283,7 +286,8 @@ SUBROUTINE test_table1()
   ! compare read and write buffers.
   !
      DO i = 1, nrecords
-        IF ( bufrr(i) .NE. bufr(i) ) THEN
+       CALL VERIFY("h5tbread_field_name_f", bufrr(i), bufr(i), errcode)
+       IF (errcode .NE.0 ) THEN
            PRINT *, 'read buffer differs from write buffer'
            PRINT *,  bufrr(i), ' and ',   bufr(i)
            STOP
@@ -298,7 +302,8 @@ SUBROUTINE test_table1()
   ! compare read and write buffers.
   !
      DO i = 1, nrecords
-        IF ( bufdr(i) .NE. bufd(i) ) THEN
+        CALL VERIFY("h5tbread_field_name_f", bufdr(i), bufd(i), errcode)
+        IF (errcode .NE.0 ) THEN
            PRINT *, 'read buffer differs from write buffer'
            PRINT *,  bufdr(i), ' and ',   bufd(i)
            STOP
@@ -315,7 +320,8 @@ SUBROUTINE test_table1()
   ! compare read and write buffers.
   !
   DO i = 1, nrecords
-     IF ( bufrr(i) .NE. bufr(i) ) THEN
+     CALL VERIFY("h5tbread_field_name_f", bufrr(i), bufr(i), errcode)
+     IF (errcode .NE.0 ) THEN
         PRINT *, 'read buffer differs from write buffer'
         PRINT *,  bufrr(i), ' and ',   bufr(i)
         STOP
@@ -362,7 +368,8 @@ SUBROUTINE test_table1()
   ! compare read and write buffers.
   !
   DO i = 1, nrecords
-     IF ( bufsr(i) .NE. bufs(i) ) THEN
+     CALL VERIFY("h5tbread_field_index_f", bufsr(i), bufs(i), errcode)
+     IF (errcode .NE.0 ) THEN
         PRINT *, 'read buffer differs from write buffer'
         PRINT *,  bufsr(i), ' and ',   bufs(i)
         STOP
@@ -376,7 +383,8 @@ SUBROUTINE test_table1()
   ! compare read and write buffers.
   !
   DO i = 1, nrecords
-     IF ( bufir(i) .NE. bufi(i) ) THEN
+     CALL VERIFY("h5tbread_field_index_f", bufir(i), bufi(i), errcode)
+     IF (errcode .NE.0 ) THEN
         PRINT *, 'read buffer differs from write buffer'
         PRINT *,  bufir(i), ' and ',   bufi(i)
         STOP
@@ -390,7 +398,8 @@ SUBROUTINE test_table1()
      ! compare read and write buffers.
      !
      DO i = 1, nrecords
-        IF ( bufrr(i) .NE. bufr(i) ) THEN
+        CALL VERIFY("h5tbread_field_index_f", bufrr(i), bufr(i), errcode)
+        IF (errcode .NE.0 ) THEN
            PRINT *, 'read buffer differs from write buffer'
            PRINT *,  bufrr(i), ' and ',   bufr(i)
            STOP
@@ -404,7 +413,8 @@ SUBROUTINE test_table1()
      ! compare read and write buffers.
      !
      DO i = 1, nrecords
-        IF ( bufdr(i) .NE. bufd(i) ) THEN
+        CALL VERIFY("h5tbread_field_index_f", bufdr(i), bufd(i), errcode)
+        IF (errcode .NE.0 ) THEN
            PRINT *, 'read buffer differs from write buffer'
            PRINT *,  bufdr(i), ' and ',   bufd(i)
            STOP
@@ -419,7 +429,8 @@ SUBROUTINE test_table1()
   ! compare read and write buffers.
   !
   DO i = 1, nrecords
-     IF ( bufrr(i) .NE. bufr(i) ) THEN
+     CALL VERIFY("h5tbread_field_index_f", bufrr(i), bufr(i), errcode)
+     IF (errcode .NE.0 ) THEN
         PRINT *, 'read buffer differs from write buffer'
         PRINT *,  bufrr(i), ' and ',   bufr(i)
         STOP
@@ -444,7 +455,8 @@ SUBROUTINE test_table1()
   ! compare read and write buffers.
   !
   DO i = 1, nrecords
-     IF ( bufrr(i) .NE. bufr(i) ) THEN
+     CALL VERIFY("h5tbread_field_index_f", bufrr(i), bufr(i), errcode)
+     IF (errcode .NE.0 ) THEN
         PRINT *, 'read buffer differs from write buffer'
         PRINT *,  bufrr(i), ' and ',   bufr(i)
         STOP
@@ -670,11 +682,12 @@ SUBROUTINE test_table2()
   CALL h5tbread_table_f(file_id, table_name_fill, nfields, dst_size, dst_offset, dst_sizes, f_ptr3, errcode)
 
   DO i = 1, nfields
-     IF(r_data(i)%name.NE.fill_data(i)%name.OR. &
-          r_data(i)%lati.NE.fill_data(i)%lati.OR. &
-          r_data(i)%long.NE.fill_data(i)%long.OR. &
-          r_data(i)%pressure.NE.fill_data(i)%pressure.OR. &
-          r_data(i)%temperature.NE.fill_data(i)%temperature)THEN
+     CALL VERIFY("h5tbread_table_f", r_data(i)%name, fill_data(i)%name, errcode)
+     CALL VERIFY("h5tbread_table_f", r_data(i)%lati, fill_data(i)%lati, errcode)
+     CALL VERIFY("h5tbread_table_f", r_data(i)%long, fill_data(i)%long, errcode)
+     CALL VERIFY("h5tbread_table_f", r_data(i)%pressure, fill_data(i)%pressure, errcode)
+     CALL VERIFY("h5tbread_table_f", r_data(i)%temperature, fill_data(i)%temperature, errcode)
+     IF (errcode .NE.0 ) THEN
         PRINT*,'H5TBmake/read_table_f --filled-- FAILED'
         STOP
      ENDIF
@@ -693,11 +706,12 @@ SUBROUTINE test_table2()
   CALL h5tbread_table_f(file_id, table_name, nfields, dst_size, dst_offset, dst_sizes, f_ptr3, errcode)
 
   DO i = 1, nfields
-     IF(r_data(i)%name.NE.p_data(i)%name.OR. &
-          r_data(i)%lati.NE.p_data(i)%lati.OR. &
-          r_data(i)%long.NE.p_data(i)%long.OR. &
-          r_data(i)%pressure.NE.p_data(i)%pressure.OR. &
-          r_data(i)%temperature.NE.p_data(i)%temperature)THEN
+     CALL VERIFY("h5tbread_table_f", r_data(i)%name, p_data(i)%name, errcode)
+     CALL VERIFY("h5tbread_table_f", r_data(i)%lati, p_data(i)%lati, errcode)
+     CALL VERIFY("h5tbread_table_f", r_data(i)%long, p_data(i)%long, errcode)
+     CALL VERIFY("h5tbread_table_f", r_data(i)%pressure, p_data(i)%pressure, errcode)
+     CALL VERIFY("h5tbread_table_f", r_data(i)%temperature, p_data(i)%temperature, errcode)
+     IF (errcode .NE.0 ) THEN
         PRINT*,'H5TBmake/read_table_f FAILED'
         STOP
      ENDIF

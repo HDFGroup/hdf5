@@ -20,6 +20,7 @@
 
 MODULE TSTLITE
 
+  USE TH5_MISC_GEN
   IMPLICIT NONE
 
 CONTAINS
@@ -122,7 +123,8 @@ CONTAINS
     ! compare read and write buffers.
     !
     DO i = 1, DIM1
-       IF ( buf1(i) .NE. bufr1(i) ) THEN
+       CALL VERIFY("h5ltread_dataset_f",buf1(i), bufr1(i), errcode)
+       IF (errcode .NE.0 ) THEN
           PRINT *, 'read buffer differs from write buffer (I)'
           PRINT *,  bufr1(i), ' and ',   buf1(i)
           STOP
@@ -147,7 +149,8 @@ CONTAINS
     ! compare read and write buffers.
     !
     DO i = 1, DIM1
-       IF ( buf2(i) .NE. bufr2(i) ) THEN
+       CALL VERIFY("h5ltread_dataset_f",buf2(i), bufr2(i), errcode)
+       IF (errcode .NE.0 ) THEN
           PRINT *, 'read buffer differs from write buffer (R)'
           PRINT *,  bufr2(i), ' and ',   buf2(i)
           STOP
@@ -179,7 +182,8 @@ CONTAINS
     ! compare read and write buffers.
     !
     DO i = 1, DIM1
-       IF ( buf3(i) .NE. bufr3(i) ) THEN
+       CALL VERIFY("h5ltread_dataset_f",buf3(i), bufr3(i), errcode)
+       IF (errcode .NE.0 ) THEN
           PRINT *, 'read buffer differs from write buffer (D)'
           PRINT *,  bufr3(i), ' and ',   buf3(i)
           STOP
@@ -337,7 +341,8 @@ CONTAINS
     !
     DO i = 1, dims(1)
        DO j = 1, dims(2)
-          IF ( buf3(i,j) .NE. buf3r(i,j) ) THEN
+          CALL VERIFY("h5ltread_dataset_f",buf3(i,j), buf3r(i,j), errcode)
+          IF (errcode .NE.0 ) THEN
              PRINT *, 'read buffer differs from write buffer'
              PRINT *,  buf3r(i,j), ' and ',   buf3(i,j)
              STOP
@@ -368,7 +373,8 @@ CONTAINS
     !
     DO i = 1, dims(1)
        DO j = 1, dims(2)
-          IF ( buf4(i,j) .NE. buf4r(i,j) ) THEN
+          CALL VERIFY("h5ltread_dataset_f", buf4(i,j), buf4r(i,j), errcode)
+          IF (errcode .NE.0 ) THEN
              PRINT *, 'read buffer differs from write buffer'
              PRINT *,  buf4r(i,j), ' and ',   buf4(i,j)
              STOP
@@ -551,7 +557,8 @@ CONTAINS
     DO i = 1, dims(1)
        DO j = 1, dims(2)
           DO k = 1, dims(3)
-             IF ( buf3(i,j,k) .NE. buf3r(i,j,k) ) THEN
+             CALL VERIFY("h5ltread_dataset_f",buf3(i,j,k), buf3r(i,j,k), errcode)
+             IF (errcode .NE.0 ) THEN
                 PRINT *, 'read buffer differs from write buffer'
                 PRINT *,  buf3r(i,j,k), ' and ',   buf3(i,j,k)
                 STOP
@@ -582,7 +589,8 @@ CONTAINS
     DO i = 1, dims(1)
        DO j = 1, dims(2)
           DO k = 1, dims(3)
-             IF ( buf4(i,j,k) .NE. buf4r(i,j,k) ) THEN
+             CALL VERIFY("h5ltread_dataset_f", buf4(i,j,k), buf4r(i,j,k), errcode)
+             IF (errcode .NE.0 ) THEN
                 PRINT *, 'read buffer differs from write buffer'
                 PRINT *,  buf4r(i,j,k), ' and ',   buf4(i,j,k)
                 STOP
@@ -1040,7 +1048,8 @@ CONTAINS
           DO k = 1, dims(3)
              DO l = 1, dims(4)
                 IF(rank.EQ.4)THEN
-                   IF ( rbuf_4(i,j,k,l) .NE. rbufr_4(i,j,k,l) ) THEN
+                   CALL VERIFY("h5ltread_dataset_f",rbuf_4(i,j,k,l), rbufr_4(i,j,k,l), errcode)
+                   IF (errcode .NE.0 ) THEN
                       PRINT *, 'read buffer differs from write buffer'
                       PRINT *,  rbuf_4(i,j,k,l), ' and ', rbufr_4(i,j,k,l)
                       STOP
@@ -1048,7 +1057,8 @@ CONTAINS
                 ENDIF
                 DO m = 1, dims(5)
                    IF(rank.EQ.5)THEN
-                      IF ( rbuf_5(i,j,k,l,m) .NE. rbufr_5(i,j,k,l,m) ) THEN
+                      CALL VERIFY("h5ltread_dataset_f",rbuf_5(i,j,k,l,m), rbufr_5(i,j,k,l,m), errcode)
+                      IF (errcode .NE.0 ) THEN
                          PRINT *, 'read buffer differs from write buffer'
                          PRINT *,  rbuf_5(i,j,k,l,m), ' and ', rbufr_5(i,j,k,l,m)
                          STOP
@@ -1056,7 +1066,8 @@ CONTAINS
                    ENDIF
                    DO n = 1, dims(6)
                       IF(rank.EQ.6)THEN
-                         IF ( rbuf_6(i,j,k,l,m,n) .NE. rbufr_6(i,j,k,l,m,n) ) THEN
+                         CALL VERIFY("h5ltread_dataset_f",rbuf_6(i,j,k,l,m,n), rbufr_6(i,j,k,l,m,n), errcode)
+                         IF (errcode .NE.0 ) THEN
                             PRINT *, 'read buffer differs from write buffer'
                             PRINT *,  rbuf_6(i,j,k,l,m,n), ' and ', rbufr_6(i,j,k,l,m,n)
                             STOP
@@ -1064,7 +1075,8 @@ CONTAINS
                       ENDIF
                       DO o = 1, dims(7)
                          IF(rank.EQ.7)THEN
-                            IF ( rbuf_7(i,j,k,l,m,n,o) .NE. rbufr_7(i,j,k,l,m,n,o) ) THEN
+                            CALL VERIFY("h5ltread_dataset_f",rbuf_7(i,j,k,l,m,n,o), rbufr_7(i,j,k,l,m,n,o), errcode)
+                            IF (errcode .NE.0 ) THEN
                                PRINT *, 'read buffer differs from write buffer'
                                PRINT *,  rbuf_7(i,j,k,l,m,n,o), ' and ', rbufr_7(i,j,k,l,m,n,o)
                                STOP
@@ -1124,7 +1136,8 @@ CONTAINS
           DO k = 1, dims(3)
              DO l = 1, dims(4)
                 IF(rank.EQ.4)THEN
-                   IF ( dbuf_4(i,j,k,l) .NE. dbufr_4(i,j,k,l) ) THEN
+                   CALL VERIFY("h5ltread_dataset_f",dbuf_4(i,j,k,l), dbufr_4(i,j,k,l), errcode)
+                   IF (errcode .NE.0 ) THEN
                       PRINT *, 'read buffer differs from write buffer'
                       PRINT *,  dbuf_4(i,j,k,l), ' and ', dbufr_4(i,j,k,l)
                       STOP
@@ -1132,7 +1145,8 @@ CONTAINS
                 ENDIF
                 DO m = 1, dims(5)
                    IF(rank.EQ.5)THEN
-                      IF ( dbuf_5(i,j,k,l,m) .NE. dbufr_5(i,j,k,l,m) ) THEN
+                      CALL VERIFY("h5ltread_dataset_f",dbuf_5(i,j,k,l,m), dbufr_5(i,j,k,l,m), errcode)
+                      IF (errcode .NE.0 ) THEN
                          PRINT *, 'read buffer differs from write buffer'
                          PRINT *,  dbuf_5(i,j,k,l,m), ' and ', dbufr_5(i,j,k,l,m)
                          STOP
@@ -1140,7 +1154,8 @@ CONTAINS
                    ENDIF
                    DO n = 1, dims(6)
                       IF(rank.EQ.6)THEN
-                         IF ( dbuf_6(i,j,k,l,m,n) .NE. dbufr_6(i,j,k,l,m,n) ) THEN
+                         CALL VERIFY("h5ltread_dataset_f",dbuf_6(i,j,k,l,m,n), dbufr_6(i,j,k,l,m,n), errcode)
+                         IF (errcode .NE.0 ) THEN
                             PRINT *, 'read buffer differs from write buffer'
                             PRINT *,  dbuf_6(i,j,k,l,m,n), ' and ', dbufr_6(i,j,k,l,m,n)
                             STOP
@@ -1148,7 +1163,8 @@ CONTAINS
                       ENDIF
                       DO o = 1, dims(7)
                          IF(rank.EQ.7)THEN
-                            IF ( dbuf_7(i,j,k,l,m,n,o) .NE. dbufr_7(i,j,k,l,m,n,o) ) THEN
+                            CALL VERIFY("h5ltread_dataset_f",dbuf_7(i,j,k,l,m,n,o), dbufr_7(i,j,k,l,m,n,o), errcode)
+                            IF (errcode .NE.0 ) THEN
                                PRINT *, 'read buffer differs from write buffer'
                                PRINT *,  dbuf_7(i,j,k,l,m,n,o), ' and ', dbufr_7(i,j,k,l,m,n,o)
                                STOP
@@ -1323,7 +1339,8 @@ CONTAINS
     REAL, DIMENSION(DIM1) , TARGET            :: bufr3   ! Data buffer
     DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: buf4    ! Data buffer
     DOUBLE PRECISION, DIMENSION(DIM1), TARGET :: bufr4   ! Data buffer
-    INTEGER          :: i, j, n                          ! general purpose integer
+    INTEGER          :: i, n                             ! general purpose integer
+    INTEGER(SIZE_T)  :: i_sz, j_sz                       ! general purpose integer
     INTEGER          :: has                              ! general purpose integer
     INTEGER          :: type_class
     INTEGER(SIZE_T)  :: type_size
@@ -1375,14 +1392,14 @@ CONTAINS
     ALLOCATE( ptr(1)%data(1:wdata(1)%len) )
     ALLOCATE( ptr(2)%data(1:wdata(2)%len) )
 
-    DO i=1, wdata(1)%len
-       ptr(1)%data(i) = wdata(1)%len - i + 1 ! 3 2 1
+    DO i_sz=1, wdata(1)%len
+       ptr(1)%data(i_sz) = INT(wdata(1)%len) - INT(i_sz) + 1 ! 3 2 1
     ENDDO
     wdata(1)%p = C_LOC(ptr(1)%data(1))
 
     ptr(2)%data(1:2) = 1
-    DO i = 3, wdata(2)%len
-       ptr(2)%data(i) = ptr(2)%data(i-1) + ptr(2)%data(i-2) ! (1 1 2 3 5 8 etc.)
+    DO i_sz = 3, wdata(2)%len
+       ptr(2)%data(i_sz) = ptr(2)%data(i_sz-1_size_t) + ptr(2)%data(i_sz-2_size_t) ! (1 1 2 3 5 8 etc.)
     ENDDO
     wdata(2)%p = C_LOC(ptr(2)%data(1))
 
@@ -1439,7 +1456,8 @@ CONTAINS
     ! compare read and write buffers.
     !
     DO i = 1, DIM1
-       IF ( buf3(i) .NE. bufr3(i) ) THEN
+       CALL VERIFY("h5ltread_dataset_f", buf3(i), bufr3(i), errcode)
+       IF (errcode .NE.0 ) THEN
           PRINT *, 'read buffer differs from write buffer'
           PRINT *,  bufr3(i), ' and ',   buf3(i)
           STOP
@@ -1473,7 +1491,8 @@ CONTAINS
     ! compare read and write buffers.
     !
     DO i = 1, DIM1
-       IF ( buf4(i) .NE. bufr4(i) ) THEN
+       CALL VERIFY("h5ltread_dataset_double_f", buf4(i), bufr4(i), errcode)
+       IF (errcode .NE.0 ) THEN
           PRINT *, 'read buffer differs from write buffer'
           PRINT *,  bufr4(i), ' and ',   buf4(i)
           STOP
@@ -1530,8 +1549,9 @@ CONTAINS
 
     DO i = 1, INT(dims_vl(1))
        CALL c_f_pointer(rdata(i)%p, ptr_r, [rdata(i)%len] )
-       DO j = 1, rdata(i)%len
-          IF(ptr_r(j).NE.ptr(i)%data(j))THEN
+       DO j_sz = 1, rdata(i)%len
+          CALL VERIFY("h5ltread_dataset_f", ptr_r(j_sz), ptr(i)%data(j_sz), errcode)
+          IF (errcode .NE.0 ) THEN
              PRINT *, 'Writing/Reading variable-length dataset failed'
              STOP
           ENDIF
@@ -1793,7 +1813,8 @@ CONTAINS
     ! compare read and write buffers.
     !
     DO i = 1, DIM1
-       IF ( buf3(i) .NE. bufr3(i) ) THEN
+       CALL VERIFY("h5ltget_attribute_f",buf3(i), bufr3(i), errcode)
+       IF (errcode .NE.0 ) THEN
           PRINT *, 'read buffer differs from write buffer'
           PRINT *,  bufr3(i), ' and ',   buf3(i)
           STOP
@@ -1841,7 +1862,8 @@ CONTAINS
        ! compare read and write buffers.
        !
        DO i = 1, DIM1
-          IF ( buf4(i) .NE. bufr4(i) ) THEN
+          CALL VERIFY("h5ltget_attribute_f",buf4(i), bufr4(i), errcode)
+          IF (errcode .NE.0 ) THEN
              PRINT *, 'read buffer differs from write buffer'
              PRINT *,  bufr4(i), ' and ',   buf4(i)
              STOP
