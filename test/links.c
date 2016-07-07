@@ -7379,7 +7379,7 @@ external_link_with_committed_datatype(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Open the group which is externally linked to target file */
-    if((gid1 = H5Gopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+    if((gid1 = H5Gopen2(fid1, "link_to_2", H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Create a copy of integer datatype */
@@ -7481,7 +7481,7 @@ external_link_with_committed_datatype(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Open the committed datatype in the mainfile */
-    if((tid = H5Topen(fid1, "myDatatype", H5P_DEFAULT)) < 0)
+    if((tid = H5Topen2(fid1, "myDatatype", H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Verify the datatype is committed */
@@ -7489,7 +7489,7 @@ external_link_with_committed_datatype(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Open the group which is externally linked to target file */
-    if((gid1 = H5Gopen(fid1, "link_to_2", H5P_DEFAULT)) < 0)
+    if((gid1 = H5Gopen2(fid1, "link_to_2", H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Open the attribute attached to the group */
