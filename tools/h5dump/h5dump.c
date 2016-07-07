@@ -638,7 +638,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
         if(HDisdigit(*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)HDatoll(ptr);
+            p_list[i++] = (hsize_t)HDstrtoull(ptr, NULL, 0);
 
             while (HDisdigit(*ptr))
                 /* scroll to end of integer */
