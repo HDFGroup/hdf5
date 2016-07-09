@@ -196,7 +196,8 @@ test_core(void)
     h5_reset();
 
     /* Get a file access property list and fix up the file name */
-    fapl_id = h5_fileaccess();
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
     h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename));
 
     /************************************************************************
