@@ -255,6 +255,11 @@ Bug Fixes since HDF5-1.8.16
 
     Library
     -------
+    - Fixed a memory bug that could occur when a message was improperly marked
+      as sharable on disk.
+
+      (NAF, 2016/07/01, HDFFV-9950)
+
     - Fixed some format string warnings that prevent compiling with
       -Werror=format-security on gcc.
 
