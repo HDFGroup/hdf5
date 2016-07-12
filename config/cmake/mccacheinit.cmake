@@ -32,7 +32,7 @@ set (HDF5_ENABLE_SZIP_ENCODING ON CACHE BOOL "Use SZip Encoding" FORCE)
 
 set (HDF5_ENABLE_HSIZET ON CACHE BOOL "Enable datasets larger than memory" FORCE)
 
-set (HDF5_ENABLE_UNSUPPORTED OFF CACHE BOOL "Enable unsupported combinations of configuration options" FORCE)
+set (ALLOW_UNSUPPORTED OFF CACHE BOOL "Enable unsupported combinations of configuration options" FORCE)
 
 set (HDF5_ENABLE_DEPRECATED_SYMBOLS ON CACHE BOOL "Enable deprecated public API symbols" FORCE)
 
