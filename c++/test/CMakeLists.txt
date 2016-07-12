@@ -48,11 +48,4 @@ set_target_properties (cpp_testhdf5 PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
 )
 
-add_custom_command (
-    TARGET     cpp_testhdf5
-    POST_BUILD
-    COMMAND    ${CMAKE_COMMAND}
-    ARGS       -E copy_if_different ${HDF5_CPP_TEST_SOURCE_DIR}/th5s.h5 ${PROJECT_BINARY_DIR}/th5s.h5
-)
-
 include (CMakeTests.cmake)

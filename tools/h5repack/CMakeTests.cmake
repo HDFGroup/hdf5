@@ -14,14 +14,14 @@
         multi
         family
     )
-  
+
     if (DIRECT_VFD)
       set (VFD_LIST ${VFD_LIST} direct)
     endif (DIRECT_VFD)
 
     MACRO (ADD_VFD_TEST vfdname resultcode)
       add_test (
-        NAME H5REPACK-VFD-${vfdname}-h5repacktest 
+        NAME H5REPACK-VFD-${vfdname}-h5repacktest
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_PROGRAM=$<TARGET_FILE:h5repacktest>"
             -D "TEST_ARGS:STRING="
@@ -37,7 +37,7 @@
       set (last_test "H5REPACK-VFD-${vfdname}-h5repacktest")
     ENDMACRO (ADD_VFD_TEST)
   endif (HDF5_TEST_VFD)
-    
+
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the source directory into the test directory
   # --------------------------------------------------------------------
@@ -94,16 +94,10 @@
   )
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${h5_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
-    #message (STATUS " Copying ${h5_file}")
-    add_custom_command (
-        TARGET     h5repack
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${h5_file} ${dest}
-    )
+    get_filename_component(fname "${h5_file}" NAME)
+    HDFTEST_COPY_FILE("${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5repack_files")
   endforeach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+  add_custom_target(h5repack_files ALL COMMENT "Copying files needed by h5repack tests" DEPENDS ${h5repack_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -118,7 +112,7 @@
       set_tests_properties (H5REPACK-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       set (last_test "H5REPACK-${testname}")
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -157,7 +151,7 @@
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_OLD-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       add_test (
           NAME H5REPACK_OLD-${testname}_DFF
           COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
@@ -181,7 +175,7 @@
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       add_test (
           NAME H5REPACK-${testname}_DFF
           COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
@@ -220,7 +214,7 @@
       endif (HDF5_ENABLE_USING_MEMCHECKER)
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
     endif ("${testtype}" STREQUAL "SKIP")
   ENDMACRO (ADD_H5_CMP_TEST)
 
@@ -239,7 +233,7 @@
           COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile})
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_DMP-h5dump-${testname}
@@ -273,7 +267,7 @@
         )
         if (NOT "${last_test}" STREQUAL "")
           set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DEPENDS ${last_test})
-        endif (NOT "${last_test}" STREQUAL "")
+        endif ()
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}_DFF
             COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
@@ -296,13 +290,13 @@
         else ("${resultcode}" STREQUAL "0")
           if ("${testfilter}" STREQUAL "CHUNKED")
             set (nottestfilter "(CONTIGUOUS|COMPACT)")
-          endif ("${testfilter}" STREQUAL "CHUNKED")
+          endif ()
           if ("${testfilter}" STREQUAL "CONTIGUOUS")
             set (nottestfilter "(CHUNK|COMPACT)")
-          endif ("${testfilter}" STREQUAL "CONTIGUOUS")
+          endif ()
           if ("${testfilter}" STREQUAL "COMPACT")
             set (nottestfilter "(CONTIGUOUS|CHUNK)")
-          endif ("${testfilter}" STREQUAL "COMPACT")
+          endif ()
           add_test (
               NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
               COMMAND "${CMAKE_COMMAND}"
@@ -328,7 +322,7 @@
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_META-${testname}_N PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       add_test (
           NAME H5REPACK_META-${testname}_M
           COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5
@@ -346,7 +340,7 @@
       add_test (
           NAME H5REPACK_UD-${testname}-clearall-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove 
+              -E remove
               testfiles/out-${testname}.${resultfile}
               testfiles/${testname}.${resultfile}.out
               testfiles/${testname}.${resultfile}.out.err
@@ -392,7 +386,7 @@
 ##############################################################################
 
   # --------------------------------------------------------------------
-  # test file names 
+  # test file names
   # --------------------------------------------------------------------
   set (INFO_FILE testfiles/h5repack.info)
 
@@ -420,7 +414,7 @@
   add_test (
       NAME H5REPACK-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
          ./testfiles/h5dump-help.out
          ./testfiles/h5repack_filters.h5-gzip_verbose_filters.out
          ./testfiles/h5repack_filters.h5-gzip_verbose_filters.out.err
@@ -560,7 +554,7 @@
          h5repack_attr_out.h5
          h5repack_attr_refs.h5
          h5repack_big.h5
-         h5repack_deflate.h5 
+         h5repack_deflate.h5
          h5repack_deflate_out.h5
          h5repack_early2.h5
          h5repack_early.h5
@@ -588,7 +582,7 @@
          h5repack_refs.h5
          h5repack_shuffle.h5
          h5repack_shuffle_out.h5
-         h5repack_soffset.h5 
+         h5repack_soffset.h5
          h5repack_soffset_out.h5
          h5repack_szip.h5
          h5repack_szip_out.h5
@@ -628,14 +622,14 @@
 # Each run generates "<file>.out.h5" and the tool h5diff is used to
 # compare the input and output files
 #
-# the tests are the same as the program h5repacktst, but run from the CLI 
+# the tests are the same as the program h5repacktst, but run from the CLI
 #
 
 # See which filters are usable (and skip tests for filters we
 # don't have).  Do this by searching H5pubconf.h to see which
 # filters are defined.
 
-# detect whether the encoder is present. 
+# detect whether the encoder is present.
   set (USE_FILTER_SZIP_ENCODER "no")
   if (HDF5_ENABLE_SZIP_ENCODING)
     set (USE_FILTER_SZIP_ENCODER ${testh5repack_detect_szip})
@@ -649,7 +643,7 @@
     set (USE_FILTER_SZIP "true")
   endif (H5_HAVE_FILTER_SZIP)
 
-# copy files (these files have no filters) 
+# copy files (these files have no filters)
   ADD_H5_TEST (fill "TEST" ${FILE0})
   ADD_H5_TEST (objs "TEST" ${FILE1})
   ADD_H5_TEST (attr "TEST" ${FILE2})
@@ -666,8 +660,8 @@
     set (TESTTYPE "SKIP")
   endif (NOT USE_FILTER_DEFLATE)
   ADD_H5_TEST (gzip_individual ${TESTTYPE} ${arg})
-  
-# gzip for all 
+
+# gzip for all
   set (arg ${FILE4} -f GZIP=1)
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
@@ -681,7 +675,7 @@
   if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
     set (TESTTYPE "SKIP")
   endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
-  ADD_H5_TEST (szip_individual ${TESTTYPE} ${arg}) 
+  ADD_H5_TEST (szip_individual ${TESTTYPE} ${arg})
 
 # szip for all
   set (arg ${FILE4} -f SZIP=8,NN)
@@ -689,16 +683,16 @@
   if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
     set (TESTTYPE "SKIP")
   endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
-  ADD_H5_TEST (szip_all ${TESTTYPE} ${arg}) 
+  ADD_H5_TEST (szip_all ${TESTTYPE} ${arg})
 
 # shuffle with individual object
   set (arg ${FILE4} -f dset2:SHUF  -l dset2:CHUNK=20x10)
-  ADD_H5_TEST (shuffle_individual "TEST" ${arg}) 
+  ADD_H5_TEST (shuffle_individual "TEST" ${arg})
 
 # shuffle for all
   set (arg ${FILE4} -f SHUF)
   ADD_H5_TEST (shuffle_all "TEST" ${arg})
-  
+
 # fletcher32  with individual object
   set (arg ${FILE4} -f dset2:FLET  -l dset2:CHUNK=20x10)
   ADD_H5_TEST (fletcher_individual "TEST" ${arg})
@@ -722,7 +716,7 @@
     set (TESTTYPE "SKIP")
   endif (NOT USE_FILTER_DEFLATE)
   ADD_H5_CMP_TEST (gzip_verbose_filters "O?...ing file[^\n]+\n" ${TESTTYPE} 0 ${arg})
-  
+
 ###########################################################
 # the following tests assume the input files have filters
 ###########################################################
@@ -734,7 +728,7 @@
     set (TESTTYPE "SKIP")
   endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
   ADD_H5_TEST (szip_copy ${TESTTYPE} ${arg})
-  
+
 # szip remove
   set (arg ${FILE7} --filter=dset_szip:NONE)
   set (TESTTYPE "TEST")
@@ -742,7 +736,7 @@
     set (TESTTYPE "SKIP")
   endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
   ADD_H5_TEST (szip_remove ${TESTTYPE} ${arg})
-  
+
 # deflate copy
   set (arg ${FILE8})
   set (TESTTYPE "TEST")
@@ -758,7 +752,7 @@
     set (TESTTYPE "SKIP")
   endif (NOT USE_FILTER_DEFLATE)
   ADD_H5_TEST (deflate_remove ${TESTTYPE} ${arg})
-    
+
 # shuffle copy
   set (arg ${FILE9})
   ADD_H5_TEST (shuffle_copy "TEST" ${arg})
@@ -813,14 +807,14 @@
   if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
   endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
-  ADD_H5_TEST (deflate_convert ${TESTTYPE} ${arg}) 
+  ADD_H5_TEST (deflate_convert ${TESTTYPE} ${arg})
 
   set (arg ${FILE7} -f dset_szip:GZIP=1)
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
   endif (NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_DEFLATE)
-  ADD_H5_TEST (szip_convert ${TESTTYPE} ${arg}) 
+  ADD_H5_TEST (szip_convert ${TESTTYPE} ${arg})
 
 #limit
   set (arg ${FILE4} -f GZIP=1 -m 1024)
@@ -836,7 +830,7 @@
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
   endif (NOT USE_FILTER_DEFLATE)
-  ADD_H5_TEST (deflate_file ${TESTTYPE} ${arg}) 
+  ADD_H5_TEST (deflate_file ${TESTTYPE} ${arg})
 
 #########################################################
 # layout options (these files have no filters)
@@ -865,18 +859,18 @@
   ADD_H5_VERIFY_TEST (contig_small_compa "TEST" 0 ${FILE18} contig_small COMPACT -l contig_small:COMPA)
   ADD_H5_VERIFY_TEST (contig_small_fixed_compa "TEST" 0 ${FILE18} chunked_small_fixed COMPACT -l chunked_small_fixed:COMPA)
 
-#--------------------------------------------------------------------------- 
-# Test file contains chunked datasets (need multiple dsets) with 
+#---------------------------------------------------------------------------
+# Test file contains chunked datasets (need multiple dsets) with
 # unlimited max dims.   (HDFFV-7933)
 # Use first dset to test.
 #---------------------------------------------------------------------------
 # chunk to chunk - specify chunk dim bigger than any current dim
   ADD_H5_VERIFY_TEST (chunk2chunk "TEST" 0 h5repack_layout3.h5 chunk_unlimit1 CHUNK -l chunk_unlimit1:CHUNK=100x300)
 
-# chunk to contiguous 
+# chunk to contiguous
   ADD_H5_VERIFY_TEST (chunk2conti "TEST" 0 h5repack_layout3.h5 chunk_unlimit1 CONTI -l chunk_unlimit1:CONTI)
 
-# chunk to compact - convert big dataset (should be > 64k) for this purpose, 
+# chunk to compact - convert big dataset (should be > 64k) for this purpose,
 # should remain as original layout (chunk)
   ADD_H5_VERIFY_TEST (chunk2compa "TEST" 0 h5repack_layout3.h5 chunk_unlimit1 CHUNK -l chunk_unlimit1:COMPA)
 
@@ -884,7 +878,7 @@
 # Test -f for some specific cases. Chunked dataset with unlimited max dims.
 # (HDFFV-8012)
 #--------------------------------------------------------------------------
-# - should not fail 
+# - should not fail
 # - should not change max dims from unlimit
 
 # chunk dim is bigger than dataset dim. ( dset size < 64k )
@@ -900,13 +894,13 @@
   ADD_H5_TEST (error4 "TEST" h5repack_layout3.h5 -f NONE)
 
 #--------------------------------------------------------------------------
-# Test base: Convert CHUNK to CONTI for a chunked dataset with small dataset 
+# Test base: Convert CHUNK to CONTI for a chunked dataset with small dataset
 # (dset size < 64K) and with unlimited max dims on a condition as follow.
 # (HDFFV-8214)
 #--------------------------------------------------------------------------
 # chunk dim is bigger than dataset dim. should succeed.
   ADD_H5_VERIFY_TEST (ckdim_biger "TEST" 0 h5repack_layout3.h5 chunk_unlimit2 CONTI -l chunk_unlimit2:CONTI)
-# chunk dim is smaller than dataset dim. should succeed.  
+# chunk dim is smaller than dataset dim. should succeed.
   ADD_H5_VERIFY_TEST (ckdim_smaller "TEST" 0 h5repack_layout3.h5 chunk_unlimit3 CONTI -l chunk_unlimit3:CONTI)
 
 
@@ -975,11 +969,11 @@
   ADD_H5_TEST (bug1814 "TEST" ${FILE_REF})
 
 # test attribute with various references (bug1797 / HDFFV-5932)
-# the references in attribute of compund or vlen datatype 
+# the references in attribute of compund or vlen datatype
   ADD_H5_TEST (HDFFV-5932 "TEST" ${FILE_ATTR_REF})
 
-# Add test for memory leak in attirbute. This test is verified by CTEST.   
-# 1. leak from vlen string  
+# Add test for memory leak in attirbute. This test is verified by CTEST.
+# 1. leak from vlen string
 # 2. leak from compound type without reference member
 # (HDFFV-7840, )
 # Note: this test is experimental for sharing test file among tools

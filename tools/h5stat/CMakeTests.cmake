@@ -4,7 +4,7 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-  
+
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
@@ -49,27 +49,14 @@
   )
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
-    set (ddldest "${PROJECT_BINARY_DIR}/${ddl_file}")
-    #message (STATUS " Translating ${ddl_file}")
-    add_custom_command (
-        TARGET     h5stat
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/testfiles/${ddl_file} ${ddldest}
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_H5STAT_SOURCE_DIR}/testfiles/${ddl_file}" "${PROJECT_BINARY_DIR}/${ddl_file}" "h5stat_files")
   endforeach (ddl_file ${HDF5_REFERENCE_FILES})
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    set (dest "${PROJECT_BINARY_DIR}/${h5_file}")
-    #message (STATUS " Copying ${h5_file}")
-    add_custom_command (
-        TARGET     h5stat
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5STAT_SOURCE_DIR}/testfiles/${h5_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_H5STAT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5stat_files")
   endforeach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-  
+  add_custom_target(h5stat_files ALL COMMENT "Copying files needed by h5stat tests" DEPENDS ${h5stat_files_list})
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -118,7 +105,7 @@
     add_test (
       NAME H5STAT-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
           h5stat_help1.out
           h5stat_help1.out.err
           h5stat_help2.out
@@ -214,7 +201,7 @@
   ADD_H5_TEST (h5stat_newgrat-UG 0 -G h5stat_newgrat.h5)
   ADD_H5_TEST (h5stat_newgrat-UA 0 -A h5stat_newgrat.h5)
 #
-# Tests for -l (--links) option on h5stat_threshold.h5: 
+# Tests for -l (--links) option on h5stat_threshold.h5:
 #   -l 0 (incorrect threshold value)
 #   -g -l 8
 #   --links=8
@@ -224,7 +211,7 @@
   ADD_H5_TEST (h5stat_links2 0 --links=8 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_links3 0 --links=20 -g h5stat_threshold.h5)
 #
-# Tests for -l (--links) option on h5stat_newgrat.h5: 
+# Tests for -l (--links) option on h5stat_newgrat.h5:
 #   -g
 #   -g -l 40000
   ADD_H5_TEST (h5stat_links4 0 -g h5stat_newgrat.h5)
@@ -254,4 +241,3 @@
 #   -A -a 100
   ADD_H5_TEST (h5stat_numattrs4 0 -A -a 100 h5stat_newgrat.h5)
 #
-  

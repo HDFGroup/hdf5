@@ -31,12 +31,12 @@ FROM_DIR=`pwd`/.libs
 case $(uname) in
     CYGWIN* )
         PLUGIN_LIB1="$FROM_DIR/cygdynlib1* $FROM_DIR/cygdynlib3*"
-        PLUGIN_LIB2="$FROM_DIR/cygdynlib2*"
+        PLUGIN_LIB2="$FROM_DIR/cygdynlib2* $FROM_DIR/cygdynlib4*"
         ;;
     *)
         PLUGIN_LIB1="$FROM_DIR/libdynlib1.* $FROM_DIR/libdynlib3.*"
-        PLUGIN_LIB2="$FROM_DIR/libdynlib2.*"
-        ::
+        PLUGIN_LIB2="$FROM_DIR/libdynlib2.* $FROM_DIR/libdynlib4.*"
+        ;;
 esac
 PLUGIN_LIBDIR1=testdir1
 PLUGIN_LIBDIR2=testdir2
@@ -75,6 +75,12 @@ fi
 $CP $PLUGIN_LIB2 $PLUGIN_LIBDIR2
 if [ $? != 0 ]; then
     echo "Failed to copy plugin library ($PLUGIN_LIB2) for test."
+    exit $EXIT_FAILURE
+fi
+
+$CP $PLUGIN_LIB4 $PLUGIN_LIBDIR2
+if [ $? != 0 ]; then
+    echo "Failed to copy plugin library ($PLUGIN_LIB4) for test."
     exit $EXIT_FAILURE
 fi
 

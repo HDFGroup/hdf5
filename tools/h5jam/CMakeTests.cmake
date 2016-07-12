@@ -22,27 +22,14 @@
 
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/${h5_file}")
-    #message (STATUS " Copying ${h5_file}")
-    add_custom_command (
-        TARGET     h5jam
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5JAM_SOURCE_DIR}/testfiles/${h5_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_H5JAM_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5jam_files")
   endforeach (h5_file ${HDF5_REFERENCE_TEST_FILES})
 
   foreach (txt_file ${HDF5_REFERENCE_TXT_FILES})
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/${txt_file}")
-    #message (STATUS " Copying ${txt_file}")
-    add_custom_command (
-        TARGET     h5jam
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5JAM_SOURCE_DIR}/testfiles/${txt_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_H5JAM_SOURCE_DIR}/testfiles/${txt_file}" "${PROJECT_BINARY_DIR}/testfiles/${txt_file}" "h5jam_files")
   endforeach (txt_file ${HDF5_REFERENCE_TXT_FILES})
-    
+  add_custom_target(h5jam_files ALL COMMENT "Copying files needed by h5jam tests" DEPENDS ${h5jam_files_list})
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -306,7 +293,7 @@
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5JAM-${testname}_NONE-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove 
+          COMMAND ${CMAKE_COMMAND} -E remove
               ${chkfile} ${chkfile}.cpy.h5
       )
       add_test (

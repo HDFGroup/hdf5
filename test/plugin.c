@@ -33,6 +33,7 @@
 #define H5Z_FILTER_DYNLIB1      257
 #define H5Z_FILTER_DYNLIB2      258 
 #define H5Z_FILTER_DYNLIB3      259
+#define H5Z_FILTER_DYNLIB4      260
 
 const char *FILENAME[] = {
     "plugin",
@@ -44,6 +45,7 @@ const char *FILENAME[] = {
 #define DSET_DEFLATE_NAME	"deflate"
 #define DSET_DYNLIB1_NAME	"dynlib1"
 #define DSET_DYNLIB2_NAME       "dynlib2"
+#define DSET_DYNLIB4_NAME   "dynlib4"
 
 /* Parameters for internal filter test */
 #define FILTER_CHUNK_DIM1       2
@@ -65,6 +67,7 @@ const char *FILENAME[] = {
 int	points_deflate[DSET_DIM1][DSET_DIM2], 
         points_dynlib1[DSET_DIM1][DSET_DIM2],
         points_dynlib2[DSET_DIM1][DSET_DIM2],
+        points_dynlib4[DSET_DIM1][DSET_DIM2],
         points_bzip2[DSET_DIM1][DSET_DIM2];
 
 
@@ -306,6 +309,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
 	        points_dynlib1[i][j] = points[i][j];
             } else if(!HDstrcmp(name, DSET_DYNLIB2_NAME)) {
 	        points_dynlib2[i][j] = points[i][j];
+            } else if(!HDstrcmp(name, DSET_DYNLIB4_NAME)) {
+            points_dynlib4[i][j] = points[i][j];
             }
 	}
     }
@@ -344,6 +349,7 @@ test_filters_for_datasets(hid_t file)
     hid_t	dc;                 /* Dataset creation property list ID */
     const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};  /* Chunk dimensions */
     unsigned int         compress_level = 9;
+    unsigned int         dynlib4_values[4];
 
     /*----------------------------------------------------------
      * STEP 1: Test deflation by itself.
@@ -401,6 +407,27 @@ test_filters_for_datasets(hid_t file)
      * the new file format, the library's H5PL code has to search in the table of loaded plugin libraries
      * for this filter. */
     if(H5Zunregister(H5Z_FILTER_DYNLIB2) < 0) goto error;
+
+    /*----------------------------------------------------------
+     * STEP 4: Test DYNLIB4 by itself.
+     *----------------------------------------------------------
+     */
+    puts("Testing DYNLIB4 filter");
+    if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
+    if(H5Pset_chunk (dc, 2, chunk_size) < 0) goto error;
+    dynlib4_values[0] = 9;
+    if(H5get_libversion(&dynlib4_values[1], &dynlib4_values[2], &dynlib4_values[3]) < 0) goto error;
+    if(H5Pset_filter (dc, H5Z_FILTER_DYNLIB4, H5Z_FLAG_MANDATORY, (size_t)4, dynlib4_values) < 0) goto error;
+
+    if(test_filter_internal(file,DSET_DYNLIB4_NAME,dc) < 0) goto error;
+
+    /* Clean up objects used for this test */
+    if(H5Pclose (dc) < 0) goto error;
+
+    /* Unregister the dynamic filter DYNLIB4 for testing purpose. The next time when this test is run for
+     * the new file format, the library's H5PL code has to search in the table of loaded plugin libraries
+     * for this filter. */
+    if(H5Zunregister(H5Z_FILTER_DYNLIB4) < 0) goto error;
 
     return 0;
 
@@ -516,6 +543,18 @@ test_read_with_filters(hid_t file)
     if((dset = H5Dopen2(file,DSET_DYNLIB2_NAME,H5P_DEFAULT)) < 0) TEST_ERROR
 
     if(test_read_data(dset, (int *)points_dynlib2) < 0) TEST_ERROR
+
+    if(H5Dclose(dset) < 0) TEST_ERROR
+
+    /*----------------------------------------------------------
+     * STEP 4: Test DYNLIB4 by itself.
+     *----------------------------------------------------------
+     */
+    TESTING("Testing DYNLIB4 filter");
+
+    if((dset = H5Dopen2(file,DSET_DYNLIB4_NAME,H5P_DEFAULT)) < 0) TEST_ERROR
+
+    if(test_read_data(dset, (int *)points_dynlib4) < 0) TEST_ERROR
 
     if(H5Dclose(dset) < 0) TEST_ERROR
 

@@ -1,3 +1,5 @@
+HDFTEST_COPY_FILE("${HDF5_CPP_TEST_SOURCE_DIR}/th5s.h5" "${PROJECT_BINARY_DIR}/th5s.h5" "cpp_testhdf5_files")
+add_custom_target(cpp_testhdf5_files ALL COMMENT "Copying files needed by cpp_testhdf5 tests" DEPENDS ${cpp_testhdf5_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -8,7 +10,7 @@
 add_test (
     NAME CPP_testhdf5-clear-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove 
+        -E remove
             tattr_basic.h5
             tattr_compound.h5
             tattr_dtype.h5
@@ -30,7 +32,7 @@ if (HDF5_TEST_VFD)
       multi
       family
   )
-  
+
   if (DIRECT_VFD)
     set (VFD_LIST ${VFD_LIST} direct)
   endif (DIRECT_VFD)
@@ -40,7 +42,7 @@ if (HDF5_TEST_VFD)
       add_test (
           NAME CPP_VFD-${vfdname}-cpp_testhdf5-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove 
+              -E remove
                   tattr_basic.h5
                   tattr_compound.h5
                   tattr_dtype.h5
@@ -49,7 +51,7 @@ if (HDF5_TEST_VFD)
                   tfattrs.h5
       )
       add_test (
-        NAME CPP_VFD-${vfdname}-cpp_testhdf5 
+        NAME CPP_VFD-${vfdname}-cpp_testhdf5
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_PROGRAM=$<TARGET_FILE:cpp_testhdf5>"
             -D "TEST_ARGS:STRING="
@@ -63,7 +65,7 @@ if (HDF5_TEST_VFD)
       set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES TIMEOUT 30)
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_VFD_TEST)
-  
+
   # Run test with different Virtual File Driver
   foreach (vfd ${VFD_LIST})
     ADD_VFD_TEST (${vfd} 0)

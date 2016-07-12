@@ -128,29 +128,16 @@
   )
 
   foreach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${tst_xml_h5_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}")
-    #message (STATUS " Copying ${tst_xml_h5_file}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${tst_xml_h5_file} ${dest}
-    )
+    get_filename_component(fname "${tst_xml_h5_file}" NAME)
+    HDFTEST_COPY_FILE("${tst_xml_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}" "h5dump_xml_files")
   endforeach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
-  
+
   foreach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
-    GET_FILENAME_COMPONENT(fname "${tst_xml_other_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}")
-    #message (STATUS " Copying ${tst_xml_other_file}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${tst_xml_other_file} ${dest}
-    )
+    get_filename_component(fname "${tst_xml_other_file}" NAME)
+    HDFTEST_COPY_FILE("${tst_xml_other_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}" "h5dump_xml_files")
   endforeach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
-  
+  add_custom_target(h5dump_xml_files ALL COMMENT "Copying files needed by h5dump_xml tests" DEPENDS ${h5dump_xml_files_list})
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -176,10 +163,10 @@
       set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif (NOT ${resultcode} STREQUAL "0")
+      endif ()
       if (NOT "${last_xml_test}" STREQUAL "")
         set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
-      endif (NOT "${last_xml_test}" STREQUAL "")
+      endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5DUMP-XML-${resultfile}-clear-objects
@@ -204,16 +191,16 @@
 
 ##############################################################################
 ##############################################################################
-###           T H E   T E S T S                                          HDF5_ENABLE_USING_MEMCHECKER  ###
+###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
-   
+
   if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
     add_test (
       NAME H5DUMP-XML-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
           tall.h5.out
           tall.h5.out.err
           tall-2A.h5.out
@@ -401,7 +388,7 @@
   ADD_XML_H5_TEST (tempty.h5 0 tempty.h5)
   ADD_XML_H5_TEST (tnamed_dtype_attr.h5 0 tnamed_dtype_attr.h5)
   ##Test dataset and attribute of null space.  Commented out:
-  ## wait until the XML schema is updated for null space. 
+  ## wait until the XML schema is updated for null space.
   ##  ADD_XML_H5_TEST (tnullspace.h5 0 tnulspace.h5)
   ## So is dataspace with 0 dimension size.
   ##  ADD_XML_H5_TEST (zerodim.h5 0 zerodim.h5)
@@ -414,7 +401,7 @@
   ADD_XML_H5_TEST (tempty-nons-2.h5 0 --xml-ns=: tempty.h5)
 
   ## Some of these combinations are syntactically correct but
-  ##  the URLs are dummies 
+  ##  the URLs are dummies
   ADD_XML_H5_TEST (tempty-ns.h5 0 -X thing: tempty.h5)
   ADD_XML_H5_TEST (tempty-ns-2.h5 0 --xml-ns=thing: tempty.h5)
   ADD_XML_H5_TEST (tempty-nons-uri.h5 0 --xml-ns=: --xml-dtd=http://somewhere.net tempty.h5)
@@ -431,4 +418,4 @@
 
   # tests for floating point user defined printf format
   ADD_XML_H5_TEST (tfpformat.h5 0 -u -m %.7f tfpformat.h5)
-   
+

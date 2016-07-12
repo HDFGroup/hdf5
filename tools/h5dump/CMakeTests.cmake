@@ -4,7 +4,7 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-  
+
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the test directory into the source directory
   # --------------------------------------------------------------------
@@ -61,6 +61,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdintarray.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdints.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdintsize.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_complex2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcomp-1.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcomp-2.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcomp-3.ddl
@@ -172,6 +173,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes3.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes4.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes5.ddl
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlenstr_array.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvms.ddl
       ${HDF5_TOOLS_SRC_DIR}/testfiles/twidedisplay.ddl
@@ -220,6 +222,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcmpdintsize.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_complex.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tcompound_complex2.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tdatareg.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tdset.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tempty.h5
@@ -284,6 +287,7 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes3.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes4.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvldtypes5.h5
+      ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlenstr_array.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvlstr.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/tvms.h5
       ${HDF5_TOOLS_SRC_DIR}/testfiles/zerodim.h5
@@ -323,76 +327,41 @@
   #
   foreach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
     get_filename_component (fname "${tst_h5_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/std/${fname}")
-    #message (STATUS " Copying ${tst_h5_file}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${tst_h5_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${tst_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
   endforeach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
-  
+
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
     if (WIN32)
       file (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file} TEST_STREAM)
       file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file} "${TEST_STREAM}")
     else (WIN32)
-      add_custom_command (
-          TARGET     h5dump
-          POST_BUILD
-          COMMAND    ${CMAKE_COMMAND}
-          ARGS       -E copy_if_different  ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file}  ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}
-      )
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
     endif (WIN32)
   endforeach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
 
   foreach (tst_other_file ${HDF5_REFERENCE_FILES})
     get_filename_component (fname "${tst_other_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/std/${fname}")
-    #message (STATUS " Copying ${tst_other_file}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${tst_other_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
   endforeach (tst_other_file ${HDF5_REFERENCE_FILES})
 
   foreach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
     get_filename_component (fname "${tst_error_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/std/${fname}")
-    #message (STATUS " Copying ${tst_error_file}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${tst_error_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${tst_error_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
   endforeach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
 
   # --------------------------------------------------------------------
   # Special file handling
   # --------------------------------------------------------------------
-  add_custom_command (
-      TARGET     h5dump
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different  ${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbin1.ddl  ${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl
-  )
-  
+  HDFTEST_COPY_FILE("${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
+
   if (WIN32)
     file (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp TEST_STREAM)
     file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
   else (WIN32)
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different  ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp  ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
   endif (WIN32)
-  
+  add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
+
 ##############################################################################
 ##############################################################################
 ###           T H E   T E S T S  M A C R O S                               ###
@@ -737,7 +706,7 @@
     add_test (
       NAME H5DUMP-clearall-objects
       COMMAND    ${CMAKE_COMMAND}
-          -E remove 
+          -E remove
           h5dump-help.out
           charsets.out
           charsets.out.err
@@ -846,6 +815,8 @@
           tcomp-4.out.err
           tcompact.out
           tcompact.out.err
+          tcompound_complex.out
+          tcompound_complex.out.err
           tcontents.out
           tcontents.out.err
           tcontiguos.out
@@ -1062,6 +1033,8 @@
           tvldtypes4.out.err
           tvldtypes5.out
           tvldtypes5.out.err
+          tvlenstr_array.out
+          tvlenstr_array.out.err
           tvlstr.out
           tvlstr.out.err
           tvms.out
@@ -1094,9 +1067,9 @@
   ADD_H5_TEST_EXPORT (trawdatafile packedbits.h5 0 --enable-error-stack -y -o)
   ADD_H5_TEST_EXPORT (tnoddlfile packedbits.h5 0 --enable-error-stack -O -y -o)
   ADD_H5_TEST_EXPORT (trawssetfile tdset.h5 0 --enable-error-stack -d "/dset1[1,1;;;]" -y -o)
-  
+
   ADD_H5_TEST_EXPORT_DDL (twithddlfile packedbits.h5 0 twithddl --enable-error-stack --ddl=twithddl.txt -y -o)
-  
+
   # test for maximum display datasets
   ADD_H5_TEST (twidedisplay 0 --enable-error-stack -w0 packedbits.h5)
 
@@ -1166,10 +1139,11 @@
   # test for named data types
   ADD_H5_TEST (tcomp-2 0 --enable-error-stack -t /type1 --datatype /type2 --datatype=/group1/type3 tcompound.h5)
   ADD_H5_TEST_N (tcomp-2 0 --enable-error-stack -N /type1 --any_path /type2 --any_path=/group1/type3 tcompound.h5)
-  # test for unamed type 
+  # test for unamed type
   ADD_H5ERR_MASK_TEST (tcomp-3 0 "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
   # test complicated compound datatype
   ADD_H5_TEST (tcomp-4 0 --enable-error-stack tcompound_complex.h5)
+  ADD_H5_TEST (tcompound_complex2 0 --enable-error-stack tcompound_complex2.h5)
   # tests for bitfields and opaque data types
   ADD_H5_TEST (tbitnopaque 0 --enable-error-stack tbitnopaque.h5)
 
@@ -1188,7 +1162,7 @@
   # test for loop detection
   ADD_H5_TEST (tloop-1 0 --enable-error-stack tloop.h5)
 
-  # test for string 
+  # test for string
   ADD_H5_TEST (tstr-1 0 --enable-error-stack tstr.h5)
   ADD_H5_TEST (tstr-2 0 --enable-error-stack tstr2.h5)
 
@@ -1204,6 +1178,7 @@
 
   #test for file with variable length string data
   ADD_H5_TEST (tvlstr 0 --enable-error-stack tvlstr.h5)
+  ADD_H5_TEST (tvlenstr_array 0 --enable-error-stack tvlenstr_array.h5)
 
   # test for files with array data
   ADD_H5_TEST (tarray1 0 --enable-error-stack tarray1.h5)
@@ -1221,7 +1196,7 @@
   #ADD_H5_MASK_TEST (tstarfile 0 --enable-error-stack -H -d Dataset1 tarr*.h5)
   #ADD_H5_MASK_TEST (tqmarkfile 0 --enable-error-stack -H -d Dataset1 tarray?.h5)
   ADD_H5_TEST (tmultifile 0 --enable-error-stack -H -d Dataset1 tarray2.h5 tarray3.h5 tarray4.h5 tarray5.h5 tarray6.h5 tarray7.h5)
-  
+
   # test for files with empty data
   ADD_H5_TEST (tempty 0 --enable-error-stack tempty.h5)
 
@@ -1287,7 +1262,7 @@
   ADD_H5_TEST (tcontiguos 0 --enable-error-stack -H -p -d contiguous tfilters.h5)
   # chunked
   ADD_H5_TEST (tchunked 0 --enable-error-stack -H -p -d chunked tfilters.h5)
-  # external 
+  # external
   ADD_H5_TEST (texternal 0 --enable-error-stack -H -p -d external tfilters.h5)
 
   # fill values
@@ -1355,7 +1330,7 @@
 # don't have).  Do this by searching H5pubconf.h to see which
 # filters are defined.
 
-# detect whether the encoder is present. 
+# detect whether the encoder is present.
   if (H5_HAVE_FILTER_DEFLATE)
     set (USE_FILTER_DEFLATE "true")
   endif (H5_HAVE_FILTER_DEFLATE)
@@ -1376,12 +1351,12 @@
   # test for displaying objects with very long names
   ADD_H5_TEST (tlonglinks 0 --enable-error-stack tlonglinks.h5)
 
-  # dimensions over 4GB, print boundary 
+  # dimensions over 4GB, print boundary
   ADD_H5_TEST (tbigdims 0 --enable-error-stack -d dset4gb -s 4294967284 -c 22 tbigdims.h5)
 
   # hyperslab read
   ADD_H5_TEST (thyperslab 0 --enable-error-stack thyperslab.h5)
-    
+
   # test for displaying dataset and attribute of null space
   ADD_H5_TEST (tnullspace 0 --enable-error-stack tnullspace.h5)
 
@@ -1415,9 +1390,10 @@
     ADD_H5_TEST (tbin4 0 --enable-error-stack -d double -b FILE -o tbin4.bin tbinary.h5)
   endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
 
-  # test for dataset region references 
+  # test for dataset region references
   ADD_H5_TEST (tdatareg 0 --enable-error-stack tdatareg.h5)
   ADD_H5ERR_MASK_TEST (tdataregR 0 --enable-error-stack -R tdatareg.h5)
+  ADD_H5_TEST (tattrreg 0 --enable-error-stack tattrreg.h5)
   ADD_H5ERR_MASK_TEST (tattrregR 0 -R --enable-error-stack tattrreg.h5)
   ADD_H5_EXPORT_TEST (tbinregR tdatareg.h5 0 --enable-error-stack -d /Dataset1 -s 0 -R -y -o)
 
@@ -1438,7 +1414,7 @@
   # tests for link references and order
   ADD_H5ERR_MASK_TEST (torderlinks1 0 --enable-error-stack --sort_by=name --sort_order=ascending tfcontents1.h5)
   ADD_H5ERR_MASK_TEST (torderlinks2 0 --enable-error-stack --sort_by=name --sort_order=descending tfcontents1.h5)
-  
+
   # tests for floating point user defined printf format
   ADD_H5_TEST (tfpformat 0 --enable-error-stack -m %.7f tfpformat.h5)
 
