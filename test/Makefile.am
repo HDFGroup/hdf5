@@ -81,7 +81,7 @@ if HAVE_SHARED_CONDITIONAL
 
   # The libdynlib1, libdynlib2, libdynlib3, and libdynlib4 library for testing plugin module plugin.c.
   # Build it as shared library if configure is enabled for shared library.
-  lib_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la
+  lib_LTLIBRARIES=libdynlib1.la libdynlib2.la libdynlib3.la libdynlib4.la
   libdynlib1_la_SOURCES=dynlib1.c
   libdynlib2_la_SOURCES=dynlib2.c
   libdynlib3_la_SOURCES=dynlib3.c
