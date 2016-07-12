@@ -1995,11 +1995,14 @@ H5_DLL herr_t H5C_ignore_tags(H5C_t *cache_ptr);
 H5_DLL void H5C_retag_copied_metadata(H5C_t *cache_ptr, haddr_t metadata_tag);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
 
+herr_t H5C__generate_image(const H5F_t *f, H5C_t * cache_ptr, H5C_cache_entry_t *entry_ptr, 
+                           hid_t dxpl_id, int64_t *entry_size_change_ptr);
+
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,
     H5C_t *cache_ptr, int num_candidates, haddr_t *candidates_list_ptr,
     int mpi_rank, int mpi_size);
-H5_DLL herr_t H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_construct_candidate_list__clean_cache(H5F_t *f, H5C_t *cache_ptr, hid_t dxpl_id);
 H5_DLL herr_t H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_clear_coll_entries(H5C_t * cache_ptr, hbool_t partial);
 H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, int32_t ce_array_len,

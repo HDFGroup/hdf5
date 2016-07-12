@@ -181,9 +181,6 @@ static herr_t H5C_mark_tagged_entries(H5C_t * cache_ptr,
 static herr_t H5C_flush_marked_entries(H5F_t * f, 
                                        hid_t dxpl_id);
 
-static herr_t H5C__generate_image(const H5F_t *f, H5C_t * cache_ptr, H5C_cache_entry_t *entry_ptr, 
-                                  hid_t dxpl_id, int64_t *entry_size_change_ptr);
-
 #if H5C_DO_TAGGING_SANITY_CHECKS
 static herr_t H5C_verify_tag(int id, haddr_t tag);
 #endif
@@ -9945,7 +9942,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5C__generate_image(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, 
     hid_t dxpl_id, int64_t *entry_size_change_ptr)
 {
