@@ -484,6 +484,13 @@ if (NOT WINDOWS)
   endif (NOT CYGWIN AND NOT MINGW)
   CHECK_SYMBOL_EXISTS (TIOCGWINSZ "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGWINSZ)
   CHECK_SYMBOL_EXISTS (TIOCGETD   "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGETD)
+
+  # ----------------------------------------------------------------------
+  # cygwin user credentials are different then on linux
+  #
+  if (NOT CYGWIN AND NOT MINGW)
+    CHECK_FUNCTION_EXISTS (getpwuid        ${HDF_PREFIX}_HAVE_GETPWUID)
+  endif (NOT CYGWIN AND NOT MINGW)
 endif (NOT WINDOWS)
 
 #-----------------------------------------------------------------------------
@@ -495,7 +502,6 @@ CHECK_FUNCTION_EXISTS (frexpf            ${HDF_PREFIX}_HAVE_FREXPF)
 CHECK_FUNCTION_EXISTS (frexpl            ${HDF_PREFIX}_HAVE_FREXPL)
 
 CHECK_FUNCTION_EXISTS (gethostname       ${HDF_PREFIX}_HAVE_GETHOSTNAME)
-CHECK_FUNCTION_EXISTS (getpwuid          ${HDF_PREFIX}_HAVE_GETPWUID)
 CHECK_FUNCTION_EXISTS (getrusage         ${HDF_PREFIX}_HAVE_GETRUSAGE)
 CHECK_FUNCTION_EXISTS (lstat             ${HDF_PREFIX}_HAVE_LSTAT)
 

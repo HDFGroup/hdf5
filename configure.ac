@@ -1536,7 +1536,7 @@ case "`uname`" in
   CYGWIN*)
     ;;
   *)
-    AC_CHECK_FUNCS([GetConsoleScreenBufferInfo])
+    AC_CHECK_FUNCS([GetConsoleScreenBufferInfo getpwuid])
     ;;
 esac
 AC_CHECK_FUNCS([_scrsize ioctl])
@@ -1577,7 +1577,7 @@ AC_TRY_COMPILE([#include <sys/ioctl.h>],[int w=TIOCGETD;],
 ##       so we'll search for it before calling AC_CHECK_FUNCS.
 AC_SEARCH_LIBS([clock_gettime], [rt posix4])
 AC_CHECK_FUNCS([alarm clock_gettime difftime fork frexpf frexpl])
-AC_CHECK_FUNCS([gethostname getpwuid getrusage gettimeofday])
+AC_CHECK_FUNCS([gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])

@@ -99,12 +99,11 @@
 ./config/cce-flags
 ./config/commence.am
 ./config/conclude.am
+./config/cygwin
 ./config/examples.am
 ./config/freebsd
 ./config/gnu-fflags
 ./config/gnu-flags
-./config/i386-pc-cygwin32
-./config/i686-pc-cygwin
 ./config/ibm-aix
 ./config/ibm-flags
 ./config/intel-fflags
@@ -118,7 +117,6 @@
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/solaris
-./config/x86_64-pc-cygwin
 
 ./config/site-specific/BlankForm
 
@@ -1331,6 +1329,8 @@
 ./tools/testfiles/tcompound.h5
 ./tools/testfiles/tcompound2.h5
 ./tools/testfiles/tcompound_complex.h5
+./tools/testfiles/tcompound_complex2.h5
+./tools/testfiles/tcompound_complex2.ddl
 ./tools/testfiles/tdatareg.h5
 ./tools/testfiles/tdatareg.ddl
 ./tools/testfiles/tdataregR.ddl
@@ -1498,6 +1498,8 @@
 ./tools/testfiles/tvldtypes4.h5
 ./tools/testfiles/tvldtypes5.ddl
 ./tools/testfiles/tvldtypes5.h5
+./tools/testfiles/tvlenstr_array.ddl
+./tools/testfiles/tvlenstr_array.h5
 ./tools/testfiles/tvlstr.h5
 ./tools/testfiles/tvlstr.ddl
 ./tools/testfiles/tvms.ddl
@@ -1678,7 +1680,6 @@
 ./tools/testfiles/tsoftlinks-nodangle-1.ls
 ./tools/testfiles/thlinks-nodangle-1.ls
 ./tools/testfiles/tudlink-1.ls
-
 
 
 #additional test input and output for h5dump XML
@@ -2100,7 +2101,6 @@
 ./tools/perform/sio_standalone.h
 ./tools/perform/zip_perf.c
 
-
 # high level libraries
 ./hl/COPYING
 ./hl/Makefile.am
@@ -2349,7 +2349,8 @@
 ./hl/test/CMakeLists.txt
 ./hl/test/CMakeTests.cmake
 ./hl/tools/CMakeLists.txt
-./hl/tools/CMakeTests.cmake
+./hl/tools/gif2h5/CMakeLists.txt
+./hl/tools/gif2h5/CMakeTests.cmake
 ./src/CMakeLists.txt
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake

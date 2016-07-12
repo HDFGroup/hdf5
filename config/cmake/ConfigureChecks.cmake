@@ -3,7 +3,6 @@
 #-----------------------------------------------------------------------------
 set (HDF_PREFIX "H5")
 include (${HDF_RESOURCES_EXT_DIR}/ConfigureChecks.cmake)
-include (${CMAKE_ROOT}/Modules/TestForSTDNamespace.cmake)
 
 #-----------------------------------------------------------------------------
 # Option to Clear File Buffers before write --enable-clear-file-buffers
