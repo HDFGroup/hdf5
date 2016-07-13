@@ -233,6 +233,13 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
   )
 
+  set (LIST_WIN_TEST_FILES
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_101w.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102w.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103w.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104w.txt
+  )
+
   # Make testfiles dir under build dir
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
