@@ -234,10 +234,10 @@
   )
 
   set (LIST_WIN_TEST_FILES
-      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_101w.txt
-      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102w.txt
-      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103w.txt
-      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104w.txt
+      h5diff_101
+      h5diff_102
+      h5diff_103
+      h5diff_104
   )
 
   # Make testfiles dir under build dir
@@ -258,7 +258,7 @@
   if (WIN32 AND MSVC_VERSION LESS 1900)
     foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
       get_filename_component(fname "${h5_tstfiles}" NAME)
-      HDFTEST_COPY_FILE("${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5diff_files")
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/testfiles/${fname}.txt" "h5diff_files")
     endforeach ()
   endif ()
   add_custom_target(h5diff_files ALL COMMENT "Copying files needed by h5diff tests" DEPENDS ${h5diff_files_list})
