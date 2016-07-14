@@ -97,7 +97,8 @@ test_sec2(void)
     h5_reset();
 
     /* Set property list and file name for SEC2 driver. */
-    fapl_id = h5_fileaccess();
+    if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
     if(H5Pset_fapl_sec2(fapl_id) < 0)
         FAIL_STACK_ERROR;
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
