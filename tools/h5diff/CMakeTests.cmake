@@ -55,10 +55,6 @@
   set (LIST_OTHER_TEST_FILES
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_10.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_100.txt
-      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_101.txt
-      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_102.txt
-      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_103.txt
-      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_104.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_11.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_12.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_13.txt
@@ -259,6 +255,11 @@
     foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
       get_filename_component(fname "${h5_tstfiles}" NAME)
       HDFTEST_COPY_FILE("${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/testfiles/${fname}.txt" "h5diff_files")
+    endforeach ()
+  else ()
+    foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
+      get_filename_component(fname "${h5_tstfiles}" NAME)
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/testfiles/${fname}.txt" "h5diff_files")
     endforeach ()
   endif ()
   add_custom_target(h5diff_files ALL COMMENT "Copying files needed by h5diff tests" DEPENDS ${h5diff_files_list})
