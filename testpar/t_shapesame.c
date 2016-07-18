@@ -5078,24 +5078,24 @@ int main(int argc, char **argv)
     /* Shape Same tests using contigous hyperslab */
 #if 1
     AddTest("sscontig1", sscontig1, NULL,
-	"Shape Same, contigous hyperslab, ind IO, contig datasets", PARATESTFILE);
+	"Cntg hslab, ind IO, cntg dsets", PARATESTFILE);
     AddTest("sscontig2", sscontig2, NULL,
-	"Shape Same, contigous hyperslab, col IO, contig datasets", PARATESTFILE);
+	"Cntg hslab, col IO, cntg dsets", PARATESTFILE);
     AddTest("sscontig3", sscontig3, NULL,
-	"Shape Same, contigous hyperslab, ind IO, chunked datasets", PARATESTFILE);
+	"Cntg hslab, ind IO, chnk dsets", PARATESTFILE);
     AddTest("sscontig4", sscontig4, NULL,
-	"Shape Same, contigous hyperslab, col IO, chunked datasets", PARATESTFILE);
+	"Cntg hslab, col IO, chnk dsets", PARATESTFILE);
 #endif
 
     /* Shape Same tests using checker board hyperslab */
     AddTest("sschecker1", sschecker1, NULL,
-	"Shape Same, checker hyperslab, ind IO, contig datasets", PARATESTFILE);
+	"Check hslab, ind IO, cntg dsets", PARATESTFILE);
     AddTest("sschecker2", sschecker2, NULL,
-	"Shape Same, checker hyperslab, col IO, contig datasets", PARATESTFILE);
+	"Check hslab, col IO, cntg dsets", PARATESTFILE);
     AddTest("sschecker3", sschecker3, NULL,
-	"Shape Same, checker hyperslab, ind IO, chunked datasets", PARATESTFILE);
+	"Check hslab, ind IO, chnk dsets", PARATESTFILE);
     AddTest("sschecker4", sschecker4, NULL,
-	"Shape Same, checker hyperslab, col IO, chunked datasets", PARATESTFILE);
+	"Check hslab, col IO, chnk dsets", PARATESTFILE);
 
     /* Display testing information */
     TestInfo(argv[0]);

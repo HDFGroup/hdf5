@@ -7335,7 +7335,6 @@ external_link_with_committed_datatype(hid_t fapl, hbool_t new_format)
     hid_t       dtid = -1;                   	/* Dataset's datatype ID */
     hid_t	dcpl = -1;			/* Dataset creation property list */
     int		wdata = 99;			/* Attribute data written */
-    int		rdata = 0;			/* Attribute data read */
     int		wbuf[60];			/* Data buffer for writing */
     int		rbuf[60];			/* Data buffer for reading */
     int		i;				/* Local index variable */

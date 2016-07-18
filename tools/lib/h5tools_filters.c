@@ -13,7 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "hdf5.h"
+#include "H5private.h"
 #include "h5tools.h"
 
 /*-------------------------------------------------------------------------
@@ -147,7 +147,7 @@ int h5tools_canreadf(const char* name, /* object name, serves also as boolean pr
  *
  *-------------------------------------------------------------------------
  */
-int
+H5_ATTR_CONST int
 h5tools_can_encode(H5Z_filter_t filtn) {
     switch (filtn) {
 	/* user defined filter     */

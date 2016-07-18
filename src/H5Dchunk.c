@@ -364,6 +364,9 @@ H5FL_DEFINE(H5D_chunk_info_t);
 /* Declare a free list to manage the chunk sequence information */
 H5FL_BLK_DEFINE_STATIC(chunk);
 
+/* Declare extern free list to manage the H5S_sel_iter_t struct */
+H5FL_EXTERN(H5S_sel_iter_t);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__chunk_direct_write
@@ -4557,14 +4560,14 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
     const H5O_layout_t *layout = &(dset->shared->layout); /* Dataset's layout */
     unsigned    rank = udata->common.layout->ndims - 1; /* Dataset rank */
     const hsize_t *scaled = udata->common.scaled; /* Scaled chunk offset */
-    H5S_sel_iter_t chunk_iter;          /* Memory selection iteration info */
+    H5S_sel_iter_t *chunk_iter = NULL;  /* Memory selection iteration info */
+    hbool_t     chunk_iter_init = FALSE; /* Whether the chunk iterator has been initialized */
     hssize_t    sel_nelmts;             /* Number of elements in selection */
     hsize_t     count[H5O_LAYOUT_NDIMS]; /* Element count of hyperslab */
     size_t      chunk_size;             /*size of a chunk       */
     void        *chunk;	                /* The file chunk  */
     H5D_chunk_ud_t chk_udata;           /* User data for locking chunk */
     uint32_t    bytes_accessed;         /* Bytes accessed in chunk */
-    hbool_t     chunk_iter_init = FALSE; /* Whether the chunk iterator has been initialized */
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -4629,13 +4632,17 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
         if(H5D__fill_refill_vl(&udata->fb_info, (size_t)sel_nelmts, io_info->md_dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "can't refill fill value buffer")
 
+    /* Allocate the chunk selection iterator */
+    if(NULL == (chunk_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk selection iterator")
+
     /* Create a selection iterator for scattering the elements to memory buffer */
-    if(H5S_select_iter_init(&chunk_iter, udata->chunk_space, layout->u.chunk.dim[rank]) < 0)
+    if(H5S_select_iter_init(chunk_iter, udata->chunk_space, layout->u.chunk.dim[rank]) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize chunk selection information")
     chunk_iter_init = TRUE;
 
     /* Scatter the data into memory */
-    if(H5D__scatter_mem(udata->fb_info.fill_buf, udata->chunk_space, &chunk_iter, (size_t)sel_nelmts, io_info->dxpl_cache, chunk/*out*/) < 0)
+    if(H5D__scatter_mem(udata->fb_info.fill_buf, udata->chunk_space, chunk_iter, (size_t)sel_nelmts, io_info->dxpl_cache, chunk/*out*/) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed")
 
 
@@ -4650,8 +4657,10 @@ H5D__chunk_prune_fill(H5D_chunk_it_ud1_t *udata, hbool_t new_unfilt_chunk)
 
 done:
     /* Release the selection iterator */
-    if(chunk_iter_init && H5S_SELECT_ITER_RELEASE(&chunk_iter) < 0)
+    if(chunk_iter_init && H5S_SELECT_ITER_RELEASE(chunk_iter) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release selection iterator")
+    if(chunk_iter)
+        chunk_iter = H5FL_FREE(H5S_sel_iter_t, chunk_iter);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_prune_fill */

@@ -169,7 +169,7 @@ static void
 test_vltypes_funcs(void)
 {
     hid_t               type;       /* Datatype ID          */
-    int                 size;
+    size_t              size;
     H5T_pad_t           inpad;
     H5T_norm_t          norm;
     H5T_cset_t          cset;
@@ -183,16 +183,16 @@ test_vltypes_funcs(void)
     type = H5Tvlen_create (H5T_IEEE_F32BE);
     CHECK(type, FAIL, "H5Tvlen_create");
 
-    size=H5Tget_precision(type);
-    CHECK(size, FAIL, "H5Tget_precision");
+    size = H5Tget_precision(type);
+    CHECK(size, 0, "H5Tget_precision");
 
-    size=H5Tget_size(type);
-    CHECK(size, FAIL, "H5Tget_size");
+    size = H5Tget_size(type);
+    CHECK(size, 0, "H5Tget_size");
 
-    size=H5Tget_ebias(type);
-    CHECK(size, FAIL, "H5Tget_ebias");
+    size = H5Tget_ebias(type);
+    CHECK(size, 0, "H5Tget_ebias");
 
-    ret=H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);
+    ret = H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);
     CHECK(ret, FAIL, "H5Tset_pad");
 
     inpad = H5Tget_inpad(type);
@@ -558,7 +558,7 @@ rewrite_vltypes_vlen_atomic(void)
     hsize_t     size;       /* Number of bytes which will be used */
     unsigned       i,j;        /* counting variables */
     size_t         mem_used=0; /* Memory used during allocation */
-    int			increment=4;
+    unsigned	increment=4;
     herr_t              ret;            /* Generic return value         */
 
     /* Output message about test being performed */
@@ -730,8 +730,8 @@ test_vltypes_vlen_compound(void)
         wdata[i].p=HDmalloc((i+1)*sizeof(s1));
         wdata[i].len=i+1;
         for(j=0; j<(i+1); j++) {
-            ((s1 *)wdata[i].p)[j].i=i*10+j;
-            ((s1 *)wdata[i].p)[j].f=(float)((i*20+j)/3.0F);
+            ((s1 *)wdata[i].p)[j].i = (int)(i * 10 + j);
+            ((s1 *)wdata[i].p)[j].f = (float)(i * 20 + j) / 3.0F;
           } /* end for */
     } /* end for */
 
@@ -865,7 +865,7 @@ rewrite_vltypes_vlen_compound(void)
     hsize_t     size;       /* Number of bytes which will be used */
     unsigned       i,j;        /* counting variables */
     size_t         mem_used=0; /* Memory used during allocation */
-    int 		increment=4;
+    unsigned 	increment=4;
     herr_t              ret;            /* Generic return value         */
 
     /* Output message about test being performed */
@@ -876,8 +876,8 @@ rewrite_vltypes_vlen_compound(void)
         wdata[i].p = HDmalloc((i + increment) * sizeof(s1));
         wdata[i].len = i + increment;
         for(j = 0; j < (i + increment); j++) {
-            ((s1 *)wdata[i].p)[j].i = i * 40 + j;
-            ((s1 *)wdata[i].p)[j].f = (float)((i * 60 + j) / 3.0F);
+            ((s1 *)wdata[i].p)[j].i = (int)(i * 40 + j);
+            ((s1 *)wdata[i].p)[j].f = (float)(i * 60 + j) / 3.0F;
           } /* end for */
     } /* end for */
 
@@ -1016,17 +1016,17 @@ test_vltypes_compound_vlen_vlen(void)
     MESSAGE(5, ("Testing Compound Datatypes with VL Atomic Datatype Component Functionality\n"));
 
     /* Allocate and initialize VL data to write */
-    for(i=0; i<SPACE3_DIM1; i++) {
-        wdata[i].i=i*10;
-        wdata[i].f=(float)((i*20)/3.0F);
-        wdata[i].v.p=HDmalloc((i+L1_INCM)*sizeof(hvl_t));
-        wdata[i].v.len=i+L1_INCM;
-        for(t1=(hvl_t *)((wdata[i].v).p),j=0; j<(i+L1_INCM); j++, t1++) {
-            t1->p=HDmalloc((j+L2_INCM)*sizeof(unsigned int));
-            t1->len=j+L2_INCM;
-            for(k=0; k<j+L2_INCM; k++)
-                ((unsigned int*)t1->p)[k] = i*100 + j*10 + k;
-        }
+    for(i = 0; i < SPACE3_DIM1; i++) {
+        wdata[i].i = (int)(i * 10);
+        wdata[i].f = (float)(i * 20) / 3.0F;
+        wdata[i].v.p = HDmalloc((i + L1_INCM) * sizeof(hvl_t));
+        wdata[i].v.len = i + L1_INCM;
+        for(t1 = (hvl_t *)((wdata[i].v).p), j = 0; j < (i + L1_INCM); j++, t1++) {
+            t1->p = HDmalloc((j + L2_INCM) * sizeof(unsigned int));
+            t1->len = j + L2_INCM;
+            for(k = 0; k < j + L2_INCM; k++)
+                ((unsigned int*)t1->p)[k] = i * 100 + j * 10 + k;
+        } /* end for */
     } /* end for */
 
     /* Create file */
@@ -1477,13 +1477,13 @@ test_vltypes_compound_vlen_atomic(void)
     MESSAGE(5, ("Testing Compound Datatypes with VL Atomic Datatype Component Functionality\n"));
 
     /* Allocate and initialize VL data to write */
-    for(i=0; i<SPACE1_DIM1; i++) {
-        wdata[i].i=i*10;
-        wdata[i].f=(float)((i*20)/3.0F);
-        wdata[i].v.p=HDmalloc((i+1)*sizeof(unsigned int));
-        wdata[i].v.len=i+1;
-        for(j=0; j<(i+1); j++)
-            ((unsigned int *)wdata[i].v.p)[j]=i*10+j;
+    for(i = 0; i < SPACE1_DIM1; i++) {
+        wdata[i].i = (int)(i * 10);
+        wdata[i].f = (float)(i * 20) / 3.0F;
+        wdata[i].v.p = HDmalloc((i + 1)*sizeof(unsigned int));
+        wdata[i].v.len = i + 1;
+        for(j = 0; j < (i + 1); j++)
+            ((unsigned int *)wdata[i].v.p)[j] = i * 10 + j;
     } /* end for */
 
     /* Create file */
@@ -1688,7 +1688,7 @@ rewrite_vltypes_compound_vlen_atomic(void)
     hsize_t     size;       /* Number of bytes which will be used */
     unsigned       i,j;        /* counting variables */
     size_t         mem_used=0; /* Memory used during allocation */
-    int			increment=4;
+    unsigned		increment=4;
     herr_t              ret;            /* Generic return value         */
 
     /* Output message about test being performed */
@@ -1696,8 +1696,8 @@ rewrite_vltypes_compound_vlen_atomic(void)
 
     /* Allocate and initialize VL data to write */
     for(i = 0; i < SPACE1_DIM1; i++) {
-        wdata[i].i = i * 40;
-        wdata[i].f = (float)((i * 50) / 3.0F);
+        wdata[i].i = (int)(i * 40);
+        wdata[i].f = (float)(i * 50) / 3.0F;
         wdata[i].v.p = HDmalloc((i + increment) * sizeof(unsigned int));
         wdata[i].v.len = i + increment;
         for(j = 0; j < (i + increment); j++)
@@ -1960,7 +1960,7 @@ test_vltypes_vlen_vlen_atomic(void)
 
     /* 10 hvl_t elements allocated = 1 + 2 + 3 + 4 elements for each array position */
     /* 20 unsigned int elements allocated = 1 + 3 + 6 + 10 elements */
-    VERIFY(size, ((SPACE1_DIM1 * (SPACE1_DIM1 + 1)) / 2) * sizeof(hvl_t) + vlen_size_func((unsigned long)SPACE1_DIM1) * sizeof(unsigned int), "H5Dvlen_get_buf_size");
+    VERIFY(size, (hsize_t)(((SPACE1_DIM1 * (SPACE1_DIM1 + 1)) / 2) * sizeof(hvl_t) + vlen_size_func((unsigned long)SPACE1_DIM1) * sizeof(unsigned int)), "H5Dvlen_get_buf_size");
 
     /* Read dataset from disk */
     ret = H5Dread(dataset, tid2, H5S_ALL, H5S_ALL, xfer_pid, rdata);
@@ -1969,7 +1969,7 @@ test_vltypes_vlen_vlen_atomic(void)
     /* Make certain the correct amount of memory has been used */
     /* 10 hvl_t elements allocated = 1 + 2 + 3 + 4 elements for each array position */
     /* 20 unsigned int elements allocated = 1 + 3 + 6 + 10 elements */
-    VERIFY(mem_used, ((SPACE1_DIM1 * (SPACE1_DIM1 + 1)) / 2) * sizeof(hvl_t) + vlen_size_func((unsigned long)SPACE1_DIM1) * sizeof(unsigned int), "H5Dread");
+    VERIFY(mem_used, (size_t)(((SPACE1_DIM1 * (SPACE1_DIM1 + 1)) / 2) * sizeof(hvl_t) + vlen_size_func((unsigned long)SPACE1_DIM1) * sizeof(unsigned int)), "H5Dread");
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -2048,7 +2048,7 @@ rewrite_longer_vltypes_vlen_vlen_atomic(void)
     hsize_t     size;       /* Number of bytes which will be used */
     unsigned       i,j,k;      /* counting variables */
     size_t         mem_used=0; /* Memory used during allocation */
-    int			increment=1;
+    unsigned		increment=1;
     herr_t              ret;            /* Generic return value         */
 
     /* Output message about test being performed */
@@ -2224,7 +2224,7 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
     hsize_t     size;       /* Number of bytes which will be used */
     unsigned       i,j,k;      /* counting variables */
     size_t         mem_used=0; /* Memory used during allocation */
-    int                 increment=1;
+    unsigned         increment=1;
     herr_t              ret;            /* Generic return value         */
 
     /* Output message about test being performed */
@@ -2316,7 +2316,7 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
 
     /* 10 hvl_t elements allocated = 1 + 2 + 3 + 4 elements for each array position */
     /* 20 unsigned int elements allocated = 1 + 3 + 6 + 10 elements */
-    VERIFY(size, ((SPACE1_DIM1*(SPACE1_DIM1 + 1)) / 2) * sizeof(hvl_t) + vlen_size_func((unsigned long)SPACE1_DIM1) * sizeof(unsigned int), "H5Dvlen_get_buf_size");
+    VERIFY(size, (hsize_t)(((SPACE1_DIM1*(SPACE1_DIM1 + 1)) / 2) * sizeof(hvl_t) + vlen_size_func((unsigned long)SPACE1_DIM1) * sizeof(unsigned int)), "H5Dvlen_get_buf_size");
 
     /* Read dataset from disk */
     ret=H5Dread(dataset,tid2,H5S_ALL,H5S_ALL,xfer_pid,rdata);
@@ -2325,7 +2325,7 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
     /* Make certain the correct amount of memory has been used */
     /* 10 hvl_t elements allocated = 1 + 2 + 3 + 4 elements for each array position */
     /* 20 unsigned int elements allocated = 1 + 3 + 6 + 10 elements */
-    VERIFY(mem_used,((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func((unsigned long)SPACE1_DIM1)*sizeof(unsigned int),"H5Dread");
+    VERIFY(mem_used, (size_t)(((SPACE1_DIM1*(SPACE1_DIM1+1))/2)*sizeof(hvl_t)+vlen_size_func((unsigned long)SPACE1_DIM1)*sizeof(unsigned int)),"H5Dread");
 
     /* Compare data read in */
     for(i=0; i<SPACE1_DIM1; i++) {
@@ -2597,6 +2597,10 @@ test_vltypes_fill_value(void)
                     }
                     break;
 
+                case H5D_VIRTUAL:
+                    assert(0 && "Invalid layout type!");
+                    break;
+
                 case H5D_LAYOUT_ERROR:
                 case H5D_NLAYOUTS:
                 default:
@@ -2698,6 +2702,10 @@ test_vltypes_fill_value(void)
                     dset_dspace_id = large_dspace_id;
                     dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts = SPACE4_DIM_LARGE;
+                    break;
+
+                case H5D_VIRTUAL:
+                    assert(0 && "Invalid layout type!");
                     break;
 
                 case H5D_LAYOUT_ERROR:
@@ -2895,6 +2903,10 @@ test_vltypes_fill_value(void)
                     dset_dspace_id = large_dspace_id;
                     dset_select_dspace_id = large_select_dspace_id;
                     dset_elmts = SPACE4_DIM_LARGE;
+                    break;
+
+                case H5D_VIRTUAL:
+                    assert(0 && "Invalid layout type!");
                     break;
 
                 case H5D_LAYOUT_ERROR:

@@ -34,8 +34,8 @@
  *
  *-------------------------------------------------------------------------
  */
-static
-int aux_find_obj(const char* name,          /* object name from traverse list */
+static int
+aux_find_obj(const char* name,          /* object name from traverse list */
                  pack_opt_t *options,       /* repack options */
                  pack_info_t *obj /*OUT*/)  /* info about object to filter */
 {
@@ -48,7 +48,7 @@ int aux_find_obj(const char* name,          /* object name from traverse list */
      if (HDstrcmp(options->op_tbl->objs[i].path,name)==0)
      {
          *obj =  options->op_tbl->objs[i];
-         return i;
+         return (int)i;
      }
 
      pdest  = HDstrstr(name,options->op_tbl->objs[i].path);
@@ -58,7 +58,7 @@ int aux_find_obj(const char* name,          /* object name from traverse list */
      if( pdest != NULL && result==1 )
      {
          *obj =  options->op_tbl->objs[i];
-         return i;
+         return (int)i;
      }
  }/*i*/
 
@@ -76,8 +76,8 @@ int aux_find_obj(const char* name,          /* object name from traverse list */
  *
  *-------------------------------------------------------------------------
  */
-static
-int aux_assign_obj(const char* name,            /* object name from traverse list */
+static int
+aux_assign_obj(const char* name,            /* object name from traverse list */
                    pack_opt_t *options,         /* repack options */
                    pack_info_t *obj /*OUT*/)    /* info about object to filter */
 {
@@ -109,6 +109,7 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
             case H5D_LAYOUT_ERROR:
             case H5D_COMPACT:
             case H5D_CONTIGUOUS:
+            case H5D_VIRTUAL:
             case H5D_NLAYOUTS:
                 break;
             default:
@@ -128,6 +129,7 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
             case H5D_LAYOUT_ERROR:
             case H5D_COMPACT:
             case H5D_CONTIGUOUS:
+            case H5D_VIRTUAL:
             case H5D_NLAYOUTS:
                 break;
             default:
@@ -184,6 +186,7 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
             case H5D_LAYOUT_ERROR:
             case H5D_COMPACT:
             case H5D_CONTIGUOUS:
+            case H5D_VIRTUAL:
             case H5D_NLAYOUTS:
                 break;
             default:
@@ -433,7 +436,7 @@ int apply_filters(const char* name,    /* object name from traverse list */
                     int                 scale_factor;
 
                     scale_type   = (H5Z_SO_scale_type_t)obj.filter[i].cd_values[0];
-                    scale_factor = obj.filter[i].cd_values[1];
+                    scale_factor = (int)obj.filter[i].cd_values[1];
 
                     if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
                         return -1;

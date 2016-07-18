@@ -123,8 +123,8 @@ static hid_t       h5dxpl = -1;            /* Dataset transfer property list */
  * Programmer:      Christian Chilan, April, 2008
  * Modifications:
  */
-    results
-do_sio(parameters param)
+void
+do_sio(parameters param, results *res)
 {
     char       *buffer = NULL; /*data buffer pointer           */
     size_t      buf_size[MAX_DIMS];     /* general buffer size in bytes     */
@@ -133,7 +133,6 @@ do_sio(parameters param)
     char base_name[256];                /* test file base name */
     /* return codes */
     herr_t      ret_code = 0;   /*return code                           */
-    results     res;
 
     char        fname[FILENAME_MAX];    /* test file name */
     int     i;
@@ -148,11 +147,11 @@ do_sio(parameters param)
     switch (iot) {
     case POSIXIO:
         fd.posixfd = -1;
-        res.timers = io_time_new(SYS_CLOCK);
+        res->timers = io_time_new(SYS_CLOCK);
         break;
     case HDF5:
         fd.h5fd = -1;
-        res.timers = io_time_new(SYS_CLOCK);
+        res->timers = io_time_new(SYS_CLOCK);
         break;
     default:
         /* unknown request */
@@ -209,18 +208,18 @@ do_sio(parameters param)
         HDfprintf(output, "data filename=%s\n",
              fname);
 
-    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
+    set_time(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTART);
     hrc = do_fopen(&param, fname, &fd, SIO_CREATE | SIO_WRITE);
     VRFY((hrc == SUCCESS), "do_fopen failed");
 
-    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
-    hrc = do_write(&res, &fd, &param, buffer);
-    set_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
+    set_time(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTART);
+    hrc = do_write(res, &fd, &param, buffer);
+    set_time(res->timers, HDF5_FINE_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_write failed");
 
     /* Close file for write */
     hrc = do_fclose(iot, &fd);
-    set_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
+    set_time(res->timers, HDF5_GROSS_WRITE_FIXED_DIMS, TSTOP);
     VRFY((hrc == SUCCESS), "do_fclose failed");
 
     if (!param.h5_write_only) {
@@ -229,19 +228,19 @@ do_sio(parameters param)
          */
 
         /* Open file for read */
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
+        set_time(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTART);
         hrc = do_fopen(&param, fname, &fd, SIO_READ);
         VRFY((hrc == SUCCESS), "do_fopen failed");
 
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
-        hrc = do_read(&res, &fd, &param, buffer);
-        set_time(res.timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
+        set_time(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTART);
+        hrc = do_read(res, &fd, &param, buffer);
+        set_time(res->timers, HDF5_FINE_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_read failed");
 
         /* Close file for read */
         hrc = do_fclose(iot, &fd);
 
-        set_time(res.timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
+        set_time(res->timers, HDF5_GROSS_READ_FIXED_DIMS, TSTOP);
         VRFY((hrc == SUCCESS), "do_fclose failed");
     }
 
@@ -272,8 +271,7 @@ done:
     if (buffer)
         free(buffer);
 
-    res.ret_code = ret_code;
-    return res;
+    res->ret_code = ret_code;
 }
 
 /*

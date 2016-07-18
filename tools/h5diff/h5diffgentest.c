@@ -28,7 +28,7 @@
  * NOTE: this value should stay in sync with the value defined in the tools
  *       library file: h5tools_utils.h 
  */
-hsize_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
+size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 
 /*-------------------------------------------------------------------------
 * Program: h5diffgentest
@@ -3745,7 +3745,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     /* vlen string */
     hid_t    sid_vlen_str=0;      /* dataspace ID */
     hid_t    tid_vlen_str=0;      /* datatype ID */
-    const char vlen_str_buf[]= {
+    char vlen_str_buf[]= {
         "Variable length string"
         };
     hsize_t dims_vlen_str[]  = {VLEN_STR_DIM};
@@ -3762,7 +3762,7 @@ static int test_comp_vlen_strings(const char *fname1, const char *grp_name, int 
     hid_t    sid_vlen_str_array=0;      /* dataspace ID */
     hid_t    tid_vlen_str_array_pre=0;      /* datatype ID */
     hid_t    tid_vlen_str_array=0; /* datatype ID */
-    const char *vlen_str_array_buf[VLEN_STR_ARRY_DIM]= {
+    char *vlen_str_array_buf[VLEN_STR_ARRY_DIM]= {
         "1 - Variable length string Array",
         "2 - Testing variable length string array in compound type",
         "3 - Four score and seven\n years ago our forefathers brought forth on this continent a new nation,"
@@ -4478,8 +4478,8 @@ static void test_comps_array (const char *fname, const char *dset, const char *a
         wdata[i].i1 = i;
         for(j=0; j < SDIM_CMPD_ARRAY; j++) 
         {
-            wdata[i].cmpd2[j].i2 = i*10 + diff;
-            wdata[i].cmpd2[j].f2 = (float)(i*10.5F) + diff;
+            wdata[i].cmpd2[j].i2 = i * 10 + diff;
+            wdata[i].cmpd2[j].f2 = (float)i * 10.5F + (float)diff;
         } /* end for */
     }
 
@@ -4588,15 +4588,13 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
     herr_t  ret;  /* Generic return value  */
 
     /* Allocate and initialize VL data to write */
-    for(i=0; i<SDIM_DSET; i++)
-    {
-        wdata[i].i1 = i;
-        wdata[i].vl.p = HDmalloc((i+1)*sizeof(cmpd2_t));
-        wdata[i].vl.len = i+1;
-        for(j=0; j<(i+1); j++)
-        {
-            ((cmpd2_t *)wdata[i].vl.p)[j].i2 = i*10 + diff;
-            ((cmpd2_t *)wdata[i].vl.p)[j].f2 = (float)(i*10.5F) + diff;
+    for(i = 0; i < SDIM_DSET; i++) {
+        wdata[i].i1 = (int)i;
+        wdata[i].vl.p = HDmalloc((i + 1) * sizeof(cmpd2_t));
+        wdata[i].vl.len = i + 1;
+        for(j = 0; j < (i + 1); j++) {
+            ((cmpd2_t *)wdata[i].vl.p)[j].i2 = (int)(i * 10 + (unsigned)diff);
+            ((cmpd2_t *)wdata[i].vl.p)[j].f2 = (float)i * 10.5F + (float)diff;
         } /* end for */
     } /* end for */
 
@@ -4703,26 +4701,24 @@ static void test_comps_array_vlen (const char * fname, const char *dset,const ch
     hid_t  tid_cmpd3;       /* Compound3 Datatype ID   */
     hsize_t  sdims_dset[] = {SDIM_DSET};
     hsize_t  sdims_arry[] = {SDIM_CMPD_ARRAY};
-    int        i,j,k;        /* counting variables */
-    herr_t  ret;  /* Generic return value  */
+    unsigned i, j, k;   /* counting variables */
+    herr_t  ret;        /* Generic return value  */
 
 
 
     /* Initialize array data to write in compound1 */
-    for(i=0; i < SDIM_DSET; i++)
-    {
-        wdata[i].i1 = i;
+    for(i = 0; i < SDIM_DSET; i++) {
+        wdata[i].i1 = (int)i;
+
         /* Allocate and initialize VL data to write in compound2 */
-        for(j=0; j < SDIM_CMPD_ARRAY; j++) 
-        {
-            wdata[i].cmpd2[j].i2 = j*10;
-            wdata[i].cmpd2[j].vl.p = HDmalloc((j+1)*sizeof(cmpd3_t));
-            wdata[i].cmpd2[j].vl.len = j+1;
-            for(k=0; k<(j+1); k++) 
-            {
+        for(j = 0; j < SDIM_CMPD_ARRAY; j++) {
+            wdata[i].cmpd2[j].i2 = (int)(j * 10);
+            wdata[i].cmpd2[j].vl.p = HDmalloc((j + 1) * sizeof(cmpd3_t));
+            wdata[i].cmpd2[j].vl.len = j + 1;
+            for(k = 0; k < (j + 1); k++) {
                 /* Initialize data of compound3 */
-                ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].i3 = j*10 + diff;
-                ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].f3 = (float)(j*10.5F) + diff;
+                ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].i3 = (int)j * 10 + diff;
+                ((cmpd3_t *)wdata[i].cmpd2[j].vl.p)[k].f3 = (float)j * 10.5F + (float)diff;
             } /* end for */
         } /* end for */
     }
@@ -4856,22 +4852,19 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
     herr_t  ret;  /* Generic return value  */
 
     /* Allocate and initialize VL data to write */
-    for(i=0; i<SDIM_DSET; i++)
-    {
+    for(i = 0; i < SDIM_DSET; i++) {
         /* compound 1 data */
-        wdata[i].i1 = i;
-        wdata[i].vl.p = HDmalloc((i+1)*sizeof(cmpd2_t));
-        wdata[i].vl.len = i+1;
-        for(j=0; j<(i+1); j++)
-        {
+        wdata[i].i1 = (int)i;
+        wdata[i].vl.p = HDmalloc((i + 1) * sizeof(cmpd2_t));
+        wdata[i].vl.len = i + 1;
+        for(j = 0; j < (i + 1); j++) {
             /* compound2 data */
-            ((cmpd2_t *)wdata[i].vl.p)[j].i2 = i*10 + diff;
-            for (k=0; k < SDIM_CMPD_ARRAY; k++)
-            {
+            ((cmpd2_t *)wdata[i].vl.p)[j].i2 = (int)i * 10 + diff;
+            for(k = 0; k < SDIM_CMPD_ARRAY; k++) {
                 /* compound 3 data */
-                ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].i3 = k*10.5F + diff;
-                ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].f3 = (float)(k*10.5F) + diff;
-            }
+                ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].i3 = (int)((float)k * 10.5F) + diff;
+                ((cmpd2_t *)(wdata[i].vl.p))[j].cmpd3[k].f3 = (float)k * 10.5F + (float)diff;
+            } /* end for */
         } /* end for */
     } /* end for */
 
@@ -5857,13 +5850,15 @@ void write_attr_in(hid_t loc_id,
 
     /* Allocate and initialize VL dataset to write */
     n=0;
-    for (i = 0; i < 3; i++) {
-        for (j = 0; j < 2; j++) {
-            buf52[i][j].p = HDmalloc((i + 1) * sizeof(int));
-            buf52[i][j].len = i + 1;
-            for (l = 0; l < i + 1; l++)
-                if (make_diffs)((int *)buf52[i][j].p)[l] = 0;
-                else ((int *)buf52[i][j].p)[l] = n++;
+    for(i = 0; i < 3; i++) {
+        for(j = 0; j < 2; j++) {
+            buf52[i][j].p = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].len = (size_t)(i + 1);
+            for(l = 0; l < i + 1; l++)
+                if(make_diffs)
+                    ((int *)buf52[i][j].p)[l] = 0;
+                else
+                    ((int *)buf52[i][j].p)[l] = n++;
         }
     }
 
@@ -6074,8 +6069,10 @@ void write_attr_in(hid_t loc_id,
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             for (k = 0; k < 2; k++) {
-                if (make_diffs) buf23[i][j][k]=0;
-                else buf23[i][j][k]=n++;
+                if(make_diffs)
+                    buf23[i][j][k] = 0;
+                else
+                    buf23[i][j][k] = (char)n++;
             }
         }
     }
@@ -6132,12 +6129,12 @@ void write_attr_in(hid_t loc_id,
         for (j = 0; j < 3; j++) {
             for (k = 0; k < 2; k++) {
                 if (make_diffs) {
-                    buf33[i][j][k].a=0;
-                    buf33[i][j][k].b=0.0F;
+                    buf33[i][j][k].a = 0;
+                    buf33[i][j][k].b = 0.0F;
                 }
                 else {
-                    buf33[i][j][k].a=n++;
-                    buf33[i][j][k].b=n++;
+                    buf33[i][j][k].a = (char)n++;
+                    buf33[i][j][k].b = n++;
                 }
             }
         }
@@ -6275,11 +6272,13 @@ void write_attr_in(hid_t loc_id,
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 3; j++) {
             for (k = 0; k < 2; k++) {
-                buf53[i][j][k].p = HDmalloc((i + 1) * sizeof(int));
-                buf53[i][j][k].len = i + 1;
+                buf53[i][j][k].p = HDmalloc((size_t)(i + 1) * sizeof(int));
+                buf53[i][j][k].len = (size_t)(i + 1);
                 for (l = 0; l < i + 1; l++)
-                    if (make_diffs)((int *)buf53[i][j][k].p)[l] = 0;
-                    else ((int *)buf53[i][j][k].p)[l] = n++;
+                    if(make_diffs)
+                        ((int *)buf53[i][j][k].p)[l] = 0;
+                    else
+                        ((int *)buf53[i][j][k].p)[l] = n++;
             }
         }
     }
@@ -6649,22 +6648,21 @@ void write_dset_in(hid_t loc_id,
     status = H5Tclose(tid);
 
     {
-
         double  *dbuf;                           /* information to write */
-        hid_t   did;                             /* dataset ID   */
-        hid_t   sid;                             /* dataspace ID   */
-        hid_t   tid;                             /* datatype ID   */
+        hid_t   ldid;                            /* dataset ID   */
+        hid_t   lsid;                            /* dataspace ID   */
+        hid_t   ltid;                            /* datatype ID   */
         size_t  size;
         hsize_t sdims[] = {1};
         hsize_t tdims[] = {H5TOOLS_MALLOCSIZE / sizeof(double) + 1};
-        int     j;
+        size_t  jj;
 
         /* allocate and initialize array data to write */
         size = ( H5TOOLS_MALLOCSIZE / sizeof(double) + 1 ) * sizeof(double);
-        dbuf = (double *)HDmalloc( size );
+        dbuf = (double *)HDmalloc(size);
 
-        for( j = 0; j < H5TOOLS_MALLOCSIZE / sizeof(double) + 1; j++)
-            dbuf[j] = j;
+        for(jj = 0; jj < (H5TOOLS_MALLOCSIZE / sizeof(double) + 1); jj++)
+            dbuf[jj] = (double)jj;
 
         if (make_diffs)
         {
@@ -6673,19 +6671,19 @@ void write_dset_in(hid_t loc_id,
         }
 
         /* create a type larger than H5TOOLS_MALLOCSIZE */
-        tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, tdims);
-        size = H5Tget_size(tid);
-        sid = H5Screate_simple(1, sdims, NULL);
-        did = H5Dcreate2(loc_id, "arrayd", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        ltid = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, tdims);
+        size = H5Tget_size(ltid);
+        lsid = H5Screate_simple(1, sdims, NULL);
+        ldid = H5Dcreate2(loc_id, "arrayd", ltid, lsid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 #if defined(WRITE_ARRAY)
-        H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
+        H5Dwrite(ldid, ltid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
 #endif
 
         /* close */
-        H5Dclose(did);
-        H5Tclose(tid);
-        H5Sclose(sid);
-        HDfree( dbuf );
+        H5Dclose(ldid);
+        H5Tclose(ltid);
+        H5Sclose(lsid);
+        HDfree(dbuf);
     }
 
     /*-------------------------------------------------------------------------
@@ -6815,15 +6813,12 @@ void write_dset_in(hid_t loc_id,
 
     /* Allocate and initialize VL dataset to write */
     n = 0;
-    for(i = 0; i < 3; i++)
-    {
-        for(j = 0; j < 2; j++)
-        {
-            buf52[i][j].p = HDmalloc((i + 1) * sizeof(int));
-            buf52[i][j].len = i + 1;
-            for(l = 0; l < i + 1; l++)
-            {
-                if (make_diffs)
+    for(i = 0; i < 3; i++) {
+        for(j = 0; j < 2; j++) {
+            buf52[i][j].p = HDmalloc((size_t)(i + 1) * sizeof(int));
+            buf52[i][j].len = (size_t)(i + 1);
+            for(l = 0; l < i + 1; l++) {
+                if(make_diffs)
                     ((int *)buf52[i][j].p)[l] = 0;
                 else
                     ((int *)buf52[i][j].p)[l] = n++;
@@ -6933,15 +6928,13 @@ void write_dset_in(hid_t loc_id,
 
 
     n=1;
-    for (i = 0; i < 4; i++)
-    {
-        for (j = 0; j < 3; j++)
-        {
-            for (k = 0; k < 2; k++)
-            {
-                if (make_diffs)
-                    buf23[i][j][k]=0;
-                else buf23[i][j][k]=n++;
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            for (k = 0; k < 2; k++) {
+                if(make_diffs)
+                    buf23[i][j][k] = 0;
+                else
+                    buf23[i][j][k] = (char)n++;
             }
         }
     }
@@ -6966,20 +6959,16 @@ void write_dset_in(hid_t loc_id,
     */
 
     n=1;
-    for (i = 0; i < 4; i++)
-    {
-        for (j = 0; j < 3; j++)
-        {
-            for (k = 0; k < 2; k++)
-            {
-                if (make_diffs)
-                {
-                    buf33[i][j][k].a=0;
-                    buf33[i][j][k].b=0.0F;
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 3; j++) {
+            for (k = 0; k < 2; k++) {
+                if (make_diffs) {
+                    buf33[i][j][k].a = 0;
+                    buf33[i][j][k].b = 0.0F;
                 }
                 else {
-                    buf33[i][j][k].a=n++;
-                    buf33[i][j][k].b=n++;
+                    buf33[i][j][k].a = (char)n++;
+                    buf33[i][j][k].b = n++;
                 }
             }
         }
@@ -7026,16 +7015,12 @@ void write_dset_in(hid_t loc_id,
 
     /* Allocate and initialize VL dataset to write */
     n=0;
-    for(i = 0; i < 4; i++)
-    {
-        for(j = 0; j < 3; j++)
-        {
-            for(k = 0; k < 2; k++)
-            {
-                buf53[i][j][k].p = HDmalloc((i + 1) * sizeof(int));
-                buf53[i][j][k].len = i + 1;
-                for(l = 0; l < i + 1; l++)
-                {
+    for(i = 0; i < 4; i++) {
+        for(j = 0; j < 3; j++) {
+            for(k = 0; k < 2; k++) {
+                buf53[i][j][k].p = HDmalloc((size_t)(i + 1) * sizeof(int));
+                buf53[i][j][k].len = (size_t)(i + 1);
+                for(l = 0; l < i + 1; l++) {
                     if(make_diffs)
                         ((int *)buf53[i][j][k].p)[l] = 0;
                     else
@@ -7265,7 +7250,7 @@ int test_hyperslab(const char *fname,
         if(make_diffs && i == 512 * 512)
             HDmemset(buf, 0, nelmts);
 
-        hs_start[0] = i * GBLL/(1024*1024);
+        hs_start[0] = (unsigned long long)i * GBLL / (1024 * 1024);
         if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL) < 0)
             goto out;
 

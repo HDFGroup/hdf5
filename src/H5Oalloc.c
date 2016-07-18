@@ -763,7 +763,7 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
     size_t      idx;                    /* Message number */
     uint8_t     *p = NULL;              /*ptr into new chunk            */
     H5O_cont_t  *cont = NULL;           /*native continuation message   */
-    size_t      chunkno;                /* Chunk allocated */
+    unsigned    chunkno;                /* Chunk allocated */
     haddr_t	new_chunk_addr;
     unsigned    u;                      /* Local index variable */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -921,7 +921,8 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
         oh->chunk = x;
     } /* end if */
 
-    chunkno = (unsigned)oh->nchunks++;
+    H5_CHECKED_ASSIGN(chunkno, unsigned, oh->nchunks, size_t);
+    oh->nchunks++;
     oh->chunk[chunkno].addr = new_chunk_addr;
     oh->chunk[chunkno].size = size;
     oh->chunk[chunkno].gap = 0;

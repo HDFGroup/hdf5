@@ -22,7 +22,6 @@
 *************************************************************/
 
 #include "h5test.h"
-#include "H5srcdir.h"
 #include "H5Fprivate.h" /* required to test property removals */
 #define VERIFY(condition, string) do { if (!(condition)) FAIL_PUTS_ERROR(string) } while(0)
 

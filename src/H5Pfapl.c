@@ -778,7 +778,7 @@ done:
 const void *
 H5P_peek_driver_info(H5P_genplist_t *plist)
 {
-    void *ret_value = NULL;     /* Return value */
+    const void *ret_value = NULL;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

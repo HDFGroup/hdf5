@@ -196,7 +196,9 @@ usage: %s [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]\n\
                    as a soft link or external link and prints the value\n\
                    assigned to the symbolic link; it does not provide any\n\
                    information regarding the target object or determine\n\
-                   whether the link is a dangling link.\n\
+                   whether the link is a dangling link.\n",
+     h5tools_getprogname());
+    HDfprintf(rawerrorstream, "\
    --no-dangling-links\n\
                    Must be used with --follow-symlinks option;\n\
                    otherwise, h5ls shows error message and returns an exit\n\
@@ -216,7 +218,8 @@ usage: %s [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]\n\
    -v, --verbose   Generate more verbose output\n\
    -V, --version   Print version number and exit\n\
    --vfd=DRIVER    Use the specified virtual file driver\n\
-   -x, --hexdump   Show raw data in hexadecimal format\n\
+   -x, --hexdump   Show raw data in hexadecimal format\n");
+    HDfprintf(rawerrorstream, "\
 \n\
   file/OBJECT\n\
     Each object consists of an HDF5 file name optionally followed by a\n\
@@ -235,8 +238,7 @@ usage: %s [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]\n\
    -E or --external   Follow external links.\n\
                       Replaced by --follow-symlinks.\n\
    -e, --errors       Show all HDF5 error reporting\n\
-                      Replaced by --enable-error-stack.\n",
-     h5tools_getprogname());
+                      Replaced by --enable-error-stack.\n");
 }
 
 

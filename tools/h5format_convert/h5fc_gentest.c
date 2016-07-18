@@ -471,9 +471,9 @@ gen_err_level(const char *fname)
 	hsize_t extent[2] = {0, 0};
 
 	start[0] = 0;
-	start[1] = n;
+	start[1] = (hsize_t)n;
 	extent[0] = 1;
-	extent[1] = n+1;
+	extent[1] = (hsize_t)(n + 1);
 
 	/* Set current dimension sizes for the dataset */
 	if(H5Dset_extent(did, extent) < 0)

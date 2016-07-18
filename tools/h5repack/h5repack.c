@@ -564,7 +564,7 @@ done:
 			H5Aclose(attr_out);
 		} H5E_END_TRY;
 
-	return -1;
+	return ret_value;
 } /* end copy_attr() */
 
 /*-------------------------------------------------------------------------
@@ -605,6 +605,9 @@ static int check_options(pack_opt_t *options) {
 				break;
 			case H5D_CHUNKED:
 				strcpy(slayout, "chunked");
+				break;
+			case H5D_VIRTUAL:
+				strcpy(slayout, "virtual");
 				break;
 			case H5D_LAYOUT_ERROR:
 			case H5D_NLAYOUTS:
