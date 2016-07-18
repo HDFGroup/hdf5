@@ -26,9 +26,8 @@
 /*
  * Definitions for the testing structure.
  */
-#define MAXNUMOFTESTS   24
 #define MAXTESTNAME     16
-#define MAXTESTDESC     32
+#define MAXTESTDESC     64
 
 typedef struct TestStruct {
 	int    NumErrors;
@@ -49,8 +48,9 @@ int TestVerbosity = VERBO_DEF;       /* Default Verbosity is Low */
 static int Summary = 0;		/* Show test summary. Default is no. */
 static int CleanUp = 1;		/* Do cleanup or not. Default is yes. */
 static int TestExpress = -1;	/* Do TestExpress or not. -1 means not set yet. */
-static TestStruct Test[MAXNUMOFTESTS];
-static int    Index = 0;
+static TestStruct *Test = NULL; /* Array of tests */
+static unsigned TestAlloc = 0;  /* Size of the Test array */
+static unsigned Index = 0;
 static const void *Test_parameters = NULL;
 static const char *TestProgName = NULL;
 static void (*TestPrivateUsage)(void) = NULL;
@@ -74,14 +74,9 @@ void
 AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), const char *TheDescr, const void *Parameters)
 {
     /* Sanity checking */
-    if (Index >= MAXNUMOFTESTS) {
-        printf("Too many tests added, increase MAXNUMOFTESTS(%d).\n",
-		MAXNUMOFTESTS);
-        exit(EXIT_FAILURE);
-    }                           /* end if */
     if (HDstrlen(TheDescr) >= MAXTESTDESC) {
-        printf("Test description too long, increase MAXTESTDESC(%d).\n",
-		MAXTESTDESC);
+        printf("Test description ('%s') too long, increase MAXTESTDESC(%d).\n",
+		TheDescr, MAXTESTDESC);
         exit(EXIT_FAILURE);
     } /* end if */
     if (HDstrlen(TheName) >= MAXTESTNAME) {
@@ -90,9 +85,25 @@ AddTest(const char *TheName, void (*TheCall) (void), void (*Cleanup) (void), con
         exit(EXIT_FAILURE);
     } /* end if */
 
+    /* Check for increasing the Test array size */
+    if(Index >= TestAlloc) {
+        TestStruct *newTest = Test;        /* New array of tests */
+        unsigned newAlloc = MAX(1, TestAlloc * 2);      /* New array size */
+
+        /* Reallocate array */
+        if(NULL == (newTest = (TestStruct *)HDrealloc(Test, newAlloc * sizeof(TestStruct)))) {
+            printf("Out of memory for tests, Index = %u, TestAlloc = %u, newAlloc = %u\n", Index, TestAlloc, newAlloc);
+            exit(EXIT_FAILURE);
+        } /* end if */
+
+        /* Update info */
+        Test = newTest;
+        TestAlloc = newAlloc;
+    } /* end if */
+
     /* Set up test function */
     HDstrcpy(Test[Index].Description, TheDescr);
-    if (*TheName != '-'){
+    if(*TheName != '-') {
 	HDstrcpy(Test[Index].Name, TheName);
 	Test[Index].SkipFlag = 0;
     }
@@ -153,7 +164,7 @@ void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_p
  */
 void TestUsage(void)
 {
-	int i;
+	unsigned i;
 
 	print_func("Usage: %s [-v[erbose] (l[ow]|m[edium]|h[igh]|0-9)] %s\n",
 	    TestProgName, (TestPrivateUsage ? "<extra options>" : ""));
@@ -250,7 +261,7 @@ void TestParseCmdLine(int argc, char *argv[])
 	else if (((HDstrcmp(*argv, "-only") == 0) ||
 				    (HDstrcmp(*argv, "-o") == 0))) {
 	    if(argc > 0) {
-		int Loop;
+		unsigned Loop;
 
 		--argc; ++argv;
 
@@ -296,7 +307,7 @@ void TestParseCmdLine(int argc, char *argv[])
  */
 void PerformTests(void)
 {
-    int                     Loop;
+    unsigned                     Loop;
 
     for (Loop = 0; Loop < Index; Loop++)
         if (Test[Loop].SkipFlag) {
@@ -329,7 +340,7 @@ void PerformTests(void)
  */
 void TestSummary(void)
 {
-    int                     Loop;
+    unsigned                     Loop;
 
     print_func("Summary of Test Results:\n");
     print_func("Name of Test     Errors Description of Test\n");
@@ -351,7 +362,7 @@ void TestSummary(void)
  */
 void TestCleanup(void)
 {
-    int                     Loop;
+    unsigned                     Loop;
 
     MESSAGE(2, ("\nCleaning Up temp files...\n\n"));
 
@@ -359,6 +370,16 @@ void TestCleanup(void)
     for (Loop = 0; Loop < Index; Loop++)
         if (!Test[Loop].SkipFlag && Test[Loop].Cleanup!=NULL)
             Test[Loop].Cleanup();
+}
+
+
+/*
+ * Shutdown the test infrastructure
+ */
+void TestShutdown(void)
+{
+    if(Test)
+        HDfree(Test);
 }
 
 
@@ -554,7 +575,7 @@ TestErrPrintf(const char *format, ...)
  */
 void SetTest(const char *testname, int action)
 {
-    int Loop;
+    unsigned Loop;
 
     switch (action){
 	case SKIPTEST:

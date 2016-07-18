@@ -5147,6 +5147,12 @@ int main(int argc, char **argv)
 	printf("===================================\n");
     }
 
+    /* close HDF5 library */
+    H5close();
+
+    /* Release test infrastructure */
+    TestShutdown();
+
     MPI_Finalize();
 
     /* cannot just return (nerrors) because exit code is limited to 1byte */

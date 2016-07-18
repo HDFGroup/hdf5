@@ -166,6 +166,7 @@ H5TEST_DLL void TestParseCmdLine(int argc, char *argv[]);
 H5TEST_DLL void PerformTests(void);
 H5TEST_DLL void TestSummary(void);
 H5TEST_DLL void TestCleanup(void);
+H5TEST_DLL void TestShutdown(void);
 H5TEST_DLL void TestInit(const char *ProgName, void (*private_usage)(void), int (*private_parser)(int ac, char *av[]));
 H5TEST_DLL int  GetTestVerbosity(void);
 H5TEST_DLL int  SetTestVerbosity(int newval);

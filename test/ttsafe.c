@@ -143,6 +143,9 @@ int main(int argc, char *argv[])
     if (GetTestCleanup() && !getenv("HDF5_NOCLEANUP"))
         TestCleanup();
 
+    /* Release test infrastructure */
+    TestShutdown();
+
     return GetTestNumErrs();
 
 } /* end main() */
