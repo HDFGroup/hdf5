@@ -2210,7 +2210,7 @@ H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__open_subfile(H5F_t *file, unsigned flags, hid_t H5_ATTR_UNUSED fcpl_id, hid_t fapl_id, hid_t dxpl_id)
+H5F__open_subfile(H5F_t *file, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
 {
     H5P_genplist_t *plist;
     const char *subfile_name = NULL;
@@ -2229,7 +2229,7 @@ H5F__open_subfile(H5F_t *file, unsigned flags, hid_t H5_ATTR_UNUSED fcpl_id, hid
 
     if(subfile_name) {
         H5P_genplist_t *new_plist = NULL, *old_plist = NULL;
-        H5FD_mpio_fapl_t fa, *old_fa = NULL;
+        H5FD_mpio_fapl_t fa;
 
         if(NULL == (old_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
@@ -2245,14 +2245,14 @@ H5F__open_subfile(H5F_t *file, unsigned flags, hid_t H5_ATTR_UNUSED fcpl_id, hid
         /* reset subfiling properties */
         {
             unsigned num_groups = 0;
-            const char *subfile_name = NULL;
+            const char *temp_name = NULL;
             MPI_Comm comm = MPI_COMM_NULL;
             MPI_Info info = MPI_INFO_NULL;
 
             if(H5P_set(new_plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &num_groups) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set number of groups for subfiling")
 
-            if(H5P_set(new_plist, H5F_ACS_SUBFILING_FILENAME_NAME, &subfile_name) < 0)
+            if(H5P_set(new_plist, H5F_ACS_SUBFILING_FILENAME_NAME, &temp_name) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile name")
 
             if(H5P_set(new_plist, H5F_ACS_SUBFILE_COMM_NAME, &comm) < 0)
@@ -2269,9 +2269,10 @@ H5F__open_subfile(H5F_t *file, unsigned flags, hid_t H5_ATTR_UNUSED fcpl_id, hid
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get driver info")
 
         /* create the subfile */
-        if(NULL == (file->subfile = H5F_open(subfile_name, flags, H5P_FILE_CREATE_DEFAULT, 
+        if(NULL == (file->subfile = H5F_open(subfile_name, flags, fcpl_id, 
                                              subfile_fapl_id, dxpl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create sub-file")
+
         /* Get an atom for the file */
         if((file->subfile->file_id = H5I_register(H5I_FILE, file->subfile, TRUE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
