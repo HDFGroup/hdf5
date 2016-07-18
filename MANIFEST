@@ -34,6 +34,7 @@
 
 ./m4/aclocal_cxx.m4
 ./m4/aclocal_fc.m4
+./m4/aclocal_fc.f90
 ./m4/ax_check_class.m4
 ./m4/ax_check_classpath.m4
 ./m4/ax_check_java_home.m4
