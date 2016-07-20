@@ -484,6 +484,13 @@ if (NOT WINDOWS)
   endif (NOT CYGWIN AND NOT MINGW)
   CHECK_SYMBOL_EXISTS (TIOCGWINSZ "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGWINSZ)
   CHECK_SYMBOL_EXISTS (TIOCGETD   "sys/ioctl.h" ${HDF_PREFIX}_HAVE_TIOCGETD)
+
+  # ----------------------------------------------------------------------
+  # cygwin user credentials are different then on linux
+  #
+  if (NOT CYGWIN AND NOT MINGW)
+    CHECK_FUNCTION_EXISTS (getpwuid        ${HDF_PREFIX}_HAVE_GETPWUID)
+  endif (NOT CYGWIN AND NOT MINGW)
 endif (NOT WINDOWS)
 
 #-----------------------------------------------------------------------------
@@ -497,7 +504,6 @@ CHECK_FUNCTION_EXISTS (frexpf            ${HDF_PREFIX}_HAVE_FREXPF)
 CHECK_FUNCTION_EXISTS (frexpl            ${HDF_PREFIX}_HAVE_FREXPL)
 
 CHECK_FUNCTION_EXISTS (gethostname       ${HDF_PREFIX}_HAVE_GETHOSTNAME)
-CHECK_FUNCTION_EXISTS (getpwuid          ${HDF_PREFIX}_HAVE_GETPWUID)
 CHECK_FUNCTION_EXISTS (getrusage         ${HDF_PREFIX}_HAVE_GETRUSAGE)
 CHECK_FUNCTION_EXISTS (llround           ${HDF_PREFIX}_HAVE_LLROUND)
 CHECK_FUNCTION_EXISTS (llroundf          ${HDF_PREFIX}_HAVE_LLROUNDF)
@@ -560,7 +566,6 @@ if (NOT WINDOWS)
       HAVE_C99_DESIGNATED_INITIALIZER
       SYSTEM_SCOPE_THREADS
       HAVE_SOCKLEN_T
-      CXX_HAVE_OFFSETOF
   )
     HDF_FUNCTION_TEST (${test})
   endforeach (test)
@@ -624,6 +629,7 @@ if (CMAKE_CXX_COMPILER_LOADED)
       ${HDF_PREFIX}_NO_STD
       BOOL_NOTDEFINED
       NO_STATIC_CAST
+      CXX_HAVE_OFFSETOF
   )
     HDF_CXX_FUNCTION_TEST (${test})
   endforeach (test)
