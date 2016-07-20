@@ -1061,6 +1061,9 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5AreadVL(long attr_id, long mem_type_id, String[] buf)
             throws HDF5LibraryException, NullPointerException;
 
+    public synchronized static native int H5AreadComplex(long attr_id, long mem_type_id, String[] buf)
+            throws HDF5LibraryException, NullPointerException;
+
     /**
      * H5Arename changes the name of attribute that is attached to the object specified by loc_id. The attribute named
      * old_attr_name is renamed new_attr_name.

@@ -2009,6 +2009,60 @@ Java_hdf_hdf5lib_H5_H5AreadVL
 } /* end Java_hdf_hdf5lib_H5_H5AreadVL */
 
 /*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5AreadComplex
+ * Signature: (JJ[Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5AreadComplex
+(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
+{
+    herr_t      status = -1;
+    int         i;
+    int         n;
+    char       *rdata;
+    size_t      max_len = 0;
+    size_t      size;
+    h5str_t     h5str;
+    hid_t       p_type = -1;
+    jstring     jstr;
+
+    p_type = H5Tget_native_type(mem_type_id, H5T_DIR_DEFAULT);
+    size = (((H5Tget_size(mem_type_id))>(H5Tget_size(p_type))) ? (H5Tget_size(mem_type_id)) : (H5Tget_size(p_type)));
+    H5Tclose(p_type);
+
+    n = ENVPTR->GetArrayLength(ENVPAR buf);
+    rdata = (char *)malloc((size_t)n * size);
+    if (rdata == NULL) {
+        h5JNIFatalError(env, "H5AreadComplex:  failed to allocate buff for read");
+    } /* end if */
+    else {
+        status = H5Aread(attr_id, mem_type_id, rdata);
+        if (status < 0) {
+            h5JNIFatalError(env, "H5AreadComplex: failed to read data");
+        } /* end if */
+        else {
+            HDmemset(&h5str, 0, sizeof(h5str_t));
+            h5str_new(&h5str, 4 * size);
+            if (h5str.s == NULL) {
+                h5JNIFatalError(env, "H5AreadComplex:  failed to allocate string buf");
+            } /* end if */
+            else {
+                for (i = 0; i < n; i++) {
+                    h5str.s[0] = '\0';
+                    h5str_sprintf(&h5str, attr_id, mem_type_id, rdata + ((size_t)i * size), 0);
+                    jstr = ENVPTR->NewStringUTF(ENVPAR h5str.s);
+                    ENVPTR->SetObjectArrayElement(ENVPAR buf, i, jstr);
+                } /* end for */
+            }  /* end else */
+            h5str_free(&h5str);
+        }  /* end else */
+        HDfree(rdata);
+    }  /* end else */
+    return status;
+}
+
+/*
  * Copies the content of one dataset to another dataset
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Acopy

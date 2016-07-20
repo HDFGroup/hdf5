@@ -1151,7 +1151,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1VLStrings
         h5nullArgument(env, "H5Dread_VLStrings:  buf is NULL");
     } /* end if */
     else {
-        isVlenStr = H5Tis_variable_str((hid_t)mem_type_id);
+        isVlenStr = H5Tdetect_class((hid_t)mem_type_id, H5T_STRING);
 
         if (isVlenStr) {
             status = H5DreadVL_str(env, (hid_t)dataset_id, (hid_t)mem_type_id,
@@ -1786,7 +1786,7 @@ Java_hdf_hdf5lib_H5_H5Diterate
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Dflush
-	(JNIEnv *env, jclass clss, jlong loc_id)
+    (JNIEnv *env, jclass clss, jlong loc_id)
 {
     if (H5Dflush((hid_t)loc_id) < 0)
         h5libraryError(env);
@@ -1799,7 +1799,7 @@ Java_hdf_hdf5lib_H5_H5Dflush
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Drefresh
-	(JNIEnv *env, jclass clss, jlong loc_id)
+    (JNIEnv *env, jclass clss, jlong loc_id)
 {
     if (H5Drefresh((hid_t)loc_id) < 0)
         h5libraryError(env);
