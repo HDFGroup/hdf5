@@ -117,7 +117,6 @@
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/solaris
-./config/x86_64-pc-cygwin
 
 ./config/site-specific/BlankForm
 
