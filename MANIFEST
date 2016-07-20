@@ -103,8 +103,7 @@
 ./config/gnu-cxxflags
 ./config/gnu-fflags
 ./config/gnu-flags
-./config/i386-pc-cygwin32
-./config/i686-pc-cygwin
+./config/cygwin
 ./config/ibm-aix
 ./config/ibm-flags
 ./config/intel-fflags
