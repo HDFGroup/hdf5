@@ -695,11 +695,13 @@ if test "X$HDF_CXX" = "Xyes"; then
   ## Checking if C++ can handle namespaces
   PAC_PROG_CXX_NAMESPACE
 
-  ## Checking if C++ has offsetof extension
-  PAC_PROG_CXX_OFFSETOF
-
   ## if C++ can handle static cast
   PAC_PROG_CXX_STATIC_CAST
+
+  ## Checking if C++ has offsetof extension, 
+  ## note: this test has to be the last of the C++ tests because it sets a definition
+  ## which would be used in the other tests, causing them to fail.
+  PAC_PROG_CXX_OFFSETOF
 
 else
   AC_MSG_RESULT([no])
