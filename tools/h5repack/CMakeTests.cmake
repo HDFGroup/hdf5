@@ -66,41 +66,41 @@
       # h5diff/testfile
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr1.h5
       # tools/testfiles
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00000.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00001.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00002.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00003.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00004.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00005.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00006.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00007.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00008.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00009.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/tfamily00010.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfamily00000.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfamily00001.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfamily00002.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfamily00003.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfamily00004.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfamily00005.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfamily00006.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfamily00007.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfamily00008.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfamily00009.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfamily00010.h5
       # tools/testfiles/vds
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_a.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_b.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_c.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_d.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_e.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_f.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/1_vds.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_a.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_b.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_c.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_d.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_e.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/2_vds.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/3_1_vds.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/3_2_vds.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/4_0.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/4_1.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/4_2.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/4_vds.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/5_a.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/5_b.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/5_c.h5
-      ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/5_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_a.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_b.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_c.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_d.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_e.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_f.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/1_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_a.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_b.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_c.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_d.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_e.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/2_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/3_1_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/3_2_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/4_0.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/4_1.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/4_2.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/4_vds.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/5_a.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/5_b.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/5_c.h5
+      ${HDF5_TOOLS_DIR}/testfiles/vds/5_vds.h5
   )
 
   set (LIST_OTHER_TEST_FILES
@@ -110,15 +110,21 @@
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack.info
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/deflate_limit.h5repack_layout.h5.ddl
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5.ddl
-      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_filters.h5.tst
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_filters.h5-gzip_verbose_filters.tst
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-dset2_chunk_20x10-errstk.tst
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_test.ddl
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/plugin_test.h5repack_layout.h5.tst
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/plugin_none.h5repack_layout.UD.h5.tst
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/2_vds.h5-vds_chunk3x6x9-v.ddl
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_compa-v.ddl
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_conti-v.ddl
   )
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${h5_file}" NAME)
+    get_filename_component(fname "${h5_file}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
     #message (STATUS " Copying ${h5_file}")
     add_custom_command (
@@ -238,7 +244,7 @@
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_FILTER:STRING=${testfilter}"
-                -D "TEST_REFERENCE=${resultfile}.tst"
+                -D "TEST_REFERENCE=${resultfile}-${testname}.tst"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
       endif (HDF5_ENABLE_USING_MEMCHECKER)
@@ -247,6 +253,40 @@
       endif (NOT "${last_test}" STREQUAL "")
     endif ("${testtype}" STREQUAL "SKIP")
   ENDMACRO (ADD_H5_CMP_TEST)
+
+  MACRO (ADD_H5_MASK_TEST testname testtype resultcode resultfile)
+    if ("${testtype}" STREQUAL "SKIP")
+      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+            NAME H5REPACK_MASK-${testname}-SKIPPED
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
+        )
+      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    else ("${testtype}" STREQUAL "SKIP")
+      # If using memchecker add tests without using scripts
+      if (HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+            NAME H5REPACK_MASK-${testname}
+            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile})
+      else (HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+            NAME H5REPACK_MASK-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
+                -D "TEST_ARGS:STRING=${ARGN};${resultfile};out-${testname}.${resultfile}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${resultfile}-${testname}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_MASK_ERROR=true"
+                -D "TEST_REFERENCE=${resultfile}-${testname}.tst"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif (HDF5_ENABLE_USING_MEMCHECKER)
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DEPENDS ${last_test})
+      endif (NOT "${last_test}" STREQUAL "")
+    endif ("${testtype}" STREQUAL "SKIP")
+  ENDMACRO (ADD_H5_MASK_TEST)
 
   MACRO (ADD_H5_DMP_TEST testname testtype resultcode resultfile)
     if ("${testtype}" STREQUAL "SKIP")
@@ -344,6 +384,41 @@
       endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
     endif ("${testtype}" STREQUAL "SKIP")
   ENDMACRO (ADD_H5_VERIFY_TEST)
+
+  MACRO (ADD_H5_VERIFY_VDS testname testtype resultcode testfile testdset testfilter)
+    if ("${testtype}" STREQUAL "SKIP")
+      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+            NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}-SKIPPED
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP -d ${testdset} -pH ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
+        )
+      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    else ("${testtype}" STREQUAL "SKIP")
+      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+            NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}
+            COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+        )
+        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+        if (NOT "${last_test}" STREQUAL "")
+          set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES DEPENDS ${last_test})
+        endif (NOT "${last_test}" STREQUAL "")
+        add_test (
+            NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+                -D "TEST_ARGS:STRING=-d;${testdset};-p;out-${testname}.${testfile}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${testfile}-${testname}-v.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${testfile}-${testname}-v.ddl"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+        set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT_VDS-${testname})
+      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
+    endif ("${testtype}" STREQUAL "SKIP")
+  ENDMACRO (ADD_H5_VERIFY_VDS)
 
   MACRO (ADD_H5_TEST_META testname testfile)
       add_test (
@@ -470,6 +545,8 @@
          ./testfiles/h5repack_layout.h5-deflate_limit.out.err
          ./testfiles/h5repack_layout.h5-dset2_chunk_20x10-v.out
          ./testfiles/h5repack_layout.h5-dset2_chunk_20x10-v.out.err
+         ./testfiles/h5repack_layout.h5-dset2_chunk_20x10-errstk.out
+         ./testfiles/h5repack_layout.h5-dset2_chunk_20x10-errstk.out.err
          ./testfiles/h5repack_layout.h5-dset2_compa-v.out
          ./testfiles/h5repack_layout.h5-dset2_compa-v.out.err
          ./testfiles/h5repack_layout.h5-dset2_conti-v.out
@@ -585,36 +662,21 @@
          ./testfiles/out-meta_short_N.meta_short.h5
          ./testfiles/out-meta_long_M.meta_long.h5
          ./testfiles/out-meta_long_N.meta_long.h5
-         ./testfiles/1_vds.h5-vds_dset_compa-v.out
-         ./testfiles/1_vds.h5-vds_dset_compa-v.out.err
-         ./testfiles/1_vds.h5-vds_dset_conti-v.out
-         ./testfiles/1_vds.h5-vds_dset_conti-v.out.err
-         ./testfiles/2_vds.h5-vds_null_compa-v.out
-         ./testfiles/2_vds.h5-vds_null_compa-v.out.err
-         ./testfiles/2_vds.h5-vds_null_conti-v.out
-         ./testfiles/2_vds.h5-vds_null_conti-v.out.err
+         ./testfiles/1_vds.h5-vds_dset_chunk20x10x5-v.out
+         ./testfiles/1_vds.h5-vds_dset_chunk20x10x5-v.out.err
+         ./testfiles/2_vds.h5-vds_chunk3x6x9-v.out
+         ./testfiles/2_vds.h5-vds_chunk3x6x9-v.out.err
+         ./testfiles/3_1_vds.h5-vds_chunk2x5x8-v.out
+         ./testfiles/3_1_vds.h5-vds_chunk2x5x8-v.out.err
          ./testfiles/4_vds.h5-vds_compa-v.out
          ./testfiles/4_vds.h5-vds_compa-v.out.err
-         ./testfiles/4_vds.h5-vds_compa_compa-v.out
-         ./testfiles/4_vds.h5-vds_compa_compa-v.out.err
-         ./testfiles/4_vds.h5-vds_compa_conti-v.out
-         ./testfiles/4_vds.h5-vds_compa_conti-v.out.err
          ./testfiles/4_vds.h5-vds_conti-v.out
          ./testfiles/4_vds.h5-vds_conti-v.out.err
-         ./testfiles/4_vds.h5-vds_conti_compa-v.out
-         ./testfiles/4_vds.h5-vds_conti_compa-v.out.err
-         ./testfiles/4_vds.h5-vds_conti_conti-v.out
-         ./testfiles/4_vds.h5-vds_conti_conti-v.out.err
          ./testfiles/out-vds_compa.4_vds.h5
-         ./testfiles/out-vds_compa_compa.4_vds.h5
-         ./testfiles/out-vds_compa_conti.4_vds.h5
          ./testfiles/out-vds_conti.4_vds.h5
-         ./testfiles/out-vds_conti_compa.4_vds.h5
-         ./testfiles/out-vds_conti_conti.4_vds.h5
-         ./testfiles/out-vds_dset_compa.1_vds.h5
-         ./testfiles/out-vds_dset_conti.1_vds.h5
-         ./testfiles/out-vds_null_compa.2_vds.h5
-         ./testfiles/out-vds_null_conti.2_vds.h5
+         ./testfiles/out-vds_chunk2x5x8.3_1_vds.h5
+         ./testfiles/out-vds_chunk3x6x9.2_vds.h5
+         ./testfiles/out-vds_dset_chunk20x10x5.1_vds.h5
          h5repack_attr.h5
          h5repack_attr_out.h5
          h5repack_attr_refs.h5
@@ -906,6 +968,7 @@
   ADD_H5_VERIFY_TEST (conti "TEST" 1 ${FILE4} null CONTIGUOUS -l CONTI)
   ADD_H5_VERIFY_TEST (dset2_compa "TEST" 0 ${FILE4} dset2 COMPACT -l dset2:COMPA)
   ADD_H5_VERIFY_TEST (compa "TEST" 1 ${FILE4} null COMPACT -l COMPA)
+  ADD_H5_MASK_TEST (dset2_chunk_20x10-errstk "TEST" 0 ${FILE4} --layout=dset2:CHUNK=20x10x5 --enable-error-stack)
 
 ################################################################
 # layout conversions (file has no filters)
@@ -1050,23 +1113,38 @@
 
 # VDS tests
 
-#########################################################
-# layout options
-#########################################################
-  ADD_H5_VERIFY_TEST (vds_dset_conti "TEST" 0 ${FILEV1} vds_dset CONTIGUOUS -l vds_dset:CONTI)
-  ADD_H5_VERIFY_TEST (vds_null_conti "TEST" 1 ${FILEV2} null CONTIGUOUS -l CONTI)
-  ADD_H5_VERIFY_TEST (vds_dset_compa "TEST" 0 ${FILEV1} vds_dset COMPACT -l vds_dset:COMPA)
-  ADD_H5_VERIFY_TEST (vds_null_compa "TEST" 1 ${FILEV2} null COMPACT -l COMPA)
-
 ################################################################
 # layout conversions
 ###############################################################
-  ADD_H5_VERIFY_TEST (vds_compa_conti "TEST" 0 ${FILEV4} vds_dset CONTIGUOUS -l vds_dset:CONTI)
-  ADD_H5_VERIFY_TEST (vds_compa_compa "TEST" 0 ${FILEV4} vds_dset COMPACT -l vds_dset:COMPA)
-  ADD_H5_VERIFY_TEST (vds_conti_compa "TEST" 0 ${FILEV4} vds_dset COMPACT -l vds_dset:COMPA)
-  ADD_H5_VERIFY_TEST (vds_conti_conti "TEST" 0 ${FILEV4} vds_dset CONTIGUOUS -l vds_dset:CONTI)
-  ADD_H5_VERIFY_TEST (vds_compa "TEST" 0 ${FILEV4} vds_dset COMPACT -l vds_dset:COMPA)
-  ADD_H5_VERIFY_TEST (vds_conti "TEST" 0 ${FILEV4} vds_dset CONTIGUOUS -l vds_dset:CONTI)
+  set (TESTTYPE "TEST")
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif (NOT USE_FILTER_DEFLATE)
+  ADD_H5_VERIFY_VDS (vds_dset_chunk20x10x5 ${TESTTYPE} 0 ${FILEV1} vds_dset CHUNKED -l vds_dset:CHUNK=20x10x5)
+
+  set (TESTTYPE "TEST")
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif (NOT USE_FILTER_DEFLATE)
+  ADD_H5_VERIFY_VDS (vds_chunk2x5x8 ${TESTTYPE} 0 ${FILEV3_1} vds_dset CHUNKED -l vds_dset:CHUNK=2x5x8)
+
+  set (TESTTYPE "TEST")
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif (NOT USE_FILTER_DEFLATE)
+  ADD_H5_VERIFY_VDS (vds_chunk3x6x9 ${TESTTYPE} 0 ${FILEV2} vds_dset CHUNKED -l vds_dset:CHUNK=3x6x9)
+
+  set (TESTTYPE "TEST")
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif (NOT USE_FILTER_DEFLATE)
+  ADD_H5_VERIFY_VDS (vds_compa ${TESTTYPE} 0 ${FILEV4} vds_dset COMPACT -l vds_dset:COMPA)
+
+  set (TESTTYPE "TEST")
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif (NOT USE_FILTER_DEFLATE)
+  ADD_H5_VERIFY_VDS (vds_conti ${TESTTYPE} 0 ${FILEV4} vds_dset CONTIGUOUS -l vds_dset:CONTI)
 
 ##############################################################################
 ###    P L U G I N  T E S T S

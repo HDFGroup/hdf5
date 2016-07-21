@@ -312,14 +312,15 @@ void Exception::printErrorStack(FILE* stream, hid_t err_stack)
 
 //--------------------------------------------------------------------------
 // Function:	Exception::printError
-///\brief	Prints the error stack in a default manner.  This member
-///		function is replaced by the static function printErrorStack
-///		and will be removed from the next major release.
-///\param	stream - IN: File pointer
+// Purpose:	Prints the error stack in a default manner.  This member
+// 		function is replaced by the static function printErrorStack
+// 		and will be removed from the next major release.
+// Parameter	stream - IN: File pointer
 // Programmer	Binh-Minh Ribler - 2000
 // Description:
 //		This function can be removed in next major release.
 //		-BMR, 2014/04/24
+//		Removed from documentation. -BMR, 2016/03/23
 //--------------------------------------------------------------------------
 void Exception::printError(FILE* stream) const
 {

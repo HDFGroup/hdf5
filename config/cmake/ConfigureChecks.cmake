@@ -3,7 +3,10 @@
 #-----------------------------------------------------------------------------
 set (HDF_PREFIX "H5")
 include (${HDF_RESOURCES_EXT_DIR}/ConfigureChecks.cmake)
-include (${CMAKE_ROOT}/Modules/TestForSTDNamespace.cmake)
+
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  set (H5_USING_MEMCHECKER 1)
+endif (HDF5_ENABLE_USING_MEMCHECKER)
 
 #-----------------------------------------------------------------------------
 # Option for --enable-strict-format-checks

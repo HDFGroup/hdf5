@@ -65,7 +65,7 @@
   )
 
   foreach (vds_h5_file ${HDF5_REFERENCE_TEST_VDS})
-    GET_FILENAME_COMPONENT(fname "${vds_h5_file}" NAME)
+    get_filename_component(fname "${vds_h5_file}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}")
     #message (STATUS " Copying ${vds_h5_file}")
     add_custom_command (
@@ -78,7 +78,7 @@
 
 
   foreach (ddl_vds ${HDF5_REFERENCE_VDS})
-    GET_FILENAME_COMPONENT(fname "${ddl_vds}" NAME)
+    get_filename_component(fname "${ddl_vds}" NAME)
     set (ddldest "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}")
     #message (STATUS " Copying ${ddl_vds}")
     add_custom_command (
@@ -90,7 +90,7 @@
   endforeach (ddl_vds ${HDF5_REFERENCE_VDS})
 
   foreach (ddl_vds ${HDF5_ERROR_REFERENCE_VDS})
-    GET_FILENAME_COMPONENT(fname "${ddl_vds}" NAME)
+    get_filename_component(fname "${ddl_vds}" NAME)
     set (ddldest "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}")
     #message (STATUS " Copying ${ddl_vds}")
     add_custom_command (
@@ -111,7 +111,7 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfilesvds")
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif (NOT ${resultcode} STREQUAL "0")
@@ -144,7 +144,7 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> -p ${ARGN})
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfilesvds")
+      set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
       endif (NOT ${resultcode} STREQUAL "0")

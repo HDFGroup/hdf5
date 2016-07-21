@@ -141,10 +141,7 @@ hid_t H5PTcreate(hid_t loc_id,
   if(H5Pclose(plistcopy_id) < 0)
     goto error;
 
-  if((table->type_id = H5Tcopy(dtype_id)) < 0)
-    goto error;
-
-  if((table->type_id = H5Tget_native_type(table->type_id, H5T_DIR_DEFAULT)) < 0)
+  if((table->type_id = H5Tget_native_type(dtype_id, H5T_DIR_DEFAULT)) < 0)
     goto error;
 
   H5PT_create_index(table);

@@ -23,7 +23,11 @@ include $(top_srcdir)/config/commence.am
 
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 
-# Test script for error_test and err_compat
+# Test scripts--
+#       testerror.sh: err_compat, error_test
+#       testlibinfo.sh:
+#       testcheck_version.sh: tcheck_version
+#       tetlinks_env.sh: links_env
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
@@ -44,15 +48,18 @@ TEST_PROG= testhdf5 cache cache_api cache_tagging lheap ohdr stab gheap \
            big mtime fillval mount flush1 flush2 app_ref enum \
            set_extent ttsafe enc_dec_plist enc_dec_plist_cross_platform\
            getname vfd ntypes dangle dtransform reserved cross_read \
-           freespace mf vds file_image unregister
+           freespace mf vds file_image unregister cork
 
-# List programs to be built when testing here. error_test and err_compat are
-# built at the same time as the other tests, but executed by testerror.sh.
+# List programs to be built when testing here.
+# error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
 # tcheck_version is used by testcheck_version.sh.
+# links_env is used by testlinks_env.sh
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
-check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version testmeta links_env
+check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
+    testmeta \
+    links_env 
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= plugin
 endif
@@ -126,10 +133,13 @@ flush2.chkexe_: flush1.chkexe_
 # the temporary file name in ways that the makefile is not aware of.
 CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
     max_compact_dataset.h5 simple.h5 set_local.h5 random_chunks.h5 \
-    huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_expand.h5 \
-    copy_dcpl_newfile.h5 extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
+    huge_chunks.h5 chunk_cache.h5 big_chunk.h5 chunk_fast.h5 chunk_expand.h5 \
+    chunk_fixed.h5 copy_dcpl_newfile.h5 partial_chunks.h5 layout_extend.h5 \
+    zero_chunk.h5 chunk_single.h5 \
+    storage_size.h5 dls_01_strings.h5 \
+    extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
-    stab.h5 extern_[1-4].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
+    stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 tmp \
     big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
@@ -149,8 +159,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     new_multi_file_v16-r.h5 new_multi_file_v16-s.h5                  \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
-    vds_virt.h5 vds_src_[0-1].h5
-
+    vds_virt.h5 vds_dapl.h5 vds_src_[0-1].h5
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c tcoords.c theap.c tid.c titerate.c tmeta.c tmisc.c \
@@ -159,5 +168,4 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 
 # Temporary files.
 DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
-
 include $(top_srcdir)/config/conclude.am

@@ -3036,8 +3036,10 @@ H5T__create(H5T_class_t type, size_t size)
                     subtype = H5T_NATIVE_INT_g;
                 else if(sizeof(long) == size)
                     subtype = H5T_NATIVE_LONG_g;
+#if H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG
                 else if(sizeof(long long) == size)
                     subtype = H5T_NATIVE_LLONG_g;
+#endif /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
                 else
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "no applicable native integer type")
                 if(NULL == (dt = H5T__alloc()))
@@ -3612,6 +3614,17 @@ H5T_close(H5T_t *dt)
         dt->shared->fo_count--;
 
     if(dt->shared->state != H5T_STATE_OPEN || dt->shared->fo_count == 0) {
+	/* Uncork cache entries with object address tag for named datatype only */
+	if(dt->shared->state == H5T_STATE_OPEN && dt->shared->fo_count == 0) {
+            hbool_t 	corked;			/* Whether the named datatype is corked or not */
+
+	    if(H5AC_cork(dt->oloc.file, dt->oloc.addr, H5AC__GET_CORKED, &corked) < 0)
+		HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to retrieve an object's cork status")
+	    if(corked)
+		if(H5AC_cork(dt->oloc.file, dt->oloc.addr, H5AC__UNCORK, NULL) < 0)
+		    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTUNCORK, FAIL, "unable to uncork an object")
+	} /* end if */
+
         if(H5T__free(dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
@@ -4990,6 +5003,49 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    H5T_convert_committed_datatype
+ *
+ * Purpose:     To convert the committed datatype "dt" to a transient embedded
+ *		type if the file location associated with the committed datatype is 
+ *		different from the parameter "f".  
+ *		"f" is the file location where the dataset or attribute will be created.
+ *
+ * Notes:       See HDFFV-9940
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *
+ * Programmer:  Vailin Choi; June 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_convert_committed_datatype(H5T_t *dt, H5F_t *f)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(dt);
+    HDassert(f);
+
+    if(H5T_is_named(dt) && (dt->sh_loc.file != f)) {
+       HDassert(dt->sh_loc.type == H5O_SHARE_TYPE_COMMITTED);
+
+        H5O_msg_reset_share(H5O_DTYPE_ID, dt);
+        if(H5O_loc_free(&dt->oloc) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRESET, FAIL, "unable to initialize location")
+        if(H5G_name_free(&dt->path) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to reset path")
+
+        dt->shared->state = H5T_STATE_TRANSIENT;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5T_convert_committed_datatype() */
+
 
 /*--------------------------------------------------------------------------
  NAME
@@ -5452,4 +5508,105 @@ H5T_patch_file(H5T_t *dt, H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_patch_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_patch_vlen_file
+ *
+ * Purpose:     Patch the top-level file pointer contained in (dt->shared->u.vlen.f)
+ *              to point to f.  This is possible because
+ *              the top-level file pointer can be closed out from under
+ *              dt while dt is contained in the shared file's cache.
+ *
+ * Return:      SUCCEED
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_patch_vlen_file(H5T_t *dt, H5F_t *f)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(dt);
+    HDassert(dt->shared);
+    HDassert(f);
+
+    if((dt->shared->type == H5T_VLEN) && dt->shared->u.vlen.f != f)
+        dt->shared->u.vlen.f = f;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5T_patch_vlen_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Tflush
+ *
+ * Purpose:     Flushes all buffers associated with a named datatype to disk.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              May 19, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tflush(hid_t type_id)
+{
+    H5T_t *dt; /* Datatype for this operation */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", type_id);
+    
+    /* Check args */
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(!H5T_is_named(dt))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
+
+    /* To flush metadata and invoke flush callback if there is */
+    if(H5O_flush_common(&dt->oloc, type_id, H5AC_ind_read_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype and object flush callback")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Tflush */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Trefresh
+ *
+ * Purpose:     Refreshes all buffers associated with a named datatype.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              July 21, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Trefresh(hid_t type_id)
+{
+    H5T_t * dt = NULL;
+    herr_t ret_value = SUCCEED; /* return value */
+    
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", type_id);
+
+    /* Check args */
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    if(!H5T_is_named(dt))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
+
+    /* Call private function to refresh datatype object */
+    if ((H5O_refresh_metadata(type_id, dt->oloc, H5AC_ind_read_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "unable to refresh datatype")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Trefresh */
 

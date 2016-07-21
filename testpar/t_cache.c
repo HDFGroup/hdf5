@@ -3054,7 +3054,7 @@ expunge_entry(H5F_t * file_ptr,
 	HDassert( ! ((entry_ptr->header).is_dirty) );
 
 	result = H5C_get_entry_status(file_ptr, entry_ptr->base_addr,
-				      NULL, &in_cache, NULL, NULL, NULL, NULL, NULL);
+				      NULL, &in_cache, NULL, NULL, NULL, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -3126,7 +3126,7 @@ insert_entry(H5C_t * cache_ptr,
         entry_ptr->dirty = TRUE;
 
         result = H5AC_insert_entry(file_ptr, H5AC_ind_read_dxpl_id, &(types[0]),
-               entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
+                entry_ptr->base_addr, (void *)(&(entry_ptr->header)), flags);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.type != &(types[0]) ) ||
@@ -7164,10 +7164,6 @@ smoke_check_6(int metadata_write_strategy)
     hbool_t success = TRUE;
     int i;
     int max_nerrors;
-    int min_count;
-    int max_count;
-    int min_idx;
-    int max_idx;
     hid_t fid = -1;
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;
@@ -7225,9 +7221,6 @@ smoke_check_6(int metadata_write_strategy)
                           world_mpi_rank, FUNC);
             }
         }
-
-        min_count = 100 / ((file_mpi_rank + 1) * (file_mpi_rank + 1));
-        max_count = min_count + 50;
 
         temp = virt_num_data_entries;
         virt_num_data_entries = NUM_DATA_ENTRIES;

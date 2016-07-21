@@ -158,7 +158,7 @@ H5_DLL herr_t H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t typ
     haddr_t addr, size_t size, void *buf/*out*/);
 H5_DLL herr_t H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type,
     haddr_t addr, size_t size, const void *buf);
-H5_DLL herr_t H5FD_flush(H5FD_t *file, hid_t dxpl_id, unsigned closing);
+H5_DLL herr_t H5FD_flush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FD_truncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FD_lock(H5FD_t *file, hbool_t rw);
 H5_DLL herr_t H5FD_unlock(H5FD_t *file);

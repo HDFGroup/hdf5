@@ -33,6 +33,7 @@
 
 /* Other private headers needed by this file */
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5B2private.h"        /* v2 B-trees                           */
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5SLprivate.h"	/* Skip lists				*/
@@ -46,19 +47,19 @@
 #define H5D_MINHDR_SIZE 256
 
 /* [Simple] Macro to construct a H5D_io_info_t from it's components */
-#define H5D_BUILD_IO_INFO_WRT(io_info, ds, dxpl_c, dxpl_i, str, buf)    \
+#define H5D_BUILD_IO_INFO_WRT(io_info, ds, dxpl_c, dxpl_m, dxpl_r, str, buf)    \
     (io_info)->dset = ds;                                               \
     (io_info)->dxpl_cache = dxpl_c;                                     \
-    (io_info)->raw_dxpl_id = dxpl_i;                                    \
-    (io_info)->md_dxpl_id = dxpl_i;                                    \
+    (io_info)->raw_dxpl_id = dxpl_r;                                    \
+    (io_info)->md_dxpl_id = dxpl_m;                                     \
     (io_info)->store = str;                                             \
     (io_info)->op_type = H5D_IO_OP_WRITE;                               \
     (io_info)->u.wbuf = buf
-#define H5D_BUILD_IO_INFO_RD(io_info, ds, dxpl_c, dxpl_i, str, buf)     \
+#define H5D_BUILD_IO_INFO_RD(io_info, ds, dxpl_c, dxpl_m, dxpl_r, str, buf) \
     (io_info)->dset = ds;                                               \
     (io_info)->dxpl_cache = dxpl_c;                                     \
-    (io_info)->raw_dxpl_id = dxpl_i;                                    \
-    (io_info)->md_dxpl_id = dxpl_i;                                    \
+    (io_info)->raw_dxpl_id = dxpl_r;                                    \
+    (io_info)->md_dxpl_id = dxpl_m;                                     \
     (io_info)->store = str;                                             \
     (io_info)->op_type = H5D_IO_OP_READ;                                \
     (io_info)->u.rbuf = buf
@@ -66,6 +67,27 @@
 /* Flags for marking aspects of a dataset dirty */
 #define H5D_MARK_SPACE  0x01
 #define H5D_MARK_LAYOUT  0x02
+
+/* Default creation parameters for chunk index data structures */
+/* See H5O_layout_chunk_t */
+
+/* Fixed array creation values */
+#define H5D_FARRAY_CREATE_PARAM_SIZE		1	/* Size of the creation parameters in bytes */
+#define H5D_FARRAY_MAX_DBLK_PAGE_NELMTS_BITS 	10  	/* i.e. 1024 elements per data block page */
+
+/* Extensible array creation values */
+#define H5D_EARRAY_CREATE_PARAM_SIZE		5	/* Size of the creation parameters in bytes */
+#define H5D_EARRAY_MAX_NELMTS_BITS         	32	/* i.e. 4 giga-elements */
+#define H5D_EARRAY_IDX_BLK_ELMTS           	4
+#define H5D_EARRAY_SUP_BLK_MIN_DATA_PTRS   	4
+#define H5D_EARRAY_DATA_BLK_MIN_ELMTS      	16
+#define H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS 	10 	/* i.e. 1024 elements per data block page */
+
+/* v2 B-tree creation values for raw meta_size */
+#define H5D_BT2_CREATE_PARAM_SIZE	6		/* Size of the creation parameters in bytes */
+#define H5D_BT2_NODE_SIZE       	2048
+#define H5D_BT2_SPLIT_PERC      	100
+#define H5D_BT2_MERGE_PERC      	40
 
 
 /****************************/
@@ -267,6 +289,7 @@ typedef struct H5D_chunk_ud_t {
     unsigned    idx_hint;               /* Index of chunk in cache, if present */
     H5F_block_t chunk_block;            /* Offset/length of chunk in file */
     unsigned	filter_mask;		/* Excluded filters	*/
+    hbool_t     new_unfilt_chunk;       /* Whether the chunk just became unfiltered */
     hsize_t     chunk_idx;              /* Chunk index for EA, FA indexing */
 } H5D_chunk_ud_t;
 
@@ -371,6 +394,12 @@ typedef struct H5D_chunk_cached_t {
     unsigned	filter_mask;			/*excluded filters	*/
 } H5D_chunk_cached_t;
 
+/* List of files held open during refresh operations */
+typedef struct H5D_virtual_held_file_t {
+    H5F_t *file;                                /* Pointer to file held open */
+    struct H5D_virtual_held_file_t *next;       /* Pointer to next node in list */
+} H5D_virtual_held_file_t;
+
 /* The raw data chunk cache */
 struct H5D_rdcc_ent_t;  /* Forward declaration of struct used below */
 typedef struct H5D_rdcc_t {
@@ -442,6 +471,7 @@ typedef struct H5D_shared_t {
         H5D_rdcc_t      chunk;          /* Information about chunked data */
     } cache;
 
+    H5D_append_flush_t  append_flush;   /* Append flush property information */
     char                *extfile_prefix; /* expanded external file prefix */
 } H5D_shared_t;
 
@@ -520,6 +550,15 @@ H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1];
 
 /* Chunked layout operations */
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_NONE[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_SINGLE[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_EARRAY[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_FARRAY[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BT2[1];
+
+/* The v2 B-tree class for indexing chunked datasets with >1 unlimited dimensions */
+H5_DLLVAR const H5B2_class_t H5D_BT2[1];
+H5_DLLVAR const H5B2_class_t H5D_BT2_FILT[1];
 
 
 /******************************/
@@ -546,11 +585,15 @@ H5_DLL herr_t H5D__check_filters(H5D_t *dataset);
 H5_DLL herr_t H5D__set_extent(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id);
 H5_DLL herr_t H5D__get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
 H5_DLL herr_t H5D__flush_sieve_buf(H5D_t *dataset, hid_t dxpl_id);
-H5_DLL herr_t H5D__mark(const H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D__flush_real(H5D_t *dataset, hid_t dxpl_id);
+H5_DLL herr_t H5D__mark(const H5D_t *dataset, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5D__refresh(hid_t dset_id, H5D_t *dataset, hid_t dxpl_id);
 #ifdef H5_DEBUG_BUILD
 H5_DLL herr_t H5D_set_io_info_dxpls(H5D_io_info_t *io_info, hid_t dxpl_id);
 #endif /* H5_DEBUG_BUILD */
+
+/* To convert a dataset's chunk indexing type to v1 B-tree */
+H5_DLL herr_t H5D__format_convert(H5D_t *dataset, hid_t dxpl_id);
 
 /* Internal I/O routines */
 H5_DLL herr_t H5D__read(H5D_t *dataset, hid_t mem_type_id,
@@ -583,6 +626,10 @@ H5_DLL herr_t H5D__scatgath_write(const H5D_io_info_t *io_info,
 H5_DLL herr_t H5D__layout_set_io_ops(const H5D_t *dataset);
 H5_DLL size_t H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout,
     hbool_t include_compact_data);
+H5_DLL herr_t H5D__layout_set_latest_version(H5O_layout_t *layout,
+    const H5S_t *space, const H5D_dcpl_cache_t *dcpl_cache);
+H5_DLL herr_t H5D__layout_set_latest_indexing(H5O_layout_t *layout,
+    const H5S_t *space, const H5D_dcpl_cache_t *dcpl_cache);
 H5_DLL herr_t H5D__layout_oh_create(H5F_t *file, hid_t dxpl_id, H5O_t *oh,
     H5D_t *dset, hid_t dapl_id);
 H5_DLL herr_t H5D__layout_oh_read(H5D_t *dset, hid_t dxpl_id, hid_t dapl_id,
@@ -617,8 +664,11 @@ H5_DLL herr_t H5D__chunk_lookup(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *scaled, H5D_chunk_ud_t *udata);
 H5_DLL herr_t H5D__chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes);
 H5_DLL herr_t H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[]);
+H5_DLL herr_t H5D__chunk_update_old_edge_chunks(H5D_t *dset, hid_t dxpl_id,
+    hsize_t old_dim[]);
 H5_DLL herr_t H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id,
     const hsize_t *old_dim);
+H5_DLL herr_t H5D__chunk_set_sizes(H5D_t *dset);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5D__chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[]);
 #endif /* H5_HAVE_PARALLEL */
@@ -637,6 +687,7 @@ H5_DLL herr_t H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t
 #ifdef H5D_CHUNK_DEBUG
 H5_DLL herr_t H5D__chunk_stats(const H5D_t *dset, hbool_t headers);
 #endif /* H5D_CHUNK_DEBUG */
+H5_DLL herr_t H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info, H5D_chk_idx_info_t *new_idx_info);
 
 /* Functions that operate on compact dataset storage */
 H5_DLL herr_t H5D__compact_fill(const H5D_t *dset, hid_t dxpl_id);
@@ -654,6 +705,9 @@ H5_DLL herr_t H5D__virtual_copy(H5F_t *f_src, H5O_layout_t *layout_dst,
 H5_DLL herr_t H5D__virtual_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id);
 H5_DLL hbool_t H5D__virtual_is_space_alloc(const H5O_storage_t *storage);
+H5_DLL herr_t H5D__virtual_hold_source_dset_files(const H5D_t *dset, H5D_virtual_held_file_t **head);
+H5_DLL herr_t H5D__virtual_refresh_source_dsets(H5D_t *dset, hid_t dxpl_id);
+H5_DLL herr_t H5D__virtual_release_source_dset_files(H5D_virtual_held_file_t *head);
 
 /* Functions that operate on EFL (External File List)*/
 H5_DLL hbool_t H5D__efl_is_space_alloc(const H5O_storage_t *storage);
@@ -725,6 +779,7 @@ H5_DLL htri_t H5D__mpio_opt_possible(const H5D_io_info_t *io_info,
 #ifdef H5D_TESTING
 H5_DLL herr_t H5D__layout_version_test(hid_t did, unsigned *version);
 H5_DLL herr_t H5D__layout_contig_size_test(hid_t did, hsize_t *size);
+H5_DLL herr_t H5D__layout_idx_type_test(hid_t did, H5D_chunk_index_t *idx_type);
 H5_DLL herr_t H5D__current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused);
 #endif /* H5D_TESTING */
 

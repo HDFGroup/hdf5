@@ -36,22 +36,6 @@ bool IdComponent::H5cppinit = false;
 bool IdComponent::H5dontAtexit_called = false;
 
 //--------------------------------------------------------------------------
-// Function:	IdComponent overloaded constructor
-///\brief 	Creates an IdComponent object using the id of an existing
-///		object. - Obsolete, will be removed in 1.8.17
-// Param	h5_id - IN: Id of an existing object
-// Exception	H5::DataTypeIException
-// Programmer	Binh-Minh Ribler - 2000
-//
-// *** Deprecation warning ***
-// This constructor is no longer appropriate because the data member "id" had
-// been moved to the sub-classes.  It will be removed in 1.10 release.  If its
-// removal does not raise any problems in 1.10, it will be removed from 1.8 in
-// subsequent releases.
-//--------------------------------------------------------------------------
-IdComponent::IdComponent(const hid_t h5_id) {}
-
-//--------------------------------------------------------------------------
 // Function:	IdComponent::incRefCount
 ///\brief	Increment reference counter for a given id.
 // Programmer	Binh-Minh Ribler - May 2005
@@ -207,7 +191,7 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 	    // Note: a = b, so there are two objects with the same hdf5 id
 	    // that's why incRefCount is needed, and it is called by setId
 	}
-	catch (Exception close_error) {
+	catch (Exception& close_error) {
 	    throw FileIException(inMemFunc("operator="), close_error.getDetailMsg());
 	}
     }

@@ -40,7 +40,8 @@ extern jobject visit_callback;
  * Signature: (JLjava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Topen2(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_plist)
+Java_hdf_hdf5lib_H5__1H5Topen2
+    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_plist)
 {
     hid_t       status;
     const char *tName;
@@ -63,7 +64,8 @@ Java_hdf_hdf5lib_H5__1H5Topen2(JNIEnv *env, jclass clss, jlong loc_id, jstring n
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Tcommitted(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tcommitted
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     htri_t bval = JNI_FALSE;
 
@@ -82,7 +84,8 @@ Java_hdf_hdf5lib_H5_H5Tcommitted(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (IJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Tcreate(JNIEnv *env, jclass clss, jint dclass, jlong size)
+Java_hdf_hdf5lib_H5__1H5Tcreate
+    (JNIEnv *env, jclass clss, jint dclass, jlong size)
 {
     hid_t retVal = -1;
 
@@ -95,11 +98,12 @@ Java_hdf_hdf5lib_H5__1H5Tcreate(JNIEnv *env, jclass clss, jint dclass, jlong siz
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Tcopy
+ * Method:    _H5Tcopy
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Tcopy(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5__1H5Tcopy
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     hid_t retVal = -1;
 
@@ -116,7 +120,8 @@ Java_hdf_hdf5lib_H5__1H5Tcopy(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (JJ)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Tequal(JNIEnv *env, jclass clss, jlong type_id1, jlong type_id2)
+Java_hdf_hdf5lib_H5_H5Tequal
+    (JNIEnv *env, jclass clss, jlong type_id1, jlong type_id2)
 {
     htri_t bval = JNI_FALSE;
 
@@ -135,7 +140,8 @@ Java_hdf_hdf5lib_H5_H5Tequal(JNIEnv *env, jclass clss, jlong type_id1, jlong typ
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tlock(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tlock
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     herr_t retVal = -1;
 
@@ -152,7 +158,8 @@ Java_hdf_hdf5lib_H5_H5Tlock(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1class(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1class
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     H5T_class_t retVal = H5T_NO_CLASS;
 
@@ -169,7 +176,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1class(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1size(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1size
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     size_t retVal = 0;
 
@@ -186,7 +194,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1size(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (JJ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1size(JNIEnv *env, jclass clss, jlong type_id, jlong size)
+Java_hdf_hdf5lib_H5_H5Tset_1size
+    (JNIEnv *env, jclass clss, jlong type_id, jlong size)
 {
     size_t tsize = (size_t)size;
     herr_t retVal = -1;
@@ -204,7 +213,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1size(JNIEnv *env, jclass clss, jlong type_id, jlong 
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1order(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1order
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     H5T_order_t retVal = H5T_ORDER_ERROR;
 
@@ -221,7 +231,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1order(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1order(JNIEnv *env, jclass clss, jlong type_id, jint order)
+Java_hdf_hdf5lib_H5_H5Tset_1order
+    (JNIEnv *env, jclass clss, jlong type_id, jint order)
 {
     herr_t retVal = -1;
 
@@ -238,7 +249,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1order(JNIEnv *env, jclass clss, jlong type_id, jint 
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1precision(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1precision
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     size_t retVal = 0;
 
@@ -255,7 +267,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1precision(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1precision_1long(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1precision_1long
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     size_t retVal = 0;
 
@@ -272,7 +285,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1precision_1long(JNIEnv *env, jclass clss, jlong type
  * Signature: (JJ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1precision(JNIEnv *env, jclass clss, jlong type_id, jlong precision)
+Java_hdf_hdf5lib_H5_H5Tset_1precision
+    (JNIEnv *env, jclass clss, jlong type_id, jlong precision)
 {
     herr_t retVal = -1;
 
@@ -289,7 +303,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1precision(JNIEnv *env, jclass clss, jlong type_id, j
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1offset(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1offset
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     int retVal = -1;
 
@@ -306,7 +321,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1offset(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (JJ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1offset(JNIEnv *env, jclass clss, jlong type_id, jlong offset)
+Java_hdf_hdf5lib_H5_H5Tset_1offset
+    (JNIEnv *env, jclass clss, jlong type_id, jlong offset)
 {
     herr_t retVal = -1;
 
@@ -323,7 +339,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1offset(JNIEnv *env, jclass clss, jlong type_id, jlon
  * Signature: (J[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1pad(JNIEnv *env, jclass clss, jlong type_id, jintArray pad)
+Java_hdf_hdf5lib_H5_H5Tget_1pad
+    (JNIEnv *env, jclass clss, jlong type_id, jintArray pad)
 {
     herr_t   status = -1;
     jboolean isCopy;
@@ -358,7 +375,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1pad(JNIEnv *env, jclass clss, jlong type_id, jintArr
  * Signature: (JII)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1pad(JNIEnv *env, jclass clss, jlong type_id, jint lsb, jint msb)
+Java_hdf_hdf5lib_H5_H5Tset_1pad
+    (JNIEnv *env, jclass clss, jlong type_id, jint lsb, jint msb)
 {
     herr_t retVal = -1;
 
@@ -375,7 +393,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1pad(JNIEnv *env, jclass clss, jlong type_id, jint ls
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1sign(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1sign
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     H5T_sign_t retVal = H5T_SGN_ERROR;
 
@@ -392,7 +411,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1sign(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1sign(JNIEnv *env, jclass clss, jlong type_id, jint sign)
+Java_hdf_hdf5lib_H5_H5Tset_1sign
+    (JNIEnv *env, jclass clss, jlong type_id, jint sign)
 {
     herr_t retVal = -1;
 
@@ -409,7 +429,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1sign(JNIEnv *env, jclass clss, jlong type_id, jint s
  * Signature: (J[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1fields_1int(JNIEnv *env, jclass clss, jlong type_id, jintArray fields)
+Java_hdf_hdf5lib_H5_H5Tget_1fields_1int
+    (JNIEnv *env, jclass clss, jlong type_id, jintArray fields)
 {
     herr_t   status;
     jboolean isCopy;
@@ -447,7 +468,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1fields_1int(JNIEnv *env, jclass clss, jlong type_id,
  * Signature: (J[J)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1fields(JNIEnv *env, jclass clss, jlong type_id, jlongArray fields)
+Java_hdf_hdf5lib_H5_H5Tget_1fields
+    (JNIEnv *env, jclass clss, jlong type_id, jlongArray fields)
 {
     herr_t   status;
     jboolean isCopy;
@@ -507,7 +529,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1fields(JNIEnv *env, jclass clss, jlong type_id, jlon
  * Signature: (JJJJJJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1fields(JNIEnv *env, jclass clss, jlong type_id, jlong spos, jlong epos,
+Java_hdf_hdf5lib_H5_H5Tset_1fields
+    (JNIEnv *env, jclass clss, jlong type_id, jlong spos, jlong epos,
         jlong esize, jlong mpos, jlong msize)
 {
     if (H5Tset_fields((hid_t)type_id, (size_t)spos, (size_t)epos, (size_t)esize, (size_t)mpos, (size_t)msize) < 0)
@@ -520,7 +543,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1fields(JNIEnv *env, jclass clss, jlong type_id, jlon
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1ebias(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1ebias
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     size_t retVal = 0;
 
@@ -537,7 +561,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1ebias(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1ebias_1long(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1ebias_1long
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     size_t retVal = 0;
 
@@ -554,7 +579,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1ebias_1long(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (JJ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1ebias(JNIEnv *env, jclass clss, jlong type_id, jlong ebias)
+Java_hdf_hdf5lib_H5_H5Tset_1ebias
+    (JNIEnv *env, jclass clss, jlong type_id, jlong ebias)
 {
     herr_t retVal = -1;
 
@@ -571,7 +597,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1ebias(JNIEnv *env, jclass clss, jlong type_id, jlong
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1norm(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1norm
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     H5T_norm_t retVal = H5T_NORM_ERROR;
 
@@ -588,7 +615,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1norm(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1norm(JNIEnv *env, jclass clss, jlong type_id, jint norm)
+Java_hdf_hdf5lib_H5_H5Tset_1norm
+    (JNIEnv *env, jclass clss, jlong type_id, jint norm)
 {
     herr_t retVal = -1;
 
@@ -605,7 +633,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1norm(JNIEnv *env, jclass clss, jlong type_id, jint n
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1inpad(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1inpad
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     H5T_pad_t retVal = H5T_PAD_ERROR;
 
@@ -622,7 +651,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1inpad(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1inpad(JNIEnv *env, jclass clss, jlong type_id, jint inpad)
+Java_hdf_hdf5lib_H5_H5Tset_1inpad
+    (JNIEnv *env, jclass clss, jlong type_id, jint inpad)
 {
     herr_t retVal = -1;
 
@@ -639,7 +669,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1inpad(JNIEnv *env, jclass clss, jlong type_id, jint 
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1cset(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1cset
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     H5T_cset_t retVal = H5T_CSET_ERROR;
 
@@ -656,7 +687,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1cset(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1cset(JNIEnv *env, jclass clss, jlong type_id, jint cset)
+Java_hdf_hdf5lib_H5_H5Tset_1cset
+    (JNIEnv *env, jclass clss, jlong type_id, jint cset)
 {
     herr_t retVal = -1;
 
@@ -673,7 +705,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1cset(JNIEnv *env, jclass clss, jlong type_id, jint c
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1strpad(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1strpad
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     H5T_str_t retVal = H5T_STR_ERROR;
 
@@ -690,7 +723,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1strpad(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1strpad(JNIEnv *env, jclass clss, jlong type_id, jint strpad)
+Java_hdf_hdf5lib_H5_H5Tset_1strpad
+    (JNIEnv *env, jclass clss, jlong type_id, jint strpad)
 {
     herr_t retVal = -1;
 
@@ -707,7 +741,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1strpad(JNIEnv *env, jclass clss, jlong type_id, jint
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1nmembers(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1nmembers
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     int retVal = -1;
 
@@ -724,7 +759,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1nmembers(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (JI)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1member_1name(JNIEnv *env, jclass clss, jlong type_id, jint field_idx)
+Java_hdf_hdf5lib_H5_H5Tget_1member_1name
+    (JNIEnv *env, jclass clss, jlong type_id, jint field_idx)
 {
     char   *name;
     jstring str = NULL;
@@ -747,7 +783,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1name(JNIEnv *env, jclass clss, jlong type_id
  * Signature: (JLjava/lang/String)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1member_1index(JNIEnv *env, jclass clss, jlong type_id, jstring field_name)
+Java_hdf_hdf5lib_H5_H5Tget_1member_1index
+    (JNIEnv *env, jclass clss, jlong type_id, jstring field_name)
 {
     const char *tName;
     int         index = -1;
@@ -770,7 +807,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1index(JNIEnv *env, jclass clss, jlong type_i
  * Signature: (JI)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Tget_1member_1type(JNIEnv *env, jclass clss, jlong type_id, jint field_idx)
+Java_hdf_hdf5lib_H5__1H5Tget_1member_1type
+    (JNIEnv *env, jclass clss, jlong type_id, jint field_idx)
 {
     hid_t retVal = -1;
 
@@ -787,7 +825,8 @@ Java_hdf_hdf5lib_H5__1H5Tget_1member_1type(JNIEnv *env, jclass clss, jlong type_
  * Signature: (JI)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1member_1offset(JNIEnv *env, jclass clss, jlong type_id, jint memno)
+Java_hdf_hdf5lib_H5_H5Tget_1member_1offset
+    (JNIEnv *env, jclass clss, jlong type_id, jint memno)
 {
     return (jlong)H5Tget_member_offset((hid_t)type_id, (unsigned)memno);
 } /* end Java_hdf_hdf5lib_H5_H5Tget_1member_1offset */
@@ -798,7 +837,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1offset(JNIEnv *env, jclass clss, jlong type_
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1member_1class(JNIEnv *env, jclass clss, jlong type_id, jint memno)
+Java_hdf_hdf5lib_H5_H5Tget_1member_1class
+    (JNIEnv *env, jclass clss, jlong type_id, jint memno)
 {
     int retVal = -1;
 
@@ -815,7 +855,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1class(JNIEnv *env, jclass clss, jlong type_i
  * Signature: (JLjava/lang/String;JJ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tinsert(JNIEnv *env, jclass clss, jlong type_id, jstring name, jlong offset, jlong field_id)
+Java_hdf_hdf5lib_H5_H5Tinsert
+    (JNIEnv *env, jclass clss, jlong type_id, jstring name, jlong offset, jlong field_id)
 {
     herr_t      status;
     const char *tName;
@@ -838,7 +879,8 @@ Java_hdf_hdf5lib_H5_H5Tinsert(JNIEnv *env, jclass clss, jlong type_id, jstring n
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tpack(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tpack
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     herr_t retVal = -1;
 
@@ -855,7 +897,8 @@ Java_hdf_hdf5lib_H5_H5Tpack(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5__1H5Tclose(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5__1H5Tclose
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     herr_t retVal = -1;
 
@@ -872,7 +915,8 @@ Java_hdf_hdf5lib_H5__1H5Tclose(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Tvlen_1create(JNIEnv *env, jclass clss, jlong base_id)
+Java_hdf_hdf5lib_H5__1H5Tvlen_1create
+    (JNIEnv *env, jclass clss, jlong base_id)
 {
     hid_t retVal = -1;
 
@@ -889,7 +933,8 @@ Java_hdf_hdf5lib_H5__1H5Tvlen_1create(JNIEnv *env, jclass clss, jlong base_id)
  * Signature: (JLjava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tset_1tag(JNIEnv *env, jclass clss, jlong type, jstring tag)
+Java_hdf_hdf5lib_H5_H5Tset_1tag
+    (JNIEnv *env, jclass clss, jlong type, jstring tag)
 {
     herr_t      status = -1;
     const char *tagP;
@@ -912,7 +957,8 @@ Java_hdf_hdf5lib_H5_H5Tset_1tag(JNIEnv *env, jclass clss, jlong type, jstring ta
  * Signature: (J)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1tag(JNIEnv *env, jclass clss, jlong type)
+Java_hdf_hdf5lib_H5_H5Tget_1tag
+    (JNIEnv *env, jclass clss, jlong type)
 {
     jstring str = NULL;
     char   *tag;
@@ -935,7 +981,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1tag(JNIEnv *env, jclass clss, jlong type)
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Tget_1super(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5__1H5Tget_1super
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     hid_t retVal = -1;
 
@@ -952,7 +999,8 @@ Java_hdf_hdf5lib_H5__1H5Tget_1super(JNIEnv *env, jclass clss, jlong type_id)
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Tenum_1create(JNIEnv *env, jclass clss, jlong base_id)
+Java_hdf_hdf5lib_H5__1H5Tenum_1create
+    (JNIEnv *env, jclass clss, jlong base_id)
 {
     hid_t retVal = -1;
 
@@ -969,7 +1017,8 @@ Java_hdf_hdf5lib_H5__1H5Tenum_1create(JNIEnv *env, jclass clss, jlong base_id)
  * Signature: (JLjava/lang/String;[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tenum_1insert_1int(JNIEnv *env, jclass clss, jlong type_id, jstring name, jintArray value)
+Java_hdf_hdf5lib_H5_H5Tenum_1insert_1int
+    (JNIEnv *env, jclass clss, jlong type_id, jstring name, jintArray value)
 {
     herr_t      status = -1;
     jint       *intP;
@@ -984,19 +1033,17 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert_1int(JNIEnv *env, jclass clss, jlong type_id
 
         intP = ENVPTR->GetIntArrayElements(ENVPAR value, &isCopy2);
         if (intP == NULL) {
-            UNPIN_JAVA_STRING(name, nameP);
             h5JNIFatalError(env, "H5Tenum_insert:  value not pinned");
-            return -1;
         } /* end if */
         else {
             status = H5Tenum_insert((hid_t)type_id, nameP, intP);
 
-            UNPIN_JAVA_STRING(name, nameP);
             ENVPTR->ReleaseIntArrayElements(ENVPAR value, intP, JNI_ABORT);
 
             if (status < 0)
                 h5libraryError(env);
         } /* end else */
+        UNPIN_JAVA_STRING(name, nameP);
     } /* end else */
 
     return (jint)status;
@@ -1008,7 +1055,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert_1int(JNIEnv *env, jclass clss, jlong type_id
  * Signature: (JLjava/lang/String;[B)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Tenum_1insert(JNIEnv *env, jclass clss, jlong type_id, jstring name, jbyteArray value)
+Java_hdf_hdf5lib_H5_H5Tenum_1insert
+    (JNIEnv *env, jclass clss, jlong type_id, jstring name, jbyteArray value)
 {
     herr_t      status = -1;
     jbyte      *byteP;
@@ -1023,18 +1071,17 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert(JNIEnv *env, jclass clss, jlong type_id, jst
 
         byteP = ENVPTR->GetByteArrayElements(ENVPAR value, &isCopy2);
         if (byteP == NULL) {
-            UNPIN_JAVA_STRING(name, nameP);
             h5JNIFatalError(env, "H5Tenum_insert:  value not pinned");
         } /* end if */
         else {
             status = H5Tenum_insert((hid_t)type_id, nameP, byteP);
 
-            UNPIN_JAVA_STRING(name, nameP);
             ENVPTR->ReleaseByteArrayElements(ENVPAR value, byteP, JNI_ABORT);
 
             if (status < 0)
                 h5libraryError(env);
         } /* end else */
+        UNPIN_JAVA_STRING(name, nameP);
     } /* end else */
 } /* end Java_hdf_hdf5lib_H5_H5Tenum_1insert */
 
@@ -1044,7 +1091,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert(JNIEnv *env, jclass clss, jlong type_id, jst
  * Signature: (J[I[Ljava/lang/String;I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tenum_1nameof_1int(JNIEnv *env, jclass clss, jlong type_id, jintArray value, jobjectArray name,
+Java_hdf_hdf5lib_H5_H5Tenum_1nameof_1int
+    (JNIEnv *env, jclass clss, jlong type_id, jintArray value, jobjectArray name,
           jint size)
 {
     herr_t   status = -1;
@@ -1102,7 +1150,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1nameof_1int(JNIEnv *env, jclass clss, jlong type_id
  * Signature: (J[BJ)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Tenum_1nameof(JNIEnv *env, jclass clss, jlong type_id, jbyteArray value, jlong size)
+Java_hdf_hdf5lib_H5_H5Tenum_1nameof
+    (JNIEnv *env, jclass clss, jlong type_id, jbyteArray value, jlong size)
 {
     herr_t status = -1;
     jbyte *byteP;
@@ -1157,7 +1206,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1nameof(JNIEnv *env, jclass clss, jlong type_id, jby
  * Signature: (JLjava/lang/String;[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tenum_1valueof_1int(JNIEnv *env, jclass clss, jlong type_id, jstring name, jintArray value)
+Java_hdf_hdf5lib_H5_H5Tenum_1valueof_1int
+    (JNIEnv *env, jclass clss, jlong type_id, jstring name, jintArray value)
 {
     herr_t      status = -1;
     jint       *intP;
@@ -1172,13 +1222,10 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof_1int(JNIEnv *env, jclass clss, jlong type_i
 
         intP = ENVPTR->GetIntArrayElements(ENVPAR value, &isCopy2);
         if (intP == NULL)  {
-            UNPIN_JAVA_STRING(name, nameP);
             h5JNIFatalError(env, "H5Tenum_valueof:  value not pinned");
         } /* end if */
         else {
             status = H5Tenum_valueof((hid_t)type_id, nameP, intP);
-
-            UNPIN_JAVA_STRING(name, nameP);
 
             if (status < 0) {
                 ENVPTR->ReleaseIntArrayElements(ENVPAR value, intP, JNI_ABORT);
@@ -1187,6 +1234,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof_1int(JNIEnv *env, jclass clss, jlong type_i
             else
                 ENVPTR->ReleaseIntArrayElements(ENVPAR value, intP, 0);
         } /* end else */
+        UNPIN_JAVA_STRING(name, nameP);
     } /* end else */
 
     return (jint)status;
@@ -1198,7 +1246,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof_1int(JNIEnv *env, jclass clss, jlong type_i
  * Signature: (JLjava/lang/String;[B)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Tenum_1valueof(JNIEnv *env, jclass clss, jlong type_id, jstring name, jbyteArray value)
+Java_hdf_hdf5lib_H5_H5Tenum_1valueof
+    (JNIEnv *env, jclass clss, jlong type_id, jstring name, jbyteArray value)
 {
     herr_t      status = -1;
     jbyte      *byteP;
@@ -1213,13 +1262,10 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof(JNIEnv *env, jclass clss, jlong type_id, js
 
         byteP = ENVPTR->GetByteArrayElements(ENVPAR value, &isCopy2);
         if (byteP == NULL)  {
-            UNPIN_JAVA_STRING(name,nameP);
             h5JNIFatalError(env, "H5Tenum_valueof:  value not pinned");
         } /* end if */
         else {
             status = H5Tenum_valueof((hid_t)type_id, nameP, byteP);
-
-            UNPIN_JAVA_STRING(name, nameP);
 
             if (status < 0) {
                 ENVPTR->ReleaseByteArrayElements(ENVPAR value, byteP, JNI_ABORT);
@@ -1228,6 +1274,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof(JNIEnv *env, jclass clss, jlong type_id, js
             else
                 ENVPTR->ReleaseByteArrayElements(ENVPAR value, byteP, 0);
         } /* end else */
+        UNPIN_JAVA_STRING(name, nameP);
     } /* end else */
 } /* end Java_hdf_hdf5lib_H5_H5Tenum_1valueof */
 
@@ -1237,7 +1284,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof(JNIEnv *env, jclass clss, jlong type_id, js
  * Signature: (JI[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1member_1value_1int(JNIEnv *env, jclass clss, jlong type_id, jint membno, jintArray value)
+Java_hdf_hdf5lib_H5_H5Tget_1member_1value_1int
+    (JNIEnv *env, jclass clss, jlong type_id, jint membno, jintArray value)
 {
     herr_t   status = -1;
     jint    *intP;
@@ -1273,7 +1321,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1value_1int(JNIEnv *env, jclass clss, jlong t
  * Signature: (JI[B)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1member_1value(JNIEnv *env, jclass clss, jlong type_id, jint membno, jbyteArray value)
+Java_hdf_hdf5lib_H5_H5Tget_1member_1value
+    (JNIEnv *env, jclass clss, jlong type_id, jint membno, jbyteArray value)
 {
     herr_t   status = -1;
     jbyte   *byteP;
@@ -1306,7 +1355,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1value(JNIEnv *env, jclass clss, jlong type_i
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1array_1ndims(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tget_1array_1ndims
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     int ndims = -1;
 
@@ -1323,7 +1373,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1ndims(JNIEnv *env, jclass clss, jlong type_id
  * Signature: (J[I[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1array_1dims(JNIEnv *env, jclass clss, jlong type_id, jintArray dims, jintArray perms)
+Java_hdf_hdf5lib_H5_H5Tget_1array_1dims
+    (JNIEnv *env, jclass clss, jlong type_id, jintArray dims, jintArray perms)
 {
     int      ndims = -1;
     int      dlen;
@@ -1370,7 +1421,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims(JNIEnv *env, jclass clss, jlong type_id,
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Tis_1variable_1str(JNIEnv *env, jclass clss, jlong type_id)
+Java_hdf_hdf5lib_H5_H5Tis_1variable_1str
+    (JNIEnv *env, jclass clss, jlong type_id)
 {
     htri_t bval = JNI_FALSE;
 
@@ -1389,7 +1441,8 @@ Java_hdf_hdf5lib_H5_H5Tis_1variable_1str(JNIEnv *env, jclass clss, jlong type_id
  * Signature: (JI)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Tget_1native_1type(JNIEnv *env, jclass clss, jlong type_id, jint direction)
+Java_hdf_hdf5lib_H5__1H5Tget_1native_1type
+    (JNIEnv *env, jclass clss, jlong type_id, jint direction)
 {
     hid_t native_tid = -1;
 
@@ -1407,7 +1460,8 @@ Java_hdf_hdf5lib_H5__1H5Tget_1native_1type(JNIEnv *env, jclass clss, jlong type_
  * Signature: (JI)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Tdetect_1class(JNIEnv *env, jclass clss, jlong type_id, jint dtype_class)
+Java_hdf_hdf5lib_H5_H5Tdetect_1class
+    (JNIEnv *env, jclass clss, jlong type_id, jint dtype_class)
 {
     htri_t bval = JNI_FALSE;
 
@@ -1426,7 +1480,8 @@ Java_hdf_hdf5lib_H5_H5Tdetect_1class(JNIEnv *env, jclass clss, jlong type_id, ji
  * Signature: (JLjava/lang/String;JJJJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Tcommit(JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong type,
+Java_hdf_hdf5lib_H5_H5Tcommit
+    (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong type,
           jlong link_plist_id, jlong create_plist_id, jlong access_plist_id)
 {
     herr_t      status = -1;
@@ -1448,7 +1503,8 @@ Java_hdf_hdf5lib_H5_H5Tcommit(JNIEnv *env, jclass clss, jlong loc_id, jstring na
  * Signature: (JI[J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Tarray_1create2(JNIEnv *env, jclass clss, jlong base_id, jint rank, jlongArray dims)
+Java_hdf_hdf5lib_H5__1H5Tarray_1create2
+    (JNIEnv *env, jclass clss, jlong base_id, jint rank, jlongArray dims)
 {
     hid_t    retVal = -1;
     jlong   *dimsP;
@@ -1499,7 +1555,8 @@ Java_hdf_hdf5lib_H5__1H5Tarray_1create2(JNIEnv *env, jclass clss, jlong base_id,
  * Signature: (J[J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2(JNIEnv *env, jclass clss, jlong type_id, jlongArray dims)
+Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2
+    (JNIEnv *env, jclass clss, jlong type_id, jlongArray dims)
 {
     int      ndims = -1;
     int      dlen;
@@ -1549,7 +1606,8 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2(JNIEnv *env, jclass clss, jlong type_id
  * Signature: (JJJ[B[BJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Tconvert(JNIEnv *env, jclass clss, jlong src_id, jlong dst_id, jlong nelmts,
+Java_hdf_hdf5lib_H5_H5Tconvert
+    (JNIEnv *env, jclass clss, jlong src_id, jlong dst_id, jlong nelmts,
       jbyteArray buf, jbyteArray background, jlong plist_id)
 {
     herr_t   status;
@@ -1581,6 +1639,31 @@ Java_hdf_hdf5lib_H5_H5Tconvert(JNIEnv *env, jclass clss, jlong src_id, jlong dst
         } /* end else */
     } /* end else */
 } /* end Java_hdf_hdf5lib_H5_H5Tconvert */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Tflush
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Tflush(JNIEnv *env, jclass clss, jlong loc_id)
+{
+    if (H5Tflush((hid_t)loc_id) < 0)
+        h5libraryError(env);
+}
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Trefresh
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Trefresh(JNIEnv *env, jclass clss, jlong loc_id)
+{
+    if (H5Trefresh((hid_t)loc_id) < 0)
+        h5libraryError(env);
+}
+
 
 
 #ifdef __cplusplus

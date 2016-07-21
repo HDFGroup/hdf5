@@ -45,12 +45,13 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5AC.c \
         H5B.c H5Bcache.c H5Bdbg.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2hdr.c H5B2int.c H5B2stat.c H5B2test.c \
-        H5C.c \
+        H5C.c H5Cepoch.c H5Cquery.c H5Ctag.c H5Ctest.c \
         H5CS.c \
-        H5D.c H5Dbtree.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
-        H5Ddeprec.c H5Defl.c H5Dfill.c H5Dint.c \
-        H5Dio.c H5Dlayout.c \
-        H5Doh.c H5Dscatgath.c H5Dselect.c H5Dtest.c H5Dvirtual.c \
+        H5D.c H5Dbtree.c H5Dbtree2.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
+        H5Ddeprec.c H5Dearray.c H5Defl.c H5Dfarray.c H5Dfill.c H5Dint.c \
+        H5Dio.c H5Dlayout.c H5Dnone.c \
+        H5Doh.c H5Dscatgath.c H5Dselect.c \
+        H5Dsingle.c H5Dtest.c H5Dvirtual.c \
         H5E.c H5Edeprec.c H5Eint.c \
         H5EA.c H5EAcache.c H5EAdbg.c H5EAdblkpage.c H5EAdblock.c H5EAhdr.c \
         H5EAiblock.c H5EAint.c H5EAsblock.c H5EAstat.c H5EAtest.c \
@@ -80,12 +81,14 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5O.c H5Oainfo.c H5Oalloc.c H5Oattr.c \
         H5Oattribute.c H5Obogus.c H5Obtreek.c H5Ocache.c H5Ochunk.c \
         H5Ocont.c H5Ocopy.c H5Odbg.c H5Odrvinfo.c H5Odtype.c H5Oefl.c \
-        H5Ofill.c H5Ofsinfo.c H5Oginfo.c \
+        H5Ofill.c H5Oflush.c H5Ofsinfo.c H5Oginfo.c \
         H5Olayout.c \
         H5Olinfo.c H5Olink.c H5Omessage.c H5Omtime.c \
         H5Oname.c H5Onull.c H5Opline.c H5Orefcount.c \
-        H5Osdspace.c H5Oshared.c H5Ostab.c \
-        H5Oshmesg.c H5Otest.c H5Ounknown.c \
+        H5Osdspace.c H5Oshared.c \
+        H5Oshmesg.c \
+        H5Ostab.c \
+        H5Otest.c H5Ounknown.c \
         H5P.c H5Pacpl.c H5Pdapl.c H5Pdcpl.c \
         H5Pdeprec.c H5Pdxpl.c H5Pencdec.c \
         H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
@@ -126,7 +129,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5Fpublic.h \
         H5FDpublic.h H5FDcore.h H5FDdirect.h \
-	H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
+        H5FDfamily.h H5FDlog.h H5FDmpi.h H5FDmpio.h \
         H5FDmulti.h H5FDsec2.h  H5FDstdio.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5MMpublic.h H5Opublic.h H5Ppublic.h \

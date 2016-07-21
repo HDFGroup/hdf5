@@ -37,7 +37,7 @@
 #define MICROSECOND         1000000.0F
 
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes,t) ((fabs(t)<0.0000000001F) ? 0.0F : ((((double)bytes) / ONE_MB) / (t)))
+#define MB_PER_SEC(bytes,t) ((fabs(t) < (double)0.0000000001F) ? (double)0.0F : ((((double)bytes) / (double)ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE    1
@@ -173,7 +173,7 @@ write_file(Bytef *source, uLongf sourceLen)
 
     /* destination buffer needs to be at least 0.1% larger than sourceLen
      * plus 12 bytes */
-    destLen = (uLongf)((double)sourceLen + ((double)sourceLen * 0.1F)) + 12;
+    destLen = (uLongf)((double)sourceLen + ((double)sourceLen * (double)0.1F)) + 12;
     dest = (Bytef *)HDmalloc(destLen);
 
     if (!dest)
@@ -184,9 +184,9 @@ write_file(Bytef *source, uLongf sourceLen)
     HDgettimeofday(&timer_stop, NULL);
 
     compression_time += ((double)timer_stop.tv_sec +
-                            ((double)timer_stop.tv_usec) / MICROSECOND) -
+                            ((double)timer_stop.tv_usec) / (double)MICROSECOND) -
                         ((double)timer_start.tv_sec +
-                            ((double)timer_start.tv_usec) / MICROSECOND);
+                            ((double)timer_start.tv_usec) / (double)MICROSECOND);
 
     if (report_once_flag) {
         HDfprintf(stdout, "\tCompression Ratio: %g\n", ((double)destLen) / (double)sourceLen);
@@ -206,7 +206,7 @@ write_file(Bytef *source, uLongf sourceLen)
         if (rc == (int)d_len)
             break;
 
-        d_len -= rc;
+        d_len -= (size_t)rc;
         d_ptr += rc;
     }
 
@@ -419,7 +419,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
                 break;
 
             buf += rc;
-            len -= rc;
+            len -= (size_t)rc;
         }
     } else {
         HDfprintf(stdout, "Using random() for random data\n");
@@ -429,7 +429,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
     }
 
     if (compress_percent) {
-        unsigned long s = src_len * compress_percent / 100;
+        size_t s = (size_t)((src_len * (uLongf)compress_percent) / 100);
 
         HDmemset(src, '\0', s);
     }
@@ -495,7 +495,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
                 if (rc == (ssize_t)s_len)
                     break;
 
-                s_len -= rc;
+                s_len -= (size_t)rc;
                 s_ptr += rc;
             }
         }
@@ -504,9 +504,9 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         HDgettimeofday(&timer_stop, NULL);
 
         total_time = ((double)timer_stop.tv_sec +
-                            ((double)timer_stop.tv_usec) / MICROSECOND) -
+                            ((double)timer_stop.tv_usec) / (double)MICROSECOND) -
                      ((double)timer_start.tv_sec +
-                            ((double)timer_start.tv_usec) / MICROSECOND);
+                            ((double)timer_start.tv_usec) / (double)MICROSECOND);
 
         HDfprintf(stdout, "\tUncompressed Write Time: %.2fs\n", total_time);
         HDfprintf(stdout, "\tUncompressed Write Throughput: %.2fMB/s\n",
@@ -530,9 +530,9 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         HDgettimeofday(&timer_stop, NULL);
 
         total_time = ((double)timer_stop.tv_sec +
-                            ((double)timer_stop.tv_usec) / MICROSECOND) -
+                            ((double)timer_stop.tv_usec) / (double)MICROSECOND) -
                      ((double)timer_start.tv_sec +
-                            ((double)timer_start.tv_usec) / MICROSECOND);
+                            ((double)timer_start.tv_usec) / (double)MICROSECOND);
 
         HDfprintf(stdout, "\tCompressed Write Time: %.2fs\n", total_time);
         HDfprintf(stdout, "\tCompressed Write Throughput: %.2fMB/s\n",

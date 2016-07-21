@@ -35,7 +35,8 @@ extern "C" {
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zunregister(JNIEnv *env, jclass clss, jint filter)
+Java_hdf_hdf5lib_H5_H5Zunregister
+    (JNIEnv *env, jclass clss, jint filter)
 {
     herr_t retValue = H5Zunregister((H5Z_filter_t)filter);
 
@@ -51,7 +52,8 @@ Java_hdf_hdf5lib_H5_H5Zunregister(JNIEnv *env, jclass clss, jint filter)
  * Signature: (I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zfilter_1avail(JNIEnv *env, jclass clss, jint filter)
+Java_hdf_hdf5lib_H5_H5Zfilter_1avail
+    (JNIEnv *env, jclass clss, jint filter)
 {
     herr_t retValue = H5Zfilter_avail((H5Z_filter_t)filter);
 
@@ -68,7 +70,8 @@ Java_hdf_hdf5lib_H5_H5Zfilter_1avail(JNIEnv *env, jclass clss, jint filter)
  */
 
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Zget_1filter_1info(JNIEnv *env, jclass clss, jint filter)
+Java_hdf_hdf5lib_H5_H5Zget_1filter_1info
+    (JNIEnv *env, jclass clss, jint filter)
 {
     unsigned int flags = 0;
 

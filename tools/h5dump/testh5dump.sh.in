@@ -1034,6 +1034,8 @@ TOOLTEST tcomp-2.ddl --enable-error-stack -N /type1 --any_path /type2 --any_path
 TOOLTEST4 tcomp-3.ddl --enable-error-stack -t /#6632 -g /group2 tcompound.h5
 # test complicated compound datatype
 TOOLTEST tcomp-4.ddl --enable-error-stack tcompound_complex.h5
+# tests for bitfields and opaque data types
+TOOLTEST tbitnopaque.ddl --enable-error-stack tbitnopaque.h5
 
 #test for the nested compound type
 TOOLTEST tnestcomp-1.ddl --enable-error-stack tnestedcomp.h5

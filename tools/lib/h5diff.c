@@ -30,7 +30,8 @@
  *  2) when diff was found (normal mode)
  *-------------------------------------------------------------------------
  */
-int print_objname (diff_opt_t * options, hsize_t nfound)
+H5_ATTR_PURE int
+print_objname (diff_opt_t * options, hsize_t nfound)
 {
     return ((options->m_verbose || nfound) && !options->m_quiet) ? 1 : 0;
 }
@@ -663,7 +664,8 @@ hsize_t h5diff(const char *fname1,
         {
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
-            HDasprintf(&obj1fullname, "/%s", objname1);
+            if(HDasprintf(&obj1fullname, "/%s", objname1) < 0)
+                goto out;
 #else /* H5_HAVE_ASPRINTF */
             /* (malloc 2 more for "/" and end-of-line) */
             obj1fullname = (char*)HDmalloc(HDstrlen(objname1) + 2);
@@ -679,7 +681,8 @@ hsize_t h5diff(const char *fname1,
         {
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
-            HDasprintf(&obj2fullname, "/%s", objname2);
+            if(HDasprintf(&obj2fullname, "/%s", objname2) < 0)
+                goto out;
 #else /* H5_HAVE_ASPRINTF */
             /* (malloc 2 more for "/" and end-of-line) */
             obj2fullname = (char*)HDmalloc(HDstrlen(objname2) + 2);
@@ -1186,7 +1189,8 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             /* make full path for obj1 */
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
-            HDasprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name);
+            if(HDasprintf(&obj1_fullpath, "%s%s", grp1_path, table->objs[i].name) < 0)
+                goto out;
 #else /* H5_HAVE_ASPRINTF */
             obj1_fullpath = (char*)HDmalloc(HDstrlen(grp1_path) + HDstrlen(table->objs[i].name) + 1);
             HDstrcpy(obj1_fullpath, grp1_path);
@@ -1196,7 +1200,8 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
             /* make full path for obj2 */
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
-            HDasprintf(&obj2_fullpath, "%s%s", grp2_path, table->objs[i].name);
+            if(HDasprintf(&obj2_fullpath, "%s%s", grp2_path, table->objs[i].name) < 0)
+                goto out;
 #else /* H5_HAVE_ASPRINTF */
             obj2_fullpath = (char*)HDmalloc(HDstrlen(grp2_path) + HDstrlen(table->objs[i].name) + 1);
             HDstrcpy(obj2_fullpath, grp2_path);
@@ -1493,6 +1498,7 @@ hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1,
     }
 #endif /* H5_HAVE_PARALLEL */
 
+out:
     /* free table */
     if (table)
         trav_table_free(table);

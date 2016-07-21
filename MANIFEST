@@ -28,13 +28,13 @@
 ./Makefile.dist
 ./Makefile.am
 ./README.txt
-./BRANCH.txt
 ./acsite.m4
 ./autogen.sh
 ./configure.ac
 
 ./m4/aclocal_cxx.m4
 ./m4/aclocal_fc.m4
+./m4/aclocal_fc.f90
 ./m4/ax_check_class.m4
 ./m4/ax_check_classpath.m4
 ./m4/ax_check_java_home.m4
@@ -103,8 +103,7 @@
 ./config/gnu-cxxflags
 ./config/gnu-fflags
 ./config/gnu-flags
-./config/i386-pc-cygwin32
-./config/i686-pc-cygwin
+./config/cygwin
 ./config/ibm-aix
 ./config/ibm-flags
 ./config/intel-fflags
@@ -118,7 +117,6 @@
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/solaris
-./config/x86_64-pc-cygwin
 
 ./config/site-specific/BlankForm
 
@@ -489,33 +487,42 @@
 ./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
+./src/H5Cepoch.c
 ./src/H5Cmodule.h
 ./src/H5Cmpio.c
 ./src/H5Cpkg.h
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h
+./src/H5Cquery.c
+./src/H5Ctag.c
+./src/H5Ctest.c
 ./src/H5CS.c
 ./src/H5CSprivate.h
 ./src/H5D.c
 ./src/H5Dbtree.c
+./src/H5Dbtree2.c
 ./src/H5Dchunk.c
 ./src/H5Dcompact.c
 ./src/H5Dcontig.c
 ./src/H5Ddbg.c
 ./src/H5Ddeprec.c
+./src/H5Dearray.c
 ./src/H5Defl.c
+./src/H5Dfarray.c
 ./src/H5Dfill.c
 ./src/H5Dint.c
 ./src/H5Dio.c
 ./src/H5Dlayout.c
 ./src/H5Dmodule.h
 ./src/H5Dmpio.c
+./src/H5Dnone.c
 ./src/H5Doh.c
 ./src/H5Dpkg.h
 ./src/H5Dprivate.h
 ./src/H5Dpublic.h
 ./src/H5Dscatgath.c
 ./src/H5Dselect.c
+./src/H5Dsingle.c
 ./src/H5Dtest.c
 ./src/H5Dvirtual.c
 ./src/H5E.c
@@ -718,6 +725,7 @@
 ./src/H5Odtype.c
 ./src/H5Oefl.c
 ./src/H5Ofill.c
+./src/H5Oflush.c
 ./src/H5Ofsinfo.c
 ./src/H5Oginfo.c
 ./src/H5Olayout.c
@@ -865,6 +873,8 @@
 ./test/be_extlink2.h5
 ./test/big.c
 ./test/bittests.c
+./test/btree_idx_1_6.h5
+./test/btree_idx_1_8.h5
 ./test/btree2.c
 ./test/cache.c
 ./test/cache_api.c
@@ -872,6 +882,7 @@
 ./test/cache_common.h
 ./test/cache_tagging.c
 ./test/cmpd_dset.c
+./test/cork.c
 ./test/corrupt_stab_msg.h5
 ./test/cross_read.c
 ./test/dangle.c
@@ -1233,6 +1244,59 @@
 ./tools/h5diff/testh5diff.sh.in
 ./tools/h5diff/testph5diff.sh.in
 
+# h5format_convert sources
+./tools/h5format_convert/Makefile.am
+./tools/h5format_convert/h5fc_chk_idx.c
+./tools/h5format_convert/h5fc_gentest.c
+./tools/h5format_convert/h5format_convert.c
+./tools/h5format_convert/testfiles/h5fc_v_n_all.ddl
+./tools/h5format_convert/testfiles/h5fc_v_bt1.ddl
+./tools/h5format_convert/testfiles/h5fc_v_err.ddl
+./tools/h5format_convert/testfiles/h5fc_v_non_chunked.ddl
+./tools/h5format_convert/testfiles/h5fc_d_file.ddl
+./tools/h5format_convert/testfiles/h5fc_v_ndata_bt1.ddl
+./tools/h5format_convert/testfiles/h5fc_dname.ddl
+./tools/h5format_convert/testfiles/h5fc_nonexistdset_file.ddl
+./tools/h5format_convert/testfiles/h5fc_help.ddl
+./tools/h5format_convert/testfiles/h5fc_v_all.ddl
+./tools/h5format_convert/testfiles/h5fc_nooption.ddl
+./tools/h5format_convert/testfiles/h5fc_v_n_1d.ddl
+./tools/h5format_convert/testfiles/h5fc_nonexistfile.ddl
+./tools/h5format_convert/testfiles/h5fc_non_v3.h5
+./tools/h5format_convert/testfiles/h5fc_edge_v3.h5
+./tools/h5format_convert/testfiles/h5fc_err_level.h5
+./tools/h5format_convert/testfiles/h5fc_ext1_f.h5
+./tools/h5format_convert/testfiles/h5fc_ext1_i.h5
+./tools/h5format_convert/testfiles/h5fc_ext1_s.h5
+./tools/h5format_convert/testfiles/h5fc_ext2_if.h5
+./tools/h5format_convert/testfiles/h5fc_ext2_is.h5
+./tools/h5format_convert/testfiles/h5fc_ext2_sf.h5
+./tools/h5format_convert/testfiles/h5fc_ext3_isf.h5
+./tools/h5format_convert/testfiles/h5fc_ext_none.h5
+./tools/h5format_convert/testfiles/old_h5fc_ext1_f.h5
+./tools/h5format_convert/testfiles/old_h5fc_ext1_i.h5
+./tools/h5format_convert/testfiles/old_h5fc_ext1_s.h5
+./tools/h5format_convert/testfiles/old_h5fc_ext2_if.h5
+./tools/h5format_convert/testfiles/old_h5fc_ext2_is.h5
+./tools/h5format_convert/testfiles/old_h5fc_ext2_sf.h5
+./tools/h5format_convert/testfiles/old_h5fc_ext3_isf.h5
+./tools/h5format_convert/testfiles/old_h5fc_ext_none.h5
+./tools/h5format_convert/testfiles/h5fc_ext1_f.ddl
+./tools/h5format_convert/testfiles/h5fc_ext1_i.ddl
+./tools/h5format_convert/testfiles/h5fc_ext1_s.ddl
+./tools/h5format_convert/testfiles/h5fc_ext2_if.ddl
+./tools/h5format_convert/testfiles/h5fc_ext2_is.ddl
+./tools/h5format_convert/testfiles/h5fc_ext2_sf.ddl
+./tools/h5format_convert/testfiles/h5fc_ext3_isf.ddl
+./tools/h5format_convert/testfiles/old_h5fc_ext1_f.ddl
+./tools/h5format_convert/testfiles/old_h5fc_ext1_i.ddl
+./tools/h5format_convert/testfiles/old_h5fc_ext1_s.ddl
+./tools/h5format_convert/testfiles/old_h5fc_ext2_if.ddl
+./tools/h5format_convert/testfiles/old_h5fc_ext2_is.ddl
+./tools/h5format_convert/testfiles/old_h5fc_ext2_sf.ddl
+./tools/h5format_convert/testfiles/old_h5fc_ext3_isf.ddl
+./tools/h5format_convert/testh5fc.sh.in
+
 # h5repack sources
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/dynlib_rpk.c
@@ -1341,6 +1405,8 @@
 ./tools/h5stat/testfiles/h5stat_filters.h5
 ./tools/h5stat/testfiles/h5stat_help1.ddl
 ./tools/h5stat/testfiles/h5stat_help2.ddl
+./tools/h5stat/testfiles/h5stat_idx.h5
+./tools/h5stat/testfiles/h5stat_idx.ddl
 ./tools/h5stat/testfiles/h5stat_links1.ddl
 ./tools/h5stat/testfiles/h5stat_links2.ddl
 ./tools/h5stat/testfiles/h5stat_links3.ddl
@@ -1481,6 +1547,8 @@
 ./tools/testfiles/tdset-3s.ddl
 ./tools/testfiles/tdset.h5
 ./tools/testfiles/tdset2.h5
+./tools/testfiles/tdset_idx.ls
+./tools/testfiles/tdset_idx.h5
 ./tools/testfiles/tempty.ddl
 ./tools/testfiles/tempty.h5
 ./tools/testfiles/tenum.h5
@@ -2228,10 +2296,16 @@
 ./tools/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/h5repack-help.txt
-./tools/h5repack/testfiles/h5repack_filters.h5.tst
+./tools/h5repack/testfiles/h5repack_filters.h5-gzip_verbose_filters.tst
+./tools/h5repack/testfiles/h5repack_layout.h5-dset2_chunk_20x10-errstk.tst
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
+./tools/h5repack/testfiles/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
+./tools/h5repack/testfiles/2_vds.h5-vds_chunk3x6x9-v.ddl
+./tools/h5repack/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl
+./tools/h5repack/testfiles/4_vds.h5-vds_conti-v.ddl
+./tools/h5repack/testfiles/4_vds.h5-vds_compa-v.ddl
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c
@@ -2263,6 +2337,8 @@
 ./tools/h5copy/testfiles/h5copy_extlinks_trg.h5
 ./tools/h5copy/testfiles/h5copy_extlinks_src.out.ls
 ./tools/h5copy/testfiles/h5copy_misc1.out
+./tools/h5copy/testfiles/h5copytst_new.h5
+./tools/h5copy/testfiles/h5copytst_new.out.ls
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_nested_p.ls
@@ -2339,6 +2415,9 @@
 ./hl/src/H5IM.c
 ./hl/src/H5IMprivate.h
 ./hl/src/H5IMpublic.h
+./hl/src/H5LD.c
+./hl/src/H5LDprivate.h
+./hl/src/H5LDpublic.h
 ./hl/src/H5LT.c
 ./hl/src/H5LTanalyze.c
 ./hl/src/H5LTanalyze.l
@@ -2357,33 +2436,37 @@
 ./hl/test/COPYING
 ./hl/test/H5srcdir_str.h.in
 ./hl/test/Makefile.am
+./hl/test/dectris_hl_perf.c
 ./hl/test/dsdata.txt
 ./hl/test/dslat.txt
 ./hl/test/dslon.txt
 ./hl/test/dtype_file.txt
 ./hl/test/dtype_file_readable.txt
 ./hl/test/earth.pal
+./hl/test/gen_test_ds.c
+./hl/test/gen_test_ld.c
 ./hl/test/h5hltest.h
-./hl/test/image8.txt
 ./hl/test/image24pixel.txt
 ./hl/test/image24plane.txt
+./hl/test/image8.txt
 ./hl/test/pal_rgb.h
 ./hl/test/sepia.pal
-./hl/test/dectris_hl_perf.c
-./hl/test/gen_test_ds.c
 ./hl/test/test_ds.c
+./hl/test/test_ds_be.h5
+./hl/test/test_ds_le.h5
+./hl/test/test_dset_append.c
 ./hl/test/test_dset_opt.c
 ./hl/test/test_file_image.c
 ./hl/test/test_image.c
+./hl/test/test_ld.c
+./hl/test/test_ld.h5
 ./hl/test/test_lite.c
 ./hl/test/test_packet.c
 ./hl/test/test_packet_vlen.c
 ./hl/test/test_table.c
-./hl/test/test_ds_le.h5
-./hl/test/test_ds_be.h5
-./hl/test/test_table_le.h5
 ./hl/test/test_table_be.h5
 ./hl/test/test_table_cray.h5
+./hl/test/test_table_le.h5
 ./hl/test/usa.wri
 
 # tools
@@ -2492,6 +2575,7 @@
 ./java/src/jni/h5zImp.h
 
 ./java/src/hdf/CMakeLists.txt
+./java/src/hdf/overview.html
 ./java/src/hdf/hdf5lib/CMakeLists.txt
 
 ./java/src/hdf/hdf5lib/callbacks/Callbacks.java
@@ -2499,6 +2583,8 @@
 ./java/src/hdf/hdf5lib/callbacks/H5A_iterate_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5D_iterate_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5D_iterate_t.java
+./java/src/hdf/hdf5lib/callbacks/H5D_append_cb.java
+./java/src/hdf/hdf5lib/callbacks/H5D_append_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5E_walk_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5E_walk_t.java
 ./java/src/hdf/hdf5lib/callbacks/H5L_iterate_cb.java
@@ -2689,7 +2775,8 @@
 ./java/test/CMakeLists.txt
 ./java/test/junit.sh.in
 ./java/test/JUnit-interface.txt
-./java/test/h5ex_g_iterate.hdf
+./java/test/JUnit-interface.ert
+./java/test/h5ex_g_iterate.orig
 ./java/test/TestH5.java
 ./java/test/TestH5A.java
 ./java/test/TestH5Dparams.java
@@ -2834,7 +2921,8 @@
 ./hl/test/CMakeLists.txt
 ./hl/test/CMakeTests.cmake
 ./hl/tools/CMakeLists.txt
-./hl/tools/CMakeTests.cmake
+./hl/tools/gif2h5/CMakeLists.txt
+./hl/tools/gif2h5/CMakeTests.cmake
 ./src/CMakeLists.txt
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
@@ -2850,6 +2938,8 @@
 ./tools/h5dump/CMakeTestsPBITS.cmake
 ./tools/h5dump/CMakeTestsXML.cmake
 ./tools/h5dump/CMakeTestsVDS.cmake
+./tools/h5format_convert/CMakeLists.txt
+./tools/h5format_convert/CMakeTests.cmake
 ./tools/h5import/CMakeLists.txt
 ./tools/h5import/CMakeTests.cmake
 ./tools/h5jam/CMakeLists.txt
@@ -2925,6 +3015,7 @@
 ./tools/h5copy/Makefile.in
 ./tools/h5diff/Makefile.in
 ./tools/h5dump/Makefile.in
+./tools/h5format_convert/Makefile.in
 ./tools/h5import/Makefile.in
 ./tools/h5jam/Makefile.in
 ./tools/h5ls/Makefile.in

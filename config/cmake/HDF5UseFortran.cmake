@@ -19,7 +19,7 @@ ENABLE_LANGUAGE (Fortran)
 # so this one is used.
 #-----------------------------------------------------------------------------
 MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
-# MSB CHECK WHY THIS CHECK?
+#
 #  if (NOT DEFINED ${RUN_RESULT_VAR}) 
     message (STATUS "Detecting Fortran ${FUNCTION}")
     if (CMAKE_REQUIRED_LIBRARIES)
@@ -38,8 +38,6 @@ MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
         CMAKE_FLAGS "${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}"
         RUN_OUTPUT_VARIABLE OUTPUT
     )
-
-	
 
     set(${RETURN} ${OUTPUT})
 	
@@ -70,17 +68,22 @@ MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
 #  endif (NOT DEFINED ${RUN_RESULT_VAR})
 ENDMACRO (FORTRAN_RUN)
 
+# Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
+MACRO (READ_SOURCE START END RETURN)
+  file(READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" CODE)
+  string(REGEX MATCH "${START}[\\\t\\\n\\\r[].+]*${END}" CODE ${CODE})	
+  set(RETURN "${CODE}")
+ENDMACRO (READ_SOURCE START END RETURN)
+
 #-----------------------------------------------------------------------------
 #  Check to see C_LONG_DOUBLE is available
+
+READ_SOURCE("PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" "END PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" CODE)
 CHECK_FORTRAN_FEATURE(c_long_double
-  "
-       PROGRAM main
-         USE ISO_C_BINDING
-         REAL(KIND=C_LONG_DOUBLE) :: d
-       END PROGRAM
-  "
+  "${CODE}"
   FORTRAN_HAVE_C_LONG_DOUBLE
 )
+
 if (${FORTRAN_HAVE_C_LONG_DOUBLE})
   set(FORTRAN_HAVE_C_LONG_DOUBLE 1)
 else ()
@@ -89,31 +92,9 @@ endif()
 
 # Check to see C_LONG_DOUBLE is different from C_DOUBLE
 
+READ_SOURCE("MODULE type_mod" "END PROGRAM PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE" CODE)
 CHECK_FORTRAN_FEATURE(c_long_double
-  "
-     MODULE type_mod
-       USE ISO_C_BINDING
-       INTERFACE h5t	
-         MODULE PROCEDURE h5t_c_double
-         MODULE PROCEDURE h5t_c_long_double
-       END INTERFACE
-     CONTAINS
-       SUBROUTINE h5t_c_double(r)
-         REAL(KIND=C_DOUBLE) :: r
-       END SUBROUTINE h5t_c_double
-       SUBROUTINE h5t_c_long_double(d)
-         REAL(KIND=C_LONG_DOUBLE) :: d
-       END SUBROUTINE h5t_c_long_double
-     END MODULE type_mod
-     PROGRAM main
-       USE ISO_C_BINDING
-       USE type_mod
-       REAL(KIND=C_DOUBLE)      :: r
-       REAL(KIND=C_LONG_DOUBLE) :: d
-       CALL h5t(r)
-       CALL h5t(d)
-     END PROGRAM main
-  "
+  "${CODE}"
   FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
 )
 if (${FORTRAN_C_LONG_DOUBLE_IS_UNIQUE})
@@ -139,57 +120,9 @@ endif(FORTRAN_HAVE_STORAGE_SIZE)
 # Determine the available KINDs for REALs and INTEGERs
 #-----------------------------------------------------------------------------
 
+READ_SOURCE("PROGRAM FC_AVAIL_KINDS" "END PROGRAM FC_AVAIL_KINDS" CODE)
 FORTRAN_RUN("REAL and INTEGER KINDs"
-  "  
-       PROGRAM main
-           IMPLICIT NONE
-           INTEGER :: ik, k, lastkind, max_decimal_prec
-	   INTEGER :: num_rkinds, num_ikinds
-           num_ikinds = 0
-           lastkind=SELECTED_INT_KIND(1)
-           ! Find integer KINDs
-           DO ik=2,36
-                k = SELECTED_INT_KIND(ik)
-                IF (k .NE. lastkind) THEN
-	             num_ikinds = num_ikinds + 1	
-                     WRITE(*,'(I0)',ADVANCE='NO') lastkind
-                     lastkind = k
-             	     IF(k.GT.0) WRITE(*,'(A)',ADVANCE='NO') ','	
-                ENDIF
-                IF (k .LE. 0) EXIT
-           ENDDO
-      	   IF (lastkind.NE.-1) THEN
-	      num_ikinds = num_ikinds + 1	
-              WRITE(*,'(I0)') lastkind
-	   ELSE
-              WRITE(*,'()')
-           ENDIF
-           ! Find real KINDs
-           num_rkinds = 0
-           lastkind=SELECTED_REAL_KIND(1)
-	   max_decimal_prec = 1
-           DO ik=2,36
-                k = SELECTED_REAL_KIND(ik)
-                IF (k .NE. lastkind) THEN
-                     num_rkinds = num_rkinds + 1
-                     WRITE(*,'(I0)',ADVANCE='NO') lastkind
-                     lastkind = k
-             	     IF(k.GT.0) WRITE(*,'(A)',ADVANCE='NO') ','
-	             max_decimal_prec = ik
-                ENDIF
-                IF (k .LE. 0) EXIT
-           ENDDO
-           IF (lastkind.NE.-1)THEN
-	       num_rkinds = num_rkinds + 1
-               WRITE(*,'(I0)') lastkind
-	   ELSE
-              WRITE(*,'()')
-           ENDIF
-	   WRITE(*,'(I0)') max_decimal_prec
-	   WRITE(*,'(I0)') num_ikinds
-	   WRITE(*,'(I0)') num_rkinds
-       END
-  "
+  "${CODE}"
   XX
   YY
   PROG_OUTPUT
@@ -201,12 +134,24 @@ FORTRAN_RUN("REAL and INTEGER KINDs"
 # dnl    -- LINE 4 --  number of valid integer kinds
 # dnl    -- LINE 5 --  number of valid real kinds
 
+file(READ "${CMAKE_BINARY_DIR}/pac_fconftest.out" PROG_OUTPUT)
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
 string(REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
 
 list(GET PROG_OUTPUT 0 pac_validIntKinds)
 list(GET PROG_OUTPUT 1 pac_validRealKinds)
 list(GET PROG_OUTPUT 2 H5_PAC_FC_MAX_REAL_PRECISION)
+
+# If the lists are empty then something went wrong.
+if( NOT pac_validIntKinds)
+    message (FATAL_ERROR "Failed to find available INTEGER KINDs for Fortran")
+endif()
+if( NOT pac_validRealKinds)
+    message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
+endif()
+if( NOT H5_PAC_FC_MAX_REAL_PRECISION)
+    message (FATAL_ERROR "No output from Fortran decimal precision program")
+endif()
 
 set(PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
 set(PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
@@ -248,6 +193,11 @@ foreach( KIND ${VAR} )
   string(REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set(pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
 endforeach(KIND)
+
+if (pack_int_sizeof STREQUAL "")
+   message (FATAL_ERROR "Failed to find available INTEGER KINDs for Fortran")
+endif()
+
 string(STRIP ${pack_int_sizeof} pack_int_sizeof)
 
 
@@ -288,6 +238,11 @@ foreach( KIND ${VAR} )
   string(REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set(pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
 endforeach(KIND)
+
+if (pack_int_sizeof STREQUAL "")
+   message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
+endif()
+
 string(STRIP ${pack_real_sizeof} pack_real_sizeof)
 
 #Remove trailing comma
@@ -347,6 +302,26 @@ list(GET PROG_OUTPUT 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
 list(GET PROG_OUTPUT 3 PAC_FORTRAN_NATIVE_REAL_KIND)
 list(GET PROG_OUTPUT 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
 list(GET PROG_OUTPUT 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
+
+if (NOT PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
+   message (FATAL_ERROR "Failed to find SIZEOF NATIVE INTEGER KINDs for Fortran")
+endif()
+if (NOT PAC_FORTRAN_NATIVE_REAL_SIZEOF)
+   message (FATAL_ERROR "Failed to find SIZEOF NATIVE REAL KINDs for Fortran")
+endif()
+if (NOT PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
+   message (FATAL_ERROR "Failed to find SIZEOF NATIVE DOUBLE KINDs for Fortran")
+endif()
+if (NOT PAC_FORTRAN_NATIVE_INTEGER_KIND)
+   message (FATAL_ERROR "Failed to find KIND of NATIVE INTEGER for Fortran")
+endif()
+if (NOT PAC_FORTRAN_NATIVE_REAL_KIND)
+   message (FATAL_ERROR "Failed to find KIND of NATIVE REAL for Fortran")
+endif()
+if (NOT PAC_FORTRAN_NATIVE_DOUBLE_KIND)
+   message (FATAL_ERROR "Failed to find KIND of NATIVE DOUBLE for Fortran")
+endif()
+
 
 set(FORTRAN_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
 #set(H5_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})

@@ -744,6 +744,9 @@ done:
     if(va_started)
         va_end(ap);
 #ifdef H5_HAVE_VASPRINTF
+    /* Memory was allocated with HDvasprintf so it needs to be freed
+     * with HDfree
+     */
     if(tmp)
         HDfree(tmp);
 #else /* H5_HAVE_VASPRINTF */

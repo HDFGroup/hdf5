@@ -172,7 +172,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 s = rest;
             } /* end if */
             else if ('*'==*s) {
-                fwidth = va_arg (ap, int);
+                fwidth = va_arg(ap, int);
                 if(fwidth < 0) {
                     leftjust = 1;
                     fwidth = -fwidth;
@@ -269,23 +269,22 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%s", modifier);
             HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%c", conv);
 
-
             /* Conversion */
             switch (conv) {
                 case 'd':
                 case 'i':
                     if(!HDstrcmp(modifier, "h")) {
-                        short x = (short)va_arg (ap, int);
-                        n = fprintf (stream, format_templ, x);
+                        short x = (short)va_arg(ap, int);
+                        n = fprintf(stream, format_templ, x);
                     } else if(!*modifier) {
-                        int x = va_arg (ap, int);
-                        n = fprintf (stream, format_templ, x);
-                    } else if(!HDstrcmp (modifier, "l")) {
-                        long x = va_arg (ap, long);
-                        n = fprintf (stream, format_templ, x);
+                        int x = va_arg(ap, int);
+                        n = fprintf(stream, format_templ, x);
+                    } else if(!HDstrcmp(modifier, "l")) {
+                        long x = va_arg(ap, long);
+                        n = fprintf(stream, format_templ, x);
                     } else {
                         int64_t x = va_arg(ap, int64_t);
-                        n = fprintf (stream, format_templ, x);
+                        n = fprintf(stream, format_templ, x);
                     }
                     break;
 
@@ -294,13 +293,13 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                 case 'x':
                 case 'X':
                     if(!HDstrcmp(modifier, "h")) {
-                        unsigned short x = (unsigned short)va_arg (ap, unsigned int);
+                        unsigned short x = (unsigned short)va_arg(ap, unsigned int);
                         n = fprintf(stream, format_templ, x);
                     } else if(!*modifier) {
-                        unsigned int x = va_arg (ap, unsigned int); /*lint !e732 Loss of sign not really occuring */
+                        unsigned int x = va_arg(ap, unsigned int); /*lint !e732 Loss of sign not really occuring */
                         n = fprintf(stream, format_templ, x);
                     } else if(!HDstrcmp(modifier, "l")) {
-                        unsigned long x = va_arg (ap, unsigned long); /*lint !e732 Loss of sign not really occuring */
+                        unsigned long x = va_arg(ap, unsigned long); /*lint !e732 Loss of sign not really occuring */
                         n = fprintf(stream, format_templ, x);
                     } else {
                         uint64_t x = va_arg(ap, uint64_t); /*lint !e732 Loss of sign not really occuring */
@@ -336,7 +335,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
 
                 case 'a':
                     {
-                        haddr_t x = va_arg (ap, haddr_t); /*lint !e732 Loss of sign not really occuring */
+                        haddr_t x = va_arg(ap, haddr_t); /*lint !e732 Loss of sign not really occuring */
 
                         if(H5F_addr_defined(x)) {
                             len = 0;
@@ -405,7 +404,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
                         htri_t tri_var = va_arg(ap, htri_t);
 
                         if(tri_var > 0)
-                            fprintf (stream, "TRUE");
+                            fprintf(stream, "TRUE");
                         else if(!tri_var)
                             fprintf(stream, "FALSE");
                         else
@@ -728,7 +727,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_make_time() */
 
-#ifdef H5_HAVE_VISUAL_STUDIO
+#ifdef H5_HAVE_WIN32_API
 
 /* Offset between 1/1/1601 and 1/1/1970 in 100 nanosecond units */
 #define _W32_FT_OFFSET (116444736000000000ULL)
@@ -912,7 +911,7 @@ Wflock(int fd, int operation) {
     return 0;
 } /* end Wflock() */
 
-#endif /* H5_HAVE_VISUAL_STUDIO */
+#endif /* H5_HAVE_WIN32_API */
 
 
 /*-------------------------------------------------------------------------

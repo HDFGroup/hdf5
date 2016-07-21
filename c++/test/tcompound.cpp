@@ -78,8 +78,8 @@ static void test_compound_1()
 	PASSED();
     }   // end of try block
 
-    catch (Exception E) {
-cerr << "test_compound_1 in catch" << endl;
+    catch (Exception& E)
+    {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_compound_1()
@@ -200,8 +200,8 @@ static void test_compound_2()
 	PASSED();
     }   // end of try block
 
-    catch (Exception E) {
-cerr << "test_compound_2 in catch" << endl;
+    catch (Exception& E)
+    {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
@@ -322,8 +322,8 @@ static void test_compound_3()
 	PASSED();
     }   // end of try block
 
-    catch (Exception E) {
-cerr << "test_compound_3 in catch" << endl;
+    catch (Exception& E)
+    {
 	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
@@ -454,8 +454,8 @@ static void test_compound_4()
 	PASSED();
     }   // end of try block
 
-    catch (Exception E) {
-cerr << "test_compound_4 in catch" << endl;
+    catch (Exception& E)
+    {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
@@ -558,8 +558,8 @@ static void test_compound_5()
 	PASSED();
     }   // end of try block
 
-    catch (Exception E) {
-cerr << "test_compound_5 in catch" << endl;
+    catch (Exception& E)
+    {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
@@ -655,8 +655,8 @@ static void test_compound_6()
 	PASSED();
     }   // end of try block
 
-    catch (Exception E) {
-cerr << "test_compound_6 in catch" << endl;
+    catch (Exception& E)
+    {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_compound_6()
@@ -714,7 +714,7 @@ static void test_compound_7()
 	    tid2.insertMember("d", HOFFSET(s2_typ_t, d), PredType::NATIVE_DOUBLE);
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("CompType::insertMember", "Attempted to insert field past end of compound data type.");
-	} catch (DataTypeIException err) {}
+	} catch (DataTypeIException& err) {}
 
 	/* Release resources */
 	tid1.close();
@@ -722,8 +722,8 @@ static void test_compound_7()
 	PASSED();
     }   // end of try block
 
-    catch (Exception E) {
-cerr << "test_compound_7 in catch" << endl;
+    catch (Exception& E)
+    {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_compound_7()
@@ -812,7 +812,8 @@ static void test_compound_set_size()
 	PASSED();
     }   // end of try block
 
-    catch (Exception E) {
+    catch (Exception& E)
+    {
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_compound_set_size()

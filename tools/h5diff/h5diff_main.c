@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <memory.h>
+#include "H5private.h"
 #include "h5diff.h"
 #include "h5diff_common.h"
 #include "h5tools.h"
@@ -136,8 +137,9 @@ int main(int argc, const char *argv[])
  *
  *-------------------------------------------------------------------------
  */
-void h5diff_exit(int status)
+H5_ATTR_NORETURN void
+h5diff_exit(int status)
 {
-    exit(status);
+    HDexit(status);
 }
 

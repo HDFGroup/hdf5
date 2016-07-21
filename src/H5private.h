@@ -538,20 +538,21 @@
  *       It's the developer's responsibility not to pass in the value 0, which
  *       may cause the equation to fail.
  */
-#define H5_FLT_ABS_EQUAL(X,Y)       (HDfabsf(X-Y) < FLT_EPSILON)
-#define H5_DBL_ABS_EQUAL(X,Y)       (HDfabs (X-Y) < DBL_EPSILON)
-#define H5_LDBL_ABS_EQUAL(X,Y)      (HDfabsl(X-Y) < LDBL_EPSILON)
+#define H5_FLT_ABS_EQUAL(X,Y)       (HDfabsf((X)-(Y)) < FLT_EPSILON)
+#define H5_DBL_ABS_EQUAL(X,Y)       (HDfabs ((X)-(Y)) < DBL_EPSILON)
+#define H5_LDBL_ABS_EQUAL(X,Y)      (HDfabsl((X)-(Y)) < LDBL_EPSILON)
 
-#define H5_FLT_REL_EQUAL(X,Y,M)     (HDfabsf((Y-X) / X) < M)
-#define H5_DBL_REL_EQUAL(X,Y,M)     (HDfabs ((Y-X) / X) < M)
-#define H5_LDBL_REL_EQUAL(X,Y,M)    (HDfabsl((Y-X) / X) < M)
+#define H5_FLT_REL_EQUAL(X,Y,M)     (HDfabsf(((Y)-(X)) / (X)) < (M))
+#define H5_DBL_REL_EQUAL(X,Y,M)     (HDfabs (((Y)-(X)) / (X)) < (M))
+#define H5_LDBL_REL_EQUAL(X,Y,M)    (HDfabsl(((Y)-(X)) / (X)) < (M))
 
-/* KiB, MiB, GiB, TiB, EiB - Used in profiling and timing code */
+/* KiB, MiB, GiB, TiB, PiB, EiB - Used in profiling and timing code */
 #define H5_KB (1024.0F)
 #define H5_MB (1024.0F * 1024.0F)
 #define H5_GB (1024.0F * 1024.0F * 1024.0F)
 #define H5_TB (1024.0F * 1024.0F * 1024.0F * 1024.0F)
-#define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
+#define H5_PB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
+#define H5_EB (1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F * 1024.0F)
 
 #ifndef H5_HAVE_FLOCK
 /* flock() operations. Used in the source so we have to define them when
@@ -655,6 +656,9 @@ typedef struct {
 #endif /* HDatoi */
 #ifndef HDatol
     #define HDatol(S)    atol(S)
+#endif /* HDatol */
+#ifndef HDatoll
+    #define HDatoll(S)   atoll(S)
 #endif /* HDatol */
 #ifndef HDbsearch
     #define HDbsearch(K,B,N,Z,F)  bsearch(K,B,N,Z,F)
@@ -1028,6 +1032,15 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDlink
     #define HDlink(OLD,NEW)    link(OLD,NEW)
 #endif /* HDlink */
+#ifndef HDllround
+    #define HDllround(V)     llround(V)
+#endif /* HDround */
+#ifndef HDllroundf
+    #define HDllroundf(V)    llroundf(V)
+#endif /* HDllroundf */
+#ifndef HDllroundl
+    #define HDllroundl(V)    llroundl(V)
+#endif /* HDllroundl */
 #ifndef HDlocaleconv
     #define HDlocaleconv()    localeconv()
 #endif /* HDlocaleconv */
@@ -1043,6 +1056,15 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDlongjmp
     #define HDlongjmp(J,N)    longjmp(J,N)
 #endif /* HDlongjmp */
+#ifndef HDlround
+    #define HDlround(V)     lround(V)
+#endif /* HDround */
+#ifndef HDlroundf
+    #define HDlroundf(V)    lroundf(V)
+#endif /* HDlroundf */
+#ifndef HDlroundl
+    #define HDlroundl(V)    lroundl(V)
+#endif /* HDroundl */
 #ifndef HDlseek
     #define HDlseek(F,O,W)  lseek(F,O,W)
 #endif /* HDlseek */
@@ -1117,6 +1139,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDpow
     #define HDpow(X,Y)    pow(X,Y)
 #endif /* HDpow */
+#ifndef HDpowf
+    #define HDpowf(X,Y)   powf(X,Y)
+#endif /* HDpowf */
 /* printf() variable arguments */
 #ifndef HDputc
     #define HDputc(C,F)    putc(C,F)
@@ -1179,6 +1204,15 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDrewinddir
     #define HDrewinddir(D)    rewinddir(D)
 #endif /* HDrewinddir */
+#ifndef HDround
+    #define HDround(V)    round(V)
+#endif /* HDround */
+#ifndef HDroundf
+    #define HDroundf(V)    roundf(V)
+#endif /* HDroundf */
+#ifndef HDroundl
+    #define HDroundl(V)    roundl(V)
+#endif /* HDroundl */
 #ifndef HDrmdir
     #define HDrmdir(S)    rmdir(S)
 #endif /* HDrmdir */
@@ -1514,7 +1548,7 @@ extern char *strdup(const char *s);
 #define H5_CHECK_OVERFLOW(var, vartype, casttype) \
 {                                                 \
     casttype _tmp_overflow = (casttype)(var);     \
-    assert((var) == (vartype)_tmp_overflow);      \
+    HDassert((var) == (vartype)_tmp_overflow);      \
 }
 #else /* NDEBUG */
 #define H5_CHECK_OVERFLOW(var, vartype, casttype)
@@ -1528,7 +1562,7 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_src == (srctype)_tmp_dst);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1539,8 +1573,8 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_src >= 0);   \
-    assert(_tmp_src == _tmp_dst);   \
+    HDassert(_tmp_src >= 0);   \
+    HDassert(_tmp_src == _tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1551,8 +1585,8 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_dst >= 0);   \
-    assert(_tmp_src == (srctype)_tmp_dst);   \
+    HDassert(_tmp_dst >= 0);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 
@@ -1560,8 +1594,8 @@ extern char *strdup(const char *s);
 {                                                       \
     srctype _tmp_src = (srctype)(src);  \
     dsttype _tmp_dst = (dsttype)(_tmp_src);  \
-    assert(_tmp_src >= 0);   \
-    assert(_tmp_src == (srctype)_tmp_dst);   \
+    HDassert(_tmp_src >= 0);   \
+    HDassert(_tmp_src == (srctype)_tmp_dst);   \
     (dst) = _tmp_dst;                             \
 }
 

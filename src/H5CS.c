@@ -192,6 +192,8 @@ H5CS_push(const char *func_name)
     /* Check if we need to expand the stack of records */
     if(fstack->nused == fstack->nalloc) {
         size_t na = MAX((fstack->nalloc * 2), H5CS_MIN_NSLOTS);
+
+        /* Don't use H5MM_realloc here */
         const char **x = (const char **)HDrealloc(fstack->rec, na * sizeof(const char *));
 
         /* (Avoid returning an error from this routine, currently -QAK) */

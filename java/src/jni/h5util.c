@@ -68,7 +68,9 @@ static int     render_bin_output_region_points(FILE *stream, hid_t region_space,
 
 /** frees memory held by array of strings */
 void
-h5str_array_free(char **strs, size_t len) {
+h5str_array_free
+    (char **strs, size_t len)
+{
     size_t i;
 
     if (!strs || len <= 0)
@@ -83,7 +85,9 @@ h5str_array_free(char **strs, size_t len) {
 
 /** allocate a new str with given length */
 void
-h5str_new(h5str_t *str, size_t len) {
+h5str_new
+    (h5str_t *str, size_t len)
+{
     if (str && len > 0) {
         str->s = (char *)HDmalloc(len);
         str->max = len;
@@ -93,7 +97,9 @@ h5str_new(h5str_t *str, size_t len) {
 
 /** free string memory */
 void
-h5str_free(h5str_t *str) {
+h5str_free
+    (h5str_t *str)
+{
     if (str && str->max > 0) {
         HDfree(str->s);
         HDmemset(str, 0, sizeof(h5str_t));
@@ -102,7 +108,9 @@ h5str_free(h5str_t *str) {
 
 /** reset the max size of the string */
 void
-h5str_resize(h5str_t *str, size_t new_len) {
+h5str_resize
+    (h5str_t *str, size_t new_len)
+{
     char *new_str;
 
     if (!str || new_len <= 0 || str->max == new_len)
@@ -124,7 +132,9 @@ h5str_resize(h5str_t *str, size_t new_len) {
  the char string point to str->s
  */
 char*
-h5str_append(h5str_t *str, const char* cstr) {
+h5str_append
+    (h5str_t *str, const char* cstr)
+{
     size_t len;
 
     if (!str)
@@ -147,7 +157,9 @@ h5str_append(h5str_t *str, const char* cstr) {
  On error, a negative number is returned.
  */
 size_t
-h5str_sprintf(h5str_t *str, hid_t container, hid_t tid, void *ptr, int expand_data) {
+h5str_sprintf
+    (h5str_t *str, hid_t container, hid_t tid, void *ptr, int expand_data)
+{
     unsigned char   tmp_uchar = 0;
     char            tmp_char = 0;
     unsigned short  tmp_ushort = 0;
@@ -502,8 +514,8 @@ h5str_sprintf(h5str_t *str, hid_t container, hid_t tid, void *ptr, int expand_da
  *-------------------------------------------------------------------------
  */
 static int
-h5str_print_region_data_blocks(hid_t region_id,
-        h5str_t *str, int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata)
+h5str_print_region_data_blocks
+    (hid_t region_id, h5str_t *str, int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata)
 {
     hsize_t     *dims1 = NULL;
     hsize_t     *start = NULL;
@@ -601,7 +613,8 @@ h5str_print_region_data_blocks(hid_t region_id,
 } /* end h5str_print_region_data_blocks */
 
 int
-h5str_dump_region_blocks_data(h5str_t *str, hid_t region, hid_t region_id)
+h5str_dump_region_blocks_data
+    (h5str_t *str, hid_t region, hid_t region_id)
 {
     int        ret_value = 0;
     hssize_t   nblocks;
@@ -654,7 +667,8 @@ h5str_dump_region_blocks_data(h5str_t *str, hid_t region, hid_t region_id)
 } /* end h5str_dump_region_blocks_data */
 
 static int
-h5str_dump_region_blocks(h5str_t *str, hid_t region, hid_t region_id)
+h5str_dump_region_blocks
+    (h5str_t *str, hid_t region, hid_t region_id)
 {
     int        ret_value = 0;
     hssize_t   nblocks;
@@ -725,8 +739,8 @@ h5str_dump_region_blocks(h5str_t *str, hid_t region, hid_t region_id)
  *-------------------------------------------------------------------------
  */
 static int
-h5str_print_region_data_points(hid_t region_space, hid_t region_id,
-        h5str_t *str, int ndims, hid_t type_id, hssize_t npoints, hsize_t *ptdata)
+h5str_print_region_data_points
+    (hid_t region_space, hid_t region_id, h5str_t *str, int ndims, hid_t type_id, hssize_t npoints, hsize_t *ptdata)
 {
     hsize_t        *dims1 = NULL;
     hsize_t         total_size[H5S_MAX_RANK];
@@ -789,7 +803,8 @@ h5str_print_region_data_points(hid_t region_space, hid_t region_id,
 } /* end h5str_print_region_data_points */
 
 int
-h5str_dump_region_points_data(h5str_t *str, hid_t region, hid_t region_id)
+h5str_dump_region_points_data
+    (h5str_t *str, hid_t region, hid_t region_id)
 {
     int        ret_value = 0;
     hssize_t   npoints;
@@ -842,7 +857,8 @@ h5str_dump_region_points_data(h5str_t *str, hid_t region, hid_t region_id)
 } /* end h5str_dump_region_points_data */
 
 static int
-h5str_dump_region_points(h5str_t *str, hid_t region, hid_t region_id)
+h5str_dump_region_points
+    (h5str_t *str, hid_t region, hid_t region_id)
 {
     int        ret_value = 0;
     hssize_t   npoints;
@@ -895,7 +911,9 @@ h5str_dump_region_points(h5str_t *str, hid_t region, hid_t region_id)
 } /* end h5str_dump_region_points */
 
 static int
-h5str_is_zero(const void *_mem, size_t size) {
+h5str_is_zero
+    (const void *_mem, size_t size)
+{
     const unsigned char *mem = (const unsigned char *) _mem;
 
     while (size-- > 0)
@@ -918,7 +936,8 @@ h5str_is_zero(const void *_mem, size_t size) {
  *-------------------------------------------------------------------------
  */
 static htri_t
-h5str_detect_vlen_str(hid_t tid)
+h5str_detect_vlen_str
+    (hid_t tid)
 {
     H5T_class_t tclass = H5T_NO_CLASS;
     htri_t ret = 0;
@@ -977,7 +996,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-h5str_get_native_type(hid_t type)
+h5str_get_native_type
+    (hid_t type)
 {
     hid_t p_type;
     H5T_class_t type_class;
@@ -1002,7 +1022,8 @@ h5str_get_native_type(hid_t type)
  *-------------------------------------------------------------------------
  */
 static hid_t
-h5str_get_little_endian_type(hid_t tid)
+h5str_get_little_endian_type
+    (hid_t tid)
 {
     hid_t       p_type=-1;
     H5T_class_t type_class;
@@ -1072,7 +1093,8 @@ h5str_get_little_endian_type(hid_t tid)
  *-------------------------------------------------------------------------
  */
 static hid_t
-h5str_get_big_endian_type(hid_t tid)
+h5str_get_big_endian_type
+    (hid_t tid)
 {
     hid_t       p_type=-1;
     H5T_class_t type_class;
@@ -1144,7 +1166,8 @@ h5str_get_big_endian_type(hid_t tid)
  *-------------------------------------------------------------------------
  */
 static htri_t
-h5str_detect_vlen(hid_t tid)
+h5str_detect_vlen
+    (hid_t tid)
 {
     htri_t ret;
 
@@ -1172,7 +1195,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t block_nelmts)
+h5str_render_bin_output
+    (FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t block_nelmts)
 {
     int                ret_value = 0;
     unsigned char     *mem  = (unsigned char*)_mem;
@@ -1385,8 +1409,8 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
  *-------------------------------------------------------------------------
  */
 static int
-render_bin_output_region_data_blocks(FILE *stream, hid_t region_id,
-    hid_t container, int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata)
+render_bin_output_region_data_blocks
+    (FILE *stream, hid_t region_id, hid_t container, int ndims, hid_t type_id, hssize_t nblocks, hsize_t *ptdata)
 {
     hsize_t     *dims1 = NULL;
     hsize_t     *start = NULL;
@@ -1495,7 +1519,8 @@ render_bin_output_region_data_blocks(FILE *stream, hid_t region_id,
  *-------------------------------------------------------------------------
  */
 static int
-render_bin_output_region_blocks(FILE *stream, hid_t region_space, hid_t region_id, hid_t container)
+render_bin_output_region_blocks
+    (FILE *stream, hid_t region_space, hid_t region_id, hid_t container)
 {
     int          ret_value = SUCCEED;
     hssize_t     nblocks;
@@ -1557,7 +1582,8 @@ render_bin_output_region_blocks(FILE *stream, hid_t region_space, hid_t region_i
  *-------------------------------------------------------------------------
  */
 static int
-render_bin_output_region_data_points(FILE *stream, hid_t region_space, hid_t region_id,
+render_bin_output_region_data_points
+    (FILE *stream, hid_t region_space, hid_t region_id,
         hid_t container, int ndims, hid_t type_id, hssize_t npoints, hsize_t *ptdata)
 {
     hsize_t *dims1 = NULL;
@@ -1616,7 +1642,8 @@ render_bin_output_region_data_points(FILE *stream, hid_t region_space, hid_t reg
  *-------------------------------------------------------------------------
  */
 static int
-render_bin_output_region_points(FILE *stream, hid_t region_space, hid_t region_id, hid_t container)
+render_bin_output_region_points
+    (FILE *stream, hid_t region_space, hid_t region_id, hid_t container)
 {
     int      ret_value = SUCCEED;
     hssize_t npoints;
@@ -1668,7 +1695,8 @@ render_bin_output_region_points(FILE *stream, hid_t region_space, hid_t region_i
 } /* end render_bin_output_region_points */
 
 int
-h5str_dump_simple_dset(FILE *stream, hid_t dset, int binary_order)
+h5str_dump_simple_dset
+    (FILE *stream, hid_t dset, int binary_order)
 {
     int      ret_value = SUCCEED;
     hid_t               f_space = -1;                  /* file data space */
@@ -1827,7 +1855,8 @@ h5str_dump_simple_dset(FILE *stream, hid_t dset, int binary_order)
 } /* end h5str_dump_simple_dset */
 
 static int
-h5tools_dump_simple_data(FILE *stream, hid_t container, hid_t type, void *_mem, hsize_t nelmts)
+h5tools_dump_simple_data
+    (FILE *stream, hid_t container, hid_t type, void *_mem, hsize_t nelmts)
 {
     int                ret_value = 0;
     int                line_count;
@@ -1875,7 +1904,8 @@ h5tools_dump_simple_data(FILE *stream, hid_t container, hid_t type, void *_mem, 
  * Signature: (JJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
+Java_hdf_hdf5lib_H5_H5AwriteVL
+    (JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
 {
     herr_t  status = -1;
     char  **wdata;
@@ -1931,7 +1961,8 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
  * Signature: (JJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
+Java_hdf_hdf5lib_H5_H5AreadVL
+    (JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
 {
     herr_t  status = -1;
     jstring jstr;
@@ -1978,13 +2009,68 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
 } /* end Java_hdf_hdf5lib_H5_H5AreadVL */
 
 /*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5AreadComplex
+ * Signature: (JJ[Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5AreadComplex
+(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
+{
+    herr_t      status = -1;
+    int         i;
+    int         n;
+    char       *rdata;
+    size_t      max_len = 0;
+    size_t      size;
+    h5str_t     h5str;
+    hid_t       p_type = -1;
+    jstring     jstr;
+
+    p_type = H5Tget_native_type(mem_type_id, H5T_DIR_DEFAULT);
+    size = (((H5Tget_size(mem_type_id))>(H5Tget_size(p_type))) ? (H5Tget_size(mem_type_id)) : (H5Tget_size(p_type)));
+    H5Tclose(p_type);
+
+    n = ENVPTR->GetArrayLength(ENVPAR buf);
+    rdata = (char *)malloc((size_t)n * size);
+    if (rdata == NULL) {
+        h5JNIFatalError(env, "H5AreadComplex:  failed to allocate buff for read");
+    } /* end if */
+    else {
+        status = H5Aread(attr_id, mem_type_id, rdata);
+        if (status < 0) {
+            h5JNIFatalError(env, "H5AreadComplex: failed to read data");
+        } /* end if */
+        else {
+            HDmemset(&h5str, 0, sizeof(h5str_t));
+            h5str_new(&h5str, 4 * size);
+            if (h5str.s == NULL) {
+                h5JNIFatalError(env, "H5AreadComplex:  failed to allocate string buf");
+            } /* end if */
+            else {
+                for (i = 0; i < n; i++) {
+                    h5str.s[0] = '\0';
+                    h5str_sprintf(&h5str, attr_id, mem_type_id, rdata + ((size_t)i * size), 0);
+                    jstr = ENVPTR->NewStringUTF(ENVPAR h5str.s);
+                    ENVPTR->SetObjectArrayElement(ENVPAR buf, i, jstr);
+                } /* end for */
+            }  /* end else */
+            h5str_free(&h5str);
+        }  /* end else */
+        HDfree(rdata);
+    }  /* end else */
+    return status;
+}
+
+/*
  * Copies the content of one dataset to another dataset
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Acopy
  * Signature: (JJ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Acopy(JNIEnv *env, jclass clss, jlong src_id, jlong dst_id)
+Java_hdf_hdf5lib_H5_H5Acopy
+    (JNIEnv *env, jclass clss, jlong src_id, jlong dst_id)
 {
     jbyte  *buf;
     herr_t  retVal = -1;
@@ -2053,7 +2139,8 @@ Java_hdf_hdf5lib_H5_H5Acopy(JNIEnv *env, jclass clss, jlong src_id, jlong dst_id
  * Signature: (JJ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Dcopy(JNIEnv *env, jclass clss, jlong src_id, jlong dst_id)
+Java_hdf_hdf5lib_H5_H5Dcopy
+    (JNIEnv *env, jclass clss, jlong src_id, jlong dst_id)
 {
     jbyte  *buf;
     herr_t  retVal = -1;
@@ -2158,7 +2245,8 @@ typedef struct info_all
  * Signature: (JLjava/lang/String;[Ljava/lang/String;[I[I[J[JIII)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1full(JNIEnv *env, jclass clss, jlong loc_id, jstring group_name,
+Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1full
+    (JNIEnv *env, jclass clss, jlong loc_id, jstring group_name,
         jobjectArray objName, jintArray oType, jintArray lType, jlongArray fNo,
         jlongArray oRef, jint n, jint indx_type, jint indx_order)
 {
@@ -2311,9 +2399,9 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1full(JNIEnv *env, jclass clss, jlong loc_
  * Signature: (J[Ljava/lang/String;[I[I[JJI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max(JNIEnv *env, jclass clss, jlong loc_id, jobjectArray objName,
-          jintArray oType, jintArray lType, jlongArray oRef,
-          jlong maxnum, jint n)
+Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max
+    (JNIEnv *env, jclass clss, jlong loc_id, jobjectArray objName,
+          jintArray oType, jintArray lType, jlongArray oRef, jlong maxnum, jint n)
 {
     herr_t         ret_val = -1;
     char         **oName=NULL;
@@ -2406,7 +2494,8 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max(JNIEnv *env, jclass clss, jlong loc_i
 } /* end Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max */
 
 int
-H5Gget_obj_info_full(hid_t loc_id, char **objname, int *otype, int *ltype, unsigned long *fno, unsigned long *objno, int indexType, int indexOrder)
+H5Gget_obj_info_full
+    (hid_t loc_id, char **objname, int *otype, int *ltype, unsigned long *fno, unsigned long *objno, int indexType, int indexOrder)
 {
     info_all_t info;
     info.objname = objname;
@@ -2427,7 +2516,8 @@ H5Gget_obj_info_full(hid_t loc_id, char **objname, int *otype, int *ltype, unsig
 } /* end H5Gget_obj_info_full */
 
 int
-H5Gget_obj_info_max(hid_t loc_id, char **objname, int *otype, int *ltype, unsigned long *objno, long maxnum)
+H5Gget_obj_info_max
+    (hid_t loc_id, char **objname, int *otype, int *ltype, unsigned long *objno, long maxnum)
 {
     info_all_t info;
     info.objname = objname;
@@ -2444,7 +2534,8 @@ H5Gget_obj_info_max(hid_t loc_id, char **objname, int *otype, int *ltype, unsign
 } /* end H5Gget_obj_info_max */
 
 herr_t
-obj_info_all(hid_t loc_id, const char *name, const H5L_info_t *info, void *op_data)
+obj_info_all
+    (hid_t loc_id, const char *name, const H5L_info_t *info, void *op_data)
 {
     int         type = -1;
     hid_t       oid = -1;
@@ -2483,7 +2574,8 @@ obj_info_all(hid_t loc_id, const char *name, const H5L_info_t *info, void *op_da
 } /* end obj_info_all */
 
 herr_t
-obj_info_max(hid_t loc_id, const char *name, const H5L_info_t *info, void *op_data)
+obj_info_max
+    (hid_t loc_id, const char *name, const H5L_info_t *info, void *op_data)
 {
     int         type = -1;
     herr_t      retVal = 0;
@@ -2522,7 +2614,8 @@ obj_info_max(hid_t loc_id, const char *name, const H5L_info_t *info, void *op_da
  * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5export_1dataset(JNIEnv *env, jclass cls, jstring file_export_name, jstring file_name, jstring object_path, jint binary_order)
+Java_hdf_hdf5lib_H5_H5export_1dataset
+    (JNIEnv *env, jclass cls, jstring file_export_name, jstring file_name, jstring object_path, jint binary_order)
 {
     herr_t      status = -1;
     herr_t      ret_val = -1;

@@ -130,6 +130,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
     hbool_t driver_prop_copied = FALSE;     /* Whether the driver property has been set up */
     unsigned    efc_size = 0;
+    hbool_t	latest_format = FALSE;	    /* Always use the latest format? */
     hid_t	ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -166,8 +167,13 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't sieve buffer size")
     if(H5P_set(new_plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->sdata_aggr.alloc_size)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size")
-    if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
+    if(f->shared->latest_flags > 0)
+        latest_format = TRUE;
+    if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+    if(H5P_set(new_plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object flush callback")
+
     if(f->shared->efc)
         efc_size = H5F_efc_max_nfiles(f->shared->efc);
     if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
@@ -575,16 +581,17 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
     FUNC_ENTER_NOAPI_NOINIT
 
     if(NULL == (f = H5FL_CALLOC(H5F_t)))
-	HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
     f->file_id = -1;
 
     if(shared) {
         HDassert(lf == NULL);
-	f->shared = shared;
+        f->shared = shared;
     } /* end if */
     else {
         H5P_genplist_t *plist;          /* Property list */
         unsigned        efc_size;       /* External file cache size */
+        hbool_t	latest_format;	        /* Always use the latest format?	*/
         size_t u;                       /* Local index variable */
 
         HDassert(lf != NULL);
@@ -592,18 +599,18 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
 
         f->shared->flags = flags;
-	f->shared->sohm_addr = HADDR_UNDEF;
-	f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
+        f->shared->sohm_addr = HADDR_UNDEF;
+        f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
         for(u = 0; u < NELMTS(f->shared->fs_addr); u++)
             f->shared->fs_addr[u] = HADDR_UNDEF;
-	f->shared->accum.loc = HADDR_UNDEF;
+        f->shared->accum.loc = HADDR_UNDEF;
         f->shared->lf = lf;
 
-	/*
-	 * Copy the file creation and file access property lists into the
-	 * new file handle.  We do this early because some values might need
-	 * to change as the file is being opened.
-	 */
+        /*
+         * Copy the file creation and file access property lists into the
+         * new file handle.  We do this early because some values might need
+         * to change as the file is being opened.
+         */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list")
         f->shared->fcpl_id = H5P_copy_plist(plist, FALSE);
@@ -644,8 +651,11 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get garbage collect reference")
         if(H5P_get(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &(f->shared->sieve_buf_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get sieve buffer size")
-        if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
+        if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest_format) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
+        /* For latest format, activate all latest version support */
+        if(latest_format)
+            f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
         if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &(f->shared->meta_aggr.alloc_size)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get metadata cache size")
         f->shared->meta_aggr.feature_flag = H5FD_FEAT_AGGREGATE_METADATA;
@@ -713,21 +723,25 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
          */
         f->shared->use_tmp_space = !H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI);
 
-	/*
-	 * Create a metadata cache with the specified number of elements.
-	 * The cache might be created with a different number of elements and
-	 * the access property list should be updated to reflect that.
-	 */
-	if(H5AC_create(f, &(f->shared->mdc_initCacheCfg)) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create metadata cache")
+        /* Get object flush callback information */
+        if(H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get object flush cb info")
+
+        /*
+         * Create a metadata cache with the specified number of elements.
+         * The cache might be created with a different number of elements and
+         * the access property list should be updated to reflect that.
+         */
+        if(H5AC_create(f, &(f->shared->mdc_initCacheCfg)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create metadata cache")
 
         /* Create the file's "open object" information */
         if(H5FO_create(f) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create open object data structure")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create open object data structure")
 
         /* Add new "shared" struct to list of open files */
         if(H5F_sfile_add(f->shared) < 0)
-	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to append to list of open files")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to append to list of open files")
     } /* end else */
 
     f->shared->nrefs++;
@@ -741,7 +755,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
 
 done:
     if(!ret_value && f) {
-	if(!shared) {
+        if(!shared) {
             /* Attempt to clean up some of the shared file structures */
             if(f->shared->efc)
                 if(H5F_efc_destroy(f->shared->efc) < 0)
@@ -752,7 +766,7 @@ done:
 
             f->shared = H5FL_FREE(H5F_file_t, f->shared);
         } /* end if */
-	f = H5FL_FREE(H5F_t, f);
+        f = H5FL_FREE(H5F_t, f);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1115,7 +1129,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     } else if (1 == shared->nrefs) {
 
 	/* Read the superblock if it hasn't been read before. */
-        if(H5F__super_read(file, dxpl_id) < 0)
+        if(H5F__super_read(file, dxpl_id, TRUE) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
 
 	/* Open the root group */
@@ -1592,6 +1606,10 @@ H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *na
     char **actual_name/*out*/)
 {
     hid_t       new_fapl_id = -1;       /* ID for duplicated FAPL */
+#ifdef H5_HAVE_SYMLINK
+    /* This has to be declared here to avoid unfreed resources on errors */
+    char *realname = NULL;              /* Fully resolved path name of file */
+#endif /* H5_HAVE_SYMLINK */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1623,8 +1641,11 @@ H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *na
             int *fd;                    /* POSIX I/O file descriptor */
             h5_stat_t st;               /* Stat info from stat() call */
             h5_stat_t fst;              /* Stat info from fstat() call */
-            char realname[PATH_MAX];    /* Fully resolved path name of file */
             hbool_t want_posix_fd;      /* Flag for retrieving file descriptor from VFD */
+
+            /* Allocate realname buffer */
+            if(NULL == (realname = (char *)H5MM_calloc((size_t)PATH_MAX * sizeof(char))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             /* Perform a sanity check that the file or link wasn't switched
              * between when we opened it and when we called lstat().  This is
@@ -1682,6 +1703,10 @@ done:
     if(new_fapl_id > 0)
         if(H5I_dec_app_ref(new_fapl_id) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close duplicated FAPL")
+#ifdef H5_HAVE_SYMLINK
+    if(realname)
+        realname = (char *)H5MM_xfree(realname);
+#endif /* H5_HAVE_SYMLINK */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_build_actual_name() */
@@ -2104,6 +2129,39 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t dxpl_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_file_image() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_object_flush_cb
+ *
+ * Purpose:     To invoke the callback function for object flush that is set
+ *              in the file's access property list.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi; October 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_object_flush_cb(H5F_t *f, hid_t obj_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Invoke object flush callback if there is one */
+    if(f->shared->object_flush.func && f->shared->object_flush.func(obj_id, f->shared->object_flush.udata) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "object flush callback returns error")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_object_flush_cb() */
 
 
 /*-------------------------------------------------------------------------

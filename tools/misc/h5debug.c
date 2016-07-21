@@ -121,6 +121,14 @@ get_H5B2_class(const uint8_t *sig)
             cls = H5A_BT2_CORDER;
             break;
 
+        case H5B2_CDSET_ID:
+            cls = H5D_BT2;
+            break;
+
+        case H5B2_CDSET_FILT_ID:
+            cls = H5D_BT2_FILT;
+            break;
+
         case H5B2_TEST2_ID:
             cls = H5B2_TEST2;
             break;
@@ -161,6 +169,14 @@ get_H5EA_class(const uint8_t *sig)
             cls = H5EA_CLS_TEST;
             break;
 
+        case H5EA_CLS_CHUNK_ID:
+            cls = H5EA_CLS_CHUNK;
+            break;
+
+        case H5EA_CLS_FILT_CHUNK_ID:
+            cls = H5EA_CLS_FILT_CHUNK;
+            break;
+
         case H5EA_NUM_CLS_ID:
         default:
             HDfprintf(stderr, "Unknown extensible array class %u\n", (unsigned)(clsid));
@@ -197,6 +213,14 @@ get_H5FA_class(const uint8_t *sig)
             cls = H5FA_CLS_TEST;
             break;
 
+        case H5FA_CLS_CHUNK_ID:
+            cls = H5FA_CLS_CHUNK;
+            break;
+
+        case H5FA_CLS_FILT_CHUNK_ID:
+            cls = H5FA_CLS_FILT_CHUNK;
+            break;
+
         case H5FA_NUM_CLS_ID: 
         default:
             HDfprintf(stderr, "Unknown fixed array class %u\n", (unsigned)(clsid));
@@ -230,11 +254,13 @@ main(int argc, char *argv[])
     haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
+    H5E_auto2_t func;
+    void 	*edata;
     herr_t      status = SUCCEED;
 
     if(argc == 1) {
-  		HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
-  		HDexit(1);
+  	HDfprintf(stderr, "Usage: %s filename [signature-addr [extra]]\n", argv[0]);
+  	HDexit(1);
     } /* end if */
 
     /* Initialize the library */
@@ -243,13 +269,14 @@ main(int argc, char *argv[])
         HDexit(1);
     } /* end if */
 
+    /* Disable error reporting */
+    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
     /*
      * Open the file and get the file descriptor.
      */
-    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0) {
-        HDfprintf(stderr, "cannot create dataset transfer property list\n");
-        HDexit(1);
-    } /* end if */
+    dxpl = H5AC_ind_read_dxpl_id;
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         HDfprintf(stderr, "cannot create file access property list\n");
         HDexit(1);
@@ -402,6 +429,13 @@ main(int argc, char *argv[])
         const H5B2_class_t *cls = get_H5B2_class(sig);
         HDassert(cls);
 
+	    if((cls == H5D_BT2 || cls == H5D_BT2_FILT) && extra == 0) {
+            HDfprintf(stderr, "ERROR: Need v2 B-tree header address and object header address containing the layout message in order to dump header\n");
+            HDfprintf(stderr, "v2 B-tree hdr usage:\n");
+            HDfprintf(stderr, "\th5debug <filename> <v2 B-tree header address> <object header address>\n");
+            HDexit(4);
+	    } /* end if */
+
         status = H5B2__hdr_debug(f, H5AC_ind_read_dxpl_id, addr, stdout, 0, VCOL, cls, (haddr_t)extra);
 
     } else if(!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
@@ -412,7 +446,16 @@ main(int argc, char *argv[])
         HDassert(cls);
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0 || extra3 == 0) {
+	if((cls == H5D_BT2 || cls == H5D_BT2_FILT) &&
+	   (extra == 0 || extra2 == 0 || extra3 == 0 || extra4 == 0)) {
+
+            fprintf(stderr, "ERROR: Need v2 B-tree header address, the node's number of records, depth, and object header address containing the layout message in order to dump internal node\n");
+            fprintf(stderr, "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
+            fprintf(stderr, "v2 B-tree internal node usage:\n");
+            fprintf(stderr, "\th5debug <filename> <internal node address> <v2 B-tree header address> <number of records> <depth> <object header address>\n");
+            HDexit(4);
+
+        } else if(extra == 0 || extra2 == 0 || extra3 == 0) {
             HDfprintf(stderr, "ERROR: Need v2 B-tree header address and the node's number of records and depth in order to dump internal node\n");
             HDfprintf(stderr, "NOTE: Leaf nodes are depth 0, the internal nodes above them are depth 1, etc.\n");
             HDfprintf(stderr, "v2 B-tree internal node usage:\n");
@@ -430,7 +473,15 @@ main(int argc, char *argv[])
         HDassert(cls);
 
         /* Check for enough valid parameters */
-        if(extra == 0 || extra2 == 0) {
+	if((cls == H5D_BT2 || cls == H5D_BT2_FILT) &&
+	   (extra == 0 || extra2 == 0 || extra3 == 0 )) {
+
+            fprintf(stderr, "ERROR: Need v2 B-tree header address, number of records, and object header address containing the layout message in order to dump leaf node\n");
+            fprintf(stderr, "v2 B-tree leaf node usage:\n");
+            fprintf(stderr, "\th5debug <filename> <leaf node address> <v2 B-tree header address> <number of records> <object header address>\n");
+            HDexit(4);
+
+        } else if(extra == 0 || extra2 == 0) {
             HDfprintf(stderr, "ERROR: Need v2 B-tree header address and number of records in order to dump leaf node\n");
             HDfprintf(stderr, "v2 B-tree leaf node usage:\n");
             HDfprintf(stderr, "\th5debug <filename> <leaf node address> <v2 B-tree header address> <number of records>\n");
@@ -662,9 +713,10 @@ main(int argc, char *argv[])
         HDexit(5);
     } /* end if */
 
-    H5Pclose(dxpl);
     H5Pclose(fapl);
     H5Fclose(fid);
+
+    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     return 0;
 } /* main() */

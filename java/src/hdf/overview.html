@@ -1,0 +1,96 @@
+<body>
+
+<h1>Java HDF5 Interface (JHI5)</h1>
+
+<h2><u>What it is</u></h2>
+The <b>Java HD5 Interface (JHI5)</b> is a Java package
+(<a href="../../hdf-java-html/javadocs/hdf/hdf5lib/package-summary.html">hdf.hdf5lib</a>)
+that ``wraps around'' the HDF5 library.
+<p />There are a large number of functions in the HDF5
+library (version 1.10). Some of the functions are not supported in JHI5. Most
+of the unsupported functions have C function pointers, which is not currently
+implemented in JHI5.
+
+<center><table BORDER=1 COLS=1 WIDTH="71%" BGCOLOR="#dbeaf5" >
+<tr>
+<td>
+<center>Note: The JHI5 does not support HDF4 or earlier.</center>
+</td>
+</tr>
+</table></center>
+
+<p>The JHI5 may be used by any Java application that needs to access HDF5
+files. It is extremely important to emphasize that <i>this package is not
+a pure Java implementation of the HDF5 library.</i> The JHI5 calls the
+same HDF5 library that is used by C or FORTRAN programs. (Note that this
+product cannot be used in most network browsers because it accesses the
+local disk using native code.)
+<p>The Java HDF5 Interface consists of Java classes and a dynamically
+linked native library. The Java classes declare native methods, and the
+library contains C functions which implement the native methods. The C
+functions call the standard HDF5 library, which is linked as part of the
+same library on most platforms.
+<p>The central part of the JHI5 is the Java class <i>
+<a href="../../hdf-java-html/javadocs/hdf/hdf5lib/H5.html">hdf.hdf5lib.H5</a></i>.
+The <i>H5 </i>class calls the standard (<i>i.e.</i>, `native' code) HDF5
+library, with native methods for most of the HDF5 functions.
+
+<h3>
+<u>How to use it</u></h3>
+The JHI5 is used by Java classes to call the HDF5 library, in order to
+create HDF5 files, and read and write data in existing HDF5 files.
+<p>For example, the HDF5 library has the function <b>H5Fopen</b> to open
+an HDF5 file. The Java interface is the class <i>
+<a href="../../hdf-java-html/javadocs/hdf/hdf5lib/H5.html">hdf.hdf5lib.H5</a></i>,
+which has a method:
+<pre><b>static native int H5Fopen(String filename, int flags, int access );</b></pre>
+The native method is implemented in C using the
+<a href="http://java.sun.com/javase/6/docs/technotes/guides/jni/index.html">Java
+Native Method Interface </a>(JNI). This is written something like the following:
+<pre><b>JNIEXPORT jint
+JNICALL Java_hdf_hdf5lib_H5_H5Fopen
+(
+&nbsp;JNIEnv *env,
+&nbsp;jclass class,
+&nbsp;jstring hdfFile,
+&nbsp;jint flags,
+&nbsp;jint access)
+&nbsp;{
+
+&nbsp;/* ...convert Java String to (char *) */
+
+&nbsp;/* call the HDF library */
+&nbsp;retVal = H5Fopen((char *)file, (unsigned)flags, (hid_t)access );
+
+&nbsp;/* ... */
+}</b></pre>
+This C function calls the HDF5 library and returns the result appropriately.
+<p>There is one native method for each HDF entry point (several hundred
+in all), which are compiled with the HDF library into a dynamically loaded
+library (<i>libhdf5_java</i>). Note that this library must be built for each
+platform.
+<p>To call the HDF `<b><i>H5Fopen</i></b>' function, a Java program would
+import the package '<i><b>hdf.hdf5lib.*</b>'</i>, and invoke the method
+on the class '<b><i>H5</i></b>'. The Java program would look something
+like this:
+<pre><b>import hdf.hdf5lib.*;
+
+{
+&nbsp;/* ... */
+
+&nbsp;try {
+&nbsp;file = H5.Hopen("myFile.hdf", flags, access );
+&nbsp;} catch (HDF5Exception ex) {
+&nbsp;//...
+&nbsp;}
+
+&nbsp;/* ... */
+}</b></pre>
+The <i><b>H5</b> </i>class automatically loads the native method implementations
+and the HDF5 library.
+
+<h3>
+<a NAME="DOWNLOAD"></a>To Obtain</h3>
+The JHI5 is included with the <a href="http://www.hdfgroup.org/HDF5/index.html">HDF5</a> library.
+
+</body>

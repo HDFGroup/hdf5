@@ -614,15 +614,10 @@ END SUBROUTINE test_array_compound_atomic
              total_error = total_error + 1
           ENDIF
           DO k = 1, ARRAY2_DIM1
-             
-             IF(wdata(i,j)%f(k).NE.rdata(i,j)%f(k))THEN
-                PRINT*, 'ERROR: Wrong real array data is read back by H5Dread_f '
-                total_error = total_error + 1
-             ENDIF
-             IF(wdata(i,j)%c(k).NE.rdata(i,j)%c(k))THEN
-                PRINT*, 'ERROR: Wrong character array data is read back by H5Dread_f '
-                total_error = total_error + 1
-             ENDIF
+             CALL VERIFY("h5dread_f",wdata(i,j)%f(k),rdata(i,j)%f(k),total_error)
+             IF(total_error.NE.0) PRINT*,'ERROR: Wrong real array data is read back by H5Dread_f'
+             CALL VERIFY("h5dread_f",wdata(i,j)%c(k),rdata(i,j)%c(k),total_error) 
+             IF(total_error.NE.0) PRINT*,'ERROR: Wrong character array data is read back by H5Dread_f'
           ENDDO
        ENDDO
     ENDDO
@@ -1054,12 +1049,12 @@ END SUBROUTINE test_array_compound_atomic
     ! Initialize the dset_data array.
     !
     DO i = 1, 4
-       dset_data_i1(i)  = HUGE(0_int_kind_1)-i
-       dset_data_i4(i)  = HUGE(0_int_kind_4)-i
-       dset_data_i8(i)  = HUGE(0_int_kind_8)-i
-       dset_data_i16(i) = HUGE(0_int_kind_16)-i
+       dset_data_i1(i)  = HUGE(0_int_kind_1)-INT(i,int_kind_1)
+       dset_data_i4(i)  = HUGE(0_int_kind_4)-INT(i,int_kind_4)
+       dset_data_i8(i)  = HUGE(0_int_kind_8)-INT(i,int_kind_8)
+       dset_data_i16(i) = HUGE(0_int_kind_16)-INT(i,int_kind_16)
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
-       dset_data_i32(i) = HUGE(0_int_kind_32)-i
+       dset_data_i32(i) = HUGE(0_int_kind_32)-INT(i,int_kind_32)
 #endif
        dset_data_r(i) = 4.0*ATAN(1.0)-REAL(i-1)
        dset_data_r7(i) = 4.0_real_kind_7*ATAN(1.0_real_kind_7)-REAL(i-1,real_kind_7)
@@ -1548,7 +1543,7 @@ SUBROUTINE t_bit(total_error)
   INTEGER :: A, B, C, D
   INTEGER :: Aw, Bw, Cw, Dw
   INTEGER :: i, j
-  INTEGER, PARAMETER :: hex =  Z'00000003'
+  INTEGER, PARAMETER :: hex =  INT(Z'00000003')
   TYPE(C_PTR) :: f_ptr
   INTEGER :: error     ! Error flag
   !
@@ -2181,13 +2176,13 @@ SUBROUTINE t_vlen(total_error)
   ALLOCATE( ptr(1)%data(1:wdata(1)%len) )
   ALLOCATE( ptr(2)%data(1:wdata(2)%len) )
 
-  DO i=1, wdata(1)%len
-     ptr(1)%data(i) = wdata(1)%len - i + 1 ! 3 2 1
+  DO i=1, INT(wdata(1)%len)
+     ptr(1)%data(i) = INT(wdata(1)%len) - i + 1 ! 3 2 1
   ENDDO
   wdata(1)%p = C_LOC(ptr(1)%data(1))
 
   ptr(2)%data(1:2) = 1
-  DO i = 3, wdata(2)%len
+  DO i = 3, INT(wdata(2)%len)
      ptr(2)%data(i) = ptr(2)%data(i-1) + ptr(2)%data(i-2) ! (1 1 2 3 5 8 etc.)
   ENDDO
   wdata(2)%p = C_LOC(ptr(2)%data(1))
@@ -2273,7 +2268,7 @@ SUBROUTINE t_vlen(total_error)
 
   DO i = 1, INT(dims(1))
      CALL c_f_pointer(rdata(i)%p, ptr_r, [rdata(i)%len] )
-     DO j = 1, rdata(i)%len
+     DO j = 1, INT(rdata(i)%len)
         CALL VERIFY("t_vlen", ptr_r(j), ptr(i)%data(j), total_error)
      ENDDO
   ENDDO

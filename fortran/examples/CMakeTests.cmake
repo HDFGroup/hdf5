@@ -23,6 +23,8 @@
           mount2.h5
           sdsf.h5
           subset.h5
+          SDScompound.h5
+          test.h5
   )
   if (NOT "${last_test}" STREQUAL "")
     set_tests_properties (f90_ex-clear-objects PROPERTIES DEPENDS ${last_test})
@@ -46,6 +48,8 @@
             mount2.h5
             sdsf.h5
             subset.h5
+            SDScompound.h5
+            test.h5
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (f90_ex-shared-clear-objects PROPERTIES DEPENDS ${last_test})

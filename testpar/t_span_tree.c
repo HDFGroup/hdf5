@@ -2615,7 +2615,7 @@ lower_dim_size_comp_test(void)
     int  	use_collective_io = 1;
     hid_t	dset_type = H5T_NATIVE_UINT;
 #if 0
-   sleep(60);
+   HDsleep(60);
 #endif
     HDcompile_assert(sizeof(uint32_t) == sizeof(unsigned));
     for ( use_collective_io = (hbool_t)0; 

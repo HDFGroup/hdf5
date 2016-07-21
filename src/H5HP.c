@@ -848,7 +848,8 @@ H5HP_decr(H5HP_t *heap, unsigned amt, void *_obj)
     HDassert(obj_loc>0 && obj_loc<=heap->nobjs);
 
     /* Change the heap object's priority */
-    heap->heap[obj_loc].val-=amt;
+    H5_CHECK_OVERFLOW(amt, unsigned, int);
+    heap->heap[obj_loc].val-=(int)amt;
 
     /* Restore heap condition */
     if(heap->type==H5HP_MAX_HEAP) {

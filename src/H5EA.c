@@ -74,6 +74,11 @@ typedef herr_t (*H5EA__unprotect_func_t)(void *thing, hid_t dxpl_id,
 /* Local Prototypes */
 /********************/
 
+static herr_t
+H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_extend,
+    unsigned thing_acc, void **thing, uint8_t **thing_elmt_buf,
+    hsize_t *thing_elmt_idx, H5EA__unprotect_func_t *thing_unprot_func);
+
 
 /*********************/
 /* Package Variables */
@@ -88,6 +93,8 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
  * client class..
  */
 const H5EA_class_t *const H5EA_client_class_g[] = {
+    H5EA_CLS_CHUNK,		/* 0 - H5EA_CLS_CHUNK_ID 		*/
+    H5EA_CLS_FILT_CHUNK,	/* 1 - H5EA_CLS_FILT_CHUNK_ID 		*/
     H5EA_CLS_TEST,		/* ? - H5EA_CLS_TEST_ID			*/
 };
 
@@ -104,6 +111,8 @@ const H5EA_class_t *const H5EA_client_class_g[] = {
 /* Declare a free list to manage the H5EA_t struct */
 H5FL_DEFINE_STATIC(H5EA_t);
 
+/* Declare a PQ free list to manage the element */
+H5FL_BLK_DEFINE(ea_native_elmt);
 
 
 /*-------------------------------------------------------------------------
@@ -128,10 +137,6 @@ H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam, void *ctx_udat
     H5EA_t *ea = NULL;          /* Pointer to new extensible array */
     H5EA_hdr_t *hdr = NULL;     /* The extensible array header information */
     haddr_t ea_addr;            /* Array header address */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
 
     /*
      * Check arguments.
@@ -209,9 +214,6 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
     HDassert(H5F_addr_defined(ea_addr));
 
     /* Load the array header into memory */
-#ifdef QAK
-HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
-#endif /* QAK */
     if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
         H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header, address = %llu", (unsigned long long)ea_addr)
 
@@ -268,10 +270,6 @@ H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts))
 
     /* Local variables */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
     /*
      * Check arguments.
      */
@@ -303,10 +301,6 @@ H5EA_get_addr(const H5EA_t *ea, haddr_t *addr))
 
     /* Local variables */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
     /*
      * Check arguments.
      */
@@ -321,7 +315,7 @@ END_FUNC(PRIV)  /* end H5EA_get_addr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_lookup_elmt
+ * Function:	H5EA__lookup_elmt
  *
  * Purpose:	Retrieve the metadata object and the element buffer for a
  *              given element in the array.
@@ -336,9 +330,9 @@ END_FUNC(PRIV)  /* end H5EA_get_addr() */
  */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, unsigned thing_acc,
-    void **thing, uint8_t **thing_elmt_buf, hsize_t *thing_elmt_idx,
-    H5EA__unprotect_func_t *thing_unprot_func))
+H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_extend,
+    unsigned thing_acc, void **thing, uint8_t **thing_elmt_buf,
+    hsize_t *thing_elmt_idx, H5EA__unprotect_func_t *thing_unprot_func))
 
     /* Local variables */
     H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
@@ -350,11 +344,6 @@ H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, unsigned thing_a
     unsigned sblock_cache_flags = H5AC__NO_FLAGS_SET;   /* Flags to unprotecting super block */
     hbool_t stats_changed = FALSE;      /* Whether array statistics changed */
     hbool_t hdr_dirty = FALSE;          /* Whether the array header changed */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
-#endif /* QAK */
 
     /*
      * Check arguments.
@@ -379,9 +368,6 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
 
     /* Check if we should create the index block */
     if(!H5F_addr_defined(hdr->idx_blk_addr)) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Index block address not defined!\n", FUNC, idx);
-#endif /* QAK */
         /* Check if we are allowed to create the thing */
         if(0 == (thing_acc & H5AC__READ_ONLY_FLAG)) { /* i.e. r/w access */
             /* Create the index block */
@@ -393,9 +379,6 @@ HDfprintf(stderr, "%s: Index block address not defined!\n", FUNC, idx);
         else
             H5_LEAVE(SUCCEED)
     } /* end if */
-#ifdef QAK
-HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
-#endif /* QAK */
 
     /* Protect index block */
     if(NULL == (iblock = H5EA__iblock_protect(hdr, dxpl_id, thing_acc)))
@@ -416,26 +399,14 @@ HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
 
         /* Get super block index where element is located */
         sblk_idx = H5EA__dblock_sblk_idx(hdr, idx);
-#ifdef QAK
-HDfprintf(stderr, "%s: sblk_idx = %u, iblock->nsblks = %Zu\n", FUNC, sblk_idx, iblock->nsblks);
-#endif /* QAK */
 
         /* Adjust index to offset in super block */
         elmt_idx = idx - (hdr->cparam.idx_blk_elmts + hdr->sblk_info[sblk_idx].start_idx);
-#ifdef QAK
-HDfprintf(stderr, "%s: after adjusting for super block elements, elmt_idx = %Hu\n", FUNC, elmt_idx);
-#endif /* QAK */
 
         /* Check for data block containing element address in the index block */
         if(sblk_idx < iblock->nsblks) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Element in data block pointed to by address in index block\n", FUNC);
-#endif /* QAK */
             /* Compute the data block index in index block */
             dblk_idx = (size_t)(hdr->sblk_info[sblk_idx].start_dblk + (elmt_idx / hdr->sblk_info[sblk_idx].dblk_nelmts));
-#ifdef QAK
-HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_idx, iblock->ndblk_addrs);
-#endif /* QAK */
             HDassert(dblk_idx < iblock->ndblk_addrs);
 
             /* Check if the data block has been allocated on disk yet */
@@ -466,6 +437,13 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
             /* Adjust index to offset in data block */
             elmt_idx %= hdr->sblk_info[sblk_idx].dblk_nelmts;
 
+            /* Check if there is already a dependency on the header */
+            if(will_extend && !dblock->has_hdr_depend) {
+                if(H5EA__create_flush_depend((H5AC_info_t *)hdr, (H5AC_info_t *)dblock) < 0)
+                    H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block and header, index = %llu", (unsigned long long)idx)
+                dblock->has_hdr_depend = TRUE;
+            } /* end if */
+
             /* Set 'thing' info to refer to the data block */
             *thing = dblock;
             *thing_elmt_buf = (uint8_t *)dblock->elmts;
@@ -486,9 +464,6 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
 
                     /* Create super block */
                     sblk_addr = H5EA__sblock_create(hdr, dxpl_id, iblock, &stats_changed, sblk_idx);
-#ifdef QAK
-HDfprintf(stderr, "%s: New super block address is: %a\n", FUNC, sblk_addr);
-#endif /* QAK */
                     if(!H5F_addr_defined(sblk_addr))
                         H5E_THROW(H5E_CANTCREATE, "unable to create extensible array super block")
 
@@ -506,9 +481,6 @@ HDfprintf(stderr, "%s: New super block address is: %a\n", FUNC, sblk_addr);
 
             /* Compute the data block index in super block */
             dblk_idx = (size_t)(elmt_idx / sblock->dblk_nelmts);
-#ifdef QAK
-HDfprintf(stderr, "%s: dblk_idx = %u, sblock->ndblks = %Zu\n", FUNC, dblk_idx, sblock->ndblks);
-#endif /* QAK */
             HDassert(dblk_idx < sblock->ndblks);
 
             /* Check if the data block has been allocated on disk yet */
@@ -527,21 +499,20 @@ HDfprintf(stderr, "%s: dblk_idx = %u, sblock->ndblks = %Zu\n", FUNC, dblk_idx, s
                     /* Set data block address in index block */
                     sblock->dblk_addrs[dblk_idx] = dblk_addr;
                     sblock_cache_flags |= H5AC__DIRTIED_FLAG;
+
+                    /* Create flush dependency on header, if extending the array and one doesn't already exist */
+                    if(will_extend && !sblock->has_hdr_depend) {
+                        if(H5EA__create_flush_depend((H5AC_info_t *)sblock->hdr, (H5AC_info_t *)sblock) < 0)
+                            H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between super block and header, address = %llu", (unsigned long long)sblock->addr)
+                        sblock->has_hdr_depend = TRUE;
+                    } /* end if */
                 } /* end if */
                 else
                     H5_LEAVE(SUCCEED)
             } /* end if */
 
-#ifdef QAK
-if(sblock->dblk_npages)
-    HDfprintf(stderr, "%s: Check 1.0: elmt_idx = %Hu\n", FUNC, elmt_idx);
-#endif /* QAK */
             /* Adjust index to offset in data block */
             elmt_idx %= sblock->dblk_nelmts;
-#ifdef QAK
-if(sblock->dblk_npages)
-    HDfprintf(stderr, "%s: Check 2.0: elmt_idx = %Hu\n", FUNC, elmt_idx);
-#endif /* QAK */
 
             /* Check if the data block is paged */
             if(sblock->dblk_npages) {
@@ -562,14 +533,6 @@ if(sblock->dblk_npages)
                 dblk_page_addr = sblock->dblk_addrs[dblk_idx] +
                         H5EA_DBLOCK_PREFIX_SIZE(sblock) +
                         (page_idx * sblock->dblk_page_size);
-#ifdef QAK
-HDfprintf(stderr, "%s: sblock->addr = %a\n", FUNC, sblock->addr);
-HDfprintf(stderr, "%s: sblock->dblk_addrs[%Zu] = %a\n", FUNC, dblk_idx, sblock->dblk_addrs[dblk_idx]);
-HDfprintf(stderr, "%s: H5EA_DBLOCK_PREFIX_SIZE(sblock) = %u\n", FUNC, (unsigned)H5EA_DBLOCK_PREFIX_SIZE(sblock));
-HDfprintf(stderr, "%s: sblock->page_init[%Zu] = %t\n", FUNC, page_init_idx, H5VM_bit_get(sblock->page_init, page_init_idx));
-HDfprintf(stderr, "%s: page_idx = %Zu, elmt_idx = %Hu, dblk_page_addr = %a\n", FUNC, page_idx, elmt_idx, dblk_page_addr);
-HDfprintf(stderr, "%s: sblock->dblk_page_size = %Zu\n", FUNC, sblock->dblk_page_size);
-#endif /* QAK */
 
                 /* Check if page has been initialized yet */
                 if(!H5VM_bit_get(sblock->page_init, page_init_idx)) {
@@ -591,6 +554,13 @@ HDfprintf(stderr, "%s: sblock->dblk_page_size = %Zu\n", FUNC, sblock->dblk_page_
                 if(NULL == (dblk_page = H5EA__dblk_page_protect(hdr, dxpl_id, sblock, dblk_page_addr, thing_acc)))
                     H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
+                /* Check if there is already a dependency on the header */
+                if(will_extend && !dblk_page->has_hdr_depend) {
+                    if(H5EA__create_flush_depend((H5AC_info_t *)hdr, (H5AC_info_t *)dblk_page) < 0)
+                        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block page and header, index = %llu", (unsigned long long)idx)
+                    dblk_page->has_hdr_depend = TRUE;
+                } /* end if */
+
                 /* Set 'thing' info to refer to the data block page */
                 *thing = dblk_page;
                 *thing_elmt_buf = (uint8_t *)dblk_page->elmts;
@@ -602,6 +572,13 @@ HDfprintf(stderr, "%s: sblock->dblk_page_size = %Zu\n", FUNC, sblock->dblk_page_
                 if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, sblock, sblock->dblk_addrs[dblk_idx], sblock->dblk_nelmts, thing_acc)))
                     H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)sblock->dblk_addrs[dblk_idx])
 
+                /* Check if there is already a dependency on the header */
+                if(will_extend && !dblock->has_hdr_depend) {
+                    if(H5EA__create_flush_depend((H5AC_info_t *)hdr, (H5AC_info_t *)dblock) < 0)
+                        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block and header, index = %llu", (unsigned long long)idx)
+                    dblock->has_hdr_depend = TRUE;
+                } /* end if */
+
                 /* Set 'thing' info to refer to the data block */
                 *thing = dblock;
                 *thing_elmt_buf = (uint8_t *)dblock->elmts;
@@ -610,6 +587,10 @@ HDfprintf(stderr, "%s: sblock->dblk_page_size = %Zu\n", FUNC, sblock->dblk_page_
             } /* end else */
         } /* end else */
     } /* end else */
+
+    /* Sanity checks */
+    HDassert(*thing != NULL);
+    HDassert(*thing_unprot_func != NULL);
 
 CATCH
     /* Reset 'thing' info on error */
@@ -640,7 +621,7 @@ CATCH
     if(dblk_page && *thing != dblk_page && H5EA__dblk_page_unprotect(dblk_page, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array data block page")
 
-END_FUNC(STATIC)  /* end H5EA_lookup_elmt() */
+END_FUNC(STATIC)  /* end H5EA__lookup_elmt() */
 
 
 /*-------------------------------------------------------------------------
@@ -666,12 +647,8 @@ H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt))
     uint8_t *thing_elmt_buf;            /* Pointer to the element buffer for the array metadata */
     hsize_t thing_elmt_idx;             /* Index of the element in the element buffer for the array metadata */
     H5EA__unprotect_func_t thing_unprot_func;   /* Function pointer for unprotecting the array metadata */
+    hbool_t will_extend;                /* Flag indicating if setting the element will extend the array */
     unsigned thing_cache_flags = H5AC__NO_FLAGS_SET;   /* Flags for unprotecting array metadata */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
-#endif /* QAK */
 
     /*
      * Check arguments.
@@ -683,7 +660,8 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
     hdr->f = ea->f;
 
     /* Look up the array metadata containing the element we want to set */
-    if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC__NO_FLAGS_SET, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
+    will_extend = (idx >= hdr->stats.stored.max_idx_set);
+    if(H5EA__lookup_elmt(ea, dxpl_id, idx, will_extend, H5AC__NO_FLAGS_SET, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
         H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
 
     /* Sanity check */
@@ -696,10 +674,7 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
     thing_cache_flags |= H5AC__DIRTIED_FLAG;
 
     /* Update max. element set in array, if appropriate */
-#ifdef QAK
-HDfprintf(stderr, "%s: idx = %Hu, hdr->stats.max_idx_set = %Hu\n", FUNC, idx, hdr->stats.max_idx_set);
-#endif /* QAK */
-    if(idx >= hdr->stats.stored.max_idx_set) {
+    if(will_extend) {
         /* Update the max index for the array */
         hdr->stats.stored.max_idx_set = idx + 1;
         if(H5EA__hdr_modified(hdr) < 0)
@@ -736,11 +711,6 @@ H5EA_get(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt))
     void *thing = NULL;                 /* Pointer to the array metadata containing the array index we are interested in */
     H5EA__unprotect_func_t thing_unprot_func;   /* Function pointer for unprotecting the array metadata */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
-#endif /* QAK */
-
     /*
      * Check arguments.
      */
@@ -749,9 +719,6 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
 
     /* Check for element beyond max. element in array */
     if(idx >= hdr->stats.stored.max_idx_set) {
-#ifdef QAK
-HDfprintf(stderr, "%s: Element beyond max. index set, hdr->stats.max_idx_set = %Hu, idx = %Hu\n", FUNC, hdr->stats.max_idx_set, idx);
-#endif /* QAK */
         /* Call the class's 'fill' callback */
         if((hdr->cparam.cls->fill)(elmt, (size_t)1) < 0)
             H5E_THROW(H5E_CANTSET, "can't set element to class's fill value")
@@ -760,15 +727,11 @@ HDfprintf(stderr, "%s: Element beyond max. index set, hdr->stats.max_idx_set = %
         uint8_t *thing_elmt_buf;        /* Pointer to the element buffer for the array metadata */
         hsize_t thing_elmt_idx;         /* Index of the element in the element buffer for the array metadata */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
-#endif /* QAK */
-
         /* Set the shared array header's file context for this operation */
         hdr->f = ea->f;
 
         /* Look up the array metadata containing the element we want to set */
-        if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC__READ_ONLY_FLAG, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
+        if(H5EA__lookup_elmt(ea, dxpl_id, idx, FALSE, H5AC__READ_ONLY_FLAG, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
             H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
 
         /* Check if the thing holding the element has been created yet */
@@ -811,10 +774,6 @@ H5EA_depend(H5AC_info_t *parent_entry, H5EA_t *ea))
     /* Local variables */
     H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
     /*
      * Check arguments.
      */
@@ -831,159 +790,6 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 CATCH
 
 END_FUNC(PRIV)  /* end H5EA_depend() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5EA_undepend
- *
- * Purpose:	Remove a child flush dependency between the extensible array's
- *              header and another piece of metadata in the file.
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		May 27 2009
- *
- *-------------------------------------------------------------------------
- */
-BEGIN_FUNC(PRIV, ERR,
-herr_t, SUCCEED, FAIL,
-H5EA_undepend(H5AC_info_t *parent_entry, H5EA_t *ea))
-
-    /* Local variables */
-    H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
-    /*
-     * Check arguments.
-     */
-    HDassert(ea);
-    HDassert(hdr);
-
-    /* Set the shared array header's file context for this operation */
-    hdr->f = ea->f;
-
-    /* Remove flush dependency between parent entry and extensible array header */
-    if(H5EA__destroy_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
-        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency on file metadata")
-
-CATCH
-
-END_FUNC(PRIV)  /* end H5EA_undepend() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5EA_support
- *
- * Purpose:	Create a child flush dependency on the array metadata that
- *              contains the element for an array index.
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		May 21 2009
- *
- *-------------------------------------------------------------------------
- */
-BEGIN_FUNC(PRIV, ERR,
-herr_t, SUCCEED, FAIL,
-H5EA_support(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, H5AC_info_t *child_entry))
-
-    /* Local variables */
-    void *thing = NULL;                 /* Pointer to the array metadata containing the array index we are interested in */
-    uint8_t *thing_elmt_buf;            /* Pointer to the element buffer for the array metadata */
-    hsize_t thing_elmt_idx;             /* Index of the element in the element buffer for the array metadata */
-    H5EA__unprotect_func_t thing_unprot_func;   /* Function pointer for unprotecting the array metadata */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
-#endif /* QAK */
-
-    /*
-     * Check arguments.
-     */
-    HDassert(ea);
-
-    /* Look up the array metadata containing the element we want to set */
-    if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC__NO_FLAGS_SET, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
-
-    /* Sanity check */
-    HDassert(thing);
-    HDassert(thing_elmt_buf);
-    HDassert(thing_unprot_func);
-
-    /* Set up flush dependency between child_entry and metadata array 'thing' */
-    if(H5EA__create_flush_depend((H5AC_info_t *)thing, child_entry) < 0)
-        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on array metadata")
-
-CATCH
-    /* Release resources */
-    if(thing && (thing_unprot_func)(thing, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
-        H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array metadata")
-
-END_FUNC(PRIV)  /* end H5EA_support() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5EA_unsupport
- *
- * Purpose:	Remove a flush dependency on the array metadata that contains
- *              the element for an array index.
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		May 21 2009
- *
- *-------------------------------------------------------------------------
- */
-BEGIN_FUNC(PRIV, ERR,
-herr_t, SUCCEED, FAIL,
-H5EA_unsupport(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, H5AC_info_t *child_entry))
-
-    /* Local variables */
-    void *thing = NULL;                 /* Pointer to the array metadata containing the array index we are interested in */
-    uint8_t *thing_elmt_buf;            /* Pointer to the element buffer for the array metadata */
-    hsize_t thing_elmt_idx;             /* Index of the element in the element buffer for the array metadata */
-    H5EA__unprotect_func_t thing_unprot_func;   /* Function pointer for unprotecting the array metadata */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
-#endif /* QAK */
-
-    /*
-     * Check arguments.
-     */
-    HDassert(ea);
-
-    /* Look up the array metadata containing the element we want to set */
-    if(H5EA__lookup_elmt(ea, dxpl_id, idx, H5AC__READ_ONLY_FLAG, &thing, &thing_elmt_buf, &thing_elmt_idx, &thing_unprot_func) < 0)
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect array metadata")
-
-    /* Sanity check */
-    HDassert(thing);
-    HDassert(thing_elmt_buf);
-    HDassert(thing_unprot_func);
-
-    /* Remove flush dependency between child_entry and metadata array 'thing' */
-    if(H5EA__destroy_flush_depend((H5AC_info_t *)thing, child_entry) < 0)
-        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency on array metadata")
-
-CATCH
-    /* Release resources */
-    if(thing && (thing_unprot_func)(thing, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
-        H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array metadata")
-
-END_FUNC(PRIV)  /* end H5EA_unsupport() */
 
 
 /*-------------------------------------------------------------------------
@@ -1006,10 +812,6 @@ H5EA_close(H5EA_t *ea, hid_t dxpl_id))
     /* Local variables */
     hbool_t pending_delete = FALSE;     /* Whether the array is pending deletion */
     haddr_t ea_addr = HADDR_UNDEF;      /* Address of array (for deletion) */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
 
     /*
      * Check arguments.
@@ -1115,9 +917,6 @@ H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
     HDassert(H5F_addr_defined(ea_addr));
 
     /* Lock the array header into memory */
-#ifdef QAK
-HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
-#endif /* QAK */
     if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
 
@@ -1141,4 +940,88 @@ CATCH
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
 
 END_FUNC(PRIV)  /* end H5EA_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5EA_iterate
+ *
+ * Purpose:	Iterate over the elements of an extensible array
+ *		(copied and modified from FA_iterate() in H5FA.c)
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Vailin Choi; Feb 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA_iterate(H5EA_t *ea, hid_t dxpl_id, H5EA_operator_t op, void *udata))
+
+    /* Local variables */
+    uint8_t     *elmt = NULL;
+    hsize_t     u;
+
+    /*
+     * Check arguments.
+     */
+    HDassert(ea);
+    HDassert(op);
+    HDassert(udata);
+
+    /* Allocate space for a native array element */
+    if(NULL == (elmt = H5FL_BLK_MALLOC(ea_native_elmt, ea->hdr->cparam.cls->nat_elmt_size)))
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array element")
+
+    /* Iterate over all elements in array */
+    for(u = 0; u < ea->hdr->stats.stored.max_idx_set; u++) {
+        int cb_ret;     /* Return value from callback */
+
+        /* Get array element */
+        if(H5EA_get(ea, dxpl_id, u, elmt) < 0)
+            H5E_THROW(H5E_CANTGET, "unable to delete fixed array")
+
+        /* Make callback */
+        if((cb_ret = (*op)(u, elmt, udata)) < 0) {
+            H5E_PRINTF(H5E_BADITER, "iterator function failed");
+            H5_LEAVE(cb_ret)
+        } /* end if */
+    } /* end for */
+
+CATCH
+
+    if(elmt)
+        elmt = H5FL_BLK_FREE(ea_native_elmt, elmt);
+
+END_FUNC(PRIV)  /* end H5EA_iterate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5EA_patch_file
+ *
+ * Purpose:     Patch the top-level file pointer contained in ea
+ *              to point to idx_info->f if they are different.
+ *              This is possible because the file pointer in ea can be
+ *              closed out if ea remains open.
+ *
+ * Return:      SUCCEED
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, NOERR,
+herr_t, SUCCEED, -,
+H5EA_patch_file(H5EA_t *ea, H5F_t *f))
+
+    /* Local variables */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(ea);
+    HDassert(f);
+
+    if(ea->f != f || ea->hdr->f != f)
+        ea->f = ea->hdr->f = f;
+
+END_FUNC(PRIV)  /* end H5EA_patch_file() */
 

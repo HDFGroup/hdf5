@@ -28,6 +28,7 @@
 #include "H5IMpublic.h" /* image */
 #include "H5TBpublic.h" /* table */
 #include "H5PTpublic.h" /* packet table */
+#include "H5LDpublic.h" /* lite dataset */
 
 #endif /*H5_INCLUDE_HL*/
 

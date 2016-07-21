@@ -378,7 +378,7 @@ H5Dget_space(hid_t dset_id)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Dget_space() */
 
 
 /*-------------------------------------------------------------------------
@@ -414,7 +414,7 @@ H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation)
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* H5Dget_space_status() */
 
 
 /*-------------------------------------------------------------------------
@@ -915,4 +915,176 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
 done:
         FUNC_LEAVE_API(ret_value)
 } /* end H5Dset_extent() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dflush
+ *
+ * Purpose:     Flushes all buffers associated with a dataset.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              May 19, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dflush(hid_t dset_id)
+{
+    H5D_t *dset; /* Dataset for this operation */
+    herr_t ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", dset_id);
+    
+    /* Check args */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Flush any dataset information still cached in memory */
+    if(H5D__flush_real(dset, H5AC_ind_read_dxpl_id) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
+
+    /* Flush object's metadata to file */
+    if(H5O_flush_common(&dset->oloc, dset_id, H5AC_ind_read_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to flush dataset and object flush callback")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Dflush */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Drefresh
+ *
+ * Purpose:     Refreshes all buffers associated with a dataset.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              July 21, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Drefresh(hid_t dset_id)
+{
+    H5D_t       *dset;                  /* Dataset to refresh */
+    herr_t      ret_value = SUCCEED;    /* return value */
+    
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", dset_id);
+
+    /* Check args */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Call private function to refresh the dataset object */
+    if((H5D__refresh(dset_id, dset, H5AC_ind_read_dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to refresh dataset")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Drefresh() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dformat_convert (Internal)
+ *
+ * Purpose:     For chunked: 
+ *		  Convert the chunk indexing type to version 1 B-tree if not
+ *		For compact/contiguous: 
+ *		  Downgrade layout version to 3 if greater than 3
+ *		For virtual: no conversion
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              Feb 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dformat_convert(hid_t dset_id)
+{
+    H5D_t *dset;                /* Dataset to refresh */
+    herr_t ret_value = SUCCEED; /* return value */
+    
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", dset_id);
+
+    /* Check args */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    switch(dset->shared->layout.type) {
+	case H5D_CHUNKED:
+	    /* Convert the chunk indexing type to version 1 B-tree if not */
+	    if(dset->shared->layout.u.chunk.idx_type != H5D_CHUNK_IDX_BTREE)
+                if((H5D__format_convert(dset, H5AC_ind_read_dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to downgrade chunk indexing type for dataset")
+	    break;
+
+	case H5D_CONTIGUOUS:
+	case H5D_COMPACT:
+	    /* Downgrade the layout version to 3 if greater than 3 */
+	    if(dset->shared->layout.version > H5O_LAYOUT_VERSION_DEFAULT)
+                if((H5D__format_convert(dset, H5AC_ind_read_dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to downgrade layout version for dataset")
+	    break;
+
+	case H5D_VIRTUAL:
+	    /* Nothing to do even though layout is version 4 */
+	    break;
+
+        case H5D_LAYOUT_ERROR:
+        case H5D_NLAYOUTS:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset layout type")
+
+	default: 
+	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "unknown dataset layout type")
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Dformat_convert */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dget_chunk_index_type (Internal)
+ *
+ * Purpose:     Retrieve a dataset's chunk indexing type
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *              Feb 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type)
+{
+    H5D_t *dset;                /* Dataset to refresh */
+    herr_t ret_value = SUCCEED; /* return value */
+    
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Dk", did, idx_type);
+
+    /* Check args */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Should be a chunked dataset */
+    if(dset->shared->layout.type != H5D_CHUNKED)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not chunked")
+
+    /* Get the chunk indexing type */
+    if(idx_type)
+        *idx_type = dset->shared->layout.u.chunk.idx_type;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Dget_chunk_index_type() */
 

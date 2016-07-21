@@ -133,9 +133,6 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, unsigned sblk_idx))
     sblock->ndblks = hdr->sblk_info[sblk_idx].ndblks;
     HDassert(sblock->ndblks);
     sblock->dblk_nelmts = hdr->sblk_info[sblk_idx].dblk_nelmts;
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->dblk_page_nelmts = %Zu, sblock->ndblks = %Zu, sblock->dblk_nelmts = %Zu\n", FUNC, hdr->dblk_page_nelmts, sblock->ndblks, sblock->dblk_nelmts);
-#endif /* QAK */
 
     /* Allocate buffer for data block addresses in super block */
     if(NULL == (sblock->dblk_addrs = H5FL_SEQ_MALLOC(haddr_t, sblock->ndblks)))
@@ -199,10 +196,6 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_iblock_t *parent,
     haddr_t sblock_addr;                /* Extensible array super block address */
     haddr_t tmp_addr = HADDR_UNDEF;     /* Address value to fill data block addresses with */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
     /* Sanity check */
     HDassert(hdr);
     HDassert(stats_changed);
@@ -213,15 +206,9 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Set size of super block on disk */
     sblock->size = H5EA_SBLOCK_SIZE(sblock);
-#ifdef QAK
-HDfprintf(stderr, "%s: sblock->size = %Zu\n", FUNC, sblock->size);
-#endif /* QAK */
 
     /* Set offset of block in array's address space */
     sblock->block_off = hdr->sblk_info[sblk_idx].start_idx;
-#ifdef QAK
-HDfprintf(stderr, "%s: sblock->block_off = %Hu\n", FUNC, sblock->block_off);
-#endif /* QAK */
 
     /* Allocate space for the super block on disk */
     if(HADDR_UNDEF == (sblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_SBLOCK, dxpl_id, (hsize_t)sblock->size)))
@@ -281,11 +268,6 @@ H5EA__sblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_iblock_t *parent,
     /* Local variables */
     H5EA_sblock_cache_ud_t udata;      /* Information needed for loading super block */
 
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
     /* Sanity check */
     HDassert(hdr);
     HDassert(H5F_addr_defined(sblk_addr));
@@ -327,10 +309,6 @@ H5EA__sblock_unprotect(H5EA_sblock_t *sblock, hid_t dxpl_id, unsigned cache_flag
 
     /* Local variables */
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
     /* Sanity check */
     HDassert(sblock);
 
@@ -364,10 +342,6 @@ H5EA__sblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_iblock_t *parent,
     /* Local variables */
     H5EA_sblock_t *sblock = NULL;       /* Pointer to super block */
     size_t u;                           /* Local index variable */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
 
     /* Sanity check */
     HDassert(hdr);
@@ -415,9 +389,7 @@ H5EA__sblock_dest(H5EA_sblock_t *sblock))
 
     /* Sanity check */
     HDassert(sblock);
-#ifdef QAK
-HDfprintf(stderr, "%s: sblock->hdr->dblk_page_nelmts = %Zu, sblock->ndblks = %Zu, sblock->dblk_nelmts = %Zu\n", FUNC, sblock->hdr->dblk_page_nelmts, sblock->ndblks, sblock->dblk_nelmts);
-#endif /* QAK */
+    HDassert(!sblock->has_hdr_depend);
 
     /* Check if shared header field has been initialized */
     if(sblock->hdr) {

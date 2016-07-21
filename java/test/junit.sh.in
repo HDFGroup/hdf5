@@ -32,6 +32,10 @@ LS='ls'
 AWK='awk'
 
 nerrors=0
+verbose=yes
+
+# setup my machine information.
+myos=`uname -s`
 
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
@@ -60,8 +64,14 @@ $top_builddir/java/src/jni/.libs/libhdf5_java.*
 $top_builddir/java/src/$JARFILE
 "
 LIST_DATA_FILES="
-$HDFTEST_HOME/h5ex_g_iterate.hdf
+$HDFTEST_HOME/JUnit-interface.txt
+$HDFTEST_HOME/JUnit-interface.ert
 "
+
+expect="JUnit-interface.txt"
+actual="JUnit-interface.out"
+actual_err="JUnit-interface.err"
+actual_ext="JUnit-interface.ext"
 
 #
 # copy files from source dirs to test dir
@@ -82,7 +92,7 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             # make cp fail
             SDIR=`$DIRNAME $tstfile`
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
                 $CP -f $tstfile $BLDLIBDIR
                 if [ $? -ne 0 ]; then
@@ -101,9 +111,9 @@ CLEAN_LIBFILES_AND_BLDLIBDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=`$DIRNAME $tstfile`
+    SDIR=`$DIRNAME $HDFLIB_HOME/junit.jar`
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $BLDLIBDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
         $RM $BLDLIBDIR
     fi
@@ -125,7 +135,7 @@ COPY_DATAFILES_TO_BLDDIR()
             # make cp fail
             SDIR=`$DIRNAME $tstfile`
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
                 $CP -f $tstfile $BLDDIR
                 if [ $? -ne 0 ]; then
@@ -137,20 +147,16 @@ COPY_DATAFILES_TO_BLDDIR()
             fi
         fi
     done
+    $CP -f $HDFTEST_HOME/h5ex_g_iterate.orig $BLDDIR/h5ex_g_iterate.hdf
 }
 
 CLEAN_DATAFILES_AND_BLDDIR()
 {
-    # skip rm if srcdir is same as destdir
-    # this occurs when build/test performed in source dir and
-    # make cp fail
-    SDIR=`$DIRNAME $tstfile`
-    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
-    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
-    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-        $RM $BLDDIR/*.hdf
-        $RM $BLDDIR/*.out
-    fi
+        $RM $BLDDIR/h5ex_g_iterate.hdf
+        $RM $BLDDIR/JUnit-interface.out
+        $RM $BLDDIR/JUnit-interface.err
+        $RM $BLDDIR/JUnit-interface.ext
+        $RM $BLDDIR/JUnit-interface.txt
 }
 
 # Print a line-line message left justified in a field of 70 characters
@@ -218,7 +224,30 @@ esac
 export LD_LIBRARY_PATH
 
 echo "$JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestAll"
-($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestAll)
+($JAVAEXE $JAVAEXEFLAGS -Xmx1024M -Dorg.slf4j.simpleLogger.defaultLog=trace -Djava.library.path=$BLDLIBDIR -cp $CLASSPATH -ea org.junit.runner.JUnitCore test.TestAll 1>$actual_ext 2>$actual_err)
+
+# Extract file name, line number, version and thread IDs because they may be different
+sed -e 's/thread [0-9]*/thread (IDs)/' -e 's/: .*\.c /: (file name) /' \
+    -e 's/line [0-9]*/line (number)/' \
+    -e 's/Time: [0-9]*\.[0-9]*/Time:  XXXX/' \
+    -e 's/v[1-9]*\.[0-9]*\./version (number)\./' \
+    -e 's/[1-9]*\.[0-9]*\.[0-9]*[^)]*/version (number)/' \
+    $actual_ext > $actual
+
+# SunOS does not support this. Skip it.
+if [ $myos = SunOS ]; then
+    echo " SKIPPED"
+else
+    if $CMP $expect $actual; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        echo "    Expected result differs from actual result"
+        nerrors="`expr $nerrors + 1`"
+        test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+    fi
+fi
+
 
 # Clean up temporary files/directories
 CLEAN_LIBFILES_AND_BLDLIBDIR

@@ -37,7 +37,7 @@
 /* Local Macros */
 /****************/
 
-/* Version of datatype encoding */
+/* Version of dataspace encoding */
 #define H5S_ENCODE_VERSION      0
 
 
@@ -1550,7 +1550,7 @@ H5Sencode(hid_t obj_id, void *buf, size_t *nalloc)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     if(H5S_encode(dspace, (unsigned char **)&buf, nalloc)<0)
-	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode datatype")
+	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTENCODE, FAIL, "can't encode dataspace")
 
 done:
     FUNC_LEAVE_API(ret_value)

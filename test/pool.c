@@ -671,7 +671,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Shuffle pointers to free */
     for(u = 0; u < MPOOL_NUM_RANDOM; u++) {
-        swap_idx = (size_t)(HDrandom() % (MPOOL_NUM_RANDOM - u)) + u;
+        swap_idx = (size_t)(HDrandom() % (int)(MPOOL_NUM_RANDOM - u)) + u;
         swap_ptr = spc[u];
         spc[u] = spc[swap_idx];
         spc[swap_idx] = swap_ptr;

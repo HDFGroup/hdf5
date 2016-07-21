@@ -102,15 +102,18 @@ typedef struct {
     float f, g, h[16], i, j;
     double k, l, m, n;
 } stype1;
+
 typedef struct {
     int a, b, c[8], d, e;
     float f, g, h[16], i, j;
     double k, l, m, n;
     long o, p, q;
 } stype2;
+
 typedef struct {
     int a, b, c[8], d, e;
 } stype3;
+
 typedef struct {
     int a, b, c[8], d, e;
     float f, g, h[16], i, j;
@@ -147,7 +150,7 @@ typedef struct {
  *              Moved this part of code from MAIN to TEST_COMPOUND function.
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_compound (char *filename, hid_t fapl)
 {
     /* First dataset */
@@ -868,31 +871,31 @@ error:
  *-------------------------------------------------------------------------
  */
 static void
-initialize_stype1(unsigned char *buf, const size_t num)
+initialize_stype1(unsigned char *buf, size_t num)
 {
     int	  i, j;
     stype1 *s_ptr;
 
-    for (i=0; i<(int)num; i++) {
-	s_ptr = (stype1*)buf + i;
-	s_ptr->a    = i*8+0;
-	s_ptr->b    = i*8+1;
-        for(j=0; j<8; j++)
-	    s_ptr->c[j] = i*8+j;
-	s_ptr->d    = i*8+6;
-	s_ptr->e    = i*8+7;
+    for(i = 0; i < (int)num; i++) {
+	s_ptr = (stype1 *)buf + i;
+	s_ptr->a    = i * 8 + 0;
+	s_ptr->b    = i * 8 + 1;
+        for(j = 0; j < 8; j++)
+	    s_ptr->c[j] = i * 8 + j;
+	s_ptr->d    = i * 8 + 6;
+	s_ptr->e    = i * 8 + 7;
 
-        s_ptr->f    = i*2/3;
-        s_ptr->g    = i*2/3+1;
-        for(j=0; j<16; j++)
-	    s_ptr->h[j] = i*j/5+j;
-        s_ptr->i    = i*2/3+2;
-        s_ptr->j    = i*2/3+3;
+        s_ptr->f    = (float)(i * 2 / 3);
+        s_ptr->g    = (float)(i * 2 / 3 + 1);
+        for(j = 0; j < 16; j++)
+	    s_ptr->h[j] = (float)(i * j / 5 + j);
+        s_ptr->i    = (float)(i * 2 / 3 + 2);
+        s_ptr->j    = (float)(i * 2 / 3 + 3);
 
-        s_ptr->k    = i/7+1;
-        s_ptr->l    = i/7+2;
-        s_ptr->m    = i/7+3;
-        s_ptr->n    = i/7+4;
+        s_ptr->k    = i / 7 + 1;
+        s_ptr->l    = i / 7 + 2;
+        s_ptr->m    = i / 7 + 3;
+        s_ptr->n    = i / 7 + 4;
     }
 }
 
@@ -911,35 +914,35 @@ initialize_stype1(unsigned char *buf, const size_t num)
  *-------------------------------------------------------------------------
  */
 static void
-initialize_stype2(unsigned char *buf, const size_t num)
+initialize_stype2(unsigned char *buf, size_t num)
 {
     size_t i, j;
     stype2 *s_ptr;
 
-    for (i=0; i<num; i++) {
-	s_ptr = (stype2*)buf + i;
-	s_ptr->a    = i*8+0;
-	s_ptr->b    = i*8+1;
-        for(j=0; j<8; j++)
-	    s_ptr->c[j] = i*8+j;
-	s_ptr->d    = i*8+6;
-	s_ptr->e    = i*8+7;
+    for(i = 0; i < num; i++) {
+	s_ptr = (stype2 *)buf + i;
+	s_ptr->a    = (int)(i * 8 + 0);
+	s_ptr->b    = (int)(i * 8 + 1);
+        for(j = 0; j < 8; j++)
+	    s_ptr->c[j] = (int)(i * 8 + j);
+	s_ptr->d    = (int)(i * 8 + 6);
+	s_ptr->e    = (int)(i * 8 + 7);
 
-        s_ptr->f    = i*2/3;
-        s_ptr->g    = i*2/3+1;
-        for(j=0; j<16; j++)
-	    s_ptr->h[j] = i*j/5+j;
-        s_ptr->i    = i*2/3+2;
-        s_ptr->j    = i*2/3+3;
+        s_ptr->f    = (float)(i * 2 / 3);
+        s_ptr->g    = (float)(i * 2 / 3 + 1);
+        for(j = 0; j < 16; j++)
+	    s_ptr->h[j] = (float)(i * j / 5 + j);
+        s_ptr->i    = (float)(i * 2 / 3 + 2);
+        s_ptr->j    = (float)(i * 2 / 3 + 3);
 
-        s_ptr->k    = i/7+1;
-        s_ptr->l    = i/7+2;
-        s_ptr->m    = i/7+3;
-        s_ptr->n    = i/7+4;
+        s_ptr->k    = (double)(i / 7 + 1);
+        s_ptr->l    = (double)(i / 7 + 2);
+        s_ptr->m    = (double)(i / 7 + 3);
+        s_ptr->n    = (double)(i / 7 + 4);
 
-        s_ptr->o    = i*3+0;
-        s_ptr->p    = i*3+1;
-        s_ptr->q    = i*3+2;
+        s_ptr->o    = (long)(i * 3 + 0);
+        s_ptr->p    = (long)(i * 3 + 1);
+        s_ptr->q    = (long)(i * 3 + 2);
     }
 }
 
@@ -958,19 +961,19 @@ initialize_stype2(unsigned char *buf, const size_t num)
  *-------------------------------------------------------------------------
  */
 static void
-initialize_stype3(unsigned char *buf, const size_t num)
+initialize_stype3(unsigned char *buf, size_t num)
 {
     int	  i, j;
     stype3 *s_ptr;
 
-    for (i=0; i<(int)num; i++) {
-	s_ptr = (stype3*)buf + i;
-	s_ptr->a    = i*8+0;
-	s_ptr->b    = i*8+1;
-        for(j=0; j<8; j++)
-	    s_ptr->c[j] = i*8+j;
-	s_ptr->d    = i*8+6;
-	s_ptr->e    = i*8+7;
+    for(i = 0; i < (int)num; i++) {
+	s_ptr = (stype3 *)buf + i;
+	s_ptr->a    = i * 8 + 0;
+	s_ptr->b    = i * 8 + 1;
+        for(j = 0; j < 8; j++)
+	    s_ptr->c[j] = i * 8 + j;
+	s_ptr->d    = i * 8 + 6;
+	s_ptr->e    = i * 8 + 7;
     }
 }
 
@@ -989,39 +992,39 @@ initialize_stype3(unsigned char *buf, const size_t num)
  *-------------------------------------------------------------------------
  */
 static void
-initialize_stype4(unsigned char *buf, const size_t num)
+initialize_stype4(unsigned char *buf, size_t num)
 {
     size_t i, j;
     stype4 *s_ptr;
 
-    for (i=0; i<num; i++) {
-	s_ptr = (stype4*)buf + i;
-	s_ptr->a    = i*8+0;
-	s_ptr->b    = i*8+1;
-        for(j=0; j<8; j++)
-	    s_ptr->c[j] = i*8+j;
-	s_ptr->d    = i*8+6;
-	s_ptr->e    = i*8+7;
+    for(i = 0; i < num; i++) {
+	s_ptr = (stype4 *)buf + i;
+	s_ptr->a    = (int)(i * 8 + 0);
+	s_ptr->b    = (int)(i * 8 + 1);
+        for(j = 0; j < 8; j++)
+	    s_ptr->c[j] = (int)(i * 8 + j);
+	s_ptr->d    = (int)(i * 8 + 6);
+	s_ptr->e    = (int)(i * 8 + 7);
 
-        s_ptr->f    = i*2/3;
-        s_ptr->g    = i*2/3+1;
-        for(j=0; j<16; j++)
-	    s_ptr->h[j] = i*j/5+j;
-        s_ptr->i    = i*2/3+2;
-        s_ptr->j    = i*2/3+3;
+        s_ptr->f    = (float)(i * 2 / 3);
+        s_ptr->g    = (float)(i * 2 / 3 + 1);
+        for(j = 0; j < 16; j++)
+	    s_ptr->h[j] = (float)(i * j / 5 + j);
+        s_ptr->i    = (float)(i * 2 / 3 + 2);
+        s_ptr->j    = (float)(i * 2 / 3 + 3);
 
-        s_ptr->k    = i/7+1;
-        s_ptr->l    = i/7+2;
-        s_ptr->m    = i/7+3;
-        s_ptr->n    = i/7+4;
+        s_ptr->k    = (double)(i / 7 + 1);
+        s_ptr->l    = (double)(i / 7 + 2);
+        s_ptr->m    = (double)(i / 7 + 3);
+        s_ptr->n    = (double)(i / 7 + 4);
 
-        s_ptr->o    = i*3+0;
-        s_ptr->p    = i*3+1;
-        s_ptr->q    = i*3+2;
+        s_ptr->o    = (long)(i * 3 + 0);
+        s_ptr->p    = (long)(i * 3 + 1);
+        s_ptr->q    = (long)(i * 3 + 2);
 
-        s_ptr->r    = i*5+1;
-        s_ptr->s    = i*5+2;
-        s_ptr->t    = i*5+3;
+        s_ptr->r    = (long long)(i * 5 + 1);
+        s_ptr->s    = (long long)(i * 5 + 2);
+        s_ptr->t    = (long long)(i * 5 + 3);
     }
 }
 
@@ -1349,7 +1352,7 @@ error:
  * Modifications:
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_hdf5_src_subset(char *filename, hid_t fapl)
 {
     hid_t   file;
@@ -1554,7 +1557,7 @@ error:
  * Modifications:
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_hdf5_dst_subset(char *filename, hid_t fapl)
 {
     hid_t   file;
@@ -1763,7 +1766,7 @@ error:
  * Modifications:
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_pack_ooo(void)
 {
     hid_t       cmpd, sub_cmpd;     /* Datatype IDs */
@@ -1788,7 +1791,7 @@ test_pack_ooo(void)
     for(i=0; i<PACK_NMEMBS; i++) {
         /* Generate index into free_order array */
         num_free = PACK_NMEMBS - i;
-        j = HDrand() % num_free;
+        j = (unsigned)HDrandom() % num_free;
 
         /* Update order array at the randomly generated (but guaranteed to be
          * free) location */
@@ -1800,7 +1803,7 @@ test_pack_ooo(void)
     } /* end for */
 
     /* Generate order to insert inner compound type */
-    sub_cmpd_order = HDrand() % PACK_NMEMBS;
+    sub_cmpd_order = (unsigned)HDrandom() % PACK_NMEMBS;
 
     for(extra_space=0; extra_space<2; extra_space ++) {
         if(extra_space)
@@ -1995,7 +1998,7 @@ error:
  * Modifications:
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_ooo_order(char *filename)
 {
     hid_t       file = -1;          /* File ID */

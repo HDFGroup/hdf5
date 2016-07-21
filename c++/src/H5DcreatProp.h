@@ -114,6 +114,9 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
 	// Sets SZIP compression method.
 	void setSzip(unsigned int options_mask, unsigned int pixels_per_block) const;
 
+	// Sets N-bit compression method.
+	void setNbit() const;
+
 	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("DSetCreatPropList"); }
 

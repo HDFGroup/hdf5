@@ -17,6 +17,7 @@ add_test (
         dsetf5.h5
         f1img.h5
         f1tab.h5
+        f2tab.h5
         tstds.h5
 )
 
@@ -44,6 +45,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
           dsetf5.h5
           f1img.h5
           f1tab.h5
+          f2tab.h5
           tstds.h5
   )
   set_tests_properties (HL_FORTRAN_test-shared-clear-objects

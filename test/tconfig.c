@@ -42,8 +42,8 @@
 /* Needs this extra step so that we can print the macro name. */
 #define vrfy_macrosize(type, macro, macroname) \
     if (sizeof(type) != macro) \
-	TestErrPrintf("Error: sizeof(%s) is %d but %s is %d\n", \
-	    #type, sizeof(type), macroname, macro);
+	TestErrPrintf("Error: sizeof(%s) is %zu but %s is %d\n", \
+	    #type, sizeof(type), macroname, (int)macro);
 
 /* local routine prototypes */
 void test_config_ctypes(void);
@@ -86,7 +86,7 @@ test_configure(void)
  *
  *-------------------------------------------------------------------------
  */
-void
+H5_ATTR_PURE void
 cleanup_configure(void)
 {
     /* no file to clean */
@@ -109,7 +109,7 @@ cleanup_configure(void)
  *
  *-------------------------------------------------------------------------
  */
-void
+H5_ATTR_PURE void
 test_config_ctypes(void)
 {
     /* standard C89 basic types */
@@ -218,7 +218,7 @@ test_config_ctypes(void)
  *
  *-------------------------------------------------------------------------
  */
-void
+H5_ATTR_PURE void
 test_exit_definitions(void)
 {
     /* Verify the EXIT_SUCCESS and EXIT_FAILURE are 0 and 1 respectively. */

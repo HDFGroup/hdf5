@@ -54,6 +54,7 @@
 #define H5D_ACS_PREEMPT_READ_CHUNKS_NAME    "rdcc_w0"       /* Preemption read chunks first */
 #define H5D_ACS_VDS_VIEW_NAME               "vds_view"      /* VDS view option */
 #define H5D_ACS_VDS_PRINTF_GAP_NAME         "vds_printf_gap" /* VDS printf gap size */
+#define H5D_ACS_APPEND_FLUSH_NAME    "append_flush"         /* Append flush actions */
 #define H5D_ACS_EFILE_PREFIX_NAME           "external file prefix" /* External file prefix */
 #ifdef H5_HAVE_PARALLEL
 #define H5D_ACS_SUBFILING_SELECTION_NAME    "subfile_selection" /* dataspace selection of subfiled dataset */
@@ -154,6 +155,14 @@ typedef struct H5D_copy_file_ud_t {
     H5T_t *src_dtype;                   /* Copy of datatype for dataset */
 } H5D_copy_file_ud_t;
 
+/* Structure for dataset append flush property (H5Pset_append_flush) */
+typedef struct H5D_append_flush_t {
+    unsigned ndims;			/* The # of dimensions for "boundary" */
+    hsize_t boundary[H5S_MAX_RANK];	/* The dimension sizes for determining boundary */
+    H5D_append_cb_t func;		/* The callback function */
+    void *udata;			/* User data */
+} H5D_append_flush_t;
+
 
 /*****************************/
 /* Library Private Variables */
@@ -167,6 +176,8 @@ typedef struct H5D_copy_file_ud_t {
 H5_DLL herr_t H5D_init(void);
 H5_DLL H5D_t *H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5D_close(H5D_t *dataset);
+H5_DLL herr_t H5D_mult_refresh_close(hid_t dset_id, hid_t dxpl_id);
+H5_DLL herr_t H5D_mult_refresh_reopen(H5D_t *dataset, hid_t dxpl_id);
 H5_DLL H5O_loc_t *H5D_oloc(H5D_t *dataset);
 H5_DLL H5G_name_t *H5D_nameof(H5D_t *dataset);
 H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);

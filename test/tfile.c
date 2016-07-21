@@ -2173,6 +2173,356 @@ test_file_double_dataset_open(void)
 
 /****************************************************************
 **
+**  test_file_double_file_dataset_open():
+**      This test checks multi-opens of files & datasets: 
+**	It simulates the multi-thread test program from DLS 
+**	which exposes the file pointer segmentation fault failure.
+**	NOTE: The order on when the files and datasets are open/close
+**	is important.
+**
+*****************************************************************/
+static void
+test_file_double_file_dataset_open(hbool_t new_format)
+{
+    hid_t fapl = -1;				/* File access property list */
+    hid_t dcpl = -1;				/* Dataset creation property list */
+    hid_t fid1 = -1, fid2 = -1;			/* File IDs */
+    hid_t did1 = -1, did2 = -1;			/* Dataset IDs */
+    hid_t sid1 = -1, sid2 = -1;			/* Dataspace IDs */
+    hid_t tid1 = -1, tid2 = -1;			/* Datatype IDs */
+    hsize_t dims[1] = {5}, dims2[2] = {1, 4};	/* Dimension sizes */
+    hsize_t e_ext_dims[1] = {7};		/* Expanded dimension sizes */
+    hsize_t s_ext_dims[1] = {3};		/* Shrunk dimension sizes */
+    hsize_t max_dims0[1] = {8}; 		/* Maximum dimension sizes */
+    hsize_t max_dims1[1] = {H5S_UNLIMITED}; 	/* Maximum dimesion sizes for extensible array index */
+    hsize_t max_dims2[2] = {H5S_UNLIMITED, H5S_UNLIMITED};	/* Maximum dimension sizes for v2 B-tree index */
+    hsize_t chunks[1] = {2}, chunks2[2] = {4, 5};		/* Chunk dimension sizes */
+    char* data[] = {"String 1", "String 2", "String 3", "String 4", "String 5"};	/* Input Data */
+    char* e_data[] = {"String 1", "String 2", "String 3", "String 4", "String 5", "String 6", "String 7"};	/* Input Data */
+    char* buffer[5];				/* Output buffer */
+    int wbuf[4] = {1, 2, 3, 4};			/* Input data */
+    herr_t ret;         			/* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing double file and dataset open/close\n"));
+
+    /* Setting up test file */
+
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+
+    if(new_format) {
+        ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+        CHECK(ret, FAIL, "H5Pset_libver_bounds");
+    } /* end if */
+
+    /* Create the test file */
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create a chunked dataset with fixed array indexing */
+    sid1 = H5Screate_simple(1, dims, max_dims0);
+    CHECK(sid1, FAIL, "H5Screate");
+    tid1 = H5Tcopy(H5T_C_S1);
+    CHECK(tid1, FAIL, "H5Tcopy");
+    ret = H5Tset_size(tid1, H5T_VARIABLE);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+    ret = H5Pset_chunk(dcpl, 1, chunks);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+    did1 = H5Dcreate2(fid1, "dset_fa", tid1, sid1, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(did1, FAIL, "H5Dcreate2");
+
+    /* Closing */
+    ret = H5Dclose(did1);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Create a chunked dataset with extensible array indexing */
+    sid1 = H5Screate_simple(1, dims, max_dims1);
+    CHECK(sid1, FAIL, "H5Screate");
+    tid1 = H5Tcopy(H5T_C_S1);
+    CHECK(tid1, FAIL, "H5Tcopy");
+    ret = H5Tset_size(tid1, H5T_VARIABLE);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+    ret = H5Pset_chunk(dcpl, 1, chunks);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+    did1 = H5Dcreate2(fid1, "dset_ea", tid1, sid1, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(did1, FAIL, "H5Dcreate2");
+
+    /* Write to the dataset */
+    ret = H5Dwrite(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Closing */
+    ret = H5Dclose(did1);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Create a chunked dataset with v2 btree indexing */
+    sid2 = H5Screate_simple(2, dims2, max_dims2);
+    CHECK(sid2, FAIL, "H5Screate");
+
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+    ret = H5Pset_chunk(dcpl, 2, chunks2);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+    did2 = H5Dcreate2(fid1, "dset_bt2", H5T_NATIVE_INT, sid2, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(did2, FAIL, "H5Dcreate2");
+
+    /* Write to the dataset */
+    ret = H5Dwrite(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Closing */
+    ret = H5Dclose(did2);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* 
+     * Scenario 1 
+     */
+
+    /* First file open */
+    fid1 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* First file's dataset open */
+    did1 = H5Dopen2(fid1, "/dset_fa", H5P_DEFAULT);
+    CHECK(did1, FAIL, "H5Dopen2");
+
+    tid1 = H5Tcopy(did1);
+    CHECK(tid1, FAIL, "H5Tcopy");
+
+    /* First file's dataset write */
+    ret = H5Dwrite(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Second file open */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Second file's dataset open */
+    did2 = H5Dopen2(fid2, "/dset_fa", H5P_DEFAULT );
+    CHECK(did2, FAIL, "H5Dopen2");
+
+    tid2 = H5Tcopy(did2);
+    CHECK(tid2, FAIL, "H5Tcopy");
+
+    /* First file's dataset close */
+    ret = H5Dclose(did1);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* First file close */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Second file's dataset write */
+    ret = H5Dwrite(did2, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Second file's dataset close */
+    ret = H5Dclose(did2);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Second file close */
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Closing */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* 
+     * Scenario 2 
+     */
+
+    /* First file open */
+    fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Second file open */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Second file's dataset open */
+    did2 = H5Dopen2(fid2, "/dset_ea", H5P_DEFAULT );
+    CHECK(did2, FAIL, "H5Dopen2");
+
+    tid2 = H5Tcopy(did2);
+    CHECK(tid2, FAIL, "H5Tcopy");
+
+    /* First file's dataset open */
+    did1 = H5Dopen2(fid1, "/dset_ea", H5P_DEFAULT);
+    CHECK(did1, FAIL, "H5Dopen2");
+
+    tid1 = H5Tcopy(did1);
+    CHECK(tid1, FAIL, "H5Tcopy");
+
+    /* Second file's dataset read */
+    HDmemset(buffer, 0, sizeof(char*) * 5);
+    ret = H5Dread(did2, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Second file's dataset close */
+    ret = H5Dclose(did2);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Second file close */
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* First file's dataset read */
+    HDmemset(buffer, 0, sizeof(char*) * 5);
+    ret = H5Dread(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
+
+    /* First file's dataset close */
+    ret = H5Dclose(did1);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* First file close */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Closing */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* 
+     * Scenario 3
+     */
+
+    /* First file open */
+    fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* First file's dataset open */
+    did1 = H5Dopen2(fid1, "/dset_bt2", H5P_DEFAULT);
+    CHECK(did1, FAIL, "H5Dopen2");
+
+    /* First file's get storage size */
+    ret = H5Dget_storage_size(did1);
+    CHECK(ret, FAIL, "H5Dget_storage_size");
+
+    /* Second file open */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Second file's dataset open */
+    did2 = H5Dopen2(fid2, "/dset_bt2", H5P_DEFAULT );
+    CHECK(did2, FAIL, "H5Dopen2");
+
+    /* First file's dataset close */
+    ret = H5Dclose(did1);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* First file close */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Second file's get storage size */
+    ret = H5Dget_storage_size(did2);
+    CHECK(ret, FAIL, "H5Dget_storage_size");
+
+    /* Second file's dataset close */
+    ret = H5Dclose(did2);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Second file close */
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* 
+     * Scenario 4
+     * --trigger H5AC_protect: Assertion `f->shared' failed
+     *	 from second call to H5Dset_extent->...H5D__earray_idx_remove->H5EA_get...H5EA__iblock_protect...H5AC_protect
+     */
+    /* First file open */
+    fid1 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* First file's dataset open */
+    did1 = H5Dopen2(fid1, "/dset_ea", H5P_DEFAULT);
+    CHECK(did1, FAIL, "H5Dopen2");
+
+    tid1 = H5Tcopy(did1);
+    CHECK(tid1, FAIL, "H5Tcopy");
+
+    /* Extend the dataset */
+    ret = H5Dset_extent(did1, e_ext_dims);
+    CHECK(ret, FAIL, "H5Dset_extent");
+
+    /* Write to the dataset */
+    ret = H5Dwrite(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, e_data);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Second file open */
+    fid2 = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Second file's dataset open */
+    did2 = H5Dopen2(fid2, "/dset_ea", H5P_DEFAULT );
+    CHECK(did2, FAIL, "H5Dopen2");
+
+    /* First file's dataset close */
+    ret = H5Dclose(did1);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* First file close */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Shrink the dataset */
+    ret = H5Dset_extent(did2, s_ext_dims);
+    CHECK(ret, FAIL, "H5Dset_extent");
+
+    /* Second file's dataset close */
+    ret = H5Dclose(did2);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Second file close */
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Close the data type */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+
+} /* end test_file_double_dataset_open() */
+
+/****************************************************************
+**
 **  test_file_double_datatype_open(): low-level file test routine.
 **      This test checks whether opening the same named datatype from two
 **      different files works correctly.
@@ -3261,8 +3611,10 @@ test_filespace_compatible(void)
 	CHECK(fd_new, FAIL, "HDopen");
 
 	/* Copy data */
-	while((nread = HDread(fd_old, buf, (size_t)READ_OLD_BUFSIZE)) > 0)
-	    HDwrite(fd_new, buf, (size_t)nread);
+	while((nread = HDread(fd_old, buf, (size_t)READ_OLD_BUFSIZE)) > 0) {
+        ssize_t write_err = HDwrite(fd_new, buf, (size_t)nread);
+        CHECK(write_err, -1, "HDwrite");
+    } /* end while */
 
 	/* Close the files */
 	ret = HDclose(fd_old);
@@ -3733,6 +4085,8 @@ test_file(void)
     test_file_double_group_open();      /* Test opening same group from two files works properly */
     test_file_double_dataset_open();    /* Test opening same dataset from two files works properly */
     test_file_double_datatype_open();   /* Test opening same named datatype from two files works properly */
+    test_file_double_file_dataset_open(TRUE);
+    test_file_double_file_dataset_open(FALSE);
     test_userblock_file_size(); /* Tests that files created with a userblock have the correct size */
     test_cached_stab_info();    /* Tests that files are created with cached stab info in the superblock */
     test_rw_noupdate();         /* Test to ensure that RW permissions don't write the file unless dirtied */

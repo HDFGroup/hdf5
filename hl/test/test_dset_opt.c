@@ -16,7 +16,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "h5hltest.h"
-#include "H5srcdir.h"
 #include "H5DOpublic.h"
 #include <math.h>
 
@@ -41,7 +40,7 @@
 #define CHUNK_NX     4
 #define CHUNK_NY     4
 
-#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*1.001F)+12)
+#define DEFLATE_SIZE_ADJUST(s) (ceil(((double)(s))*(double)1.001F)+12)
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS1	305

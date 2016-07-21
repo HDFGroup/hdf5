@@ -368,4 +368,14 @@ public class TestH5Gbasic {
         assertNotNull(info);
     }
 
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Gflush_invalid() throws Throwable {
+        H5.H5Gflush(-1);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5Grefresh_invalid() throws Throwable {
+        H5.H5Grefresh(-1);
+    }
+
 }

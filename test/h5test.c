@@ -22,8 +22,7 @@
  */
 
 #undef NDEBUG      /*override -DNDEBUG      */
-#include <sys/types.h>
-#include <sys/stat.h>
+
 #include "h5test.h"
 #include "H5srcdir.h"
 
@@ -768,15 +767,15 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix,
  *
  *-------------------------------------------------------------------------
  */
-const char *
+H5_ATTR_PURE const char *
 h5_rmprefix(const char *filename)
 {
     const char *ret_ptr;
 
     if ((ret_ptr = HDstrstr(filename, ":")) == NULL)
-  ret_ptr = filename;
+        ret_ptr = filename;
     else
-  ret_ptr++;
+        ret_ptr++;
 
     return(ret_ptr);
 }
@@ -837,7 +836,7 @@ h5_fileaccess(void)
         /* In-memory driver with write tracking and paging on */
         if (H5Pset_fapl_core(fapl, (size_t)1, TRUE)<0) return -1;
         if (H5Pset_core_write_tracking(fapl, TRUE, (size_t)4096)<0) return -1;
-     } else if (!HDstrcmp(name, "split")) {
+    } else if (!HDstrcmp(name, "split")) {
         /* Split meta data and raw data each using default driver */
         if (H5Pset_fapl_split(fapl,
             "-m.h5", H5P_DEFAULT,
@@ -1557,8 +1556,6 @@ getenv_all(MPI_Comm comm, int root, const char* name)
  * Programmer:  Larry Knox
  *              Monday, October 13, 2009
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -1570,20 +1567,22 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
     const char *filename = H5_get_srcdir_filename(origfilename);;       /* Get the test file name to copy */
 
     /* Copy old file into temporary file */
-    if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0) return -1;
-    if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, 0666))
-        < 0) return -1;
+    if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0)
+        return -1;
+    if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
+        return -1;
 
     /* Copy data */
     while((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
-        HDwrite(fd_new, buf, (size_t)nread);
+        if(HDwrite(fd_new, buf, (size_t)nread) < 0)
+            return -1;
 
     /* Close files */
     if(HDclose(fd_old) < 0) return -1;
     if(HDclose(fd_new) < 0) return -1;
 
     return 0;
-}
+} /* end h5_make_local_copy() */
 
 
 /*-------------------------------------------------------------------------

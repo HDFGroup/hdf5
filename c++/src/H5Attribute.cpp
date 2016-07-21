@@ -293,7 +293,7 @@ H5std_string Attribute::getFileName() const
    try {
       return(p_get_file_name());
    }
-   catch (IdComponentException E) {
+   catch (IdComponentException& E) {
       throw FileIException("Attribute::getFileName", E.getDetailMsg());
    }
 }
@@ -348,7 +348,7 @@ H5std_string Attribute::getName() const
     H5std_string attr_name(""); // attribute name to return
 
     // Preliminary call to get the size of the attribute name
-    ssize_t name_size = H5Aget_name(id, (size_t)0, NULL);
+    ssize_t name_size = H5Aget_name(id, static_cast<size_t>(0), NULL);
 
     // If H5Aget_name failed, throw exception
     if (name_size < 0)
@@ -630,7 +630,7 @@ void Attribute::p_setId(const hid_t new_id)
     try {
 	close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
 	throw AttributeIException("Attribute::p_setId", close_error.getDetailMsg());
     }
    // reset object's id to the given id
@@ -674,7 +674,7 @@ Attribute::~Attribute()
     try {
 	close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
 	cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
     }
 }

@@ -30,7 +30,7 @@ AM_FCFLAGS+=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/s
 lib_LTLIBRARIES=libhdf5hl_fortran.la
 
 # Add libtool numbers to the HDF5 HL Fortran library (from config/lt_vers.am)
-libhdf5hl_fortran_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE) $(AM_LDFLAGS)
+libhdf5hl_fortran_la_LDFLAGS= -version-info $(LT_HL_F_VERS_INTERFACE):$(LT_HL_F_VERS_REVISION):$(LT_HL_F_VERS_AGE) $(AM_LDFLAGS)
 
 # Some Fortran compilers can't build shared libraries, so sometimes we
 # want to build a shared C library and a static Fortran library.  If so,

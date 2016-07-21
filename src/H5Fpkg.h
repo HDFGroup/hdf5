@@ -268,7 +268,7 @@ struct H5F_file_t {
     hsize_t	threshold;	/* Threshold for alignment		*/
     hsize_t	alignment;	/* Alignment				*/
     unsigned	gc_ref;		/* Garbage-collect references?		*/
-    hbool_t	latest_format;	/* Always use the latest format?	*/
+    unsigned	latest_flags;	/* The latest version support */
     hbool_t	store_msg_crt_idx;  /* Store creation index for object header messages?	*/
     unsigned	ncwfs;		/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
@@ -296,6 +296,9 @@ struct H5F_file_t {
 
     /* Metadata accumulator information */
     H5F_meta_accum_t accum;     /* Metadata accumulator info           	*/
+
+    /* Object flush info */
+    H5F_object_flush_t 	object_flush;		/* Information for object flush callback */
 };
 
 /*
@@ -361,7 +364,7 @@ H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nop
 
 /* Superblock related routines */
 H5_DLL herr_t H5F__super_init(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F__super_read(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read);
 H5_DLL herr_t H5F__super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_size);
 H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
 

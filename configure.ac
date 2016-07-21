@@ -281,6 +281,7 @@ while test -n "$hname"; do
   test "$hname_tmp" = "$hname" && break
 done
 
+
 ## ----------------------------------------------------------------------
 ## Determine build mode (debug, production, clean).
 ## This has to be done early since the build mode is referred to
@@ -617,10 +618,9 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   FORTRAN_SIZEOF_LONG_DOUBLE=${ac_cv_sizeof_long_double}
   AC_DEFINE_UNQUOTED([FORTRAN_SIZEOF_LONG_DOUBLE], ["${ac_cv_sizeof_long_double}"], [Determine the size of C long double])
 
-
   dnl get the largest sizeof for REAL kinds
-  max_real_fortran_sizeof="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -ne 's/.*,\([[0-9]]*\)\}/\1/p'`"
-  max_real_fortran_kind="`echo \"[$]PAC_FC_ALL_REAL_KINDS\" | sed -ne 's/.*,\([[0-9]]*\)\}/\1/p'`"
+  max_real_fortran_sizeof="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -ne 's/.*,\([[0-9]]*\)}/\1/p'`"
+  max_real_fortran_kind="`echo $PAC_FC_ALL_REAL_KINDS | sed -ne 's/.*,\([[0-9]]*\)}/\1/p'`"
 
   dnl remove the invalid kind from the list
   if test "$ac_cv_sizeof___float128" != 0;then
@@ -636,6 +636,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
           ])
       PAC_FC_ALL_REAL_KINDS="`echo $PAC_FC_ALL_REAL_KINDS | sed -e 's/,[[0-9]]\+}/}/g'`"
       PAC_FC_ALL_REAL_KINDS_SIZEOF="`echo $PAC_FC_ALL_REAL_KINDS_SIZEOF | sed -e 's/,[[0-9]]\+}/}/g'`"
+
     fi
   fi
   AC_MSG_CHECKING([for Fortran interoperable KINDS with C])
@@ -694,11 +695,13 @@ if test "X$HDF_CXX" = "Xyes"; then
   ## Checking if C++ can handle namespaces
   PAC_PROG_CXX_NAMESPACE
 
-  ## Checking if C++ has offsetof extension
-  PAC_PROG_CXX_OFFSETOF
-
   ## if C++ can handle static cast
   PAC_PROG_CXX_STATIC_CAST
+
+  ## Checking if C++ has offsetof extension, 
+  ## note: this test has to be the last of the C++ tests because it sets a definition
+  ## which would be used in the other tests, causing them to fail.
+  PAC_PROG_CXX_OFFSETOF
 
 else
   AC_MSG_RESULT([no])
@@ -855,10 +858,10 @@ esac
 ## Check if they would like the Java native interface (JNI) compiled
 ##
 
-## This needs to be exposed for the library info file even if JAVA is disabled.
+## This needs to be exposed for the library info file even if Java is disabled.
 AC_SUBST([HDF_JAVA])
 
-## Default is no JAVA
+## Default is no Java
 HDF_JAVA=no
 
 AC_SUBST([H5_CLASSPATH]) H5_CLASSPATH=""
@@ -1575,7 +1578,7 @@ AC_ARG_ENABLE([threadsafe],
                               [default=no]])],
               [THREADSAFE=$enableval])
 
-## The high-level, C++, and Fortran interfaces are not compatible
+## The high-level, C++, Fortran and Java interfaces are not compatible
 ## with the thread-safety option because the lock is not hoisted
 ## into the higher-level API calls.
 
@@ -1604,6 +1607,14 @@ fi
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   if test "X${HDF_FORTRAN}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
     AC_MSG_ERROR([--enable-fortran and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
+## --enable-threadsafe is also incompatible with --enable-java unless
+## --enable-unsupported has been specified on the configure line.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_JAVA}" = "Xyes" -a "X${enable_threadsafe}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-java and --enable-threadsafe flags are incompatible. Use --enable-unsupported to override this error.])
   fi
 fi
 
@@ -1840,6 +1851,7 @@ AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
 AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
+AC_CHECK_FUNCS([roundf lroundf llroundf round lround llround])
 
 ## ----------------------------------------------------------------------
 ## Check compiler characteristics
@@ -2429,6 +2441,15 @@ if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   fi
 fi
 
+## The --enable-parallel flag is not compatible with --enable-java.
+## If the user tried to specify both flags, throw an error, unless
+## they also provided the --enable-unsupported flag.
+if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
+  if test "X${HDF_JAVA}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
+    AC_MSG_ERROR([--enable-java and --enable-parallel flags are incompatible. Use --enable-unsupported to override this error.])
+  fi
+fi
+
 ## --enable-parallel is also incompatible with --enable-threadsafe, unless
 ## --enable-unsupported has been specified on the configure line.
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
@@ -2776,63 +2797,18 @@ esac
 ##
 AC_MSG_CHECKING([if using special algorithm to convert long double to (unsigned) long values])
 
+## NOTE: Place all configure test programs into cmake's source file, then use a preprocessor directive
+## to select the proper test program. This is done by echoing the #define and cat'ing the cmake
+## source file. (HDFFV-9467)
+
+TEST_SRC="`(echo \"#define H5_LDOUBLE_TO_LONG_SPECIAL_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_cv_ldouble_to_long_special=${hdf5_cv_ldouble_to_long_special=no}
 else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_long_special],
         [AC_RUN_IFELSE(
-            [AC_LANG_PROGRAM([
-                #include <string.h>
-            ],[[
-                long double         ld = 20041683600089727.779961L;
-                long                ll;
-                unsigned long       ull;
-                unsigned char       s[16];
-                unsigned char       s2[8];
-                int                 ret = 1;
-
-                if(sizeof(long double) == 16 && sizeof(long) == 8) {
-                    /*make sure the long double type has 16 bytes in size and
-                     * 11 bits of exponent.  If it is,
-                     *the bit sequence should be like below.  It's not
-                     *a decent way to check but this info isn't available. */
-                    memcpy(s, &ld, 16);
-                    if(s[0]==0x43 && s[1]==0x51 && s[2]==0xcc && s[3]==0xf3 &&
-                        s[4]==0x85 && s[5]==0xeb && s[6]==0xc8 && s[7]==0xa0 &&
-                        s[8]==0xbf && s[9]==0xcc && s[10]==0x2a && s[11]==0x3c) {
-
-                        /* Assign the hexadecimal value of long double type. */
-                        s[0]=0x43; s[1]=0x51; s[2]=0xcc; s[3]=0xf3;
-                        s[4]=0x85; s[5]=0xeb; s[6]=0xc8; s[7]=0xa0;
-                        s[8]=0xbf; s[9]=0xcc; s[10]=0x2a; s[11]=0x3c;
-                        s[12]=0x3d; s[13]=0x85; s[14]=0x56; s[15]=0x20;
-
-                        memcpy(&ld, s, 16);
-
-                        ll = (long)ld;
-                        memcpy(s2, &ll, 8);
-
-                        /* The library's algorithm converts it to 0x 00 47 33 ce 17 af 22 82
-                         * and gets wrong value 20041683600089730 on the IBM Power6 Linux.
-                         * But the IBM Power6 Linux converts it to 0x00 47 33 ce 17 af 22 7f
-                         * and gets the correct value 20041683600089727.  It uses some special
-                         * algorithm.  We're going to define the macro and skip the test until
-                         * we can figure out how they do it. */
-                        if(s2[0]==0x00 && s2[1]==0x47 && s2[2]==0x33 && s2[3]==0xce &&
-                           s2[4]==0x17 && s2[5]==0xaf && s2[6]==0x22 && s2[7]==0x7f)
-                            ret = 0;
-
-                        ull = (unsigned long)ld;
-                        memcpy(s2, &ull, 8);
-
-                        /* The unsigned long is the same as signed long. */
-                        if(s2[0]==0x00 && s2[1]==0x47 && s2[2]==0x33 && s2[3]==0xce &&
-                           s2[4]==0x17 && s2[5]==0xaf && s2[6]==0x22 && s2[7]==0x7f)
-                            ret = 0;
-                    }
-                }
-                exit(ret);
-        ]])]
+            [AC_LANG_SOURCE([$TEST_SRC])]
     , [hdf5_cv_ldouble_to_long_special=yes], [hdf5_cv_ldouble_to_long_special=no],)])
 fi
 
@@ -2854,66 +2830,14 @@ fi
 ##
 AC_MSG_CHECKING([if using special algorithm to convert (unsigned) long to long double values])
 
+TEST_SRC="`(echo \"#define H5_LONG_TO_LDOUBLE_SPECIAL_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_cv_long_to_ldouble_special=${hdf5_cv_long_to_ldouble_special=no}
 else
    AC_CACHE_VAL([hdf5_cv_long_to_ldouble_special],
         [AC_RUN_IFELSE(
-            [AC_LANG_PROGRAM([
-                #include <string.h>
-            ],[[
-                long double         ld;
-                long                ll;
-                unsigned long       ull;
-                unsigned char       s[16];
-                int                 flag=0, ret=1;
-
-                /*Determine if long double has 16 byte in size, 11 bit exponent, and
-                 *the bias is 0x3ff */
-                if(sizeof(long double) == 16) {
-                    ld = 1.0L;
-                    memcpy(s, &ld, 16);
-                    if(s[0]==0x3f && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
-                        s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00)
-                        flag = 1;
-                }
-
-                if(flag==1 && sizeof(long)==8) {
-                    ll = 0x003fffffffffffffL;
-                    ld = (long double)ll;
-                    memcpy(s, &ld, 16);
-                    /* The library converts the value to 0x434fffffffffffff8000000000000000.
-                     * In decimal it is 18014398509481982.000000, one value short of the original.
-                     * The IBM Power6 Linux converts it to 0x4350000000000000bff0000000000000.
-                     * The value is correct in decimal. It uses some special
-                     * algorithm.  We're going to define the macro and skip the test until
-                     * we can figure out how they do it. */
-                    if(s[0]==0x43 && s[1]==0x50 && s[2]==0x00 && s[3]==0x00 &&
-                        s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00 &&
-                        s[8]==0xbf && s[9]==0xf0 && s[10]==0x00 && s[11]==0x00 &&
-                        s[12]==0x00 && s[13]==0x00 && s[14]==0x00 && s[15]==0x00)
-                        ret = 0;
-                }
-                if(flag==1 && sizeof(unsigned long)==8) {
-                    ull = 0xffffffffffffffffUL;
-                    ld = (long double)ull;
-                    memcpy(s, &ld, 16);
-                    /* Use a different value from signed long to test. The problem is the same
-                     * for both long and unsigned long. The value is 18446744073709551615.
-                     * The library converts the value to 0x43effffffffffffffe000000000000000.
-                     * In decimal it's 18446744073709548544.000000, very different from the original.
-                     * The IBM Power6 Linux converts it to 0x43f0000000000000bff0000000000000.
-                     * The value is correct in decimal. It uses some special
-                     * algorithm.  We're going to define the macro and skip the test until
-                     * we can figure out how they do it. */
-                    if(s[0]==0x43 && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
-                        s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00 &&
-                        s[8]==0xbf && s[9]==0xf0 && s[10]==0x00 && s[11]==0x00 &&
-                        s[12]==0x00 && s[13]==0x00 && s[14]==0x00 && s[15]==0x00)
-                        ret = 0;
-                }
-                exit(ret);
-        ]])]
+            [AC_LANG_SOURCE([$TEST_SRC])]
     , [hdf5_cv_long_to_ldouble_special=yes], [hdf5_cv_long_to_ldouble_special=no],)])
 fi
 
@@ -2938,48 +2862,14 @@ fi
 ##
 AC_MSG_CHECKING([if correctly converting long double to (unsigned) long long values])
 
+TEST_SRC="`(echo \"#define H5_LDOUBLE_TO_LLONG_ACCURATE_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_cv_ldouble_to_llong_accurate=${hdf5_cv_ldouble_to_llong_accurate=no}
 else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_llong_accurate],
-        [AC_RUN_IFELSE([AC_LANG_SOURCE([[
-        int main(void)
-        {
-            long double         ld = 20041683600089727.779961L;
-            long long           ll;
-            unsigned long long  ull;
-            unsigned char       s[16];
-            int                 ret = 0;
-
-            if(sizeof(long double) == 16) {
-                /*make sure the long double type is the same as the failing type
-                 *which has 16 bytes in size and 11 bits of exponent.  If it is,
-                 *the bit sequence should be like below.  It's not
-                 *a decent way to check but this info isn't available. */
-                memcpy(s, &ld, 16);
-                if(s[0]==0x43 && s[1]==0x51 && s[2]==0xcc && s[3]==0xf3 &&
-                    s[4]==0x85 && s[5]==0xeb && s[6]==0xc8 && s[7]==0xa0 &&
-                    s[8]==0xbf && s[9]==0xcc && s[10]==0x2a && s[11]==0x3c) {
-
-                    /*slightly adjust the bit sequence (s[8]=0xdf).  The converted
-                     *values will go wild on Mac OS 10.4 and IRIX64 6.5.*/
-                    s[0]=0x43; s[1]=0x51; s[2]=0xcc; s[3]=0xf3;
-                    s[4]=0x85; s[5]=0xeb; s[6]=0xc8; s[7]=0xa0;
-                    s[8]=0xdf; s[9]=0xcc; s[10]=0x2a; s[11]=0x3c;
-                    s[12]=0x3d; s[13]=0x85; s[14]=0x56; s[15]=0x20;
-
-                    memcpy(&ld, s, 16);
-                    ll = (long long)ld;
-                    ull = (unsigned long long)ld;
-
-                    if(ll != 20041683600089728 || ull != 20041683600089728)
-                        ret = 1;
-                }
-            }
-    done:
-            exit(ret);
-        }
-        ]])], [hdf5_cv_ldouble_to_llong_accurate=yes], [hdf5_cv_ldouble_to_llong_accurate=no],[])])
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])], 
+        [hdf5_cv_ldouble_to_llong_accurate=yes], [hdf5_cv_ldouble_to_llong_accurate=no],[])])
 fi
 
 if test ${hdf5_cv_ldouble_to_llong_accurate} = "yes"; then
@@ -3001,52 +2891,14 @@ fi
 ##
 AC_MSG_CHECKING([if correctly converting (unsigned) long long to long double values])
 
+TEST_SRC="`(echo \"#define H5_LLONG_TO_LDOUBLE_CORRECT_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
 if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_cv_llong_to_ldouble_correct=${hdf5_cv_llong_to_ldouble_correct=no}
 else
    AC_CACHE_VAL([hdf5_cv_llong_to_ldouble_correct],
-        [AC_RUN_IFELSE([AC_LANG_SOURCE([[
-        int main(void)
-        {
-            long double         ld;
-            long long           ll;
-            unsigned long long  ull;
-            unsigned char       s[16];
-            int                 flag=0, ret=0;
-
-            /*Determine if long double has 16 byte in size, 11 bit exponent, and
-             *the bias is 0x3ff */
-            if(sizeof(long double) == 16) {
-                ld = 1.0L;
-                memcpy(s, &ld, 16);
-                if(s[0]==0x3f && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
-                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00)
-                    flag = 1;
-            }
-
-            if(flag==1 && sizeof(long long)==8) {
-                ll = 0x01ffffffffffffffLL;
-                ld = (long double)ll;
-                memcpy(s, &ld, 16);
-                /*Check if the bit sequence is as supposed to be*/
-                if(s[0]!=0x43 || s[1]!=0x7f || s[2]!=0xff || s[3]!=0xff ||
-                    s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
-                    s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
-                    ret = 1;
-            }
-            if(flag==1 && sizeof(unsigned long long)==8) {
-                ull = 0x01ffffffffffffffULL;
-                ld = (long double)ull;
-                memcpy(s, &ld, 16);
-                if(s[0]!=0x43 || s[1]!=0x7f || s[2]!=0xff || s[3]!=0xff ||
-                    s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
-                    s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
-                    ret = 1;
-            }
-    done:
-            exit(ret);
-        }
-        ]])],[hdf5_cv_llong_to_ldouble_correct=yes], [hdf5_cv_llong_to_ldouble_correct=no],[])])
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
+        [hdf5_cv_llong_to_ldouble_correct=yes], [hdf5_cv_llong_to_ldouble_correct=no],[])])
 fi
 
 if test ${hdf5_cv_llong_to_ldouble_correct} = "yes"; then
@@ -3174,7 +3026,7 @@ fi
 java_version_info=`$JAVA -version 2>&1 |\
   grep 'version' | sed -e 's/version "//' | sed -e 's/"//'`
 if test -n "$java_version_info"; then
-  JAVA_VERSION="$JAVA_VERSION ( $java_version_info)"
+  JAVA_VERSION="$JAVA_VERSION ($java_version_info)"
 fi
 
 ## ----------------------------------------------------------------------
@@ -3340,40 +3192,11 @@ AC_ARG_ENABLE([embedded-libinfo],
 ## Check if pointer alignments are enforced
 ##
 AC_MSG_CHECKING([if alignment restrictions are strictly enforced])
+
+TEST_SRC="`(echo \"#define H5_NO_ALIGNMENT_RESTRICTIONS_TEST 1\"; cat $srcdir/config/cmake/ConversionTests.c)`"
+
 AC_RUN_IFELSE([
-    AC_LANG_PROGRAM([
-        #include <stdlib.h>
-        #include <string.h>
-
-        typedef struct {
-            size_t len;
-            void *p;
-        } hvl_t;
-        ], [
-        char *chp = "beefs";
-        char **chpp = malloc (2 * sizeof (char *));
-        char **chpp2;
-        hvl_t vl = { 12345, (void *) chp };
-        hvl_t *vlp;
-        hvl_t *vlp2;
-
-        memcpy ((void *) ((char *) chpp + 1), &chp, sizeof (char *));
-        chpp2 = (char **) ((char *) chpp + 1);
-        if (strcmp (*chpp2, chp)) {
-            free (chpp);
-            return 1;
-        }
-        free (chpp);
-
-        vlp = malloc (2 * sizeof (hvl_t));
-        memcpy ((void *) ((char *) vlp + 1), &vl, sizeof (hvl_t));
-        vlp2 = (hvl_t *) ((char *) vlp + 1);
-        if (vlp2->len != vl.len || vlp2->p != vl.p) {
-            free (vlp);
-            return 1;
-        }
-        free (vlp);
-    ])
+    AC_LANG_SOURCE([$TEST_SRC])
     ], [
     AC_DEFINE([NO_ALIGNMENT_RESTRICTIONS], [1], [Define if we can violate pointer alignment restrictions])
     AC_MSG_RESULT([no])
@@ -3527,6 +3350,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/misc/vds/Makefile
                  tools/h5stat/testh5stat.sh
                  tools/h5stat/Makefile
+                 tools/h5format_convert/Makefile
+                 tools/h5format_convert/testh5fc.sh
                  tools/perform/Makefile
                  examples/Makefile
                  examples/run-c-ex.sh
@@ -3581,6 +3406,13 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/fortran/test/Makefile
                  hl/fortran/examples/Makefile
                  hl/fortran/examples/run-hlfortran-ex.sh])
+
+AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
+                $MKDIR_P java/test/.classes;
+                $MKDIR_P java/examples/intro/.classes;
+                $MKDIR_P java/examples/datasets/.classes;
+                $MKDIR_P java/examples/datatypes/.classes;
+                $MKDIR_P java/examples/groups/.classes])
 
 AC_OUTPUT
 

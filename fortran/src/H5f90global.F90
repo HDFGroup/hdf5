@@ -984,17 +984,17 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(OUT) :: f_string
     INTEGER(SIZE_T) :: c_len, f_len
 
-    ! Find the length of the C string by located the null terminator
-    c_len = MAX(INDEX(c_string,C_NULL_CHAR, KIND=SIZE_T)-1,1)
+    ! Find the length of the C string by locating the null terminator
+    c_len = MAX(INDEX(c_string,C_NULL_CHAR, KIND=SIZE_T)-1_SIZE_T,1_SIZE_T)
     ! Find the length of the Fortran string
     f_len = LEN(f_string)
 
-    ! CASE (1): C string is equal to or larger then Fortran character buffer,
+    ! CASE (1): C string is equal to or larger than Fortran character buffer,
     !           so fill the entire Fortran buffer. 
     IF(c_len.GE.f_len)THEN !
        f_string(1:f_len) = c_string(1:f_len)
 
-    ! CASE (2): C string is smaller then Fortran character buffer, 
+    ! CASE (2): C string is smaller than Fortran character buffer, 
     !           so copy C string and blank pad remaining characters.
     ELSE
        f_string(1:c_len) = c_string(1:c_len)

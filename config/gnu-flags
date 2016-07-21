@@ -102,7 +102,7 @@ case "$cc_vendor-$cc_version" in
       gcc-[34].*)
         PROD_CFLAGS=
         ;;
-      gcc-5.*)
+      gcc-[56].*)
         PROD_CFLAGS="-fstdarg-opt"
         ;;
       *)
@@ -116,7 +116,7 @@ case "$cc_vendor-$cc_version" in
     # NDEBUG is handled explicitly by the configure script
     # -g is hanled by the symbols flags
     case "$cc_vendor-$cc_version" in
-      gcc-5.*)
+      gcc-[56].*)
         DEBUG_CFLAGS="-ftrapv -fno-common"
         ;;
       *)
@@ -138,7 +138,7 @@ case "$cc_vendor-$cc_version" in
         HIGH_OPT_CFLAGS="-O3"
         DEBUG_OPT_CFLAGS=
         ;;
-      gcc-5.*)
+      gcc-[56].*)
         HIGH_OPT_CFLAGS="-O3"
         DEBUG_OPT_CFLAGS="-Og"
         ;;
@@ -164,9 +164,83 @@ esac
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
 
-# Closer to the gcc 5.2 release, we should check for additional flags to
+# When the gcc 7.x release is out, we should check for additional flags to
 # include and break it out into it's own section, like the other versions
 # below. -QAK
+  gcc-6*)
+    # Append warning flags
+    # Don't use the '-Wtraditional' flag, we're way past having K&R C code
+    # H5_CFLAGS="$H5_CFLAGS -Wtraditional"
+    # Don't use the '-Wtraditional-conversion' flag, there's too many warnings
+    #  from GCC's assert macro
+    # H5_CFLAGS="$H5_CFLAGS -Wtraditional-conversion"
+
+    # Append warning flags from gcc-3* case
+    # (don't use -Wpadded flag for normal builds, many of the warnings its
+    #   issuing can't be fixed and they are making it hard to detect other,
+    #   more important warnings)
+    #H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute -Wpadded"
+    H5_CFLAGS="$H5_CFLAGS -Wfloat-equal -Wmissing-format-attribute"
+
+    # Append warning flags from gcc-3.2* case
+    H5_CFLAGS="$H5_CFLAGS -Wmissing-noreturn -Wpacked -Wdisabled-optimization"
+
+    # Enable more format checking flags, beyond the basic -Wformat included
+    # in -Wall
+    H5_CFLAGS="$H5_CFLAGS -Wformat=2"
+
+    # The "unreachable code" warning appears to be reliable now...
+    H5_CFLAGS="$H5_CFLAGS -Wunreachable-code"
+
+    # Append warning flags from gcc-3.3* case
+    H5_CFLAGS="$H5_CFLAGS -Wendif-labels"
+
+    # Append warning flags from gcc-3.4* case
+    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wold-style-definition -Winvalid-pch"
+
+    # Replace old -W flag with new -Wextra flag
+    H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-W\ /-Wextra\ /g'`"
+
+    # Append more extra warning flags that only gcc4.0+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
+
+    # Append more extra warning flags that only gcc 4.1+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized"
+
+    # Append more extra warning flags that only gcc 4.2+ know about
+    # (none, or incorporated in -Wall / -Wextra now)
+
+    # Append more extra warning flags that only gcc 4.3+ know about
+    #
+    # Technically, variable-length arrays are part of the C99 standard, but
+    #   we should approach them a bit cautiously... -QAK
+    H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2048 -Wvla"
+
+    # Append more extra warning flags that only gcc 4.4+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
+
+    # Append more extra warning flags that only gcc 4.5+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
+
+    # Append more extra warning flags that only gcc 4.6+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
+
+    # Append more extra warning flags that only gcc 4.7+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
+
+    # Append more extra warning flags that only gcc 4.8+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wsuggest-attribute=format"
+
+    # Append more extra warning flags that only gcc 4.9+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wdate-time"
+
+    # Append more extra warning flags that only gcc 5.x+ know about
+    H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
+
+    # Append more extra warning flags that only gcc 6.x+ know about
+    H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa"
+    ;;
+
   gcc-5*)
     # Append warning flags
     # Don't use the '-Wtraditional' flag, we're way past having K&R C code
@@ -205,10 +279,10 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wvariadic-macros -Winit-self -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wunused-macros"
 
     # Append more extra warning flags that only gcc 4.1+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
+    H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat -Wnormalized"
 
     # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
+    # (none, or incorporated in -Wall / -Wextra now)
 
     # Append more extra warning flags that only gcc 4.3+ know about
     #
@@ -232,11 +306,9 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wsuggest-attribute=format"
 
     # Append more extra warning flags that only gcc 4.9+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wdate-time -Wopenmp-simd"
+    H5_CFLAGS="$H5_CFLAGS -Wdate-time"
 
-    # (There was no release of gcc 5.0)
-
-    # Append more extra warning flags that only gcc 5.1+ know about
+    # Append more extra warning flags that only gcc 5.x+ know about
     H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
     ;;
 
@@ -281,7 +353,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
 
     # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
+    # (none, or incorporated in -Wall / -Wextra now)
 
     # Append more extra warning flags that only gcc 4.3+ know about
     #
@@ -305,7 +377,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wsuggest-attribute=format"
 
     # Append more extra warning flags that only gcc 4.9+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wdate-time -Wopenmp-simd"
+    H5_CFLAGS="$H5_CFLAGS -Wdate-time"
     ;;
 
   gcc-4.8*)
@@ -349,7 +421,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
 
     # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
+    # (none, or incorporated in -Wall / -Wextra now)
 
     # Append more extra warning flags that only gcc 4.3+ know about
     #
@@ -415,7 +487,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
 
     # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
+    # (none, or incorporated in -Wall / -Wextra now)
 
     # Append more extra warning flags that only gcc 4.3+ know about
     #
@@ -474,7 +546,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
 
     # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
+    # (none, or incorporated in -Wall / -Wextra now)
 
     # Append more extra warning flags that only gcc 4.3+ know about
     #
@@ -530,7 +602,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wunsafe-loop-optimizations -Wc++-compat"
 
     # Append more extra warning flags that only gcc 4.2+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
+    # (none, or incorporated in -Wall / -Wextra now)
 
     # Append more extra warning flags that only gcc 4.3+ know about
     #

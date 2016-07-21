@@ -414,7 +414,7 @@ H5MF_aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr, H5FD_mem_t type,
 	    /* If the aggregator is at the end of file: */
 	    if(H5F_addr_eq(eoa, aggr->addr + aggr->size)) {
 		/* If extra_requested is below percentage threshold, extend block into the aggregator. */
-		if(extra_requested <= (EXTEND_THRESHOLD * aggr->size)) {
+		if(extra_requested <= (hsize_t)(EXTEND_THRESHOLD * (float)aggr->size)) {
 		    aggr->size -= extra_requested;
 		    aggr->addr += extra_requested;
 

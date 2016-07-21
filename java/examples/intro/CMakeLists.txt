@@ -63,12 +63,15 @@ foreach (example ${HDF_JAVA_OBJECT_EXAMPLES})
 endforeach (example ${HDF_JAVA_OBJECT_EXAMPLES})
 
 MACRO (ADD_H5_TEST resultfile resultcode)
+  if (CMAKE_BUILD_TYPE MATCHES Debug)
+    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+  endif(CMAKE_BUILD_TYPE MATCHES Debug)
   add_test (
       NAME JAVA_intro-${resultfile}
       COMMAND "${CMAKE_COMMAND}"
           -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
           -D "TEST_PROGRAM=examples.intro.${resultfile}"
-          -D "TEST_ARGS:STRING=${ARGN}"
+          -D "TEST_ARGS:STRING=${CMD_ARGS}${ARGN}"
           -D "TEST_CLASSPATH:STRING=${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${resultfile}_JAR_FILE}"
           -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
           -D "TEST_FOLDER=${HDFJAVA_EXAMPLES_BINARY_DIR}"
@@ -87,7 +90,7 @@ if (BUILD_TESTING)
 
   foreach (example ${HDF_JAVA_EXAMPLES})
     add_test (
-        NAME JAVA_intro-${example}-clearall-objects
+        NAME JAVA_intro-${example}-clear-objects
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
@@ -95,7 +98,7 @@ if (BUILD_TESTING)
             ${example}.out.err
     )
     if (NOT "${last_test}" STREQUAL "")
-      set_tests_properties (JAVA_intro-${example}-clearall-objects PROPERTIES DEPENDS ${last_test})
+      set_tests_properties (JAVA_intro-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
     endif (NOT "${last_test}" STREQUAL "")
     add_test (
         NAME JAVA_intro-${example}-copy-objects
@@ -104,7 +107,7 @@ if (BUILD_TESTING)
             ${HDFJAVA_EXAMPLES_SOURCE_DIR}/testfiles/examples.intro.${example}.txt
             ${HDFJAVA_EXAMPLES_INTRO_BINARY_DIR}/${example}.txt
     )
-    set_tests_properties (JAVA_intro-${example}-copy-objects PROPERTIES DEPENDS JAVA_intro-${example}-clearall-objects)
+    set_tests_properties (JAVA_intro-${example}-copy-objects PROPERTIES DEPENDS JAVA_intro-${example}-clear-objects)
     set (last_test "JAVA_intro-${example}-copy-objects")
     ADD_H5_TEST (${example} 0)
   endforeach (example ${HDF_JAVA_EXAMPLES})

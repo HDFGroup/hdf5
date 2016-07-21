@@ -87,6 +87,9 @@ static herr_t H5D__typeinfo_term(const H5D_type_info_t *type_info);
 /* Declare a free list to manage blocks of type conversion data */
 H5FL_BLK_DEFINE(type_conv);
 
+/* Declare a free list to manage the H5D_chunk_map_t struct */
+H5FL_DEFINE(H5D_chunk_map_t);
+
 
 
 /*-------------------------------------------------------------------------
@@ -366,7 +369,7 @@ herr_t
 H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	 const H5S_t *file_space, hid_t dxpl_id, void *buf/*out*/)
 {
-    H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
+    H5D_chunk_map_t *fm = NULL;         /* Chunk file<->memory mapping */
     H5D_io_info_t io_info;              /* Dataset I/O info     */
     H5D_type_info_t type_info;          /* Datatype info for operation */
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
@@ -523,26 +526,31 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
                 || dataset->shared->dcpl_cache.efl.nused > 0
                 || dataset->shared->layout.type == H5D_COMPACT);
 
+    /* Allocate the chunk map */
+    if(NULL == (fm = H5FL_CALLOC(H5D_chunk_map_t)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk map")
+
     /* Call storage method's I/O initialization routine */
-    HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
-    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
     io_op_init = TRUE;
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
-    if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
+    if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Invoke correct "high level" I/O routine */
-    if((*io_info.io_ops.multi_read)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+    if((*io_info.io_ops.multi_read)(&io_info, &type_info, nelmts, file_space, mem_space, fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
     /* Shut down the I/O op information */
-    if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
+    if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(fm) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+    if(fm)
+        fm = H5FL_FREE(H5D_chunk_map_t, fm);
 
     if(io_info_init) {
 #ifdef H5_DEBUG_BUILD
@@ -587,7 +595,7 @@ herr_t
 H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 	  const H5S_t *file_space, hid_t dxpl_id, const void *buf)
 {
-    H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
+    H5D_chunk_map_t *fm = NULL;         /* Chunk file<->memory mapping */
     H5D_io_info_t io_info;              /* Dataset I/O info     */
     H5D_type_info_t type_info;          /* Datatype info for operation */
     hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
@@ -760,25 +768,28 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         else
             full_overwrite = (hbool_t)((hsize_t)file_nelmts == nelmts ? TRUE : FALSE);
 
- 	/* Allocate storage */
+        /* Allocate storage */
         if(H5D__alloc_storage(&io_info, H5D_ALLOC_WRITE, full_overwrite, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
     } /* end if */
 
+    /* Allocate the chunk map */
+    if(NULL == (fm = H5FL_CALLOC(H5D_chunk_map_t)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk map")
+
     /* Call storage method's I/O initialization routine */
-    HDmemset(&fm, 0, sizeof(H5D_chunk_map_t));
-    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+    if(io_info.layout_ops.io_init && (*io_info.layout_ops.io_init)(&io_info, &type_info, nelmts, file_space, mem_space, fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
     io_op_init = TRUE;
 
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
-    if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, &fm) < 0)
+    if(H5D__ioinfo_adjust(&io_info, dataset, dxpl_id, file_space, mem_space, &type_info, fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to adjust I/O info for parallel I/O")
 #endif /*H5_HAVE_PARALLEL*/
 
     /* Invoke correct "high level" I/O routine */
-    if((*io_info.io_ops.multi_write)(&io_info, &type_info, nelmts, file_space, mem_space, &fm) < 0)
+    if((*io_info.io_ops.multi_write)(&io_info, &type_info, nelmts, file_space, mem_space, fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 #ifdef OLD_WAY
@@ -801,8 +812,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
 
 done:
     /* Shut down the I/O op information */
-    if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(&fm) < 0)
+    if(io_op_init && io_info.layout_ops.io_term && (*io_info.layout_ops.io_term)(fm) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+    if(fm)
+        fm = H5FL_FREE(H5D_chunk_map_t, fm);
 
     if(io_info_init) {
 #ifdef H5_DEBUG_BUILD
@@ -938,6 +951,10 @@ H5D__typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     /* check args */
     HDassert(type_info);
     HDassert(dset);
+
+    /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
+    if(H5T_patch_vlen_file(dset->shared->type, dset->oloc.file) < 0 )
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer")
 
     /* Initialize type info safely */
     HDmemset(type_info, 0, sizeof(*type_info));

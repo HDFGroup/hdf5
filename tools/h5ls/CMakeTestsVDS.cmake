@@ -47,7 +47,7 @@
 
   # copy the list of test files
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-    GET_FILENAME_COMPONENT(fname "${listfiles}" NAME)
+    get_filename_component(fname "${listfiles}" NAME)
     set (dest "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}")
     #message (STATUS " Copying ${listfiles} to ${dest}")
     add_custom_command (

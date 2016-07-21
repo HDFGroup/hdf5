@@ -124,8 +124,8 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 	tree_val = ((RESR).type==H5Z_XFORM_INTEGER ? (double)(RESR).value.int_val : (RESR).value.float_val); \
 	p = (TYPE*)(RESL).value.dat_val;                                    \
                                                                             \
-	for(u=0; u<(SIZE); u++) {                                           \
-	    *p = *p OP tree_val;                                            \
+	for(u = 0; u < (SIZE); u++) {                                       \
+	    *p = (TYPE)((double)*p OP tree_val);                            \
             p++;                                                            \
         }                                                                   \
     }									    \
@@ -141,32 +141,31 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
 	    tree_val = ((RESL).type==H5Z_XFORM_INTEGER ? (double)(RESL).value.int_val : (RESL).value.float_val); \
                                                                             \
 	p = (TYPE*)(RESR).value.dat_val;                                    \
-	for(u=0; u<(SIZE); u++) {                                           \
-	    *p = tree_val OP *p;                                            \
+	for(u = 0; u < (SIZE); u++) {                                       \
+	    *p = (TYPE)(tree_val OP (double)*p);                            \
             p++;                                                            \
         }                                                                   \
     }									    \
-    else if( ((RESL).type == H5Z_XFORM_SYMBOL) && ((RESR).type==H5Z_XFORM_SYMBOL))  \
-    {										\
-	TYPE* pl = (TYPE*)(RESL).value.dat_val;                             	\
-	TYPE* pr = (TYPE*)(RESR).value.dat_val;                             	\
-										\
-	for(u=0; u<(SIZE); u++) {                                            	\
-	    *pl = *pl OP *pr;                                           	\
-            pl++; pr++;                                                         \
-        }                                                                       \
-    }										\
-    else									\
+    else if( ((RESL).type == H5Z_XFORM_SYMBOL) && ((RESR).type == H5Z_XFORM_SYMBOL))  \
+    {									    \
+	TYPE* pl = (TYPE*)(RESL).value.dat_val;                             \
+	TYPE* pr = (TYPE*)(RESR).value.dat_val;                             \
+									    \
+	for(u = 0; u < (SIZE); u++) {                                       \
+	    *pl = (TYPE)(*pl OP *pr);                                       \
+            pl++; pr++;                                                     \
+        }                                                                   \
+    }									    \
+    else								    \
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unexpected type conversion operation")	\
 }
 
-#if H5_SIZEOF_LONG_DOUBLE !=0
+#if H5_SIZEOF_LONG_DOUBLE != 0
+#if CHAR_MIN >= 0
 #define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
 {									\
     if((TYPE) == H5T_NATIVE_CHAR)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), char, OP, (SIZE))		\
-    else if((TYPE) == H5T_NATIVE_UCHAR)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned char, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_SCHAR)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), signed char, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_SHORT)					\
@@ -182,7 +181,7 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_ULONG)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_LLONG)					\
-	H5Z_XFORM_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	        \
     else if((TYPE) == H5T_NATIVE_ULLONG)				\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long long, OP, (SIZE)) \
     else if((TYPE) == H5T_NATIVE_FLOAT)					\
@@ -192,13 +191,43 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_LDOUBLE)				\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), long double, OP, (SIZE))	\
 }
-#else
+#else /* CHAR_MIN >= 0 */
 #define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
 {									\
     if((TYPE) == H5T_NATIVE_CHAR)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), char, OP, (SIZE))		\
     else if((TYPE) == H5T_NATIVE_UCHAR)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned char, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_SHORT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), short, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_USHORT)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned short, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_INT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), int, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_UINT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned int, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_LONG)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_ULONG)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_LLONG)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	        \
+    else if((TYPE) == H5T_NATIVE_ULLONG)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long long, OP, (SIZE)) \
+    else if((TYPE) == H5T_NATIVE_FLOAT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_DOUBLE)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), double, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_LDOUBLE)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long double, OP, (SIZE))	\
+}
+#endif /* CHAR_MIN >= 0 */
+#else
+#if CHAR_MIN >= 0
+#define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
+{									\
+    if((TYPE) == H5T_NATIVE_CHAR)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), char, OP, (SIZE))		\
     else if((TYPE) == H5T_NATIVE_SCHAR)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), signed char, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_SHORT)					\
@@ -222,6 +251,35 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_DOUBLE)				\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), double, OP, (SIZE))		\
 }
+#else /* CHAR_MIN >= 0 */
+#define H5Z_XFORM_TYPE_OP(RESL,RESR,TYPE,OP,SIZE)			\
+{									\
+    if((TYPE) == H5T_NATIVE_CHAR)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), char, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_UCHAR)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned char, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_SHORT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), short, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_USHORT)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned short, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_INT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), int, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_UINT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned int, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_LONG)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_ULONG)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_LLONG)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	\
+    else if((TYPE) == H5T_NATIVE_ULLONG)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long long, OP, (SIZE)) \
+    else if((TYPE) == H5T_NATIVE_FLOAT)					\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
+    else if((TYPE) == H5T_NATIVE_DOUBLE)				\
+	H5Z_XFORM_DO_OP1((RESL), (RESR), double, OP, (SIZE))		\
+}
+#endif /* CHAR_MIN >= 0 */
 #endif /*H5_SIZEOF_LONG_DOUBLE */
 
 #define H5Z_XFORM_DO_OP3(OP)                                                                                                                    \
@@ -977,17 +1035,20 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size
     if(tree->type == H5Z_XFORM_INTEGER || tree->type == H5Z_XFORM_FLOAT) {
         if(array_type == H5T_NATIVE_CHAR)
             H5Z_XFORM_DO_OP5(char, array_size)
-        else if(array_type ==  H5T_NATIVE_UCHAR)
-            H5Z_XFORM_DO_OP5(unsigned char, array_size)
+#if CHAR_MIN >= 0
         else if(array_type == H5T_NATIVE_SCHAR)
             H5Z_XFORM_DO_OP5(signed char, array_size)
+#else /* CHAR_MIN >= 0 */
+        else if(array_type == H5T_NATIVE_UCHAR)
+            H5Z_XFORM_DO_OP5(unsigned char, array_size)
+#endif /* CHAR_MIN >= 0 */
         else if(array_type == H5T_NATIVE_SHORT)
             H5Z_XFORM_DO_OP5(short, array_size)
         else if(array_type == H5T_NATIVE_USHORT)
             H5Z_XFORM_DO_OP5(unsigned short, array_size)
         else if(array_type == H5T_NATIVE_INT)
             H5Z_XFORM_DO_OP5(int, array_size)
-        else if(array_type ==  H5T_NATIVE_UINT)
+        else if(array_type == H5T_NATIVE_UINT)
             H5Z_XFORM_DO_OP5(unsigned int, array_size)
         else if(array_type == H5T_NATIVE_LONG)
             H5Z_XFORM_DO_OP5(long, array_size)
@@ -1106,34 +1167,32 @@ H5Z_xform_eval_full(H5Z_node *tree, const size_t array_size,  const hid_t array_
 	 * 1.  See if "x" is on left hand side, right hand side, or if both sides are "x"
 	 * 2.  Figure out what type of data we're going to be manipulating
 	 * 3.  Do the operation on the data. */
-
-
 	switch (tree->type) {
 	    case H5Z_XFORM_PLUS:
-            H5Z_XFORM_TYPE_OP(resl, resr, array_type, +, array_size)
-            break;
+                H5Z_XFORM_TYPE_OP(resl, resr, array_type, +, array_size)
+                break;
 
 	    case H5Z_XFORM_MINUS:
-            H5Z_XFORM_TYPE_OP(resl, resr, array_type, -, array_size)
-            break;
+                H5Z_XFORM_TYPE_OP(resl, resr, array_type, -, array_size)
+                break;
 
 	    case H5Z_XFORM_MULT:
-            H5Z_XFORM_TYPE_OP(resl, resr, array_type, *, array_size)
-            break;
+                H5Z_XFORM_TYPE_OP(resl, resr, array_type, *, array_size)
+                break;
 
 	    case H5Z_XFORM_DIVIDE:
-            H5Z_XFORM_TYPE_OP(resl, resr, array_type, /, array_size)
-            break;
+                H5Z_XFORM_TYPE_OP(resl, resr, array_type, /, array_size)
+                break;
 
-        case H5Z_XFORM_ERROR:
-        case H5Z_XFORM_INTEGER:
-        case H5Z_XFORM_FLOAT:
-        case H5Z_XFORM_SYMBOL:
-        case H5Z_XFORM_LPAREN:
-        case H5Z_XFORM_RPAREN:
-        case H5Z_XFORM_END:
+            case H5Z_XFORM_ERROR:
+            case H5Z_XFORM_INTEGER:
+            case H5Z_XFORM_FLOAT:
+            case H5Z_XFORM_SYMBOL:
+            case H5Z_XFORM_LPAREN:
+            case H5Z_XFORM_RPAREN:
+            case H5Z_XFORM_END:
 	    default:
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid expression tree")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid expression tree")
 	} /* end switch */
 
 	/* The result stores a pointer to the new data */

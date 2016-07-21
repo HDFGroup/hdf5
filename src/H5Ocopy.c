@@ -354,17 +354,30 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 	H5G_loc_t   tmp_loc; 	/* Location of object */
 	H5O_loc_t   tmp_oloc; 	/* Location of object */
 	H5G_name_t  tmp_path;	/* Object's path */
+	void *obj_ptr = NULL;	/* Object pointer */
+	hid_t tmp_id = -1;	/* Object ID */
 
 	tmp_loc.oloc = &tmp_oloc;
 	tmp_loc.path = &tmp_path;
 	tmp_oloc.file = oloc_src->file;
 	tmp_oloc.addr = oloc_src->addr;
-	tmp_oloc.holding_file = oloc_src->holding_file;
+	tmp_oloc.holding_file = FALSE;
 	H5G_name_reset(tmp_loc.path);
 
-	/* Flush the object of this class */
-        if(obj_class->flush && obj_class->flush(&tmp_loc, dxpl_id) < 0)
+	/* Get a temporary ID */
+	if((tmp_id = obj_class->open(&tmp_loc, H5P_DEFAULT, dxpl_id, FALSE)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to open object")
+
+	/* Get object pointer */
+	obj_ptr = H5I_object(tmp_id);
+
+	/* Flush the object */
+        if(obj_class->flush && obj_class->flush(obj_ptr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
+
+	/* Release the temporary ID */
+	if(tmp_id != -1 && H5I_dec_app_ref(tmp_id))
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close temporary ID")
     } /* end if */
 
     /* Get source object header */

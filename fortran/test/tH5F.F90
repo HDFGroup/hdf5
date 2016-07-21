@@ -590,7 +590,7 @@ CONTAINS
           LOGICAL        :: flag
           INTEGER(SIZE_T) :: obj_count, obj_countf
           INTEGER(HID_T), ALLOCATABLE, DIMENSION(:) :: obj_ids
-          INTEGER        :: i
+          INTEGER(SIZE_T) :: i
 
           CALL h5eset_auto_f(0, error)
 

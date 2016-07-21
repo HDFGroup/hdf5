@@ -72,7 +72,7 @@ herr_t aiter_cb(hid_t group, const char *name, const H5A_info_t *ainfo,
 **  iter_strcmp(): String comparison routine for qsort
 **
 ****************************************************************/
-int iter_strcmp(const void *s1, const void *s2)
+H5_ATTR_PURE int iter_strcmp(const void *s1, const void *s2)
 {
     return(HDstrcmp(*(const char * const *)s1,*(const char * const *)s2));
 }
@@ -527,7 +527,7 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
 **  iter_strcmp2(): String comparison routine for qsort
 **
 ****************************************************************/
-int iter_strcmp2(const void *s1, const void *s2)
+H5_ATTR_PURE int iter_strcmp2(const void *s1, const void *s2)
 {
     return(HDstrcmp((const char *)s1, (const char *)s2));
 } /* end iter_strcmp2() */

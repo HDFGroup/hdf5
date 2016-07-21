@@ -127,39 +127,39 @@ static int without_hardware_g = 0;
     /*positive values, ascending order. VALUE1 starts from 00000001, to 00000010, until 10000000*/ \
     /*VALUE2 ascends from 00000000, to 00000011, 00000111,...,  until 11111111.*/               \
     for(n=0; n<SRC_PREC; n++) {                                                                 \
-        if(value1<=SRC_MAX && value1>=SRC_MIN) {                                                \
-            memcpy(buf_p, &value1, SRC_SIZE);                                                   \
-            memcpy(saved_p, &value1, SRC_SIZE);                                                 \
+        {                                                                                       \
+            HDmemcpy(buf_p, &value1, SRC_SIZE);                                                 \
+            HDmemcpy(saved_p, &value1, SRC_SIZE);                                               \
             buf_p += SRC_SIZE;                                                                  \
             saved_p += SRC_SIZE;                                                                \
         }                                                                                       \
-        if(value2<=SRC_MAX && value2>=SRC_MIN) {                                                \
-            memcpy(buf_p, &value2, SRC_SIZE);                                                   \
-            memcpy(saved_p, &value2, SRC_SIZE);                                                 \
+        {                                                                                       \
+            HDmemcpy(buf_p, &value2, SRC_SIZE);                                                 \
+            HDmemcpy(saved_p, &value2, SRC_SIZE);                                               \
             buf_p += SRC_SIZE;                                                                  \
             saved_p += SRC_SIZE;                                                                \
         }                                                                                       \
                                                                                                 \
         if(n<SRC_PREC-2) {                                                                      \
-            value1 <<= 1;                                                                       \
-            value2 = (value1 - 1) | value1;                                                     \
+            value1 = (TYPE)(value1 << 1);                                                       \
+            value2 = (TYPE)((value1 - 1) | value1);                                             \
         } else if(n==SRC_PREC-2) { /*to avoid overflow of negative values for signed integer*/  \
-            value1 <<= 1;                                                                       \
-            value2 = (~value1) | value1;                                                        \
+            value1 = (TYPE)(value1 << 1);                                                       \
+            value2 = (TYPE)((~value1) | value1);                                                \
         }                                                                                       \
     }                                                                                           \
                                                                                                 \
     /* negative values for signed; descending positive values for unsigned */                   \
     /* VALUE2 descends from 11111111 to 11111110, 11111100, ..., until 10000000. */             \
     for(n=0; n<SRC_PREC-1; n++) {                                                               \
-        if(value2<=SRC_MAX && value2>=SRC_MIN) {                                                \
-            memcpy(buf_p, &value2, SRC_SIZE);                                                   \
-            memcpy(saved_p, &value2, SRC_SIZE);                                                 \
+        {                                                                                       \
+            HDmemcpy(buf_p, &value2, SRC_SIZE);                                                 \
+            HDmemcpy(saved_p, &value2, SRC_SIZE);                                               \
             buf_p += SRC_SIZE;                                                                  \
             saved_p += SRC_SIZE;                                                                \
         }                                                                                       \
         if(n<SRC_PREC-1)                                                                        \
-            value2 <<= 1;                                                                       \
+            value2 = (TYPE)(value2 << 1);                                                       \
     }                                                                                           \
 }
 
@@ -242,15 +242,15 @@ static int without_hardware_g = 0;
     value2 = -SRC_MIN;                                                                          \
     for(n=0; n<num_norm; n++) {                                                                 \
         if(value1<SRC_MAX) { /*positive*/                                                       \
-            memcpy(buf_p, &value1, SRC_SIZE);                                                   \
-            memcpy(saved_p, &value1, SRC_SIZE);                                                 \
+            HDmemcpy(buf_p, &value1, SRC_SIZE);                                                 \
+            HDmemcpy(saved_p, &value1, SRC_SIZE);                                               \
             value1 *= multiply;                                                                 \
             buf_p += SRC_SIZE;                                                                  \
             saved_p += SRC_SIZE;                                                                \
         }                                                                                       \
         if(value2>-SRC_MAX) { /*negative*/                                                      \
-            memcpy(buf_p, &value2, SRC_SIZE);                                                   \
-            memcpy(saved_p, &value2, SRC_SIZE);                                                 \
+            HDmemcpy(buf_p, &value2, SRC_SIZE);                                                 \
+            HDmemcpy(saved_p, &value2, SRC_SIZE);                                               \
             value2 *= multiply;                                                                 \
             buf_p += SRC_SIZE;                                                                  \
             saved_p += SRC_SIZE;                                                                \
@@ -258,14 +258,14 @@ static int without_hardware_g = 0;
     }                                                                                           \
                                                                                                 \
     value1 = SRC_MAX;                              /*maximal value*/                            \
-    memcpy(buf_p, &value1, SRC_SIZE);                                                           \
-    memcpy(saved_p, &value1, SRC_SIZE);                                                         \
+    HDmemcpy(buf_p, &value1, SRC_SIZE);                                                         \
+    HDmemcpy(saved_p, &value1, SRC_SIZE);                                                       \
     buf_p += SRC_SIZE;                                                                          \
     saved_p += SRC_SIZE;                                                                        \
                                                                                                 \
     value2 = -SRC_MAX;                             /*negative value*/                           \
-    memcpy(buf_p, &value2, SRC_SIZE);                                                           \
-    memcpy(saved_p, &value2, SRC_SIZE);                                                         \
+    HDmemcpy(buf_p, &value2, SRC_SIZE);                                                         \
+    HDmemcpy(saved_p, &value2, SRC_SIZE);                                                       \
     buf_p += SRC_SIZE;                                                                          \
     saved_p += SRC_SIZE;                                                                        \
 }
@@ -290,37 +290,37 @@ static int without_hardware_g = 0;
     HDmemset(BUF, 0, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                           \
     HDmemset(SAVED, 0, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                         \
                                                                                                 \
-    tmp1 = (unsigned char*)HDcalloc((size_t)1, (size_t)SRC_SIZE);                                                 \
-    tmp2 = (unsigned char*)HDcalloc((size_t)1, (size_t)SRC_SIZE);                                                 \
+    tmp1 = (unsigned char*)HDcalloc((size_t)1, (size_t)SRC_SIZE);                               \
+    tmp2 = (unsigned char*)HDcalloc((size_t)1, (size_t)SRC_SIZE);                               \
                                                                                                 \
     buf_p = BUF;                                                                                \
     saved_p = SAVED;                                                                            \
                                                                                                 \
     /*Denormalized values. Exponent is 0. Let mantissa starts from 00000001, 00000011,          \
      *00000111,..., until 11111111.*/                                                           \
-    memset(tmp1, 0, SRC_SIZE);                                                                  \
-    memset(tmp2, 0, SRC_SIZE);                                                                  \
-    H5T__bit_set (tmp2, SRC_PREC-1, (size_t)1, TRUE);       /*the negative value*/                       \
+    HDmemset(tmp1, 0, SRC_SIZE);                                                                \
+    HDmemset(tmp2, 0, SRC_SIZE);                                                                \
+    H5T__bit_set (tmp2, SRC_PREC-1, (size_t)1, TRUE);       /*the negative value*/              \
     for(n=0; n<SRC_MANT_DIG-1; n++) {                                                           \
-        H5T__bit_set (tmp1, n, (size_t)1, TRUE);            /*turn on 1 bit each time*/                  \
+        H5T__bit_set (tmp1, n, (size_t)1, TRUE);            /*turn on 1 bit each time*/         \
         CHANGE_ORDER(tmp1, SRC_ORDR, SRC_SIZE);    /*change order for big endian*/              \
-        memcpy(buf_p, tmp1, SRC_SIZE);                                                          \
-        memcpy(saved_p, tmp1, SRC_SIZE);                                                        \
+        HDmemcpy(buf_p, tmp1, SRC_SIZE);                                                        \
+        HDmemcpy(saved_p, tmp1, SRC_SIZE);                                                      \
         CHANGE_ORDER(tmp1, SRC_ORDR, SRC_SIZE);    /*change back the order for bit operation*/  \
         buf_p += SRC_SIZE;                                                                      \
         saved_p += SRC_SIZE;                                                                    \
                                                                                                 \
         /*negative values*/                                                                     \
-        H5T__bit_set (tmp2, n, (size_t)1, TRUE);                                                         \
+        H5T__bit_set (tmp2, n, (size_t)1, TRUE);                                                \
         CHANGE_ORDER(tmp2, SRC_ORDR, SRC_SIZE);                                                 \
-        memcpy(buf_p, tmp2, SRC_SIZE);                                                          \
-        memcpy(saved_p, tmp2, SRC_SIZE);                                                        \
+        HDmemcpy(buf_p, tmp2, SRC_SIZE);                                                        \
+        HDmemcpy(saved_p, tmp2, SRC_SIZE);                                                      \
         CHANGE_ORDER(tmp2, SRC_ORDR, SRC_SIZE);                                                 \
         buf_p += SRC_SIZE;                                                                      \
         saved_p += SRC_SIZE;                                                                    \
     }                                                                                           \
-    HDfree(tmp1);                                                                                 \
-    HDfree(tmp2);                                                                                 \
+    HDfree(tmp1);                                                                               \
+    HDfree(tmp2);                                                                               \
 }
 
 /* Allocate buffer and initialize it with floating-point special values, +/-0, +/-infinity,
@@ -342,50 +342,50 @@ static int without_hardware_g = 0;
     SAVED = (unsigned char*)aligned_malloc( NELMTS*MAX(SRC_SIZE, DST_SIZE));                    \
     HDmemset(BUF, 0, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                           \
     HDmemset(SAVED, 0, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                         \
-    value = (unsigned char*)HDcalloc(SRC_SIZE, sizeof(unsigned char));                            \
+    value = (unsigned char*)HDcalloc(SRC_SIZE, sizeof(unsigned char));                          \
                                                                                                 \
     buf_p = BUF;                                                                                \
                                                                                                 \
     /* +0 */                                                                                    \
-    H5T__bit_set(value, (size_t)0, SRC_PREC, FALSE);                                                     \
-    memcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                                       \
+    H5T__bit_set(value, (size_t)0, SRC_PREC, FALSE);                                            \
+    HDmemcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                                     \
     buf_p += SRC_SIZE;                                                                          \
                                                                                                 \
     for(n=0; n<2; n++) {                                                                        \
         if(n==1) {                                                                              \
             memset(value, 0, SRC_SIZE*sizeof(unsigned char));                                   \
             /* -0 */                                                                            \
-            H5T__bit_set(value, (size_t)(SRC_PREC - 1), (size_t)1, TRUE);                                            \
+            H5T__bit_set(value, (size_t)(SRC_PREC - 1), (size_t)1, TRUE);                       \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);/*change order for big endian*/             \
-            HDmemcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                               \
+            HDmemcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                             \
             CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);/*change back the order for bit operation*/ \
             buf_p += SRC_SIZE;                                                                  \
         }                                                                                       \
                                                                                                 \
         /* +/-infinity */                                                                       \
-        H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 1), SRC_PREC-SRC_MANT_DIG, TRUE);                        \
+        H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 1), SRC_PREC-SRC_MANT_DIG, TRUE);           \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change order for big endian*/             \
-        HDmemcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                                   \
+        HDmemcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                                 \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change back the order for bit operation*/ \
         buf_p += SRC_SIZE;                                                                      \
                                                                                                 \
         /* +/-SNaN */                                                                           \
-        H5T__bit_set(value, (size_t)0, (size_t)1, TRUE);                                                         \
+        H5T__bit_set(value, (size_t)0, (size_t)1, TRUE);                                        \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change order for big endian*/             \
-        HDmemcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                                   \
+        HDmemcpy(buf_p, value, SRC_SIZE * sizeof(unsigned char));                               \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change back the order for bit operation*/ \
         buf_p += SRC_SIZE;                                                                      \
                                                                                                 \
         /* +/-QNaN */                                                                           \
-        H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 2), (size_t)1, TRUE);                                            \
+        H5T__bit_set(value, (size_t)(SRC_MANT_DIG - 2), (size_t)1, TRUE);                       \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change order for big endian*/             \
-        HDmemcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                                   \
+        HDmemcpy(buf_p, value, SRC_SIZE*sizeof(unsigned char));                                 \
         CHANGE_ORDER(value, SRC_ORDR, SRC_SIZE);    /*change back the order for bit operation*/ \
         buf_p += SRC_SIZE;                                                                      \
     }                                                                                           \
                                                                                                 \
-    HDmemcpy(SAVED, BUF, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                         \
-    HDfree(value);                                                                                \
+    HDmemcpy(SAVED, BUF, NELMTS*MAX(SRC_SIZE, DST_SIZE));                                       \
+    HDfree(value);                                                                              \
 }
 
 void some_dummy_func(float x);
@@ -4507,10 +4507,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 printf(" %29lu\n", *((unsigned long*)hw));
                 break;
             case INT_LLONG:
-                printf(" %29"H5_PRINTF_LL_WIDTH"d\n", *((long long*)hw));
+                HDfprintf(stdout, " %29"H5_PRINTF_LL_WIDTH"d\n", *((long long*)hw));
                 break;
             case INT_ULLONG:
-                printf(" %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long long*)hw));
+                HDfprintf(stdout, " %29"H5_PRINTF_LL_WIDTH"u\n", *((unsigned long long*)hw));
                 break;
             case FLT_FLOAT:
                 printf(" %29f\n", (double)*((float*)hw));
@@ -5181,36 +5181,36 @@ main(void)
     /* Do the tests */
 
     /* Test H5Tcompiler_conv() for querying hard conversion. */
-    nerrors += test_hard_query();
+    nerrors += (unsigned long)test_hard_query();
 
     /* Test user-define, query functions and software conversion
      * for user-defined floating-point types */
-    nerrors += test_derived_flt();
+    nerrors += (unsigned long)test_derived_flt();
 
     /* Test user-define, query functions and software conversion
      * for user-defined integer types */
-    nerrors += test_derived_integer();
+    nerrors += (unsigned long)test_derived_integer();
 
     /* Does floating point overflow generate a SIGFPE? */
     generates_sigfpe();
 
     /* Test degenerate cases */
-    nerrors += run_fp_tests("noop");
+    nerrors += (unsigned long)run_fp_tests("noop");
 
     /* Test hardware floating-point conversion functions */
-    nerrors += run_fp_tests("hard");
+    nerrors += (unsigned long)run_fp_tests("hard");
 
     /* Test hardware integer conversion functions */
-    nerrors += run_integer_tests("hard");
+    nerrors += (unsigned long)run_integer_tests("hard");
 
     /* Test hardware integer-float conversion functions */
-    nerrors += run_int_fp_conv("hard");
+    nerrors += (unsigned long)run_int_fp_conv("hard");
 
     /* Test hardware float-integer conversion functions */
-    nerrors += run_fp_int_conv("hard");
+    nerrors += (unsigned long)run_fp_int_conv("hard");
 
     /* Test a few special values for hardware float-integer conversions */
-    nerrors += test_particular_fp_integer();
+    nerrors += (unsigned long)test_particular_fp_integer();
 
     /*----------------------------------------------------------------------
      * Software tests
@@ -5224,17 +5224,17 @@ main(void)
     reset_hdf5();
 
     /* Test software floating-point conversion functions */
-    nerrors += run_fp_tests("soft");
+    nerrors += (unsigned long)run_fp_tests("soft");
 
     /* Test software integer conversion functions */
-    nerrors += test_conv_int_2();
-    nerrors += run_integer_tests("soft");
+    nerrors += (unsigned long)test_conv_int_2();
+    nerrors += (unsigned long)run_integer_tests("soft");
 
     /* Test software float-integer conversion functions */
-    nerrors += run_fp_int_conv("soft");
+    nerrors += (unsigned long)run_fp_int_conv("soft");
 
     /* Test software integer-float conversion functions */
-    nerrors += run_int_fp_conv("soft");
+    nerrors += (unsigned long)run_int_fp_conv("soft");
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();

@@ -30,7 +30,8 @@ extern "C" {
  *
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5error_1off(JNIEnv *env, jclass clss );
+Java_hdf_hdf5lib_H5_H5error_1off
+  (JNIEnv *env, jclass clss );
 
 
 /*
@@ -41,8 +42,8 @@ Java_hdf_hdf5lib_H5_H5error_1off(JNIEnv *env, jclass clss );
  *  Call the HDF-5 library to print the HDF-5 error stack to 'file_name'.
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0(JNIEnv *env,
-    jobject obj, jstring file_name);
+Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0
+  (JNIEnv *env, jobject obj, jstring file_name);
 
 /*
  * Class:     hdf_hdf5lib_exceptions_HDFLibraryException
@@ -50,7 +51,8 @@ Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0(JNIEnv *env,
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMajorErrorNumber(JNIEnv *env, jobject obj);
+Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMajorErrorNumber
+  (JNIEnv *env, jobject obj);
 
 /*
  * Class:     hdf_hdf5lib_exceptions_HDFLibraryException
@@ -58,7 +60,8 @@ Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMajorErrorNumber(JNIEnv *env
  * Signature: ()J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMinorErrorNumber(JNIEnv *env, jobject obj);
+Java_hdf_hdf5lib_exceptions_HDF5LibraryException_getMinorErrorNumber
+  (JNIEnv *env, jobject obj);
 
 #ifdef __cplusplus
 } /* end extern "C" */

@@ -327,8 +327,10 @@ h5ltset_attribute_c(hid_t_f *loc_id,
         ret = H5LT_set_attribute_numerical(c_loc_id,c_name,c_attrname, c_size, H5T_NATIVE_INT, (const int *)buf);
       else if ((size_t)*sizeof_val == sizeof(long))
 	ret = H5LT_set_attribute_numerical(c_loc_id,c_name,c_attrname, c_size, H5T_NATIVE_LONG, (const long *)buf);
+#if H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG
       else if ((size_t)*sizeof_val == sizeof(long long))
         ret = H5LT_set_attribute_numerical(c_loc_id,c_name,c_attrname, c_size, H5T_NATIVE_LLONG, (const long long *)buf);
+#endif /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
       else
         goto done;
     } else if ( HDstrncmp(dtype,"R",1) == 0 ) {
@@ -420,8 +422,10 @@ h5ltget_attribute_c(hid_t_f *loc_id,
 	ret = H5LTget_attribute(c_loc_id,c_name,c_attrname,H5T_NATIVE_INT,buf);
       else if ((size_t)*sizeof_val == sizeof(long))
 	ret = H5LTget_attribute(c_loc_id,c_name,c_attrname,H5T_NATIVE_LONG,buf);
+#if H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG
       else if ((size_t)*sizeof_val == sizeof(long long))
 	ret = H5LTget_attribute(c_loc_id,c_name,c_attrname,H5T_NATIVE_LLONG,buf);
+#endif /* H5_SIZEOF_LONG != H5_SIZEOF_LONG_LONG */
       else
         goto done;
     } else if ( HDstrncmp(dtype,"R",1) == 0 ) {

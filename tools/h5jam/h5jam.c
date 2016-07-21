@@ -21,7 +21,7 @@
 /* Name of tool */
 #define PROGRAMNAME "h5jam"
 
-hsize_t write_pad (int, hsize_t);
+herr_t write_pad(int ofile, hsize_t old_where, hsize_t *new_where);
 hsize_t compute_user_block_size (hsize_t);
 hsize_t copy_some_to_file (int, int, hsize_t, hsize_t, ssize_t);
 void parse_command_line (int, const char *[]);
@@ -380,7 +380,13 @@ main (int argc, const char *argv[])
     where = copy_some_to_file (ufid, ofid, (hsize_t) 0, startub, (ssize_t) - 1);
 
     /* pad the ub */
-    where = write_pad (ofid, where);
+    if(write_pad(ofid, where, &where) < 0) {
+        error_msg("Can't pad file \"%s\"\n", output_file);
+        HDclose (h5fid);
+        HDclose (ufid);
+        HDclose (ofid);
+        leave (EXIT_FAILURE);
+    } /* end if */
 
     if(ub_file)
         HDfree (ub_file);
@@ -534,25 +540,32 @@ compute_user_block_size(hsize_t ublock_size)
 /*
  *  Write zeroes to fill the file from 'where' to 512, 1024, etc. bytes.
  *
- *  Returns the size of the padded file.
+ *  Sets new_where to the size of the padded file and
+ *  returns SUCCEED/FAIL.
  */
-hsize_t
-write_pad(int ofile, hsize_t where)
+herr_t
+write_pad(int ofile, hsize_t old_where, hsize_t *new_where)
 {
     unsigned int i;
     char buf[1];
     hsize_t psize;
 
+    HDassert(new_where);
+
     buf[0] = '\0';
 
-    HDlseek(ofile, (off_t) where, SEEK_SET);
+    HDlseek(ofile, (off_t)old_where, SEEK_SET);
 
-    psize = compute_user_block_size (where);
-    psize -= where;
+    psize = compute_user_block_size(old_where);
+    psize -= old_where;
 
     for(i = 0; i < psize; i++)
-        HDwrite (ofile, buf, 1);
+        if(HDwrite(ofile, buf, 1) < 0)
+            return FAIL;
 
-    return(where + psize);  /* the new size of the file. */
-}
+    /* Set the new size of the file. */
+    *new_where = old_where + psize;
+
+    return SUCCEED;
+} /* end write_pad() */
 

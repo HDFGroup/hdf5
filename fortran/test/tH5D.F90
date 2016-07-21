@@ -529,7 +529,7 @@ CONTAINS
 
     INTEGER(hid_t) :: file, fcpl, dataset, space
     INTEGER :: i, j, n, ios
-    INTEGER(hsize_t), DIMENSION(1:2) ::	dims
+    INTEGER(hsize_t), DIMENSION(1:2) :: dims
     INTEGER(haddr_t) :: offset
     INTEGER, DIMENSION(1:dset_dim1,1:dset_dim2), TARGET :: rdata, data_in
     INTEGER :: error
@@ -622,6 +622,11 @@ CONTAINS
     END DO
 
     CLOSE(10)
+
+    IF(cleanup) CALL h5_cleanup_f(fix_filename, H5P_DEFAULT_F, error)
+    CALL check("h5_cleanup_f", error, total_error)
+    IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+    CALL check("h5_cleanup_f", error, total_error)
     
   END SUBROUTINE test_userblock_offset
 

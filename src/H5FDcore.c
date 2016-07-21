@@ -139,7 +139,7 @@ static herr_t H5FD__core_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, had
             size_t size, void *buf);
 static herr_t H5FD__core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
             size_t size, const void *buf);
-static herr_t H5FD__core_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD__core_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD__core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD_core_lock(H5FD_t *_file, hbool_t rw);
 static herr_t H5FD_core_unlock(H5FD_t *_file);
@@ -203,9 +203,6 @@ H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
     haddr_t     a_addr          = 0;
     hbool_t     create_new_node = TRUE;
     herr_t      ret_value       = SUCCEED;
-#ifdef DER
-    hbool_t     was_adjusted    = FALSE;
-#endif
 
     FUNC_ENTER_STATIC
 
@@ -213,34 +210,15 @@ H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
     HDassert(file->dirty_list);
     HDassert(start <= end);
 
-#ifdef DER
-fprintf(stderr, "Add region: (%llu, %llu)\n", start, end);
-#endif
-
     /* Adjust the dirty region to the nearest block boundaries */
-    if(start % file->bstore_page_size != 0) {
+    if(start % file->bstore_page_size != 0)
         start = (start / file->bstore_page_size) * file->bstore_page_size;
-#ifdef DER
-        was_adjusted = TRUE;
-#endif
-    }
+
     if(end % file->bstore_page_size != (file->bstore_page_size - 1)) {
         end = (((end / file->bstore_page_size) + 1) * file->bstore_page_size) - 1;
-        if(end > file->eof){
-#ifdef DER
-fprintf(stderr, "Adjusted to EOF\n");
-#endif
+        if(end > file->eof)
             end = file->eof - 1;
-        }
-#ifdef DER
-        was_adjusted = TRUE;
-#endif
-    }
-
-#ifdef DER
-if(was_adjusted)
-    fprintf(stderr, "Adjusted region: (%llu, %llu)\n", start, end);
-#endif
+    } /* end if */
 
     /* Get the regions before and after the intended insertion point */
     b_addr = start +1;
@@ -249,15 +227,13 @@ if(was_adjusted)
     a_item = (H5FD_core_region_t *)H5SL_less(file->dirty_list, &a_addr);
 
     /* Check to see if we need to extend the upper end of the NEW region */
-    if(a_item) {
+    if(a_item)
         if(start < a_item->start && end < a_item->end) {
-
             /* Extend the end of the NEW region to match the existing AFTER region */
             end = a_item->end;
-        }
-    }
+        } /* end if */
     /* Attempt to extend the PREV region */
-    if(b_item) {
+    if(b_item)
         if(start <= b_item->end + 1) {
 
             /* Need to set this for the delete algorithm */
@@ -267,8 +243,7 @@ if(was_adjusted)
              * just update an existing one instead.
              */
             create_new_node = FALSE;
-        }
-    }
+        } /* end if */
 
     /* Remove any old nodes that are no longer needed */
     while(a_item && a_item->start > start) {
@@ -286,7 +261,7 @@ if(was_adjusted)
         /* Set up to check the next node */
         if(less)
             a_item = less;
-    }
+    } /* end while */
 
     /* Insert the new node */
     if(create_new_node) {
@@ -296,18 +271,18 @@ if(was_adjusted)
             item->start = start;
             item->end = end;
             if(H5SL_insert(file->dirty_list, item, &item->start) < 0)
-                HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, FAIL, "can't insert new dirty region: (%llu, %llu)\n", start, end)
-        }
+                HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, FAIL, "can't insert new dirty region: (%llu, %llu)\n", (unsigned long long)start, (unsigned long long)end)
+        } /* end if */
         else {
             /* Store the new item endpoint if it's bigger */
             item->end = (item->end < end) ? end : item->end;
-        }
-    }
+        } /* end else */
+    } /* end if */
     else {
         /* Update the size of the before region */
         if(b_item->end < end)
             b_item->end = end;
-    }
+    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -336,20 +311,13 @@ H5FD__core_destroy_dirty_list(H5FD_core_t *file)
     if(file->dirty_list) {
         H5FD_core_region_t *region = NULL;
 
-#ifdef DER
-{
-size_t count = H5SL_count(file->dirty_list);
-if(count != 0)
-    fprintf(stderr, "LIST NOT EMPTY AT DESTROY\n");
-}
-#endif
         while(NULL != (region = (H5FD_core_region_t *)H5SL_remove_first(file->dirty_list)))
             region = H5FL_FREE(H5FD_core_region_t, region);
 
         if(H5SL_close(file->dirty_list) < 0)
             HGOTO_ERROR(H5E_SLIST, H5E_CLOSEERROR, FAIL, "can't close core vfd dirty list")
         file->dirty_list = NULL;
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -394,14 +362,8 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
         else
             bytes_in = (h5_posix_io_t)size;
 
-#ifdef DER
-fprintf(stderr, "\nNEW\n");
-#endif
         do {
             bytes_wrote = HDwrite(file->fd, ptr, bytes_in);
-#ifdef DER
-fprintf(stderr, "bytes wrote: %lu\n", bytes_wrote);
-#endif
         } while(-1 == bytes_wrote && EINTR == errno);
 
         if(-1 == bytes_wrote) { /* error */
@@ -755,11 +717,11 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
             /* Allocate memory for the file's data, using the file image callback if available. */
             if(file->fi_callbacks.image_malloc) {
                 if(NULL == (file->mem = (unsigned char*)file->fi_callbacks.image_malloc(size, H5FD_FILE_IMAGE_OP_FILE_OPEN, file->fi_callbacks.udata)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "image malloc callback failed")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "image malloc callback failed")
             } /* end if */
             else {
                 if(NULL == (file->mem = (unsigned char*)H5MM_malloc(size)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "unable to allocate memory block")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate memory block")
             } /* end else */
 
             /* Set up data structures */
@@ -844,9 +806,6 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         if(use_write_tracking) {
             if(NULL == (file->dirty_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
                 HGOTO_ERROR(H5E_SLIST, H5E_CANTCREATE, NULL, "can't create core vfd dirty region list");
-#ifdef DER
-fprintf(stderr, "\n");
-#endif
         } /* end if */
     } /* end if */
 
@@ -1288,11 +1247,11 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         /* (Re)allocate memory for the file buffer, using callbacks if available */
         if(file->fi_callbacks.image_realloc) {
             if(NULL == (x = (unsigned char *)file->fi_callbacks.image_realloc(file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata)))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate memory block of %llu bytes with callback", (unsigned long long)new_eof)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate memory block of %llu bytes with callback", (unsigned long long)new_eof)
         } /* end if */
         else {
             if(NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate memory block of %llu bytes", (unsigned long long)new_eof)
         } /* end else */
 
         HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
@@ -1307,7 +1266,7 @@ H5FD__core_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
         haddr_t end = addr + (haddr_t)size - 1;
 
         if(H5FD__core_add_dirty_region(file, start, end) != SUCCEED)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINSERT, FAIL, "unable to add core VFD dirty region during write call - addresses: start=%llu end=%llu", start, end)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINSERT, FAIL, "unable to add core VFD dirty region during write call - addresses: start=%llu end=%llu", (unsigned long long)start, (unsigned long long)end)
     }
 
     /* Write from BUF to memory */
@@ -1335,7 +1294,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, unsigned H5_ATTR_UNUSED closing)
+H5FD__core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
 {
     H5FD_core_t *file = (H5FD_core_t*)_file;
     herr_t      ret_value = SUCCEED;            /* Return value */
@@ -1350,9 +1309,6 @@ H5FD__core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, unsigned H5_ATTR_U
             H5FD_core_region_t *item = NULL;
             size_t size;
 
-#ifdef DER
-    fprintf(stderr, "FLUSHING. DIRTY LIST:\n");
-#endif
             while(NULL != (item = (H5FD_core_region_t *)H5SL_remove_first(file->dirty_list))) {
 
                 /* The file may have been truncated, so check for that
@@ -1362,11 +1318,8 @@ H5FD__core_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, unsigned H5_ATTR_U
                     if(item->end >= file->eof)
                         item->end = file->eof - 1;
 
-
                     size = (size_t)((item->end - item->start) + 1);
-#ifdef DER
-fprintf(stderr, "(%llu, %llu : %lu)\n", item->start, item->end, size);
-#endif
+
                     if(H5FD__core_write_to_bstore(file, item->start, size) != SUCCEED)
                         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write to backing store")
                 } /* end if */
@@ -1374,13 +1327,6 @@ fprintf(stderr, "(%llu, %llu : %lu)\n", item->start, item->end, size);
                 item = H5FL_FREE(H5FD_core_region_t, item);
            } /* end while */
 
-#ifdef DER
-fprintf(stderr, "EOF: %llu\n", file->eof);
-fprintf(stderr, "EOA: %llu\n", file->eoa);
-if(file->eoa > file->eof)
-    fprintf(stderr, "*** EOA BADNESS ***\n");
-fprintf(stderr, "\n");
-#endif
         } /* end if */
         /* Otherwise, write the entire file out at once */
         else {
@@ -1460,11 +1406,11 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
             /* (Re)allocate memory for the file buffer, using callback if available */
             if(file->fi_callbacks.image_realloc) {
                 if(NULL == (x = (unsigned char *)file->fi_callbacks.image_realloc(file->mem, new_eof, H5FD_FILE_IMAGE_OP_FILE_RESIZE, file->fi_callbacks.udata)))
-                  HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate memory block with callback")
+                  HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate memory block with callback")
             } /* end if */
             else {
                 if(NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate memory block")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate memory block")
             } /* end else */
 
             if(file->eof < new_eof)
@@ -1504,9 +1450,6 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
                     HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* H5_HAVE_WIN32_API */
 
-#ifdef DER
-fprintf(stderr, "OLD: Truncated to: %llu\n", file->eoa);
-#endif
             } /* end if */
 
             /* Update the eof value */

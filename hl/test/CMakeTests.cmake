@@ -11,7 +11,10 @@
 MACRO (HL_ADD_TEST hl_name files)
   add_test (NAME HL_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
   if (NOT "${last_test}" STREQUAL "")
-    set_tests_properties (HL_${hl_name} PROPERTIES DEPENDS ${last_test})
+    set_tests_properties (HL_${hl_name} PROPERTIES DEPENDS ${last_test}
+      ENVIRONMENT "srcdir=${HDF5_HL_TEST_BINARY_DIR}"
+      WORKING_DIRECTORY ${HDF5_HL_TEST_BINARY_DIR}
+    )
   endif (NOT "${last_test}" STREQUAL "")
 
   # --------------------------------------------------------------------
@@ -34,9 +37,12 @@ ENDMACRO (HL_ADD_TEST)
 add_test (
     NAME HL_test-clear-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove 
+        -E remove
         combine_tables1.h5
         combine_tables2.h5
+        file_img1.h5
+        file_img2.h5
+        test_append.h5
         test_detach.h5
         test_ds1.h5
         test_ds2.h5
@@ -58,6 +64,8 @@ add_test (
         test_lite4.h5
         test_packet_compress.h5
         test_packet_table.h5
+        test_packet_table_vlen.h5
+        testfl_packet_table_vlen.h5
         test_table.h5
 )
 if (NOT "${last_test}" STREQUAL "")
@@ -65,9 +73,13 @@ if (NOT "${last_test}" STREQUAL "")
 endif (NOT "${last_test}" STREQUAL "")
 set (last_test "HL_test-clear-objects")
 
-HL_add_test (test_ds "dsdata.txt;dslat.txt;dslon.txt;test_ds_be.h5;test_ds_le.h5")
-HL_add_test (test_dset_opt "")
-HL_add_test (test_image "image8.txt;sepia.pal;earth.pal;image24pixel.txt;image24plane.txt;usa.wri")
 HL_add_test (test_lite "dtype_file.txt")
-HL_add_test (test_packet "")
+HL_add_test (test_image "image8.txt;sepia.pal;earth.pal;image24pixel.txt;image24plane.txt;usa.wri")
+HL_add_test (test_file_image "")
 HL_add_test (test_table "test_table_be.h5;test_table_cray.h5;test_table_le.h5")
+HL_add_test (test_ds "dsdata.txt;dslat.txt;dslon.txt;test_ds_be.h5;test_ds_le.h5")
+HL_add_test (test_packet "")
+HL_add_test (test_dset_opt "")
+HL_add_test (test_ld "test_ld.h5")
+HL_add_test (test_dset_append "")
+

@@ -105,7 +105,9 @@ JUnit version 4.11
 .testH5Gcreate_null
 .testH5Gget_info_by_idx_fileid
 .testH5Gclose_invalid
+.testH5Gflush_invalid
 .testH5Gopen_invalid
+.testH5Grefresh_invalid
 .testH5Gget_info_invalid
 .testH5Gcreate_invalid
 .testH5Gcreate_exists
@@ -232,9 +234,11 @@ JUnit version 4.11
 .testH5Tget_nmembers_invalid
 .testH5Tarray_create_value_null
 .testH5Tset_size_invalid
+.testH5Tflush_invalid
 .testH5Tenum_insert_invalid
 .testH5Tget_array_dims_null
 .testH5Tget_member_index_null
+.testH5Trefresh_invalid
 .testH5Tset_sign_invalid
 .testH5Tenum_insert_name_null
 .testH5Tequal_not
@@ -270,6 +274,8 @@ JUnit version 4.11
 .testH5Dvlen_reclaim_invalid
 .testH5Dopen_invalid
 .testH5Dclose_invalid
+.testH5Dflush_invalid
+.testH5Drefresh_invalid
 .testH5Dget_storage_size_invalid
 .testH5Dget_space_invalid
 .testH5Dopen_null
@@ -564,7 +570,9 @@ JUnit version 4.11
 .testH5Oset_comment_by_name_invalid
 .testH5Oopen_null
 .testH5Oclose_invalid
+.testH5Oflush_invalid
 .testH5Oget_comment_by_name_invalid
+.testH5Orefresh_invalid
 .testH5Ocopy_null_dest
 .testH5Olink_invalid
 .testH5Oget_info_by_idx_invalid
@@ -626,7 +634,7 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (624 tests)
+OK (632 tests)
 
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Fopen(): can't set access and transfer property lists
@@ -648,5 +656,3 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #002: (file name) line (number) in H5P_isa_class(): not a property list
     major: Invalid arguments to routine
     minor: Inappropriate type
-[main] INFO hdf.hdf5lib.H5 - HDF5 library: hdf5_java
-[main] INFO hdf.hdf5lib.H5 -  successfully loaded from java.library.path

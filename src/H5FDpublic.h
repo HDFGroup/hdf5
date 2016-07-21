@@ -272,7 +272,7 @@ typedef struct H5FD_class_t {
                     haddr_t addr, size_t size, void *buffer);
     herr_t  (*write)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl,
                      haddr_t addr, size_t size, const void *buffer);
-    herr_t  (*flush)(H5FD_t *file, hid_t dxpl_id, unsigned closing);
+    herr_t  (*flush)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t  (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t  (*lock)(H5FD_t *file, hbool_t rw);
     herr_t  (*unlock)(H5FD_t *file);
@@ -353,7 +353,7 @@ H5_DLL herr_t H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                        haddr_t addr, size_t size, void *buf/*out*/);
 H5_DLL herr_t H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                         haddr_t addr, size_t size, const void *buf);
-H5_DLL herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, unsigned closing);
+H5_DLL herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FDlock(H5FD_t *file, hbool_t rw);
 H5_DLL herr_t H5FDunlock(H5FD_t *file);

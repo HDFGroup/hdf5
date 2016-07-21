@@ -58,7 +58,6 @@
 /********************/
 
 
-
 /*********************/
 /* Package Variables */
 /*********************/
@@ -141,7 +140,7 @@ H5F_term_package(void)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if(H5_PKG_INIT_VAR) {
-	if(H5I_nmembers(H5I_FILE) > 0) {
+        if(H5I_nmembers(H5I_FILE) > 0) {
             (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
             n++; /*H5I*/
 	} /* end if */
@@ -150,12 +149,12 @@ H5F_term_package(void)
             H5F_sfile_assert_num(0);
 
             /* Destroy the file object id group */
-	    n += (H5I_dec_type_ref(H5I_FILE) > 0);
+            n += (H5I_dec_type_ref(H5I_FILE) > 0);
 
-	    /* Mark closed */
+            /* Mark closed */
             if(0 == n)
                 H5_PKG_INIT_VAR = FALSE;
-	} /* end else */
+        } /* end else */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
@@ -189,13 +188,13 @@ H5Fget_create_plist(hid_t file_id)
 
     /* check args */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(file->shared->fcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Create the property list object to return */
     if((ret_value = H5P_copy_plist(plist, TRUE)) < 0)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -234,7 +233,7 @@ H5Fget_access_plist(hid_t file_id)
 
     /* Check args */
     if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Retrieve the file's access property list */
     if((ret_value = H5F_get_access_plist(f, TRUE)) < 0)
@@ -276,7 +275,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
 
     /* Perform the query */
     if(H5F_get_obj_count(f, types, TRUE, &obj_count) < 0)
-	HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_BADITER, FAIL, "H5F_get_obj_count failed")
 
     /* Set the return value */
     ret_value = (ssize_t)obj_count;
@@ -482,18 +481,18 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
      * reading and writing.
      */
     if (0==(flags & (H5F_ACC_EXCL|H5F_ACC_TRUNC)))
-	flags |= H5F_ACC_EXCL;	 /*default*/
+        flags |= H5F_ACC_EXCL;	 /*default*/
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /*
      * Create a new file or truncate an existing file.
      */
     if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
@@ -559,11 +558,11 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 
     /* Check/fix arguments. */
     if(!filename || !*filename)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
     /* Reject undefined flags (~H5F_ACC_PUBLIC_FLAGS) and the H5F_ACC_TRUNC & H5F_ACC_EXCL flags */
     if((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
             (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
 
     /* Verify access property list and get correct dxpl */
     if(H5P_verify_apl_and_dxpl(&fapl_id, H5P_CLS_FACC, &dxpl_id, H5I_INVALID_HID, TRUE) < 0)
@@ -571,11 +570,11 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 
     /* Open the file */
     if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
-	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
 
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
     new_file->file_id = ret_value;
@@ -674,12 +673,12 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
     } /* end switch */
 
     if(!f) {
-	if(!oloc)
-	    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not assocated with a file")
-	f = oloc->file;
+        if(!oloc)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not assocated with a file")
+        f = oloc->file;
     } /* end if */
     if(!f)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "object is not associated with a file")
 
     /* Flush the file */
     /*
@@ -741,7 +740,7 @@ H5Fclose(hid_t file_id)
 
     /* Check/fix arguments. */
     if(H5I_FILE != H5I_get_type(file_id))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
 
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.
@@ -762,7 +761,7 @@ H5Fclose(hid_t file_id)
      * be closed.
      */
     if(H5I_dec_app_ref(file_id) < 0)
-	HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1179,7 +1178,7 @@ H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_size() failed.")
 
     if(cur_num_entries_ptr != NULL)
-	*cur_num_entries_ptr = (int)cur_num_entries;
+        *cur_num_entries_ptr = (int)cur_num_entries;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1346,11 +1345,11 @@ H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo)
 
     /* Get the size of the superblock and any superblock extensions */
     if(H5F__super_size(f, H5AC_ind_read_dxpl_id, &finfo->super.super_size, &finfo->super.super_ext_size) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve superblock sizes")
 
     /* Get the size of any persistent free space */
     if(H5MF_get_freespace(f, H5AC_ind_read_dxpl_id, &finfo->free.tot_space, &finfo->free.meta_size) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "Unable to retrieve free space information")
 
     /* Check for SOHM info */
     if(H5F_addr_defined(f->shared->sohm_addr))
@@ -1442,4 +1441,74 @@ H5Fclear_elink_file_cache(hid_t file_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclear_elink_file_cache() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Fformat_convert_super (Internal)
+ *
+ * Purpose:	Downgrade the superblock version to v2 and
+ *		downgrade persistent file space to non-persistent
+ *		for 1.8 library.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *              Jan 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fformat_convert(hid_t fid)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", fid);
+
+    if(H5I_FILE == H5I_get_type(fid)) {
+        H5F_t	*f;                     /* File to flush */
+        hbool_t	mark_dirty = FALSE;
+
+        /* Get file object */
+        if(NULL == (f = (H5F_t *)H5I_object(fid)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+        /* Check if the superblock should be downgraded */
+        if(f->shared->sblock->super_vers > HDF5_SUPERBLOCK_VERSION_V18_LATEST) {
+            f->shared->sblock->super_vers = HDF5_SUPERBLOCK_VERSION_V18_LATEST;
+            mark_dirty = TRUE;
+        } /* end if */
+
+        /* Check for persistent freespace manager, which needs to be downgraded */
+        if(!(f->shared->fs_strategy == H5F_FILE_SPACE_STRATEGY_DEF &&
+                f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF)) {
+            /* Check to remove free-space manager info message from superblock extension */
+            if(H5F_addr_defined(f->shared->sblock->ext_addr))
+                if(H5F_super_ext_remove_msg(f, H5AC_ind_read_dxpl_id, H5O_FSINFO_ID) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
+
+            /* Close freespace manager */
+            if(H5MF_try_close(f, H5AC_ind_read_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to free free-space address")
+
+            /* Set non-persistent freespace manager */
+            f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
+            f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
+
+            /* Indicate that the superblock should be marked dirty */
+            mark_dirty = TRUE;
+        } /* end if */
+
+        /* Check if we should mark the superblock dirty */
+        if(mark_dirty)
+            /* Mark superblock as dirty */
+            if(H5F_super_dirty(f) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fformat_convert() */
 

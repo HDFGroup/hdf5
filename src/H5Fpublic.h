@@ -48,9 +48,6 @@
  * which are compatible with the library to which the application is linked.
  * We're assuming that these constants are used rather early in the hdf5
  * session.
- *
- * Note that H5F_ACC_DEBUG is deprecated (nonfuncational) but retained as a
- * symbol for backward compatibility.
  */
 #define H5F_ACC_RDONLY	(H5CHECK H5OPEN 0x0000u)	/*absence of rdwr => rd-only */
 #define H5F_ACC_RDWR	(H5CHECK H5OPEN 0x0001u)	/*open for read and write    */
@@ -178,6 +175,9 @@ typedef enum H5F_file_space_type_t {
     H5F_FILE_SPACE_NTYPES	    /* must be last */
 } H5F_file_space_type_t;
 
+/* Callback for H5Pset_object_flush_cb() in a file access property list */
+typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -219,6 +219,7 @@ H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo);
 H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
     size_t nsects, H5F_sect_info_t *sect_info/*out*/);
 H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);
+H5_DLL herr_t H5Fformat_convert(hid_t fid);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
 H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);

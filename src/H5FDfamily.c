@@ -46,10 +46,8 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 
-#undef MAX
-#define MAX(X,Y)	((X)>(Y)?(X):(Y))
-#undef MIN
-#define MIN(X,Y)	((X)<(Y)?(X):(Y))
+/* The size of the member name buffers */
+#define H5FD_FAM_MEMB_NAME_BUF_SIZE 4096
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_FAMILY_g = 0;
@@ -104,8 +102,8 @@ static herr_t H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, ha
 			       size_t size, void *_buf/*out*/);
 static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 				size_t size, const void *_buf);
-static herr_t H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
-static herr_t H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t H5FD_family_lock(H5FD_t *_file, hbool_t rw);
 static herr_t H5FD_family_unlock(H5FD_t *_file);
 
@@ -623,11 +621,11 @@ static H5FD_t *
 H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
 		 haddr_t maxaddr)
 {
-    H5FD_family_t	*file=NULL;
-    H5FD_t     		*ret_value=NULL;
-    char		memb_name[4096], temp[4096];
-    hsize_t		eof=HADDR_UNDEF;
+    H5FD_family_t	*file = NULL;
+    char		*memb_name = NULL, *temp = NULL;
+    hsize_t		eof = HADDR_UNDEF;
     unsigned		t_flags = flags & ~H5F_ACC_CREAT;
+    H5FD_t     		*ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -683,15 +681,21 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     file->name = H5MM_strdup(name);
     file->flags = flags;
 
+    /* Allocate space for the string buffers */
+    if(NULL == (memb_name = (char *)H5MM_malloc(H5FD_FAM_MEMB_NAME_BUF_SIZE)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "unable to allocate member name")
+    if(NULL == (temp = (char *)H5MM_malloc(H5FD_FAM_MEMB_NAME_BUF_SIZE)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "unable to allocate temporary member name")
+
     /* Check that names are unique */
-    HDsnprintf(memb_name, sizeof(memb_name), name, 0);
-    HDsnprintf(temp, sizeof(temp), name, 1);
+    HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 0);
+    HDsnprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, 1);
     if(!HDstrcmp(memb_name, temp))
         HGOTO_ERROR(H5E_FILE, H5E_FILEEXISTS, NULL, "file names not unique")
 
     /* Open all the family members */
     while(1) {
-        HDsnprintf(memb_name, sizeof(memb_name), name, file->nmembs);
+        HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, name, file->nmembs);
 
         /* Enlarge member array */
         if(file->nmembs >= file->amembs) {
@@ -732,6 +736,12 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id,
     ret_value=(H5FD_t *)file;
 
 done:
+    /* Release resources */
+    if(memb_name)
+        H5MM_xfree(memb_name);
+    if(temp)
+        H5MM_xfree(temp);
+
     /* Cleanup and fail */
     if(ret_value == NULL && file != NULL) {
         unsigned nerrors = 0;   /* Number of errors closing member files */
@@ -941,11 +951,15 @@ H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     haddr_t		addr = abs_eoa;
-    char		memb_name[4096];
+    char		*memb_name = NULL;
     unsigned		u;                      /* Local index variable */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    /* Allocate space for the member name buffer */
+    if(NULL == (memb_name = (char *)H5MM_malloc(H5FD_FAM_MEMB_NAME_BUF_SIZE)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "unable to allocate member name")
 
     for(u = 0; addr || u < file->nmembs; u++) {
 
@@ -964,7 +978,7 @@ H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
         /* Create another file if necessary */
         if(u >= file->nmembs || !file->memb[u]) {
             file->nmembs = MAX(file->nmembs, u+1);
-            HDsnprintf(memb_name, sizeof(memb_name), file->name, u);
+            HDsnprintf(memb_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, file->name, u);
             H5E_BEGIN_TRY {
                 H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
                 file->memb[u] = H5FDopen(memb_name, file->flags | H5F_ACC_CREAT,
@@ -992,6 +1006,10 @@ H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
     file->eoa = abs_eoa;
 
 done:
+    /* Release resources */
+    if(memb_name)
+        H5MM_xfree(memb_name);
+
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -1249,7 +1267,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
+H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     unsigned		u, nerrors = 0;
@@ -1284,7 +1302,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
+H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
     unsigned		u, nerrors = 0;

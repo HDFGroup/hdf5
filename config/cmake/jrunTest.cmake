@@ -26,7 +26,10 @@ if (NOT TEST_REFERENCE)
 endif (NOT TEST_REFERENCE)
 
 if (NOT TEST_ERRREF)
-  set (ERROR_APPEND 1)
+  if (NOT SKIP_APPEND)
+    # append error file since skip was not defined
+    set (ERROR_APPEND 1)
+  endif(NOT SKIP_APPEND)
 endif (NOT TEST_ERRREF)
 
 if (NOT TEST_LOG_LEVEL)
@@ -60,30 +63,35 @@ message (STATUS "COMMAND Result: ${TEST_RESULT}")
 if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   if (TEST_MASK_FILE)
-    STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}") 
+    STRING(REGEX REPLACE "CurrentDir is [^\n]+\n" "CurrentDir is (dir name)\n" TEST_STREAM "${TEST_STREAM}")
   endif (TEST_MASK_FILE)
 
-  if (ERROR_APPEND)
-    file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}") 
-  else (ERROR_APPEND)
+  if (NOT ERROR_APPEND)
+    # append error output to the stdout output file
     file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err "${TEST_STREAM}")
-  endif (ERROR_APPEND)
+  else (NOT ERROR_APPEND)
+    # write back to original .err file
+    file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
+  endif (NOT ERROR_APPEND)
 endif (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
 
 if (TEST_MASK_ERROR)
   if (NOT TEST_ERRREF)
+    # the error stack has been appended to the output file
     file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
   else (NOT TEST_ERRREF)
+    # the error stack remains in the .err file
     file (READ ${TEST_FOLDER}/${TEST_OUTPUT}.err TEST_STREAM)
   endif (NOT TEST_ERRREF)
-  string (REGEX REPLACE "Time:[^\n]+\n" "Time:  XXXX\n" TEST_STREAM "${TEST_STREAM}") 
-  string (REGEX REPLACE "thread [0-9]*:" "thread (IDs):" TEST_STREAM "${TEST_STREAM}") 
-  string (REGEX REPLACE ": ([^\n]*)[.]c " ": (file name) " TEST_STREAM "${TEST_STREAM}") 
-  string (REGEX REPLACE " line [0-9]*" " line (number)" TEST_STREAM "${TEST_STREAM}") 
-  #string (REGEX REPLACE "v[1-9]*[.][0-9]*[.]" "version (number)." TEST_STREAM "${TEST_STREAM}") 
-  string (REGEX REPLACE "HDF5 .[1-9]*[.][0-9]*[.][0-9]*[^)]*" "HDF5 (version (number)" TEST_STREAM "${TEST_STREAM}") 
-  string (REGEX REPLACE "H5Eget_auto[1-2]*" "H5Eget_auto(1 or 2)" TEST_STREAM "${TEST_STREAM}") 
-  string (REGEX REPLACE "H5Eset_auto[1-2]*" "H5Eset_auto(1 or 2)" TEST_STREAM "${TEST_STREAM}") 
+  string (REGEX REPLACE "Time:[^\n]+\n" "Time:  XXXX\n" TEST_STREAM "${TEST_STREAM}")
+  string (REGEX REPLACE "thread [0-9]*:" "thread (IDs):" TEST_STREAM "${TEST_STREAM}")
+  string (REGEX REPLACE ": ([^\n]*)[.]c " ": (file name) " TEST_STREAM "${TEST_STREAM}")
+  string (REGEX REPLACE " line [0-9]*" " line (number)" TEST_STREAM "${TEST_STREAM}")
+  #string (REGEX REPLACE "v[1-9]*[.][0-9]*[.]" "version (number)." TEST_STREAM "${TEST_STREAM}")
+  string (REGEX REPLACE "HDF5 .[1-9]*[.][0-9]*[.][0-9]*[^)]*" "HDF5 (version (number)" TEST_STREAM "${TEST_STREAM}")
+  string (REGEX REPLACE "H5Eget_auto[1-2]*" "H5Eget_auto(1 or 2)" TEST_STREAM "${TEST_STREAM}")
+  string (REGEX REPLACE "H5Eset_auto[1-2]*" "H5Eset_auto(1 or 2)" TEST_STREAM "${TEST_STREAM}")
+  # write back the changes to the original files
   if (NOT TEST_ERRREF)
     file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
   else (NOT TEST_ERRREF)
@@ -99,6 +107,7 @@ endif (NOT ${TEST_RESULT} STREQUAL ${TEST_EXPECT})
 
 message (STATUS "COMMAND Error: ${TEST_ERROR}")
 
+# compare output files to references unless this must be skipped
 if (NOT TEST_SKIP_COMPARE)
   if (WIN32 AND NOT MINGW)
     file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
@@ -140,7 +149,8 @@ if (NOT TEST_SKIP_COMPARE)
   if (NOT ${TEST_RESULT} STREQUAL 0)
     message (FATAL_ERROR "Failed: The output of ${TEST_OUTPUT} did not match ${TEST_REFERENCE}")
   endif (NOT ${TEST_RESULT} STREQUAL 0)
-  
+
+  # now compare the .err file with the error reference, if supplied
   if (TEST_ERRREF)
     if (WIN32 AND NOT MINGW)
       file (READ ${TEST_FOLDER}/${TEST_ERRREF} TEST_STREAM)
@@ -191,16 +201,16 @@ if (TEST_GREP_COMPARE)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT} TEST_STREAM)
 
   # TEST_REFERENCE should always be matched
-  string (REGEX MATCH "${TEST_REFERENCE}" TEST_MATCH ${TEST_STREAM}) 
-  string (COMPARE EQUAL "${TEST_REFERENCE}" "${TEST_MATCH}" TEST_RESULT) 
+  string (REGEX MATCH "${TEST_REFERENCE}" TEST_MATCH ${TEST_STREAM})
+  string (COMPARE EQUAL "${TEST_REFERENCE}" "${TEST_MATCH}" TEST_RESULT)
   if (${TEST_RESULT} STREQUAL "0")
     message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_REFERENCE}")
   endif (${TEST_RESULT} STREQUAL "0")
 
-  string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM}) 
+  string (REGEX MATCH "${TEST_FILTER}" TEST_MATCH ${TEST_STREAM})
   if (${TEST_EXPECT} STREQUAL "1")
     # TEST_EXPECT (1) interperts TEST_FILTER as NOT to match
-    string (LENGTH "${TEST_MATCH}" TEST_RESULT) 
+    string (LENGTH "${TEST_MATCH}" TEST_RESULT)
     if (NOT ${TEST_RESULT} STREQUAL "0")
       message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did contain ${TEST_FILTER}")
     endif (NOT ${TEST_RESULT} STREQUAL "0")

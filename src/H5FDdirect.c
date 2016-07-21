@@ -526,6 +526,9 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
      * is to handle correctly the case that the file is in a different file system
      * than the one where the program is running.
      */
+    /* NOTE: Use HDmalloc and HDfree here to ensure compatibility with
+     *       HDposix_memalign.
+     */
     buf1 = (int *)HDmalloc(sizeof(int));
     if(HDposix_memalign(&buf2, file->fa.mboundary, file->fa.fbsize) != 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "HDposix_memalign failed")
@@ -992,6 +995,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
       addr = (haddr_t)(((addr + size - 1) / _fbsize + 1) * _fbsize);
 
       if(copy_buf) {
+                /* Free with HDfree since it came from posix_memalign */
                 HDfree(copy_buf);
                 copy_buf = NULL;
             } /* end if */
@@ -1003,6 +1007,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
 
 done:
     if(ret_value<0) {
+        /* Free with HDfree since it came from posix_memalign */
         if(copy_buf)
             HDfree(copy_buf);
 
@@ -1223,6 +1228,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
   buf = (const char*)buf + size;
 
   if(copy_buf) {
+    /* Free with HDfree since it came from posix_memalign */
       HDfree(copy_buf);
       copy_buf = NULL;
         } /* end if */
@@ -1236,6 +1242,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
 
 done:
     if(ret_value<0) {
+        /* Free with HDfree since it came from posix_memalign */
         if(copy_buf)
             HDfree(copy_buf);
 

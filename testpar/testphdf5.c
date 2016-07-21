@@ -88,7 +88,7 @@ void pause_proc(void)
 	    }
 	    printf("waiting(%ds) for file %s ...\n", time_int, greenlight);
 	    fflush(stdout);
-	    sleep(time_int);
+            HDsleep(time_int);
 	}
     MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -589,8 +589,12 @@ int main(int argc, char **argv)
 	    printf("PHDF5 tests finished with no errors\n");
 	printf("===================================\n");
     }
+
     /* close HDF5 library */
     H5close();
+
+    /* Release test infrastructure */
+    TestShutdown();
 
     /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
     MPI_Finalize();

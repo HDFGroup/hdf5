@@ -169,7 +169,7 @@ void PropList::copy( const PropList& like_plist )
     try {
 	close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
 	throw PropListIException(inMemFunc("copy"), close_error.getDetailMsg());
     }
 
@@ -301,7 +301,7 @@ void PropList::p_setId(const hid_t new_id)
     try {
         close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
         throw PropListIException(inMemFunc("p_setId"), close_error.getDetailMsg());
     }
    // reset object's id to the given id
@@ -747,7 +747,7 @@ PropList::~PropList()
     try {
 	close();
     }
-    catch (Exception close_error) {
+    catch (Exception& close_error) {
 	cerr << "PropList::~PropList - " << close_error.getDetailMsg() << endl;
     }
 }

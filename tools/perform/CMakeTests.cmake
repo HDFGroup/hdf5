@@ -9,7 +9,7 @@ add_custom_command (
     TARGET     zip_perf
     POST_BUILD
     COMMAND    ${CMAKE_COMMAND}
-    ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/tfilters.h5 ${PROJECT_BINARY_DIR}/tfilters.h5
+    ARGS       -E copy_if_different ${HDF5_TOOLS_DIR}/testfiles/tfilters.h5 ${PROJECT_BINARY_DIR}/tfilters.h5
 )
 
 #-----------------------------------------------------------------------------

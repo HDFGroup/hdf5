@@ -524,7 +524,7 @@ H5P_term_package(void)
             if(nlist == 0 && nclass > 0) {
                 (void)H5I_clear_type(H5I_GENPROP_CLS, FALSE, FALSE);
 
-                /* Reset the default property lists, if they've been closed */
+                /* Reset the default property classes, if they've been closed */
                 if(H5I_nmembers(H5I_GENPROP_CLS) == 0) {
                         H5P_CLS_ROOT_g =
                         H5P_CLS_OBJECT_CREATE_g =
@@ -2997,7 +2997,7 @@ done:
     herr_t H5P_set(plist, name, value)
         H5P_genplist_t *plist;  IN: Property list to find property in
         const char *name;       IN: Name of property to set
-        void *value;            IN: Pointer to the value for the property
+        const void *value;      IN: Pointer to the value for the property
  RETURNS
     Returns non-negative on success, negative on failure.
  DESCRIPTION

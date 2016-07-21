@@ -39,6 +39,15 @@ static htri_t H5S_select_iter_has_next_block(const H5S_sel_iter_t *iter);
 static herr_t H5S_select_iter_next_block(H5S_sel_iter_t *iter);
 #endif /* LATER */
 
+/* Declare a free list to manage the H5S_sel_iter_t struct */
+H5FL_DEFINE(H5S_sel_iter_t);
+
+/* Declare extern free list to manage sequences of size_t */
+H5FL_SEQ_EXTERN(size_t);
+
+/* Declare extern free list to manage sequences of hsize_t */
+H5FL_SEQ_EXTERN(hsize_t);
+
 
 
 /*--------------------------------------------------------------------------
@@ -1364,8 +1373,10 @@ herr_t
 H5S_select_iterate(void *buf, const H5T_t *type, const H5S_t *space,
     const H5S_sel_iter_op_t *op, void *op_data)
 {
-    H5S_sel_iter_t iter;        /* Selection iteration info */
+    H5S_sel_iter_t *iter = NULL; /* Selection iteration info */
     hbool_t iter_init = FALSE;  /* Selection iteration info has been initialized */
+    hsize_t *off = NULL;        /* Array to store sequence offsets */
+    size_t *len = NULL;         /* Array to store sequence lengths */
     hssize_t nelmts;            /* Number of elements in selection */
     hsize_t space_size[H5O_LAYOUT_NDIMS]; /* Dataspace size */
     size_t max_elem;            /* Maximum number of elements allowed in sequences */
@@ -1386,8 +1397,12 @@ H5S_select_iterate(void *buf, const H5T_t *type, const H5S_t *space,
     if(0 == (elmt_size = H5T_get_size(type)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid")
 
+    /* Allocate the selection iterator */
+    if(NULL == (iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
+
     /* Initialize iterator */
-    if(H5S_select_iter_init(&iter, space, elmt_size) < 0)
+    if(H5S_select_iter_init(iter, space, elmt_size) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
     iter_init = TRUE;	/* Selection iteration info has been initialized */
 
@@ -1408,16 +1423,20 @@ H5S_select_iterate(void *buf, const H5T_t *type, const H5S_t *space,
     /* Compute the maximum number of bytes required */
     H5_CHECKED_ASSIGN(max_elem, size_t, nelmts, hssize_t);
 
+    /* Allocate the offset & length arrays */
+    if(NULL == (len = H5FL_SEQ_MALLOC(size_t, H5D_IO_VECTOR_SIZE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate length vector array")
+    if(NULL == (off = H5FL_SEQ_MALLOC(hsize_t, H5D_IO_VECTOR_SIZE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate offset vector array")
+
     /* Loop, while elements left in selection */
     while(max_elem > 0 && user_ret == 0) {
-        hsize_t off[H5D_IO_VECTOR_SIZE];        /* Array to store sequence offsets */
-        size_t len[H5D_IO_VECTOR_SIZE];         /* Array to store sequence lengths */
         size_t nelem;               /* Number of elements used in sequences */
         size_t nseq;                /* Number of sequences generated */
         size_t curr_seq;            /* Current sequence being worked on */
 
         /* Get the sequences of bytes */
-        if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, (size_t)H5D_IO_VECTOR_SIZE, max_elem, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_GET_SEQ_LIST(space, 0, iter, (size_t)H5D_IO_VECTOR_SIZE, max_elem, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
         /* Loop, while sequences left to process */
@@ -1477,9 +1496,17 @@ H5S_select_iterate(void *buf, const H5T_t *type, const H5S_t *space,
     ret_value = user_ret;
 
 done:
+    /* Release resources, if allocated */
+    if(len)
+        len = H5FL_SEQ_FREE(size_t, len);
+    if(off)
+        off = H5FL_SEQ_FREE(hsize_t, off);
+
     /* Release selection iterator */
-    if(iter_init && H5S_SELECT_ITER_RELEASE(&iter) < 0)
+    if(iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+    if(iter)
+        iter = H5FL_FREE(H5S_sel_iter_t, iter);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_iterate() */
@@ -1583,8 +1610,8 @@ H5S_get_select_type(const H5S_t *space)
 htri_t
 H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
 {
-    H5S_sel_iter_t iter_a;    /* Selection a iteration info */
-    H5S_sel_iter_t iter_b;    /* Selection b iteration info */
+    H5S_sel_iter_t *iter_a = NULL;  /* Selection a iteration info */
+    H5S_sel_iter_t *iter_b = NULL;  /* Selection b iteration info */
     hbool_t iter_a_init = 0;  /* Selection a iteration info has been initialized */
     hbool_t iter_b_init = 0;  /* Selection b iteration info has been initialized */
     htri_t ret_value = TRUE; /* Return value */
@@ -1729,15 +1756,21 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
             hsize_t off_b[H5O_LAYOUT_NDIMS];   /* Offset of selection b blocks */
             hbool_t first_block = TRUE;        /* Flag to indicate the first block */
 
+            /* Allocate the selection iterators */
+            if(NULL == (iter_a = H5FL_MALLOC(H5S_sel_iter_t)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
+            if(NULL == (iter_b = H5FL_MALLOC(H5S_sel_iter_t)))
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
+
             /* Initialize iterator for each dataspace selection
              * Use '0' for element size instead of actual element size to indicate
              * that the selection iterator shouldn't be "flattened", since we
              * aren't actually going to be doing I/O with the iterators.
              */
-            if(H5S_select_iter_init(&iter_a, space_a, (size_t)0) < 0)
+            if(H5S_select_iter_init(iter_a, space_a, (size_t)0) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator a")
             iter_a_init = 1;
-            if(H5S_select_iter_init(&iter_b, space_b, (size_t)0) < 0)
+            if(H5S_select_iter_init(iter_b, space_b, (size_t)0) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator b")
             iter_b_init = 1;
 
@@ -1748,9 +1781,9 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
                 htri_t status_a, status_b;      /* Status from next block checks */
 
                 /* Get the current block for each selection iterator */
-                if(H5S_SELECT_ITER_BLOCK(&iter_a, start_a, end_a) < 0)
+                if(H5S_SELECT_ITER_BLOCK(iter_a, start_a, end_a) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator block a")
-                if(H5S_SELECT_ITER_BLOCK(&iter_b, start_b, end_b) < 0)
+                if(H5S_SELECT_ITER_BLOCK(iter_b, start_b, end_b) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator block b")
 
                 space_a_dim = (int)space_a_rank - 1;
@@ -1821,10 +1854,10 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
                 } /* end else */
 
                 /* Check if we are able to advance to the next selection block */
-                if((status_a = H5S_SELECT_ITER_HAS_NEXT_BLOCK(&iter_a)) < 0)
+                if((status_a = H5S_SELECT_ITER_HAS_NEXT_BLOCK(iter_a)) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to check iterator block a")
 
-                if((status_b = H5S_SELECT_ITER_HAS_NEXT_BLOCK(&iter_b)) < 0)
+                if((status_b = H5S_SELECT_ITER_HAS_NEXT_BLOCK(iter_b)) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to check iterator block b")
 
                 /* Did we run out of blocks at the same time? */
@@ -1834,10 +1867,10 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
                     HGOTO_DONE(FALSE)
                 else {
                     /* Advance to next block in selection iterators */
-                    if(H5S_SELECT_ITER_NEXT_BLOCK(&iter_a) < 0)
+                    if(H5S_SELECT_ITER_NEXT_BLOCK(iter_a) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to advance to next iterator block a")
 
-                    if(H5S_SELECT_ITER_NEXT_BLOCK(&iter_b) < 0)
+                    if(H5S_SELECT_ITER_NEXT_BLOCK(iter_b) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTNEXT, FAIL, "unable to advance to next iterator block b")
                 } /* end else */
             } /* end while */
@@ -1845,12 +1878,14 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
     } /* end else */
 
 done:
-    if(iter_a_init)
-        if(H5S_SELECT_ITER_RELEASE(&iter_a) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator a")
-    if(iter_b_init)
-        if(H5S_SELECT_ITER_RELEASE(&iter_b) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator b")
+    if(iter_a_init && H5S_SELECT_ITER_RELEASE(iter_a) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator a")
+    if(iter_a)
+        iter_a = H5FL_FREE(H5S_sel_iter_t, iter_a);
+    if(iter_b_init && H5S_SELECT_ITER_RELEASE(iter_b) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator b")
+    if(iter_b)
+        iter_b = H5FL_FREE(H5S_sel_iter_t, iter_b);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_shape_same() */
@@ -2152,8 +2187,10 @@ done:
 herr_t
 H5S_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *_buf)
 {
-    H5S_sel_iter_t iter;        /* Selection iteration info */
+    H5S_sel_iter_t *iter = NULL; /* Selection iteration info */
     hbool_t iter_init = 0;      /* Selection iteration info has been initialized */
+    hsize_t *off = NULL;        /* Array to store sequence offsets */
+    size_t *len = NULL;         /* Array to store sequence lengths */
     hssize_t nelmts;            /* Number of elements in selection */
     size_t max_elem;            /* Total number of elements in selection */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -2166,8 +2203,12 @@ H5S_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *_b
     HDassert(space);
     HDassert(_buf);
 
+    /* Allocate the selection iterator */
+    if(NULL == (iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate selection iterator")
+
     /* Initialize iterator */
-    if(H5S_select_iter_init(&iter, space, fill_size) < 0)
+    if(H5S_select_iter_init(iter, space, fill_size) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
     iter_init = 1;	/* Selection iteration info has been initialized */
 
@@ -2178,16 +2219,20 @@ H5S_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *_b
     /* Compute the number of bytes to process */
     H5_CHECKED_ASSIGN(max_elem, size_t, nelmts, hssize_t);
 
+    /* Allocate the offset & length arrays */
+    if(NULL == (len = H5FL_SEQ_MALLOC(size_t, H5D_IO_VECTOR_SIZE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate length vector array")
+    if(NULL == (off = H5FL_SEQ_MALLOC(hsize_t, H5D_IO_VECTOR_SIZE)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate offset vector array")
+
     /* Loop, while elements left in selection */
     while(max_elem > 0) {
-        hsize_t off[H5D_IO_VECTOR_SIZE];          /* Array to store sequence offsets */
-        size_t len[H5D_IO_VECTOR_SIZE];           /* Array to store sequence lengths */
         size_t nseq;                /* Number of sequences generated */
         size_t curr_seq;            /* Current sequnce being worked on */
         size_t nelem;               /* Number of elements used in sequences */
 
         /* Get the sequences of bytes */
-        if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, (size_t)H5D_IO_VECTOR_SIZE, max_elem, &nseq, &nelem, off, len) < 0)
+        if(H5S_SELECT_GET_SEQ_LIST(space, 0, iter, (size_t)H5D_IO_VECTOR_SIZE, max_elem, &nseq, &nelem, off, len) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
         /* Loop over sequences */
@@ -2207,9 +2252,17 @@ H5S_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *_b
     } /* end while */
 
 done:
-    /* Release resouces */
-    if(iter_init && H5S_SELECT_ITER_RELEASE(&iter) < 0)
+    /* Release resources, if allocated */
+    if(len)
+        len = H5FL_SEQ_FREE(size_t, len);
+    if(off)
+        off = H5FL_SEQ_FREE(hsize_t, off);
+
+    /* Release selection iterator */
+    if(iter_init && H5S_SELECT_ITER_RELEASE(iter) < 0)
         HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+    if(iter)
+        iter = H5FL_FREE(H5S_sel_iter_t, iter);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5S_select_fill() */

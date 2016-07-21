@@ -18,9 +18,9 @@
 # See libtool versioning documentation online.
 # After making changes, run bin/reconfigure to update other configure related
 # files like Makefile.in.
-LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 224
+LT_VERS_INTERFACE = 1000
 LT_VERS_AGE = 0
+LT_VERS_REVISION = 0
 
 ## If the API changes *at all*, increment LT_VERS_INTERFACE and
 ## reset LT_VERS_REVISION to 0.
@@ -40,9 +40,34 @@ LT_VERS_AGE = 0
 ## Note that this versioning system doesn't attempt to handle
 ## the effects of the H5_V1_x_COMPAT flag.
 ##
-## Since the revision number is automatically incremented by
-## bin/h5vers, don't move LT_VERS_REVISION from the fourth line
-## without also editing the script!
+## Version numbers for wrapper shared library files.
+LT_CXX_VERS_INTERFACE = 1000
+LT_CXX_VERS_REVISION = 0
+LT_CXX_VERS_AGE = 0
+
+LT_F_VERS_INTERFACE = 1000
+LT_F_VERS_REVISION = 0
+LT_F_VERS_AGE = 0
+
+LT_HL_VERS_INTERFACE = 1000
+LT_HL_VERS_REVISION = 0
+LT_HL_VERS_AGE = 0
+
+LT_HL_CXX_VERS_INTERFACE = 1000
+LT_HL_CXX_VERS_REVISION = 0
+LT_HL_CXX_VERS_AGE = 0
+
+LT_HL_F_VERS_INTERFACE = 1000
+LT_HL_F_VERS_REVISION = 0
+LT_HL_F_VERS_AGE = 0
+
+LT_JAVA_VERS_INTERFACE = 1000
+LT_JAVA_VERS_REVISION = 0
+LT_JAVA_VERS_AGE = 0
+
+LT_TOOLS_VERS_INTERFACE = 1000
+LT_TOOLS_VERS_REVISION = 0
+LT_TOOLS_VERS_AGE = 0
 
 
 # Copyright by The HDF Group.

@@ -42,6 +42,7 @@
 
 /* Get the native key at a given index */
 #define H5B_NKEY(b, shared, idx)  ((b)->native + (shared)->nkey[(idx)])
+#define LEVEL_BITS	8 	/* # of bits for node level: 1 byte */
 
 
 /****************************/

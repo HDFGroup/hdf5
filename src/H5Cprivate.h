@@ -41,8 +41,8 @@
 /**************************/
 
 /* Cache configuration settings */
-#define H5C__MAX_NUM_TYPE_IDS	28
-#define H5C__PREFIX_LEN		32
+#define H5C__MAX_NUM_TYPE_IDS   28
+#define H5C__PREFIX_LEN         32
 
 /* This sanity checking constant was picked out of the air.  Increase
  * or decrease it if appropriate.  Its purposes is to detect corrupt
@@ -96,14 +96,6 @@
  */
 #define H5C__DEFAULT_MAX_CACHE_SIZE     ((size_t)(4 * 1024 * 1024))
 #define H5C__DEFAULT_MIN_CLEAN_SIZE     ((size_t)(2 * 1024 * 1024))
-
-/* Maximum height of flush dependency relationships between entries.  This is
- * currently tuned to the extensible array (H5EA) data structure, which only
- * requires 6 levels of dependency (i.e. heights 0-6) (actually, the extensible
- * array needs 4 levels, plus another 2 levels are needed: one for the layer
- * under the extensible array and one for the layer above it).
- */
-#define H5C__NUM_FLUSH_DEP_HEIGHTS            6
 
 /* Values for cache entry magic field */
 #define H5C__H5C_CACHE_ENTRY_T_MAGIC		0x005CAC0A
@@ -205,11 +197,17 @@
 #define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0080
 #define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0100
 #define H5C__READ_ONLY_FLAG			0x0200
-#define H5C__FREE_FILE_SPACE_FLAG		0x0800
-#define H5C__TAKE_OWNERSHIP_FLAG		0x1000
-#define H5C__FLUSH_LAST_FLAG			0x2000
-#define H5C__FLUSH_COLLECTIVELY_FLAG		0x4000
+#define H5C__FREE_FILE_SPACE_FLAG		0x0400
+#define H5C__TAKE_OWNERSHIP_FLAG		0x0800
+#define H5C__FLUSH_LAST_FLAG			0x1000
+#define H5C__FLUSH_COLLECTIVELY_FLAG		0x2000
+#define H5C__EVICT_ALLOW_LAST_PINS_FLAG         0x4000
 #define H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG     0x8000
+
+/* Definitions for cache "tag" property */
+#define H5C_TAG_NAME           "H5C_tag"
+#define H5C_TAG_SIZE           sizeof(H5C_tag_t)
+#define H5C_TAG_DEF            {(haddr_t)0, H5C_GLOBALITY_NONE}
 
 /* Debugging/sanity checking/statistics settings */
 #ifndef NDEBUG
@@ -226,6 +224,11 @@
 #define H5C_DO_TAGGING_SANITY_CHECKS	0
 #define H5C_DO_EXTREME_SANITY_CHECKS	0
 #endif /* NDEBUG */
+
+/* Cork actions: cork/uncork/get cork status of an object */
+#define H5C__SET_CORK                  0x1
+#define H5C__UNCORK                    0x2
+#define H5C__GET_CORKED                0x4
 
 /* Note: The memory sanity checks aren't going to work until I/O filters are
  *      changed to call a particular alloc/free routine for their buffers,
@@ -268,8 +271,20 @@
 /* Typedef for the main structure for the cache (defined in H5Cpkg.h) */
 typedef struct H5C_t H5C_t;
 
+/* Define enum for cache entry tag 'globality' value */
+typedef enum {
+    H5C_GLOBALITY_NONE=0, /* Non-global tag */
+    H5C_GLOBALITY_MINOR,  /* global, not flushed during single object flush */
+    H5C_GLOBALITY_MAJOR   /* global, needs flushed during single obect flush */
+} H5C_tag_globality_t;
 
-/***************************************************************************
+/* Cache entry tag structure */
+typedef struct H5C_tag_t {
+    haddr_t value;
+    H5C_tag_globality_t globality;
+} H5C_tag_t;
+
+/*
  *
  * Struct H5C_class_t
  *
@@ -1273,6 +1288,9 @@ typedef int H5C_ring_t;
  *		The name is not particularly descriptive, but is retained
  *		to avoid changes in existing code.
  *
+ * is_corked:	Boolean flag indicating whether the cache entry associated
+ *		with an object is corked or not corked.
+ *
  * is_dirty:	Boolean flag indicating whether the contents of the cache
  *		entry has been modified since the last time it was written
  *		to disk.
@@ -1448,33 +1466,29 @@ typedef int H5C_ring_t;
  *
  * Fields supporting the 'flush dependency' feature:
  *
- * Entries in the cache may have a 'flush dependency' on another entry in the
+ * Entries in the cache may have 'flush dependencies' on other entries in the
  * cache.  A flush dependency requires that all dirty child entries be flushed
  * to the file before a dirty parent entry (of those child entries) can be
  * flushed to the file.  This can be used by cache clients to create data
  * structures that allow Single-Writer/Multiple-Reader (SWMR) access for the
  * data structure.
  *
- * The leaf child entry will have a "height" of 0, with any parent entries
- * having a height of 1 greater than the maximum height of any of their child
- * entries (flush dependencies are allowed to create asymmetric trees of
- * relationships).
+ * flush_dep_parent:    Pointer to the array of flush dependency parent entries
+ *              for this entry.
  *
- * flush_dep_parent:	Pointer to the parent entry for an entry in a flush
- *		dependency relationship.
+ * flush_dep_nparents:  Number of flush dependency parent entries for this
+ *              entry, i.e. the number of valid elements in flush_dep_parent.
  *
- * child_flush_dep_height_rc:	An array of reference counts for child entries,
- *		where the number of children of each height is tracked.
+ * flush_dep_parent_nalloc: The number of allocated elements in
+ *              flush_dep_parent_nalloc.
  *
- * flush_dep_height:	The height of the entry, which is one greater than the
- *		maximum height of any of its child entries..
+ * flush_dep_nchildren: Number of flush dependency children for this entry.  If
+ *              this field is nonzero, then this entry must be pinned and
+ *              therefore cannot be evicted.
  *
- * pinned_from_client:	Whether the entry was pinned by an explicit pin request
- *		from a cache client.
- *
- * pinned_from_cache:	Whether the entry was pinned implicitly as a
- *		request of being a parent entry in a flush dependency
- *		relationship.
+ * flush_dep_ndirty_children: Number of flush dependency children that are
+ *              either dirty or have a nonzero flush_dep_ndirty_children.  If
+ *              this field is nonzero, then this entry cannot be flushed.
  *
  *
  * Fields supporting the hash table:
@@ -1596,6 +1610,8 @@ typedef struct H5C_cache_entry_t {
     hbool_t			image_up_to_date;
     const H5C_class_t	      *	type;
     haddr_t		        tag;
+    H5C_tag_globality_t		globality;
+    hbool_t			is_corked;
     hbool_t			is_dirty;
     hbool_t			dirtied;
     hbool_t			is_protected;
@@ -1617,9 +1633,11 @@ typedef struct H5C_cache_entry_t {
     H5C_ring_t                  ring;
 
     /* fields supporting the 'flush dependency' feature: */
-    struct H5C_cache_entry_t  *	flush_dep_parent;
-    uint64_t			child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
-    unsigned			flush_dep_height;
+    struct H5C_cache_entry_t ** flush_dep_parent;
+    unsigned                    flush_dep_nparents;
+    unsigned                    flush_dep_parent_nalloc;
+    unsigned                    flush_dep_nchildren;
+    unsigned                    flush_dep_ndirty_children;
     hbool_t			pinned_from_client;
     hbool_t			pinned_from_cache;
 
@@ -1951,6 +1969,12 @@ H5_DLL herr_t H5C_dest(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5C_expunge_entry(H5F_t *f, hid_t dxpl_id,
     const H5C_class_t *type, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag); 
+H5_DLL herr_t H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag);
+H5_DLL herr_t H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
+#if H5C_DO_TAGGING_SANITY_CHECKS
+herr_t H5C_verify_tag(int id, haddr_t tag, H5C_tag_globality_t globality);
+#endif
 H5_DLL herr_t H5C_flush_to_min_clean(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5C_get_cache_auto_resize_config(const H5C_t *cache_ptr,
     H5C_auto_size_ctl_t *config_ptr);
@@ -1960,7 +1984,7 @@ H5_DLL herr_t H5C_get_cache_size(H5C_t *cache_ptr, size_t *max_size_ptr,
 H5_DLL herr_t H5C_get_cache_hit_rate(H5C_t *cache_ptr, double *hit_rate_ptr);
 H5_DLL herr_t H5C_get_entry_status(const H5F_t *f, haddr_t addr,
     size_t *size_ptr, hbool_t *in_cache_ptr, hbool_t *is_dirty_ptr,
-    hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr,
+    hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr, hbool_t *is_corked_ptr,
     hbool_t *is_flush_dep_parent_ptr, hbool_t *is_flush_dep_child_ptr);
 H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictions_enabled_ptr);
 H5_DLL void * H5C_get_aux_ptr(const H5C_t *cache_ptr);
@@ -1992,7 +2016,9 @@ H5_DLL herr_t H5C_unprotect(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *thing,
 H5_DLL herr_t H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr,
     unsigned int tests);
 H5_DLL herr_t H5C_ignore_tags(H5C_t *cache_ptr);
-H5_DLL void H5C_retag_copied_metadata(H5C_t *cache_ptr, haddr_t metadata_tag);
+H5_DLL hbool_t H5C_get_ignore_tags(const H5C_t *cache_ptr);
+H5_DLL herr_t H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
+H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
 
 herr_t H5C__generate_image(const H5F_t *f, H5C_t * cache_ptr, H5C_cache_entry_t *entry_ptr, 
@@ -2008,14 +2034,6 @@ H5_DLL herr_t H5C_clear_coll_entries(H5C_t * cache_ptr, hbool_t partial);
 H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, int32_t ce_array_len,
     haddr_t *ce_array_ptr);
 #endif /* H5_HAVE_PARALLEL */
-
-#ifndef NDEBUG	/* debugging functions */
-H5_DLL herr_t H5C_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr,
-    void **entry_ptr_ptr);
-H5_DLL herr_t H5C_verify_entry_type(const H5F_t *f, haddr_t addr,
-    const H5C_class_t *expected_type, hbool_t *in_cache_ptr,
-    hbool_t *type_ok_ptr);
-#endif /* NDEBUG */
 
 #endif /* !_H5Cprivate_H */
 

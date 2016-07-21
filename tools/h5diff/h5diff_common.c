@@ -358,7 +358,7 @@ void parse_command_line(int argc,
  *
  *-------------------------------------------------------------------------
  */
-static int
+H5_ATTR_PURE static int
 check_n_input( const char *str )
 {
     unsigned i;

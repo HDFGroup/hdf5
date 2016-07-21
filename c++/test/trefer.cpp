@@ -144,19 +144,19 @@ test_reference_params(void)
 	/* Test parameters to H5Location::reference */
 	try {
 	    file1->reference(NULL, "/Group1/Dataset1");
-	} catch (ReferenceException E) {} // We expect this to fail
+	} catch (ReferenceException& E) {} // We expect this to fail
 	try {
 	    file1->reference(&wbuf[0], NULL);
-	} catch (ReferenceException E) {} // We expect this to fail
+	} catch (ReferenceException& E) {} // We expect this to fail
 	try {
 	    file1->reference(&wbuf[0], "");
-	} catch (ReferenceException E) {} // We expect this to fail
+	} catch (ReferenceException& E) {} // We expect this to fail
 	try {
 	    file1->reference(&wbuf[0], "/Group1/Dataset1", H5R_MAXTYPE);
-	} catch (ReferenceException E) {} // We expect this to fail
+	} catch (ReferenceException& E) {} // We expect this to fail
 	try {
 	    file1->reference(&wbuf[0], "/Group1/Dataset1", H5R_DATASET_REGION);
-	} catch (ReferenceException E) {} // We expect this to fail
+	} catch (ReferenceException& E) {} // We expect this to fail
 
 	// Close resources
 	dataset.close();
@@ -170,7 +170,8 @@ test_reference_params(void)
 
 	PASSED();
     } // end try
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_reference_param()",__LINE__,__FILE__,
 			E.getCFuncName(), E.getCDetailMsg());
     }
@@ -330,7 +331,7 @@ static void test_reference_obj(void)
 	try {
 	    H5std_string read_comment_tmp = group.getComment(NULL);
 	}
-	catch (Exception E) {} // We expect this to fail
+	catch (Exception& E) {} // We expect this to fail
 
 	// Close group
 	group.close();
@@ -361,7 +362,8 @@ static void test_reference_obj(void)
 
 	PASSED();
     } // end try
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_reference_obj()",__LINE__,__FILE__,
 			E.getCFuncName(), E.getCDetailMsg());
     }
@@ -489,7 +491,8 @@ test_reference_group(void)
 
 	PASSED();
     } // end try
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_reference_group()",__LINE__,__FILE__,
 			E.getCFuncName(), E.getCDetailMsg());
     }
@@ -780,7 +783,8 @@ test_reference_region_1D(void)
 
 	PASSED();
     } // end try
-    catch (Exception E) {
+    catch (Exception& E)
+    {
 	issue_fail_msg("test_reference_region_1D()",__LINE__,__FILE__,
 			E.getCFuncName(), E.getCDetailMsg());
     }

@@ -431,8 +431,6 @@ SUBROUTINE test_h5p_file_image(total_error)
   TYPE(C_PTR), DIMENSION(1:count) :: f_ptr1
   TYPE(C_PTR), DIMENSION(1:1) :: f_ptr2
 
-  INTEGER(HSIZE_T) :: sizeof_buffer
-
   ! Initialize file image buffer
   DO i = 1, count
      buffer(i) = i*10
@@ -520,7 +518,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   ! Write the data to external files directly
   DO i = 1, 4
      DO j = 1, 25
-        part(j) = (i-1)*25+(j-1)
+        part(j) = INT((i-1_size_t)*25_size_t+(j-1_size_t))
      ENDDO
      WRITE(ichr1,'(I1.1)') i
      filename = "extern_"//ichr1//"a.raw"
@@ -640,16 +638,13 @@ SUBROUTINE test_vds(total_error)
 
   INTEGER, INTENT(INOUT) :: total_error
 
-  INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(9)   !should map to INTEGER*4 on most modern processors
-  INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(18) !should map to INTEGER*8 on most modern processors
-
   CHARACTER(LEN=6), PARAMETER ::  VFILENAME="vds.h5"
   CHARACTER(LEN=3), PARAMETER :: DATASET="VDS"
-  INTEGER :: VDSDIM0
-  INTEGER, PARAMETER :: VDSDIM1 = 10
-  INTEGER, PARAMETER :: VDSDIM2 = 15 
+  INTEGER(hsize_t) :: VDSDIM0
+  INTEGER(hsize_t), PARAMETER :: VDSDIM1 = 10
+  INTEGER(hsize_t), PARAMETER :: VDSDIM2 = 15 
 
-  INTEGER :: DIM0
+  INTEGER(hsize_t) :: DIM0
   INTEGER, PARAMETER :: DIM0_1= 4  ! Initial size of the source datasets
   INTEGER, PARAMETER :: DIM1 = 10 
   INTEGER, PARAMETER :: DIM2 = 15 
@@ -663,7 +658,8 @@ SUBROUTINE test_vds(total_error)
   INTEGER(hid_t) :: vfile, file, src_space, mem_space, vspace, vdset, dset !Handles
   INTEGER(hid_t) :: dcpl, dapl
   INTEGER :: error
-  INTEGER(hsize_t), DIMENSION(1:3) :: vdsdims = (/4*DIM0_1, VDSDIM1, VDSDIM2/), &
+  INTEGER(hsize_t), DIMENSION(1:3) :: &
+       vdsdims = (/4_hsize_t*INT(DIM0_1,hsize_t), VDSDIM1, VDSDIM2/), &
                  vdsdims_max, &
                  dims = (/DIM0_1, DIM1, DIM2/), &
                  memdims = (/DIM0_1, DIM1, DIM2/), &
@@ -682,6 +678,7 @@ SUBROUTINE test_vds(total_error)
   INTEGER(hsize_t), DIMENSION(1:3,1:PLANE_STRIDE) :: start_correct
 
   INTEGER :: i, j
+  INTEGER(size_t) :: i_sz 
   INTEGER :: layout                     ! Storage layout
   INTEGER(size_t) :: num_map            ! Number of mappings 
   INTEGER(size_t) :: len                ! Length of the string also a RETURN value 
@@ -713,7 +710,7 @@ SUBROUTINE test_vds(total_error)
   VDSDIM0 = H5S_UNLIMITED_F
   DIM0 = H5S_UNLIMITED_F
   vdsdims_max = (/VDSDIM0, VDSDIM1, VDSDIM2/)
-  dims_max = (/DIM0, DIM1, DIM2/)
+  dims_max = (/INT(DIM0,hsize_t), INT(DIM1,hsize_t), INT(DIM2,hsize_t)/)
 
   !
   ! Create source files and datasets. 
@@ -951,8 +948,8 @@ SUBROUTINE test_vds(total_error)
   ! 
   ! Get mapping parameters for each mapping.
   !
-  DO i = 1, num_map
-     CALL H5Pget_virtual_vspace_f(dcpl, INT(i-1,size_t), vspace, error)
+  DO i_sz = 1, num_map
+     CALL H5Pget_virtual_vspace_f(dcpl, INT(i_sz-1,size_t), vspace, error)
      CALL check("H5Pget_virtual_vspace_f", error, total_error)
 
      CALL h5sget_select_type_f(vspace, s_type, error)
@@ -965,7 +962,7 @@ SUBROUTINE test_vds(total_error)
            CALL H5Sget_regular_hyperslab_f(vspace, start_out, stride_out, count_out, block_out, error)
            CALL check("H5Sget_regular_hyperslab_f", error, total_error)
            DO j = 1, 3
-              IF(start_out(j).NE.start_correct(j,i) .OR. &
+              IF(start_out(j).NE.start_correct(j,i_sz) .OR. &
                    stride_out(j).NE.stride(j).OR. &
                    count_out(j).NE.src_count(j))THEN
                  total_error = total_error + 1
@@ -1032,7 +1029,7 @@ SUBROUTINE test_vds(total_error)
         total_error = total_error + 1
      ENDIF
 
-     CALL h5pget_virtual_srcspace_f(dcpl, INT(i-1,size_t), space_out, error)
+     CALL h5pget_virtual_srcspace_f(dcpl, i_sz - 1_size_t, space_out, error)
      CALL check("H5Pget_virtual_srcspace_f", error, total_error)
 
      CALL h5sget_select_type_f(space_out, type1, error)

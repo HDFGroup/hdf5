@@ -110,7 +110,7 @@ Comment out tests that are not done yet */
 	AddTest("enum", test_enum, cleanup_enum,  "Enum Data Types", NULL);
 */
     }
-    catch (Exception E)
+    catch (Exception& E)
     {
         issue_fail_msg("Tests failed", __LINE__, __FILE__, E.getCDetailMsg());
     }
@@ -131,6 +131,9 @@ Comment out tests that are not done yet */
     /* Clean up test files, if allowed */
     if (GetTestCleanup() && !getenv("HDF5_NOCLEANUP"))
         TestCleanup();
+
+    /* Release test infrastructure */
+    TestShutdown();
 
     return (GetTestNumErrs());
 }
