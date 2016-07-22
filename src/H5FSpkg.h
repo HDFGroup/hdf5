@@ -85,7 +85,7 @@
     H5FS_METADATA_PREFIX_SIZE                                                 \
                                                                               \
     /* Free space serialized sections specific fields */                      \
-    + H5F_SIZEOF_ADDR(f) /* Address of free space header for these sections */ \
+    + (unsigned)H5F_SIZEOF_ADDR(f) /* Address of free space header for these sections */ \
     )
 
 

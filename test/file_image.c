@@ -867,9 +867,11 @@ test_get_file_image(const char * test_banner,
         VERIFY(fd >= 0, "HDopen() failed.");
 
 	if(user) {
+            HDoff_t off;
+
             /* Position at userblock */
-            ret = HDlseek(fd, (off_t)USERBLOCK_SIZE, SEEK_SET);
-            VERIFY(ret >= 0, "HDlseek() failed.");
+            off = HDlseek(fd, (off_t)USERBLOCK_SIZE, SEEK_SET);
+            VERIFY(off >= 0, "HDlseek() failed.");
         }
 
         /* read the test file from disk into the buffer */

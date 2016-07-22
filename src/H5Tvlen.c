@@ -243,7 +243,7 @@ H5T__vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
                  * of an address in this file, plus 4 bytes for the size of a heap
                  * ID.  Memory size is different
                  */
-                dt->shared->size = 4 + H5F_SIZEOF_ADDR(f) + 4;
+                dt->shared->size = 4 + (size_t)H5F_SIZEOF_ADDR(f) + 4;
 
                 /* Set up the function pointers to access the VL information on disk */
                 /* VL sequences and VL strings are stored identically on disk, so use the same functions */
@@ -801,7 +801,7 @@ H5T_vlen_disk_getptr(void H5_ATTR_UNUSED *vl)
 static htri_t
 H5T_vlen_disk_isnull(const H5F_t *f, void *_vl)
 {
-    uint8_t *vl=(uint8_t *)_vl; /* Pointer to the disk VL information */
+    uint8_t *vl = (uint8_t *)_vl; /* Pointer to the disk VL information */
     haddr_t addr;               /* Sequence's heap address */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -810,12 +810,12 @@ H5T_vlen_disk_isnull(const H5F_t *f, void *_vl)
     HDassert(vl);
 
     /* Skip the sequence's length */
-    vl+=4;
+    vl += 4;
 
     /* Get the heap address */
-    H5F_addr_decode(f,(const uint8_t **)&vl,&addr);
+    H5F_addr_decode(f, (const uint8_t **)&vl, &addr);
 
-    FUNC_LEAVE_NOAPI(addr==0 ? TRUE : FALSE)
+    FUNC_LEAVE_NOAPI(addr == 0 ? TRUE : FALSE)
 }   /* end H5T_vlen_disk_isnull() */
 
 

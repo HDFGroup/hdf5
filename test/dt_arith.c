@@ -3094,8 +3094,8 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
             if (FLT_FLOAT==dst_type) {
                 hw_f = (float)(*((double*)aligned));
                 hw = (unsigned char*)&hw_f;
-                underflow = HDfabs(*((double*)aligned)) < FLT_MIN;
-                overflow = HDfabs(*((double*)aligned)) > FLT_MAX;
+                underflow = HDfabs(*((double*)aligned)) < (double)FLT_MIN;
+                overflow = HDfabs(*((double*)aligned)) > (double)FLT_MAX;
             } else if (FLT_DOUBLE==dst_type) {
                 hw_d = *((double*)aligned);
                 hw = (unsigned char*)&hw_d;
@@ -3109,12 +3109,12 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
         } else {
             HDmemcpy(aligned, saved+j*sizeof(long double), sizeof(long double));
             if (FLT_FLOAT==dst_type) {
-                hw_f = *((long double*)aligned);
+                hw_f = (float)*((long double*)aligned);
                 hw = (unsigned char*)&hw_f;
                 underflow = HDfabsl(*((long double*)aligned)) < FLT_MIN;
                 overflow = HDfabsl(*((long double*)aligned)) > FLT_MAX;
             } else if (FLT_DOUBLE==dst_type) {
-                hw_d = *((long double*)aligned);
+                hw_d = (double)*((long double*)aligned);
                 hw = (unsigned char*)&hw_d;
                 underflow = HDfabsl(*((long double*)aligned)) < DBL_MIN;
                 overflow = HDfabsl(*((long double*)aligned)) > DBL_MAX;
@@ -3227,15 +3227,15 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                 long double x;
                 HDmemcpy(&x, &buf[j*dst_size], sizeof(long double));
                 /* dst is largest float, no need to check underflow. */
-                check_mant[0] = HDfrexpl(x, check_expo+0);
-                check_mant[1] = HDfrexpl(hw_ld, check_expo+1);
+                check_mant[0] = (double)HDfrexpl(x, check_expo+0);
+                check_mant[1] = (double)HDfrexpl(hw_ld, check_expo+1);
 #endif
             }
             /* Special check for denormalized values */
             if(check_expo[0]<(-(int)dst_ebias) || check_expo[1]<(-(int)dst_ebias)) {
-                int expo_diff=check_expo[0]-check_expo[1];
-                int valid_bits=(int)((dst_ebias+dst_msize)+MIN(check_expo[0],check_expo[1]))-1;
-                double epsilon=1.0F;
+                int expo_diff = check_expo[0] - check_expo[1];
+                int valid_bits = (int)((dst_ebias + dst_msize) + (size_t)MIN(check_expo[0], check_expo[1])) - 1;
+                double epsilon = 1.0F;
 
                 /* Re-scale the mantissas based on any exponent difference */
                 if(expo_diff!=0)
@@ -3249,8 +3249,8 @@ test_conv_flt_1 (const char *name, int run_test, hid_t src, hid_t dst)
                     continue;
             } /* end if */
             else {
-                if (check_expo[0]==check_expo[1] &&
-                        HDfabs(check_mant[0]-check_mant[1])<FP_EPSILON)
+                if(check_expo[0] == check_expo[1] &&
+                        HDfabs(check_mant[0] - check_mant[1]) < (double)FP_EPSILON)
                     continue;
             } /* end else */
         }
@@ -4217,10 +4217,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
          */
 #if H5_SIZEOF_LONG_DOUBLE !=0
         if(dendian==H5T_ORDER_LE && dst_type==FLT_LDOUBLE) {
-            unsigned int q;
-            for(q=dst_nbits/8; q<dst_size; q++) {
-                buf[j*dst_size+q] = 0x00;
-            }
+            size_t q;
+
+            for(q = dst_nbits / 8; q < dst_size; q++)
+                buf[j * dst_size + q] = 0x00;
         }
 #endif
 

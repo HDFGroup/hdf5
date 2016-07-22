@@ -79,7 +79,6 @@ static hsize_t UC_2_DIMS[UC_2_N_SOURCES][RANK] = {
     {0, UC_2_D_HEIGHT, UC_2_WIDTH},
     {0, UC_2_E_HEIGHT, UC_2_WIDTH}
 };
-static hsize_t UC_2_VDS_DIMS[RANK]  = {0, UC_2_FULL_HEIGHT, UC_2_FULL_WIDTH};
 
 /* Maximum size of datasets, both source and VDS */
 static hsize_t UC_2_MAX_DIMS[UC_2_N_SOURCES][RANK] = {
@@ -88,36 +87,6 @@ static hsize_t UC_2_MAX_DIMS[UC_2_N_SOURCES][RANK] = {
     {UC_2_N_MAX_PLANES, UC_2_C_HEIGHT, UC_2_WIDTH},
     {UC_2_N_MAX_PLANES, UC_2_D_HEIGHT, UC_2_WIDTH},
     {UC_2_N_MAX_PLANES, UC_2_E_HEIGHT, UC_2_WIDTH}
-};
-static hsize_t UC_2_VDS_MAX_DIMS[RANK]  = {UC_2_N_MAX_PLANES, UC_2_FULL_HEIGHT, UC_2_FULL_WIDTH};
-
-/* Positions of source datasets in the VDS */
-static hsize_t UC_2_POSITIONS[UC_2_N_SOURCES][RANK] = {
-    /* A */ {0, 0,              0},
-    /* B */ {0, UC_2_A_HEIGHT,  0},
-    /* C */ {0, UC_2_AB_HEIGHT, 0},
-    /* D */ {0, 0,              UC_2_WIDTH},
-    /* E */ {0, UC_2_D_HEIGHT,  UC_2_WIDTH}
-};
-
-/* Planes */
-static hsize_t UC_2_PLANES[UC_2_N_SOURCES][RANK] = {
-    {1, UC_2_A_HEIGHT, UC_2_WIDTH},
-    {1, UC_2_B_HEIGHT, UC_2_WIDTH},
-    {1, UC_2_C_HEIGHT, UC_2_WIDTH},
-    {1, UC_2_D_HEIGHT, UC_2_WIDTH},
-    {1, UC_2_E_HEIGHT, UC_2_WIDTH}
-};
-static hsize_t UC_2_VDS_SUB_IMAGE[RANK] = {1, UC_2_FULL_HEIGHT, UC_2_WIDTH};
-static hsize_t UC_2_VDS_PLANE[RANK]     = {1, UC_2_FULL_HEIGHT, UC_2_FULL_WIDTH};
-
-/* Chunk dimensions */
-static hsize_t UC_2_CHUNK_DIMS[UC_2_N_SOURCES][RANK] = {
-    {UC_2_N_PLANES_IN_SERIES, UC_2_A_HEIGHT, UC_2_WIDTH},
-    {UC_2_N_PLANES_IN_SERIES, UC_2_B_HEIGHT, UC_2_WIDTH},
-    {UC_2_N_PLANES_IN_SERIES, UC_2_C_HEIGHT, UC_2_WIDTH},
-    {UC_2_N_PLANES_IN_SERIES, UC_2_D_HEIGHT, UC_2_WIDTH},
-    {UC_2_N_PLANES_IN_SERIES, UC_2_E_HEIGHT, UC_2_WIDTH}
 };
 
 /* File names for source datasets */
@@ -136,16 +105,6 @@ static char UC_2_FILE_NAMES[UC_2_N_SOURCES][NAME_LEN] = {
 #define UC_2_SOURCE_DSET_NAME   "source_dset"
 #define UC_2_SOURCE_DSET_PATH   "/source_dset"
 #define UC_2_VDS_DSET_NAME      "vds_dset"
-
-/* Fill values */
-static int UC_2_FILL_VALUES[UC_2_N_SOURCES] = {
-    -1,
-    -2,
-    -3,
-    -4,
-    -5
-};
-static int UC_2_VDS_FILL_VALUE      = -9;
 
 #endif /* UC_2_H */
 

@@ -551,18 +551,18 @@ test_h5s_zero_dim(void)
     MESSAGE(5, ("Testing Dataspace with zero dimension size\n"));
 
     /* Initialize the data */
-    for(i=0; i<SPACE1_DIM2; i++)
-        for(j=0; j<SPACE1_DIM3; j++) {
-            wdata[i][j] = i + j;
+    for(i = 0; i < SPACE1_DIM2; i++)
+        for(j = 0; j < SPACE1_DIM3; j++) {
+            wdata[i][j] = (int)(i + j);
             rdata[i][j] = 7;
-            wdata_short[i][j] = i + j;
+            wdata_short[i][j] = (short)(i + j);
             rdata_short[i][j] = 7;
         }
 
-    for(i=0; i<SPACE1_DIM1; i++)
-        for(j=0; j<SPACE1_DIM2; j++)
-            for(k=0; k<SPACE1_DIM3; k++)
-                wdata_real[i][j][k] = i + j + k;
+    for(i = 0; i < SPACE1_DIM1; i++)
+        for(j = 0; j < SPACE1_DIM2; j++)
+            for(k = 0; k < SPACE1_DIM3; k++)
+                wdata_real[i][j][k] = (int)(i + j + k);
 
     /* Test with different space allocation times */
     for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
@@ -1647,7 +1647,7 @@ test_h5s_chunk(void)
     /* Initialize float array */
     for(i = 0; i < 50000; i++)
         for(j = 0; j < 3; j++)
-            chunk_data_flt[i][j] = (float)((i + 1) * 2.5F - j * 100.3F);
+            chunk_data_flt[i][j] = (float)(i + 1) * 2.5F - (float)j * 100.3F;
 
     status = H5Dwrite(dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt);
     CHECK(status, FAIL, "H5Dwrite");
@@ -1683,7 +1683,7 @@ test_h5s_chunk(void)
     for(i=0; i<50000; i++) {
         for(j=0; j<3; j++) {
             /* Check if the two values are within 0.001% range. */
-            if(!H5_DBL_REL_EQUAL(chunk_data_dbl[i][j], chunk_data_flt[i][j], 0.00001F))
+            if(!H5_DBL_REL_EQUAL(chunk_data_dbl[i][j], (double)chunk_data_flt[i][j], (double)0.00001F))
                 TestErrPrintf("%u: chunk_data_dbl[%d][%d]=%e, chunk_data_flt[%d][%d]=%e\n", (unsigned)__LINE__, i, j, chunk_data_dbl[i][j], i, j, (double)chunk_data_flt[i][j]);
         } /* end for */
     } /* end for */

@@ -428,7 +428,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
 			break;
 
 		case 'm':
-			options->min_comp = HDatoi( opt_arg );
+			options->min_comp = HDstrtoull(opt_arg , NULL, 0);
 			if ((int) options->min_comp <= 0) {
 				error_msg("invalid minimum compress size <%s>\n", opt_arg);
 				h5tools_setstatus(EXIT_FAILURE);
@@ -515,7 +515,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
 			break;
 
 		case 'a':
-			options->alignment = HDatol( opt_arg );
+			options->alignment = HDstrtoull(opt_arg , NULL, 0);
 			if (options->alignment < 1) {
 				error_msg("invalid alignment size\n", opt_arg);
 				h5tools_setstatus(EXIT_FAILURE);
