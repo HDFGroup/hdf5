@@ -173,11 +173,11 @@ main(void)
 
     /* Results */
     if(nerrors) {
-        printf("***** %d External Link (HDF5_EXT_PREFIX) test%s FAILED! *****\n",
+        HDprintf("***** %d External Link (HDF5_EXT_PREFIX) test%s FAILED! *****\n",
                 nerrors, 1 == nerrors ? "" : "s");
-        exit(1);
+        HDexit(1);
     }
-    printf("All external Link (HDF5_EXT_PREFIX) tests passed.\n");
+    HDprintf("All external Link (HDF5_EXT_PREFIX) tests passed.\n");
 
     /* clean up tmp directory created by external link tests */
     HDrmdir(TMPDIR);
@@ -185,6 +185,6 @@ main(void)
     return 0;
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     return 1;
 }
