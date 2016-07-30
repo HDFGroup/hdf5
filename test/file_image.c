@@ -632,7 +632,8 @@ test_core(void)
     VERIFY(ret == 0, "fstat failed");
     size = (size_t)sb.st_size;
     file_image = (unsigned char *)HDmalloc(size);
-    HDread(fd, file_image, size);
+    if(HDread(fd, file_image, size) < 0)
+        FAIL_PUTS_ERROR("unable to read from file descriptor");
     ret = HDclose(fd);
     VERIFY(ret == 0, "close failed");
 
@@ -1318,7 +1319,7 @@ main(void)
 
     h5_reset();
 
-    printf("Testing File Image Functionality.\n");
+    HDprintf("Testing File Image Functionality.\n");
 
     errors += test_properties();
     errors += test_callbacks();
@@ -1379,12 +1380,12 @@ main(void)
     h5_restore_err();
 
     if(errors) { 
-        printf("***** %d File Image TEST%s FAILED! *****\n", 
+        HDprintf("***** %d File Image TEST%s FAILED! *****\n", 
             errors, errors > 1 ? "S" : ""); 
         return 1; 
     }
 
-    printf("All File Image tests passed.\n");
+    HDprintf("All File Image tests passed.\n");
     return 0;
 }
 
