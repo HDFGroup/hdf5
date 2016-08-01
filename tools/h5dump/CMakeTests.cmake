@@ -62,6 +62,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tcmpdintarray.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tcmpdints.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tcmpdintsize.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tcomp-1.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tcomp-2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tcomp-3.ddl
@@ -173,6 +174,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes3.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes4.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes5.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tvlenstr_array.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tvlstr.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tvms.ddl
       ${HDF5_TOOLS_DIR}/testfiles/twidedisplay.ddl
@@ -222,6 +224,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tcmpdintsize.h5
       ${HDF5_TOOLS_DIR}/testfiles/tcompound.h5
       ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tcompound_complex2.h5
       ${HDF5_TOOLS_DIR}/testfiles/tdatareg.h5
       ${HDF5_TOOLS_DIR}/testfiles/tdset.h5
       ${HDF5_TOOLS_DIR}/testfiles/tempty.h5
@@ -286,6 +289,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes3.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes4.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes5.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tvlenstr_array.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvms.h5
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.h5
@@ -850,6 +854,8 @@
           tcomp-4.out.err
           tcompact.out
           tcompact.out.err
+          tcompound_complex.out
+          tcompound_complex.out.err
           tcontents.out
           tcontents.out.err
           tcontiguos.out
@@ -1066,6 +1072,8 @@
           tvldtypes4.out.err
           tvldtypes5.out
           tvldtypes5.out.err
+          tvlenstr_array.out
+          tvlenstr_array.out.err
           tvlstr.out
           tvlstr.out.err
           tvms.out
@@ -1174,6 +1182,7 @@
   ADD_H5ERR_MASK_TEST (tcomp-3 0 "--enable-error-stack;-t;/#6632;-g;/group2;tcompound.h5")
   # test complicated compound datatype
   ADD_H5_TEST (tcomp-4 0 --enable-error-stack tcompound_complex.h5)
+  ADD_H5_TEST (tcompound_complex2 0 --enable-error-stack tcompound_complex2.h5)
   # tests for bitfields and opaque data types
   ADD_H5_TEST (tbitnopaque 0 --enable-error-stack tbitnopaque.h5)
 
@@ -1208,6 +1217,7 @@
 
   #test for file with variable length string data
   ADD_H5_TEST (tvlstr 0 --enable-error-stack tvlstr.h5)
+  ADD_H5_TEST (tvlenstr_array 0 --enable-error-stack tvlenstr_array.h5)
 
   # test for files with array data
   ADD_H5_TEST (tarray1 0 --enable-error-stack tarray1.h5)

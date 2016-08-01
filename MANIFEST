@@ -1538,6 +1538,8 @@
 ./tools/testfiles/tcompound.h5
 ./tools/testfiles/tcompound2.h5
 ./tools/testfiles/tcompound_complex.h5
+./tools/testfiles/tcompound_complex2.h5
+./tools/testfiles/tcompound_complex2.ddl
 ./tools/testfiles/tdatareg.h5
 ./tools/testfiles/tdatareg.ddl
 ./tools/testfiles/tdataregR.ddl
@@ -1707,6 +1709,8 @@
 ./tools/testfiles/tvldtypes4.h5
 ./tools/testfiles/tvldtypes5.ddl
 ./tools/testfiles/tvldtypes5.h5
+./tools/testfiles/tvlenstr_array.ddl
+./tools/testfiles/tvlenstr_array.h5
 ./tools/testfiles/tvlstr.h5
 ./tools/testfiles/tvlstr.ddl
 ./tools/testfiles/tvms.ddl
