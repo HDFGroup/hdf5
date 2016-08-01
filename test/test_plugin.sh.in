@@ -78,12 +78,6 @@ if [ $? != 0 ]; then
     exit $EXIT_FAILURE
 fi
 
-$CP $PLUGIN_LIB4 $PLUGIN_LIBDIR2
-if [ $? != 0 ]; then
-    echo "Failed to copy plugin library ($PLUGIN_LIB4) for test."
-    exit $EXIT_FAILURE
-fi
-
 # setup plugin path
 ENVCMD="env HDF5_PLUGIN_PATH=${PLUGIN_LIBDIR1}:${PLUGIN_LIBDIR2}"
 
