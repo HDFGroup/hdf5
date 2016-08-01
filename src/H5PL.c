@@ -70,6 +70,9 @@
 /* Clear error - nothing to do */
 #define H5PL_CLR_ERROR
 
+/* maximum size for expanding env vars */
+#define EXPAND_BUFFER_SIZE 32767
+
 typedef const void *(__cdecl *H5PL_get_plugin_info_t)(void);
 
 /* Unix support */
@@ -419,6 +422,19 @@ H5PL__init_path_table(void)
     if(NULL == dl_path)
         HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, FAIL, "can't allocate memory for path")
 
+#ifdef H5_HAVE_WIN32_API
+    else { /* Expand windows env var*/
+        long bufCharCount;
+        char tempbuf[EXPAND_BUFFER_SIZE];
+        if((bufCharCount = ExpandEnvironmentStrings(dl_path, tempbuf, EXPAND_BUFFER_SIZE)) > EXPAND_BUFFER_SIZE)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_NOSPACE, FAIL, "expanded path is too long")
+        if(bufCharCount == 0)
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "failed to expand path")
+        dl_path = (char *)H5MM_xfree(dl_path);
+        dl_path = H5MM_strdup(tempbuf);
+    }
+#endif H5_HAVE_WIN32_API
+
     /* Put paths in the path table.  They are separated by ":" */
     dir = HDstrtok(dl_path, H5PL_PATH_SEPARATOR);
     while(dir) {
@@ -471,7 +487,7 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
 
     /* Open the directory */  
     if(!(dirp = HDopendir(dir)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory: %s", dir)
 
     /* Iterates through all entries in the directory to find the right plugin library */
     while(NULL != (dp = HDreaddir(dirp))) {
@@ -507,13 +523,9 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
             /* Attempt to open the dynamic library as a filter library */
             if((found_in_dir = H5PL__open(plugin_type, pathname, type_id, info)) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
-            if(found_in_dir) {
-                /* Indicate success */
-                HGOTO_DONE(TRUE)
-            } /* end if */
-            else
-                HDassert(pathname);
-                pathname = (char *)H5MM_xfree(pathname);
+            if(found_in_dir)
+                HGOTO_DONE(TRUE)    /* Indicate success */
+            pathname = (char *)H5MM_xfree(pathname);
         } /* end if */
     } /* end while */
 
@@ -521,8 +533,7 @@ done:
     if(dirp) 
         if(HDclosedir(dirp) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close directory: %s", HDstrerror(errno))
-    if(pathname) 
-        pathname = (char *)H5MM_xfree(pathname);
+    pathname = (char *)H5MM_xfree(pathname);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__find() */
@@ -563,13 +574,9 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
 
             if((found_in_dir = H5PL__open(plugin_type, pathname, type_id, info)) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
-            if(found_in_dir) {
-                /* Indicate success */
-                HGOTO_DONE(TRUE)
-            } /* end if */
-            else
-                HDassert(pathname);
-                pathname = (char *)H5MM_xfree(pathname);
+            if(found_in_dir)
+                HGOTO_DONE(TRUE)    /* Indicate success */
+            pathname = (char *)H5MM_xfree(pathname);
         } /* end if */
     } while(FindNextFileA(hFind, &fdFile)); /* Find the next file. */
 
