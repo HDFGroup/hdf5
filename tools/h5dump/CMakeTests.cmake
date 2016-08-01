@@ -329,14 +329,7 @@
   #
   foreach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
     get_filename_component (fname "${tst_h5_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/std/${fname}")
-    #message (STATUS " Copying ${tst_h5_file}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${tst_h5_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${tst_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
   endforeach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
 
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
@@ -344,60 +337,32 @@
       file (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file} TEST_STREAM)
       file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file} "${TEST_STREAM}")
     else (WIN32)
-      add_custom_command (
-          TARGET     h5dump
-          POST_BUILD
-          COMMAND    ${CMAKE_COMMAND}
-          ARGS       -E copy_if_different  ${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file}  ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}
-      )
+      HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
     endif (WIN32)
   endforeach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
 
   foreach (tst_other_file ${HDF5_REFERENCE_FILES})
     get_filename_component (fname "${tst_other_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/std/${fname}")
-    #message (STATUS " Copying ${tst_other_file}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${tst_other_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
   endforeach (tst_other_file ${HDF5_REFERENCE_FILES})
 
   foreach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
     get_filename_component (fname "${tst_error_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/std/${fname}")
-    #message (STATUS " Copying ${tst_error_file}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${tst_error_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${tst_error_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
   endforeach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
 
   # --------------------------------------------------------------------
   # Special file handling
   # --------------------------------------------------------------------
-  add_custom_command (
-      TARGET     h5dump
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different  ${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbin1.ddl  ${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl
-  )
+  HDFTEST_COPY_FILE("${HDF5_TOOLS_SOURCE_DIR}/testfiles/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
 
   if (WIN32)
     file (READ ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp TEST_STREAM)
     file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
   else (WIN32)
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different  ${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp  ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
   endif (WIN32)
+  add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
 
 ##############################################################################
 ##############################################################################

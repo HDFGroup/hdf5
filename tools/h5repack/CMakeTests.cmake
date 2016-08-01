@@ -125,15 +125,9 @@
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     get_filename_component(fname "${h5_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
-    #message (STATUS " Copying ${h5_file}")
-    add_custom_command (
-        TARGET     h5repack
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${h5_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5repack_files")
   endforeach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+  add_custom_target(h5repack_files ALL COMMENT "Copying files needed by h5repack tests" DEPENDS ${h5repack_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -148,7 +142,7 @@
       set_tests_properties (H5REPACK-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       set (last_test "H5REPACK-${testname}")
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -187,7 +181,7 @@
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_OLD-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       add_test (
           NAME H5REPACK_OLD-${testname}_DFF
           COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
@@ -211,7 +205,7 @@
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       add_test (
           NAME H5REPACK-${testname}_DFF
           COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
@@ -250,7 +244,7 @@
       endif (HDF5_ENABLE_USING_MEMCHECKER)
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
     endif ("${testtype}" STREQUAL "SKIP")
   ENDMACRO (ADD_H5_CMP_TEST)
 
@@ -284,7 +278,7 @@
       endif (HDF5_ENABLE_USING_MEMCHECKER)
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_MASK-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
     endif ("${testtype}" STREQUAL "SKIP")
   ENDMACRO (ADD_H5_MASK_TEST)
 
@@ -303,7 +297,7 @@
           COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile})
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_DMP-h5dump-${testname}
@@ -337,7 +331,7 @@
         )
         if (NOT "${last_test}" STREQUAL "")
           set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname} PROPERTIES DEPENDS ${last_test})
-        endif (NOT "${last_test}" STREQUAL "")
+        endif ()
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}_DFF
             COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
@@ -360,13 +354,13 @@
         else ("${resultcode}" STREQUAL "0")
           if ("${testfilter}" STREQUAL "CHUNKED")
             set (nottestfilter "(CONTIGUOUS|COMPACT)")
-          endif ("${testfilter}" STREQUAL "CHUNKED")
+          endif ()
           if ("${testfilter}" STREQUAL "CONTIGUOUS")
             set (nottestfilter "(CHUNK|COMPACT)")
-          endif ("${testfilter}" STREQUAL "CONTIGUOUS")
+          endif ()
           if ("${testfilter}" STREQUAL "COMPACT")
             set (nottestfilter "(CONTIGUOUS|CHUNK)")
-          endif ("${testfilter}" STREQUAL "COMPACT")
+          endif ()
           add_test (
               NAME H5REPACK_VERIFY_LAYOUT-${testname}_DMP
               COMMAND "${CMAKE_COMMAND}"
@@ -402,7 +396,7 @@
         set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
         if (NOT "${last_test}" STREQUAL "")
           set_tests_properties (H5REPACK_VERIFY_LAYOUT_VDS-${testname} PROPERTIES DEPENDS ${last_test})
-        endif (NOT "${last_test}" STREQUAL "")
+        endif ()
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT_VDS-${testname}_DMP
             COMMAND "${CMAKE_COMMAND}"
@@ -427,7 +421,7 @@
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_META-${testname}_N PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       add_test (
           NAME H5REPACK_META-${testname}_M
           COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5

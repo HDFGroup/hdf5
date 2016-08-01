@@ -63,26 +63,13 @@
   add_custom_target(h5fc-files ALL COMMENT "Copying files needed by h5fc tests")
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
-    set (ddldest "${PROJECT_BINARY_DIR}/testfiles/${ddl_file}")
-    #message (STATUS " Translating ${ddl_file}")
-    add_custom_command (
-        TARGET     h5fc-files
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5FC_SOURCE_DIR}/testfiles/${ddl_file} ${ddldest}
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_H5FC_SOURCE_DIR}/testfiles/${ddl_file}" "${PROJECT_BINARY_DIR}/testfiles/${ddl_file}" "h5fc_files")
   endforeach (ddl_file ${HDF5_REFERENCE_FILES})
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/${h5_file}")
-    #message (STATUS " Copying ${h5_file}")
-    add_custom_command (
-        TARGET     h5fc-files
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_H5FC_SOURCE_DIR}/testfiles/${h5_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_H5FC_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5fc_files")
   endforeach (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  add_custom_target(h5fc_files ALL COMMENT "Copying files needed by h5fc tests" DEPENDS ${h5fc_files_list})
 
 ##############################################################################
 ##############################################################################
