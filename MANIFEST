@@ -894,6 +894,7 @@
 ./test/dynlib1.c
 ./test/dynlib2.c
 ./test/dynlib3.c
+./test/dynlib4.c
 ./test/earray.c
 ./test/efc.c
 ./test/enc_dec_plist.c
