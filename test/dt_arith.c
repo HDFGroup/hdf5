@@ -20,8 +20,6 @@
  * Purpose:     Tests the data type interface (H5T)
  */
 
-#include <math.h>
-#include <time.h>
 #include "h5test.h"
 
 /* Number of elements in each random test */

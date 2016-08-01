@@ -20,8 +20,6 @@
  * Purpose:     Tests the datatype interface (H5T)
  */
 
-#include <math.h>
-#include <time.h>
 #include "h5test.h"
 #include "H5srcdir.h"
 #include "H5Iprivate.h"     /* For checking that datatype id's don't leak */

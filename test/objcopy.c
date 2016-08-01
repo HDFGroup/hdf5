@@ -20,7 +20,6 @@
  * Purpose:	Test H5Ocopy().
  */
 
-#include <time.h>
 #include "h5test.h"
 #include "H5srcdir.h"
 
