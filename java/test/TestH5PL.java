@@ -70,12 +70,12 @@ public class TestH5PL {
 
     @Test
     public void TestH5PLdlopen() {
+        long file_id = -1;
+        long filespace_id = -1;
+        long dataset_id = -1;
+        long fapl_id = -1;
+        long dcpl_id = -1;
         try {
-            long file_id = -1;
-            long filespace_id = -1;
-            long dataset_id = -1;
-            long fapl_id = -1;
-            long dcpl_id = -1;
             int[]  cd_values = {9, 0, 0, 0};
             int[] libversion = {0, 0, 0};
             long[] dims = { DIM_X, DIM_Y };
@@ -163,21 +163,21 @@ public class TestH5PL {
                 e.printStackTrace();
                 fail("TestH5PLdlopen H5Dwrite:" + e);
             }
-            finally {
-                // End access to the dataset and release resources used by it.
-                if (dcpl_id >= 0)
-                    try {H5.H5Pclose_class(dcpl_id);} catch (Throwable err) {}
-                if (dataset_id >= 0)
-                    try {H5.H5Dclose(dataset_id);} catch (Throwable err) {}
-                if (filespace_id >= 0)
-                    try {H5.H5Sclose(filespace_id);} catch (Throwable err) {}
-                if (file_id >= 0)
-                    try {H5.H5Fclose(file_id);} catch (Throwable err) {}
-            }
         }
         catch (Throwable err) {
             err.printStackTrace();
             fail("TestH5PLdlopen " + err);
+        }
+        finally {
+            // End access to the dataset and release resources used by it.
+            if (dcpl_id >= 0)
+                try {H5.H5Pclose_class(dcpl_id);} catch (Throwable err) {}
+            if (dataset_id >= 0)
+                try {H5.H5Dclose(dataset_id);} catch (Throwable err) {}
+            if (filespace_id >= 0)
+                try {H5.H5Sclose(filespace_id);} catch (Throwable err) {}
+            if (file_id >= 0)
+                try {H5.H5Fclose(file_id);} catch (Throwable err) {}
         }
     }
 }
