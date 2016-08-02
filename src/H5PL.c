@@ -72,6 +72,9 @@
 /* Clear error - nothing to do */
 #define H5PL_CLR_ERROR
 
+/* maximum size for expanding env vars */
+#define EXPAND_BUFFER_SIZE 32767
+
 typedef const void *(__cdecl *H5PL_get_plugin_info_t)(void);
 
 /* Unix support */
@@ -223,7 +226,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5PLset_loading_state() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function: H5PLget_loading_state
  *
