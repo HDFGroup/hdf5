@@ -68,7 +68,7 @@ public class TestH5PL {
         }
     }
 
-    @Test
+    @Ignore
     public void TestH5PLdlopen() {
         long file_id = -1;
         long filespace_id = -1;
