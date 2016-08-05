@@ -72,7 +72,8 @@ CONTAINS
     IMPLICIT NONE
     TYPE(comp_datatype), INTENT(in) :: a
 
-    H5_SIZEOF_CMPD = C_SIZEOF(a)
+   !H5_SIZEOF_CMPD = C_SIZEOF(a)
+    H5_SIZEOF_CMPD = storage_size(a, c_size_t)/storage_size(c_char_'a',c_size_t)
 
   END FUNCTION H5_SIZEOF_CMPD
 
