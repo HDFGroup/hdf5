@@ -285,6 +285,7 @@ void io_mode_confusion(void);
 void rr_obj_hdr_flush_confusion(void);
 void rr_obj_hdr_flush_confusion_reader(MPI_Comm comm);
 void rr_obj_hdr_flush_confusion_writer(MPI_Comm comm);
+void chunk_align_bug_1(void);
 void lower_dim_size_comp_test(void);
 void link_chunk_collective_io_test(void);
 void contig_hyperslab_dr_pio_test(ShapeSameTestMethods sstest_type);
