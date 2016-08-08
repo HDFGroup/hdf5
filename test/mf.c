@@ -6016,7 +6016,7 @@ test_mf_bug1(hid_t fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Create the file to work on */
-    if((file = H5Fcreate(NULL/*filename*/, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
 
     /* Get file's VFD handle */
