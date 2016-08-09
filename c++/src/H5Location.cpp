@@ -74,8 +74,9 @@ H5Location::H5Location() : IdComponent() {}
 // been moved to the sub-classes.  It will be removed in 1.10 release.  If its
 // removal does not raise any problems in 1.10, it will be removed from 1.8 in
 // subsequent releases.
+// Removed in 1.10.1 - Aug 2016
 //--------------------------------------------------------------------------
-H5Location::H5Location(const hid_t object_id) : IdComponent() {}
+// H5Location::H5Location(const hid_t object_id) : IdComponent() {}
 
 //--------------------------------------------------------------------------
 // Function:	H5Location copy constructor
@@ -563,8 +564,8 @@ H5std_string H5Location::getComment(const char* name, size_t buf_size) const
 	HDmemset(comment_C, 0, tmp_len+1); // clear buffer
 
 	// Used overloaded function
-	ssize_t comment_len = getComment(name, tmp_len+1, comment_C);
-	if (comment_len < 0)
+	ssize_t temp_len = getComment(name, tmp_len+1, comment_C);
+	if (temp_len < 0)
 	{
 	    delete []comment_C;
 	    throw LocationException("H5Location::getComment", "H5Oget_comment_by_name failed");
