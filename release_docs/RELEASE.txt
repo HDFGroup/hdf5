@@ -279,7 +279,11 @@ Bug Fixes since HDF5-1.8.16
 
     Parallel Library
     ----------------
-    - None
+    - Fixed a bug that could occur when allocating a chunked dataset in parallel
+      with an alignment set and an alignment threshold greater than the chunk
+      size but less than or equal to the raw data aggregator size.
+
+      (NAF, 2016/08/11, HDFFV-9969)
 
     Performance
     -------------
