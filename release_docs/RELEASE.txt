@@ -255,6 +255,10 @@ Bug Fixes since HDF5-1.8.16
 
     Library
     -------
+    - Fixed a bug that could occur when using H5Pset_alignment.
+
+      (NAF, 2016/08/11, HDFFV-9948)
+
     - Fixed a memory bug that could occur when a message was improperly marked
       as sharable on disk.
 
