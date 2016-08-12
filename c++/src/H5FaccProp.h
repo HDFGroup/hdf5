@@ -112,10 +112,10 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	void getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const;
 
 	// Sets the degree for the file close behavior.
-	void setFcloseDegree(H5F_close_degree_t degree);
+	void setFcloseDegree(H5F_close_degree_t degree) const;
 
 	// Returns the degree for the file close behavior.
-	H5F_close_degree_t getFcloseDegree();
+	H5F_close_degree_t getFcloseDegree() const;
 
 	// Sets garbage collecting references flag.
 	void setGcReferences( unsigned gc_ref = 0 ) const;

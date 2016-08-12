@@ -500,6 +500,26 @@ void CommonFG::mount(const char* name, const H5File& child, const PropList& plis
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::mount
+// Purpose	This is an overloaded member function, kept for backward
+//		compatibility.  It differs from the above function in that it
+//		misses const's.  This wrapper will be removed in future release.
+// Param	name  - IN: Name of the group
+// Param	child - IN: File to mount
+// Param	plist - IN: Property list to use
+// Exception	H5::FileIException or H5::GroupIException
+// Programmer	Binh-Minh Ribler - 2000
+// Modification
+//		Modified to call its replacement. -BMR, 2014/04/16
+//		Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
+//		Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
+//--------------------------------------------------------------------------
+//void CommonFG::mount(const char* name, H5File& child, PropList& plist) const
+//{
+//   mount(name, child, plist);
+//}
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::mount
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It takes an \c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
@@ -510,6 +530,22 @@ void CommonFG::mount(const H5std_string& name, const H5File& child, const PropLi
 {
    mount(name.c_str(), child, plist);
 }
+
+//--------------------------------------------------------------------------
+// Function:	CommonFG::mount
+// Purpose	This is an overloaded member function, kept for backward
+//		compatibility.  It differs from the above function in that it
+//		misses const's.  This wrapper will be removed in future release.
+// Programmer	Binh-Minh Ribler - 2014
+// Modification
+//		Modified to call its replacement. -BMR, 2014/04/16
+//		Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
+//		Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
+//--------------------------------------------------------------------------
+//void CommonFG::mount(const H5std_string& name, H5File& child, PropList& plist) const
+//{
+//   mount(name.c_str(), child, plist);
+//}
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::unmount

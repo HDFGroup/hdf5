@@ -80,10 +80,9 @@ ArrayType::ArrayType(const DataType& base_type, int ndims, const hsize_t* dims) 
 ///\param	rhs - IN: Reference to the existing array datatype
 ///\return	Reference to ArrayType instance
 ///\exception	H5::DataTypeIException
-///		std::bad_alloc
 // Description
 // 		Closes the id on the lhs object first with setId, then copies
-//		each data member from the rhs object.
+//		each data member from the rhs object. (Issue HDFFV-9562)
 // Programmer	Binh-Minh Ribler - Mar 2016
 // Modification
 //--------------------------------------------------------------------------
@@ -120,24 +119,7 @@ int ArrayType::getArrayNDims() const
     int ndims = H5Tget_array_ndims(id);
     if (ndims < 0)
     {
-	throw DataTypeIException("ArrayType::setArrayInfo", "H5Tget_array_ndims failed");
-    }
-
-    return(ndims);
-}
-//---------------------------- Deprecated ----------------------------------
-// Function:	ArrayType::getArrayNDims
-// This non-const version of the above method is here for compatibility
-// purposes and may be removed in the future.
-// -BMR, Apr 2016
-//--------------------------------------------------------------------------
-int ArrayType::getArrayNDims()
-{
-    // Get the rank of the array type specified by id from the C API
-    int ndims = H5Tget_array_ndims(id);
-    if (ndims < 0)
-    {
-	throw DataTypeIException("ArrayType::setArrayInfo", "H5Tget_array_ndims failed");
+	throw DataTypeIException("ArrayType::getArrayNDims", "H5Tget_array_ndims failed");
     }
 
     return(ndims);
@@ -159,23 +141,7 @@ int ArrayType::getArrayDims(hsize_t* dims) const
     // Get the dimensions
     int ndims = H5Tget_array_dims2(id, dims);
     if (ndims < 0)
-	throw DataTypeIException("ArrayType::setArrayInfo", "H5Tget_array_dims2 failed");
-
-    // Return the number of dimensions
-    return(ndims);
-}
-//---------------------------- Deprecated ----------------------------------
-// Function:	ArrayType::getArrayDims
-// This non-const version of the above method is here for compatibility
-// purposes and may be removed in the future.
-// -BMR, Apr 2016
-//--------------------------------------------------------------------------
-int ArrayType::getArrayDims(hsize_t* dims)
-{
-    // Get the dimensions
-    int ndims = H5Tget_array_dims2(id, dims);
-    if (ndims < 0)
-	throw DataTypeIException("ArrayType::setArrayInfo", "H5Tget_array_dims2 failed");
+	throw DataTypeIException("ArrayType::getArrayDims", "H5Tget_array_dims2 failed");
 
     // Return the number of dimensions
     return(ndims);

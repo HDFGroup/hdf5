@@ -38,13 +38,13 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
 
 	// Queries whether all the filters set in this property list are
 	// available currently.
-	bool allFiltersAvail();
+	bool allFiltersAvail() const;
 
 	// Get space allocation time for this property.
-	H5D_alloc_time_t getAllocTime();
+	H5D_alloc_time_t getAllocTime() const;
 
 	// Set space allocation time for dataset during creation.
-	void setAllocTime(H5D_alloc_time_t alloc_time);
+	void setAllocTime(H5D_alloc_time_t alloc_time) const;
 
 	// Retrieves the size of the chunks used to store a chunked layout dataset.
 	int getChunk( int max_ndims, hsize_t* dim ) const;
@@ -59,10 +59,10 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
 	int getExternalCount() const;
 
 	// Gets fill value writing time.
-	H5D_fill_time_t getFillTime();
+	H5D_fill_time_t getFillTime() const;
 
 	// Sets fill value writing time for dataset.
-	void setFillTime(H5D_fill_time_t fill_time);
+	void setFillTime(H5D_fill_time_t fill_time) const;
 
 	// Retrieves a dataset fill value.
 	void getFillValue( const DataType& fvalue_type, void* value ) const;
@@ -88,7 +88,7 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
 	int getNfilters() const;
 
 	// Checks if fill value has been defined for this property.
-	H5D_fill_value_t isFillValueDefined();
+	H5D_fill_value_t isFillValueDefined() const;
 
 	// Modifies the specified filter.
 	void modifyFilter( H5Z_filter_t filter_id, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[] ) const;

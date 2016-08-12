@@ -48,7 +48,7 @@ class H5_DLLCPP H5Object : public H5Location {
    public:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Gets the name of this HDF5 object, i.e., Group, DataSet, or
-	// DataType.
+	// DataType.  These should have const but are retiring anyway.
 	ssize_t getObjName(char *obj_name, size_t buf_size = 0) const;
 	ssize_t getObjName(H5std_string& obj_name, size_t len = 0) const;
 	H5std_string getObjName() const;

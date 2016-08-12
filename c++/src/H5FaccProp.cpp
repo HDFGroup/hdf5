@@ -617,7 +617,7 @@ void FileAccPropList::getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rd
 ///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void FileAccPropList::setFcloseDegree(H5F_close_degree_t degree)
+void FileAccPropList::setFcloseDegree(H5F_close_degree_t degree) const
 {
    herr_t ret_value = H5Pset_fclose_degree(id, degree);
    if( ret_value < 0 )
@@ -633,7 +633,7 @@ void FileAccPropList::setFcloseDegree(H5F_close_degree_t degree)
 ///\exception	H5::PropListIException
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-H5F_close_degree_t FileAccPropList::getFcloseDegree()
+H5F_close_degree_t FileAccPropList::getFcloseDegree() const
 {
    H5F_close_degree_t degree;
    herr_t ret_value = H5Pget_fclose_degree(id, &degree);

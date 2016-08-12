@@ -63,9 +63,9 @@ class H5_DLLCPP DataType : public H5Object {
 	void commit(const H5Location& loc, const char* name);
 	void commit(const H5Location& loc, const H5std_string& name);
 	// These two overloaded functions are kept for backward compatibility
-	// only; they missed the const.
-	void commit(H5Location& loc, const char* name);
-	void commit(H5Location& loc, const H5std_string& name);
+	// only; they missed the const - removed from 1.8.18 and 1.10.1
+	//void commit(H5Location& loc, const char* name);
+	//void commit(H5Location& loc, const H5std_string& name);
 
 	// Determines whether this datatype is a named datatype or
 	// a transient datatype.
