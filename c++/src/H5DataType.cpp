@@ -313,12 +313,13 @@ void DataType::commit(const H5Location& loc, const char* name)
 // Programmer	Binh-Minh Ribler - Jan, 2007
 // Modification
 //		Planned for removal. -BMR, 2014/04/16
-//		Removed from documentation. -BMR, 2016/03/07
+//		Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
+//		Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
 //--------------------------------------------------------------------------
-void DataType::commit(H5Location& loc, const char* name)
-{
-   p_commit(loc.getId(), name);
-}
+//void DataType::commit(H5Location& loc, const char* name)
+//{
+//   p_commit(loc.getId(), name);
+//}
 
 //--------------------------------------------------------------------------
 // Function:	DataType::commit
@@ -343,12 +344,13 @@ void DataType::commit(const H5Location& loc, const H5std_string& name)
 // Programmer	Binh-Minh Ribler - Jan, 2007
 // Modification
 //		Planned for removal. -BMR, 2014/04/16
-//		Removed from documentation. -BMR, 2016/03/07
+//		Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
+//		Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
 //--------------------------------------------------------------------------
-void DataType::commit(H5Location& loc, const H5std_string& name)
-{
-   p_commit(loc.getId(), name.c_str());
-}
+//void DataType::commit(H5Location& loc, const H5std_string& name)
+//{
+//   p_commit(loc.getId(), name.c_str());
+//}
 
 //--------------------------------------------------------------------------
 // Function:	DataType::committed

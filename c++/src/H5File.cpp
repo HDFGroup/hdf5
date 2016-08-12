@@ -477,12 +477,13 @@ void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 // Programmer   Binh-Minh Ribler - May 2004
 // Modification
 //		Planned for removal. -BMR, 2014/04/16
-//		Removed from documentation. -BMR, 2016/03/07
+//		Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
+//		Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
 //--------------------------------------------------------------------------
-void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
-{
-    getVFDHandle((const FileAccPropList)fapl, file_handle);
-}
+//void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
+//{
+//    getVFDHandle((const FileAccPropList)fapl, file_handle);
+//}
 
 //--------------------------------------------------------------------------
 // Function:	H5File::getVFDHandle
