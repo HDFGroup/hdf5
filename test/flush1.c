@@ -68,13 +68,8 @@ create_file(char* name, hid_t fapl)
 
     /* Write some data */
     for(i = 0; i < ds_size[0]; i++)
-	/*
-	 * The extra cast in the following statement is a bug workaround
-	 * for the Win32 version 5.0 compiler.
-	 * 1998-11-06 ptl
-	 */
         for(j = 0; j < (size_t)ds_size[1]; j++)
-	    the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
+	    the_data[i][j] = (double)i / (double)(j + 1);
     if(H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, the_data) < 0) FAIL_STACK_ERROR
 
     /* Create some groups */
@@ -124,25 +119,15 @@ extend_file(hid_t file)
 	goto error;
 
     /* Write some data */
-    for (i=0; i<ds_size[0]; i++) {
-	/*
-	 * The extra cast in the following statement is a bug workaround
-	 * for the Win32 version 5.0 compiler.
-	 * 1998-11-06 ptl
-	 */
-	for (j=0; j<(size_t)ds_size[1]; j++) {
-	    the_data[i][j] = (double)(hssize_t)i/(hssize_t)(j+1);
-	}
-    }
-    if (H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT,
-		the_data) < 0) goto error;
-
+    for(i = 0; i < ds_size[0]; i++)
+	for(j = 0; j < (size_t)ds_size[1]; j++)
+	    the_data[i][j] = (double)i / (double)(j + 1);
+    if(H5Dwrite(dset, H5T_NATIVE_DOUBLE, space, space, H5P_DEFAULT, the_data) < 0) goto error;
 
     return file;
 
 error:
-        HD_exit(1);
-
+    HD_exit(1);
 }
 
 /*-------------------------------------------------------------------------
@@ -206,3 +191,4 @@ error:
     HD_exit(1);
     return 1;
 }
+

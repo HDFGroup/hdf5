@@ -65,18 +65,18 @@
                                                                               \
     /* Free space header specific fields */                                   \
     + 1 /* Client ID */                                                       \
-    + H5F_SIZEOF_SIZE(f) /* Total free space tracked */                       \
-    + H5F_SIZEOF_SIZE(f) /* Total # of sections tracked */                    \
-    + H5F_SIZEOF_SIZE(f) /* # of serializable sections tracked */             \
-    + H5F_SIZEOF_SIZE(f) /* # of ghost sections tracked */                    \
+    + (unsigned)H5F_SIZEOF_SIZE(f) /* Total free space tracked */                       \
+    + (unsigned)H5F_SIZEOF_SIZE(f) /* Total # of sections tracked */                    \
+    + (unsigned)H5F_SIZEOF_SIZE(f) /* # of serializable sections tracked */             \
+    + (unsigned)H5F_SIZEOF_SIZE(f) /* # of ghost sections tracked */                    \
     + 2 /* Number of section classes */                                       \
     + 2 /* Shrink percent */                                                  \
     + 2 /* Expand percent */                                                  \
     + 2 /* Size of address space for sections (log2 of value) */              \
-    + H5F_SIZEOF_SIZE(f) /* Max. size of section to track */                  \
-    + H5F_SIZEOF_ADDR(f) /* Address of serialized free space sections */      \
-    + H5F_SIZEOF_SIZE(f) /* Size of serialized free space sections used */    \
-    + H5F_SIZEOF_SIZE(f) /* Allocated size of serialized free space sections */ \
+    + (unsigned)H5F_SIZEOF_SIZE(f) /* Max. size of section to track */                  \
+    + (unsigned)H5F_SIZEOF_ADDR(f) /* Address of serialized free space sections */      \
+    + (unsigned)H5F_SIZEOF_SIZE(f) /* Size of serialized free space sections used */    \
+    + (unsigned)H5F_SIZEOF_SIZE(f) /* Allocated size of serialized free space sections */ \
     )
 
 /* Size of the free space serialized sections on disk */

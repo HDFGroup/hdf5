@@ -194,9 +194,7 @@ main (int argc, char *argv[])
     int		src, dst=-1;		/*source & destination files	*/
     int		need_seek=FALSE;	/*destination needs to seek?	*/
     int		need_write;		/*data needs to be written?	*/
-    /*struct stat	sb;			temporary file stat buffer	*/
-	/*struct _stati64 sb;*/
-	h5_stat_t sb;
+    h5_stat_t sb;                       /*temporary file stat buffer	*/
 
     int		verbose=FALSE;		/*display file names?		*/
 
@@ -243,7 +241,7 @@ main (int argc, char *argv[])
             family_to_sec2 = TRUE;
             argno++;
         } else if ('b'==argv[argno][1]) {
-            blk_size = get_size (prog_name, &argno, argc, argv);
+            blk_size = (size_t)get_size (prog_name, &argno, argc, argv);
         } else if ('m'==argv[argno][1]) {
             dst_size = get_size (prog_name, &argno, argc, argv);
         } else {
@@ -308,7 +306,7 @@ main (int argc, char *argv[])
 	if (dst_is_family) n = (size_t)MIN((off_t)n, dst_size-dst_offset);
 	if (left_overs) {
 	    n = (size_t)MIN ((off_t)n, left_overs);
-	    left_overs -= n;
+	    left_overs = left_overs - (off_t)n;
 	    need_write = FALSE;
 	} else if (src_offset<src_act_size) {
 	    n = (size_t)MIN ((off_t)n, src_act_size-src_offset);
@@ -359,16 +357,16 @@ main (int argc, char *argv[])
 	 * loop.   The destination offset must be updated so we can fix
 	 * trailing holes.
 	 */
-	src_offset += n;
+	src_offset = src_offset + (off_t)n;
 	if (src_offset==src_act_size) {
 	    HDclose (src);
 	    if (!src_is_family) {
-		dst_offset += n;
+                dst_offset = dst_offset + (off_t)n;
 		break;
 	    }
 	    sprintf (src_name, src_gen_name, ++src_membno);
 	    if ((src=HDopen (src_name, O_RDONLY,0))<0 && ENOENT==errno) {
-		dst_offset += n;
+                dst_offset = dst_offset + (off_t)n;
 		break;
 	    } else if (src<0) {
 		perror (src_name);
@@ -392,7 +390,7 @@ main (int argc, char *argv[])
 	 * needed. The first member is extended to the logical member size
 	 * but other members might be smaller if they end with a hole.
 	 */
-	dst_offset += n;
+        dst_offset = dst_offset + (off_t)n;
 	if (dst_is_family && dst_offset==dst_size) {
 	    if (0==dst_membno) {
 		if (HDlseek (dst, dst_size-1, SEEK_SET)<0) {
@@ -474,7 +472,7 @@ main (int argc, char *argv[])
         }
 
         /* Set the property of the new member size as hsize_t */
-        hdsize = dst_size;
+        hdsize = (hsize_t)dst_size;
         if(H5Pset(fapl, H5F_ACS_FAMILY_NEWSIZE_NAME, &hdsize) < 0) {
             perror ("H5Pset");
             exit (EXIT_FAILURE);

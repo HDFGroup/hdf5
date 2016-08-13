@@ -123,7 +123,7 @@ test_tst_init(void)
     curr_time=HDtime(NULL);
     HDsrandom((unsigned)curr_time);
     for(u=0; u<num_uniq_words; u++) {
-        v=u+(HDrandom()%(num_uniq_words-u));
+        v = u + ((size_t)HDrandom() % (num_uniq_words - u));
         if(u!=v) {
             tmp_word=rand_uniq_words[u];
             rand_uniq_words[u]=rand_uniq_words[v];

@@ -384,6 +384,7 @@ void test_objnames(hid_t fid, const char* string)
   char path_buf[MAX_PATH_LENGTH];
   hsize_t dims=1;
   hobj_ref_t obj_ref;
+  ssize_t size;
   herr_t ret;
 
   /* Create a group with a UTF-8 name */
@@ -395,8 +396,8 @@ void test_objnames(hid_t fid, const char* string)
    */
   ret = H5Oset_comment_by_name(fid, string, string, H5P_DEFAULT);
   CHECK(ret, FAIL, "H5Oset_comment_by_name");
-  ret = H5Oget_comment_by_name(fid, string, read_buf, (size_t)MAX_STRING_LENGTH, H5P_DEFAULT);
-  CHECK(ret, FAIL, "H5Oget_comment_by_name");
+  size = H5Oget_comment_by_name(fid, string, read_buf, (size_t)MAX_STRING_LENGTH, H5P_DEFAULT);
+  CHECK(size, FAIL, "H5Oget_comment_by_name");
 
   ret = H5Gclose(grp_id);
   CHECK(ret, FAIL, "H5Gclose");
@@ -510,6 +511,7 @@ void test_attrname(hid_t fid, const char * string)
   hid_t dtype_id, space_id;
   hsize_t dims=1;
   char read_buf[MAX_STRING_LENGTH];
+  ssize_t size;
   herr_t ret;
 
  /* Create a new group and give it an attribute whose
@@ -528,8 +530,8 @@ void test_attrname(hid_t fid, const char * string)
   /* Create the attribute and check that its name is correct */
   attr_id = H5Acreate2(group_id, string, dtype_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
   CHECK(attr_id, FAIL, "H5Acreate2");
-  ret = H5Aget_name(attr_id, (size_t)MAX_STRING_LENGTH, read_buf);
-  CHECK(ret, FAIL, "H5Aget_name");
+  size = H5Aget_name(attr_id, (size_t)MAX_STRING_LENGTH, read_buf);
+  CHECK(size, FAIL, "H5Aget_name");
   ret = strcmp(read_buf, string);
   VERIFY(ret, 0, "strcmp");
   read_buf[0] = '\0';
@@ -740,25 +742,25 @@ static hid_t mkstr(size_t len, H5T_str_t strpad)
 unsigned int write_char(unsigned int c, char * test_string, unsigned int cur_pos)
 {
   if (c < 0x80) {
-    test_string[cur_pos] = c;
+    test_string[cur_pos] = (char)c;
     cur_pos++;
   }
   else if (c < 0x800) {
-    test_string[cur_pos] = (0xC0 | c>>6);
-    test_string[cur_pos+1] = (0x80 | (c & 0x3F));
+    test_string[cur_pos] = (char)(0xC0 | c >> 6);
+    test_string[cur_pos + 1] = (char)(0x80 | (c & 0x3F));
     cur_pos += 2;
   }
   else if (c < 0x10000) {
-    test_string[cur_pos] = (0xE0 | c>>12);
-    test_string[cur_pos+1] = (0x80 | (c>>6 & 0x3F));
-    test_string[cur_pos+2] = (0x80 | (c & 0x3F));
+    test_string[cur_pos] = (char)(0xE0 | c >> 12);
+    test_string[cur_pos + 1] = (char)(0x80 | (c >> 6 & 0x3F));
+    test_string[cur_pos + 2] = (char)(0x80 | (c & 0x3F));
     cur_pos += 3;
   }
   else if (c < 0x200000) {
-    test_string[cur_pos] = (0xF0 | c>>18);
-    test_string[cur_pos+1] = (0x80 | (c>>12 & 0x3F));
-    test_string[cur_pos+2] = (0x80 | (c>>6 & 0x3F));
-    test_string[cur_pos+3] = (0x80 | (c & 0x3F));
+    test_string[cur_pos] = (char)(0xF0 | c >> 18);
+    test_string[cur_pos + 1] = (char)(0x80 | (c >> 12 & 0x3F));
+    test_string[cur_pos + 2] = (char)(0x80 | (c >> 6 & 0x3F));
+    test_string[cur_pos + 3] = (char)(0x80 | (c & 0x3F));
     cur_pos += 4;
   }
 
@@ -771,13 +773,13 @@ unsigned int write_char(unsigned int c, char * test_string, unsigned int cur_pos
  * could confuse printf (e.g., '\n'). */
 void dump_string(const char * string)
 {
-  unsigned int length;
-  unsigned int x;
+  size_t length;
+  size_t x;
 
   printf("The string was:\n %s", string);
   printf("Or in hex:\n");
 
-  length = strlen(string);
+  length = HDstrlen(string);
 
   for(x=0; x<length; x++)
     printf("%x ", string[x] & (0x000000FF));
@@ -810,7 +812,7 @@ void test_unicode(void)
     /* We need to avoid unprintable characters (codes 0-31) and the
      * . and / characters, since they aren't allowed in path names.
      */
-    unicode_point = (HDrandom() % (MAX_CODE_POINT-32)) + 32;
+    unicode_point = (unsigned)(HDrandom() % (MAX_CODE_POINT-32)) + 32;
     if(unicode_point != 46 && unicode_point != 47)
       cur_pos = write_char(unicode_point, test_string, cur_pos);
   }

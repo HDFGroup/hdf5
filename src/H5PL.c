@@ -433,7 +433,7 @@ H5PL__init_path_table(void)
         dl_path = (char *)H5MM_xfree(dl_path);
         dl_path = H5MM_strdup(tempbuf);
     }
-#endif H5_HAVE_WIN32_API
+#endif /* H5_HAVE_WIN32_API */
 
     /* Put paths in the path table.  They are separated by ":" */
     dir = HDstrtok(dl_path, H5PL_PATH_SEPARATOR);

@@ -56,14 +56,12 @@ test_dataset_append_notset(hid_t fid)
     hid_t did = -1;			/* Dataset ID */
     hid_t sid = -1;			/* Dataspace ID */
     hid_t dcpl = -1;			/* A copy of dataset creation property */
-    hid_t dapl = -1;			/* A copy of dataset access property */
     hid_t ffapl = -1;			/* The file's file access property list */
 
     hsize_t dims[2] = {0, 10};			/* Current dimension sizes */
     hsize_t maxdims[2] = {H5S_UNLIMITED, 20};	/* Maximum dimension sizes */
     hsize_t chunk_dims[2] = {2,5};		/* Chunk dimension sizes */
     int lbuf[10];			/* The data buffers */
-    hsize_t file_size; 			/* File size */
     int i, j;				/* Local index variables */
     h5_stat_t  sb1, sb2;		/* File info */
 

@@ -376,15 +376,12 @@ typedef struct s1_t {
 /* "File 82" macros */
 /* Name of dataset to create in datafile                              */
 #define F82_DATASETNAME    "CompoundComplex1D"
-#define F82_DATASETNAME2   "CompoundComplex2D"
-#define F82_DATASETNAME3   "CompoundComplex3D"
-#define F82_DATASETNAME4   "CompoundComplex4D"
 /* Dataset dimensions                                                 */
 #define F82_DIM32          32
 #define F82_RANK           1
-#define F82_RANK2          2
-#define F82_RANK3          3
-#define F82_RANK4          4
+//#define F82_RANK2          2
+//#define F82_RANK3          3
+//#define F82_RANK4          4
 
 /* "File 83" macros */
 /* Name of dataset to create in datafile                              */
@@ -9923,9 +9920,9 @@ static void gent_compound_complex2(void)
 
     compound        buf[F82_DIM32];        /* compound */
 
-    hid_t file, grp=-1, type=-1, space=-1, dset=-1;
+    hid_t file, type=-1, space=-1, dset=-1;
     hid_t dset_array_a, dset_array_b, dset_array_c;
-    hid_t cmpd_tid1, cmpd_tid2, cmpd_tid3;
+    hid_t cmpd_tid1 = -1, cmpd_tid2 = -1, cmpd_tid3 = -1;
     size_t  i;
     size_t j, k;
     unsigned dset_array_ndims;
@@ -9937,6 +9934,10 @@ static void gent_compound_complex2(void)
     if ((space = H5Screate_simple(F82_RANK, &nelmts, NULL)) >= 0) {
         /* CompoundComplex1D */
         if ((type = H5Tcreate(H5T_COMPOUND, sizeof(compound))) >= 0) {
+            hid_t str_type, array;
+            hsize_t dims[1];
+            hid_t nest1, nest2;
+
             /* Insert top-level array members */
             dset_array_ndims = 1; dset_array_a_dims[0] = 4;
             dset_array_a = H5Tarray_create2(H5T_STD_U32LE, dset_array_ndims, dset_array_a_dims);
@@ -9954,8 +9955,6 @@ static void gent_compound_complex2(void)
             H5Tclose(dset_array_c);
 
             /* Insert first nested compound */
-            hid_t str_type, array;
-            hsize_t dims[1];
             cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(nested_compound));
 
             H5Tinsert(cmpd_tid1, "nested_double", HOFFSET(nested_compound, nested_a), H5T_IEEE_F64LE);
@@ -9977,7 +9976,6 @@ static void gent_compound_complex2(void)
             H5Tinsert(type, "nested_compound", HOFFSET(compound, d), cmpd_tid1);
 
             /* Insert second nested compound */
-            hid_t nest1, nest2;
             cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(multiple_nested_compound));
 
             H5Tinsert(cmpd_tid2, "nested_float", HOFFSET(multiple_nested_compound, a), H5T_IEEE_F32LE);

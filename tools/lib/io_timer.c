@@ -55,9 +55,9 @@ io_time_t   *timer_g;            /* timer: global for stub functions     */
 static double sub_time(struct timeval* a, struct timeval* b)
 {
     return (((double)a->tv_sec +
-     ((double)a->tv_usec) / MICROSECOND) -
+     ((double)a->tv_usec) / (double)MICROSECOND) -
   ((double)b->tv_sec +
-   ((double)b->tv_usec) / MICROSECOND));
+   ((double)b->tv_usec) / (double)MICROSECOND));
 }
 
 
