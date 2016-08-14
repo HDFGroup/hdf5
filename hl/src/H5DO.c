@@ -238,26 +238,24 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
 	goto done;
 
     /* No boundary for this axis */
-    if(boundary[axis] == 0) {
-	ret_value = SUCCEED;
-	goto done;
-    }
+    if(boundary[axis] != 0) {
 
-    /* Determine whether a boundary is hit or not */
-    for(k = start[axis]; k < size[axis]; k++)
-	if(!((k + 1) % boundary[axis])) {
-	    hit = TRUE;
-	    break;
-	}
+	/* Determine whether a boundary is hit or not */
+	for(k = start[axis]; k < size[axis]; k++)
+	    if(!((k + 1) % boundary[axis])) {
+		hit = TRUE;
+		break;
+	    }
 
-    if(hit) { /* Hit the boundary */
-	/* Invoke callback if there is one */
-	if(append_cb && append_cb(dset_id, size, udata) < 0)
-	    goto done;
+	if(hit) { /* Hit the boundary */
+	    /* Invoke callback if there is one */
+	    if(append_cb && append_cb(dset_id, size, udata) < 0)
+		goto done;
 
-	/* Do a dataset flush */
-	if(H5Dflush(dset_id) < 0)
-	    goto done;
+	    /* Do a dataset flush */
+	    if(H5Dflush(dset_id) < 0)
+		goto done;
+	} /* end if */
     } /* end if */
 
     /* Indicate success */
