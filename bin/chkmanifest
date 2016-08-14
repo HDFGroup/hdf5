@@ -79,8 +79,8 @@ done
 #
 # First get a list of all the pending files with svn stat and
 # check those.
-svn_stat=`svn stat -q`
-for file in $svn_stat; do
+git_stat=`git status -s`
+for file in $git_stat; do
 
     # Newly added files are not listed by svn ls, which
     # we check later.
@@ -93,7 +93,8 @@ for file in $svn_stat; do
         #
         # There is a space between the status columns and file name, hence
         # the '8' instead of '7'.
-        path=`echo $file | sed 's/^.\{8\}/\.\//g'`
+        # For git status -s it's 3 instead of 8.
+        path=`echo $file | sed 's/^.\{3\}/\.\//g'`
         # Ignore directories
         if [ ! -d $path ]; then
             if (grep ^$path$ $MANIFEST >/dev/null); then
@@ -108,8 +109,9 @@ done
 
 # Next check svn ls, which gets a list of all files that are
 # checked in.
-svn_ls=`svn ls -R`
-for file in $svn_ls; do
+##svn_ls=`svn ls -R`
+git_ls=`git ls-files`
+for file in $git_ls; do
     path="./${file}"
     # Ignore directories
     if [ ! -d $path ]; then
