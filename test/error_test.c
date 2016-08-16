@@ -284,7 +284,7 @@ error_stack(void)
     /* Make it push error, force this function to fail */
     if((err_num = H5Eget_num(ERR_STACK)) == 0) {
         H5Epush(ERR_STACK, __FILE__, FUNC_error_stack, __LINE__, ERR_CLS, ERR_MAJ_API, ERR_MIN_GETNUM,
-                "Get number test failed, returned %zd", err_num);
+                "Get number test failed, returned %d", (int)err_num);
         goto error;
     } /* end if */
 
