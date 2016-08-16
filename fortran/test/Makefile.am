@@ -54,17 +54,13 @@ endif
 check_PROGRAMS=$(TEST_PROG)
 
 if FORTRAN_HAVE_STORAGE_SIZE
-if FORTRAN_HAVE_C_SIZEOF
     libh5test_fortran_la_SOURCES = tf_F08.f90
 else
+  if FORTRAN_2003_CONDITIONAL_F
     libh5test_fortran_la_SOURCES = tf_F03.f90
-endif
-else
-if FORTRAN_2003_CONDITIONAL_F
-  libh5test_fortran_la_SOURCES = tf_F03.f90
-else
-  libh5test_fortran_la_SOURCES = tf_F90.f90
-endif
+  else
+    libh5test_fortran_la_SOURCES = tf_F90.f90
+  endif
 endif
 
 # tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be

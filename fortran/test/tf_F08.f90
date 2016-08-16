@@ -29,13 +29,11 @@
 ! NOTES
 !   This file contains "sizeof" functions that are F2008 standard compliant
 !   and replace the non-standard 'SIZEOF' functions found in the file tf_F03.
-!   Unfortunity we need to wrap the C_SIZEOF/STORAGE_SIZE functions to handle different
+!   Unfortunity we need to wrap the STORAGE_SIZE functions to handle different
 !   data types from the various tests.
-!
-!   F08+TS29113 requires C interoperable variable as argument for C_SIZEOF.
 !   
 !   This file will be build instead of tf_F03.f90 if the intrinsic fortran 
-!   function C_SIZEOF/STORAGE_SIZE is found during configure.
+!   function STORAGE_SIZE is found during configure.
 !
 !*****
 MODULE TH5_MISC_PROVISIONAL
@@ -72,7 +70,6 @@ CONTAINS
     IMPLICIT NONE
     TYPE(comp_datatype), INTENT(in) :: a
 
-   !H5_SIZEOF_CMPD = C_SIZEOF(a)
     H5_SIZEOF_CMPD = storage_size(a, c_size_t)/storage_size(c_char_'a',c_size_t)
 
   END FUNCTION H5_SIZEOF_CMPD
