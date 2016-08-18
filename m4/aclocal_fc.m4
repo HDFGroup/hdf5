@@ -400,12 +400,12 @@ rm -f pac_fconftest.out
                 REAL b
                 DOUBLE PRECISION c
                 OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
+	        WRITE(8,*) KIND(a)
                 WRITE(8,*) $FC_SIZEOF_A
-	        WRITE(8,*) kind(a)
+	        WRITE(8,*) KIND(b)
 	        WRITE(8,*) $FC_SIZEOF_B
-	        WRITE(8,*) kind(b)
+                WRITE(8,*) KIND(c)
                 WRITE(8,*) $FC_SIZEOF_C
-                WRITE(8,*) kind(c)
                 CLOSE(8)
                 END
             ])
