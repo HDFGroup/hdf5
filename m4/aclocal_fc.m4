@@ -400,24 +400,24 @@ rm -f pac_fconftest.out
                 REAL b
                 DOUBLE PRECISION c
                 OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
-	        WRITE(8,*) KIND(a)
                 WRITE(8,*) $FC_SIZEOF_A
-	        WRITE(8,*) KIND(b)
+	        WRITE(8,*) KIND(a)
 	        WRITE(8,*) $FC_SIZEOF_B
-                WRITE(8,*) KIND(c)
+	        WRITE(8,*) KIND(b)
                 WRITE(8,*) $FC_SIZEOF_C
+                WRITE(8,*) KIND(c)
                 CLOSE(8)
                 END
             ])
         ])
         AC_RUN_IFELSE([],[
             if test -s pac_fconftest.out ; then
-                PAC_FORTRAN_NATIVE_INTEGER_KIND="`sed -n '1p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`sed -n '2p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_KIND="`sed -n '3p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`sed -n '4p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '5p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '6p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`sed -n '1p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_KIND="`sed -n '2p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`sed -n '3p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_KIND="`sed -n '4p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '5p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '6p' pac_fconftest.out`"
             else
                 AC_MSG_ERROR([No output from Fortran test program!])
             fi
