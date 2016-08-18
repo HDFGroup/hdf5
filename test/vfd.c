@@ -98,31 +98,31 @@ test_sec2(void)
 
     /* Set property list and file name for SEC2 driver. */
     if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(H5Pset_fapl_sec2(fapl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
 
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Retrieve the access property list... */
     if((fapl_id_out = H5Fget_access_plist(fid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that the driver is correct */
     if(H5FD_SEC2 != H5Pget_driver(fapl_id_out))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* ...and close the property list */
     if(H5Pclose(fapl_id_out) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that we can get an operating-system-specific handle from
      * the library.
      */
     if(H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(os_file_handle == NULL)
         FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
 
@@ -133,13 +133,13 @@ test_sec2(void)
      * Currently it should be around 2 KB.
      */
     if(H5Fget_filesize(fid, &file_size) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(file_size < 1 * KB || file_size > 4 * KB)
         FAIL_PUTS_ERROR("suspicious file size obtained from H5Fget_filesize");
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     h5_cleanup(FILENAME, fapl_id);
     PASSED();
@@ -198,7 +198,7 @@ test_core(void)
 
     /* Get a file access property list and fix up the file name */
     if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename));
 
     /************************************************************************
@@ -212,11 +212,11 @@ test_core(void)
             FAIL_PUTS_ERROR("unable to remove backing store file");
     /* Create and close file w/ backing store off */
     if(H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, FALSE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     /* Check for the backing store file */
     if(HDaccess(filename, F_OK) != -1)
         FAIL_PUTS_ERROR("file created when backing store set to FALSE");
@@ -229,13 +229,13 @@ test_core(void)
 
     /* Turn the backing store on */
     if(H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that write tracking is off by default and that the default
      * page size is non-zero.
      */
     if(H5Pget_core_write_tracking(fapl_id, &use_write_tracking, &write_tracking_page_size) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(FALSE != use_write_tracking)
         FAIL_PUTS_ERROR("write tracking should be off by default");
     if(0 == write_tracking_page_size)
@@ -243,25 +243,25 @@ test_core(void)
 
     /* Set core VFD properties */
     if(H5Pset_core_write_tracking(fapl_id, TRUE, CORE_PAGE_SIZE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Retrieve the access property list... */
     if((fapl_id_out = H5Fget_access_plist(fid)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that the driver is correct */
     if(H5FD_CORE != H5Pget_driver(fapl_id_out))
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Get the basic VFD properties from the fapl and ensure that
      * they are correct.
      */
     if(H5Pget_fapl_core(fapl_id_out, &increment, &backing_store) < 0)
-        FAIL_STACK_ERROR
+        TEST_ERROR
     if(increment != (size_t)CORE_INCREMENT)
         FAIL_PUTS_ERROR("incorrect increment from file fapl");
     if(backing_store != TRUE)
@@ -273,7 +273,7 @@ test_core(void)
      *       test the main fapl_id.
      */
     if(H5Pget_core_write_tracking(fapl_id, &use_write_tracking, &write_tracking_page_size) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(TRUE != use_write_tracking)
         FAIL_PUTS_ERROR("write tracking flag incorrect in fapl obtained from H5Fget_access_plist");
     if(CORE_PAGE_SIZE != write_tracking_page_size)
@@ -281,13 +281,13 @@ test_core(void)
 
     /* Close the property list */
     if(H5Pclose(fapl_id_out) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that we can get an operating-system-specific handle from
      * the library.
      */
     if(H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(os_file_handle == NULL)
         FAIL_PUTS_ERROR("NULL os-specific vfd/file handle was returned from H5Fget_vfd_handle");
 
@@ -297,13 +297,13 @@ test_core(void)
      * TODO: Needs justification of why is this is a reasonable size.
      */
     if(H5Fget_filesize(fid, &file_size) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(file_size < 2 * KB || file_size > 6 * KB)
         FAIL_PUTS_ERROR("suspicious file size obtained from H5Fget_filesize");
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
 
     /************************************************************************
@@ -315,9 +315,9 @@ test_core(void)
      * Changes won't be saved in file.
      */
     if(H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, FALSE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Allocate memory for data set. */
     if(NULL == (data_w = (int *)HDmalloc(DSET1_DIM1 * DSET1_DIM2 * sizeof(int))))
@@ -337,25 +337,25 @@ test_core(void)
     dims[0] = CORE_DSET_DIM1;
     dims[1] = CORE_DSET_DIM2;
     if((sid = H5Screate_simple(2, dims, NULL)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset */
     if((did = H5Dcreate2(fid, CORE_DSET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write the data to the dataset */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_w) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close and reopen the dataset */
     if(H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if((did = H5Dopen2(fid, CORE_DSET_NAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Read the data back from dset1 */
     if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_r) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
     pw = data_w;
@@ -371,22 +371,22 @@ test_core(void)
 
     /* Close everything except the dataspace ID (needed below)*/
     if(H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Reopen the file and ensure that the dataset does not exist */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     status = H5Lexists(fid, CORE_DSET_NAME, H5P_DEFAULT);
     if(status < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(status > 0)
         FAIL_PUTS_ERROR("core VFD dataset created in file when backing store disabled");
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
 
     /************************************************************************
@@ -398,32 +398,32 @@ test_core(void)
      * Changes will be saved in file.
      */
     if(H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Create the dataset */
     if((did = H5Dcreate2(fid, CORE_DSET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Write the data to the dataset */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_w) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Close everything and reopen */
     if(H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_id)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if((did = H5Dopen2(fid, CORE_DSET_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Read the data back from the dataset */
     HDmemset(data_r, 0, DSET1_DIM1 * DSET1_DIM2 * sizeof(int)); 
     if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data_r) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
     pw = data_w;
@@ -444,17 +444,17 @@ test_core(void)
      * TODO: Needs justification of why is this is a reasonable size.
      */
     if(H5Fget_filesize(fid, &file_size) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(file_size < 64 * KB || file_size > 256 * KB)
         FAIL_PUTS_ERROR("suspicious file size obtained from H5Fget_filesize");
 
     /* Close everything */
     if(H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(H5Dclose(did) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(H5Fclose(fid) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     HDfree(data_w);
     HDfree(data_r);
@@ -1226,7 +1226,7 @@ test_multi(void)
 
     /* Create and write attribute for the root group. */
     if((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* Attribute string. */
     if((atype = H5Tcopy(H5T_C_S1)) < 0)
