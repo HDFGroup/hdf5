@@ -279,7 +279,7 @@
 #define H5F_ACTUAL_NAME(F)      ((F)->actual_name)
 #define H5F_EXTPATH(F)          ((F)->extpath)
 #define H5F_SHARED(F)           ((F)->shared)
-#define H5F_SAME_SHARED(F1, F2) ((F1)->shared == (F2)->shared))
+#define H5F_SAME_SHARED(F1, F2) ((F1)->shared == (F2)->shared)
 #define H5F_NOPEN_OBJS(F)       ((F)->nopen_objs)
 #define H5F_INCR_NOPEN_OBJS(F)  ((F)->nopen_objs++)
 #define H5F_DECR_NOPEN_OBJS(F)  ((F)->nopen_objs--)
