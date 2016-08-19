@@ -34,9 +34,12 @@
 #define DATASET_COMPRESSED      "compressed"
 #define DATASET_NAMED_VL        "named_vl"
 #define DATASET_NESTED_VL       "nested_vl"
+#define DATASET_ATTR		"dset_attr"
+#define ATTR			"attr"
 #define GROUP_EMPTY             "grp_empty"
 #define GROUP_DATASETS          "grp_dsets"
 #define GROUP_NESTED            "grp_nested"
+#define GROUP_ATTR		"grp_attr"
 
 /* Obj reference */
 #define OBJ_REF_DS "Dset1"
@@ -320,6 +323,86 @@ static void gent_nested_vl(hid_t loc_id)
     H5Tclose(tid2);
 }
 
+
+/*-------------------------------------------------------------------------
+ * Function:    gent_att_compound_vlstr
+ *
+ * Purpose:     Generate a dataset and a group.
+ *		Both has an attribute with a compound datatype consisting 
+ *		of a variable length string
+ *
+ *-------------------------------------------------------------------------
+ */
+static void gent_att_compound_vlstr(hid_t loc_id)
+{
+    typedef struct { /* Compound structure for the attribute */
+        int i;
+        char *v;
+    } s1;
+    hsize_t dim[1] = {1};	/* Dimension size */
+    hid_t sid = -1; 		/* Dataspace ID */
+    hid_t tid = -1; 		/* Datatype ID */
+    hid_t aid = -1; 		/* Attribute ID */
+    hid_t did = -1; 		/* Dataset ID */
+    hid_t gid = -1; 		/* Group ID */
+    hid_t vl_str_tid = -1;	/* Variable length datatype ID */
+    hid_t cmpd_tid = -1;	/* Compound datatype ID */
+    hid_t null_sid = -1;	/* Null dataspace ID */
+    s1 buf;			/* Buffer */
+
+    buf.i = 9;
+    buf.v = "ThisIsAString";
+
+    /* Create an integer datatype */
+    tid = H5Tcopy(H5T_NATIVE_INT);
+
+    /* Create a variable length string */
+    vl_str_tid = H5Tcopy(H5T_C_S1);
+    H5Tset_size(vl_str_tid, H5T_VARIABLE);
+
+    /* Create a compound datatype with a variable length string and an integer */
+    cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1));
+    H5Tinsert(cmpd_tid, "i", HOFFSET(s1, i), tid);
+    H5Tinsert(cmpd_tid, "v", HOFFSET(s1, v), vl_str_tid);
+
+    /* Create a dataset */
+    null_sid = H5Screate(H5S_NULL);
+    did = H5Dcreate2(loc_id, DATASET_ATTR, H5T_NATIVE_INT, null_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Attach an attribute with the compound datatype to the dataset */
+    sid = H5Screate_simple(1, dim, dim);
+    aid = H5Acreate2(did, ATTR, cmpd_tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Write the attribute */
+    buf.i = 9;
+    buf.v = "ThisIsAString";
+    H5Awrite(aid, cmpd_tid, &buf);
+
+    /* Close the dataset and its attribute */
+    H5Dclose(did);
+    H5Aclose(aid);
+
+    /* Create a group */
+    gid = H5Gcreate2(loc_id, GROUP_ATTR, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Attach an attribute with the compound datatype to the group */
+    aid = H5Acreate2(gid, ATTR, cmpd_tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(aid, cmpd_tid, &buf);
+
+    /* Close the group and its attribute */
+    H5Aclose(aid);
+    H5Gclose(gid);
+
+    /* Close dataspaces */
+    H5Sclose(sid);
+    H5Sclose(null_sid);
+
+    /* Close datatypes */
+    H5Tclose(tid);
+    H5Tclose(vl_str_tid);
+    H5Tclose(cmpd_tid);
+
+} /* gen_att_compound_vlstr() */
 
 /*-------------------------------------------------------------------------
  * Function: gent_datasets
@@ -658,6 +741,7 @@ static void Test_Obj_Copy(void)
     gent_empty_group(fid);
     gent_nested_datasets(fid);
     gent_nested_group(fid);
+    gent_att_compound_vlstr(fid);
 
 out:
     /*-----------------------------------------------------------------------

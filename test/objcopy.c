@@ -20,8 +20,7 @@
  * Purpose:	Test H5Ocopy().
  */
 
-#include <time.h>
-#include "h5test.h"
+#include "testhdf5.h"
 #include "H5srcdir.h"
 
 /*
@@ -147,6 +146,13 @@ static int
 compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf);
 static int
 compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags);
+
+static int
+test_copy_attribute_compound_vlstr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl);
+static int
+attach_attribute_compound_vlstr(hid_t loc_id);
+static int
+compare_attribute_compound_vlstr(hid_t loc, hid_t loc2);
 
 
 /*-------------------------------------------------------------------------
@@ -522,6 +528,7 @@ done:
         H5Aclose(aid);
     return ret_value;
 } /* end of attach_attribute_vl */
+
 
 
 /*-------------------------------------------------------------------------
@@ -4526,6 +4533,312 @@ error:
     } H5E_END_TRY;
     return 1;
 } /* end test_copy_dataset_simple_empty */
+
+/*-------------------------------------------------------------------------
+ * Function:    attach_attribute_compound_vlstr
+ *
+ * Purpose:     Attach a compound datatype with a variable length string to the object
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; Aug 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+attach_attribute_compound_vlstr(hid_t loc_id)
+{
+    hid_t aid = -1; 		/* Attribute ID */
+    hid_t sid = -1; 		/* Dataspace ID */
+    hid_t tid = -1;		/* Datatype ID */
+    hid_t vl_str_tid = -1;	/* Variable length string datatype ID */
+    hid_t cmpd_tid = -1;	/* Compound datatype ID */
+    hsize_t dim1 = 1;		/* Dimension size */
+    typedef struct { 		/* Compound structure for the attribute */
+        int i;
+        char *v;
+    } s1;
+    s1 buf;                     /* Buffer */
+    int ret_value = -1;		/* Return value */
+
+    /* Create dataspace */
+    if((sid = H5Screate_simple(1, &dim1, NULL)) < 0 )
+        goto done;
+
+    /* Create an integer datatype */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        goto done;
+
+    /* Create a variable length string */
+    if((vl_str_tid = H5Tcopy(H5T_C_S1)) < 0)
+        goto done;
+    if(H5Tset_size(vl_str_tid, H5T_VARIABLE) < 0)
+        goto done;
+
+    /* Create a compound datatype with a variable length string and an integer */
+    if((cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0)
+        goto done;
+    if(H5Tinsert(cmpd_tid, "i", HOFFSET(s1, i), tid) < 0)
+        goto done;
+    if(H5Tinsert(cmpd_tid, "v", HOFFSET(s1, v), vl_str_tid) < 0)
+        goto done;
+
+    /* Attach an attribute to the object */
+    if((aid = H5Acreate2(loc_id, "attr_cmpd_vlstr", cmpd_tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto done;
+
+    /* Write to the attribute */
+    buf.i = 9;
+    buf.v = "ThisIsAString";
+    if(H5Awrite(aid, cmpd_tid, &buf) < 0)
+        goto done;
+
+    ret_value = 0;
+
+done:
+    if(sid > 0)
+        H5Sclose(sid);
+    if(tid > 0)
+        H5Tclose(tid);
+    if(vl_str_tid > 0)
+        H5Tclose(vl_str_tid);
+    if(cmpd_tid > 0)
+        H5Tclose(cmpd_tid);
+    if(aid > 0)
+        H5Aclose(aid);
+    return ret_value;
+} /* attach_attribute_compound_vlstr */
+
+/*-------------------------------------------------------------------------
+ * Function:    compare_attribute_compound_vlstr
+ *
+ * Purpose:     Compare data of the attributes attached to the two objects.
+ *		The attribute is a  compound datatype with a variable length string.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; Aug 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
+{
+    hid_t aid = -1, aid2 = -1;	/* Attribute IDs */
+    hid_t tid = -1, tid2 = -1;	/* Datatype IDs */
+    typedef struct {		/* Compound structure for the attribute */
+	int i;
+	char *v;
+    } s1;
+    s1 rbuf;			/* Buffer for data read */
+    s1 rbuf2;			/* Buffer for data read */
+    
+    /* Open the attributes attached to the objects */
+    if((aid = H5Aopen_by_idx(loc, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR	
+    if((aid2 = H5Aopen_by_idx(loc2, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR	
+
+    /* Get the attributes' datatypes */
+    if((tid = H5Aget_type(aid)) < 0) 
+	FAIL_STACK_ERROR	
+    if((tid2 = H5Aget_type(aid2)) < 0)
+	FAIL_STACK_ERROR	
+
+    /* Read the attributes */
+    if(H5Aread(aid, tid, &rbuf) < 0)
+	FAIL_STACK_ERROR	
+    if(H5Aread(aid2, tid2, &rbuf2) < 0)
+	FAIL_STACK_ERROR
+
+    /* Compare the attributes' data */
+    if(rbuf.i != rbuf2.i)
+	FAIL_STACK_ERROR
+    if(HDstrlen(rbuf.v) != HDstrlen(rbuf2.v)) 
+	FAIL_STACK_ERROR
+    if(HDmemcmp(rbuf.v, rbuf2.v, HDstrlen(rbuf.v))) 
+	FAIL_STACK_ERROR
+
+    /* Close the attributes */
+    if(H5Aclose(aid) < 0)
+	FAIL_STACK_ERROR
+    if(H5Aclose(aid2) < 0)
+	FAIL_STACK_ERROR
+    return TRUE;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Aclose(aid);
+        H5Aclose(aid2);
+        H5Tclose(tid);
+        H5Tclose(tid2);
+    } H5E_END_TRY;
+    return FALSE;
+
+} /* compare_attribute_compound_vlstr() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_copy_attribute_compound_vlstr
+ *
+ * Purpose:     Create a simple dataset and a group in SRC file.
+ *		Both has an attribute with a compound datatype consisting
+ *              of a variable length string
+ *              Copy the dataset and the group to DST file
+ *		This is for HDFFV-7991
+ *
+ * Return:      Success:        0
+ *              Failure:        number of errors
+ *
+ * Programmer:  
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_copy_attribute_compound_vlstr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
+{
+    hid_t fid_src = -1, fid_dst = -1;           /* File IDs */
+    hid_t sid = -1;                             /* Dataspace ID */
+    hid_t did = -1, did2 = -1;                  /* Dataset IDs */
+    hid_t aid = -1, aid2 = -1;                  /* Attribute IDs */
+    hid_t gid = -1, gid2 = -1;			/* Group IDs */
+    hsize_t dim2d[2];                           /* Dataset dimensions */
+    char src_filename[NAME_BUF_SIZE];		/* Source file name */
+    char dst_filename[NAME_BUF_SIZE];		/* Destination file name */
+
+    TESTING("H5Ocopy(): attribute with compound datatype consisting of variable length string");
+
+    /* Initialize the filenames */
+    h5_fixname(FILENAME[0], src_fapl, src_filename, sizeof src_filename);
+    h5_fixname(FILENAME[1], dst_fapl, dst_filename, sizeof dst_filename);
+
+    /* Reset file address checking info */
+    addr_reset();
+
+    /* create source file */
+    if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* set dataspace dimensions */
+    dim2d[0] = DIM_SIZE_1;
+    dim2d[1] = DIM_SIZE_2;
+
+    /* create 2D dataspace */
+    if((sid = H5Screate_simple(2, dim2d, NULL)) < 0)
+	FAIL_STACK_ERROR
+
+    /* create 2D int dataset at SRC file */
+    if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* close dataspace */
+    if(H5Sclose(sid) < 0)
+	FAIL_STACK_ERROR
+
+    /* attach an attribute to the dataset */
+    if(attach_attribute_compound_vlstr(did) < 0)
+	FAIL_STACK_ERROR
+
+    /* close the dataset */
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR
+
+    /* create a group */
+    if((gid = H5Gcreate2(fid_src, NAME_GROUP_EMPTY, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* attach attribute to the group */
+    if(attach_attribute_compound_vlstr(gid) < 0)
+	FAIL_STACK_ERROR
+
+    /* close the group */
+    if(H5Gclose(gid) < 0)
+	FAIL_STACK_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0)
+	FAIL_STACK_ERROR
+
+
+    /* open the source file with read-only */
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* create destination file */
+    if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
+    if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* copy the dataset from SRC to DST */
+    if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0)
+	FAIL_STACK_ERROR
+
+    /* open the src dataset */
+    if((did = H5Dopen2(fid_src, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* open the destination dataset */
+    if((did2 = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* compare the data of the attributes attached to the two datasets */
+    if(compare_attribute_compound_vlstr(did, did2) < 0)
+	FAIL_STACK_ERROR
+
+    /* close the datasets */
+    if(H5Dclose(did2) < 0)
+	FAIL_STACK_ERROR
+    if(H5Dclose(did) < 0)
+	FAIL_STACK_ERROR
+
+    /* Copy the group */
+    if(H5Ocopy(fid_src, NAME_GROUP_EMPTY, fid_dst, NAME_GROUP_EMPTY, H5P_DEFAULT, H5P_DEFAULT) < 0)
+	FAIL_STACK_ERROR
+
+    /* Open the src group */
+    if((gid = H5Gopen2(fid_src, NAME_GROUP_EMPTY, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+    /* Open the destination group */
+    if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_EMPTY, H5P_DEFAULT)) < 0)
+	FAIL_STACK_ERROR
+
+    /* compare the data of the attributes attached to the two groups */
+    if(compare_attribute_compound_vlstr(gid, gid2) < 0)
+	FAIL_STACK_ERROR
+
+    /* close the groups */
+    if(H5Gclose(gid) < 0) 
+	FAIL_STACK_ERROR
+    if(H5Gclose(gid2) < 0) 
+	FAIL_STACK_ERROR
+
+    /* close the SRC file */
+    if(H5Fclose(fid_src) < 0)
+	FAIL_STACK_ERROR
+
+    /* close the DST file */
+    if(H5Fclose(fid_dst) < 0)
+	FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Aclose(aid2);
+        H5Aclose(aid);
+    	H5Dclose(did2);
+    	H5Dclose(did);
+    	H5Gclose(gid);
+    	H5Gclose(gid2);
+    	H5Sclose(sid);
+    	H5Fclose(fid_dst);
+    	H5Fclose(fid_src);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_copy_attribute_compound_vlstr() */
 
 
 /*-------------------------------------------------------------------------
@@ -9115,7 +9428,7 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     if((aid = H5Acreate2(gid, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    if(H5Awrite(aid, tid, buf) < 0) TEST_ERROR
+    //if(H5Awrite(aid, tid, buf) < 0) TEST_ERROR
 
     /* close the datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
@@ -12360,6 +12673,7 @@ main(void)
             nerrors += test_copy_dataset_compact_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_dataset_compressed_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_attribute_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
+            nerrors += test_copy_attribute_compound_vlstr(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_dataset_compact_named_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_dataset_contig_named_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
             nerrors += test_copy_dataset_chunked_named_vl(fcpl_src, fcpl_dst, src_fapl, dst_fapl);
