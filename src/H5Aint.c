@@ -1926,6 +1926,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
     hid_t       tid_mem = -1;           /* Datatype ID for memory datatype */
     void       *buf = NULL;             /* Buffer for copying data */
     void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
+    void       *bkg_buf = NULL;     	/* Background buffer */
     hid_t       buf_sid = -1;           /* ID for buffer dataspace */
     hssize_t	sdst_nelmts;	        /* # of elements in destination attribute (signed) */
     size_t	dst_nelmts;		/* # of elements in destination attribute */
@@ -2104,14 +2105,24 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
 
             HDmemcpy(buf, attr_src->shared->data, attr_src->shared->data_size);
 
+	    /* Allocate background memory */
+	    if(H5T_path_bkg(tpath_src_mem) || H5T_path_bkg(tpath_mem_dst)) {
+		if(NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
+		    HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+	    }
+
             /* Convert from source file to memory */
-            if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
+            if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, bkg_buf, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
 
             HDmemcpy(reclaim_buf, buf, buf_size);
 
+	    /* Set background buffer to all zeros */
+	    if(bkg_buf)
+		HDmemset(bkg_buf, 0, buf_size);
+
             /* Convert from memory to destination file */
-            if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
+            if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg_buf, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
 
             HDmemcpy(attr_dst->shared->data, buf, attr_dst->shared->data_size);
@@ -2158,6 +2169,8 @@ done:
         buf = H5FL_BLK_FREE(attr_buf, buf);
     if(reclaim_buf)
         reclaim_buf = H5FL_BLK_FREE(attr_buf, reclaim_buf);
+    if(bkg_buf)
+        bkg_buf = H5FL_BLK_FREE(attr_buf, bkg_buf);
 
     /* Release destination attribute information on failure */
     if(!ret_value && attr_dst && H5A_close(attr_dst) < 0)
