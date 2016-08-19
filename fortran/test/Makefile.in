@@ -103,9 +103,13 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libh5test_fortran_la_LIBADD =
 am__libh5test_fortran_la_SOURCES_DIST = tf_F90.f90 tf.f90 t.c \
-	tf_F08.f90
-@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_libh5test_fortran_la_OBJECTS =  \
-@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf_F90.lo tf.lo t.lo
+	tf_F03.f90 tf_F08.f90
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_libh5test_fortran_la_OBJECTS = tf_F90.lo \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.lo \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.lo
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@am_libh5test_fortran_la_OBJECTS = tf_F03.lo \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.lo \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.lo
 @FORTRAN_HAVE_STORAGE_SIZE_TRUE@am_libh5test_fortran_la_OBJECTS =  \
 @FORTRAN_HAVE_STORAGE_SIZE_TRUE@	tf_F08.lo tf.lo t.lo
 libh5test_fortran_la_OBJECTS = $(am_libh5test_fortran_la_OBJECTS)
@@ -736,8 +740,15 @@ TEST_PROG = fortranlib_test fflush1 fflush2 fortranlib_test_1_8 \
 
 # tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
 # compiled first
-@FORTRAN_HAVE_STORAGE_SIZE_FALSE@libh5test_fortran_la_SOURCES =  \
-@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf_F90.f90 tf.f90 t.c
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@libh5test_fortran_la_SOURCES = tf_F90.f90 \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.f90 \
+@FORTRAN_2003_CONDITIONAL_F_FALSE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.c
+
+# tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
+# compiled first
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@libh5test_fortran_la_SOURCES = tf_F03.f90 \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	tf.f90 \
+@FORTRAN_2003_CONDITIONAL_F_TRUE@@FORTRAN_HAVE_STORAGE_SIZE_FALSE@	t.c
 
 # tf.f90 depends on either tf_F08.f90 or tf_F03.f90 so they need to be
 # compiled first
@@ -1422,9 +1433,6 @@ uninstall-am:
 
 help:
 	@$(top_srcdir)/bin/makehelp
-@FORTRAN_HAVE_STORAGE_SIZE_FALSE@  if FORTRAN_2003_CONDITIONAL_F
-@FORTRAN_HAVE_STORAGE_SIZE_FALSE@  else
-@FORTRAN_HAVE_STORAGE_SIZE_FALSE@  endif
 
 # Fortran module files can have different extensions and different names
 # (e.g., different capitalizations) on different platforms.  Write rules
