@@ -30,9 +30,10 @@
 #include "H5FcreatProp.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
-#include "H5CommonFG.h"
+//#include "H5CommonFG.h"
 #include "H5DataType.h"
 #include "H5DataSpace.h"
+#include "H5Group.h"
 #include "H5File.h"
 #include "H5Attribute.h"
 #include "H5private.h"		// for HDfree
