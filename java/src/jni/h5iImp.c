@@ -52,11 +52,11 @@ Java_hdf_hdf5lib_H5_H5Iget_1type
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Iget_name
+ * Method:    H5Iget_name_long
  * Signature: (JLjava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Iget_1name
+Java_hdf_hdf5lib_H5_H5Iget_1name_1long
     (JNIEnv *env, jclass clss, jlong obj_id, jobjectArray name, jlong buf_size)
 {
     char *aName;
@@ -91,11 +91,11 @@ Java_hdf_hdf5lib_H5_H5Iget_1name
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Iget_name_str
+ * Method:    H5Iget_name
  * Signature: (J)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Iget_1name_1str
+Java_hdf_hdf5lib_H5_H5Iget_1name
     (JNIEnv *env, jclass clss, jlong obj_id)
 {
     char *aName;
