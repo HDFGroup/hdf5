@@ -17,8 +17,8 @@
 #ifndef __H5Object_H
 #define __H5Object_H
 
-#include "H5Location.h"
-#include "H5Classes.h"		// constains forward class declarations
+//#include "H5Location.h"
+//#include "H5Classes.h"		// constains forward class declarations
 
 // H5Object is a baseclass.  It has these subclasses:
 // Group, DataSet, and DataType.
@@ -38,6 +38,21 @@
 namespace H5 {
 #endif
 
+class H5_DLLCPP H5Object;
+
+// Define the operator function pointer for H5Aiterate().
+typedef void (*attr_operator_t)( H5Object& loc/*in*/,
+                                 const H5std_string attr_name/*in*/,
+                                 void *operator_data/*in,out*/);
+
+// User data for attribute iteration
+class UserData4Aiterate {
+    public:
+	attr_operator_t op;
+	void* opData;
+	H5Object* location;
+};
+
 /*! \class H5Object
     \brief Class H5Object is a bridge between H5Location and DataSet, DataType,
      and Group.
@@ -46,15 +61,51 @@ namespace H5 {
 */
 class H5_DLLCPP H5Object : public H5Location {
    public:
+// Rearranging classes (HDFFV-9920) moved H5A wrappers back into H5Object.
+// That way, C functions that takes attribute id can be in
+// H5Location and those that cannot take attribute id can be in H5Object.
+
+	// Creates an attribute for the specified object
+	// PropList is currently not used, so always be default.
+	Attribute createAttribute( const char* name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT ) const;
+	Attribute createAttribute( const H5std_string& name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT ) const;
+
+	// Given its name, opens the attribute that belongs to an object at
+	// this location.
+	Attribute openAttribute( const char* name ) const;
+	Attribute openAttribute( const H5std_string& name ) const;
+
+	// Given its index, opens the attribute that belongs to an object at
+	// this location.
+	Attribute openAttribute( const unsigned int idx ) const;
+
+	// Iterate user's function over the attributes of this object.
+	int iterateAttrs(attr_operator_t user_op, unsigned* idx = NULL, void* op_data = NULL);
+
+	// Determines the number of attributes belong to this object.
+	int getNumAttrs() const;
+
+	// Checks whether the named attribute exists for this object.
+	bool attrExists(const char* name) const;
+	bool attrExists(const H5std_string& name) const;
+
+	// Renames the named attribute to a new name.
+	void renameAttr(const char* oldname, const char* newname) const;
+	void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
+
+	// Removes the named attribute from this object.
+	void removeAttr(const char* name) const;
+	void removeAttr(const H5std_string& name) const;
+
+	// Returns an identifier.
+	virtual hid_t getId() const = 0;
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Gets the name of this HDF5 object, i.e., Group, DataSet, or
 	// DataType.  These should have const but are retiring anyway.
 	ssize_t getObjName(char *obj_name, size_t buf_size = 0) const;
 	ssize_t getObjName(H5std_string& obj_name, size_t len = 0) const;
 	H5std_string getObjName() const;
-
-	// Noop destructor.
-	virtual ~H5Object();
 
    protected:
 	// Default constructor
@@ -72,6 +123,13 @@ class H5_DLLCPP H5Object : public H5Location {
 
 	// Copy constructor: makes copy of an H5Object object.
 	// H5Object(const H5Object& original);
+
+        // Sets the identifier of this object to a new value. - this one
+        // doesn't increment reference count
+        virtual void p_setId(const hid_t new_id) = 0;
+
+	// Noop destructor.
+	virtual ~H5Object();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
