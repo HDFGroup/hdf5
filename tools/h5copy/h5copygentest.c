@@ -368,7 +368,7 @@ static void gent_att_compound_vlstr(hid_t loc_id)
 
     /* Create a dataset */
     null_sid = H5Screate(H5S_NULL);
-    did = H5Dcreate(loc_id, DATASET_ATTR, H5T_NATIVE_INT, null_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    did = H5Dcreate2(loc_id, DATASET_ATTR, H5T_NATIVE_INT, null_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Attach an attribute with the compound datatype to the dataset */
     sid = H5Screate_simple(1, dim, dim);
