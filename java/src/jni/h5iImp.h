@@ -43,6 +43,15 @@ Java_hdf_hdf5lib_H5_H5Iget_1name
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Iget_name_str
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Iget_1name_1str
+  (JNIEnv*, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Iget_ref
  * Signature: (J)I
  */

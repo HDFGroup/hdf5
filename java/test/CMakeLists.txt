@@ -88,7 +88,11 @@ set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}
 set (testfilter "OK (598 tests)")
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+  if (WIN32)
+    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_D;")
+  else()
+    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+  endif()
 endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 add_test (
