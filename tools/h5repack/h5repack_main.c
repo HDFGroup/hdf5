@@ -265,11 +265,11 @@ int read_info(const char *filename, pack_opt_t *options) {
 			c = '0';
 			while (c != ' ') {
 				if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
-                                    error_msg("fscanf error\n");
-                                    h5tools_setstatus(EXIT_FAILURE);
-                                    ret_value = EXIT_FAILURE;
-                                    goto done;
-                                } /* end if */
+                    error_msg("fscanf error\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = EXIT_FAILURE;
+                    goto done;
+                } /* end if */
 				if (HDfeof(fp))
 					break;
 			}
@@ -277,11 +277,11 @@ int read_info(const char *filename, pack_opt_t *options) {
 			/* go until end */
 			while (c != ' ') {
 				if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
-                                    error_msg("fscanf error\n");
-                                    h5tools_setstatus(EXIT_FAILURE);
-                                    ret_value = EXIT_FAILURE;
-                                    goto done;
-                                } /* end if */
+                    error_msg("fscanf error\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = EXIT_FAILURE;
+                    goto done;
+                } /* end if */
 				comp_info[i] = c;
 				i++;
 				if (HDfeof(fp))
@@ -292,10 +292,10 @@ int read_info(const char *filename, pack_opt_t *options) {
 			comp_info[i - 1] = '\0'; /*cut the last " */
 
 			if (h5repack_addfilter(comp_info, options) == -1) {
-                                error_msg("could not add compression option\n");
-                                h5tools_setstatus(EXIT_FAILURE);
-                                ret_value = EXIT_FAILURE;
-                                goto done;
+				error_msg("could not add compression option\n");
+				h5tools_setstatus(EXIT_FAILURE);
+				ret_value = EXIT_FAILURE;
+				goto done;
 			}
 		}
 		/*-------------------------------------------------------------------------
@@ -309,11 +309,11 @@ int read_info(const char *filename, pack_opt_t *options) {
 			c = '0';
 			while (c != ' ') {
 				if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
-                                    error_msg("fscanf error\n");
-                                    h5tools_setstatus(EXIT_FAILURE);
-                                    ret_value = EXIT_FAILURE;
-                                    goto done;
-                                } /* end if */
+                    error_msg("fscanf error\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = EXIT_FAILURE;
+                    goto done;
+                } /* end if */
 				if (HDfeof(fp))
 					break;
 			}
@@ -321,11 +321,11 @@ int read_info(const char *filename, pack_opt_t *options) {
 			/* go until end */
 			while (c != ' ') {
 				if(fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
-                                    error_msg("fscanf error\n");
-                                    h5tools_setstatus(EXIT_FAILURE);
-                                    ret_value = EXIT_FAILURE;
-                                    goto done;
-                                } /* end if */
+                    error_msg("fscanf error\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = EXIT_FAILURE;
+                    goto done;
+                } /* end if */
 				comp_info[i] = c;
 				i++;
 				if (HDfeof(fp))
@@ -336,10 +336,10 @@ int read_info(const char *filename, pack_opt_t *options) {
 			comp_info[i - 1] = '\0'; /*cut the last " */
 
 			if (h5repack_addlayout(comp_info, options) == -1) {
-                            error_msg("could not add chunck option\n");
-                            h5tools_setstatus(EXIT_FAILURE);
-                            ret_value = EXIT_FAILURE;
-                            goto done;
+				error_msg("could not add chunck option\n");
+				h5tools_setstatus(EXIT_FAILURE);
+				ret_value = EXIT_FAILURE;
+				goto done;
 			}
 		}
 		/*-------------------------------------------------------------------------
