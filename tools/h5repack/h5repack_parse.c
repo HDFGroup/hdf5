@@ -44,7 +44,7 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
     size_t      i, m, u;
     char        c;
     size_t      len = HDstrlen(str);
-    int         k, l, p, r, q, end_obj = -1, no_param = 0;
+    int         k, l, p, q, end_obj = -1, no_param = 0;
     unsigned    j, n;
     char        sobj[MAX_NC_NAME];
     char        scomp[10];
@@ -219,7 +219,6 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                 else if (HDstrcmp(scomp, "UD") == 0) {
                     l = -1; /* filter number index check */
                     p = -1; /* CD_VAL count check */
-                    r = -1; /* CD_VAL check */
                     for (m = 0, q = 0, u = i + 1; u < len; u++, m++, q++) {
                         if (str[u] == ',') {
                             stype[q] = '\0'; /* end digit */
@@ -232,7 +231,7 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                                 p = 0;
                             }
                             else
-                                r = 0;
+                                filt->cd_values[j++] = (unsigned)HDstrtoul(stype, NULL, 0);
                             q = 0;
                             u++; /* skip ',' */
                         }
@@ -244,11 +243,7 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                             HDexit(EXIT_FAILURE);
                         }
                         stype[q] = c;
-                        if (l == 0 && p == 0) {
-                            if (r == 0)
-                                filt->cd_values[j++] = (unsigned) HDstrtoul(stype, NULL, 0);
-                        }
-                    } /* u */
+                    } /* for u */
                     stype[q] = '\0';
                 } /*if */
 
@@ -273,6 +268,8 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                 } /*if */
 
                 filt->cd_values[j++] = (unsigned) HDstrtoul(stype, NULL, 0);
+                if(filt->cd_nelmts == 0)
+                    j = 0;
                 i += m; /* jump */
             }
             else if (i == len - 1) { /*no more parameters */

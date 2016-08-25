@@ -2306,6 +2306,7 @@
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
+./tools/h5repack/testfiles/h5repack_layout.h5-plugin_zero.tst
 ./tools/h5repack/testfiles/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
 ./tools/h5repack/testfiles/2_vds.h5-vds_chunk3x6x9-v.ddl
 ./tools/h5repack/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl

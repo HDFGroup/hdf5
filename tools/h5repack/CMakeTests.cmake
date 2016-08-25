@@ -121,6 +121,7 @@
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_compa-v.ddl
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/4_vds.h5-vds_conti-v.ddl
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_zero.tst
   )
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
@@ -1145,6 +1146,8 @@
 ##############################################################################
   ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,1,9)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
+  # check for no parameters
+  ADD_H5_CMP_TEST (plugin_zero "" "TEST" 255 h5repack_layout.h5 -v -f UD=250,0)
 
   if (HDF5_TEST_VFD)
     # Run test with different Virtual File Driver
