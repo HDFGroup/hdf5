@@ -49,6 +49,19 @@ else
     fi
 fi
 
+# Do an autogen if generated files (e.g., configure) is not present
+if [ ! -f configure ]; then
+    echo "   running $AUTOGEN"
+    $AUTOGEN > $AUTOGEN_LOG 2>&1
+    if [ $? -ne 0 ]; then
+	echo $AUTOGEN encountered error. Abort.
+	echo output from $AUTOGEN:
+	cat $AUTOGEN_LOG
+	exit 1
+    fi
+    rm $AUTOGEN_LOG
+fi
+
 # Check for duplicate entries.  This can be done at any time, but it may as 
 # well be sooner so that if something else fails the presence of duplicates
 # will already be known.
@@ -77,23 +90,22 @@ done
 # Get the list of files under version control and check that they are
 # present.
 #
-# First get a list of all the pending files with svn stat and
+# First get a list of all the pending files with git status and
 # check those.
 git_stat=`git status -s`
 for file in $git_stat; do
 
-    # Newly added files are not listed by svn ls, which
+    # Newly added files are not listed by git ls-files, which
     # we check later.
 
     # The line listing new files starts with 'A'.
     letter=`echo $file | head -c 1`
     if [ "$letter" = "A" ]; then
-        # Convert the seven Subversion status columns to './' so it matches
+        # Convert the git status columns to './' so it matches
         # the manifest file name.
         #
         # There is a space between the status columns and file name, hence
-        # the '8' instead of '7'.
-        # For git status -s it's 3 instead of 8.
+        # the '3'.
         path=`echo $file | sed 's/^.\{3\}/\.\//g'`
         # Ignore directories
         if [ ! -d $path ]; then
@@ -107,9 +119,8 @@ for file in $git_stat; do
     fi
 done
 
-# Next check svn ls, which gets a list of all files that are
+# Next check git ls-files, which gets a list of all files that are
 # checked in.
-##svn_ls=`svn ls -R`
 git_ls=`git ls-files`
 for file in $git_ls; do
     path="./${file}"
