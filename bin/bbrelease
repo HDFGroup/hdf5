@@ -33,6 +33,15 @@
 #
 #   James Laird, 2005-09-07
 #   Added the md5 method.
+#
+#   Larry Knox, 2016-08-30
+#   Added the --revision option to create private releases with the 
+#   code revision hash in the version strings. Currently the version
+#   of this script with the --revision option is named bbrelease. It 
+#   can probably be merged into the original release script in the
+#   future.
+#   Commands to get the revision hash have now been converted to git
+#   to match the source repository change.
 
 # Function definitions
 #
@@ -265,19 +274,18 @@ fi
 
 if [ X$revmode = Xyes ]; then
     VERS_OLD=$VERS
+    echo "Save old version $VERS_OLD for restoration later."
     # Copy old version of config/lt_vers.am, since it's hard to
     # "undo" changes to it.
     cp config/lt_vers.am $tmpdir
-#branch=`svn info | grep ^URL: | awk -F/ '{print $NF}'`
-#revision=`svn info | grep "Revision:" | awk '{print $2}'`
-    branch=`git branch | awk '{print $2}'`
+    branch=`git branch | grep '*' | awk '{print $NF}'`
     revision=`git rev-parse HEAD`
 # Set version information to m.n.r-r$revision.
     # (h5vers does not correctly handle just m.n.r-$today.)
-    VERS=`echo $VERS | sed -e s/-.*//`-r$revision
+    VERS=`echo $VERS | sed -e s/-.*//`-$revision
     echo Private release of $VERS
     bin/h5vers -s $VERS
-    HDF5_VERS=hdf5-$branch-r$revision
+    HDF5_VERS=hdf5-$branch-$revision
     # use a generic directory name for revision releases
     HDF5_IN_VERS=hdfsrc
 else
@@ -394,6 +402,7 @@ test -f $tmpdir/Makefile.x && mv $tmpdir/Makefile.x Makefile
 
 # Restore OLD version information, then no need for trap.
 if [ X$pmode = Xyes ] || [ X$revmode = Xyes ]; then
+    echo "Restore the original version $VERS_OLD"
     RESTORE_VERSION
     trap 0
 fi
