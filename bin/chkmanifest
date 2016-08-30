@@ -54,8 +54,8 @@ fi
 
 # Do an autogen if generated files (e.g., configure) is not present
 if [ ! -f configure ]; then
-    echo "   running $AUTOGEN -p"
-    $AUTOGEN -p > $AUTOGEN_LOG 2>&1
+    echo "   running $AUTOGEN"
+    $AUTOGEN > $AUTOGEN_LOG 2>&1
     if [ $? -ne 0 ]; then
 	echo $AUTOGEN encountered error. Abort.
 	echo output from $AUTOGEN:
