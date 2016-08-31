@@ -127,7 +127,7 @@ then
         RunTest h5_shared_mesg &&\
         rm h5_shared_mesg &&\
         RunTest h5_vol_external_log_native &&\
-        rm h5_vol_external_log_native; then
+        rm h5_vol_external_log_native &&\
         RunTest h5_vds-eiger &&\
         rm h5_vds-eiger &&\
         RunTest h5_vds-exclim &&\
