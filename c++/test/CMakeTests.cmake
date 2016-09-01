@@ -39,6 +39,7 @@ if (HDF5_TEST_VFD)
 
   MACRO (ADD_VFD_TEST vfdname resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdname}")
       add_test (
           NAME CPP_VFD-${vfdname}-cpp_testhdf5-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -58,7 +59,7 @@ if (HDF5_TEST_VFD)
             -D "TEST_VFD:STRING=${vfdname}"
             -D "TEST_EXPECT=${resultcode}"
             -D "TEST_OUTPUT=cpp_testhdf5"
-            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}"
             -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
       )
       set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES DEPENDS CPP_VFD-${vfdname}-cpp_testhdf5-clear-objects)
