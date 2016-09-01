@@ -357,7 +357,7 @@ subf_fpp_r(void)
     ret = H5Pclose(fapl_id);
     VRFY((ret == 0), "");
 
-    /* create the dataset with the subfiling dapl settings */
+    /* open the dataset */
     did = H5Dopen2(fid, DATASET1, H5P_DEFAULT);
     VRFY((did >= 0), "");
 
@@ -374,7 +374,7 @@ subf_fpp_r(void)
     stride[0] = 1;
     stride[1] = 1;
 
-    /* set the selection for this dataset that this process will write to */
+    /* set the selection for this dataset that this process will read from */
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret == 0), "H5Sset_hyperslab succeeded");
 
@@ -601,7 +601,7 @@ subf_2_r(void)
     ret = H5Pclose(fapl_id);
     VRFY((ret == 0), "");
 
-    /* create the dataset with the subfiling dapl settings */
+    /* open the dataset */
     did = H5Dopen2(fid, DATASET1, H5P_DEFAULT);
     VRFY((did >= 0), "");
 
@@ -618,7 +618,7 @@ subf_2_r(void)
     stride[0] = 1;
     stride[1] = 1;
 
-    /* set the selection for this dataset that this process will write to */
+    /* set the selection for this dataset that this process will read from */
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret == 0), "H5Sset_hyperslab succeeded");
 
