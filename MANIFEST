@@ -91,6 +91,10 @@
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
+./bin/pkgscrpts/h5rmflags                  _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/makeHDF5BinaryTarfiles.pl  _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/makeInternalREADME.pl      _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/makeOuterREADME.pl         _DO_NOT_DISTRIBUTE_
 
 ./config/COPYING
 ./config/BlankForm
