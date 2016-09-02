@@ -63,7 +63,11 @@ endforeach (HDFJAVA_JAR)
 
 MACRO (ADD_H5_TEST resultfile resultcode)
   if (CMAKE_BUILD_TYPE MATCHES Debug)
-    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+    if (WIN32)
+      set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_D;")
+    else()
+      set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+    endif()
   endif(CMAKE_BUILD_TYPE MATCHES Debug)
   add_test (
       NAME JAVA_datasets-${resultfile}

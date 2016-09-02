@@ -2634,49 +2634,50 @@ Java_hdf_hdf5lib_H5_H5export_1dataset
         h5nullArgument(env, "HDF5Library_export_data:  object_path is NULL");
     } /* end else if */
     else {
-        PIN_JAVA_STRING0(file_name, fileName);
+        PIN_JAVA_STRING(file_name, fileName);
+        if (fileName != NULL) {
+            file_id = H5Fopen(fileName, (unsigned)H5F_ACC_RDWR, (hid_t)H5P_DEFAULT);
 
-        file_id = H5Fopen(fileName, (unsigned)H5F_ACC_RDWR, (hid_t)H5P_DEFAULT);
+            UNPIN_JAVA_STRING(file_name, fileName);
 
-        UNPIN_JAVA_STRING(file_name, fileName);
-
-        if (file_id < 0) {
-            /* throw exception */
-            h5libraryError(env);
-        } /* end if */
-        else {
-            object_name = ENVPTR->GetStringUTFChars(ENVPAR object_path, &isCopy2);
-            if (object_name == NULL) {
-                h5JNIFatalError( env, "H5Dopen:  object name not pinned");
+            if (file_id < 0) {
+                /* throw exception */
+                h5libraryError(env);
             } /* end if */
             else {
-                dataset_id = H5Dopen2(file_id, object_name, H5P_DEFAULT);
-
-                ENVPTR->ReleaseStringUTFChars(ENVPAR object_path, object_name);
-
-                if (dataset_id < 0) {
-                    H5Fclose(file_id);
-                    h5libraryError(env);
+                object_name = ENVPTR->GetStringUTFChars(ENVPAR object_path, &isCopy2);
+                if (object_name == NULL) {
+                    h5JNIFatalError( env, "H5Dopen:  object name not pinned");
                 } /* end if */
                 else {
-                    file_export = ENVPTR->GetStringUTFChars(ENVPAR file_export_name, 0);
-                    stream = HDfopen(file_export, "w+");
-                    ENVPTR->ReleaseStringUTFChars(ENVPAR file_export_name, file_export);
+                    dataset_id = H5Dopen2(file_id, object_name, H5P_DEFAULT);
 
-                    ret_val = h5str_dump_simple_dset(stream, dataset_id, binary_order);
+                    ENVPTR->ReleaseStringUTFChars(ENVPAR object_path, object_name);
 
-                    if (stream)
-                        HDfclose(stream);
-
-                    H5Dclose(dataset_id);
-
-                    H5Fclose(file_id);
-
-                    if (ret_val < 0)
+                    if (dataset_id < 0) {
+                        H5Fclose(file_id);
                         h5libraryError(env);
+                    } /* end if */
+                    else {
+                        file_export = ENVPTR->GetStringUTFChars(ENVPAR file_export_name, 0);
+                        stream = HDfopen(file_export, "w+");
+                        ENVPTR->ReleaseStringUTFChars(ENVPAR file_export_name, file_export);
+
+                        ret_val = h5str_dump_simple_dset(stream, dataset_id, binary_order);
+
+                        if (stream)
+                            HDfclose(stream);
+
+                        H5Dclose(dataset_id);
+
+                        H5Fclose(file_id);
+
+                        if (ret_val < 0)
+                            h5libraryError(env);
+                    } /* end else */
                 } /* end else */
             } /* end else */
-        } /* end else */
+        }
     } /* end else */
 } /* end Java_hdf_hdf5lib_H5_H5export_1dataset */
 

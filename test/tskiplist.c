@@ -31,9 +31,6 @@
        11/15/04 - Started coding
  */
 
-#include <time.h>
-#include <stdlib.h>
-
 #include "testhdf5.h"
 #include "H5SLprivate.h"
 

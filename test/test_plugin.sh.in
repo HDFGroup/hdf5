@@ -31,11 +31,11 @@ FROM_DIR=`pwd`/.libs
 case $(uname) in
     CYGWIN* )
         PLUGIN_LIB1="$FROM_DIR/cygdynlib1* $FROM_DIR/cygdynlib3*"
-        PLUGIN_LIB2="$FROM_DIR/cygdynlib2*"
+        PLUGIN_LIB2="$FROM_DIR/cygdynlib2* $FROM_DIR/cygdynlib4*"
         ;;
     *)
         PLUGIN_LIB1="$FROM_DIR/libdynlib1.* $FROM_DIR/libdynlib3.*"
-        PLUGIN_LIB2="$FROM_DIR/libdynlib2.*"
+        PLUGIN_LIB2="$FROM_DIR/libdynlib2.* $FROM_DIR/libdynlib4.*"
         ;;
 esac
 PLUGIN_LIBDIR1=testdir1

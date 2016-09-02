@@ -75,7 +75,7 @@ set (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FO
 
 set (CMAKE_BUILD_TYPE "Debug" CACHE STRING "Build Debug" FORCE)
 
-set (CTEST_BUILD_CONFIGURATION "Debug" CACHE STRING "Build Debug" FORCE)
+set (CTEST_CONFIGURATION_TYPE "Debug" CACHE STRING "Build Debug" FORCE)
 
 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
 

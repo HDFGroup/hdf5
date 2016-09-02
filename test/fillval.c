@@ -623,7 +623,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
         if((dset9 = H5Dopen2(file, "dset9", H5P_DEFAULT)) < 0) goto error;
         if((dcpl = H5Dget_create_plist(dset9)) < 0) goto error;
         if(H5Pget_fill_value(dcpl, comp_type_id, &rd_c) < 0) goto error;
-        if( rd_c.a!=0 || rd_c.y != fill_ctype.y || rd_c.x != 0 || rd_c.z != '\0') {
+        if(!H5_FLT_ABS_EQUAL(rd_c.a, 0) || !H5_DBL_ABS_EQUAL(rd_c.y, fill_ctype.y) || rd_c.x != 0 || rd_c.z != '\0') {
            H5_FAILED();
            puts("    Got wrong fill value");
            printf("    Got rd_c.a=%f, rd_c.y=%f and rd_c.x=%d, rd_c.z=%c\n",
@@ -696,7 +696,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
     if((dset8 = H5Dopen2(file, "dset8", H5P_DEFAULT)) < 0) goto error;
     if((dcpl = H5Dget_create_plist(dset8)) < 0) goto error;
     if(H5Pget_fill_value(dcpl, comp_type_id, &rd_c) < 0) goto error;
-    if(rd_c.a != 0 || rd_c.y != fill_ctype.y || rd_c.x != 0 || rd_c.z!='\0') {
+    if(!H5_FLT_ABS_EQUAL(rd_c.a, 0) || !H5_DBL_ABS_EQUAL(rd_c.y, fill_ctype.y) || rd_c.x != 0 || rd_c.z != '\0') {
         H5_FAILED();
         puts("    Got wrong fill value");
         printf("    Got rd_c.a=%f, rd_c.y=%f and rd_c.x=%d, rd_c.z=%c\n",
@@ -789,7 +789,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
         goto error;
     for (i=0; i<1000; i++) {
 	for (j=0; j<5; j++)
-	    hs_offset[j] = rand() % cur_size[j];
+	    hs_offset[j] = (hsize_t)HDrand() % cur_size[j];
 	if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL,
 				one, NULL) < 0) goto error;
 
@@ -811,9 +811,9 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 	} else if(datatype==H5T_COMPOUND) {
             if(H5Dread(dset2, ctype_id, mspace, fspace, H5P_DEFAULT,
                 &rd_c) < 0) goto error;
-            if(fill_time!=H5D_FILL_TIME_NEVER && (rd_c.a!=fill_c.a ||
-		rd_c.x!=fill_c.x || rd_c.y!=fill_c.y ||
-		rd_c.z!=fill_c.z)) {
+            if(fill_time != H5D_FILL_TIME_NEVER && (!H5_FLT_ABS_EQUAL(rd_c.a, fill_c.a) ||
+                    rd_c.x != fill_c.x || !H5_DBL_ABS_EQUAL(rd_c.y, fill_c.y) ||
+                    rd_c.z != fill_c.z)) {
                 H5_FAILED();
                 HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                 HDfprintf(stdout,"    Elmt={%Hu,%Hu,%Hu,%Hu,%Hu}, read: %f, %d, %f, %c"
@@ -879,8 +879,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
         /* Verify values, except if no fill value written */
         if(fill_time != H5D_FILL_TIME_NEVER) {
             for(u = 0; u < nelmts; u++) {
-                if(buf_c[u].a != fill_c.a || buf_c[u].x != fill_c.x ||
-                        buf_c[u].y != fill_c.y || buf_c[u].z != fill_c.z) {
+                if(!H5_FLT_ABS_EQUAL(buf_c[u].a, fill_c.a) || buf_c[u].x != fill_c.x ||
+                        !H5_DBL_ABS_EQUAL(buf_c[u].y, fill_c.y) || buf_c[u].z != fill_c.z) {
                     H5_FAILED();
                     HDfprintf(stdout, "%u: Value read was not a fill value.\n", (unsigned)__LINE__);
                     HDfprintf(stdout,"    Elmt={%Hu, %Hu, %Hu, %Hu, %Hu}, read: %f, %d, %f, %c"
@@ -938,7 +938,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
         goto error;
     for(i = 0; i < 1000; i++) {
 	for(j = 0, odd = 0; j < 5; j++) {
-	    hs_offset[j] = rand() % cur_size[j];
+	    hs_offset[j] = (hsize_t)HDrand() % cur_size[j];
 	    odd += (int)(hs_offset[j]%2);
 	} /* end for */
 	if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0)
@@ -993,8 +993,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
 		    should_be_c.y=buf_c[0].y;
 		    should_be_c.z=buf_c[0].z;
 		}
-		if( rd_c.a!=should_be_c.a || rd_c.x!=should_be_c.x ||
-		    rd_c.y!=should_be_c.y || rd_c.z!=should_be_c.z)  {
+		if(!H5_FLT_ABS_EQUAL(rd_c.a, should_be_c.a) || rd_c.x != should_be_c.x ||
+		    !H5_DBL_ABS_EQUAL(rd_c.y, should_be_c.y) || rd_c.z != should_be_c.z)  {
                     H5_FAILED();
                     HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
                     printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %f,%d,%f,%c "
@@ -1012,8 +1012,8 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval,
                 should_be_c.x=buf_c[0].x;
                 should_be_c.y=buf_c[0].y;
                 should_be_c.z=buf_c[0].z;
-                if( rd_c.a!=should_be_c.a || rd_c.x!=should_be_c.x ||
-                    rd_c.y!=should_be_c.y || rd_c.z!=should_be_c.z)  {
+		if(!H5_FLT_ABS_EQUAL(rd_c.a, should_be_c.a) || rd_c.x != should_be_c.x ||
+		    !H5_DBL_ABS_EQUAL(rd_c.y, should_be_c.y) || rd_c.z != should_be_c.z)  {
                     H5_FAILED();
                     HDfprintf(stdout, "%u: Value read was not correct.\n", (unsigned)__LINE__);
                     printf("    Elmt={%ld,%ld,%ld,%ld,%ld}, read: %f,%d,%f,%c "
@@ -1438,9 +1438,11 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     int         (*verify_rtn)(unsigned, const hsize_t *, const void *, const void *);
     int         (*release_rtn)(void *);
     size_t      val_size;               /* Size of element */
-    void        *val_rd, *should_be, *init_val, *odd_val, *even_val;
+    void        *val_rd, *odd_val;
+    const void  *init_val, *should_be, *even_val;
     int		val_rd_i, init_val_i = 9999;
-    comp_vl_datatype	val_rd_c, init_val_c = {87, "baz", "mumble", 129};
+    comp_vl_datatype init_val_c = {87, "baz", "mumble", 129};
+    comp_vl_datatype val_rd_c;
     void	*buf = NULL;
     unsigned	odd;                    /* Whether an odd or even coord. was read */
     unsigned	i, j;                   /* Local index variables */
@@ -1495,7 +1497,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     for(i = 0; i < 1000; i++) {
         /* Set offset for random element */
 	for(j = 0; j < 5; j++)
-	    hs_offset[j] = rand() % start_size[j];
+	    hs_offset[j] = (hsize_t)HDrand() % start_size[j];
 
         /* Select the random element */
 	if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, one, NULL) < 0) TEST_ERROR
@@ -1548,7 +1550,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     for(i = 0; i < 1000; i++) {
         /* Set offset for random element */
 	for(j = 0, odd = 0; j < 5; j++) {
-	    hs_offset[j] = rand() % start_size[j];
+	    hs_offset[j] = (hsize_t)HDrand() % start_size[j];
 	    odd += (unsigned)(hs_offset[j] % 2);
 	} /* end for */
 
@@ -1586,7 +1588,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     for(i = 0; i < 1000; i++) {
         /* Set offset for random element */
 	for(j = 0, odd = 0; j < 5; j++) {
-	    hs_offset[j] = rand() % extend_size[j];
+	    hs_offset[j] = (hsize_t)HDrand() % extend_size[j];
 	    if(hs_offset[j] >= start_size[j])
 		odd = 1;
 	    else
@@ -1625,7 +1627,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     for(i = 0; i < 1000; i++) {
         /* Set offset for random element */
 	for(j = 0, odd = 0; j < 5; j++) {
-	    hs_offset[j] = rand() % max_size[j];
+	    hs_offset[j] = (hsize_t)HDrand() % max_size[j];
 	    if(hs_offset[j] >= start_size[j])
 		odd = 1;
 	    else
@@ -1666,7 +1668,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     for(i = 0; i < 1000; i++) {
         /* Set offset for random element */
 	for(j = 0, odd = 0; j < 5; j++) {
-	    hs_offset[j] = rand() % extend_size[j];
+	    hs_offset[j] = (hsize_t)HDrand() % extend_size[j];
 	    if(hs_offset[j] >= start_size[j])
 		odd = 1;
 	    else
@@ -1759,7 +1761,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     for(i = 0; i < 1000; i++) {
         /* Set offset for random element */
 	for(j = 0, odd = 0; j < 5; j++) {
-	    hs_offset[j] = rand() % extend_size[j];
+	    hs_offset[j] = (hsize_t)HDrand() % extend_size[j];
 	    if(hs_offset[j] >= start_size[j])
 		odd = 1;
 	    else

@@ -25,19 +25,20 @@
 #include "H5IdComponent.h"
 #include "H5PropList.h"
 #include "H5DataSpace.h"
+#include "H5Location.h"
 #include "H5Object.h"
 #include "H5FaccProp.h"
 #include "H5FcreatProp.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
-#include "H5CommonFG.h"
 #include "H5DataType.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
 #include "H5private.h"
 #include "H5AbstractDs.h"
 #include "H5DataSet.h"
+#include "H5Group.h"
 #include "H5File.h"
 #include "H5Attribute.h"
 
@@ -313,12 +314,13 @@ void DataType::commit(const H5Location& loc, const char* name)
 // Programmer	Binh-Minh Ribler - Jan, 2007
 // Modification
 //		Planned for removal. -BMR, 2014/04/16
-//		Removed from documentation. -BMR, 2016/03/07
+//		Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
+//		Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
 //--------------------------------------------------------------------------
-void DataType::commit(H5Location& loc, const char* name)
-{
-   p_commit(loc.getId(), name);
-}
+//void DataType::commit(H5Location& loc, const char* name)
+//{
+//   p_commit(loc.getId(), name);
+//}
 
 //--------------------------------------------------------------------------
 // Function:	DataType::commit
@@ -343,12 +345,13 @@ void DataType::commit(const H5Location& loc, const H5std_string& name)
 // Programmer	Binh-Minh Ribler - Jan, 2007
 // Modification
 //		Planned for removal. -BMR, 2014/04/16
-//		Removed from documentation. -BMR, 2016/03/07
+//		Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
+//		Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
 //--------------------------------------------------------------------------
-void DataType::commit(H5Location& loc, const H5std_string& name)
-{
-   p_commit(loc.getId(), name.c_str());
-}
+//void DataType::commit(H5Location& loc, const H5std_string& name)
+//{
+//   p_commit(loc.getId(), name.c_str());
+//}
 
 //--------------------------------------------------------------------------
 // Function:	DataType::committed

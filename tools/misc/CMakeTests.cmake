@@ -30,15 +30,9 @@
   )
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
-    set (dest "${PROJECT_BINARY_DIR}/${h5_file}")
-    #message (STATUS " Copying ${h5_file}")
-    add_custom_command (
-        TARGET     h5repart
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5repart_files")
   endforeach (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  add_custom_target(h5repart_files ALL COMMENT "Copying files needed by h5repart tests" DEPENDS ${h5repart_files_list})
 
   set (HDF5_MKGRP_TEST_FILES
       #h5mkgrp_help.txt
@@ -61,22 +55,12 @@
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
 
   foreach (h5_mkgrp_file ${HDF5_MKGRP_TEST_FILES})
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/${h5_mkgrp_file}")
-    #message (STATUS " Copying ${h5_mkgrp_file}")
-    add_custom_command (
-        TARGET     h5mkgrp
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_mkgrp_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/${h5_mkgrp_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_mkgrp_file}" "h5mkgrp_files")
   endforeach (h5_mkgrp_file ${HDF5_MKGRP_TEST_FILES})
 
-  add_custom_command (
-      TARGET     h5mkgrp
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/testfiles/h5mkgrp_help.txt ${PROJECT_BINARY_DIR}/testfiles/h5mkgrp_help.txt
-  )
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/testfiles/h5mkgrp_help.txt" "${PROJECT_BINARY_DIR}/testfiles/h5mkgrp_help.txt" "h5mkgrp_files")
+  add_custom_target(h5mkgrp_files ALL COMMENT "Copying files needed by h5mkgrp tests" DEPENDS ${h5mkgrp_files_list})
+
   configure_file (${PROJECT_SOURCE_DIR}/testfiles/h5mkgrp_version.txt.in ${PROJECT_BINARY_DIR}/testfiles/h5mkgrp_version.txt @ONLY)
 
 ##############################################################################

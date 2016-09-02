@@ -27,6 +27,36 @@
 #include "UC_common.h"
 #include "UC_1.h"
 
+static hsize_t UC_1_VDS_DIMS[RANK] = {0, UC_1_FULL_HEIGHT, UC_1_WIDTH};
+static hsize_t UC_1_VDS_MAX_DIMS[RANK] = {UC_1_N_MAX_PLANES, UC_1_FULL_HEIGHT, UC_1_WIDTH};
+
+/* Planes */
+static hsize_t UC_1_PLANES[UC_1_N_SOURCES][RANK] = {
+    {1, UC_1_SM_HEIGHT, UC_1_WIDTH},
+    {1, UC_1_LG_HEIGHT, UC_1_WIDTH},
+    {1, UC_1_SM_HEIGHT, UC_1_WIDTH},
+    {1, UC_1_LG_HEIGHT, UC_1_WIDTH},
+    {1, UC_1_SM_HEIGHT, UC_1_WIDTH},
+    {1, UC_1_LG_HEIGHT, UC_1_WIDTH}
+};
+
+/* VDS file name */
+static char UC_1_VDS_FILE_NAME[NAME_LEN] = "1_vds.h5";
+
+/* Dataset names */
+static char UC_1_SOURCE_DSET_NAME[NAME_LEN] = "source_dset";
+static char UC_1_VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
+    
+/* Fill values */
+static int UC_1_FILL_VALUES[UC_1_N_SOURCES] = {
+    -1,
+    -2,
+    -3,
+    -4,
+    -5,
+    -6
+};
+static int UC_1_VDS_FILL_VALUE = -9;
 
 int
 main(void)
@@ -44,7 +74,7 @@ main(void)
 
     hsize_t extent[RANK];       /* dataset extents                          */
     hsize_t start[RANK];        /* starting point for hyperslab             */
-    int map_start       = -1;   /* starting point in the VDS map            */
+    hsize_t map_start   = 0;    /* starting point in the VDS map            */
 
     int *buffer         = NULL; /* data buffer                              */
     hsize_t count       = 0;    /* number of elements in a plane            */
@@ -53,7 +83,7 @@ main(void)
 
     int i;                      /* iterator                                 */
     int j;                      /* iterator                                 */
-    int k;                      /* iterator                                 */
+    hsize_t k;                  /* iterator                                 */
 
 
     /* Start by creating the virtual dataset (VDS) dataspace and creation
@@ -136,7 +166,7 @@ main(void)
             for(k = 0; k < count; k++)
                buffer[k] = value; 
 
-            start[0] = j;
+            start[0] = (hsize_t)j;
             start[1] = 0;
             start[2] = 0;
             if(H5Sselect_hyperslab(fsid, H5S_SELECT_SET, start, NULL, UC_1_PLANES[i], NULL) < 0)

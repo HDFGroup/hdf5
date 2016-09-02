@@ -129,27 +129,14 @@
 
   foreach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
     get_filename_component(fname "${tst_xml_h5_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}")
-    #message (STATUS " Copying ${tst_xml_h5_file}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${tst_xml_h5_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${tst_xml_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}" "h5dump_xml_files")
   endforeach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
 
   foreach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
     get_filename_component(fname "${tst_xml_other_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}")
-    #message (STATUS " Copying ${tst_xml_other_file}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${tst_xml_other_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${tst_xml_other_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}" "h5dump_xml_files")
   endforeach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
+  add_custom_target(h5dump_xml_files ALL COMMENT "Copying files needed by h5dump_xml tests" DEPENDS ${h5dump_xml_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -176,10 +163,10 @@
       set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif (NOT ${resultcode} STREQUAL "0")
+      endif ()
       if (NOT "${last_xml_test}" STREQUAL "")
         set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
-      endif (NOT "${last_xml_test}" STREQUAL "")
+      endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5DUMP-XML-${resultfile}-clear-objects

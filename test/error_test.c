@@ -270,7 +270,7 @@ error:
 static herr_t
 error_stack(void)
 {
-    int err_num;
+    ssize_t err_num;
     const char          *FUNC_error_stack = "error_stack";
 
     if((err_num = H5Eget_num(H5E_DEFAULT)) < 0)
@@ -284,7 +284,7 @@ error_stack(void)
     /* Make it push error, force this function to fail */
     if((err_num = H5Eget_num(ERR_STACK)) == 0) {
         H5Epush(ERR_STACK, __FILE__, FUNC_error_stack, __LINE__, ERR_CLS, ERR_MAJ_API, ERR_MIN_GETNUM,
-                "Get number test failed, returned %d", err_num);
+                "Get number test failed, returned %d", (int)err_num);
         goto error;
     } /* end if */
 
@@ -354,7 +354,7 @@ test_long_desc(void)
 
     /* Create the long part of the error description */
     for(u = 0; u < LONG_DESC_SIZE; u++)
-        long_desc[u] = 'A' + (u % 26);
+        long_desc[u] = (char)('A' + (u % 26));
     long_desc[LONG_DESC_SIZE - 1] = '\0';
 
     /* Clear the default error stack */
@@ -487,7 +487,7 @@ test_create(void)
 {
     const char *err_func = "test_create";      /* Function name for pushing error */
     const char *err_msg = "Error message";     /* Error message for pushing error */
-    int         err_num;        /* Number of errors on stack */
+    ssize_t     err_num;        /* Number of errors on stack */
     hid_t       estack_id;      /* Error stack ID */
 
     /* Create an empty error stack */
@@ -538,7 +538,7 @@ test_copy(void)
 {
     const char *err_func = "test_copy";      /* Function name for pushing error */
     const char *err_msg = "Error message";     /* Error message for pushing error */
-    int         err_num;             /* Number of errors on stack */
+    ssize_t     err_num;             /* Number of errors on stack */
     hid_t       estack_id;           /* Error stack ID */
     herr_t      ret;                 /* Generic return value */
 

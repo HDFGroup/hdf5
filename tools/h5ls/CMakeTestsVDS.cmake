@@ -48,16 +48,9 @@
   # copy the list of test files
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     get_filename_component(fname "${listfiles}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}")
-    #message (STATUS " Copying ${listfiles} to ${dest}")
-    add_custom_command (
-        TARGET     h5ls
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/${listfiles} ${dest}
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5ls_vds_files")
   endforeach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-
+  add_custom_target(h5ls_vds_files ALL COMMENT "Copying files needed by h5ls_vds tests" DEPENDS ${h5ls_vds_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -72,10 +65,10 @@
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if (${resultcode} STREQUAL "1")
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif (${resultcode} STREQUAL "1")
+      endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5LS-${resultfile}-clear-objects

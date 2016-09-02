@@ -145,13 +145,12 @@ void DSetMemXferPropList::setBuffer( size_t size, void* tconv, void* bkg ) const
 //--------------------------------------------------------------------------
 // Function:	DSetMemXferPropList::getBuffer
 ///\brief	Reads buffer settings.
-///\param	tconv - IN: Pointer to application-allocated type conversion buffer
-///\param	bkg   - IN: Pointer to application-allocated background buffer
+///\param	tconv - OUT: Pointer to application-allocated type conversion buf
+///\param	bkg   - OUT: Pointer to application-allocated background buffer
 ///\return	Buffer size, in bytes
 ///\exception	H5::PropListIException
 // Programmer:	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-
 size_t DSetMemXferPropList::getBuffer( void** tconv, void** bkg ) const
 {
    size_t buffer_size = H5Pget_buffer( id, tconv, bkg );
@@ -443,7 +442,7 @@ void DSetMemXferPropList::getVlenMemManager( H5MM_allocate_t& alloc_func, void**
 /// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetSmallData
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void DSetMemXferPropList::setSmallDataBlockSize(hsize_t size)
+void DSetMemXferPropList::setSmallDataBlockSize(hsize_t size) const
 {
    herr_t ret_value = H5Pset_small_data_block_size(id, size);
    if (ret_value < 0)
@@ -460,7 +459,7 @@ void DSetMemXferPropList::setSmallDataBlockSize(hsize_t size)
 ///\exception	H5::PropListIException
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-hsize_t DSetMemXferPropList::getSmallDataBlockSize()
+hsize_t DSetMemXferPropList::getSmallDataBlockSize() const
 {
    hsize_t size;
    herr_t ret_value = H5Pget_small_data_block_size(id, &size);
@@ -483,7 +482,7 @@ hsize_t DSetMemXferPropList::getSmallDataBlockSize()
 /// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetHyperVectorSize
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void DSetMemXferPropList::setHyperVectorSize(size_t vector_size)
+void DSetMemXferPropList::setHyperVectorSize(size_t vector_size) const
 {
    herr_t ret_value = H5Pset_hyper_vector_size(id, vector_size);
    if (ret_value < 0)
@@ -501,7 +500,7 @@ void DSetMemXferPropList::setHyperVectorSize(size_t vector_size)
 ///\exception	H5::PropListIException
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-size_t DSetMemXferPropList::getHyperVectorSize()
+size_t DSetMemXferPropList::getHyperVectorSize() const
 {
    size_t vector_size;
    herr_t ret_value = H5Pget_hyper_vector_size(id, &vector_size);
@@ -531,7 +530,7 @@ size_t DSetMemXferPropList::getHyperVectorSize()
 ///		\li \c H5Z_DISABLE_EDC
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-void DSetMemXferPropList::setEDCCheck(H5Z_EDC_t check)
+void DSetMemXferPropList::setEDCCheck(H5Z_EDC_t check) const
 {
    herr_t ret_value = H5Pset_edc_check(id, check);
    if (ret_value < 0)
@@ -548,7 +547,7 @@ void DSetMemXferPropList::setEDCCheck(H5Z_EDC_t check)
 ///\exception	H5::PropListIException
 // Programmer:	Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
-H5Z_EDC_t DSetMemXferPropList::getEDCCheck()
+H5Z_EDC_t DSetMemXferPropList::getEDCCheck() const
 {
    H5Z_EDC_t check = H5Pget_edc_check(id);
    if (check < 0)

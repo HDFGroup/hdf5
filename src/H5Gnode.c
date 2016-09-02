@@ -715,7 +715,7 @@ H5G_node_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 		md_key->offset = ent.name_off;
 	} /* end if */
         else {
-	    idx -= H5F_SYM_LEAF_K(f);
+	    idx -= (int)H5F_SYM_LEAF_K(f);
 	    insert_into = snrt;
 	    if(idx == (int)H5F_SYM_LEAF_K(f)) {
 		rt_key->offset = ent.name_off;

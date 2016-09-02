@@ -1125,10 +1125,10 @@ H5S_point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
             if(((hssize_t)node->pnt[u] + space->select.offset[u]) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "offset moves selection out of bounds")
 
-            if(start[u] > (node->pnt[u] + space->select.offset[u]))
-                start[u] = node->pnt[u] + space->select.offset[u];
-            if(end[u] < (node->pnt[u] + space->select.offset[u]))
-                end[u] = node->pnt[u] + space->select.offset[u];
+            if(start[u] > (hsize_t)((hssize_t)node->pnt[u] + space->select.offset[u]))
+                start[u] = (hsize_t)((hssize_t)node->pnt[u] + space->select.offset[u]);
+            if(end[u] < (hsize_t)((hssize_t)node->pnt[u] + space->select.offset[u]))
+                end[u] = (hsize_t)((hssize_t)node->pnt[u] + space->select.offset[u]);
         } /* end for */
         node = node->next;
       } /* end while */
@@ -1703,7 +1703,7 @@ H5S_point_get_seq_list(const H5S_t *space, unsigned flags, H5S_sel_iter_t *iter,
     while(NULL != node) {
         /* Compute the offset of each selected point in the buffer */
         for(i = ndims - 1, acc = iter->elmt_size, loc = 0; i >= 0; i--) {
-            loc += (node->pnt[i] + space->select.offset[i]) * acc;
+            loc += (hsize_t)((hssize_t)node->pnt[i] + space->select.offset[i]) * acc;
             acc *= dims[i];
         } /* end for */
 

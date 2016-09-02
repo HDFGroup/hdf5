@@ -279,7 +279,7 @@
 #define H5F_ACTUAL_NAME(F)      ((F)->actual_name)
 #define H5F_EXTPATH(F)          ((F)->extpath)
 #define H5F_SHARED(F)           ((F)->shared)
-#define H5F_SAME_SHARED(F1, F2) ((F1)->shared == (F2)->shared))
+#define H5F_SAME_SHARED(F1, F2) ((F1)->shared == (F2)->shared)
 #define H5F_NOPEN_OBJS(F)       ((F)->nopen_objs)
 #define H5F_INCR_NOPEN_OBJS(F)  ((F)->nopen_objs++)
 #define H5F_DECR_NOPEN_OBJS(F)  ((F)->nopen_objs--)
@@ -413,7 +413,7 @@
 #endif
 #if (H5_SIZEOF_HSIZE_T >= H5_SIZEOF_OFF_T)
 #   define H5F_OVERFLOW_HSIZET2OFFT(X)					      \
-    ((hsize_t)(X)>=(hsize_t)((hsize_t)1<<(8*sizeof(HDoff_t)-1)))
+    ((hsize_t)(X) >= (hsize_t)((hsize_t)1 << (8 * sizeof(HDoff_t) - 1)))
 #else
 #   define H5F_OVERFLOW_HSIZET2OFFT(X) 0
 #endif

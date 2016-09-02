@@ -17,6 +17,7 @@
 #ifndef __H5File_H
 #define __H5File_H
 
+
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
 #endif
@@ -26,7 +27,7 @@ namespace H5 {
 
     It inherits from H5Location and CommonFG.
 */
-class H5_DLLCPP H5File : public H5Location, public CommonFG {
+class H5_DLLCPP H5File : public Group {
    public:
 	// Creates or opens an HDF5 file.
 	H5File( const char* name, unsigned int flags,
@@ -68,7 +69,7 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 	// Returns the pointer to the file handle of the low-level file driver.
 	void getVFDHandle(void **file_handle) const;
 	void getVFDHandle(const FileAccPropList& fapl, void **file_handle) const;
-	void getVFDHandle(FileAccPropList& fapl, void **file_handle) const; // kept for backward compatibility
+	//void getVFDHandle(FileAccPropList& fapl, void **file_handle) const; // removed from 1.8.18 and 1.10.1
 
 	// Determines if a file, specified by its name, is in HDF5 format
 	static bool isHdf5(const char* name );
@@ -79,9 +80,6 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	void reopen();  // obsolete in favor of reOpen()
-
-	// Gets the file id
-	virtual hid_t getLocId() const;
 
 	// Creates an H5File using an existing file id.  Not recommended
 	// in applications.
@@ -94,6 +92,9 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 
 	// Throw file exception.
 	virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
+
+	// for CommonFG to get the file id.
+	virtual hid_t getLocId() const;
 
 	// Default constructor
 	H5File();
@@ -125,3 +126,4 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 }
 #endif
 #endif // __H5File_H
+

@@ -496,6 +496,11 @@ int main(int argc, char **argv)
                 &rr_obj_flush_confusion_params);
     }
 
+    AddTest("alnbg1",
+            chunk_align_bug_1, NULL,
+            "Chunk allocation with alignment bug.",
+            PARATESTFILE);
+
     AddTest("tldsc",
             lower_dim_size_comp_test, NULL,
             "test lower dim size comp in span tree to mpi derived type", 

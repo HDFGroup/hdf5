@@ -60,10 +60,6 @@ static hsize_t UC_32_POSITIONS[UC_2_N_SOURCES][RANK] = {
     /* E */ {0,  8, 12}
 };
 
-/* Planes */
-static hsize_t UC_31_VDS_PLANE[RANK]    = {1, UC_31_VDS_HEIGHT, UC_31_VDS_WIDTH};
-static hsize_t UC_32_VDS_PLANE[RANK]    = {1, UC_32_VDS_HEIGHT, UC_32_VDS_WIDTH};
-
 /* VDS file names */
 #define UC_31_VDS_FILE_NAME     "3_1_vds.h5"
 #define UC_32_VDS_FILE_NAME     "3_2_vds.h5"

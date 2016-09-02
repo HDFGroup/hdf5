@@ -1858,7 +1858,7 @@ test_file_open_overlap(void)
     hid_t did1, did2;
     hid_t gid;
     hid_t sid;
-    int nobjs;          /* # of open objects */
+    ssize_t nobjs;      /* # of open objects */
     unsigned intent;
     herr_t ret;         /* Generic return value */
 
@@ -2197,8 +2197,9 @@ test_file_double_file_dataset_open(hbool_t new_format)
     hsize_t max_dims1[1] = {H5S_UNLIMITED}; 	/* Maximum dimesion sizes for extensible array index */
     hsize_t max_dims2[2] = {H5S_UNLIMITED, H5S_UNLIMITED};	/* Maximum dimension sizes for v2 B-tree index */
     hsize_t chunks[1] = {2}, chunks2[2] = {4, 5};		/* Chunk dimension sizes */
-    char* data[] = {"String 1", "String 2", "String 3", "String 4", "String 5"};	/* Input Data */
-    char* e_data[] = {"String 1", "String 2", "String 3", "String 4", "String 5", "String 6", "String 7"};	/* Input Data */
+    hsize_t size;                               /* File size */
+    const char* data[] = {"String 1", "String 2", "String 3", "String 4", "String 5"};	/* Input Data */
+    const char* e_data[] = {"String 1", "String 2", "String 3", "String 4", "String 5", "String 6", "String 7"};	/* Input Data */
     char* buffer[5];				/* Output buffer */
     int wbuf[4] = {1, 2, 3, 4};			/* Input data */
     herr_t ret;         			/* Generic return value */
@@ -2432,8 +2433,8 @@ test_file_double_file_dataset_open(hbool_t new_format)
     CHECK(did1, FAIL, "H5Dopen2");
 
     /* First file's get storage size */
-    ret = H5Dget_storage_size(did1);
-    CHECK(ret, FAIL, "H5Dget_storage_size");
+    size = H5Dget_storage_size(did1);
+    CHECK(size, 0, "H5Dget_storage_size");
 
     /* Second file open */
     fid2 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -2452,8 +2453,8 @@ test_file_double_file_dataset_open(hbool_t new_format)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Second file's get storage size */
-    ret = H5Dget_storage_size(did2);
-    CHECK(ret, FAIL, "H5Dget_storage_size");
+    size = H5Dget_storage_size(did2);
+    CHECK(size, 0, "H5Dget_storage_size");
 
     /* Second file's dataset close */
     ret = H5Dclose(did2);
@@ -2775,7 +2776,7 @@ test_rw_noupdate(void)
     diff = HDdifftime(sb2.st_mtime, sb1.st_mtime);
 
     /* Check That Timestamps Are Equal */
-    if(diff > 0.0F) {
+    if(diff > (double)0.0F) {
         /* Output message about test being performed */
         MESSAGE(1, ("Testing to verify that nothing is written if nothing is changed: This test is skipped on this system because the modification time from stat is the same as the last access time.\n"));
     } /* end if */
@@ -2808,7 +2809,7 @@ test_rw_noupdate(void)
 
         /* Ensure That Timestamps Are Equal */
         diff = HDdifftime(sb2.st_mtime, sb1.st_mtime);
-        ret = (diff > 0.0F);
+        ret = (diff > (double)0.0F);
         VERIFY(ret, 0, "Timestamp");
     } /* end else */
 } /* end test_rw_noupdate() */

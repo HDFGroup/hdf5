@@ -27,12 +27,13 @@
 #define FAMILY_SIZE     1024
 #define FILENAME        "family_file%05d.h5"
 
+static int buf[FAMILY_NUMBER][FAMILY_SIZE];
+
 int main(void)
 {
     hid_t       file=(-1), fapl, space=(-1), dset=(-1);
     char        dname[]="dataset";
     int         i, j;
-    int         buf[FAMILY_NUMBER][FAMILY_SIZE];
     hsize_t     dims[2]={FAMILY_NUMBER, FAMILY_SIZE};
 
     /* Set property list and file name for FAMILY driver */

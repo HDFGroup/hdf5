@@ -199,7 +199,7 @@ test(fill_t fill_style, const double splits[],
     int  *had = NULL;      /*for random filling  */
     const char  *sname=NULL;      /*fill style nam  */
     int    mdc_nelmts;      /*num meta objs to cache*/
-    hsize_t  i;
+    hsize_t  i, k;
     int    j;
     h5_stat_t  sb;
 
@@ -236,13 +236,13 @@ test(fill_t fill_style, const double splits[],
             hs_start[0] = i%2 ? i/2 : cur_size[0]-i/2;
             break;
         case FILL_OUTWARD:
-            j = (int)(cur_size[0]-i)+1;
-            hs_start[0] = j%2 ? j/2 : (hssize_t)cur_size[0]-j/2;
+            k = (cur_size[0] - i) + 1;
+            hs_start[0] = k % 2 ? (k / 2) : (hsize_t)((hssize_t)cur_size[0] - (hssize_t)(k / 2));
             break;
         case FILL_RANDOM:
             for (j=HDrand()%(int)cur_size[0]; had[j]; j=(j+1)%(int)cur_size[0])
                 /*void*/;
-            hs_start[0] = j;
+            hs_start[0] = (hsize_t)j;
             had[j] = 1;
             break;
         case FILL_ALL:
@@ -265,14 +265,9 @@ test(fill_t fill_style, const double splits[],
         if (verbose) {
             if (H5Fflush(file, H5F_SCOPE_LOCAL) < 0) goto error;
             if (HDfstat(fd, &sb) < 0) goto error;
-            /*
-             * The extra cast in the following statement is a bug workaround
-             * for the Win32 version 5.0 compiler.
-             * 1998-11-06 ptl
-             */
             printf("%4lu %8.3f ***\n",
                     (unsigned long)i,
-                    (double)(hssize_t)(sb.st_size-i*sizeof(int))/(hssize_t)i);
+                    (double)(sb.st_size - (HDoff_t)(i * sizeof(int))) / (double)i);
         }
     }
 
@@ -316,8 +311,8 @@ test(fill_t fill_style, const double splits[],
 
         if (HDfstat(fd, &sb) < 0) goto error;
         printf("%-7s %8.3f\n", sname,
-                (double)(hssize_t)(sb.st_size-cur_size[0]*sizeof(int))/
-                (hssize_t)cur_size[0]);
+                (double)(sb.st_size - (HDoff_t)(cur_size[0] * sizeof(int))) /
+                (double)cur_size[0]);
     }
     HDclose(fd);
 

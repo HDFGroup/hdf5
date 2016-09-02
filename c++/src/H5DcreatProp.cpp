@@ -20,9 +20,9 @@
 #include "H5IdComponent.h"
 #include "H5PropList.h"
 #include "H5OcreatProp.h"
+#include "H5Location.h"
 #include "H5Object.h"
 #include "H5DcreatProp.h"
-#include "H5CommonFG.h"
 #include "H5DataType.h"
 
 #ifndef H5_NO_NAMESPACE
@@ -333,7 +333,7 @@ void DSetCreatPropList::getFillValue( const DataType& fvalue_type, void* value )
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5D_fill_value_t DSetCreatPropList::isFillValueDefined()
+H5D_fill_value_t DSetCreatPropList::isFillValueDefined() const
 {
    H5D_fill_value_t status;
    herr_t ret_value = H5Pfill_value_defined(id, &status);
@@ -517,7 +517,7 @@ void DSetCreatPropList::modifyFilter( H5Z_filter_t filter_id, unsigned int
 ///\exception	H5::PropListIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-bool DSetCreatPropList::allFiltersAvail()
+bool DSetCreatPropList::allFiltersAvail() const
 {
    htri_t ret_value = H5Pall_filters_avail(id);
    if( ret_value > 0 )
@@ -565,7 +565,7 @@ void DSetCreatPropList::setShuffle() const
 ///		\li \c H5D_ALLOC_TIME_INCR
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5D_alloc_time_t DSetCreatPropList::getAllocTime()
+H5D_alloc_time_t DSetCreatPropList::getAllocTime() const
 {
    H5D_alloc_time_t alloc_time;
    herr_t ret_value = H5Pget_alloc_time(id, &alloc_time);
@@ -589,7 +589,7 @@ H5D_alloc_time_t DSetCreatPropList::getAllocTime()
 ///		\li \c H5D_FILL_TIME_ALLOC.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5D_fill_time_t DSetCreatPropList::getFillTime()
+H5D_fill_time_t DSetCreatPropList::getFillTime() const
 {
    H5D_fill_time_t fill_time;
    herr_t ret_value = H5Pget_fill_time(id, &fill_time);
@@ -615,7 +615,7 @@ H5D_fill_time_t DSetCreatPropList::getFillTime()
 ///		\li \c H5D_ALLOC_TIME_INCR
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DSetCreatPropList::setAllocTime(H5D_alloc_time_t alloc_time)
+void DSetCreatPropList::setAllocTime(H5D_alloc_time_t alloc_time) const
 {
    herr_t ret_value = H5Pset_alloc_time(id, alloc_time);
    if( ret_value < 0 )
@@ -636,7 +636,7 @@ void DSetCreatPropList::setAllocTime(H5D_alloc_time_t alloc_time)
 ///		\li \c H5D_FILL_TIME_ALLOC.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DSetCreatPropList::setFillTime(H5D_fill_time_t fill_time)
+void DSetCreatPropList::setFillTime(H5D_fill_time_t fill_time) const
 {
    herr_t ret_value = H5Pset_fill_time(id, fill_time);
    if( ret_value < 0 )

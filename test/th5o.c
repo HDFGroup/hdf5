@@ -920,6 +920,7 @@ test_h5o_comment(void)
     const char  *dtype_comment = "datatype comment";
     char        check_comment[64];
     ssize_t     comment_len = 0;
+    ssize_t     len;
     herr_t      ret;                        /* Value returned from API calls */
     int         ret_value;
 
@@ -1008,8 +1009,8 @@ test_h5o_comment(void)
     comment_len = H5Oget_comment(fid, NULL, (size_t)0);
     CHECK(comment_len, FAIL, "H5Oget_comment");
 
-    ret = H5Oget_comment(fid, check_comment, (size_t)comment_len+1);
-    CHECK(ret, FAIL, "H5Oget_comment");
+    len = H5Oget_comment(fid, check_comment, (size_t)comment_len+1);
+    CHECK(len, FAIL, "H5Oget_comment");
 
     ret_value = HDstrcmp(file_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
@@ -1022,8 +1023,8 @@ test_h5o_comment(void)
     comment_len = H5Oget_comment(grp, NULL, (size_t)0);
     CHECK(comment_len, FAIL, "H5Oget_comment");
 
-    ret = H5Oget_comment(grp, check_comment, (size_t)comment_len+1);
-    CHECK(ret, FAIL, "H5Oget_comment");
+    len = H5Oget_comment(grp, check_comment, (size_t)comment_len+1);
+    CHECK(len, FAIL, "H5Oget_comment");
 
     ret_value = HDstrcmp(grp_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
@@ -1036,8 +1037,8 @@ test_h5o_comment(void)
     comment_len = H5Oget_comment(dtype, NULL, (size_t)0);
     CHECK(comment_len, FAIL, "H5Oget_comment");
 
-    ret = H5Oget_comment(dtype, check_comment, (size_t)comment_len+1);
-    CHECK(ret, FAIL, "H5Oget_comment");
+    len = H5Oget_comment(dtype, check_comment, (size_t)comment_len+1);
+    CHECK(len, FAIL, "H5Oget_comment");
 
     ret_value = HDstrcmp(dtype_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
@@ -1050,8 +1051,8 @@ test_h5o_comment(void)
     comment_len = H5Oget_comment(dset, NULL, (size_t)0);
     CHECK(comment_len, FAIL, "H5Oget_comment");
 
-    ret = H5Oget_comment(dset, check_comment, (size_t)comment_len+1);
-    CHECK(ret, FAIL, "H5Oget_comment");
+    len = H5Oget_comment(dset, check_comment, (size_t)comment_len+1);
+    CHECK(ret, len, "H5Oget_comment");
 
     ret_value = HDstrcmp(dset_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment");
@@ -1092,6 +1093,7 @@ test_h5o_comment_by_name(void)
     const char  *dtype_comment = "datatype comment by name";
     char        check_comment[64];
     ssize_t     comment_len = 0;
+    ssize_t     len;
     herr_t      ret;                        /* Value returned from API calls */
     int         ret_value;
 
@@ -1179,8 +1181,8 @@ test_h5o_comment_by_name(void)
     comment_len = H5Oget_comment_by_name(fid, ".", NULL, (size_t)0, H5P_DEFAULT);
     CHECK(comment_len, FAIL, "H5Oget_comment_by_name");
 
-    ret = H5Oget_comment_by_name(fid, ".", check_comment, (size_t)comment_len+1, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_comment_by_name");
+    len = H5Oget_comment_by_name(fid, ".", check_comment, (size_t)comment_len+1, H5P_DEFAULT);
+    CHECK(len, FAIL, "H5Oget_comment_by_name");
 
     ret_value = HDstrcmp(file_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
@@ -1193,8 +1195,8 @@ test_h5o_comment_by_name(void)
     comment_len = H5Oget_comment_by_name(fid, "group", NULL, (size_t)0, H5P_DEFAULT);
     CHECK(comment_len, FAIL, "H5Oget_comment_by_name");
 
-    ret = H5Oget_comment_by_name(fid, "group", check_comment, (size_t)comment_len+1, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_comment_by_name");
+    len = H5Oget_comment_by_name(fid, "group", check_comment, (size_t)comment_len+1, H5P_DEFAULT);
+    CHECK(len, FAIL, "H5Oget_comment_by_name");
 
     ret_value = HDstrcmp(grp_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
@@ -1203,8 +1205,8 @@ test_h5o_comment_by_name(void)
     comment_len = H5Oget_comment_by_name(grp, "datatype", NULL, (size_t)0, H5P_DEFAULT);
     CHECK(comment_len, FAIL, "H5Oget_comment_by_name");
 
-    ret = H5Oget_comment_by_name(grp, "datatype", check_comment, (size_t)comment_len+1, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_comment");
+    len = H5Oget_comment_by_name(grp, "datatype", check_comment, (size_t)comment_len+1, H5P_DEFAULT);
+    CHECK(len, FAIL, "H5Oget_comment");
 
     ret_value = HDstrcmp(dtype_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
@@ -1213,8 +1215,8 @@ test_h5o_comment_by_name(void)
     comment_len = H5Oget_comment_by_name(fid, "dataset", NULL, (size_t)0, H5P_DEFAULT);
     CHECK(comment_len, FAIL, "H5Oget_comment_by_name");
 
-    ret = H5Oget_comment_by_name(fid, "dataset", check_comment, (size_t)comment_len+1, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Oget_comment_by_name");
+    len = H5Oget_comment_by_name(fid, "dataset", check_comment, (size_t)comment_len+1, H5P_DEFAULT);
+    CHECK(len, FAIL, "H5Oget_comment_by_name");
 
     ret_value = HDstrcmp(dset_comment, check_comment);
     VERIFY(ret_value, 0, "H5Oget_comment_by_name");
