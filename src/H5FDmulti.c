@@ -44,16 +44,22 @@
 #endif
 
 /* Loop through all mapped files */
-#define UNIQUE_MEMBERS(MAP,LOOPVAR) {					      \
-    H5FD_mem_t _unmapped, LOOPVAR;					      \
-    unsigned _seen[H5FD_MEM_NTYPES];					      \
+#define UNIQUE_MEMBERS_CORE(MAP, ITER, SEEN, LOOPVAR) {					      \
+    H5FD_mem_t ITER, LOOPVAR;					      \
+    unsigned SEEN[H5FD_MEM_NTYPES];					      \
 									      \
-    memset(_seen, 0, sizeof _seen);	      				      \
-    for (_unmapped=H5FD_MEM_SUPER; _unmapped<H5FD_MEM_NTYPES; _unmapped=(H5FD_mem_t)(_unmapped+1)) {  \
-	LOOPVAR = MAP[_unmapped];					      \
-	if (H5FD_MEM_DEFAULT==LOOPVAR) LOOPVAR=_unmapped;		      \
+    memset(SEEN, 0, sizeof SEEN);	      				      \
+    for (ITER=H5FD_MEM_SUPER; ITER<H5FD_MEM_NTYPES; ITER=(H5FD_mem_t)(ITER+1)) {  \
+	LOOPVAR = MAP[ITER];					      \
+	if (H5FD_MEM_DEFAULT==LOOPVAR) LOOPVAR=ITER;		      \
 	assert(LOOPVAR>0 && LOOPVAR<H5FD_MEM_NTYPES);			      \
-	if (_seen[LOOPVAR]++) continue;					      \
+	if (SEEN[LOOPVAR]++) continue;					      \
+
+/* Need two front-ends, since they are nested sometimes */
+#define UNIQUE_MEMBERS(MAP, LOOPVAR)                                          \
+    UNIQUE_MEMBERS_CORE(MAP, _unmapped, _seen, LOOPVAR)
+#define UNIQUE_MEMBERS2(MAP, LOOPVAR)                                         \
+    UNIQUE_MEMBERS_CORE(MAP, _unmapped2, _seen2, LOOPVAR)
 
 #define ALL_MEMBERS(LOOPVAR) {						      \
     H5FD_mem_t LOOPVAR;							      \
@@ -1904,7 +1910,7 @@ compute_next(H5FD_multi_t *file)
     } END_MEMBERS;
 
     UNIQUE_MEMBERS(file->fa.memb_map, mt1) {
-	UNIQUE_MEMBERS(file->fa.memb_map, mt2) {
+	UNIQUE_MEMBERS2(file->fa.memb_map, mt2) {
 	    if (file->fa.memb_addr[mt1]<file->fa.memb_addr[mt2] &&
 		(HADDR_UNDEF==file->memb_next[mt1] ||
 		 file->memb_next[mt1]>file->fa.memb_addr[mt2])) {

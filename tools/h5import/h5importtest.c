@@ -119,8 +119,8 @@ main(void)
 #ifdef H5_SIZEOF_LONG_LONG
         row4i64[i] = row4i64[i - 1] + rowi4i64;
 #endif
-        row4i16[i] = row4i16[i - 1] + rowi4i16;
-        row4i8[i] = row4i8[i - 1] + rowi4i8;
+        row4i16[i] = (short)(row4i16[i - 1] + rowi4i16);
+        row4i8[i] = (char)(row4i8[i - 1] + rowi4i8);
     }
 
     for (j = 1; j < ncol; j++)
@@ -131,8 +131,8 @@ main(void)
 #ifdef H5_SIZEOF_LONG_LONG
         col4i64[j] = col4i64[j - 1] + coli4i64;
 #endif
-        col4i16[j] = col4i16[j - 1] + coli4i16;
-        col4i8[j] = col4i8[j - 1] + coli4i8;
+        col4i16[j] = (short)(col4i16[j - 1] + coli4i16);
+        col4i8[j] = (char)(col4i8[j - 1] + coli4i8);
     }
     for (k = 1; k < npln; k++)
     {
@@ -142,8 +142,8 @@ main(void)
 #ifdef H5_SIZEOF_LONG_LONG
         pln4i64[k] = pln4i64[k - 1] + plni4i64;
 #endif
-        pln4i16[k] = pln4i16[k - 1] + plni4i16;
-        pln4i8[k] = pln4i8[k - 1] + plni4i8;
+        pln4i16[k] = (short)(pln4i16[k - 1] + plni4i16);
+        pln4i8[k] = (char)(pln4i8[k - 1] + plni4i8);
     }
 
     /*
@@ -157,8 +157,8 @@ main(void)
             for (k = 0; k < npln; k++) {
                 b64r3[k][i][j] = row8[i] + col8[j] + pln8[k];
                 b32i3[k][i][j] = row4i[i] + col4i[j] + pln4i[k];
-                b16i3[k][i][j] = row4i16[i] + col4i16[j] + pln4i16[k];
-                b8i3[k][i][j] = row4i8[i] + col4i8[j] + pln4i8[k];
+                b16i3[k][i][j] = (short)(row4i16[i] + col4i16[j] + pln4i16[k]);
+                b8i3[k][i][j] = (char)(row4i8[i] + col4i8[j] + pln4i8[k]);
             }
 
 

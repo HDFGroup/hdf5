@@ -110,7 +110,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1info_1by_1idx
  * Method:    H5Lget_name_by_idx
  * Signature: (JLjava/lang/String;IIJJ)Ljava/lang/String;
  */
-JNIEXPORT jobject JNICALL
+JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Lget_1name_1by_1idx
 (JNIEnv*, jclass, jlong, jstring, jint, jint, jlong, jlong);
 

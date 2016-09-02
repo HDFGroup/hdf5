@@ -98,14 +98,15 @@ Java_hdf_hdf5lib_H5_H5Eregister_1class
     const char* the_lib_name;
     const char* the_version;
 
-    PIN_JAVA_STRING_THREE(cls_name, the_cls_name, lib_name, the_lib_name, version, the_version, -1);
+    PIN_JAVA_STRING_THREE(cls_name, the_cls_name, lib_name, the_lib_name, version, the_version);
+    if (the_cls_name != NULL && the_lib_name != NULL && the_version != NULL) {
+        ret_val = H5Eregister_class(the_cls_name, the_lib_name, the_version);
 
-    ret_val = H5Eregister_class(the_cls_name, the_lib_name, the_version);
+        UNPIN_JAVA_STRING_THREE(cls_name, the_cls_name, lib_name, the_lib_name, version, the_version);
 
-    UNPIN_JAVA_STRING_THREE(cls_name, the_cls_name, lib_name, the_lib_name, version, the_version);
-
-    if (ret_val < 0)
-        h5libraryError(env);
+        if (ret_val < 0)
+            h5libraryError(env);
+    }
 
     return (jlong)ret_val;
 } /* end Java_hdf_hdf5lib_H5_H5Eregister_1class */
@@ -159,14 +160,15 @@ Java_hdf_hdf5lib_H5_H5Ecreate_1msg
         h5badArgument(env, "H5Ecreate_msg: invalid argument");
     } /* end if */
     else {
-        PIN_JAVA_STRING(err_msg, the_err_msg, -1);
+        PIN_JAVA_STRING(err_msg, the_err_msg);
+        if (the_err_msg != NULL) {
+            ret_val = H5Ecreate_msg((hid_t)err_id, error_msg_type, the_err_msg);
 
-        ret_val = H5Ecreate_msg((hid_t)err_id, error_msg_type, the_err_msg);
+            UNPIN_JAVA_STRING(err_msg, the_err_msg);
 
-        UNPIN_JAVA_STRING(err_msg, the_err_msg);
-
-        if (ret_val < 0)
-            h5libraryError(env);
+            if (ret_val < 0)
+                h5libraryError(env);
+        }
     } /* end else */
 
     return (jlong)ret_val;
@@ -305,7 +307,7 @@ Java_hdf_hdf5lib_H5_H5Eget_1class_1name
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Eset_1current_1stack
-	(JNIEnv *env, jclass cls, jlong stk_id)
+    (JNIEnv *env, jclass cls, jlong stk_id)
 {
     if (stk_id < 0) {
         h5badArgument(env, "H5Eset_current_stack: invalid argument");
@@ -358,15 +360,16 @@ Java_hdf_hdf5lib_H5_H5Epush2
         h5badArgument(env, "H5Epush: invalid minor_id argument");
     } /* end else if */
     else {
-        PIN_JAVA_STRING_THREE0(filename, fName, funcname, fncName, err_desc, errMsg);
+        PIN_JAVA_STRING_THREE(filename, fName, funcname, fncName, err_desc, errMsg);
+        if (fName != NULL && fncName != NULL && errMsg != NULL) {
+            ret_val = H5Epush2((hid_t)stk_id, fName, fncName, (unsigned)linenumber, (hid_t)class_id,
+                    (hid_t)major_id, (hid_t)minor_id, errMsg);
 
-        ret_val = H5Epush2((hid_t)stk_id, fName, fncName, (unsigned)linenumber, (hid_t)class_id,
-                (hid_t)major_id, (hid_t)minor_id, errMsg);
+            UNPIN_JAVA_STRING_THREE(filename, fName, funcname, fncName, err_desc, errMsg);
 
-        UNPIN_JAVA_STRING_THREE(filename, fName, funcname, fncName, err_desc, errMsg);
-
-        if (ret_val < 0)
-            h5libraryError(env);
+            if (ret_val < 0)
+                h5libraryError(env);
+        }
     } /* end else */
 } /* end Java_hdf_hdf5lib_H5_H5Epush2 */
 

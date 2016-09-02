@@ -106,7 +106,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
       The -S option uses the script version of ctest.
 
       The value for the -C option (as shown above, "-C Release") must
-      match the setting for CTEST_BUILD_CONFIGURATION in the platform
+      match the setting for CTEST_CONFIGURATION_TYPE in the platform
       configuration file.
 
       The -VV option is for most verbose; use -V for less verbose.
@@ -675,7 +675,7 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 #            VS201264 * Visual Studio 11 2012 Win64
 #
 #     INSTALLDIR  -  root folder where hdf5 is installed
-#     CTEST_BUILD_CONFIGURATION  - Release, Debug, etc
+#     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
 #     STATIC_LIBRARIES  -  Build/use static libraries
 #     FORTRAN_LIBRARIES -  Build/use fortran libraries
@@ -690,7 +690,7 @@ set(CTEST_SOURCE_VERSEXT "-pre1")
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
 #INSTALLDIR - HDF5-1.10.0 root folder
-#CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
+#CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
 #STATIC_LIBRARIES - Default is YES
 #FORTRAN_LIBRARIES - Default is NO
@@ -738,8 +738,8 @@ if(NOT DEFINED INSTALLDIR)
     set(INSTALLDIR "/usr/local/myhdf5")
   endif()
 endif()
-if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
-    set(CTEST_BUILD_CONFIGURATION "Release")
+if(NOT DEFINED CTEST_CONFIGURATION_TYPE)
+    set(CTEST_CONFIGURATION_TYPE "Release")
 endif()
 if(NOT DEFINED CTEST_SOURCE_NAME)
     set(CTEST_SOURCE_NAME "hdf5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")

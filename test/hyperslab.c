@@ -223,7 +223,7 @@ test_fill(size_t nx, size_t ny, size_t nz,
                                     for(v = (size_t)dst_offset[1]; v < dst_offset[1] + dy; v++)
                                         for(w = (size_t)dst_offset[2]; w < dst_offset[2] + dz; w++)
                                             ref_value -= dst[u * ny * nz + v * nz + w];
-                                ref_value += fill_value * dx * dy * dz;
+                                ref_value += fill_value * (unsigned)dx * (unsigned)dy * (unsigned)dz;
 
                                 /* Fill the hyperslab with some value */
                                 H5VM_hyper_fill(ndims, hs_size, dst_size, dst_offset, dst, fill_value);
@@ -819,8 +819,8 @@ test_transpose(size_t nx, size_t ny)
     size[1] = ny;
     src_stride[0] = 0;
     src_stride[1] = sizeof(*src);
-    dst_stride[0] = (ssize_t)((1 - nx * ny) * sizeof(*src));
-    dst_stride[1] = (ssize_t)(nx * sizeof(*src));
+    dst_stride[0] = (hsize_t)((1 - nx * ny) * sizeof(*src));
+    dst_stride[1] = (hsize_t)(nx * sizeof(*src));
 
     /* Copy and transpose */
     if(nx == ny)
@@ -923,7 +923,7 @@ test_sub_super(size_t nx, size_t ny)
     /* Setup */
     size[0] = nx;
     size[1] = ny;
-    src_stride[0] = (ssize_t)(2 * ny);
+    src_stride[0] = (hsize_t)(2 * ny);
     src_stride[1] = 2;
     dst_stride[0] = 0;
     dst_stride[1] = 1;
@@ -972,9 +972,9 @@ test_sub_super(size_t nx, size_t ny)
     src_stride[1] = 1;
     src_stride[2] = 0;
     src_stride[3] = 0;
-    dst_stride[0] = (ssize_t)(2 * ny);
-    dst_stride[1] = (ssize_t)(2 * sizeof(uint8_t) - 4 * ny);
-    dst_stride[2] = (ssize_t)(2 * ny - 2 * sizeof(uint8_t));
+    dst_stride[0] = (hsize_t)(2 * ny);
+    dst_stride[1] = (hsize_t)(2 * sizeof(uint8_t) - 4 * ny);
+    dst_stride[2] = (hsize_t)(2 * ny - 2 * sizeof(uint8_t));
     dst_stride[3] = sizeof(uint8_t);
 
     /* Copy */
@@ -1144,9 +1144,9 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     /* Check offsets */
     for(u = 0; u < n; u++) {
         /* Get random coordinate */
-        coords[0] = (hssize_t)(HDrandom() % z);
-        coords[1] = (hssize_t)(HDrandom() % y);
-        coords[2] = (hssize_t)(HDrandom() % x);
+        coords[0] = (hsize_t)((size_t)HDrandom() % z);
+        coords[1] = (hsize_t)((size_t)HDrandom() % y);
+        coords[2] = (hsize_t)((size_t)HDrandom() % x);
 
         /* Get offset of coordinate */
         off = H5VM_array_offset(ARRAY_OFFSET_NDIMS, dims, coords);

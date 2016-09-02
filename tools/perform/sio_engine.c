@@ -96,7 +96,7 @@ static herr_t do_fclose(iotype iot, file_descr *fd);
 static void do_cleanupfile(iotype iot, char *fname);
 
 /* global variables */
-static off_t offset[MAX_DIMS];       /* dataset size in bytes     */
+static HDoff_t offset[MAX_DIMS];       /* dataset size in bytes     */
 static size_t buf_offset[MAX_DIMS];   /* dataset size in bytes     */
 static int order[MAX_DIMS];        /* dimension access order */
 static size_t      linear_buf_size;        /* linear buffer size     */
@@ -406,7 +406,8 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
 {
     int         ret_code = SUCCESS;
     char        dname[64];
-    long        i;
+    int        i;
+    size_t     u;
     /* HDF5 variables */
     herr_t      hrc;                    /*HDF5 return code              */
     hsize_t     h5dims[MAX_DIMS];       /*dataset dim sizes             */
@@ -416,20 +417,20 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
     hsize_t     h5start[MAX_DIMS];      /*selection start               */
     hsize_t     h5maxdims[MAX_DIMS];
     int         rank;                   /*rank of dataset */
-        /* Prepare buffer for verifying data */
+
+    /* Prepare buffer for verifying data */
 /*    if (parms->verify)
             memset(buffer,1,linear_buf_size); */
 
     buf_p=(unsigned char *)buffer;
 
-    for (i=0; i < linear_buf_size; i++)
-        buf_p[i]=i%128;
+    for(u = 0; u < linear_buf_size; u++)
+        buf_p[u] = u % 128;
 
     rank = parms->rank;
 
-    for (i=0; i<rank; i++) {
+    for(i = 0; i < rank; i++)
         h5offset[i] = offset[i] = 0;
-    }
 
     /* I/O Access specific setup */
     switch (parms->io_type) {
@@ -616,20 +617,22 @@ done:
  * Programmer:      Christian Chilan, April, 2008
  * Modifications:
  */
-
-static herr_t dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
+static herr_t
+dset_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
 {
     int cur_dim = order[local_dim]-1;
     int         ret_code = SUCCESS;
     int         k;
     hsize_t  dims[MAX_DIMS], maxdims[MAX_DIMS];
-    long i,j;
+    hsize_t i;
+    int j;
     herr_t hrc;
 
     /* iterates according to the dimensions in order array */
     for (i=0; i < parms->dset_size[cur_dim]; i += parms->buf_size[cur_dim]){
 
-        h5offset[cur_dim] = offset[cur_dim] = i;
+        h5offset[cur_dim] = (hssize_t)i;
+        offset[cur_dim] = (HDoff_t)i;
 
         if (local_dim > 0){
 
@@ -641,17 +644,15 @@ static herr_t dset_write(int local_dim, file_descr *fd, parameters *parms, void 
 
             case POSIXIO:
                 /* initialize POSIX offset in the buffer */
-                for (j=0; j < parms->rank; j++) {
-                    buf_offset[j]=0;
-                }
+                for(j = 0; j < parms->rank; j++)
+                    buf_offset[j] = 0;
                 buf_p = (unsigned char *)buffer;
                 /* write POSIX buffer */
                 posix_buffer_write(0, fd, parms, buffer);
                 break;
 
             case HDF5:
-                /* if dimensions are extendable, extend them as needed during
-                access */
+                /* if dimensions are extendable, extend them as needed during access */
                 if (parms->h5_use_chunks && parms->h5_extendable) {
 
                     hrc=H5Sget_simple_extent_dims(h5dset_space_id,dims,maxdims);
@@ -659,7 +660,8 @@ static herr_t dset_write(int local_dim, file_descr *fd, parameters *parms, void 
 
                     for (k=0; k < parms->rank; k++){
 
-                        if (dims[k] <= h5offset[k]) {
+                        HDassert(h5offset[k] >= 0);
+                        if (dims[k] <= (hsize_t)h5offset[k]) {
                             dims[k] = dims[k]+h5count[k];
                             hrc=H5Sset_extent_simple(h5dset_space_id,parms->rank,dims,maxdims);
                             VRFY((hrc >= 0), "H5Sset_extent_simple");
@@ -700,20 +702,17 @@ done:
  * Modifications:
  */
 
-static herr_t posix_buffer_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
+static herr_t
+posix_buffer_write(int local_dim, file_descr *fd, parameters *parms, void *buffer)
 {
-    int dtype_size = 1;
     int         ret_code = SUCCESS;
-    long i;
-    size_t d_offset;
-    size_t linear_dset_offset = 0;
-    int j, rc;
 
     /* if dimension is not contiguous, call recursively */
     if (local_dim < parms->rank-1 && local_dim != cont_dim) {
+        size_t u;
 
-        for (i=0; i < parms->buf_size[local_dim]; i += dtype_size) {
-            buf_offset[local_dim] = i;
+        for(u = 0; u < parms->buf_size[local_dim]; u ++) {
+            buf_offset[local_dim] = u;
             posix_buffer_write(local_dim+1, fd, parms, buffer);
 
             /* if next dimension is cont_dim, it will fill out the buffer
@@ -724,17 +723,20 @@ static herr_t posix_buffer_write(int local_dim, file_descr *fd, parameters *parm
         }
     /* otherwise, perform contiguous POSIX access */
     } else {
+        HDoff_t d_offset;
+        HDoff_t linear_dset_offset = 0;
+        int i, j, rc;
 
         buf_offset[local_dim] = 0;
 
         /* determine offset in the buffer */
-        for (i=0; i < parms->rank; i++){
-            d_offset=1;
+        for(i = 0; i < parms->rank; i++) {
+            d_offset = 1;
 
-            for (j=i+1; j < parms->rank; j++)
-                d_offset *= parms->dset_size[j];
+            for(j = i + 1; j < parms->rank; j++)
+                d_offset *= (HDoff_t)parms->dset_size[j];
 
-            linear_dset_offset += (offset[i]+buf_offset[i])*d_offset;
+            linear_dset_offset += (offset[i] + (HDoff_t)buf_offset[i]) * d_offset;
         }
 
         /* only care if seek returns error */
@@ -749,6 +751,7 @@ static herr_t posix_buffer_write(int local_dim, file_descr *fd, parameters *parm
         buf_p += cont_size;
 
     }
+
 done:
     return ret_code;
 }
@@ -766,7 +769,8 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
     char        *buffer2 = NULL;       /* Buffer for data verification */
     int         ret_code = SUCCESS;
     char        dname[64];
-    long        i;
+    int         i;
+    size_t      u;
     /* HDF5 variables */
     herr_t      hrc;                    /*HDF5 return code              */
     hsize_t     h5dims[MAX_DIMS];       /*dataset dim sizes             */
@@ -782,8 +786,8 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
     } /* end if */
 
     /* Prepare buffer for verifying data */
-    for(i = 0; i < linear_buf_size; i++)
-        buffer2[i] = i % 128;
+    for(u = 0; u < linear_buf_size; u++)
+        buffer2[u] = (char)(u % 128);
 
     rank = parms->rank;
     for(i = 0; i < rank; i++)
@@ -937,18 +941,21 @@ done:
  * Modifications:
  */
 
-static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms,
-    void *buffer, const char *buffer2)
+static herr_t
+dset_read(int local_dim, file_descr *fd, parameters *parms, void *buffer,
+    const char *buffer2)
 {
     int cur_dim = order[local_dim]-1;
-    int         ret_code = SUCCESS;
-    long i,j;
+    hsize_t i;
+    int j;
     herr_t hrc;
+    int         ret_code = SUCCESS;
 
     /* iterate on the current dimension */
     for (i=0; i < parms->dset_size[cur_dim]; i += parms->buf_size[cur_dim]){
 
-        h5offset[cur_dim] = offset[cur_dim] = i;
+        h5offset[cur_dim] = (hssize_t)i;
+        offset[cur_dim] = (HDoff_t)i;
 
         /* if traverse in order array is incomplete, recurse */
         if (local_dim > 0){
@@ -975,13 +982,6 @@ static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms,
                 hrc = H5Dread(h5ds_id, ELMT_H5_TYPE, h5mem_space_id,
                     h5dset_space_id, h5dxpl, buffer);
                 VRFY((hrc >= 0), "H5Dread");
-#if 0
-                for (j=0; j<linear_buf_size; j++) {
-                     buf_p = (unsigned char*)buffer;
-                     if (buf_p[j]!=buffer2[j])
-                        printf("Inconsistent data in %d\n", j);
-                }
-#endif
                 break;
 				
             default:
@@ -1004,26 +1004,26 @@ done:
  * Modifications:
  */
 
-static herr_t posix_buffer_read(int local_dim, file_descr *fd, parameters *parms, void *buffer)
+static herr_t
+posix_buffer_read(int local_dim, file_descr *fd, parameters *parms, void *buffer)
 {
-    int dtype_size = 1;
     int         ret_code = SUCCESS;
-    long i;
-    size_t d_offset;
-    size_t linear_dset_offset = 0;
-    int j, rc;
 
     /* if local dimension is not contiguous, recurse */
     if (local_dim < parms->rank-1 && local_dim != cont_dim) {
+        size_t u;
 
-        for (i=0; i < parms->buf_size[local_dim]; i += dtype_size) {
-            buf_offset[local_dim] = i;
+        for(u = 0; u < parms->buf_size[local_dim]; u++) {
+            buf_offset[local_dim] = u;
             ret_code = posix_buffer_read(local_dim+1, fd, parms, buffer);
             if (local_dim+1==cont_dim)
                 break;
         }
     /* otherwise, perform contiguous POSIX access */
     } else {
+        HDoff_t d_offset;
+        HDoff_t linear_dset_offset = 0;
+        int i, j, rc;
 
         buf_offset[local_dim] = 0;
         /* determine offset in buffer */
@@ -1031,9 +1031,9 @@ static herr_t posix_buffer_read(int local_dim, file_descr *fd, parameters *parms
             d_offset=1;
 
             for (j=i+1; j<parms->rank; j++)
-                d_offset *= parms->dset_size[j];
+                d_offset *= (HDoff_t)parms->dset_size[j];
 
-            linear_dset_offset += (offset[i]+buf_offset[i])*d_offset;
+            linear_dset_offset += (offset[i] + (HDoff_t)buf_offset[i]) * d_offset;
         }
 
         /* only care if seek returns error */
@@ -1165,7 +1165,7 @@ set_vfd(parameters *param)
             memb_fapl[mt] = H5P_DEFAULT;
             sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
-            memb_addr[mt] = MAX(mt-1,0)*(HADDR_MAX/10);
+            memb_addr[mt] = (haddr_t)MAX(mt - 1,0) * (HADDR_MAX / 10);
         }
 
         if (H5Pset_fapl_multi(my_fapl, memb_map, memb_fapl, memb_name,

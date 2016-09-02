@@ -5995,6 +5995,169 @@ error:
 
 
 /*
+ * Test a bug that occurs when an allocator with zero size left and an unaligned
+ * endpoint is extended to allocate an aligned object
+ */
+static unsigned
+test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
+{
+    hid_t               file = -1;              /* File ID */
+    hid_t               copied_fapl = -1;       /* FAPL to use for this test */
+    char                filename[FILENAME_LEN]; /* Filename to use */
+    H5F_t               *f = NULL;              /* Internal file object pointer */
+    H5FD_mem_t          type;
+    haddr_t             addr1, addr2;
+    hsize_t             block_size;
+    hsize_t             align;
+    hbool_t             split = FALSE, multi = FALSE;
+
+    TESTING("H5MF_alloc() bug 1");
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Copy fapl */
+    if((copied_fapl = H5Pcopy(fapl)) < 0)
+        TEST_ERROR
+
+    /* Get metadata block size */
+    if(H5Pget_meta_block_size(copied_fapl, &block_size) < 0)
+        TEST_ERROR
+
+    /* Set alignment to equal block size / 2 */
+    align = block_size / 2;
+    if(H5Pset_alignment(copied_fapl, 0, align) < 0)
+        TEST_ERROR
+
+    /* Check for split or multi driver */
+    if(!HDstrcmp(env_h5_drvr, "split"))
+        split = TRUE;
+    else if(!HDstrcmp(env_h5_drvr, "multi"))
+        multi = TRUE;
+
+    /* Add alignment to member files for split/multi driver */
+    if(split || multi) {
+        hid_t memb_fapl;
+
+        /* Creat fapl */
+        if((memb_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+            TEST_ERROR
+
+        /* Set alignment. Note that it is the block size of the parent FAPL that
+         * is important here. */
+        if(H5Pset_alignment(memb_fapl, 0, align) < 0)
+            TEST_ERROR
+
+        if(split) {
+            /* Set split driver with new FAPLs */
+            if(H5Pset_fapl_split(copied_fapl, "-m.h5", memb_fapl, "-r.h5", memb_fapl) < 0)
+                TEST_ERROR
+        } /* end if */
+        else {
+            H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
+            hid_t memb_fapl_arr[H5FD_MEM_NTYPES];
+            char *memb_name[H5FD_MEM_NTYPES];
+            haddr_t memb_addr[H5FD_MEM_NTYPES];
+            hbool_t relax;
+            H5FD_mem_t  mt;
+
+            /* Get current multi settings */
+            HDmemset(memb_name, 0, sizeof memb_name);
+            if(H5Pget_fapl_multi(copied_fapl, memb_map, NULL, memb_name, memb_addr, &relax) < 0)
+                TEST_ERROR
+
+            /* Populate memb_fapl_arr, patch memb_addr so member file addresses
+             * are aligned */
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+                memb_fapl_arr[mt] = memb_fapl;
+                memb_addr[mt] = ((memb_addr[mt] + align - 1) / align) * align;
+            } /* end for */
+
+            /* Set multi driver with new FAPLs */
+            if(H5Pset_fapl_multi(copied_fapl, memb_map, memb_fapl_arr, (const char * const *)memb_name, memb_addr, relax) < 0)
+                TEST_ERROR
+
+            /* Free memb_name */
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+                free(memb_name[mt]);
+        } /* end else */
+
+        /* Close memb_fapl */
+        if(H5Pclose(memb_fapl) < 0)
+            TEST_ERROR
+    } /* end if */
+
+    /* Reopen the file with alignment */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, copied_fapl)) < 0)
+        TEST_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
+        TEST_ERROR
+
+    /* Allocate a block of size align from meta_aggr.  This should create an
+     * aggregator that extends to the end of the file, with
+     * block_size / 2 bytes remaining, and the end of the file aligned */
+    type = H5FD_MEM_SUPER;
+    addr1 = H5MF_alloc(f, type, H5AC_ind_read_dxpl_id, align);
+
+    /* Verify that the allocated block is aligned */
+    if(addr1 % align) TEST_ERROR
+
+    /* Allocate a block of size align from meta_aggr.  This should force the
+     * aggregator to extend to the end of the file, with 0 bytes remaining, and
+     * the end of the file aligned */
+    type = H5FD_MEM_SUPER;
+    addr2 = H5MF_alloc(f, type, H5AC_ind_read_dxpl_id, align);
+
+    /* Verify that the allocated block is aligned */
+    if(addr2 % align) TEST_ERROR
+
+    /* Verify that the allocated block is placed align after the previous */
+    if((addr2 - addr1) != align) TEST_ERROR
+
+    /* Allocate a block of size block_size + 1 from meta_aggr.  This should
+     * force the aggregator to extend to the end of the file, with 0 bytes
+     * remaining, and the end of the file unaligned */
+    type = H5FD_MEM_SUPER;
+    addr1 = H5MF_alloc(f, type, H5AC_ind_read_dxpl_id, block_size + (hsize_t)1);
+
+    /* Verify that the allocated block is aligned */
+    if(addr1 % align) TEST_ERROR
+
+    /* Verify that the allocated block is placed block_size / 2 after the
+     * previous */
+    if((addr1 - addr2) != align) TEST_ERROR
+
+    /* Allocate a block of size 1.  This should extend the aggregator from
+     * the previous allocation, and align the new block */
+    type = H5FD_MEM_SUPER;
+    addr2 = H5MF_alloc(f, type, H5AC_ind_read_dxpl_id, (hsize_t)1);
+
+    /* Verify that the allocated block is aligned */
+    if(addr2 % align) TEST_ERROR
+
+    /* Verify that the allocated block is placed 3 * (block_size / 2) after
+     * the previous */
+    if((addr2 - addr1) != (3 * align)) TEST_ERROR
+
+    PASSED()
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        TEST_ERROR
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_mf_bug1() */
+
+
+/*
  * Verify that the file's free-space manager persists where there are free sections in the manager
  */
 static unsigned
@@ -7502,38 +7665,41 @@ main(void)
     /* Tests for alignment */
     for(curr_test = TEST_NORMAL; curr_test < TEST_NTESTS; H5_INC_ENUM(test_type_t, curr_test)) {
 
-	switch(curr_test) {
+        switch(curr_test) {
             case TEST_NORMAL: /* set alignment = 1024 */
-		if(H5Pset_alignment(new_fapl, (hsize_t)0, (hsize_t)TEST_ALIGN1024) < 0)
-		    TEST_ERROR
+                if(H5Pset_alignment(new_fapl, (hsize_t)0, (hsize_t)TEST_ALIGN1024) < 0)
+                    TEST_ERROR
                 break;
 
             case TEST_AGGR_SMALL: /* set alignment = 4096 */
-		if(H5Pset_alignment(new_fapl, (hsize_t)0, (hsize_t)TEST_ALIGN4096) < 0)
-		    TEST_ERROR
+                if(H5Pset_alignment(new_fapl, (hsize_t)0, (hsize_t)TEST_ALIGN4096) < 0)
+                    TEST_ERROR
                 break;
 
             case TEST_NTESTS:
             default:
                 TEST_ERROR;
-		break;
-	} /* end switch */
+                break;
+        } /* end switch */
 
-	nerrors += test_mf_align_eoa(env_h5_drvr, fapl, new_fapl);
-	nerrors += test_mf_align_fs(env_h5_drvr, fapl, new_fapl);
-	nerrors += test_mf_align_alloc1(env_h5_drvr, fapl, new_fapl);
-	nerrors += test_mf_align_alloc2(env_h5_drvr, fapl, new_fapl);
-	nerrors += test_mf_align_alloc3(env_h5_drvr, fapl, new_fapl);
-	nerrors += test_mf_align_alloc4(env_h5_drvr, fapl, new_fapl);
-	nerrors += test_mf_align_alloc5(env_h5_drvr, fapl, new_fapl);
-	nerrors += test_mf_align_alloc6(env_h5_drvr, fapl, new_fapl);
-    } /* end if */
+        nerrors += test_mf_align_eoa(env_h5_drvr, fapl, new_fapl);
+        nerrors += test_mf_align_fs(env_h5_drvr, fapl, new_fapl);
+        nerrors += test_mf_align_alloc1(env_h5_drvr, fapl, new_fapl);
+        nerrors += test_mf_align_alloc2(env_h5_drvr, fapl, new_fapl);
+        nerrors += test_mf_align_alloc3(env_h5_drvr, fapl, new_fapl);
+        nerrors += test_mf_align_alloc4(env_h5_drvr, fapl, new_fapl);
+        nerrors += test_mf_align_alloc5(env_h5_drvr, fapl, new_fapl);
+        nerrors += test_mf_align_alloc6(env_h5_drvr, fapl, new_fapl);
+    } /* end for */
 
     /* tests to verify that file's free-space managers are persistent */
     nerrors += test_mf_fs_drivers(fapl);
 
     /* tests for file space management */
     nerrors += test_filespace_drivers(fapl);
+
+    /* tests for specific bugs */
+    nerrors += test_mf_bug1(env_h5_drvr, fapl);
 
     if(H5Pclose(new_fapl) < 0)
         FAIL_STACK_ERROR

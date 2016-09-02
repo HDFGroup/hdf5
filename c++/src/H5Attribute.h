@@ -26,10 +26,10 @@ namespace H5 {
 
     An attribute has many characteristics similar to a dataset, thus both
     Attribute and DataSet are derivatives of AbstractDs.  Attribute also
-    inherits from IdComponent because an attribute is an HDF5 component that
-    is identified by an identifier.
+    inherits from H5Location because an attribute can be used to specify
+    a location.
 */
-class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
+class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
    public:
 
 	// Copy constructor: makes a copy of an existing Attribute object.
@@ -43,9 +43,6 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 
 	// Closes this attribute.
 	virtual void close();
-
-	// Gets the name of the file, in which this attribute belongs.
-	H5std_string getFileName() const;
 
 	// Gets the name of this attribute.
 	ssize_t getName(char* attr_name, size_t buf_size = 0) const;
@@ -72,10 +69,6 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	// Writes data to this attribute.
 	void write(const DataType& mem_type, const void *buf ) const;
 	void write(const DataType& mem_type, const H5std_string& strg ) const;
-
-	// Flushes all buffers associated with the file specified by this
-	// attribute to disk.
-	void flush( H5F_scope_t scope ) const;
 
 	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("Attribute"); }
@@ -104,12 +97,6 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	// Reads variable or fixed len strings from this attribute.
 	void p_read_variable_len(const DataType& mem_type, H5std_string& strg) const;
 	void p_read_fixed_len(const DataType& mem_type, H5std_string& strg) const;
-
-	// do not inherit H5Object::iterateAttrs
-	int iterateAttrs() { return 0; }
-
-	// do not inherit H5Object::renameAttr
-	void renameAttr() {}
 
 	// Friend function to set Attribute id.  For library use only.
 	friend void f_Attribute_setId(Attribute* attr, hid_t new_id);

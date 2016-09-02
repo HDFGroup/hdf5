@@ -24,13 +24,13 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
+#include "H5Location.h"
 #include "H5Object.h"
 #include "H5FaccProp.h"
 #include "H5FcreatProp.h"
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
-#include "H5CommonFG.h"
 #include "H5Group.h"
 #include "H5AbstractDs.h"
 #include "H5DataSpace.h"
@@ -51,7 +51,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub H5File object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File() : H5Location(), CommonFG(), id(H5I_INVALID_HID) {}
+H5File::H5File() : Group(), id(H5I_INVALID_HID) {}
 
 //--------------------------------------------------------------------------
 // Function:	H5File overloaded constructor
@@ -84,7 +84,7 @@ H5File::H5File() : H5Location(), CommonFG(), id(H5I_INVALID_HID) {}
 //		to catch then re-throw it. -BMR 2013/03/21
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), CommonFG(), id(H5I_INVALID_HID)
+H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : Group(), id(H5I_INVALID_HID)
 {
     try {
 	p_get_file(name, flags, create_plist, access_plist);
@@ -109,7 +109,7 @@ H5File::H5File( const char* name, unsigned int flags, const FileCreatPropList& c
 //		to catch then re-throw it. -BMR 2013/03/21
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : H5Location(), CommonFG(), id(H5I_INVALID_HID)
+H5File::H5File( const H5std_string& name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist ) : Group(), id(H5I_INVALID_HID)
 {
     try {
 	p_get_file(name.c_str(), flags, create_plist, access_plist);
@@ -166,7 +166,7 @@ void H5File::p_get_file(const char* name, unsigned int flags, const FileCreatPro
 //		constructor is needed by the library in order to return
 //		an object, H5File doesn't need it. -BMR (HDFFV-8766 partially)
 //--------------------------------------------------------------------------
-H5File::H5File(hid_t existing_id) : H5Location(), CommonFG()
+H5File::H5File(hid_t existing_id) : Group()
 {
     id = existing_id;
     incRefCount(); // increment number of references to this id
@@ -181,7 +181,7 @@ H5File::H5File(hid_t existing_id) : H5Location(), CommonFG()
 ///\param	original - IN: H5File instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5File::H5File(const H5File& original) : H5Location(), CommonFG()
+H5File::H5File(const H5File& original) : Group()
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id
@@ -477,12 +477,13 @@ void H5File::getVFDHandle(const FileAccPropList& fapl, void **file_handle) const
 // Programmer   Binh-Minh Ribler - May 2004
 // Modification
 //		Planned for removal. -BMR, 2014/04/16
-//		Removed from documentation. -BMR, 2016/03/07
+//		Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
+//		Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
 //--------------------------------------------------------------------------
-void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
-{
-    getVFDHandle((const FileAccPropList)fapl, file_handle);
-}
+//void H5File::getVFDHandle(FileAccPropList& fapl, void **file_handle) const
+//{
+//    getVFDHandle((const FileAccPropList)fapl, file_handle);
+//}
 
 //--------------------------------------------------------------------------
 // Function:	H5File::getVFDHandle

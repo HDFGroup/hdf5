@@ -283,7 +283,8 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     /* Test all objects in group, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
     info.command = RET_TWO;
-    idx = i = 0;
+    i = 0;
+    idx = 0;
     while((ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
         VERIFY(ret, 2, "H5Literate");
@@ -308,7 +309,8 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     /* Test all objects in group, when callback changes return value */
     /* This also tests the "restarting" ability, because the index changes */
     info.command = new_format ? RET_CHANGE2 : RET_CHANGE;
-    idx = i = 0;
+    i = 0;
+    idx = 0;
     while((ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info)) >= 0) {
         /* Verify return value from iterator gets propagated correctly */
         VERIFY(ret, 1, "H5Literate");
@@ -462,7 +464,8 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     /* Test all attributes on dataset, when callback always returns 1 */
     /* This also tests the "restarting" ability, because the index changes */
     info.command = RET_TWO;
-    idx = i = 0;
+    i = 0;
+    idx = 0;
     while((ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
         VERIFY(ret, 2, "H5Aiterate2");
@@ -488,7 +491,8 @@ static void test_iter_attr(hid_t fapl, hbool_t new_format)
     /* Test all attributes on dataset, when callback changes return value */
     /* This also tests the "restarting" ability, because the index changes */
     info.command = new_format ? RET_CHANGE2 : RET_CHANGE;
-    idx = i = 0;
+    i = 0;
+    idx = 0;
     while((ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info)) > 0) {
         /* Verify return value from iterator gets propagated correctly */
         VERIFY(ret, 1, "H5Aiterate2");
@@ -672,7 +676,7 @@ test_iter_group_large(hid_t fapl)
     ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, NULL, liter_cb2, curr_name);
     CHECK(ret, FAIL, "H5Literate");
     for(i = 1; i < 100; i++) {
-        hsize_t idx = i;
+        hsize_t idx = (hsize_t)i;
 
         curr_name = &names[i];
         ret = H5Literate(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb2, curr_name);

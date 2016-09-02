@@ -25,7 +25,6 @@
 /* Define this macro to indicate that the testing APIs should be available */
 #define H5G_TESTING
 
-#include <time.h>
 #include "h5test.h"
 #include "H5Gpkg.h"		/* Groups				*/
 

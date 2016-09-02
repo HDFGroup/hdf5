@@ -13758,7 +13758,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     unsigned char obj_type;             /* Type of storage for object */
     fheap_heap_state_t state;           /* State of fractal heap */
     unsigned    deflate_level;          /* Deflation level */
-    unsigned    old_actual_id_len = 0;  /* Old actual ID length */
+    size_t      old_actual_id_len =0 ;  /* Old actual ID length */
     hbool_t     huge_ids_direct;        /* Are 'huge' objects directly acccessed? */
     const char *base_desc = "insert 'huge' object into heap with I/O filters, then remove %s";       /* Test description */
 
@@ -15741,7 +15741,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     /* Loop over adding objects to the heap, until the size limit is reached */
     total_obj_added = 0;
     while(total_obj_added < size_limit) {
-        unsigned size_range = (tmp_cparam.managed.start_block_size / 8);       /* Object size range */
+        size_t size_range = (tmp_cparam.managed.start_block_size / 8);       /* Object size range */
 
         /* Determine the size of the range for this object */
         /* (50% of the objects inserted will use the initial size range,
@@ -16061,9 +16061,9 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 
         /* Change size of data to write */
         if(u < 20)
-            obj_size = (size_t)(obj_size * 1.3F);
+            obj_size = (size_t)((float)obj_size * 1.3F);
         else
-            obj_size = (size_t)(obj_size / 1.3F);
+            obj_size = (size_t)((float)obj_size / 1.3F);
     } /* end for */
 
     /* Close the fractal heap */
@@ -16110,9 +16110,9 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
 
         /* Change size of data to write */
         if(u < 20)
-            obj_size = (size_t)(obj_size * 1.3F);
+            obj_size = (size_t)((float)obj_size * 1.3F);
         else
-            obj_size = (size_t)(obj_size / 1.3F);
+            obj_size = (size_t)((float)obj_size / 1.3F);
     } /* end for */
 
     /* Close the fractal heap */

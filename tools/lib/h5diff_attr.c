@@ -75,14 +75,12 @@ static void table_attrs_free( table_attrs_t *table )
 {
     unsigned int i;
 
-    if (table)
-    {
-        if(table->attrs) 
-        {
-            for(i = 0; i < table->nattrs; i++) 
-            {
-                if(table->attrs[i].name)
-                    HDfree(table->attrs[i].name );
+    if (table) {
+        if (table->attrs) {
+            for (i = 0; i < table->nattrs; i++) {
+                if (table->attrs[i].name) {
+                    HDfree(table->attrs[i].name);
+                }
             } /* end for */
             HDfree(table->attrs);
             table->attrs = NULL;

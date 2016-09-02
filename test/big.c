@@ -129,8 +129,8 @@ randll(hsize_t limit, int current_index)
     /* does not overlap with any previous writes */
     while(overlap != 0 && tries < MAX_TRIES)
     {
-        acc = HDrandom();
-        acc *= HDrandom();
+        acc = (hsize_t)HDrandom();
+        acc *= (hsize_t)HDrandom();
         acc = acc % limit;
         overlap = 0;
 
@@ -508,7 +508,7 @@ reader(char *filename, hid_t fapl)
         if('#' != ln[0])
             break;
         i = (int)HDstrtol(ln + 1, &s, 10);
-        hs_offset[0] = HDstrtoll(s, NULL, 0);
+        hs_offset[0] = HDstrtoull(s, NULL, 0);
         HDfprintf(stdout, "#%03d 0x%016Hx%47s", i, hs_offset[0], "");
         HDfflush(stdout);
 
@@ -801,7 +801,7 @@ main (int ac, char **av)
     /* seed = (unsigned long)1155438845; */
     HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 #endif /* QAK */
-    HDsrandom(seed);
+    HDsrandom((unsigned)seed);
 
     /* run VFD-specific test */
     if(H5FD_SEC2 == driver) {

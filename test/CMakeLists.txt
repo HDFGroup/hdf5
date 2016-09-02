@@ -83,6 +83,7 @@ endif (BUILD_SHARED_LIBS)
   )
   set (TEST2_PLUGIN_LIBS
       dynlib2
+      dynlib4
   )
 
   foreach (test_lib ${TEST_PLUGIN_LIBS})

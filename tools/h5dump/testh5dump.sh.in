@@ -104,6 +104,7 @@ $SRC_H5DUMP_TESTFILES/tcmpdattrintsize.h5
 $SRC_H5DUMP_TESTFILES/tcmpdintsize.h5
 $SRC_H5DUMP_TESTFILES/tcompound.h5
 $SRC_H5DUMP_TESTFILES/tcompound_complex.h5
+$SRC_H5DUMP_TESTFILES/tcompound_complex2.h5
 $SRC_H5DUMP_TESTFILES/tdatareg.h5
 $SRC_H5DUMP_TESTFILES/tdset.h5
 $SRC_H5DUMP_TESTFILES/tempty.h5
@@ -169,6 +170,7 @@ $SRC_H5DUMP_TESTFILES/tvldtypes2.h5
 $SRC_H5DUMP_TESTFILES/tvldtypes3.h5
 $SRC_H5DUMP_TESTFILES/tvldtypes4.h5
 $SRC_H5DUMP_TESTFILES/tvldtypes5.h5
+$SRC_H5DUMP_TESTFILES/tvlenstr_array.h5
 $SRC_H5DUMP_TESTFILES/tvlstr.h5
 $SRC_H5DUMP_TESTFILES/tvms.h5
 "
@@ -229,6 +231,7 @@ $SRC_H5DUMP_TESTFILES/tcomp-1.ddl
 $SRC_H5DUMP_TESTFILES/tcomp-2.ddl
 $SRC_H5DUMP_TESTFILES/tcomp-3.ddl
 $SRC_H5DUMP_TESTFILES/tcomp-4.ddl
+$SRC_H5DUMP_TESTFILES/tcompound_complex2.ddl
 $SRC_H5DUMP_TESTFILES/tcompact.ddl
 $SRC_H5DUMP_TESTFILES/tcontents.ddl
 $SRC_H5DUMP_TESTFILES/tcontiguos.ddl
@@ -342,6 +345,7 @@ $SRC_H5DUMP_TESTFILES/tvldtypes2.ddl
 $SRC_H5DUMP_TESTFILES/tvldtypes3.ddl
 $SRC_H5DUMP_TESTFILES/tvldtypes4.ddl
 $SRC_H5DUMP_TESTFILES/tvldtypes5.ddl
+$SRC_H5DUMP_TESTFILES/tvlenstr_array.ddl
 $SRC_H5DUMP_TESTFILES/tvlstr.ddl
 $SRC_H5DUMP_TESTFILES/tvms.ddl
 $SRC_H5DUMP_TESTFILES/twidedisplay.ddl
@@ -419,7 +423,7 @@ CLEAN_TESTFILES_AND_TESTDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=`$DIRNAME $tstfile`
+    SDIR=$SRC_H5DUMP_TESTFILES
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
@@ -1034,6 +1038,7 @@ TOOLTEST tcomp-2.ddl --enable-error-stack -N /type1 --any_path /type2 --any_path
 TOOLTEST4 tcomp-3.ddl --enable-error-stack -t /#6632 -g /group2 tcompound.h5
 # test complicated compound datatype
 TOOLTEST tcomp-4.ddl --enable-error-stack tcompound_complex.h5
+TOOLTEST tcompound_complex.ddl --enable-error-stack tcompound_complex2.h5
 # tests for bitfields and opaque data types
 TOOLTEST tbitnopaque.ddl --enable-error-stack tbitnopaque.h5
 
@@ -1068,6 +1073,7 @@ TOOLTEST tvldtypes5.ddl --enable-error-stack tvldtypes5.h5
 
 #test for file with variable length string data
 TOOLTEST tvlstr.ddl --enable-error-stack tvlstr.h5
+TOOLTEST tvlenstr_array.ddl --enable-error-stack tvlenstr_array.h5
 
 # test for files with array data
 TOOLTEST tarray1.ddl --enable-error-stack tarray1.h5

@@ -43,17 +43,18 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Topen2
     (JNIEnv *env, jclass clss, jlong loc_id, jstring name, jlong access_plist)
 {
-    hid_t       status;
+    hid_t       status = -1;
     const char *tName;
 
-    PIN_JAVA_STRING(name, tName, -1);
+    PIN_JAVA_STRING(name, tName);
+    if (tName != NULL) {
+        status = H5Topen2((hid_t)loc_id, tName, (hid_t)access_plist);
 
-    status = H5Topen2((hid_t)loc_id, tName, (hid_t)access_plist);
+        UNPIN_JAVA_STRING(name, tName);
 
-    UNPIN_JAVA_STRING(name, tName);
-
-    if (status < 0)
-        h5libraryError(env);
+        if (status < 0)
+            h5libraryError(env);
+    }
 
     return (jlong)status;
 } /* end Java_hdf_hdf5lib_H5__1H5Topen2 */
@@ -789,14 +790,15 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1index
     const char *tName;
     int         index = -1;
 
-    PIN_JAVA_STRING(field_name, tName, -1);
+    PIN_JAVA_STRING(field_name, tName);
+    if (tName != NULL) {
+        index = H5Tget_member_index((hid_t)type_id, tName);
 
-    index = H5Tget_member_index((hid_t)type_id, tName);
+        UNPIN_JAVA_STRING(field_name, tName);
 
-    UNPIN_JAVA_STRING(field_name, tName);
-
-    if (index < 0)
-        h5libraryError(env);
+        if (index < 0)
+            h5libraryError(env);
+    }
 
     return (jint)index;
 } /* end Java_hdf_hdf5lib_H5_H5Tget_1member_1index */
@@ -858,17 +860,18 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Tinsert
     (JNIEnv *env, jclass clss, jlong type_id, jstring name, jlong offset, jlong field_id)
 {
-    herr_t      status;
+    herr_t      status = -1;
     const char *tName;
     long        off = (long)offset;
 
-    PIN_JAVA_STRING(name, tName, -1);
+    PIN_JAVA_STRING(name, tName);
+    if (tName != NULL) {
+        status = H5Tinsert((hid_t)type_id, tName, (size_t)off, field_id);
 
-    status = H5Tinsert((hid_t)type_id, tName, (size_t)off, field_id);
-
-    UNPIN_JAVA_STRING(name,tName);
-    if (status < 0)
-        h5libraryError(env);
+        UNPIN_JAVA_STRING(name,tName);
+        if (status < 0)
+            h5libraryError(env);
+    }
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Tinsert */
@@ -939,14 +942,15 @@ Java_hdf_hdf5lib_H5_H5Tset_1tag
     herr_t      status = -1;
     const char *tagP;
 
-    PIN_JAVA_STRING(tag, tagP, -1);
+    PIN_JAVA_STRING(tag, tagP);
+    if (tagP != NULL) {
+        status = H5Tset_tag((hid_t)type, tagP);
 
-    status = H5Tset_tag((hid_t)type, tagP);
+        UNPIN_JAVA_STRING(tag,tagP);
 
-    UNPIN_JAVA_STRING(tag,tagP);
-
-    if (status < 0)
-        h5libraryError(env);
+        if (status < 0)
+            h5libraryError(env);
+    }
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Tset_1tag */
@@ -1029,21 +1033,22 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert_1int
         h5nullArgument(env, "H5Tenum_insert:  value is NULL");
     } /* end if */
     else {
-        PIN_JAVA_STRING(name, nameP, -1);
+        PIN_JAVA_STRING(name, nameP);
+        if (nameP != NULL) {
+            intP = ENVPTR->GetIntArrayElements(ENVPAR value, &isCopy2);
+            if (intP == NULL) {
+                h5JNIFatalError(env, "H5Tenum_insert:  value not pinned");
+            } /* end if */
+            else {
+                status = H5Tenum_insert((hid_t)type_id, nameP, intP);
 
-        intP = ENVPTR->GetIntArrayElements(ENVPAR value, &isCopy2);
-        if (intP == NULL) {
-            h5JNIFatalError(env, "H5Tenum_insert:  value not pinned");
-        } /* end if */
-        else {
-            status = H5Tenum_insert((hid_t)type_id, nameP, intP);
+                ENVPTR->ReleaseIntArrayElements(ENVPAR value, intP, JNI_ABORT);
 
-            ENVPTR->ReleaseIntArrayElements(ENVPAR value, intP, JNI_ABORT);
-
-            if (status < 0)
-                h5libraryError(env);
-        } /* end else */
-        UNPIN_JAVA_STRING(name, nameP);
+                if (status < 0)
+                    h5libraryError(env);
+            } /* end else */
+            UNPIN_JAVA_STRING(name, nameP);
+        }
     } /* end else */
 
     return (jint)status;
@@ -1067,21 +1072,22 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert
         h5nullArgument(env, "H5Tenum_insert:  value is NULL");
     } /* end if */
     else {
-        PIN_JAVA_STRING0(name, nameP);
+        PIN_JAVA_STRING(name, nameP);
+        if (nameP != NULL) {
+            byteP = ENVPTR->GetByteArrayElements(ENVPAR value, &isCopy2);
+            if (byteP == NULL) {
+                h5JNIFatalError(env, "H5Tenum_insert:  value not pinned");
+            } /* end if */
+            else {
+                status = H5Tenum_insert((hid_t)type_id, nameP, byteP);
 
-        byteP = ENVPTR->GetByteArrayElements(ENVPAR value, &isCopy2);
-        if (byteP == NULL) {
-            h5JNIFatalError(env, "H5Tenum_insert:  value not pinned");
-        } /* end if */
-        else {
-            status = H5Tenum_insert((hid_t)type_id, nameP, byteP);
+                ENVPTR->ReleaseByteArrayElements(ENVPAR value, byteP, JNI_ABORT);
 
-            ENVPTR->ReleaseByteArrayElements(ENVPAR value, byteP, JNI_ABORT);
-
-            if (status < 0)
-                h5libraryError(env);
-        } /* end else */
-        UNPIN_JAVA_STRING(name, nameP);
+                if (status < 0)
+                    h5libraryError(env);
+            } /* end else */
+            UNPIN_JAVA_STRING(name, nameP);
+        }
     } /* end else */
 } /* end Java_hdf_hdf5lib_H5_H5Tenum_1insert */
 
@@ -1218,23 +1224,24 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof_1int
         h5nullArgument(env, "H5Tenum_valueof:  value is NULL");
     } /* end if */
     else {
-        PIN_JAVA_STRING(name, nameP, -1);
-
-        intP = ENVPTR->GetIntArrayElements(ENVPAR value, &isCopy2);
-        if (intP == NULL)  {
-            h5JNIFatalError(env, "H5Tenum_valueof:  value not pinned");
-        } /* end if */
-        else {
-            status = H5Tenum_valueof((hid_t)type_id, nameP, intP);
-
-            if (status < 0) {
-                ENVPTR->ReleaseIntArrayElements(ENVPAR value, intP, JNI_ABORT);
-                h5libraryError(env);
+        PIN_JAVA_STRING(name, nameP);
+        if (nameP != NULL) {
+            intP = ENVPTR->GetIntArrayElements(ENVPAR value, &isCopy2);
+            if (intP == NULL)  {
+                h5JNIFatalError(env, "H5Tenum_valueof:  value not pinned");
             } /* end if */
-            else
-                ENVPTR->ReleaseIntArrayElements(ENVPAR value, intP, 0);
-        } /* end else */
-        UNPIN_JAVA_STRING(name, nameP);
+            else {
+                status = H5Tenum_valueof((hid_t)type_id, nameP, intP);
+
+                if (status < 0) {
+                    ENVPTR->ReleaseIntArrayElements(ENVPAR value, intP, JNI_ABORT);
+                    h5libraryError(env);
+                } /* end if */
+                else
+                    ENVPTR->ReleaseIntArrayElements(ENVPAR value, intP, 0);
+            } /* end else */
+            UNPIN_JAVA_STRING(name, nameP);
+        }
     } /* end else */
 
     return (jint)status;
@@ -1258,23 +1265,24 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof
         h5nullArgument(env, "H5Tenum_valueof:  value is NULL");
     } /* end if */
     else {
-        PIN_JAVA_STRING0(name, nameP);
-
-        byteP = ENVPTR->GetByteArrayElements(ENVPAR value, &isCopy2);
-        if (byteP == NULL)  {
-            h5JNIFatalError(env, "H5Tenum_valueof:  value not pinned");
-        } /* end if */
-        else {
-            status = H5Tenum_valueof((hid_t)type_id, nameP, byteP);
-
-            if (status < 0) {
-                ENVPTR->ReleaseByteArrayElements(ENVPAR value, byteP, JNI_ABORT);
-                h5libraryError(env);
+        PIN_JAVA_STRING(name, nameP);
+        if (nameP != NULL) {
+            byteP = ENVPTR->GetByteArrayElements(ENVPAR value, &isCopy2);
+            if (byteP == NULL)  {
+                h5JNIFatalError(env, "H5Tenum_valueof:  value not pinned");
             } /* end if */
-            else
-                ENVPTR->ReleaseByteArrayElements(ENVPAR value, byteP, 0);
-        } /* end else */
-        UNPIN_JAVA_STRING(name, nameP);
+            else {
+                status = H5Tenum_valueof((hid_t)type_id, nameP, byteP);
+
+                if (status < 0) {
+                    ENVPTR->ReleaseByteArrayElements(ENVPAR value, byteP, JNI_ABORT);
+                    h5libraryError(env);
+                } /* end if */
+                else
+                    ENVPTR->ReleaseByteArrayElements(ENVPAR value, byteP, 0);
+            } /* end else */
+            UNPIN_JAVA_STRING(name, nameP);
+        }
     } /* end else */
 } /* end Java_hdf_hdf5lib_H5_H5Tenum_1valueof */
 
@@ -1487,14 +1495,15 @@ Java_hdf_hdf5lib_H5_H5Tcommit
     herr_t      status = -1;
     const char *tName;
 
-    PIN_JAVA_STRING0(name, tName);
+    PIN_JAVA_STRING(name, tName);
+    if (tName != NULL) {
+        status = H5Tcommit2((hid_t)loc_id, tName, (hid_t)type, (hid_t)link_plist_id, (hid_t)create_plist_id, (hid_t)access_plist_id);
 
-    status = H5Tcommit2((hid_t)loc_id, tName, (hid_t)type, (hid_t)link_plist_id, (hid_t)create_plist_id, (hid_t)access_plist_id);
+        UNPIN_JAVA_STRING(name, tName);
 
-    UNPIN_JAVA_STRING(name, tName);
-
-    if (status < 0)
-        h5libraryError(env);
+        if (status < 0)
+            h5libraryError(env);
+    }
 } /* end Java_hdf_hdf5lib_H5_H5Tcommit */
 
 /*

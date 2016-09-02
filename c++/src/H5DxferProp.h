@@ -86,24 +86,24 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 				H5MM_free_t& free, void** free_info ) const;
 
 	// Sets the size of a contiguous block reserved for small data.
-	void setSmallDataBlockSize(hsize_t size);
+	void setSmallDataBlockSize(hsize_t size) const;
 
 	// Returns the current small data block size setting.
-	hsize_t getSmallDataBlockSize();
+	hsize_t getSmallDataBlockSize() const;
 
 	// Sets number of I/O vectors to be read/written in hyperslab I/O.
-	void setHyperVectorSize(size_t vector_size);
+	void setHyperVectorSize(size_t vector_size) const;
 
 	// Returns the number of I/O vectors to be read/written in
 	// hyperslab I/O.
-	size_t getHyperVectorSize();
+	size_t getHyperVectorSize() const;
 
 	// Enables or disables error-detecting for a dataset reading
 	// process.
-	void setEDCCheck(H5Z_EDC_t check);
+	void setEDCCheck(H5Z_EDC_t check) const;
 
 	// Determines whether error-detection is enabled for dataset reads.
-	H5Z_EDC_t getEDCCheck();
+	H5Z_EDC_t getEDCCheck() const;
 
 	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("DSetMemXferPropList"); }
