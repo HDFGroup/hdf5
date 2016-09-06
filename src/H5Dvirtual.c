@@ -774,6 +774,8 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
             src_file = H5F_SUBFILE(vdset->oloc.file);
             if(NULL == src_file)
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "VDS is not supported with the MPIO VFD")
+            if(strcmp(H5F_OPEN_NAME(src_file), source_dset->file_name) != 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Dataset I/O spans to the wrong subfile")
         }
         else
 #endif /* H5_HAVE_PARALLEL */

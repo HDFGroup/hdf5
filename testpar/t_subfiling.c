@@ -520,7 +520,6 @@ subf_2_w(void)
     VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
 
     ret = H5Dwrite(did, H5T_NATIVE_INT, mem_space_id, sid, dxpl_id, wbuf);
-    if(ret < 0) FAIL_STACK_ERROR;
     VRFY((ret == 0), "");
 
     {
@@ -530,6 +529,25 @@ subf_2_w(void)
 
         VRFY((io_mode == H5D_MPIO_CONTIGUOUS_COLLECTIVE), "Collective Mode invoked");
     }
+
+    /* check if a process tries to access a different sub-file */
+    start[0] = DIMS0 * ((mpi_rank+1) % mpi_size);
+    start[1] = 0;
+    block[0] = DIMS0;
+    block[1] = DIMS1;
+    count[0] = 1;
+    count[1] = 1;
+    stride[0] = 1;
+    stride[1] = 1;
+
+    /* set the selection for this dataset that this process will write to */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret == 0), "H5Sset_hyperslab succeeded");
+
+    H5E_BEGIN_TRY {
+        ret = H5Dwrite(did, H5T_NATIVE_INT, mem_space_id, sid, dxpl_id, wbuf);
+    } H5E_END_TRY;
+    VRFY((ret < 0), "H5Dwrite failed");
 
     ret = H5Pclose(dxpl_id);
     VRFY((ret == 0), "");
@@ -660,6 +678,25 @@ subf_2_r(void)
 
     for(i=0 ; i<npoints ; i++)
         VRFY((rbuf[i] == (mpi_rank+1) * 10), "Data read verified");
+
+    /* check if a process tries to access a different sub-file */
+    start[0] = DIMS0 * ((mpi_rank+1) % mpi_size);
+    start[1] = 0;
+    block[0] = DIMS0;
+    block[1] = DIMS1;
+    count[0] = 1;
+    count[1] = 1;
+    stride[0] = 1;
+    stride[1] = 1;
+
+    /* set the selection for this dataset that this process will write to */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret == 0), "H5Sset_hyperslab succeeded");
+
+    H5E_BEGIN_TRY {
+        ret = H5Dread(did, H5T_NATIVE_INT, mem_space_id, sid, dxpl_id, rbuf);
+    } H5E_END_TRY;
+    VRFY((ret < 0), "H5Dwrite failed");
 
     ret = H5Dclose(did);
     VRFY((ret == 0), "");
