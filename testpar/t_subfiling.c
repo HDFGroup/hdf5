@@ -523,6 +523,14 @@ subf_2_w(void)
     if(ret < 0) FAIL_STACK_ERROR;
     VRFY((ret == 0), "");
 
+    {
+        H5D_mpio_actual_io_mode_t io_mode;
+        ret = H5Pget_mpio_actual_io_mode(dxpl_id, &io_mode);
+        VRFY((ret == 0), "");
+
+        VRFY((io_mode == H5D_MPIO_CONTIGUOUS_COLLECTIVE), "Collective Mode invoked");
+    }
+
     ret = H5Pclose(dxpl_id);
     VRFY((ret == 0), "");
 
@@ -638,6 +646,14 @@ subf_2_r(void)
     ret = H5Dread(did, H5T_NATIVE_INT, mem_space_id, sid, dxpl_id, rbuf);
     if(ret < 0) FAIL_STACK_ERROR;
     VRFY((ret == 0), "");
+
+    {
+        H5D_mpio_actual_io_mode_t io_mode;
+        ret = H5Pget_mpio_actual_io_mode(dxpl_id, &io_mode);
+        VRFY((ret == 0), "");
+
+        VRFY((io_mode == H5D_MPIO_CONTIGUOUS_COLLECTIVE), "Collective Mode invoked");
+    }
 
     ret = H5Pclose(dxpl_id);
     VRFY((ret == 0), "");
