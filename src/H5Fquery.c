@@ -320,6 +320,7 @@ H5F_get_nmounts(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->nmounts)
 } /* end H5F_get_nmounts() */
 
+#ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_get_subfile
@@ -361,6 +362,7 @@ H5F_get_subfile_name(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(f->subfile_name)
 } /* end H5F_get_subfile_name() */
+#endif /* H5_HAVE_PARALLEL */
 
 
 /*-------------------------------------------------------------------------

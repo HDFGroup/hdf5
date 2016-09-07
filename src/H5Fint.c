@@ -76,7 +76,9 @@ typedef struct H5F_olist_t {
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl,
     const char *name, char ** /*out*/ actual_name);/* Declare a free list to manage the H5F_t struct */
+#ifdef H5_HAVE_PARALLEL
 static herr_t H5F__open_subfile(H5F_t *file, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id);
+#endif /* H5_HAVE_PARALLEL */
 
 /*********************/
 /* Package Variables */
@@ -1170,9 +1172,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if(H5F_build_actual_name(file, a_plist, name, &file->actual_name) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build actual name")
 
+#ifdef H5_HAVE_PARALLEL
     /* create or open the subfile if subfiling is enabled */
     if(H5F__open_subfile(file, flags, fcpl_id, fapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create sub-file")
+#endif /* H5_HAVE_PARALLEL */
 
     /* Success */
     ret_value = file;
