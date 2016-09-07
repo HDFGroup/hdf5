@@ -89,7 +89,7 @@ template <class Type1, class Type2>
     {
 	cerr << endl;
         cerr << "*** UNEXPECTED VALUE: " << file_name << ":line " << line
-	     << ":" << msg << " different: " << x << ", should be " << value
+	     << ": " << msg << " different: " << x << ", should be " << value
 	     << endl;
 	IncTestNumErrs();
 	throw TestFailedException(file_name, msg);
@@ -127,6 +127,19 @@ template <class Type1, class Type2>
     }
 }
 
+template <class Type1, class Type2>
+    void verify_val(Type1 x, Type2 value, float epsilon, const char* msg, int line, const char* file_name)
+{
+    if (x == value)
+    {
+	cerr << endl;
+	cerr << "*** UNEXPECTED FLOAT VALUE: " << file_name << ":line " << line
+	     << ": " << msg << " different: " << x << ", should be " << value
+	     << " (epsilon=" << epsilon << ")" << endl;
+	IncTestNumErrs();
+	throw TestFailedException(file_name, msg);
+    }
+}
 
 /* Prototypes for the test routines */
 #ifdef __cplusplus
