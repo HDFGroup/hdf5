@@ -81,11 +81,13 @@ static herr_t H5D_build_extfile_prefix(const H5D_t *dset, hid_t dapl_id,
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
 static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite,
     hsize_t old_dim[]);
+static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
+#ifdef H5_HAVE_PARALLEL
 static herr_t H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, 
                                   hid_t *dcpl_id, hid_t dapl_id, hid_t dxpl_id);
 static int H5D__subfiling_init_cb(void *item, void *key, void *_op_data);
 static herr_t H5D__subfiling_dest_cb(void *item, void *key, void *op_data);
-static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
+#endif /* H5_HAVE_PARALLEL */
 
 /*********************/
 /* Package Variables */
@@ -1158,9 +1160,11 @@ H5D__create(H5F_t *file, H5G_loc_t *loc, const char *name, hid_t type_id, const 
     if(!H5S_has_extent(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set.")
 
+#ifdef H5_HAVE_PARALLEL
     /* check for subfiling and set virtual layout if subfiling is requested */
     if(H5D__subfiling_init(loc, name, type_id, &dcpl_id, dapl_id, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't subfile dataset")
+#endif /* H5_HAVE_PARALLEL */
 
     /* Initialize the dataset object */
     if(NULL == (new_dset = H5FL_CALLOC(H5D_t)))
