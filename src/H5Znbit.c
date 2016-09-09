@@ -1162,7 +1162,7 @@ H5Z__nbit_decompress_one_compound(unsigned char *data, size_t data_offset,
               /* Advance past member size */
               parms_index++;
               H5Z_nbit_decompress_one_nooptype(data, data_offset+member_offset,
-                                               buffer, j, buf_len, size);
+                                               buffer, j, buf_len, member_size);
               break;
           default:
               HDassert(0 && "This Should never be executed!");
