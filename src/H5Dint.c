@@ -3834,7 +3834,7 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
            and substituting '/' with '-' */
         {
             char *loc_name = H5RS_get_str(loc->path->full_path_r);
-            size_t u;
+            size_t u, temp_size;
 
             dset_name = (char *)HDmalloc(HDstrlen(loc_name) + HDstrlen(name) + 1);
 
@@ -3842,7 +3842,8 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
             HDstrcat(dset_name, name);
 
             /* replace '/' with '-' */
-            for(u=0 ; u<HDstrlen(dset_name); u++) {
+            temp_size = HDstrlen(dset_name);
+            for(u=0 ; u<temp_size; u++) {
                 if(dset_name[u] == '/')
                     dset_name[u] = '-';
             }
@@ -3855,7 +3856,7 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
             H5S_t *temp_space = NULL;
             H5D_subfile_node_t *node;
 
-            /* Source file name */
+            /* Source file name */xf
             name_len = HDstrlen((const char *)rp) + 1;
             if(NULL == (temp_name = (char *)HDmalloc(name_len)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory for source file name")
@@ -3876,6 +3877,7 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
                 if(NULL == (cur_node = (H5D_subfile_node_t *)H5SL_find(subfile_map, temp_name)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert subfile entry in skip list")
 
+                /* MSC - optimize insertion with tail pointer maybe. */
                 while(1) {
                     if(NULL == cur_node->next)
                         break;
@@ -3953,14 +3955,14 @@ H5D__subfiling_init_cb(void *item, void *key, void *_op_data)
     } while(node != NULL);
 
     /* Create the src dataset space and set the extent */
-    /* MSC - need to handle extendible / chunked datasets */
+    /* MSC - need to handle extensible / chunked datasets */
     if(NULL == (src_space = H5S_create_simple(1, &npoints, NULL)))
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
     /* if the node we are iterating over has the same subfile key as
        the subile for the MPI process, create the source dataset in
        the subfile */
-    if(strcmp(subfile_name, my_subfile_name) == 0) {
+    if(HDstrcmp(subfile_name, my_subfile_name) == 0) {
         H5G_loc_t loc;
 
         if(H5G_root_loc(H5F_get_subfile(f), &loc) < 0)
@@ -3974,9 +3976,9 @@ H5D__subfiling_init_cb(void *item, void *key, void *_op_data)
 
     /* iterate over all the selection in the current node and set the
        virtual layout to the source dataset. */
-    /* MSC - this create a lot of dataset metadata; consider combining
+    /* MSC - this creates a lot of dataset metadata; consider combining
        all selection from all the nodes and map that into the source
-       dataset */
+       dataset - however we loose the contiguity of data accessed per rank. */
     node = head_node;
     do {
         hsize_t count;
