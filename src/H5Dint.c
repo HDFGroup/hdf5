@@ -3856,7 +3856,7 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
             H5S_t *temp_space = NULL;
             H5D_subfile_node_t *node;
 
-            /* Source file name */xf
+            /* Source file name */
             name_len = HDstrlen((const char *)rp) + 1;
             if(NULL == (temp_name = (char *)HDmalloc(name_len)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate memory for source file name")
