@@ -772,8 +772,22 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
         /* if this is a parallel driver, VDS is enabled through subfiling only */
         if(H5F_HAS_FEATURE(vdset->oloc.file, H5FD_FEAT_HAS_MPI)) {
             src_file = H5F_SUBFILE(vdset->oloc.file);
-            if(NULL == src_file)
-                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "VDS is not supported with the MPIO VFD")
+            /* if the master file is open read only, we can do reads without subfiling 
+               being enabled, just open the source file here */
+            if(NULL == src_file && H5F_INTENT(vdset->oloc.file) == H5F_ACC_RDONLY) {
+                if(NULL == (src_file = H5F_open(source_dset->file_name, 
+                                                H5F_ACC_RDONLY, H5P_FILE_CREATE_DEFAULT, 
+                                                H5P_FILE_ACCESS_DEFAULT, dxpl_id)))
+                    H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
+                else
+                    /* make sure we close the file later in this function */
+                    src_file_open = TRUE;
+            }
+            /* otherwise we should fail since VDS without subfiling is not supported in Read-Write mode */
+            else if(NULL == src_file)
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "VDS is not supported in parallel in RDWR mode without Subfiling")
+
+            /* make sure we are accessing our subfile */
             if(strcmp(H5F_OPEN_NAME(src_file), source_dset->file_name) != 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Dataset I/O spans to the wrong subfile")
         }

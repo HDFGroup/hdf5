@@ -3749,6 +3749,9 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
         uint8_t *p; /* pointer used to encode the send buffer */
         const uint8_t *rp; /* pointer used to decode the recieve buffer */
 
+        if(NULL == subfile_name)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't create a subfiled dataset without subfiling enabled on the file")
+
         /* Get the property list structure */
         if(NULL == (dcpl = (H5P_genplist_t *)H5I_object(*dcpl_id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for dcpl id")

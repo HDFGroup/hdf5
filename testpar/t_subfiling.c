@@ -77,8 +77,43 @@ subf_api(void)
     ret = H5Pset_fapl_mpio(fapl_id, comm, info);
     VRFY((ret == 0), "");
 
-    /* set subfiling to be 1 file per mpi rank */
+    /* create the dataspace for the master dataset */
+    dims[0] = DIMS0 * mpi_size;
+    dims[1] = DIMS1;
+    sid = H5Screate_simple (2, dims, NULL);
+    VRFY((sid >= 0), "");
 
+    /* set the selection for this dataset that this process will write to */
+    start[0] = DIMS0 * mpi_rank;
+    start[1] = 0;
+    block[0] = DIMS0;
+    block[1] = DIMS1;
+    count[0] = 1;
+    count[1] = 1;
+    stride[0] = 1;
+    stride[1] = 1;
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+    VRFY((ret == 0), "H5Sset_hyperslab succeeded");
+    /* create the dataset access property list */
+    dapl_id = H5Pcreate(H5P_DATASET_ACCESS);
+    VRFY((dapl_id >= 0), "");
+    /* Set the selection that this process will access the dataset with */
+    ret = H5Pset_subfiling_selection(dapl_id, sid);
+    VRFY((ret == 0), "");
+
+    /* create a file with no subfiling enabled */
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((fid >= 0), "H5Fcreate succeeded");
+    /* try to create a dataset with subfiling enabled - should fail */
+    H5E_BEGIN_TRY {
+        did = H5Dcreate2(fid, DATASET1, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, dapl_id);
+    } H5E_END_TRY;
+    VRFY((did < 0), "H5Dcreate failed");
+    /* close the file */
+    ret = H5Fclose(fid);
+    VRFY((ret == 0), "");
+
+    /* set subfiling to be 1 file per mpi rank */
     /* set name of subfile */
     sprintf(subfile_name, "Subfile_%d.h5", mpi_rank);
 
@@ -124,34 +159,6 @@ subf_api(void)
     }
 
     ret = H5Pclose(fapl_id);
-    VRFY((ret == 0), "");
-
-    dims[0] = DIMS0 * mpi_size;
-    dims[1] = DIMS1;
-
-    /* create the dataspace for the master dataset */
-    sid = H5Screate_simple (2, dims, NULL);
-    VRFY((sid >= 0), "");
-
-    start[0] = DIMS0 * mpi_rank;
-    start[1] = 0;
-    block[0] = DIMS0;
-    block[1] = DIMS1;
-    count[0] = 1;
-    count[1] = 1;
-    stride[0] = 1;
-    stride[1] = 1;
-
-    /* set the selection for this dataset that this process will write to */
-    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
-    VRFY((ret == 0), "H5Sset_hyperslab succeeded");
-
-    /* create the dataset access property list */
-    dapl_id = H5Pcreate(H5P_DATASET_ACCESS);
-    VRFY((dapl_id >= 0), "");
-
-    /* Set the selection that this process will access the dataset with */
-    ret = H5Pset_subfiling_selection(dapl_id, sid);
     VRFY((ret == 0), "");
 
     /* create the dataset with the subfiling dapl settings */
@@ -314,7 +321,7 @@ subf_fpp_r(void)
     hid_t fid;                  /* HDF5 file ID */
     hid_t did;
     hid_t sid, mem_space_id;
-    hid_t fapl_id;      	/* Property Lists */
+    hid_t fapl_id, dxpl_id;  	/* Property Lists */
 
     const char *filename;
     char subfile_name[50];
@@ -379,7 +386,7 @@ subf_fpp_r(void)
     VRFY((ret == 0), "H5Sset_hyperslab succeeded");
 
     npoints = DIMS0 * DIMS1;
-    rbuf = (int *)HDmalloc(npoints * sizeof(int));
+    rbuf = (int *)HDmalloc(npoints * mpi_size * sizeof(int));
 
     mem_space_id = H5Screate_simple(1, &npoints, NULL);
     VRFY((mem_space_id >= 0), "");
@@ -401,6 +408,68 @@ subf_fpp_r(void)
     VRFY((ret == 0), "");
 
     ret = H5Fclose(fid);
+    VRFY((ret == 0), "");
+
+    /* try to read with no subfiling on the opened file */
+
+    /* create file access property list */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id >= 0), "");
+    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+    VRFY((ret == 0), "");
+    fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
+    VRFY((fid >= 0), "H5Fopen succeeded");
+    ret = H5Pclose(fapl_id);
+    VRFY((ret == 0), "");
+
+    /* open the dataset */
+    did = H5Dopen2(fid, DATASET1, H5P_DEFAULT);
+    VRFY((did >= 0), "");
+
+    /* Create dataset transfer property list */
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id > 0), "H5Pcreate succeeded");
+
+    /* set collective I/O which should be broken */
+    ret = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+
+    {
+        hsize_t temp = npoints * mpi_size;
+
+        mem_space_id = H5Screate_simple(1, &temp, NULL);
+        VRFY((mem_space_id >= 0), "");
+    }
+
+    ret = H5Dread(did, H5T_NATIVE_INT, mem_space_id, H5S_ALL, dxpl_id, rbuf);
+    if(ret < 0) FAIL_STACK_ERROR;
+    VRFY((ret == 0), "");
+
+    {
+        uint32_t local_cause, global_cause;
+
+        H5Pget_mpio_no_collective_cause(dxpl_id, &local_cause, &global_cause);
+        VRFY((ret == 0), "");
+        VRFY((local_cause == H5D_MPIO_VDS_PARALLEL_READ), "Broke Collective I/O");
+        VRFY((global_cause == H5D_MPIO_VDS_PARALLEL_READ), "Broke Collective I/O");
+    }
+
+    ret = H5Pclose(dxpl_id);
+    VRFY((ret == 0), "");
+
+    for(i=0 ; i<npoints*mpi_size ; i++) {
+        int temp = i/npoints;
+
+        VRFY((rbuf[i] == (temp%mpi_size + 1) * 10), "Data read verified");
+    }
+
+    ret = H5Dclose(did);
+    VRFY((ret == 0), "");
+
+    ret = H5Fclose(fid);
+    VRFY((ret == 0), "");
+
+    ret = H5Sclose(mem_space_id);
     VRFY((ret == 0), "");
 
     HDfree(rbuf);
@@ -524,10 +593,16 @@ subf_2_w(void)
 
     {
         H5D_mpio_actual_io_mode_t io_mode;
+        uint32_t local_cause, global_cause;
+
         ret = H5Pget_mpio_actual_io_mode(dxpl_id, &io_mode);
         VRFY((ret == 0), "");
-
         VRFY((io_mode == H5D_MPIO_CONTIGUOUS_COLLECTIVE), "Collective Mode invoked");
+
+        H5Pget_mpio_no_collective_cause(dxpl_id, &local_cause, &global_cause);
+        VRFY((ret == 0), "");
+        VRFY((local_cause == H5D_MPIO_COLLECTIVE), "Collective I/O invoked");
+        VRFY((global_cause == H5D_MPIO_COLLECTIVE), "Collective I/O invoked");
     }
 
     /* check if a process tries to access a different sub-file */
@@ -544,6 +619,7 @@ subf_2_w(void)
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret == 0), "H5Sset_hyperslab succeeded");
 
+    /* Should fail sine we try to access wrong selection */
     H5E_BEGIN_TRY {
         ret = H5Dwrite(did, H5T_NATIVE_INT, mem_space_id, sid, dxpl_id, wbuf);
     } H5E_END_TRY;
@@ -649,7 +725,7 @@ subf_2_r(void)
     VRFY((ret == 0), "H5Sset_hyperslab succeeded");
 
     npoints = DIMS0 * DIMS1;
-    rbuf = (int *)HDmalloc(npoints * sizeof(int));
+    rbuf = (int *)HDmalloc(npoints * mpi_size * sizeof(int));
 
     mem_space_id = H5Screate_simple(1, &npoints, NULL);
     VRFY((mem_space_id >= 0), "");
@@ -667,10 +743,16 @@ subf_2_r(void)
 
     {
         H5D_mpio_actual_io_mode_t io_mode;
+        uint32_t local_cause, global_cause;
+
         ret = H5Pget_mpio_actual_io_mode(dxpl_id, &io_mode);
         VRFY((ret == 0), "");
-
         VRFY((io_mode == H5D_MPIO_CONTIGUOUS_COLLECTIVE), "Collective Mode invoked");
+
+        H5Pget_mpio_no_collective_cause(dxpl_id, &local_cause, &global_cause);
+        VRFY((ret == 0), "");
+        VRFY((local_cause == H5D_MPIO_COLLECTIVE), "Collective I/O invoked");
+        VRFY((global_cause == H5D_MPIO_COLLECTIVE), "Collective I/O invoked");
     }
 
     ret = H5Pclose(dxpl_id);
@@ -688,8 +770,7 @@ subf_2_r(void)
     count[1] = 1;
     stride[0] = 1;
     stride[1] = 1;
-
-    /* set the selection for this dataset that this process will write to */
+    /* set the selection for this dataset that this process will read from */
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
     VRFY((ret == 0), "H5Sset_hyperslab succeeded");
 
@@ -704,10 +785,70 @@ subf_2_r(void)
     ret = H5Sclose(sid);
     VRFY((ret == 0), "");
 
-    ret = H5Sclose(mem_space_id);
+    ret = H5Fclose(fid);
+    VRFY((ret == 0), "");
+
+
+    /* try to read with no subfiling on the opened file */
+
+    /* create file access property list */
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((fapl_id >= 0), "");
+    ret = H5Pset_fapl_mpio(fapl_id, comm, info);
+    VRFY((ret == 0), "");
+    fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
+    VRFY((fid >= 0), "H5Fopen succeeded");
+    ret = H5Pclose(fapl_id);
+    VRFY((ret == 0), "");
+
+    /* open the dataset */
+    did = H5Dopen2(fid, DATASET1, H5P_DEFAULT);
+    VRFY((did >= 0), "");
+
+    /* Create dataset transfer property list */
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((dxpl_id > 0), "H5Pcreate succeeded");
+
+    /* set collective I/O which should be broken */
+    ret = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
+    VRFY((ret >= 0), "H5Pset_dxpl_mpio succeeded");
+
+    {
+        hsize_t temp = npoints * mpi_size;
+
+        mem_space_id = H5Screate_simple(1, &temp, NULL);
+        VRFY((mem_space_id >= 0), "");
+    }
+
+    ret = H5Dread(did, H5T_NATIVE_INT, mem_space_id, H5S_ALL, dxpl_id, rbuf);
+    if(ret < 0) FAIL_STACK_ERROR;
+    VRFY((ret == 0), "");
+
+    {
+        uint32_t local_cause, global_cause;
+
+        H5Pget_mpio_no_collective_cause(dxpl_id, &local_cause, &global_cause);
+        VRFY((ret == 0), "");
+        VRFY((local_cause == H5D_MPIO_VDS_PARALLEL_READ), "Broke Collective I/O");
+        VRFY((global_cause == H5D_MPIO_VDS_PARALLEL_READ), "Broke Collective I/O");
+    }
+
+    ret = H5Pclose(dxpl_id);
+    VRFY((ret == 0), "");
+
+    for(i=0 ; i<npoints*mpi_size ; i++) {
+        int temp = i/npoints;
+
+        VRFY((rbuf[i] == (temp%mpi_size + 1) * 10), "Data read verified");
+    }
+
+    ret = H5Dclose(did);
     VRFY((ret == 0), "");
 
     ret = H5Fclose(fid);
+    VRFY((ret == 0), "");
+
+    ret = H5Sclose(mem_space_id);
     VRFY((ret == 0), "");
 
     HDfree(rbuf);
