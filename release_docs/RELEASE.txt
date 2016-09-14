@@ -41,9 +41,12 @@ New Features
 
     Configuration:
     -------------
+    - CMake: change CTEST_BUILD_CONFIGURATION to CTEST_CONFIGURATION_TYPE, which is
+      recommended by CMake documentation.
+      HDFFV-9971 (ADB 2016/8/22)
     - Java JNI library API wrappers and supporting files added as HDF_JAVA language
       option. Both configure and CMake disable this option by default.
-      HDFFV-9552 (ADB 2016/02.28)
+      HDFFV-9552 (ADB 2016/02/28)
     - CMake minimum is now 3.1.0. (ADB 2015/11/14)
     - cmakehdf5: configure options added to enable or disable the building of
       different API's and testings. See "cmakehdf5 --help" for details.
@@ -121,6 +124,14 @@ New Features
 
     Library:
     --------
+    - Java API added new H5Iget_name that returns a string.
+      The old function, now deprecated, would cause a memory leak and
+      not return a proper String value.
+      HDFFV-9972 (ADB 2016/8/22)
+    - Add support to expand the plugin path value on Windows when the path
+      includes an environment variable.
+      HDFFV-9706 (ADB 2016/8/22)
+
     - H5F_ACC_DEBUG labeled "deprecated"
 
       The symbol was originally used to emit some extra debugging
@@ -418,7 +429,7 @@ New Features
     ---------------
 
      C Packet Table API
-     ------------------ 
+     ------------------
      - Replacement of a public function
 
       The existing function H5PTcreate_fl limits applications to deflate
@@ -426,18 +437,18 @@ New Features
       H5PTcreate_fl.  H5PTcreate takes a property list ID to provide
       flexibility on creation properties.
 
-	hid_t H5PTcreate(hid_t loc_id, const char *dset_name,
+    hid_t H5PTcreate(hid_t loc_id, const char *dset_name,
                          hid_t dtype_id, hsize_t chunk_size, hid_t plist_id);
                                                (BMR, 2016/03/04, HDFFV-8623)
 
      - New public functions
 
       Two accessor functions were added per HDFFV-8623/patch 003.
-	/* Returns the ID of the dataset associated with the packet table  */
-	   hid_t H5PTget_dataset(hid_t table_id);
+    /* Returns the ID of the dataset associated with the packet table  */
+    hid_t H5PTget_dataset(hid_t table_id);
 
-	/* Returns the ID of the datatype the packet table uses */
-	   hid_t H5PTget_type(hid_t table_id);
+    /* Returns the ID of the datatype the packet table uses */
+    hid_t H5PTget_type(hid_t table_id);
                                                (BMR, 2016/03/04, HDFFV-8623)
 
      - Regarding #ifdef VLPT_REMOVED
@@ -449,23 +460,23 @@ New Features
                                                (BMR, 2016/03/04, HDFFV-442)
 
      C++ Packet Table API
-     -------------------- 
+     --------------------
      - New constructor
 
       An overloaded constructor is added to FL_PacketTable and takes a property
       list ID to provide flexibility on creation properties.
 
-	FL_PacketTable(hid_t fileID, hid_t plist_id, const char* name, hid_t dtypeID, hsize_t chunkSize);
+    FL_PacketTable(hid_t fileID, hid_t plist_id, const char* name, hid_t dtypeID, hsize_t chunkSize);
                                                (BMR, 2016/03/08, HDFFV-8623)
 
      - New public functions
 
       Two accessor wrappers to class PacketTable, per HDFFV-8623/patch 004.
-	/* Returns the ID of the dataset associated with the packet table  */
-	   hid_t PacketTable::GetDataset()
+    /* Returns the ID of the dataset associated with the packet table  */
+    hid_t PacketTable::GetDataset()
 
-	/* Returns the ID of the datatype the packet table uses */
-	   hid_t PacketTable::GetDataset()
+    /* Returns the ID of the datatype the packet table uses */
+    hid_t PacketTable::GetDataset()
                                                (BMR, 2016/03/04, HDFFV-8623)
 
      - Member functions having "char*" as an argument
@@ -478,14 +489,14 @@ New Features
 
       The #ifdef VLPT_REMOVED blocks are removed from the PT library source
       except the following cases:
-	+ VL_PacketTable::IsVariableLength() is moved to PacketTable
-	+ VL_PacketTable::FreeReadBuff() now became PacketTable::FreeBuff()
+    + VL_PacketTable::IsVariableLength() is moved to PacketTable
+    + VL_PacketTable::FreeReadBuff() now became PacketTable::FreeBuff()
 
                                                (BMR, 2016/03/04, HDFFV-442)
 
 
      Internal header file
-     -------------------- 
+     --------------------
      - A new API function H5DOwrite_chunk.  It writes a data chunk directly
             into a file bypassing hyperslab selection, data conversion, and
             filter pipeline.  The user must be careful with the function and
@@ -526,6 +537,11 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a memory bug that could occur when a message was improperly marked
+        as sharable on disk.
+
+        (NAF, 2016/07/01, HDFFV-9950)
+
       - Incorrect usage of list in CMake COMPILE_DEFINITIONS set_property
 
         The CMake command, set_property with COMPILE_DEFINITIONS property

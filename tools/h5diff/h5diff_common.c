@@ -218,7 +218,7 @@ void parse_command_line(int argc,
             options->delta = atof( opt_arg );
 
             /* -d 0 is the same as default */
-            if (options->delta == 0)
+            if (H5_DBL_ABS_EQUAL(options->delta, (double)0.0F))
             options->d=0;
 
             break;
@@ -235,7 +235,7 @@ void parse_command_line(int argc,
             options->percent = atof( opt_arg );
 
             /* -p 0 is the same as default */
-            if (options->percent == 0)
+            if (H5_DBL_ABS_EQUAL(options->percent, (double)0.0F))
             options->p = 0;
 
             break;
@@ -249,16 +249,17 @@ void parse_command_line(int argc,
                 usage();
                 h5diff_exit(EXIT_FAILURE);
             }
-            options->count = atol( opt_arg );
-
+            options->count = HDstrtoull(opt_arg, NULL, 0);
             break;
 
         case 'N':
             options->do_nans = 0;
             break;
+
         case 'c':
             options->m_list_not_cmp = 1;
             break;
+
         case 'e':
             options->use_system_epsilon = 1;
             break;

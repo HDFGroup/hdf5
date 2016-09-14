@@ -51,7 +51,7 @@ main(void)
 
     int i;                      /* iterator                                 */
     int j;                      /* iterator                                 */
-    int k;                      /* iterator                                 */
+    hsize_t k;                  /* iterator                                 */
 
     /************************************
      * Create source files and datasets *
@@ -112,7 +112,7 @@ main(void)
             for(k = 0; k < n; k++)
                buffer[k] = value;
 
-            start[0] = j;
+            start[0] = (hsize_t)j;
             start[1] = 0;
             start[2] = 0;
             if(H5Sselect_hyperslab(fsid, H5S_SELECT_SET, start, NULL, UC_4_PLANE, NULL) < 0)

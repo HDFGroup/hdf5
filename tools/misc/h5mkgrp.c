@@ -63,7 +63,7 @@ param_t params;             /* Command line parameter settings */
 static void
 leave(int ret)
 {
-    int curr_group;
+    size_t curr_group;
 
     if (params.fname)
         HDfree (params.fname);
@@ -180,7 +180,7 @@ parse_command_line(int argc, const char *argv[], param_t *parms)
     } /* end if */
 
     /* Allocate space for the group name pointers */
-    parms->ngroups = (argc - opt_ind);
+    parms->ngroups = (size_t)(argc - opt_ind);
     parms->groups = (char **)HDmalloc(parms->ngroups * sizeof(char *));
 
     /* Retrieve the group names */

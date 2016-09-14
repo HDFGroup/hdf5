@@ -23,15 +23,9 @@
 
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     get_filename_component(fname "${listfiles}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
-    #message (STATUS " Copying ${listfiles}")
-    add_custom_command (
-        TARGET     h5copy
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${listfiles} ${dest}
-    )
+    HDFTEST_COPY_FILE("${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5copy_files")
   endforeach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+  add_custom_target(h5copy_files ALL COMMENT "Copying files needed by h5copy tests" DEPENDS ${h5copy_files_list})
 
 ##############################################################################
 ##############################################################################

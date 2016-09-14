@@ -36,11 +36,11 @@ class H5_DLLCPP ArrayType : public DataType {
 
 	// Returns the number of dimensions of this array datatype.
 	int getArrayNDims() const;
-	int getArrayNDims(); // deprecated
+	//int getArrayNDims(); // removed 1.8.18 and 1.10.1
 
 	// Returns the sizes of dimensions of this array datatype.
 	int getArrayDims(hsize_t* dims) const;
-	int getArrayDims(hsize_t* dims); // deprecated
+	//int getArrayDims(hsize_t* dims); // removed 1.8.18 and 1.10.1
 
 	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("ArrayType"); }

@@ -68,7 +68,7 @@
 #define SIO_HDF5            0x4
 
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes,t) (((t)==0.0F) ? 0.0F : ((((double)bytes) / ONE_MB) / (t)))
+#define MB_PER_SEC(bytes,t) (H5_DBL_ABS_EQUAL(t, (double)0.0F) ? (double)0.0F : ((((double)bytes) / (double)ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE    1
@@ -279,18 +279,18 @@ struct options {
     long num_files;             /* number of files                      */
     off_t num_bpp;              /* number of bytes per proc per dset    */
     int num_iters;              /* number of iterations                 */
-    off_t dset_size[MAX_DIMS];  /* Dataset size                           */
+    hsize_t dset_size[MAX_DIMS];  /* Dataset size                           */
     size_t buf_size[MAX_DIMS];  /* Buffer size                           */
     size_t chk_size[MAX_DIMS];  /* Chunk size                           */
-    int order[MAX_DIMS];  /* Dimension access order                           */
-    int dset_rank;             /* Rank                   */
-    int buf_rank;             /* Rank                   */
+    int order[MAX_DIMS];        /* Dimension access order                           */
+    int dset_rank;              /* Rank                   */
+    int buf_rank;               /* Rank                   */
     int order_rank;             /* Rank                   */
-    int chk_rank;             /* Rank                   */
+    int chk_rank;               /* Rank                   */
     int print_times;       	/* print times as well as throughputs   */
     int print_raw;         	/* print raw data throughput info       */
-    off_t h5_alignment;         /* alignment in HDF5 file               */
-    off_t h5_threshold;         /* threshold for alignment in HDF5 file */
+    hsize_t h5_alignment;       /* alignment in HDF5 file               */
+    hsize_t h5_threshold;       /* threshold for alignment in HDF5 file */
     int h5_use_chunks;     	/* Make HDF5 dataset chunked            */
     int h5_write_only;        	/* Perform the write tests only         */
     int h5_extendable;        	/* Perform the write tests only         */
@@ -307,13 +307,13 @@ typedef struct _minmax {
 } minmax;
 
 /* local functions */
-static off_t parse_size_directive(const char *size);
+static hsize_t parse_size_directive(const char *size);
 static struct options *parse_command_line(int argc, char *argv[]);
 static void run_test_loop(struct options *options);
 static int run_test(iotype iot, parameters parms, struct options *opts);
 static void output_all_info(minmax *mm, int count, int indent_level);
 static void get_minmax(minmax *mm, double val);
-static minmax accumulate_minmax_stuff(minmax *mm, int count);
+static void accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm);
 static void output_results(const struct options *options, const char *name,
                            minmax *table, int table_size, off_t data_size);
 static void output_report(const char *fmt, ...);
@@ -392,6 +392,7 @@ run_test_loop(struct options *opts)
     parameters parms;
     int i;
     size_t      buf_bytes;
+
     /* load options into parameter structure */
     parms.num_files = opts->num_files;
     parms.num_dsets = opts->num_dsets;
@@ -496,7 +497,8 @@ run_test(iotype iot, parameters parms, struct options *opts)
     /* Do IO iteration times, collecting statistics each time */
     for (i = 0; i < parms.num_iters; ++i) {
         double t;
-        res = do_sio(parms);
+
+        do_sio(parms, &res);
 
         /* gather all of the "sys write" times */
         t = get_time(res.timers, HDF5_MPI_WRITE);
@@ -711,30 +713,27 @@ get_minmax(minmax *mm, double val)
  * Modifications:
  *              Changed to use seconds instead of MB/s - QAK, 5/9/02
  */
-static minmax
-accumulate_minmax_stuff(minmax *mm, int count)
+static void
+accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm)
 {
     int i;
-    minmax total_mm;
 
-    total_mm.sum = 0.0F;
-    total_mm.max = -DBL_MAX;
-    total_mm.min = DBL_MAX;
-    total_mm.num = count;
+    total_mm->sum = 0.0F;
+    total_mm->max = -DBL_MAX;
+    total_mm->min = DBL_MAX;
+    total_mm->num = count;
 
     for (i = 0; i < count; ++i) {
         double m = mm[i].max;
 
-        total_mm.sum += m;
+        total_mm->sum += m;
 
-        if (m < total_mm.min)
-            total_mm.min = m;
+        if (m < total_mm->min)
+            total_mm->min = m;
 
-        if (m > total_mm.max)
-            total_mm.max = m;
+        if (m > total_mm->max)
+            total_mm->max = m;
     }
-
-    return total_mm;
 }
 
 
@@ -752,7 +751,7 @@ output_results(const struct options *opts, const char *name, minmax *table,
 {
     minmax          total_mm;
 
-    total_mm = accumulate_minmax_stuff(table, table_size);
+    accumulate_minmax_stuff(table, table_size, &total_mm);
 
     print_indent(3);
     output_report("%s (%d iteration(s)):\n", name,table_size);
@@ -940,10 +939,11 @@ report_parameters(struct options *opts)
 static struct options *
 parse_command_line(int argc, char *argv[])
 {
-    register int opt;
+    int opt;
     struct options *cl_opts;
     int i, default_rank, actual_rank, ranks[4];
-    cl_opts = (struct options *)malloc(sizeof(struct options));
+
+    cl_opts = (struct options *)HDmalloc(sizeof(struct options));
 
     cl_opts->output_file = NULL;
     cl_opts->io_types =  0;    /* will set default after parsing options */
@@ -956,11 +956,11 @@ parse_command_line(int argc, char *argv[])
     cl_opts->chk_rank = 0;
     cl_opts->order_rank = 0;
 
-    for (i=0; i<MAX_DIMS; i++){
-        cl_opts->buf_size[i]=(i+1)*10;
-        cl_opts->dset_size[i]=(i+1)*100;
-        cl_opts->chk_size[i]=(i+1)*10;
-        cl_opts->order[i]=i+1;
+    for(i = 0; i < MAX_DIMS; i++) {
+        cl_opts->buf_size[i] = (size_t)((i + 1) * 10);
+        cl_opts->dset_size[i] = (hsize_t)((i + 1) * 100);
+        cl_opts->chk_size[i] = (size_t)((i + 1) * 10);
+        cl_opts->order[i] = i + 1;
     }
 
     cl_opts->vfd = sec2;
@@ -985,7 +985,7 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1024,7 +1024,7 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1052,7 +1052,7 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1110,7 +1110,7 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1174,7 +1174,7 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1202,13 +1202,13 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
-                    cl_opts->order[j] = parse_size_directive(buf);
+                    cl_opts->order[j] = (int)parse_size_directive(buf);
 
                     j++;
 
@@ -1294,13 +1294,13 @@ parse_command_line(int argc, char *argv[])
  * Modifications:
  */
 
-static off_t
+static hsize_t
 parse_size_directive(const char *size)
 {
-    off_t s;
+    hsize_t s;
     char *endptr;
 
-    s = strtol(size, &endptr, 10);
+    s = HDstrtoull(size, &endptr, 10);
 
     if (endptr && *endptr) {
         while (*endptr != '\0' && (*endptr == ' ' || *endptr == '\t'))
@@ -1311,14 +1311,17 @@ parse_size_directive(const char *size)
             case 'k':
                 s *= ONE_KB;
                 break;
+
             case 'M':
             case 'm':
                 s *= ONE_MB;
                 break;
+
             case 'G':
             case 'g':
                 s *= ONE_GB;
                 break;
+
             default:
                 fprintf(stderr, "Illegal size specifier '%c'\n", *endptr);
                 exit(EXIT_FAILURE);

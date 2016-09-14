@@ -349,7 +349,7 @@ typedef struct H5O_link_t {
 typedef struct H5O_efl_entry_t {
     size_t	name_offset;		/*offset of name within heap	     */
     char	*name;			/*malloc'd name			     */
-    off_t	offset;			/*offset of data within file	     */
+    HDoff_t	offset;			/*offset of data within file	     */
     hsize_t	size;			/*size allocated within file	     */
 } H5O_efl_entry_t;
 

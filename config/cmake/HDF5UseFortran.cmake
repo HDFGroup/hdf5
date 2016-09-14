@@ -19,7 +19,7 @@ ENABLE_LANGUAGE (Fortran)
 # so this one is used.
 #-----------------------------------------------------------------------------
 MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
-# MSB CHECK WHY THIS CHECK?
+#
 #  if (NOT DEFINED ${RUN_RESULT_VAR}) 
     message (STATUS "Detecting Fortran ${FUNCTION}")
     if (CMAKE_REQUIRED_LIBRARIES)
@@ -38,8 +38,6 @@ MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
         CMAKE_FLAGS "${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}"
         RUN_OUTPUT_VARIABLE OUTPUT
     )
-
-	
 
     set(${RETURN} ${OUTPUT})
 	
@@ -70,17 +68,22 @@ MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
 #  endif (NOT DEFINED ${RUN_RESULT_VAR})
 ENDMACRO (FORTRAN_RUN)
 
+# Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
+MACRO (READ_SOURCE START END RETURN)
+  file(READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" CODE)
+  string(REGEX MATCH "${START}[\\\t\\\n\\\r[].+]*${END}" CODE ${CODE})	
+  set(RETURN "${CODE}")
+ENDMACRO (READ_SOURCE START END RETURN)
+
 #-----------------------------------------------------------------------------
 #  Check to see C_LONG_DOUBLE is available
+
+READ_SOURCE("PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" "END PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" CODE)
 CHECK_FORTRAN_FEATURE(c_long_double
-  "
-       PROGRAM main
-         USE ISO_C_BINDING
-         REAL(KIND=C_LONG_DOUBLE) :: d
-       END PROGRAM
-  "
+  "${CODE}"
   FORTRAN_HAVE_C_LONG_DOUBLE
 )
+
 if (${FORTRAN_HAVE_C_LONG_DOUBLE})
   set(FORTRAN_HAVE_C_LONG_DOUBLE 1)
 else ()
@@ -89,31 +92,9 @@ endif()
 
 # Check to see C_LONG_DOUBLE is different from C_DOUBLE
 
+READ_SOURCE("MODULE type_mod" "END PROGRAM PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE" CODE)
 CHECK_FORTRAN_FEATURE(c_long_double
-  "
-     MODULE type_mod
-       USE ISO_C_BINDING
-       INTERFACE h5t	
-         MODULE PROCEDURE h5t_c_double
-         MODULE PROCEDURE h5t_c_long_double
-       END INTERFACE
-     CONTAINS
-       SUBROUTINE h5t_c_double(r)
-         REAL(KIND=C_DOUBLE) :: r
-       END SUBROUTINE h5t_c_double
-       SUBROUTINE h5t_c_long_double(d)
-         REAL(KIND=C_LONG_DOUBLE) :: d
-       END SUBROUTINE h5t_c_long_double
-     END MODULE type_mod
-     PROGRAM main
-       USE ISO_C_BINDING
-       USE type_mod
-       REAL(KIND=C_DOUBLE)      :: r
-       REAL(KIND=C_LONG_DOUBLE) :: d
-       CALL h5t(r)
-       CALL h5t(d)
-     END PROGRAM main
-  "
+  "${CODE}"
   FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
 )
 if (${FORTRAN_C_LONG_DOUBLE_IS_UNIQUE})
@@ -139,66 +120,9 @@ endif(FORTRAN_HAVE_STORAGE_SIZE)
 # Determine the available KINDs for REALs and INTEGERs
 #-----------------------------------------------------------------------------
 
+READ_SOURCE("PROGRAM FC_AVAIL_KINDS" "END PROGRAM FC_AVAIL_KINDS" CODE)
 FORTRAN_RUN("REAL and INTEGER KINDs"
-  "      
-         PROGRAM main
-           IMPLICIT NONE
-           INTEGER :: ik, jk, k, max_decimal_prec
-           INTEGER :: num_rkinds = 1, num_ikinds = 1
-           INTEGER, DIMENSION(1:10) :: list_ikinds = -1
-           INTEGER, DIMENSION(1:10) :: list_rkinds = -1
-
-           ! Find integer KINDs
-           list_ikinds(num_ikinds)=SELECTED_INT_KIND(1)
-           DO ik = 2, 36
-              k = SELECTED_INT_KIND(ik)
-              IF(k.LT.0) EXIT
-              IF(k.GT.list_ikinds(num_ikinds))THEN
-                 num_ikinds = num_ikinds + 1
-                 list_ikinds(num_ikinds) = k
-              ENDIF
-           ENDDO
-
-           DO k = 1, num_ikinds
-              WRITE(*,'(I0)', ADVANCE='NO') list_ikinds(k)
-              IF(k.NE.num_ikinds)THEN
-                 WRITE(*,'(A)',ADVANCE='NO') ','
-              ELSE
-                 WRITE(*,'()')
-              ENDIF
-           ENDDO
-
-           ! Find real KINDs
-           list_rkinds(num_rkinds)=SELECTED_REAL_KIND(1)
-           max_decimal_prec = 1
-
-           prec: DO ik = 2, 36
-              exp: DO jk = 1, 17000
-                 k = SELECTED_REAL_KIND(ik,jk)
-                 IF(k.LT.0) EXIT exp
-                 IF(k.GT.list_rkinds(num_rkinds))THEN
-                    num_rkinds = num_rkinds + 1
-                    list_rkinds(num_rkinds) = k
-                 ENDIF
-                 max_decimal_prec = ik
-              ENDDO exp
-           ENDDO prec
-
-           DO k = 1, num_rkinds
-              WRITE(*,'(I0)', ADVANCE='NO') list_rkinds(k)
-              IF(k.NE.num_rkinds)THEN
-                 WRITE(*,'(A)',ADVANCE='NO') ','
-              ELSE
-                 WRITE(*,'()')
-              ENDIF
-           ENDDO
-
-           WRITE(*,'(I0)') max_decimal_prec
-           WRITE(*,'(I0)') num_ikinds
-           WRITE(*,'(I0)') num_rkinds
-    
-         END PROGRAM main
-  "
+  "${CODE}"
   XX
   YY
   PROG_OUTPUT
@@ -210,6 +134,7 @@ FORTRAN_RUN("REAL and INTEGER KINDs"
 # dnl    -- LINE 4 --  number of valid integer kinds
 # dnl    -- LINE 5 --  number of valid real kinds
 
+file(READ "${CMAKE_BINARY_DIR}/pac_fconftest.out" PROG_OUTPUT)
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
 string(REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
 

@@ -132,6 +132,9 @@ Comment out tests that are not done yet */
     if (GetTestCleanup() && !getenv("HDF5_NOCLEANUP"))
         TestCleanup();
 
+    /* Release test infrastructure */
+    TestShutdown();
+
     return (GetTestNumErrs());
 }
 

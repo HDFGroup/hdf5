@@ -74,13 +74,6 @@ class H5_DLLCPP FileAccPropList : public PropList {
 		      const FileAccPropList& raw_plist,
 		      const H5std_string& meta_ext = ".meta",
 		      const H5std_string& raw_ext = ".raw") const;
-	// These two overloaded functions are kept for backward compatibility
-	// only; they missed the const's and will be removed in future release.
-	void setSplit(FileAccPropList& meta_plist, FileAccPropList& raw_plist,
-	     const char* meta_ext=".meta", const char* raw_ext=".raw") const;
-	void setSplit(FileAccPropList& meta_plist, FileAccPropList& raw_plist,
-	     const H5std_string& meta_ext=".meta",
-	     const H5std_string& raw_ext=".raw") const;
 
 	// Sets the maximum size of the data sieve buffer.
 	void setSieveBufSize(size_t bufsize) const;
@@ -119,10 +112,10 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	void getCache( int& mdc_nelmts, size_t& rdcc_nelmts, size_t& rdcc_nbytes, double& rdcc_w0 ) const;
 
 	// Sets the degree for the file close behavior.
-	void setFcloseDegree(H5F_close_degree_t degree);
+	void setFcloseDegree(H5F_close_degree_t degree) const;
 
 	// Returns the degree for the file close behavior.
-	H5F_close_degree_t getFcloseDegree();
+	H5F_close_degree_t getFcloseDegree() const;
 
 	// Sets garbage collecting references flag.
 	void setGcReferences( unsigned gc_ref = 0 ) const;

@@ -1061,6 +1061,9 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5AreadVL(long attr_id, long mem_type_id, String[] buf)
             throws HDF5LibraryException, NullPointerException;
 
+    public synchronized static native int H5AreadComplex(long attr_id, long mem_type_id, String[] buf)
+            throws HDF5LibraryException, NullPointerException;
+
     /**
      * H5Arename changes the name of attribute that is attached to the object specified by loc_id. The attribute named
      * old_attr_name is renamed new_attr_name.
@@ -3348,8 +3351,22 @@ public class H5 implements java.io.Serializable {
 
     public synchronized static native long H5Iget_file_id(long obj_id) throws HDF5LibraryException;
 
-    public synchronized static native long H5Iget_name(long obj_id, String[] name, long size)
+    @Deprecated
+    public synchronized static native long H5Iget_name_long(long obj_id, String[] name, long size)
             throws HDF5LibraryException, NullPointerException;
+    /**
+     * H5Iget_name_str retrieves the name of an object specified by the identifier, obj_id.
+     *
+     * @param obj_id
+     *            IN: Identifier of the object.
+     *
+     * @return String for Attribute name.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native String H5Iget_name(long obj_id)
+            throws HDF5LibraryException;
 
     public synchronized static native int H5Iget_ref(long obj_id) throws HDF5LibraryException, NullPointerException;
 

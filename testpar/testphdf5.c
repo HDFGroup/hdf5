@@ -496,6 +496,11 @@ int main(int argc, char **argv)
                 &rr_obj_flush_confusion_params);
     }
 
+    AddTest("alnbg1",
+            chunk_align_bug_1, NULL,
+            "Chunk allocation with alignment bug.",
+            PARATESTFILE);
+
     AddTest("tldsc",
             lower_dim_size_comp_test, NULL,
             "test lower dim size comp in span tree to mpi derived type", 
@@ -589,8 +594,12 @@ int main(int argc, char **argv)
 	    printf("PHDF5 tests finished with no errors\n");
 	printf("===================================\n");
     }
+
     /* close HDF5 library */
     H5close();
+
+    /* Release test infrastructure */
+    TestShutdown();
 
     /* MPI_Finalize must be called AFTER H5close which may use MPI calls */
     MPI_Finalize();

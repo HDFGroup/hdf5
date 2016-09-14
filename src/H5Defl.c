@@ -286,13 +286,13 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
         HDassert(buf);
         if(u >= efl->nused)
             HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "read past logical end of file")
-        if(H5F_OVERFLOW_HSIZET2OFFT(efl->slot[u].offset + skip))
+        if(H5F_OVERFLOW_HSIZET2OFFT((hsize_t)efl->slot[u].offset + skip))
             HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "external file address overflowed")
         if(H5_combine_path(dset->shared->extfile_prefix, efl->slot[u].name, &full_name) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_NOSPACE, FAIL, "can't build external file name")
         if((fd = HDopen(full_name, O_RDONLY, 0)) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_CANTOPENFILE, FAIL, "unable to open external raw data file")
-        if(HDlseek(fd, (HDoff_t)(efl->slot[u].offset + skip), SEEK_SET) < 0)
+        if(HDlseek(fd, (HDoff_t)(efl->slot[u].offset + (HDoff_t)skip), SEEK_SET) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_SEEKERROR, FAIL, "unable to seek in external raw data file")
 #ifndef NDEBUG
         tempto_read = MIN((size_t)(efl->slot[u].size-skip), (hsize_t)size);
@@ -378,7 +378,7 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
         HDassert(buf);
         if(u >= efl->nused)
             HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "write past logical end of file")
-        if(H5F_OVERFLOW_HSIZET2OFFT(efl->slot[u].offset + skip))
+        if(H5F_OVERFLOW_HSIZET2OFFT((hsize_t)efl->slot[u].offset + skip))
             HGOTO_ERROR(H5E_EFL, H5E_OVERFLOW, FAIL, "external file address overflowed")
         if(H5_combine_path(dset->shared->extfile_prefix, efl->slot[u].name, &full_name) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_NOSPACE, FAIL, "can't build external file name")
@@ -388,7 +388,7 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
             else
                 HGOTO_ERROR(H5E_EFL, H5E_CANTOPENFILE, FAIL, "unable to open external raw data file")
             } /* end if */
-        if(HDlseek(fd, (HDoff_t)(efl->slot[u].offset + skip), SEEK_SET) < 0)
+        if(HDlseek(fd, (HDoff_t)(efl->slot[u].offset + (HDoff_t)skip), SEEK_SET) < 0)
             HGOTO_ERROR(H5E_EFL, H5E_SEEKERROR, FAIL, "unable to seek in external raw data file")
 #ifndef NDEBUG
         tempto_write = MIN(efl->slot[u].size - skip, (hsize_t)size);

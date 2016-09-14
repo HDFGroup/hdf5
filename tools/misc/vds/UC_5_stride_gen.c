@@ -44,7 +44,7 @@ main(void)
     hsize_t start[RANK];        /* starting point for hyperslab             */
     hsize_t stride[RANK];       /* hypserslab stride                        */
     hsize_t count[RANK];        /* hypserslab count                         */
-    int map_start       = -1;   /* starting point in the VDS map            */
+    hsize_t map_start   = 0;    /* starting point in the VDS map            */
 
     int *buffer         = NULL; /* data buffer                              */
     int value           = -1;   /* value written to datasets                */
@@ -53,7 +53,7 @@ main(void)
 
     int i;                      /* iterator                                 */
     int j;                      /* iterator                                 */
-    int k;                      /* iterator                                 */
+    hsize_t k;                  /* iterator                                 */
 
     /* Start by creating the virtual dataset (VDS) dataspace and creation
      * property list. The individual source datasets are then created
@@ -143,7 +143,7 @@ main(void)
             for(k = 0; k < n; k++)
                buffer[k] = value;
 
-            start[0] = j;
+            start[0] = (hsize_t)j;
             start[1] = 0;
             start[2] = 0;
             if(H5Sselect_hyperslab(fsid, H5S_SELECT_SET, start, NULL, UC_5_PLANE, NULL) < 0)

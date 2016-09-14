@@ -128,7 +128,7 @@ CLEAN_TESTFILES_AND_TESTDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=`$DIRNAME $tstfile`
+    SDIR=$SRC_H5COPY_TESTFILES
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
@@ -490,6 +490,7 @@ COPY_OBJECTS()
     TOOLTEST -i $TESTFILE -o $TESTDIR/compressed.out.h5 -v -s compressed -d compressed
     TOOLTEST -i $TESTFILE -o $TESTDIR/named_vl.out.h5 -v -s named_vl   -d named_vl
     TOOLTEST -i $TESTFILE -o $TESTDIR/nested_vl.out.h5 -v -s nested_vl  -d nested_vl
+    TOOLTEST -i $TESTFILE -o $TESTDIR/dset_attr.out.h5 -v -s /dset_attr  -d /dset_attr
 
     echo "Test copying dataset within group in source file to root of destination"
     TOOLTEST -i $TESTFILE -o $TESTDIR/simple_top.out.h5 -v -s grp_dsets/simple  -d simple_top
@@ -501,6 +502,7 @@ COPY_OBJECTS()
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_empty.out.h5 -v -s grp_empty  -d grp_empty
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_dsets.out.h5 -v -s grp_dsets  -d grp_dsets
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_nested.out.h5 -v -s grp_nested -d grp_nested
+    TOOLTEST -i $TESTFILE -o $TESTDIR/grp_attr.out.h5 -v -s grp_attr -d grp_attr
 
     echo "Test copying dataset within group in source file to group in destination"
     TOOLTEST_PREFILL -i $TESTFILE -o $TESTDIR/simple_group.out.h5 grp_dsets grp_dsets /grp_dsets/simple /grp_dsets/simple_group

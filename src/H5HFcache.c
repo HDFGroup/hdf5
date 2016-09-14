@@ -618,8 +618,8 @@ H5HF__cache_hdr_image_len(const void *_thing, size_t *image_len,
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
-    haddr_t addr, size_t len, size_t H5_ATTR_UNUSED compressed_len, 
+H5HF__cache_hdr_pre_serialize(const H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id,
+    void *_thing, haddr_t addr, size_t len, size_t H5_ATTR_UNUSED compressed_len, 
     haddr_t H5_ATTR_UNUSED *new_addr, size_t H5_ATTR_UNUSED *new_len,
     size_t H5_ATTR_UNUSED *new_compressed_len, unsigned *flags)
 {

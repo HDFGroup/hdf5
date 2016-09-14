@@ -97,16 +97,9 @@
   # copy the list of test files
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     get_filename_component(fname "${listfiles}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/${fname}")
-    #message (STATUS " Copying ${listfiles} to ${dest}")
-    add_custom_command (
-        TARGET     h5ls
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${listfiles} ${dest}
-    )
+    HDFTEST_COPY_FILE("${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5ls_files")
   endforeach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
-
+  add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -121,10 +114,10 @@
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if (${resultcode} STREQUAL "1")
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif (${resultcode} STREQUAL "1")
+      endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5LS-${resultfile}-clear-objects
@@ -323,7 +316,7 @@
   ADD_H5_TEST (textlinksrc-6-old 0 -w80 -E textlinksrc.h5)
   ADD_H5_TEST (textlinksrc-7-old 0 -w80 -E textlinksrc.h5/ext_link1)
 
-  # tests for no-dangling-links 
+  # tests for no-dangling-links
   # if this option is given on dangling link, h5ls should return exit code 1
   # when used alone , expect to print out help and return exit code 1
   ADD_H5_TEST (textlinksrc-nodangle-1 1 -w80 --no-dangling-links textlinksrc.h5)

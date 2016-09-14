@@ -66,40 +66,20 @@
 
   foreach (vds_h5_file ${HDF5_REFERENCE_TEST_VDS})
     get_filename_component(fname "${vds_h5_file}" NAME)
-    set (dest "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}")
-    #message (STATUS " Copying ${vds_h5_file}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/${vds_h5_file} ${dest}
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5dump_vds_files")
   endforeach (vds_h5_file ${HDF5_REFERENCE_TEST_VDS})
 
 
   foreach (ddl_vds ${HDF5_REFERENCE_VDS})
     get_filename_component(fname "${ddl_vds}" NAME)
-    set (ddldest "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}")
-    #message (STATUS " Copying ${ddl_vds}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${HDF5_TOOLS_SRC_DIR}/testfiles/vds/${ddl_vds} ${ddldest}
-    )
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/vds/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5dump_vds_files")
   endforeach (ddl_vds ${HDF5_REFERENCE_VDS})
 
   foreach (ddl_vds ${HDF5_ERROR_REFERENCE_VDS})
     get_filename_component(fname "${ddl_vds}" NAME)
-    set (ddldest "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}")
-    #message (STATUS " Copying ${ddl_vds}")
-    add_custom_command (
-        TARGET     h5dump
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/errfiles/${ddl_vds} ${ddldest}
-    )
+    HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5dump_vds_files")
   endforeach (ddl_vds ${HDF5_ERROR_REFERENCE_VDS})
+  add_custom_target(h5dump_vds_files ALL COMMENT "Copying files needed by h5dump_vds tests" DEPENDS ${h5dump_vds_files_list})
 
 ##############################################################################
 ##############################################################################
@@ -114,10 +94,10 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif (NOT ${resultcode} STREQUAL "0")
+      endif ()
       if (NOT "${last_vds_test}" STREQUAL "")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_VDS_test})
-      endif (NOT "${last_vds_test}" STREQUAL "")
+      endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5DUMP-${resultfile}-clear-objects
@@ -147,10 +127,10 @@
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif (NOT ${resultcode} STREQUAL "0")
+      endif ()
       if (NOT "${last_vds_test}" STREQUAL "")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_VDS_test})
-      endif (NOT "${last_vds_test}" STREQUAL "")
+      endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5DUMP-${resultfile}-clear-objects

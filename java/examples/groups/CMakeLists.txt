@@ -56,19 +56,17 @@ set (HDF_JAVA_TEST_FILES
 )
 
 foreach (h5_file ${HDF_JAVA_TEST_FILES})
-  set (dest "${PROJECT_BINARY_DIR}/${h5_file}")
-  #message (STATUS " Copying ${h5_file}")
-  add_custom_command (
-      TARGET     H5Ex_G_Visit
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/${h5_file} ${dest}
-  )
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "H5Ex_G_Visit_files")
 endforeach (h5_file ${HDF_JAVA_TEST_FILES})
+add_custom_target(H5Ex_G_Visit_files ALL COMMENT "Copying files needed by H5Ex_G_Visit tests" DEPENDS ${H5Ex_G_Visit_files_list})
 
 MACRO (ADD_H5_TEST resultfile resultcode)
   if (CMAKE_BUILD_TYPE MATCHES Debug)
-    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+    if (WIN32)
+      set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_D;")
+    else()
+      set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+    endif()
   endif(CMAKE_BUILD_TYPE MATCHES Debug)
   add_test (
       NAME JAVA_groups-${resultfile}

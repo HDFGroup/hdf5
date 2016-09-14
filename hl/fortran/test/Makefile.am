@@ -22,7 +22,7 @@
 include $(top_srcdir)/config/commence.am
 
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src -I$(top_srcdir)/hl/src
-AM_FCFLAGS+=-I$(top_builddir)/fortran/src -I$(top_builddir)/hl/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/hl/fortran/src
+AM_FCFLAGS+=-I$(top_builddir)/fortran/src -I$(top_builddir)/hl/fortran/src -I$(top_builddir)/fortran/test $(F9XMODFLAG)$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/test $(F9XMODFLAG)$(top_builddir)/hl/fortran/src
 
 # Some Fortran compilers can't build shared libraries, so sometimes we
 # need to make sure the Fortran programs link against the static version
@@ -36,7 +36,9 @@ endif
 TEST_PROG=tstds tstlite tstimage tsttable
 check_PROGRAMS=$(TEST_PROG)
 
-LDADD= $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL)  $(LIBHDF5)
+LIBOBJS=$(top_builddir)/fortran/test/tf_gen.o
+
+LDADD=$(LIBOBJS) $(LIBH5F_HL) $(LIBH5F) $(LIBH5_HL)  $(LIBHDF5) 
 
 # Source files for the programs
 tstds_SOURCES=tstds.F90
@@ -46,6 +48,29 @@ tsttable_SOURCES=tsttable.F90
 
 # Temporary files.
 CHECK_CLEANFILES+=dsetf[1-5].h5 f1img.h5 f[1-2]tab.h5 tstds.h5
+
+# Fortran module files can have different extensions and different names
+# (e.g., different capitalizations) on different platforms.  Write rules
+# for them explicitly rather than trying to teach automake about them.
+# They should be installed as headers and removed during clean.
+maintainer-clean-local: clean-local
+distclean-local: clean-local
+clean-local:
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	  $(RM) *.$(F9XMODEXT); \
+	fi
+
+install-data-local:
+	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
+	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(includedir)/. ; \
+	fi
+
+uninstall-local:
+	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
+	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(DESTDIR)$(includedir)/HDF5.$(F9XMODEXT)"; then \
+	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
+	  fi;                                                           \
+	fi
 
 # Mark this directory as part of the Fortran API (this affects output
 # from tests in conclude.am)

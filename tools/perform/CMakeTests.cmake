@@ -5,12 +5,8 @@
 ##############################################################################
 ##############################################################################
 
-add_custom_command (
-    TARGET     zip_perf
-    POST_BUILD
-    COMMAND    ${CMAKE_COMMAND}
-    ARGS       -E copy_if_different ${HDF5_TOOLS_DIR}/testfiles/tfilters.h5 ${PROJECT_BINARY_DIR}/tfilters.h5
-)
+HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tfilters.h5" "${PROJECT_BINARY_DIR}/tfilters.h5" "zip_perf_files")
+add_custom_target(zip_perf_files ALL COMMENT "Copying files needed by zip_perf tests" DEPENDS ${zip_perf_list})
 
 #-----------------------------------------------------------------------------
 # Add Tests
@@ -20,7 +16,7 @@ add_custom_command (
 add_test (
     NAME PERFORM_h5perform-clear-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove 
+        -E remove
         chunk.h5
         iopipe.h5
         iopipe.raw

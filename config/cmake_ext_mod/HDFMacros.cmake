@@ -279,3 +279,13 @@ macro (HDF_README_PROPERTIES target_fortran)
       ${CMAKE_BINARY_DIR}/README.txt @ONLY
   )
 endmacro (HDF_README_PROPERTIES)
+
+macro (HDFTEST_COPY_FILE src dest target)
+    add_custom_command(
+        OUTPUT  "${dest}"
+        COMMAND "${CMAKE_COMMAND}"
+        ARGS     -E copy_if_different "${src}" "${dest}"
+        DEPENDS "${src}"
+    )
+    list (APPEND ${target}_list "${dest}")
+endmacro ()

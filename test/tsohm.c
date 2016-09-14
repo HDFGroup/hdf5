@@ -1681,8 +1681,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
 
     for(x = 0; x < NUM_ATTRIBUTES; ++x) {
         /* Create a unique name and value for each attribute */
-        attr_string1[0] = attr_name[0] = (x / 10) + '0';
-        attr_string1[1] = attr_name[1] = (x % 10) + '0';
+        attr_string1[0] = attr_name[0] = (char)((x / 10) + '0');
+        attr_string1[1] = attr_name[1] = (char)((x % 10) + '0');
 
         /* Create an attribute on the group */
         attr_id = H5Acreate2(group_id, attr_name, attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT);
@@ -1721,8 +1721,8 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     for(x=0; x<NUM_ATTRIBUTES; ++x)
     {
         /* Create the same name and value for each attribute as before */
-        attr_string1[0] = attr_name[0] = (x / 10) + '0';
-        attr_string1[1] = attr_name[1] = (x % 10) + '0';
+        attr_string1[0] = attr_name[0] = (char)((x / 10) + '0');
+        attr_string1[1] = attr_name[1] = (char)((x % 10) + '0');
 
         /* Create an attribute on the group */
         attr_id = H5Acreate2(group_id, attr_name, attr_type_id, attr_space_id, H5P_DEFAULT, H5P_DEFAULT);
@@ -1940,8 +1940,8 @@ static void size2_verify(void)
 
     for(x = 0; x < NUM_ATTRIBUTES; ++x) {
         /* Create the name and correct value for each attribute */
-        attr_correct_string[0] = attr_name[0] = (x / 10) + '0';
-        attr_correct_string[1] = attr_name[1] = (x % 10) + '0';
+        attr_correct_string[0] = attr_name[0] = (char)((x / 10) + '0');
+        attr_correct_string[1] = attr_name[1] = (char)((x % 10) + '0');
 
         attr1_id = H5Aopen(group1_id, attr_name, H5P_DEFAULT);
         CHECK_I(attr1_id, "H5Aopen");
@@ -2197,7 +2197,7 @@ static void test_sohm_size2(int close_reopen)
     /* The files with indexes shouldn't be that much bigger than an
      * empty file.
      */
-    if(list_index_med.empty_size > norm_sizes.empty_size * OVERHEAD_ALLOWED)
+    if(list_index_med.empty_size > (h5_stat_size_t)((float)norm_sizes.empty_size * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
 
 
@@ -2258,7 +2258,7 @@ static void test_sohm_size2(int close_reopen)
      */
     if(list_index_med.dsets2 >= btree_index.dsets2)
         VERIFY(list_index_med.dsets2, 1, "h5_get_file_size");
-    if(btree_index.dsets2 > list_index_small.dsets2 * OVERHEAD_ALLOWED)
+    if(btree_index.dsets2 > (h5_stat_size_t)((float)list_index_small.dsets2 * OVERHEAD_ALLOWED))
         VERIFY(btree_index.dsets2, list_index_small.dsets2, "h5_get_file_size");
     if(list_index_small.dsets2 >= norm_sizes.dsets2)
         VERIFY(btree_index.dsets2, 1, "h5_get_file_size");
@@ -2267,7 +2267,7 @@ static void test_sohm_size2(int close_reopen)
      * It seems that the small lists tends to be pretty big anyway.  Allow
      * for it to have twice as much overhead.
      */
-    if(list_index_small.dsets2 > btree_index.dsets2 * OVERHEAD_ALLOWED * OVERHEAD_ALLOWED)
+    if(list_index_small.dsets2 > (h5_stat_size_t)((float)btree_index.dsets2 * OVERHEAD_ALLOWED * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
     /* The lists should have grown the least since they share messages and
      * have no extra overhead.  The normal file should have grown more than
@@ -2291,7 +2291,7 @@ static void test_sohm_size2(int close_reopen)
      */
     if(list_index_med.interleaved >= btree_index.interleaved)
         VERIFY(0, 1, "h5_get_file_size");
-    if(btree_index.interleaved > list_index_small.interleaved * OVERHEAD_ALLOWED)
+    if(btree_index.interleaved > (h5_stat_size_t)((float)list_index_small.interleaved * OVERHEAD_ALLOWED))
         VERIFY(btree_index.interleaved, list_index_small.interleaved, "h5_get_file_size");
     if(list_index_small.interleaved >= norm_sizes.interleaved)
         VERIFY(0, 1, "h5_get_file_size");
@@ -2318,22 +2318,21 @@ static void test_sohm_size2(int close_reopen)
      * that started as a B-tree.
      * Add in OVERHEAD_ALLOWED as a fudge factor here, since the allocation
      * of file space can be hard to predict.
-
      */
-    if(btree_index.attrs1 > list_index_small.attrs1 * OVERHEAD_ALLOWED)
+    if(btree_index.attrs1 > (h5_stat_size_t)((float)list_index_small.attrs1 * OVERHEAD_ALLOWED))
         VERIFY(btree_index.attrs1, list_index_small.attrs1, "h5_get_file_size");
-    if(btree_index.attrs1 > list_index_med.attrs1 * OVERHEAD_ALLOWED)
+    if(btree_index.attrs1 > (h5_stat_size_t)((float)list_index_med.attrs1 * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
-    if(list_index_med.attrs1 > btree_index.attrs1 * OVERHEAD_ALLOWED)
+    if(list_index_med.attrs1 > (h5_stat_size_t)((float)btree_index.attrs1 * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
-    if(list_index_small.attrs1 > btree_index.attrs1 * OVERHEAD_ALLOWED)
+    if(list_index_small.attrs1 > (h5_stat_size_t)((float)btree_index.attrs1 * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
     /* Neither of the converted lists should be too much bigger than
      * the index that was originally a B-tree.
      */
-    if(list_index_small.attrs1 > btree_index.attrs1 * OVERHEAD_ALLOWED)
+    if(list_index_small.attrs1 > (h5_stat_size_t)((float)btree_index.attrs1 * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
-    if(list_index_med.attrs1 > btree_index.attrs1 * OVERHEAD_ALLOWED)
+    if(list_index_med.attrs1 > (h5_stat_size_t)((float)btree_index.attrs1 * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
     /* The "normal" file should have had less overhead, so should gain less
      * size than any of the other indexes since none of these attribute
@@ -2349,7 +2348,7 @@ static void test_sohm_size2(int close_reopen)
 
     /* Give it some overhead (for checkin to move messages into continuation message) */
     if((list_index_small.attrs1 - list_index_small.interleaved) >
-            ((btree_index.attrs1 - btree_index.interleaved) * OVERHEAD_ALLOWED))
+            (h5_stat_size_t)((float)(btree_index.attrs1 - btree_index.interleaved) * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
 
 
@@ -2357,13 +2356,13 @@ static void test_sohm_size2(int close_reopen)
      * of sizes.  The big list index is still too big to be smaller than a
      * normal file.  The B-tree indexes should all be about the same size.
      */
-    if(btree_index.attrs2 > list_index_small.attrs2 * OVERHEAD_ALLOWED)
+    if(btree_index.attrs2 > (h5_stat_size_t)((float)list_index_small.attrs2 * OVERHEAD_ALLOWED))
         VERIFY(btree_index.attrs2, list_index_small.attrs2, "h5_get_file_size");
-    if(list_index_small.attrs2 > btree_index.attrs2 * OVERHEAD_ALLOWED)
+    if(list_index_small.attrs2 > (h5_stat_size_t)((float)btree_index.attrs2 * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
-    if(btree_index.attrs2 > list_index_med.attrs2 * OVERHEAD_ALLOWED)
+    if(btree_index.attrs2 > (h5_stat_size_t)((float)list_index_med.attrs2 * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
-    if(list_index_med.attrs2 > btree_index.attrs2 * OVERHEAD_ALLOWED)
+    if(list_index_med.attrs2 > (h5_stat_size_t)((float)btree_index.attrs2 * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
     if(list_index_med.attrs2 >= norm_sizes.attrs2)
         VERIFY(0, 1, "h5_get_file_size");
@@ -2451,17 +2450,17 @@ static void test_sohm_size2(int close_reopen)
         VERIFY((mult_index_btree.dsets1 - mult_index_btree.second_dset), (btree_index.dsets1 - btree_index.second_dset), "h5_get_file_size");
 
      if((mult_index_med.dsets2 - mult_index_med.dsets1) >
-            (list_index_med.dsets2 - list_index_med.dsets1) * OVERHEAD_ALLOWED)
+            (h5_stat_size_t)((float)(list_index_med.dsets2 - list_index_med.dsets1) * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
      if((mult_index_btree.dsets2 - mult_index_btree.dsets1) >
-            (btree_index.dsets2 - btree_index.dsets1) * OVERHEAD_ALLOWED)
+            (h5_stat_size_t)((float)(btree_index.dsets2 - btree_index.dsets1) * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
 
      if((mult_index_med.interleaved - mult_index_med.dsets2) >
-            (list_index_med.interleaved - list_index_med.dsets2) * OVERHEAD_ALLOWED)
+            (h5_stat_size_t)((float)(list_index_med.interleaved - list_index_med.dsets2) * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
      if((mult_index_btree.interleaved - mult_index_btree.dsets2) >
-            (btree_index.interleaved - btree_index.dsets2) * OVERHEAD_ALLOWED)
+            (h5_stat_size_t)((float)(btree_index.interleaved - btree_index.dsets2) * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
 
     /* When all the attributes are added, only the index holding attributes
@@ -2470,10 +2469,10 @@ static void test_sohm_size2(int close_reopen)
      * will take.
      */
      if((mult_index_med.attrs2 - mult_index_med.attrs1) >
-            (list_index_med.attrs2 - list_index_med.attrs1) * OVERHEAD_ALLOWED)
+            (h5_stat_size_t)((float)(list_index_med.attrs2 - list_index_med.attrs1) * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
      if((mult_index_btree.attrs2 - mult_index_btree.attrs1) >
-            (btree_index.attrs2 - btree_index.attrs1) * OVERHEAD_ALLOWED)
+            (h5_stat_size_t)((float)(btree_index.attrs2 - btree_index.attrs1) * OVERHEAD_ALLOWED))
         VERIFY(0, 1, "h5_get_file_size");
 
     /* The final file size for both of the multiple index files should be
@@ -2483,9 +2482,9 @@ static void test_sohm_size2(int close_reopen)
         VERIFY(0, 1, "h5_get_file_size");
      if(mult_index_btree.attrs2 >= norm_sizes.attrs2)
         VERIFY(0, 1, "h5_get_file_size");
-     if(mult_index_med.attrs2 * OVERHEAD_ALLOWED < btree_index.attrs2)
+     if((h5_stat_size_t)((float)mult_index_med.attrs2 * OVERHEAD_ALLOWED) < btree_index.attrs2)
         VERIFY(0, 1, "h5_get_file_size");
-     if(mult_index_btree.attrs2 * OVERHEAD_ALLOWED < btree_index.attrs2)
+     if((h5_stat_size_t)((float)mult_index_btree.attrs2 * OVERHEAD_ALLOWED) < btree_index.attrs2)
         VERIFY(0, 1, "h5_get_file_size");
 
 
@@ -2554,39 +2553,39 @@ static void test_sohm_size2(int close_reopen)
     if(share_tiny_index.empty_size != type_space_index.empty_size)
         VERIFY(share_tiny_index.empty_size, type_space_index.empty_size, "h5_get_file_size");
 
-    if(share_tiny_index.first_dset >= type_space_index.first_dset * OVERHEAD_ALLOWED)
+    if(share_tiny_index.first_dset >= (h5_stat_size_t)((float)type_space_index.first_dset * OVERHEAD_ALLOWED))
         VERIFY(share_tiny_index.first_dset, type_space_index.first_dset, "h5_get_file_size");
     if(share_tiny_index.first_dset < type_space_index.first_dset)
         VERIFY(0, 1, "h5_get_file_size");
 
     if(share_tiny_index.second_dset >= type_space_index.second_dset)
         VERIFY(share_tiny_index.second_dset, type_space_index.second_dset, "h5_get_file_size");
-    if(share_tiny_index.second_dset * OVERHEAD_ALLOWED < type_space_index.second_dset)
+    if((h5_stat_size_t)((float)share_tiny_index.second_dset * OVERHEAD_ALLOWED) < type_space_index.second_dset)
         VERIFY(0, 1, "h5_get_file_size");
 
     if(share_tiny_index.dsets1 >= type_space_index.dsets1)
         VERIFY(0, 1, "h5_get_file_size");
-    if(share_tiny_index.dsets1 * OVERHEAD_ALLOWED < type_space_index.dsets1)
+    if((h5_stat_size_t)((float)share_tiny_index.dsets1 * OVERHEAD_ALLOWED) < type_space_index.dsets1)
         VERIFY(0, 1, "h5_get_file_size");
 
     if(share_tiny_index.dsets2 >= type_space_index.dsets2)
         VERIFY(0, 1, "h5_get_file_size");
-    if(share_tiny_index.dsets2 * OVERHEAD_ALLOWED < type_space_index.dsets2)
+    if((h5_stat_size_t)((float)share_tiny_index.dsets2 * OVERHEAD_ALLOWED) < type_space_index.dsets2)
         VERIFY(0, 1, "h5_get_file_size");
 
     if(share_tiny_index.interleaved >= type_space_index.interleaved)
         VERIFY(0, 1, "h5_get_file_size");
-    if(share_tiny_index.interleaved * OVERHEAD_ALLOWED < type_space_index.interleaved)
+    if((h5_stat_size_t)((float)share_tiny_index.interleaved * OVERHEAD_ALLOWED) < type_space_index.interleaved)
         VERIFY(0, 1, "h5_get_file_size");
 
     if(share_tiny_index.attrs1 >= type_space_index.attrs1)
         VERIFY(0, 1, "h5_get_file_size");
-    if(share_tiny_index.attrs1 * OVERHEAD_ALLOWED < type_space_index.attrs1)
+    if((h5_stat_size_t)((float)share_tiny_index.attrs1 * OVERHEAD_ALLOWED) < type_space_index.attrs1)
         VERIFY(0, 1, "h5_get_file_size");
 
     if(share_tiny_index.attrs2 >= type_space_index.attrs2)
         VERIFY(0, 1, "h5_get_file_size");
-    if(share_tiny_index.attrs2 * OVERHEAD_ALLOWED < type_space_index.attrs2)
+    if((h5_stat_size_t)((float)share_tiny_index.attrs2 * OVERHEAD_ALLOWED) < type_space_index.attrs2)
         VERIFY(0, 1, "h5_get_file_size");
 } /* end test_sohm_size2() */
 
@@ -2616,7 +2615,7 @@ static void delete_helper_write(hid_t file_id, hid_t *dspace_id, hid_t *dcpl_id,
     CHECK_I(dset_id, "H5Dcreate2");
 
     /* Write data to dataset */
-    wdata = x + 'a';
+    wdata = (char)(x + 'a');
     ret = H5Dwrite(dset_id, H5T_NATIVE_CHAR, dspace_id[x], dspace_id[x], H5P_DEFAULT, &wdata);
     CHECK_I(ret, "H5Dwrite");
 
@@ -2764,9 +2763,9 @@ static void delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
     deleted_filesize = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
     /* The two filesizes should be almost the same */
-    if(norm_filesize > deleted_filesize * OVERHEAD_ALLOWED)
+    if(norm_filesize > (h5_stat_size_t)((float)deleted_filesize * OVERHEAD_ALLOWED))
         VERIFY(norm_filesize, deleted_filesize, "h5_get_file_size");
-    if(deleted_filesize > norm_filesize * OVERHEAD_ALLOWED)
+    if(deleted_filesize > (h5_stat_size_t)((float)norm_filesize * OVERHEAD_ALLOWED))
         VERIFY(deleted_filesize, norm_filesize, "h5_get_file_size");
 }
 
@@ -3887,8 +3886,8 @@ test_sohm_external_dtype(void)
     orig = (s1_t*)HDmalloc(NX * NY * sizeof(s1_t));
     for(i=0; i<NX*NY; i++) {
         s_ptr = (s1_t*)orig + i;
-        s_ptr->a = i*3 + 1;
-        s_ptr->b = i*3 + 2;
+        s_ptr->a = (int)(i * 3 + 1);
+        s_ptr->b = (int)(i * 3 + 2);
     }
 
     /* Write the data to the dataset1 */

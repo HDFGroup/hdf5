@@ -68,11 +68,8 @@ dnl See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
 AC_DEFUN([PAC_PROG_FC_ISO_FORTRAN_ENV],[
   HAVE_ISO_FORTRAN_ENV="no"
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic module ISO_FORTRAN_ENV])
-  AC_LINK_IFELSE([AC_LANG_SOURCE([ 
-   PROGRAM main
-     USE, INTRINSIC :: ISO_FORTRAN_ENV
-   END PROGRAM
-  ])],[AC_MSG_RESULT([yes])
+  TEST_SRC="`sed -n '/PROGRAM PROG_FC_ISO_FORTRAN_ENV/,/END PROGRAM PROG_FC_ISO_FORTRAN_ENV/p' $srcdir/m4/aclocal_fc.f90`"	
+  AC_LINK_IFELSE([$TEST_SRC],[AC_MSG_RESULT([yes])
      	HAVE_ISO_FORTRAN_ENV="yes"],
       [AC_MSG_RESULT([no])])
 ])
@@ -82,11 +79,8 @@ dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
 AC_DEFUN([PAC_PROG_FC_SIZEOF],[
   HAVE_SIZEOF_FORTRAN="no"
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
-  AC_LINK_IFELSE([AC_LANG_SOURCE([ 
-   PROGRAM main
-     i = sizeof(x)
-   END PROGRAM
-  ])],[AC_MSG_RESULT([yes])
+  TEST_SRC="`sed -n '/PROGRAM PROG_FC_SIZEOF/,/END PROGRAM PROG_FC_SIZEOF/p' $srcdir/m4/aclocal_fc.f90`"
+  AC_LINK_IFELSE([$TEST_SRC],[AC_MSG_RESULT([yes])
      	HAVE_SIZEOF_FORTRAN="yes"],
       [AC_MSG_RESULT([no])])
 ])
@@ -96,14 +90,8 @@ dnl See if the fortran compiler supports the intrinsic function "C_SIZEOF"
 AC_DEFUN([PAC_PROG_FC_C_SIZEOF],[
   HAVE_C_SIZEOF_FORTRAN="no"
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic C_SIZEOF])
-  AC_LINK_IFELSE([AC_LANG_SOURCE([ 
-   PROGRAM main
-     USE ISO_C_BINDING
-     INTEGER(C_INT) :: a
-     INTEGER(C_SIZE_T) :: result
-     result = C_SIZEOF(a)
-   END PROGRAM
-  ])], [AC_MSG_RESULT([yes])
+  TEST_SRC="`sed -n '/PROGRAM PROG_FC_C_SIZEOF/,/END PROGRAM PROG_FC_C_SIZEOF/p' $srcdir/m4/aclocal_fc.f90`"
+  AC_LINK_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
      	HAVE_C_SIZEOF_FORTRAN="yes"],
      [AC_MSG_RESULT([no])])
 ])
@@ -113,13 +101,8 @@ dnl See if the fortran compiler supports the intrinsic function "STORAGE_SIZE"
 AC_DEFUN([PAC_PROG_FC_STORAGE_SIZE],[
   HAVE_STORAGE_SIZE_FORTRAN="no"
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic STORAGE_SIZE])
-  AC_LINK_IFELSE([AC_LANG_SOURCE([
-   PROGRAM main
-     INTEGER :: a
-     INTEGER :: result
-     result = STORAGE_SIZE(a)
-   END PROGRAM
-  ])], [AC_MSG_RESULT([yes])
+  TEST_SRC="`sed -ne '/PROGRAM PROG_FC_STORAGE_SIZE/,/END PROGRAM PROG_FC_STORAGE_SIZE/p' $srcdir/m4/aclocal_fc.f90`"
+  AC_LINK_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
      	HAVE_STORAGE_SIZE_FORTRAN="yes"],
      [AC_MSG_RESULT([no])])
 
@@ -130,12 +113,9 @@ dnl Check to see C_LONG_DOUBLE is available
 AC_DEFUN([PAC_PROG_FC_HAVE_C_LONG_DOUBLE],[
   HAVE_C_LONG_DOUBLE_FORTRAN="no"
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic C_LONG_DOUBLE])
-  AC_LINK_IFELSE([AC_LANG_SOURCE([
-   PROGRAM main
-     USE ISO_C_BINDING
-     REAL(KIND=C_LONG_DOUBLE) :: d
-   END PROGRAM
-  ])], [AC_MSG_RESULT([yes])
+  TEST_SRC=""
+  TEST_SRC="`sed -n '/PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE/,/END PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE/p' $srcdir/m4/aclocal_fc.f90`"
+  AC_LINK_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
      	HAVE_C_LONG_DOUBLE_FORTRAN="yes"],
      [AC_MSG_RESULT([no])])
 ])
@@ -146,31 +126,8 @@ if  test "X$FORTRAN_HAVE_C_LONG_DOUBLE" = "Xyes"; then
 AC_DEFUN([PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE],[
   C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="no"	
   AC_MSG_CHECKING([if Fortran C_LONG_DOUBLE is different from C_DOUBLE])
-  
-  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-     MODULE type_mod
-       USE ISO_C_BINDING
-       INTERFACE h5t	
-         MODULE PROCEDURE h5t_c_double
-         MODULE PROCEDURE h5t_c_long_double
-       END INTERFACE
-     CONTAINS
-       SUBROUTINE h5t_c_double(r)
-         REAL(KIND=C_DOUBLE) :: r
-       END SUBROUTINE h5t_c_double
-       SUBROUTINE h5t_c_long_double(d)
-         REAL(KIND=C_LONG_DOUBLE) :: d
-       END SUBROUTINE h5t_c_long_double
-     END MODULE type_mod
-     PROGRAM main
-       USE ISO_C_BINDING
-       USE type_mod
-       REAL(KIND=C_DOUBLE)      :: r
-       REAL(KIND=C_LONG_DOUBLE) :: d
-       CALL h5t(r)
-       CALL h5t(d)
-     END PROGRAM main
-    ])], [AC_MSG_RESULT([yes]) 
+  TEST_SRC="`sed -n '/MODULE type_mod/,/END PROGRAM PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE/p' $srcdir/m4/aclocal_fc.f90`"
+  AC_COMPILE_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes]) 
             C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="yes"], 
          [AC_MSG_RESULT([no])])
 ])
@@ -180,24 +137,12 @@ dnl Checking if the compiler supports the required Fortran 2003 features and
 dnl disable Fortran 2003 if it does not.
 
 AC_DEFUN([PAC_PROG_FC_HAVE_F2003_REQUIREMENTS],[
+   HAVE_F2003_REQUIREMENTS="no"
    AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003 HDF])
-dnl --------------------------------------------------------------------
-dnl Default for FORTRAN 2003 compliant compilers
-dnl
-    HAVE_F2003_REQUIREMENTS="no"
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([],[
-
-        USE iso_c_binding
-        IMPLICIT NONE
-        TYPE(C_PTR) :: ptr
-        TYPE(C_FUNPTR) :: funptr
-        CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
-
-        ptr = C_LOC(ichr(1:1))
-
-        ])],[AC_MSG_RESULT([yes])
-        HAVE_F2003_REQUIREMENTS=[yes]], 
-      [AC_MSG_RESULT([no])])
+   TEST_SRC="`sed -n '/PROG_FC_HAVE_F2003_REQUIREMENTS/,/END PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS/p' $srcdir/m4/aclocal_fc.f90`"
+   AC_COMPILE_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes]) 
+            HAVE_F2003_REQUIREMENTS="yes"], 
+         [AC_MSG_RESULT([no])])
 ])
 
 dnl -------------------------------------------------------------------------
@@ -294,16 +239,10 @@ AC_DEFUN([PAC_PROG_FC_MPI_CHECK],[
 
 dnl   Change to the Fortran 90 language
       AC_LANG_PUSH(Fortran)
-
+      TEST_SRC="`sed -n '/PROGRAM FC_MPI_CHECK/,/END PROGRAM FC_MPI_CHECK/p' $srcdir/m4/aclocal_fc.f90`"
 dnl   Try link a simple MPI program.
       AC_MSG_CHECKING([whether a simple MPI-IO Fortran program can be linked])
-      AC_LINK_IFELSE([ 
-          PROGRAM main
-          INCLUDE 'mpif.h'
-          INTEGER :: comm, amode, info, fh, ierror
-          CHARACTER(LEN=1) :: filename 
-          CALL MPI_File_open( comm, filename, amode, info, fh, ierror)
-          END],
+      AC_LINK_IFELSE([$TEST_SRC],
 	  [AC_MSG_RESULT([yes])],
 	  [AC_MSG_RESULT([no])
 	   AC_MSG_ERROR([unable to link a simple MPI-IO Fortran program])])
@@ -321,69 +260,9 @@ dnl
 AC_DEFUN([PAC_FC_AVAIL_KINDS],[
 AC_LANG_PUSH([Fortran])
 rm -f pac_fconftest.out
-
-AC_RUN_IFELSE([
-    AC_LANG_SOURCE([
-    PROGRAM main
-      IMPLICIT NONE
-      INTEGER :: ik, jk, k, max_decimal_prec
-      INTEGER :: num_rkinds = 1, num_ikinds = 1
-      INTEGER, DIMENSION(1:10) :: list_ikinds = -1
-      INTEGER, DIMENSION(1:10) :: list_rkinds = -1
-  
-      OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
-
-      ! Find integer KINDs
-      list_ikinds(num_ikinds)=SELECTED_INT_KIND(1)
-      DO ik = 2, 36
-         k = SELECTED_INT_KIND(ik)
-         IF(k.LT.0) EXIT
-         IF(k.GT.list_ikinds(num_ikinds))THEN
-            num_ikinds = num_ikinds + 1
-            list_ikinds(num_ikinds) = k
-         ENDIF
-      ENDDO
-
-      DO k = 1, num_ikinds
-         WRITE(8,'(I0)', ADVANCE='NO') list_ikinds(k)
-         IF(k.NE.num_ikinds)THEN
-            WRITE(8,'(A)',ADVANCE='NO') ','
-         ELSE
-            WRITE(8,'()')
-         ENDIF
-      ENDDO
-
-      ! Find real KINDs
-      list_rkinds(num_rkinds)=SELECTED_REAL_KIND(1)
-      max_decimal_prec = 1
-
-      prec: DO ik = 2, 36
-         exp: DO jk = 1, 17000
-            k = SELECTED_REAL_KIND(ik,jk)
-            IF(k.LT.0) EXIT exp
-            IF(k.GT.list_rkinds(num_rkinds))THEN
-               num_rkinds = num_rkinds + 1
-               list_rkinds(num_rkinds) = k
-            ENDIF
-            max_decimal_prec = ik
-         ENDDO exp
-      ENDDO prec
-
-      DO k = 1, num_rkinds
-         WRITE(8,'(I0)', ADVANCE='NO') list_rkinds(k)
-         IF(k.NE.num_rkinds)THEN
-            WRITE(8,'(A)',ADVANCE='NO') ','
-         ELSE
-            WRITE(8,'()')
-         ENDIF
-      ENDDO
-
-     WRITE(8,'(I0)') max_decimal_prec
-     WRITE(8,'(I0)') num_ikinds
-     WRITE(8,'(I0)') num_rkinds
-    END PROGRAM main
-    ])
-],[
+TEST_SRC="`sed -n '/PROGRAM FC_AVAIL_KINDS/,/END PROGRAM FC_AVAIL_KINDS/p' $srcdir/m4/aclocal_fc.f90`"
+AC_RUN_IFELSE([$TEST_SRC],
+ [
     if test -s pac_fconftest.out ; then
 	
      dnl The output from the above program will be:
@@ -522,23 +401,23 @@ rm -f pac_fconftest.out
                 DOUBLE PRECISION c
                 OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
                 WRITE(8,*) $FC_SIZEOF_A
-	        WRITE(8,*) kind(a)
+	        WRITE(8,*) KIND(a)
 	        WRITE(8,*) $FC_SIZEOF_B
-	        WRITE(8,*) kind(b)
+	        WRITE(8,*) KIND(b)
                 WRITE(8,*) $FC_SIZEOF_C
-                WRITE(8,*) kind(c)
+                WRITE(8,*) KIND(c)
                 CLOSE(8)
                 END
             ])
         ])
         AC_RUN_IFELSE([],[
             if test -s pac_fconftest.out ; then
-                PAC_FORTRAN_NATIVE_INTEGER_KIND="`sed -n '1p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`sed -n '2p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_KIND="`sed -n '3p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`sed -n '4p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '5p' pac_fconftest.out`"
-                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '6p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF="`sed -n '1p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_INTEGER_KIND="`sed -n '2p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_SIZEOF="`sed -n '3p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_REAL_KIND="`sed -n '4p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF="`sed -n '5p' pac_fconftest.out`"
+                PAC_FORTRAN_NATIVE_DOUBLE_KIND="`sed -n '6p' pac_fconftest.out`"
             else
                 AC_MSG_ERROR([No output from Fortran test program!])
             fi
@@ -588,7 +467,7 @@ rm -f pac_Cconftest.out
 	        LDBL_DIG="`sed -n '1p' pac_Cconftest.out`" 
 	        FLT128_DIG="`sed -n '2p' pac_Cconftest.out`"
             else
-                AC_MSG_ERROR([No output from Fortran decimal precision program!])
+                AC_MSG_ERROR([No output from C decimal precision program!])
             fi
             rm -f pac_Cconftest.out
         ],[

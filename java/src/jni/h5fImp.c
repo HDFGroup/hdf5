@@ -45,14 +45,15 @@ Java_hdf_hdf5lib_H5__1H5Fopen
     hid_t       status = -1;
     const char *fileName;
 
-    PIN_JAVA_STRING(name, fileName, -1);
+    PIN_JAVA_STRING(name, fileName);
+    if (fileName != NULL) {
+        status = H5Fopen(fileName, (unsigned)flags, (hid_t)access_id );
 
-    status = H5Fopen(fileName, (unsigned)flags, (hid_t)access_id );
+        UNPIN_JAVA_STRING(name, fileName);
 
-    UNPIN_JAVA_STRING(name, fileName);
-
-    if (status < 0)
-        h5libraryError(env);
+        if (status < 0)
+            h5libraryError(env);
+    }
 
     return (jlong)status;
 } /* end Java_hdf_hdf5lib_H5__1H5Fopen */
@@ -69,14 +70,15 @@ Java_hdf_hdf5lib_H5__1H5Fcreate
     hid_t       status = -1;
     const char *fileName;
 
-    PIN_JAVA_STRING(name, fileName, -1);
+    PIN_JAVA_STRING(name, fileName);
+    if (fileName != NULL) {
+        status = H5Fcreate(fileName, (unsigned)flags, create_id, access_id);
 
-    status = H5Fcreate(fileName, (unsigned)flags, create_id, access_id);
+        UNPIN_JAVA_STRING(name, fileName);
 
-    UNPIN_JAVA_STRING(name, fileName);
-
-    if (status < 0)
-        h5libraryError(env);
+        if (status < 0)
+            h5libraryError(env);
+    }
 
     return (jlong)status;
 } /* end Java_hdf_hdf5lib_H5__1H5Fcreate */
@@ -152,16 +154,17 @@ Java_hdf_hdf5lib_H5_H5Fis_1hdf5
     htri_t      bval = JNI_FALSE;
     const char *fileName;
 
-    PIN_JAVA_STRING(name, fileName, JNI_FALSE);
+    PIN_JAVA_STRING(name, fileName);
+    if (fileName != NULL) {
+        bval = H5Fis_hdf5(fileName);
 
-    bval = H5Fis_hdf5(fileName);
+        UNPIN_JAVA_STRING(name, fileName);
 
-    UNPIN_JAVA_STRING(name, fileName);
-
-    if (bval > 0)
-        bval = JNI_TRUE;
-    else if (bval < 0)
-        h5libraryError(env);
+        if (bval > 0)
+            bval = JNI_TRUE;
+        else if (bval < 0)
+            h5libraryError(env);
+    }
 
     return (jboolean)bval;
 } /* end Java_hdf_hdf5lib_H5_H5Fis_1hdf5 */
@@ -251,14 +254,15 @@ Java_hdf_hdf5lib_H5_H5Fmount
     herr_t      status = -1;
     const char *fileName;
 
-    PIN_JAVA_STRING(name, fileName, -1);
+    PIN_JAVA_STRING(name, fileName);
+    if (fileName != NULL) {
+        status = H5Fmount((hid_t)loc_id, fileName, (hid_t)child_id, (hid_t)plist_id);
 
-    status = H5Fmount((hid_t)loc_id, fileName, (hid_t)child_id, (hid_t)plist_id);
+        UNPIN_JAVA_STRING(name, fileName);
 
-    UNPIN_JAVA_STRING(name, fileName);
-
-    if (status < 0)
-        h5libraryError(env);
+        if (status < 0)
+            h5libraryError(env);
+    }
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Fmount */
@@ -275,14 +279,15 @@ Java_hdf_hdf5lib_H5_H5Funmount
     herr_t      status = -1;
     const char *fileName;
 
-    PIN_JAVA_STRING(name, fileName, -1);
+    PIN_JAVA_STRING(name, fileName);
+    if (fileName != NULL) {
+        status = H5Funmount((hid_t)loc_id, fileName);
 
-    status = H5Funmount((hid_t)loc_id, fileName);
+        UNPIN_JAVA_STRING(name, fileName);
 
-    UNPIN_JAVA_STRING(name, fileName);
-
-    if (status < 0)
-        h5libraryError(env);
+        if (status < 0)
+            h5libraryError(env);
+    }
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Funmount */
