@@ -118,8 +118,7 @@ subf_api(void)
     sprintf(subfile_name, "Subfile_%d.h5", mpi_rank);
 
     /* set number of process groups to be equal to the mpi size */
-    ret = H5Pset_subfiling_access(fapl_id, (unsigned)mpi_size, subfile_name, 
-                                  MPI_COMM_SELF, MPI_INFO_NULL);
+    ret = H5Pset_subfiling_access(fapl_id, subfile_name, MPI_COMM_SELF, MPI_INFO_NULL);
     VRFY((ret == 0), "H5Pset_subfiling_access succeeded");
 
     /* create the file. This should also create the subfiles */
@@ -140,16 +139,14 @@ subf_api(void)
     fapl_id = H5Fget_access_plist(fid);
     VRFY((fapl_id >= 0), "");
     {
-        unsigned num_groups;
         MPI_Comm get_comm;
         MPI_Info get_info;
         int comm_size;
         char *temp_name = NULL;
 
-        ret = H5Pget_subfiling_access(fapl_id, &num_groups, &temp_name, &get_comm, &get_info);
+        ret = H5Pget_subfiling_access(fapl_id, &temp_name, &get_comm, &get_info);
         VRFY((ret == 0), "");
 
-        VRFY((num_groups == (unsigned)mpi_size), "number of subfiling groups verified");
         VRFY((strcmp(temp_name, subfile_name) == 0), "Subfile name verification succeeded");
 
         MPI_Comm_size(get_comm, &comm_size);
@@ -235,8 +232,7 @@ subf_fpp_w(void)
     sprintf(subfile_name, "Subfile_%d.h5", mpi_rank);
 
     /* set number of process groups to be equal to the mpi size */
-    ret = H5Pset_subfiling_access(fapl_id, (unsigned)mpi_size, subfile_name, 
-                                  MPI_COMM_SELF, MPI_INFO_NULL);
+    ret = H5Pset_subfiling_access(fapl_id, subfile_name, MPI_COMM_SELF, MPI_INFO_NULL);
     VRFY((ret == 0), "H5Pset_subfiling_access succeeded");
 
     /* create the file. This should also create the subfiles */
@@ -353,8 +349,7 @@ subf_fpp_r(void)
     sprintf(subfile_name, "Subfile_%d.h5", mpi_rank);
 
     /* set number of process groups to be equal to the mpi size */
-    ret = H5Pset_subfiling_access(fapl_id, (unsigned)mpi_size, subfile_name, 
-                                  MPI_COMM_SELF, MPI_INFO_NULL);
+    ret = H5Pset_subfiling_access(fapl_id, subfile_name, MPI_COMM_SELF, MPI_INFO_NULL);
     VRFY((ret == 0), "H5Pset_subfiling_access succeeded");
 
     /* open the file */
@@ -525,7 +520,7 @@ subf_2_w(void)
     VRFY((mrc==MPI_SUCCESS), "Comm_split succeeded");
 
     /* set number of process groups to 2 */
-    ret = H5Pset_subfiling_access(fapl_id, 2, subfile_name, comm, MPI_INFO_NULL);
+    ret = H5Pset_subfiling_access(fapl_id, subfile_name, comm, MPI_INFO_NULL);
     VRFY((ret == 0), "H5Pset_subfiling_access succeeded");
 
     /* create the file. This should also create the subfiles */
@@ -693,7 +688,7 @@ subf_2_r(void)
     VRFY((mrc==MPI_SUCCESS), "Comm_split succeeded");
 
     /* set number of process groups to 2 */
-    ret = H5Pset_subfiling_access(fapl_id, 2, subfile_name, comm, MPI_INFO_NULL);
+    ret = H5Pset_subfiling_access(fapl_id, subfile_name, comm, MPI_INFO_NULL);
     VRFY((ret == 0), "H5Pset_subfiling_access succeeded");
 
     /* open the file */

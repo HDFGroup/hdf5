@@ -103,3 +103,4 @@ tools/perform/Makefile.in
 tools/testfiles/Makefile.in
 tools/testfiles/pbits/Makefile.in
 tools/testfiles/vds/Makefile.in
+*~

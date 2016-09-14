@@ -303,10 +303,6 @@ H5_DLL herr_t H5Pset_shared_mesg_phase_change(hid_t plist_id, unsigned max_list,
 H5_DLL herr_t H5Pget_shared_mesg_phase_change(hid_t plist_id, unsigned *max_list, unsigned *min_btree);
 H5_DLL herr_t H5Pset_file_space(hid_t plist_id, H5F_file_space_type_t strategy, hsize_t threshold);
 H5_DLL herr_t H5Pget_file_space(hid_t plist_id, H5F_file_space_type_t *strategy, hsize_t *threshold);
-#ifdef H5_HAVE_PARALLEL
-H5_DLL herr_t H5Pset_num_subfiles(hid_t plist_id, unsigned num_subfiles);
-H5_DLL herr_t H5Pget_num_subfiles(hid_t plist_id, unsigned *num_subfiles);
-#endif /* H5_HAVE_PARALLEL */
 
 /* File access property list (FAPL) routines */
 H5_DLL herr_t H5Pset_alignment(hid_t fapl_id, hsize_t threshold,
@@ -363,9 +359,9 @@ H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective
 H5_DLL herr_t H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective);
 H5_DLL herr_t H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective);
 H5_DLL herr_t H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective);
-H5_DLL herr_t H5Pset_subfiling_access(hid_t plist_id, unsigned num_groups, const char *subfile_name, 
+H5_DLL herr_t H5Pset_subfiling_access(hid_t plist_id, const char *subfile_name, 
     MPI_Comm comm, MPI_Info info);
-H5_DLL herr_t H5Pget_subfiling_access(hid_t plist_id, unsigned *num_groups, char **subfile_name, 
+H5_DLL herr_t H5Pget_subfiling_access(hid_t plist_id, char **subfile_name, 
     MPI_Comm *comm, MPI_Info *info);
 #endif /* H5_HAVE_PARALLEL */
 

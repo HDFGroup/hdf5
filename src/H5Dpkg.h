@@ -479,6 +479,9 @@ struct H5D_t {
     H5O_loc_t           oloc;           /* Object header location       */
     H5G_name_t          path;           /* Group hierarchy path         */
     H5D_shared_t        *shared;        /* cached information from file */
+#ifdef H5_HAVE_PARALLEL
+    H5S_t               *subfile_selection; /* The process selection of where it will access for subfiling */
+#endif /* H5_HAVE_PARALLEL */
 };
 
 /* Enumerated type for allocating dataset's storage */

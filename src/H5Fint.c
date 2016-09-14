@@ -187,8 +187,6 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
 
     /* Set subfiling properties */
-    if(H5P_set(new_plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &(f->subfile_num_groups)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of groups for subfiling")
     if(H5P_set(new_plist, H5F_ACS_SUBFILE_COMM_NAME, &(f->subfile_comm)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling communicator")
     if(H5P_set(new_plist, H5F_ACS_SUBFILE_INFO_NAME, &(f->subfile_info)) < 0)
@@ -629,10 +627,6 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space strategy")
         if(H5P_get(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &f->shared->fs_threshold) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get free-space section threshold")
-#ifdef H5_HAVE_PARALLEL
-        if(H5P_get(plist, H5F_CRT_NUM_SUBFILES_NAME, &(f->shared->num_subfiles)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata read flag")
-#endif /* H5_HAVE_PARALLEL */
 
         /* Get the FAPL values to cache */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -674,16 +668,14 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata read flag")
         if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata write flag")
-        if(H5P_get(plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &(f->subfile_num_groups)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of groups for subfiling")
 
+        if(H5P_get(plist, H5F_ACS_SUBFILING_FILENAME_NAME, &(f->subfile_name)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get number of groups for subfiling")
         f->subfile_comm = MPI_COMM_NULL;
         f->subfile_info = MPI_INFO_NULL;
-
-        if(f->subfile_num_groups != 0){
+        if(NULL != f->subfile_name) {
             MPI_Comm comm;
             MPI_Info info;
-            const char *temp_name;
 
             /* get the communicator */
             if(H5P_get(plist, H5F_ACS_SUBFILE_COMM_NAME, &comm) < 0)
@@ -694,12 +686,13 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
             /* Set communicator and Info object. */
             f->subfile_comm = comm;
             f->subfile_info = info;
-
+#if 0
             /* Get the subfile name */
             if(H5P_peek(plist, H5F_ACS_SUBFILING_FILENAME_NAME, &temp_name) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get the subfile name")
             if(NULL == (f->subfile_name = H5MM_strdup(temp_name)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't duplicate subfile name")
+#endif
         }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -2306,13 +2299,9 @@ H5F__open_subfile(H5F_t *file, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid
 
         /* reset subfiling properties */
         {
-            unsigned num_groups = 0;
             const char *temp_name = NULL;
             MPI_Comm comm = MPI_COMM_NULL;
             MPI_Info info = MPI_INFO_NULL;
-
-            if(H5P_set(new_plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &num_groups) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set number of groups for subfiling")
 
             if(H5P_set(new_plist, H5F_ACS_SUBFILING_FILENAME_NAME, &temp_name) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile name")

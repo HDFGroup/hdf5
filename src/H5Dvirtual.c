@@ -786,10 +786,18 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
             /* otherwise we should fail since VDS without subfiling is not supported in Read-Write mode */
             else if(NULL == src_file)
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "VDS is not supported in parallel in RDWR mode without Subfiling")
-
             /* make sure we are accessing our subfile */
-            if(strcmp(H5F_OPEN_NAME(src_file), source_dset->file_name) != 0)
+            else if(strcmp(H5F_OPEN_NAME(src_file), source_dset->file_name) != 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Dataset I/O spans to the wrong subfile")
+            /* make sure we access the selection we said we'd access */
+            else if(vdset->subfile_selection) {
+                hsize_t off1, off2;
+
+                H5S_get_select_offset(virtual_ent->virtual_select, &off1);
+                H5S_get_select_offset(vdset->subfile_selection, &off2);
+                if(!H5S_select_shape_same(virtual_ent->virtual_select, vdset->subfile_selection) ||off1 != off2)
+                    HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "Selection does not match what was specified when dataset was created")
+            }
         }
         else
 #endif /* H5_HAVE_PARALLEL */
@@ -2141,6 +2149,10 @@ H5D__virtual_pre_io(H5D_io_info_t *io_info,
     for(i = 0; i < storage->list_nused; i++) {
         /* Sanity check that the virtual space has been patched by now */
         HDassert(storage->list[i].virtual_space_status == H5O_VIRTUAL_STATUS_CORRECT);
+
+#ifdef H5_HAVE_PARALLEL
+        storage->list[i].virtual_select = file_space;
+#endif /* H5_HAVE_PARALLEL */
 
         /* Check for "printf" source dataset resolution */
         if(storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
