@@ -34,12 +34,12 @@
 #define DATASET_COMPRESSED      "compressed"
 #define DATASET_NAMED_VL        "named_vl"
 #define DATASET_NESTED_VL       "nested_vl"
-#define DATASET_ATTR		"dset_attr"
-#define ATTR			"attr"
+#define DATASET_ATTR            "dset_attr"
+#define ATTR                    "attr"
 #define GROUP_EMPTY             "grp_empty"
 #define GROUP_DATASETS          "grp_dsets"
 #define GROUP_NESTED            "grp_nested"
-#define GROUP_ATTR		"grp_attr"
+#define GROUP_ATTR              "grp_attr"
 
 /* Obj reference */
 #define OBJ_REF_DS "Dset1"
@@ -328,8 +328,8 @@ static void gent_nested_vl(hid_t loc_id)
  * Function:    gent_att_compound_vlstr
  *
  * Purpose:     Generate a dataset and a group.
- *		Both has an attribute with a compound datatype consisting 
- *		of a variable length string
+ *              Both has an attribute with a compound datatype consisting 
+ *              of a variable length string
  *
  *-------------------------------------------------------------------------
  */
@@ -348,59 +348,94 @@ static void gent_att_compound_vlstr(hid_t loc_id)
     hid_t vl_str_tid = -1;	/* Variable length datatype ID */
     hid_t cmpd_tid = -1;	/* Compound datatype ID */
     hid_t null_sid = -1;	/* Null dataspace ID */
-    s1 buf;			/* Buffer */
+    s1 buf;                 /* Buffer */
 
     buf.i = 9;
     buf.v = "ThisIsAString";
 
     /* Create an integer datatype */
-    tid = H5Tcopy(H5T_NATIVE_INT);
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        goto error;
 
     /* Create a variable length string */
-    vl_str_tid = H5Tcopy(H5T_C_S1);
-    H5Tset_size(vl_str_tid, H5T_VARIABLE);
+    if((vl_str_tid = H5Tcopy(H5T_C_S1)) < 0)
+        goto error;
+    if(H5Tset_size(vl_str_tid, H5T_VARIABLE) < 0)
+        goto error;
 
     /* Create a compound datatype with a variable length string and an integer */
-    cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1));
-    H5Tinsert(cmpd_tid, "i", HOFFSET(s1, i), tid);
-    H5Tinsert(cmpd_tid, "v", HOFFSET(s1, v), vl_str_tid);
+    if((cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(s1))) < 0)
+        goto error;
+    if(H5Tinsert(cmpd_tid, "i", HOFFSET(s1, i), tid) < 0)
+        goto error;
+    if(H5Tinsert(cmpd_tid, "v", HOFFSET(s1, v), vl_str_tid) < 0)
+        goto error;
 
     /* Create a dataset */
-    null_sid = H5Screate(H5S_NULL);
-    did = H5Dcreate2(loc_id, DATASET_ATTR, H5T_NATIVE_INT, null_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if((null_sid = H5Screate(H5S_NULL)) < 0)
+        goto error;
+    if((did = H5Dcreate2(loc_id, DATASET_ATTR, H5T_NATIVE_INT, null_sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
 
     /* Attach an attribute with the compound datatype to the dataset */
-    sid = H5Screate_simple(1, dim, dim);
-    aid = H5Acreate2(did, ATTR, cmpd_tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+    if((sid = H5Screate_simple(1, dim, dim)) < 0)
+        goto error;
+    if((aid = H5Acreate2(did, ATTR, cmpd_tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
 
     /* Write the attribute */
     buf.i = 9;
     buf.v = "ThisIsAString";
-    H5Awrite(aid, cmpd_tid, &buf);
+    if(H5Awrite(aid, cmpd_tid, &buf) < 0)
+        goto error;
 
     /* Close the dataset and its attribute */
-    H5Dclose(did);
-    H5Aclose(aid);
+    if(H5Dclose(did) < 0)
+        goto error;
+    if(H5Aclose(aid) < 0)
+        goto error;
 
     /* Create a group */
-    gid = H5Gcreate2(loc_id, GROUP_ATTR, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if((gid = H5Gcreate2(loc_id, GROUP_ATTR, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
 
     /* Attach an attribute with the compound datatype to the group */
-    aid = H5Acreate2(gid, ATTR, cmpd_tid, sid, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(aid, cmpd_tid, &buf);
+    if((aid = H5Acreate2(gid, ATTR, cmpd_tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+    if(H5Awrite(aid, cmpd_tid, &buf) < 0)
+        goto error;
 
     /* Close the group and its attribute */
-    H5Aclose(aid);
-    H5Gclose(gid);
+    if(H5Aclose(aid) < 0)
+        goto error;
+    if(H5Gclose(gid) < 0)
+        goto error;
 
     /* Close dataspaces */
-    H5Sclose(sid);
-    H5Sclose(null_sid);
+    if(H5Sclose(sid) < 0)
+        goto error;
+    if(H5Sclose(null_sid) < 0)
+        goto error;
 
     /* Close datatypes */
-    H5Tclose(tid);
-    H5Tclose(vl_str_tid);
-    H5Tclose(cmpd_tid);
+    if(H5Tclose(tid) < 0)
+        goto error;
+    if(H5Tclose(vl_str_tid) < 0)
+        goto error;
+    if(H5Tclose(cmpd_tid) < 0)
+        goto error;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Tclose(tid);
+        H5Tclose(vl_str_tid);
+        H5Tclose(cmpd_tid);
+        H5Sclose(null_sid);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Aclose(aid);
+        H5Gclose(gid);
+    } H5E_END_TRY;
 
 } /* gen_att_compound_vlstr() */
 

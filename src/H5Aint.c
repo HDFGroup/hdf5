@@ -2098,11 +2098,11 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
 
             HDmemcpy(buf, attr_src->shared->data, attr_src->shared->data_size);
 
-	    /* Allocate background memory */
-	    if(H5T_path_bkg(tpath_src_mem) || H5T_path_bkg(tpath_mem_dst)) {
-		if(NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
-		    HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
-	    }
+            /* Allocate background memory */
+            if(H5T_path_bkg(tpath_src_mem) || H5T_path_bkg(tpath_mem_dst)) {
+                if(NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+            }
 
             /* Convert from source file to memory */
             if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, bkg_buf, dxpl_id) < 0)
@@ -2110,9 +2110,9 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
 
             HDmemcpy(reclaim_buf, buf, buf_size);
 
-	    /* Set background buffer to all zeros */
-	    if(bkg_buf)
-		HDmemset(bkg_buf, 0, buf_size);
+            /* Set background buffer to all zeros */
+            if(bkg_buf)
+                HDmemset(bkg_buf, 0, buf_size);
 
             /* Convert from memory to destination file */
             if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, bkg_buf, dxpl_id) < 0)

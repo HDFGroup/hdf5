@@ -21,7 +21,7 @@
  */
 
 #include "testhdf5.h"
-#include "H5srcdir.h"
+#include "h5test.h"
 
 /*
  * This file needs to access private information from the H5S package.
@@ -4635,35 +4635,35 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
     
     /* Open the attributes attached to the objects */
     if((aid = H5Aopen_by_idx(loc, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR	
+        TEST_ERROR	
     if((aid2 = H5Aopen_by_idx(loc2, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR	
+        TEST_ERROR	
 
     /* Get the attributes' datatypes */
     if((tid = H5Aget_type(aid)) < 0) 
-	FAIL_STACK_ERROR	
+        TEST_ERROR	
     if((tid2 = H5Aget_type(aid2)) < 0)
-	FAIL_STACK_ERROR	
+        TEST_ERROR	
 
     /* Read the attributes */
     if(H5Aread(aid, tid, &rbuf) < 0)
-	FAIL_STACK_ERROR	
+        TEST_ERROR
     if(H5Aread(aid2, tid2, &rbuf2) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* Compare the attributes' data */
     if(rbuf.i != rbuf2.i)
-	FAIL_STACK_ERROR
+        TEST_ERROR
     if(HDstrlen(rbuf.v) != HDstrlen(rbuf2.v)) 
-	FAIL_STACK_ERROR
+        TEST_ERROR
     if(HDmemcmp(rbuf.v, rbuf2.v, HDstrlen(rbuf.v))) 
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* Close the attributes */
     if(H5Aclose(aid) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
     if(H5Aclose(aid2) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
     return TRUE;
 
 error:
@@ -4716,7 +4716,7 @@ test_copy_attribute_compound_vlstr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
     /* create source file */
     if((fid_src = H5Fcreate(src_filename, H5F_ACC_TRUNC, fcpl_src, src_fapl)) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* set dataspace dimensions */
     dim2d[0] = DIM_SIZE_1;
@@ -4724,103 +4724,103 @@ test_copy_attribute_compound_vlstr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
 
     /* create 2D dataspace */
     if((sid = H5Screate_simple(2, dim2d, NULL)) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* create 2D int dataset at SRC file */
     if((did = H5Dcreate2(fid_src, NAME_DATASET_SIMPLE, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* close dataspace */
     if(H5Sclose(sid) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* attach an attribute to the dataset */
     if(attach_attribute_compound_vlstr(did) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* close the dataset */
     if(H5Dclose(did) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* create a group */
     if((gid = H5Gcreate2(fid_src, NAME_GROUP_EMPTY, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* attach attribute to the group */
     if(attach_attribute_compound_vlstr(gid) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* close the group */
     if(H5Gclose(gid) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* close the SRC file */
     if(H5Fclose(fid_src) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
 
     /* open the source file with read-only */
     if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, src_fapl)) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* Create an uncopied object in destination file so that addresses in source and destination files aren't the same */
     if(H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* copy the dataset from SRC to DST */
     if(H5Ocopy(fid_src, NAME_DATASET_SIMPLE, fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT, H5P_DEFAULT) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* open the src dataset */
     if((did = H5Dopen2(fid_src, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* open the destination dataset */
     if((did2 = H5Dopen2(fid_dst, NAME_DATASET_SIMPLE, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* compare the data of the attributes attached to the two datasets */
     if(compare_attribute_compound_vlstr(did, did2) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* close the datasets */
     if(H5Dclose(did2) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
     if(H5Dclose(did) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* Copy the group */
     if(H5Ocopy(fid_src, NAME_GROUP_EMPTY, fid_dst, NAME_GROUP_EMPTY, H5P_DEFAULT, H5P_DEFAULT) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* Open the src group */
     if((gid = H5Gopen2(fid_src, NAME_GROUP_EMPTY, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
     /* Open the destination group */
     if((gid2 = H5Gopen2(fid_dst, NAME_GROUP_EMPTY, H5P_DEFAULT)) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* compare the data of the attributes attached to the two groups */
     if(compare_attribute_compound_vlstr(gid, gid2) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* close the groups */
     if(H5Gclose(gid) < 0) 
-	FAIL_STACK_ERROR
+        TEST_ERROR
     if(H5Gclose(gid2) < 0) 
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* close the SRC file */
     if(H5Fclose(fid_src) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     /* close the DST file */
     if(H5Fclose(fid_dst) < 0)
-	FAIL_STACK_ERROR
+        TEST_ERROR
 
     PASSED();
     return 0;
@@ -9428,7 +9428,7 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     if((aid = H5Acreate2(gid, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    //if(H5Awrite(aid, tid, buf) < 0) TEST_ERROR
+    if(H5Awrite(aid, tid, buf) < 0) TEST_ERROR
 
     /* close the datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
