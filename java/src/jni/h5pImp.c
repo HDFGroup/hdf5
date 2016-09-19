@@ -4947,7 +4947,6 @@ H5P_cls_create_cb
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
-    jmethodID  constructor;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
         cls = CBENVPTR->GetObjectClass(CBENVPAR create_callback);
@@ -4972,7 +4971,6 @@ H5P_cls_copy_cb
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
-    jmethodID  constructor;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
         cls = CBENVPTR->GetObjectClass(CBENVPAR copy_callback);
@@ -4995,7 +4993,6 @@ H5P_cls_close_cb
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
-    jmethodID  constructor;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
         cls = CBENVPTR->GetObjectClass(CBENVPAR close_callback);
@@ -5019,7 +5016,6 @@ H5D_append_cb
     jclass     cls;
     jmethodID  mid;
     jlongArray cur_dimsArray;
-    jsize      size;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) != 0) {
         JVMPTR->DetachCurrentThread(JVMPAR);
@@ -5135,7 +5131,6 @@ H5P_prp_create_cb
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
-    jmethodID  constructor;
     jstring    str;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
@@ -5160,7 +5155,6 @@ H5P_prp_copy_cb
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
-    jmethodID  constructor;
     jstring    str;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
@@ -5185,7 +5179,6 @@ H5P_prp_close_cb
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
-    jmethodID  constructor;
     jstring    str;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
@@ -5210,7 +5203,6 @@ H5P_prp_compare_cb
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
-    jmethodID  constructor;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
         cls = CBENVPTR->GetObjectClass(CBENVPAR compare_callback);
@@ -5233,7 +5225,6 @@ H5P_prp_get_cb
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
-    jmethodID  constructor;
     jstring    str;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
@@ -5258,7 +5249,6 @@ H5P_prp_set_cb
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
-    jmethodID  constructor;
     jstring    str;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
@@ -5283,7 +5273,6 @@ H5P_prp_delete_cb
     jint       status = -1;
     jclass     cls;
     jmethodID  mid;
-    jmethodID  constructor;
     jstring    str;
 
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) == 0) {
@@ -5472,7 +5461,6 @@ H5P_iterate_cb
     jclass     cls;
     jmethodID  mid;
     jstring    str;
-    jmethodID  constructor;
 
     /* fprintf(stderr, "\nJNI H5P_iterate_cb entered\n"); fflush(stderr); */
     if(JVMPTR->AttachCurrentThread(JVMPAR2 (void**)&cbenv, NULL) != 0) {
