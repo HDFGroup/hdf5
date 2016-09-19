@@ -151,8 +151,6 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   set (install_targets ${install_targets} ${HDF5_F90_C_LIBSH_TARGET})
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
-set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90 PROPERTIES GENERATED TRUE)
-
 #-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
@@ -179,6 +177,7 @@ set (f90_F_BASE_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zff.F90
 )
 
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90 PROPERTIES GENERATED TRUE)
 set (f90_F_SOURCES
     ${f90_F_BASE_SOURCES}
 
@@ -189,6 +188,7 @@ set (f90_F_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
 )
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90 PROPERTIES GENERATED TRUE)
   set (f90_F_SOURCES_SHARED
       ${f90_F_BASE_SOURCES}
 
