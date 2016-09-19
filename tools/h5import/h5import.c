@@ -1439,7 +1439,7 @@ static int processConfigurationFile(char *infile, struct Input *in)
 #endif
                             if (HDstrcmp("H5T_VARIABLE;", temp)) {
                                 char *more = temp;
-                                ival = HDstrtol(more, &more, 10);
+                                ival = (int)HDstrtol(more, &more, 10);
                                 if (getInputSize(in, ival) == -1) {
                                     (void) HDfprintf(stderr, err5b, infile);
                                     goto error;
@@ -2279,13 +2279,13 @@ static int parseDimensions(struct Input *in, char *strm)
     HDstrncpy(temp, strm, sizeof(temp));
     temp[sizeof(temp) - 1] = '\0';
     in->sizeOfDimension[i++]
-            = HDstrtol(HDstrtok (temp, delimiter), NULL, BASE_10);
+            = HDstrtoull(HDstrtok (temp, delimiter), NULL, BASE_10);
 
     while (1) {
         token = HDstrtok (NULL, delimiter);
         if (token == NULL)
             break;
-        in->sizeOfDimension[i++] = HDstrtol(token, NULL, BASE_10);
+        in->sizeOfDimension[i++] = HDstrtoull(token, NULL, BASE_10);
     }
     return (0);
 }
@@ -3121,7 +3121,7 @@ static int getRank(struct Input *in, FILE *strm)
 /* same as getChunkedDimensionSizes. But defined separately for extensibility */
 static int getDimensionSizes(struct Input *in, FILE *strm)
 {
-    int         ival;
+    unsigned long long ullval;
     int         i = 0;
 
     const char *err1 = "Unable to allocate dynamic memory.\n";
@@ -3132,8 +3132,8 @@ static int getDimensionSizes(struct Input *in, FILE *strm)
         return (-1);
     }
 
-    while (fscanf(strm, "%d", (&ival)) == 1)
-        in->sizeOfDimension[i++] = ival;
+    while (fscanf(strm, "%llu", (&ullval)) == 1)
+        in->sizeOfDimension[i++] = ullval;
 
     if (in->rank != i) {
         (void) HDfprintf(stderr, "%s", err2);
@@ -3144,7 +3144,7 @@ static int getDimensionSizes(struct Input *in, FILE *strm)
 /* same as getDimensionSizes. But defined separately for extensibility */
 static int getChunkedDimensionSizes(struct Input *in, FILE *strm)
 {
-    int         ival;
+    unsigned long long ullval;
     int         i = 0;
 
     const char *err1 = "Unable to allocate dynamic memory.\n";
@@ -3156,8 +3156,8 @@ static int getChunkedDimensionSizes(struct Input *in, FILE *strm)
         return (-1);
     }
 
-    while (fscanf(strm, "%d", (&ival)) == 1)
-        in->sizeOfChunk[i++] = ival;
+    while (fscanf(strm, "%llu", (&ullval)) == 1)
+        in->sizeOfChunk[i++] = ullval;
 
     if (in->rank != i) {
         (void) HDfprintf(stderr, "%s", err2);
@@ -3174,7 +3174,7 @@ static int getChunkedDimensionSizes(struct Input *in, FILE *strm)
 
 static int getMaximumDimensionSizes(struct Input *in, FILE *strm)
 {
-    int         ival;
+    long long llval;
     int         i = 0;
 
     const char *err1 = "Unable to allocate dynamic memory.\n";
@@ -3186,11 +3186,11 @@ static int getMaximumDimensionSizes(struct Input *in, FILE *strm)
         return (-1);
     }
 
-    while (fscanf(strm, "%d", (&ival)) == 1) {
-        if (ival == -1)
+    while (fscanf(strm, "%lld", (&llval)) == 1) {
+        if (llval == -1)
             in->maxsizeOfDimension[i++] = H5S_UNLIMITED;
         else
-            in->maxsizeOfDimension[i++] = ival;
+            in->maxsizeOfDimension[i++] = (hsize_t)llval;
     }
 
     if (in->rank != i) {
@@ -3927,7 +3927,7 @@ static int process(struct Options *opt)
                     return (-1);
                 }
                 HDfclose(extfile);
-                H5Pset_external(proplist, in->externFilename, (off_t) 0, numOfElements * in->inputSize / 8);
+                H5Pset_external(proplist, in->externFilename, (off_t)0, numOfElements * (hsize_t)in->inputSize / 8);
             }
 
             /* create dataspace */

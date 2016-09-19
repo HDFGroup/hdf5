@@ -27,6 +27,46 @@
 #include "UC_common.h"
 #include "UC_2.h"
 
+static hsize_t UC_2_VDS_DIMS[RANK]  = {0, UC_2_FULL_HEIGHT, UC_2_FULL_WIDTH};
+static hsize_t UC_2_VDS_MAX_DIMS[RANK]  = {UC_2_N_MAX_PLANES, UC_2_FULL_HEIGHT, UC_2_FULL_WIDTH};
+
+/* Positions of source datasets in the VDS */
+static hsize_t UC_2_POSITIONS[UC_2_N_SOURCES][RANK] = {
+    /* A */ {0, 0,              0},
+    /* B */ {0, UC_2_A_HEIGHT,  0},
+    /* C */ {0, UC_2_AB_HEIGHT, 0},
+    /* D */ {0, 0,              UC_2_WIDTH},
+    /* E */ {0, UC_2_D_HEIGHT,  UC_2_WIDTH}
+};
+
+/* Planes */
+static hsize_t UC_2_PLANES[UC_2_N_SOURCES][RANK] = {
+    {1, UC_2_A_HEIGHT, UC_2_WIDTH},
+    {1, UC_2_B_HEIGHT, UC_2_WIDTH},
+    {1, UC_2_C_HEIGHT, UC_2_WIDTH},
+    {1, UC_2_D_HEIGHT, UC_2_WIDTH},
+    {1, UC_2_E_HEIGHT, UC_2_WIDTH}
+};
+
+/* Chunk dimensions */
+static hsize_t UC_2_CHUNK_DIMS[UC_2_N_SOURCES][RANK] = {
+    {UC_2_N_PLANES_IN_SERIES, UC_2_A_HEIGHT, UC_2_WIDTH},
+    {UC_2_N_PLANES_IN_SERIES, UC_2_B_HEIGHT, UC_2_WIDTH},
+    {UC_2_N_PLANES_IN_SERIES, UC_2_C_HEIGHT, UC_2_WIDTH},
+    {UC_2_N_PLANES_IN_SERIES, UC_2_D_HEIGHT, UC_2_WIDTH},
+    {UC_2_N_PLANES_IN_SERIES, UC_2_E_HEIGHT, UC_2_WIDTH}
+};
+
+/* Fill values */
+static int UC_2_FILL_VALUES[UC_2_N_SOURCES] = {
+    -1,
+    -2,
+    -3,
+    -4,
+    -5
+};
+static int UC_2_VDS_FILL_VALUE      = -9;
+
 int
 main(void)
 {
@@ -51,7 +91,7 @@ main(void)
 
     int i;                      /* iterator                                 */
     int j;                      /* iterator                                 */
-    int k;                      /* iterator                                 */
+    hsize_t k;                  /* iterator                                 */
 
 
     /* Start by creating the virtual dataset (VDS) dataspace and creation
@@ -132,7 +172,7 @@ main(void)
             for(k = 0; k < count; k++)
                buffer[k] = value; 
 
-            start[0] = j;
+            start[0] = (hsize_t)j;
             start[1] = 0;
             start[2] = 0;
             if(H5Sselect_hyperslab(fsid, H5S_SELECT_SET, start, NULL, UC_2_PLANES[i], NULL) < 0)

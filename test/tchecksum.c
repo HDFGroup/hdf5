@@ -189,7 +189,7 @@ test_chksum_large(void)
 
     /* Initialize buffer w/known data */
     for(u = 0; u < BUF_LEN; u++)
-        large_buf[u] = u * 3;
+        large_buf[u] = (uint8_t)(u * 3);
 
     /* Buffer w/real data */
     chksum = H5_checksum_fletcher32(large_buf, sizeof(large_buf));
@@ -247,7 +247,7 @@ test_checksum(void)
  *
  *-------------------------------------------------------------------------
  */
-H5_ATTR_PURE void
+H5_ATTR_PURE H5_ATTR_CONST void
 cleanup_checksum(void)
 {
     /* no file to clean */

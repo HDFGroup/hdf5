@@ -23,20 +23,21 @@
 namespace H5 {
 #endif
 
-class H5_DLLCPP H5Location;  // forward declaration for UserData4Aiterate
+//class H5_DLLCPP H5Location;  // forward declaration for UserData4Aiterate
 
 // Define the operator function pointer for H5Aiterate().
-typedef void (*attr_operator_t)( H5Location& loc/*in*/,
-                                 const H5std_string attr_name/*in*/,
-                                 void *operator_data/*in,out*/);
+//typedef void (*attr_operator_t)( H5Location& loc/*in*/,
+                                 //const H5std_string attr_name/*in*/,
+                                 //void *operator_data/*in,out*/);
 
 //! User data for attribute iteration
-class UserData4Aiterate {
+ /* class UserData4Aiterate {
    public:
 	attr_operator_t op;
 	void* opData;
 	H5Location* location;
 };
+ */ 
 
 /*! \class H5Location
     \brief H5Location is an abstract base class, added in version 1.8.12.
@@ -49,28 +50,11 @@ class UserData4Aiterate {
 // a location can be a file, group, dataset, or named datatype. -BMR, 2013-10-1
 class H5_DLLCPP H5Location : public IdComponent {
    public:
-	// Creates an attribute for the specified object at this location
-	// PropList is currently not used, so always be default.
-	Attribute createAttribute( const char* name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT ) const;
-	Attribute createAttribute( const H5std_string& name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT ) const;
-
-	// Given its name, opens the attribute that belongs to an object at
-	// this location.
-	Attribute openAttribute( const char* name ) const;
-	Attribute openAttribute( const H5std_string& name ) const;
-
-	// Given its index, opens the attribute that belongs to an object at
-	// this location.
-	Attribute openAttribute( const unsigned int idx ) const;
-
 	// Flushes all buffers associated with this location to disk.
 	void flush( H5F_scope_t scope ) const;
 
 	// Gets the name of the file, specified by this location.
 	H5std_string getFileName() const;
-
-	// Determines the number of attributes at this location.
-	int getNumAttrs() const;
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Retrieves the type of object that an object reference points to.
@@ -81,21 +65,6 @@ class H5_DLLCPP H5Location : public IdComponent {
 	H5O_type_t getRefObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
 	// Note: getRefObjType deprecates getObjType, but getObjType's name is
 	// misleading, so getRefObjType is used in the new function instead.
-
-	// Iterate user's function over the attributes at this location.
-	int iterateAttrs(attr_operator_t user_op, unsigned* idx = NULL, void* op_data = NULL);
-
-	// Checks whether the named attribute exists at this location.
-	bool attrExists(const char* name) const;
-	bool attrExists(const H5std_string& name) const;
-
-	// Renames the named attribute to a new name.
-	void renameAttr(const char* oldname, const char* newname) const;
-	void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
-
-	// Removes the named attribute from this location.
-	void removeAttr(const char* name) const;
-	void removeAttr(const H5std_string& name) const;
 
 	// Sets the comment for an HDF5 object specified by its name.
 	void setComment(const char* name, const char* comment) const;

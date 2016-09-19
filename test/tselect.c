@@ -720,7 +720,7 @@ test_select_all(hid_t xfer_plist)
     for(i=0, tbuf=wbuf; i<SPACE4_DIM1; i++)
         for(j=0; j<SPACE4_DIM2; j++)
             for(k=0; k<SPACE4_DIM3; k++)
-                *tbuf++ = (uint8_t)(((i * SPACE4_DIM2) + j) * SPACE4_DIM3) + k;
+                *tbuf++ = (uint8_t)((((i * SPACE4_DIM2) + j) * SPACE4_DIM3) + k);
 
     /* Create file */
     fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -7188,8 +7188,8 @@ test_select_fill_point(hssize_t *offset)
 
     /* Add in the offset */
     for(u = 0; u < (unsigned)num_points; u++) {
-        points[u][0] = (hsize_t)(points[u][0] + real_offset[0]);
-        points[u][1] = (hsize_t)(points[u][1] + real_offset[1]);
+        points[u][0] = (hsize_t)((hssize_t)points[u][0] + real_offset[0]);
+        points[u][1] = (hsize_t)((hssize_t)points[u][1] + real_offset[1]);
     } /* end for */
 
     /* Iterate through selection, verifying correct data */
@@ -7269,8 +7269,8 @@ test_select_fill_hyper_simple(hssize_t *offset)
     /* Verify memory buffer the hard way... */
     for(u = 0, tbuf = wbuf; u < SPACE7_DIM1; u++)
         for(v = 0; v < SPACE7_DIM2; v++, tbuf++) {
-            if((u >= (unsigned)(start[0] + real_offset[0]) && u < (unsigned)(start[0] + count[0] + real_offset[0]))
-                && (v >= (unsigned)(start[1] + real_offset[1]) && v < (unsigned)(start[1] + count[1] + real_offset[1]))) {
+            if((u >= (unsigned)((hssize_t)start[0] + real_offset[0]) && u < (unsigned)((hssize_t)(start[0] + count[0]) + real_offset[0]))
+                && (v >= (unsigned)((hssize_t)start[1] + real_offset[1]) && v < (unsigned)((hssize_t)(start[1] + count[1]) + real_offset[1]))) {
                     if(*tbuf != (unsigned)fill_value)
                         TestErrPrintf("Error! v=%u, u=%u, *tbuf=%u, fill_value=%u\n", v, u, *tbuf, (unsigned)fill_value);
                 } /* end if */
@@ -7288,8 +7288,8 @@ test_select_fill_hyper_simple(hssize_t *offset)
     /* Set the coordinates of the selection (with the offset) */
     for(u = 0, num_points = 0; u < (unsigned)count[0]; u++)
         for(v = 0; v < (unsigned)count[1]; v++, num_points++) {
-            points[num_points][0] = (hsize_t)(u + start[0] + real_offset[0]);
-            points[num_points][1] = (hsize_t)(v + start[1] + real_offset[1]);
+            points[num_points][0] = (hsize_t)((hssize_t)(u + start[0]) + real_offset[0]);
+            points[num_points][1] = (hsize_t)((hssize_t)(v + start[1]) + real_offset[1]);
         } /* end for */
 
     /* Iterate through selection, verifying correct data */
@@ -7379,7 +7379,7 @@ test_select_fill_hyper_regular(hssize_t *offset)
     for(u = 0, tbuf = wbuf; u < SPACE7_DIM1; u++)
         for(v = 0; v < SPACE7_DIM2; v++, tbuf++) {
             for(w = 0; w < (unsigned)num_points; w++) {
-                if(u == (unsigned)(points[w][0] + real_offset[0]) && v == (unsigned)(points[w][1] + real_offset[1])) {
+                if(u == (unsigned)((hssize_t)points[w][0] + real_offset[0]) && v == (unsigned)((hssize_t)points[w][1] + real_offset[1])) {
                     if(*tbuf != (unsigned)fill_value)
                         TestErrPrintf("Error! v=%u, u=%u, *tbuf=%u, fill_value=%u\n", v, u, *tbuf, (unsigned)fill_value);
                     break;
@@ -7396,8 +7396,8 @@ test_select_fill_hyper_regular(hssize_t *offset)
 
     /* Add in the offset */
     for(u = 0; u < (unsigned)num_points; u++) {
-        points[u][0] = (hsize_t)(points[u][0] + real_offset[0]);
-        points[u][1] = (hsize_t)(points[u][1] + real_offset[1]);
+        points[u][0] = (hsize_t)((hssize_t)points[u][0] + real_offset[0]);
+        points[u][1] = (hsize_t)((hssize_t)points[u][1] + real_offset[1]);
     } /* end for */
 
     /* Iterate through selection, verifying correct data */
@@ -7502,7 +7502,7 @@ test_select_fill_hyper_irregular(hssize_t *offset)
     for(u = 0, tbuf = wbuf; u < SPACE7_DIM1; u++)
         for(v = 0; v < SPACE7_DIM2; v++, tbuf++) {
             for(w = 0; w < (unsigned)num_points; w++) {
-                if(u == (unsigned)(points[w][0] + real_offset[0]) && v == (unsigned)(points[w][1] + real_offset[1])) {
+                if(u == (unsigned)((hssize_t)points[w][0] + real_offset[0]) && v == (unsigned)((hssize_t)points[w][1] + real_offset[1])) {
                     if(*tbuf != (unsigned)fill_value)
                         TestErrPrintf("Error! v=%u, u=%u, *tbuf=%u, fill_value=%u\n", v, u, *tbuf, (unsigned)fill_value);
                     break;
@@ -7519,8 +7519,8 @@ test_select_fill_hyper_irregular(hssize_t *offset)
 
     /* Add in the offset */
     for(u = 0; u < (unsigned)num_iter_points; u++) {
-        iter_points[u][0] = (hsize_t)(iter_points[u][0] + real_offset[0]);
-        iter_points[u][1] = (hsize_t)(iter_points[u][1] + real_offset[1]);
+        iter_points[u][0] = (hsize_t)((hssize_t)iter_points[u][0] + real_offset[0]);
+        iter_points[u][1] = (hsize_t)((hssize_t)iter_points[u][1] + real_offset[1]);
     } /* end for */
 
     /* Iterate through selection, verifying correct data */
@@ -13652,9 +13652,9 @@ test_hyper_unlim(void)
     VERIFY(start2[0], start[0], "H5Sget_select_bounds");
     VERIFY(start2[1], start[1], "H5Sget_select_bounds");
     VERIFY(start2[2], start[2], "H5Sget_select_bounds");
-    VERIFY(count2[0], start[0] + (stride[0] * (count[0] - (hsize_t)1)) + block[0] - (hsize_t)1, "H5Sget_select_bounds");
+    VERIFY(count2[0], (long)(start[0] + (stride[0] * (count[0] - 1)) + block[0] - 1), "H5Sget_select_bounds");
     VERIFY(count2[1], H5S_UNLIMITED, "H5Sget_select_bounds");
-    VERIFY(count2[2], start[2] + (stride[2] * (count[2] - (hsize_t)1)) + block[2] - (hsize_t)1, "H5Sget_select_bounds");
+    VERIFY(count2[2], (long)(start[2] + (stride[2] * (count[2] - 1)) + block[2] - 1), "H5Sget_select_bounds");
 
     /* Close the dataspace */
     ret = H5Sclose(sid);

@@ -293,7 +293,7 @@ H5FL_reg_init(H5FL_reg_head_t *head)
     H5FL_reg_gc_head.first=new_node;
 
     /* Indicate that the free list is initialized */
-    head->init=1;
+    head->init = TRUE;
 
     /* Make certain that the space allocated is large enough to store a free list pointer (eventually) */
     if(head->size<sizeof(H5FL_reg_node_t))
@@ -655,7 +655,7 @@ printf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_reg_gc_head.fir
         /* No allocations left open for list, get rid of it */
         else {
             /* Reset the "initialized" flag, in case we restart this list somehow (I don't know how..) */
-            H5FL_reg_gc_head.first->list->init = 0;
+            H5FL_reg_gc_head.first->list->init = FALSE;
 
             /* Free the node from the garbage collection list */
             H5MM_xfree(H5FL_reg_gc_head.first);
@@ -822,7 +822,7 @@ H5FL_blk_init(H5FL_blk_head_t *head)
     H5FL_blk_gc_head.first=new_node;
 
     /* Indicate that the PQ is initialized */
-    head->init=1;
+    head->init = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1326,7 +1326,7 @@ printf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_blk_gc_head.fir
         /* No allocations left open for list, get rid of it */
         else {
             /* Reset the "initialized" flag, in case we restart this list somehow (I don't know how..) */
-            H5FL_blk_gc_head.first->pq->init = 0;
+            H5FL_blk_gc_head.first->pq->init = FALSE;
 
             /* Free the node from the garbage collection list */
             H5MM_free(H5FL_blk_gc_head.first);
@@ -1379,7 +1379,7 @@ H5FL_arr_init(H5FL_arr_head_t *head)
     H5FL_arr_gc_head.first=new_node;
 
     /* Allocate room for the free lists */
-    if(NULL == (head->list_arr = (H5FL_arr_node_t *)H5MM_calloc((size_t)head->maxelem*sizeof(H5FL_arr_node_t))))
+    if(NULL == (head->list_arr = (H5FL_arr_node_t *)H5MM_calloc((size_t)head->maxelem * sizeof(H5FL_arr_node_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize the size of each array */
@@ -1387,7 +1387,7 @@ H5FL_arr_init(H5FL_arr_head_t *head)
         head->list_arr[u].size = head->base_size + (head->elem_size * u);
 
     /* Indicate that the free list is initialized */
-    head->init = 1;
+    head->init = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1795,7 +1795,7 @@ printf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_arr_gc_head.fir
             H5MM_xfree(H5FL_arr_gc_head.first->list->list_arr);
 
             /* Reset the "initialized" flag, in case we restart this list somehow (I don't know how..) */
-            H5FL_arr_gc_head.first->list->init = 0;
+            H5FL_arr_gc_head.first->list->init = FALSE;
 
             /* Free the node from the garbage collection list */
             H5MM_free(H5FL_arr_gc_head.first);
@@ -2007,7 +2007,7 @@ H5FL_fac_init(size_t size)
 #endif /* H5FL_TRACK */
 
     /* Indicate that the free list is initialized */
-    factory->init = 1;
+    factory->init = TRUE;
 
     /* Set return value */
     ret_value = factory;
@@ -2417,7 +2417,7 @@ printf("%s: head->size = %d, head->allocated = %d\n", FUNC, (int)H5FL_fac_gc_hea
         HDassert(H5FL_fac_gc_head.first->list->allocated == 0);
 
         /* Reset the "initialized" flag, in case we restart this list somehow (I don't know how..) */
-        H5FL_fac_gc_head.first->list->init = 0;
+        H5FL_fac_gc_head.first->list->init = FALSE;
 
         /* Free the node from the garbage collection list */
         H5FL_fac_gc_head.first = H5FL_FREE(H5FL_fac_gc_node_t, H5FL_fac_gc_head.first);

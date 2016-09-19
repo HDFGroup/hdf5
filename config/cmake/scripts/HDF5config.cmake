@@ -19,7 +19,7 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 #            VS201264 * Visual Studio 11 2012 Win64
 #
 #     INSTALLDIR  -  root folder where hdf5 is installed
-#     CTEST_BUILD_CONFIGURATION  - Release, Debug, etc
+#     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
 #     STATIC_LIBRARIES  -  Build/use static libraries
 #     FORTRAN_LIBRARIES -  Build/use fortran libraries
@@ -34,7 +34,7 @@ set(CTEST_SOURCE_VERSEXT "")
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
 #INSTALLDIR - HDF5-1.10.0 root folder
-#CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
+#CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
 #STATIC_LIBRARIES - Default is YES
 #FORTRAN_LIBRARIES - Default is NO
@@ -82,8 +82,8 @@ if(NOT DEFINED INSTALLDIR)
     set(INSTALLDIR "/usr/local/myhdf5")
   endif()
 endif()
-if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
-    set(CTEST_BUILD_CONFIGURATION "Release")
+if(NOT DEFINED CTEST_CONFIGURATION_TYPE)
+    set(CTEST_CONFIGURATION_TYPE "Release")
 endif()
 if(NOT DEFINED CTEST_SOURCE_NAME)
     set(CTEST_SOURCE_NAME "hdf5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")

@@ -19,7 +19,6 @@
  * Purpose:     Tests datasets with virtual layout.
  */
 #include "h5test.h"
-#include "H5srcdir.h"
 #include "H5Dprivate.h" /* For H5D_VIRTUAL_DEF_LIST_SIZE */
 
 typedef enum {

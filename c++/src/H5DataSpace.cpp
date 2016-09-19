@@ -348,12 +348,13 @@ void DataSpace::extentCopy (const DataSpace& dest_space) const
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
 //		Modified to call its replacement. -BMR, 2014/04/16
-//		Removed from documentation. -BMR, 2016/03/07
+//		Removed from documentation. -BMR, 2016/03/07 1.8.17 and 1.10.0
+//		Removed from code. -BMR, 2016/08/11 1.8.18 and 1.10.1
 //--------------------------------------------------------------------------
-void DataSpace::extentCopy( DataSpace& dest_space ) const
-{
-    extentCopy(dest_space);
-}
+//void DataSpace::extentCopy( DataSpace& dest_space ) const
+//{
+//    extentCopy(dest_space);
+//}
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::setExtentSimple

@@ -417,19 +417,19 @@ main (int argc, const char *argv[])
 
     /* create property to pass copy options */
     if ( (ocpl_id = H5Pcreate(H5P_OBJECT_COPY)) < 0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
+        HGOTO_ERROR(EXIT_FAILURE, H5E_tools_min_id_g, "H5Pcreate failed");
 
     /* set options for object copy */
     if (flag)
     {
         if ( H5Pset_copy_object(ocpl_id, flag) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_copy_object failed");
+            HGOTO_ERROR(EXIT_FAILURE, H5E_tools_min_id_g, "H5Pset_copy_object failed");
     }
 
     /* Create link creation property list */
     if((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0) {
         error_msg("Could not create link creation property list\n");
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pcreate failed");
+        HGOTO_ERROR(EXIT_FAILURE, H5E_tools_min_id_g, "H5Pcreate failed");
     } /* end if */
 
     /* Check for creating intermediate groups */
@@ -437,7 +437,7 @@ main (int argc, const char *argv[])
         /* Set the intermediate group creation property */
         if(H5Pset_create_intermediate_group(lcpl_id, 1) < 0) {
             error_msg("Could not set property for creating parent groups\n");
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pset_create_intermediate_group failed");
+            HGOTO_ERROR(EXIT_FAILURE, H5E_tools_min_id_g, "H5Pset_create_intermediate_group failed");
         } /* end if */
 
         /* Display some output if requested */
@@ -464,7 +464,7 @@ main (int argc, const char *argv[])
                 {
                     error_msg("group <%s> doesn't exist. Use -p to create parent groups.\n", str_ptr);
                     HDfree(str_ptr);
-                    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lexists failed");
+                    HGOTO_ERROR(EXIT_FAILURE, H5E_tools_min_id_g, "H5Lexists failed");
                 }
                 HDfree(str_ptr);
             }
@@ -484,7 +484,7 @@ main (int argc, const char *argv[])
         if(H5Lcopy(fid_src, oname_src,
                    fid_dst, oname_dst,
                    H5P_DEFAULT, H5P_DEFAULT) < 0)
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Lcopy failed");
+            HGOTO_ERROR(EXIT_FAILURE, H5E_tools_min_id_g, "H5Lcopy failed");
     }
     else /* valid link */
     {
@@ -494,7 +494,7 @@ main (int argc, const char *argv[])
                   oname_dst,        /* Name of the destination object  */
                   ocpl_id,          /* Object copy property list */
                   lcpl_id)<0)       /* Link creation property list */
-            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Ocopy failed");
+            HGOTO_ERROR(EXIT_FAILURE, H5E_tools_min_id_g, "H5Ocopy failed");
     }
 
     /* free link info path */
@@ -503,15 +503,15 @@ main (int argc, const char *argv[])
 
     /* close propertis */
     if(H5Pclose(ocpl_id)<0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+        HGOTO_ERROR(EXIT_FAILURE, H5E_tools_min_id_g, "H5Pclose failed");
     if(H5Pclose(lcpl_id)<0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+        HGOTO_ERROR(EXIT_FAILURE, H5E_tools_min_id_g, "H5Pclose failed");
 
     /* close files */
     if (H5Fclose(fid_src)<0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fclose failed");
+        HGOTO_ERROR(EXIT_FAILURE, H5E_tools_min_id_g, "H5Fclose failed");
     if (H5Fclose(fid_dst)<0)
-        HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Fclose failed");
+        HGOTO_ERROR(EXIT_FAILURE, H5E_tools_min_id_g, "H5Fclose failed");
 
     leave(EXIT_SUCCESS);
 
@@ -529,6 +529,6 @@ done:
     H5Fclose(fid_dst);
  } H5E_END_TRY;
 
- leave(EXIT_FAILURE);
+ leave(ret_value);
 }
 

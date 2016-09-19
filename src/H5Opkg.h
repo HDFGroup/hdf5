@@ -201,6 +201,7 @@
                                                                               \
         /* Set the message's "shared info", if it's shareable */	      \
         if((MSG)->flags & H5O_MSG_FLAG_SHAREABLE) {                           \
+            HDassert(msg_type->share_flags & H5O_SHARE_IS_SHARABLE);          \
             H5O_UPDATE_SHARED((H5O_shared_t *)(MSG)->native, H5O_SHARE_TYPE_HERE, (F), msg_type->id, (MSG)->crt_idx, (OH)->chunk[0].addr) \
         } /* end if */                                                        \
                                                                               \

@@ -66,6 +66,15 @@ Java_hdf_hdf5lib_H5_H5AreadVL
   (JNIEnv *, jclass, jlong, jlong, jobjectArray);
 
 /*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5AreadComplex
+ * Signature: (JJ[Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL
+Java_hdf_hdf5lib_H5_H5AreadComplex
+  (JNIEnv *, jclass, jlong, jlong, jobjectArray);
+
+/*
  * Copies the content of one dataset to another dataset
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Acopy

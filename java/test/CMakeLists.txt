@@ -68,22 +68,11 @@ set (HDF_JAVA_TEST_FILES
 )
 
 foreach (h5_file ${HDF_JAVA_TEST_FILES})
-  set (dest "${PROJECT_BINARY_DIR}/${h5_file}")
-  #message (STATUS " Copying ${h5_file}")
-  add_custom_command (
-      TARGET     ${HDF5_JAVA_TEST_LIB_TARGET}
-      POST_BUILD
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/${h5_file} ${dest}
-  )
+  HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "${HDF5_JAVA_TEST_LIB_TARGET}_files")
 endforeach (h5_file ${HDF_JAVA_TEST_FILES})
 
-add_custom_command (
-    TARGET     ${HDF5_JAVA_TEST_LIB_TARGET}
-    POST_BUILD
-    COMMAND    ${CMAKE_COMMAND}
-    ARGS       -E copy_if_different ${PROJECT_SOURCE_DIR}/h5ex_g_iterate.orig ${PROJECT_BINARY_DIR}/h5ex_g_iterate.hdf
-)
+HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/h5ex_g_iterate.orig" "${PROJECT_BINARY_DIR}/h5ex_g_iterate.hdf" "${HDF5_JAVA_TEST_LIB_TARGET}_files")
+add_custom_target(${HDF5_JAVA_TEST_LIB_TARGET}_files ALL COMMENT "Copying files needed by ${HDF5_JAVA_TEST_LIB_TARGET} tests" DEPENDS ${${HDF5_JAVA_TEST_LIB_TARGET}_files_list})
 
 if (WIN32)
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
@@ -99,7 +88,11 @@ set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}
 set (testfilter "OK (598 tests)")
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+  if (WIN32)
+    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_D;")
+  else()
+    set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
+  endif()
 endif(CMAKE_BUILD_TYPE MATCHES Debug)
 
 add_test (
@@ -128,4 +121,7 @@ add_test (
         -D "TEST_REFERENCE=JUnit-interface.txt"
         -P "${HDF_RESOURCES_DIR}/jrunTest.cmake"
 )
-set_tests_properties (JUnit-interface PROPERTIES DEPENDS "JUnit-interface-clearall-objects")
+set_tests_properties (JUnit-interface PROPERTIES
+    ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
+    DEPENDS "JUnit-interface-clearall-objects"
+)

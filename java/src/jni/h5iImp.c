@@ -52,11 +52,11 @@ Java_hdf_hdf5lib_H5_H5Iget_1type
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Iget_name
+ * Method:    H5Iget_name_long
  * Signature: (JLjava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Iget_1name
+Java_hdf_hdf5lib_H5_H5Iget_1name_1long
     (JNIEnv *env, jclass clss, jlong obj_id, jobjectArray name, jlong buf_size)
 {
     char *aName;
@@ -88,6 +88,45 @@ Java_hdf_hdf5lib_H5_H5Iget_1name
     return (jlong)size;
 } /* end Java_hdf_hdf5lib_H5_H5Iget_1name */
 
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Iget_name
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Iget_1name
+    (JNIEnv *env, jclass clss, jlong obj_id)
+{
+    char *aName;
+    jstring  str = NULL;
+    ssize_t  buf_size;
+
+    /* get the length of the name */
+    buf_size = H5Iget_name((hid_t)obj_id, NULL, 0);
+
+    if (buf_size <= 0) {
+        h5badArgument(env, "H5Iget_name:  buf_size <= 0");
+    } /* end if */
+    else {
+        buf_size++; /* add extra space for the null terminator */
+        aName = (char*)HDmalloc(sizeof(char) * (size_t)buf_size);
+        if (aName == NULL) {
+            h5outOfMemory(env, "H5Iget_name:  malloc failed");
+        } /* end if */
+        else {
+            buf_size = H5Iget_name((hid_t)obj_id, aName, (size_t)buf_size);
+            if (buf_size < 0) {
+                h5libraryError(env);
+            } /* end if */
+            else {
+                str = ENVPTR->NewStringUTF(ENVPAR aName);
+            }
+            HDfree(aName);
+        }
+    }
+    return str;
+} /* end Java_hdf_hdf5lib_H5_H5Iget_1name */
 
 /*
  * Class:     hdf_hdf5lib_H5

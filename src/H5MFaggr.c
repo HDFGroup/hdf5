@@ -201,7 +201,7 @@ HDfprintf(stderr, "%s: aggr = {%a, %Hu, %Hu}\n", FUNC, aggr->addr, aggr->tot_siz
 	    alignment = 0; /* no alignment */
 
         /* Generate fragment if aggregator is mis-aligned */
-	if(alignment && aggr->addr > 0 && aggr->size > 0 && (aggr_mis_align = (aggr->addr + H5FD_get_base_addr(f->shared->lf)) % alignment)) {
+	if(alignment && aggr->addr > 0 && (aggr_mis_align = (aggr->addr + H5FD_get_base_addr(f->shared->lf)) % alignment)) {
 	    aggr_frag_addr = aggr->addr;
 	    aggr_frag_size = alignment - aggr_mis_align;
 	} /* end if */
@@ -295,10 +295,26 @@ HDfprintf(stderr, "%s: Allocating block\n", FUNC);
                         if(H5MF_xfree(f, alloc_type, dxpl_id, aggr->addr, aggr->size) < 0)
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF, "can't free aggregation block")
 
-                    /* Point the aggregator at the newly allocated block */
-                    aggr->addr = new_space;
-                    aggr->size = aggr->alloc_size;
-                    aggr->tot_size = aggr->alloc_size;
+                    /* If the block is not to be aligned, fold the eoa fragment
+                     * into the newly allocated aggregator, as it could have
+                     * been allocated in an aligned manner if the aggregator
+                     * block is larger than the threshold */
+                    if(eoa_frag_size && !alignment) {
+                        HDassert(eoa_frag_addr + eoa_frag_size == new_space);
+                        aggr->addr = eoa_frag_addr;
+                        aggr->size = aggr->alloc_size + eoa_frag_size;
+                        aggr->tot_size = aggr->size;
+
+                        /* Reset EOA fragment */
+                        eoa_frag_addr = HADDR_UNDEF;
+                        eoa_frag_size = 0;
+                    } /* end if */
+                    else {
+                        /* Point the aggregator at the newly allocated block */
+                        aggr->addr = new_space;
+                        aggr->size = aggr->alloc_size;
+                        aggr->tot_size = aggr->alloc_size;
+                    }
                 } /* end else */
 
 		/* Allocate space out of the metadata block */

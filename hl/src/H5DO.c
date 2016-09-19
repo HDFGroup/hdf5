@@ -165,7 +165,7 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
         created_dxpl = TRUE;
     } /* end if */
     else if(TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
-	    goto done;
+	goto done;
 
     /* Get the dataspace of the dataset */
     if(FAIL == (space_id = H5Dget_space(dset_id)))
@@ -219,7 +219,8 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
     nelmts = (hsize_t)snelmts;
 
     /* create a memory space */
-    mem_space_id = H5Screate_simple(1, &nelmts, NULL);
+    if(FAIL == (mem_space_id = H5Screate_simple(1, &nelmts, NULL)))
+	goto done;
 
     /* Write the data */
     if(H5Dwrite(dset_id, memtype, mem_space_id, new_space_id, dxpl_id, buf) < 0)
@@ -237,24 +238,24 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension,
 	goto done;
 
     /* No boundary for this axis */
-    if(boundary[axis] == 0)
-	goto done;
+    if(boundary[axis] != 0) {
 
-    /* Determine whether a boundary is hit or not */
-    for(k = start[axis]; k < size[axis]; k++)
-	if(!((k + 1) % boundary[axis])) {
-	    hit = TRUE;
-	    break;
-	}
+	/* Determine whether a boundary is hit or not */
+	for(k = start[axis]; k < size[axis]; k++)
+	    if(!((k + 1) % boundary[axis])) {
+		hit = TRUE;
+		break;
+	    }
 
-    if(hit) { /* Hit the boundary */
-	/* Invoke callback if there is one */
-	if(append_cb && append_cb(dset_id, size, udata) < 0)
-	    goto done;
+	if(hit) { /* Hit the boundary */
+	    /* Invoke callback if there is one */
+	    if(append_cb && append_cb(dset_id, size, udata) < 0)
+		goto done;
 
-	/* Do a dataset flush */
-	if(H5Dflush(dset_id) < 0)
-	    goto done;
+	    /* Do a dataset flush */
+	    if(H5Dflush(dset_id) < 0)
+		goto done;
+	} /* end if */
     } /* end if */
 
     /* Indicate success */

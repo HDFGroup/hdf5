@@ -374,15 +374,15 @@ H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag, hbool_t match_gl
 
     /* Start evicting entries */
     do {
-	/* Reset pinned/evicted tracking flags */
-	ctx.pinned_entries_need_evicted = FALSE;
-	ctx.evicted_entries_last_pass = FALSE;
+        /* Reset pinned/evicted tracking flags */
+        ctx.pinned_entries_need_evicted = FALSE;
+        ctx.evicted_entries_last_pass = FALSE;
 
-	/* Iterate through entries in the cache */
+        /* Iterate through entries in the cache */
         if(H5C__iter_tagged_entries(cache, tag, match_global, H5C__evict_tagged_entries_cb, &ctx) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, match_global, "Iteration of tagged entries failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_BADITER, FAIL, "Iteration of tagged entries failed")
 
-    /* Keep doing this until we have stopped evicted entries */
+        /* Keep doing this until we have stopped evicted entries */
     } while(TRUE == ctx.evicted_entries_last_pass);
 
     /* Fail if we have finished evicting entries and pinned entries still need evicted */

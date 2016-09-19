@@ -65,6 +65,7 @@ set_target_properties (H5_buildiface PROPERTIES
 )
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/shared")
   if (WIN32)
     set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/\${BUILD_TYPE})
   else (WIN32)
@@ -150,8 +151,6 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   set (install_targets ${install_targets} ${HDF5_F90_C_LIBSH_TARGET})
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
-set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90 PROPERTIES GENERATED TRUE)
-
 #-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
@@ -178,6 +177,7 @@ set (f90_F_BASE_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zff.F90
 )
 
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90 PROPERTIES GENERATED TRUE)
 set (f90_F_SOURCES
     ${f90_F_BASE_SOURCES}
 
@@ -187,6 +187,19 @@ set (f90_F_SOURCES
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
 )
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90 PROPERTIES GENERATED TRUE)
+  set (f90_F_SOURCES_SHARED
+      ${f90_F_BASE_SOURCES}
+
+      # generated file
+      ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
+
+      # normal distribution
+      ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
+  )
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+
 
 set (CMD $<TARGET_FILE:H5_buildiface>)
 add_custom_target (H5gen ALL
@@ -195,8 +208,18 @@ add_custom_target (H5gen ALL
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS ${f90_F_BASE_SOURCES}
 )
-
 set_source_files_properties (${f90_F_SOURCES} PROPERTIES LANGUAGE Fortran)
+
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  add_custom_target (H5genSH ALL
+      COMMAND ${CMD}
+  #v3.2    BYPRODUCT ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
+      WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
+      DEPENDS ${f90_F_BASE_SOURCES}
+  )
+  set_source_files_properties (${f90_F_SOURCES_SHARED} PROPERTIES LANGUAGE Fortran)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+
 
 #-----------------------------------------------------------------------------
 # Add Main fortran library
@@ -224,7 +247,7 @@ endif (WIN32)
 set (install_targets ${install_targets} ${HDF5_F90_LIB_TARGET})
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  add_library (${HDF5_F90_LIBSH_TARGET} SHARED ${f90_F_SOURCES})
+  add_library (${HDF5_F90_LIBSH_TARGET} SHARED ${f90_F_SOURCES_SHARED})
   set (SHARED_LINK_FLAGS " ")
   if (WIN32 AND MSVC)
     set (SHARED_LINK_FLAGS "/DLL /DEF:${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def")

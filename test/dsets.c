@@ -2952,25 +2952,34 @@ test_nbit_float(hid_t file)
 
     /* Define user-defined single-precision floating-point type for dataset */
     datatype = H5Tcopy(H5T_IEEE_F32BE);
-    if(H5Tset_fields(datatype, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0) goto error;
+    if(H5Tset_fields(datatype, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0)
+        FAIL_STACK_ERROR
     offset = 7;
-    if(H5Tset_offset(datatype,offset) < 0) goto error;
+    if(H5Tset_offset(datatype,offset) < 0)
+        FAIL_STACK_ERROR
     precision = 20;
-    if(H5Tset_precision(datatype,precision) < 0) goto error;
-    if(H5Tset_size(datatype, (size_t)4) < 0) goto error;
-    if(H5Tset_ebias(datatype, (size_t)31) < 0) goto error;
+    if(H5Tset_precision(datatype,precision) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_size(datatype, (size_t)4) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_ebias(datatype, (size_t)31) < 0)
+        FAIL_STACK_ERROR
 
     /* Create the data space */
-    if((space = H5Screate_simple(2, size, NULL)) < 0) goto error;
+    if((space = H5Screate_simple(2, size, NULL)) < 0)
+        FAIL_STACK_ERROR
 
     /* Use nbit filter  */
-    if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
-    if(H5Pset_chunk(dc, 2, chunk_size) < 0) goto error;
-    if(H5Pset_nbit(dc) < 0) goto error;
+    if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_chunk(dc, 2, chunk_size) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_nbit(dc) < 0)
+        FAIL_STACK_ERROR
 
     /* Create the dataset */
-    if((dataset = H5Dcreate2(file, DSET_NBIT_FLOAT_NAME, datatype,
-                             space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0) goto error;
+    if((dataset = H5Dcreate2(file, DSET_NBIT_FLOAT_NAME, datatype, space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -2980,9 +2989,8 @@ test_nbit_float(hid_t file)
      */
     TESTING("    nbit float (write)");
 
-    if(H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-                 orig_data) < 0)
-        goto error;
+    if(H5Dwrite(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+        FAIL_STACK_ERROR
 
     PASSED();
 
@@ -2993,17 +3001,17 @@ test_nbit_float(hid_t file)
     TESTING("    nbit float (read)");
 
     /* Read the dataset back */
-    if(H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-                new_data) < 0)
-        goto error;
+    if(H5Dread(dataset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
+        FAIL_STACK_ERROR
 
     /* Check that the values read are the same as the values written
      * Assume size of int = size of float
      */
-    for(i=0; i<(size_t)size[0]; i++) {
-        for(j=0; j<(size_t)size[1]; j++) {
-            if(!(orig_data[i][j]==orig_data[i][j])) continue;  /* skip if value is NaN */
-            if(new_data[i][j] != orig_data[i][j]) {
+    for(i = 0; i < (size_t)size[0]; i++) {
+        for(j = 0; j < (size_t)size[1]; j++) {
+            if(!(orig_data[i][j] == orig_data[i][j]))
+                continue;  /* skip if value is NaN */
+            if(!H5_FLT_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -3016,10 +3024,14 @@ test_nbit_float(hid_t file)
      * Cleanup
      *----------------------------------------------------------------------
      */
-    if(H5Tclose(datatype) < 0) goto error;
-    if(H5Pclose(dc) < 0) goto error;
-    if(H5Sclose(space) < 0) goto error;
-    if(H5Dclose(dataset) < 0) goto error;
+    if(H5Tclose(datatype) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(dc) < 0)
+        FAIL_STACK_ERROR
+    if(H5Sclose(space) < 0)
+        FAIL_STACK_ERROR
+    if(H5Dclose(dataset) < 0)
+        FAIL_STACK_ERROR
 
     PASSED();
 
@@ -3077,25 +3089,34 @@ test_nbit_double(hid_t file)
 
     /* Define user-defined doule-precision floating-point type for dataset */
     datatype = H5Tcopy(H5T_IEEE_F64BE);
-    if(H5Tset_fields(datatype, (size_t)55, (size_t)46, (size_t)9, (size_t)5, (size_t)41) < 0) goto error;
+    if(H5Tset_fields(datatype, (size_t)55, (size_t)46, (size_t)9, (size_t)5, (size_t)41) < 0)
+        FAIL_STACK_ERROR
     offset = 5;
-    if(H5Tset_offset(datatype,offset) < 0) goto error;
+    if(H5Tset_offset(datatype,offset) < 0)
+        FAIL_STACK_ERROR
     precision = 51;
-    if(H5Tset_precision(datatype,precision) < 0) goto error;
-    if(H5Tset_size(datatype, (size_t)8) < 0) goto error;
-    if(H5Tset_ebias(datatype, (size_t)255) < 0) goto error;
+    if(H5Tset_precision(datatype,precision) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_size(datatype, (size_t)8) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_ebias(datatype, (size_t)255) < 0)
+        FAIL_STACK_ERROR
 
     /* Create the data space */
-    if((space = H5Screate_simple(2, size, NULL)) < 0) goto error;
+    if((space = H5Screate_simple(2, size, NULL)) < 0)
+        FAIL_STACK_ERROR
 
     /* Use nbit filter  */
-    if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
-    if(H5Pset_chunk(dc, 2, chunk_size) < 0) goto error;
-    if(H5Pset_nbit(dc) < 0) goto error;
+    if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_chunk(dc, 2, chunk_size) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_nbit(dc) < 0)
+        FAIL_STACK_ERROR
 
     /* Create the dataset */
-    if((dataset = H5Dcreate2(file, DSET_NBIT_DOUBLE_NAME, datatype,
-                             space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0) goto error;
+    if((dataset = H5Dcreate2(file, DSET_NBIT_DOUBLE_NAME, datatype, space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
 
     PASSED();
 
@@ -3106,9 +3127,8 @@ test_nbit_double(hid_t file)
      */
     TESTING("    nbit double (write)");
 
-    if(H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-                 orig_data) < 0)
-        goto error;
+    if(H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+        FAIL_STACK_ERROR
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -3118,17 +3138,17 @@ test_nbit_double(hid_t file)
     TESTING("    nbit double (read)");
 
     /* Read the dataset back */
-    if(H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-                new_data) < 0)
-        goto error;
+    if(H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
+        FAIL_STACK_ERROR
 
     /* Check that the values read are the same as the values written
      * Assume size of long long = size of double
      */
-    for(i=0; i<(size_t)size[0]; i++) {
-        for(j=0; j<(size_t)size[1]; j++) {
-            if(!(orig_data[i][j]==orig_data[i][j])) continue;  /* skip if value is NaN */
-            if(new_data[i][j] != orig_data[i][j]) {
+    for(i = 0; i < (size_t)size[0]; i++) {
+        for(j = 0; j < (size_t)size[1]; j++) {
+            if(!(orig_data[i][j] == orig_data[i][j]))
+                continue;  /* skip if value is NaN */
+            if(!H5_DBL_ABS_EQUAL(new_data[i][j], orig_data[i][j])) {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
                 printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -3141,10 +3161,14 @@ test_nbit_double(hid_t file)
      * Cleanup
      *----------------------------------------------------------------------
      */
-    if(H5Tclose(datatype) < 0) goto error;
-    if(H5Pclose(dc) < 0) goto error;
-    if(H5Sclose(space) < 0) goto error;
-    if(H5Dclose(dataset) < 0) goto error;
+    if(H5Tclose(datatype) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(dc) < 0)
+        FAIL_STACK_ERROR
+    if(H5Sclose(space) < 0)
+        FAIL_STACK_ERROR
+    if(H5Dclose(dataset) < 0)
+        FAIL_STACK_ERROR
 
     PASSED();
 
@@ -3330,73 +3354,103 @@ test_nbit_compound(hid_t file)
     TESTING("    nbit compound (setup)");
 
     /* Define datatypes of members of compound datatype */
-    i_tid=H5Tcopy(H5T_NATIVE_INT);
-    c_tid=H5Tcopy(H5T_NATIVE_CHAR);
-    s_tid=H5Tcopy(H5T_NATIVE_SHORT);
-    f_tid=H5Tcopy(H5T_IEEE_F32BE);
+    if((i_tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        FAIL_STACK_ERROR
+    if((c_tid = H5Tcopy(H5T_NATIVE_CHAR)) < 0)
+        FAIL_STACK_ERROR
+    if((s_tid = H5Tcopy(H5T_NATIVE_SHORT)) < 0)
+        FAIL_STACK_ERROR
+    if((f_tid = H5Tcopy(H5T_IEEE_F32BE)) < 0)
+        FAIL_STACK_ERROR
 
     /* Set precision and offset etc. */
-    if(H5Tset_precision(i_tid,precision[0]) < 0) goto error;
-    if(H5Tset_offset(i_tid,offset[0]) < 0) goto error;
+    if(H5Tset_precision(i_tid,precision[0]) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_offset(i_tid,offset[0]) < 0)
+        FAIL_STACK_ERROR
 
-    if(H5Tset_precision(c_tid,precision[1]) < 0) goto error;
-    if(H5Tset_offset(c_tid,offset[1]) < 0) goto error;
+    if(H5Tset_precision(c_tid,precision[1]) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_offset(c_tid,offset[1]) < 0)
+        FAIL_STACK_ERROR
 
-    if(H5Tset_precision(s_tid,precision[2]) < 0) goto error;
-    if(H5Tset_offset(s_tid,offset[2]) < 0) goto error;
+    if(H5Tset_precision(s_tid,precision[2]) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_offset(s_tid,offset[2]) < 0)
+        FAIL_STACK_ERROR
 
-    if(H5Tset_fields(f_tid, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0) goto error;
-    if(H5Tset_offset(f_tid, (size_t)7) < 0) goto error;
-    if(H5Tset_precision(f_tid, (size_t)20) < 0) goto error;
-    if(H5Tset_size(f_tid, (size_t)4) < 0) goto error;
-    if(H5Tset_ebias(f_tid, (size_t)31) < 0) goto error;
+    if(H5Tset_fields(f_tid, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_offset(f_tid, (size_t)7) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_precision(f_tid, (size_t)20) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_size(f_tid, (size_t)4) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_ebias(f_tid, (size_t)31) < 0)
+        FAIL_STACK_ERROR
 
     /* Create a memory compound datatype before setting the order */
-    mem_cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
-    if(H5Tinsert(mem_cmpd_tid, "i", HOFFSET(atomic, i), i_tid) < 0) goto error;
-    if(H5Tinsert(mem_cmpd_tid, "c", HOFFSET(atomic, c), c_tid) < 0) goto error;
-    if(H5Tinsert(mem_cmpd_tid, "s", HOFFSET(atomic, s), s_tid) < 0) goto error;
-    if(H5Tinsert(mem_cmpd_tid, "f", HOFFSET(atomic, f), H5T_NATIVE_FLOAT) < 0) goto error;
+    if((mem_cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(atomic))) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid, "i", HOFFSET(atomic, i), i_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid, "c", HOFFSET(atomic, c), c_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid, "s", HOFFSET(atomic, s), s_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid, "f", HOFFSET(atomic, f), H5T_NATIVE_FLOAT) < 0)
+        FAIL_STACK_ERROR
 
     /* Create a dataset compound datatype and insert some atomic types */
-    cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
-    if(H5Tinsert(cmpd_tid, "i", HOFFSET(atomic, i), i_tid) < 0) goto error;
-    if(H5Tinsert(cmpd_tid, "c", HOFFSET(atomic, c), c_tid) < 0) goto error;
-    if(H5Tinsert(cmpd_tid, "s", HOFFSET(atomic, s), s_tid) < 0) goto error;
-    if(H5Tinsert(cmpd_tid, "f", HOFFSET(atomic, f), f_tid) < 0) goto error;
+    if((cmpd_tid = H5Tcreate(H5T_COMPOUND, sizeof(atomic))) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid, "i", HOFFSET(atomic, i), i_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid, "c", HOFFSET(atomic, c), c_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid, "s", HOFFSET(atomic, s), s_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid, "f", HOFFSET(atomic, f), f_tid) < 0)
+        FAIL_STACK_ERROR
 
     /* Set order of dataset compound datatype */
-    if(H5Tset_order(cmpd_tid, H5T_ORDER_BE) < 0) goto error;
+    if(H5Tset_order(cmpd_tid, H5T_ORDER_BE) < 0)
+        FAIL_STACK_ERROR
 
     /* Create the data space */
-    if((space = H5Screate_simple(2, size, NULL)) < 0) goto error;
+    if((space = H5Screate_simple(2, size, NULL)) < 0)
+        FAIL_STACK_ERROR
 
     /* Use nbit filter  */
-    if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
-    if(H5Pset_chunk(dc, 2, chunk_size) < 0) goto error;
-    if(H5Pset_nbit(dc) < 0) goto error;
+    if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_chunk(dc, 2, chunk_size) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_nbit(dc) < 0)
+        FAIL_STACK_ERROR
 
     /* Create the dataset */
-    if((dataset = H5Dcreate2(file, DSET_NBIT_COMPOUND_NAME, cmpd_tid,
-                             space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0) goto error;
+    if((dataset = H5Dcreate2(file, DSET_NBIT_COMPOUND_NAME, cmpd_tid, space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
 
     /* Initialize data, assuming size of long long >= size of member datatypes */
-    for(i= 0;i< (size_t)size[0]; i++)
-      for(j = 0; j < (size_t)size[1]; j++) {
-        power = HDpow(2.0F, (double)(precision[0]-1));
-        orig_data[i][j].i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
-        power = HDpow(2.0F, (double)(precision[1]-1));
-        orig_data[i][j].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-        power = HDpow(2.0F, (double)(precision[2]-1));
-        orig_data[i][j].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
-        orig_data[i][j].f = float_val[i][j];
+    for(i = 0; i < (size_t)size[0]; i++)
+        for(j = 0; j < (size_t)size[1]; j++) {
+            power = HDpow(2.0F, (double)(precision[0]-1));
+            orig_data[i][j].i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
+            power = HDpow(2.0F, (double)(precision[1]-1));
+            orig_data[i][j].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
+            power = HDpow(2.0F, (double)(precision[2]-1));
+            orig_data[i][j].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
+            orig_data[i][j].f = float_val[i][j];
 
-        /* some even-numbered integer values are negtive */
-        if((i*size[1]+j+1)%2 == 0) {
-            orig_data[i][j].i = -orig_data[i][j].i;
-            orig_data[i][j].s = (short)-orig_data[i][j].s;
+            /* some even-numbered integer values are negtive */
+            if((i * size[1] + j + 1) % 2 == 0) {
+                orig_data[i][j].i = -orig_data[i][j].i;
+                orig_data[i][j].s = (short)-orig_data[i][j].s;
+            }
         }
-      }
 
     PASSED();
 
@@ -3407,9 +3461,8 @@ test_nbit_compound(hid_t file)
      */
     TESTING("    nbit compound (write)");
 
-    if(H5Dwrite(dataset, mem_cmpd_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-                 orig_data) < 0)
-        goto error;
+    if(H5Dwrite(dataset, mem_cmpd_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+        FAIL_STACK_ERROR
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -3419,9 +3472,8 @@ test_nbit_compound(hid_t file)
     TESTING("    nbit compound (read)");
 
     /* Read the dataset back */
-    if(H5Dread(dataset, mem_cmpd_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-                new_data) < 0)
-        goto error;
+    if(H5Dread(dataset, mem_cmpd_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
+        FAIL_STACK_ERROR
 
     /* Check that the values read are the same as the values written
      * Use mask for checking the significant bits, ignoring the padding bits
@@ -3429,12 +3481,12 @@ test_nbit_compound(hid_t file)
     i_mask = ~((unsigned)~0 << (precision[0] + offset[0])) & ((unsigned)~0 << offset[0]);
     c_mask = ~((unsigned)~0 << (precision[1] + offset[1])) & ((unsigned)~0 << offset[1]);
     s_mask = ~((unsigned)~0 << (precision[2] + offset[2])) & ((unsigned)~0 << offset[2]);
-    for(i=0; i<size[0]; i++) {
-        for(j=0; j<size[1]; j++) {
+    for(i = 0; i < size[0]; i++) {
+        for(j = 0; j < size[1]; j++) {
             if(((unsigned)new_data[i][j].i & i_mask) != ((unsigned)orig_data[i][j].i & i_mask) ||
                 ((unsigned)new_data[i][j].c & c_mask) != ((unsigned)orig_data[i][j].c & c_mask) ||
                 ((unsigned)new_data[i][j].s & s_mask) != ((unsigned)orig_data[i][j].s & s_mask) ||
-                (orig_data[i][j].f==orig_data[i][j].f && new_data[i][j].f != orig_data[i][j].f))
+                (orig_data[i][j].f == orig_data[i][j].f && !H5_FLT_ABS_EQUAL(new_data[i][j].f, orig_data[i][j].f)))
             {
                 H5_FAILED();
                 printf("    Read different values than written.\n");
@@ -3448,15 +3500,24 @@ test_nbit_compound(hid_t file)
      * Cleanup
      *----------------------------------------------------------------------
      */
-    if(H5Tclose(i_tid) < 0) goto error;
-    if(H5Tclose(c_tid) < 0) goto error;
-    if(H5Tclose(s_tid) < 0) goto error;
-    if(H5Tclose(f_tid) < 0) goto error;
-    if(H5Tclose(cmpd_tid) < 0) goto error;
-    if(H5Tclose(mem_cmpd_tid) < 0) goto error;
-    if(H5Pclose(dc) < 0) goto error;
-    if(H5Sclose(space) < 0) goto error;
-    if(H5Dclose(dataset) < 0) goto error;
+    if(H5Tclose(i_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(c_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(s_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(f_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(cmpd_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(mem_cmpd_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(dc) < 0)
+        FAIL_STACK_ERROR
+    if(H5Sclose(space) < 0)
+        FAIL_STACK_ERROR
+    if(H5Dclose(dataset) < 0)
+        FAIL_STACK_ERROR
 
     PASSED();
 
@@ -3525,119 +3586,169 @@ test_nbit_compound_2(hid_t file)
     TESTING("    nbit compound complex (setup)");
 
     /* Define datatypes of members of compound datatype */
-    i_tid=H5Tcopy(H5T_NATIVE_INT);
-    c_tid=H5Tcopy(H5T_NATIVE_CHAR);
-    s_tid=H5Tcopy(H5T_NATIVE_SHORT);
-    v_tid=H5Tcopy(H5T_NATIVE_UINT);
-    f_tid=H5Tcopy(H5T_IEEE_F32BE);
+    if((i_tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        FAIL_STACK_ERROR
+    if((c_tid = H5Tcopy(H5T_NATIVE_CHAR)) < 0)
+        FAIL_STACK_ERROR
+    if((s_tid = H5Tcopy(H5T_NATIVE_SHORT)) < 0)
+        FAIL_STACK_ERROR
+    if((v_tid = H5Tcopy(H5T_NATIVE_UINT)) < 0)
+        FAIL_STACK_ERROR
+    if((f_tid = H5Tcopy(H5T_IEEE_F32BE)) < 0)
+        FAIL_STACK_ERROR
 
     /* Set precision and offset etc. of atomic compound datatype members */
-    if(H5Tset_precision(i_tid,precision[0]) < 0) goto error;
-    if(H5Tset_offset(i_tid,offset[0]) < 0) goto error;
+    if(H5Tset_precision(i_tid,precision[0]) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_offset(i_tid,offset[0]) < 0)
+        FAIL_STACK_ERROR
 
-    if(H5Tset_precision(c_tid,precision[1]) < 0) goto error;
-    if(H5Tset_offset(c_tid,offset[1]) < 0) goto error;
+    if(H5Tset_precision(c_tid,precision[1]) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_offset(c_tid,offset[1]) < 0)
+        FAIL_STACK_ERROR
 
-    if(H5Tset_precision(s_tid,precision[2]) < 0) goto error;
-    if(H5Tset_offset(s_tid,offset[2]) < 0) goto error;
+    if(H5Tset_precision(s_tid,precision[2]) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_offset(s_tid,offset[2]) < 0)
+        FAIL_STACK_ERROR
 
-    if(H5Tset_fields(f_tid, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0) goto error;
-    if(H5Tset_offset(f_tid, (size_t)7) < 0) goto error;
-    if(H5Tset_precision(f_tid, (size_t)20) < 0) goto error;
-    if(H5Tset_size(f_tid, (size_t)4) < 0) goto error;
-    if(H5Tset_ebias(f_tid, (size_t)31) < 0) goto error;
+    if(H5Tset_fields(f_tid, (size_t)26, (size_t)20, (size_t)6, (size_t)7, (size_t)13) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_offset(f_tid, (size_t)7) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_precision(f_tid, (size_t)20) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_size(f_tid, (size_t)4) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_ebias(f_tid, (size_t)31) < 0)
+        FAIL_STACK_ERROR
 
     /* Create a memory atomic compound datatype before setting the order */
-    mem_cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
-    if(H5Tinsert(mem_cmpd_tid1, "i", HOFFSET(atomic, i), i_tid) < 0) goto error;
-    if(H5Tinsert(mem_cmpd_tid1, "c", HOFFSET(atomic, c), c_tid) < 0) goto error;
-    if(H5Tinsert(mem_cmpd_tid1, "s", HOFFSET(atomic, s), s_tid) < 0) goto error;
-    if(H5Tinsert(mem_cmpd_tid1, "f", HOFFSET(atomic, f), H5T_NATIVE_FLOAT) < 0) goto error;
+    if((mem_cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(atomic))) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid1, "i", HOFFSET(atomic, i), i_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid1, "c", HOFFSET(atomic, c), c_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid1, "s", HOFFSET(atomic, s), s_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid1, "f", HOFFSET(atomic, f), H5T_NATIVE_FLOAT) < 0)
+        FAIL_STACK_ERROR
 
     /* Create a dataset atomic compound datatype and insert some atomic types */
-    cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(atomic));
-    if(H5Tinsert(cmpd_tid1, "i", HOFFSET(atomic, i), i_tid) < 0) goto error;
-    if(H5Tinsert(cmpd_tid1, "c", HOFFSET(atomic, c), c_tid) < 0) goto error;
-    if(H5Tinsert(cmpd_tid1, "s", HOFFSET(atomic, s), s_tid) < 0) goto error;
-    if(H5Tinsert(cmpd_tid1, "f", HOFFSET(atomic, f), f_tid) < 0) goto error;
+    if((cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(atomic))) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid1, "i", HOFFSET(atomic, i), i_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid1, "c", HOFFSET(atomic, c), c_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid1, "s", HOFFSET(atomic, s), s_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid1, "f", HOFFSET(atomic, f), f_tid) < 0)
+        FAIL_STACK_ERROR
 
     /* Set order of dataset compound datatype */
-    if(H5Tset_order(cmpd_tid1, H5T_ORDER_BE) < 0) goto error;
+    if(H5Tset_order(cmpd_tid1, H5T_ORDER_BE) < 0)
+        FAIL_STACK_ERROR
 
     /* Set precision and offset of the other data member */
-    if(H5Tset_precision(v_tid,precision[3]) < 0) goto error;
-    if(H5Tset_offset(v_tid,offset[3]) < 0) goto error;
+    if(H5Tset_precision(v_tid,precision[3]) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_offset(v_tid,offset[3]) < 0)
+        FAIL_STACK_ERROR
 
     /* Create the simple array datatype */
-    base_tid = H5Tcopy(H5T_NATIVE_CHAR);
-    if(H5Tset_precision(base_tid,precision[4]) < 0) goto error;
-    if(H5Tset_offset(base_tid,offset[4]) < 0) goto error;
-    array_tid = H5Tarray_create2(base_tid, 2, array_dims);
+    if((base_tid = H5Tcopy(H5T_NATIVE_CHAR)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_precision(base_tid,precision[4]) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tset_offset(base_tid,offset[4]) < 0)
+        FAIL_STACK_ERROR
+    if((array_tid = H5Tarray_create2(base_tid, 2, array_dims)) < 0)
+        FAIL_STACK_ERROR
 
     /* Create the complex memory and dataset array datatype */
-    array_cmplx_tid = H5Tarray_create2(cmpd_tid1, 2, array_dims);
-    mem_array_cmplx_tid = H5Tarray_create2(mem_cmpd_tid1, 2, array_dims);
+    if((array_cmplx_tid = H5Tarray_create2(cmpd_tid1, 2, array_dims)) < 0)
+        FAIL_STACK_ERROR
+    if((mem_array_cmplx_tid = H5Tarray_create2(mem_cmpd_tid1, 2, array_dims)) < 0)
+        FAIL_STACK_ERROR
 
     /* Create a memory complex compound datatype before setting the order */
-    mem_cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(complex));
-    if(H5Tinsert(mem_cmpd_tid2, "a", HOFFSET(complex, a), mem_cmpd_tid1) < 0) goto error;
-    if(H5Tinsert(mem_cmpd_tid2, "v", HOFFSET(complex, v), v_tid) < 0) goto error;
-    if(H5Tinsert(mem_cmpd_tid2, "b", HOFFSET(complex, b), array_tid) < 0) goto error;
-    if(H5Tinsert(mem_cmpd_tid2, "d", HOFFSET(complex, d), mem_array_cmplx_tid) < 0) goto error;
+    if((mem_cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(complex))) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid2, "a", HOFFSET(complex, a), mem_cmpd_tid1) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid2, "v", HOFFSET(complex, v), v_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid2, "b", HOFFSET(complex, b), array_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(mem_cmpd_tid2, "d", HOFFSET(complex, d), mem_array_cmplx_tid) < 0)
+        FAIL_STACK_ERROR
 
     /* Set order of dataset other complex compound member datatype */
-    if(H5Tset_order(v_tid, H5T_ORDER_BE) < 0) goto error;
+    if(H5Tset_order(v_tid, H5T_ORDER_BE) < 0)
+        FAIL_STACK_ERROR
 
     /* Create a dataset complex compound datatype and insert members */
-    cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(complex));
-    if(H5Tinsert(cmpd_tid2, "a", HOFFSET(complex, a), cmpd_tid1) < 0) goto error;
-    if(H5Tinsert(cmpd_tid2, "v", HOFFSET(complex, v), v_tid) < 0) goto error;
-    if(H5Tinsert(cmpd_tid2, "b", HOFFSET(complex, b), array_tid) < 0) goto error;
-    if(H5Tinsert(cmpd_tid2, "d", HOFFSET(complex, d), array_cmplx_tid) < 0) goto error;
+    if((cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(complex))) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid2, "a", HOFFSET(complex, a), cmpd_tid1) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid2, "v", HOFFSET(complex, v), v_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid2, "b", HOFFSET(complex, b), array_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tinsert(cmpd_tid2, "d", HOFFSET(complex, d), array_cmplx_tid) < 0)
+        FAIL_STACK_ERROR
 
     /* Create the data space */
-    if((space = H5Screate_simple(2, size, NULL)) < 0) goto error;
+    if((space = H5Screate_simple(2, size, NULL)) < 0)
+        FAIL_STACK_ERROR
 
     /* Use nbit filter  */
-    if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
-    if(H5Pset_chunk(dc, 2, chunk_size) < 0) goto error;
-    if(H5Pset_nbit(dc) < 0) goto error;
+    if((dc = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_chunk(dc, 2, chunk_size) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pset_nbit(dc) < 0)
+        FAIL_STACK_ERROR
 
     /* Create the dataset */
-    if((dataset = H5Dcreate2(file, DSET_NBIT_COMPOUND_NAME_2, cmpd_tid2,
-                             space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0) goto error;
+    if((dataset = H5Dcreate2(file, DSET_NBIT_COMPOUND_NAME_2, cmpd_tid2, space, H5P_DEFAULT, dc, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
 
     /* Initialize data, assuming size of long long >= size of member datatypes */
     for(i= 0;i< (size_t)size[0]; i++)
-      for(j = 0; j < (size_t)size[1]; j++) {
-        power = HDpow(2.0F, (double)(precision[0]-1));
-        orig_data[i][j].a.i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
-        power = HDpow(2.0F, (double)(precision[1]-1));
-        orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
-        power = HDpow(2.0F, (double)(precision[2]-1));
-        orig_data[i][j].a.s = (short)(-((long long)HDrandom() % (long long)power) << offset[2]);
-        orig_data[i][j].a.f = float_val[i][j];
-
-        power = HDpow(2.0F, (double)precision[3]);
-        orig_data[i][j].v = (unsigned int)(((long long)HDrandom() % (long long)power) << offset[3]);
-
-        for(m = 0; m < (size_t)array_dims[0]; m++)
-          for(n = 0; n < (size_t)array_dims[1]; n++) {
-            power = HDpow(2.0F, (double)(precision[4]-1));
-            orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() % (long long)power) << offset[4]);
-          } /* end for */
-
-        for(m = 0; m < (size_t)array_dims[0]; m++)
-          for(n = 0; n < (size_t)array_dims[1]; n++) {
+        for(j = 0; j < (size_t)size[1]; j++) {
             power = HDpow(2.0F, (double)(precision[0]-1));
-            orig_data[i][j].d[m][n].i = (int)(-((long long)HDrandom() % (long long)power) << offset[0]);
+            orig_data[i][j].a.i = (int)(((long long)HDrandom() % (long long)power) << offset[0]);
             power = HDpow(2.0F, (double)(precision[1]-1));
-            orig_data[i][j].d[m][n].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
+            orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
             power = HDpow(2.0F, (double)(precision[2]-1));
-            orig_data[i][j].d[m][n].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
-            orig_data[i][j].d[m][n].f = float_val[i][j];
-          } /* end for */
-      } /* end for */
+            orig_data[i][j].a.s = (short)(-((long long)HDrandom() % (long long)power) << offset[2]);
+            orig_data[i][j].a.f = float_val[i][j];
+
+            power = HDpow(2.0F, (double)precision[3]);
+            orig_data[i][j].v = (unsigned int)(((long long)HDrandom() % (long long)power) << offset[3]);
+
+            for(m = 0; m < (size_t)array_dims[0]; m++)
+                for(n = 0; n < (size_t)array_dims[1]; n++) {
+                    power = HDpow(2.0F, (double)(precision[4]-1));
+                    orig_data[i][j].b[m][n] = (char)(((long long)HDrandom() % (long long)power) << offset[4]);
+                } /* end for */
+
+            for(m = 0; m < (size_t)array_dims[0]; m++)
+                for(n = 0; n < (size_t)array_dims[1]; n++) {
+                    power = HDpow(2.0F, (double)(precision[0]-1));
+                    orig_data[i][j].d[m][n].i = (int)(-((long long)HDrandom() % (long long)power) << offset[0]);
+                    power = HDpow(2.0F, (double)(precision[1]-1));
+                    orig_data[i][j].d[m][n].c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
+                    power = HDpow(2.0F, (double)(precision[2]-1));
+                    orig_data[i][j].d[m][n].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
+                    orig_data[i][j].d[m][n].f = float_val[i][j];
+                } /* end for */
+        } /* end for */
 
     PASSED();
 
@@ -3648,9 +3759,8 @@ test_nbit_compound_2(hid_t file)
      */
     TESTING("    nbit compound complex (write)");
 
-    if(H5Dwrite(dataset, mem_cmpd_tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-                 orig_data) < 0)
-        goto error;
+    if(H5Dwrite(dataset, mem_cmpd_tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, orig_data) < 0)
+        FAIL_STACK_ERROR
     PASSED();
 
     /*----------------------------------------------------------------------
@@ -3660,9 +3770,8 @@ test_nbit_compound_2(hid_t file)
     TESTING("    nbit compound complex (read)");
 
     /* Read the dataset back */
-    if(H5Dread(dataset, mem_cmpd_tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-                new_data) < 0)
-        goto error;
+    if(H5Dread(dataset, mem_cmpd_tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, new_data) < 0)
+        FAIL_STACK_ERROR
 
     /* Check that the values read are the same as the values written
      * Use mask for checking the significant bits, ignoring the padding bits
@@ -3683,63 +3792,77 @@ test_nbit_compound_2(hid_t file)
     s_mask = ~((unsigned)~0 << (precision[2] + offset[2])) & ((unsigned)~0 << offset[2]);
     b_mask = ~((unsigned)~0 << (precision[4] + offset[4])) & ((unsigned)~0 << offset[4]);
     for(i=0; i<(size_t)size[0]; i++) {
-      for(j=0; j<(size_t)size[1]; j++) {
-        b_failed = 0;
-        d_failed = 0;
+        for(j=0; j<(size_t)size[1]; j++) {
+            b_failed = 0;
+            d_failed = 0;
 
-        for(m = 0; m < (size_t)array_dims[0]; m++)
-          for(n = 0; n < (size_t)array_dims[1]; n++)
-             if(((unsigned)new_data[i][j].b[m][n] & b_mask)!=((unsigned)orig_data[i][j].b[m][n] & b_mask)) {
+            for(m = 0; m < (size_t)array_dims[0]; m++)
+            for(n = 0; n < (size_t)array_dims[1]; n++)
+            if(((unsigned)new_data[i][j].b[m][n] & b_mask)!=((unsigned)orig_data[i][j].b[m][n] & b_mask)) {
                 b_failed = 1;
                 goto out;
-             }
+            }
 
-        for(m = 0; m < (size_t)array_dims[0]; m++)
-          for(n = 0; n < (size_t)array_dims[1]; n++)
-             if(((unsigned)new_data[i][j].d[m][n].i & i_mask) != ((unsigned)orig_data[i][j].d[m][n].i & i_mask)||
-                ((unsigned)new_data[i][j].d[m][n].c & c_mask) != ((unsigned)orig_data[i][j].d[m][n].c & c_mask)||
-                ((unsigned)new_data[i][j].d[m][n].s & s_mask) != ((unsigned)orig_data[i][j].d[m][n].s & s_mask)||
-                (new_data[i][j].d[m][n].f==new_data[i][j].d[m][n].f &&
-                 new_data[i][j].d[m][n].f != new_data[i][j].d[m][n].f)) {
-                d_failed = 1;
-                goto out;
-             }
+            for(m = 0; m < (size_t)array_dims[0]; m++)
+                for(n = 0; n < (size_t)array_dims[1]; n++)
+                    if(((unsigned)new_data[i][j].d[m][n].i & i_mask) != ((unsigned)orig_data[i][j].d[m][n].i & i_mask)||
+                            ((unsigned)new_data[i][j].d[m][n].c & c_mask) != ((unsigned)orig_data[i][j].d[m][n].c & c_mask)||
+                            ((unsigned)new_data[i][j].d[m][n].s & s_mask) != ((unsigned)orig_data[i][j].d[m][n].s & s_mask)||
+                            (new_data[i][j].d[m][n].f == new_data[i][j].d[m][n].f && !H5_FLT_ABS_EQUAL(new_data[i][j].d[m][n].f, new_data[i][j].d[m][n].f))) {
+                        d_failed = 1;
+                        goto out;
+                    }
 
-        out:
-        if(((unsigned)new_data[i][j].a.i & i_mask) != ((unsigned)orig_data[i][j].a.i & i_mask)||
-           ((unsigned)new_data[i][j].a.c & c_mask) != ((unsigned)orig_data[i][j].a.c & c_mask)||
-           ((unsigned)new_data[i][j].a.s & s_mask) != ((unsigned)orig_data[i][j].a.s & s_mask)||
-           (new_data[i][j].a.f==new_data[i][j].a.f &&
-            new_data[i][j].a.f != new_data[i][j].a.f)||
-            new_data[i][j].v != orig_data[i][j].v || b_failed || d_failed) {
-           H5_FAILED();
-           printf("    Read different values than written.\n");
-           printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
-           goto error;
+out:
+            if(((unsigned)new_data[i][j].a.i & i_mask) != ((unsigned)orig_data[i][j].a.i & i_mask)||
+                    ((unsigned)new_data[i][j].a.c & c_mask) != ((unsigned)orig_data[i][j].a.c & c_mask)||
+                    ((unsigned)new_data[i][j].a.s & s_mask) != ((unsigned)orig_data[i][j].a.s & s_mask)||
+                    (new_data[i][j].a.f == new_data[i][j].a.f && !H5_FLT_ABS_EQUAL(new_data[i][j].a.f, new_data[i][j].a.f)) ||
+                    new_data[i][j].v != orig_data[i][j].v || b_failed || d_failed) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
+                goto error;
+            }
         }
-      }
     }
 
     /*----------------------------------------------------------------------
      * Cleanup
      *----------------------------------------------------------------------
      */
-    if(H5Tclose(i_tid) < 0) goto error;
-    if(H5Tclose(c_tid) < 0) goto error;
-    if(H5Tclose(s_tid) < 0) goto error;
-    if(H5Tclose(f_tid) < 0) goto error;
-    if(H5Tclose(v_tid) < 0) goto error;
-    if(H5Tclose(cmpd_tid2) < 0) goto error;
-    if(H5Tclose(cmpd_tid1) < 0) goto error;
-    if(H5Tclose(mem_cmpd_tid2) < 0) goto error;
-    if(H5Tclose(mem_cmpd_tid1) < 0) goto error;
-    if(H5Tclose(array_tid) < 0) goto error;
-    if(H5Tclose(base_tid) < 0) goto error;
-    if(H5Tclose(array_cmplx_tid) < 0) goto error;
-    if(H5Tclose(mem_array_cmplx_tid) < 0) goto error;
-    if(H5Pclose(dc) < 0) goto error;
-    if(H5Sclose(space) < 0) goto error;
-    if(H5Dclose(dataset) < 0) goto error;
+    if(H5Tclose(i_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(c_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(s_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(f_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(v_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(cmpd_tid2) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(cmpd_tid1) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(mem_cmpd_tid2) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(mem_cmpd_tid1) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(array_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(base_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(array_cmplx_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Tclose(mem_array_cmplx_tid) < 0)
+        FAIL_STACK_ERROR
+    if(H5Pclose(dc) < 0)
+        FAIL_STACK_ERROR
+    if(H5Sclose(space) < 0)
+        FAIL_STACK_ERROR
+    if(H5Dclose(dataset) < 0)
+        FAIL_STACK_ERROR
 
     PASSED();
 
@@ -3832,7 +3955,7 @@ test_nbit_compound_3(hid_t file)
     for(i = 0; i < (size_t)size[0]; i++) {
         power = HDpow(2.0F, 17.0F - 1.0F);
         HDmemset(&orig_data[i], 0, sizeof(orig_data[i]));
-        orig_data[i].i = HDrandom() % (long)power;
+        orig_data[i].i = (int)(HDrandom() % (long)power);
         HDstrcpy(orig_data[i].str, "fixed-length C string");
         orig_data[i].vl_str = HDstrdup("variable-length C string");
 
@@ -4203,7 +4326,7 @@ test_nbit_flt_size(hid_t file)
    */
    for (i=0; i < DSET_DIM1; i++)
        for (j=0; j < DSET_DIM2; j++)
-           orig_data[i][j] = (rand() % 1234567) / 2;
+           orig_data[i][j] = (float)(HDrandom() % 1234567) / 2;
 
 
    /* Describe the dataspace. */
@@ -4587,7 +4710,7 @@ test_scaleoffset_float(hid_t file)
     /* Initialize data */
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[i][j] = (float)((HDrandom() % 100000) / 1000.0F);
+        orig_data[i][j] = (float)(HDrandom() % 100000) / 1000.0F;
 
         /* even-numbered values are negtive */
         if((i*size[1]+j+1)%2 == 0)
@@ -4718,10 +4841,10 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[0][j] = (float)((HDrandom() % 100000) / 1000.0F);
+        orig_data[0][j] = (float)(HDrandom() % 100000) / 1000.0F;
 
         /* even-numbered values are negtive */
-        if((j+1)%2 == 0)
+        if((j + 1) % 2 == 0)
             orig_data[0][j] = -orig_data[0][j];
     }
 
@@ -4829,10 +4952,10 @@ test_scaleoffset_double(hid_t file)
     /* Initialize data */
     for(i= 0;i< (size_t)size[0]; i++)
       for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[i][j] = (HDrandom() % 10000000) / 10000000.0F;
+        orig_data[i][j] = (float)(HDrandom() % 10000000) / 10000000.0F;
 
         /* even-numbered values are negtive */
-        if((i*size[1]+j+1)%2 == 0)
+        if((i* size[1] + j + 1) % 2 == 0)
             orig_data[i][j] = -orig_data[i][j];
       }
 
@@ -4960,10 +5083,10 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for(j = 0; j < (size_t)size[1]; j++) {
-        orig_data[0][j] = (HDrandom() % 10000000) / 10000000.0F;
+        orig_data[0][j] = (float)(HDrandom() % 10000000) / 10000000.0F;
 
         /* even-numbered values are negtive */
-        if((j+1)%2 == 0)
+        if((j + 1) % 2 == 0)
             orig_data[0][j] = -orig_data[0][j];
     }
 
@@ -5958,7 +6081,7 @@ test_set_local(hid_t fapl)
 	for(j=0; j<dims[1]; j++) {
 	    /* If the difference between two values is greater than 0.001%, they're
              * considered not equal. */
-            if(!H5_DBL_REL_EQUAL(points_dbl[i][j],check_dbl[i][j],0.00001F)) {
+            if(!H5_DBL_REL_EQUAL(points_dbl[i][j], check_dbl[i][j], (double)0.00001F)) {
 		H5_FAILED();
 		printf("    Line %d: Read different values than written.\n",__LINE__);
 		printf("    At index %lu,%lu\n", (unsigned long)(i), (unsigned long)(j));
@@ -6717,7 +6840,7 @@ test_missing_chunk(hid_t file)
     /* Initialize data for 2-D dataset */
     for(i = 0; i < MISSING_CHUNK_DIM; i++) {
 	for(j = 0; j < MISSING_CHUNK_DIM; j++) {
-	    wdata2[i][j] = (int)j + (i * MISSING_CHUNK_DIM);
+	    wdata2[i][j] = (int)(j + (i * MISSING_CHUNK_DIM));
 	    rdata2[i][j] = 911;
 	}
     } /* end for */
@@ -7635,7 +7758,7 @@ test_chunk_cache(hid_t fapl)
     /* Set new rdcc settings on fapl */
     nslots_2 = nslots_1 * 2;
     nbytes_2 = nbytes_1 * 2;
-    w0_2 = w0_1 / 2.0F;
+    w0_2 = w0_1 / (double)2.0F;
     if (H5Pset_cache(fapl_local, 0, nslots_2, nbytes_2, w0_2) < 0) FAIL_STACK_ERROR
 
     h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
@@ -8074,7 +8197,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_chunk_fast(const char *env_h5_driver, hid_t fapl)
+test_chunk_fast(hid_t fapl)
 {
     char        filename[FILENAME_BUF_SIZE];
     hid_t       fid = -1;       /* File ID */
@@ -8135,7 +8258,7 @@ test_chunk_fast(const char *env_h5_driver, hid_t fapl)
             H5D_alloc_time_t alloc_time;        /* Storage allocation time */
 
             /* Loop over storage allocation time */
-            for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+            for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
                 unsigned ndims;          /* Current # of dims to test */
 
                 /* Loop over dataspace ranks to test */
@@ -8435,7 +8558,7 @@ test_reopen_chunk_fast(hid_t fapl)
     h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
 
     /* Loop over storage allocation time */
-    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
 	/* Create file */
 	if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -8566,7 +8689,7 @@ test_chunk_fast_bug1(hid_t fapl)
     if((sid = H5Screate_simple(2, dim, max_dim)) < 0) FAIL_STACK_ERROR
 
     /* Loop over storage allocation time */
-    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
         /* Create file */
         if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -9192,7 +9315,7 @@ test_fixed_array(hid_t fapl)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /* Loop over storage allocation time */
-        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
             /* Create file */
             if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -9564,10 +9687,10 @@ test_single_chunk(hid_t fapl)
         TEST_ERROR
 
     for(i = n = 0; i < (DSET_DIM1 * DSET_DIM2); i++)
-	wbuf[i] = n++;
+	wbuf[i] = (int)n++;
 
     for(i = n = 0; i < (50* 100); i++)
-	t_wbuf[i] = n++;
+	t_wbuf[i] = (int)n++;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Loop over compressing chunks */
@@ -9575,7 +9698,7 @@ test_single_chunk(hid_t fapl)
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
         /* Loop over storage allocation time */
-        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+        for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; H5_INC_ENUM(H5D_alloc_time_t, alloc_time)) {
             /* Create file */
             if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
@@ -9866,7 +9989,7 @@ test_unfiltered_edge_chunks(hid_t fapl)
     /* Initialize write buffer */
     for(i=0; i<dim[0]; i++)
         for(j=0; j<dim[1]; j++)
-            wbuf[i][j] = (char)(2 * i) - (char)j;
+            wbuf[i][j] = (char)((2 * i) - j);
 
     /* Reset byte counts */
     count_nbytes_read = (size_t)0;
@@ -11944,7 +12067,7 @@ main(void)
         nerrors += (test_huge_chunks(my_fapl) < 0		? 1 : 0);
         nerrors += (test_chunk_cache(my_fapl) < 0		? 1 : 0);
         nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0   ? 1 : 0);
-        nerrors += (test_chunk_fast(envval, my_fapl) < 0	? 1 : 0);
+        nerrors += (test_chunk_fast(my_fapl) < 0	? 1 : 0);
         nerrors += (test_reopen_chunk_fast(my_fapl) < 0		? 1 : 0);
         nerrors += (test_chunk_fast_bug1(my_fapl) < 0           ? 1 : 0);
         nerrors += (test_chunk_expand(my_fapl) < 0		? 1 : 0);

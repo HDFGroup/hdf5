@@ -22,7 +22,6 @@
  */
 
 #include "h5test.h"
-#include "H5srcdir.h"
 
 #define DSET_NAME 		"dset_fail"
 #define H5Z_FILTER_FAIL_TEST    312

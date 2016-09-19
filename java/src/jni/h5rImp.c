@@ -46,45 +46,41 @@ Java_hdf_hdf5lib_H5_H5Rcreate
     jbyte      *refP;
     jboolean    isCopy2;
 
-    PIN_JAVA_STRING(name, rName, -1);
-
-    if (ref == NULL) {
-        UNPIN_JAVA_STRING(name, rName);
-        h5nullArgument( env, "H5Rcreate:  ref is NULL");
-    } /* end if */
-    else {
-        if ((ref_type == H5R_OBJECT) && ENVPTR->GetArrayLength(ENVPAR ref) != H5R_OBJ_REF_BUF_SIZE) {
-            UNPIN_JAVA_STRING(name, rName);
-            h5badArgument( env, "H5Rcreate:  ref input array != H5R_OBJ_REF_BUF_SIZE");
+    PIN_JAVA_STRING(name, rName);
+    if (rName != NULL) {
+        if (ref == NULL) {
+            h5nullArgument( env, "H5Rcreate:  ref is NULL");
         } /* end if */
-        else if ((ref_type == H5R_DATASET_REGION) && ENVPTR->GetArrayLength(ENVPAR ref) != H5R_DSET_REG_REF_BUF_SIZE) {
-            UNPIN_JAVA_STRING(name, rName);
-            h5badArgument( env, "H5Rcreate:  region ref input array != H5R_DSET_REG_REF_BUF_SIZE");
-        } /* end else if */
-        else if ((ref_type != H5R_OBJECT) && (ref_type != H5R_DATASET_REGION)) {
-            UNPIN_JAVA_STRING(name, rName);
-            h5badArgument( env, "H5Rcreate:  ref_type unknown type ");
-        } /* end else if */
         else {
-            refP = (jbyte*)ENVPTR->GetByteArrayElements(ENVPAR ref, &isCopy2);
-            if (refP == NULL) {
-                UNPIN_JAVA_STRING(name, rName);
-                h5JNIFatalError(env,  "H5Rcreate:  ref not pinned");
+            if ((ref_type == H5R_OBJECT) && ENVPTR->GetArrayLength(ENVPAR ref) != H5R_OBJ_REF_BUF_SIZE) {
+                h5badArgument( env, "H5Rcreate:  ref input array != H5R_OBJ_REF_BUF_SIZE");
             } /* end if */
+            else if ((ref_type == H5R_DATASET_REGION) && ENVPTR->GetArrayLength(ENVPAR ref) != H5R_DSET_REG_REF_BUF_SIZE) {
+                h5badArgument( env, "H5Rcreate:  region ref input array != H5R_DSET_REG_REF_BUF_SIZE");
+            } /* end else if */
+            else if ((ref_type != H5R_OBJECT) && (ref_type != H5R_DATASET_REGION)) {
+                h5badArgument( env, "H5Rcreate:  ref_type unknown type ");
+            } /* end else if */
             else {
-                status = H5Rcreate(refP, (hid_t)loc_id, rName, (H5R_type_t)ref_type, (hid_t)space_id);
-
-                UNPIN_JAVA_STRING(name, rName);
-                if (status < 0) {
-                    ENVPTR->ReleaseByteArrayElements(ENVPAR ref, refP, JNI_ABORT);
-                    h5libraryError(env);
+                refP = (jbyte*)ENVPTR->GetByteArrayElements(ENVPAR ref, &isCopy2);
+                if (refP == NULL) {
+                    h5JNIFatalError(env,  "H5Rcreate:  ref not pinned");
                 } /* end if */
                 else {
-                    ENVPTR->ReleaseByteArrayElements(ENVPAR ref, refP, 0);
+                    status = H5Rcreate(refP, (hid_t)loc_id, rName, (H5R_type_t)ref_type, (hid_t)space_id);
+
+                    if (status < 0) {
+                        ENVPTR->ReleaseByteArrayElements(ENVPAR ref, refP, JNI_ABORT);
+                        h5libraryError(env);
+                    } /* end if */
+                    else {
+                        ENVPTR->ReleaseByteArrayElements(ENVPAR ref, refP, 0);
+                    } /* end else */
                 } /* end else */
             } /* end else */
         } /* end else */
-    } /* end else */
+        UNPIN_JAVA_STRING(name, rName);
+    }
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5Rcreate */

@@ -112,6 +112,8 @@
 #define FILE79  "tintsattrs.h5"
 #define FILE80  "tbitnopaque.h5"
 #define FILE81  "tints4dims.h5"
+#define FILE82  "tcompound_complex2.h5"
+#define FILE83  "tvlenstr_array.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -289,14 +291,14 @@ typedef struct s1_t {
 #define F66_DUMMYDBL        "DummyDBL"
 
 /* Declarations for gent_dataset_idx() for "FILE68a" */
-#define F68a_DSET_FIXED		"dset_fixed"
-#define F68a_DSET_FIXED_FILTER	"dset_filter"
-#define F68a_DSET_BTREE		"dset_btree"
-#define F68a_DIM200		200
-#define F68a_DIM100		100
-#define F68a_DIM20		20
-#define F68a_DIM10		10
-#define F68a_CHUNK		5
+#define F68a_DSET_FIXED        "dset_fixed"
+#define F68a_DSET_FIXED_FILTER    "dset_filter"
+#define F68a_DSET_BTREE        "dset_btree"
+#define F68a_DIM200        200
+#define F68a_DIM100        100
+#define F68a_DIM20        20
+#define F68a_DIM10        10
+#define F68a_CHUNK        5
 
 /* "FILE70" macros and for FILE71 */
 /* Name of dataset to create in datafile   */
@@ -370,6 +372,25 @@ typedef struct s1_t {
 #define F81_XDIM        8
 #define F81_YDIM        6
 #define F81_ZDIM        4
+
+/* "File 82" macros */
+/* Name of dataset to create in datafile                              */
+#define F82_DATASETNAME    "CompoundComplex1D"
+/* Dataset dimensions                                                 */
+#define F82_DIM32          32
+#define F82_RANK           1
+//#define F82_RANK2          2
+//#define F82_RANK3          3
+//#define F82_RANK4          4
+
+/* "File 83" macros */
+/* Name of dataset to create in datafile                              */
+#define F83_DATASETNAME    "ScalarArrayOfVlenStr"
+#define F83_DATASETNAME2   "CompoundArrayOfVlenStr"
+/* Dataset dimensions                                                 */
+#define F83_DIM            5
+#define F83_RANK           1
+#define F83_ARRAYDIM       3
 
 static void
 gent_group(void)
@@ -7023,16 +7044,16 @@ gent_fs_strategy_threshold(void)
 
 /*
  * Create a file with new format:
- * Create one dataset with (set_chunk, fixed dims, null max. dims) 
- *	so that Fixed Array indexing will be used.
- * Create one dataset with (set_chunk, fixed dims, null max. dims, filter) 
- *	so that Fixed Array indexing will be used.
+ * Create one dataset with (set_chunk, fixed dims, null max. dims)
+ *    so that Fixed Array indexing will be used.
+ * Create one dataset with (set_chunk, fixed dims, null max. dims, filter)
+ *    so that Fixed Array indexing will be used.
  * Create one dataset with (set_chunk, fixed dims, fixed max. dims)
- *	so that Fixed Array indexing will be used.
- * 
+ *    so that Fixed Array indexing will be used.
+ *
  * Modifications:
- *	Fixed Array indexing will be used for chunked dataset
- *	with fixed max. dims setting.
+ *    Fixed Array indexing will be used for chunked dataset
+ *    with fixed max. dims setting.
  *
  */
 static void
@@ -7062,7 +7083,7 @@ gent_dataset_idx(void)
     assert(ret >= 0);
 
     /* dataset with fixed dimensions */
-    dims[0] = F68a_DIM20; 
+    dims[0] = F68a_DIM20;
     dims[1] = F68a_DIM10;
     space = H5Screate_simple(RANK, dims, NULL);
 
@@ -7075,7 +7096,7 @@ gent_dataset_idx(void)
     H5Sclose(space);
 
     /* dataset with non-fixed dimensions */
-    maxdims[0] = F68a_DIM200; 
+    maxdims[0] = F68a_DIM200;
     maxdims[1] = F68a_DIM100;
     space = H5Screate_simple(RANK, dims, maxdims);
 
@@ -9838,6 +9859,408 @@ gent_intsfourdims(void)
     H5Fclose(fid);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    gent_compound_complex2
+ *
+ * Purpose:     Generate a file to be used in testing compound datatypes of
+ *   various sizes, dimensions, member types and nesting.
+ *-------------------------------------------------------------------------
+ */
+static void gent_compound_complex2(void)
+{
+    /* Third-level nested compound */
+    typedef struct {
+        short  deep_nested_short[10];
+        int    deep_nested_int[10];
+        long   deep_nested_long[10];
+        double deep_nested_double[10];
+        float  deep_nested_float[10];
+    } third_level_compound;
+
+    /* Second-level multiply-nested compounds */
+    typedef struct {
+        unsigned int  multiple_nested_a[5];
+        int           multiple_nested_b[5];
+        unsigned long multiple_nested_c[5];
+        long          multiple_nested_d[5];
+    } further_nested;
+
+    typedef struct {
+        char further_nested_string[11];
+        char further_nested_string_array[4][13];
+        third_level_compound deep_nest;
+    } further_nested2;
+
+    /* First First-level nested compound */
+    typedef struct
+    {
+        double nested_a;
+        char   nested_string[23];
+        char   nested_string_array[4][12];
+    } nested_compound;
+
+    /* Second First-level nested compound */
+    typedef struct
+    {
+        float           a;
+        further_nested  b;
+        further_nested2 c;
+    } multiple_nested_compound;
+
+    /* Compound datatype with different member types */
+    typedef struct
+    {
+        /* Arrays nested inside compound */
+        unsigned int             a[4];
+        int                      b[6];
+        float                    c[2][4];
+        nested_compound          d;   /* Compound inside compound */
+        multiple_nested_compound e;   /* Compound inside compound with further nested compound */
+    } compound;
+
+    compound        buf[F82_DIM32];        /* compound */
+
+    hid_t file, type=-1, space=-1, dset=-1;
+    hid_t dset_array_a, dset_array_b, dset_array_c;
+    hid_t cmpd_tid1 = -1, cmpd_tid2 = -1, cmpd_tid3 = -1;
+    size_t  i;
+    size_t j, k;
+    unsigned dset_array_ndims;
+    hsize_t  dset_array_a_dims[1], dset_array_b_dims[1], dset_array_c_dims[2];
+    hsize_t  nelmts = F82_DIM32;
+
+    file = H5Fcreate(FILE82, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    if ((space = H5Screate_simple(F82_RANK, &nelmts, NULL)) >= 0) {
+        /* CompoundComplex1D */
+        if ((type = H5Tcreate(H5T_COMPOUND, sizeof(compound))) >= 0) {
+            hid_t str_type, array;
+            hsize_t dims[1];
+            hid_t nest1, nest2;
+
+            /* Insert top-level array members */
+            dset_array_ndims = 1; dset_array_a_dims[0] = 4;
+            dset_array_a = H5Tarray_create2(H5T_STD_U32LE, dset_array_ndims, dset_array_a_dims);
+            H5Tinsert(type, "a", HOFFSET(compound, a), dset_array_a);
+            H5Tclose(dset_array_a);
+
+            dset_array_ndims = 1; dset_array_b_dims[0] = 6;
+            dset_array_b = H5Tarray_create2(H5T_STD_I32LE, dset_array_ndims, dset_array_b_dims);
+            H5Tinsert(type, "b", HOFFSET(compound, b), dset_array_b);
+            H5Tclose(dset_array_b);
+
+            dset_array_ndims = 2; dset_array_c_dims[0] = 2; dset_array_c_dims[1] = 4;
+            dset_array_c = H5Tarray_create2(H5T_IEEE_F32LE, dset_array_ndims, dset_array_c_dims);
+            H5Tinsert(type, "c", HOFFSET(compound, c), dset_array_c);
+            H5Tclose(dset_array_c);
+
+            /* Insert first nested compound */
+            cmpd_tid1 = H5Tcreate(H5T_COMPOUND, sizeof(nested_compound));
+
+            H5Tinsert(cmpd_tid1, "nested_double", HOFFSET(nested_compound, nested_a), H5T_IEEE_F64LE);
+
+            dims[0] = 1;
+            str_type = mkstr(23, H5T_STR_NULLTERM);
+            array = H5Tarray_create2(str_type, 1, dims);
+            H5Tinsert(cmpd_tid1, "nested_string", HOFFSET(nested_compound, nested_string), array);
+            H5Tclose(array);
+            H5Tclose(str_type);
+
+            dims[0] = 4;
+            str_type = mkstr(12, H5T_STR_NULLTERM);
+            array = H5Tarray_create2(str_type, 1, dims);
+            H5Tinsert(cmpd_tid1, "nested_string_array", HOFFSET(nested_compound, nested_string_array), array);
+            H5Tclose(array);
+            H5Tclose(str_type);
+
+            H5Tinsert(type, "nested_compound", HOFFSET(compound, d), cmpd_tid1);
+
+            /* Insert second nested compound */
+            cmpd_tid2 = H5Tcreate(H5T_COMPOUND, sizeof(multiple_nested_compound));
+
+            H5Tinsert(cmpd_tid2, "nested_float", HOFFSET(multiple_nested_compound, a), H5T_IEEE_F32LE);
+
+            /* Add first further nested compound */
+            nest1 = H5Tcreate(H5T_COMPOUND, sizeof(further_nested));
+
+            dims[0] = 5;
+            array = H5Tarray_create2(H5T_STD_U32LE, 1, dims);
+            H5Tinsert(nest1, "nested_unsigned_int", HOFFSET(further_nested, multiple_nested_a), array);
+            H5Tclose(array);
+
+            array = H5Tarray_create2(H5T_STD_I32LE, 1, dims);
+            H5Tinsert(nest1, "nested_int", HOFFSET(further_nested, multiple_nested_b), array);
+            H5Tclose(array);
+
+            array = H5Tarray_create2(H5T_STD_U64LE, 1, dims);
+            H5Tinsert(nest1, "nested_unsigned_long", HOFFSET(further_nested, multiple_nested_c), array);
+            H5Tclose(array);
+
+            array = H5Tarray_create2(H5T_STD_I64LE, 1, dims);
+            H5Tinsert(nest1, "nested_long", HOFFSET(further_nested, multiple_nested_d), array);
+            H5Tclose(array);
+
+            H5Tinsert(cmpd_tid2, "further_nested_compoundA", HOFFSET(multiple_nested_compound, b), nest1);
+            H5Tclose(nest1);
+
+            /* Add second further nested compound */
+            nest2 = H5Tcreate(H5T_COMPOUND, sizeof(further_nested2));
+
+            dims[0] = 1;
+            str_type = mkstr(11, H5T_STR_NULLTERM);
+            array = H5Tarray_create2(str_type, 1, dims);
+            H5Tinsert(nest2, "nested_string", HOFFSET(further_nested2, further_nested_string), array);
+            H5Tclose(array);
+            H5Tclose(str_type);
+
+            dims[0] = 4;
+            str_type = mkstr(13, H5T_STR_NULLTERM);
+            array = H5Tarray_create2(str_type, 1, dims);
+            H5Tinsert(nest2, "nested_string_array", HOFFSET(further_nested2, further_nested_string_array), array);
+            H5Tclose(array);
+            H5Tclose(str_type);
+
+            /* Add a final third-level nested compound to this second-level compound */
+            cmpd_tid3 = H5Tcreate(H5T_COMPOUND, sizeof(third_level_compound));
+
+            dims[0] = 10;
+            array = H5Tarray_create2(H5T_STD_I16LE, 1, dims);
+            H5Tinsert(cmpd_tid3, "deep_nested_short", HOFFSET(third_level_compound, deep_nested_short), array);
+            H5Tclose(array);
+
+            array = H5Tarray_create2(H5T_STD_I32LE, 1, dims);
+            H5Tinsert(cmpd_tid3, "deep_nested_int", HOFFSET(third_level_compound, deep_nested_int), array);
+            H5Tclose(array);
+
+            array = H5Tarray_create2(H5T_STD_I64LE, 1, dims);
+            H5Tinsert(cmpd_tid3, "deep_nested_long", HOFFSET(third_level_compound, deep_nested_long), array);
+            H5Tclose(array);
+
+            array = H5Tarray_create2(H5T_IEEE_F64LE, 1, dims);
+            H5Tinsert(cmpd_tid3, "deep_nested_double", HOFFSET(third_level_compound, deep_nested_double), array);
+            H5Tclose(array);
+
+            array = H5Tarray_create2(H5T_IEEE_F32LE, 1, dims);
+            H5Tinsert(cmpd_tid3, "deep_nested_float", HOFFSET(third_level_compound, deep_nested_float), array);
+            H5Tclose(array);
+
+            H5Tinsert(nest2, "deep_nested_compound", HOFFSET(further_nested2, deep_nest), cmpd_tid3);
+
+            H5Tinsert(cmpd_tid2, "further_nested_compoundB", HOFFSET(multiple_nested_compound, c), nest2);
+            H5Tclose(nest2);
+
+            H5Tinsert(type, "multiple_nested_compound", HOFFSET(compound, e), cmpd_tid2);
+
+
+            if ((dset = H5Dcreate2(file, F82_DATASETNAME, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                for(i = 0; i < nelmts; i++) {
+                    for (j = 0; j < dset_array_a_dims[0]; j++)
+                        buf[i].a[j] = (unsigned int)(j + i*10);
+                    for (j = 0; j < dset_array_b_dims[0]; j++)
+                        buf[i].b[j] = (int)(j - i*10);
+                    for (j = 0; j < dset_array_c_dims[0]; j++)
+                        for (k = 0; k < dset_array_c_dims[1]; k++)
+                            buf[i].c[j][k] = (float)(j + k + i*10) + (float)(j) * 0.1F;
+
+                    /* Set up first nested compound */
+                    buf[i].d.nested_a = (double) i;
+
+                    strcpy(buf[i].d.nested_string, "This is a test string.");
+
+                    for (j = 0; j < 4; j++)
+                        strcpy(buf[i].d.nested_string_array[j], "String test");
+
+                    /* Set up multiple nested compound */
+                    buf[i].e.a = (float) i;
+
+                    for (j = 0; j < 5; j++) {
+                        buf[i].e.b.multiple_nested_a[j] = (unsigned int)(j + i*10);
+                        buf[i].e.b.multiple_nested_b[j] = (int)(j - i*10);
+                        buf[i].e.b.multiple_nested_c[j] = (unsigned long)(j + i*10);
+                        buf[i].e.b.multiple_nested_d[j] = (long)(j - i*10);
+                    }
+
+                    strcpy(buf[i].e.c.further_nested_string, "1234567890");
+                    for (j = 0; j < 4; j++)
+                        strcpy(buf[i].e.c.further_nested_string_array[j], "STRING ARRAY");
+
+                    for (j = 0; j < 10; j++) {
+                        buf[i].e.c.deep_nest.deep_nested_short[j] = (short)(j + i*10);
+                        buf[i].e.c.deep_nest.deep_nested_int[j] = (int)(j - i*10);
+                        buf[i].e.c.deep_nest.deep_nested_long[j] = (long)(j + i*10);
+                        buf[i].e.c.deep_nest.deep_nested_double[j] = (double)(j + i*10);
+                        buf[i].e.c.deep_nest.deep_nested_float[j] = (float)(j + i*10);
+                    }
+                }
+
+                if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+                    fprintf(stderr, "gent_tcompound_complex2 H5Dwrite failed\n");
+
+                H5Dclose(dset);
+            }
+            H5Tclose(type);
+        }
+        H5Tclose(cmpd_tid1);
+        H5Tclose(cmpd_tid2);
+        H5Tclose(cmpd_tid3);
+        H5Sclose(space);
+    }
+
+//    /* CompoundComplex2D */
+//    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
+//        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
+//        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
+//        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
+//        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
+//        if ((space = H5Screate_simple(F82_RANK2, &nelmts, NULL)) >= 0) {
+//            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+//                for(i = 0; i < nelmts; i++) {
+//                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
+//                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+//                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+//                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+//                }
+//
+//                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+//                H5Dclose(dset);
+//            }
+//            H5Sclose(space);
+//        }
+//        H5Tclose(type);
+//    }
+//
+//    /* CompoundComplex3D */
+//    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
+//        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
+//        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
+//        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
+//        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
+//        if ((space = H5Screate_simple(F82_RANK3, &nelmts, NULL)) >= 0) {
+//            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+//                for(i = 0; i < nelmts; i++) {
+//                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
+//                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+//                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+//                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+//                }
+//
+//                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+//                H5Dclose(dset);
+//            }
+//            H5Sclose(space);
+//        }
+//        H5Tclose(type);
+//    }
+//
+//    /* CompoundComplex4D */
+//    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
+//        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
+//        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
+//        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
+//        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
+//        if ((space = H5Screate_simple(F82_RANK4, &nelmts, NULL)) >= 0) {
+//            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+//                for(i = 0; i < nelmts; i++) {
+//                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
+//                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+//                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+//                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+//                }
+//
+//                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+//                H5Dclose(dset);
+//            }
+//            H5Sclose(space);
+//        }
+//        H5Tclose(type);
+//    }
+
+    H5Fclose(file);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    gent_vlenstr_array
+ *
+ * Purpose:     Generate a file to be used in testing Arrays of variable
+ *              length strings.
+ *-------------------------------------------------------------------------
+ */
+static void gent_vlenstr_array(void)
+{
+    /* Compound datatype with different member types */
+    typedef struct compound
+    {
+        /* Array of variable-length strings*/
+        const char *vlen_array[F83_ARRAYDIM];
+    } compound;
+    compound        buf[F83_DIM];
+
+    const char *test[F83_ARRAYDIM] = {
+            "This is a variable-length test string.",
+            "This test string is also variable-length.",
+            "A final test of variable-length strings. This string is longer than the others."
+    };
+    const char    *buffer[F83_DIM*F83_ARRAYDIM];
+
+    hid_t  file, type=-1, space=-1, dset=-1;
+    hid_t cmpd_tid1, array_tid;
+    int i, j;
+
+    hsize_t dims[] = {F83_DIM}, arraydim[] = {F83_ARRAYDIM};
+    /* Initialize scalar data */
+    for (i = 0; i < F83_DIM; i++)
+        for (j = 0; j < 3; j++)
+            buffer[j + 3*i] = test[j];
+
+    /* Initialize compound data */
+    for (i = 0; i < F83_DIM; i++)
+        for (j = 0; j < 3; j++)
+            buf[i].vlen_array[j] = test[j];
+
+    file = H5Fcreate(FILE83, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    if ((space = H5Screate_simple(F83_RANK, dims, NULL)) >= 0) {
+        array_tid = H5Tcopy(H5T_C_S1);
+        H5Tset_size(array_tid, H5T_VARIABLE);
+
+        /* ScalarArrayOfVlenStr */
+        if ((type = H5Tarray_create2(array_tid, F83_RANK, arraydim)) >= 0) {
+            if ((dset = H5Dcreate2(file, F83_DATASETNAME, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
+                    fprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
+
+                H5Dclose(dset);
+            }
+            H5Tclose(type);
+        }
+        H5Tclose(array_tid);
+        H5Sclose(space);
+    }
+
+    if ((space = H5Screate_simple(F83_RANK, dims, NULL)) >= 0) {
+        /* CompoundArrayOfVlenStr */
+        if ((type = H5Tcreate(H5T_COMPOUND, sizeof(compound))) >= 0) {
+            cmpd_tid1 = H5Tcopy(H5T_C_S1);
+            H5Tset_size(cmpd_tid1, H5T_VARIABLE);
+
+            array_tid = H5Tarray_create2(cmpd_tid1, F83_RANK, arraydim);
+            H5Tinsert(type, "vlen_str_array", HOFFSET(compound, vlen_array), array_tid);
+
+            if ((dset = H5Dcreate2(file, F83_DATASETNAME2, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+                    fprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
+
+                H5Dclose(dset);
+            }
+            H5Tclose(cmpd_tid1);
+            H5Tclose(type);
+        }
+        H5Sclose(space);
+    }
+
+    H5Fclose(file);
+}
+
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -9892,9 +10315,11 @@ int main(void)
     gent_multi();
     gent_large_objname();
     gent_vlstr();
+    gent_vlenstr_array();
     gent_char();
     gent_attr_all();
     gent_compound_complex();
+    gent_compound_complex2();
     gent_named_dtype_attr();
     gent_null_space();
     gent_zero_dim_size();

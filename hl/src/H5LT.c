@@ -894,8 +894,8 @@ hid_t H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
     /* set allocation increment to a percentage of the supplied buffer size, or
      * a pre-defined minimum increment value, whichever is larger
      */
-    if ((buf_prcnt * buf_size) > min_incr)
-        alloc_incr = (size_t)(buf_prcnt * buf_size);
+    if ((size_t)(buf_prcnt * (double)buf_size) > min_incr)
+        alloc_incr = (size_t)(buf_prcnt * (double)buf_size);
     else
         alloc_incr = min_incr;
 

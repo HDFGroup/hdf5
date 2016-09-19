@@ -17,11 +17,6 @@
  * generate plist file
  */
 
-#include <assert.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
 #include "H5private.h"
 #include "hdf5.h"
 

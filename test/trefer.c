@@ -84,8 +84,8 @@ test_reference_params(void)
     int         i;          /* counting variables */
     const char *write_comment = "Foo!"; /* Comments for group */
     hid_t	ret_id;		/* Generic hid_t return value	*/
+    ssize_t     name_size;  /* Size of reference name */
     herr_t      ret;        /* Generic return value     */
-    size_t      name_size;  /* Size of reference name */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Reference Parameters\n"));
@@ -120,7 +120,7 @@ test_reference_params(void)
     CHECK(dataset, FAIL, "H5Dcreate2");
 
     for(tu32 = (unsigned *)wbuf, i = 0; i < SPACE1_DIM1; i++)
-        *tu32++=i*3;
+        *tu32++ = (unsigned)i * 3;
 
     /* Write selection to disk */
     ret = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
@@ -266,6 +266,7 @@ test_reference_obj(void)
     const char *write_comment="Foo!"; /* Comments for group */
     char read_comment[10];
     H5O_type_t          obj_type;   /* Object type */
+    ssize_t             size;       /* Comment length */
     herr_t		ret;	    /* Generic return value		*/
 
     /* Output message about test being performed */
@@ -301,7 +302,7 @@ test_reference_obj(void)
     CHECK(dataset, FAIL, "H5Dcreate2");
 
     for(tu32 = (unsigned *)wbuf, i = 0; i < SPACE1_DIM1; i++)
-        *tu32++=i*3;
+        *tu32++ = (unsigned)i * 3;
 
     /* Write selection to disk */
     ret = H5Dwrite(dataset, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf);
@@ -432,8 +433,8 @@ test_reference_obj(void)
     CHECK(group, FAIL, "H5Rdereference2");
 
     /* Get group's comment */
-    ret = H5Oget_comment(group, read_comment, (size_t)10);
-    CHECK(ret, FAIL, "H5Oget_comment");
+    size = H5Oget_comment(group, read_comment, (size_t)10);
+    CHECK(size, FAIL, "H5Oget_comment");
 
     /* Check for correct comment value */
     if(HDstrcmp(write_comment, read_comment) != 0)
@@ -557,7 +558,7 @@ test_reference_region(void)
     CHECK(dset2, FAIL, "H5Dcreate2");
 
     for(tu8 = dwbuf, i = 0; i < (SPACE2_DIM1 * SPACE2_DIM2); i++)
-        *tu8++ = i * 3;
+        *tu8++ = (uint8_t)(i * 3);
 
     /* Write selection to disk */
     ret = H5Dwrite(dset2, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dwbuf);
@@ -762,7 +763,7 @@ test_reference_region(void)
     VERIFY(ret, 36, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_hyper_nblocks(sid2);
     VERIFY(ret, 1, "H5Sget_select_hyper_nblocks");
-    coords = (hsize_t *)HDmalloc(ret * SPACE2_RANK * sizeof(hsize_t) * 2); /* allocate space for the hyperslab blocks */
+    coords = (hsize_t *)HDmalloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t) * 2); /* allocate space for the hyperslab blocks */
     ret = H5Sget_select_hyper_blocklist(sid2, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
     VERIFY(coords[0], 2, "Hyperslab Coordinates");
@@ -790,7 +791,7 @@ test_reference_region(void)
     VERIFY(ret, 10, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_elem_npoints(sid2);
     VERIFY(ret, 10, "H5Sget_select_elem_npoints");
-    coords = (hsize_t *)HDmalloc(ret * SPACE2_RANK * sizeof(hsize_t)); /* allocate space for the element points */
+    coords = (hsize_t *)HDmalloc((size_t)ret * SPACE2_RANK * sizeof(hsize_t)); /* allocate space for the element points */
     ret = H5Sget_select_elem_pointlist(sid2, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
     VERIFY(coords[0], coord1[0][0], "Element Coordinates");
@@ -945,7 +946,7 @@ test_reference_region_1D(void)
     CHECK(dset3, FAIL, "H5Dcreate2");
 
     for(tu8 = dwbuf, i = 0; i < SPACE3_DIM1; i++)
-        *tu8++ = i * 3;
+        *tu8++ = (uint8_t)(i * 3);
 
     /* Write selection to disk */
     ret = H5Dwrite(dset3, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dwbuf);
@@ -1068,7 +1069,7 @@ test_reference_region_1D(void)
     VERIFY(ret, 30, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_hyper_nblocks(sid3);
     VERIFY(ret, 15, "H5Sget_select_hyper_nblocks");
-    coords = (hsize_t *)HDmalloc(ret * SPACE3_RANK * sizeof(hsize_t) * 2); /* allocate space for the hyperslab blocks */
+    coords = (hsize_t *)HDmalloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t) * 2); /* allocate space for the hyperslab blocks */
     ret = H5Sget_select_hyper_blocklist(sid3, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_hyper_blocklist");
     VERIFY(coords[0],   2, "Hyperslab Coordinates");
@@ -1120,7 +1121,7 @@ test_reference_region_1D(void)
     VERIFY(ret, 10, "H5Sget_select_npoints");
     ret = (int)H5Sget_select_elem_npoints(sid3);
     VERIFY(ret, 10, "H5Sget_select_elem_npoints");
-    coords = (hsize_t *)HDmalloc(ret * SPACE3_RANK * sizeof(hsize_t)); /* allocate space for the element points */
+    coords = (hsize_t *)HDmalloc((size_t)ret * SPACE3_RANK * sizeof(hsize_t)); /* allocate space for the element points */
     ret = H5Sget_select_elem_pointlist(sid3, (hsize_t)0, (hsize_t)ret, coords);
     CHECK(ret, FAIL, "H5Sget_select_elem_pointlist");
     VERIFY(coords[0], coord1[0][0], "Element Coordinates");
@@ -1329,6 +1330,7 @@ test_reference_group(void)
     char objname[NAME_SIZE];    /* Buffer to store name */
     H5O_info_t oinfo;           /* Object info struct */
     int count = 0;              /* Count within iterated group */
+    ssize_t size;               /* Name length */
     herr_t ret;
 
     /* Create file with a group and a dataset containing an object reference to the group */
@@ -1409,8 +1411,8 @@ test_reference_group(void)
     CHECK(ret, FAIL, "H5Gget_info");
     VERIFY(ginfo.nlinks, 3, "H5Gget_info");
 
-    ret = H5Lget_name_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, objname, (size_t)NAME_SIZE, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Lget_name_by_idx");
+    size = H5Lget_name_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, objname, (size_t)NAME_SIZE, H5P_DEFAULT);
+    CHECK(size, FAIL, "H5Lget_name_by_idx");
     VERIFY_STR(objname, DSETNAME2, "H5Lget_name_by_idx");
 
     ret = H5Oget_info_by_idx(gid, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)0, &oinfo, H5P_DEFAULT);

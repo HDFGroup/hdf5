@@ -1,9 +1,5 @@
 #include "hdf5.h"
 #include "H5LDprivate.h"
-#include <time.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <stdlib.h>
 
 /*
  *  WATCH.h5: file with various types of datasets for testing--                                   

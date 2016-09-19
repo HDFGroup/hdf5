@@ -20,9 +20,12 @@
 # in column one with a '#'.
 #------------------------------------------------------------------------------
 
-./.autom4te.cfg                 _DO_NOT_DISTRIBUTE_
+./.gitattributes       _DO_NOT_DISTRIBUTE_
+./.gitignore           _DO_NOT_DISTRIBUTE_
+./.autom4te.cfg        _DO_NOT_DISTRIBUTE_
 ./.h5chkright.ini      _DO_NOT_DISTRIBUTE_
 ./ACKNOWLEDGMENTS
+./BRANCH.txt
 ./COPYING
 ./MANIFEST
 ./Makefile.dist
@@ -34,6 +37,7 @@
 
 ./m4/aclocal_cxx.m4
 ./m4/aclocal_fc.m4
+./m4/aclocal_fc.f90
 ./m4/ax_check_class.m4
 ./m4/ax_check_classpath.m4
 ./m4/ax_check_java_home.m4
@@ -88,6 +92,10 @@
 ./bin/timekeeper      _DO_NOT_DISTRIBUTE_
 ./bin/trace
 ./bin/yodconfigure
+./bin/pkgscrpts/h5rmflags                  _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/makeHDF5BinaryTarfiles.pl  _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/makeInternalREADME.pl      _DO_NOT_DISTRIBUTE_
+./bin/pkgscrpts/makeOuterREADME.pl         _DO_NOT_DISTRIBUTE_
 
 ./config/COPYING
 ./config/BlankForm
@@ -102,8 +110,7 @@
 ./config/gnu-cxxflags
 ./config/gnu-fflags
 ./config/gnu-flags
-./config/i386-pc-cygwin32
-./config/i686-pc-cygwin
+./config/cygwin
 ./config/ibm-aix
 ./config/ibm-flags
 ./config/intel-fflags
@@ -117,7 +124,6 @@
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/solaris
-./config/x86_64-pc-cygwin
 
 ./config/site-specific/BlankForm
 
@@ -895,6 +901,7 @@
 ./test/dynlib1.c
 ./test/dynlib2.c
 ./test/dynlib3.c
+./test/dynlib4.c
 ./test/earray.c
 ./test/efc.c
 ./test/enc_dec_plist.c
@@ -1540,6 +1547,8 @@
 ./tools/testfiles/tcompound.h5
 ./tools/testfiles/tcompound2.h5
 ./tools/testfiles/tcompound_complex.h5
+./tools/testfiles/tcompound_complex2.h5
+./tools/testfiles/tcompound_complex2.ddl
 ./tools/testfiles/tdatareg.h5
 ./tools/testfiles/tdatareg.ddl
 ./tools/testfiles/tdataregR.ddl
@@ -1709,6 +1718,8 @@
 ./tools/testfiles/tvldtypes4.h5
 ./tools/testfiles/tvldtypes5.ddl
 ./tools/testfiles/tvldtypes5.h5
+./tools/testfiles/tvlenstr_array.ddl
+./tools/testfiles/tvlenstr_array.h5
 ./tools/testfiles/tvlstr.h5
 ./tools/testfiles/tvlstr.ddl
 ./tools/testfiles/tvms.ddl
@@ -2303,6 +2314,7 @@
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
+./tools/h5repack/testfiles/h5repack_layout.h5-plugin_zero.tst
 ./tools/h5repack/testfiles/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
 ./tools/h5repack/testfiles/2_vds.h5-vds_chunk3x6x9-v.ddl
 ./tools/h5repack/testfiles/3_1_vds.h5-vds_chunk2x5x8-v.ddl

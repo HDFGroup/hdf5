@@ -177,6 +177,39 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_oh_tag() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Orefresh
+ *
+ * Purpose:    Refreshes all buffers associated with an object.
+ *
+ * Return:    Non-negative on success, negative on failure
+ *
+ * Programmer:  Mike McGreevy
+ *              July 28, 2010
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Orefresh(hid_t oid)
+{
+    H5O_loc_t *oloc;            /* object location */
+    herr_t ret_value = SUCCEED; /* return value */
+    
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", oid);
+
+    /* Check args */
+    if(NULL == (oloc = H5O_get_loc(oid)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
+
+    /* Private function */
+    if(H5O_refresh_metadata(oid, *oloc, H5AC_ind_read_dxpl_id) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Orefresh() */
 
 
 /*-------------------------------------------------------------------------

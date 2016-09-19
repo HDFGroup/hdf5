@@ -25,6 +25,7 @@
 #include "H5FcreatProp.h"
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
 #include "H5DcreatProp.h"

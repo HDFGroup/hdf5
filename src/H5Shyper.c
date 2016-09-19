@@ -145,6 +145,9 @@ H5FL_DEFINE_STATIC(H5S_hyper_span_t);
 /* Declare a free list to manage the H5S_hyper_span_info_t struct */
 H5FL_DEFINE_STATIC(H5S_hyper_span_info_t);
 
+/* Declare extern free list to manage the H5S_sel_iter_t struct */
+H5FL_EXTERN(H5S_sel_iter_t);
+
 /* #define H5S_HYPER_DEBUG */
 #ifdef H5S_HYPER_DEBUG
 static herr_t
@@ -9288,7 +9291,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     size_t              ss_nelem;       /* Number of elements for src_space */
     size_t              ss_i = (size_t)0; /* Index into offset/length arrays for src_space */
     hbool_t             advance_ss = FALSE; /* Whether to advance ss_i on the next iteration */
-    H5S_sel_iter_t      ss_iter;        /* Selection iterator for src_space */
+    H5S_sel_iter_t      *ss_iter = NULL; /* Selection iterator for src_space */
     hbool_t             ss_iter_init = FALSE; /* Whether ss_iter is initialized */
     hsize_t             ss_sel_off = (hsize_t)0; /* Offset within src_space selection */
     hsize_t             ds_off[H5S_PROJECT_INTERSECT_NSEQS]; /* Offset array for dst_space */
@@ -9296,7 +9299,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     size_t              ds_nseq;        /* Number of sequences for dst_space */
     size_t              ds_nelem;       /* Number of elements for dst_space */
     size_t              ds_i = (size_t)0; /* Index into offset/length arrays for dst_space */
-    H5S_sel_iter_t      ds_iter;        /* Selection iterator for dst_space */
+    H5S_sel_iter_t      *ds_iter = NULL; /* Selection iterator for dst_space */
     hbool_t             ds_iter_init = FALSE; /* Whether ds_iter is initialized */
     hsize_t             ds_sel_off = (hsize_t)0; /* Offset within dst_space selection */
     hsize_t             sis_off[H5S_PROJECT_INTERSECT_NSEQS]; /* Offset array for src_intersect_space */
@@ -9305,7 +9308,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     size_t              sis_nelem;      /* Number of elements for src_intersect_space */
     size_t              sis_i = (size_t)0; /* Index into offset/length arrays for src_intersect_space */
     hbool_t             advance_sis = FALSE; /* Whether to advance sis_i on the next iteration */
-    H5S_sel_iter_t      sis_iter;       /* Selection iterator for src_intersect_space */
+    H5S_sel_iter_t      *sis_iter = NULL; /* Selection iterator for src_intersect_space */
     hbool_t             sis_iter_init = FALSE; /* Whether sis_iter is initialized */
     hsize_t             int_sel_off;    /* Offset within intersected selections (ss/sis and ds/ps) */
     size_t              int_len;        /* Length of segment in intersected selections */
@@ -9384,35 +9387,47 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     /* Set unlim_dim */
     proj_space->select.sel_info.hslab->unlim_dim = -1;
 
+    /* Allocate the source space iterator */
+    if(NULL == (ss_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate source space iterator")
+
     /* Initialize source space iterator */
-    if(H5S_select_iter_init(&ss_iter, src_space, (size_t)1) < 0)
+    if(H5S_select_iter_init(ss_iter, src_space, (size_t)1) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
     ss_iter_init = TRUE;
 
     /* Get sequence list for source space */
-    if(H5S_SELECT_GET_SEQ_LIST(src_space, 0u, &ss_iter, H5S_PROJECT_INTERSECT_NSEQS, ss_nelem, &ss_nseq, &nelem, ss_off, ss_len) < 0)
+    if(H5S_SELECT_GET_SEQ_LIST(src_space, 0u, ss_iter, H5S_PROJECT_INTERSECT_NSEQS, ss_nelem, &ss_nseq, &nelem, ss_off, ss_len) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
     ss_nelem -= nelem;
     HDassert(ss_nseq > 0);
 
+    /* Allocate the destination space iterator */
+    if(NULL == (ds_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate destination space iterator")
+
     /* Initialize destination space iterator */
-    if(H5S_select_iter_init(&ds_iter, dst_space, (size_t)1) < 0)
+    if(H5S_select_iter_init(ds_iter, dst_space, (size_t)1) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
     ds_iter_init = TRUE;
 
     /* Get sequence list for destination space */
-    if(H5S_SELECT_GET_SEQ_LIST(dst_space, 0u, &ds_iter, H5S_PROJECT_INTERSECT_NSEQS, ds_nelem, &ds_nseq, &nelem, ds_off, ds_len) < 0)
+    if(H5S_SELECT_GET_SEQ_LIST(dst_space, 0u, ds_iter, H5S_PROJECT_INTERSECT_NSEQS, ds_nelem, &ds_nseq, &nelem, ds_off, ds_len) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
     ds_nelem -= nelem;
     HDassert(ds_nseq > 0);
 
+    /* Allocate the source intersect space iterator */
+    if(NULL == (sis_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate source intersect space iterator")
+
     /* Initialize source intersect space iterator */
-    if(H5S_select_iter_init(&sis_iter, src_intersect_space, (size_t)1) < 0)
+    if(H5S_select_iter_init(sis_iter, src_intersect_space, (size_t)1) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
     sis_iter_init = TRUE;
 
     /* Get sequence list for source intersect space */
-    if(H5S_SELECT_GET_SEQ_LIST(src_intersect_space, 0u, &sis_iter, H5S_PROJECT_INTERSECT_NSEQS, sis_nelem, &sis_nseq, &nelem, sis_off, sis_len) < 0)
+    if(H5S_SELECT_GET_SEQ_LIST(src_intersect_space, 0u, sis_iter, H5S_PROJECT_INTERSECT_NSEQS, sis_nelem, &sis_nseq, &nelem, sis_off, sis_len) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
     sis_nelem -= nelem;
     HDassert(sis_nseq > 0);
@@ -9427,7 +9442,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
             if(++ss_i == ss_nseq) {
                 if(ss_nelem > 0) {
                     /* Try to grab more sequences from src_space */
-                    if(H5S_SELECT_GET_SEQ_LIST(src_space, 0u, &ss_iter, H5S_PROJECT_INTERSECT_NSEQS, ss_nelem, &ss_nseq, &nelem, ss_off, ss_len) < 0)
+                    if(H5S_SELECT_GET_SEQ_LIST(src_space, 0u, ss_iter, H5S_PROJECT_INTERSECT_NSEQS, ss_nelem, &ss_nseq, &nelem, ss_off, ss_len) < 0)
                         HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
                     HDassert(ss_len[0] > 0);
 
@@ -9459,7 +9474,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                     if(sis_nelem > 0) {
                         /* Try to grab more sequences from src_intersect_space
                          */
-                        if(H5S_SELECT_GET_SEQ_LIST(src_intersect_space, 0u, &sis_iter, H5S_PROJECT_INTERSECT_NSEQS, sis_nelem, &sis_nseq, &nelem, sis_off, sis_len) < 0)
+                        if(H5S_SELECT_GET_SEQ_LIST(src_intersect_space, 0u, sis_iter, H5S_PROJECT_INTERSECT_NSEQS, sis_nelem, &sis_nseq, &nelem, sis_off, sis_len) < 0)
                             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
                         HDassert(sis_len[0] > 0);
 
@@ -9511,7 +9526,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
                         HDassert(ds_nelem > 0);
 
                         /* Try to grab more sequences from dst_space */
-                        if(H5S_SELECT_GET_SEQ_LIST(dst_space, 0u, &ds_iter, H5S_PROJECT_INTERSECT_NSEQS, ds_nelem, &ds_nseq, &nelem, ds_off, ds_len) < 0)
+                        if(H5S_SELECT_GET_SEQ_LIST(dst_space, 0u, ds_iter, H5S_PROJECT_INTERSECT_NSEQS, ds_nelem, &ds_nseq, &nelem, ds_off, ds_len) < 0)
                             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
                         HDassert(ds_len[0] > 0);
 
@@ -9625,19 +9640,22 @@ loop_end:
 
 done:
     /* Release source selection iterator */
-    if(ss_iter_init)
-        if(H5S_SELECT_ITER_RELEASE(&ss_iter) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+    if(ss_iter_init && H5S_SELECT_ITER_RELEASE(ss_iter) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+    if(ss_iter)
+        ss_iter = H5FL_FREE(H5S_sel_iter_t, ss_iter);
 
     /* Release destination selection iterator */
-    if(ds_iter_init)
-        if(H5S_SELECT_ITER_RELEASE(&ds_iter) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+    if(ds_iter_init && H5S_SELECT_ITER_RELEASE(ds_iter) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+    if(ds_iter)
+        ds_iter = H5FL_FREE(H5S_sel_iter_t, ds_iter);
 
     /* Release source intersect selection iterator */
-    if(sis_iter_init)
-        if(H5S_SELECT_ITER_RELEASE(&sis_iter) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+    if(sis_iter_init && H5S_SELECT_ITER_RELEASE(sis_iter) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
+    if(sis_iter)
+        sis_iter = H5FL_FREE(H5S_sel_iter_t, sis_iter);
 
     /* Cleanup on error */
     if(ret_value < 0) {

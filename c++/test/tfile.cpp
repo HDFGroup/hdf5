@@ -515,8 +515,6 @@ static void test_file_name()
 }   // test_file_name()
 
 
-#define NUM_OBJS	4
-#define NUM_ATTRS	3
 const int	RANK1 = 1;
 const int	ATTR1_DIM1 = 3;
 const H5std_string	FILE5("tfattrs.h5");
@@ -742,6 +740,70 @@ static void test_libver_bounds()
 } /* end test_libver_bounds() */
 
 /*-------------------------------------------------------------------------
+ * Function:	test_commonfg
+ *
+ * Purpose:	Verify that a file created and modified with the
+ *		specified libver bounds has the specified object header
+ *		versions for the right objects.
+ *
+ * Return:	None
+ *
+ * Programmer:	Binh-Minh Ribler (use C version)
+ *		March, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_commonfg()
+{
+    // Output message about test being performed
+    SUBTEST("Root group");
+
+    try {
+        // Create a file using default properties.
+	H5File file4(FILE4, H5F_ACC_TRUNC);
+
+	// Try opening the root group.
+	Group rootgroup(file4.openGroup(ROOTGROUP));
+
+	// Create a group in the root group.
+	Group group(rootgroup.createGroup(GROUPNAME, 0));
+
+	// Create the data space.
+	hsize_t dims[RANK] = {NX, NY};
+	DataSpace space(RANK, dims);
+
+	// Create a new dataset.
+	DataSet dataset(group.createDataSet (DSETNAME, PredType::NATIVE_INT, space));
+
+	// Get and verify file name via a dataset.
+	H5std_string file_name = dataset.getFileName();
+	verify_val(file_name, FILE4, "DataSet::getFileName", __LINE__, __FILE__);
+
+	// Create an attribute for the dataset.
+	Attribute attr(dataset.createAttribute(DATTRNAME, PredType::NATIVE_INT, space));
+
+	// Get and verify file name via an attribute.
+	file_name = attr.getFileName();
+	verify_val(file_name, FILE4, "Attribute::getFileName", __LINE__, __FILE__);
+
+	// Create an attribute for the file via root group.
+	Attribute rootg_attr(rootgroup.createAttribute(FATTRNAME, PredType::NATIVE_INT, space));
+
+	// Get and verify file name via an attribute.
+	file_name = attr.getFileName();
+	verify_val(file_name, FILE4, "Attribute::getFileName", __LINE__, __FILE__);
+
+	PASSED();
+    }   // end of try block
+
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_commonfg()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+
+} /* end test_commonfg() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_file
  *
  * Purpose:     Main file testing routine
@@ -769,6 +831,7 @@ void test_file()
     test_file_name();	// Test getting file's name
     test_file_attribute();	// Test file attribute feature
     test_libver_bounds();	// Test format version
+    test_commonfg();
 }   // test_file()
 
 
@@ -793,7 +856,7 @@ void cleanup_file()
     HDremove(FILE1.c_str());
     HDremove(FILE2.c_str());
     HDremove(FILE3.c_str());
-    HDremove(FILE4.c_str());
+//    HDremove(FILE4.c_str());
     HDremove(FILE5.c_str());
     HDremove(FILE6.c_str());
 }   // cleanup_file

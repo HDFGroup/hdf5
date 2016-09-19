@@ -455,7 +455,7 @@ test_fs_create(hid_t fapl)
     h5_stat_size_t      file_size, empty_size;  /* File size */
     frspace_state_t 	state;          	/* State of free space*/
     H5FS_create_t 	cparam, test_cparam; 	/* creation parameters */
-    size_t		nclasses;
+    uint16_t		nclasses;
     unsigned		init_flags=0;
 
     TESTING("the creation/close/reopen/deletion of the free-space manager");
@@ -589,7 +589,7 @@ test_fs_sect_add(hid_t fapl)
     H5F_t		*f = NULL;              /* Internal file object pointer */
     H5FS_t      	*frsp = NULL;          	/* pointer to free space structure */
     haddr_t     	fs_addr=HADDR_UNDEF; 	/* address of free space */
-    size_t		nclasses;
+    uint16_t		nclasses;
     H5FS_create_t 	cparam; 		/* creation parameters */
     frspace_state_t 	state;          	/* State of free space*/
 
@@ -921,7 +921,7 @@ test_fs_sect_find(hid_t fapl)
     H5F_t		*f = NULL;              /* Internal file object pointer */
     H5FS_t      	*frsp = NULL;          	/* pointer to free space structure */
     haddr_t     	fs_addr=HADDR_UNDEF; 	/* address of free space */
-    size_t		nclasses;
+    uint16_t		nclasses;
     H5FS_create_t 	cparam; 		/* creation parameters */
     frspace_state_t 	state;          	/* State of free space*/
 
@@ -1302,7 +1302,7 @@ test_fs_sect_merge(hid_t fapl)
     H5F_t		*f = NULL;              /* Internal file object pointer */
     H5FS_t      	*frsp = NULL;          	/* pointer to free space structure */
     haddr_t     	fs_addr=HADDR_UNDEF; 	/* address of free space */
-    size_t		nclasses;
+    uint16_t		nclasses;
     H5FS_create_t 	cparam; 		/* creation parameters */
     frspace_state_t 	state;          	/* State of free space*/
 
@@ -1768,7 +1768,7 @@ test_fs_sect_shrink(hid_t fapl)
     H5F_t		*f = NULL;              /* Internal file object pointer */
     H5FS_t      	*frsp = NULL;          	/* pointer to free space structure */
     haddr_t     	fs_addr=HADDR_UNDEF; 	/* address of free space */
-    size_t		nclasses;
+    uint16_t		nclasses;
     H5FS_create_t 	cparam; 		/* creation parameters */
     frspace_state_t 	state;          	/* State of free space*/
 
@@ -2106,7 +2106,7 @@ test_fs_sect_change_class(hid_t fapl)
     H5F_t		*f = NULL;              /* Internal file object pointer */
     H5FS_t      	*frsp = NULL;          	/* pointer to free space structure */
     haddr_t     	fs_addr=HADDR_UNDEF; 	/* address of free space */
-    size_t		nclasses;
+    uint16_t		nclasses;
     H5FS_create_t 	cparam; 		/* creation parameters */
     frspace_state_t 	state;          	/* State of free space*/
 
@@ -2396,7 +2396,7 @@ test_fs_sect_extend(hid_t fapl)
     H5F_t		*f = NULL;              /* Internal file object pointer */
     H5FS_t      	*frsp = NULL;          	/* pointer to free space structure */
     haddr_t     	fs_addr=HADDR_UNDEF; 	/* address of free space */
-    size_t		nclasses;
+    uint16_t		nclasses;
     H5FS_create_t 	cparam; 		/* creation parameters */
     frspace_state_t 	state;          	/* State of free space*/
     TEST_free_section_t *sect_node1=NULL, *sect_node2=NULL;
@@ -2744,7 +2744,7 @@ test_fs_sect_iterate(hid_t fapl)
     H5F_t		*f = NULL;              /* Internal file object pointer */
     H5FS_t      	*frsp = NULL;          	/* pointer to free space structure */
     haddr_t     	fs_addr=HADDR_UNDEF; 	/* address of free space */
-    size_t		nclasses;
+    uint16_t		nclasses;
     H5FS_create_t 	cparam; 		/* creation parameters */
 
     TEST_free_section_t 	*sect_node=NULL;
