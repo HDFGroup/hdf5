@@ -1612,10 +1612,10 @@ H5P__subfiling_selection_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UN
     /* Sanity check */
     HDassert(value);
 
-    /* Get the FAPL ID */
+    /* Get the space ID */
     space_id = (*(const hid_t *)value);
 
-    /* Duplicate the FAPL, if it's non-default */
+    /* Duplicate the space, if it's non-default */
     if(space_id != H5I_INVALID_HID) {
         H5S_t *space = NULL, *space_copy = NULL;
 

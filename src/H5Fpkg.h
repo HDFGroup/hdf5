@@ -320,11 +320,10 @@ struct H5F_t {
 #ifdef H5_HAVE_PARALLEL
     H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */
     hbool_t             coll_md_write;  /* Do all metadata writes collectively */
-    unsigned            subfile_num_groups; /* Number of process groups accessing the file's subfiles */
     char                *subfile_name; /* name of the subfile this process is accessing */
     MPI_Comm            subfile_comm; /* the subfiling communicator for the process accessing the subfile */
     MPI_Info            subfile_info; /* the info object for the process accessing the subfile */
-    H5F_t               *subfile;
+    struct H5F_t        *subfile;
 #endif /* H5_HAVE_PARALLEL */
 };
 
