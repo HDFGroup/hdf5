@@ -181,7 +181,6 @@ h5str_sprintf
     char           *this_str;
     size_t          this_strlen;
     int             n;
-    int             len;
     hvl_t          *vlptr;
     char           *cptr = (char*) ptr;
     unsigned char  *ucptr = (unsigned char*) ptr;
@@ -522,7 +521,6 @@ h5str_print_region_data_blocks
     hsize_t     *count = NULL;
     hsize_t      blkndx;
     hsize_t      total_size[H5S_MAX_RANK];
-    unsigned int region_flags; /* buffer extent flags */
     hsize_t      numelem;
     hsize_t      numindex;
     size_t       jndx;
@@ -622,7 +620,6 @@ h5str_dump_region_blocks_data
     hsize_t   *ptdata;
     hid_t      dtype = -1;
     hid_t      type_id = -1;
-    char       tmp_str[256];
     int        ndims = H5Sget_simple_extent_ndims(region);
 
     /*
@@ -634,8 +631,6 @@ h5str_dump_region_blocks_data
 
     /* Print block information */
     if (nblocks > 0) {
-        int i;
-
         alloc_size = (hsize_t)nblocks * (hsize_t)ndims * 2 * (hsize_t)sizeof(ptdata[0]);
         if (alloc_size == (hsize_t)((size_t) alloc_size)) {
             ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
@@ -745,13 +740,10 @@ h5str_print_region_data_points
     hsize_t        *dims1 = NULL;
     hsize_t         total_size[H5S_MAX_RANK];
     size_t          jndx;
-    unsigned        indx;
     size_t          type_size;
     int             ret_value = SUCCEED;
-    unsigned int    region_flags; /* buffer extent flags */
     hid_t           mem_space = -1;
     void           *region_buf = NULL;
-    char            tmp_str[256];
 
     /* Allocate space for the dimension array */
     if((dims1 = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)ndims)) != NULL) {
@@ -810,7 +802,6 @@ h5str_dump_region_points_data
     hssize_t   npoints;
     hsize_t    alloc_size;
     hsize_t   *ptdata;
-    char       tmp_str[256];
     hid_t      dtype = -1;
     hid_t      type_id = -1;
     int        ndims = H5Sget_simple_extent_ndims(region);
@@ -824,8 +815,6 @@ h5str_dump_region_points_data
 
     /* Print point information */
     if (npoints > 0) {
-        int i;
-
         alloc_size = (hsize_t)npoints * (hsize_t)ndims * (hsize_t)sizeof(ptdata[0]);
         if (alloc_size == (hsize_t)((size_t) alloc_size)) {
             ptdata = (hsize_t *)HDmalloc((size_t) alloc_size);
@@ -1297,7 +1286,7 @@ h5str_render_bin_output
                 case H5T_ARRAY:
                 {
                     int     k, ndims;
-                    hsize_t i, dims[H5S_MAX_RANK], temp_nelmts, nelmts;
+                    hsize_t dims[H5S_MAX_RANK], temp_nelmts, nelmts;
                     hid_t   memb;
 
                     /* get the array's base datatype for each element */
@@ -1325,7 +1314,6 @@ h5str_render_bin_output
                 break;
                 case H5T_VLEN:
                 {
-                    unsigned int i;
                     hsize_t      nelmts;
                     hid_t        memb;
 
@@ -1416,7 +1404,6 @@ render_bin_output_region_data_blocks
     hsize_t     *start = NULL;
     hsize_t     *count = NULL;
     hsize_t      numelem;
-    hsize_t      numindex;
     hsize_t      total_size[H5S_MAX_RANK];
     int          jndx;
     size_t       type_size;
@@ -1587,7 +1574,6 @@ render_bin_output_region_data_points
         hid_t container, int ndims, hid_t type_id, hssize_t npoints, hsize_t *ptdata)
 {
     hsize_t *dims1 = NULL;
-    int      jndx;
     size_t   type_size;
     hid_t    mem_space = -1;
     void    *region_buf = NULL;
@@ -1705,7 +1691,6 @@ h5str_dump_simple_dset
     int                 ndims;
     int                 carry;                    /* counter carry value */
     hsize_t             zero[8];                  /* vector of zeros */
-    unsigned int        flags;                    /* buffer extent flags */
     hsize_t             total_size[H5S_MAX_RANK]; /* total size of dataset*/
 
     /* Print info */
@@ -1862,7 +1847,6 @@ h5tools_dump_simple_data
     int                line_count;
     unsigned char     *mem  = (unsigned char*)_mem;
     size_t             size;   /* datum size */
-    H5T_class_t        type_class;
     hsize_t            i;         /*element counter  */
     h5str_t            buffer;    /*string into which to render */
 
