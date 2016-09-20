@@ -92,6 +92,7 @@ add_custom_command (
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5match_types
 )
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5fortran_types.F90 PROPERTIES GENERATED TRUE)
 
 #-----------------------------------------------------------------------------
 # f90CStub lib
@@ -114,7 +115,6 @@ set (f90CStub_C_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Tf.c
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zf.c
 )
-
 set_source_files_properties (${f90CStub_C_SOURCES} PROPERTIES LANGUAGE C)
 
 set (f90CStub_C_HDRS
@@ -163,17 +163,14 @@ add_custom_command (
     OUTPUT ${HDF5_F90_SRC_BINARY_DIR}/H5_gen.F90
     COMMAND ${CMD}
     DEPENDS ${f90_F_GEN_SOURCES}
+    COMMENT "Generating H5_gen.F90"
 )
 add_custom_target (H5gen ALL
-#v3.2    BYPRODUCT ${HDF5_F90_SRC_BINARY_DIR}/H5_gen.F90
-    #WORKING_DIRECTORY ${HDF5_F90_SRC_BINARY_DIR}
     DEPENDS ${HDF5_F90_SRC_BINARY_DIR}/H5_gen.F90
 )
+set_source_files_properties (${HDF5_F90_SRC_BINARY_DIR}/H5_gen.F90 PROPERTIES GENERATED TRUE)
 
 set (f90_F_BASE_SOURCES
-    # generated files
-    ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
-
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90global.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5fortkit.F90
@@ -192,9 +189,11 @@ set (f90_F_BASE_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Tff.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zff.F90
 )
-set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90 PROPERTIES GENERATED TRUE)
 
 set (f90_F_SOURCES
+    # generated file
+    ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+
     ${f90_F_BASE_SOURCES}
 
     # generated file
