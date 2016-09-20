@@ -164,6 +164,7 @@ set (CMD $<TARGET_FILE:H5_buildiface>)
 add_custom_command (
     OUTPUT ${HDF5_F90_BINARY_DIR}/H5_gen.F90
     COMMAND ${CMD}
+    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS ${f90_F_GEN_SOURCES}
     COMMENT "Generating the H5_gen.F90 file"
 )
@@ -177,6 +178,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_custom_command (
       OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
       COMMAND ${CMDSH}
+      WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
       DEPENDS ${f90_F_GEN_SOURCES}
       COMMENT "Generating the H5_gen.F90 shared file"
   )
