@@ -358,7 +358,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   )
   if (WIN32 AND MSVC)
     target_link_libraries (fortranlib_test_F03-shared "ws2_32.lib")
-  endif (WIN32 AND MSVC)endif (NOT SKIP_HDF5_FORTRAN_SHARED)
+  endif (WIN32 AND MSVC)
 
   target_include_directories (fortranlib_test_F03-shared PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
   set_target_properties (fortranlib_test_F03-shared PROPERTIES
