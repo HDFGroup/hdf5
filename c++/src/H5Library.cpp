@@ -25,10 +25,10 @@
 #include "H5FcreatProp.h"
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5DcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
-#include "H5DcreatProp.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
 #include "H5DataSpace.h"
@@ -82,7 +82,7 @@ void H5Library::close()
 //--------------------------------------------------------------------------
 void H5Library::dontAtExit()
 {
-   herr_t ret_value = H5dont_atexit();
+   (void)H5dont_atexit();
 }
 
 //--------------------------------------------------------------------------

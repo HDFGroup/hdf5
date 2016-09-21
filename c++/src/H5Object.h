@@ -38,7 +38,9 @@
 namespace H5 {
 #endif
 
+// Class forwarding
 class H5_DLLCPP H5Object;
+class H5_DLLCPP Attribute;
 
 // Define the operator function pointer for H5Aiterate().
 typedef void (*attr_operator_t)( H5Object& loc/*in*/,

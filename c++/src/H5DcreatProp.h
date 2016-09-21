@@ -24,6 +24,8 @@
 namespace H5 {
 #endif
 
+class DataType;
+
 /*! \class DSetCreatPropList
     \brief Class DSetCreatPropList represents the dataset creation property
     list.

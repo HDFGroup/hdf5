@@ -164,6 +164,32 @@ int check_values (hsize_t i, hsize_t j, int apoint, int acheck)
 } // check_values
 
 /*-------------------------------------------------------------------------
+ * Function:	check_values
+ *
+ * Purpose:	Checks a char string pointer for NULL.  If it is NULL,
+ *		the function will print out a message
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Binh-Minh Ribler (using C code segment for checking values)
+ *		Friday, September 16, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+void check_values(const char *value, const char* msg, int line, const char* file_name)
+{
+    if (value == NULL)
+    {
+	cerr << endl;
+        cerr << "*** ERROR: " << msg << ", at line " << line << endl;
+	IncTestNumErrs();
+	throw TestFailedException(file_name, msg);
+    }
+}
+
+/*-------------------------------------------------------------------------
  * Function:	verify_val (const char*, const char*,...)
  *
  * Purpose:	Compares two character strings.  If they are
