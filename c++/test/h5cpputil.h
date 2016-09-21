@@ -39,6 +39,7 @@ using std::endl;
 #define SUBTEST(TEST) {printf("   Subtest: %-52s",TEST); fflush(stdout);}
 
 int check_values (hsize_t i, hsize_t j, int apoint, int acheck);
+void check_values(const char *value, const char* msg, int line, const char* file_name);
 int test_report (int, const H5std_string&);
 void issue_fail_msg(const char* where, int line, const char* file_name,
 		    const char* message="");
@@ -60,6 +61,8 @@ class TestFailedException : public Exception {
 };
 
 // Overloaded/Template functions to verify values and display proper info
+
+// Verifies 
 void verify_val(const char* x, const char* value, const char* where, int line, const char* file_name);
 
 template <class Type1, class Type2>
@@ -153,6 +156,7 @@ void test_file();
 void test_filters();
 void test_links();
 void test_h5s();
+void test_iterate();
 void test_object();
 void test_reference();
 void test_types();
@@ -167,8 +171,9 @@ void cleanup_dsproplist();
 void cleanup_dsets();
 void cleanup_file();
 void cleanup_filters();
-void cleanup_links();
 void cleanup_h5s();
+void cleanup_iterate();
+void cleanup_links();
 void cleanup_object();
 void cleanup_reference();
 void cleanup_types();
@@ -182,7 +187,6 @@ void cleanup_vlstrings();
 void cleanup_select(void);
 void cleanup_time(void);
 void cleanup_vltypes(void);
-void cleanup_iterate(void);
 void cleanup_array(void);
 void cleanup_genprop(void);
 void cleanup_misc(void);
