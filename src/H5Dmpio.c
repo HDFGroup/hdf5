@@ -192,11 +192,19 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
             && (H5S_SIMPLE == H5S_GET_EXTENT_TYPE(file_space) || H5S_SCALAR == H5S_GET_EXTENT_TYPE(file_space))))
         local_cause |= H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES;
 
-    /* Dataset storage must be contiguous or chunked */
+    /* Dataset storage must be contiguous or chunked or virtual with subfiling enabled */
     if(!(io_info->dset->shared->layout.type == H5D_CONTIGUOUS ||
          io_info->dset->shared->layout.type == H5D_CHUNKED ||
          io_info->dset->shared->layout.type == H5D_VIRTUAL))
         local_cause |= H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET;
+
+    /* break collective if layout is virtual, parallel access, no subfiling, read-only case */
+    if(io_info->dset->shared->layout.type == H5D_VIRTUAL &&
+       H5F_SUBFILE(io_info->dset->oloc.file) == NULL &&
+       H5F_HAS_FEATURE(io_info->dset->oloc.file, H5FD_FEAT_HAS_MPI) && 
+       H5F_INTENT(io_info->dset->oloc.file) == H5F_ACC_RDONLY) {
+        local_cause |= H5D_MPIO_VDS_PARALLEL_READ;
+    }
 
     /* check if external-file storage is used */
     if(io_info->dset->shared->dcpl_cache.efl.nused > 0)

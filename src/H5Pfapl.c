@@ -192,28 +192,11 @@
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEF    FALSE
 #define H5F_ACS_COLL_MD_WRITE_FLAG_ENC    H5P__encode_hbool_t
 #define H5F_ACS_COLL_MD_WRITE_FLAG_DEC    H5P__decode_hbool_t
-/* Definitions for number of groups to do subfiling with */
-#define H5F_ACS_NUM_SUBFILE_GROUPS_SIZE     sizeof(unsigned)
-#define H5F_ACS_NUM_SUBFILE_GROUPS_DEF      (0)
-#define H5F_ACS_NUM_SUBFILE_GROUPS_ENC      H5P__encode_unsigned
-#define H5F_ACS_NUM_SUBFILE_GROUPS_DEC      H5P__decode_unsigned
 /* Definitions for subfiling source filename */
-#define H5F_ACS_SUBFILING_FILENAME_SIZE        sizeof(char *)
-#define H5F_ACS_SUBFILING_FILENAME_DEF         NULL /*default is no prefix */
-#define H5F_ACS_SUBFILING_FILENAME_SET         H5P__subfiling_filename_set
-#define H5F_ACS_SUBFILING_FILENAME_GET         H5P__subfiling_filename_get
-#define H5F_ACS_SUBFILING_FILENAME_ENC         H5P__subfiling_filename_enc
-#define H5F_ACS_SUBFILING_FILENAME_DEC         H5P__subfiling_filename_dec
-#define H5F_ACS_SUBFILING_FILENAME_DEL         H5P__subfiling_filename_del
-#define H5F_ACS_SUBFILING_FILENAME_COPY        H5P__subfiling_filename_copy
-#define H5F_ACS_SUBFILING_FILENAME_CMP         H5P__subfiling_filename_cmp
-#define H5F_ACS_SUBFILING_FILENAME_CLOSE       H5P__subfiling_filename_close
-/* Definition of the subfiling communicator */
-#define H5F_ACS_SUBFILE_COMM_SIZE       sizeof(MPI_Comm)
-#define H5F_ACS_SUBFILE_COMM_DEF        MPI_COMM_NULL
-/* Definition of the subfiling info object */
-#define H5F_ACS_SUBFILE_INFO_SIZE       sizeof(MPI_Info)
-#define H5F_ACS_SUBFILE_INFO_DEF        MPI_INFO_NULL
+#define H5F_ACS_SUBFILING_CONFIG_SIZE        sizeof(H5F_subfiling_config_t)
+#define H5F_ACS_SUBFILING_CONFIG_DEF         {NULL, MPI_COMM_NULL, MPI_INFO_NULL}
+#define H5F_ACS_SUBFILING_CONFIG_COPY        H5P__subfiling_config_copy
+#define H5F_ACS_SUBFILING_CONFIG_CLOSE       H5P__subfiling_config_close
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -264,14 +247,14 @@ static herr_t H5P__facc_multi_type_dec(const void **_pp, void *value);
 
 #ifdef H5_HAVE_PARALLEL
 /* subfiling file name callbacks */
-static herr_t H5P__subfiling_filename_set(hid_t prop_id, const char* name, size_t size, void* value);
-static herr_t H5P__subfiling_filename_get(hid_t prop_id, const char* name, size_t size, void* value);
-static herr_t H5P__subfiling_filename_enc(const void *value, void **_pp, size_t *size);
-static herr_t H5P__subfiling_filename_dec(const void **_pp, void *value);
-static herr_t H5P__subfiling_filename_del(hid_t prop_id, const char* name, size_t size, void* value);
-static herr_t H5P__subfiling_filename_copy(const char* name, size_t size, void* value);
-static int H5P__subfiling_filename_cmp(const void *value1, const void *value2, size_t size);
-static herr_t H5P__subfiling_filename_close(const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_config_set(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_config_get(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_config_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__subfiling_config_dec(const void **_pp, void *value);
+static herr_t H5P__subfiling_config_del(hid_t prop_id, const char* name, size_t size, void* value);
+static herr_t H5P__subfiling_config_copy(const char* name, size_t size, void* value);
+static int H5P__subfiling_config_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__subfiling_config_close(const char* name, size_t size, void* value);
 #endif /* H5_HAVE_PARALLEL */
 
 /*********************/
@@ -333,10 +316,7 @@ static const H5F_object_flush_t H5F_def_object_flush_cb_g = H5F_ACS_OBJECT_FLUSH
 #ifdef H5_HAVE_PARALLEL
 static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_MD_READ_FLAG_DEF;  /* Default setting for the collective metedata read flag */
 static const hbool_t H5F_def_coll_md_write_flag_g = H5F_ACS_COLL_MD_WRITE_FLAG_DEF;  /* Default setting for the collective metedata write flag */
-static const unsigned H5F_def_num_subfile_groups_g = H5F_ACS_NUM_SUBFILE_GROUPS_DEF; /* Default number of groups for subfiling */
-static const char *H5F_def_subfile_name_g = H5F_ACS_SUBFILING_FILENAME_DEF;
-static const MPI_Comm H5F_def_subfile_comm_g = H5F_ACS_SUBFILE_COMM_DEF; /* Default communicator for subfiling */
-static const MPI_Info H5F_def_subfile_info_g = H5F_ACS_SUBFILE_INFO_DEF; /* Default info object for subfiling */
+static const H5F_subfiling_config_t H5F_def_subfiling_config_g = H5F_ACS_SUBFILING_CONFIG_DEF;
 #endif /* H5_HAVE_PARALLEL */
 
 
@@ -513,27 +493,12 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
             NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the number of subfiling groups */
-    if(H5P_register_real(pclass, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, H5F_ACS_NUM_SUBFILE_GROUPS_SIZE, &H5F_def_num_subfile_groups_g, 
-            NULL, NULL, NULL, H5F_ACS_NUM_SUBFILE_GROUPS_ENC, H5F_ACS_NUM_SUBFILE_GROUPS_DEC, 
-            NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register property for subfiling filename */
-    if(H5P_register_real(pclass, H5F_ACS_SUBFILING_FILENAME_NAME, H5F_ACS_SUBFILING_FILENAME_SIZE, &H5F_def_subfile_name_g, 
-            NULL, H5F_ACS_SUBFILING_FILENAME_SET, H5F_ACS_SUBFILING_FILENAME_GET, H5F_ACS_SUBFILING_FILENAME_ENC, H5F_ACS_SUBFILING_FILENAME_DEC,
-            H5F_ACS_SUBFILING_FILENAME_DEL, H5F_ACS_SUBFILING_FILENAME_COPY, H5F_ACS_SUBFILING_FILENAME_CMP, H5F_ACS_SUBFILING_FILENAME_CLOSE) < 0)
+    /* Register property for subfiling config */
+    if(H5P_register_real(pclass, H5F_ACS_SUBFILING_CONFIG_NAME, H5F_ACS_SUBFILING_CONFIG_SIZE, &H5F_def_subfiling_config_g, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, 
+                         H5F_ACS_SUBFILING_CONFIG_COPY, NULL, H5F_ACS_SUBFILING_CONFIG_CLOSE) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the Subfiling Communicator */
-    if(H5P_register_real(pclass, H5F_ACS_SUBFILE_COMM_NAME, H5F_ACS_SUBFILE_COMM_SIZE, &H5F_def_subfile_comm_g, 
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the Subfiling Info object */
-    if(H5P_register_real(pclass, H5F_ACS_SUBFILE_INFO_NAME, H5F_ACS_SUBFILE_INFO_SIZE, &H5F_def_subfile_info_g, 
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 #endif /* H5_HAVE_PARALLEL */
 
 done:
@@ -3933,199 +3898,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5P__subfiling_filename_set
- *
- * Purpose:     Copies the subfiling filename when it's set in the plist
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- * Programmer:  Mohamad Chaarawi, March 2016
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__subfiling_filename_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Sanity check */
-    HDassert(value);
-
-    /* Copy the subfile name if it is set */
-    if(*(char **)value)
-        *(char **)value = H5MM_xstrdup(*(const char **)value);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__subfiling_filename_set() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5P__subfiling_filename_get
- *
- * Purpose:     Copies the subfiling filename when it's retrieved from a property list
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- * Programmer:  Mohamad Chaarawi, March 2016
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__subfiling_filename_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Sanity check */
-    HDassert(value);
-
-    /* Copy the filename */
-    if(*(char **)value)
-        *(char **)value = H5MM_xstrdup(*(const char **)value);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__subfiling_filename_get() */
-
-
-/*-------------------------------------------------------------------------
- * Function:       H5P__subfiling_filename_enc
- *
- * Purpose:        Callback routine which is called whenever the subfiling
- *                 file name property is encoded.
- *
- * Return:	   Success:	Non-negative
- *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi, March 2016
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__subfiling_filename_enc(const void *value, void **_pp, size_t *size)
-{
-    const char *filename = *(const char * const *)value;
-    uint8_t **pp = (uint8_t **)_pp;
-    size_t len = 0;
-    uint64_t enc_value;
-    unsigned enc_size;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-
-    /* calculate prefix length */
-    if(NULL != filename)
-        len = HDstrlen(filename);
-
-    enc_value = (uint64_t)len;
-    enc_size = H5VM_limit_enc_size(enc_value);
-    HDassert(enc_size < 256);
-
-    if(NULL != *pp) {
-        /* encode the length of the filename */
-        *(*pp)++ = (uint8_t)enc_size;
-        UINT64ENCODE_VAR(*pp, enc_value, enc_size);
-
-        /* encode the filename */
-        if(NULL != filename) {
-            HDmemcpy(*(char **)pp, filename, len);
-            *pp += len;
-        } /* end if */
-    } /* end if */
-
-    *size += (1 + enc_size);
-    if(NULL != filename)
-        *size += len;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__subfiling_filename_enc() */
-
-
-/*-------------------------------------------------------------------------
- * Function:       H5P__subfiling_filename_dec
- *
- * Purpose:        Callback routine which is called whenever the subfiling
- *                 file name property is decoded.
- *
- * Return:	   Success:	Non-negative
- *		   Failure:	Negative
- *
- * Programmer:     Mohamad Chaarawi, March 2016
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__subfiling_filename_dec(const void **_pp, void *_value)
-{
-    char **filename = (char **)_value;
-    const uint8_t **pp = (const uint8_t **)_pp;
-    size_t len;
-    uint64_t enc_value;                 /* Decoded property value */
-    unsigned enc_size;                  /* Size of encoded property */
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    HDassert(pp);
-    HDassert(*pp);
-    HDassert(filename);
-    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
-
-    /* Decode the size */
-    enc_size = *(*pp)++;
-    HDassert(enc_size < 256);
-
-    /* Decode the value */
-    UINT64DECODE_VAR(*pp, enc_value, enc_size);
-    len = (size_t)enc_value;
-
-    if(0 != len) {
-        /* Make a copy of the user's prefix string */
-        if(NULL == (*filename = (char *)H5MM_malloc(len + 1)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix")
-        HDstrncpy(*filename, *(const char **)pp, len);
-        (*filename)[len] = '\0';
-
-        *pp += len;
-    } /* end if */
-    else
-        *filename = NULL;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P__subfiling_filename_dec() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5P__subfiling_filename_del
- *
- * Purpose:     Frees memory used to store the subfiling filename
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Mohamad Chaarawi, March 2016
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__subfiling_filename_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    HDassert(value);
-
-    H5MM_xfree(*(void **)value);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__subfiling_filename_del() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5P__subfiling_filename_copy
+ * Function:    H5P__subfiling_config_copy
  *
  * Purpose:     Creates a copy of the subfiling file name string
  *
@@ -4136,53 +3909,34 @@ H5P__subfiling_filename_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNU
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__subfiling_filename_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+H5P__subfiling_config_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
+    H5F_subfiling_config_t *config = (H5F_subfiling_config_t *)value; /* Create local aliases for values */
+    H5F_subfiling_config_t new_config;
+
     FUNC_ENTER_STATIC_NOERR
 
     HDassert(value);
 
-    *(char **)value = H5MM_xstrdup(*(const char **)value);
+    if(config->file_name) {
+        new_config.file_name = H5MM_strdup(config->file_name);
+        new_config.comm = config->comm;
+        new_config.info = config->info;
+    }
+    else {
+        new_config.file_name = NULL;
+        new_config.comm = MPI_COMM_NULL;
+        new_config.info = MPI_INFO_NULL;
+    }
+
+    *config = new_config;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__subfiling_filename_copy() */
+} /* end H5P__subfiling_config_copy() */
 
 
 /*-------------------------------------------------------------------------
- * Function:       H5P__subfiling_filename_cmp
- *
- * Purpose:        Callback routine which is called whenever the subfiling
- *                 filename property is compared.
- *
- * Return:         zero if VALUE1 and VALUE2 are equal, non zero otherwise.
- *
- * Programmer:     Mohamad Chaarawi, March 2016
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5P__subfiling_filename_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
-{
-    const char *name1 = *(const char * const *)value1;
-    const char *name2 = *(const char * const *)value2;
-    int ret_value = 0;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    if(NULL == name1 && NULL != name2)
-        HGOTO_DONE(1);
-    if(NULL != name1 && NULL == name2)
-        HGOTO_DONE(-1);
-    if(NULL != name1 && NULL != name2)
-        ret_value = HDstrcmp(name1, name2);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P__subfiling_filename_cmp() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5P__subfiling_filename_close
+ * Function:    H5P__subfiling_config_close
  *
  * Purpose:     Frees memory used to store the subfiling filename property
  *
@@ -4193,16 +3947,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__subfiling_filename_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+H5P__subfiling_config_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
+    H5F_subfiling_config_t *config = (H5F_subfiling_config_t *)value; /* Create local aliases for values */
+
     FUNC_ENTER_STATIC_NOERR
 
     HDassert(value);
 
-    H5MM_xfree(*(void **)value);
+    config->file_name = (char *)H5MM_xfree(config->file_name);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__subfiling_filename_close() */
+} /* end H5P__subfiling_config_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -4218,14 +3974,14 @@ H5P__subfiling_filename_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UN
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_subfiling_access(hid_t plist_id, unsigned num_groups, const char *subfile_name, 
-                        MPI_Comm comm, MPI_Info info)
+H5Pset_subfiling_access(hid_t plist_id, const char *subfile_name, MPI_Comm comm, MPI_Info info)
 {
+    H5F_subfiling_config_t config;
     H5P_genplist_t *plist = NULL;       /* Property list pointer */
     herr_t ret_value = SUCCEED;         /* return value */ 
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIu*sMcMi", plist_id, num_groups, subfile_name, comm, info);
+    H5TRACE4("e", "i*sMcMi", plist_id, subfile_name, comm, info);
 
     /* Check arguments */
     if(!subfile_name)
@@ -4235,17 +3991,19 @@ H5Pset_subfiling_access(hid_t plist_id, unsigned num_groups, const char *subfile
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    if(H5P_set(plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, &num_groups) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set number of groups for subfiling")
+    if(H5P_peek(plist, H5F_ACS_SUBFILING_CONFIG_NAME, &config) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling configuration")
 
-    if(H5P_set(plist, H5F_ACS_SUBFILING_FILENAME_NAME, &subfile_name) < 0)
+    config.file_name = (char *)H5MM_xfree(config.file_name);
+
+    if(NULL == (config.file_name = H5MM_strdup(subfile_name)))
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate subfile name")
+    config.comm = comm;
+    config.info = info;
+
+    if(H5P_poke(plist, H5F_ACS_SUBFILING_CONFIG_NAME, &config) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile name")
 
-    if(H5P_set(plist, H5F_ACS_SUBFILE_COMM_NAME, &comm) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile communicator")
-
-    if(H5P_set(plist, H5F_ACS_SUBFILE_INFO_NAME, &info) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set subfile info object")
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_subfiling_access() */
@@ -4263,42 +4021,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_subfiling_access(hid_t plist_id, unsigned *num_groups, char **subfile_name,
-                        MPI_Comm *comm, MPI_Info *info)
+H5Pget_subfiling_access(hid_t plist_id, char **subfile_name, MPI_Comm *comm, MPI_Info *info)
 {
+    H5F_subfiling_config_t config;
     H5P_genplist_t *plist;              /* Property list pointer */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*Iu**s*Mc*Mi", plist_id, num_groups, subfile_name, comm, info);
+    H5TRACE4("e", "i**s*Mc*Mi", plist_id, subfile_name, comm, info);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* Get value(s) */
-    if(num_groups)
-        if(H5P_get(plist, H5F_ACS_NUM_SUBFILE_GROUPS_NAME, num_groups) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of groups for subfiling")
+    if(H5P_peek(plist, H5F_ACS_SUBFILING_CONFIG_NAME, &config) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling configuration")
 
-    if(subfile_name) {
-        const char *temp_name;
-
-        /* Get the subfile name */
-        if(H5P_peek(plist, H5F_ACS_SUBFILING_FILENAME_NAME, &temp_name) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get the subfile name")
-
-        if(temp_name)
-            *subfile_name = HDstrdup(temp_name);
-    }
-
+    if(subfile_name)
+        *subfile_name = HDstrdup(config.file_name);
     if(comm)
-        if(H5P_get(plist, H5F_ACS_SUBFILE_COMM_NAME, comm) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling communicator")
-
+        *comm = config.comm;
     if(info)
-        if(H5P_get(plist, H5F_ACS_SUBFILE_INFO_NAME, info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get subfiling info object")
+        *info = config.info;
 
 done:
     FUNC_LEAVE_API(ret_value)

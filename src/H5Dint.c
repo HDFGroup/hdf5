@@ -83,7 +83,7 @@ static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overw
     hsize_t old_dim[]);
 static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
 #ifdef H5_HAVE_PARALLEL
-static herr_t H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, 
+static herr_t H5D__subfiling_init(H5D_t *dset, H5G_loc_t *loc, const char *name, hid_t type_id, 
                                   hid_t *dcpl_id, hid_t dapl_id, hid_t dxpl_id);
 static int H5D__subfiling_init_cb(void *item, void *key, void *_op_data);
 static herr_t H5D__subfiling_dest_cb(void *item, void *key, void *op_data);
@@ -1160,15 +1160,15 @@ H5D__create(H5F_t *file, H5G_loc_t *loc, const char *name, hid_t type_id, const 
     if(!H5S_has_extent(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set.")
 
-#ifdef H5_HAVE_PARALLEL
-    /* check for subfiling and set virtual layout if subfiling is requested */
-    if(H5D__subfiling_init(loc, name, type_id, &dcpl_id, dapl_id, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't subfile dataset")
-#endif /* H5_HAVE_PARALLEL */
-
     /* Initialize the dataset object */
     if(NULL == (new_dset = H5FL_CALLOC(H5D_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+#ifdef H5_HAVE_PARALLEL
+    /* check for subfiling and set virtual layout if subfiling is requested */
+    if(H5D__subfiling_init(new_dset, loc, name, type_id, &dcpl_id, dapl_id, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't subfile dataset")
+#endif /* H5_HAVE_PARALLEL */
 
     /* Set up & reset dataset location */
     dset_loc.oloc = &(new_dset->oloc);
@@ -3713,7 +3713,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id, 
+H5D__subfiling_init(H5D_t *dset, H5G_loc_t *loc, const char *name, hid_t type_id, hid_t *dcpl_id, 
                     hid_t dapl_id, hid_t dxpl_id)
 {
     H5F_t *file = loc->oloc->file;
@@ -3722,7 +3722,7 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
     int *size_array = NULL, *displs = NULL;
     void *send_buf = NULL, *recv_buf = NULL;
     char *dset_name = NULL;
-    int mpi_size = 0, mpi_rank, i;
+    int mpi_size = 0, i;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -3749,6 +3749,9 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
         uint8_t *p; /* pointer used to encode the send buffer */
         const uint8_t *rp; /* pointer used to decode the recieve buffer */
 
+        if(NULL == subfile_name)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't create a subfiled dataset without subfiling enabled on the file")
+
         /* Get the property list structure */
         if(NULL == (dcpl = (H5P_genplist_t *)H5I_object(*dcpl_id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for dcpl id")
@@ -3763,7 +3766,6 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
 
         mpi_comm = H5F_mpi_get_comm(file);
         mpi_size = H5F_mpi_get_size(file);
-        mpi_rank = H5F_mpi_get_rank(file);
 
         if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
             HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dataspace")
@@ -3790,13 +3792,6 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
         p += name_len;
         if(H5S_encode(space, &p, &space_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
-
-                /*
-        if(0 == file->shared->num_subfiles)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Number of subfiles is not set on file creation")
-        if(MPI_COMM_NULL == file->subfiling_comm)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Subfiling communicator is not set for file access")
-                */
 
         if(mpi_size > 1) {
             int temp_size;
@@ -3903,7 +3898,11 @@ H5D__subfiling_init(H5G_loc_t *loc, char *name, hid_t type_id, hid_t *dcpl_id,
 
         if(H5SL_destroy(subfile_map, H5D__subfiling_dest_cb, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "failed to destroy subfile skip list")
+
+        if(NULL == (dset->subfile_selection = H5S_copy(space, FALSE, TRUE)))
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy dataspace")
     }
+
 done:
     if(size_array) {
         HDfree(size_array);
