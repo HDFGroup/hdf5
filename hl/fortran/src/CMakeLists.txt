@@ -185,6 +185,7 @@ if (WIN32)
   )
 endif (WIN32)
 set (install_targets ${install_targets} ${HDF5_HL_F90_LIB_TARGET})
+add_dependencies(${HDF5_HL_F90_LIB_TARGET} H5HLgen)
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_library (${HDF5_HL_F90_LIBSH_TARGET} SHARED ${HDF5_HL_F90_F_SOURCES_SHARED})
@@ -209,6 +210,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     )
   endif (WIN32)
   set (install_targets ${install_targets} ${HDF5_HL_F90_LIBSH_TARGET})
+  add_dependencies(${HDF5_HL_F90_LIBSH_TARGET} H5HLgenSH)
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-----------------------------------------------------------------------------

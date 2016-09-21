@@ -148,6 +148,8 @@ if (WIN32)
         COMPILE_DEFINITIONS "HDF5F90_WINDOWS"
     )
 endif (WIN32)
+add_dependencies(${HDF5_F90_TEST_LIB_TARGET} H5testgen)
+
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED ${HDF5_F90_TF_SOURCES_SHARED})
   set (SHARED_LINK_FLAGS " ")
@@ -175,6 +177,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
         COMPILE_DEFINITIONS "BUILD_HDF5_TEST_DLL;HDF5F90_WINDOWS"
     )
   endif (WIN32)
+  add_dependencies(${HDF5_F90_TEST_LIBSH_TARGET} H5testgenSH)
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-----------------------------------------------------------------------------
