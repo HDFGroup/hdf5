@@ -138,7 +138,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
       DEPENDS ${HDF5_HL_F90_F_BASE_SOURCES}
       COMMENT "Generating the H5LTff_gen.F90, H5TBff_gen.F90 shared files"
   )
-  add_custom_target (H5HLgen ALL
+  add_custom_target (H5HLgenSH ALL
       DEPENDS ${HDF5_HL_F90_SRC_BINARY_DIR}/shared/H5LTff_gen.F90 ${HDF5_HL_F90_SRC_BINARY_DIR}/shared/H5TBff_gen.F90
   )
   set_source_files_properties (
