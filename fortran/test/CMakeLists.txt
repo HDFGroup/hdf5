@@ -32,13 +32,19 @@ set_target_properties (H5_test_buildiface PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
-if (NOT SKIP_HDF5_FORTRAN_SHARED)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/shared")
   if (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
+    set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/\${BUILD_TYPE})
   else (WIN32)
-    set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+    set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
   endif (WIN32)
-endif (NOT SKIP_HDF5_FORTRAN_SHARED)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (WIN32)
+  set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static/\${BUILD_TYPE})
+else (WIN32)
+  set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+endif (WIN32)
 
 INCLUDE_DIRECTORIES (${CMAKE_Fortran_MODULE_DIRECTORY} ${MOD_BUILD_DIR})
 
@@ -75,29 +81,54 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   )
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
-set (HDF5_F90_TF_SOURCES
-     # generated files
-     ${HDF5_F90_BINARY_DIR}/tf_gen.F90
-)
-set_source_files_properties (
-    ${HDF5_F90_BINARY_DIR}/tf_gen.F90
-    PROPERTIES GENERATED TRUE
-)
-set_source_files_properties (tf.F90 ${HDF5_F90_BINARY_DIR}/${HDF5_F90_TF_SOURCES} PROPERTIES LANGUAGE Fortran)
-
 set (CMD $<TARGET_FILE:H5_test_buildiface>)
-add_custom_target (H5testgen ALL
+add_custom_command (
+    OUTPUT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
     COMMAND ${CMD}
-#v3.2    BYPRODUCT ${HDF5_F90_BINARY_DIR}/tf_gen.F90
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5_test_buildiface
+    COMMENT "Generating the tf_gen.F90 file"
 )
+add_custom_target (H5testgen ALL
+    DEPENDS ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+)
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/tf_gen.F90 PROPERTIES GENERATED TRUE)
 
-add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC tf.F90 ${HDF5_F90_TF_SOURCES})
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-   add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED tf.F90 ${HDF5_F90_TF_SOURCES})
+  set (CMDSH $<TARGET_FILE:H5_test_buildiface>)
+  add_custom_command (
+      OUTPUT ${HDF5_F90_BINARY_DIR}/shared/tf_gen.F90
+      COMMAND ${CMDSH}
+      WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
+      DEPENDS H5_test_buildiface
+      COMMENT "Generating the tf_gen.F90 shared file"
+  )
+  add_custom_target (H5testgenSH ALL
+      DEPENDS ${HDF5_F90_BINARY_DIR}/shared/tf_gen.F90
+  )
+  set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/tf_gen.F90 PROPERTIES GENERATED TRUE)
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
+set (HDF5_F90_TF_SOURCES
+    # generated files
+    ${HDF5_F90_BINARY_DIR}/tf_gen.F90
+
+    # normal distribution
+    tf.F90
+)
+set_source_files_properties (${HDF5_F90_TF_SOURCES} PROPERTIES LANGUAGE Fortran)
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  set (HDF5_F90_TF_SOURCES_SHARED
+      # generated file
+      ${HDF5_F90_BINARY_DIR}/shared/tf_gen.F90
+
+      # normal distribution
+      tf.F90
+  )
+  set_source_files_properties (${HDF5_F90_TF_SOURCES_SHARED} PROPERTIES LANGUAGE Fortran)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+
+add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC ${HDF5_F90_TF_SOURCES})
 TARGET_FORTRAN_PROPERTIES (${HDF5_F90_TEST_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_C_TEST_LIB_TARGET}
@@ -118,6 +149,7 @@ if (WIN32)
     )
 endif (WIN32)
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED ${HDF5_F90_TF_SOURCES_SHARED})
   set (SHARED_LINK_FLAGS " ")
   if (WIN32 AND MSVC)
     set (SHARED_LINK_FLAGS "/DLL")
@@ -326,7 +358,8 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   )
   if (WIN32 AND MSVC)
     target_link_libraries (fortranlib_test_F03-shared "ws2_32.lib")
-  endif (WIN32 AND MSVC)
+  endif (WIN32 AND MSVC)endif (NOT SKIP_HDF5_FORTRAN_SHARED)
+
   target_include_directories (fortranlib_test_F03-shared PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
   set_target_properties (fortranlib_test_F03-shared PROPERTIES
       LINKER_LANGUAGE Fortran
