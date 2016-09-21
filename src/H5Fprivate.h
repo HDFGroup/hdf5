@@ -615,10 +615,11 @@ typedef struct H5F_block_t {
 } H5F_block_t;
 
 #ifdef H5_HAVE_PARALLEL
+/* Subfiling properties */
 typedef struct H5F_subfiling_config_t {
-    char *file_name;
-    MPI_Comm comm;
-    MPI_Info info;
+    char *file_name;            /* Name of the subfile of the calling process */
+    MPI_Comm comm;              /* Subfiling Communicator for opening & accessing the subfile */
+    MPI_Info info;              /* Subfiling MPI Info Object */
 } H5F_subfiling_config_t;
 #endif /* H5_HAVE_PARALLEL */
 

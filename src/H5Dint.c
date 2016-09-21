@@ -3793,13 +3793,6 @@ H5D__subfiling_init(H5D_t *dset, H5G_loc_t *loc, const char *name, hid_t type_id
         if(H5S_encode(space, &p, &space_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTENCODE, FAIL, "unable to serialize source selection")
 
-                /*
-        if(0 == file->shared->num_subfiles)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Number of subfiles is not set on file creation")
-        if(MPI_COMM_NULL == file->subfiling_comm)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "Subfiling communicator is not set for file access")
-                */
-
         if(mpi_size > 1) {
             int temp_size;
 
