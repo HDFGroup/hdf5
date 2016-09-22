@@ -131,7 +131,7 @@ PROGRAM fortranlibtest_F03
 
   ret_total_error = 0
   CALL test_array_bkg(ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing Partial I/O of Array Fields in Compound Datatype FunctionalityT', total_error)
+  CALL write_test_status(ret_total_error, ' Testing Partial I/O of Array Fields in Compound Datatype Functionality', total_error)
 
   ret_total_error = 0
   CALL test_genprop_class_callback(ret_total_error)

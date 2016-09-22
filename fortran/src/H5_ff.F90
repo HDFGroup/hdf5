@@ -379,27 +379,24 @@ CONTAINS
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: ikind
     INTEGER, INTENT(IN) :: flag
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
-    INTEGER :: Fortran_INTEGER_16
-    Fortran_INTEGER_16=SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
-#endif
-    
-
+    INTEGER :: i
 !*****
+
+!#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+!    ! (1) The array index assumes INTEGER*16 the last integer in the series, and
+!    ! (2) it should map to INTEGER*16 on most modern processors
+!    H5T_NATIVE_INTEGER_KIND(H5_FORTRAN_NUM_INTEGER_KINDS)=SELECTED_INT_KIND(36)
+!#endif
+
+    h5_type = -1
     IF(flag.EQ.H5_INTEGER_KIND)THEN
-       IF(ikind.EQ.Fortran_INTEGER_1)THEN
-          h5_type = H5T_NATIVE_INTEGER_1
-       ELSE IF(ikind.EQ.Fortran_INTEGER_2)THEN
-          h5_type = H5T_NATIVE_INTEGER_2
-       ELSE IF(ikind.EQ.Fortran_INTEGER_4)THEN
-          h5_type = H5T_NATIVE_INTEGER_4
-       ELSE IF(ikind.EQ.Fortran_INTEGER_8)THEN
-          h5_type = H5T_NATIVE_INTEGER_8
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
-       ELSE IF(ikind.EQ.Fortran_INTEGER_16)THEN
-          h5_type = H5T_NATIVE_INTEGER_16
-#endif
-       ENDIF
+       do_kind: DO i = 1, H5_FORTRAN_NUM_INTEGER_KINDS
+          IF(ikind.EQ.Fortran_INTEGER_AVAIL_KINDS(i))THEN
+             !PRINT*,ikind, Fortran_INTEGER_AVAIL_KINDS(i),H5T_NATIVE_INTEGER_KIND(i)
+             h5_type = H5T_NATIVE_INTEGER_KIND(i)
+             EXIT do_kind
+          ENDIF
+       END DO do_kind
     ELSE IF(flag.EQ.H5_REAL_KIND)THEN
        IF(ikind.EQ.KIND(1.0_C_FLOAT))THEN
           h5_type = H5T_NATIVE_REAL_C_FLOAT
@@ -414,9 +411,6 @@ CONTAINS
        ELSE
           h5_type = H5T_NATIVE_FLOAT_128
 #endif
-#else
-       ELSE
-          h5_type = -1
 #endif
        ENDIF
     ENDIF
