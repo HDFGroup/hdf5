@@ -392,7 +392,6 @@ CONTAINS
     IF(flag.EQ.H5_INTEGER_KIND)THEN
        do_kind: DO i = 1, H5_FORTRAN_NUM_INTEGER_KINDS
           IF(ikind.EQ.Fortran_INTEGER_AVAIL_KINDS(i))THEN
-             !PRINT*,ikind, Fortran_INTEGER_AVAIL_KINDS(i),H5T_NATIVE_INTEGER_KIND(i)
              h5_type = H5T_NATIVE_INTEGER_KIND(i)
              EXIT do_kind
           ENDIF
@@ -406,7 +405,7 @@ CONTAINS
        ELSE IF(ikind.EQ.KIND(1.0_C_LONG_DOUBLE))THEN
           h5_type = H5T_NATIVE_REAL_C_LONG_DOUBLE
 #endif
-#if H5_PAC_FC_MAX_REAL_PRECISION > 28 
+#if H5_PAC_FC_MAX_REAL_PRECISION > 28
 #if H5_HAVE_FLOAT128 == 1
        ELSE
           h5_type = H5T_NATIVE_FLOAT_128
