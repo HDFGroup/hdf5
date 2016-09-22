@@ -471,7 +471,7 @@ CONTAINS
 !!  SUBROUTINE h5pget_fill_value_f(prp_id, type_id, fillvalue, hdferr)
 !!    INTEGER(HID_T), INTENT(IN)  :: prp_id 
 !!    INTEGER(HID_T), INTENT(IN)  :: type_id
-!!    TYPE(C_PTR)   , INTENT(OUT) :: fillvalue
+!!    TYPE(C_PTR)                 :: fillvalue
 !!    INTEGER       , INTENT(OUT) :: hdferr
 !*****
 
@@ -482,7 +482,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of
                                           ! of fillvalue datatype
                                           ! (in memory)
-    TYPE(C_PTR), INTENT(OUT) :: fillvalue ! Fillvalue
+    TYPE(C_PTR) :: fillvalue              ! Fillvalue
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
 
     hdferr = h5pget_fill_value_c(prp_id, type_id, fillvalue)
