@@ -175,8 +175,6 @@ int main(void)
   H5_FORTRAN_NUM_INTEGER_KINDS = (int)(sizeof(IntKinds)/sizeof(IntKinds[0]));
   H5_FORTRAN_NUM_REAL_KINDS = (int)(sizeof(RealKinds)/sizeof(RealKinds[0]));
 
-  
-
   fprintf(fort_header,"        INTEGER, PARAMETER :: H5_FORTRAN_NUM_INTEGER_KINDS = %d\n", H5_FORTRAN_NUM_INTEGER_KINDS);
 
 
@@ -346,10 +344,6 @@ int main(void)
     }
     
   }
-
-  
-
-
 
   for(i=0;i<H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
       if( FoundIntSize[i] > 0) /* Found the integer type */
