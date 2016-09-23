@@ -3621,7 +3621,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_evict_on_close
  *
- * Purpose:     
+ * Purpose:     Sets the evict_on_close property value.
+ *
+ *              When this property is set, closing an HDF5 object will
+ *              cause the object's metadata cache entries to be flushed
+ *              and evicted from the cache.
+ *
+ *              Currently only implemented for datasets.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -3659,7 +3665,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_evict_on_close
  *
- * Purpose:
+ * Purpose:     Gets the evict_on_close property value.
+ *
+ *              When this property is set, closing an HDF5 object will
+ *              cause the object's metadata cache entries to be flushed
+ *              and evicted from the cache.
+ *
+ *              Currently only implemented for datasets.
  *
  * Return:      SUCCEED/FAIL
  *
