@@ -66,9 +66,9 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     */
 
     /*
-     * FIND H5T_NATIVE_INTEGER_#
+     * Find the HDF5 type of the Fortran Integer KIND.
      */
-    for(i=0;i<4;i++) {
+    for(i=0;i<5;i++) {
 
       if ( IntKinds_SizeOf[i] == sizeof(char)) {
 	if ((types[i] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0) return ret_value;
@@ -89,52 +89,27 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
 
     }
 
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
-     /*
-     * FIND H5T_NATIVE_INTEGER_KIND(5), INTEGER*16
-     */
-    if (sizeof(int_16_f) == sizeof(char)) {
-      if ((types[4] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_16_f) == sizeof(short)) {
-      if ((types[4] = (hid_t_f)H5Tcopy(H5T_NATIVE_SHORT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_16_f) == sizeof(int)) {
-      if ((types[4] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
-    } /*end if */
-    else if (sizeof(int_16_f) == sizeof(long long)) {
-	if ((types[4] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
-    } /*end else */
-    else {
-      if ((types[4] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-      if ( H5Tset_precision (types[4], 128) < 0) return ret_value;
-    } /*end else */
-#else
-    if ((types[4] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
-    if ( H5Tset_precision (types[4], 128) < 0) return ret_value;
-#endif
-
     if (sizeof(int_f) == sizeof(int)) {
-    if ((types[5] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
+      if ((types[5] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
     } /*end if */
     else if (sizeof(int_f) == sizeof(long)) {
-    if ((types[5] = (hid_t_f)H5Tcopy(H5T_NATIVE_LONG)) < 0) return ret_value;
+      if ((types[5] = (hid_t_f)H5Tcopy(H5T_NATIVE_LONG)) < 0) return ret_value;
     } /*end if */
     else
-    if (sizeof(int_f) == sizeof(long long)) {
-    if ((types[5] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
+      if (sizeof(int_f) == sizeof(long long)) {
+	if ((types[5] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
-
+    
     /* Find appropriate size to store Fortran REAL */
     if(sizeof(real_f)==sizeof(float)) {
-        if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
+      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_FLOAT)) < 0) return ret_value;
     } /* end if */
     else if(sizeof(real_f)==sizeof(double)){
-        if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
+      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_DOUBLE)) < 0) return ret_value;
     } /* end if */
 #if H5_SIZEOF_LONG_DOUBLE!=0
     else if (sizeof(real_f) == sizeof(long double)) {
-        if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
+      if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0) return ret_value;
     } /* end else */
 #endif
 
@@ -226,11 +201,13 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     if ((types[16] = (hid_t_f)H5Tcopy(H5T_NATIVE_B32)) < 0) return ret_value;
     if ((types[17] = (hid_t_f)H5Tcopy(H5T_NATIVE_B64)) < 0) return ret_value;
 
-     /*
+    /*
      * FIND H5T_NATIVE_FLOAT_128
      */
     if ((types[18] = H5Tcopy (H5T_NATIVE_FLOAT)) < 0) return ret_value;
     if ( H5Tset_precision (types[18], 128) < 0) return ret_value;
+
+    /*--------------------------------------------------------------------------------------*/
 
     if ((floatingtypes[0] = (hid_t_f)H5Tcopy(H5T_IEEE_F32BE)) < 0) return ret_value;
     if ((floatingtypes[1] = (hid_t_f)H5Tcopy(H5T_IEEE_F32LE)) < 0) return ret_value;

@@ -52,6 +52,7 @@ FILE * fort_header;
 void writeTypedef(const char* c_typedef, const char* c_type, int size);
 void writeTypedefDefault(const char* c_typedef, int size);
 void writeToFiles(const char* c_typedef, const char* fortran_type, const char* c_type, int size, int kind);
+void writeToCFileOnly(const char* c_typedef, const char* fortran_type, const char* c_type, int size);
 void writeToFilesChr(const char* c_typedef, const char* fortran_type, const char* c_type, int size, const char* kind);
 
 static void
@@ -147,8 +148,6 @@ void writeToFilesChr(const char* c_typedef, const char* fortran_type, const char
 }
 int main(void)
 {
-  int FoundIntSize[10];
-  int FoundIntSizeKind[10];
   int i, j,flag;
   char chrA[32],chrB[32];
 
@@ -318,24 +317,11 @@ int main(void)
 
   /* int_1, int_2, int_4, int_8 */
 
-/* Defined different KINDs of integers:                       */
-/* if the integer kind is not available then we assign        */
-/* it a value of the next larger one, but if the next         */
-/* higher one is not available we assigned it the next lowest */
+/* Defined different KINDs of integers */
 
-
-  FoundIntSize[0] = -1;
-  FoundIntSize[1] = -1;
-  FoundIntSize[2] = -1;
-  FoundIntSize[3] = -1;
-  FoundIntSize[4] = -1;
-  
   fprintf(fort_header,"        INTEGER, DIMENSION(1:%d), PARAMETER :: Fortran_INTEGER_AVAIL_KINDS = (/", H5_FORTRAN_NUM_INTEGER_KINDS);
   
   for(i=0;i<H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
-    FoundIntSize[i] = (int)IntKinds[i];
-    FoundIntSizeKind[i] = (int)IntKinds_SizeOf[i];
-/*     writeToFiles("int",chrA, chrB, FoundIntSize[i], FoundIntSizeKind[i]); */
     fprintf(fort_header,"%d",(int)IntKinds[i]);
     if(i==H5_FORTRAN_NUM_INTEGER_KINDS-1) {
       fprintf(fort_header,"/)\n");
@@ -344,46 +330,6 @@ int main(void)
     }
     
   }
-
-  for(i=0;i<H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
-      if( FoundIntSize[i] > 0) /* Found the integer type */
-	{
-	  sprintf(chrA, "Fortran_INTEGER_KINDS_%d", FoundIntSizeKind[i]);
-	  sprintf(chrB, "int_%d_f", FoundIntSize[i]);
-	  writeToFiles("int",chrA, chrB, FoundIntSize[i], FoundIntSizeKind[i]);
-	}
-      else  /* Did not find the integer type */
-	{
-	  flag = 0; /* flag indicating if found the next highest */
-	  for(j=i+1;j<4;j++)  /* search for next highest */
-	    {
-	      if( FoundIntSize[j] > 0) /* Found the next highest */
-		{
-		  sprintf(chrA, "Fortran_INTEGER_KINDS_%d", (-1)*FoundIntSizeKind[i]);
-		  sprintf(chrB, "int_%d_f", (-1)*FoundIntSize[i]);
-		  writeToFiles("int",chrA, chrB, FoundIntSize[j], FoundIntSizeKind[j]);
-		  flag = 1;
-		  break;
-		}
-	    }
-	  if(flag == 0) /* No higher one found, so find next lowest */
-	    {
-	      for(j=2;j>-1;j--)  /* Search for next lowest */
-		{
-		  if( FoundIntSize[j] > 0) /* Found the next lowest */
-		    {
-		      sprintf(chrA, "Fortran_INTEGER_KINDS_%d", (-1)*FoundIntSizeKind[i]);
-		      sprintf(chrB, "int_%d_f", (-1)*FoundIntSize[i]);
-		      writeToFiles("int",chrA, chrB, FoundIntSize[j], FoundIntSizeKind[j]);
-		      flag = 1;
-		      break;
-		    }
-		}
-	    }
-	  if(flag == 0) /* No higher or lower one found, indicating an error */
-	     return -1;
-	}
-    }
 
   /* real_4, real_8, real_16 */
 
