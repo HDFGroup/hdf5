@@ -279,7 +279,7 @@ if [ X$revmode = Xyes ]; then
     # "undo" changes to it.
     cp config/lt_vers.am $tmpdir
     branch=`git branch | grep '*' | awk '{print $NF}'`
-    revision=`git rev-parse HEAD`
+    revision=`git rev-parse --short HEAD`
 # Set version information to m.n.r-r$revision.
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-$revision
