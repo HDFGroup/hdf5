@@ -376,7 +376,8 @@ CONTAINS
     INTEGER(size_t),  INTENT(in) :: dst_size                          ! The size of the structure type
     INTEGER(size_t),  DIMENSION(1:nfields), INTENT(in) :: dst_offset  ! An array containing the offsets of the fields
     INTEGER(size_t),  DIMENSION(1:nfields), INTENT(in) :: dst_sizes   ! An array containing the sizes of the fields
-    TYPE(C_PTR), INTENT(OUT) :: dst_buf                               ! Buffer with data
+    TYPE(C_PTR)                                        :: dst_buf     ! Buffer with data !! do not use INTENT, causes NAG
+                                                                      ! to segfault in C APIs
     INTEGER :: errcode                                                ! error code
 
     INTEGER(size_t) :: namelen                                        ! name length

@@ -561,6 +561,7 @@ SUBROUTINE test_table2()
   INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(10) ! This should map to REAL*8 on most modern processors
 
   TYPE particle_t
+     SEQUENCE
      CHARACTER(LEN=11) :: name
      INTEGER(KIND=i8) :: lati
      INTEGER(KIND=i16) :: long
@@ -671,11 +672,10 @@ SUBROUTINE test_table2()
 
   f_ptr1 = C_NULL_PTR
   f_ptr2 = C_LOC(fill_data(1)%name(1:1))
-
   CALL h5tbmake_table_f("Table Title Fill", file_id, table_name_fill, nfields, nrecords, &
        dst_size, field_names, dst_offset, field_type, &
        chunk_size, f_ptr2, compress, f_ptr1, errcode )
-  
+
   f_ptr3 = C_LOC(r_data(1)%name(1:1))
   CALL h5tbread_table_f(file_id, table_name_fill, nfields, dst_size, dst_offset, dst_sizes, f_ptr3, errcode)
 
