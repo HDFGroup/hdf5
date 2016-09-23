@@ -830,6 +830,9 @@ static void test_attr_scalar_write()
 **  test_attr_scalar_read(): Test scalar attribute reading functionality.
 **
 ****************************************************************/
+/* Epsilon for floating-point comparisons */
+#define FP_EPSILON 0.000001F
+
 static void test_attr_scalar_read()
 {
     // Output message about test being performed
@@ -852,7 +855,8 @@ static void test_attr_scalar_read()
 	// Read attribute information
 	float read_data2=0.0;  // Buffer for reading 1st attribute
 	ds_attr.read(PredType::NATIVE_FLOAT,&read_data2);
-	verify_val(read_data2, attr_data5, "Attribute::read", __LINE__, __FILE__);
+	if (HDfabs(read_data2 - attr_data5) > FP_EPSILON)
+	    verify_val(read_data2, attr_data5, FP_EPSILON, "Attribute::read", __LINE__, __FILE__);
 
 	// Get the dataspace of the attribute
 	DataSpace att_space = ds_attr.getSpace();
@@ -1714,7 +1718,7 @@ static void test_attr_corder_create_basic(FileCreatPropList& fcpl,
 	// Get creation order indexing on object
 	unsigned crt_order_flags = 0;
 	crt_order_flags = dcpl.getAttrCrtOrder();
-	verify_val(crt_order_flags, 0, "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
+	verify_val(crt_order_flags, (unsigned)0, "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
 
 	// Setting invalid combination of a attribute order creation order
 	// indexing on should fail
@@ -1731,7 +1735,7 @@ static void test_attr_corder_create_basic(FileCreatPropList& fcpl,
 	// verify them
 	dcpl.setAttrCrtOrder(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED);
 	crt_order_flags = dcpl.getAttrCrtOrder();
-	verify_val(crt_order_flags, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED), "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
+	verify_val(crt_order_flags, (unsigned)(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED), "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
 
 	// Create dataspace for dataset
 	DataSpace ds_space(H5S_SCALAR);
@@ -1766,7 +1770,7 @@ static void test_attr_corder_create_basic(FileCreatPropList& fcpl,
 
 	// Query the attribute creation properties
 	crt_order_flags = dcpl.getAttrCrtOrder();
-	verify_val(crt_order_flags, (H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED), "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
+	verify_val(crt_order_flags, (unsigned)(H5P_CRT_ORDER_TRACKED | H5P_CRT_ORDER_INDEXED), "DSetCreatPropList::getAttrCrtOrder",__LINE__,__FILE__);
 
 	PASSED();
     } // end try block
