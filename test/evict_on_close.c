@@ -24,7 +24,128 @@
 
 #include "h5test.h"
 
+const char *FILENAMES[] = {
+    "evict-on-close",           /* 0 */
+    NULL
+};
+#define FILENAME_BUF_SIZE       1024
+
+//#define DSET_NAME_COMPACT       "compact"
+//#define DSET_NAME_CONTIGUOUS    "contiguous"
+#define DSET_NAME_V1_BTREE      "v1_btree"
+//#define DSET_NAME_V2_BTREE      "v2_btree"
+//#define DSET_NAME_EARRAY        "earray"
+//#define DSET_NAME_FARRAY        "farray"
+//#define DSET_NAME_SINGLE        "single"
+
 static herr_t check_evict_on_close_api(void);
+static herr_t generate_eoc_test_file(hid_t fapl_id);
+
+
+/*-------------------------------------------------------------------------
+ * Function:    generate_eoc_test_file()
+ *
+ * Purpose:     Generate the evict-on-close test file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+generate_eoc_test_file(hid_t fapl_id)
+{
+    char    filename[FILENAME_BUF_SIZE];    /* decorated file name          */
+    hid_t   fid = -1;                       /* file ID                      */
+    hid_t   fapl_copy_id = -1;              /* ID of copied fapl            */
+    hid_t   sid = -1;                       /* dataspace ID                 */
+    hid_t   dcpl_id = -1;                   /* dataset creation plist       */
+    hid_t   did = -1;                       /* dataset ID                   */
+    int     rank;                           /* # of array dimensions        */
+    hsize_t current_dims[2];                /* current dataset size         */
+    hsize_t maximum_dims[2];                /* maximum dataset size         */
+    hsize_t chunk_dims[2];                  /* chunk dimensions             */
+    int     *data = NULL;                   /* buffer for fake data         */
+    int     n;                              /* # of data elements           */
+
+    TESTING("generating evict-on-close test file");
+
+    /* Get a VFD-specific filename */
+    h5_fixname(FILENAMES[0], fapl_id, filename, sizeof(filename));
+
+    /* Create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+
+    /***********************************************************/
+    /* Generate datasets and ensure that the scheme is correct */
+    /***********************************************************/
+
+    /* Create the data buffer */
+    if(NULL == (data = (int *)HDcalloc(1024, sizeof(int))))
+        TEST_ERROR;
+
+    /********************/
+    /* Version 1 B-tree */
+    /********************/
+
+    /* Create dataspace */
+    n = 100;
+    rank = 1;
+    current_dims[0] = (hsize_t)n;
+    maximum_dims[0] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(rank, current_dims, maximum_dims)) < 0)
+        TEST_ERROR;
+
+    /* Create dcpl and set up chunking */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    chunk_dims[0] = 1;
+    if(H5Pset_chunk(dcpl_id, rank, chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Create dataset */
+    if((did = H5Dcreate(fid, DSET_NAME_V1_BTREE, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write a bunch of fake data */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        TEST_ERROR;
+
+    /* Close IDs for this dataset */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if(H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+
+
+    /* Close everything else */
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+    HDfree(data);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Pclose(dcpl_id);
+        H5Pclose(fapl_copy_id);
+    } H5E_END_TRY;
+
+    HDfree(data);
+
+    H5_FAILED();
+    return FAIL;
+
+} /* end generate_eoc_test_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -52,37 +173,37 @@ check_evict_on_close_api(void)
 
     /* Create a fapl */
     if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Check the default */
     evict_on_close = TRUE;
     if(H5Pget_evict_on_close(fapl_id, &evict_on_close) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(evict_on_close != FALSE)
         FAIL_PUTS_ERROR("Incorrect default evict on close value.");
 
     /* Set the evict on close property */
     evict_on_close = TRUE;
     if(H5Pset_evict_on_close(fapl_id, evict_on_close) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* Make sure we can get it back out */
     evict_on_close = FALSE;
     if(H5Pget_evict_on_close(fapl_id, &evict_on_close) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
     if(evict_on_close != TRUE)
         FAIL_PUTS_ERROR("Incorrect evict on close value.");
 
     /* close fapl */
     if(H5Pclose(fapl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /**********************************************/
     /* Trying passing in a non-fapl property list */
     /**********************************************/
 
     if((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     /* ensure using an incorrect access plist fails */
     H5E_BEGIN_TRY {
@@ -100,7 +221,7 @@ check_evict_on_close_api(void)
 
     /* close dapl */
     if(H5Pclose(dapl_id) < 0)
-        FAIL_STACK_ERROR;
+        TEST_ERROR;
 
     PASSED();
     return SUCCEED;
@@ -125,20 +246,69 @@ error:
 int
 main(void)
 {
-    unsigned nerrors = 0;
+    hid_t       fapl_id = -1;
+    unsigned    nerrors = 0;
 
-    printf("Testing evict-on-close cache behavior.\n");
+    HDprintf("Testing evict-on-close cache behavior.\n");
 
+    /* Initialize */
+    h5_reset();
+
+    /* Test H5P call to set up EoC (does not require VFD-specific fapl) */
     nerrors += check_evict_on_close_api() < 0 ? 1 : 0;
 
-    if(nerrors) {
-        printf("***** %u evict-on-close test%s FAILED! *****\n",
-            nerrors, nerrors > 1 ? "S" : "");
-        return EXIT_FAILURE;
-    }
+    /* Set up VFD-specific fapl */
+    if((fapl_id = h5_fileaccess()) < 0) {
+        nerrors++;
+        PUTS_ERROR("Unable to get VFD-specific fapl\n");
+    } /* end if */
 
-    printf("All evict-on-close tests passed.\n");
+    /* Set evict-on-close property */
+    if(H5Pset_evict_on_close(fapl_id, TRUE) < 0) {
+        nerrors++;
+        PUTS_ERROR("Unable to set evict-on-close property\n");
+    } /* end if */
+
+    /* Generate the test file */
+    if(generate_eoc_test_file(fapl_id) < 0) {
+        nerrors++;
+        PUTS_ERROR("Unable to generate test file\n");
+    } /* end if */
+
+    /*************************/
+    /* Test EoC for datasets */
+    /*************************/
+
+#ifdef NOTYET
+    nerrors += check_v1_btree_chunk_index(fapl_id);
+#endif
+
+    /* Clean up files and close the VFD-specific fapl */
+    //h5_delete_all_test_files(FILENAMES, fapl_id);
+    if(H5Pclose(fapl_id) < 0) {
+        nerrors++;
+        PUTS_ERROR("Unable to close VFD-specific fapl\n");
+    } /* end if */
+
+
+    if(nerrors)
+        goto error;
+
+    HDprintf("All evict-on-close tests passed.\n");
 
     return EXIT_SUCCESS;
-}
+
+error:
+
+    HDprintf("***** %u evict-on-close test%s FAILED! *****\n",
+        nerrors, nerrors > 1 ? "S" : "");
+
+    h5_delete_all_test_files(FILENAMES, fapl_id);
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_id);
+    } H5E_END_TRY;
+
+    return EXIT_FAILURE;
+
+} /* end main() */
 
