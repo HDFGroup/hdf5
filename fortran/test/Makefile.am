@@ -92,10 +92,14 @@ tf_gen.F90: H5_test_buildiface$(EXEEXT)
 
 H5_test_buildiface_SOURCES = H5_test_buildiface.F90
 
-# The build of the H5_test_buildiface does depend on any libraries, so set it 
+# The build of the H5_test_buildiface does not depend on any libraries, so set it 
 # to nothing.
 
-H5_test_buildiface_LDADD = 
+H5_test_buildiface_LDADD =
+
+
+H5_test_buildiface$(EXEEXT): $(H5_test_buildiface_SOURCES)
+	$(FC) $(FCFLAGS) $< -o $@ -I.
 
 # fflush2 depends on files created by fflush1
 fflush2.chkexe_: fflush1.chkexe_
