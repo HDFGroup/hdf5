@@ -99,7 +99,7 @@ H5_test_buildiface_LDADD =
 
 
 H5_test_buildiface$(EXEEXT): $(H5_test_buildiface_SOURCES)
-	$(FC) $(FCFLAGS) $< -o $@ -I.
+	$(FC) $(FCFLAGS) $< -o $@ -I$(top_builddir)/fortran/src
 
 # fflush2 depends on files created by fflush1
 fflush2.chkexe_: fflush1.chkexe_
