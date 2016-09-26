@@ -157,7 +157,7 @@ int main(void)
   int RealKinds_SizeOf[] = H5_FORTRAN_REAL_KINDS_SIZEOF;
   char Real_C_TYPES[10][32];
   
-  int H5_FORTRAN_NUM_INTEGER_KINDS;
+  int FORTRAN_NUM_INTEGER_KINDS=H5_FORTRAN_NUM_INTEGER_KINDS;
   int H5_FORTRAN_NUM_REAL_KINDS;
   int found_long_double = 0;
 
@@ -171,13 +171,13 @@ int main(void)
 
   /* (a) define c_int_x */
 
-  H5_FORTRAN_NUM_INTEGER_KINDS = (int)(sizeof(IntKinds)/sizeof(IntKinds[0]));
+  FORTRAN_NUM_INTEGER_KINDS = (int)(sizeof(IntKinds)/sizeof(IntKinds[0]));
   H5_FORTRAN_NUM_REAL_KINDS = (int)(sizeof(RealKinds)/sizeof(RealKinds[0]));
 
-  fprintf(fort_header,"        INTEGER, PARAMETER :: H5_FORTRAN_NUM_INTEGER_KINDS = %d\n", H5_FORTRAN_NUM_INTEGER_KINDS);
+  fprintf(fort_header,"        INTEGER, PARAMETER :: H5_FORTRAN_NUM_INTEGER_KINDS = %d\n", FORTRAN_NUM_INTEGER_KINDS);
 
 
-  for(i=0;i< H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
+  for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(sizeof(long long) == IntKinds_SizeOf[i])
       writeTypedef("int", "long long", IntKinds[i]);
     else if(sizeof(long) == IntKinds[i])
@@ -258,56 +258,56 @@ int main(void)
   fprintf(c_header, "\n");
 
   /* haddr_t */
-  for(i=0;i< H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
+  for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_HADDR_T) {
       writeToFiles("int","HADDR_T", "haddr_t_f", IntKinds[i], IntKinds[i]);
       break;
     }
-    if(i == (H5_FORTRAN_NUM_INTEGER_KINDS-1) )
+    if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
       /* Error: couldn't find a size for haddr_t */
       return -1;
   }
 
   /* hsize_t */
-  for(i=0;i< H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
+  for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_HSIZE_T) {
       writeToFiles("hsize_t","HSIZE_T", "hsize_t_f", IntKinds[i], IntKinds[i]);
       break;
     }
-    if(i == (H5_FORTRAN_NUM_INTEGER_KINDS-1) )
+    if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
       /* Error: couldn't find a size for hsize_t */
       return -1;
   }
 
   /* hssize_t */
-  for(i=0;i< H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
+  for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_HSSIZE_T) {
       writeToFiles("int","HSSIZE_T", "hssize_t_f", IntKinds[i], IntKinds[i]);
       break;
     }
-    if(i == (H5_FORTRAN_NUM_INTEGER_KINDS-1) )
+    if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
       /* Error: couldn't find a size for hssize_t */
       return -1;
   }
 
   /* off_t */
-  for(i=0;i< H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
+  for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_OFF_T) {
       writeToFiles("int","OFF_T", "off_t_f", IntKinds[i], IntKinds[i]);
       break;
     }
-    if(i == (H5_FORTRAN_NUM_INTEGER_KINDS-1) )
+    if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
       /* Error: couldn't find a size for off_t */
       return -1;
   }
 
   /* size_t */
-  for(i=0;i< H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
+  for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_SIZE_T) {
       writeToFiles("size_t","SIZE_T", "size_t_f", IntKinds[i], IntKinds[i]);
       break;
     }
-    if(i == (H5_FORTRAN_NUM_INTEGER_KINDS-1) )
+    if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
       /* Error: couldn't find a size for size_t */
       return -1;
   }
@@ -319,11 +319,11 @@ int main(void)
 
 /* Defined different KINDs of integers */
 
-  fprintf(fort_header,"        INTEGER, DIMENSION(1:%d), PARAMETER :: Fortran_INTEGER_AVAIL_KINDS = (/", H5_FORTRAN_NUM_INTEGER_KINDS);
+  fprintf(fort_header,"        INTEGER, DIMENSION(1:%d), PARAMETER :: Fortran_INTEGER_AVAIL_KINDS = (/", FORTRAN_NUM_INTEGER_KINDS);
   
-  for(i=0;i<H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
+  for(i=0;i<FORTRAN_NUM_INTEGER_KINDS;i++) {
     fprintf(fort_header,"%d",(int)IntKinds[i]);
-    if(i==H5_FORTRAN_NUM_INTEGER_KINDS-1) {
+    if(i==FORTRAN_NUM_INTEGER_KINDS-1) {
       fprintf(fort_header,"/)\n");
     } else {
       fprintf(fort_header,",");
@@ -347,12 +347,12 @@ int main(void)
   }
 
   /* hid_t */
-  for(i=0;i< H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
+  for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_HID_T) {
       writeToFiles("int","HID_T", "hid_t_f", IntKinds[i], IntKinds[i]);
       break;
     }
-    if(i == (H5_FORTRAN_NUM_INTEGER_KINDS-1) )
+    if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
       /* Error: couldn't find a size for hid_t */
       return -1;
   }

@@ -280,7 +280,8 @@ AC_RUN_IFELSE([$TEST_SRC],
         PAC_FC_ALL_INTEGER_KINDS="{`echo $pac_validIntKinds`}"
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds`}"
 
-	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `sed -n '4p' pac_fconftest.out`"
+        PAC_FORTRAN_NUM_INTEGER_KINDS="`sed -n '4p' pac_fconftest.out`"
+	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `echo $PAC_FORTRAN_NUM_INTEGER_KINDS`"
 	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
 	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `sed -n '5p' pac_fconftest.out`"
 	H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
@@ -290,6 +291,8 @@ AC_RUN_IFELSE([$TEST_SRC],
 	AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
 	AC_DEFINE_UNQUOTED([H5CONFIG_F_IKIND], $H5CONFIG_F_IKIND, [Define valid Fortran INTEGER KINDs])
 
+        AC_MSG_CHECKING([for Number of Fortran INTEGER KINDs])
+        AC_MSG_RESULT([$PAC_FORTRAN_NUM_INTEGER_KINDS])
         AC_MSG_CHECKING([for Fortran INTEGER KINDs])
         AC_MSG_RESULT([$PAC_FC_ALL_INTEGER_KINDS])
 	AC_MSG_CHECKING([for Fortran REAL KINDs])

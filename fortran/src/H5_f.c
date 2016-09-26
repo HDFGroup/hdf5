@@ -34,16 +34,16 @@ int IntKinds_SizeOf[] = H5_FORTRAN_INTEGER_KINDS_SIZEOF;
  *  Initialize predefined datatypes in Fortran
  * INPUTS
  *  types - array with the predefined Native Fortran
- *  type, its element and length must be the
- *  same as the types array defined in the
+ *          type, its element and length must be the
+ *          same as the types array defined in the
  *          H5f90global.F90
  *  floatingtypes - array with the predefined Floating Fortran
- *  type, its element and length must be the
- *  same as the floatingtypes array defined in the
- *                   H5f90global.F90
+ *                  type, its element and length must be the
+ *                  same as the floatingtypes array defined in the
+ *                  H5f90global.F90
  *  integertypes - array with the predefined Integer Fortran
- *  type, its element and length must be the
- *  same as the integertypes array defined in the
+ *                 type, its element and length must be the
+ *                 same as the integertypes array defined in the
  *                 H5f90global.F90
  * RETURNS
  *  0 on success, -1 on failure
@@ -68,8 +68,13 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
     /*
      * Find the HDF5 type of the Fortran Integer KIND.
      */
-    for(i=0;i<5;i++) {
 
+    /* Initialized INTEGER KIND types to default to native integer */
+    for(i=0;i<5;i++) {
+      if ((types[i] = (hid_t_f)H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
+    }
+
+    for(i=0;i<H5_FORTRAN_NUM_INTEGER_KINDS;i++) {
       if ( IntKinds_SizeOf[i] == sizeof(char)) {
 	if ((types[i] = (hid_t_f)H5Tcopy(H5T_NATIVE_CHAR)) < 0) return ret_value;
       } /*end if */
@@ -83,7 +88,7 @@ h5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertypes
 	if ((types[i] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
       } /*end if */
       else {
-	if ((types[i] = H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
+	if ((types[i] = (hid_t_f)H5Tcopy (H5T_NATIVE_INT)) < 0) return ret_value;
 	if ( H5Tset_precision (types[i], 128) < 0) return ret_value;
       } /*end else */
 
