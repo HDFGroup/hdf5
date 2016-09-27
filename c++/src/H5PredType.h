@@ -27,6 +27,8 @@ namespace H5 {
 
     These types can only be made copy of, not created by H5Tcreate or
     closed by H5Tclose.  They are treated as constants.
+
+    Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
 */
 class H5_DLLCPP PredType : public AtomType {
    public:

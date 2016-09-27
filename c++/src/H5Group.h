@@ -24,19 +24,12 @@ namespace H5 {
 /*! \class Group
     \brief Class Group represents an HDF5 group.
 
-    It inherits many operations from H5Location and CommonFG.
+    Inheritance: H5Object -> H5Location -> IdComponent
 */
 // Class forwarding
-//class Group;
-//class H5File;
 class ArrayType;
 class VarLenType;
 
-/*! \class CommonFG
-    \brief \a CommonFG is an abstract base class of H5File and Group.
-
-    It provides common operations of H5File and Group.
-*/
 class H5_DLLCPP Group : public H5Object {
    public:
 	// Group constructor to create a group or file (aka root group).

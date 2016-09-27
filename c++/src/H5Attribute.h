@@ -28,6 +28,8 @@ namespace H5 {
     Attribute and DataSet are derivatives of AbstractDs.  Attribute also
     inherits from H5Location because an attribute can be used to specify
     a location.
+
+    Inheritance: multiple H5Location/AbstractDs -> IdComponent
 */
 class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
    public:
