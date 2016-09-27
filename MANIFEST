@@ -2032,6 +2032,7 @@
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
+./tools/h5repack/testfiles/h5repack_layout.h5-plugin_zero.tst
 
 # jam utility and tests
 ./tools/h5jam/h5jam.c

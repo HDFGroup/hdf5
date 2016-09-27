@@ -91,6 +91,7 @@
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/plugin_test.h5repack_layout.h5.tst
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/plugin_none.h5repack_layout.UD.h5.tst
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_zero.tst
   )
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
@@ -208,7 +209,7 @@
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
                 -D "TEST_FILTER:STRING=${testfilter}"
-                -D "TEST_REFERENCE=${resultfile}.tst"
+                -D "TEST_REFERENCE=${resultfile}-${testname}.tst"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
       endif (HDF5_ENABLE_USING_MEMCHECKER)
@@ -988,6 +989,12 @@
 ##############################################################################
   ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,1,9)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
+  # check for no parameters
+  set (TESTRETVAL 255)
+  if (WIN32)
+    set (TESTRETVAL -1)
+  endif()
+  ADD_H5_CMP_TEST (plugin_zero "" "TEST" ${TESTRETVAL} h5repack_layout.h5 -v -f UD=250,0)
 
   if (HDF5_TEST_VFD)
     # Run test with different Virtual File Driver

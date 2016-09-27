@@ -1,0 +1,9 @@
+Objects to modify layout are...
+Objects to apply filter are...
+ User Defined 250
+Making file <out-plugin_zero.h5repack_layout.h5>...
+-----------------------------------------
+ Type     Filter (Compression)     Name
+-----------------------------------------
+ group                       /
+h5repack error: <h5repack_layout.h5>: Could not copy data to: out-plugin_zero.h5repack_layout.h5
