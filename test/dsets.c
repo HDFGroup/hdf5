@@ -7942,11 +7942,10 @@ test_big_chunks_bypass_cache(hid_t fapl)
     int         fvalue = BYPASS_FILL_VALUE;	/* Fill value */
     hsize_t     count, stride, offset, block;	/* Setting for hyperslab (1-D) */
     hsize_t     t_count[2], t_stride[2], t_offset[2], t_block[2];  /* Setting for hyperslab (2-D) */
-		/* Buffer for reading and writing data (1-D) */
-    static int  wdata[BYPASS_CHUNK_DIM/2], rdata1[BYPASS_DIM],
-                rdata2[BYPASS_CHUNK_DIM/2];	
+		/* Buffers for reading and writing data (1-D) */
+    int         *wdata = NULL, *rdata1 = NULL, *rdata2 = NULL;	
 		/* Buffer for reading and writing data (2-D) */
-    static int  t_wdata[BYPASS_CHUNK_DIM/2][BYPASS_CHUNK_DIM/2], t_rdata1[BYPASS_DIM][BYPASS_DIM],
+    int         t_wdata[BYPASS_CHUNK_DIM/2][BYPASS_CHUNK_DIM/2], t_rdata1[BYPASS_DIM][BYPASS_DIM],
                 t_rdata2[BYPASS_CHUNK_DIM/2][BYPASS_CHUNK_DIM/2];
     int         i, j;		/* Local index variables */
     H5F_libver_t low;           /* File format low bound */
@@ -8030,6 +8029,14 @@ test_big_chunks_bypass_cache(hid_t fapl)
 
     if(H5Sselect_hyperslab(t_sid, H5S_SELECT_SET, t_offset, t_stride, t_count, t_block) < 0)
         FAIL_STACK_ERROR
+
+    /* Allocate buffers */
+    if(NULL == (wdata = (int *)HDmalloc(sizeof(int) * (BYPASS_CHUNK_DIM / 2))))
+        TEST_ERROR
+    if(NULL == (rdata1 = (int *)HDmalloc(sizeof(int) * BYPASS_DIM)))
+        TEST_ERROR
+    if(NULL == (rdata2 = (int *)HDmalloc(sizeof(int) * (BYPASS_CHUNK_DIM / 2))))
+        TEST_ERROR
 
     /* Initialize data to write for 1-D dataset */
     for(i = 0; i < BYPASS_CHUNK_DIM / 2; i++)
@@ -8165,6 +8172,11 @@ test_big_chunks_bypass_cache(hid_t fapl)
     if(H5Pclose(fapl_local) < 0) FAIL_STACK_ERROR
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
+    /* Release buffers */
+    HDfree(wdata);
+    HDfree(rdata1);
+    HDfree(rdata2);
+
     PASSED();
     return 0;
 
@@ -8179,6 +8191,12 @@ error:
         H5Sclose(t_sid);
         H5Fclose(fid);
     } H5E_END_TRY;
+    if(wdata)
+        HDfree(wdata);
+    if(rdata1)
+        HDfree(rdata1);
+    if(rdata2)
+        HDfree(rdata2);
     return -1;
 } /* end test_big_chunks_bypass_cache() */
 
@@ -9265,9 +9283,9 @@ test_fixed_array(hid_t fapl)
     hsize_t     msize_big[1] = {POINTS_BIG};    /* Size of memory space for big dataset */
 
     int         wbuf[POINTS];           /* write buffer */
-    int         wbuf_big[POINTS_BIG];  	/* write buffer for big dataset */
+    int         *wbuf_big = NULL;  	/* write buffer for big dataset */
     int         rbuf[POINTS];          	/* read buffer */
-    int         rbuf_big[POINTS_BIG];  	/* read buffer for big dataset */
+    int         *rbuf_big = NULL;  	/* read buffer for big dataset */
 
     hsize_t     chunk_dim2[2] = {4, 3}; /* Chunk dimensions */
     int         chunks[12][6];          /* # of chunks for dataset dimensions */
@@ -9307,6 +9325,12 @@ test_fixed_array(hid_t fapl)
 
     /* Get the size of the empty file */
     if((empty_size = h5_get_file_size(filename, fapl)) < 0)
+        TEST_ERROR
+
+    /* Allocate the "big" buffers */
+    if(NULL == (wbuf_big = (int *)HDmalloc(sizeof(int) * POINTS_BIG)))
+        TEST_ERROR
+    if(NULL == (rbuf_big = (int *)HDmalloc(sizeof(int) * POINTS_BIG)))
         TEST_ERROR
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -9567,7 +9591,7 @@ test_fixed_array(hid_t fapl)
 
 	    /* Verify that written and read data are the same */
 	    for(i = 0; i < POINTS_BIG; i++)
-		if(rbuf_big[i] != wbuf_big[i]){
+		if(rbuf_big[i] != wbuf_big[i]) {
 		    printf("    Line %d: Incorrect value, wbuf_bif[%u]=%d, rbuf_big[%u]=%d\n",
 			__LINE__,(unsigned)i,wbuf_big[i],(unsigned)i,rbuf_big[i]);
 		    TEST_ERROR;
@@ -9599,6 +9623,10 @@ test_fixed_array(hid_t fapl)
     } /* end for */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
+    /* Release buffers */
+    HDfree(wbuf_big);
+    HDfree(rbuf_big);
+
     PASSED();
     return 0;
 
@@ -9610,6 +9638,10 @@ error:
         H5Sclose(mem_id);
         H5Fclose(fid);
     } H5E_END_TRY;
+    if(wbuf_big)
+        HDfree(wbuf_big);
+    if(rbuf_big)
+        HDfree(rbuf_big);
     return -1;
 } /* end test_fixed_array() */
 
@@ -9650,11 +9682,11 @@ test_single_chunk(hid_t fapl)
     hid_t       sid = -1, sid_max = -1;       	/* Dataspace ID for dataset with fixed dimensions */
     hid_t       did = -1, did_max = -1;      	/* Dataset ID for dataset with fixed dimensions */
     hsize_t     dim2[2] = {DSET_DIM1, DSET_DIM2};   	/* Dataset dimensions */
-    hsize_t     t_dim2[2] = {50, 100};   	/* Dataset dimensions */
-    int         wbuf[DSET_DIM1*DSET_DIM2];           	/* write buffer */
-    int         t_wbuf[50*100];           	/* write buffer */
-    int         rbuf[DSET_DIM1*DSET_DIM2];          	/* read buffer */
-    int         t_rbuf[50*100];          	/* read buffer */
+    hsize_t     t_dim2[2] = {50, 100};   /* Dataset dimensions */
+    int         *wbuf = NULL;            /* write buffer */
+    int         *t_wbuf = NULL;          /* write buffer */
+    int         *rbuf = NULL;          	 /* read buffer */
+    int         *t_rbuf = NULL;          /* read buffer */
 
     H5D_chunk_index_t idx_type; 	/* Dataset chunk index type */
     H5F_libver_t low, high;     	/* File format bounds */
@@ -9684,6 +9716,16 @@ test_single_chunk(hid_t fapl)
 
     /* Get the size of the empty file */
     if((empty_size = h5_get_file_size(filename, fapl)) < 0)
+        TEST_ERROR
+
+    /* Allocate the buffers */
+    if(NULL == (wbuf = (int *)HDmalloc(sizeof(int) * (DSET_DIM1 * DSET_DIM2))))
+        TEST_ERROR
+    if(NULL == (rbuf = (int *)HDmalloc(sizeof(int) * (DSET_DIM1 * DSET_DIM2))))
+        TEST_ERROR
+    if(NULL == (t_wbuf = (int *)HDmalloc(sizeof(int) * (50 * 100))))
+        TEST_ERROR
+    if(NULL == (t_rbuf = (int *)HDmalloc(sizeof(int) * (50 * 100))))
         TEST_ERROR
 
     for(i = n = 0; i < (DSET_DIM1 * DSET_DIM2); i++)
@@ -9800,7 +9842,7 @@ test_single_chunk(hid_t fapl)
 	    /* Open the second dataset */
 	    if((did = H5Dopen2(fid, DSET_SINGLE_NOMAX, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-	    HDmemset(rbuf, 0, sizeof(rbuf));
+	    HDmemset(rbuf, 0, sizeof(int) * (DSET_DIM1 * DSET_DIM2));
 
 	    /* Read from dataset */
 	    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, t_rbuf) < 0) TEST_ERROR;
@@ -9836,6 +9878,12 @@ test_single_chunk(hid_t fapl)
     } /* end for */
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
+    /* Release buffers */
+    HDfree(wbuf);
+    HDfree(rbuf);
+    HDfree(t_wbuf);
+    HDfree(t_rbuf);
+
     PASSED();
     return 0;
 
@@ -9849,6 +9897,14 @@ error:
         H5Sclose(sid_max);
         H5Fclose(fid);
     } H5E_END_TRY;
+    if(wbuf)
+        HDfree(wbuf);
+    if(rbuf)
+        HDfree(rbuf);
+    if(t_wbuf)
+        HDfree(t_wbuf);
+    if(t_rbuf)
+        HDfree(t_rbuf);
     return -1;
 } /* end test_single_chunk() */
 

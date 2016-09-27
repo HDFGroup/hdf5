@@ -13,6 +13,7 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "hdf5.h"
@@ -49,12 +50,15 @@ int main(void)
 {
     hid_t         fid;
     int           i, j, n, space;
-    unsigned char buf [ WIDTH*HEIGHT ];
+    unsigned char *buf;
     unsigned char pal[ PAL_ENTRIES * 3 ];        /* palette array */
     hsize_t       pal_dims[2] = {PAL_ENTRIES,3}; /* palette dimensions */
     hsize_t       width  = WIDTH;
     hsize_t       height = HEIGHT;
 
+    /* Allocate buffer */
+    buf = (unsigned char *)malloc(WIDTH * HEIGHT);
+    assert(buf);
 
     /* create a file  */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
@@ -98,6 +102,8 @@ int main(void)
 
     if(H5Fclose(fid)<0)
         return EXIT_FAILURE;
+
+    free(buf);
 
     return EXIT_SUCCESS;
 }

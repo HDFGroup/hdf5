@@ -2673,12 +2673,14 @@ test_conv_int_2(void)
 {
     int		i, j;
     hid_t	src_type, dst_type;
-    char	buf[32*100];
+    char	*buf;
 
     printf("%-70s", "Testing overlap calculations");
     HDfflush(stdout);
 
-    HDmemset(buf, 0, sizeof buf);
+    buf = (char *)HDcalloc(32, 100);
+    HDassert(buf);
+
     for (i=1; i<=32; i++) {
 	for (j=1; j<=32; j++) {
 
@@ -2700,6 +2702,7 @@ test_conv_int_2(void)
 	}
     }
     PASSED();
+    HDfree(buf);
     return 0;
 }
 

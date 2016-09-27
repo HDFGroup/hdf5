@@ -74,7 +74,7 @@ char  *paraprefix = NULL;  /* for command line option para-prefix */
 MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
 #endif
 
-#define READ_BUF_SIZE           4096
+#define READ_BUF_SIZE           65536
 
 /*
  * These are the letters that are appended to the file name when generating
@@ -855,7 +855,7 @@ h5_fileaccess(void)
         H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
         hid_t memb_fapl[H5FD_MEM_NTYPES];
         const char *memb_name[H5FD_MEM_NTYPES];
-        char sv[H5FD_MEM_NTYPES][1024];
+        char *sv[H5FD_MEM_NTYPES];
         haddr_t memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t  mt;
 
@@ -867,6 +867,8 @@ h5_fileaccess(void)
         HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
+            sv[mt] = (char *)HDmalloc(1024);
+            HDassert(sv[mt]);
             HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
@@ -874,6 +876,9 @@ h5_fileaccess(void)
 
         if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
             return -1;
+
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+            HDfree(sv[mt]);
     }
     else if(!HDstrcmp(name, "family")) {
         hsize_t fam_size = 100*1024*1024; /*100 MB*/
@@ -989,7 +994,7 @@ h5_get_vfd_fapl(void)
         H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];
         hid_t       memb_fapl[H5FD_MEM_NTYPES];
         const char  *memb_name[H5FD_MEM_NTYPES];
-        char        sv[H5FD_MEM_NTYPES][1024];
+        char        *sv[H5FD_MEM_NTYPES];
         haddr_t     memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t  mt;
 
@@ -1001,15 +1006,18 @@ h5_get_vfd_fapl(void)
         HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
+            sv[mt] = (char *)HDmalloc(1024);
+            HDassert(sv[mt]);
             HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         } /* end for */
 
-        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
-          memb_addr, FALSE) < 0) {
+        if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
             return -1;
-        } /* end if */
+
+        for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt))
+            HDfree(sv[mt]);
     } else if(!HDstrcmp(tok, "family")) {
         /* Family of files, each 1MB and using the default driver */
         hsize_t fam_size = 100*1024*1024; /*100 MB*/
@@ -1573,8 +1581,12 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
     ssize_t nread;                      /* Number of bytes read in */
-    char  buf[READ_BUF_SIZE];           /* Buffer for copying data */
+    void  *buf;                         /* Buffer for copying data */
     const char *filename = H5_get_srcdir_filename(origfilename);;       /* Get the test file name to copy */
+
+    /* Allocate copy buffer */
+    if(NULL == (buf = HDmalloc(READ_BUF_SIZE)))
+        return -1;
 
     /* Copy old file into temporary file */
     if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0)
@@ -1586,6 +1598,9 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
     while((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
         if(HDwrite(fd_new, buf, (size_t)nread) < 0)
             return -1;
+ 
+    /* Release memory */
+    HDfree(buf);
 
     /* Close files */
     if(HDclose(fd_old) < 0) return -1;

@@ -38,9 +38,9 @@
 #define NUM_ELEMS       1000
 
 /* Random numbers */
-static int rand_num[NUM_ELEMS];
-static int sort_rand_num[NUM_ELEMS];
-static int rev_sort_rand_num[NUM_ELEMS];
+static int *rand_num;
+static int *sort_rand_num;
+static int *rev_sort_rand_num;
 
 static int tst_sort(const void *i1, const void *i2)
 {
@@ -66,23 +66,31 @@ test_skiplist_init(void)
     unsigned found;     /* Flag to indicate value was inserted already */
     size_t u,v;         /* Local index variables */
 
+    /* Allocate arrays */
+    rand_num = (int *)HDmalloc(sizeof(int) * NUM_ELEMS);
+    HDassert(rand_num);
+    sort_rand_num = (int *)HDmalloc(sizeof(int) * NUM_ELEMS);
+    HDassert(sort_rand_num);
+    rev_sort_rand_num = (int *)HDmalloc(sizeof(int) * NUM_ELEMS);
+    HDassert(rev_sort_rand_num);
+
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
     HDsrandom((unsigned)curr_time);
 
     /* Create randomized set of numbers */
-    for(u=0; u<NUM_ELEMS; u++) {
+    for(u = 0; u < NUM_ELEMS; u++) {
         do {
             /* Reset flag */
-            found=0;
+            found = 0;
 
             /* Generate random numbers from -5000 to 5000 */
-            new_val=(int)(HDrandom()%10001)-5001;
+            new_val = (int)(HDrandom() % 10001) - 5001;
 
             /* Check if the value is already in the array */
-            for(v=0; v<u; v++)
-                if(rand_num[v]==new_val)
-                    found=1;
+            for(v = 0; v < u; v++)
+                if(rand_num[v] == new_val)
+                    found = 1;
         } while(found);
 
         /* Set unique value in array */
@@ -90,7 +98,7 @@ test_skiplist_init(void)
     } /* end for */
 
     /* Copy random values to sorted array */
-    HDmemcpy(sort_rand_num,rand_num,sizeof(int)*NUM_ELEMS);
+    HDmemcpy(sort_rand_num, rand_num, sizeof(int) * NUM_ELEMS);
 
     /* Sort random numbers */
     HDqsort(sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_sort);
@@ -100,7 +108,7 @@ test_skiplist_init(void)
 
     /* Sort random numbers */
     HDqsort(rev_sort_rand_num, (size_t)NUM_ELEMS, sizeof(int), tst_rev_sort);
-} /* end test_tst_init() */
+} /* end test_skiplist_init() */
 
 /****************************************************************
 **
@@ -1746,6 +1754,21 @@ test_skiplist_remove_first_many(void)
 
 /****************************************************************
 **
+**  test_skiplist_term(): Test H5SL (skiplist) code.
+**      Release data for skip list testing
+**
+****************************************************************/
+static void
+test_skiplist_term(void)
+{
+    /* Release arrays */
+    HDfree(rand_num);
+    HDfree(sort_rand_num);
+    HDfree(rev_sort_rand_num);
+} /* end test_skiplist_term() */
+
+/****************************************************************
+**
 **  test_skiplist(): Main H5SL testing routine.
 **
 ****************************************************************/
@@ -1783,6 +1806,9 @@ test_skiplist(void)
     test_skiplist_above();      /* Test 'above' operation */
     test_skiplist_remove_first();   /* Test 'remove first' operation */
     test_skiplist_remove_first_many();  /* Test 'remove first' operation on large skip lists */
+
+    /* Release skip list testing data */
+    test_skiplist_term();
 
 }   /* end test_skiplist() */
 

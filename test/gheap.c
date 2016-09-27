@@ -78,7 +78,7 @@ test_1 (hid_t fapl)
 {
     hid_t	file = -1;
     H5F_t 	*f = NULL;
-    H5HG_t	obj[1024];
+    H5HG_t	*obj = NULL;
     uint8_t	out[1024];
     uint8_t	in[1024];
     size_t	u;
@@ -88,6 +88,10 @@ test_1 (hid_t fapl)
     char	filename[1024];
 
     TESTING("monotonically increasing lengths");
+
+    /* Allocate buffer for H5HG_t */
+    if(NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * 1024)))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -138,6 +142,10 @@ test_1 (hid_t fapl)
 	}
     }
 
+    /* Release buffer */
+    HDfree(obj);
+    obj = NULL;
+
     if(H5Fclose(file) < 0) goto error;
     if(nerrors) goto error;
 
@@ -148,6 +156,8 @@ error:
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;
+    if(obj)
+        HDfree(obj);
     return MAX(1, nerrors);
 }
 
@@ -174,7 +184,7 @@ test_2 (hid_t fapl)
 {
     hid_t	file = -1;
     H5F_t 	*f = NULL;
-    H5HG_t	obj[1024];
+    H5HG_t	*obj = NULL;
     uint8_t	out[1024];
     uint8_t	in[1024];
     size_t	u;
@@ -183,6 +193,10 @@ test_2 (hid_t fapl)
     char	filename[1024];
 
     TESTING("monotonically decreasing lengths");
+
+    /* Allocate buffer for H5HG_t */
+    if(NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * 1024)))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
@@ -226,8 +240,13 @@ test_2 (hid_t fapl)
 	}
     }
 
+    /* Release buffer */
+    HDfree(obj);
+    obj = NULL;
+
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
+
     PASSED();
     return 0;
 
@@ -235,6 +254,8 @@ test_2 (hid_t fapl)
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;
+    if(obj)
+        HDfree(obj);
     return MAX(1, nerrors);
 }
 
@@ -261,7 +282,7 @@ test_3 (hid_t fapl)
 {
     hid_t	file = -1;
     H5F_t 	*f = NULL;
-    H5HG_t	obj[1024];
+    H5HG_t	*obj = NULL;
     uint8_t	out[1024];
     size_t	u;
     size_t	size;
@@ -270,6 +291,10 @@ test_3 (hid_t fapl)
     char	filename[1024];
 
     TESTING("complete object removal");
+
+    /* Allocate buffer for H5HG_t */
+    if(NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * 1024)))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
@@ -304,8 +329,13 @@ test_3 (hid_t fapl)
 	}
     }
 
+    /* Release buffer */
+    HDfree(obj);
+    obj = NULL;
+
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
+
     PASSED();
     return 0;
 
@@ -313,6 +343,8 @@ test_3 (hid_t fapl)
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;
+    if(obj)
+        HDfree(obj);
     return MAX(1, nerrors);
 }
 
@@ -340,7 +372,7 @@ test_4 (hid_t fapl)
 {
     hid_t	file = -1;
     H5F_t 	*f = NULL;
-    H5HG_t	obj[1024];
+    H5HG_t	*obj = NULL;
     uint8_t	out[1024];
     size_t	u;
     size_t	size;
@@ -349,6 +381,10 @@ test_4 (hid_t fapl)
     char	filename[1024];
 
     TESTING("partial object removal");
+
+    /* Allocate buffer for H5HG_t */
+    if(NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * 1024)))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
@@ -389,8 +425,13 @@ test_4 (hid_t fapl)
 	}
     }
 
+    /* Release buffer */
+    HDfree(obj);
+    obj = NULL;
+
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
+
     PASSED();
     return 0;
 
@@ -398,6 +439,8 @@ test_4 (hid_t fapl)
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;
+    if(obj)
+        HDfree(obj);
     return MAX(1, nerrors);
 }
 

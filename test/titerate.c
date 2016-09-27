@@ -584,9 +584,9 @@ test_iter_group_large(hid_t fapl)
     hid_t		tid;       /* Datatype ID			*/
     hsize_t		dims[] = {SPACE1_DIM1};
     herr_t		ret;		/* Generic return value		*/
-    char gname[20];         /* Temporary group name */
-    iter_info names[ITER_NGROUPS+2]; /* Names of objects in the root group */
-    iter_info *curr_name;        /* Pointer to the current name in the root group */
+    char gname[20];             /* Temporary group name */
+    iter_info *names;           /* Names of objects in the root group */
+    iter_info *curr_name;       /* Pointer to the current name in the root group */
     int                 i;
 
     /* Compound datatype */
@@ -596,7 +596,9 @@ test_iter_group_large(hid_t fapl)
         float c;
     } s1_t;
 
-    HDmemset(names, 0, sizeof names);
+    /* Allocate & initialize array */
+    names = (iter_info *)HDcalloc(sizeof(iter_info), (ITER_NGROUPS + 2));
+    CHECK(names, NULL, "HDcalloc");
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Large Group Iteration Functionality\n"));
@@ -686,6 +688,9 @@ test_iter_group_large(hid_t fapl)
     /* Close file */
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
+
+    /* Release memory */
+    HDfree(names);
 } /* test_iterate_group_large() */
 
 /****************************************************************

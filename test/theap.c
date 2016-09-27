@@ -44,13 +44,13 @@ typedef struct test_obj {
 } test_obj;
 
 /* Array of random element values */
-static test_obj rand_num[NUM_ELEMS];
+static test_obj *rand_num;
 
 /* Array of random elements values, sorted in increasing order */
-static test_obj inc_sort_num[NUM_ELEMS];
+static test_obj *inc_sort_num;
 
 /* Array of random elements values, sorted in decreasing order */
-static test_obj dec_sort_num[NUM_ELEMS];
+static test_obj *dec_sort_num;
 
 static int tst_dec_sort(const void *_i1, const void *_i2)
 {
@@ -88,21 +88,29 @@ test_heap_init(void)
     time_t curr_time;   /* Current time, for seeding random number generator */
     size_t u;           /* Local index variables */
 
+    /* Allocate arrays */
+    rand_num = (test_obj *)HDmalloc(sizeof(test_obj) * NUM_ELEMS);
+    HDassert(rand_num);
+    inc_sort_num = (test_obj *)HDmalloc(sizeof(test_obj) * NUM_ELEMS);
+    HDassert(inc_sort_num);
+    dec_sort_num = (test_obj *)HDmalloc(sizeof(test_obj) * NUM_ELEMS);
+    HDassert(dec_sort_num);
+
     /* Create randomized set of numbers */
-    curr_time=time(NULL);
+    curr_time = HDtime(NULL);
     HDsrandom((unsigned)curr_time);
-    for(u=0; u<NUM_ELEMS; u++)
+    for(u = 0; u < NUM_ELEMS; u++)
         /* Generate random numbers from -1000 to 1000 */
-        rand_num[u].val=(int)(HDrandom()%2001)-1001;
+        rand_num[u].val = (int)(HDrandom() % 2001) - 1001;
 
     /* Sort random numbers into increasing order */
-    HDmemcpy(inc_sort_num,rand_num,sizeof(test_obj)*NUM_ELEMS);
+    HDmemcpy(inc_sort_num, rand_num, sizeof(test_obj) * NUM_ELEMS);
     HDqsort(inc_sort_num, (size_t)NUM_ELEMS, sizeof(test_obj), tst_inc_sort);
 
     /* Sort random numbers into decreasing order */
-    HDmemcpy(dec_sort_num,rand_num,sizeof(test_obj)*NUM_ELEMS);
+    HDmemcpy(dec_sort_num, rand_num, sizeof(test_obj) * NUM_ELEMS);
     HDqsort(dec_sort_num, (size_t)NUM_ELEMS, sizeof(test_obj), tst_dec_sort);
-} /* end test_tst_init() */
+} /* end test_heap_init() */
 
 /****************************************************************
 **
@@ -1023,6 +1031,21 @@ test_heap_incdec(void)
 
 /****************************************************************
 **
+**  test_heap_term(): Test H5HP (heap) code.
+**      Release data for Heap testing
+**
+****************************************************************/
+static void
+test_heap_term(void)
+{
+    /* Release arrays */
+    HDfree(rand_num);
+    HDfree(inc_sort_num);
+    HDfree(dec_sort_num);
+} /* end test_tst_term() */
+
+/****************************************************************
+**
 **  test_heap(): Main H5HP testing routine.
 **
 ****************************************************************/
@@ -1043,6 +1066,9 @@ test_heap(void)
     test_heap_remove_many();     /* Test Heap removal of many items */
     test_heap_change();          /* Test changing priority of objects on Heap */
     test_heap_incdec();          /* Test incrementing & decrementing priority of objects on Heap */
+
+    /* Release Heap testing data */
+    test_heap_term();
 
 }   /* end test_heap() */
 

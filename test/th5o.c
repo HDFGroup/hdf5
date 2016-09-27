@@ -777,15 +777,21 @@ test_h5o_link(void)
     hsize_t dims[2] = {TEST6_DIM1, TEST6_DIM2};
     htri_t committed;           /* Whether the named datatype is committed */
     unsigned new_format;        /* Whether to use the new format or not */
-    int wdata[TEST6_DIM1][TEST6_DIM2];
-    int rdata[TEST6_DIM1][TEST6_DIM2];
-    int i, n, j;
+    int *wdata;
+    int *rdata;
+    int i, n;
     herr_t ret;                 /* Value returned from API calls */
 
+    /* Allocate memory buffers */
+    /* (These are treated as 2-D buffers) */
+    wdata = (int *)HDmalloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
+    CHECK(wdata, NULL, "HDmalloc");
+    rdata = (int *)HDmalloc((size_t)(TEST6_DIM1 * TEST6_DIM2) * sizeof(int));
+    CHECK(rdata, NULL, "HDmalloc");
+
     /* Initialize the raw data */
-    for(i = n = 0; i < TEST6_DIM1; i++)
-        for(j = 0; j < TEST6_DIM2; j++)
-          wdata[i][j] = n++;
+    for(i = n = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)
+      wdata[i] = n++;
 
     /* Create the dataspace */
     space_id = H5Screate_simple(2 ,dims, NULL);
@@ -840,9 +846,8 @@ test_h5o_link(void)
         CHECK(ret, FAIL, "H5Dread");
 
         /* Verify the data */
-        for(i = 0; i < TEST6_DIM1; i++)
-            for(j = 0; j < TEST6_DIM2; j++)
-                VERIFY(wdata[i][j], rdata[i][j], "H5Dread");
+        for(i = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)
+            VERIFY(wdata[i], rdata[i], "H5Dread");
 
         /* Create a group with no name*/
         group_id = H5Gcreate_anon(file_id, H5P_DEFAULT, H5P_DEFAULT);
@@ -879,9 +884,8 @@ test_h5o_link(void)
         /* Read data from dataset */
         ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
         CHECK(ret, FAIL, "H5Dread");
-        for(i = 0; i < TEST6_DIM1; i++)
-            for(j = 0; j < TEST6_DIM2; j++)
-                VERIFY(wdata[i][j], rdata[i][j], "H5Dread");
+        for(i = 0; i < (TEST6_DIM1 * TEST6_DIM2); i++)
+            VERIFY(wdata[i], rdata[i], "H5Dread");
 
         /* Close open IDs */
         ret = H5Dclose(dset_id);
@@ -897,6 +901,10 @@ test_h5o_link(void)
     CHECK(ret, FAIL, "H5Sclose");
     ret = H5Pclose(lcpl_id);
     CHECK(ret, FAIL, "H5Pclose");
+
+    /* Release buffers */
+    HDfree(wdata);
+    HDfree(rdata);
 } /* end test_h5o_link() */
 
 
