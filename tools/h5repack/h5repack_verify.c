@@ -207,12 +207,10 @@ h5repack_verify(const char *out_fname, pack_opt_t *options)
 
 done:
     H5E_BEGIN_TRY {
-        H5Pclose(fcpl_in);
         H5Pclose(fcpl_out);
         H5Pclose(pid);
         H5Sclose(sid);
         H5Dclose(did);
-        H5Fclose(fidin);
         H5Fclose(fidout);
         if (travt)
             trav_table_free(travt);
@@ -527,7 +525,7 @@ int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
         {
 
             case H5Z_FILTER_NONE:
-        	break;
+            break;
 
             case H5Z_FILTER_SHUFFLE:
                 /* 1 private client value is returned by DCPL */

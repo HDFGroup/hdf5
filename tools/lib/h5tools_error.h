@@ -98,7 +98,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
  * to the `catch_except' label, if we're not already past it.
  */
 #define H5E_THROW(fail_value, min_id, str) {        \
-    HERROR(H5E_tools_g, min_id, str);                 \
+    H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g, min_id, str);     \
     H5_LEAVE(fail_value)                            \
 }
 
