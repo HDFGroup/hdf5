@@ -413,73 +413,6 @@ h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_str_dump_space_slabs
- *
- * Purpose: Prints information about a dataspace selection by appending
- *          the information to the specified string.
- *
- * Return:  none
- *
- * In/Out:
- *      h5tools_context_t *ctx
- *      h5tools_str_t     *str
- *-------------------------------------------------------------------------
- */
-void
-h5tools_str_dump_space_slabs(h5tools_str_t *str, hid_t rspace,
-        const h5tool_format_t *info, h5tools_context_t *ctx)
-{
-    hsize_t   start[H5S_MAX_RANK];
-    hsize_t   stride[H5S_MAX_RANK];
-    hsize_t   count[H5S_MAX_RANK];
-    hsize_t   block[H5S_MAX_RANK];
-    int       j;
-    int       ndims = H5Sget_simple_extent_ndims(rspace);
-
-    H5Sget_regular_hyperslab(rspace, start, stride, count, block);
-
-    /* Print hyperslab information */
-
-    /* Start coordinates */
-    h5tools_str_append(str, "%s%s ", info->line_indent, START);
-    for (j = 0; j < ndims; j++)
-        h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", start[j]);
-    h5tools_str_append(str, ")");
-    h5tools_str_append(str, "%s", "\n");
-    h5tools_str_indent(str, info, ctx);
-
-    /* Stride coordinates */
-    h5tools_str_append(str, "%s ", STRIDE);
-    for (j = 0; j < ndims; j++)
-        h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", stride[j]);
-    h5tools_str_append(str, ")");
-    h5tools_str_append(str, "%s", "\n");
-    h5tools_str_indent(str, info, ctx);
-
-    /* Count coordinates */
-    h5tools_str_append(str, "%s ", COUNT);
-    for (j = 0; j < ndims; j++) {
-        if(count[j] == H5S_UNLIMITED)
-            h5tools_str_append(str, "%s%s", j ? "," : "(","H5S_UNLIMITED");
-        else
-            h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", count[j]);
-    }
-    h5tools_str_append(str, ")");
-    h5tools_str_append(str, "%s", "\n");
-    h5tools_str_indent(str, info, ctx);
-
-    /* Block coordinates */
-    h5tools_str_append(str, "%s ", BLOCK);
-    for (j = 0; j < ndims; j++) {
-        if(block[j] == H5S_UNLIMITED)
-            h5tools_str_append(str, "%s%s", j ? "," : "(","H5S_UNLIMITED");
-        else
-            h5tools_str_append(str, "%s" HSIZE_T_FORMAT, j ? "," : "(", block[j]);
-    }
-    h5tools_str_append(str, ")");
-}
-
-/*-------------------------------------------------------------------------
  * Function:    h5tools_str_dump_space_blocks
  *
  * Purpose: Prints information about a dataspace selection by appending
@@ -1458,8 +1391,8 @@ h5tools_str_replace ( const char *string, const char *substr, const char *replac
     char *tok = NULL;
     char *newstr = NULL;
     char *head = NULL;
- 
-    if(substr == NULL || replacement == NULL) 
+
+    if(substr == NULL || replacement == NULL)
         return HDstrdup(string);
     newstr = HDstrdup(string);
     head = newstr;
@@ -1470,8 +1403,8 @@ h5tools_str_replace ( const char *string, const char *substr, const char *replac
         newstr = (char *)HDmalloc(HDstrlen(oldstr) - HDstrlen(substr) + HDstrlen(replacement) + 1);
 
         if(newstr == NULL) {
-	    HDfree(oldstr);
-	    return NULL;
+        HDfree(oldstr);
+        return NULL;
         }
         HDmemcpy(newstr, oldstr, (size_t)(tok - oldstr));
         HDmemcpy(newstr + (tok - oldstr), replacement, HDstrlen(replacement));
