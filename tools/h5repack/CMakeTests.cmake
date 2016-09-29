@@ -86,6 +86,7 @@
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack.info
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/deflate_limit.h5repack_layout.h5.ddl
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5.ddl
+      ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_filters.h5-gzip_verbose_filters.tst
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_filters.h5.tst
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.h5-plugin_test.ddl
       ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/testfiles/plugin_test.h5repack_layout.h5.tst
