@@ -66,6 +66,7 @@ SUBROUTINE test_array_compound_atomic(total_error)
   CHARACTER(LEN=10), PARAMETER :: FILENAME = "tarray1.h5"
 
   TYPE s1_t
+     SEQUENCE
      INTEGER :: i
      REAL :: f
   END TYPE s1_t
@@ -298,7 +299,8 @@ END SUBROUTINE test_array_compound_atomic
     INTEGER, PARAMETER :: SPACE1_DIM1 = 4
     CHARACTER(LEN=10), PARAMETER :: FILENAME = "tarray2.h5"
 
-    TYPE st_t_struct !  Typedef for compound datatype 
+    TYPE st_t_struct !  Typedef for compound datatype
+       SEQUENCE
        INTEGER :: i
        REAL, DIMENSION(1:ARRAY2_DIM1) :: f
        CHARACTER(LEN=2), DIMENSION(1:ARRAY2_DIM1) :: c
