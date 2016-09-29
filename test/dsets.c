@@ -240,6 +240,10 @@ double	points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
 size_t  count_nbytes_read = 0;
 size_t  count_nbytes_written = 0;
 
+/* Temporary buffer dimensions */
+#define DSET_TMP_DIM1   50
+#define DSET_TMP_DIM2   100
+
 /* Declarations for test_idx_compatible() */
 #define DSET            "dset"
 #define DSET_FILTER     "dset_filter"
@@ -9682,7 +9686,7 @@ test_single_chunk(hid_t fapl)
     hid_t       sid = -1, sid_max = -1;       	/* Dataspace ID for dataset with fixed dimensions */
     hid_t       did = -1, did_max = -1;      	/* Dataset ID for dataset with fixed dimensions */
     hsize_t     dim2[2] = {DSET_DIM1, DSET_DIM2};   	/* Dataset dimensions */
-    hsize_t     t_dim2[2] = {50, 100};   /* Dataset dimensions */
+    hsize_t     t_dim2[2] = {DSET_TMP_DIM1, DSET_TMP_DIM2};   /* Dataset dimensions */
     int         *wbuf = NULL;            /* write buffer */
     int         *t_wbuf = NULL;          /* write buffer */
     int         *rbuf = NULL;          	 /* read buffer */
@@ -9723,15 +9727,15 @@ test_single_chunk(hid_t fapl)
         TEST_ERROR
     if(NULL == (rbuf = (int *)HDmalloc(sizeof(int) * (DSET_DIM1 * DSET_DIM2))))
         TEST_ERROR
-    if(NULL == (t_wbuf = (int *)HDmalloc(sizeof(int) * (50 * 100))))
+    if(NULL == (t_wbuf = (int *)HDmalloc(sizeof(int) * (DSET_TMP_DIM1 * DSET_TMP_DIM2))))
         TEST_ERROR
-    if(NULL == (t_rbuf = (int *)HDmalloc(sizeof(int) * (50 * 100))))
+    if(NULL == (t_rbuf = (int *)HDmalloc(sizeof(int) * (DSET_TMP_DIM1 * DSET_TMP_DIM2))))
         TEST_ERROR
 
     for(i = n = 0; i < (DSET_DIM1 * DSET_DIM2); i++)
 	wbuf[i] = (int)n++;
 
-    for(i = n = 0; i < (50* 100); i++)
+    for(i = n = 0; i < (DSET_TMP_DIM1* DSET_TMP_DIM2); i++)
 	t_wbuf[i] = (int)n++;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
@@ -9848,8 +9852,8 @@ test_single_chunk(hid_t fapl)
 	    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, t_rbuf) < 0) TEST_ERROR;
 
 	    /* Verify that written and read data are the same */
-	    for(i = 0; i < (50* 100); i++)
-		if(t_rbuf[i] != t_wbuf[i]){
+	    for(i = 0; i < (DSET_TMP_DIM1* DSET_TMP_DIM2); i++)
+		if(t_rbuf[i] != t_wbuf[i]) {
 		    printf("    Line %d: Incorrect value, t_wbuf[%u]=%d, t_rbuf[%u]=%d\n",
 			__LINE__,(unsigned)i,t_wbuf[i],(unsigned)i,t_rbuf[i]);
 		    TEST_ERROR;

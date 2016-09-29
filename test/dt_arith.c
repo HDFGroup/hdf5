@@ -94,6 +94,9 @@ static int skip_overflow_tests_g = 0;
 #define TEST_DENORM     2
 #define TEST_SPECIAL    3
 
+/* Temporary buffer sizes */
+#define TMP_BUF_DIM1    32
+#define TMP_BUF_DIM2    100
 
 /* Don't use hardware conversions if set */
 static int without_hardware_g = 0;
@@ -2678,11 +2681,11 @@ test_conv_int_2(void)
     printf("%-70s", "Testing overlap calculations");
     HDfflush(stdout);
 
-    buf = (char *)HDcalloc(32, 100);
+    buf = (char *)HDcalloc(TMP_BUF_DIM1, TMP_BUF_DIM2);
     HDassert(buf);
 
-    for (i=1; i<=32; i++) {
-	for (j=1; j<=32; j++) {
+    for(i = 1; i <= TMP_BUF_DIM1; i++) {
+	for(j = 1; j <= TMP_BUF_DIM1; j++) {
 
 	    /* Source type */
 	    src_type = H5Tcopy(H5T_NATIVE_CHAR);
@@ -2696,7 +2699,7 @@ test_conv_int_2(void)
 	     * Conversion. If overlap calculations aren't right then an
 	     * assertion will fail in H5T__conv_i_i()
 	     */
-	    H5Tconvert(src_type, dst_type, (size_t)100, buf, NULL, H5P_DEFAULT);
+	    H5Tconvert(src_type, dst_type, (size_t)TMP_BUF_DIM2, buf, NULL, H5P_DEFAULT);
 	    H5Tclose(src_type);
 	    H5Tclose(dst_type);
 	}

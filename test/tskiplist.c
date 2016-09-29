@@ -68,11 +68,11 @@ test_skiplist_init(void)
 
     /* Allocate arrays */
     rand_num = (int *)HDmalloc(sizeof(int) * NUM_ELEMS);
-    HDassert(rand_num);
+    CHECK(rand_num, NULL, "HDmalloc");
     sort_rand_num = (int *)HDmalloc(sizeof(int) * NUM_ELEMS);
-    HDassert(sort_rand_num);
+    CHECK(sort_rand_num, NULL, "HDmalloc");
     rev_sort_rand_num = (int *)HDmalloc(sizeof(int) * NUM_ELEMS);
-    HDassert(rev_sort_rand_num);
+    CHECK(rev_sort_rand_num, NULL, "HDmalloc");
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
@@ -1762,9 +1762,12 @@ static void
 test_skiplist_term(void)
 {
     /* Release arrays */
-    HDfree(rand_num);
-    HDfree(sort_rand_num);
-    HDfree(rev_sort_rand_num);
+    if(rand_num)
+        HDfree(rand_num);
+    if(sort_rand_num)
+        HDfree(sort_rand_num);
+    if(rev_sort_rand_num)
+        HDfree(rev_sort_rand_num);
 } /* end test_skiplist_term() */
 
 /****************************************************************

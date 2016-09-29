@@ -90,11 +90,11 @@ test_heap_init(void)
 
     /* Allocate arrays */
     rand_num = (test_obj *)HDmalloc(sizeof(test_obj) * NUM_ELEMS);
-    HDassert(rand_num);
+    CHECK(rand_num, NULL, "HDmalloc");
     inc_sort_num = (test_obj *)HDmalloc(sizeof(test_obj) * NUM_ELEMS);
-    HDassert(inc_sort_num);
+    CHECK(inc_sort_num, NULL, "HDmalloc");
     dec_sort_num = (test_obj *)HDmalloc(sizeof(test_obj) * NUM_ELEMS);
-    HDassert(dec_sort_num);
+    CHECK(dec_sort_num, NULL, "HDmalloc");
 
     /* Create randomized set of numbers */
     curr_time = HDtime(NULL);
@@ -1039,9 +1039,12 @@ static void
 test_heap_term(void)
 {
     /* Release arrays */
-    HDfree(rand_num);
-    HDfree(inc_sort_num);
-    HDfree(dec_sort_num);
+    if(rand_num)
+        HDfree(rand_num);
+    if(inc_sort_num)
+        HDfree(inc_sort_num);
+    if(dec_sort_num)
+        HDfree(dec_sort_num);
 } /* end test_tst_term() */
 
 /****************************************************************

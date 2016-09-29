@@ -90,6 +90,9 @@ MPI_Info    h5_io_info_g=MPI_INFO_NULL;/* MPI INFO object for IO */
  */
 static const char *multi_letters = "msbrglo";
 
+/* Length of multi-file VFD filename buffers */
+#define H5TEST_MULTI_FILENAME_LEN       1024
+
 /* Previous error reporting function */
 static H5E_auto2_t err_func = NULL;
 
@@ -867,7 +870,7 @@ h5_fileaccess(void)
         HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
-            if(NULL == (sv[mt] = (char *)HDmalloc(1024)))
+            if(NULL == (sv[mt] = (char *)HDmalloc(H5TEST_MULTI_FILENAME_LEN)))
                 return -1;
             HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
@@ -1006,7 +1009,7 @@ h5_get_vfd_fapl(void)
         HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
-            sv[mt] = (char *)HDmalloc(1024);
+            sv[mt] = (char *)HDmalloc(H5TEST_MULTI_FILENAME_LEN);
             HDassert(sv[mt]);
             HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
