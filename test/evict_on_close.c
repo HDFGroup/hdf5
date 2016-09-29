@@ -22,7 +22,23 @@
  *              are located in cache.c.
  */
 
+#define H5C_FRIEND		/*suppress error about including H5Cpkg   */
+#define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
+#define H5D_TESTING
+#define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
+#define H5F_TESTING
+#define H5I_FRIEND		/*suppress error about including H5Ipkg	  */
+#define H5I_TESTING
+
+
 #include "h5test.h"
+#include "H5Cpkg.h"
+#include "H5Dpkg.h"
+#include "H5Fpkg.h"
+#include "H5Ipkg.h"
+
+/* Uncomment to manually inspect cache states */
+#define EOC_MANUAL_INSPECTION
 
 const char *FILENAMES[] = {
     "evict-on-close",           /* 0 */
@@ -32,14 +48,60 @@ const char *FILENAMES[] = {
 
 //#define DSET_NAME_COMPACT       "compact"
 //#define DSET_NAME_CONTIGUOUS    "contiguous"
-#define DSET_NAME_V1_BTREE      "v1_btree"
+#define DSET_NAME_V1_BTREE_NAME         "v1_btree"
 //#define DSET_NAME_V2_BTREE      "v2_btree"
 //#define DSET_NAME_EARRAY        "earray"
 //#define DSET_NAME_FARRAY        "farray"
 //#define DSET_NAME_SINGLE        "single"
 
+
+#define DSET_NAME_V1_BTREE_NELEMENTS    1024
+
+static hbool_t verify_tag_not_in_cache(H5F_t *f, haddr_t tag);
 static herr_t check_evict_on_close_api(void);
-static herr_t generate_eoc_test_file(hid_t fapl_id);
+static hid_t generate_eoc_test_file(hid_t fapl_id);
+static herr_t check_v1_btree_chunk_index(hid_t fid);
+
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_tag_not_in_cache()
+ *
+ * Purpose:     Ensure that metadata cache entries with a given tag are not
+ *              present in the cache.
+ *
+ * Return:      TRUE/FALSE
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+verify_tag_not_in_cache(H5F_t *f, haddr_t tag)
+{
+    H5C_t *cache_ptr = NULL;                /* cache pointer                */
+    int i = 0;                              /* iterator                     */
+    H5C_cache_entry_t *entry_ptr = NULL;    /* entry pointer                */
+
+    cache_ptr = f->shared->cache;
+
+    for(i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+
+        entry_ptr = cache_ptr->index[i];
+
+        while(entry_ptr != NULL) {
+
+            if(tag == entry_ptr->tag)
+                return TRUE;
+            else
+                entry_ptr = entry_ptr->ht_next;
+
+        } /* end while */
+    } /* end for */
+
+    return FALSE;
+
+} /* end verify_tag_not_in_cache() */
 
 
 /*-------------------------------------------------------------------------
@@ -47,18 +109,19 @@ static herr_t generate_eoc_test_file(hid_t fapl_id);
  *
  * Purpose:     Generate the evict-on-close test file.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Success: The file ID of the created file
+ *              Failure: -1
  *
  * Programmer:  Dana Robinson
  *              Fall 2016
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static hid_t
 generate_eoc_test_file(hid_t fapl_id)
 {
     char    filename[FILENAME_BUF_SIZE];    /* decorated file name          */
-    hid_t   fid = -1;                       /* file ID                      */
+    hid_t   fid = -1;                       /* file ID (returned)           */
     hid_t   fapl_copy_id = -1;              /* ID of copied fapl            */
     hid_t   sid = -1;                       /* dataspace ID                 */
     hid_t   dcpl_id = -1;                   /* dataset creation plist       */
@@ -84,7 +147,7 @@ generate_eoc_test_file(hid_t fapl_id)
     /***********************************************************/
 
     /* Create the data buffer */
-    if(NULL == (data = (int *)HDcalloc(1024, sizeof(int))))
+    if(NULL == (data = (int *)HDcalloc(DSET_NAME_V1_BTREE_NELEMENTS, sizeof(int))))
         TEST_ERROR;
 
     /********************/
@@ -92,7 +155,7 @@ generate_eoc_test_file(hid_t fapl_id)
     /********************/
 
     /* Create dataspace */
-    n = 100;
+    n = DSET_NAME_V1_BTREE_NELEMENTS;
     rank = 1;
     current_dims[0] = (hsize_t)n;
     maximum_dims[0] = H5S_UNLIMITED;
@@ -107,7 +170,7 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create dataset */
-    if((did = H5Dcreate(fid, DSET_NAME_V1_BTREE, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate(fid, DSET_NAME_V1_BTREE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write a bunch of fake data */
@@ -123,13 +186,11 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
 
-    /* Close everything else */
-    if(H5Fclose(fid) < 0)
-        TEST_ERROR;
+    /* Close/free everything else */
     HDfree(data);
 
     PASSED();
-    return SUCCEED;
+    return fid;
 
 error:
     H5E_BEGIN_TRY {
@@ -143,9 +204,112 @@ error:
     HDfree(data);
 
     H5_FAILED();
-    return FAIL;
+    return -1;
 
 } /* end generate_eoc_test_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    check_v1_btree_chunk_index()
+ *
+ * Purpose:     Verify that datasets using version 1 B-trees are evicted
+ *              correctly.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+check_v1_btree_chunk_index(hid_t fid)
+{
+    H5F_t   *file_ptr = NULL;               /* ptr to internal file struct  */
+    hid_t   did = -1;                       /* dataset ID                   */
+    H5D_t   *dset_ptr = NULL;               /* ptr to internal dset struct  */
+    haddr_t tag;                            /* MD cache tag for dataset     */
+    int     *data = NULL;                   /* buffer for fake data         */
+    int32_t before, during, after;          /* cache sizes                  */
+
+    TESTING("evict on close with version 1 B-trees");
+
+    /* Get a pointer to the file struct */
+    if(NULL == (file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE)))
+        TEST_ERROR;
+
+    /* Create the data buffer */
+    if(NULL == (data = (int *)HDcalloc(DSET_NAME_V1_BTREE_NELEMENTS, sizeof(int))))
+        TEST_ERROR;
+
+    /* Record the number of cache entries */
+    before = file_ptr->shared->cache->index_len;
+
+#ifdef EOC_MANUAL_INSPECTION
+    HDprintf("\nCACHE BEFORE DATASET OPEN:\n");
+    if(H5AC_dump_cache(file_ptr) < 0)
+        TEST_ERROR;
+    HDprintf("NUMBER OF CACHE ENTRIES: %d\n", before);
+#endif
+
+    /* Open dataset and get the metadata tag */
+    if((did = H5Dopen2(fid, DSET_NAME_V1_BTREE_NAME, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if(NULL == (dset_ptr = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+        TEST_ERROR;
+    tag = dset_ptr->oloc.addr;
+
+    /* Read data from the dataset so the cache gets populated with chunk indices */
+    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        TEST_ERROR;
+
+    /* Record the number of cache entries */
+    during = file_ptr->shared->cache->index_len; 
+
+#ifdef EOC_MANUAL_INSPECTION
+    HDprintf("\nCACHE AFTER DATA READ (WHILE OPEN):\n");
+    if(H5AC_dump_cache(file_ptr) < 0)
+        TEST_ERROR;
+    HDprintf("TAG: %#X\n", tag);
+    HDprintf("NUMBER OF CACHE ENTRIES: %d\n", during);
+#endif
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    /* Record the number of cache entries */
+    after = file_ptr->shared->cache->index_len;
+
+#ifdef EOC_MANUAL_INSPECTION
+    HDprintf("\nCACHE AFTER DATASET CLOSE:\n");
+    if(H5AC_dump_cache(file_ptr) < 0)
+        TEST_ERROR;
+    HDprintf("NUMBER OF CACHE ENTRIES: %d\n", after);
+#endif
+
+    /* Ensure that the cache does not contain data items with the tag */
+    if(TRUE == verify_tag_not_in_cache(file_ptr, tag))
+        TEST_ERROR;
+
+    /* Compare the number of cache entries */
+    if(before != after || before == during)
+        TEST_ERROR;
+
+    HDfree(data);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Dclose(did);
+    } H5E_END_TRY;
+
+    H5_FAILED();
+    return FAIL;
+
+} /* check_v1_btree_chunk_index() */
 
 
 /*-------------------------------------------------------------------------
@@ -246,8 +410,9 @@ error:
 int
 main(void)
 {
-    hid_t       fapl_id = -1;
-    unsigned    nerrors = 0;
+    hid_t       fapl_id = -1;       /* VFD-specific fapl                    */
+    hid_t       fid = -1;           /* file ID                              */
+    unsigned    nerrors = 0;        /* number of test errors                */
 
     HDprintf("Testing evict-on-close cache behavior.\n");
 
@@ -269,27 +434,31 @@ main(void)
         PUTS_ERROR("Unable to set evict-on-close property\n");
     } /* end if */
 
-    /* Generate the test file */
-    if(generate_eoc_test_file(fapl_id) < 0) {
-        nerrors++;
-        PUTS_ERROR("Unable to generate test file\n");
-    } /* end if */
-
     /*************************/
     /* Test EoC for datasets */
     /*************************/
 
-#ifdef NOTYET
-    nerrors += check_v1_btree_chunk_index(fapl_id);
-#endif
+    /* Generate the test file */
+    if((fid = generate_eoc_test_file(fapl_id)) < 0) {
+        nerrors++;
+        PUTS_ERROR("Unable to generate test file\n");
+    } /* end if */
+
+    /* Run tests with a variety of dataset configurations */
+    nerrors += check_v1_btree_chunk_index(fid) < 0 ? 1 : 0;
+
+    /* Close the test file */
+    if(H5Fclose(fid) < 0) {
+        nerrors++;
+        PUTS_ERROR("Unable to close the test file.\n");
+    } /* end if */
 
     /* Clean up files and close the VFD-specific fapl */
     //h5_delete_all_test_files(FILENAMES, fapl_id);
     if(H5Pclose(fapl_id) < 0) {
         nerrors++;
-        PUTS_ERROR("Unable to close VFD-specific fapl\n");
+        PUTS_ERROR("Unable to close VFD-specific fapl.\n");
     } /* end if */
-
 
     if(nerrors)
         goto error;
@@ -305,6 +474,7 @@ error:
 
     h5_delete_all_test_files(FILENAMES, fapl_id);
     H5E_BEGIN_TRY {
+        H5Fclose(fid);
         H5Pclose(fapl_id);
     } H5E_END_TRY;
 
