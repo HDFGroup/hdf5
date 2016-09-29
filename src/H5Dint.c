@@ -1977,6 +1977,12 @@ H5D_close(H5D_t *dataset)
    if(H5G_name_free(&(dataset->path)) < 0)
        free_failed = TRUE;
 
+#ifdef H5_HAVE_PARALLEL
+   if(dataset->subfile_selection)
+       if(H5S_close(dataset->subfile_selection) < 0)
+           HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't close subfiling selection")
+#endif /* H5_HAVE_PARALLEL */
+
     /* Free the dataset's memory structure */
     dataset = H5FL_FREE(H5D_t, dataset);
 
