@@ -867,8 +867,8 @@ h5_fileaccess(void)
         HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
         for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
-            sv[mt] = (char *)HDmalloc(1024);
-            HDassert(sv[mt]);
+            if(NULL == (sv[mt] = (char *)HDmalloc(1024)))
+                return -1;
             HDsprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);

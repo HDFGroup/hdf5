@@ -410,8 +410,8 @@ herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int
     long    s44_wbuf[DIM4_SIZE] = {280,280};
 
     /* Allocate buffer */
-    buf = (long *)HDmalloc(sizeof(long) * DIM1_SIZE * DIM2_SIZE * DIM3_SIZE * DIM4_SIZE);
-    HDassert(buf);
+    if(NULL == (buf = (long *)HDmalloc(sizeof(long) * DIM1_SIZE * DIM2_SIZE * DIM3_SIZE * DIM4_SIZE)))
+         return FAIL;
 
     /* make a dataset */
     if(H5LTmake_dataset_long(fid, dsname, rank, dims, buf) >= 0) {

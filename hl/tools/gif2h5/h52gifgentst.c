@@ -57,8 +57,8 @@ int main(void)
     hsize_t       height = HEIGHT;
 
     /* Allocate buffer */
-    buf = (unsigned char *)malloc(WIDTH * HEIGHT);
-    assert(buf);
+    if(NULL == (buf = (unsigned char *)malloc(WIDTH * HEIGHT)))
+        return EXIT_FAILURE;
 
     /* create a file  */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
