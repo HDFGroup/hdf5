@@ -180,7 +180,7 @@ int do_copy_refobjs(hid_t fidin,
                             } /* end if */
                             for(u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY {
-                                    if((refobj_id = H5Rdereference2(dset_in, H5P_DEFAULT, H5R_OBJECT, &buf[u])) < 0)
+                                    if((refobj_id = H5Rdereference(dset_in, H5R_OBJECT, &buf[u])) < 0)
                                         continue;
                                 } H5E_END_TRY;
 
@@ -262,7 +262,7 @@ int do_copy_refobjs(hid_t fidin,
 
                             for(u = 0; u < nelmts; u++) {
                                 H5E_BEGIN_TRY {
-                                    if((refobj_id = H5Rdereference2(dset_in, H5P_DEFAULT, H5R_DATASET_REGION, &buf[u])) < 0)
+                                    if((refobj_id = H5Rdereference(dset_in, H5R_DATASET_REGION, &buf[u])) < 0)
                                         continue;
                                 } H5E_END_TRY;
 
@@ -849,7 +849,7 @@ static herr_t update_ref_value(hid_t obj_id, H5R_type_t ref_type, void *ref_in,
     const char* ref_obj_name;
     hid_t space_id=-1, ref_obj_id=-1;
 
-    ref_obj_id = H5Rdereference2(obj_id, H5P_DEFAULT, ref_type, ref_in);
+    ref_obj_id = H5Rdereference(obj_id, ref_type, ref_in);
     if (ref_obj_id < 0)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Rdereference2 failed");
 
