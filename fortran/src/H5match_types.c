@@ -51,7 +51,7 @@ FILE * fort_header;
 /* Prototypes for the write routines */
 void writeTypedef(const char* c_typedef, const char* c_type, int size);
 void writeTypedefDefault(const char* c_typedef, int size);
-void writeToFiles(const char* c_typedef, const char* fortran_type, const char* c_type, int size, int kind);
+void writeToFiles(const char* c_typedef, const char* fortran_type, const char* c_type, int kind);
 void writeToCFileOnly(const char* c_typedef, const char* fortran_type, const char* c_type, int size);
 void writeToFilesChr(const char* c_typedef, const char* fortran_type, const char* c_type, int size, const char* kind);
 
@@ -136,10 +136,10 @@ void writeTypedefDefault(const char* c_typedef, int size)
 }
 
 /* Create matching Fortran and C types by writing to both files */
-void writeToFiles(const char* c_typedef, const char* fortran_type, const char* c_type, int size,  int kind)
+void writeToFiles(const char* c_typedef, const char* fortran_type, const char* c_type, int kind)
 {
   fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %u\n", fortran_type, kind);
-  fprintf(c_header, "typedef c_%s_%d %s;\n", c_typedef, size, c_type);
+  fprintf(c_header, "typedef c_%s_%d %s;\n", c_typedef, kind, c_type);
 }
 void writeToFilesChr(const char* c_typedef, const char* fortran_type, const char* c_type, int size, const char* kind)
 {
@@ -148,7 +148,7 @@ void writeToFilesChr(const char* c_typedef, const char* fortran_type, const char
 }
 int main(void)
 {
-  int i, j,flag;
+  int i;
   char chrA[32],chrB[32];
 
   int IntKinds[] = H5_FORTRAN_INTEGER_KINDS;
@@ -260,7 +260,7 @@ int main(void)
   /* haddr_t */
   for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_HADDR_T) {
-      writeToFiles("int","HADDR_T", "haddr_t_f", IntKinds[i], IntKinds[i]);
+      writeToFiles("int","HADDR_T", "haddr_t_f", IntKinds[i]);
       break;
     }
     if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
@@ -271,7 +271,7 @@ int main(void)
   /* hsize_t */
   for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_HSIZE_T) {
-      writeToFiles("hsize_t","HSIZE_T", "hsize_t_f", IntKinds[i], IntKinds[i]);
+      writeToFiles("hsize_t","HSIZE_T", "hsize_t_f", IntKinds[i]);
       break;
     }
     if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
@@ -282,7 +282,7 @@ int main(void)
   /* hssize_t */
   for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_HSSIZE_T) {
-      writeToFiles("int","HSSIZE_T", "hssize_t_f", IntKinds[i], IntKinds[i]);
+      writeToFiles("int","HSSIZE_T", "hssize_t_f", IntKinds[i]);
       break;
     }
     if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
@@ -293,7 +293,7 @@ int main(void)
   /* off_t */
   for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_OFF_T) {
-      writeToFiles("int","OFF_T", "off_t_f", IntKinds[i], IntKinds[i]);
+      writeToFiles("int","OFF_T", "off_t_f", IntKinds[i]);
       break;
     }
     if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
@@ -304,7 +304,7 @@ int main(void)
   /* size_t */
   for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_SIZE_T) {
-      writeToFiles("size_t","SIZE_T", "size_t_f", IntKinds[i], IntKinds[i]);
+      writeToFiles("size_t","SIZE_T", "size_t_f", IntKinds[i]);
       break;
     }
     if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
@@ -313,7 +313,7 @@ int main(void)
   }
 
   /* int */
-  writeToFiles("int","Fortran_INTEGER", "int_f", H5_FORTRAN_NATIVE_INTEGER_KIND, H5_FORTRAN_NATIVE_INTEGER_KIND);
+  writeToFiles("int","Fortran_INTEGER", "int_f", H5_FORTRAN_NATIVE_INTEGER_KIND);
 
   /* int_1, int_2, int_4, int_8 */
 
@@ -342,14 +342,14 @@ int main(void)
     if (RealKinds[i] > 0) {
       sprintf(chrA, "Fortran_REAL_%s", Real_C_TYPES[i]);
       sprintf(chrB, "real_%s_f", Real_C_TYPES[i]);
-      writeToFiles("float",chrA, chrB, RealKinds[i], RealKinds[i]);
+      writeToFiles("float",chrA, chrB, RealKinds[i]);
     }
   }
 
   /* hid_t */
   for(i=0;i< FORTRAN_NUM_INTEGER_KINDS;i++) {
     if(IntKinds_SizeOf[i] == H5_SIZEOF_HID_T) {
-      writeToFiles("int","HID_T", "hid_t_f", IntKinds[i], IntKinds[i]);
+      writeToFiles("int","HID_T", "hid_t_f", IntKinds[i]);
       break;
     }
     if(i == (FORTRAN_NUM_INTEGER_KINDS-1) )
