@@ -86,8 +86,6 @@ H5LTff_gen.F90: H5HL_buildiface$(EXEEXT)
 
 H5TBff_gen.F90: H5HL_buildiface$(EXEEXT)
 
-#H5TBff_gen.F90: H5HL_buildiface$(EXEEXT)
-
 # H5HL_buildiface.F90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
 

@@ -26,8 +26,8 @@ LTPPFCCOMPILE = $(LIBTOOL) --tag=FC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=co
 
 # Treat all .f90 and .F90 files as preprocessed Fortran.
 .f90.o:
-	$(PPFCCOMPILE) -c -o $@ $(FCFLAGS) $<
+	$(PPFCCOMPILE) -c -o $@ $<
 .F90.o:
-	$(PPFCCOMPILE) -c -o $@ $(FCFLAGS) $<
+	$(PPFCCOMPILE) -c -o $@ $<
 
 include $(top_srcdir)/config/conclude.am
