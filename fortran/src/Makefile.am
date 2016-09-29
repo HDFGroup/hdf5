@@ -138,9 +138,6 @@ H5_buildiface_SOURCES = H5_buildiface.F90
 # Mark this directory as part of the Fortran API
 FORTRAN_API=yes
 
-H5_buildiface$(EXEEXT): $(H5_buildiface_SOURCES) H5config_f.inc
-	$(FC) $(FCFLAGS) $< -o $@ -I$(top_builddir)/fortran/src
-
 # Hardcode the dependencies of these files. There isn't a known way of
 # determining this automagically (like we do with the C files). So, when
 # doing a parallel make, some modules could be made way before the
