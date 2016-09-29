@@ -207,7 +207,6 @@ h5repack_verify(const char *out_fname, pack_opt_t *options)
 
 done:
     H5E_BEGIN_TRY {
-        H5Pclose(fcpl_out);
         H5Pclose(pid);
         H5Sclose(sid);
         H5Dclose(did);
