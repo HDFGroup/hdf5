@@ -513,6 +513,7 @@ set (H5TEST_TESTS
     ohdr
     stab
     gheap
+    evict_on_close
     farray
     earray
     btree2
@@ -865,6 +866,7 @@ if (HDF5_TEST_VFD)
       ohdr
       stab
       gheap
+      evict_on_close
       pool
 #      accum
       farray

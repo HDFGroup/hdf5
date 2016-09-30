@@ -770,6 +770,7 @@ H5_DLL htri_t H5D__mpio_opt_possible(const H5D_io_info_t *io_info,
 H5_DLL herr_t H5D__layout_version_test(hid_t did, unsigned *version);
 H5_DLL herr_t H5D__layout_contig_size_test(hid_t did, hsize_t *size);
 H5_DLL herr_t H5D__layout_idx_type_test(hid_t did, H5D_chunk_index_t *idx_type);
+H5_DLL herr_t H5D__layout_type_test(hid_t did, H5D_layout_t *layout_type);
 H5_DLL herr_t H5D__current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused);
 #endif /* H5D_TESTING */
 

@@ -303,6 +303,7 @@
 #define H5F_SET_SOHM_NINDEXES(F, N) ((F)->shared->sohm_nindexes = (N))
 #define H5F_FCPL(F)             ((F)->shared->fcpl_id)
 #define H5F_GET_FC_DEGREE(F)    ((F)->shared->fc_degree)
+#define H5F_EVICT_ON_CLOSE(F)   ((F)->shared->evict_on_close)
 #define H5F_RDCC_NSLOTS(F)      ((F)->shared->rdcc_nslots)
 #define H5F_RDCC_NBYTES(F)      ((F)->shared->rdcc_nbytes)
 #define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
@@ -348,6 +349,7 @@
 #define H5F_SET_SOHM_NINDEXES(F, N) (H5F_set_sohm_nindexes((F), (N)))
 #define H5F_FCPL(F)             (H5F_get_fcpl(F))
 #define H5F_GET_FC_DEGREE(F)    (H5F_get_fc_degree(F))
+#define H5F_EVICT_ON_CLOSE(F)   (H5F_get_evict_on_close(F))
 #define H5F_RDCC_NSLOTS(F)      (H5F_rdcc_nslots(F))
 #define H5F_RDCC_NBYTES(F)      (H5F_rdcc_nbytes(F))
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
@@ -463,6 +465,7 @@
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
 #define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME       "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME        "evict_on_close_flag" /* Whether or not the metadata cache will evict objects on close */
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME  "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
 #define H5F_ACS_COLL_MD_WRITE_FLAG_NAME         "collective_metadata_write" /* property indicating whether metadata writes are done collectively or not */
 
@@ -660,6 +663,7 @@ H5_DLL unsigned H5F_get_sohm_nindexes(const H5F_t *f);
 H5_DLL herr_t H5F_set_sohm_nindexes(H5F_t *f, unsigned nindexes);
 H5_DLL hid_t H5F_get_fcpl(const H5F_t *f);
 H5_DLL H5F_close_degree_t H5F_get_fc_degree(const H5F_t *f);
+H5_DLL hbool_t H5F_get_evict_on_close(const H5F_t *f);
 H5_DLL size_t H5F_rdcc_nbytes(const H5F_t *f);
 H5_DLL size_t H5F_rdcc_nslots(const H5F_t *f);
 H5_DLL double H5F_rdcc_w0(const H5F_t *f);

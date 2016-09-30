@@ -199,7 +199,7 @@ h5_clean_files(const char *base_name[], hid_t fapl)
  *
  * Purpose      Clean up temporary test files.
  *
- *              When a test calls h5_fixname() get a VFD-dependent
+ *              When a test calls h5_fixname() to get a VFD-dependent
  *              test file name, this function can be used to clean it up.
  *
  * Return:      void

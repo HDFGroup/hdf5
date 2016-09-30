@@ -1780,9 +1780,9 @@ done:
 herr_t
 H5D_close(H5D_t *dataset)
 {
-    hbool_t free_failed = FALSE;
-    hbool_t corked;			/* Whether the dataset is corked or not */
-    herr_t ret_value = SUCCEED;      	/* Return value */
+    hbool_t free_failed = FALSE;    /* Set if freeing sub-components failed */
+    hbool_t corked;                 /* Whether the dataset is corked or not */
+    herr_t ret_value = SUCCEED;     /* Return value                         */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1797,6 +1797,7 @@ H5D_close(H5D_t *dataset)
 
     dataset->shared->fo_count--;
     if(dataset->shared->fo_count == 0) {
+
         /* Flush the dataset's information.  Continue to close even if it fails. */
         if(H5D__flush_real(dataset, H5AC_ind_read_dxpl_id) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
@@ -1891,12 +1892,12 @@ H5D_close(H5D_t *dataset)
                     (H5O_msg_reset(H5O_FILL_ID, &dataset->shared->dcpl_cache.fill) < 0) ||
                     (H5O_msg_reset(H5O_EFL_ID, &dataset->shared->dcpl_cache.efl) < 0);
 
-	/* Uncork cache entries with object address tag */
-	if(H5AC_cork(dataset->oloc.file, dataset->oloc.addr, H5AC__GET_CORKED, &corked) < 0)
-	    HDONE_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve an object's cork status")
-	if(corked)
-	    if(H5AC_cork(dataset->oloc.file, dataset->oloc.addr, H5AC__UNCORK, NULL) < 0)
-		HDONE_ERROR(H5E_DATASET, H5E_CANTUNCORK, FAIL, "unable to uncork an object")
+        /* Uncork cache entries with object address tag */
+        if(H5AC_cork(dataset->oloc.file, dataset->oloc.addr, H5AC__GET_CORKED, &corked) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve an object's cork status")
+        if(corked)
+	        if(H5AC_cork(dataset->oloc.file, dataset->oloc.addr, H5AC__UNCORK, NULL) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTUNCORK, FAIL, "unable to uncork an object")
 
         /*
          * Release datatype, dataspace and creation property list -- there isn't
@@ -1917,6 +1918,14 @@ H5D_close(H5D_t *dataset)
         if(H5O_close(&(dataset->oloc)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
+        /* Evict dataset metadata if evicting on close */
+        if(H5F_SHARED(dataset->oloc.file) && H5F_EVICT_ON_CLOSE(dataset->oloc.file)) {
+            if(H5AC_flush_tagged_metadata(dataset->oloc.file, dataset->oloc.addr, H5AC_ind_read_dxpl_id) < 0) 
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
+            if(H5AC_evict_tagged_metadata(dataset->oloc.file, dataset->oloc.addr, FALSE, H5AC_ind_read_dxpl_id) < 0) 
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict tagged metadata")
+        } /* end if */
+
         /*
          * Free memory.  Before freeing the memory set the file pointer to NULL.
          * We always check for a null file pointer in other H5D functions to be
@@ -1924,8 +1933,8 @@ H5D_close(H5D_t *dataset)
          * above).
          */
         dataset->oloc.file = NULL;
-
         dataset->shared = H5FL_FREE(H5D_shared_t, dataset->shared);
+
     } /* end if */
     else {
         /* Decrement the ref. count for this object in the top file */
@@ -1943,16 +1952,16 @@ H5D_close(H5D_t *dataset)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
     } /* end else */
 
-   /* Release the dataset's path info */
-   if(H5G_name_free(&(dataset->path)) < 0)
-       free_failed = TRUE;
+    /* Release the dataset's path info */
+    if(H5G_name_free(&(dataset->path)) < 0)
+        free_failed = TRUE;
 
     /* Free the dataset's memory structure */
     dataset = H5FL_FREE(H5D_t, dataset);
 
     /* Check if anything failed in the middle... */
     if(free_failed)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't free a component of the dataset, but the dataset was freed anyway.")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't free a component of the dataset, but the dataset was freed anyway.")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
