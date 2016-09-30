@@ -38,7 +38,7 @@
 #include "H5Ipkg.h"
 
 /* Uncomment to manually inspect cache states */
-#define EOC_MANUAL_INSPECTION
+/* #define EOC_MANUAL_INSPECTION */
 
 const char *FILENAMES[] = {
     "evict-on-close",           /* 0 */
@@ -61,7 +61,7 @@ const char *FILENAMES[] = {
 static hbool_t verify_tag_not_in_cache(H5F_t *f, haddr_t tag);
 static herr_t check_evict_on_close_api(void);
 static hid_t generate_eoc_test_file(hid_t fapl_id);
-static herr_t check_v1_btree_chunk_index(hid_t fid);
+static herr_t check_configuration(hid_t fid, const char *dset_name);
 
 
 /*-------------------------------------------------------------------------
@@ -488,10 +488,10 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    check_v1_btree_chunk_index()
+ * Function:    check_configuration()
  *
- * Purpose:     Verify that datasets using version 1 B-trees are evicted
- *              correctly.
+ * Purpose:     Verify that the evict-on-close feature works for a given
+ *              dataset layout and/or chunk index.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -501,7 +501,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-check_v1_btree_chunk_index(hid_t fid)
+check_configuration(hid_t fid, const char *dset_name)
 {
     H5F_t   *file_ptr = NULL;               /* ptr to internal file struct  */
     hid_t   did = -1;                       /* dataset ID                   */
@@ -510,7 +510,7 @@ check_v1_btree_chunk_index(hid_t fid)
     int     *data = NULL;                   /* buffer for fake data         */
     int32_t before, during, after;          /* cache sizes                  */
 
-    TESTING("evict on close with version 1 B-trees");
+    /* NOTE: The TESTING() macro is called in main() */
 
     /* Get a pointer to the file struct */
     if(NULL == (file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE)))
@@ -531,13 +531,15 @@ check_v1_btree_chunk_index(hid_t fid)
 #endif
 
     /* Open dataset and get the metadata tag */
-    if((did = H5Dopen2(fid, DSET_BTREE_NAME, H5P_DEFAULT)) < 0)
+    if((did = H5Dopen2(fid, dset_name, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if(NULL == (dset_ptr = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
         TEST_ERROR;
     tag = dset_ptr->oloc.addr;
 
-    /* Read data from the dataset so the cache gets populated with chunk indices */
+    /* Read data from the dataset so the cache gets populated with chunk
+     * and the like.
+     */
     if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
         TEST_ERROR;
 
@@ -587,7 +589,7 @@ error:
     H5_FAILED();
     return FAIL;
 
-} /* check_v1_btree_chunk_index() */
+} /* check_configuration() */
 
 
 /*-------------------------------------------------------------------------
@@ -722,8 +724,23 @@ main(void)
         PUTS_ERROR("Unable to generate test file\n");
     } /* end if */
 
-    /* Run tests with a variety of dataset configurations */
-    nerrors += check_v1_btree_chunk_index(fid) < 0 ? 1 : 0;
+    /* Run tests with a variety of dataset configurations
+     * PASSED() and H5_FAILED() are handled in check_configuration()
+     */
+    TESTING("evict on close with version 1 B-tree chunk index");
+        nerrors += check_configuration(fid, DSET_BTREE_NAME) < 0 ? 1 : 0;
+    TESTING("evict on close with extensible array chunk index");
+        nerrors += check_configuration(fid, DSET_EARRAY_NAME) < 0 ? 1 : 0;
+    TESTING("evict on close with version 2 B-tree chunk index");
+        nerrors += check_configuration(fid, DSET_BT2_NAME) < 0 ? 1 : 0;
+    TESTING("evict on close with fixed array chunk index");
+        nerrors += check_configuration(fid, DSET_FARRAY_NAME) < 0 ? 1 : 0;
+    TESTING("evict on close with \'single chunk\' chunk index");
+        nerrors += check_configuration(fid, DSET_SINGLE_NAME) < 0 ? 1 : 0;
+    TESTING("evict on close with contiguous layout");
+        nerrors += check_configuration(fid, DSET_CONTIGUOUS_NAME) < 0 ? 1 : 0;
+    TESTING("evict on close with compact layout");
+        nerrors += check_configuration(fid, DSET_COMPACT_NAME) < 0 ? 1 : 0;
 
     /* Close the test file */
     if(H5Fclose(fid) < 0) {
@@ -732,7 +749,7 @@ main(void)
     } /* end if */
 
     /* Clean up files and close the VFD-specific fapl */
-    //h5_delete_all_test_files(FILENAMES, fapl_id);
+    h5_delete_all_test_files(FILENAMES, fapl_id);
     if(H5Pclose(fapl_id) < 0) {
         nerrors++;
         PUTS_ERROR("Unable to close VFD-specific fapl.\n");
