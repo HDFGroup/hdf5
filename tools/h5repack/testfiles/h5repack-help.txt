@@ -31,6 +31,9 @@ usage: h5repack [OPTIONS] file1 file2
     F - is the shared object header message type, any of <dspace|dtype|fill|
         pline|attr>. If F is not specified, S applies to all messages
 
+     --enable-error-stack Prints messages from the HDF5 error stack as they
+                          occur.
+
     FILT - is a string with the format:
 
       <list of objects>:<name of filter>=<filter parameters>
