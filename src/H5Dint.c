@@ -1920,17 +1920,10 @@ H5D_close(H5D_t *dataset)
 
         /* Evict dataset metadata if evicting on close */
         if(H5F_SHARED(dataset->oloc.file) && H5F_EVICT_ON_CLOSE(dataset->oloc.file)) {
-//            printf("EVICTING DATASET (TAG: 0x%3llx)\n", dataset->oloc.addr);
-//            printf("DUMPING CACHE - BEFORE FLUSH\n");
-//            H5AC_dump_cache(dataset->oloc.file);
             if(H5AC_flush_tagged_metadata(dataset->oloc.file, dataset->oloc.addr, H5AC_ind_read_dxpl_id) < 0) 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
-//            printf("DUMPING CACHE - BETWEEN FLUSH AND EVICT\n");
-//            H5AC_dump_cache(dataset->oloc.file);
             if(H5AC_evict_tagged_metadata(dataset->oloc.file, dataset->oloc.addr, FALSE, H5AC_ind_read_dxpl_id) < 0) 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict tagged metadata")
-//            printf("DUMPING CACHE - AFTER EVICT\n");
-//            H5AC_dump_cache(dataset->oloc.file);
         } /* end if */
 
         /*
@@ -2672,7 +2665,6 @@ H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_ATT
 
     /* Read in the point (with the custom VL memory allocator) */
     if(H5D__read(vlen_bufsize->dset, type_id, vlen_bufsize->mspace, vlen_bufsize->fspace, vlen_bufsize->xfer_pid, vlen_bufsize->fl_tbuf) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

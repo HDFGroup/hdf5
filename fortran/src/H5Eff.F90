@@ -136,10 +136,12 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        END FUNCTION h5eprint_c1
     END INTERFACE
+
     INTERFACE
        INTEGER FUNCTION h5eprint_c2()  BIND(C,NAME='h5eprint_c2')
        END FUNCTION h5eprint_c2
     END INTERFACE
+
     IF (PRESENT(name)) THEN
        namelen = LEN(NAME)
        hdferr = h5eprint_c1(name, namelen)
