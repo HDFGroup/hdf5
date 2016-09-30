@@ -46,16 +46,17 @@ const char *FILENAMES[] = {
 };
 #define FILENAME_BUF_SIZE       1024
 
-//#define DSET_NAME_COMPACT       "compact"
-//#define DSET_NAME_CONTIGUOUS    "contiguous"
-#define DSET_NAME_V1_BTREE_NAME         "v1_btree"
-//#define DSET_NAME_V2_BTREE      "v2_btree"
-//#define DSET_NAME_EARRAY        "earray"
-//#define DSET_NAME_FARRAY        "farray"
-//#define DSET_NAME_SINGLE        "single"
+/* Dataset names */
+#define DSET_COMPACT_NAME           "compact"
+#define DSET_CONTIGUOUS_NAME        "contiguous"
+#define DSET_BTREE_NAME             "v1_btree"
+#define DSET_EARRAY_NAME            "earray"
+#define DSET_BT2_NAME               "v2_btree"
+#define DSET_FARRAY_NAME            "farray"
+#define DSET_SINGLE_NAME            "single"
 
-
-#define DSET_NAME_V1_BTREE_NELEMENTS    1024
+/* All datasets store 1000 elements */
+#define NELEMENTS                   1024
 
 static hbool_t verify_tag_not_in_cache(H5F_t *f, haddr_t tag);
 static herr_t check_evict_on_close_api(void);
@@ -130,6 +131,8 @@ generate_eoc_test_file(hid_t fapl_id)
     hsize_t current_dims[2];                /* current dataset size         */
     hsize_t maximum_dims[2];                /* maximum dataset size         */
     hsize_t chunk_dims[2];                  /* chunk dimensions             */
+    H5D_chunk_index_t idx_type;             /* dataset chunk index type     */
+    H5D_layout_t layout_type;               /* dataset layout type          */
     int     *data = NULL;                   /* buffer for fake data         */
     int     n;                              /* # of data elements           */
 
@@ -147,15 +150,19 @@ generate_eoc_test_file(hid_t fapl_id)
     /***********************************************************/
 
     /* Create the data buffer */
-    if(NULL == (data = (int *)HDcalloc(DSET_NAME_V1_BTREE_NELEMENTS, sizeof(int))))
+    if(NULL == (data = (int *)HDcalloc(NELEMENTS, sizeof(int))))
         TEST_ERROR;
+
+    /****************************************************/
+    /* Old file format data structures (v1 B-tree only) */
+    /****************************************************/
 
     /********************/
     /* Version 1 B-tree */
     /********************/
 
     /* Create dataspace */
-    n = DSET_NAME_V1_BTREE_NELEMENTS;
+    n = NELEMENTS;
     rank = 1;
     current_dims[0] = (hsize_t)n;
     maximum_dims[0] = H5S_UNLIMITED;
@@ -170,8 +177,14 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create dataset */
-    if((did = H5Dcreate(fid, DSET_NAME_V1_BTREE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate(fid, DSET_BTREE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
+
+    /* Ensure we're using the correct chunk indexing scheme */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if(idx_type != H5D_CHUNK_IDX_BTREE)
+        FAIL_PUTS_ERROR("should be using version 1 B-tree as the chunk index");
 
     /* Write a bunch of fake data */
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
@@ -185,8 +198,273 @@ generate_eoc_test_file(hid_t fapl_id)
     if(H5Pclose(dcpl_id) < 0)
         TEST_ERROR;
 
+    /***********************************/
+    /* New file format data structures */
+    /***********************************/
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Copy the fapl and set the latest file format */
+    if((fapl_copy_id = H5Pcopy(fapl_id)) < 0)
+        TEST_ERROR;
+    if(H5Pset_libver_bounds(fapl_copy_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+
+    /* Reopen the file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_copy_id)) < 0)
+        TEST_ERROR;
+
+    /********************/
+    /* Extensible Array */
+    /********************/
+
+    /* Create dataspace */
+    n = NELEMENTS;
+    rank = 1;
+    current_dims[0] = (hsize_t)n;
+    maximum_dims[0] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(rank, current_dims, maximum_dims)) < 0)
+        TEST_ERROR;
+
+    /* Create dcpl and set up chunking */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    chunk_dims[0] = 1;
+    if(H5Pset_chunk(dcpl_id, rank, chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Create dataset */
+    if((did = H5Dcreate(fid, DSET_EARRAY_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Ensure we're using the correct chunk indexing scheme */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if(idx_type != H5D_CHUNK_IDX_EARRAY)
+        FAIL_PUTS_ERROR("should be using extensible array as the chunk index");
+
+    /* Write a bunch of fake data */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        TEST_ERROR;
+
+    /* Close IDs for this dataset */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if(H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+
+    /********************/
+    /* Version 2 B-Tree */
+    /********************/
+
+    /* Create dataspace */
+    n = NELEMENTS;
+    rank = 2;
+    current_dims[0] = (hsize_t)2;
+    current_dims[1] = (hsize_t)(n/2);
+    maximum_dims[0] = H5S_UNLIMITED;
+    maximum_dims[1] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(rank, current_dims, maximum_dims)) < 0)
+        TEST_ERROR;
+
+    /* Create dcpl and set up chunking */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    chunk_dims[0] = 1;
+    chunk_dims[1] = 1;
+    if(H5Pset_chunk(dcpl_id, rank, chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Create dataset */
+    if((did = H5Dcreate(fid, DSET_BT2_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Ensure we're using the correct chunk indexing scheme */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if(idx_type != H5D_CHUNK_IDX_BT2)
+        FAIL_PUTS_ERROR("should be using version 2 B-tree as the chunk index");
+
+    /* Write a bunch of fake data */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        TEST_ERROR;
+
+    /* Close IDs for this dataset */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if(H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+
+    /***************/
+    /* Fixed Array */
+    /***************/
+
+    /* Create dataspace */
+    n = NELEMENTS;
+    rank = 1;
+    current_dims[0] = (hsize_t)n;
+    maximum_dims[0] = (hsize_t)n;
+    if((sid = H5Screate_simple(rank, current_dims, maximum_dims)) < 0)
+        TEST_ERROR;
+
+    /* Create dcpl and set up chunking */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    chunk_dims[0] = 1;
+    chunk_dims[1] = 1;
+    if(H5Pset_chunk(dcpl_id, rank, chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Create dataset */
+    if((did = H5Dcreate(fid, DSET_FARRAY_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Ensure we're using the correct chunk indexing scheme */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if(idx_type != H5D_CHUNK_IDX_FARRAY)
+        FAIL_PUTS_ERROR("should be using fixed array as the chunk index");
+
+    /* Write a bunch of fake data */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        TEST_ERROR;
+
+    /* Close IDs for this dataset */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if(H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+
+    /****************/
+    /* Single Chunk */
+    /****************/
+
+    /* Create dataspace */
+    n = NELEMENTS;
+    rank = 1;
+    current_dims[0] = (hsize_t)n;
+    maximum_dims[0] = (hsize_t)n;
+    if((sid = H5Screate_simple(rank, current_dims, maximum_dims)) < 0)
+        TEST_ERROR;
+
+    /* Create dcpl and set up chunking */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    chunk_dims[0] = (hsize_t)n;
+    chunk_dims[1] = (hsize_t)n;
+    if(H5Pset_chunk(dcpl_id, rank, chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Create dataset */
+    if((did = H5Dcreate(fid, DSET_SINGLE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Ensure we're using the correct chunk indexing scheme */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0)
+        TEST_ERROR;
+    if(idx_type != H5D_CHUNK_IDX_SINGLE)
+        FAIL_PUTS_ERROR("should be using single chunk as the chunk index");
+
+    /* Write a bunch of fake data */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        TEST_ERROR;
+
+    /* Close IDs for this dataset */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if(H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+
+    /**************/
+    /* Contiguous */
+    /**************/
+
+    /* Create dataspace */
+    n = NELEMENTS;
+    rank = 1;
+    current_dims[0] = (hsize_t)n;
+    maximum_dims[0] = (hsize_t)n;
+    if((sid = H5Screate_simple(rank, current_dims, maximum_dims)) < 0)
+        TEST_ERROR;
+
+    /* Create dataset */
+    if((did = H5Dcreate(fid, DSET_CONTIGUOUS_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Ensure we're using the correct layout scheme */
+    if(H5D__layout_type_test(did, &layout_type) < 0)
+        TEST_ERROR;
+    if(layout_type != H5D_CONTIGUOUS)
+        FAIL_PUTS_ERROR("should be using contiguous layout");
+
+    /* Write a bunch of fake data */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        TEST_ERROR;
+
+    /* Close IDs for this dataset */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /***********/
+    /* Compact */
+    /***********/
+
+    /* Create dataspace */
+    n = 1;
+    rank = 1;
+    current_dims[0] = (hsize_t)n;
+    maximum_dims[0] = (hsize_t)n;
+    if((sid = H5Screate_simple(rank, current_dims, maximum_dims)) < 0)
+        TEST_ERROR;
+
+    /* Create dcpl and set up compact layout */
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if(H5Pset_layout(dcpl_id, H5D_COMPACT) < 0)
+        TEST_ERROR;
+
+    /* Create dataset */
+    if((did = H5Dcreate(fid, DSET_COMPACT_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Ensure we're using the correct layout scheme */
+    if(H5D__layout_type_test(did, &layout_type) < 0)
+        TEST_ERROR;
+    if(layout_type != H5D_COMPACT)
+        FAIL_PUTS_ERROR("should be using compact layout");
+
+    /* Write a bunch of fake data */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0)
+        TEST_ERROR;
+
+    /* Close IDs for this dataset */
+    if(H5Dclose(did) < 0)
+        TEST_ERROR;
+    if(H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if(H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+
+    /********/
+    /* DONE */
+    /********/
 
     /* Close/free everything else */
+    if(H5Pclose(fapl_copy_id) < 0)
+        TEST_ERROR;
+
     HDfree(data);
 
     PASSED();
@@ -239,7 +517,7 @@ check_v1_btree_chunk_index(hid_t fid)
         TEST_ERROR;
 
     /* Create the data buffer */
-    if(NULL == (data = (int *)HDcalloc(DSET_NAME_V1_BTREE_NELEMENTS, sizeof(int))))
+    if(NULL == (data = (int *)HDcalloc(NELEMENTS, sizeof(int))))
         TEST_ERROR;
 
     /* Record the number of cache entries */
@@ -253,7 +531,7 @@ check_v1_btree_chunk_index(hid_t fid)
 #endif
 
     /* Open dataset and get the metadata tag */
-    if((did = H5Dopen2(fid, DSET_NAME_V1_BTREE_NAME, H5P_DEFAULT)) < 0)
+    if((did = H5Dopen2(fid, DSET_BTREE_NAME, H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if(NULL == (dset_ptr = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
         TEST_ERROR;
