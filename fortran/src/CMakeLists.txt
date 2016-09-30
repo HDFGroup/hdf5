@@ -93,6 +93,8 @@ add_custom_command (
     WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
     DEPENDS H5match_types
 )
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5f90i_gen.h PROPERTIES GENERATED TRUE)
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5fortran_types.F90 PROPERTIES GENERATED TRUE)
 
 #-----------------------------------------------------------------------------
 # f90CStub lib
@@ -115,7 +117,6 @@ set (f90CStub_C_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Tf.c
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zf.c
 )
-
 set_source_files_properties (${f90CStub_C_SOURCES} PROPERTIES LANGUAGE C)
 
 set (f90CStub_C_HDRS
@@ -154,10 +155,40 @@ endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 #-----------------------------------------------------------------------------
 # Fortran Modules
 #-----------------------------------------------------------------------------
-set (f90_F_BASE_SOURCES
-    # generated files
-    ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+set (f90_F_GEN_SOURCES
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Aff.F90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Dff.F90
+    ${HDF5_F90_SRC_SOURCE_DIR}/H5Pff.F90
+)
+set (CMD $<TARGET_FILE:H5_buildiface>)
+add_custom_command (
+    OUTPUT ${HDF5_F90_BINARY_DIR}/H5_gen.F90
+    COMMAND ${CMD}
+    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
+    DEPENDS ${f90_F_GEN_SOURCES}
+    COMMENT "Generating the H5_gen.F90 file"
+)
+add_custom_target (H5gen ALL
+    DEPENDS ${HDF5_F90_BINARY_DIR}/H5_gen.F90
+)
+set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90 PROPERTIES GENERATED TRUE)
 
+if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  set (CMDSH $<TARGET_FILE:H5_buildiface>)
+  add_custom_command (
+      OUTPUT ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
+      COMMAND ${CMDSH}
+      WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
+      DEPENDS ${f90_F_GEN_SOURCES}
+      COMMENT "Generating the H5_gen.F90 shared file"
+  )
+  add_custom_target (H5genSH ALL
+      DEPENDS ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
+  )
+  set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90 PROPERTIES GENERATED TRUE)
+endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+
+set (f90_F_BASE_SOURCES
     # normal distribution
     ${HDF5_F90_SRC_SOURCE_DIR}/H5f90global.F90
     ${HDF5_F90_SRC_SOURCE_DIR}/H5fortkit.F90
@@ -177,8 +208,10 @@ set (f90_F_BASE_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/H5Zff.F90
 )
 
-set_source_files_properties (${HDF5_F90_BINARY_DIR}/H5_gen.F90 PROPERTIES GENERATED TRUE)
 set (f90_F_SOURCES
+    # generated file
+    ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+
     ${f90_F_BASE_SOURCES}
 
     # generated file
@@ -188,38 +221,19 @@ set (f90_F_SOURCES
     ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
 )
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  set_source_files_properties (${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90 PROPERTIES GENERATED TRUE)
   set (f90_F_SOURCES_SHARED
+      # generated file
+      ${HDF5_F90_BINARY_DIR}/H5fortran_types.F90
+
       ${f90_F_BASE_SOURCES}
 
-      # generated file
+     # generated file
       ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
 
       # normal distribution
       ${HDF5_F90_SRC_SOURCE_DIR}/HDF5.F90
   )
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-
-
-set (CMD $<TARGET_FILE:H5_buildiface>)
-add_custom_target (H5gen ALL
-    COMMAND ${CMD}
-#v3.2    BYPRODUCT ${HDF5_F90_BINARY_DIR}/H5_gen.F90
-    WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}
-    DEPENDS ${f90_F_BASE_SOURCES}
-)
-set_source_files_properties (${f90_F_SOURCES} PROPERTIES LANGUAGE Fortran)
-
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-  add_custom_target (H5genSH ALL
-      COMMAND ${CMD}
-  #v3.2    BYPRODUCT ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
-      WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
-      DEPENDS ${f90_F_BASE_SOURCES}
-  )
-  set_source_files_properties (${f90_F_SOURCES_SHARED} PROPERTIES LANGUAGE Fortran)
-endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
-
 
 #-----------------------------------------------------------------------------
 # Add Main fortran library
@@ -245,6 +259,7 @@ if (WIN32)
   )
 endif (WIN32)
 set (install_targets ${install_targets} ${HDF5_F90_LIB_TARGET})
+add_dependencies(${HDF5_F90_LIB_TARGET} H5gen)
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_library (${HDF5_F90_LIBSH_TARGET} SHARED ${f90_F_SOURCES_SHARED})
@@ -273,6 +288,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
     )
   endif (WIN32)
   set (install_targets ${install_targets} ${HDF5_F90_LIBSH_TARGET})
+  add_dependencies(${HDF5_F90_LIBSH_TARGET} H5genSH)
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
 #-----------------------------------------------------------------------------
