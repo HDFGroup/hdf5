@@ -177,7 +177,7 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create dataset */
-    if((did = H5Dcreate(fid, DSET_BTREE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate2(fid, DSET_BTREE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Ensure we're using the correct chunk indexing scheme */
@@ -236,7 +236,7 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create dataset */
-    if((did = H5Dcreate(fid, DSET_EARRAY_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate2(fid, DSET_EARRAY_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Ensure we're using the correct chunk indexing scheme */
@@ -280,7 +280,7 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create dataset */
-    if((did = H5Dcreate(fid, DSET_BT2_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate2(fid, DSET_BT2_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Ensure we're using the correct chunk indexing scheme */
@@ -322,7 +322,7 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create dataset */
-    if((did = H5Dcreate(fid, DSET_FARRAY_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate2(fid, DSET_FARRAY_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Ensure we're using the correct chunk indexing scheme */
@@ -364,7 +364,7 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create dataset */
-    if((did = H5Dcreate(fid, DSET_SINGLE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate2(fid, DSET_SINGLE_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Ensure we're using the correct chunk indexing scheme */
@@ -398,7 +398,7 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create dataset */
-    if((did = H5Dcreate(fid, DSET_CONTIGUOUS_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate2(fid, DSET_CONTIGUOUS_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Ensure we're using the correct layout scheme */
@@ -436,7 +436,7 @@ generate_eoc_test_file(hid_t fapl_id)
         TEST_ERROR;
 
     /* Create dataset */
-    if((did = H5Dcreate(fid, DSET_COMPACT_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+    if((did = H5Dcreate2(fid, DSET_COMPACT_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Ensure we're using the correct layout scheme */
