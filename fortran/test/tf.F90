@@ -340,11 +340,7 @@ CONTAINS
 #ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
     H5_SIZEOF_CMPD = storage_size(a, c_size_t)/storage_size(c_char_'a',c_size_t)
 #else
-#  ifdef H5_FORTRAN_HAVE_C_SIZEOF
-    H5_SIZEOF_CMPD = C_SIZEOF(a)
-#  else
-     H5_SIZEOF_CMPD = SIZEOF(a)
-#  endif
+    H5_SIZEOF_CMPD = SIZEOF(a)
 #endif
 
   END FUNCTION H5_SIZEOF_CMPD
