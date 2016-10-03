@@ -76,8 +76,6 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
                   ${resultfile}.h5
-                  ${resultfile}.out
-                  ${resultfile}.out.err
       )
       set_tests_properties (H5MKGRP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -118,8 +116,6 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
                   ${resultfile}.h5
-                  ${resultfile}.out
-                  ${resultfile}.out.err
       )
       set_tests_properties (H5MKGRP_CMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       add_test (

@@ -146,11 +146,6 @@
       endif ()
       set (last_test "H5REPACK-${testname}")
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5REPACK-h5repack-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove h5repack-${testname}.out h5repack-${testname}.out.err
-      )
       set_tests_properties (H5REPACK-h5repack-${testname}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       add_test (
           NAME H5REPACK-h5repack-${testname}
@@ -163,7 +158,6 @@
               -D "TEST_REFERENCE=h5repack-${testname}.txt"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES DEPENDS "H5REPACK-h5repack-${testname}-clear-objects")
     endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_HELP_TEST)
 
@@ -442,10 +436,6 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               testfiles/out-${testname}.${resultfile}
-              testfiles/${testname}.${resultfile}.out
-              testfiles/${testname}.${resultfile}.out.err
-              testfiles/${resultfile}-${testname}.out
-              testfiles/${resultfile}-${testname}.out.err
       )
       add_test (
           NAME H5REPACK_UD-${testname}

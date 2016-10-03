@@ -88,20 +88,8 @@
         set_tests_properties (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-h5importtest)
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5IMPORT-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${testfile}
-              ${testfile}.new
-              ${testfile}.new.err
-              ${testfile}.out
-              ${testfile}.out.err
-      )
-      set_tests_properties (H5IMPORT-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
-
       add_test (NAME H5IMPORT-${testname} COMMAND $<TARGET_FILE:h5import> ${importfile} -c ${conffile} -o ${testfile})
-      set_tests_properties (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-${testname}-clear-objects)
+      set_tests_properties (H5IMPORT-${testname} PROPERTIES DEPENDS H5IMPORT-h5importtest)
 
       add_test (
           NAME H5IMPORT-${testname}-H5DMP
@@ -141,12 +129,6 @@
               -E remove
               d${testfile}
               d${testfile}.bin
-              d${testfile}.imp
-              d${testfile}.imp.err
-              d${testfile}.dmp
-              d${testfile}.dmp.err
-              d${testfile}.dff
-              d${testfile}.dff.err
       )
       set_tests_properties (H5IMPORT-DUMP-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
 
