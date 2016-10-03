@@ -70,11 +70,11 @@
         set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5LS-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/vds/${resultfile}.out ./testfiles/vds/${resultfile}.out.err
-      )
+#      add_test (
+#          NAME H5LS-${resultfile}-clear-objects
+#          COMMAND    ${CMAKE_COMMAND}
+#              -E remove ./testfiles/vds/${resultfile}.out ./testfiles/vds/${resultfile}.out.err
+#      )
       add_test (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
