@@ -146,7 +146,6 @@
       endif ()
       set (last_test "H5REPACK-${testname}")
     else (HDF5_ENABLE_USING_MEMCHECKER)
-      set_tests_properties (H5REPACK-h5repack-${testname}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       add_test (
           NAME H5REPACK-h5repack-${testname}
           COMMAND "${CMAKE_COMMAND}"
