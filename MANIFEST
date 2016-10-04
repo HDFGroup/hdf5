@@ -2267,7 +2267,6 @@
 ./config/cmake/ConfigureChecks.cmake
 ./config/cmake/CPack.Info.plist.in
 ./config/cmake/CTestCustom.cmake
-./config/cmake/FindHDF5.cmake.in
 ./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
 ./config/cmake/hdf5-config.cmake.in
