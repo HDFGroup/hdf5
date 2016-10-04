@@ -565,7 +565,7 @@ static void test_file_attribute()
 	dattr.write(PredType::NATIVE_INT, dattr_data);
 
 	// Test flushing out the data from the attribute object
-        dattr.flush(H5F_SCOPE_GLOBAL);
+    dattr.flush(H5F_SCOPE_GLOBAL);
 
 	// Get and verify the number of all objects in the file
 	// Current: 1 file, 2 file attr, 1 ds, and 1 ds attr.

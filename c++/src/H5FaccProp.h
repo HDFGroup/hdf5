@@ -58,6 +58,12 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	// Queries H5FD_CORE driver properties.
 	void getCore (size_t& increment, hbool_t& backing_store) const;
 
+	// Sets write tracking for the core driver.
+	void setCoreWriteTracking (hbool_t is_enabled, size_t page_size) const;
+
+	// Queries the core driver write tracking property.
+	void getCoreWriteTracking (hbool_t& is_enabled, size_t& page_size) const;
+
 	// Sets this file access properties list to the family driver.
 	void setFamily( hsize_t memb_size, const FileAccPropList& memb_plist ) const;
 
