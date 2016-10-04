@@ -75,21 +75,6 @@ configure_package_config_file (
 )
 
 #-----------------------------------------------------------------------------
-# Configure the FindHDF5.cmake file for the install directory
-#-----------------------------------------------------------------------------
-if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  configure_file (
-      ${HDF_RESOURCES_DIR}/FindHDF5.cmake.in
-      ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindHDF5${HDF_PACKAGE_EXT}.cmake @ONLY
-  )
-  install (
-      FILES ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindHDF5${HDF_PACKAGE_EXT}.cmake
-      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
-      COMPONENT configinstall
-  )
-endif (NOT HDF5_EXTERNALLY_CONFIGURED)
-
-#-----------------------------------------------------------------------------
 # Configure the hdf5-config.cmake file for the install directory
 #-----------------------------------------------------------------------------
 set (INCLUDE_INSTALL_DIR ${HDF5_INSTALL_INCLUDE_DIR})
