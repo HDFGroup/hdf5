@@ -403,7 +403,7 @@
 #    Sets the directory where the header files will be generated. Same behavior as option
 #    '-d' of javah tool. If not specified, ${CMAKE_CURRENT_BINARY_DIR} is used as output directory.
 
-include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
+include(CMakeParseArguments)
 
 function (__java_copy_file src dest comment)
     add_custom_command(
