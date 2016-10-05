@@ -620,10 +620,9 @@ parse_hsize_list(const char *h_list, subset_d *d)
                 size_count++;
 
             last_digit = 1;
-        } 
-        else {
-            last_digit = 0;
         }
+        else
+            last_digit = 0;
 
     if (size_count == 0)
         /* there aren't any integers to read */
@@ -635,7 +634,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
         if(HDisdigit(*ptr)) {
             /* we should have an integer now */
-            p_list[i++] = (hsize_t)HDatof(ptr);
+            p_list[i++] = (hsize_t)HDstrtoull(ptr, NULL, 0);
 
             while (HDisdigit(*ptr))
                 /* scroll to end of integer */
@@ -643,8 +642,6 @@ parse_hsize_list(const char *h_list, subset_d *d)
         }
     d->data = p_list;
     d->len = size_count;
-    
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -667,7 +664,7 @@ static struct subset_t *
 parse_subset_params(char *dset)
 {
     struct subset_t *s = NULL;
-    register char   *brace;
+    char   *brace;
 
     if (!disable_compact_subset && ((brace = HDstrrchr(dset, '[')) != NULL)) {
         *brace++ = '\0';
@@ -705,20 +702,21 @@ parse_subset_params(char *dset)
  *
  * Purpose:     Parse a list of comma or space separated integers and fill
  *              the packed_bits list and counter. The string being passed into this function
- *              should be at the start of the list you want to parse. 
+ *              should be at the start of the list you want to parse.
  *
  * Return:      Success:        SUCCEED
  *
  *              Failure:        FAIL
- *
  *
  *-------------------------------------------------------------------------
  */
 static int
 parse_mask_list(const char *h_list)
 {
-    int                offset_value;
-    int                length_value;
+    int                soffset_value;
+    unsigned           offset_value;
+    int                slength_value;
+    unsigned           length_value;
     unsigned long long temp_mask;
     const char        *ptr = NULL;
 
@@ -736,10 +734,11 @@ parse_mask_list(const char *h_list)
             error_msg("Bad mask list(%s)\n", h_list);
             return FAIL;
         }
-        offset_value = HDatoi(ptr);
-        if (offset_value < 0 || offset_value >= PACKED_BITS_SIZE_MAX) {
-            error_msg("Packed Bit offset value(%d) must be between 0 and %d\n",
-                    offset_value, PACKED_BITS_SIZE_MAX - 1);
+        soffset_value = HDatoi(ptr);
+        offset_value = (unsigned)soffset_value;
+        if (soffset_value < 0 || offset_value >= PACKED_BITS_SIZE_MAX) {
+            error_msg("Packed Bit offset value(%d) must be between 0 and %u\n",
+                    soffset_value, (unsigned)(PACKED_BITS_SIZE_MAX - 1));
             return FAIL;
         }
 
@@ -757,14 +756,15 @@ parse_mask_list(const char *h_list)
             error_msg("Bad mask list(%s)\n", h_list);
             return FAIL;
         }
-        length_value = HDatoi(ptr);
-        if (length_value <= 0) {
-            error_msg("Packed Bit length value(%d) must be positive.\n", length_value);
+        slength_value = HDatoi(ptr);
+        if (slength_value <= 0) {
+            error_msg("Packed Bit length value(%d) must be positive.\n", slength_value);
             return FAIL;
         }
-        if ((offset_value + length_value) > PACKED_BITS_SIZE_MAX){
-            error_msg("Packed Bit offset+length value(%d) too large. Max is %d\n",
-                       offset_value+length_value, PACKED_BITS_SIZE_MAX);
+        length_value = (unsigned)slength_value;
+        if ((offset_value + length_value) > PACKED_BITS_SIZE_MAX) {
+            error_msg("Packed Bit offset+length value(%u) too large. Max is %u\n",
+                       offset_value+length_value, (unsigned)PACKED_BITS_SIZE_MAX);
             return FAIL;
         }
 
@@ -783,8 +783,8 @@ parse_mask_list(const char *h_list)
         /* create the bit mask by left shift 1's by length, then negate it. */
         /* After packed_mask is calculated, packed_length is not needed but  */
         /* keep it for debug purpose. */
-        temp_mask = ~0L;
-        if(length_value<8*sizeof(unsigned long long)) {
+        temp_mask = ~0ULL;
+        if(length_value < (int)(8 *sizeof(unsigned long long))) {
             temp_mask = temp_mask << length_value;
             packed_mask[packed_bits_num] = ~temp_mask;
         }
@@ -831,7 +831,7 @@ static void
 free_handler(struct handler_t *hand, int len)
 {
     int i;
-    
+
     if(hand) {
         for (i = 0; i < len; i++) {
             if(hand[i].obj) {
@@ -956,11 +956,15 @@ parse_start:
             goto done;
             break;
         case 'w':
-            h5tools_nCols = HDatoi(opt_arg);
-            if (h5tools_nCols <= 0) {
-                h5tools_nCols = 65535;
+            {
+                int sh5tools_nCols = HDatoi(opt_arg);
+
+                if (sh5tools_nCols <= 0)
+                    h5tools_nCols = 65535;
+                else
+                    h5tools_nCols = (unsigned)sh5tools_nCols;
+                last_was_dset = FALSE;
             }
-            last_was_dset = FALSE;
             break;
         case 'N':
             display_all = 0;
@@ -1159,12 +1163,10 @@ parse_start:
                 usage(h5tools_getprogname());
                 goto error;
             }
-            if (HDstrcmp(opt_arg,":") == 0) {
+            if (HDstrcmp(opt_arg,":") == 0)
                 xmlnsprefix = "";
-            } 
-            else {
+            else
                 xmlnsprefix = opt_arg;
-            }
             h5tools_nCols = 0;
             break;
         /** end XML parameters **/
@@ -1187,7 +1189,7 @@ parse_start:
                  * the two.
                  */
                 s = last_dset->subset_info;
-            } 
+            }
             else {
                 last_dset->subset_info = s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
             }
@@ -1358,7 +1360,7 @@ main(int argc, const char *argv[])
     /* Disable tools error reporting */
     H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
     H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
-    
+
     if((hand = parse_command_line(argc, argv))==NULL) {
         goto done;
     }
@@ -1444,12 +1446,12 @@ main(int argc, const char *argv[])
             if (xml_dtd_uri == NULL) {
                 if (useschema) {
                     xml_dtd_uri = DEFAULT_XSD;
-                } 
+                }
                 else {
                     xml_dtd_uri = DEFAULT_DTD;
                     xmlnsprefix = "";
                 }
-            } 
+            }
             else {
                 if (useschema && HDstrcmp(xmlnsprefix,"")) {
                     error_msg("Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
@@ -1486,7 +1488,7 @@ main(int argc, const char *argv[])
         /* start to dump - display file header information */
         if (!doxml) {
             begin_obj(h5tools_dump_header_format->filebegin, fname, h5tools_dump_header_format->fileblockbegin);
-        } 
+        }
         else {
             PRINTVALSTREAM(rawoutstream, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
@@ -1495,7 +1497,7 @@ main(int argc, const char *argv[])
                 if (HDstrcmp(xmlnsprefix,"") == 0) {
                     PRINTSTREAM(rawoutstream, "<HDF5-File xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"%s\">\n",
                             xml_dtd_uri);
-                } 
+                }
                 else {
                     /*  TO DO: make -url option work in this case (may need new option) */
                     char *ns;
@@ -1511,7 +1513,7 @@ main(int argc, const char *argv[])
                             "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd\">\n",xmlnsprefix,ns);
                     HDfree(ns);
                 }
-            } 
+            }
             else {
                 PRINTSTREAM(rawoutstream, "<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n", xml_dtd_uri);
                 PRINTVALSTREAM(rawoutstream, "<HDF5-File>\n");
@@ -1570,7 +1572,7 @@ main(int argc, const char *argv[])
         if (!doxml) {
             end_obj(h5tools_dump_header_format->fileend, h5tools_dump_header_format->fileblockend);
             PRINTVALSTREAM(rawoutstream, "\n");
-        } 
+        }
         else {
             PRINTSTREAM(rawoutstream, "</%sHDF5-File>\n", xmlnsprefix);
         }
@@ -1591,7 +1593,7 @@ main(int argc, const char *argv[])
         }
     } /* end while */
 
-    if(hand) 
+    if(hand)
         free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
@@ -1615,7 +1617,7 @@ done:
         fname = NULL;
     }
 
-    if(hand) 
+    if(hand)
         free_handler(hand, argc);
 
     /* To Do:  clean up XML table */
@@ -1668,20 +1670,20 @@ h5_fileaccess(void)
     if (!HDstrcmp(name, "sec2")) {
         /* Unix read() and write() system calls */
         if (H5Pset_fapl_sec2(fapl)<0) return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "stdio")) {
         /* Standard C fread() and fwrite() system calls */
         if (H5Pset_fapl_stdio(fapl)<0) return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "core")) {
         /* In-core temporary file with 1MB increment */
         if (H5Pset_fapl_core(fapl, 1024*1024, FALSE)<0) return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "split")) {
         /* Split meta data and raw data each using default driver */
         if (H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT) < 0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "multi")) {
         /* Multi-file driver, general case of the split driver */
         H5FD_mem_t      memb_map[H5FD_MEM_NTYPES];
@@ -1702,12 +1704,12 @@ h5_fileaccess(void)
             memb_map[mt] = mt;
             sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv[mt];
-            memb_addr[mt] = MAX(mt-1,0)*(HADDR_MAX/10);
+            memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         }
 
         if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, FALSE) < 0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "family")) {
         hsize_t fam_size = 100*1024*1024; /*100 MB*/
 
@@ -1716,7 +1718,7 @@ h5_fileaccess(void)
             fam_size = (hsize_t)(HDstrtod(val, NULL) * 1024*1024);
         if (H5Pset_fapl_family(fapl, fam_size, H5P_DEFAULT)<0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "log")) {
         long log_flags = H5FD_LOG_LOC_IO;
 
@@ -1726,12 +1728,12 @@ h5_fileaccess(void)
 
         if (H5Pset_fapl_log(fapl, NULL, (unsigned)log_flags, 0) < 0)
             return -1;
-    } 
+    }
     else if (!HDstrcmp(name, "direct")) {
         /* Substitute Direct I/O driver with sec2 driver temporarily because
          * some output has sec2 driver as the standard. */
         if (H5Pset_fapl_sec2(fapl)<0) return -1;
-    } 
+    }
     else {
         /* Unknown driver */
         return -1;

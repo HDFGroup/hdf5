@@ -82,9 +82,9 @@ typedef struct {
 
 /* store a table of all objects */
 typedef struct {
- unsigned int size;
- unsigned int nelems;
- pack_info_t  *objs;
+    unsigned int size;
+    unsigned int nelems;
+    pack_info_t  *objs;
 } pack_opttbl_t;
 
 
@@ -207,11 +207,11 @@ int apply_filters(const char* name,    /* object name from traverse list */
 int          options_table_init( pack_opttbl_t **tbl );
 int          options_table_free( pack_opttbl_t *table );
 int          options_add_layout( obj_list_t *obj_list,
-                                 int n_objs,
+                                 unsigned n_objs,
                                  pack_info_t *pack,
                                  pack_opttbl_t *table );
 int          options_add_filter ( obj_list_t *obj_list,
-                                 int n_objs,
+                                 unsigned n_objs,
                                  filter_info_t filt,
                                  pack_opttbl_t *table );
 pack_info_t* options_get_object( const char *path,
@@ -223,13 +223,13 @@ pack_info_t* options_get_object( const char *path,
  */
 
 obj_list_t* parse_filter(const char *str,
-                         int *n_objs,
+                         unsigned *n_objs,
                          filter_info_t *filt,
                          pack_opt_t *options,
                          int *is_glb);
 
 obj_list_t* parse_layout(const char *str,
-                         int *n_objs,
+                         unsigned *n_objs,
                          pack_info_t *pack,    /* info about object */
                          pack_opt_t *options);
 
