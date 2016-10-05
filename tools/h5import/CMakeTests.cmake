@@ -93,10 +93,6 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               ${testfile}
-              ${testfile}.new
-              ${testfile}.new.err
-              ${testfile}.out
-              ${testfile}.out.err
       )
       set_tests_properties (H5IMPORT-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
 
@@ -141,12 +137,6 @@
               -E remove
               d${testfile}
               d${testfile}.bin
-              d${testfile}.imp
-              d${testfile}.imp.err
-              d${testfile}.dmp
-              d${testfile}.dmp.err
-              d${testfile}.dff
-              d${testfile}.dff.err
       )
       set_tests_properties (H5IMPORT-DUMP-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
 

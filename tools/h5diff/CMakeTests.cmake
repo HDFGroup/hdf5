@@ -310,11 +310,6 @@
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
-          NAME H5DIFF-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/${resultfile}.out ./testfiles/${resultfile}.out.err
-      )
-      add_test (
           NAME H5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
@@ -326,7 +321,6 @@
               -D "TEST_APPEND=EXIT CODE:"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS "H5DIFF-${resultfile}-clear-objects")
     endif (HDF5_ENABLE_USING_MEMCHECKER)
     if (H5_HAVE_PARALLEL)
       ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
@@ -346,11 +340,6 @@
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
-          NAME PH5DIFF-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/${resultfile}_p.out ./testfiles/${resultfile}_p.out.err
-      )
-      add_test (
           NAME PH5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=${MPIEXEC};${MPIEXEC_PREFLAGS};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_POSTFLAGS};$<TARGET_FILE:ph5diff>"
@@ -364,40 +353,8 @@
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_EXT_DIR}/prunTest.cmake"
       )
-      set_tests_properties (PH5DIFF-${resultfile} PROPERTIES DEPENDS "PH5DIFF-${resultfile}-clear-objects")
     endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (ADD_PH5_TEST file)
-
-   # ADD_H5_NO_OUTPUT_TEST
-   # Purpose to verify only exitcode without output comparison
-   # Don't use this if possible; this may be removed.
-   MACRO (ADD_H5_NO_OUTPUT_TEST testname resultcode)
-    # If using memchecker add tests without using scripts
-    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5DIFF-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/${testname}.out ./testfiles/${testname}.out.err
-      )
-      # if there was a previous test
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5DIFF-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
-    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-
-    add_test (NAME H5DIFF-${testname} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
-    if (NOT ${resultcode} STREQUAL "0")
-      set_tests_properties (H5DIFF-${testname} PROPERTIES WILL_FAIL "true")
-    endif ()
-
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      if (NOT "${last_test}" STREQUAL "")
-        set_tests_properties (H5DIFF-${testname} PROPERTIES DEPENDS ${last_test})
-      endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
-      set_tests_properties (H5DIFF-${testname} PROPERTIES DEPENDS H5DIFF-${testname}-clear-objects)
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_NO_OUTPUT_TEST)
 
 ##############################################################################
 ##############################################################################

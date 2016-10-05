@@ -211,8 +211,6 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               ./testfiles/${testname}.out.h5
-              ./testfiles/${testname}.out.out
-              ./testfiles/${testname}.out.out.err
       )
       add_test (
           NAME H5COPY-CMP-${testname}

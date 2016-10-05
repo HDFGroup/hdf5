@@ -108,8 +108,6 @@ if (BUILD_TESTING)
               -E remove
               ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
               ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.data
-              ${example}.out
-              ${example}.out.err
       )
     else (${example} STREQUAL "H5Ex_D_External")
       add_test (
@@ -117,8 +115,6 @@ if (BUILD_TESTING)
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
-              ${example}.out
-              ${example}.out.err
       )
     endif (${example} STREQUAL "H5Ex_D_External")
     if (NOT "${last_test}" STREQUAL "")

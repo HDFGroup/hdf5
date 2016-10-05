@@ -83,7 +83,7 @@
       add_test (
           NAME H5FC-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/${testname}.out ./testfiles/${testname}.out.err ./testfiles/outtmp.h5
+              -E remove ./testfiles/outtmp.h5
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
@@ -132,7 +132,7 @@
       add_test (
           NAME H5FC-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/${testname}.out ./testfiles/${testname}.out.err ./testfiles/tmp.h5
+              -E remove ./testfiles/tmp.h5
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
@@ -176,7 +176,7 @@
       add_test (
           NAME H5FC-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/${testname}.out ./testfiles/${testname}.out.err ./testfiles/chktmp.h5
+              -E remove ./testfiles/chktmp.h5
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
@@ -214,7 +214,7 @@
       add_test (
           NAME H5FC-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
-              -E remove ./testfiles/${testname}.out ./testfiles/${testname}.out.err ./testfiles/dmptmp.h5
+              -E remove ./testfiles/dmptmp.h5
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
