@@ -2919,33 +2919,23 @@ SUBROUTINE setup_buffer(data_in, line_lengths, char_type)
   
   CHARACTER(len=10), DIMENSION(:) :: data_in
   INTEGER(size_t), DIMENSION(:) :: line_lengths
-  INTEGER, DIMENSION(1:3) :: letters
-  CHARACTER(LEN=3) :: lets
+  CHARACTER(LEN=3) :: lets = 'abc'
   CHARACTER(KIND=C_CHAR,LEN=*) :: char_type
-  CHARACTER(KIND=C_CHAR,LEN=1) :: char_tmp
-  INTEGER :: i, j, n, ff
+  INTEGER :: i, j, n
 
-  ! Convert the letters and special character to integers    
-  lets = 'abc'
-  
-  READ(lets,'(3A1)') letters
-  READ(char_type,'(A1)') ff
   n = SIZE(data_in)
   j = 1
   DO i=1,n-1
      IF( j .EQ. 4 )THEN
-        WRITE(char_tmp,'(A1)') ff
-        data_in(i:i) = char_tmp
+        data_in(i:i) = char_type(1:1)
      ELSE
-        WRITE(char_tmp,'(A1)') letters(j)
-        data_in(i:i) = char_tmp
+        data_in(i:i) = lets(j:j)
      ENDIF
      line_lengths(i) = LEN_TRIM(data_in(i))
      j = j + 1
      IF( j .EQ. 5 ) j = 1
   END DO
-  WRITE(char_tmp,'(A1)') ff
-  data_in(n:n) =  char_tmp
+  data_in(n:n) =  char_type(1:1)
   line_lengths(n) = 1
   
 END SUBROUTINE setup_buffer
