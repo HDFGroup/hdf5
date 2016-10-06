@@ -1128,7 +1128,7 @@ H5Z__nbit_decompress_one_compound(unsigned char *data, size_t data_offset,
       member_class = parms[parms_index++];
 
       /* Check for overflow */
-      member_size = parms[*parms_index];
+      member_size = parms[parms_index];
       used_size += member_size;
       if(used_size > size)
          HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "compound member offset overflowed compound size")
@@ -1173,9 +1173,8 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-<<<<<<< HEAD
-static void
-H5Z_nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
+static herr_t
+H5Z__nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
                                 const unsigned parms[])
 {
    /* i: index of data, j: index of buffer,
@@ -1214,7 +1213,7 @@ H5Z_nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buffe
            size = parms[4];
            parms_index = 4;
            for(i = 0; i < d_nelmts; i++) {
-              if(H5Z_nbit_decompress_one_array(data, i*size, buffer, &j, &buf_len, parms) < 0)
+              if(H5Z__nbit_decompress_one_array(data, i*size, buffer, &j, &buf_len, parms) < 0)
                  HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress array")
               parms_index = 4;
            }
@@ -1223,7 +1222,7 @@ H5Z_nbit_decompress(unsigned char *data, unsigned d_nelmts, unsigned char *buffe
            size = parms[4];
            parms_index = 4;
            for(i = 0; i < d_nelmts; i++) {
-              if(H5Z_nbit_decompress_one_compound(data, i*size, buffer, &j, &buf_len, parms) < 0)
+              if(H5Z__nbit_decompress_one_compound(data, i*size, buffer, &j, &buf_len, parms) < 0)
                  HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "can't decompress compound")
               parms_index = 4;
            }
