@@ -25,6 +25,14 @@ if (NOT TEST_SKIP_COMPARE AND NOT TEST_REFERENCE)
   message (FATAL_ERROR "Require TEST_REFERENCE to be defined")
 endif ()
 
+if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+  file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
+endif ()
+
+if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+  file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+endif ()
+
 # if there is not an error reference file add the error output to the stdout file
 if (NOT TEST_ERRREF)
   set (ERROR_APPEND 1)
