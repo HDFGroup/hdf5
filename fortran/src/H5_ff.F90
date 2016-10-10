@@ -102,6 +102,7 @@ CONTAINS
             i_H5P_flags_int, &
             i_H5R_flags, &
             i_H5S_flags, &
+            i_H5S_hid_flags, &
             i_H5S_hsize_flags, &
             i_H5T_flags, &
             i_H5Z_flags, &
@@ -114,7 +115,7 @@ CONTAINS
               H5F_FLAGS_LEN, H5G_FLAGS_LEN, H5FD_FLAGS_LEN, &
               H5FD_HID_FLAGS_LEN, H5I_FLAGS_LEN, H5L_FLAGS_LEN, &
               H5O_FLAGS_LEN, H5P_FLAGS_LEN, H5P_FLAGS_INT_LEN, &
-              H5R_FLAGS_LEN, H5S_FLAGS_LEN, H5S_HSIZE_FLAGS_LEN, &
+              H5R_FLAGS_LEN, H5S_FLAGS_LEN, H5S_HID_FLAGS_LEN, H5S_HSIZE_FLAGS_LEN, &
               H5T_FLAGS_LEN, H5Z_FLAGS_LEN, H5generic_FLAGS_LEN, H5generic_haddr_FLAGS_LEN
          IMPLICIT NONE
          INTEGER i_H5D_flags(H5D_FLAGS_LEN)
@@ -132,6 +133,7 @@ CONTAINS
          INTEGER i_H5P_flags_int(H5P_FLAGS_INT_LEN)
          INTEGER i_H5R_flags(H5R_FLAGS_LEN)
          INTEGER i_H5S_flags(H5S_FLAGS_LEN)
+         INTEGER(HID_T) i_H5S_hid_flags(H5S_HID_FLAGS_LEN)
          INTEGER(HSIZE_T) i_H5S_hsize_flags(H5S_HSIZE_FLAGS_LEN)
          INTEGER i_H5T_flags(H5T_FLAGS_LEN)
          INTEGER i_H5Z_flags(H5Z_FLAGS_LEN)
@@ -163,6 +165,7 @@ CONTAINS
          H5P_flags_int, &
          H5R_flags, &
          H5S_flags, &
+         H5S_hid_flags, &
          H5S_hsize_flags, &
          H5T_flags, &
          H5Z_flags, &

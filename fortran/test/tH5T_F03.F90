@@ -249,7 +249,7 @@ SUBROUTINE test_array_compound_atomic(total_error)
   ! Read dataset from disk 
 
   f_ptr = C_LOC(rdata(1,1))
-  CALL H5Dread_f(dataset, tid1, f_ptr, error)
+  CALL H5Dread_f(dataset, tid1, f_ptr, error, H5S_ALL_F, H5S_ALL_F, H5P_DEFAULT_F)
   CALL check("H5Dread_f", error, total_error)
 
   ! Compare data read in 
