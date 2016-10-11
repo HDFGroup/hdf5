@@ -39,7 +39,6 @@ namespace H5 {
 	class FloatType;
 	class StrType;
 	class CompType;
-	//class RefType;
 	class AbstractDs;
 	class DataSet;
 	class Group;

@@ -30,6 +30,8 @@ namespace H5 {
     DataType inherits from H5Object because a named datatype is an HDF5
     object and is a base class of ArrayType, AtomType, CompType, EnumType,
     and VarLenType.
+
+    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
 class H5_DLLCPP DataType : public H5Object {
    public:

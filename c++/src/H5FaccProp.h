@@ -24,7 +24,12 @@
 namespace H5 {
 #endif
 
-//! Class FileAccPropList represents the HDF5 file access property list.
+/*! \class FileAccPropList
+    \brief Class FileAccPropList inherits from PropList and provides
+    wrappers for the HDF5 file access property list.
+
+    Inheritance: PropList -> IdComponent
+*/
 class H5_DLLCPP FileAccPropList : public PropList {
    public:
 	///\brief Default file access property list.

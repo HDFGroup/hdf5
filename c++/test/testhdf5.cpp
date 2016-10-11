@@ -100,7 +100,9 @@ main(int argc, char *argv[])
 	AddTest("select", test_select, cleanup_select,  "Selections", NULL);
 	AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);
 	AddTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes", NULL);
+*/
 	AddTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration", NULL);
+/*
 	AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
 	AddTest("id", test_ids, NULL,  "User-Created Identifiers", NULL);
 

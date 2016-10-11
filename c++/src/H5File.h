@@ -23,9 +23,10 @@ namespace H5 {
 #endif
 
 /*! \class H5File
-    \brief Class H5File represents an HDF5 file.
+    \brief Class H5File represents an HDF5 file and inherits from class Group
+    as file is a root group.
 
-    It inherits from H5Location and CommonFG.
+    Inheritance: Group -> H5Object -> H5Location -> IdComponent
 */
 class H5_DLLCPP H5File : public Group {
    public:

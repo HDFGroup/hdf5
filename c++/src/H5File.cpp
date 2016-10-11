@@ -24,13 +24,13 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
-#include "H5Location.h"
-#include "H5Object.h"
 #include "H5FaccProp.h"
 #include "H5FcreatProp.h"
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
+#include "H5Location.h"
+#include "H5Object.h"
 #include "H5Group.h"
 #include "H5AbstractDs.h"
 #include "H5DataSpace.h"
@@ -563,6 +563,9 @@ void H5File::reopen()
 //		This function is a redefinition of CommonFG::getLocId.  It
 //		is used by CommonFG member functions to get the file id.
 // Programmer	Binh-Minh Ribler - 2000
+// Deprecated:
+//	After HDFFV-9920, the Group's methods can use getId() and getLocId()
+//	is kept for backward compatibility.  Aug 18, 2016 -BMR
 //--------------------------------------------------------------------------
 hid_t H5File::getLocId() const
 {
@@ -623,11 +626,10 @@ void H5File::close()
 ///\param	msg       - Message describing the failure
 ///\exception	H5::FileIException
 // Description
-// 		This function is used in CommonFG implementation so that
+// 		This function is also used in H5Location implementation so that
 //		proper exception can be thrown for file or group.  The
-//		argument func_name is a member of CommonFG and "H5File::"
-//		will be inserted to indicate the function called is an
-//		implementation of H5File.
+//		"H5File::" will be inserted to indicate the function called is
+//		an implementation of H5File.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5File::throwException(const H5std_string& func_name, const H5std_string& msg) const

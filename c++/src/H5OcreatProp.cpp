@@ -19,8 +19,8 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
-#include "H5FaccProp.h"
 #include "H5OcreatProp.h"
+#include "H5FaccProp.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
