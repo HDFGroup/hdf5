@@ -49,13 +49,6 @@
       endif (NOT "${resultcode}" STREQUAL "0")
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
-          NAME H5JAM-${expectfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${expectfile}.out
-              ${expectfile}.out.err
-      )
-      add_test (
           NAME H5JAM-${expectfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5jam>"
@@ -66,7 +59,6 @@
               -D "TEST_REFERENCE=testfiles/${expectfile}.txt"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5JAM-${expectfile} PROPERTIES DEPENDS H5JAM-${expectfile}-clear-objects)
     endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (TEST_H5JAM_OUTPUT)
 
@@ -83,13 +75,6 @@
       endif (NOT "${resultcode}" STREQUAL "0")
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
-          NAME H5JAM-UNJAM-${expectfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${expectfile}.out
-              ${expectfile}.out.err
-      )
-      add_test (
           NAME H5JAM-UNJAM-${expectfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5unjam>"
@@ -100,23 +85,12 @@
               -D "TEST_REFERENCE=testfiles/${expectfile}.txt"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5JAM-UNJAM-${expectfile} PROPERTIES DEPENDS H5JAM-UNJAM-${expectfile}-clear-objects)
     endif (HDF5_ENABLE_USING_MEMCHECKER)
   ENDMACRO (TEST_H5UNJAM_OUTPUT)
 
   MACRO (CHECKFILE testname testdepends expected actual)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5JAM-${testname}-CHECKFILE-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove
-              ${actual}.new
-              ${actual}.new.err
-              ${actual}.out
-              ${actual}.out.err
-      )
-      set_tests_properties (H5JAM-${testname}-CHECKFILE-clear-objects PROPERTIES DEPENDS ${testdepends})
       add_test (
           NAME H5JAM-${testname}-CHECKFILE-H5DMP
           COMMAND "${CMAKE_COMMAND}"
@@ -129,7 +103,7 @@
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5JAM-${testname}-CHECKFILE-H5DMP PROPERTIES DEPENDS H5JAM-${testname}-CHECKFILE-clear-objects)
+      set_tests_properties (H5JAM-${testname}-CHECKFILE-H5DMP PROPERTIES DEPENDS ${testdepends})
       add_test (
           NAME H5JAM-${testname}-CHECKFILE-H5DMP_CMP
           COMMAND "${CMAKE_COMMAND}"
@@ -174,11 +148,6 @@
       else (NOT "${ufile}" STREQUAL "NONE")
         if (NOT "${ARGN}" STREQUAL "--delete")
           add_test (
-              NAME H5JAM-${testname}-UNJAM_D-clear-objects
-              COMMAND ${CMAKE_COMMAND} -E remove ${outfile}.ufile.txt ${outfile}.ufile.txt.err
-          )
-          set_tests_properties (H5JAM-${testname}-UNJAM_D-clear-objects PROPERTIES DEPENDS H5JAM-${testname}-UNJAM-clear-objects)
-          add_test (
               NAME H5JAM-${testname}-UNJAM
               COMMAND "${CMAKE_COMMAND}"
                   -D "TEST_PROGRAM=$<TARGET_FILE:h5unjam>"
@@ -189,7 +158,7 @@
                   -D "TEST_SKIP_COMPARE=TRUE"
                   -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
           )
-          set_tests_properties (H5JAM-${testname}-UNJAM PROPERTIES DEPENDS H5JAM-${testname}-UNJAM_D-clear-objects)
+          set_tests_properties (H5JAM-${testname}-UNJAM PROPERTIES DEPENDS H5JAM-${testname}-UNJAM-clear-objects)
           set (compare_test "${outfile}.ufile.txt")
         else (NOT "${ARGN}" STREQUAL "--delete")
           add_test (NAME H5JAM-${testname}-UNJAM COMMAND $<TARGET_FILE:h5unjam> -i ${infile} -o ${outfile})

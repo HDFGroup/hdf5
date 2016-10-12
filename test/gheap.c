@@ -35,6 +35,9 @@
  * GHEAP_REPEATED_ERR_LIM errors, and suppress the rest */
 #define GHEAP_REPEATED_ERR_LIM 20
 
+/* Number of heap objects to test */
+#define GHEAP_TEST_NOBJS        1024
+
 #define GHEAP_REPEATED_ERR(MSG)                                                \
 {                                                                              \
     nerrors++;                                                                 \
@@ -78,9 +81,9 @@ test_1 (hid_t fapl)
 {
     hid_t	file = -1;
     H5F_t 	*f = NULL;
-    H5HG_t	obj[1024];
-    uint8_t	out[1024];
-    uint8_t	in[1024];
+    H5HG_t	*obj = NULL;
+    uint8_t	out[GHEAP_TEST_NOBJS];
+    uint8_t	in[GHEAP_TEST_NOBJS];
     size_t	u;
     size_t	size;
     herr_t	status;
@@ -88,6 +91,10 @@ test_1 (hid_t fapl)
     char	filename[1024];
 
     TESTING("monotonically increasing lengths");
+
+    /* Allocate buffer for H5HG_t */
+    if(NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -104,7 +111,7 @@ test_1 (hid_t fapl)
      * a clean file, the addresses allocated for the collections should also
      * be monotonically increasing.
      */
-    for(u = 0; u < 1024; u++) {
+    for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
 	size = u + 1;
 	HDmemset(out, (int)('A' + u % 26), size);
 	H5Eclear2(H5E_DEFAULT);
@@ -123,7 +130,7 @@ test_1 (hid_t fapl)
     /*
      * Now try to read each object back.
      */
-    for(u = 0; u < 1024; u++) {
+    for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
 	size = u + 1;
 	HDmemset(out, (int)('A' + u % 26), size);
 	H5Eclear2(H5E_DEFAULT);
@@ -138,6 +145,10 @@ test_1 (hid_t fapl)
 	}
     }
 
+    /* Release buffer */
+    HDfree(obj);
+    obj = NULL;
+
     if(H5Fclose(file) < 0) goto error;
     if(nerrors) goto error;
 
@@ -148,6 +159,8 @@ error:
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;
+    if(obj)
+        HDfree(obj);
     return MAX(1, nerrors);
 }
 
@@ -174,15 +187,19 @@ test_2 (hid_t fapl)
 {
     hid_t	file = -1;
     H5F_t 	*f = NULL;
-    H5HG_t	obj[1024];
-    uint8_t	out[1024];
-    uint8_t	in[1024];
+    H5HG_t	*obj = NULL;
+    uint8_t	out[GHEAP_TEST_NOBJS];
+    uint8_t	in[GHEAP_TEST_NOBJS];
     size_t	u;
     size_t	size;
     int		nerrors = 0;
     char	filename[1024];
 
     TESTING("monotonically decreasing lengths");
+
+    /* Allocate buffer for H5HG_t */
+    if(NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
@@ -197,8 +214,8 @@ test_2 (hid_t fapl)
     /*
      * Write the objects, monotonically decreasing in length.
      */
-    for(u = 0; u < 1024; u++) {
-	size = 1024 - u;
+    for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
+	size = GHEAP_TEST_NOBJS - u;
 	HDmemset(out, (int)('A' + u % 26), size);
 	H5Eclear2(H5E_DEFAULT);
 	if (H5HG_insert (f, H5AC_ind_read_dxpl_id, size, out, obj + u) < 0) {
@@ -211,8 +228,8 @@ test_2 (hid_t fapl)
     /*
      * Now try to read each object back.
      */
-    for(u = 0; u < 1024; u++) {
-	size = 1024 - u;
+    for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
+	size = GHEAP_TEST_NOBJS - u;
 	HDmemset(out, (int)('A' + u % 26), size);
 	H5Eclear2(H5E_DEFAULT);
 	if (NULL==H5HG_read (f, H5AC_ind_read_dxpl_id, obj + u, in, NULL)) {
@@ -226,8 +243,13 @@ test_2 (hid_t fapl)
 	}
     }
 
+    /* Release buffer */
+    HDfree(obj);
+    obj = NULL;
+
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
+
     PASSED();
     return 0;
 
@@ -235,6 +257,8 @@ test_2 (hid_t fapl)
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;
+    if(obj)
+        HDfree(obj);
     return MAX(1, nerrors);
 }
 
@@ -261,8 +285,8 @@ test_3 (hid_t fapl)
 {
     hid_t	file = -1;
     H5F_t 	*f = NULL;
-    H5HG_t	obj[1024];
-    uint8_t	out[1024];
+    H5HG_t	*obj = NULL;
+    uint8_t	out[GHEAP_TEST_NOBJS];
     size_t	u;
     size_t	size;
     herr_t	status;
@@ -270,6 +294,10 @@ test_3 (hid_t fapl)
     char	filename[1024];
 
     TESTING("complete object removal");
+
+    /* Allocate buffer for H5HG_t */
+    if(NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
@@ -282,7 +310,7 @@ test_3 (hid_t fapl)
     }
 
     /* Create some stuff */
-    for(u = 0; u < 1024; u++) {
+    for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
 	size = u % 30 + 100;
 	HDmemset(out, (int)('A' + u % 26), size);
 	H5Eclear2(H5E_DEFAULT);
@@ -295,7 +323,7 @@ test_3 (hid_t fapl)
     }
 
     /* Remove everything */
-    for(u = 0; u < 1024; u++) {
+    for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
 	status = H5HG_remove (f, H5AC_ind_read_dxpl_id, obj + u);
 	if (status<0) {
 	    H5_FAILED();
@@ -304,8 +332,13 @@ test_3 (hid_t fapl)
 	}
     }
 
+    /* Release buffer */
+    HDfree(obj);
+    obj = NULL;
+
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
+
     PASSED();
     return 0;
 
@@ -313,6 +346,8 @@ test_3 (hid_t fapl)
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;
+    if(obj)
+        HDfree(obj);
     return MAX(1, nerrors);
 }
 
@@ -340,8 +375,8 @@ test_4 (hid_t fapl)
 {
     hid_t	file = -1;
     H5F_t 	*f = NULL;
-    H5HG_t	obj[1024];
-    uint8_t	out[1024];
+    H5HG_t	*obj = NULL;
+    uint8_t	out[GHEAP_TEST_NOBJS];
     size_t	u;
     size_t	size;
     herr_t	status;
@@ -349,6 +384,10 @@ test_4 (hid_t fapl)
     char	filename[1024];
 
     TESTING("partial object removal");
+
+    /* Allocate buffer for H5HG_t */
+    if(NULL == (obj = (H5HG_t *)HDmalloc(sizeof(H5HG_t) * GHEAP_TEST_NOBJS)))
+        goto error;
 
     /* Open a clean file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
@@ -360,7 +399,7 @@ test_4 (hid_t fapl)
 	goto error;
     }
 
-    for(u = 0; u < 1024; u++) {
+    for(u = 0; u < GHEAP_TEST_NOBJS; u++) {
 	/* Insert */
 	size = u % 30 + 100;
 	HDmemset(out, (int)('A' + u % 26), size);
@@ -389,8 +428,13 @@ test_4 (hid_t fapl)
 	}
     }
 
+    /* Release buffer */
+    HDfree(obj);
+    obj = NULL;
+
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;
+
     PASSED();
     return 0;
 
@@ -398,6 +442,8 @@ test_4 (hid_t fapl)
     H5E_BEGIN_TRY {
 	H5Fclose(file);
     } H5E_END_TRY;
+    if(obj)
+        HDfree(obj);
     return MAX(1, nerrors);
 }
 

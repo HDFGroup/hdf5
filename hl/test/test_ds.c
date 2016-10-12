@@ -389,7 +389,7 @@ herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int
     int     rank = 4;
     int     rankds = 1;
     hsize_t dims[4]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE,DIM4_SIZE};
-    long    buf[DIM1_SIZE*DIM2_SIZE*DIM3_SIZE*DIM4_SIZE];
+    long    *buf;
     hsize_t s1_dim[1]  = {DIM1_SIZE};
     hsize_t s2_dim[1]  = {DIM2_SIZE};
     hsize_t s3_dim[1]  = {DIM3_SIZE};
@@ -408,6 +408,10 @@ herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int
     long    s42_wbuf[DIM4_SIZE] = {80,80};
     long    s43_wbuf[DIM4_SIZE] = {180,180};
     long    s44_wbuf[DIM4_SIZE] = {280,280};
+
+    /* Allocate buffer */
+    if(NULL == (buf = (long *)HDmalloc(sizeof(long) * DIM1_SIZE * DIM2_SIZE * DIM3_SIZE * DIM4_SIZE)))
+         return FAIL;
 
     /* make a dataset */
     if(H5LTmake_dataset_long(fid, dsname, rank, dims, buf) >= 0) {
@@ -444,6 +448,9 @@ herr_t create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int
      }
      else
          return FAIL;
+
+    HDfree(buf);
+
     return SUCCEED;
 }
 

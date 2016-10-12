@@ -181,6 +181,11 @@
 /* Definition for object flush callback */
 #define H5F_ACS_OBJECT_FLUSH_CB_SIZE		sizeof(H5F_object_flush_t)
 #define H5F_ACS_OBJECT_FLUSH_CB_DEF             {NULL, NULL}
+/* Definition for evict on close property */
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE                sizeof(hbool_t)
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF                 FALSE
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC                 H5P__encode_hbool_t
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC                 H5P__decode_hbool_t
 #ifdef H5_HAVE_PARALLEL
 /* Definition of collective metadata read mode flag */
 #define H5F_ACS_COLL_MD_READ_FLAG_SIZE   sizeof(H5P_coll_md_read_flag_t)
@@ -296,6 +301,7 @@ static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMA
 static const hbool_t H5F_def_core_write_tracking_flag_g = H5F_ACS_CORE_WRITE_TRACKING_FLAG_DEF;              /* Default setting for core VFD write tracking */
 static const size_t H5F_def_core_write_tracking_page_size_g = H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_DEF;     /* Default core VFD write tracking page size */
 static const H5F_object_flush_t H5F_def_object_flush_cb_g = H5F_ACS_OBJECT_FLUSH_CB_DEF;      /* Default setting for object flush callback */
+static const hbool_t H5F_def_evict_on_close_flag_g = H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF;         /* Default setting for evict on close property */
 #ifdef H5_HAVE_PARALLEL
 static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_MD_READ_FLAG_DEF;  /* Default setting for the collective metedata read flag */
 static const hbool_t H5F_def_coll_md_write_flag_g = H5F_ACS_COLL_MD_WRITE_FLAG_DEF;  /* Default setting for the collective metedata write flag */
@@ -460,6 +466,12 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if(H5P_register_real(pclass, H5F_ACS_OBJECT_FLUSH_CB_NAME, H5F_ACS_OBJECT_FLUSH_CB_SIZE, &H5F_def_object_flush_cb_g, 
             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the evict on close flag */
+    if(H5P_register_real(pclass, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE, &H5F_def_evict_on_close_flag_g, 
+            NULL, NULL, NULL, H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC, H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC, 
+            NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 #ifdef H5_HAVE_PARALLEL
@@ -3604,6 +3616,93 @@ H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func, void **udata)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_obj_flush_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_evict_on_close
+ *
+ * Purpose:     Sets the evict_on_close property value.
+ *
+ *              When this property is set, closing an HDF5 object will
+ *              cause the object's metadata cache entries to be flushed
+ *              and evicted from the cache.
+ *
+ *              Currently only implemented for datasets.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close)
+{
+    H5P_genplist_t *plist;          /* property list pointer */
+    herr_t ret_value = SUCCEED;     /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", fapl_id, evict_on_close);
+
+    /* Compare the property list's class against the other class */
+    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set values */
+    if(H5P_set(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set evict on close property")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_evict_on_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_evict_on_close
+ *
+ * Purpose:     Gets the evict_on_close property value.
+ *
+ *              When this property is set, closing an HDF5 object will
+ *              cause the object's metadata cache entries to be flushed
+ *              and evicted from the cache.
+ *
+ *              Currently only implemented for datasets.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close)
+{
+    H5P_genplist_t *plist;          /* property list pointer */
+    herr_t ret_value = SUCCEED;     /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", fapl_id, evict_on_close);
+
+    /* Compare the property list's class against the other class */
+    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    if(H5P_get(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, evict_on_close) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get evict on close property")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_evict_on_close() */
 
 #ifdef H5_HAVE_PARALLEL
 

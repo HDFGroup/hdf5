@@ -22,6 +22,7 @@ macro (EXTERNAL_JPEG_LIBRARY compress_type jpeg_pic)
   elseif (${compress_type} MATCHES "GIT")
     EXTERNALPROJECT_ADD (JPEG
         GIT_REPOSITORY ${JPEG_URL}
+        GIT_TAG ${JPEG_BRANCH}
         INSTALL_COMMAND ""
         CMAKE_ARGS
             -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
@@ -82,9 +83,9 @@ macro (PACKAGE_JPEG_LIBRARY compress_type)
       COMMENT "Copying ${JPEG_INCLUDE_DIR_GEN}/jconfig.h to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
   )
   set (EXTERNAL_HEADER_LIST ${EXTERNAL_HEADER_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/jconfig.h)
-  if (${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
+  if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
     add_dependencies (JPEG-GenHeader-Copy JPEG)
-  endif (${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
+  endif (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
 endmacro (PACKAGE_JPEG_LIBRARY)
 
 #-------------------------------------------------------------------------------
@@ -109,7 +110,7 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
   elseif (${compress_type} MATCHES "GIT")
     EXTERNALPROJECT_ADD (SZIP
         GIT_REPOSITORY ${SZIP_URL}
-        # [SVN_REVISION rev]
+        GIT_TAG ${SZIP_BRANCH}
         INSTALL_COMMAND ""
         CMAKE_ARGS
             -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
@@ -172,9 +173,9 @@ macro (PACKAGE_SZIP_LIBRARY compress_type)
       COMMENT "Copying ${SZIP_INCLUDE_DIR_GEN}/SZconfig.h to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
   )
   set (EXTERNAL_HEADER_LIST ${EXTERNAL_HEADER_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/SZconfig.h)
-  if (${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
+  if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
     add_dependencies (SZIP-GenHeader-Copy SZIP)
-  endif (${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
+  endif (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
 endmacro (PACKAGE_SZIP_LIBRARY)
 
 #-------------------------------------------------------------------------------
@@ -198,7 +199,7 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
   elseif (${compress_type} MATCHES "GIT")
     EXTERNALPROJECT_ADD (ZLIB
         GIT_REPOSITORY ${ZLIB_URL}
-        # [SVN_REVISION rev]
+        GIT_TAG ${ZLIB_BRANCH}
         INSTALL_COMMAND ""
         CMAKE_ARGS
             -DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}
@@ -264,7 +265,7 @@ macro (PACKAGE_ZLIB_LIBRARY compress_type)
       COMMENT "Copying ${ZLIB_INCLUDE_DIR_GEN}/zconf.h to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
   )
   set (EXTERNAL_HEADER_LIST ${EXTERNAL_HEADER_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zconf.h)
-  if (${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
+  if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
     add_dependencies (ZLIB-GenHeader-Copy ZLIB)
-  endif (${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
+  endif (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
 endmacro (PACKAGE_ZLIB_LIBRARY)

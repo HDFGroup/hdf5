@@ -185,7 +185,7 @@ SUBROUTINE test_table1()
   ! make table
   !-------------------------------------------------------------------------
 
-  test_txt = " Make table"
+  test_txt = "Make table"
   CALL test_begin(test_txt)
 
   CALL h5tbmake_table_f(dsetname1,&
@@ -508,7 +508,6 @@ SUBROUTINE test_table1()
      WRITE(*,'(/,5X,"H5TBGET_FIELD_INFO_F: RETURN ERROR")')
      STOP
   ENDIF
-
   ! "field4abc" was deleted and "field5" was added.
   field_names(4) = "field5"
 
@@ -538,7 +537,6 @@ SUBROUTINE test_table1()
   !
   CALL h5fclose_f(file_id, errcode)
 
-
   !
   ! end function.
   !
@@ -557,15 +555,16 @@ SUBROUTINE test_table2()
 
   IMPLICIT NONE
   
-  INTEGER, PARAMETER :: int_kind_8 = SELECTED_INT_KIND(9)   !should map to INTEGER*4 on most modern processors
-  INTEGER, PARAMETER :: int_kind_16 = SELECTED_INT_KIND(9) ! (18) !should map to INTEGER*8 on most modern processors
+  INTEGER, PARAMETER :: i8 = SELECTED_INT_KIND(9)   !should map to INTEGER*4 on most modern processors
+  INTEGER, PARAMETER :: i16 = SELECTED_INT_KIND(9) ! (18) !should map to INTEGER*8 on most modern processors
   INTEGER, PARAMETER :: sp = SELECTED_REAL_KIND(5)  ! This should map to REAL*4 on most modern processors
   INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(10) ! This should map to REAL*8 on most modern processors
 
   TYPE particle_t
+     SEQUENCE
      CHARACTER(LEN=11) :: name
-     INTEGER(KIND=int_kind_8) :: lati
-     INTEGER(KIND=int_kind_16) :: long
+     INTEGER(KIND=i8) :: lati
+     INTEGER(KIND=i16) :: long
      REAL(KIND=sp) :: pressure
      REAL(KIND=dp) :: temperature
   END TYPE particle_t
@@ -607,23 +606,23 @@ SUBROUTINE test_table2()
 
   test_txt = "Testing H5TBread_table_f and H5TBmake_table_f (F2003)"
   CALL test_begin(test_txt)
+
   
   ! Define an array of Particles
   p_data(1:nrecords) = (/ &
-       particle_t("zero       ",0_int_kind_8,0_int_kind_16,0.0_sp,0.0_dp),     &
-       particle_t("one        ",10_int_kind_8,10_int_kind_16,10.0_sp,10.0_dp),  &
-       particle_t("two        ",20_int_kind_8,20_int_kind_16,20.0_sp,20.0_dp),  &
-       particle_t("three      ",30_int_kind_8,30_int_kind_16,30.0_sp,30.0_dp),&
-       particle_t("four       ",40_int_kind_8,40_int_kind_16,40.0_sp,40.0_dp), &
-       particle_t("five       ",50_int_kind_8,50_int_kind_16,50.0_sp,50.0_dp), &
-       particle_t("six        ",60_int_kind_8,60_int_kind_16,60.0_sp,60.0_dp),  &
-       particle_t("seven      ",70_int_kind_8,70_int_kind_16,70.0_sp,70.0_dp) &
+       particle_t("zero       ",0_i8,0_i16,0.0_sp,0.0_dp),     &
+       particle_t("one        ",10_i8,10_i16,10.0_sp,10.0_dp),  &
+       particle_t("two        ",20_i8,20_i16,20.0_sp,20.0_dp),  &
+       particle_t("three      ",30_i8,30_i16,30.0_sp,30.0_dp),&
+       particle_t("four       ",40_i8,40_i16,40.0_sp,40.0_dp), &
+       particle_t("five       ",50_i8,50_i16,50.0_sp,50.0_dp), &
+       particle_t("six        ",60_i8,60_i16,60.0_sp,60.0_dp),  &
+       particle_t("seven      ",70_i8,70_i16,70.0_sp,70.0_dp) &
        /)
 
-  fill_data(1:nrecords) = particle_t("no data",-1_int_kind_8, -2_int_kind_16, -99.0_sp, -100.0_dp)
+  fill_data(1:nrecords) = particle_t("no data",-1_i8, -2_i16, -99.0_sp, -100.0_dp)
 
   compress = 0
-
   dst_size = H5OFFSETOF(C_LOC(dst_buf(1)), C_LOC(dst_buf(2)))
 
 #ifdef H5_FORTRAN_HAVE_STORAGE_SIZE
@@ -673,11 +672,10 @@ SUBROUTINE test_table2()
 
   f_ptr1 = C_NULL_PTR
   f_ptr2 = C_LOC(fill_data(1)%name(1:1))
-
   CALL h5tbmake_table_f("Table Title Fill", file_id, table_name_fill, nfields, nrecords, &
        dst_size, field_names, dst_offset, field_type, &
        chunk_size, f_ptr2, compress, f_ptr1, errcode )
-  
+
   f_ptr3 = C_LOC(r_data(1)%name(1:1))
   CALL h5tbread_table_f(file_id, table_name_fill, nfields, dst_size, dst_offset, dst_sizes, f_ptr3, errcode)
 

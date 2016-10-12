@@ -311,7 +311,11 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                     if(version == H5O_DTYPE_VERSION_1) {
                         /* Decode the number of dimensions */
                         ndims = *(*pp)++;
-                        HDassert(ndims <= 4);
+
+                        /* Check that ndims is valid */
+                        if(ndims > 4)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid number of dimensions for array")
+
                         *pp += 3;		/*reserved bytes */
 
                         /* Skip dimension permutation */
@@ -519,7 +523,8 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
             dt->shared->u.array.ndims = *(*pp)++;
 
             /* Double-check the number of dimensions */
-            HDassert(dt->shared->u.array.ndims <= H5S_MAX_RANK);
+            if(dt->shared->u.array.ndims > H5S_MAX_RANK)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "too many dimensions for array datatype")
 
             /* Skip reserved bytes, if version has them */
             if(version < H5O_DTYPE_VERSION_3)

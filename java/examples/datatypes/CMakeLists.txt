@@ -96,8 +96,6 @@ if (BUILD_TESTING)
         COMMAND    ${CMAKE_COMMAND}
             -E remove
             ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
-            ${example}.out
-            ${example}.out.err
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (JAVA_datatypes-${example}-clear-objects PROPERTIES DEPENDS ${last_test})

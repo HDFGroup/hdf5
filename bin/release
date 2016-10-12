@@ -152,7 +152,7 @@ tar2zip()
 
 # This command must be run at the top level of the hdf5 source directory.
 # Verify this requirement.
-if [ ! \( -f configure -a -f bin/release \) ]; then
+if [ ! \( -f configure.ac -a -f bin/release \) ]; then
     echo "$0 must be run at the top level of the hdf5 source directory"
     exit 1
 fi

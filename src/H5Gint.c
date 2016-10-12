@@ -486,7 +486,7 @@ H5G_close(H5G_t *grp)
     if(0 == grp->shared->fo_count) {
         HDassert(grp != H5G_rootof(H5G_fileof(grp)));
 
-	/* Uncork cache entries with object address tag */
+        /* Uncork cache entries with object address tag */
         if(H5AC_cork(grp->oloc.file, grp->oloc.addr, H5AC__GET_CORKED, &corked) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to retrieve an object's cork status")
         if(corked)
@@ -500,6 +500,8 @@ H5G_close(H5G_t *grp)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't remove group from list of open objects")
         if(H5O_close(&(grp->oloc)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")
+
+        /* Free memory */
         grp->shared = H5FL_FREE(H5G_shared_t, grp->shared);
     } else {
         /* Decrement the ref. count for this object in the top file */

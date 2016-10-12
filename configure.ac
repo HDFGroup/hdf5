@@ -26,7 +26,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.9.234], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.235], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -551,6 +551,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   AC_SUBST([PAC_FC_ALL_REAL_KINDS])
   AC_SUBST([PAC_FC_MAX_REAL_PRECISION])
+  AC_SUBST([PAC_FORTRAN_NUM_INTEGER_KINDS])
   AC_SUBST([PAC_FC_ALL_INTEGER_KINDS])
   AC_SUBST([PAC_FC_ALL_REAL_KINDS_SIZEOF])
   AC_SUBST([PAC_FC_ALL_INTEGER_KINDS_SIZEOF])
