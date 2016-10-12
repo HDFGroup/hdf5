@@ -415,6 +415,7 @@
 ./c++/test/tfilter.cpp
 ./c++/test/th5s.cpp
 ./c++/test/th5s.h5
+./c++/test/titerate.cpp
 ./c++/test/tlinks.cpp
 ./c++/test/tobject.cpp
 ./c++/test/ttypes.cpp
