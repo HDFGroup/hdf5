@@ -208,9 +208,6 @@ class H5_DLLCPP H5Location : public IdComponent {
 
 // end From CommonFG
 
-	///\brief Returns an identifier.
-	//virtual hid_t getId() const;
-
 	/// For subclasses, H5File and Group, to throw appropriate exception.
 	virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const;
 
