@@ -14,24 +14,28 @@ TARGET_NAMING (h5jam STATIC)
 TARGET_C_PROPERTIES (h5jam STATIC " " " ")
 target_link_libraries (h5jam  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5jam PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5jam")
 
 add_executable (getub ${HDF5_TOOLS_H5JAM_SOURCE_DIR}/getub.c)
 TARGET_NAMING (getub STATIC)
 TARGET_C_PROPERTIES (getub STATIC " " " ")
 target_link_libraries (getub  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (getub PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5getub")
 
 add_executable (tellub ${HDF5_TOOLS_H5JAM_SOURCE_DIR}/tellub.c)
 TARGET_NAMING (tellub STATIC)
 TARGET_C_PROPERTIES (tellub STATIC " " " ")
 target_link_libraries (tellub  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (tellub PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5tellub")
 
 add_executable (h5unjam ${HDF5_TOOLS_H5JAM_SOURCE_DIR}/h5unjam.c)
 TARGET_NAMING (h5unjam STATIC)
 TARGET_C_PROPERTIES (h5unjam STATIC " " " ")
 target_link_libraries (h5unjam  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5unjam PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5unjam")
 
 set (H5_DEP_EXECUTABLES
     h5jam
@@ -50,7 +54,7 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (testhdf5 STATIC " " " ")
     target_link_libraries (h5jamgentest ${HDF5_LIB_TARGET})
     set_target_properties (h5jamgentest PROPERTIES FOLDER generator/tools)
-    
+
     #add_test (NAME h5jamgentest COMMAND $<TARGET_FILE:h5jamgentest>)
   endif (HDF5_BUILD_GENERATORS)
 

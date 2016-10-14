@@ -213,7 +213,7 @@ foreach(v
     CTEST_SOURCE_DIRECTORY
     CTEST_BINARY_DIRECTORY
     CTEST_CMAKE_GENERATOR
-    CTEST_BUILD_CONFIGURATION
+    CTEST_CONFIGURATION_TYPE
     CTEST_GIT_COMMAND
     CTEST_CHECKOUT_COMMAND
     CTEST_CONFIGURE_COMMAND
@@ -239,12 +239,18 @@ message(STATUS "Dashboard script configuration:\n${vars}\n")
   endif()
   configure_file(${CTEST_SOURCE_DIRECTORY}/config/cmake/CTestCustom.cmake ${CTEST_BINARY_DIRECTORY}/CTestCustom.cmake)
   ctest_read_custom_files ("${CTEST_BINARY_DIRECTORY}")
-  ctest_configure (BUILD "${CTEST_BINARY_DIRECTORY}")
+  ctest_configure (BUILD "${CTEST_BINARY_DIRECTORY}" RETURN_VALUE res)
+  if(${res} LESS 0 OR ${res} GREATER 0)
+    message(FATAL_ERROR "Failed configure: ${res}\n")
+  endif()
   if(LOCAL_SUBMIT)
     ctest_submit (PARTS Update Configure Notes)
   endif()
 
-  ctest_build (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
+  ctest_build (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND RETURN_VALUE res NUMBER_ERRORS errval)
+  if(${res} LESS 0 OR ${res} GREATER 0 OR ${errval} GREATER 0)
+    message(FATAL_ERROR "Failed build: ${res} with Errors=${errval}\n")
+  endif()
   if(LOCAL_SUBMIT)
     ctest_submit (PARTS Build)
   endif()
@@ -255,7 +261,7 @@ message(STATUS "Dashboard script configuration:\n${vars}\n")
       if(LOCAL_SUBMIT)
         ctest_submit (PARTS Test)
       endif()
-      if(res GREATER 0)
+      if(${res} LESS 0 OR ${res} GREATER 0)
         message(FATAL_ERROR "Failed tests: ${res}\n")
       endif()
     else()
@@ -276,7 +282,7 @@ message(STATUS "Dashboard script configuration:\n${vars}\n")
     ##-----------------------------------------------
     ## Package the product
     ##-----------------------------------------------
-    execute_process(COMMAND cpack -C ${CTEST_BUILD_CONFIGURATION} -V
+    execute_process(COMMAND cpack -C ${CTEST_CONFIGURATION_TYPE} -V
       WORKING_DIRECTORY ${CTEST_BINARY_DIRECTORY}
       RESULT_VARIABLE cpackResult
       OUTPUT_VARIABLE cpackLog

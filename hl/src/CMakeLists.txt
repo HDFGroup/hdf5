@@ -1,7 +1,6 @@
 cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_HL_SRC)
 
-
 #-----------------------------------------------------------------------------
 # List Source files
 #-----------------------------------------------------------------------------
@@ -82,5 +81,6 @@ if (HDF5_EXPORTED_TARGETS)
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hllibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hllibraries
       FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT hllibraries
+      INCLUDES DESTINATION include
   )
 endif (HDF5_EXPORTED_TARGETS)
