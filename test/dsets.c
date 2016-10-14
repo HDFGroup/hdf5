@@ -7949,7 +7949,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
 		/* Buffers for reading and writing data (1-D) */
     int         *wdata = NULL, *rdata1 = NULL, *rdata2 = NULL;	
 		/* Buffer for reading and writing data (2-D) */
-    static int  t_wdata[BYPASS_CHUNK_DIM/2][BYPASS_CHUNK_DIM/2], t_rdata1[BYPASS_DIM][BYPASS_DIM],
+    int         t_wdata[BYPASS_CHUNK_DIM/2][BYPASS_CHUNK_DIM/2], t_rdata1[BYPASS_DIM][BYPASS_DIM],
                 t_rdata2[BYPASS_CHUNK_DIM/2][BYPASS_CHUNK_DIM/2];
     int         i, j;		/* Local index variables */
     H5F_libver_t low;           /* File format low bound */
