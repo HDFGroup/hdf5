@@ -41,6 +41,8 @@ New Features
 
     Configuration:
     -------------
+    - CMake
+      Added NAMESPACE hdf5:: to package configuration files
     - CMake: change CTEST_BUILD_CONFIGURATION to CTEST_CONFIGURATION_TYPE, which is
       recommended by CMake documentation.
       HDFFV-9971 (ADB 2016/8/22)
