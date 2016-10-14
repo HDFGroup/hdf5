@@ -14,6 +14,7 @@ TARGET_NAMING (h5format_convert STATIC)
 TARGET_C_PROPERTIES (h5format_convert STATIC " " " ")
 target_link_libraries (h5format_convert  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5format_convert PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5format_convert")
 
 set (H5_DEP_EXECUTABLES h5format_convert)
 

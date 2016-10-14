@@ -14,6 +14,7 @@ TARGET_NAMING (h5stat STATIC)
 TARGET_C_PROPERTIES (h5stat STATIC " " " ")
 target_link_libraries (h5stat  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5stat PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5stat")
 
 set (H5_DEP_EXECUTABLES h5stat)
 
@@ -27,7 +28,7 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5stat_gentest STATIC " " " ")
     target_link_libraries (h5stat_gentest ${HDF5_LIB_TARGET})
     set_target_properties (h5stat_gentest PROPERTIES FOLDER generator/tools)
-    
+
     #add_test (NAME h5stat_gentest COMMAND $<TARGET_FILE:h5stat_gentest>)
   endif (HDF5_BUILD_GENERATORS)
 

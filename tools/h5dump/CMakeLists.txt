@@ -18,6 +18,7 @@ TARGET_NAMING (h5dump STATIC)
 TARGET_C_PROPERTIES (h5dump STATIC " " " ")
 target_link_libraries (h5dump  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5dump PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5dump")
 
 set (H5_DEP_EXECUTABLES h5dump)
 
@@ -31,7 +32,7 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5dumpgentest STATIC " " " ")
     target_link_libraries (h5dumpgentest ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
     set_target_properties (h5dumpgentest PROPERTIES FOLDER generator/tools)
-    
+
     #add_test (NAME h5dumpgentest COMMAND $<TARGET_FILE:h5dumpgentest>)
   endif (HDF5_BUILD_GENERATORS)
 
