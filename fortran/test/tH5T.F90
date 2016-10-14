@@ -490,7 +490,7 @@ CONTAINS
      !
      ! Read part of the dataset
      !
-     CALL h5dread_f(dset_id, dt1_id, char_member_out, data_dims, error)
+     CALL h5dread_f(dset_id, dt1_id, char_member_out, data_dims, error, H5S_ALL_F, H5S_ALL_F, H5P_DEFAULT_F)
      CALL check("h5dread_f", error, total_error)
          do i = 1, dimsize
             if (char_member_out(i) .ne. char_member(i)) then
