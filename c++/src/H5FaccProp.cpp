@@ -241,47 +241,6 @@ void FileAccPropList::getCore (size_t& increment, hbool_t& backing_store) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	FileAccPropList::setCoreWriteTracking
-///\brief	Modifies core driver write tracking properties on this file
-///             access property list.
-///\param	is_enabled - IN: Whether the write tracking feature should
-///             be enabled or not.
-///\param	page_size - IN: Sets the page size used with the write tracking
-///             feature. When set to a value greater than 1, this allows
-///             page-sized aggregation of tracked writes.
-///\exception	H5::PropListIException
-///\par Description
-///		For more details on the use of the write tracking feature, refer to
-/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetCoreWriteTracking
-// Programmer:  Dana Robinson - Fall 2016
-//--------------------------------------------------------------------------
-void FileAccPropList::setCoreWriteTracking (hbool_t is_enabled, size_t page_size) const
-{
-   herr_t ret_value = H5Pset_core_write_tracking (id, is_enabled, page_size);
-   if (ret_value < 0)
-   {
-      throw PropListIException ("FileAccPropList::setCoreWriteTracking", "H5Pset_core_write_tracking failed");
-   }
-}
-
-//--------------------------------------------------------------------------
-// Function:	FileAccPropList::getCoreWriteTracking
-///\brief	Queries core file driver write tracking properties.
-///\param	is_enabled - OUT: Whether or not the write tracking feature is
-///             enabled.
-///\param	page_size - OUT: The page size used when aggregating tracked writes.
-///\exception	H5::PropListIException
-// Programmer:  Dana Robinson - Fall 2016
-//--------------------------------------------------------------------------
-void FileAccPropList::getCoreWriteTracking (hbool_t& is_enabled, size_t& page_size) const
-{
-   herr_t ret_value = H5Pget_core_write_tracking(id, &is_enabled, &page_size);
-   if( ret_value < 0 )
-   {
-      throw PropListIException("FileAccPropList::getCoreWriteTracking", "H5Pget_core_write_tracking failed");
-   }
-}
-//--------------------------------------------------------------------------
 // Function:	FileAccPropList::setFamily
 ///\brief	Sets this file access property list to use the family driver.
 ///\param	memb_size  - IN: Size in bytes of each file member
