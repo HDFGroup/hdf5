@@ -1,3 +1,5 @@
+# Distributed under the OSI-approved BSD 3-Clause License.  See https://cmake.org/licensing for details.
+
 #.rst:
 # FindMPI
 # -------
@@ -11,7 +13,8 @@
 # of them have somewhat different include paths, libraries to link
 # against, etc., and this module tries to smooth out those differences.
 #
-# === Variables ===
+# Variables
+# ^^^^^^^^^
 #
 # This module will set the following variables per language in your
 # project, where <lang> is one of C, CXX, or Fortran:
@@ -37,11 +40,12 @@
 #                               before the executable to run.
 #    MPIEXEC_POSTFLAGS          Flags to pass to MPIEXEC after other flags
 #
-# === Usage ===
+# Usage
+# ^^^^^
 #
 # To use this module, simply call FindMPI from a CMakeLists.txt file, or
-# run find_package(MPI), then run CMake.  If you are happy with the
-# auto- detected configuration for your language, then you're done.  If
+# run ``find_package(MPI)``, then run CMake.  If you are happy with the
+# auto-detected configuration for your language, then you're done.  If
 # not, you have two options:
 #
 # ::
@@ -55,24 +59,25 @@
 #       listed above, but these two are required.  This will circumvent
 #       autodetection entirely.
 #
-# When configuration is successful, MPI_<lang>_COMPILER will be set to
-# the compiler wrapper for <lang>, if it was found.  MPI_<lang>_FOUND
+# When configuration is successful, ``MPI_<lang>_COMPILER`` will be set to
+# the compiler wrapper for <lang>, if it was found.  ``MPI_<lang>_FOUND``
 # and other variables above will be set if any MPI implementation was
 # found for <lang>, regardless of whether a compiler was found.
 #
-# When using MPIEXEC to execute MPI applications, you should typically
-# use all of the MPIEXEC flags as follows:
+# When using ``MPIEXEC`` to execute MPI applications, you should typically
+# use all of the ``MPIEXEC`` flags as follows:
 #
 # ::
 #
 #    ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} PROCS
 #      ${MPIEXEC_PREFLAGS} EXECUTABLE ${MPIEXEC_POSTFLAGS} ARGS
 #
-# where PROCS is the number of processors on which to execute the
-# program, EXECUTABLE is the MPI program, and ARGS are the arguments to
+# where ``PROCS`` is the number of processors on which to execute the
+# program, ``EXECUTABLE`` is the MPI program, and ``ARGS`` are the arguments to
 # pass to the MPI program.
 #
-# === Backward Compatibility ===
+# Backward Compatibility
+# ^^^^^^^^^^^^^^^^^^^^^^
 #
 # For backward compatibility with older versions of FindMPI, these
 # variables are set, but deprecated:
@@ -83,22 +88,7 @@
 #    MPI_COMPILE_FLAGS   MPI_INCLUDE_PATH    MPI_EXTRA_LIBRARY
 #    MPI_LINK_FLAGS      MPI_LIBRARIES
 #
-# In new projects, please use the MPI_<lang>_XXX equivalents.
-
-#=============================================================================
-# Copyright 2001-2011 Kitware, Inc.
-# Copyright 2010-2011 Todd Gamblin tgamblin@llnl.gov
-# Copyright 2001-2009 Dave Partyka
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
+# In new projects, please use the ``MPI_<lang>_XXX`` equivalents.
 
 # include this to handle the QUIETLY and REQUIRED arguments
 include(${CMAKE_ROOT}/Modules/FindPackageHandleStandardArgs.cmake)
@@ -204,7 +194,7 @@ function (_mpi_check_compiler compiler options cmdvar resvar)
   # Intel MPI 5.0.1 will return a zero return code even when the
   # argument to the MPI compiler wrapper is unknown.  Attempt to
   # catch this case.
-  if("${cmdline}" MATCHES "undefined reference")
+  if(cmdline MATCHES "undefined reference" OR cmdline MATCHES "unrecognized")
     set(success 255 )
   endif()
   set(${cmdvar} "${cmdline}" PARENT_SCOPE)
@@ -325,7 +315,7 @@ function (interrogate_mpi_compiler lang try_libs)
 
         foreach(FLAG ${MPI_ALL_COMPILE_FLAGS})
           if (MPI_COMPILE_FLAGS_WORK)
-            set(MPI_COMPILE_FLAGS_WORK "${MPI_COMPILE_FLAGS_WORK} ${FLAG}")
+            string(APPEND MPI_COMPILE_FLAGS_WORK " ${FLAG}")
           else()
             set(MPI_COMPILE_FLAGS_WORK ${FLAG})
           endif()
@@ -355,10 +345,10 @@ function (interrogate_mpi_compiler lang try_libs)
         endif()
 
         # Extract linker paths from the link command line
-        string(REGEX MATCHALL "(^| |-Wl,)-L([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
+        string(REGEX MATCHALL "(^| |-Wl,)(-L|/LIBPATH:)([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_PATHS "${MPI_LINK_CMDLINE}")
         set(MPI_LINK_PATH)
         foreach(LPATH ${MPI_ALL_LINK_PATHS})
-          string(REGEX REPLACE "^(| |-Wl,)-L" "" LPATH ${LPATH})
+          string(REGEX REPLACE "^(| |-Wl,)(-L|/LIBPATH:)" "" LPATH ${LPATH})
           string(REPLACE "//" "/" LPATH ${LPATH})
           list(APPEND MPI_LINK_PATH ${LPATH})
         endforeach()
@@ -374,7 +364,7 @@ function (interrogate_mpi_compiler lang try_libs)
         set(MPI_LINK_FLAGS_WORK)
         foreach(FLAG ${MPI_ALL_LINK_FLAGS})
           if (MPI_LINK_FLAGS_WORK)
-            set(MPI_LINK_FLAGS_WORK "${MPI_LINK_FLAGS_WORK} ${FLAG}")
+            string(APPEND MPI_LINK_FLAGS_WORK " ${FLAG}")
           else()
             set(MPI_LINK_FLAGS_WORK ${FLAG})
           endif()
@@ -383,20 +373,31 @@ function (interrogate_mpi_compiler lang try_libs)
         # Extract the set of libraries to link against from the link command
         # line
         string(REGEX MATCHALL "(^| )-l([^\" ]+|\"[^\"]+\")" MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
+        if(WIN32)
+          # The intel wrappers on windows link against static versions of the MPI libraries.
+          # The static libraries are simply listed on the command line without -l.
+          # For instance: " icl ... impi.lib "
+          string(REGEX MATCHALL "(^| )([^\" ]+)\\.lib" tmp "${MPI_LINK_CMDLINE}")
+          list(APPEND MPI_LIBNAMES ${tmp})
+        endif()
 
         # add the compiler implicit directories because some compilers
         # such as the intel compiler have libraries that show up
         # in the showme list that can only be found in the implicit
         # link directories of the compiler.
         if (DEFINED CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES)
-          set(MPI_LINK_PATH
-            "${MPI_LINK_PATH};${CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES}")
+          string(APPEND MPI_LINK_PATH
+            ";${CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES}")
         endif ()
 
         # Determine full path names for all of the libraries that one needs
         # to link against in an MPI program
         foreach(LIB ${MPI_LIBNAMES})
           string(REGEX REPLACE "^ ?-l" "" LIB ${LIB})
+          if(WIN32)
+            string(REGEX REPLACE "\\.lib$" "" LIB ${LIB})
+          endif()
+          string(STRIP ${LIB} LIB)
           # MPI_LIB is cached by find_library, but we don't want that.  Clear it first.
           set(MPI_LIB "MPI_LIB-NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
           find_library(MPI_LIB NAMES ${LIB} HINTS ${MPI_LINK_PATH})
@@ -597,14 +598,13 @@ foreach (lang C CXX Fortran)
   if (CMAKE_${lang}_COMPILER_WORKS)
     # If the user supplies a compiler *name* instead of an absolute path, assume that we need to find THAT compiler.
     if (MPI_${lang}_COMPILER)
-      is_file_executable(MPI_${lang}_COMPILER MPI_COMPILER_IS_EXECUTABLE)
-      if (NOT MPI_COMPILER_IS_EXECUTABLE)
+      if (NOT IS_ABSOLUTE "${MPI_${lang}_COMPILER}")
         # Get rid of our default list of names and just search for the name the user wants.
         set(_MPI_${lang}_COMPILER_NAMES ${MPI_${lang}_COMPILER})
         set(MPI_${lang}_COMPILER "MPI_${lang}_COMPILER-NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
-        # If the user specifies a compiler, we don't want to try to search libraries either.
-        set(try_libs FALSE)
       endif()
+      # If the user specifies a compiler, we don't want to try to search libraries either.
+      set(try_libs FALSE)
     else()
       set(try_libs TRUE)
     endif()

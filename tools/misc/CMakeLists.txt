@@ -15,18 +15,21 @@ TARGET_NAMING (h5debug STATIC)
 TARGET_C_PROPERTIES (h5debug STATIC " " " ")
 target_link_libraries (h5debug ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (h5debug PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5debug")
 
 add_executable (h5repart ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5repart.c)
 TARGET_NAMING (h5repart STATIC)
 TARGET_C_PROPERTIES (h5repart STATIC " " " ")
 target_link_libraries (h5repart ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
 set_target_properties (h5repart PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5repart")
 
 add_executable (h5mkgrp ${HDF5_TOOLS_MISC_SOURCE_DIR}/h5mkgrp.c)
 TARGET_NAMING (h5mkgrp STATIC)
 TARGET_C_PROPERTIES (h5mkgrp STATIC " " " ")
 target_link_libraries (h5mkgrp  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5mkgrp PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5mkgrp")
 
 set (H5_DEP_EXECUTABLES
     h5debug
@@ -80,5 +83,7 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5debug h5repart h5mkgrp
+    EXPORT
+        ${HDF5_EXPORTED_TARGETS}
     RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

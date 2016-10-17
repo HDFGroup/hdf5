@@ -25,6 +25,7 @@ TARGET_NAMING (h5repack STATIC)
 TARGET_C_PROPERTIES (h5repack STATIC " " " ")
 target_link_libraries (h5repack  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5repack PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5repack")
 
 set (H5_DEP_EXECUTABLES h5repack)
 
@@ -94,5 +95,7 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5repack
+    EXPORT
+        ${HDF5_EXPORTED_TARGETS}
     RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

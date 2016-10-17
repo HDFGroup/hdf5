@@ -103,8 +103,8 @@ These steps are described in more detail below.
             * Visual Studio 12 2013 Win64
             * Visual Studio 11 2012
             * Visual Studio 11 2012 Win64
-            * Visual Studio 10 2010
-            * Visual Studio 10 2010 Win64
+            * Visual Studio 14 2015
+            * Visual Studio 14 2015 Win64
 
         <options> is:
             * BUILD_TESTING:BOOL=ON
@@ -132,7 +132,7 @@ These steps are described in more detail below.
 
       2.2  Alternative command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
 
-           cmake -G "Visual Studio 11" -DBUILD_TESTING:BOOL=ON ..
+           cmake -G "Visual Studio 12 2013" -DBUILD_TESTING:BOOL=ON ..
 
    3. Build HDF5 Applications
 
@@ -183,15 +183,19 @@ source root. Include the following text in the file:
 cmake_minimum_required (VERSION 3.1.0)
 project (HDF5MyApp C CXX)
 
-find_package (HDF5 NAMES hdf5 COMPONENTS C static)
+set (LIB_TYPE STATIC) # or SHARED
+string(TOLOWER ${LIB_TYPE} SEARCH_TYPE)
+
+find_package (HDF5 NAMES hdf5 COMPONENTS C ${SEARCH_TYPE})
 # find_package (HDF5) # Find non-cmake built HDF5
 INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIR})
-set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_STATIC_LIBRARY})
+set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_${LIB_TYPE}_LIBRARY})
 
 set (example hdf_example)
 
 add_executable (${example} ${PROJECT_SOURCE_DIR}/${example}.c)
-TARGET_C_PROPERTIES (${example} " " " ")
+TARGET_NAMING (${example} ${LIB_TYPE})
+TARGET_C_PROPERTIES (${example} ${LIB_TYPE} " " " ")
 target_link_libraries (${example} ${LINK_LIBS})
 
 enable_testing ()
@@ -247,7 +251,7 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
 #INSTALLDIR - HDF5-1.8 root folder
-#CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
+#CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF4Examples
 #STATIC_LIBRARIES - Default is YES
 #FORTRAN_LIBRARIES - Default is NO
@@ -290,23 +294,23 @@ set(CTEST_CMAKE_GENERATOR "${CMAKE_GENERATOR}")
 set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 
 if(NOT DEFINED INSTALLDIR)
-  if(WIN32)
-    set(INSTALLDIR "C:\\Program\ Files\\myhdf5")
-  else()
-    set(INSTALLDIR "/usr/local/myhdf5")
-  endif()
+    set(INSTALLDIR "@CMAKE_INSTALL_PREFIX@")
 endif()
-if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
-    set(CTEST_BUILD_CONFIGURATION "Release")
+if(NOT DEFINED CTEST_CONFIGURATION_TYPE)
+    set(CTEST_CONFIGURATION_TYPE "Release")
 endif()
 if(NOT DEFINED CTEST_SOURCE_NAME)
     set(CTEST_SOURCE_NAME "HDF5Examples")
 endif()
 if(NOT DEFINED STATIC_LIBRARIES)
     set(STATICLIBRARIES "YES")
+else(NOT DEFINED STATIC_LIBRARIES)
+    set(STATICLIBRARIES "NO")
 endif()
 if(NOT DEFINED FORTRAN_LIBRARIES)
     set(FORTRANLIBRARIES "NO")
+else(NOT DEFINED FORTRAN_LIBRARIES)
+    set(FORTRANLIBRARIES "YES")
 endif()
 
 #TAR_SOURCE - name of tarfile
@@ -336,9 +340,9 @@ else(WIN32)
   set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_BINARY_NAME}")
 endif(WIN32)
 if(${FORTRANLIBRARIES})
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
+  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
 else()
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
+  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
 endif()
 set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PACKAGE@@HDF_PACKAGE_EXT@")
 
@@ -406,7 +410,7 @@ if(NOT N EQUAL 0)
   set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
 endif()
 set (CTEST_CONFIGURE_COMMAND
-    "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\""
+    "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_CONFIGURATION_TYPE} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\""
 )
 
 #-----------------------------------------------------------------------------

@@ -106,7 +106,7 @@ To build HDF5 with the SZIP and ZLIB external libraries you will need to:
       The -S option uses the script version of ctest.
 
       The value for the -C option (as shown above, "-C Release") must
-      match the setting for CTEST_BUILD_CONFIGURATION in the platform
+      match the setting for CTEST_CONFIGURATION_TYPE in the platform
       configuration file.
 
       The -VV option is for most verbose; use -V for less verbose.
@@ -380,8 +380,8 @@ These five steps are described in detail below.
             * Visual Studio 12 2013 Win64
             * Visual Studio 11 2012
             * Visual Studio 11 2012 Win64
-            * Visual Studio 10 2010
-            * Visual Studio 10 2010 Win64
+            * Visual Studio 14 2015
+            * Visual Studio 14 2015 Win64
 
         <options> is:
             * SZIP_INCLUDE_DIR:PATH=<path to szip includes directory>
@@ -589,14 +589,18 @@ HDF5_ENABLE_TRACE              "Enable API tracing capability"                  
 HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"                       OFF
 HDF5_METADATA_TRACE_FILE       "Enable metadata trace file collection"                        OFF
 HDF5_NO_PACKAGES               "Do not include CPack Packaging"                               OFF
+HDF5_PACK_EXAMPLES             "Package the HDF5 Library Examples Compressed File"            OFF
+HDF5_PACK_MACOSX_FRAMEWORK     "Package the HDF5 Library in a Frameworks"                     OFF
 HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                           OFF
 HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                 OFF
+HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "0"
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_USE_16_API_DEFAULT        "Use the HDF5 1.6.x API by default"                            OFF
 HDF5_USE_FOLDERS               "Enable folder grouping of projects in IDEs."                  OFF
 HDF5_WANT_DATA_ACCURACY        "IF data accuracy is guaranteed during data conversions"       ON
 HDF5_WANT_DCONV_EXCEPTION      "exception handling functions is checked during data conversions" ON
 HDF5_ENABLE_THREADSAFE         "Enable Threadsafety"                                          OFF
+SKIP_HDF5_FORTRAN_SHARED       "Do not build the fortran shared libraries"                    OFF
 if (APPLE)
     HDF5_BUILD_WITH_INSTALL_NAME "Build with library install_name set to the installation path"  OFF
 if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -665,7 +669,7 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 #            VS201264 * Visual Studio 11 2012 Win64
 #
 #     INSTALLDIR  -  root folder where hdf5 is installed
-#     CTEST_BUILD_CONFIGURATION  - Release, Debug, etc
+#     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
 #     STATIC_LIBRARIES  -  Build/use static libraries
 #     FORTRAN_LIBRARIES -  Build/use fortran libraries
@@ -679,7 +683,7 @@ set(CTEST_SOURCE_VERSEXT "")
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
 #INSTALLDIR - HDF5-1.8 root folder
-#CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
+#CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.8
 #STATIC_LIBRARIES - Default is YES
 #FORTRAN_LIBRARIES - Default is NO
@@ -698,7 +702,7 @@ endif()
 
 # build generator must be defined
 if(NOT DEFINED BUILD_GENERATOR)
-  message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2013, VS201364, VS2012, or VS201264")
+  message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
 else()
   if(${BUILD_GENERATOR} STREQUAL "Unix")
     set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
@@ -715,7 +719,7 @@ else()
   elseif(${BUILD_GENERATOR} STREQUAL "VS201264")
     set(CTEST_CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
   else()
-    message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2013, VS201364, VS2012, or VS201264")
+    message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
   endif()
 endif()
 
@@ -726,17 +730,21 @@ if(NOT DEFINED INSTALLDIR)
     set(INSTALLDIR "/usr/local/myhdf5")
   endif()
 endif()
-if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
-    set(CTEST_BUILD_CONFIGURATION "Release")
+if(NOT DEFINED CTEST_CONFIGURATION_TYPE)
+    set(CTEST_CONFIGURATION_TYPE "Release")
 endif()
 if(NOT DEFINED CTEST_SOURCE_NAME)
     set(CTEST_SOURCE_NAME "hdf5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
 endif()
 if(NOT DEFINED STATIC_LIBRARIES)
     set(STATICLIBRARIES "YES")
+else()
+    set(STATICLIBRARIES "NO")
 endif()
 if(NOT DEFINED FORTRAN_LIBRARIES)
     set(FORTRANLIBRARIES "NO")
+else()
+    set(FORTRANLIBRARIES "YES")
 endif()
 
 set(CTEST_BINARY_NAME "build")
@@ -754,7 +762,15 @@ endif()
 if(WIN32)
   set(SITE_OS_NAME "Windows")
   set(SITE_OS_VERSION "WIN7")
-  if(${BUILD_GENERATOR} STREQUAL "VS201364")
+  if(${BUILD_GENERATOR} STREQUAL "VS201564")
+    set(SITE_OS_BITS "64")
+    set(SITE_COMPILER_NAME "vs2015")
+    set(SITE_COMPILER_VERSION "14")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS2015")
+    set(SITE_OS_BITS "32")
+    set(SITE_COMPILER_NAME "vs2015")
+    set(SITE_COMPILER_VERSION "14")
+  elseif(${BUILD_GENERATOR} STREQUAL "VS201364")
     set(SITE_OS_BITS "64")
     set(SITE_COMPILER_NAME "vs2013")
     set(SITE_COMPILER_VERSION "12")
