@@ -116,6 +116,7 @@ add_custom_command (
 )
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  file (MAKE_DIRECTORY "${HDF5_F90_BINARY_DIR}/shared")
   if (WIN32)
     set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${CMAKE_BUILD_TYPE})
   else (WIN32)
@@ -432,7 +433,6 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   )
 endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
-
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
@@ -451,5 +451,6 @@ if (HDF5_EXPORTED_TARGETS)
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT fortlibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT fortlibraries
       FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT fortlibraries
+      INCLUDES DESTINATION include
   )
 endif (HDF5_EXPORTED_TARGETS)

@@ -17,6 +17,7 @@ TARGET_NAMING (h5diff STATIC)
 TARGET_C_PROPERTIES (h5diff STATIC " " " ")
 target_link_libraries (h5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
 set_target_properties (h5diff PROPERTIES FOLDER tools)
+set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5diff")
 
 set (H5_DEP_EXECUTABLES h5diff)
 
@@ -29,6 +30,7 @@ if (H5_HAVE_PARALLEL)
   TARGET_C_PROPERTIES (ph5diff STATIC " " " ")
   target_link_libraries (ph5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (ph5diff PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};ph5diff")
 endif (H5_HAVE_PARALLEL)
 
 if (BUILD_TESTING)
@@ -41,12 +43,12 @@ if (BUILD_TESTING)
     TARGET_C_PROPERTIES (h5diffgentest STATIC " " " ")
     target_link_libraries (h5diffgentest ${HDF5_LIB_TARGET})
     set_target_properties (h5diffgentest PROPERTIES FOLDER generator/tools)
-    
+
     #add_test (NAME h5diffgentest COMMAND $<TARGET_FILE:h5diffgentest>)
   endif (HDF5_BUILD_GENERATORS)
 
   include (CMakeTests.cmake)
- 
+
 endif (BUILD_TESTING)
 
 ##############################################################################
@@ -64,6 +66,8 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5diff
+    EXPORT
+        ${HDF5_EXPORTED_TARGETS}
     RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )
 
@@ -74,6 +78,8 @@ if (H5_HAVE_PARALLEL)
   install (
       TARGETS
           ph5diff
+      EXPORT
+          ${HDF5_EXPORTED_TARGETS}
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
   )
 endif (H5_HAVE_PARALLEL)

@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.1.0)
 PROJECT(HDF5_HL_F90_SRC C CXX Fortran)
 
 if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+  file (MAKE_DIRECTORY "${HDF5_HL_F90_SRC_BINARY_DIR}/shared")
   if (WIN32)
     set (MODSH_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/shared/${CMAKE_BUILD_TYPE})
   else (WIN32)
@@ -13,6 +14,7 @@ if (WIN32)
 else (WIN32)
   set (MOD_BUILD_DIR ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
 endif (WIN32)
+
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
@@ -176,5 +178,6 @@ if (HDF5_EXPORTED_TARGETS)
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT hlfortlibraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hlfortlibraries
       FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT hlfortlibraries
+      INCLUDES DESTINATION include
   )
 endif (HDF5_EXPORTED_TARGETS)

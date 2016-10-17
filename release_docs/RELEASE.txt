@@ -57,6 +57,12 @@ New Features
 
     Configuration
     -------------
+    - CMake
+      Added NAMESPACE hdf5:: to package configuration files
+    - CMake: change CTEST_BUILD_CONFIGURATION to CTEST_CONFIGURATION_TYPE, which is
+      recommended by CMake documentation.
+      HDFFV-9971 (ADB 2016/8/22)
+    - CMake minimum is now 3.1.0. (ADB 2015/11/14)
     - Cmakehdf5: added ability to run multiple make commands.
       Added option --njobs to specific up to homw many jobs to launch during
       build (cmamke) and testing (ctest).

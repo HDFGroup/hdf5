@@ -49,7 +49,7 @@ Default installation process:
        The default installation folder is defined as "@CMAKE_INSTALL_PREFIX@".
            It can be changed with the INSTALLDIR script option.
        The default ctest configuration is defined as "Release". It can be changed
-           with the CTEST_BUILD_CONFIGURATION script option. Note that this must
+           with the CTEST_CONFIGURATION_TYPE script option. Note that this must
            be the same as the value used with the -C command line option.
        The default build configuration is defined to build and use static libraries.
            Shared libraries can be used with the STATIC_LIBRARIES script option set to "NO".
