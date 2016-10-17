@@ -300,6 +300,7 @@
   ADD_H5_TEST (compressed 0 ${HDF_FILE1}.h5 -v -s compressed -d compressed)
   ADD_H5_TEST (named_vl 0 ${HDF_FILE1}.h5 -v -s named_vl -d named_vl)
   ADD_H5_TEST (nested_vl 0 ${HDF_FILE1}.h5 -v -s nested_vl -d nested_vl)
+  ADD_H5_TEST (dset_attr 0 ${HDF_FILE1}.h5 -v -s dset_attr -d dset_attr)
 
   # "Test copying dataset within group in source file to root of destination"
   ADD_H5_TEST (simple_top 0 ${HDF_FILE1}.h5 -v -s grp_dsets/simple -d simple_top)
@@ -311,6 +312,7 @@
   ADD_H5_TEST (grp_empty 0 ${HDF_FILE1}.h5 -v -s grp_empty -d grp_empty)
   ADD_H5_TEST (grp_dsets 0 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_dsets)
   ADD_H5_TEST (grp_nested 0 ${HDF_FILE1}.h5 -v -s grp_nested -d grp_nested)
+  ADD_H5_TEST (grp_attr 0 ${HDF_FILE1}.h5 -v -s grp_attr -d grp_attr)
 
   # "Test copying dataset within group in source file to group in destination"
   ADD_H5_TEST2 (simple_group 0 ${HDF_FILE1}.h5 grp_dsets grp_dsets -v -s /grp_dsets/simple -d /grp_dsets/simple_group)
