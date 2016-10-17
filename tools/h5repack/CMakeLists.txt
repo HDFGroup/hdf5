@@ -95,5 +95,7 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5repack
+    EXPORT
+        ${HDF5_EXPORTED_TARGETS}
     RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )

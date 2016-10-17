@@ -83,5 +83,7 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5debug h5repart h5mkgrp
+    EXPORT
+        ${HDF5_EXPORTED_TARGETS}
     RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )
