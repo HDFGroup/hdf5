@@ -10,7 +10,7 @@ set(CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 
 # handle input parameters to script.
 #INSTALLDIR - HDF5-1.8 root folder
-#CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
+#CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF4Examples
 #STATIC_LIBRARIES - Default is YES
 #FORTRAN_LIBRARIES - Default is NO
@@ -29,8 +29,8 @@ endif()
 if(NOT DEFINED INSTALLDIR)
     set(INSTALLDIR "@CMAKE_INSTALL_PREFIX@")
 endif()
-if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
-    set(CTEST_BUILD_CONFIGURATION "Release")
+if(NOT DEFINED CTEST_CONFIGURATION_TYPE)
+    set(CTEST_CONFIGURATION_TYPE "Release")
 endif()
 if(NOT DEFINED CTEST_SOURCE_NAME)
     set(CTEST_SOURCE_NAME "HDF5Examples")
@@ -45,6 +45,18 @@ if(NOT DEFINED FORTRAN_LIBRARIES)
 else(NOT DEFINED FORTRAN_LIBRARIES)
     set(FORTRANLIBRARIES "YES")
 endif()
+if(NOT DEFINED HDF_LOCAL)
+    set(CDASH_LOCAL "NO")
+else(NOT HDF_LOCAL)
+    set(CDASH_LOCAL "YES")
+endif()
+if(NOT DEFINED CTEST_SITE)
+    set(CTEST_SITE "local")
+endif()
+if(NOT DEFINED CTEST_BUILD_NAME)
+    set(CTEST_BUILD_NAME "examples")
+endif()
+set(BUILD_OPTIONS "${BUILD_OPTIONS} -DSITE:STRING=${CTEST_SITE} -DBUILDNAME:STRING=${CTEST_BUILD_NAME}")
 
 #TAR_SOURCE - name of tarfile
 #if(NOT DEFINED TAR_SOURCE)
@@ -73,9 +85,12 @@ else(WIN32)
   set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}/${CTEST_BINARY_NAME}")
 endif(WIN32)
 if(${FORTRANLIBRARIES})
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
+  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
 else()
-  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
+  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=OFF")
+endif()
+if(${CDASH_LOCAL})
+  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCDASH_LOCAL:BOOL=ON")
 endif()
 set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF5_PACKAGE_NAME:STRING=@HDF5_PACKAGE@@HDF_PACKAGE_EXT@")
 
@@ -143,7 +158,7 @@ if(NOT N EQUAL 0)
   set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
 endif()
 set (CTEST_CONFIGURE_COMMAND
-    "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_BUILD_CONFIGURATION} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\""
+    "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_CONFIGURATION_TYPE} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\""
 )
 
 #-----------------------------------------------------------------------------
@@ -156,19 +171,28 @@ ctest_read_custom_files ("${CTEST_BINARY_DIRECTORY}")
 ## NORMAL process
 ## --------------------------
 ctest_start (Experimental)
-ctest_configure (BUILD "${CTEST_BINARY_DIRECTORY}")
+ctest_configure (BUILD "${CTEST_BINARY_DIRECTORY}" RETURN_VALUE res)
+if(${res} LESS 0 OR ${res} GREATER 0)
+  file(APPEND ${CTEST_SCRIPT_DIRECTORY}/FailedCTest.txt "Failed Configure: ${res}\n")
+endif()
 if(LOCAL_SUBMIT)
   ctest_submit (PARTS Configure Notes)
 endif()
-ctest_build (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND)
+ctest_build (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND APPEND RETURN_VALUE res NUMBER_ERRORS errval)
+if(${res} LESS 0 OR ${res} GREATER 0 OR ${errval} GREATER 0)
+  file(APPEND ${CTEST_SCRIPT_DIRECTORY}/FailedCTest.txt "Failed ${errval} Build: ${res}\n")
+endif()
 if(LOCAL_SUBMIT)
   ctest_submit (PARTS Build)
 endif()
 ctest_test (BUILD "${CTEST_BINARY_DIRECTORY}" APPEND ${ctest_test_args} RETURN_VALUE res)
+if(${res} LESS 0 OR ${res} GREATER 0)
+  file(APPEND ${CTEST_SCRIPT_DIRECTORY}/FailedCTest.txt "Failed Tests: ${res}\n")
+endif()
 if(LOCAL_SUBMIT)
   ctest_submit (PARTS Test)
 endif()
-if(res GREATER 0)
+if(${res} LESS 0 OR ${res} GREATER 0)
   message (FATAL_ERROR "tests FAILED")
 endif()
 #-----------------------------------------------------------------------------

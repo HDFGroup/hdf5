@@ -78,8 +78,6 @@ void print_type(hid_t type)
 {
     switch (H5Tget_class(type))
     {
-    default:
-        return;
     case H5T_INTEGER:
         if (H5Tequal(type, H5T_STD_I8BE)) {
             parallel_print("H5T_STD_I8BE");
@@ -160,7 +158,21 @@ void print_type(hid_t type)
         }
         break;
 
-    }/*switch*/
+    case H5T_TIME:
+    case H5T_STRING:
+    case H5T_BITFIELD:
+    case H5T_OPAQUE:
+    case H5T_COMPOUND:
+    case H5T_REFERENCE:
+    case H5T_ENUM:
+    case H5T_VLEN:
+    case H5T_ARRAY:
+    case H5T_NO_CLASS:
+    case H5T_NCLASSES:
+    default:
+        return;
+
+    } /* end switch */
 }
 
 /*-------------------------------------------------------------------------
@@ -179,16 +191,16 @@ diff_basename(const char *name)
 {
     size_t i;
 
-    if (name==NULL)
+    if (name == NULL)
         return NULL;
 
     /* Find the end of the base name */
     i = HDstrlen(name);
-    while (i>0 && '/'==name[i-1])
+    while (i > 0 && '/' == name[i - 1])
         --i;
 
     /* Skip backward over base name */
-    while (i>0 && '/'!=name[i-1])
+    while (i > 0 && '/' != name[i - 1])
         --i;
 
     return(name+i);
@@ -211,14 +223,20 @@ get_type(h5trav_type_t type)
     switch(type) {
         case H5TRAV_TYPE_DATASET:
             return("H5G_DATASET");
+
         case H5TRAV_TYPE_GROUP:
             return("H5G_GROUP");
+
         case H5TRAV_TYPE_NAMED_DATATYPE:
             return("H5G_TYPE");
+
         case H5TRAV_TYPE_LINK:
             return("H5G_LINK");
+
         case H5TRAV_TYPE_UDLINK:
             return("H5G_UDLINK");
+
+        case H5TRAV_TYPE_UNKNOWN:
         default:
             return("unknown type");
     }
@@ -242,13 +260,22 @@ get_sign(H5T_sign_t sign)
 {
     switch (sign)
     {
-    default:
-        return("H5T_SGN_ERROR");
-    case H5T_SGN_NONE:
-        return("H5T_SGN_NONE");
-    case H5T_SGN_2:
-        return("H5T_SGN_2");
-    }
+        case H5T_SGN_NONE:
+            return "H5T_SGN_NONE";
+
+        case H5T_SGN_2:
+            return "H5T_SGN_2";
+
+        case H5T_SGN_ERROR:
+            return "H5T_SGN_ERROR";
+
+        case H5T_NSGN:
+            return "H5T_NSGN";
+
+        default:
+            HDassert(0);
+            return "unknown sign value";
+    } /* end switch */
 }
 
 
@@ -266,34 +293,47 @@ get_sign(H5T_sign_t sign)
 const char*
 get_class(H5T_class_t tclass)
 {
-    switch (tclass)
-    {
-    default:
-        return("Invalid class");
-    case H5T_TIME:
-        return("H5T_TIME");
-    case H5T_INTEGER:
-        return("H5T_INTEGER");
-    case H5T_FLOAT:
-        return("H5T_FLOAT");
-    case H5T_STRING:
-        return("H5T_STRING");
-    case H5T_BITFIELD:
-        return("H5T_BITFIELD");
-    case H5T_OPAQUE:
-        return("H5T_OPAQUE");
-    case H5T_COMPOUND:
-        return("H5T_COMPOUND");
-    case H5T_REFERENCE:
-        return("H5T_REFERENCE");
-    case H5T_ENUM:
-        return("H5T_ENUM");
-    case H5T_VLEN:
-        return("H5T_VLEN");
-    case H5T_ARRAY:
-        return("H5T_ARRAY");
-    }
-}
+    switch (tclass) {
+        case H5T_TIME:
+            return("H5T_TIME");
+
+        case H5T_INTEGER:
+            return("H5T_INTEGER");
+
+        case H5T_FLOAT:
+            return("H5T_FLOAT");
+
+        case H5T_STRING:
+            return("H5T_STRING");
+
+        case H5T_BITFIELD:
+            return("H5T_BITFIELD");
+
+        case H5T_OPAQUE:
+            return("H5T_OPAQUE");
+
+        case H5T_COMPOUND:
+            return("H5T_COMPOUND");
+
+        case H5T_REFERENCE:
+            return("H5T_REFERENCE");
+
+        case H5T_ENUM:
+            return("H5T_ENUM");
+
+        case H5T_VLEN:
+            return("H5T_VLEN");
+
+        case H5T_ARRAY:
+            return("H5T_ARRAY");
+
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            HDassert(0);
+            return("Invalid class");
+    } /* end switch */
+} /* end get_class() */
 
 /*-------------------------------------------------------------------------
  * Function: print_found
@@ -304,10 +344,10 @@ get_class(H5T_class_t tclass)
  */
 void print_found(hsize_t nfound)
 {
- if(g_Parallel)
-  parallel_print("%"H5_PRINTF_LL_WIDTH"u differences found\n", (unsigned long long)nfound);
- else
-  HDfprintf(stdout,"%Hu differences found\n",nfound);
+    if(g_Parallel)
+        parallel_print("%"H5_PRINTF_LL_WIDTH"u differences found\n", (unsigned long long)nfound);
+    else
+        HDfprintf(stdout,"%Hu differences found\n",nfound);
 }
 
 
@@ -354,3 +394,4 @@ herr_t match_up_memsize (hid_t f_tid1_id, hid_t f_tid2_id,
 out:
     return ret;
 }
+

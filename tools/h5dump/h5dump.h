@@ -39,11 +39,11 @@ typedef struct dump_functions_t {
 
 /* List of table structures.  There is one table structure for each file */
 typedef struct h5dump_table_items_t {
-        unsigned long   fileno;         /* File number that these tables refer to */
-        hid_t           oid;            /* ID of an object in this file, held open so fileno is consistent */
-        table_t         *group_table;   /* Table of groups */
-        table_t         *dset_table;    /* Table of datasets */
-        table_t         *type_table;    /* Table of datatypes */
+    unsigned long   fileno;         /* File number that these tables refer to */
+    hid_t           oid;            /* ID of an object in this file, held open so fileno is consistent */
+    table_t         *group_table;   /* Table of groups */
+    table_t         *dset_table;    /* Table of datasets */
+    table_t         *type_table;    /* Table of datatypes */
 } h5dump_table_items_t;
 typedef struct h5dump_table_list_t {
     size_t                  nalloc;
@@ -53,7 +53,7 @@ typedef struct h5dump_table_list_t {
 
 h5dump_table_list_t  table_list = {0, 0, NULL};
 table_t             *group_table = NULL, *dset_table = NULL, *type_table = NULL;
-int                  dump_indent = 0;              /*how far in to indent the line         */
+unsigned            dump_indent = 0;              /*how far in to indent the line         */
 
 int          unamedtype = 0;     /* shared datatype with no name */
 hbool_t      hit_elink = FALSE;  /* whether we have traversed an external link */
@@ -74,7 +74,6 @@ int          display_fi        = FALSE; /*file index */
 int          display_ai        = TRUE;  /*array index */
 int          display_escape    = FALSE; /*escape non printable characters */
 int          display_region    = FALSE; /*print region reference data */
-int          enable_error_stack= FALSE; /* re-enable error stack */
 int          disable_compact_subset= FALSE; /* disable compact form of subset notation */
 int          display_packed_bits = FALSE; /*print 1-8 byte numbers as packed bits*/
 int          include_attrs     = TRUE; /* Display attributes */
@@ -84,13 +83,13 @@ H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name
 H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
 
 #define PACKED_BITS_MAX         8  /* Maximum number of packed-bits to display */
-#define PACKED_BITS_SIZE_MAX    8*sizeof(long long)  /* Maximum bits size of integer types of packed-bits */
+#define PACKED_BITS_SIZE_MAX    (8*sizeof(long long))  /* Maximum bits size of integer types of packed-bits */
 /* mask list for packed bits */
 unsigned long long packed_mask[PACKED_BITS_MAX];  /* packed bits are restricted to 8*sizeof(llong) bytes */
 
 /* packed bits display parameters */
-int packed_offset[PACKED_BITS_MAX];
-int packed_length[PACKED_BITS_MAX];
+unsigned packed_offset[PACKED_BITS_MAX];
+unsigned packed_length[PACKED_BITS_MAX];
 
 /*
  * The global table is set to either ddl_function_table or

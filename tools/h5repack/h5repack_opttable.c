@@ -105,21 +105,22 @@ static void aux_tblinsert_layout(pack_opttbl_t *table, unsigned int I,
  *
  *-------------------------------------------------------------------------
  */
+static int
+aux_inctable(pack_opttbl_t *table, unsigned n_objs)
+{
+    unsigned u;
 
-static int aux_inctable(pack_opttbl_t *table, int n_objs) {
-	unsigned int i;
+    table->size += n_objs;
+    table->objs = (pack_info_t*) HDrealloc(table->objs, table->size * sizeof(pack_info_t));
+    if (table->objs == NULL) {
+        error_msg("not enough memory for options table\n");
+        return -1;
+    }
 
-	table->size += n_objs;
-	table->objs =
-			(pack_info_t*) HDrealloc(table->objs, table->size * sizeof(pack_info_t));
-	if (table->objs == NULL) {
-		error_msg("not enough memory for options table\n");
-		return -1;
-	}
-	for (i = table->nelems; i < table->size; i++) {
-		init_packobject(&table->objs[i]);
-	}
-	return 0;
+    for (u = table->nelems; u < table->size; u++)
+        init_packobject(&table->objs[u]);
+
+    return 0;
 }
 
 
@@ -183,80 +184,77 @@ int options_table_free(pack_opttbl_t *table) {
  *
  *-------------------------------------------------------------------------
  */
+int
+options_add_layout(obj_list_t *obj_list, unsigned  n_objs, pack_info_t *pack,
+    pack_opttbl_t *table)
+{
+    unsigned i, j, I;
+    unsigned added = 0;
+    int found = FALSE;
 
-int options_add_layout(obj_list_t *obj_list, int n_objs, pack_info_t *pack,
-		pack_opttbl_t *table) {
-	unsigned int i, I;
-	int j, added = 0, found = 0;
+    /* increase the size of the collection by N_OBJS if necessary */
+    if (table->nelems + n_objs >= table->size)
+        if (aux_inctable(table, n_objs) < 0)
+            return -1;
 
-	/* increase the size of the collection by N_OBJS if necessary */
-	if (table->nelems + n_objs >= table->size) {
-		if (aux_inctable(table, n_objs) < 0)
-			return -1;
-	}
+    /* search if this object is already in the table; "path" is the key */
+    if (table->nelems > 0) {
+        /* go tru the supplied list of names */
+        for (j = 0; j < n_objs; j++) {
+            /* linear table search */
+            for (i = 0; i < table->nelems; i++) {
+                /*already on the table */
+                if (HDstrcmp(obj_list[j].obj,table->objs[i].path) == 0) {
+                    /* already chunk info inserted for this one; exit */
+                    if (table->objs[i].chunk.rank > 0) {
+                        error_msg("chunk information already inserted for <%s>\n", obj_list[j].obj);
+                        HDexit(EXIT_FAILURE);
+                    }
+                    /* insert the layout info */
+                    else {
+                        aux_tblinsert_layout(table, i, pack);
+                        found = TRUE;
+                        break;
+                    }
+                } /* if */
+            } /* i */
 
-	/* search if this object is already in the table; "path" is the key */
-	if (table->nelems > 0) {
-		/* go tru the supplied list of names */
-		for (j = 0; j < n_objs; j++) {
-			/* linear table search */
-			for (i = 0; i < table->nelems; i++) {
-				/*already on the table */
-				if (HDstrcmp(obj_list[j].obj,table->objs[i].path) == 0) {
-					/* already chunk info inserted for this one; exit */
-					if (table->objs[i].chunk.rank > 0) {
-						error_msg(
-								"chunk information already inserted for <%s>\n",
-								obj_list[j].obj);
-						HDexit(EXIT_FAILURE);
-					}
-					/* insert the layout info */
-					else {
-						aux_tblinsert_layout(table, i, pack);
-						found = 1;
-						break;
-					}
-				} /* if */
-			} /* i */
+            if (!found) {
+                /* keep the grow in a temp var */
+                I = table->nelems + added;
+                added++;
+                HDstrcpy(table->objs[I].path, obj_list[j].obj);
+                aux_tblinsert_layout(table, I, pack);
+            }
+            /* cases where we have an already inserted name but there is a new name also
+             example:
+             -f dset1:GZIP=1 -l dset1,dset2:CHUNK=20x20
+             dset1 is already inserted, but dset2 must also be
+             */
+            else
+                if(found && HDstrcmp(obj_list[j].obj,table->objs[i].path) != 0) {
+                    /* keep the grow in a temp var */
+                    I = table->nelems + added;
+                    added++;
+                    HDstrcpy(table->objs[I].path, obj_list[j].obj);
+                    aux_tblinsert_layout(table, I, pack);
+                }
+        } /* j */
+    }
+    /* first time insertion */
+    else {
+        /* go tru the supplied list of names */
+        for (j = 0; j < n_objs; j++) {
+            I = table->nelems + added;
+            added++;
+            HDstrcpy(table->objs[I].path, obj_list[j].obj);
+            aux_tblinsert_layout(table, I, pack);
+        }
+    }
 
-			if (found == 0) {
-				/* keep the grow in a temp var */
-				I = table->nelems + added;
-				added++;
-				HDstrcpy(table->objs[I].path, obj_list[j].obj);
-				aux_tblinsert_layout(table, I, pack);
-			}
-			/* cases where we have an already inserted name but there is a new name also
-			 example:
-			 -f dset1:GZIP=1 -l dset1,dset2:CHUNK=20x20
-			 dset1 is already inserted, but dset2 must also be
-			 */
-			else if (found == 1
-					&& HDstrcmp(obj_list[j].obj,table->objs[i].path) != 0) {
-				/* keep the grow in a temp var */
-				I = table->nelems + added;
-				added++;
-				HDstrcpy(table->objs[I].path, obj_list[j].obj);
-				aux_tblinsert_layout(table, I, pack);
-			}
-		} /* j */
-	}
+    table->nelems += added;
 
-	/* first time insertion */
-	else {
-		/* go tru the supplied list of names */
-		for (j = 0; j < n_objs; j++) {
-			I = table->nelems + added;
-			added++;
-			HDstrcpy(table->objs[I].path, obj_list[j].obj);
-			aux_tblinsert_layout(table, I, pack);
-
-		}
-	}
-
-	table->nelems += added;
-
-	return 0;
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
@@ -268,71 +266,71 @@ int options_add_layout(obj_list_t *obj_list, int n_objs, pack_info_t *pack,
  *
  *-------------------------------------------------------------------------
  */
+int
+options_add_filter(obj_list_t *obj_list, unsigned n_objs, filter_info_t filt,
+    pack_opttbl_t *table)
+{
+    unsigned int i, j, I;
+    unsigned added = 0;
+    int found = FALSE;
 
-int options_add_filter(obj_list_t *obj_list, int n_objs, filter_info_t filt,
-		pack_opttbl_t *table) {
+    /* increase the size of the collection by N_OBJS if necessary */
+    if (table->nelems + n_objs >= table->size)
+        if (aux_inctable(table, n_objs) < 0)
+            return -1;
 
-	unsigned int i, I;
-	int j, added = 0, found = 0;
+    /* search if this object is already in the table; "path" is the key */
+    if (table->nelems > 0) {
+        /* go tru the supplied list of names */
+        for (j = 0; j < n_objs; j++) {
+            /* linear table search */
+            for (i = 0; i < table->nelems; i++) {
+                /*already on the table */
+                if (HDstrcmp(obj_list[j].obj, table->objs[i].path) == 0) {
+                    /* insert */
+                    aux_tblinsert_filter(table, i, filt);
+                    found = TRUE;
+                    break;
+                } /* if */
+            } /* i */
 
-	/* increase the size of the collection by N_OBJS if necessary */
-	if (table->nelems + n_objs >= table->size) {
-		if (aux_inctable(table, n_objs) < 0)
-			return -1;
-	}
+            if (!found) {
+                /* keep the grow in a temp var */
+                I = table->nelems + added;
+                added++;
+                HDstrcpy(table->objs[I].path, obj_list[j].obj);
+                aux_tblinsert_filter(table, I, filt);
+            }
+            /* cases where we have an already inserted name but there is a new name also
+             example:
+             -l dset1:CHUNK=20x20 -f dset1,dset2:GZIP=1
+             dset1 is already inserted, but dset2 must also be
+             */
+            else
+                if(found && HDstrcmp(obj_list[j].obj,table->objs[i].path) != 0) {
+                    /* keep the grow in a temp var */
+                    I = table->nelems + added;
+                    added++;
+                    HDstrcpy(table->objs[I].path, obj_list[j].obj);
+                    aux_tblinsert_filter(table, I, filt);
+                }
+        } /* j */
+    }
 
-	/* search if this object is already in the table; "path" is the key */
-	if (table->nelems > 0) {
-		/* go tru the supplied list of names */
-		for (j = 0; j < n_objs; j++) {
-			/* linear table search */
-			for (i = 0; i < table->nelems; i++) {
-				/*already on the table */
-				if (HDstrcmp(obj_list[j].obj,table->objs[i].path) == 0) {
-					/* insert */
-					aux_tblinsert_filter(table, i, filt);
-					found = 1;
-					break;
-				} /* if */
-			} /* i */
+    /* first time insertion */
+    else {
+        /* go tru the supplied list of names */
+        for (j = 0; j < n_objs; j++) {
+            I = table->nelems + added;
+            added++;
+            HDstrcpy(table->objs[I].path, obj_list[j].obj);
+            aux_tblinsert_filter(table, I, filt);
+        }
+    }
 
-			if (found == 0) {
-				/* keep the grow in a temp var */
-				I = table->nelems + added;
-				added++;
-				HDstrcpy(table->objs[I].path, obj_list[j].obj);
-				aux_tblinsert_filter(table, I, filt);
-			}
-			/* cases where we have an already inserted name but there is a new name also
-			 example:
-			 -l dset1:CHUNK=20x20 -f dset1,dset2:GZIP=1
-			 dset1 is already inserted, but dset2 must also be
-			 */
-			else if (found == 1
-					&& HDstrcmp(obj_list[j].obj,table->objs[i].path) != 0) {
-				/* keep the grow in a temp var */
-				I = table->nelems + added;
-				added++;
-				HDstrcpy(table->objs[I].path, obj_list[j].obj);
-				aux_tblinsert_filter(table, I, filt);
-			}
-		} /* j */
-	}
+    table->nelems += added;
 
-	/* first time insertion */
-	else {
-		/* go tru the supplied list of names */
-		for (j = 0; j < n_objs; j++) {
-			I = table->nelems + added;
-			added++;
-			HDstrcpy(table->objs[I].path, obj_list[j].obj);
-			aux_tblinsert_filter(table, I, filt);
-		}
-	}
-
-	table->nelems += added;
-
-	return 0;
+    return 0;
 }
 
 /*-------------------------------------------------------------------------
