@@ -56,5 +56,7 @@ endif (BUILD_TESTING)
 install (
     TARGETS
         h5format_convert
+    EXPORT
+        ${HDF5_EXPORTED_TARGETS}
     RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
 )
