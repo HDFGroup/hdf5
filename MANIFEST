@@ -1309,6 +1309,7 @@
 # h5repack sources
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/dynlib_rpk.c
+./tools/h5repack/dynlib_vrpk.c
 ./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/h5repack_plugin.sh.in
 ./tools/h5repack/h5repack.c
@@ -2308,12 +2309,14 @@
 ./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
+./tools/h5repack/testfiles/plugin_version_test.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/h5repack-help.txt
 ./tools/h5repack/testfiles/h5repack_filters.h5-gzip_verbose_filters.tst
 ./tools/h5repack/testfiles/h5repack_layout.h5-dset2_chunk_20x10-errstk.tst
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
+./tools/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_zero.tst
 ./tools/h5repack/testfiles/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
 ./tools/h5repack/testfiles/2_vds.h5-vds_chunk3x6x9-v.ddl
