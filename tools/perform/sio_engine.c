@@ -123,7 +123,7 @@ static hid_t       h5dxpl = -1;            /* Dataset transfer property list */
  * Programmer:      Christian Chilan, April, 2008
  * Modifications:
  */
-void
+    results
 do_sio(parameters param)
 {
     char       *buffer = NULL; /*data buffer pointer           */
