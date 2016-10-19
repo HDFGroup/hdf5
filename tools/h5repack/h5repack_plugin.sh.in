@@ -34,6 +34,7 @@ exit_code=$EXIT_SUCCESS
 TEST_NAME=ud_plugin
 FROM_DIR=`pwd`/.libs
 PLUGIN_LIB="$FROM_DIR/libdynlibadd.*"
+PLUGIN_LIB2="$FROM_DIR/libdynlibvers.*"
 PLUGIN_LIBDIR=testdir3
 RM='rm -rf'
 
@@ -90,6 +91,11 @@ fi
 $CP $PLUGIN_LIB $PLUGIN_LIBDIR
 if [ $? != 0 ]; then
     echo "Failed to copy plugin library ($PLUGIN_LIB) for test."
+    exit $EXIT_FAILURE
+fi
+$CP $PLUGIN_LIB2 $PLUGIN_LIBDIR
+if [ $? != 0 ]; then
+    echo "Failed to copy plugin library ($PLUGIN_LIB2) for test."
     exit $EXIT_FAILURE
 fi
 
