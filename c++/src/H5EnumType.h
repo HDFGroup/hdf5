@@ -17,9 +17,7 @@
 #ifndef __H5EnumType_H
 #define __H5EnumType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class EnumType
     \brief EnumType is a derivative of a DataType and operates on HDF5
@@ -77,7 +75,5 @@ class H5_DLLCPP EnumType : public DataType {
 
 	virtual ~EnumType();
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5EnumType_H

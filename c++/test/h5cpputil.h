@@ -26,14 +26,9 @@
 
 #include "h5test.h"
 
-#ifndef H5_NO_NAMESPACE
 using namespace H5;
-#endif
-
-#ifndef H5_NO_STD
 using std::cerr;
 using std::endl;
-#endif
 
 #define MESSAGE(V,A) {if (HDGetTestVerbosity()>(V)) print_func A;}
 #define SUBTEST(TEST) {printf("   Subtest: %-52s",TEST); fflush(stdout);}

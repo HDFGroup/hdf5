@@ -19,9 +19,7 @@
 
 #include "H5Classes.h"		// constains forward class declarations
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class H5Location
     \brief H5Location is an abstract base class, added in version 1.8.12.
@@ -251,7 +249,5 @@ class H5_DLLCPP H5Location : public IdComponent {
 
 }; /* end class H5Location */
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5Location_H

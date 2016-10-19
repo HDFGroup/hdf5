@@ -20,9 +20,7 @@
 #ifndef __H5DSCreatPropList_H
 #define __H5DSCreatPropList_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 class DataType;
 
@@ -147,7 +145,5 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5DSCreatPropList_H

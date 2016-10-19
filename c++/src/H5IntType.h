@@ -17,9 +17,7 @@
 #ifndef __H5IntType_H
 #define __H5IntType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class IntType
     \brief IntType is a derivative of a DataType and operates on HDF5
@@ -56,7 +54,5 @@ class H5_DLLCPP IntType : public AtomType {
 	// Noop destructor.
 	virtual ~IntType();
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5IntType_H

@@ -17,9 +17,7 @@
 #ifndef __IdComponent_H
 #define __IdComponent_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 class DataSpace;
 /*! \class IdComponent
@@ -118,7 +116,5 @@ class H5_DLLCPP IdComponent {
 
 }; // end class IdComponent
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __IdComponent_H

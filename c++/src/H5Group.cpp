@@ -40,13 +40,9 @@
 #include "H5Alltypes.h"
 #include "H5private.h"		// for HDstrcpy
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#ifndef H5_NO_STD
     using std::cerr;
     using std::endl;
-#endif  // H5_NO_STD
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	Group default constructor
@@ -231,6 +227,4 @@ Group::~Group()
     }
 }
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

@@ -17,9 +17,7 @@
 #ifndef __H5FileCreatPropList_H
 #define __H5FileCreatPropList_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class FileCreatPropList
     \brief Class FileCreatPropList inherits from PropList and provides
@@ -94,7 +92,5 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5FileCreatPropList_H

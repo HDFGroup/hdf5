@@ -18,28 +18,20 @@
         C link interface (H5L)
 
  ***************************************************************************/
-
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
-
 #include "H5Cpp.h"      // C++ API header file
+using namespace H5;
 
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
-
-#include "h5cpputil.h"  // C++ test utilility header file
+#include "h5test.h"
+#include "h5cpputil.h"  // C++ utilility header file
 
 // A lot of the definition inherited from C test links.c is left here until
 // the H5L API is implemented and tests are completed - BMR 10/19/2009
@@ -460,9 +452,7 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void test_links()
 {
     hid_t	fapl_id, fapl2_id;    /* File access property lists */
@@ -651,9 +641,7 @@ void test_links()
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void cleanup_links()
 {
     HDremove(FILENAME[0]);

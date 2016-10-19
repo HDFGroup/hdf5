@@ -22,28 +22,20 @@
         h5_fileaccess() -- in h5test.c, returns a file access template
 
  ***************************************************************************/
-
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
+#include "H5Cpp.h"      // C++ API header file
+using namespace H5;
 
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
-
-#include "H5Cpp.h"	// C++ API header file
-
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
-
-#include "h5cpputil.h"	// C++ utilility header file
+#include "h5test.h"
+#include "h5cpputil.h"  // C++ utilility header file
 
 const hsize_t F1_USERBLOCK_SIZE = (hsize_t)0;
 const size_t F1_OFFSET_SIZE = sizeof(haddr_t);
@@ -817,9 +809,7 @@ static void test_commonfg()
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void test_file()
 {
     // Output message about test being performed

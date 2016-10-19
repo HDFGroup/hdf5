@@ -21,28 +21,20 @@
    EXTERNAL ROUTINES/VARIABLES:
 
  ***************************************************************************/
-
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
+#include "H5Cpp.h"      // C++ API header file
+using namespace H5;
 
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
-
-#include "H5Cpp.h"	// C++ API header file
-
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
-
-#include "h5cpputil.h"	// C++ utilility header file
+#include "h5test.h"
+#include "h5cpputil.h"  // C++ utilility header file
 #include "H5srcdir.h"	// srcdir querying header file
 
 const H5std_string    TESTFILE("th5s.h5");
@@ -566,9 +558,7 @@ static void test_h5s_compound_scalar_read()
  * Modifications:
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void test_h5s()
 {
     // Output message about test being performed
@@ -597,9 +587,7 @@ void test_h5s()
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void cleanup_h5s()
 {
     HDremove(DATAFILE.c_str());

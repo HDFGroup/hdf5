@@ -32,10 +32,7 @@
 #include "H5DataSet.h"
 #include "H5PredType.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
-
 
 //--------------------------------------------------------------------------
 // Function:	IntType default constructor
@@ -136,6 +133,4 @@ void IntType::setSign( H5T_sign_t sign ) const
 //--------------------------------------------------------------------------
 IntType::~IntType() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

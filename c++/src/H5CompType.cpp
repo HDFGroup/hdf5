@@ -30,9 +30,7 @@
 #include "H5DataSet.h"
 #include "H5private.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	CompType default constructor
@@ -485,6 +483,4 @@ void CompType::setSize(size_t size) const
 //--------------------------------------------------------------------------
 CompType::~CompType() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

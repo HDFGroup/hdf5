@@ -17,9 +17,7 @@
 #ifndef __H5ArrayType_H
 #define __H5ArrayType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class ArrayType
     \brief Class ArrayType inherits from DataType and provides wrappers for
@@ -59,7 +57,5 @@ class H5_DLLCPP ArrayType : public DataType {
 	// Default constructor
 	ArrayType();
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5ArrayType_H

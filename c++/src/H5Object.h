@@ -17,9 +17,7 @@
 #ifndef __H5Object_H
 #define __H5Object_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class H5Object
     \brief Class H5Object is a bridge between H5Location and DataSet, DataType,
@@ -132,7 +130,5 @@ class H5_DLLCPP H5Object : public H5Location {
 
 }; /* end class H5Object */
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5Object_H

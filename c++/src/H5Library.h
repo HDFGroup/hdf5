@@ -17,9 +17,7 @@
 #ifndef __H5Library_H
 #define __H5Library_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class H5Library
     \brief Class H5Library operates the HDF5 library globably.
@@ -72,7 +70,5 @@ class H5_DLLCPP H5Library {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5Library_H

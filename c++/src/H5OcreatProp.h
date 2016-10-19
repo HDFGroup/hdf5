@@ -17,9 +17,7 @@
 #ifndef __H5ObjCreatPropList_H
 #define __H5ObjCreatPropList_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class ObjCreatPropList
     \brief Class ObjCreatPropList inherits from PropList and provides
@@ -75,7 +73,5 @@ class H5_DLLCPP ObjCreatPropList : public PropList {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5ObjCreatPropList_H

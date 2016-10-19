@@ -26,10 +26,7 @@
 #include "H5DataType.h"
 #include "H5VarLenType.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
-
 
 //--------------------------------------------------------------------------
 // Function:	VarLenType default constructor
@@ -81,6 +78,4 @@ VarLenType::VarLenType(const DataType* base_type) : DataType()
 //--------------------------------------------------------------------------
 VarLenType::~VarLenType() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif
