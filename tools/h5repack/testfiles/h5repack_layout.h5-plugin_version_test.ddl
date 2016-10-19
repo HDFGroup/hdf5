@@ -1,4 +1,4 @@
-HDF5 "out-plugin_test.h5repack_layout.h5" {
+HDF5 "out-plugin_version_test.h5repack_layout.h5" {
 GROUP "/" {
    DATASET "dset1" {
       DATATYPE  H5T_STD_I32LE
@@ -9,9 +9,9 @@ GROUP "/" {
       }
       FILTERS {
          USER_DEFINED_FILTER {
-            FILTER_ID 257
-            COMMENT dynlib1
-            PARAMS { 9 }
+            FILTER_ID 260
+            COMMENT dynlib4
+            PARAMS { 9 1 9 235 }
          }
       }
       FILLVALUE {
@@ -31,9 +31,9 @@ GROUP "/" {
       }
       FILTERS {
          USER_DEFINED_FILTER {
-            FILTER_ID 257
-            COMMENT dynlib1
-            PARAMS { 9 }
+            FILTER_ID 260
+            COMMENT dynlib4
+            PARAMS { 9 1 9 235 }
          }
       }
       FILLVALUE {
@@ -53,9 +53,9 @@ GROUP "/" {
       }
       FILTERS {
          USER_DEFINED_FILTER {
-            FILTER_ID 257
-            COMMENT dynlib1
-            PARAMS { 9 }
+            FILTER_ID 260
+            COMMENT dynlib4
+            PARAMS { 9 1 9 235 }
          }
       }
       FILLVALUE {
@@ -75,9 +75,9 @@ GROUP "/" {
       }
       FILTERS {
          USER_DEFINED_FILTER {
-            FILTER_ID 257
-            COMMENT dynlib1
-            PARAMS { 9 }
+            FILTER_ID 260
+            COMMENT dynlib4
+            PARAMS { 9 1 9 235 }
          }
       }
       FILLVALUE {
@@ -97,9 +97,9 @@ GROUP "/" {
       }
       FILTERS {
          USER_DEFINED_FILTER {
-            FILTER_ID 257
-            COMMENT dynlib1
-            PARAMS { 9 }
+            FILTER_ID 260
+            COMMENT dynlib4
+            PARAMS { 9 1 9 235 }
          }
       }
       FILLVALUE {
@@ -119,9 +119,9 @@ GROUP "/" {
       }
       FILTERS {
          USER_DEFINED_FILTER {
-            FILTER_ID 257
-            COMMENT dynlib1
-            PARAMS { 9 }
+            FILTER_ID 260
+            COMMENT dynlib4
+            PARAMS { 9 1 9 235 }
          }
       }
       FILLVALUE {
@@ -141,9 +141,9 @@ GROUP "/" {
       }
       FILTERS {
          USER_DEFINED_FILTER {
-            FILTER_ID 257
-            COMMENT dynlib1
-            PARAMS { 9 }
+            FILTER_ID 260
+            COMMENT dynlib4
+            PARAMS { 9 1 9 235 }
          }
       }
       FILLVALUE {

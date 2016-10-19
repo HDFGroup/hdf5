@@ -1034,7 +1034,7 @@ TOOLTEST add_alignment $arg
 
 # Check repacking file with old version of layout message (should get upgraded
 #       to new version and be readable, etc.)
-TOOLTEST pgrade_layout h5repack_layouto.h5
+TOOLTEST upgrade_layout h5repack_layouto.h5
 
 # test for datum size > H5TOOLS_MALLOCSIZE
 TOOLTEST gt_mallocsize h5repack_objs.h5 -f GZIP=1
