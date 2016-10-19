@@ -16,17 +16,23 @@
  * Author: Christian Chilan, April 2008
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "hdf5.h"
+
+#ifdef H5_STDC_HEADERS
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#ifdef H5_HAVE_UNISTD_H
-#  include <unistd.h>
 #endif
-#include <errno.h>
 
-#include "hdf5.h"
+#ifdef H5_HAVE_UNISTD_H
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+
+#ifdef H5_HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 
 #include "sio_perf.h"
 
@@ -90,7 +96,7 @@ static herr_t do_fclose(iotype iot, file_descr *fd);
 static void do_cleanupfile(iotype iot, char *fname);
 
 /* global variables */
-static off_t offset[MAX_DIMS];       /* dataset size in bytes     */
+static HDoff_t offset[MAX_DIMS];       /* dataset size in bytes     */
 static size_t buf_offset[MAX_DIMS];   /* dataset size in bytes     */
 static int order[MAX_DIMS];        /* dimension access order */
 static size_t      linear_buf_size;        /* linear buffer size     */
@@ -117,7 +123,7 @@ static hid_t       h5dxpl = -1;            /* Dataset transfer property list */
  * Programmer:      Christian Chilan, April, 2008
  * Modifications:
  */
-    results
+void
 do_sio(parameters param)
 {
     char       *buffer = NULL; /*data buffer pointer           */
