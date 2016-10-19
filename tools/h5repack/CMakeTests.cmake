@@ -413,7 +413,7 @@
   set (FILE18 h5repack_layout2.h5)
   set (FILE_REF h5repack_refs.h5)
   set (FILE_ATTR_REF h5repack_attr_refs.h5)
-  
+
   # Remove any output file left over from previous test run
   add_test (
       NAME H5REPACK-clearall-objects
@@ -990,7 +990,7 @@
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
-  ADD_H5_UD_TEST (plugin_version_test 0 h5repack_layout.h5 -v -f UD=260,4,9,1,9,235)
+  ADD_H5_UD_TEST (plugin_version_test 0 h5repack_layout.h5 -v -f UD=260,4,9,1,8,18)
   ADD_H5_UD_TEST (plugin_test 0 h5repack_layout.h5 -v -f UD=257,1,9)
   ADD_H5_UD_TEST (plugin_none 0 h5repack_layout.UD.h5 -v -f NONE)
   # check for no parameters

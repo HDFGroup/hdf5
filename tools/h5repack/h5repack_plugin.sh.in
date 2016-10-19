@@ -66,6 +66,8 @@ LIST_HDF5_TEST_FILES="
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
 $SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
+$SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_version_test.ddl
+$SRC_H5REPACK_TESTFILES/plugin_version_test.h5repack_layout.h5.tst
 "
 #$SRC_H5REPACK_TESTFILES/h5repack_layout.UD.h5
 #$SRC_H5REPACK_TESTFILES/h5repack_layout.UD.h5-plugin_none.ddl
@@ -246,6 +248,9 @@ TOOLTEST_DUMP()
 COPY_TESTFILES_TO_TESTDIR
 
 # Run the test
+arg="h5repack_layout.h5 -v -f UD=260,4,9,1,8,18"
+TOOLTEST_DUMP plugin_version_test $arg
+
 arg="h5repack_layout.h5 -v -f UD=257,1,9"
 TOOLTEST_DUMP plugin_test $arg
 
