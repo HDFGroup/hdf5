@@ -123,7 +123,7 @@ static hid_t       h5dxpl = -1;            /* Dataset transfer property list */
  * Programmer:      Christian Chilan, April, 2008
  * Modifications:
  */
-void
+    results
 do_sio(parameters param)
 {
     char       *buffer = NULL; /*data buffer pointer           */
@@ -261,7 +261,7 @@ done:
         case HDF5:
             if (fd.h5fd != -1)
                 hrc = do_fclose(iot, &fd);
-			break;
+            break;
         default:
             /* unknown request */
             HDassert(0 && "Unknown IO type");
@@ -681,7 +681,7 @@ static herr_t dset_write(int local_dim, file_descr *fd, parameters *parms, void 
                 VRFY((hrc >= 0), "H5Dwrite");
 
                 break;
-				
+
             default:
                 /* unknown request */
                 HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -857,7 +857,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             GOTOERROR(FAIL);
         }
         break;
-		
+
         default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -985,7 +985,7 @@ static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms,
                 }
 #endif
                 break;
-				
+
             default:
                 /* unknown request */
                 HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)parms->io_type);
@@ -1103,7 +1103,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             GOTOERROR(FAIL);
         }
         break;
-		
+
     default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)param->io_type);
@@ -1231,7 +1231,7 @@ do_fclose(iotype iot, file_descr *fd /*out*/)
 
         fd->h5fd = -1;
         break;
-		
+
     default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
@@ -1303,7 +1303,7 @@ do_cleanupfile(iotype iot, char *filename)
             }
             H5Pclose(fapl);
         break;
-			
+
     default:
         /* unknown request */
         HDfprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
