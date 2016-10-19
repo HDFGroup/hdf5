@@ -419,13 +419,13 @@ They are built with the configure process unless specified otherwise.
 
     Windows 7                     Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2015  (cmake)
+                                  Visual Studio 2015 w/ Intel Fortran 16  (cmake)
                                   Cygwin(CYGWIN_NT-6.1 2.2.1(0.289/5/3) gcc(4.9.3) compiler and gfortran)
                                   (cmake and autotools)
 
     Windows 7 x64                 Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2015  (cmake)
+                                  Visual Studio 2015 w/ Intel Fortran 16  (cmake)
 
     Windows 8.1                   Visual Studio 2012 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
