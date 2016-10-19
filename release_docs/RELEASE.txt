@@ -297,6 +297,13 @@ Bug Fixes since HDF5-1.8.16
 
     Tools
     -----
+    - h5repack User Defined (UD) filter parameters were not parsed correctly.
+
+      The UD filter parameters were not being parsed correctly. Reworked coding
+      section to parse the correct values and verify number of parameters.
+
+      (ADB, 2016/10/19, HDFFV-9996, HDFFV-9974, HDFFV-9515, HDFFV-9039)
+
     - h5dump subsetting fixed for dims greater then two.
 
       When a dataset has more then two dimensions, subsetting would incorrectly
