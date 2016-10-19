@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -16,6 +15,7 @@
 #ifndef PIO_PERF_H__
 #define PIO_PERF_H__
 
+#include "io_timer.h"
 #ifndef STANDALONE
 #include "H5private.h"
 #include "h5test.h"
@@ -24,7 +24,6 @@
 #else
 #include "pio_standalone.h"
 #endif
-#include "io_timer.h"
 
 /* setup the dataset no fill option if this is v1.5 or more */
 #if H5_VERS_MAJOR > 1 || H5_VERS_MINOR > 4
