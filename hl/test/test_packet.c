@@ -767,14 +767,12 @@ static int test_rw_nonnative_dt(hid_t fid)
  if( (err = H5PTappend(ptable, (size_t)4, &(writeBuffer[1]))) < 0)
         goto error;
 
- /*  if( (err = H5PTclose(ptable)) < 0)
+ if( (err = H5PTclose(ptable)) < 0)
         goto error;
- */ 
 
  /* Open the Packet table */
-  /* if( (ptable = H5PTopen(fid, "Packet Test Dataset, Non-native")) < 0)
+ if( (ptable = H5PTopen(fid, "Packet Test Dataset, Non-native")) < 0)
         goto error;
- */ 
 
  /* Get the number of packets in the packet table.  This should be five. */
  if( (err = H5PTget_num_packets(ptable, &count)) < 0)

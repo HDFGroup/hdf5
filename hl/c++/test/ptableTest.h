@@ -56,7 +56,4 @@ int SystemTest(void);
    that data was written and read correctly. */
 int TestHDFFV_9758(void);
 
-/* Test the variable length dataset functionality */
-int VariableLengthTest(void);
-
 #endif /* PTABLETEST */
