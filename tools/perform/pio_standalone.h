@@ -56,6 +56,11 @@
 #define F_OK    0       /* Test for existence.  */
 #else /* H5_HAVE_WIN32_API */
 #define HDaccess(F,M)           access(F, M)
+#ifndef F_OK
+#define F_OK  00
+#define W_OK 02
+#define R_OK 04
+#endif
 #endif /* H5_HAVE_WIN32_API */
 #define HDacos(X)               acos(X)
 #ifdef H5_HAVE_ALARM
