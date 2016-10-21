@@ -156,6 +156,13 @@ am__v_lt_0 = --silent
 am__v_lt_1 = 
 @HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibadd_la_rpath = -rpath \
 @HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
+libdynlibvers_la_LIBADD =
+am__libdynlibvers_la_SOURCES_DIST = dynlib_vrpk.c
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibvers_la_OBJECTS =  \
+@HAVE_SHARED_CONDITIONAL_TRUE@	dynlib_vrpk.lo
+libdynlibvers_la_OBJECTS = $(am_libdynlibvers_la_OBJECTS)
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibvers_la_rpath = -rpath \
+@HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
 am__EXEEXT_1 = h5repacktst$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am__objects_1 = h5repack.$(OBJEXT) h5repack_copy.$(OBJEXT) \
@@ -214,9 +221,11 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libdynlibadd_la_SOURCES) $(h5repack_SOURCES) \
-	$(h5repacktst_SOURCES) $(testh5repack_detect_szip_SOURCES)
-DIST_SOURCES = $(am__libdynlibadd_la_SOURCES_DIST) $(h5repack_SOURCES) \
+SOURCES = $(libdynlibadd_la_SOURCES) $(libdynlibvers_la_SOURCES) \
+	$(h5repack_SOURCES) $(h5repacktst_SOURCES) \
+	$(testh5repack_detect_szip_SOURCES)
+DIST_SOURCES = $(am__libdynlibadd_la_SOURCES_DIST) \
+	$(am__libdynlibvers_la_SOURCES_DIST) $(h5repack_SOURCES) \
 	$(h5repacktst_SOURCES) $(testh5repack_detect_szip_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -711,8 +720,9 @@ COMMON_SOURCES = h5repack.c h5repack_copy.c h5repack_filters.c \
 h5repack_SOURCES = $(COMMON_SOURCES) h5repack_main.c
 h5repacktst_SOURCES = $(COMMON_SOURCES) h5repacktst.c 
 testh5repack_detect_szip_SOURCES = testh5repack_detect_szip.c
-@HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlibadd.la
+@HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlibadd.la libdynlibvers.la
 @HAVE_SHARED_CONDITIONAL_TRUE@libdynlibadd_la_SOURCES = dynlib_rpk.c
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibvers_la_SOURCES = dynlib_vrpk.c
 DISTCLEANFILES = h5repack.sh h5repack_plugin.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
@@ -811,6 +821,9 @@ clean-libLTLIBRARIES:
 
 libdynlibadd.la: $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_DEPENDENCIES) $(EXTRA_libdynlibadd_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK) $(am_libdynlibadd_la_rpath) $(libdynlibadd_la_OBJECTS) $(libdynlibadd_la_LIBADD) $(LIBS)
+
+libdynlibvers.la: $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_DEPENDENCIES) $(EXTRA_libdynlibvers_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) $(am_libdynlibvers_la_rpath) $(libdynlibvers_la_OBJECTS) $(libdynlibvers_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -898,6 +911,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynlib_rpk.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynlib_vrpk.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_copy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5repack_filters.Po@am__quote@

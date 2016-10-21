@@ -1106,6 +1106,7 @@
 ./tools/h5repack/Makefile.am
 ./tools/h5repack/Makefile.in
 ./tools/h5repack/dynlib_rpk.c
+./tools/h5repack/dynlib_vrpk.c
 ./tools/h5repack/h5repack.sh.in
 ./tools/h5repack/h5repack_plugin.sh.in
 ./tools/h5repack/h5repack.c
@@ -2027,12 +2028,14 @@
 ./tools/h5repack/testfiles/deflate_limit.h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/plugin_none.h5repack_layout.UD.h5.tst
 ./tools/h5repack/testfiles/plugin_test.h5repack_layout.h5.tst
+./tools/h5repack/testfiles/plugin_version_test.h5repack_layout.h5.tst
 ./tools/h5repack/testfiles/h5repack-help.txt
 ./tools/h5repack/testfiles/h5repack_filters.h5.tst
 ./tools/h5repack/testfiles/h5repack_filters.h5-gzip_verbose_filters.tst
 ./tools/h5repack/testfiles/h5repack_layout.h5.ddl
 ./tools/h5repack/testfiles/h5repack_layout.UD.h5-plugin_none.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
+./tools/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
 ./tools/h5repack/testfiles/h5repack_layout.h5-plugin_zero.tst
 
 # jam utility and tests
