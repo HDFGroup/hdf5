@@ -57,9 +57,9 @@
 #define RM_CACHE_STRT	25
 #define RM_CACHE_END	25
 #define RM_CACHE_DELT	5
-#define RM_START	0.50F
-#define RM_END	        5.00F
-#define RM_DELTA	0.50F
+#define RM_START	(double)0.50F
+#define RM_END	        (double)5.00F
+#define RM_DELTA	(double)0.50F
 #define RM_W0		0.0F
 #define RM_NRDCC	521
 
@@ -67,9 +67,9 @@
 #define DIAG_CACHE_STRT	25
 #define DIAG_CACHE_END	25
 #define DIAG_CACHE_DELT	5
-#define DIAG_START	0.50F
-#define DIAG_END	5.00F
-#define DIAG_DELTA	0.50F
+#define DIAG_START	(double)0.50F
+#define DIAG_END	(double)5.00F
+#define DIAG_DELTA	(double)0.50F
 /* #define DIAG_W0		0.65F */
 /* #define DIAG_NRDCC		521 */
 
@@ -163,7 +163,7 @@ create_dataset (void)
     assert(dset>=0);
 
     /* The data */
-    buf = calloc(1, SQUARE (DS_SIZE*CH_SIZE));
+    buf = (signed char *)calloc(1, SQUARE (DS_SIZE*CH_SIZE));
     H5Dwrite(dset, H5T_NATIVE_SCHAR, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
     free(buf);
 
@@ -194,7 +194,7 @@ static double
 test_rowmaj (int op, size_t cache_size, size_t io_size)
 {
     hid_t	file, dset, mem_space, file_space;
-    signed char	*buf = calloc (1, (size_t)(SQUARE(io_size)));
+    signed char	*buf = (signed char *)calloc (1, (size_t)(SQUARE(io_size)));
     hsize_t	i, j, hs_size[2];
     hsize_t	hs_offset[2];
     int		mdc_nelmts;
@@ -273,7 +273,7 @@ test_diag (int op, size_t cache_size, size_t io_size, size_t offset)
     hsize_t	i, hs_size[2];
     hsize_t	nio = 0;
     hsize_t	hs_offset[2];
-    signed char	*buf = calloc (1, (size_t)(SQUARE (io_size)));
+    signed char	*buf = (signed char *)calloc(1, (size_t)(SQUARE (io_size)));
     int		mdc_nelmts;
     size_t	rdcc_nelmts;
     double	w0;
@@ -320,7 +320,7 @@ test_diag (int op, size_t cache_size, size_t io_size, size_t offset)
      * Win32 version 5.0 compiler.
      * 1998-11-06 ptl
      */
-    return (double)(hssize_t)nio/(hssize_t)nio_g;
+    return (double)nio/(double)nio_g;
 }
 
 
@@ -479,9 +479,7 @@ main (void)
     for (cache_size=DIAG_CACHE_STRT;
 	 cache_size<=DIAG_CACHE_END;
 	 cache_size+=DIAG_CACHE_DELT) {
-	for (io_percent=DIAG_START;
-	     io_percent<=DIAG_END;
-	     io_percent+=DIAG_DELTA) {
+	for (io_percent=DIAG_START; io_percent<=DIAG_END; io_percent+=DIAG_DELTA) {
 	    io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
 	    printf ("Diag-rd   %8d %8.2f", (int)cache_size, io_percent);
 	    fflush (stdout);
