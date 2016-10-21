@@ -63,8 +63,9 @@ h5repack.sh.chkexe_: h5repacktst.chkexe_
 
 if HAVE_SHARED_CONDITIONAL
   # Build it as shared library if configure is enabled for shared library.
-  lib_LTLIBRARIES=libdynlibadd.la
+  lib_LTLIBRARIES=libdynlibadd.la libdynlibvers.la
   libdynlibadd_la_SOURCES=dynlib_rpk.c
+  libdynlibvers_la_SOURCES=dynlib_vrpk.c
 
 install-exec-hook:
 	$(RM) $(DESTDIR)$(libdir)/*dynlib*
