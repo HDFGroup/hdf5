@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -378,7 +377,7 @@ main(int argc, char **argv)
     }
 
     if (opts->output_file) {
-        if ((output = fopen(opts->output_file, "w")) == NULL) {
+        if ((output = HDfopen(opts->output_file, "w")) == NULL) {
             fprintf(stderr, "%s: cannot open output file\n", progname);
             perror(opts->output_file);
             goto finish;
@@ -1228,7 +1227,7 @@ report_parameters(struct options *opts)
         HDfprintf(output, "Contiguous\n");
 
     {
-        char *prefix = getenv("HDF5_PARAPREFIX");
+        char *prefix = HDgetenv("HDF5_PARAPREFIX");
 
         HDfprintf(output, "rank %d: Env HDF5_PARAPREFIX=%s\n", rank,
                   (prefix ? prefix : "not set"));
@@ -1293,7 +1292,7 @@ parse_command_line(int argc, char *argv[])
                     char buf[10];
                     int i;
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1345,7 +1344,7 @@ parse_command_line(int argc, char *argv[])
                     char buf[10];
                     int i;
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1509,7 +1508,7 @@ parse_size_directive(const char *size)
     off_t s;
     char *endptr;
 
-    s = strtol(size, &endptr, 10);
+    s = HDstrtol(size, &endptr, 10);
 
     if (endptr && *endptr) {
         while (*endptr != '\0' && (*endptr == ' ' || *endptr == '\t'))
