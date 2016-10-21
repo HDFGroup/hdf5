@@ -24,26 +24,15 @@
 
 #include "hdf5.h"
 #include "H5private.h"
-
 #ifdef H5_HAVE_PARALLEL
-
-#ifdef H5_STDC_HEADERS
-#include <errno.h>
-#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#endif
-
+#include <fcntl.h>
 #ifdef H5_HAVE_UNISTD_H
-#include <sys/types.h>
 #include <unistd.h>
 #endif
-
-#ifdef H5_HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-
+#include <errno.h>
+#include <string.h>
 #if defined(H5_TIME_WITH_SYS_TIME)
 #   include <sys/time.h>
 #   include <time.h>
@@ -52,7 +41,6 @@
 #else
 #   include <time.h>
 #endif
-
 #include <mpi.h>
 #ifndef MPI_FILE_NULL           /*MPIO may be defined in mpi.h already       */
 #   include <mpio.h>

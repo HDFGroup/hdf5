@@ -17,23 +17,17 @@
  * Author: Albert Cheng of NCSA, Oct 24, 2001.
  */
 
-#include "hdf5.h"
-
-#ifdef H5_STDC_HEADERS
-#include <errno.h>
-#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#endif
-
+#include <fcntl.h>
 #ifdef H5_HAVE_UNISTD_H
-#include <sys/types.h>
 #include <unistd.h>
 #endif
+#include <errno.h>
 
-#ifdef H5_HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
+#include "hdf5.h"
 
 #ifdef H5_HAVE_PARALLEL
 
