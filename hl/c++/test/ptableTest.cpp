@@ -52,9 +52,7 @@ int main(void)
 
             num_errors += SystemTest();
 
-#ifdef VLPT_REMOVED
-            num_errors += VariableLengthTest();
-#endif /* VLPT_REMOVED */
+	num_errors += TestHDFFV_9758();
 
         /* Terminate access to the file. */
         err = H5Fclose(fileID);
@@ -562,73 +560,128 @@ error:
     return 1;
 }
 
-#ifdef VLPT_REMOVED
-int VariableLengthTest(void)
+/*-------------------------------------------------------------------------
+ * TestHDFFV_9758(): Test that a packet table with compound datatype which
+ *	contain string type can be created and written correctly. (HDFFV-9758)
+ *
+ * Notes:
+ *	Previously, data of the field that follows the string was read back
+ *	as garbage when #pragma pack(1) is used.
+ * 2016/10/20 -BMR
+ *-------------------------------------------------------------------------
+ */
+#pragma pack(1)  // no padding
+const char* ABHI_PT("/abhiTest");
+const hsize_t NUM_PACKETS = 5;
+const int STRING_LENGTH = 19; // including terminating NULL
+int TestHDFFV_9758()
 {
-    long test_long;
-    short test_short;
-    hvl_t read_buf;
-    VL_PacketTable* test_VLPT;
-    PacketTable* new_pt;
+    hid_t strtype;
+    hid_t compound_type;
+    herr_t err;
+    struct s1_t
+    {
+        int a;
+        float b;
+        double c;
+        char d[STRING_LENGTH]; // null terminated string
+        int e;
+    };
 
-    TESTING("variable-length packet tables")
+    s1_t s1[NUM_PACKETS];
+    
+    for (hsize_t i = 0; i < NUM_PACKETS; i++)
+    {
+        s1[i].a = i;
+        s1[i].b = 1.f * static_cast<float>(i * i);
+        s1[i].c = 1. / (i + 1);
+        sprintf(s1[i].d, "string%d", (int)i);
+        s1[i].e = 100+i;
+    }
 
-    /* Create a variable length table */
-    test_VLPT = new VL_PacketTable(fileID, "/VariableLengthTest", 1);
+    TESTING("the fix of issue HDFFV-9758")
 
-    /* Verify that the creation succeeded */
-    if(! test_VLPT->IsValid())
-      goto error;
+    FL_PacketTable wrapper(fileID, H5P_DEFAULT, ABHI_PT, H5T_NATIVE_INT, 1);
+    if(! wrapper.IsValid())
+	goto error;
 
-    /* Append some packets */
-    test_short = 9;
-    test_VLPT->AppendPacket(&test_short, sizeof(short));
-    test_long = 16;
-    test_VLPT->AppendPacket(&test_long, sizeof(long));
+    compound_type = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
+    if (compound_type < 0)
+	goto error;
+    
+    err = H5Tinsert(compound_type, "a_name", HOFFSET(s1_t, a), H5T_NATIVE_INT);
+    if (err < 0)
+	goto error;
+    err = H5Tinsert(compound_type, "b_name", HOFFSET(s1_t, b), H5T_NATIVE_FLOAT);
+    if (err < 0)
+	goto error;
+    err = H5Tinsert(compound_type, "c_name", HOFFSET(s1_t, c), H5T_NATIVE_DOUBLE);
+    if (err < 0)
+	goto error;
 
-    /* Read them back and make sure they are correct */
-    test_VLPT->GetNextPackets(1, &read_buf);
+    strtype  = H5Tcopy (H5T_C_S1);
+    if (compound_type < 0)
+	goto error;
+    err = H5Tset_size (strtype, STRING_LENGTH); /* create string */
+    if (err < 0)
+	goto error;
+    err = H5Tinsert(compound_type, "d_name", HOFFSET(s1_t, d), strtype);
+    if (err < 0)
+	goto error;
+    err = H5Tinsert(compound_type, "e_name", HOFFSET(s1_t, e), H5T_NATIVE_INT);
+    if (err < 0)
+	goto error;
 
-    if(read_buf.len != sizeof(short))
-      goto error;
-    if(*(short *)(read_buf.p) != test_short)
-      goto error;
+{ // so ptable will go out of scope
+    FL_PacketTable ptable(fileID, "/examplePacketTable", compound_type, 1);
+    if (not ptable.IsValid())
+	goto error;
 
-    /* Free the memory used by the read */
-    test_VLPT->FreeReadbuff(1, &read_buf);
+    for (size_t i = 0; i < NUM_PACKETS; i++)
+    {
+	/* Appends one packet at the current position */
+        err = ptable.AppendPacket(s1 + i);
+        if (err < 0) goto error;
+    }
 
-    /* Read the second record */
-    test_VLPT->GetNextPackets(1, &read_buf);
+    const hsize_t count = ptable.GetPacketCount(err);
+    if (err < 0)
+	goto error;
+  
+    if (count != NUM_PACKETS)
+    {
+	std::cerr
+        << "Number of packets in packet table should be " << NUM_PACKETS
+        << " but is " << count << endl;
+    }
 
-    if(read_buf.len != sizeof(long))
-      goto error;
-    if(*(long *)(read_buf.p) != test_long)
-      goto error;
+    ptable.ResetIndex();
 
-    /* Free the memory used by the read */
-    test_VLPT->FreeReadbuff(1, &read_buf);
+    for (size_t i = 0; i < NUM_PACKETS; i++)
+    {
+	s1_t s2;
+	memset(&s2, 0, sizeof(s1_t));
+	err = ptable.GetNextPacket(&s2);
+	if (err < 0)
+	    goto error;
 
-    /* Close the packet table */
-    delete test_VLPT;
-
-    /* Reopen the packet table and verify that it is variable length */
-    new_pt = new PacketTable(fileID, "/VariableLengthTest");
-
-    /* Verify that the open succeeded */
-    if(! new_pt->IsValid())
-      goto error;
-
-    if(new_pt->IsVariableLength() != 1)
-      goto error;
-
-    /* Close the packet table */
-    delete new_pt;
+	if (s2.a != s1[i].a || s2.e != s1[i].e)
+	    goto error;
+	else if (HDstrcmp(s2.d, s1[i].d))
+	    goto error;
+    }
+}
 
     PASSED();
     return 0;
 
 error:
+
+    H5E_BEGIN_TRY {
+        H5Fclose(fileID);
+    } H5E_END_TRY;
+
     H5_FAILED();
     return 1;
 }
-#endif /* VLPT_REMOVED */
+
