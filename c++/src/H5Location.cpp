@@ -35,9 +35,7 @@
 #include "H5Attribute.h"
 #include "H5private.h"		// for HDmemset
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // userAttrOpWrpr simply interfaces between the user's function and the
@@ -959,6 +957,4 @@ void f_DataSpace_setId(DataSpace* dspace, hid_t new_id)
     dspace->p_setId(new_id);
 }
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

@@ -39,13 +39,11 @@
 #include "H5File.h"
 #include "H5Alltypes.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
 #ifndef H5_NO_STD
     using std::cerr;
     using std::endl;
 #endif  // H5_NO_STD
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	Group default constructor
@@ -224,6 +222,4 @@ Group::~Group()
     }
 }
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

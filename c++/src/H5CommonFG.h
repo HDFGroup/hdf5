@@ -17,9 +17,7 @@
 #ifndef __CommonFG_H
 #define __CommonFG_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 // Class forwarding
 class Group;
@@ -173,8 +171,6 @@ class H5_DLLCPP CommonFG {
 
 }; // end of CommonFG declaration
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __CommonFG_H
 

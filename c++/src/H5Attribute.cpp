@@ -37,13 +37,11 @@
 #include "H5Attribute.h"
 #include "H5private.h"		// for HDfree
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
 #ifndef H5_NO_STD
     using std::cerr;
     using std::endl;
 #endif  // H5_NO_STD
-#endif
 
 class H5_DLLCPP H5Object;  // forward declaration for UserData4Aiterate
 
@@ -679,7 +677,4 @@ Attribute::~Attribute()
 	cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
     }
 }
-
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

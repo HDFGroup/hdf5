@@ -26,9 +26,7 @@
 #include "H5DataType.h"
 #include "H5AtomType.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
@@ -295,6 +293,4 @@ void AtomType::setPad( H5T_pad_t lsb, H5T_pad_t msb ) const
 AtomType::~AtomType() {}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

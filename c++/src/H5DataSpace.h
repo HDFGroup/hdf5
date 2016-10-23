@@ -17,9 +17,7 @@
 #ifndef __H5DataSpace_H
 #define __H5DataSpace_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //! Class DataSpace operates on HDF5 dataspaces.
 class H5_DLLCPP DataSpace : public IdComponent {
@@ -147,7 +145,5 @@ class H5_DLLCPP DataSpace : public IdComponent {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5DataSpace_H

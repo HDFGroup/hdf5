@@ -17,9 +17,7 @@
 #ifndef __AbstractDs_H
 #define __AbstractDs_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 class ArrayType;
 class CompType;
@@ -94,7 +92,5 @@ class H5_DLLCPP AbstractDs {
 	// This member function is implemented by DataSet and Attribute - pure virtual.
 	virtual hid_t p_get_type() const = 0;
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __AbstractDs_H

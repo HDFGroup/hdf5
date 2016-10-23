@@ -26,9 +26,7 @@
 
 #include "h5test.h"
 
-#ifndef H5_NO_NAMESPACE
 using namespace H5;
-#endif
 
 #ifndef H5_NO_STD
 using std::cerr;
@@ -129,9 +127,7 @@ template <class Type1, class Type2>
 
 
 /* Prototypes for the test routines */
-#ifdef __cplusplus
 extern "C" {
-#endif
 void test_array();
 void test_attr();
 void test_compound();
@@ -161,9 +157,7 @@ void cleanup_reference();
 void cleanup_types();
 void cleanup_vlstrings();
 
-#ifdef __cplusplus
 }
-#endif
 
 /* not yet
 void cleanup_select(void);

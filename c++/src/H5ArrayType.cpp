@@ -26,9 +26,7 @@
 #include "H5DataType.h"
 #include "H5ArrayType.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	ArrayType default constructor
@@ -154,6 +152,4 @@ int ArrayType::getArrayDims(hsize_t* dims) const
 //--------------------------------------------------------------------------
 ArrayType::~ArrayType() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

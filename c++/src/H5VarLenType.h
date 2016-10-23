@@ -20,9 +20,7 @@
 #ifndef __H5VarLenType_H
 #define __H5VarLenType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //! VarLenType operates on the HDF5 C's Variable-length Datatypes.
 class H5_DLLCPP VarLenType : public DataType {
@@ -46,7 +44,5 @@ class H5_DLLCPP VarLenType : public DataType {
 	// Default constructor
 	VarLenType();
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5VarLenType_H

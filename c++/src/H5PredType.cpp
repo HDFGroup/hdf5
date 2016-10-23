@@ -24,9 +24,7 @@
 #include "H5AtomType.h"
 #include "H5PredType.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
@@ -886,9 +884,7 @@ const PredType& PredType::NATIVE_UINT_FAST64 = *NATIVE_UINT_FAST64_;
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif
 
 /***************************************************************************
 				Design Note

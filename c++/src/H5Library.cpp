@@ -33,9 +33,7 @@
 #include "H5DataSpace.h"
 #include "H5Library.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	H5Library::open (static)
@@ -260,6 +258,4 @@ H5Library::H5Library(){}
 // Destructor - private
 H5Library::~H5Library(){}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif
