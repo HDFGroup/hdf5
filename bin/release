@@ -168,7 +168,7 @@ release_date=`date +%F`
 today=`date +%Y%m%d`
 pmode='no'
 tmpdir="../#release_tmp.$$"	# tmp work directory
-DOC_URL=http://svn.hdfgroup.uiuc.edu/hdf5doc/trunk
+DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git
 CPPLUS_RM_NAME=cpplus_RM
 
 # Restore previous Version information
@@ -316,8 +316,8 @@ for comp in $methods; do
 	    ;;
 	doc)
 	    test "$verbose" && echo "   Creating docs..." 1>&2
-	    # Check out docs from svn repo
-	    (cd $tmpdir; svn co $DOC_URL > /dev/null) || exit 1
+	    # Check out docs from git repo
+	    (cd $tmpdir; git clone $DOC_URL > /dev/null) || exit 1
 	    # Create doxygen C++ RM
 	    (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
 	    # Replace version of C++ RM with just-created version
