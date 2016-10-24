@@ -20,9 +20,7 @@
 #ifndef __H5DSetMemXferPropList_H
 #define __H5DSetMemXferPropList_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class DSetMemXferPropList
     \brief Class DSetMemXferPropList represents the dataset memory and
@@ -131,7 +129,5 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5DSetMemXferPropList_H

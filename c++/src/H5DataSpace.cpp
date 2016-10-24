@@ -25,13 +25,11 @@
 #include "H5IdComponent.h"
 #include "H5DataSpace.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
 #ifndef H5_NO_STD
     using std::cerr;
     using std::endl;
 #endif  // H5_NO_STD
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // This DOXYGEN_SHOULD_SKIP_THIS block is a work-around approach to control
@@ -707,7 +705,4 @@ DataSpace::~DataSpace()
 	cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
     }
 }
-
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

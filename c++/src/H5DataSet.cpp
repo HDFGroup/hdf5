@@ -40,13 +40,11 @@
 #include "H5DataSet.h"
 #include "H5private.h"		// for HDfree
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
 #ifndef H5_NO_STD
     using std::cerr;
     using std::endl;
 #endif  // H5_NO_STD
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	DataSet default constructor
@@ -851,7 +849,4 @@ DataSet::~DataSet()
 	cerr << "DataSet::~DataSet - " << close_error.getDetailMsg() << endl;
     }
 }
-
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

@@ -28,10 +28,7 @@
 #include <string>
 
 #include "H5Cpp.h"      // C++ API header file
-
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
+using namespace H5;
 
 #include "h5cpputil.h"  // C++ utilility header file
 
@@ -806,9 +803,7 @@ static void test_reference_compat(void)
 **  test_reference(): Main reference testing routine.
 **
 ****************************************************************/
-#ifdef __cplusplus
 extern "C"
-#endif
 void test_reference(void)
 {
     // Output message about test being performed
@@ -829,9 +824,7 @@ void test_reference(void)
 ** Purpose:	Cleanup temporary test files
 ** Return:	none
 ****************************************************************/
-#ifdef __cplusplus
 extern "C"
-#endif
 void cleanup_reference(void)
 {
     HDremove(FILE1.c_str());

@@ -17,9 +17,7 @@
 #ifndef __H5IntType_H
 #define __H5IntType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //! Class IntType operates on HDF5 integer datatype.
 class H5_DLLCPP IntType : public AtomType {
@@ -51,7 +49,5 @@ class H5_DLLCPP IntType : public AtomType {
 	// Noop destructor.
 	virtual ~IntType();
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5IntType_H

@@ -27,9 +27,7 @@
 #include "H5CommonFG.h"
 #include "H5Alltypes.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs default constructor
@@ -324,6 +322,4 @@ VarLenType AbstractDs::getVarLenType() const
 //--------------------------------------------------------------------------
 AbstractDs::~AbstractDs() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

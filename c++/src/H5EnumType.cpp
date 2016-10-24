@@ -33,9 +33,7 @@
 #include "H5EnumType.h"
 #include "H5private.h"			// for HDmemset
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	EnumType default constructor
@@ -277,6 +275,4 @@ void EnumType::getMemberValue( unsigned memb_no, void *value ) const
 //--------------------------------------------------------------------------
 EnumType::~EnumType() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

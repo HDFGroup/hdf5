@@ -32,9 +32,7 @@
 #include "H5DataSet.h"
 #include "H5PredType.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	FloatType default constructor
@@ -285,6 +283,4 @@ void FloatType::setInpad( H5T_pad_t inpad ) const
 //--------------------------------------------------------------------------
 FloatType::~FloatType() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

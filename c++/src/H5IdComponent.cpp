@@ -22,9 +22,7 @@
 #include "H5DataSpace.h"
 #include "H5private.h"			// for HDmemset
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 // This flag indicates whether H5Library::initH5cpp has been called to register
 // the terminating functions with atexit()
@@ -352,6 +350,4 @@ bool IdComponent::p_valid_id(const hid_t obj_id)
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif

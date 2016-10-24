@@ -26,18 +26,13 @@
 #endif
 #include <string>
 
-#ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
     using std::cerr;
     using std::endl;
 #endif  // H5_NO_STD
-#endif
 
 #include "H5Cpp.h"      // C++ API header file
-
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
+using namespace H5;
 
 #include "h5cpputil.h"  // C++ utilility header file
 
@@ -546,9 +541,7 @@ static void test_named ()
 **  test_types(): Main datatypes testing routine.
 **
 ****************************************************************/
-#ifdef __cplusplus
 extern "C"
-#endif
 void test_types()
 {
     // Output message about test being performed
@@ -578,9 +571,7 @@ void test_types()
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void cleanup_types()
 {
     for (int i = 0; i < 3; i++)

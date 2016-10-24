@@ -17,9 +17,7 @@
 #ifndef __H5File_H
 #define __H5File_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class H5File
     \brief Class H5File represents an HDF5 file.
@@ -121,7 +119,5 @@ class H5_DLLCPP H5File : public H5Location, public CommonFG {
 	void p_get_file( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist );
 
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5File_H

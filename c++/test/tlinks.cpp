@@ -26,18 +26,13 @@
 #endif
 #include <string>
 
-#ifndef H5_NO_NAMESPACE
 #ifndef H5_NO_STD
     using std::cerr;
     using std::endl;
 #endif  // H5_NO_STD
-#endif
 
 #include "H5Cpp.h"      // C++ API header file
-
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
+using namespace H5;
 
 #include "h5cpputil.h"  // C++ test utilility header file
 
@@ -460,9 +455,7 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void test_links()
 {
     hid_t	fapl_id, fapl2_id;    /* File access property lists */
@@ -651,9 +644,7 @@ void test_links()
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void cleanup_links()
 {
     HDremove(FILENAME[0]);

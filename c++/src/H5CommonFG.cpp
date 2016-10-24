@@ -47,9 +47,7 @@
 //   GroupIException.
 // December 2000
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	CommonFG::createGroup
@@ -1302,7 +1300,5 @@ void f_DataSet_setId(DataSet* dset, hid_t new_id)
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 

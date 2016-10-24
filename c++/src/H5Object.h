@@ -34,9 +34,7 @@
 //		to H5Location will risk breaking user applications.
 //		-BMR
 //	Apr 2, 2014: Added wrapper getObjName for H5Iget_name 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class H5Object
     \brief Class H5Object is a bridge between H5Location and DataSet, DataType,
@@ -77,7 +75,5 @@ class H5_DLLCPP H5Object : public H5Location {
 
 }; /* end class H5Object */
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5Object_H
