@@ -14,8 +14,8 @@
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
 
-# Check that all the files in MANIFEST exist and that (if this is a
-# SVN checkout) that all the SVN-managed files appear in the
+# Check that all the files in MANIFEST exist and (if this is a
+# GIT checkout) that all the GIT-managed files appear in the
 # MANIFEST.
 # 
 
@@ -142,7 +142,7 @@ done
 if [ "X$fail" = "Xyes" ]; then
     cat 1>&2 <<EOF
 The MANIFEST is out of date. Files marked with a minus sign (-) no
-longer exist; files marked with a plus sign (+) are SVN-managed but do
+longer exist; files marked with a plus sign (+) are GIT-managed but do
 not appear in the MANIFEST.  Please remedy the situation and try again.
 EOF
     exit 1
