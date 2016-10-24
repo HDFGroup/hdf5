@@ -17,9 +17,9 @@
  * Programmer:  Robb Matzke <robb@arborea.spizella.com>
  *              Thursday, May 14, 1998
  *
- * Purpose:	Checks the effect of various I/O request sizes and raw data
- *		cache sizes.  Performance depends on the amount of data read
- *		from disk and we use a filter to get that number.
+ * Purpose:    Checks the effect of various I/O request sizes and raw data
+ *        cache sizes.  Performance depends on the amount of data read
+ *        from disk and we use a filter to get that number.
  */
 
 /* See H5private.h for how to include headers */
@@ -42,68 +42,68 @@
 #   define H5_ATTR_UNUSED __attribute__((unused))
 #endif
 
-#define FILE_NAME	"chunk.h5"
-#define LINESPOINTS	"lines"
-#define CH_SIZE		100		/*squared in terms of bytes    	*/
-#define DS_SIZE		20		/*squared in terms of chunks	*/
-#define FILTER_COUNTER	305
-#define READ		0
-#define WRITE		1
-#define MIN(X,Y)	((X)<(Y)?(X):(Y))
-#define MAX(X,Y)	((X)>(Y)?(X):(Y))
-#define SQUARE(X)	((X)*(X))
+#define FILE_NAME    "chunk.h5"
+#define LINESPOINTS    "lines"
+#define CH_SIZE        100        /*squared in terms of bytes        */
+#define DS_SIZE        20        /*squared in terms of chunks    */
+#define FILTER_COUNTER    305
+#define READ        0
+#define WRITE        1
+#define MIN(X,Y)    ((X)<(Y)?(X):(Y))
+#define MAX(X,Y)    ((X)>(Y)?(X):(Y))
+#define SQUARE(X)    ((X)*(X))
 
 /* The row-major test */
-#define RM_CACHE_STRT	25
-#define RM_CACHE_END	25
-#define RM_CACHE_DELT	5
-#define RM_START	(double)0.50F
-#define RM_END	        (double)5.00F
-#define RM_DELTA	(double)0.50F
-#define RM_W0		0.0F
-#define RM_NRDCC	521
+#define RM_CACHE_STRT    25
+#define RM_CACHE_END    25
+#define RM_CACHE_DELT    5
+#define RM_START    (double)0.50F
+#define RM_END            (double)5.00F
+#define RM_DELTA    (double)0.50F
+#define RM_W0        0.0F
+#define RM_NRDCC    521
 
 /* Diagonal test */
-#define DIAG_CACHE_STRT	25
-#define DIAG_CACHE_END	25
-#define DIAG_CACHE_DELT	5
-#define DIAG_START	(double)0.50F
-#define DIAG_END	(double)5.00F
-#define DIAG_DELTA	(double)0.50F
-/* #define DIAG_W0		0.65F */
-/* #define DIAG_NRDCC		521 */
+#define DIAG_CACHE_STRT    25
+#define DIAG_CACHE_END    25
+#define DIAG_CACHE_DELT    5
+#define DIAG_START    (double)0.50F
+#define DIAG_END    (double)5.00F
+#define DIAG_DELTA    (double)0.50F
+/* #define DIAG_W0        0.65F */
+/* #define DIAG_NRDCC        521 */
 
-static size_t	nio_g;
-static hid_t	fapl_g = -1;
+static size_t    nio_g;
+static hid_t    fapl_g = -1;
 
 /* Local function prototypes */
 static size_t
 counter (unsigned H5_ATTR_UNUSED flags, size_t cd_nelmts,
-	 const unsigned *cd_values, size_t nbytes,
-	 size_t *buf_size, void **buf);
+    const unsigned *cd_values, size_t nbytes,
+    size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_COUNTER[1] = {{
-    H5Z_CLASS_T_VERS,		/* H5Z_class_t version		*/
-    FILTER_COUNTER,		/* Filter id number		*/
-    1, 1,			/* Encoding and decoding enabled */
-    "counter",			/* Filter name for debugging	*/
+    H5Z_CLASS_T_VERS,        /* H5Z_class_t version        */
+    FILTER_COUNTER,        /* Filter id number        */
+    1, 1,            /* Encoding and decoding enabled */
+    "counter",            /* Filter name for debugging    */
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
-    counter,			/* The actual filter function	*/
+    counter,            /* The actual filter function    */
 }};
 
 
 /*-------------------------------------------------------------------------
- * Function:	counter
+ * Function:    counter
  *
- * Purpose:	Count number of bytes but don't do anything.
+ * Purpose:    Count number of bytes but don't do anything.
  *
- * Return:	Success:	src_nbytes-1
+ * Return:    Success:    src_nbytes-1
  *
- *		Failure:	never fails
+ *        Failure:    never fails
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, May 14, 1998
  *
  * Modifications:
@@ -112,8 +112,8 @@ const H5Z_class2_t H5Z_COUNTER[1] = {{
  */
 static size_t
 counter (unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
-	 const unsigned H5_ATTR_UNUSED *cd_values, size_t nbytes,
-	 size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
+    const unsigned H5_ATTR_UNUSED *cd_values, size_t nbytes,
+    size_t H5_ATTR_UNUSED *buf_size, void H5_ATTR_UNUSED **buf)
 {
     nio_g += nbytes;
     return nbytes;
@@ -121,16 +121,16 @@ counter (unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
 
 
 /*-------------------------------------------------------------------------
- * Function:	create_dataset
+ * Function:    create_dataset
  *
- * Purpose:	Creates a square dataset with square chunks, registers a
- *		stupid compress/uncompress pair for counting I/O, and
- *		initializes the dataset.  The chunk size is in bytes, the
- *		dataset size is in terms of chunks.
+ * Purpose:    Creates a square dataset with square chunks, registers a
+ *        stupid compress/uncompress pair for counting I/O, and
+ *        initializes the dataset.  The chunk size is in bytes, the
+ *        dataset size is in terms of chunks.
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, May 14, 1998
  *
  * Modifications:
@@ -140,12 +140,13 @@ counter (unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
 static void
 create_dataset (void)
 {
-    hid_t	file, space, dcpl, dset;
-    hsize_t	size[2];
-    signed char	*buf;
+    hid_t    file, space, dcpl, dset;
+    hsize_t    size[2];
+    signed char    *buf;
 
     /* The file */
     file = H5Fcreate (FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_g);
+    assert(file>=0);
 
     /* The data space */
     size[0] = size[1] = DS_SIZE * CH_SIZE;
@@ -176,14 +177,14 @@ create_dataset (void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_rowmaj
+ * Function:    test_rowmaj
  *
- * Purpose:	Reads the entire dataset using the specified size-squared
- *		I/O requests in row major order.
+ * Purpose:    Reads the entire dataset using the specified size-squared
+ *        I/O requests in row major order.
  *
- * Return:	Efficiency: data requested divided by data actually read.
+ * Return:    Efficiency: data requested divided by data actually read.
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, May 14, 1998
  *
  * Modifications:
@@ -193,13 +194,13 @@ create_dataset (void)
 static double
 test_rowmaj (int op, size_t cache_size, size_t io_size)
 {
-    hid_t	file, dset, mem_space, file_space;
-    signed char	*buf = (signed char *)calloc (1, (size_t)(SQUARE(io_size)));
-    hsize_t	i, j, hs_size[2];
-    hsize_t	hs_offset[2];
-    int		mdc_nelmts;
-    size_t	rdcc_nelmts;
-    double	w0;
+    hid_t    file, dset, mem_space, file_space;
+    signed char    *buf = (signed char *)calloc (1, (size_t)(SQUARE(io_size)));
+    hsize_t    i, j, hs_size[2];
+    hsize_t    hs_offset[2];
+    int        mdc_nelmts;
+    size_t    rdcc_nelmts;
+    double    w0;
 
     H5Pget_cache (fapl_g, &mdc_nelmts, &rdcc_nelmts, NULL, &w0);
 #ifdef RM_W0
@@ -209,7 +210,7 @@ test_rowmaj (int op, size_t cache_size, size_t io_size)
     rdcc_nelmts = RM_NRDCC;
 #endif
     H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
-		  cache_size*SQUARE (CH_SIZE), w0);
+        cache_size*SQUARE (CH_SIZE), w0);
     file = H5Fopen(FILE_NAME, H5F_ACC_RDWR, fapl_g);
     dset = H5Dopen2(file, "dset", H5P_DEFAULT);
     file_space = H5Dget_space(dset);
@@ -217,27 +218,27 @@ test_rowmaj (int op, size_t cache_size, size_t io_size)
 
     for (i=0; i<CH_SIZE*DS_SIZE; i+=io_size) {
 #if 0
-	fprintf (stderr, "%5d\b\b\b\b\b", (int)i);
-	fflush (stderr);
+    fprintf (stderr, "%5d\b\b\b\b\b", (int)i);
+    fflush (stderr);
 #endif
-	for (j=0; j<CH_SIZE*DS_SIZE; j+=io_size) {
-	    hs_offset[0] = i;
-	    hs_size[0] = MIN (io_size, CH_SIZE*DS_SIZE-i);
-	    hs_offset[1] = j;
-	    hs_size[1] = MIN (io_size, CH_SIZE*DS_SIZE-j);
-	    mem_space = H5Screate_simple (2, hs_size, hs_size);
-	    H5Sselect_hyperslab (file_space, H5S_SELECT_SET, hs_offset,
-				 NULL, hs_size, NULL);
+    for (j=0; j<CH_SIZE*DS_SIZE; j+=io_size) {
+        hs_offset[0] = i;
+        hs_size[0] = MIN (io_size, CH_SIZE*DS_SIZE-i);
+        hs_offset[1] = j;
+        hs_size[1] = MIN (io_size, CH_SIZE*DS_SIZE-j);
+        mem_space = H5Screate_simple (2, hs_size, hs_size);
+        H5Sselect_hyperslab (file_space, H5S_SELECT_SET, hs_offset,
+                NULL, hs_size, NULL);
 
-	    if (READ==op) {
-		H5Dread (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
-			 H5P_DEFAULT, buf);
-	    } else {
-		H5Dwrite (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
-			  H5P_DEFAULT, buf);
-	    }
-	    H5Sclose (mem_space);
-	}
+        if (READ==op) {
+        H5Dread (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
+            H5P_DEFAULT, buf);
+        } else {
+        H5Dwrite (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
+            H5P_DEFAULT, buf);
+        }
+        H5Sclose (mem_space);
+    }
     }
 
     free (buf);
@@ -250,16 +251,16 @@ test_rowmaj (int op, size_t cache_size, size_t io_size)
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_diag
+ * Function:    test_diag
  *
- * Purpose:	Reads windows diagonally across the dataset.  Each window is
- *		offset from the previous window by OFFSET in the x and y
- *		directions.  The reading ends after the (k,k) value is read
- *		where k is the maximum index in the dataset.
+ * Purpose:    Reads windows diagonally across the dataset.  Each window is
+ *        offset from the previous window by OFFSET in the x and y
+ *        directions.  The reading ends after the (k,k) value is read
+ *        where k is the maximum index in the dataset.
  *
- * Return:	Efficiency.
+ * Return:    Efficiency.
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Friday, May 15, 1998
  *
  * Modifications:
@@ -269,14 +270,14 @@ test_rowmaj (int op, size_t cache_size, size_t io_size)
 static double
 test_diag (int op, size_t cache_size, size_t io_size, size_t offset)
 {
-    hid_t	file, dset, mem_space, file_space;
-    hsize_t	i, hs_size[2];
-    hsize_t	nio = 0;
-    hsize_t	hs_offset[2];
-    signed char	*buf = (signed char *)calloc(1, (size_t)(SQUARE (io_size)));
-    int		mdc_nelmts;
-    size_t	rdcc_nelmts;
-    double	w0;
+    hid_t    file, dset, mem_space, file_space;
+    hsize_t    i, hs_size[2];
+    hsize_t    nio = 0;
+    hsize_t    hs_offset[2];
+    signed char    *buf = (signed char *)calloc(1, (size_t)(SQUARE (io_size)));
+    int        mdc_nelmts;
+    size_t    rdcc_nelmts;
+    double    w0;
 
     H5Pget_cache (fapl_g, &mdc_nelmts, &rdcc_nelmts, NULL, &w0);
 #ifdef DIAG_W0
@@ -286,28 +287,28 @@ test_diag (int op, size_t cache_size, size_t io_size, size_t offset)
     rdcc_nelmts = DIAG_NRDCC;
 #endif
     H5Pset_cache (fapl_g, mdc_nelmts, rdcc_nelmts,
-		  cache_size*SQUARE (CH_SIZE), w0);
+        cache_size*SQUARE (CH_SIZE), w0);
     file = H5Fopen(FILE_NAME, H5F_ACC_RDWR, fapl_g);
     dset = H5Dopen2(file, "dset", H5P_DEFAULT);
     file_space = H5Dget_space(dset);
     nio_g = 0;
 
     for (i=0, hs_size[0]=io_size; hs_size[0]==io_size; i+=offset) {
-	hs_offset[0] = hs_offset[1] = i;
-	hs_size[0] = hs_size[1] = MIN (io_size, CH_SIZE*DS_SIZE-i);
-	mem_space = H5Screate_simple (2, hs_size, hs_size);
-	H5Sselect_hyperslab (file_space, H5S_SELECT_SET, hs_offset, NULL,
-			     hs_size, NULL);
-	if (READ==op) {
-	    H5Dread (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
-		     H5P_DEFAULT, buf);
-	} else {
-	    H5Dwrite (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
-		      H5P_DEFAULT, buf);
-	}
-	H5Sclose (mem_space);
-	nio += hs_size[0]*hs_size[1];
-	if (i>0) nio -= SQUARE (io_size-offset);
+    hs_offset[0] = hs_offset[1] = i;
+    hs_size[0] = hs_size[1] = MIN (io_size, CH_SIZE*DS_SIZE-i);
+    mem_space = H5Screate_simple (2, hs_size, hs_size);
+    H5Sselect_hyperslab (file_space, H5S_SELECT_SET, hs_offset, NULL,
+                hs_size, NULL);
+    if (READ==op) {
+        H5Dread (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
+            H5P_DEFAULT, buf);
+    } else {
+        H5Dwrite (dset, H5T_NATIVE_SCHAR, mem_space, file_space,
+            H5P_DEFAULT, buf);
+    }
+    H5Sclose (mem_space);
+    nio += hs_size[0]*hs_size[1];
+    if (i>0) nio -= SQUARE (io_size-offset);
     }
 
     free (buf);
@@ -325,15 +326,15 @@ test_diag (int op, size_t cache_size, size_t io_size, size_t offset)
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	See file prologue.
+ * Purpose:    See file prologue.
  *
- * Return:	Success:
+ * Return:    Success:
  *
- *		Failure:
+ *        Failure:
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, May 14, 1998
  *
  * Modifications:
@@ -343,11 +344,11 @@ test_diag (int op, size_t cache_size, size_t io_size, size_t offset)
 int
 main (void)
 {
-    size_t	io_size;
-    double	effic, io_percent;
-    FILE	*f, *d;
-    size_t	cache_size;
-    double	w0;
+    size_t    io_size;
+    double    effic, io_percent;
+    FILE    *f, *d;
+    size_t    cache_size;
+    double    w0;
 
     /*
      * Create a global file access property list.
@@ -368,41 +369,41 @@ main (void)
      * windows.
      */
     if (RM_CACHE_STRT==RM_CACHE_END) {
-	fprintf (f, "set yrange [0:1.2]\n");
-	fprintf (f, "set ytics 0, 0.1, 1\n");
-	fprintf (f, "set xlabel \"%s\"\n",
-		 "Request size as a fraction of chunk size");
-	fprintf (f, "set ylabel \"Efficiency\"\n");
-	fprintf (f, "set title \"Cache %d chunks, w0=%g, "
-		 "Size=(total=%d, chunk=%d)\"\n",
-		 RM_CACHE_STRT, w0, DS_SIZE*CH_SIZE, CH_SIZE);
+    fprintf (f, "set yrange [0:1.2]\n");
+    fprintf (f, "set ytics 0, 0.1, 1\n");
+    fprintf (f, "set xlabel \"%s\"\n",
+        "Request size as a fraction of chunk size");
+    fprintf (f, "set ylabel \"Efficiency\"\n");
+    fprintf (f, "set title \"Cache %d chunks, w0=%g, "
+        "Size=(total=%d, chunk=%d)\"\n",
+        RM_CACHE_STRT, w0, DS_SIZE*CH_SIZE, CH_SIZE);
     } else {
-	fprintf (f, "set autoscale\n");
-	fprintf (f, "set hidden3d\n");
+    fprintf (f, "set autoscale\n");
+    fprintf (f, "set hidden3d\n");
     }
 
     fprintf (f, "set terminal postscript\nset output \"x-rowmaj-rd.ps\"\n");
     fprintf (f, "%s \"x-rowmaj-rd.dat\" title \"RowMaj-Read\" with %s\n",
-	     RM_CACHE_STRT==RM_CACHE_END?"plot":"splot",
-	     LINESPOINTS);
+        RM_CACHE_STRT==RM_CACHE_END?"plot":"splot",
+        LINESPOINTS);
     fprintf (f, "set terminal x11\nreplot\n");
     d = fopen ("x-rowmaj-rd.dat", "w");
     for (cache_size=RM_CACHE_STRT;
-	 cache_size<=RM_CACHE_END;
-	 cache_size+=RM_CACHE_DELT) {
-	for (io_percent=RM_START; io_percent<=RM_END; io_percent+=RM_DELTA) {
-	    io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
-	    printf ("Rowmaj-rd %8d %8.2f", (int)cache_size, io_percent);
-	    fflush (stdout);
-	    effic = test_rowmaj (READ, cache_size, io_size);
-	    printf (" %8.2f\n", effic);
-	    if (RM_CACHE_STRT==RM_CACHE_END) {
-		fprintf (d, "%g %g\n", io_percent, effic);
-	    } else {
-		fprintf (d, "%g\n", effic);
-	    }
-	}
-	fprintf (d, "\n");
+    cache_size<=RM_CACHE_END;
+    cache_size+=RM_CACHE_DELT) {
+    for (io_percent=RM_START; io_percent<=RM_END; io_percent+=RM_DELTA) {
+        io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
+        printf ("Rowmaj-rd %8d %8.2f", (int)cache_size, io_percent);
+        fflush (stdout);
+        effic = test_rowmaj (READ, cache_size, io_size);
+        printf (" %8.2f\n", effic);
+        if (RM_CACHE_STRT==RM_CACHE_END) {
+        fprintf (d, "%g %g\n", io_percent, effic);
+        } else {
+        fprintf (d, "%g\n", effic);
+        }
+    }
+    fprintf (d, "\n");
     }
     fclose (d);
     fprintf (f, "pause -1\n");
@@ -414,41 +415,41 @@ main (void)
      * windows.
      */
     if (RM_CACHE_STRT==RM_CACHE_END) {
-	fprintf (f, "set yrange [0:1.2]\n");
-	fprintf (f, "set ytics 0, 0.1, 1\n");
-	fprintf (f, "set xlabel \"%s\"\n",
-		 "Request size as a fraction of chunk size");
-	fprintf (f, "set ylabel \"Efficiency\"\n");
-	fprintf (f, "set title \"Cache %d chunks,w0=%g, "
-		 "Size=(total=%d, chunk=%d)\"\n",
-		 RM_CACHE_STRT, w0, DS_SIZE*CH_SIZE, CH_SIZE);
+    fprintf (f, "set yrange [0:1.2]\n");
+    fprintf (f, "set ytics 0, 0.1, 1\n");
+    fprintf (f, "set xlabel \"%s\"\n",
+        "Request size as a fraction of chunk size");
+    fprintf (f, "set ylabel \"Efficiency\"\n");
+    fprintf (f, "set title \"Cache %d chunks,w0=%g, "
+        "Size=(total=%d, chunk=%d)\"\n",
+        RM_CACHE_STRT, w0, DS_SIZE*CH_SIZE, CH_SIZE);
     } else {
-	fprintf (f, "set autoscale\n");
-	fprintf (f, "set hidden3d\n");
+    fprintf (f, "set autoscale\n");
+    fprintf (f, "set hidden3d\n");
     }
 
     fprintf (f, "set terminal postscript\nset output \"x-rowmaj-wr.ps\"\n");
     fprintf (f, "%s \"x-rowmaj-wr.dat\" title \"RowMaj-Write\" with %s\n",
-	     RM_CACHE_STRT==RM_CACHE_END?"plot":"splot",
-	     LINESPOINTS);
+        RM_CACHE_STRT==RM_CACHE_END?"plot":"splot",
+        LINESPOINTS);
     fprintf (f, "set terminal x11\nreplot\n");
     d = fopen ("x-rowmaj-wr.dat", "w");
     for (cache_size=RM_CACHE_STRT;
-	 cache_size<=RM_CACHE_END;
-	 cache_size+=RM_CACHE_DELT) {
-	for (io_percent=RM_START; io_percent<=RM_END; io_percent+=RM_DELTA) {
-	    io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
-	    printf ("Rowmaj-wr %8d %8.2f", (int)cache_size, io_percent);
-	    fflush (stdout);
-	    effic = test_rowmaj (WRITE, cache_size, io_size);
-	    printf (" %8.2f\n", effic);
-	    if (RM_CACHE_STRT==RM_CACHE_END) {
-		fprintf (d, "%g %g\n", io_percent, effic);
-	    } else {
-		fprintf (d, "%g\n", effic);
-	    }
-	}
-	fprintf (d, "\n");
+    cache_size<=RM_CACHE_END;
+    cache_size+=RM_CACHE_DELT) {
+    for (io_percent=RM_START; io_percent<=RM_END; io_percent+=RM_DELTA) {
+        io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
+        printf ("Rowmaj-wr %8d %8.2f", (int)cache_size, io_percent);
+        fflush (stdout);
+        effic = test_rowmaj (WRITE, cache_size, io_size);
+        printf (" %8.2f\n", effic);
+        if (RM_CACHE_STRT==RM_CACHE_END) {
+        fprintf (d, "%g %g\n", io_percent, effic);
+        } else {
+        fprintf (d, "%g\n", effic);
+        }
+    }
+    fprintf (d, "\n");
     }
     fclose (d);
     fprintf (f, "pause -1\n");
@@ -459,39 +460,39 @@ main (void)
      * Test diagonal read
      */
     if (DIAG_CACHE_STRT==DIAG_CACHE_END) {
-	fprintf (f, "set yrange [0:1.2]\n");
-	fprintf (f, "set ytics 0, 0.1, 1\n");
-	fprintf (f, "set xlabel \"%s\"\n",
-		 "Request size as a fraction of chunk size");
-	fprintf (f, "set ylabel \"Efficiency\"\n");
-	fprintf (f, "set title \"Cache %d chunks,w0=%g, "
-		 "Size=(total=%d, chunk=%d)\"\n",
-		 DIAG_CACHE_STRT, w0, DS_SIZE*CH_SIZE, CH_SIZE);
+    fprintf (f, "set yrange [0:1.2]\n");
+    fprintf (f, "set ytics 0, 0.1, 1\n");
+    fprintf (f, "set xlabel \"%s\"\n",
+        "Request size as a fraction of chunk size");
+    fprintf (f, "set ylabel \"Efficiency\"\n");
+    fprintf (f, "set title \"Cache %d chunks,w0=%g, "
+        "Size=(total=%d, chunk=%d)\"\n",
+        DIAG_CACHE_STRT, w0, DS_SIZE*CH_SIZE, CH_SIZE);
     } else {
-	fprintf (f, "set autoscale\n");
-	fprintf (f, "set hidden3d\n");
+    fprintf (f, "set autoscale\n");
+    fprintf (f, "set hidden3d\n");
     }
     fprintf (f, "set terminal postscript\nset output \"x-diag-rd.ps\"\n");
     fprintf (f, "%s \"x-diag-rd.dat\" title \"Diag-Read\" with %s\n",
-	     DIAG_CACHE_STRT==DIAG_CACHE_END?"plot":"splot", LINESPOINTS);
+        DIAG_CACHE_STRT==DIAG_CACHE_END?"plot":"splot", LINESPOINTS);
     fprintf (f, "set terminal x11\nreplot\n");
     d = fopen ("x-diag-rd.dat", "w");
     for (cache_size=DIAG_CACHE_STRT;
-	 cache_size<=DIAG_CACHE_END;
-	 cache_size+=DIAG_CACHE_DELT) {
-	for (io_percent=DIAG_START; io_percent<=DIAG_END; io_percent+=DIAG_DELTA) {
-	    io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
-	    printf ("Diag-rd   %8d %8.2f", (int)cache_size, io_percent);
-	    fflush (stdout);
-	    effic = test_diag (READ, cache_size, io_size, MAX (1, io_size/2));
-	    printf (" %8.2f\n", effic);
-	    if (DIAG_CACHE_STRT==DIAG_CACHE_END) {
-		fprintf (d, "%g %g\n", io_percent, effic);
-	    } else {
-		fprintf (d, "%g\n", effic);
-	    }
-	}
-	fprintf (d, "\n");
+    cache_size<=DIAG_CACHE_END;
+    cache_size+=DIAG_CACHE_DELT) {
+    for (io_percent=DIAG_START; io_percent<=DIAG_END; io_percent+=DIAG_DELTA) {
+        io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
+        printf ("Diag-rd   %8d %8.2f", (int)cache_size, io_percent);
+        fflush (stdout);
+        effic = test_diag (READ, cache_size, io_size, MAX (1, io_size/2));
+        printf (" %8.2f\n", effic);
+        if (DIAG_CACHE_STRT==DIAG_CACHE_END) {
+        fprintf (d, "%g %g\n", io_percent, effic);
+        } else {
+        fprintf (d, "%g\n", effic);
+        }
+    }
+    fprintf (d, "\n");
     }
     fclose (d);
     fprintf (f, "pause -1\n");
@@ -502,41 +503,41 @@ main (void)
      * Test diagonal write
      */
     if (DIAG_CACHE_STRT==DIAG_CACHE_END) {
-	fprintf (f, "set yrange [0:1.2]\n");
-	fprintf (f, "set ytics 0, 0.1, 1\n");
-	fprintf (f, "set xlabel \"%s\"\n",
-		 "Request size as a fraction of chunk size");
-	fprintf (f, "set ylabel \"Efficiency\"\n");
-	fprintf (f, "set title \"Cache %d chunks, w0=%g, "
-		 "Size=(total=%d, chunk=%d)\"\n",
-		 DIAG_CACHE_STRT, w0, DS_SIZE*CH_SIZE, CH_SIZE);
+    fprintf (f, "set yrange [0:1.2]\n");
+    fprintf (f, "set ytics 0, 0.1, 1\n");
+    fprintf (f, "set xlabel \"%s\"\n",
+        "Request size as a fraction of chunk size");
+    fprintf (f, "set ylabel \"Efficiency\"\n");
+    fprintf (f, "set title \"Cache %d chunks, w0=%g, "
+        "Size=(total=%d, chunk=%d)\"\n",
+        DIAG_CACHE_STRT, w0, DS_SIZE*CH_SIZE, CH_SIZE);
     } else {
-	fprintf (f, "set autoscale\n");
-	fprintf (f, "set hidden3d\n");
+    fprintf (f, "set autoscale\n");
+    fprintf (f, "set hidden3d\n");
     }
     fprintf (f, "set terminal postscript\nset output \"x-diag-wr.ps\"\n");
     fprintf (f, "%s \"x-diag-wr.dat\" title \"Diag-Write\" with %s\n",
-	     DIAG_CACHE_STRT==DIAG_CACHE_END?"plot":"splot", LINESPOINTS);
+        DIAG_CACHE_STRT==DIAG_CACHE_END?"plot":"splot", LINESPOINTS);
     fprintf (f, "set terminal x11\nreplot\n");
     d = fopen ("x-diag-wr.dat", "w");
     for (cache_size=DIAG_CACHE_STRT;
-	 cache_size<=DIAG_CACHE_END;
-	 cache_size+=DIAG_CACHE_DELT) {
-	for (io_percent=DIAG_START;
-	     io_percent<=DIAG_END;
-	     io_percent+=DIAG_DELTA) {
-	    io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
-	    printf ("Diag-wr   %8d %8.2f", (int)cache_size, io_percent);
-	    fflush (stdout);
-	    effic = test_diag (WRITE, cache_size, io_size, MAX (1, io_size/2));
-	    printf (" %8.2f\n", effic);
-	    if (DIAG_CACHE_STRT==DIAG_CACHE_END) {
-		fprintf (d, "%g %g\n", io_percent, effic);
-	    } else {
-		fprintf (d, "%g\n", effic);
-	    }
-	}
-	fprintf (d, "\n");
+    cache_size<=DIAG_CACHE_END;
+    cache_size+=DIAG_CACHE_DELT) {
+    for (io_percent=DIAG_START;
+        io_percent<=DIAG_END;
+        io_percent+=DIAG_DELTA) {
+        io_size = MAX (1, (size_t)(CH_SIZE*io_percent));
+        printf ("Diag-wr   %8d %8.2f", (int)cache_size, io_percent);
+        fflush (stdout);
+        effic = test_diag (WRITE, cache_size, io_size, MAX (1, io_size/2));
+        printf (" %8.2f\n", effic);
+        if (DIAG_CACHE_STRT==DIAG_CACHE_END) {
+        fprintf (d, "%g %g\n", io_percent, effic);
+        } else {
+        fprintf (d, "%g\n", effic);
+        }
+    }
+    fprintf (d, "\n");
     }
     fclose (d);
     fprintf (f, "pause -1\n");
