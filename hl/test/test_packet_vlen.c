@@ -28,7 +28,6 @@
 #define PT_COMP_VLEN "Dataset with Compound Type of VL types"
 #define PT_VLEN_VLEN "Dataset with VL of VL types"
 #define PT_FIXED_LEN "Fixed-length Packet Table"
-#define SPACE3_RANK     1
 #define L1_INCM         16
 #define L2_INCM         8
 #define NAME_BUF_SIZE   80
@@ -149,6 +148,7 @@ static int test_VLof_atomic(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vltype > 0) H5Tclose(vltype);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -228,7 +228,9 @@ static int test_VLof_comptype(void)
     if (ptable == H5I_INVALID_HID)
 	goto error;
 
-    /* Close the vlen datatype */
+    /* Release the datatypes */
+    if (H5Tclose(cmptype) < 0)
+	goto error;
     if (H5Tclose(vltype) < 0)
 	goto error;
 
@@ -286,6 +288,8 @@ static int test_VLof_comptype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (cmptype > 0) H5Tclose(cmptype);
+    if (vltype > 0) H5Tclose(vltype);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -311,13 +315,11 @@ static int test_compound_VL_VLtype(void)
 	hvl_t v;
     } compVLVL_t;
     hid_t   fid=H5I_INVALID_HID;	/* Test file identifier */
-    hid_t   space=H5I_INVALID_HID;	/* Dataspace identifier */
     hid_t   ptable=H5I_INVALID_HID;	/* Packet table identifier */
     hid_t   vlatomic=H5I_INVALID_HID;	/* Variable length datatype */
     hid_t   vlofvl=H5I_INVALID_HID;	/* Variable length datatype */
     hid_t   comp_vlvl=H5I_INVALID_HID;	/* ID of a compound datatype containing 
 					   a VL of VL of atomic datatype */
-    hsize_t dims1[] = {NRECORDS};
     hsize_t count;		/* Number of records in the table */
     compVLVL_t writeBuf[NRECORDS];/* Buffer to hold data to be written */
     compVLVL_t readBuf[NRECORDS]; /* Buffer to hold read data */
@@ -356,11 +358,6 @@ static int test_compound_VL_VLtype(void)
     if (fid < 0)
 	goto error;
 
-    /* Create dataspace for datasets */
-    space = H5Screate_simple(SPACE3_RANK, dims1, NULL);
-    if (space < 0)
-	goto error;
-
     /* Create a VL datatype of an atomic type */
     vlatomic = H5Tvlen_create (H5T_NATIVE_UINT);
     if (vlatomic < 0)
@@ -394,7 +391,11 @@ static int test_compound_VL_VLtype(void)
     if (ptable == H5I_INVALID_HID)
 	goto error;
 
-    /* Close the vlen datatype */
+    /* Release datatypes */
+    if (H5Tclose(vlatomic) < 0)
+	goto error;
+    if (H5Tclose(vlofvl) < 0)
+	goto error;
     if (H5Tclose(comp_vlvl) < 0)
 	goto error;
 
@@ -459,12 +460,6 @@ static int test_compound_VL_VLtype(void)
     if (ret < 0)
 	goto error;
 
-    /* Release datatypes */
-    if (H5Tclose(vlatomic) < 0)
-	goto error;
-    if (H5Tclose(vlofvl) < 0)
-	goto error;
-
     /* Close the file */
     if (H5Fclose(fid) < 0)
 	goto error;
@@ -473,6 +468,9 @@ static int test_compound_VL_VLtype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vlatomic > 0) H5Tclose(vlatomic);
+    if (vlofvl > 0) H5Tclose(vlofvl);
+    if (comp_vlvl > 0) H5Tclose(comp_vlvl);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -547,7 +545,9 @@ static int test_VLof_VLtype(void)
     if (ptable == H5I_INVALID_HID)
 	goto error;
 
-    /* Close the vlen datatype */
+    /* Release datatypes */
+    if (H5Tclose(vlatomic) < 0)
+	goto error;
     if (H5Tclose(vlofvl) < 0)
 	goto error;
 
@@ -590,6 +590,8 @@ static int test_VLof_VLtype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vlatomic > 0) H5Tclose(vlatomic);
+    if (vlofvl > 0) H5Tclose(vlofvl);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -771,6 +773,10 @@ static int adding_attribute(hid_t fid, const char *table_name, const char *attr_
     if (H5Aclose(attr_id) < 0)
 	goto error;
 
+    /* Close the dataspace */
+    if (H5Sclose(space_id) < 0)
+	goto error;
+
     /* Close the packet table */
     if (H5PTclose(ptable) < 0)
 	goto error;
@@ -778,6 +784,8 @@ static int adding_attribute(hid_t fid, const char *table_name, const char *attr_
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (attr_id > 0) H5Aclose(attr_id);
+    if (space_id > 0) H5Sclose(space_id);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     return ret;
 } /* adding_attribute */
@@ -792,18 +800,11 @@ error: /* An error has occurred.  Clean up and exit. */
 static herr_t verify_attribute(hid_t fid, const char *table_name, const char *attr_name)
 {
     hid_t ptable=H5I_INVALID_HID;	/* Packet table identifier */
-    hid_t space_id=H5I_INVALID_HID;	/* Dataspace for the attribute */
     hid_t attr_id=H5I_INVALID_HID;	/* Attribute identifier */
     hid_t dset_id=H5I_INVALID_HID;	/* Dataset associated with the pt */
-    hsize_t dims[] = {ATTR_DIM};	/* Dimensions for dataspace */
     int read_data[ATTR_DIM];		/* Output buffer */
     int ii;
     herr_t ret = FAIL;		/* Returned status from a callee */
-
-    /* Create dataspace for attribute */
-    space_id = H5Screate_simple(ATTR_RANK, dims, NULL);
-    if (space_id < 0)
-	goto error;
 
     /* Open the named packet table */
     ptable = H5PTopen(fid, table_name);
@@ -907,7 +908,7 @@ static int test_attributes(void)
     return(ret);
 
 error: /* An error has occurred.  Clean up and exit. */
-    H5Fclose(fid);
+    if (fid > 0) H5Fclose(fid);
     H5_FAILED();
     return FAIL;
 } /* test_attributes */
@@ -929,9 +930,8 @@ error: /* An error has occurred.  Clean up and exit. */
  * 2016/01/27 -BMR
  *-------------------------------------------------------------------------
  */
-static herr_t verify_accessors(const char *table_name, herr_t expected_value)
+static herr_t verify_accessors(hid_t fid, const char *table_name, herr_t expected_value)
 {
-    hid_t fid=H5I_INVALID_HID;		/* File identifier */
     hid_t ptable=H5I_INVALID_HID;	/* Packet table identifier */
     hid_t dset_id=H5I_INVALID_HID;	/* Dataset associated with the pt */
     hid_t dtype_id=H5I_INVALID_HID;	/* Dataset identifier */
@@ -939,11 +939,6 @@ static herr_t verify_accessors(const char *table_name, herr_t expected_value)
     ssize_t name_size;
     herr_t  is_varlen = 0;
     herr_t ret = FAIL;		/* Returned status from a callee */
-
-    /* Open the file. */
-    fid = H5Fopen(TEST_FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);
-    if (fid < 0)
-	goto error;
 
     /* Open the named packet table. */
     ptable = H5PTopen(fid, table_name);
@@ -993,7 +988,8 @@ static herr_t verify_accessors(const char *table_name, herr_t expected_value)
 
 error: /* An error has occurred.  Clean up and exit. */
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
-    return ret;
+    H5_FAILED();
+    return FAIL;
 } /* verify_accessors */
 
 /*-------------------------------------------------------------------------
@@ -1009,7 +1005,6 @@ error: /* An error has occurred.  Clean up and exit. */
 static int test_accessors(void)
 {
     hid_t fid=H5I_INVALID_HID;		/* File identifier */
-    hid_t ptable=H5I_INVALID_HID;	/* File identifier */
     herr_t ret = FAIL;		/* Returned status from a callee */
 
     TESTING("accessor functions");
@@ -1019,11 +1014,11 @@ static int test_accessors(void)
     if (fid < 0)
 	goto error;
 
-    ret = verify_accessors(PT_VLEN_ATOMIC, TRUE);
+    ret = verify_accessors(fid, PT_VLEN_ATOMIC, TRUE);
     if (ret < 0)
 	goto error;
 
-    ret = verify_accessors(PT_FIXED_LEN, FALSE);
+    ret = verify_accessors(fid, PT_FIXED_LEN, FALSE);
     if (ret < 0)
 	goto error;
 
@@ -1035,7 +1030,6 @@ static int test_accessors(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
-    if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5_FAILED();
     return FAIL;
@@ -1150,6 +1144,7 @@ static int testfl_VLof_atomic(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vltype > 0) H5Tclose(vltype);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -1229,7 +1224,9 @@ static int testfl_VLof_comptype(void)
     if (ptable == H5I_INVALID_HID)
 	goto error;
 
-    /* Close the vlen datatype */
+    /* Release the datatypes */
+    if (H5Tclose(cmptype) < 0)
+	goto error;
     if (H5Tclose(vltype) < 0)
 	goto error;
 
@@ -1287,6 +1284,8 @@ static int testfl_VLof_comptype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (cmptype > 0) H5Tclose(cmptype);
+    if (vltype > 0) H5Tclose(vltype);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -1312,13 +1311,11 @@ static int testfl_compound_VL_VLtype(void)
 	hvl_t v;
     } compVLVL_t;
     hid_t   fid=H5I_INVALID_HID;	/* Test file identifier */
-    hid_t   space=H5I_INVALID_HID;	/* Dataspace identifier */
     hid_t   ptable=H5I_INVALID_HID;	/* Packet table identifier */
     hid_t   vlatomic=H5I_INVALID_HID;	/* Variable length datatype */
     hid_t   vlofvl=H5I_INVALID_HID;	/* Variable length datatype */
     hid_t   comp_vlvl=H5I_INVALID_HID;	/* ID of a compound datatype containing 
 					   a VL of VL of atomic datatype */
-    hsize_t dims1[] = {NRECORDS};
     hsize_t count;		/* Number of records in the table */
     compVLVL_t writeBuf[NRECORDS];/* Buffer to hold data to be written */
     compVLVL_t readBuf[NRECORDS]; /* Buffer to hold read data */
@@ -1357,11 +1354,6 @@ static int testfl_compound_VL_VLtype(void)
     if (fid < 0)
 	goto error;
 
-    /* Create dataspace for datasets */
-    space = H5Screate_simple(SPACE3_RANK, dims1, NULL);
-    if (space < 0)
-	goto error;
-
     /* Create a VL datatype of an atomic type */
     vlatomic = H5Tvlen_create (H5T_NATIVE_UINT);
     if (vlatomic < 0)
@@ -1395,7 +1387,11 @@ static int testfl_compound_VL_VLtype(void)
     if (ptable == H5I_INVALID_HID)
 	goto error;
 
-    /* Close the vlen datatype */
+    /* Release datatypes */
+    if (H5Tclose(vlatomic) < 0)
+	goto error;
+    if (H5Tclose(vlofvl) < 0)
+	goto error;
     if (H5Tclose(comp_vlvl) < 0)
 	goto error;
 
@@ -1460,12 +1456,6 @@ static int testfl_compound_VL_VLtype(void)
     if (ret < 0)
 	goto error;
 
-    /* Release datatypes */
-    if (H5Tclose(vlatomic) < 0)
-	goto error;
-    if (H5Tclose(vlofvl) < 0)
-	goto error;
-
     /* Close the file */
     if (H5Fclose(fid) < 0)
 	goto error;
@@ -1474,6 +1464,9 @@ static int testfl_compound_VL_VLtype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vlatomic > 0) H5Tclose(vlatomic);
+    if (vlofvl > 0) H5Tclose(vlofvl);
+    if (comp_vlvl > 0) H5Tclose(comp_vlvl);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -1548,7 +1541,9 @@ static int testfl_VLof_VLtype(void)
     if (ptable == H5I_INVALID_HID)
 	goto error;
 
-    /* Close the vlen datatype */
+    /* Release datatypes */
+    if (H5Tclose(vlatomic) < 0)
+	goto error;
     if (H5Tclose(vlofvl) < 0)
 	goto error;
 
@@ -1591,6 +1586,8 @@ static int testfl_VLof_VLtype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vlatomic > 0) H5Tclose(vlatomic);
+    if (vlofvl > 0) H5Tclose(vlofvl);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -1653,7 +1650,6 @@ int test_packet_table_with_varlen(void)
     /* Test accessor functions */
     if (test_accessors() < 0)
 	status = FAIL;
-
 
 /**************************************************************************
 	Calling test functions for deprecated function H5PTcreate_fl

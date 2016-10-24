@@ -141,7 +141,9 @@ hid_t H5PTcreate(hid_t loc_id,
   if(H5Pclose(plistcopy_id) < 0)
     goto error;
 
-  if((table->type_id = H5Tget_native_type(dtype_id, H5T_DIR_DEFAULT)) < 0)
+  /* Make a copy of caller's datatype and save it in the table structure.
+     It will be closed when the table is closed */
+   if((table->type_id = H5Tcopy(dtype_id)) < 0)
     goto error;
 
   H5PT_create_index(table);
@@ -259,10 +261,9 @@ hid_t H5PTcreate_fl ( hid_t loc_id,
   if(H5Pclose(plist_id) < 0)
     goto error;
 
+  /* Make a copy of caller's datatype and save it in the table structure.
+     It will be closed when the table is closed */
   if((table->type_id = H5Tcopy(dtype_id)) < 0)
-    goto error;
-
-  if((table->type_id = H5Tget_native_type(table->type_id, H5T_DIR_DEFAULT)) < 0)
     goto error;
 
   H5PT_create_index(table);
@@ -352,8 +353,9 @@ hid_t H5PTopen( hid_t loc_id,
   if((type_id = H5Dget_type(table->dset_id)) < 0)
     goto error;
 
-  /* Get the table's native datatype */
-  if((table->type_id = H5Tget_native_type(type_id, H5T_DIR_ASCEND)) < 0)
+  /* Make a copy of the datatype obtained and save it in the table structure.
+     It will be closed when the table is closed */
+   if((table->type_id = H5Tcopy(type_id)) < 0)
     goto error;
 
   /* Close the disk datatype */

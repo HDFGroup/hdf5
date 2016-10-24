@@ -52,7 +52,8 @@ int TestGetPacket(void);
    Test for unusual interactions between multiple packet tables. */
 int SystemTest(void);
 
-/* Test the variable length dataset functionality */
-int VariableLengthTest(void);
+/* Create a packet table with compound type, which has a string type.  Verify
+   that data was written and read correctly. */
+int TestHDFFV_9758(void);
 
 #endif /* PTABLETEST */
