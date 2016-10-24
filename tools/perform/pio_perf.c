@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -378,7 +377,7 @@ main(int argc, char **argv)
     }
 
     if (opts->output_file) {
-        if ((output = fopen(opts->output_file, "w")) == NULL) {
+        if ((output = HDfopen(opts->output_file, "w")) == NULL) {
             fprintf(stderr, "%s: cannot open output file\n", progname);
             perror(opts->output_file);
             goto finish;
@@ -461,28 +460,28 @@ run_test_loop(struct options *opts)
         if (parms.dim2d){
             parms.num_bytes = (off_t)pow((double)(opts->num_bpp*parms.num_procs),2);
             if (parms.interleaved)
-            output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MBs\n",
+            output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MB\n",
                 buf_size, opts->blk_size,
                 ((double)parms.num_dsets * (double)parms.num_bytes)
                 / ONE_MB);
             else
-            output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MBs\n",
+            output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MB\n",
                 opts->blk_size, buf_size,
                 ((double)parms.num_dsets * (double)parms.num_bytes)
                 / ONE_MB);
 
             print_indent(1);
-            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2fx%.2f KBs\n",
+            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2fx%.2f KB\n",
                 parms.num_files, parms.num_dsets, (double)(opts->num_bpp*parms.num_procs)/ONE_KB,
                 (double)(opts->num_bpp*parms.num_procs)/ONE_KB);
         }
         else{
             parms.num_bytes = (off_t)opts->num_bpp*parms.num_procs;
-            output_report("Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
+            output_report("Transfer Buffer Size: %ld bytes, File size: %.2f MB\n",
                 buf_size,((double)parms.num_dsets * (double)parms.num_bytes) / ONE_MB);
 
             print_indent(1);
-            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2f MBs\n",
+            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2f MB\n",
                 parms.num_files, parms.num_dsets, (double)(opts->num_bpp*parms.num_procs)/ONE_MB);
         }
 
@@ -1228,7 +1227,7 @@ report_parameters(struct options *opts)
         HDfprintf(output, "Contiguous\n");
 
     {
-        char *prefix = getenv("HDF5_PARAPREFIX");
+        char *prefix = HDgetenv("HDF5_PARAPREFIX");
 
         HDfprintf(output, "rank %d: Env HDF5_PARAPREFIX=%s\n", rank,
                   (prefix ? prefix : "not set"));
@@ -1293,7 +1292,7 @@ parse_command_line(int argc, char *argv[])
                     char buf[10];
                     int i;
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1345,7 +1344,7 @@ parse_command_line(int argc, char *argv[])
                     char buf[10];
                     int i;
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1509,7 +1508,7 @@ parse_size_directive(const char *size)
     off_t s;
     char *endptr;
 
-    s = strtol(size, &endptr, 10);
+    s = HDstrtol(size, &endptr, 10);
 
     if (endptr && *endptr) {
         while (*endptr != '\0' && (*endptr == ' ' || *endptr == '\t'))
@@ -1673,60 +1672,8 @@ usage(const char *prog)
         printf("  HDF5_MPI_INFO    MPI INFO object key=value separated by ;\n");
         printf("  HDF5_PARAPREFIX  Paralllel data files prefix\n");
         fflush(stdout);
-    }
-}
-
-void debug_start_stop_time(io_time_t *pt, timer_type t, int start_stop)
-{
-#if 1
-        if (pio_debug_level >= 4) {
-            const char *msg;
-            int myrank;
-
-            MPI_Comm_rank(pio_comm_g, &myrank);
-
-            switch (t) {
-            case HDF5_FILE_OPENCLOSE:
-                msg = "File Open/Close";
-                break;
-            case HDF5_DATASET_CREATE:
-                msg = "Dataset Create";
-                break;
-            case HDF5_MPI_WRITE:
-                msg = "MPI Write";
-                break;
-            case HDF5_MPI_READ:
-                msg = "MPI Read";
-                break;
-            case HDF5_FINE_WRITE_FIXED_DIMS:
-                msg = "Fine Write";
-                break;
-            case HDF5_FINE_READ_FIXED_DIMS:
-                msg = "Fine Read";
-                break;
-            case HDF5_GROSS_WRITE_FIXED_DIMS:
-                msg = "Gross Write";
-                break;
-            case HDF5_GROSS_READ_FIXED_DIMS:
-                msg = "Gross Read";
-                break;
-            case HDF5_RAW_WRITE_FIXED_DIMS:
-                msg = "Raw Write";
-                break;
-            case HDF5_RAW_READ_FIXED_DIMS:
-                msg = "Raw Read";
-                break;
-            default:
-                msg = "Unknown Timer";
-                break;
-            }
-
-            fprintf(output, "    Proc %d: %s %s: %.2f\n", myrank, msg,
-                    (start_stop == TSTART ? "Start" : "Stop"),
-                    pt->total_time[t]);
-        }
-#endif
-} /* debug_start_stop_time */
+    } /* end if */
+} /* end usage() */
 
 #else /* H5_HAVE_PARALLEL */
 
@@ -1736,13 +1683,12 @@ void debug_start_stop_time(io_time_t *pt, timer_type t, int start_stop)
  *              parallel stuff.
  * Return:      EXIT_SUCCESS
  * Programmer:  Bill Wendling, 14. November 2001
- * Modifications:
  */
 int
 main(void)
 {
     printf("No parallel IO performance because parallel is not configured\n");
     return EXIT_SUCCESS;
-}
+} /* end main */
 
 #endif /* !H5_HAVE_PARALLEL */
