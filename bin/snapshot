@@ -315,11 +315,9 @@ CURRENT=${BASEDIR}/current
 PREVIOUS=${BASEDIR}/previous
 ReleaseDir=${ReleaseDir:=${BASEDIR}/${ReleaseDir_default}}
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
-if [ $H5VERSION != hdf5 ]; then
-    SVNVERSION="hdf5/branches/$H5VERSION"
-else
-    SVNVERSION=hdf5/trunk		# use the default (trunk) version
-fi
+HDFREPOS=hdf5
+GIT_URL=ssh://git@bitbucket.hdfgroup.org:7999/hdffv/hdf5.git
+GIT_BRANCH=hdf5_1_8
 
 # Try finding a version of diff that supports the -I option too.
 DIFF=diff
@@ -343,9 +341,14 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     # regardless of the return code of distclean.
     ( cd ${CURRENT}; test -f Makefile && ${MAKE} distclean)
 
-    SVNROOT=http://svn.hdfgroup.uiuc.edu
-    # Check out the current version from source repository.
-    (cd $BASEDIR; svn -q co ${SVNROOT}/${SVNVERSION} current ) || exit 1
+    # Create fresh clone of $GIT_URL from source repository in $BASEDIR/current
+     (cd $BASEDIR; rm -rf current
+      if test -n $GIT_BRANCH; then         # checkout the branch
+         git clone $GIT_URL -b $GIT_BRANCH
+      else                                 # use the default (develop) version
+         git clone $GIT_URL
+      fi
+      mv $HDFREPOS current ) || exit 1
 fi # Do source checkout
 
 
@@ -470,14 +473,14 @@ if [ "$cmd" = "all" -o -n "$cmdrel" ]; then
 	    echo "Making snapshot release ($RELEASE_VERSION) to ${ReleaseDir}..."
 	    bin/release -d $ReleaseDir $METHODS
 	    perl bin/h5vers -i
-	    svn -q commit -m "Snapshot $RELEASE_VERSION"
+	    git commit -m "Snapshot $RELEASE_VERSION"
 	)
 	errcode=$?
     fi
 
     # Replace the previous version with the current version.
     # Should check if the errcode of the release process but there
-    # are other failures after release was done (e.g. h5vers or svn failures)
+    # are other failures after release was done (e.g. h5vers or git failures)
     # that should allow the replacement to occure.
     rm -rf ${PREVIOUS}
     mv ${CURRENT} ${PREVIOUS}
