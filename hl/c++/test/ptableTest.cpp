@@ -634,7 +634,7 @@ int TestHDFFV_9758()
 
     // Create a packet table
     FL_PacketTable ptable(fileID, "/examplePacketTable", compound_type, 1);
-    if (not ptable.IsValid())
+    if (!ptable.IsValid())
 	goto error;
 
     // Add packets to the table
