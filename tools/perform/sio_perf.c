@@ -68,7 +68,7 @@
 #define SIO_HDF5            0x4
 
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes,t) (((t)==0.0F) ? 0.0F : ((((double)bytes) / ONE_MB) / (t)))
+#define MB_PER_SEC(bytes,t) (H5_DBL_ABS_EQUAL(t, (double)0.0F) ? (double)0.0F : ((((double)bytes) / (double)ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE    1
@@ -392,6 +392,7 @@ run_test_loop(struct options *opts)
     parameters parms;
     int i;
     size_t      buf_bytes;
+
     /* load options into parameter structure */
     parms.num_files = opts->num_files;
     parms.num_dsets = opts->num_dsets;
@@ -943,7 +944,8 @@ parse_command_line(int argc, char *argv[])
     register int opt;
     struct options *cl_opts;
     int i, default_rank, actual_rank, ranks[4];
-    cl_opts = (struct options *)malloc(sizeof(struct options));
+
+    cl_opts = (struct options *)HDmalloc(sizeof(struct options));
 
     cl_opts->output_file = NULL;
     cl_opts->io_types =  0;    /* will set default after parsing options */
@@ -956,11 +958,11 @@ parse_command_line(int argc, char *argv[])
     cl_opts->chk_rank = 0;
     cl_opts->order_rank = 0;
 
-    for (i=0; i<MAX_DIMS; i++){
-        cl_opts->buf_size[i]=(i+1)*10;
-        cl_opts->dset_size[i]=(i+1)*100;
-        cl_opts->chk_size[i]=(i+1)*10;
-        cl_opts->order[i]=i+1;
+    for(i = 0; i < MAX_DIMS; i++) {
+        cl_opts->buf_size[i] = (size_t)((i + 1) * 10);
+        cl_opts->dset_size[i] = (hsize_t)((i + 1) * 100);
+        cl_opts->chk_size[i] = (size_t)((i + 1) * 10);
+        cl_opts->order[i] = i + 1;
     }
 
     cl_opts->vfd = sec2;
@@ -985,7 +987,7 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1024,7 +1026,7 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1052,7 +1054,7 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1110,7 +1112,7 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1174,7 +1176,7 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
@@ -1202,13 +1204,13 @@ parse_command_line(int argc, char *argv[])
                 while (end && *end != '\0') {
                     char buf[10];
 
-                    memset(buf, '\0', sizeof(buf));
+                    HDmemset(buf, '\0', sizeof(buf));
 
                     for (i = 0; *end != '\0' && *end != ','; ++end)
                         if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
-                    cl_opts->order[j] = parse_size_directive(buf);
+                    cl_opts->order[j] = (int)parse_size_directive(buf);
 
                     j++;
 
@@ -1300,7 +1302,7 @@ parse_size_directive(const char *size)
     off_t s;
     char *endptr;
 
-    s = strtol(size, &endptr, 10);
+    s = HDstrtoull(size, &endptr, 10);
 
     if (endptr && *endptr) {
         while (*endptr != '\0' && (*endptr == ' ' || *endptr == '\t'))
@@ -1311,14 +1313,17 @@ parse_size_directive(const char *size)
             case 'k':
                 s *= ONE_KB;
                 break;
+
             case 'M':
             case 'm':
                 s *= ONE_MB;
                 break;
+
             case 'G':
             case 'g':
                 s *= ONE_GB;
                 break;
+
             default:
                 fprintf(stderr, "Illegal size specifier '%c'\n", *endptr);
                 exit(EXIT_FAILURE);
