@@ -148,6 +148,7 @@ static int test_VLof_atomic(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vltype > 0) H5Tclose(vltype);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -287,6 +288,8 @@ static int test_VLof_comptype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (cmptype > 0) H5Tclose(cmptype);
+    if (vltype > 0) H5Tclose(vltype);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -465,6 +468,9 @@ static int test_compound_VL_VLtype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vlatomic > 0) H5Tclose(vlatomic);
+    if (vlofvl > 0) H5Tclose(vlofvl);
+    if (comp_vlvl > 0) H5Tclose(comp_vlvl);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -584,6 +590,8 @@ static int test_VLof_VLtype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vlatomic > 0) H5Tclose(vlatomic);
+    if (vlofvl > 0) H5Tclose(vlofvl);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -776,6 +784,8 @@ static int adding_attribute(hid_t fid, const char *table_name, const char *attr_
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (attr_id > 0) H5Aclose(attr_id);
+    if (space_id > 0) H5Sclose(space_id);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     return ret;
 } /* adding_attribute */
@@ -898,7 +908,7 @@ static int test_attributes(void)
     return(ret);
 
 error: /* An error has occurred.  Clean up and exit. */
-    H5Fclose(fid);
+    if (fid > 0) H5Fclose(fid);
     H5_FAILED();
     return FAIL;
 } /* test_attributes */
@@ -920,9 +930,8 @@ error: /* An error has occurred.  Clean up and exit. */
  * 2016/01/27 -BMR
  *-------------------------------------------------------------------------
  */
-static herr_t verify_accessors(const char *table_name, herr_t expected_value)
+static herr_t verify_accessors(hid_t fid, const char *table_name, herr_t expected_value)
 {
-    hid_t fid=H5I_INVALID_HID;		/* File identifier */
     hid_t ptable=H5I_INVALID_HID;	/* Packet table identifier */
     hid_t dset_id=H5I_INVALID_HID;	/* Dataset associated with the pt */
     hid_t dtype_id=H5I_INVALID_HID;	/* Dataset identifier */
@@ -930,11 +939,6 @@ static herr_t verify_accessors(const char *table_name, herr_t expected_value)
     ssize_t name_size;
     herr_t  is_varlen = 0;
     herr_t ret = FAIL;		/* Returned status from a callee */
-
-    /* Open the file. */
-    fid = H5Fopen(TEST_FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);
-    if (fid < 0)
-	goto error;
 
     /* Open the named packet table. */
     ptable = H5PTopen(fid, table_name);
@@ -984,7 +988,8 @@ static herr_t verify_accessors(const char *table_name, herr_t expected_value)
 
 error: /* An error has occurred.  Clean up and exit. */
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
-    return ret;
+    H5_FAILED();
+    return FAIL;
 } /* verify_accessors */
 
 /*-------------------------------------------------------------------------
@@ -1000,7 +1005,6 @@ error: /* An error has occurred.  Clean up and exit. */
 static int test_accessors(void)
 {
     hid_t fid=H5I_INVALID_HID;		/* File identifier */
-    hid_t ptable=H5I_INVALID_HID;	/* File identifier */
     herr_t ret = FAIL;		/* Returned status from a callee */
 
     TESTING("accessor functions");
@@ -1010,11 +1014,11 @@ static int test_accessors(void)
     if (fid < 0)
 	goto error;
 
-    ret = verify_accessors(PT_VLEN_ATOMIC, TRUE);
+    ret = verify_accessors(fid, PT_VLEN_ATOMIC, TRUE);
     if (ret < 0)
 	goto error;
 
-    ret = verify_accessors(PT_FIXED_LEN, FALSE);
+    ret = verify_accessors(fid, PT_FIXED_LEN, FALSE);
     if (ret < 0)
 	goto error;
 
@@ -1026,7 +1030,6 @@ static int test_accessors(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
-    if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5_FAILED();
     return FAIL;
@@ -1141,6 +1144,7 @@ static int testfl_VLof_atomic(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vltype > 0) H5Tclose(vltype);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -1280,6 +1284,8 @@ static int testfl_VLof_comptype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (cmptype > 0) H5Tclose(cmptype);
+    if (vltype > 0) H5Tclose(vltype);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -1458,6 +1464,9 @@ static int testfl_compound_VL_VLtype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vlatomic > 0) H5Tclose(vlatomic);
+    if (vlofvl > 0) H5Tclose(vlofvl);
+    if (comp_vlvl > 0) H5Tclose(comp_vlvl);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);
@@ -1577,6 +1586,8 @@ static int testfl_VLof_VLtype(void)
     return SUCCEED;
 
 error: /* An error has occurred.  Clean up and exit. */
+    if (vlatomic > 0) H5Tclose(vlatomic);
+    if (vlofvl > 0) H5Tclose(vlofvl);
     if (H5PTis_valid(ptable) > 0) H5PTclose(ptable);
     if (fid > 0) H5Fclose(fid);
     H5PTfree_vlen_buff(ptable, NRECORDS, readBuf);

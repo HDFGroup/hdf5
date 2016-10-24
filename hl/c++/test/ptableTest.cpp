@@ -38,20 +38,21 @@ int main(void)
     }
     else {
 
-            num_errors += BasicTest();
+	num_errors += BasicTest();
 
-            num_errors += TestCompoundDatatype();
+	num_errors += TestCompoundDatatype();
 
-            num_errors += TestGetPacket();
+	num_errors += TestGetPacket();
 
-            num_errors += TestGetNext();
+	num_errors += TestGetNext();
 
-            num_errors += TestCompress();
+	num_errors += TestCompress();
 
-            num_errors += TestErrors();
+	num_errors += TestErrors();
 
-            num_errors += SystemTest();
+	num_errors += SystemTest();
 
+	/* Test data corruption in packed structs */
 	num_errors += TestHDFFV_9758();
 
         /* Terminate access to the file. */
@@ -562,7 +563,7 @@ error:
 
 /*-------------------------------------------------------------------------
  * TestHDFFV_9758(): Test that a packet table with compound datatype which
- *	contain string type can be created and written correctly. (HDFFV-9758)
+ *	contains string type can be created and written correctly. (HDFFV-9758)
  *
  * Notes:
  *	Previously, data of the field that follows the string was read back
@@ -599,12 +600,9 @@ int TestHDFFV_9758()
         s1[i].e = 100+i;
     }
 
-    TESTING("the fix of issue HDFFV-9758")
+    TESTING("data corruption in packed structs (HDFFV-9758)")
 
-    FL_PacketTable wrapper(fileID, H5P_DEFAULT, ABHI_PT, H5T_NATIVE_INT, 1);
-    if(! wrapper.IsValid())
-	goto error;
-
+    // Build a compound datatype
     compound_type = H5Tcreate(H5T_COMPOUND, sizeof(s1_t));
     if (compound_type < 0)
 	goto error;
@@ -619,7 +617,7 @@ int TestHDFFV_9758()
     if (err < 0)
 	goto error;
 
-    strtype  = H5Tcopy (H5T_C_S1);
+    strtype = H5Tcopy (H5T_C_S1);
     if (compound_type < 0)
 	goto error;
     err = H5Tset_size (strtype, STRING_LENGTH); /* create string */
@@ -632,11 +630,14 @@ int TestHDFFV_9758()
     if (err < 0)
 	goto error;
 
-{ // so ptable will go out of scope
+    { // so ptable will go out of scope before PASSED
+
+    // Create a packet table
     FL_PacketTable ptable(fileID, "/examplePacketTable", compound_type, 1);
     if (not ptable.IsValid())
 	goto error;
 
+    // Add packets to the table
     for (size_t i = 0; i < NUM_PACKETS; i++)
     {
 	/* Appends one packet at the current position */
@@ -644,6 +645,7 @@ int TestHDFFV_9758()
         if (err < 0) goto error;
     }
 
+    // Check packet count
     const hsize_t count = ptable.GetPacketCount(err);
     if (err < 0)
 	goto error;
@@ -655,8 +657,8 @@ int TestHDFFV_9758()
         << " but is " << count << endl;
     }
 
+    // Read and verify the data
     ptable.ResetIndex();
-
     for (size_t i = 0; i < NUM_PACKETS; i++)
     {
 	s1_t s2;
@@ -670,7 +672,7 @@ int TestHDFFV_9758()
 	else if (HDstrcmp(s2.d, s1[i].d))
 	    goto error;
     }
-}
+    } // end of ptable block
 
     PASSED();
     return 0;
@@ -678,6 +680,8 @@ int TestHDFFV_9758()
 error:
 
     H5E_BEGIN_TRY {
+        H5Tclose(strtype);
+        H5Tclose(compound_type);
         H5Fclose(fileID);
     } H5E_END_TRY;
 
