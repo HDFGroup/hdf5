@@ -585,9 +585,9 @@ error:
  *
  * Purpose:	Tests indexed storage stuff.
  *
- * Return:	Success:	exit(0)
+ * Return:	Success:	exit(EXIT_SUCCESS)
  *
- *		Failure:	exit(non-zero)
+ *		Failure:	exit(EXIT_FAILURE)
  *
  * Programmer:	Robb Matzke
  *		Wednesday, October 15, 1997
@@ -623,7 +623,7 @@ main(int argc, char *argv[])
             } else {
                 printf("unrecognized argument: %s\n", argv[i]);
 #if 0
-                exit(1);
+                exit(EXIT_FAILURE);
 #endif
             }
         }
@@ -658,7 +658,7 @@ main(int argc, char *argv[])
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0) {
         printf("Cannot create file %s; test aborted\n", filename);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     /* Initialize chunk dimensions */
@@ -726,7 +726,7 @@ main(int argc, char *argv[])
     if (nerrors) {
         printf("***** %d I-STORE TEST%s FAILED! *****\n",
                 nerrors, 1 == nerrors ? "" : "S");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     printf("All i-store tests passed.\n");

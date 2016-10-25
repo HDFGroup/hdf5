@@ -567,7 +567,7 @@ generates_sigfpe(void)
     HDfflush(stderr);
     if ((pid=fork()) < 0) {
 	HDperror("fork");
-	HDexit(1);
+	HDexit(EXIT_FAILURE);
     } else if (0==pid) {
 	for (i=0; i<2000; i++) {
 	    for(j = 0; j < sizeof(double); j++)
@@ -575,7 +575,7 @@ generates_sigfpe(void)
 	    f = (float)d;
 	    some_dummy_func((float)f);
 	}
-	HDexit(0);
+	HDexit(EXIT_SUCCESS);
     }
 
     while (pid!=waitpid(pid, &status, 0))
@@ -3346,7 +3346,7 @@ done:
     if(run_test==TEST_NOOP || run_test==TEST_NORMAL)
         HDexit(MIN((int)fails_all_tests, 254));
     else if(run_test==TEST_DENORM || run_test==TEST_SPECIAL)
-        HDexit(0);
+        HDexit(EXIT_SUCCESS);
     HDassert(0 && "Should not reach this point!");
     return 1;
 #else
@@ -3372,7 +3372,7 @@ error:
     if(run_test==TEST_NOOP || run_test==TEST_NORMAL)
         HDexit(MIN(MAX((int)fails_all_tests, 1), 254));
     else if(run_test==TEST_DENORM || run_test==TEST_SPECIAL)
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     HDassert(0 && "Should not reach this point!");
     return 1;
 #else
@@ -5251,7 +5251,7 @@ main(void)
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
     printf("All data type tests passed.\n");
     return 0;

@@ -2553,7 +2553,7 @@ main(void)
 
     if (nerrors) {
         printf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     puts("All unlink tests passed.");

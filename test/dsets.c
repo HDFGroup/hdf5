@@ -12008,9 +12008,9 @@ error:
  *
  * Purpose:	Tests the dataset interface (H5D)
  *
- * Return:	Success:	exit(0)
+ * Return:	Success:	exit(EXIT_SUCCESS)
  *
- *		Failure:	exit(1)
+ *		Failure:	exit(EXIT_FAILURE)
  *
  * Programmer:	Robb Matzke
  *		Tuesday, December  9, 1997
