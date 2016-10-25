@@ -170,8 +170,8 @@ int main (void)
 {
     pack_opt_t  pack_options;
     diff_opt_t  diff_options;
-    h5_stat_t		file_stat;
-    h5_stat_size_t	fsize1, fsize2;	/* file sizes */
+    h5_stat_t        file_stat;
+    h5_stat_size_t    fsize1, fsize2;    /* file sizes */
 #if defined (H5_HAVE_FILTER_SZIP)
     int szip_can_encode = 0;
 #endif
@@ -1536,8 +1536,6 @@ int main (void)
     {
         hid_t       fapl;
 
-        /* setup */
-        h5_reset();
         fapl = h5_fileaccess();
         h5_cleanup(H5REPACK_FILENAMES, fapl);
 
@@ -1798,7 +1796,7 @@ int make_testfiles(void)
         return -1;
 
     /*-------------------------------------------------------------------------
-    * create a file with obj and region references in attribute of compound and 
+    * create a file with obj and region references in attribute of compound and
     * vlen datatype
     *-------------------------------------------------------------------------*/
     if((fid = H5Fcreate(FNAME_ATTR_REF,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
@@ -2985,7 +2983,7 @@ out:
     H5E_BEGIN_TRY {
         H5Pclose(contig_dcpl);
         H5Pclose(chunked_dcpl);
-    
+
         H5Sclose(s_sid);
 
     } H5E_END_TRY;
@@ -3000,9 +2998,9 @@ out:
 * Purpose: make chunked datasets with unlimited max dim and chunk dim is
 *          bigger than current dim. (HDFFV-7933)
 *          Test for converting chunk to chunk , chunk to conti and chunk
-*          to compact.  
-*          - The chunk to chunk changes layout bigger than any current dim 
-*            again. 
+*          to compact.
+*          - The chunk to chunk changes layout bigger than any current dim
+*            again.
 *          - The chunk to compact test dataset bigger than 64K, should
 *            remain original layout.*
 *
@@ -4060,7 +4058,7 @@ int write_dset_in(hid_t loc_id,
             for(k = 0; k < 2; k++) {
                 if(make_diffs)
                     buf23[i][j][k] = 0;
-                else 
+                else
                     buf23[i][j][k] = (char)(n++);
             }
         }
@@ -5806,9 +5804,9 @@ out:
 /*-------------------------------------------------------------------------
  * Function: add_attr_with_objref
  *
- * Purpose: 
+ * Purpose:
  *  Create attributes with object reference to objects (dset,
- *  group, datatype). 
+ *  group, datatype).
  *
  * Note:
  *  this function depends on locally created objects, however can be modified
@@ -5826,7 +5824,7 @@ static herr_t add_attr_with_objref(hid_t file_id, hid_t obj_id)
 
     /* --------------------------------
      * add attribute with obj ref type
-     */    
+     */
     /* ref to dset */
     status = H5Rcreate(&data_attr_objref[0],file_id,NAME_OBJ_DS1,H5R_OBJECT,(hid_t)-1);
     if (status < 0)
@@ -5872,7 +5870,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: add_attr_with_regref
  *
- * Purpose: 
+ * Purpose:
  *  Create attributes with region reference to dset
  *
  * Note:
@@ -5943,11 +5941,11 @@ out:
 /*-------------------------------------------------------------------------
  * Function: gen_refered_objs
  *
- * Purpose: 
+ * Purpose:
  *  Create objects (dataset, group, datatype) to be referenced
  *
  * Note:
- *  This function is to use along with gen_obj_ref() gen_region_ref() 
+ *  This function is to use along with gen_obj_ref() gen_region_ref()
  *
  * Programmer: Jonathan Kim (March 23, 2010)
  *------------------------------------------------------------------------*/
@@ -5962,12 +5960,12 @@ static herr_t gen_refered_objs(hid_t loc_id)
     int data[3] = {10,20,30};
 
     /* Dset2 */
-    hid_t sid2=0, did2=0; 
+    hid_t sid2=0, did2=0;
     hsize_t dims2[2] = {3,16};
     char  data2[3][16] = {"The quick brown", "fox jumps over ", "the 5 lazy dogs"};
 
     /*-----------------------
-     * add short dataset 
+     * add short dataset
      * (define NAME_OBJ_DS1)
      */
     sid = H5Screate_simple(1, dims1, NULL);
@@ -5995,7 +5993,7 @@ static herr_t gen_refered_objs(hid_t loc_id)
     }
 
     /*--------------
-     * add group  
+     * add group
      * (define NAME_OBJ_GRP)
      */
     gid = H5Gcreate2 (loc_id, NAME_OBJ_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -6065,17 +6063,17 @@ out:
     if(sid2 > 0)
         H5Sclose(sid2);
     return ret;
-    
+
 }
 
 /*-------------------------------------------------------------------------
  * Function: gen_obj_ref
  *
- * Purpose: 
+ * Purpose:
  *  Generate object references to objects (dataset,group and named datatype)
  *
  * Note:
- *  copied from h5copygentest.c and upate to create named datatype  
+ *  copied from h5copygentest.c and upate to create named datatype
  *
  * Programmer: Jonathan Kim (March 18, 2010)
  *------------------------------------------------------------------------*/
@@ -6089,7 +6087,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
 
     /* attr with int type */
     hsize_t dim_attr_int[1]={2};
-    int data_attr_int[2] = {10,20}; 
+    int data_attr_int[2] = {10,20};
 
     /* write buffer for obj reference */
     hobj_ref_t objref_buf[3];
@@ -6126,7 +6124,7 @@ static herr_t gen_obj_ref(hid_t loc_id)
     }
 
     /*---------------------------------------------------------
-     * create dataset contain references 
+     * create dataset contain references
      */
     sid = H5Screate_simple (1, dims_dset_objref, NULL);
     if (sid < 0)
@@ -6190,7 +6188,7 @@ out:
  * Purpose: Generate dataset region references
  *
  * Note:
- *  copied from h5copygentest.c 
+ *  copied from h5copygentest.c
  *
  * Programmer: Jonathan Kim (March 18, 2010)
  *------------------------------------------------------------------------*/
@@ -6200,11 +6198,11 @@ static herr_t gen_region_ref(hid_t loc_id)
     herr_t ret = SUCCEED;
 
     /* target dataset */
-    hid_t sid_trg=0; 
+    hid_t sid_trg=0;
     hsize_t dims_trg[2] = {3,16};
 
     /* dset with region ref type */
-    hid_t sid_ref=0, oid_ref=0; 
+    hid_t sid_ref=0, oid_ref=0;
 
     /* region ref to target dataset */
     hsize_t coords[4][2] = { {0,1}, {2,11}, {1,0}, {2,4} };
@@ -6217,7 +6215,7 @@ static herr_t gen_region_ref(hid_t loc_id)
 
     /* attr with int type */
     hsize_t dim_attr_int[1]={2};
-    int data_attr_int[2] = {10,20}; 
+    int data_attr_int[2] = {10,20};
 
     sid_trg = H5Screate_simple (2, dims_trg, NULL);
     if (sid_trg < 0)
@@ -6318,7 +6316,7 @@ out:
     if (sid_ref > 0)
         H5Sclose (sid_ref);
     if (sid_trg > 0)
-        H5Sclose (sid_trg); 
+        H5Sclose (sid_trg);
 
     return ret;
 }
@@ -6326,7 +6324,7 @@ out:
 /*-------------------------------------------------------------------------
 * Function: make_references
 *
-* Purpose: create a file with obj and region references 
+* Purpose: create a file with obj and region references
 *
 * Programmer: Jonathan Kim (March 18, 2010)
 *-------------------------------------------------------------------------
@@ -6342,7 +6340,7 @@ static herr_t make_references(hid_t loc_id)
     {
         fprintf(stderr, "Failed to generate referenced object.\n");
         ret = FAIL;
-    } 
+    }
 
     /* add object reference */
     status = gen_obj_ref(loc_id);
@@ -6366,7 +6364,7 @@ static herr_t make_references(hid_t loc_id)
 /*-------------------------------------------------------------------------
 * Function: make_complex_attr_references
 *
-* Purpose: 
+* Purpose:
 *   create a file with :
 *   1. obj ref in attribute of compound type
 *   2. region ref in attribute of compound type
@@ -6398,14 +6396,14 @@ static herr_t make_references(hid_t loc_id)
 /* 4. region references in vlen attr */
 #define RANK_VLEN_REGREF 1
 #define DIM_VLEN_REGREF 1   /*  for element region */
-#define LEN0_VLEN_REGREF 1  /* element region  */ 
+#define LEN0_VLEN_REGREF 1  /* element region  */
 
 static herr_t make_complex_attr_references(hid_t loc_id)
 {
     herr_t ret = SUCCEED;
-    herr_t status; 
-    /* 
-     * for objects 
+    herr_t status;
+    /*
+     * for objects
      */
     hid_t objgid=0, objdid=0, objtid=0, objsid=0;
     hsize_t obj_dims[RANK_OBJ] = {DIM0_OBJ, DIM1_OBJ};
@@ -6426,8 +6424,8 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      */
     hsize_t main_dset_dims[RANK_DSET] = {DIM_DSET};
     hid_t main_sid=0, main_did=0;
-    /* 
-     * 1. obj references in compound attr 
+    /*
+     * 1. obj references in compound attr
      */
     hid_t comp_objref_tid=0, comp_objref_aid=0;
     typedef struct comp_objref_t {
@@ -6438,8 +6436,8 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     hid_t comp_objref_attr_sid=0;
     hsize_t comp_objref_dim[RANK_COMP_OBJREF] = {DIM_COMP_OBJREF};
 
-    /* 
-     * 2. region references in compound attr 
+    /*
+     * 2. region references in compound attr
      */
     hid_t comp_regref_tid=0, comp_regref_aid=0;
     typedef struct comp_regref_t {
@@ -6450,16 +6448,16 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     hid_t comp_regref_attr_sid=0;
     hsize_t comp_regref_dim[RANK_COMP_REGREF] = {DIM_COMP_REGREF};
     hsize_t coords[4][2] = { {0,1}, {2,3}, {3,4}, {4,5} };
-    
-    /* 
-     * 3. obj references in vlen attr 
+
+    /*
+     * 3. obj references in vlen attr
      */
     hid_t vlen_objref_attr_tid=0, vlen_objref_attr_sid=0;
     hid_t vlen_objref_attr_id=0;
     hvl_t vlen_objref_data[DIM_VLEN_OBJREF];
     hsize_t vlen_objref_dims[RANK_VLEN_OBJREF] = {DIM_VLEN_OBJREF};
 
-    /* 
+    /*
      * 4. region references in vlen attr
      */
     hid_t vlen_regref_attr_tid=0, vlen_regref_attr_sid=0;
@@ -6469,7 +6467,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
 
 
     /* ---------------------------------------
-     * create objects which to be referenced 
+     * create objects which to be referenced
      */
     /* object1 group */
     objgid = H5Gcreate2(loc_id, NAME_OBJ_GRP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -6497,7 +6495,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
 
 
     /* ---------------------------------------------
-     *  Put testing objs in this group 
+     *  Put testing objs in this group
      * create group contain dataset with attribute and the attribute has
      * compound type which contain obj and region reference */
     main_gid = H5Gcreate2(loc_id, "group_main", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -6514,7 +6512,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     main_sid = H5Screate_simple(RANK_DSET, main_dset_dims, NULL);
 
     main_did = H5Dcreate2(main_gid, "dset_main", H5T_NATIVE_INT, main_sid, H5P_DEFAULT,H5P_DEFAULT, H5P_DEFAULT);
-    
+
     status = H5Dwrite(main_did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, obj_data[0]);
     if (status < 0)
     {
@@ -6527,8 +6525,8 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      * 1. create obj references in a attribute of compound type
      */
 
-    /* 
-     * create compound type for attribute 
+    /*
+     * create compound type for attribute
      */
     comp_objref_tid = H5Tcreate (H5T_COMPOUND, sizeof(comp_objref_t));
 
@@ -6567,8 +6565,8 @@ static herr_t make_complex_attr_references(hid_t loc_id)
         goto out;
     }
     comp_objref_data[2].val_int = 20;
-    
-    /* 
+
+    /*
      * create attribute and write the object ref
      */
     comp_objref_attr_sid = H5Screate_simple (RANK_COMP_OBJREF, comp_objref_dim, NULL);
@@ -6593,7 +6591,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     H5Tinsert(comp_regref_tid, "value_int", HOFFSET(comp_regref_t, val_int), H5T_NATIVE_INT);
 
     /*
-     * create the region reference 
+     * create the region reference
      */
     status = H5Sselect_elements (objsid, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0)
@@ -6638,8 +6636,8 @@ static herr_t make_complex_attr_references(hid_t loc_id)
      vlen_objref_data[2].len = LEN2_VLEN_OBJREF;
      vlen_objref_data[2].p = HDmalloc (vlen_objref_data[2].len * sizeof(hobj_ref_t));
 
-     /* 
-      * create obj references 
+     /*
+      * create obj references
       */
      /* reference to dataset */
      status = H5Rcreate (&((hobj_ref_t*)vlen_objref_data[0].p)[0], loc_id, NAME_OBJ_DS1, H5R_OBJECT, (hid_t)-1);
@@ -6650,7 +6648,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
         goto out;
     }
      /* reference to group */
-     status = H5Rcreate (&((hobj_ref_t*)vlen_objref_data[1].p)[0], loc_id, NAME_OBJ_GRP, H5R_OBJECT, (hid_t)-1); 
+     status = H5Rcreate (&((hobj_ref_t*)vlen_objref_data[1].p)[0], loc_id, NAME_OBJ_GRP, H5R_OBJECT, (hid_t)-1);
     if (status < 0)
     {
         fprintf(stderr, "Error: %s %d> H5Rcreate failed.\n", FUNC, __LINE__);
@@ -6665,15 +6663,15 @@ static herr_t make_complex_attr_references(hid_t loc_id)
         ret = FAIL;
         goto out;
     }
-     
-     /* 
+
+     /*
       * create vlen type with obj reference
       */
      vlen_objref_attr_tid = H5Tvlen_create (H5T_STD_REF_OBJ);
      vlen_objref_attr_sid = H5Screate_simple (RANK_VLEN_OBJREF, vlen_objref_dims, NULL);
 
      /*
-     * create attribute and write the object reference 
+     * create attribute and write the object reference
      */
      vlen_objref_attr_id = H5Acreate2(main_did, "Vlen_OBJREF", vlen_objref_attr_tid, vlen_objref_attr_sid, H5P_DEFAULT, H5P_DEFAULT);
      status = H5Awrite (vlen_objref_attr_id, vlen_objref_attr_tid, vlen_objref_data);
@@ -6696,7 +6694,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     /*-------------------------------------------------------------------
      * 4. create region references in a attribute of vlen type
      */
-     
+
     /*
      * prepare vlen data
      */
@@ -6704,7 +6702,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
     vlen_regref_data[0].p = HDmalloc (vlen_regref_data[0].len * sizeof(hdset_reg_ref_t));
 
     /*
-     * create region reference 
+     * create region reference
      */
     status = H5Sselect_elements(objsid, H5S_SELECT_SET, (size_t)4, coords[0]);
     if (status < 0)
@@ -6720,15 +6718,15 @@ static herr_t make_complex_attr_references(hid_t loc_id)
         ret = FAIL;
         goto out;
     }
-    
-    /* 
+
+    /*
      * create vlen type with region reference
      */
     vlen_regref_attr_tid = H5Tvlen_create(H5T_STD_REF_DSETREG);
     vlen_regref_attr_sid = H5Screate_simple(RANK_VLEN_REGREF, vlen_regref_dim, NULL);
-    
+
     /*
-     * create attribute and write the region reference 
+     * create attribute and write the region reference
      */
     vlen_regref_attr_id = H5Acreate2(main_did, "Vlen_REGREF", vlen_regref_attr_tid, vlen_regref_attr_sid, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Awrite(vlen_regref_attr_id, vlen_regref_attr_tid, vlen_regref_data);
@@ -6738,7 +6736,7 @@ static herr_t make_complex_attr_references(hid_t loc_id)
         ret = FAIL;
         goto out;
     }
-    
+
     /* close resource for vlen data */
     status = H5Dvlen_reclaim (vlen_regref_attr_tid, vlen_regref_attr_sid, H5P_DEFAULT, vlen_regref_data);
     if (status < 0)
