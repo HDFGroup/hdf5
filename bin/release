@@ -332,7 +332,7 @@ for comp in $methods; do
             fi
 	    test "$verbose" && echo "   Creating docs..." 1>&2
 	    # Check out docs from git repo
-	    (cd $tmpdir; git clone $DOC_URL > /dev/null) || exit 1
+	    (cd $tmpdir; git clone -q $DOC_URL ${DOCVERSION} ) || exit 1
 	    # Create doxygen C++ RM
 	    (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
 	    # Replace version of C++ RM with just-created version
