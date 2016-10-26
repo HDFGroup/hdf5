@@ -252,10 +252,12 @@ void H5Library::setFreeListLimits(int reg_global_lim, int reg_list_lim,
    }
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Default constructor - private
 H5Library::H5Library(){}
 
 // Destructor - private
 H5Library::~H5Library(){}
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 } // end namespace
