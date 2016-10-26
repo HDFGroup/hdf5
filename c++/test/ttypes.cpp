@@ -18,27 +18,19 @@
    ttypes.cpp - HDF5 C++ testing the general datatype functionality
 
  ***************************************************************************/
-
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
-
 #include "H5Cpp.h"      // C++ API header file
+using namespace H5;
 
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
-
+#include "h5test.h"
 #include "h5cpputil.h"  // C++ utilility header file
 
 /*
@@ -549,9 +541,7 @@ static void test_named ()
 **  test_types(): Main datatypes testing routine.
 **
 ****************************************************************/
-#ifdef __cplusplus
 extern "C"
-#endif
 void test_types()
 {
     // Output message about test being performed
@@ -581,9 +571,7 @@ void test_types()
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void cleanup_types()
 {
     for (int i = 0; i < 3; i++)

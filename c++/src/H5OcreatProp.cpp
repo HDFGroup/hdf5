@@ -22,9 +22,7 @@
 #include "H5OcreatProp.h"
 #include "H5FaccProp.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // This DOXYGEN_SHOULD_SKIP_THIS block is a work-around approach to control
@@ -217,6 +215,4 @@ unsigned ObjCreatPropList::getAttrCrtOrder() const
 //--------------------------------------------------------------------------
 ObjCreatPropList::~ObjCreatPropList() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

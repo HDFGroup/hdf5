@@ -48,10 +48,7 @@
 //   GroupIException.
 // December 2000
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-using namespace std;
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
@@ -70,6 +67,4 @@ CommonFG::~CommonFG() {}
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif

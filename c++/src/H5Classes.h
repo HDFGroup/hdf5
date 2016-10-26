@@ -17,9 +17,7 @@
 #ifndef __H5Classes_H
 #define __H5Classes_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 	class Exception;
 	class IdComponent;
 	class H5Location;
@@ -45,7 +43,5 @@ namespace H5 {
 	class H5File;
 	class Attribute;
 	class H5Library;
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5Classes_H

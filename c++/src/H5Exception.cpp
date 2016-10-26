@@ -18,9 +18,7 @@
 #include "H5Include.h"
 #include "H5Exception.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 const char Exception::DEFAULT_MSG[] = "No detailed information provided";
 
@@ -586,6 +584,5 @@ IdComponentException::IdComponentException(const H5std_string& func, const H5std
 ///\brief	Noop destructor.
 //--------------------------------------------------------------------------
 IdComponentException::~IdComponentException() throw() {}
-#ifndef H5_NO_NAMESPACE
+
 } // end namespace
-#endif

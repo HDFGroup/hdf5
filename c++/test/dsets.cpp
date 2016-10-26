@@ -30,21 +30,14 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
-
 #include "H5Cpp.h"	// C++ API header file
+using namespace H5;
 
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
-
+#include "h5test.h"
 #include "h5cpputil.h"	// C++ utilility header file
 
 const H5std_string	FILE1("dataset.h5");
@@ -1175,9 +1168,7 @@ test_types(H5File& file)
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void test_dset()
 {
     hid_t	fapl_id;
@@ -1235,9 +1226,7 @@ void test_dset()
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void cleanup_dsets()
 {
     HDremove(FILE1.c_str());

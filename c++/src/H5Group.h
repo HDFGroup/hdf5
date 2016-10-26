@@ -17,9 +17,7 @@
 #ifndef __Group_H
 #define __Group_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class Group
     \brief Class Group represents an HDF5 group.
@@ -81,7 +79,5 @@ class H5_DLLCPP Group : public H5Object {
 	hid_t id;	// HDF5 group id
 };
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __Group_H

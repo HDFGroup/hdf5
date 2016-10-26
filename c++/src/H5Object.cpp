@@ -35,9 +35,7 @@
 #include "H5Attribute.h"
 #include "H5private.h"		// for HDmemset
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // userAttrOpWrpr simply interfaces between the user's function and the
@@ -465,6 +463,4 @@ ssize_t H5Object::getObjName(H5std_string& obj_name, size_t len) const
 H5Object::~H5Object() {}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

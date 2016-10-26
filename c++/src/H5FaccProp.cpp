@@ -21,9 +21,7 @@
 #include "H5PropList.h"
 #include "H5FaccProp.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // This DOXYGEN_SHOULD_SKIP_THIS block is a work-around approach to control
@@ -748,6 +746,4 @@ void FileAccPropList::getLibverBounds(H5F_libver_t& libver_low, H5F_libver_t& li
 //--------------------------------------------------------------------------
 FileAccPropList::~FileAccPropList() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

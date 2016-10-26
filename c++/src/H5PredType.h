@@ -17,9 +17,7 @@
 #ifndef __H5PredType_H
 #define __H5PredType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class PredType
     \brief Class PredType holds the definition of all the HDF5 predefined
@@ -441,7 +439,5 @@ class H5_DLLCPP PredType : public AtomType {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5PredType_H

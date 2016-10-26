@@ -17,9 +17,7 @@
 #ifndef __H5PropList_H
 #define __H5PropList_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //! Class PropList provides operations for generic property lists.
 /*! \class PropList
@@ -139,7 +137,5 @@ class H5_DLLCPP PropList : public IdComponent {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 };
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif  // __H5PropList_H

@@ -18,27 +18,19 @@
    tobject.cpp - HDF5 C++ testing object related functionality
 
  ***************************************************************************/
-
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
-
 #include "H5Cpp.h"      // C++ API header file
+using namespace H5;
 
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
-
+#include "h5test.h"
 #include "h5cpputil.h"  // C++ utilility header file
 
 const H5std_string	FILE_OBJECTS("tobjects.h5");
@@ -319,9 +311,7 @@ static void test_get_objtype()
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void test_object()
 {
     // Output message about test being performed
@@ -346,9 +336,7 @@ void test_object()
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void cleanup_object()
 {
     HDremove(FILE_OBJECTS.c_str());

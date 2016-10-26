@@ -19,13 +19,11 @@
 
 #include <string>
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
 #ifdef H5_NO_STD
     #define H5std_string ::string
 #else
     #define H5std_string std::string
-#endif
 #endif
 
 /*! \class Exception
@@ -171,8 +169,6 @@ class H5_DLLCPP IdComponentException : public Exception {
 	virtual ~IdComponentException() throw();
 };
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 
 #endif // __H5Exception_H

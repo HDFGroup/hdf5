@@ -32,9 +32,7 @@
 #include "H5DataSet.h"
 #include "H5PredType.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	StrType default constructor
@@ -247,6 +245,4 @@ void StrType::setStrpad( H5T_str_t strpad ) const
 //--------------------------------------------------------------------------
 StrType::~StrType() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

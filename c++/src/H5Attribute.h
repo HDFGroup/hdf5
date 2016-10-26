@@ -17,9 +17,7 @@
 #ifndef __H5Attribute_H
 #define __H5Attribute_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class Attribute
     \brief Class Attribute operates on HDF5 attributes.
@@ -104,7 +102,5 @@ class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
 	friend void f_Attribute_setId(Attribute* attr, hid_t new_id);
 
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5Attribute_H

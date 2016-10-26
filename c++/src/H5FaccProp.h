@@ -20,9 +20,7 @@
 #ifndef __H5FileAccPropList_H
 #define __H5FileAccPropList_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class FileAccPropList
     \brief Class FileAccPropList inherits from PropList and provides
@@ -162,7 +160,5 @@ class H5_DLLCPP FileAccPropList : public PropList {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5FileAccPropList_H

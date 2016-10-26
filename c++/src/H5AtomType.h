@@ -17,9 +17,7 @@
 #ifndef __H5AtomType_H
 #define __H5AtomType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class AtomType
     \brief AtomType is a base class, inherited by IntType, FloatType,
@@ -81,7 +79,5 @@ class H5_DLLCPP AtomType : public DataType {
 	AtomType( const hid_t existing_id );
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5AtomType_H

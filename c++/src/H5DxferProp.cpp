@@ -22,9 +22,7 @@
 #include "H5DxferProp.h"
 #include "H5private.h"		// for HDmemset
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // This DOXYGEN_SHOULD_SKIP_THIS block is a work-around approach to control
@@ -565,7 +563,5 @@ H5Z_EDC_t DSetMemXferPropList::getEDCCheck() const
 //--------------------------------------------------------------------------
 DSetMemXferPropList::~DSetMemXferPropList() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif
 

@@ -17,9 +17,7 @@
 #ifndef __H5CompType_H
 #define __H5CompType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class CompType
     \brief CompType is a derivative of a DataType and operates on HDF5
@@ -114,7 +112,5 @@ class H5_DLLCPP CompType : public DataType {
 	// getMemberXxxType
 	hid_t p_get_member_type(unsigned member_num) const;
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5CompType_H
