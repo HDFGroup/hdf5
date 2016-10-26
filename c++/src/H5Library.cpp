@@ -253,6 +253,7 @@ void H5Library::setFreeListLimits(int reg_global_lim, int reg_list_lim,
    }
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:	H5Library default constructor - private
 ///\brief	Default constructor: Creates a stub H5Library object
@@ -266,5 +267,6 @@ H5Library::H5Library(){}
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Library::~H5Library(){}
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 } // end namespace
