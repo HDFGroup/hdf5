@@ -551,7 +551,6 @@ int SystemTest()
     return 0;
 
 error:
-
     H5E_BEGIN_TRY {
         H5Tclose(dtypeID1);
         H5Tclose(dtypeID2);
@@ -569,9 +568,14 @@ error:
  *	Previously, data of the field that follows the string was read back
  *	as garbage when #pragma pack(1) is used.
  * 2016/10/20 -BMR
+ *      Updated:
+ *		#pragma pack(1) caused failure on Emu because Sparc cannot
+ *		access misaligned data.  Changed it to pack() to do the
+ *		default alignment.
+ * 2016/10/25 -BMR
  *-------------------------------------------------------------------------
  */
-#pragma pack(1)  // no padding
+#pragma pack()  // default alignment
 const char* ABHI_PT("/abhiTest");
 const hsize_t NUM_PACKETS = 5;
 const int STRING_LENGTH = 19; // including terminating NULL

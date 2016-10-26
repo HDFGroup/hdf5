@@ -59,9 +59,7 @@ class H5_DLLCPP H5Library {
         static void termH5cpp(void);
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
    private:
-
         // Default constructor - no instance ever created from outsiders
         H5Library();
 
