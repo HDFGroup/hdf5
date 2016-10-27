@@ -525,15 +525,15 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
         daos_obj_id_t oid = {0, 0, 0};
 
         /* Connect to the pool */
-        if(0 != daos_pool_connect(fa->pool_uuid, fa->pool_grp, NULL /*pool_svc*/, DAOS_PC_RW, NULL /*failed*/, &file->poh, NULL /*&file->pool_info*/, NULL /*event*/))
+        if(0 != daos_pool_connect(fa->pool_uuid, fa->pool_grp, NULL /*pool_svc*/, DAOS_PC_RW, &file->poh, NULL /*&file->pool_info*/, NULL /*event*/))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't connect to pool")
 
         /* Create the container for the file */
-        if(0 != daos_co_create(file->poh, file->uuid, NULL /*event*/))
+        if(0 != daos_cont_create(file->poh, file->uuid, NULL /*event*/))
             HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create container")
 
         /* Open the container */
-        if(0 != daos_co_open(file->poh, file->uuid, DAOS_COO_RW, NULL /*failed*/, &file->coh, NULL /*&file->co_info*/, NULL /*event*/))
+        if(0 != daos_cont_open(file->poh, file->uuid, DAOS_COO_RW, NULL /*failed*/, &file->coh, NULL /*&file->co_info*/, NULL /*event*/))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open container")
 
         /* Hold the epoch */
@@ -578,7 +578,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
             glob.iov_buf = NULL;
             glob.iov_buf_len = 0;
             glob.iov_len = 0;
-            if(0 != daos_co_local2global(file->coh, &glob))
+            if(0 != daos_cont_local2global(file->coh, &glob))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global container handle size")
             gh_sizes[1] = (uint64_t)glob.iov_buf_len;
 
@@ -594,7 +594,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
             glob.iov_buf = gh_buf + gh_sizes[0];
             glob.iov_buf_len = gh_sizes[1];
             glob.iov_len = 0;
-            if(0 != daos_co_local2global(file->coh, &glob))
+            if(0 != daos_cont_local2global(file->coh, &glob))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global container handle")
             HDassert(glob.iov_len == glob.iov_buf_len);
 
@@ -633,7 +633,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
         glob.iov_buf = gh_buf + gh_sizes[0];
         glob.iov_buf_len = gh_sizes[1];
         glob.iov_len = gh_sizes[1];
-        if(0 != daos_co_global2local(file->poh, glob, &file->coh))
+        if(0 != daos_cont_global2local(file->poh, glob, &file->coh))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't get local container handle")
 
         /* Leave global md object and root group handles empty for now */
@@ -723,11 +723,11 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         daos_obj_id_t oid = {0, 0, 0};
 
         /* Connect to the pool */
-        if(0 != daos_pool_connect(fa->pool_uuid, fa->pool_grp, NULL /*pool_svc*/, DAOS_PC_RW, NULL /*failed*/, &file->poh, NULL /*&file->pool_info*/, NULL /*event*/))
+        if(0 != daos_pool_connect(fa->pool_uuid, fa->pool_grp, NULL /*pool_svc*/, DAOS_PC_RW, &file->poh, NULL /*&file->pool_info*/, NULL /*event*/))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't connect to pool")
 
         /* Open the container */
-        if(0 != daos_co_open(file->poh, file->uuid, DAOS_COO_RW, NULL /*failed*/, &file->coh, NULL /*&file->co_info*/, NULL /*event*/))
+        if(0 != daos_cont_open(file->poh, file->uuid, DAOS_COO_RW, NULL /*failed*/, &file->coh, NULL /*&file->co_info*/, NULL /*event*/))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open container")
 
         /* Hold the epoch */
@@ -758,7 +758,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         glob.iov_buf = NULL;
         glob.iov_buf_len = 0;
         glob.iov_len = 0;
-        if(0 != daos_co_local2global(file->coh, &glob))
+        if(0 != daos_cont_local2global(file->coh, &glob))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global container handle size")
         gh_sizes[1] = (uint64_t)glob.iov_buf_len;
 
@@ -774,7 +774,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         glob.iov_buf = gh_buf + gh_sizes[0];
         glob.iov_buf_len = gh_sizes[1];
         glob.iov_len = 0;
-        if(0 != daos_co_local2global(file->coh, &glob))
+        if(0 != daos_cont_local2global(file->coh, &glob))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global container handle")
         HDassert(glob.iov_len == glob.iov_buf_len);
 
@@ -809,7 +809,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         glob.iov_buf = gh_buf + gh_sizes[0];
         glob.iov_buf_len = gh_sizes[1];
         glob.iov_len = gh_sizes[1];
-        if(0 != daos_co_global2local(file->poh, glob, &file->coh))
+        if(0 != daos_cont_global2local(file->poh, glob, &file->coh))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't get local container handle")
 
         /* Leave global md object and root group handles empty for now */
@@ -883,7 +883,7 @@ H5VL_daosm_file_close(void *_file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
         if(0 != daos_obj_close(file->root_oh, NULL /*event*/))
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close root group")
     if(!HDmemcmp(&file->coh, &hdl_inval, sizeof(hdl_inval)))
-        if(0 != daos_co_close(file->coh, NULL /*event*/))
+        if(0 != daos_cont_close(file->coh, NULL /*event*/))
             HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close container")
     if(!HDmemcmp(&file->poh, &hdl_inval, sizeof(hdl_inval)))
         if(0 != daos_pool_disconnect(file->poh, NULL /*event*/))
