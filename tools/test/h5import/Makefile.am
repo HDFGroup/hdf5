@@ -14,16 +14,27 @@
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
-##
 #
-# Tools HDF5 Makefile(.in)
+# HDF5 Library Makefile(.in)
 #
 
 include $(top_srcdir)/config/commence.am
 
-CONFIG=ordered
+# Include src and tools/lib directories
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
-# All subdirectories
-SUBDIRS=lib src test
+# Test programs and scripts
+TEST_PROG=h5importtest
+TEST_SCRIPT=h5importtestutil.sh
+
+check_PROGRAMS=$(TEST_PROG)
+check_SCRIPT=$(TEST_SCRIPT)
+SCRIPT_DEPEND=../../src/h5import/h5import$(EXEEXT)
+
+# All programs depend on the main hdf5 library and the tools library
+LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+
+# Temporary files from h5importtest
+CHECK_CLEANFILES+=*.bin
 
 include $(top_srcdir)/config/conclude.am

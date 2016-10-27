@@ -14,16 +14,25 @@
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
-##
 #
-# Tools HDF5 Makefile(.in)
+# HDF5 Library Makefile(.in)
 #
 
 include $(top_srcdir)/config/commence.am
 
-CONFIG=ordered
+# Include files in /src directory and /tools/lib directory
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
-# All subdirectories
-SUBDIRS=lib src test
+# Our main target, the h5dump tool.
+bin_PROGRAMS=h5dump
+
+# Add h5dump specific linker flags here
+h5dump_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+
+# All the programs depend on the hdf5 and h5tools libraries
+LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+
+# Source files for the program
+h5dump_SOURCES=h5dump.c h5dump_ddl.c h5dump_xml.c
 
 include $(top_srcdir)/config/conclude.am

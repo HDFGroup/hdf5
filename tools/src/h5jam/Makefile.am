@@ -14,16 +14,22 @@
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
-##
 #
-# Tools HDF5 Makefile(.in)
+# HDF5 Library Makefile(.in)
 #
 
 include $(top_srcdir)/config/commence.am
 
-CONFIG=ordered
+# Include src and tools/lib directories
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
-# All subdirectories
-SUBDIRS=lib src test
+bin_PROGRAMS=h5jam h5unjam
+
+# Add h5jam and h5unjam specific linker flags here
+h5jam_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+h5unjam_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+
+# Link against the main HDF5 library and tools library
+LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am

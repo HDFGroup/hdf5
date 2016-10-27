@@ -14,16 +14,26 @@
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
-##
 #
-# Tools HDF5 Makefile(.in)
+# HDF5 Library Makefile(.in)
 #
 
 include $(top_srcdir)/config/commence.am
 
-CONFIG=ordered
+# Include src directory
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
-# All subdirectories
-SUBDIRS=lib src test
+# These are our main targets, the tools
+bin_PROGRAMS=h5stat
+bin_SCRIPTS=
+
+# Add h5stat specific linker flags here
+h5stat_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+
+# Tell automake to clean h5redeploy script
+CLEANFILES=
+
+# All programs rely on hdf5 library and h5tools library
+LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am
