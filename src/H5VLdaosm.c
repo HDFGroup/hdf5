@@ -31,6 +31,8 @@
 #include "H5VLprivate.h"        /* VOL plugins                          */
 #include "H5VLdaosm.h"          /* DAOS-M plugin                        */
 
+hid_t H5VL_DAOSM_g = 0;
+
 /* Prototypes */
 static void *H5VL_daosm_fapl_copy(const void *_old_fa);
 static herr_t H5VL_daosm_fapl_free(void *_fa);
@@ -525,7 +527,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
         daos_obj_id_t oid = {0, 0, 0};
 
         /* Connect to the pool */
-        if(0 != daos_pool_connect(fa->pool_uuid, fa->pool_grp, NULL /*pool_svc*/, DAOS_PC_RW, &file->poh, NULL /*&file->pool_info*/, NULL /*event*/))
+        if(0 != daos_pool_connect(fa->pool_uuid, NULL/*fa->pool_grp DSMINC*/, NULL /*pool_svc*/, DAOS_PC_RW, &file->poh, NULL /*&file->pool_info*/, NULL /*event*/))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't connect to pool")
 
         /* Create the container for the file */
@@ -723,7 +725,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         daos_obj_id_t oid = {0, 0, 0};
 
         /* Connect to the pool */
-        if(0 != daos_pool_connect(fa->pool_uuid, fa->pool_grp, NULL /*pool_svc*/, DAOS_PC_RW, &file->poh, NULL /*&file->pool_info*/, NULL /*event*/))
+        if(0 != daos_pool_connect(fa->pool_uuid, NULL/*fa->pool_grp DSMINC*/, NULL /*pool_svc*/, DAOS_PC_RW, &file->poh, NULL /*&file->pool_info*/, NULL /*event*/))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't connect to pool")
 
         /* Open the container */
