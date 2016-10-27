@@ -533,8 +533,19 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't connect to pool: %d", ret)
 
         /* Create the container for the file */
-        if(0 != (ret = daos_cont_create(file->poh, file->uuid, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create container: %d", ret)
+        if(0 != (ret = daos_cont_create(file->poh, file->uuid, NULL /*event*/))) {
+            /* Check for failure due to the container already existing and
+             * opening with H5F_ACC_TRUNC */
+            if((ret == -(int)DER_EXIST) && (flags & H5F_ACC_TRUNC)) {
+                /* Destroy and re-create container */
+                if(0 != (ret = daos_cont_destroy(file->poh, file->uuid, 0, NULL /*event*/)))
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't destroy container: %d", ret)
+                if(0 != (ret = daos_cont_create(file->poh, file->uuid, NULL /*event*/)))
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create container: %d", ret)
+            } /* end if */
+            else
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create container: %d", ret)
+        } /* end if */
 
         /* Open the container */
         if(0 != (ret = daos_cont_open(file->poh, file->uuid, DAOS_COO_RW, &file->coh, NULL /*&file->co_info*/, NULL /*event*/)))
@@ -542,8 +553,12 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
 
         /* Query the epoch */
         if(0 != (ret = daos_epoch_query(file->coh, &epoch_state, NULL /*event*/)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't query epoch: %d", ret)
+
+        /* Hold the epoch */
+        epoch = epoch_state.es_hce + (daos_epoch_t)1;
+        if(0 != (ret = daos_epoch_hold(file->coh, &epoch, NULL /*state*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't hold epoch: %d", ret)
-        epoch = epoch_state.es_lhe;
 
         /* Create global metadata object */
         daos_obj_id_generate(&oid, DAOS_OC_REPLICA_RW);
@@ -739,8 +754,12 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
 
         /* Query the epoch */
         if(0 != (ret = daos_epoch_query(file->coh, &epoch_state, NULL /*event*/)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't query epoch: %d", ret)
+
+        /* Hold the epoch */
+        epoch = epoch_state.es_hce + (daos_epoch_t)1;
+        if(0 != (ret = daos_epoch_hold(file->coh, &epoch, NULL /*state*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't hold epoch: %d", ret)
-        epoch = epoch_state.es_lhe;
 
         /* Open global metadata object */
         daos_obj_id_generate(&oid, DAOS_OC_REPLICA_RW);
@@ -888,16 +907,16 @@ H5VL_daosm_file_close(void *_file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UN
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
     if(file->fcpl_id != FAIL && H5I_dec_ref(file->fcpl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
-    if(!HDmemcmp(&file->glob_md_oh, &hdl_inval, sizeof(hdl_inval)))
+    if(HDmemcmp(&file->glob_md_oh, &hdl_inval, sizeof(hdl_inval)))
         if(0 != (ret = daos_obj_close(file->glob_md_oh, NULL /*event*/)))
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close global metadata object: %d", ret)
-    if(!HDmemcmp(&file->root_oh, &hdl_inval, sizeof(hdl_inval)))
+    if(HDmemcmp(&file->root_oh, &hdl_inval, sizeof(hdl_inval)))
         if(0 != (ret = daos_obj_close(file->root_oh, NULL /*event*/)))
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close root group: %d", ret)
-    if(!HDmemcmp(&file->coh, &hdl_inval, sizeof(hdl_inval)))
+    if(HDmemcmp(&file->coh, &hdl_inval, sizeof(hdl_inval)))
         if(0 != (ret = daos_cont_close(file->coh, NULL /*event*/)))
             HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close container: %d", ret)
-    if(!HDmemcmp(&file->poh, &hdl_inval, sizeof(hdl_inval)))
+    if(HDmemcmp(&file->poh, &hdl_inval, sizeof(hdl_inval)))
         if(0 != (ret = daos_pool_disconnect(file->poh, NULL /*event*/)))
             HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't disconnect from pool: %d", ret)
     file = H5FL_FREE(H5VL_daosm_file_t, file);
