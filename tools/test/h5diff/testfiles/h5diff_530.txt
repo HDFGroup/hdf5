@@ -1,0 +1,35 @@
+
+group1   group2
+---------------------------------------
+    x      x                   
+    x      x    /Compound_dset1
+    x      x    /Compound_dset2
+    x      x    /Compound_dset3
+    x      x    /Compound_dset4
+    x      x    /Compound_dset5
+    x      x    /Compound_dset6
+    x      x    /Compound_dset7
+    x      x    /Compound_dset8
+    x      x    /Compound_dset9
+
+group  : </group> and </group_copy>
+0 differences found
+dataset: </group/Compound_dset1> and </group_copy/Compound_dset1>
+0 differences found
+dataset: </group/Compound_dset2> and </group_copy/Compound_dset2>
+0 differences found
+dataset: </group/Compound_dset3> and </group_copy/Compound_dset3>
+0 differences found
+dataset: </group/Compound_dset4> and </group_copy/Compound_dset4>
+0 differences found
+dataset: </group/Compound_dset5> and </group_copy/Compound_dset5>
+0 differences found
+dataset: </group/Compound_dset6> and </group_copy/Compound_dset6>
+0 differences found
+dataset: </group/Compound_dset7> and </group_copy/Compound_dset7>
+0 differences found
+dataset: </group/Compound_dset8> and </group_copy/Compound_dset8>
+0 differences found
+dataset: </group/Compound_dset9> and </group_copy/Compound_dset9>
+0 differences found
+EXIT CODE: 0

@@ -1,0 +1,12 @@
+
+file1     file2
+---------------------------------------
+    x      x    /              
+    x      x    /dset1         
+    x           /group1        
+
+group  : </> and </>
+0 differences found
+dataset: </dset1> and </dset1>
+0 differences found
+EXIT CODE: 1

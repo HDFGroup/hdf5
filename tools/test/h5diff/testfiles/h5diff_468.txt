@@ -1,0 +1,5 @@
+obj1 </ext_link4> is a dangling link.
+obj2 </ext_link4> is a dangling link.
+dangling link: </ext_link4> and </ext_link4>
+0 differences found
+EXIT CODE: 0

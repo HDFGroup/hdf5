@@ -1,0 +1,27 @@
+usage: h5unjam -i <in_file.h5>  [-o <out_file.h5> ] [-u <out_user_file> | --delete]
+
+Splits user file and HDF5 file into two files: user block data and HDF5 data.
+
+OPTIONS
+  -i in_file.h5   Specifies the HDF5 as input.  If the input HDF5 file
+                  contains no user block, exit with an error message.
+  -o out_file.h5  Specifies output HDF5 file without a user block.
+                  If not specified, the user block will be removed from the
+                  input HDF5 file.
+  -u out_user_file
+                  Specifies the output file containing the data from the
+                  user block.
+                  Cannot be used with --delete option.
+  --delete        Remove the user block from the input HDF5 file. The content
+                  of the user block is discarded.
+                  Cannot be used with the -u option.
+
+  -h              Prints a usage message and exits.
+  -V              Prints the HDF5 library version and exits.
+
+  If neither --delete nor -u is specified, the user block from the input file
+  will be displayed to stdout.
+
+Exit Status:
+  0      Succeeded.
+  >0    An error occurred.
