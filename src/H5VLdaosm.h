@@ -26,8 +26,7 @@
 
 #ifdef H5_HAVE_EFF
 
-#include "daos_sr.h"
-#include "daos_types.h"
+#include "daos.h"
 
 #define H5VL_DAOSM	(H5VL_daosm_init())
 #define HDF5_VOL_DAOSM_VERSION_1	1	/* Version number of IOD VOL plugin */
