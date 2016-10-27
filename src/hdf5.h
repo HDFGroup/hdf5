@@ -41,6 +41,10 @@
 #include "H5Zpublic.h"		/* Data filters				*/
 #include "H5VLpublic.h"		/* VOL plugins			        */
 
+/* FastForward headers */
+#include "H5FFpublic.h"         /* FastForward wrappers                 */
+#include "H5VLdaosm.h"          /* DAOS-M VOL plugin                    */
+
 /* Predefined VOL plugins */
 #include "H5VLnative.h"		/* Native HDF5 plugin           	*/
 
