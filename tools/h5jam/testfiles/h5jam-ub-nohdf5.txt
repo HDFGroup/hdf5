@@ -1,2 +1,0 @@
-h5jam error: -u <user_file> cannot be HDF5 file, but it appears to be an HDF5 file.
-Try '-h' or '--help' for more information or see the <h5jam> entry in the 'HDF5 Reference Manual'.
