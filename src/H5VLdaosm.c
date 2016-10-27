@@ -533,7 +533,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
             HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create container")
 
         /* Open the container */
-        if(0 != daos_cont_open(file->poh, file->uuid, DAOS_COO_RW, NULL /*failed*/, &file->coh, NULL /*&file->co_info*/, NULL /*event*/))
+        if(0 != daos_cont_open(file->poh, file->uuid, DAOS_COO_RW, &file->coh, NULL /*&file->co_info*/, NULL /*event*/))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open container")
 
         /* Hold the epoch */
@@ -583,7 +583,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
             gh_sizes[1] = (uint64_t)glob.iov_buf_len;
 
             /* Retrieve global pool and container handles */
-            if(NULL == (gh_buf = H5MM_malloc(gh_sizes[0] + gh_sizes[1])))
+            if(NULL == (gh_buf = (char *)H5MM_malloc(gh_sizes[0] + gh_sizes[1])))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for global handles")
             glob.iov_buf = gh_buf;
             glob.iov_buf_len = gh_sizes[0];
@@ -617,7 +617,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
             HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
 
         /* Allocate global handle buffer */
-        if(NULL == (gh_buf = H5MM_malloc(gh_sizes[0] + gh_sizes[1])))
+        if(NULL == (gh_buf = (char *)H5MM_malloc(gh_sizes[0] + gh_sizes[1])))
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for global handles")
 
         /* Receive gh_buf */
@@ -727,7 +727,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't connect to pool")
 
         /* Open the container */
-        if(0 != daos_cont_open(file->poh, file->uuid, DAOS_COO_RW, NULL /*failed*/, &file->coh, NULL /*&file->co_info*/, NULL /*event*/))
+        if(0 != daos_cont_open(file->poh, file->uuid, DAOS_COO_RW, &file->coh, NULL /*&file->co_info*/, NULL /*event*/))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open container")
 
         /* Hold the epoch */
@@ -763,7 +763,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         gh_sizes[1] = (uint64_t)glob.iov_buf_len;
 
         /* Retrieve global pool and container handles */
-        if(NULL == (gh_buf = malloc(gh_sizes[0] + gh_sizes[1])))
+        if(NULL == (gh_buf = (char *)malloc(gh_sizes[0] + gh_sizes[1])))
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for global handles")
         glob.iov_buf = gh_buf;
         glob.iov_buf_len = gh_sizes[0];
@@ -793,7 +793,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
             HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
 
         /* Allocate global handle buffer */
-        if(NULL == (gh_buf = malloc(gh_sizes[0] + gh_sizes[1])))
+        if(NULL == (gh_buf = (char *)malloc(gh_sizes[0] + gh_sizes[1])))
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for global handles")
 
         /* Receive gh_buf */
