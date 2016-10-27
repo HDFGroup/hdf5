@@ -4,7 +4,7 @@ PROJECT (HDF5_TOOLS_TEST_MISC_VDS)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_TOOLS_TEST_SRC_DIR}/lib)
+INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
 
 MACRO (ADD_H5_GENERATOR genfile)
   add_executable (${genfile} ${HDF5_TOOLS_TEST_MISC_VDS_SOURCE_DIR}/${genfile}.c)
