@@ -93,7 +93,7 @@ typedef const void *(__cdecl *H5PL_get_plugin_info_t)(void);
 #define H5PL_CLOSE_LIB(H) dlclose(H)
 
 /* Clear error */
-#define H5PL_CLR_ERROR dlerror()
+#define H5PL_CLR_ERROR HERROR(H5E_PLUGIN, H5E_CANTGET, "can't dlopen:%s", dlerror())
 
 typedef const void *(*H5PL_get_plugin_info_t)(void);
 #endif /* H5_HAVE_WIN32_API */
