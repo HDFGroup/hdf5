@@ -490,6 +490,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
     daos_iov_t glob;
     uint64_t gh_sizes[2];
     char *gh_buf = NULL;
+    hbool_t must_bcast = FALSE;
     int ret;
     void *ret_value = NULL;
 
@@ -527,6 +528,11 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
     if(file->my_rank == 0) {
         daos_epoch_state_t epoch_state;
         daos_obj_id_t oid = {0, 0, 0};
+
+        /* If there are other processes and we fail we must bcast anyways so they
+         * don't hang */
+        if(file->num_procs > 1)
+            must_bcast = TRUE;
 
         /* Connect to the pool */
         if(0 != (ret = daos_pool_connect(fa->pool_uuid, NULL/*fa->pool_grp DSMINC*/, NULL /*pool_svc*/, DAOS_PC_RW, &file->poh, NULL /*&file->pool_info*/, NULL /*event*/)))
@@ -586,6 +592,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
         if(0 != (ret = daos_epoch_flush(file->coh, epoch, NULL /*state*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "can't flush epoch: %d", ret)
 
+        /* Bcast global handles if there are other processes */
         if(file->num_procs > 1) {
             /* Calculate sizes of global pool and container handles */
             glob.iov_buf = NULL;
@@ -617,6 +624,9 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global container handle: %d", ret)
             HDassert(glob.iov_len == glob.iov_buf_len);
 
+            /* We are about to bcast so we no longer need to bcast on failure */
+            must_bcast = FALSE;
+
             /* MPI_Bcast gh_sizes */
             if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
                 HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
@@ -635,6 +645,12 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fa
         /* Receive gh_sizes */
         if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
             HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
+
+        /* Check for gh_sizes set to 0 - indicates failure */
+        if(gh_sizes[0] == 0) {
+            HDassert(gh_sizes[1] == 0);
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "lead process failed to open file")
+        } /* end if */
 
         /* Allocate global handle buffer */
         if(NULL == (gh_buf = (char *)H5MM_malloc(gh_sizes[0] + gh_sizes[1])))
@@ -683,9 +699,20 @@ done:
 
     /* If the operation is synchronous and it failed at the server, or
        it failed locally, then cleanup and return fail */
-    if(NULL == ret_value)
+    if(NULL == ret_value) {
+        /* Bcast gh_sizes as '0' if necessary - this will trigger failures in
+         * the other processes so we do not need to do the second bcast. */
+        if(must_bcast) {
+            gh_sizes[0] = 0;
+            gh_sizes[1] = 0;
+            if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
+                HDONE_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
+        } /* end if */
+
+        /* Close file */
         if(file != NULL && H5VL_daosm_file_close(file, dxpl_id, req) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close file")
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_file_create() */
@@ -715,6 +742,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     daos_iov_t glob;
     uint64_t gh_sizes[2];
     char *gh_buf = NULL;
+    hbool_t must_bcast = FALSE;
     int ret;
     void *ret_value = NULL;
 
@@ -743,6 +771,11 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     if(file->my_rank == 0) {
         daos_epoch_state_t epoch_state;
         daos_obj_id_t oid = {0, 0, 0};
+
+        /* If there are other processes and we fail we must bcast anyways so they
+         * don't hang */
+        if(file->num_procs > 1)
+            must_bcast = TRUE;
 
         /* Connect to the pool */
         if(0 != (ret = daos_pool_connect(fa->pool_uuid, NULL/*fa->pool_grp DSMINC*/, NULL /*pool_svc*/, DAOS_PC_RW, &file->poh, NULL /*&file->pool_info*/, NULL /*event*/)))
@@ -774,6 +807,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         if(0 != (ret = daos_obj_open(file->root_oh, oid, epoch, DAOS_OO_RW, &file->root_oh, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
 
+        /* Bcast global handles if there are other processes */
         if(file->num_procs > 1) {
             /* Calculate sizes of global pool and container handles */
             glob.iov_buf = NULL;
@@ -805,6 +839,9 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global container handle: %d", ret)
             HDassert(glob.iov_len == glob.iov_buf_len);
 
+            /* We are about to bcast so we no longer need to bcast on failure */
+            must_bcast = FALSE;
+
             /* MPI_Bcast gh_sizes */
             if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
                 HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
@@ -818,6 +855,12 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         /* Receive gh_sizes */
         if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
             HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
+
+        /* Check for gh_sizes set to 0 - indicates failure */
+        if(gh_sizes[0] == 0) {
+            HDassert(gh_sizes[1] == 0);
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "lead process failed to open file")
+        } /* end if */
 
         /* Allocate global handle buffer */
         if(NULL == (gh_buf = (char *)malloc(gh_sizes[0] + gh_sizes[1])))
@@ -859,14 +902,25 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     ret_value = (void *)file;
 
 done:
-    /* Clean up */
+    /* Clean up buffer */
     H5MM_xfree(gh_buf);
 
     /* If the operation is synchronous and it failed at the server, or
        it failed locally, then cleanup and return fail */
-    if(NULL == ret_value)
+    if(NULL == ret_value) {
+        /* Bcast gh_sizes as '0' if necessary - this will trigger failures in
+         * the other processes so we do not need to do the second bcast. */
+        if(must_bcast) {
+            gh_sizes[0] = 0;
+            gh_sizes[1] = 0;
+            if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
+                HDONE_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
+        } /* end if */
+
+        /* Close file */
         if(file != NULL && H5VL_daosm_file_close(file, dxpl_id, req) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close file")
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_iod_file_open() */
