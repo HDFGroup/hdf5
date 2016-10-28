@@ -501,6 +501,14 @@ H5G_close(H5G_t *grp)
         if(H5O_close(&(grp->oloc)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")
 
+        /* Evict group metadata if evicting on close */
+        if(H5F_SHARED(grp->oloc.file) && H5F_EVICT_ON_CLOSE(grp->oloc.file)) {
+            if(H5AC_flush_tagged_metadata(grp->oloc.file, grp->oloc.addr, H5AC_ind_read_dxpl_id) < 0) 
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
+            if(H5AC_evict_tagged_metadata(grp->oloc.file, grp->oloc.addr, FALSE, H5AC_ind_read_dxpl_id) < 0) 
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict tagged metadata")
+        } /* end if */
+
         /* Free memory */
         grp->shared = H5FL_FREE(H5G_shared_t, grp->shared);
     } else {

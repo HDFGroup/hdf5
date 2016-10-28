@@ -46,6 +46,12 @@ const char *FILENAMES[] = {
 };
 #define FILENAME_BUF_SIZE       1024
 
+/* Group names */
+#define GROUP_OLD_STYLE_1           "old1"
+#define GROUP_OLD_STYLE_2           "old2"
+#define GROUP_NEW_STYLE_1           "new1"
+#define GROUP_NEW_STYLE_2           "new2"
+
 /* Dataset names */
 #define DSET_COMPACT_NAME           "compact"
 #define DSET_CONTIGUOUS_NAME        "contiguous"
@@ -61,7 +67,7 @@ const char *FILENAMES[] = {
 static hbool_t verify_tag_not_in_cache(H5F_t *f, haddr_t tag);
 static herr_t check_evict_on_close_api(void);
 static hid_t generate_eoc_test_file(hid_t fapl_id);
-static herr_t check_configuration(hid_t fid, const char *dset_name);
+static herr_t check_dset_chunk_scheme(hid_t fid, const char *dset_name);
 
 
 /*-------------------------------------------------------------------------
@@ -124,6 +130,7 @@ generate_eoc_test_file(hid_t fapl_id)
     char    filename[FILENAME_BUF_SIZE];    /* decorated file name          */
     hid_t   fid = -1;                       /* file ID (returned)           */
     hid_t   fapl_copy_id = -1;              /* ID of copied fapl            */
+    hid_t   gid1 = -1, gid2 = -1;           /* group IDs                    */
     hid_t   sid = -1;                       /* dataspace ID                 */
     hid_t   dcpl_id = -1;                   /* dataset creation plist       */
     hid_t   did = -1;                       /* dataset ID                   */
@@ -141,21 +148,49 @@ generate_eoc_test_file(hid_t fapl_id)
     /* Get a VFD-specific filename */
     h5_fixname(FILENAMES[0], fapl_id, filename, sizeof(filename));
 
+    /* Copy the fapl and set the latest file format */
+    if((fapl_copy_id = H5Pcopy(fapl_id)) < 0)
+        TEST_ERROR;
+    if(H5Pset_libver_bounds(fapl_copy_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+
+    /* Create a data buffer for dataset writes */
+    if(NULL == (data = (int *)HDcalloc(NELEMENTS, sizeof(int))))
+        TEST_ERROR;
+
     /* Create file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
-    /***********************************************************/
-    /* Generate datasets and ensure that the scheme is correct */
-    /***********************************************************/
 
-    /* Create the data buffer */
-    if(NULL == (data = (int *)HDcalloc(NELEMENTS, sizeof(int))))
+    /*******************************************/
+    /* CREATE OBJECTS WITH THE OLD FILE FORMAT */
+    /*******************************************/
+
+    /*********************************************************/
+    /* Generate groups and ensure that the layout is correct */
+    /*********************************************************/
+
+    /*********************************************/
+    /* Old-style (version 1 B-tree + local heap) */
+    /*********************************************/
+
+    if((gid1 = H5Gcreate2(fid, GROUP_OLD_STYLE_1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if((gid2 = H5Gcreate2(gid1, GROUP_OLD_STYLE_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if(H5Gclose(gid1) < 0)
+        TEST_ERROR;
+    if(H5Gclose(gid2) < 0)
         TEST_ERROR;
 
-    /****************************************************/
-    /* Old file format data structures (v1 B-tree only) */
-    /****************************************************/
+    /********************************************************************/
+    /* Generate datasets and ensure that the chunking scheme is correct */
+    /********************************************************************/
+
+    /***********************************/
+    /* Old file format data structures */
+    /***********************************/
 
     /********************/
     /* Version 1 B-tree */
@@ -198,23 +233,39 @@ generate_eoc_test_file(hid_t fapl_id)
     if(H5Pclose(dcpl_id) < 0)
         TEST_ERROR;
 
-    /***********************************/
-    /* New file format data structures */
-    /***********************************/
+
+    /**********************************************/
+    /* CREATE OBJECTS WITH THE LATEST FILE FORMAT */
+    /**********************************************/
 
     /* Close the file */
     if(H5Fclose(fid) < 0)
         TEST_ERROR;
 
-    /* Copy the fapl and set the latest file format */
-    if((fapl_copy_id = H5Pcopy(fapl_id)) < 0)
-        TEST_ERROR;
-    if(H5Pset_libver_bounds(fapl_copy_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        TEST_ERROR;
-
-    /* Reopen the file */
+    /* Reopen the file with the "latest file format" fapl */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_copy_id)) < 0)
         TEST_ERROR;
+
+    /*********************************************************/
+    /* Generate groups and ensure that the layout is correct */
+    /*********************************************************/
+
+    /***********************************************/
+    /* New-style (version 2 B-tree + fractal heap) */
+    /***********************************************/
+
+    if((gid1 = H5Gcreate2(fid, GROUP_NEW_STYLE_1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if((gid2 = H5Gcreate2(gid1, GROUP_NEW_STYLE_2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if(H5Gclose(gid1) < 0)
+        TEST_ERROR;
+    if(H5Gclose(gid2) < 0)
+        TEST_ERROR;
+
+    /********************************************************************/
+    /* Generate datasets and ensure that the scheme is chunking correct */
+    /********************************************************************/
 
     /********************/
     /* Extensible Array */
@@ -488,7 +539,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    check_configuration()
+ * Function:    check_dset_chunk_scheme()
  *
  * Purpose:     Verify that the evict-on-close feature works for a given
  *              dataset layout and/or chunk index.
@@ -501,7 +552,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-check_configuration(hid_t fid, const char *dset_name)
+check_dset_chunk_scheme(hid_t fid, const char *dset_name)
 {
     H5F_t   *file_ptr = NULL;               /* ptr to internal file struct  */
     hid_t   did = -1;                       /* dataset ID                   */
@@ -589,7 +640,7 @@ error:
     H5_FAILED();
     return FAIL;
 
-} /* check_configuration() */
+} /* check_dset_chunk_scheme() */
 
 
 /*-------------------------------------------------------------------------
@@ -694,7 +745,7 @@ main(void)
     hid_t       fid = -1;           /* file ID                              */
     unsigned    nerrors = 0;        /* number of test errors                */
 
-    HDprintf("Testing evict-on-close cache behavior.\n");
+    HDprintf("Testing evict-on-close cache behavior\n");
 
     /* Initialize */
     h5_reset();
@@ -724,23 +775,31 @@ main(void)
         PUTS_ERROR("Unable to generate test file\n");
     } /* end if */
 
+    /* Run tests with old- and new-style groups
+     * PASSED() and H5_FAILED() are handled in check_configuration()
+     */
+    TESTING("evict on close with version 1 B-tree chunk index");
+        nerrors += check_group_layout(fid, DSET_BTREE_NAME) < 0 ? 1 : 0;
+    TESTING("evict on close with version 1 B-tree chunk index");
+        nerrors += check_group_layout(fid, DSET_BTREE_NAME) < 0 ? 1 : 0;
+
     /* Run tests with a variety of dataset configurations
      * PASSED() and H5_FAILED() are handled in check_configuration()
      */
     TESTING("evict on close with version 1 B-tree chunk index");
-        nerrors += check_configuration(fid, DSET_BTREE_NAME) < 0 ? 1 : 0;
+        nerrors += check_dset_chunk_scheme(fid, DSET_BTREE_NAME) < 0 ? 1 : 0;
     TESTING("evict on close with extensible array chunk index");
-        nerrors += check_configuration(fid, DSET_EARRAY_NAME) < 0 ? 1 : 0;
+        nerrors += check_dset_chunk_scheme(fid, DSET_EARRAY_NAME) < 0 ? 1 : 0;
     TESTING("evict on close with version 2 B-tree chunk index");
-        nerrors += check_configuration(fid, DSET_BT2_NAME) < 0 ? 1 : 0;
+        nerrors += check_dset_chunk_scheme(fid, DSET_BT2_NAME) < 0 ? 1 : 0;
     TESTING("evict on close with fixed array chunk index");
-        nerrors += check_configuration(fid, DSET_FARRAY_NAME) < 0 ? 1 : 0;
+        nerrors += check_dset_chunk_scheme(fid, DSET_FARRAY_NAME) < 0 ? 1 : 0;
     TESTING("evict on close with \'single chunk\' chunk index");
-        nerrors += check_configuration(fid, DSET_SINGLE_NAME) < 0 ? 1 : 0;
+        nerrors += check_dset_chunk_scheme(fid, DSET_SINGLE_NAME) < 0 ? 1 : 0;
     TESTING("evict on close with contiguous layout");
-        nerrors += check_configuration(fid, DSET_CONTIGUOUS_NAME) < 0 ? 1 : 0;
+        nerrors += check_dset_chunk_scheme(fid, DSET_CONTIGUOUS_NAME) < 0 ? 1 : 0;
     TESTING("evict on close with compact layout");
-        nerrors += check_configuration(fid, DSET_COMPACT_NAME) < 0 ? 1 : 0;
+        nerrors += check_dset_chunk_scheme(fid, DSET_COMPACT_NAME) < 0 ? 1 : 0;
 
     /* Close the test file */
     if(H5Fclose(fid) < 0) {
