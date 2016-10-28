@@ -74,6 +74,16 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_vds-exclim.c h5_vds-eiger.c h5_vds-simpleIO.c h5_vds-percival.c \
           h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c
 
+if BUILD_EFF_CONDITIONAL
+INSTALL_FILES += h5ff_client_adv_analysis.c h5ff_client_evict_deltas.c \
+        h5ff_client_M7.2-pep_demo.c h5ff_client_prefetch.c h5ff_client_vds.c \
+        h5ff_client_analysis.c h5ff_client_index.c h5ff_client_map.c \
+        h5ff_client_ref.c h5ff_client_view.c \
+        h5ff_client_attr.c h5ff_client_index_inr.c h5ff_client_multiple_cont.c \
+        h5ff_client_time_datasets.c h5ff_client_vl_data.c h5ff_client_do.c \
+        h5ff_client_links.c h5ff_client_obj.c h5ff_client_timings.c h5ff_python_exec.c \
+       h5ff_client_dset.c h5ff_client_M6.2_demo.c h5ff_client_old_api.c h5ff_client_trans.c h5ff_server.c
+endif
 
 # How to build examples, using installed version of h5cc
 if BUILD_PARALLEL_CONDITIONAL
@@ -150,6 +160,33 @@ h5_vds-simpleIO: $(srcdir)/h5_vds-simpleIO.c
 h5_vds-percival: $(srcdir)/h5_vds-percival.c
 h5_vds-percival-unlim: $(srcdir)/h5_vds-percival-unlim.c
 h5_vds-percival-unlim-maxmin: $(srcdir)/h5_vds-percival-unlim-maxmin.c
+if BUILD_EFF_CONDITIONAL
+h5ff_client_adv_analysis: $(srcdir)/h5ff_client_adv_analysis.c
+h5ff_client_evict_deltas: $(srcdir)/h5ff_client_evict_deltas.c
+h5ff_client_M7.2-pep_demo: $(srcdir)/h5ff_client_M7.2-pep_demo.c
+h5ff_client_prefetch: $(srcdir)/h5ff_client_prefetch.c
+h5ff_client_vds: $(srcdir)/h5ff_client_vds.c
+h5ff_client_analysis: $(srcdir)/h5ff_client_analysis.c
+h5ff_client_index: $(srcdir)/h5ff_client_index.c
+h5ff_client_map: $(srcdir)/h5ff_client_map.c
+h5ff_client_ref: $(srcdir)/h5ff_client_ref.c
+h5ff_client_view: $(srcdir)/h5ff_client_view.c
+h5ff_client_attr: $(srcdir)/h5ff_client_attr.c
+h5ff_client_index_inr: $(srcdir)/h5ff_client_index_inr.c
+h5ff_client_multiple_cont: $(srcdir)/h5ff_client_multiple_cont.c
+h5ff_client_time_datasets: $(srcdir)/h5ff_client_time_datasets.c
+h5ff_client_vl_data: $(srcdir)/h5ff_client_vl_data.c
+h5ff_client_do: $(srcdir)/h5ff_client_do.c
+h5ff_client_links: $(srcdir)/h5ff_client_links.c
+h5ff_client_obj: $(srcdir)/h5ff_client_obj.c
+h5ff_client_timings: $(srcdir)/h5ff_client_timings.c
+h5ff_python_exec: $(srcdir)/h5ff_python_exec.c
+h5ff_client_dset: $(srcdir)/h5ff_client_dset.c
+h5ff_client_M6.2_demo: $(srcdir)/h5ff_client_M6.2_demo.c
+h5ff_client_old_api: $(srcdir)/h5ff_client_old_api.c
+h5ff_client_trans: $(srcdir)/h5ff_client_trans.c
+h5ff_server: $(srcdir)/h5ff_server.c
+endif
 
 if BUILD_SHARED_SZIP_CONDITIONAL
 LD_LIBRARY_PATH=$(LL_PATH)
