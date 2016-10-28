@@ -152,12 +152,30 @@ Bug Fixes since HDF5-1.8.17
 
     C++ API
     -------
-    - None
+    - The macros H5_NO_NAMESPACE is deprecated from the HDF5 C++ API library.
+      In future releases, the macros H5_NO_STD and OLD_HEADER_FILENAME may
+      also be removed.
+      (BMR, 2016/10/27, HDFFV-9532)
 
 
     High-Level APIs:
     ---------------
-    - None
+
+    Packet Table APIs:
+    ------------------
+    - The high-level API Packet Table (PT) did not write data correctly when
+      the datatype is a compound type that has string type as one of the
+      members.  This problem started in 1.8.15, after the fix of HDFFV-9042
+      was applied, which caused the Packet Table to use native type to access
+      the data.  It should be up to the application to specify whether the
+      buffer to be read into memory in the machine’s native architecture.
+      Thus, the PT is fixed to not use native type but to make a copy of the
+      user's provided datatype during creation or the packet table's datatype
+      during opening.  If an application wishes to use native type to read the
+      data, then the application will request that.  However, the Packet Table
+      doesn't provide a way to specify memory datatype in this release.
+      Please refer to the Known Problems section for a work-around.
+      (BMR, 2016/10/27, HDFFV-9758)
 
 
     Fortran High-Level APIs:
@@ -339,6 +357,18 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+* Currently, the Packet Table doesn't provide a way to specify memory datatype
+  when the packet table is read.  To work around this limitation, an
+  application can use the following approach:
+  + For the C API of the Packet Table
+    - call the PT API H5PTget_type to get the datatype of the packet table
+    - call the C API H5Tget_native_type to get the native type of that datatype
+  + For the C++ API of the Packet Table
+    - call the member function PacketTable::GetDatatype to get the datatype
+      of the packet table
+    - call the C API H5Tget_native_type to get the native type of that datatype
+  (BMR, 2016/10/27, HDFFV-9758)
+
 * On windows platforms in debug configurations, the VFD flush1 tests will fail
   with the split and multi VFD drivers. These tests will display a modal debug
   dialog which must be answered or wait for the test timeout to expire.
