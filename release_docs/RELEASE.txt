@@ -152,9 +152,9 @@ Bug Fixes since HDF5-1.8.17
       * Removed the non-standard assumption that KIND=SIZEOF, in the HDF5
         configure programs.
       * Removed Fortran 66 character/integer conversions from tests.
-      * Removed the use of C_SIZEOF in the test programs (MSB, 2016/8/16)
+      * Removed the use of C_SIZEOF in the test programs 
       * Changed to using STORAGE_SIZE in the test programs if available. Otherwise,
-        uses C_SIZEOF or SIZEOF. (MSB, 2016/8/16)
+        uses C_SIZEOF or SIZEOF.
 
       (MSB, 2016/9/22, HDFFV-9973)
    
