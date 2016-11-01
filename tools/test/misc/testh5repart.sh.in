@@ -162,11 +162,11 @@ SKIP() {
 COPY_TESTFILES_TO_TESTDIR
 
 # repartition family member size to 20,000 bytes.
-TOOLTEST -m 20000 family_file%05d.h5 $actual_dir/fst_family%05d.h5
+TOOLTEST -m 20000 family_file%05d.h5 fst_family%05d.h5
 # repartition family member size to 5 KB.
-TOOLTEST -m 5k family_file%05d.h5 $actual_dir/scd_family%05d.h5
+TOOLTEST -m 5k family_file%05d.h5 scd_family%05d.h5
 # convert family file to sec2 file of 20,000 bytes
-TOOLTEST -m 20000 -family_to_sec2 family_file%05d.h5 $actual_dir/family_to_sec2.h5
+TOOLTEST -m 20000 -family_to_sec2 family_file%05d.h5 family_to_sec2.h5
 
 # test the output files repartitioned above.
 OUTPUTTEST
