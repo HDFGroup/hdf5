@@ -27,6 +27,14 @@ REPART_BIN=`pwd`/$REPART    # The path of the tool binary
 REPARTED_FAM=repart_test                # The test name
 REPARTED_FAM_BIN=`pwd`/$REPARTED_FAM    # The path of the test binary
 
+RM='rm -rf'
+CMP='cmp'
+DIFF='diff -c'
+CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
 nerrors=0
 verbose=yes
 
