@@ -147,7 +147,23 @@ Bug Fixes since HDF5-1.8.17
 
     Fortran API
     -----------
-    - None
+    - Fortran library fails to compile and fails tests with NAG compiler.
+
+      * Removed the non-standard assumption that KIND=SIZEOF, in the HDF5
+        configure programs.
+      * Removed Fortran 66 character/integer conversions from tests.
+      * Removed the use of C_SIZEOF in the test programs 
+      * Changed to using STORAGE_SIZE in the test programs if available. Otherwise,
+        uses C_SIZEOF or SIZEOF.
+
+      (MSB, 2016/9/22, HDFFV-9973)
+   
+    - Fortran segfaults for F03 tests with NAG compiler
+
+      * Removed INTENT(OUT) from 'fillvalue' in F2003 interface 
+        for H5Pget_fill_value_f.
+
+      (MSB, 2016/9/22, HDFFV-9980)
 
 
     C++ API
