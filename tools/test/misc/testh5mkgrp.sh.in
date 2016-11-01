@@ -32,7 +32,7 @@ H5LS_ARGS=-vr               # Arguments to the h5ls tool
 H5LS_BIN=`pwd`/$H5LS # The path of the h5ls tool binary
 
 RM='rm -rf'
-CMP='cmp'
+CMP='cmp -s'
 DIFF='diff -c'
 CP='cp'
 DIRNAME='dirname'
@@ -61,9 +61,6 @@ test -d $TESTDIR || mkdir -p $TESTDIR
 #       This list are also used for checking exist.
 #       Comment '#' without space can be used.
 # --------------------------------------------------------------------
-
-CMP='cmp -s'
-DIFF='diff -c'
 
 #
 # copy test files and expected output files from source dirs to test dir
