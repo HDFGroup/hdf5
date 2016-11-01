@@ -29,10 +29,10 @@
 
 # HDF5 currently uses the following versions of the autotools:
 AUTOCONF_VERSION="autoconf (GNU Autoconf) 2.69"
-AUTOMAKE_VERSION="automake (GNU automake) 1.14.1"
+AUTOMAKE_VERSION="automake (GNU automake) 1.15"
 AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.69"
-ACLOCAL_VERSION="aclocal (GNU automake) 1.14.1"
-LIBTOOL_VERSION="(GNU libtool) 2.4.2"
+ACLOCAL_VERSION="aclocal (GNU automake) 1.15"
+LIBTOOL_VERSION="(GNU libtool) 2.4.6"
 M4_VERSION="m4 (GNU M4) 1.4.17"
 
 #
@@ -49,16 +49,16 @@ if test -z ${AUTOCONF}; then
   AUTOCONF=/mnt/hdf/packages/autoconf/autoconf-2.69/bin/autoconf
 fi
 if test -z ${AUTOMAKE}; then
-  AUTOMAKE=/mnt/hdf/packages/automake/automake-1.14.1/bin/automake-1.14
+  AUTOMAKE=/mnt/hdf/packages/AUTOTOOLS/automake/1.15/i386/bin/automake-1.15
 fi
 if test -z ${AUTOHEADER}; then
   AUTOHEADER=/mnt/hdf/packages/autoconf/autoconf-2.69/bin/autoheader
 fi
 if test -z ${ACLOCAL}; then
-  ACLOCAL=/mnt/hdf/packages/automake/automake-1.14.1/bin/aclocal-1.14
+  ACLOCAL=/mnt/hdf/packages/AUTOTOOLS/automake/1.15/i386/bin/aclocal-1.15
 fi
 if test -z ${LIBTOOL}; then
-  LIBTOOL=/mnt/hdf/packages/libtool/libtool-2.4.2/bin/libtool
+  LIBTOOL=/mnt/hdf/packages/AUTOTOOLS/libtool/2.4.6/i386/bin/libtool
 fi
 if test -z ${M4}; then
   M4=/mnt/hdf/packages/m4/m4-1.4.17/bin/m4

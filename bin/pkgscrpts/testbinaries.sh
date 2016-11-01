@@ -444,7 +444,7 @@ for f in $FILE_LIST ; do
     if test -d hdf5-examples ; then
       rm -rf hdf5-examples
     fi
-    svn co https://svn.hdfgroup.uiuc.edu/hdf5-examples/trunk/ hdf5-examples > checkout.log
+    git clone https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5-examples.git hdf5-examples > checkout.log
 
     CC=$THIS_DIR/$EXTRACTED/bin/h5cc
     export CC
