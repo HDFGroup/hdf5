@@ -14,16 +14,33 @@
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
-##
 #
-# Tools HDF5 Makefile(.in)
+# HDF5 Library Makefile(.in)
 #
 
 include $(top_srcdir)/config/commence.am
 
-CONFIG=ordered
+# Include src and tools/lib directories
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
-# All subdirectories
-SUBDIRS=lib src test
+# Always build and test h5diff but build and test ph5diff only if parallel
+# is enabled.
+if BUILD_PARALLEL_CONDITIONAL
+  H5PDIFF=ph5diff
+endif
+
+# Our main target, h5diff
+bin_PROGRAMS=h5diff $(H5PDIFF)
+
+# Add h5diff specific linker flags here
+h5diff_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+
+# Source files for the program
+h5diff_SOURCES=h5diff_main.c h5diff_common.c
+ph5diff_SOURCES=ph5diff_main.c h5diff_common.c
+
+# Programs depend on the main HDF5 library and tools library
+LDADD=$(LIBH5TOOLS) $(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am
+
