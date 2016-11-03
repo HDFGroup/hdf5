@@ -1188,9 +1188,9 @@ error:
  *		`small' and/or `medium' on the command line or only `small'
  *		is assumed.
  *
- * Return:	Success:	exit(0)
+ * Return:	Success:	exit(EXIT_SUCCESS)
  *
- *		Failure:	exit(non-zero)
+ *		Failure:	exit(EXIT_FAILURE)
  *
  * Programmer:	Robb Matzke
  *		Friday, October 10, 1997
@@ -1217,7 +1217,7 @@ main(int argc, char *argv[])
                 size_of_test |= TEST_MEDIUM;
             else {
                 printf("unrecognized argument: %s\n", argv[i]);
-                HDexit(1);
+                HDexit(EXIT_FAILURE);
             } /* end else */
         } /* end for */
     } /* end else */
@@ -1437,7 +1437,7 @@ main(int argc, char *argv[])
                 == nerrors ? "" : "S");
         if(HDisatty(1))
             printf("(Redirect output to a pager or a file to see debug output)\n");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     } /* end if */
 
     printf("All hyperslab tests passed.\n");

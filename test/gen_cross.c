@@ -1260,8 +1260,8 @@ error:
  *
  * Purpose:     Create a file for cross_read.c test.
  *
- * Return:      Success:        exit(0)
- *              Failure:        exit(1)
+ * Return:      Success:        exit(EXIT_SUCCESS)
+ *              Failure:        exit(EXIT_FAILURE)
  *
  * Programmer:  Raymond Lu
  *              Some time ago

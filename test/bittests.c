@@ -932,7 +932,7 @@ main(void)
     if(nerrors) {
         printf("***** %u FAILURE%s! *****\n",
                nerrors, 1 == nerrors ? "" : "S");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
     printf("All bit tests passed.\n");
 

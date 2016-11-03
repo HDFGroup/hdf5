@@ -2383,7 +2383,7 @@ main(int argc, char *argv[])
                 test_compact =1;
             else {
                 fprintf(stderr, "usage: %s [contiguous] [chunked] [compact]\n", argv[0]);
-                exit(1);
+                exit(EXIT_FAILURE);
             }
         } /* end for */
     } /* end if */

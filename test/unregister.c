@@ -218,9 +218,9 @@ error:
  *
  * Purpose:	Tests unregistering filter with H5Zunregister
  *
- * Return:	Success:	exit(0)
+ * Return:	Success:	exit(EXIT_SUCCESS)
  *
- *		Failure:	exit(1)
+ *		Failure:	exit(EXIT_FAILURE)
  *
  * Programmer:	Raymond Lu
  *              11 April 2013

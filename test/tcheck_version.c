@@ -65,7 +65,7 @@ parse(int ac, char **av)
 	pt = *(++av);
 	if (*pt != '-') {
 	    fprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}else{
 	    switch(*(++pt)) {
 		case 't': 	/* option -t */
@@ -81,15 +81,15 @@ parse(int ac, char **av)
 			    break;
 			default:
 			    fprintf(stderr, "Unknown -v parameter (%s). Aborted.\n", *av);
-			    exit(1);
+			    exit(EXIT_FAILURE);
 		    }
 		    break;
 		case 'h':	/* help page */
 		    showhelp();
-		    exit(0);
+		    exit(EXIT_SUCCESS);
 		default:
 		    fprintf(stderr, "Unknown option(%s). Aborted.\n", *av);
-		    exit(1);
+		    exit(EXIT_FAILURE);
 	    }
 	}
     }

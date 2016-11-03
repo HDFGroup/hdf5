@@ -733,9 +733,9 @@ error:
  *
  * Purpose:	Tests the plugin module (H5PL)
  *
- * Return:	Success:	exit(0)
+ * Return:	Success:	exit(EXIT_SUCCESS)
  *
- *		Failure:	exit(1)
+ *		Failure:	exit(EXIT_FAILURE)
  *
  * Programmer:	Raymond Lu
  *		14 March 2013

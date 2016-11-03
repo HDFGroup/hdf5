@@ -20,7 +20,7 @@
  * Purpose:	This is the first half of a two-part test that makes sure
  *		that a file can be read after an application crashes as long
  *		as the file was flushed first.  We simulate a crash by
- *		calling _exit(0) since this doesn't flush HDF5 caches but
+ *		calling _exit(EXIT_SUCCESS) since this doesn't flush HDF5 caches but
  *		still exits with success.
  */
 #include "h5test.h"
@@ -83,7 +83,7 @@ create_file(char* name, hid_t fapl)
     return file;
 
 error:
-    HD_exit(1);
+    HD_exit(EXIT_FAILURE);
 }
 
 
@@ -127,7 +127,7 @@ extend_file(hid_t file)
     return file;
 
 error:
-    HD_exit(1);
+    HD_exit(EXIT_FAILURE);
 }
 
 /*-------------------------------------------------------------------------
@@ -185,10 +185,10 @@ main(void)
     fflush(stdout);
     fflush(stderr);
 
-    HD_exit(0);
+    HD_exit(EXIT_SUCCESS);
 
 error:
-    HD_exit(1);
+    HD_exit(EXIT_FAILURE);
     return 1;
 }
 
