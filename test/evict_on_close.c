@@ -916,7 +916,7 @@ main(void)
     } /* end if */
 
     /* Clean up files and close the VFD-specific fapl */
-//    h5_delete_all_test_files(FILENAMES, fapl_id);
+    h5_delete_all_test_files(FILENAMES, fapl_id);
     if(H5Pclose(fapl_id) < 0) {
         nerrors++;
         PUTS_ERROR("Unable to close VFD-specific fapl.\n");
@@ -934,7 +934,7 @@ error:
     HDprintf("***** %u evict-on-close test%s FAILED! *****\n",
         nerrors, nerrors > 1 ? "S" : "");
 
-//    h5_delete_all_test_files(FILENAMES, fapl_id);
+    h5_delete_all_test_files(FILENAMES, fapl_id);
     H5E_BEGIN_TRY {
         H5Fclose(fid);
         H5Pclose(fapl_id);
