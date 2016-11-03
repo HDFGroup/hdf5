@@ -470,6 +470,7 @@
 ./src/H5Aprivate.h
 ./src/H5Apublic.h
 ./src/H5AC.c
+./src/H5ACdbg.c
 ./src/H5ACmodule.h
 ./src/H5ACmpio.c
 ./src/H5ACpkg.h
@@ -494,6 +495,7 @@
 ./src/H5B2stat.c
 ./src/H5B2test.c
 ./src/H5C.c
+./src/H5Cdbg.c
 ./src/H5Cepoch.c
 ./src/H5Cmodule.h
 ./src/H5Cmpio.c
