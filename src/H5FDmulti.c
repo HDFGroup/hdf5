@@ -1290,7 +1290,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
     } else {
         H5FD_mem_t mmt = file->fa.memb_map[type];
 
-        if(H5FD_MEM_DEFAULT==mmt)
+        if(H5FD_MEM_DEFAULT == mmt)
             mmt = type;
 
 	if(file->memb[mmt]) {
@@ -1361,13 +1361,15 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     if(H5FD_MEM_DEFAULT == mmt)
         mmt = type;
 
-    /* Handle backward compatibility in a quick and simple way.  v1.6 library had EOA for the entire virtual 
-     * file.  But it wasn't meaningful.  So v1.8 library doesn't have it anymore.  It saves the EOA for the 
-     * metadata file, instead.  Here we try to figure out whether the EOA is from a v1.6 file by comparing its 
-     * value.  If it is a big value, we assume it's from v1.6 and simply discard it. This is the normal case 
-     * when the metadata file has the smallest starting address.  If the metadata file has the biggest address,
-     * the EOAs of v1.6 and v1.8 files are the same.  It won't cause any trouble.  (Please see Issue 2598 
-     * in Jira) SLU - 2011/6/21
+    /* Handle backward compatibility in a quick and simple way.  v1.6 library
+     * had EOA for the entire virtual file.  But it wasn't meaningful.  So v1.8
+     * library doesn't have it anymore.  It saves the EOA for the metadata file,
+     * instead.  Here we try to figure out whether the EOA is from a v1.6 file
+     * by comparing its value.  If it is a big value, we assume it's from v1.6
+     * and simply discard it. This is the normal case when the metadata file
+     * has the smallest starting address.  If the metadata file has the biggest
+     * address, the EOAs of v1.6 and v1.8 files are the same.  It won't cause
+     * any trouble.  (Please see Issue 2598 in Jira) SLU - 2011/6/21
      */
     if(H5FD_MEM_SUPER == type && file->memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > file->memb_eoa[H5FD_MEM_SUPER])
         return 0;
@@ -1378,7 +1380,7 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     H5E_BEGIN_TRY {
 	status = H5FDset_eoa(file->memb[mmt], mmt, (eoa - file->fa.memb_addr[mmt]));
     } H5E_END_TRY;
-    if (status<0)
+    if(status < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "member H5FDset_eoa failed", -1)
 
     return 0;
