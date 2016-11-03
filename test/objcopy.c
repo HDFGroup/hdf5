@@ -10547,7 +10547,7 @@ test_copy_committed_dt_merge_attr(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
     if((aid = H5Acreate2(gid, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* write data into file */
-    //if(H5Awrite(aid, tid, buf) < 0) TEST_ERROR
+    if(H5Awrite(aid, tid, buf) < 0) TEST_ERROR
 
     /* close the datatype */
     if(H5Tclose(tid) < 0) TEST_ERROR
