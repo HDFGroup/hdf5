@@ -57,7 +57,18 @@ New Features
 
     Configuration
     -------------
-    - None
+
+    - CMake: Added NAMESPACE hdf5:: to package configuration files to allow
+      projects using installed HDF5 binaries built with CMake to link with
+      them without specifying the HDF5 library location via IMPORTED_LOCATION.
+
+      (ABD, 2016/10/17, HDFFV-10003)
+
+
+    - CMake: Changed the CTEST_BUILD_CONFIGURATION option to
+      CTEST_CONFIGURATION_TYPE as recommended by the CMake documentation.
+
+      (ABD, 2016/10/17, HDFFV-9971)
 
 
     Library
@@ -120,13 +131,6 @@ Bug Fixes since HDF5-1.8.17
       name collisions.
 
       (ABD, 2016/09/19, HDFFV-9431)
-
-
-    - CMake: Added NAMESPACE hdf5:: to package configuration files to fix a
-      problem where projects using installed HDF5 binaries built with CMake
-      were unable to link to them.
-
-      (ABD, 2016/10/17, HDFFV-10003)
 
 
     Library
