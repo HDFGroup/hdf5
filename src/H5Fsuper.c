@@ -401,7 +401,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
      * individually.
      */
     /* Can skip this test when it is not the initial file open--
-     * H5F_super_read() call from H5F_evict_tagged_metadata() for
+     * H5F__super_read() call from H5F_evict_tagged_metadata() for
      * refreshing object.
      * When flushing file buffers and fractal heap is involved,
      * the library will allocate actual space for tmp addresses
@@ -448,8 +448,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
          * portion of the driver info block 
          */
         if(H5FD_set_eoa(f->shared->lf, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE) < 0) /* will extend eoa later if required */ 
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, \
-                        "set end of space allocation request failed")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
 
         /* Look up the driver info block */
         if(NULL == (drvinfo = (H5O_drvinfo_t *)H5AC_protect(f, dxpl_id, H5AC_DRVRINFO, sblock->driver_addr, &drvrinfo_udata, rw_flags)))
@@ -458,11 +457,8 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
         /* Loading the driver info block is enough to set up the right info */
 
         /* Check if we need to rewrite the driver info block info */
-        if ( ( (rw_flags & H5AC__READ_ONLY_FLAG) == 0 ) &&
-             ( H5F_HAS_FEATURE(f, H5FD_FEAT_DIRTY_DRVRINFO_LOAD) ) ) {
-
+        if(((rw_flags & H5AC__READ_ONLY_FLAG) == 0) && H5F_HAS_FEATURE(f, H5FD_FEAT_DIRTY_DRVRINFO_LOAD))
             drvinfo_flags |= H5AC__DIRTIED_FLAG;
-        } /* end if */
 
         /* set the pin entry flag so that the driver information block 
          * cache entry will be pinned in the cache.
@@ -478,7 +474,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
     } /* end if */
 
     /* (Account for the stored EOA being absolute offset -NAF) */
-    if(H5F__set_eoa(f, H5FD_MEM_SUPER, udata.stored_eof - sblock->base_addr) < 0)
+    if(H5F__set_eoa(f, H5FD_MEM_DEFAULT, udata.stored_eof - sblock->base_addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set end-of-address marker for file")
 
     /* Decode the optional superblock extension info */

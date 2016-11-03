@@ -635,7 +635,7 @@ static int gent_softlink2(void)
     fileid1 = H5Fcreate(FILE4_1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     if (fileid1 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Fcreate failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Fcreate failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -646,7 +646,7 @@ static int gent_softlink2(void)
     gid1 = H5Gcreate2(fileid1, "group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid1 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -654,7 +654,7 @@ static int gent_softlink2(void)
     gid2 = H5Gcreate2(fileid1, "group_empty", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (gid2 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Gcreate2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -666,7 +666,7 @@ static int gent_softlink2(void)
     status = H5Tcommit2(fileid1, "dtype", datatype, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Tcommit2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -694,7 +694,7 @@ static int gent_softlink2(void)
             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dset1 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -702,7 +702,7 @@ static int gent_softlink2(void)
     status = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data1);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -715,7 +715,7 @@ static int gent_softlink2(void)
             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dset2 < 0)
     {
-        fprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dcreate2 failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -723,7 +723,7 @@ static int gent_softlink2(void)
     status = H5Dwrite(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data2);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dwrite failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -738,7 +738,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/dset1", fileid1, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -747,7 +747,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/dtype", fileid1, "soft_dtype", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -756,7 +756,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/group1", fileid1, "soft_group1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -765,7 +765,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/group_empty", fileid1, "soft_empty_grp", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -774,7 +774,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("not_yet", fileid1, "soft_dangle", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -786,7 +786,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/dset1", gid1, "soft_dset1", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -795,7 +795,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/dset2", gid1, "soft_dset2", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -804,7 +804,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/dtype", gid1, "soft_dtype", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -813,7 +813,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("/group_empty", gid1, "soft_empty_grp", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -822,7 +822,7 @@ static int gent_softlink2(void)
     status = H5Lcreate_soft("not_yet", gid1, "soft_dangle", H5P_DEFAULT, H5P_DEFAULT);
     if (status < 0)
     {
-        fprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Lcreate_soft failed.\n", FILE4_1);
         status = FAIL;
         goto out;
     }
@@ -832,31 +832,31 @@ static int gent_softlink2(void)
      * Close/release resources.
      */
     if(dataspace >= 0 && H5Sclose(dataspace) < 0) {
-        fprintf(stderr, "Error: %s> H5Sclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Sclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(gid1 >= 0 && H5Gclose(gid1) < 0) {
-        fprintf(stderr, "Error: %s> H5Gclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Gclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(gid2 >= 0 && H5Gclose(gid2) < 0) {
-        fprintf(stderr, "Error: %s> H5Gclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Gclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(datatype >= 0 && H5Tclose(datatype) < 0) {
-        fprintf(stderr, "Error: %s> H5Tclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Tclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(dset1 >= 0 && H5Dclose(dset1) < 0) {
-        fprintf(stderr, "Error: %s> H5Dclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(dset2 >= 0 && H5Dclose(dset2) < 0) {
-        fprintf(stderr, "Error: %s> H5Dclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Dclose failed.\n", FILE4_1);
         status = FAIL;
     }
     if(fileid1 >= 0 && H5Fclose(fileid1) < 0) {
-        fprintf(stderr, "Error: %s> H5Fclose failed.\n", FILE4_1);
+        HDfprintf(stderr, "Error: %s> H5Fclose failed.\n", FILE4_1);
         status = FAIL;
     }
 
@@ -932,7 +932,7 @@ static void gent_udlink(void)
     /* This ud link will dangle, but that's okay */
     fid = H5Fcreate(FILE54, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     H5Lcreate_ud(fid, "udlink1", (H5L_type_t)MY_LINKCLASS, NULL, 0, H5P_DEFAULT, H5P_DEFAULT);
-    strcpy(buf, "foo");
+    HDstrcpy(buf, "foo");
     H5Lcreate_ud(fid, "udlink2", (H5L_type_t)MY_LINKCLASS, buf, 4, H5P_DEFAULT, H5P_DEFAULT);
 
     H5Fclose(fid);
@@ -1837,7 +1837,7 @@ static void gent_str(void) {
                 for(l = 0; l < 10; l++)
                     comp1[i][j].a[k][l] = (l + j + k) * (l + j + k);
             for(k = 0 ; k < 12; k++)
-                strcpy(comp1[i][j].s[k], "abcdefgh12345678abcdefgh12345678");
+                HDstrcpy(comp1[i][j].s[k], "abcdefgh12345678abcdefgh12345678");
         }
 
     dataset = H5Dcreate2(fid, "/comp1", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -2469,7 +2469,7 @@ static void gent_nestcomp(void)
      */
     status = H5Dwrite(dataset, s2_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, s1);
     if(status < 0)
-        fprintf(stderr, "gent_nestcomp H5Dwrite failed\n");
+        HDfprintf(stderr, "gent_nestcomp H5Dwrite failed\n");
 
     /*
      * Release resources
@@ -10088,10 +10088,10 @@ static void gent_compound_complex2(void)
                     /* Set up first nested compound */
                     buf[i].d.nested_a = (double) i;
 
-                    strcpy(buf[i].d.nested_string, "This is a test string.");
+                    HDstrcpy(buf[i].d.nested_string, "This is a test string.");
 
                     for (j = 0; j < 4; j++)
-                        strcpy(buf[i].d.nested_string_array[j], "String test");
+                        HDstrcpy(buf[i].d.nested_string_array[j], "String test");
 
                     /* Set up multiple nested compound */
                     buf[i].e.a = (float) i;
@@ -10103,9 +10103,9 @@ static void gent_compound_complex2(void)
                         buf[i].e.b.multiple_nested_d[j] = (long)(j - i*10);
                     }
 
-                    strcpy(buf[i].e.c.further_nested_string, "1234567890");
+                    HDstrcpy(buf[i].e.c.further_nested_string, "1234567890");
                     for (j = 0; j < 4; j++)
-                        strcpy(buf[i].e.c.further_nested_string_array[j], "STRING ARRAY");
+                        HDstrcpy(buf[i].e.c.further_nested_string_array[j], "STRING ARRAY");
 
                     for (j = 0; j < 10; j++) {
                         buf[i].e.c.deep_nest.deep_nested_short[j] = (short)(j + i*10);
@@ -10117,7 +10117,7 @@ static void gent_compound_complex2(void)
                 }
 
                 if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-                    fprintf(stderr, "gent_tcompound_complex2 H5Dwrite failed\n");
+                    HDfprintf(stderr, "gent_tcompound_complex2 H5Dwrite failed\n");
 
                 H5Dclose(dset);
             }
@@ -10252,7 +10252,7 @@ static void gent_vlenstr_array(void)
         if ((type = H5Tarray_create2(array_tid, F83_RANK, arraydim)) >= 0) {
             if ((dset = H5Dcreate2(file, F83_DATASETNAME, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                 if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
-                    fprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
+                    HDfprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
 
                 H5Dclose(dset);
             }
@@ -10273,7 +10273,7 @@ static void gent_vlenstr_array(void)
 
             if ((dset = H5Dcreate2(file, F83_DATASETNAME2, type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                 if (H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-                    fprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
+                    HDfprintf(stderr, "gent_vlenstr_array H5Dwrite failed\n");
 
                 H5Dclose(dset);
             }
