@@ -699,7 +699,7 @@ if test "X$HDF_CXX" = "Xyes"; then
   ## if C++ can handle static cast
   PAC_PROG_CXX_STATIC_CAST
 
-  ## Checking if C++ has offsetof extension, 
+  ## Checking if C++ has offsetof extension,
   ## note: this test has to be the last of the C++ tests because it sets a definition
   ## which would be used in the other tests, causing them to fail.
   PAC_PROG_CXX_OFFSETOF
@@ -2869,7 +2869,7 @@ if test ${ac_cv_sizeof_long_double} = 0; then
    hdf5_cv_ldouble_to_llong_accurate=${hdf5_cv_ldouble_to_llong_accurate=no}
 else
    AC_CACHE_VAL([hdf5_cv_ldouble_to_llong_accurate],
-        [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])], 
+        [AC_RUN_IFELSE([AC_LANG_SOURCE([$TEST_SRC])],
         [hdf5_cv_ldouble_to_llong_accurate=yes], [hdf5_cv_ldouble_to_llong_accurate=no],[])])
 fi
 
@@ -3348,6 +3348,9 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/test/h5diff/Makefile
                  tools/test/h5diff/testh5diff.sh
                  tools/test/h5diff/testph5diff.sh
+                 tools/src/h5format_convert/Makefile
+                 tools/test/h5format_convert/Makefile
+                 tools/test/h5format_convert/testh5fc.sh
                  tools/test/h5jam/Makefile
                  tools/test/h5jam/testh5jam.sh
                  tools/test/h5repack/Makefile
@@ -3426,7 +3429,7 @@ AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
 
 AC_OUTPUT
 
-chmod 755 tools/misc/h5cc
+chmod 755 tools/src/misc/h5cc
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
   chmod 755 fortran/src/h5fc
