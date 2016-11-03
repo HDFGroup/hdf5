@@ -1358,8 +1358,12 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     H5Eclear2(H5E_DEFAULT);
 
     mmt = file->fa.memb_map[type];
-    if(H5FD_MEM_DEFAULT == mmt)
-        mmt = type;
+    if(H5FD_MEM_DEFAULT == mmt) {
+        if(H5FD_MEM_DEFAULT == type)
+            mmt = H5FD_MEM_SUPER;
+        else
+            mmt = type;
+    } /* end if */
 
     /* Handle backward compatibility in a quick and simple way.  v1.6 library
      * had EOA for the entire virtual file.  But it wasn't meaningful.  So v1.8
@@ -1371,7 +1375,7 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
      * address, the EOAs of v1.6 and v1.8 files are the same.  It won't cause
      * any trouble.  (Please see Issue 2598 in Jira) SLU - 2011/6/21
      */
-    if(H5FD_MEM_SUPER == type && file->memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > file->memb_eoa[H5FD_MEM_SUPER])
+    if(H5FD_MEM_SUPER == mmt && file->memb_eoa[H5FD_MEM_SUPER] > 0 && eoa > (file->memb_next[H5FD_MEM_SUPER] / 2))
         return 0;
 
     assert(eoa >= file->fa.memb_addr[mmt]);

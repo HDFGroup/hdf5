@@ -474,7 +474,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
     } /* end if */
 
     /* (Account for the stored EOA being absolute offset -NAF) */
-    if(H5F__set_eoa(f, H5FD_MEM_SUPER, udata.stored_eof - sblock->base_addr) < 0)
+    if(H5F__set_eoa(f, H5FD_MEM_DEFAULT, udata.stored_eof - sblock->base_addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set end-of-address marker for file")
 
     /* Decode the optional superblock extension info */
