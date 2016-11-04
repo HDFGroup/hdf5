@@ -471,6 +471,7 @@
 ./src/H5Apublic.h
 ./src/H5AC.c
 ./src/H5ACdbg.c
+./src/H5AClog.c
 ./src/H5ACmodule.h
 ./src/H5ACmpio.c
 ./src/H5ACpkg.h
@@ -497,6 +498,7 @@
 ./src/H5C.c
 ./src/H5Cdbg.c
 ./src/H5Cepoch.c
+./src/H5Clog.c
 ./src/H5Cmodule.h
 ./src/H5Cmpio.c
 ./src/H5Cpkg.h
