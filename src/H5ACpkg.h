@@ -426,5 +426,9 @@ H5_DLL herr_t H5AC__set_write_done_callback(H5C_t * cache_ptr,
     void (* write_done)(void));
 #endif /* H5_HAVE_PARALLEL */
 
+/* Trace file routines */
+H5_DLL herr_t H5AC__close_trace_file(H5AC_t *cache_ptr);
+H5_DLL herr_t H5AC__open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name);
+
 #endif /* _H5ACpkg_H */
 
