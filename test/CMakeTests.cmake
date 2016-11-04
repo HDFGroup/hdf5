@@ -493,6 +493,8 @@ set (test_CLEANFILES
     vds_src_0.h5
     vds_src_1.h5
     tbogus.h5.copy
+    cache_logging.h5
+    cache_logging.out
 )
 
 # Remove any output file left over from previous test run
@@ -558,6 +560,7 @@ set (H5TEST_TESTS
     vds
     file_image
     unregister
+    cache_logging
     cork
 )
 

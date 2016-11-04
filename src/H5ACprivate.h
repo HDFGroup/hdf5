@@ -378,7 +378,8 @@ H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t ta
 H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);
 #endif /* H5_HAVE_PARALLEL */
 
-#ifndef NDEBUG  /* debugging functions */
+/* Debugging functions */
+#ifndef NDEBUG
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
 H5_DLL herr_t H5AC_dump_cache(const H5F_t *f);
 #endif /* NDEBUG */ /* end debugging functions */

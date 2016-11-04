@@ -299,6 +299,12 @@ H5C_create(size_t		      max_cache_size,
 
     cache_ptr->flush_in_progress		= FALSE;
 
+    cache_ptr->logging_enabled                  = FALSE;
+
+    cache_ptr->currently_logging                = FALSE;
+
+    cache_ptr->log_file_ptr			= NULL;
+
     cache_ptr->trace_file_ptr			= NULL;
 
     cache_ptr->aux_ptr				= aux_ptr;
