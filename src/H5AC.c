@@ -70,8 +70,6 @@ static herr_t H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr,
 #if H5AC_DO_TAGGING_SANITY_CHECKS
 static herr_t H5AC__verify_tag(hid_t dxpl_id, const H5AC_class_t * type);
 #endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
-static herr_t H5AC__open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name);
-static herr_t H5AC__close_trace_file(H5AC_t *cache_ptr);
 
 
 /*********************/
