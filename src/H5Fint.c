@@ -686,6 +686,22 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
          */
         f->shared->use_tmp_space = !H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI);
 
+        /* Get the metadata cache log location (if we're logging) */
+        {
+            char *mdc_log_location = NULL;      /* location of metadata cache log location */
+
+            if(H5P_get(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &mdc_log_location) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get mdc log location")
+            if(mdc_log_location != NULL) {
+                size_t len = HDstrlen(mdc_log_location);
+                if(NULL == (f->shared->mdc_log_location = (char *)H5MM_calloc((len + 1) * sizeof(char))))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate memory for mdc log file name")
+                HDstrncpy(f->shared->mdc_log_location, mdc_log_location, len);
+            }
+            else
+                f->shared->mdc_log_location = NULL;
+        } /* end block */
+
         /* Get object flush callback information */
         if(H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &(f->shared->object_flush)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get object flush cb info")
