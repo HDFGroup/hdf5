@@ -142,12 +142,6 @@ Bug Fixes since HDF5-1.8.17
       (DER, 2016/04/29)
 
 
-    - Fixed a memory bug that could occur when a message was improperly marked
-      as sharable on disk.
-
-      (NAF, 2016/07/01, HDFFV-9950)
-
-
     - Fixed an error that would occur when calling H5Adelete on an attribute
       which is attached to an externally linked object in the target file and
       whose datatype is a committed datatype in the main file.
@@ -162,9 +156,32 @@ Bug Fixes since HDF5-1.8.17
       (ABD, 2016/08/01, HDFFV-9706)
 
 
-    - Fixed a bug that could occur when using H5Pset_alignment.
+    - H5Pset_alignment can result in misaligned blocks with some input
+      combinations, causing an assertion failure in debug mode.
 
       (NAF, 2016/08/11, HDFFV-9948)
+
+
+    - A number of issues were fixed when reading/writing from/to corrupted
+      files to ensure that the library fails gracefully in these cases:
+
+      * Writing to a corrupted file that has an object message which is
+        incorrectly marked as sharable on disk results in a buffer overflow /
+        invalid write instead of a clean error message.
+
+      * Decoding data from a corrupted file with a dataset encoded with the
+        H5Z_NBIT decoding can result in a code execution vulnerability under
+        the context of the application using the HDF5 library.
+
+      * When decoding an array datatype from a corrupted file, the HDF5 library
+        fails to return an error in production if the number of dimensions
+        decoded is greater than the maximum rank.
+
+      * When decoding an "old style" array datatype from a corrupted file, the
+        HDF5 library fails to return an error in production if the number of
+        dimensions decoded is greater than the maximum rank.
+
+      (NAF, 2016/10/06, HDFFV-9950, HDFFV-9951, HDFFV-9992, HDFFV-9993)
 
 
     - Fixed an error that would occur when copying an object with an attribute
