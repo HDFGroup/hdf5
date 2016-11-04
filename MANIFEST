@@ -1263,6 +1263,7 @@
 # h5format_convert sources
 ./tools/src/h5format_convert/Makefile.am
 ./tools/src/h5format_convert/h5format_convert.c
+./tools/test/h5format_convert/Makefile.am
 ./tools/test/h5format_convert/h5fc_chk_idx.c
 ./tools/test/h5format_convert/h5fc_gentest.c
 ./tools/test/h5format_convert/testfiles/h5fc_v_n_all.ddl
@@ -1336,7 +1337,6 @@
 ./tools/src/h5ls/Makefile.am
 ./tools/src/h5ls/h5ls.c
 ./tools/test/h5ls/Makefile.am
-./tools/test/h5ls/CMakeTestsVDS.cmake
 ./tools/test/h5ls/testh5ls.sh.in
 ./tools/test/h5ls/testh5lsvds.sh.in
 
@@ -2973,6 +2973,9 @@
 ./tools/test/h5dump/CMakeTestsPBITS.cmake
 ./tools/test/h5dump/CMakeTestsXML.cmake
 ./tools/test/h5dump/CMakeTestsVDS.cmake
+./tools/src/h5format_convert/CMakeLists.txt
+./tools/test/h5format_convert/CMakeLists.txt
+./tools/test/h5format_convert/CMakeTests.cmake
 ./tools/src/h5import/CMakeLists.txt
 ./tools/test/h5import/CMakeLists.txt
 ./tools/test/h5import/CMakeTests.cmake

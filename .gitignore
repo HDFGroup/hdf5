@@ -80,6 +80,8 @@ test/testfiles/plist_files/Makefile.in
 testpar/Makefile.in
 tools/Makefile.in
 tools/lib/Makefile.in
+tools/src/Makefile.in
+tools/test/Makefile.in
 tools/testfiles/Makefile.in
 tools/testfiles/pbits/Makefile.in
 tools/testfiles/vds/Makefile.in
