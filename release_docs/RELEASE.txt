@@ -62,13 +62,17 @@ New Features
       projects using installed HDF5 binaries built with CMake to link with
       them without specifying the HDF5 library location via IMPORTED_LOCATION.
 
-      (ABD, 2016/10/17, HDFFV-10003)
+      (ADB, 2016/10/17, HDFFV-10003)
 
 
     - CMake: Changed the CTEST_BUILD_CONFIGURATION option to
       CTEST_CONFIGURATION_TYPE as recommended by the CMake documentation.
 
-      (ABD, 2016/10/17, HDFFV-9971)
+      (ADB, 2016/10/17, HDFFV-9971)
+
+    - CMake: Added support for GIT
+
+      (ADB, 2016/07/12)
 
 
     Library
@@ -103,8 +107,8 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    
-    
+
+
 
 Bug Fixes since HDF5-1.8.17
 ===========================
@@ -232,16 +236,16 @@ Bug Fixes since HDF5-1.8.17
       * Removed the non-standard assumption that KIND=SIZEOF, in the HDF5
         configure programs.
       * Removed Fortran 66 character/integer conversions from tests.
-      * Removed the use of C_SIZEOF in the test programs 
+      * Removed the use of C_SIZEOF in the test programs
       * Changed to using STORAGE_SIZE in the test programs if available. Otherwise,
         uses C_SIZEOF or SIZEOF.
 
       (MSB, 2016/9/22, HDFFV-9973)
-   
+
 
     - Fortran segfaults for F03 tests with NAG compiler
 
-      * Removed INTENT(OUT) from 'fillvalue' in F2003 interface 
+      * Removed INTENT(OUT) from 'fillvalue' in F2003 interface
         for H5Pget_fill_value_f.
 
       (MSB, 2016/9/22, HDFFV-9980)
@@ -298,7 +302,7 @@ They are built with the configure process unless specified otherwise.
     Linux 2.6.32-573.22.1.el6     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (platypus/mayll)              Version 4.4.7 20120313
-                                     Versions 4.8.4, 4.9.3, 5.2.0 
+                                     Versions 4.8.4, 4.9.3, 5.2.0
                                   PGI C, Fortran, C++ for 64-bit target on
                                   x86-64;
                                       Version 15.7-0
