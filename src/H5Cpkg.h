@@ -3201,6 +3201,29 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  *              When we get to using H5C in other places, we may add
  *              code to write trace file data at the H5C level as well.
  *
+ * logging_enabled: Boolean flag indicating whether cache logging
+ *              which is used to record cache operations for use in
+ *              debugging and performance analysis. When this flag is set
+ *              to TRUE, it means that the log file is open and ready to
+ *              receive log entries. It does NOT mean that cache operations
+ *              are currently being recorded. That is controlled by the
+ *              currently_logging flag (below).
+ *
+ *              Since much of the code supporting the parallel metadata
+ *              cache is in H5AC, we don't write the trace file from
+ *              H5C.  Instead, H5AC reads the trace_file_ptr as needed.
+ *
+ *              When we get to using H5C in other places, we may add
+ *              code to write trace file data at the H5C level as well.
+ *
+ * currently_logging: Boolean flag that indicates if cache operations are
+ *              currently being logged. This flag is flipped by the
+ *              H5Fstart/stop_mdc_logging functions.
+ *
+ * log_file_ptr:  File pointer pointing to the log file. The I/O functions
+ *              in stdio.h are used to write to the log file regardless of
+ *              the VFD selected.
+ *
  * aux_ptr:	Pointer to void used to allow wrapper code to associate
  *		its data with an instance of H5C_t.  The H5C cache code
  *		sets this field to NULL, and otherwise leaves it alone.
@@ -4059,6 +4082,9 @@ struct H5C_t {
     uint32_t			magic;
     hbool_t			flush_in_progress;
     FILE *			trace_file_ptr;
+    hbool_t                     logging_enabled;
+    hbool_t                     currently_logging;
+    FILE *			log_file_ptr;
     void *			aux_ptr;
     int32_t			max_type_id;
     const char *                (* type_name_table_ptr);

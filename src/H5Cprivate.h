@@ -1961,6 +1961,13 @@ H5_DLL H5C_t *H5C_create(size_t max_cache_size, size_t min_clean_size,
     int max_type_id, const char *(*type_name_table_ptr),
     H5C_write_permitted_func_t check_write_permitted, hbool_t write_permitted,
     H5C_log_flush_func_t log_flush, void *aux_ptr);
+H5_DLL herr_t H5C_set_up_logging(H5C_t *cache_ptr, const char log_location[], hbool_t start_immediately);
+H5_DLL herr_t H5C_tear_down_logging(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_start_logging(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_stop_logging(H5C_t *cache_ptr);
+H5_DLL herr_t H5C_get_logging_status(const H5C_t *cache_ptr, /*OUT*/ hbool_t *is_enabled,
+    /*OUT*/ hbool_t *is_currently_logging);
+H5_DLL herr_t H5C_write_log_message(const H5C_t *cache_ptr, const char message[]);
 H5_DLL void H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr, int32_t version,
     double hit_rate, enum H5C_resize_status status,
     size_t old_max_cache_size, size_t new_max_cache_size,
