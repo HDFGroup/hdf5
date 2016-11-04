@@ -156,8 +156,8 @@ Bug Fixes since HDF5-1.8.17
       (ABD, 2016/08/01, HDFFV-9706)
 
 
-    - H5Pset_alignment can result in misaligned blocks with some input
-      combinations, causing an assertion failure in debug mode.
+    - Fixed an issue where H5Pset_alignment could result in misaligned blocks
+      with some input combinations, causing an assertion failure in debug mode.
 
       (NAF, 2016/08/11, HDFFV-9948)
 
