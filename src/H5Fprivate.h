@@ -319,6 +319,9 @@
 #ifdef H5_HAVE_PARALLEL
 #define H5F_COLL_MD_READ(F)     ((F)->coll_md_read)
 #endif /* H5_HAVE_PARALLEL */
+#define H5F_USE_MDC_LOGGING(F)  ((F)->shared->use_mdc_logging)
+#define H5F_START_MDC_LOG_ON_ACCESS(F)  ((F)->shared->start_mdc_log_on_access)
+#define H5F_MDC_LOG_LOCATION(F) ((F)->shared->mdc_log_location)
 #else /* H5F_MODULE */
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_OPEN_NAME(F)        (H5F_get_open_name(F))
@@ -365,6 +368,9 @@
 #ifdef H5_HAVE_PARALLEL
 #define H5F_COLL_MD_READ(F)     (H5F_coll_md_read(F))
 #endif /* H5_HAVE_PARALLEL */
+#define H5F_USE_MDC_LOGGING(F)  (H5F_use_mdc_logging(F))
+#define H5F_START_MDC_LOG_ON_ACCESS(F)  (H5F_start_mdc_log_on_access(F))
+#define H5F_MDC_LOG_LOCATION(F) (H5F_mdc_log_location(F))
 #endif /* H5F_MODULE */
 
 
@@ -464,6 +470,9 @@
 #define H5F_ACS_OBJECT_FLUSH_CB_NAME     	"object_flush_cb" 	 /* Object flush callback */
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
+#define H5F_ACS_USE_MDC_LOGGING_NAME            "use_mdc_logging" /* Whether to use metadata cache logging */
+#define H5F_ACS_MDC_LOG_LOCATION_NAME           "mdc_log_location" /* Name of metadata cache log location */
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME    "start_mdc_log_on_access" /* Whether logging starts on file create/open */
 #define H5F_ACS_CORE_WRITE_TRACKING_FLAG_NAME       "core_write_tracking_flag" /* Whether or not core VFD backing store write tracking is enabled */
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME        "evict_on_close_flag" /* Whether or not the metadata cache will evict objects on close */
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME  "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
@@ -680,6 +689,9 @@ H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
 H5_DLL H5P_coll_md_read_flag_t H5F_coll_md_read(const H5F_t *f);
 H5_DLL void H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t flag);
 #endif /* H5_HAVE_PARALLEL */
+H5_DLL hbool_t H5F_use_mdc_logging(const H5F_t *f);
+H5_DLL hbool_t H5F_start_mdc_log_on_access(const H5F_t *f);
+H5_DLL char *H5F_mdc_log_location(const H5F_t *f);
 
 /* Functions that retrieve values from VFD layer */
 H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
