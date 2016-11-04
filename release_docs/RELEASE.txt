@@ -5,8 +5,8 @@ INTRODUCTION
 ============
 
 This document describes the differences between HDF5-1.8.17 and
-HDF5-1.8.18-*, and contains information on the platforms tested and
-known problems in HDF5-1.8.18-*.
+HDF5-1.8.18, and contains information on the platforms tested and
+known problems in HDF5-1.8.18.
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
@@ -33,7 +33,7 @@ All new and modified APIs are listed in detail in the "HDF5 Software Changes
 from Release to Release" document, in the section "Release 1.8.18 (current
 release) versus Release 1.8.17
 
-     http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
+     http://www.hdfgroup.org/HDF5/doc1.8/ADGuide/Changes.html
 
 If you have any questions or comments, please send them to the HDF Help Desk:
 
@@ -57,22 +57,29 @@ New Features
 
     Configuration
     -------------
-    - CMake
-      Added NAMESPACE hdf5:: to package configuration files
-    - CMake: change CTEST_BUILD_CONFIGURATION to CTEST_CONFIGURATION_TYPE, which is
-      recommended by CMake documentation.
-      HDFFV-9971 (ADB 2016/8/22)
 
+    - CMake: Added NAMESPACE hdf5:: to package configuration files to allow
+      projects using installed HDF5 binaries built with CMake to link with
+      them without specifying the HDF5 library location via IMPORTED_LOCATION.
+
+      (ABD, 2016/10/17, HDFFV-10003)
+
+
+    - CMake: Changed the CTEST_BUILD_CONFIGURATION option to
+      CTEST_CONFIGURATION_TYPE as recommended by the CMake documentation.
+
+      (ABD, 2016/10/17, HDFFV-9971)
 
 
     Library
     -------
-    -None
+    - None
 
 
     Parallel Library
     ----------------
     - None
+
 
     Tools
     -----
@@ -81,9 +88,6 @@ New Features
 
     High-Level APIs
     ---------------
-
-    C Packet Table API
-    ------------------
     - None
 
 
@@ -107,28 +111,94 @@ Bug Fixes since HDF5-1.8.17
 
     Configuration
     -------------
-    - None
+
+    - Fixed a problem preventing HDF5 to be built on 32-bit CYGWIN by
+      condensing cygwin configuration files into a single file and
+      removing outdated compiler settings.
+
+      (ABD, 2016/07/12, HDFFV-9946)
+
+
+    - CMake: Fixed a command length overflow error by converting custom
+      commands inside CMakeTest.cmake files into regular dependencies and
+      targets.
+
+      (ABD, 2016/07/12, HDFFV-9939)
+
+
+    - CMake: Fixed a timeout error that would occasionally occur when running
+      the virtual file driver tests simultaneously due to test directory and file
+      name collisions.
+
+      (ABD, 2016/09/19, HDFFV-9431)
 
 
     Library
     -------
-    - Fixed a bug that could occur when using H5Pset_alignment.
+
+    - Fixed a memory leak that would occur when the library allocated memory
+      for an external file prefix (H5Pset_efile_prefix) and failed to free it.
+
+      (DER, 2016/04/29)
+
+
+    - Fixed an error that would occur when calling H5Adelete on an attribute
+      which is attached to an externally linked object in the target file and
+      whose datatype is a committed datatype in the main file.
+
+      (VC, 2016-07-04, HDFFV-9940)
+
+
+    - Fixed a problem where a plugin compiled into a DLL in the default plugin
+      directory could not be found by the HDF5 library at runtime on Windows
+      when the HDF5_PLUGIN_PATH environment variable was not set.
+
+      (ABD, 2016/08/01, HDFFV-9706)
+
+
+    - Fixed an issue where H5Pset_alignment could result in misaligned blocks
+      with some input combinations, causing an assertion failure in debug mode.
 
       (NAF, 2016/08/11, HDFFV-9948)
 
-    - Fixed a memory bug that could occur when a message was improperly marked
-      as sharable on disk.
 
-      (NAF, 2016/07/01, HDFFV-9950)
+    - A number of issues were fixed when reading/writing from/to corrupted
+      files to ensure that the library fails gracefully in these cases:
+
+      * Writing to a corrupted file that has an object message which is
+        incorrectly marked as sharable on disk results in a buffer overflow /
+        invalid write instead of a clean error message.
+
+      * Decoding data from a corrupted file with a dataset encoded with the
+        H5Z_NBIT decoding can result in a code execution vulnerability under
+        the context of the application using the HDF5 library.
+
+      * When decoding an array datatype from a corrupted file, the HDF5 library
+        fails to return an error in production if the number of dimensions
+        decoded is greater than the maximum rank.
+
+      * When decoding an "old style" array datatype from a corrupted file, the
+        HDF5 library fails to return an error in production if the number of
+        dimensions decoded is greater than the maximum rank.
+
+      (NAF, 2016/10/06, HDFFV-9950, HDFFV-9951, HDFFV-9992, HDFFV-9993)
+
+
+    - Fixed an error that would occur when copying an object with an attribute
+      which is a compound datatype consisting of a variable length string.
+
+      (VC, 2016-10-17, HDFFV-7991)
 
 
     Parallel Library
     ----------------
+
     - Fixed a bug that could occur when allocating a chunked dataset in parallel
       with an alignment set and an alignment threshold greater than the chunk
       size but less than or equal to the raw data aggregator size.
 
       (NAF, 2016/08/11, HDFFV-9969)
+
 
     Performance
     -------------
@@ -137,6 +207,15 @@ Bug Fixes since HDF5-1.8.17
 
     Tools
     -----
+
+    - Fixed an error in the compiler wrapper scripts (h5cc, h5fc, et al.)
+      in which they would erroneously drop the file argument specified via
+      the -o flag when the -o flag was specified before the -c flag on the
+      command line, resulting in a failure to compile.
+
+      (LRK, 2016/06/08, HDFFV-9938, HDFFV-9530)
+
+
     - h5repack User Defined (UD) filter parameters were not parsed correctly.
 
       The UD filter parameters were not being parsed correctly. Reworked coding
@@ -147,6 +226,7 @@ Bug Fixes since HDF5-1.8.17
 
     Fortran API
     -----------
+
     - Fortran library fails to compile and fails tests with NAG compiler.
 
       * Removed the non-standard assumption that KIND=SIZEOF, in the HDF5
@@ -158,6 +238,7 @@ Bug Fixes since HDF5-1.8.17
 
       (MSB, 2016/9/22, HDFFV-9973)
    
+
     - Fortran segfaults for F03 tests with NAG compiler
 
       * Removed INTENT(OUT) from 'fillvalue' in F2003 interface 
@@ -168,18 +249,18 @@ Bug Fixes since HDF5-1.8.17
 
     C++ API
     -------
-    - The macros H5_NO_NAMESPACE is deprecated from the HDF5 C++ API library.
+
+    - The macro H5_NO_NAMESPACE is deprecated from the HDF5 C++ API library.
       In future releases, the macros H5_NO_STD and OLD_HEADER_FILENAME may
       also be removed.
+
       (BMR, 2016/10/27, HDFFV-9532)
 
 
     High-Level APIs:
     ---------------
 
-    Packet Table APIs:
-    ------------------
-    - The high-level API Packet Table (PT) did not write data correctly when
+    - The high-level Packet Table (PT) API did not write data correctly when
       the datatype is a compound type that has string type as one of the
       members.  This problem started in 1.8.15, after the fix of HDFFV-9042
       was applied, which caused the Packet Table to use native type to access
@@ -191,6 +272,7 @@ Bug Fixes since HDF5-1.8.17
       data, then the application will request that.  However, the Packet Table
       doesn't provide a way to specify memory datatype in this release.
       Please refer to the Known Problems section for a work-around.
+
       (BMR, 2016/10/27, HDFFV-9758)
 
 
