@@ -891,6 +891,7 @@
 ./test/cache_api.c
 ./test/cache_common.c
 ./test/cache_common.h
+./test/cache_logging.c
 ./test/cache_tagging.c
 ./test/cmpd_dset.c
 ./test/cork.c
