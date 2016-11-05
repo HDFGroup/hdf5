@@ -534,7 +534,7 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
 		  hid_t *memb_fapl/*out*/, char **memb_name/*out*/,
 		  haddr_t *memb_addr/*out*/, hbool_t *relax)
 {
-    H5FD_multi_fapl_t	*fa;
+    const H5FD_multi_fapl_t *fa;
     H5FD_mem_t		mt;
     static const char *func="H5FDget_fapl_multi";  /* Function Name for error reporting */
 
@@ -548,7 +548,7 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not an access list", -1)
     if(H5FD_MULTI != H5Pget_driver(fapl_id))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1)
-    if(NULL == (fa= (H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id)))
+    if(NULL == (fa= (const H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id)))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1)
 
     if (memb_map)
@@ -992,7 +992,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
 {
     H5FD_multi_t	*file=NULL;
     hid_t		close_fapl=-1;
-    H5FD_multi_fapl_t	*fa;
+    const H5FD_multi_fapl_t *fa;
     H5FD_mem_t		m;
     static const char *func="H5FD_multi_open";  /* Function Name for error reporting */
 
@@ -1018,7 +1018,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
         if(H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE)<0)
             H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTSET, "can't set property value", error)
     }
-    fa = (H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
+    fa = (const H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
     assert(fa);
     ALL_MEMBERS(mt) {
 	file->fa.memb_map[mt] = fa->memb_map[mt];

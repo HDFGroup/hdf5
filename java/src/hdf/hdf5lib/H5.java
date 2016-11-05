@@ -6915,7 +6915,7 @@ public class H5 implements java.io.Serializable {
 
     // File access property list (FAPL) routines //
     // herr_t H5Pset_driver( hid_t plist_id, hid_t new_driver_id, const void *new_driver_info )
-    // void *H5Pget_driver_info( hid_t plist_id )
+    // const void *H5Pget_driver_info( hid_t plist_id )
     // herr_t H5Pget_multi_type ( hid_t fapl_id, H5FD_mem_t *type )
     // herr_t H5Pset_multi_type ( hid_t fapl_id, H5FD_mem_t type )
     // herr_t H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr);

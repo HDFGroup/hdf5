@@ -875,11 +875,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-void *
+const void *
 H5Pget_driver_info(hid_t plist_id)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    void *ret_value;            /* Return value */
+    H5P_genplist_t *plist = NULL;       /* Property list pointer            */
+    const void *ret_value = NULL;       /* Return value                     */
 
     FUNC_ENTER_API(NULL)
     H5TRACE1("*x", "i", plist_id);
@@ -888,7 +888,7 @@ H5Pget_driver_info(hid_t plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
 
     /* Get the driver info */
-    if(NULL == (ret_value = (void *)H5P_peek_driver_info(plist)))
+    if(NULL == (ret_value = (const void *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info")
 
 done:
