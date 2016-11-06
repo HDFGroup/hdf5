@@ -38,7 +38,6 @@
 namespace H5 {
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
 //--------------------------------------------------------------------------
 // Function:	H5Location default constructor (protected)
 // Programmer	Binh-Minh Ribler - 2000

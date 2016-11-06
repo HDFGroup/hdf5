@@ -241,10 +241,12 @@ typedef struct H5EA_sblock_t {
 
     /* Internal array information (not stored) */
     H5EA_hdr_t  *hdr;           /* Shared array header info                     */
-    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
-    H5EA_iblock_t *parent;      /* Parent object for super block (index block)  */
     haddr_t     addr;           /* Address of this index block on disk          */
     size_t      size;           /* Size of index block on disk                  */
+
+    /* Flush dependency information (not stored) */
+    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
+    H5EA_iblock_t *parent;      /* Parent object for super block (index block)  */
 
     /* Computed/cached values (not stored) */
     unsigned    idx;            /* Super block index within the extensible array */
@@ -266,10 +268,12 @@ typedef struct H5EA_dblock_t {
 
     /* Internal array information (not stored) */
     H5EA_hdr_t  *hdr;           /* Shared array header info                             */
-    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
-    void        *parent;        /* Parent object for data block (index or super block)  */
     haddr_t     addr;           /* Address of this data block on disk                   */
     size_t      size;           /* Size of data block on disk                           */
+
+    /* Flush dependency information (not stored) */
+    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
+    void        *parent;        /* Parent object for data block (index or super block)  */
 
     /* Computed/cached values (not stored) */
     size_t      nelmts;         /* Number of elements in block                */
@@ -286,10 +290,12 @@ typedef struct H5EA_dbk_page_t {
 
     /* Internal array information (not stored) */
     H5EA_hdr_t  *hdr;           /* Shared array header info                         */
-    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
-    H5EA_sblock_t *parent;      /* Parent object for data block page (super block)  */
     haddr_t     addr;           /* Address of this data block page on disk          */
     size_t      size;           /* Size of data block page on disk                  */
+
+    /* Flush dependency information (not stored) */
+    hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
+    H5EA_sblock_t *parent;      /* Parent object for data block page (super block)  */
 
     /* Computed/cached values (not stored) */
     /* <none> */

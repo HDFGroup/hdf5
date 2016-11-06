@@ -298,7 +298,7 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 
     /* Check arguments */
     if (cd_nelmts!=4)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid deflate aggression level")
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid number of filter parameters")
 
     /* Copy the filter parameters into the szip parameter block */
     H5_CHECKED_ASSIGN(sz_param.options_mask, int, cd_values[H5Z_SZIP_PARM_MASK], unsigned);

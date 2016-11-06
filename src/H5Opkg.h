@@ -535,7 +535,7 @@ H5_DLL const H5O_obj_class_t * H5O_obj_class(const H5O_loc_t *loc, hid_t dxpl_id
 H5_DLL int H5O_link_oh(H5F_t *f, int adjust, hid_t dxpl_id, H5O_t *oh, hbool_t *deleted);
 H5_DLL herr_t H5O_inc_rc(H5O_t *oh);
 H5_DLL herr_t H5O_dec_rc(H5O_t *oh);
-H5_DLL herr_t H5O_free(H5O_t *oh);
+H5_DLL herr_t H5O__free(H5O_t *oh);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh,

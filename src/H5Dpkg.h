@@ -394,6 +394,10 @@ typedef struct H5D_chunk_cached_t {
     unsigned	filter_mask;			/*excluded filters	*/
 } H5D_chunk_cached_t;
 
+/****************************/
+/* Virtual dataset typedefs */
+/****************************/
+
 /* List of files held open during refresh operations */
 typedef struct H5D_virtual_held_file_t {
     H5F_t *file;                                /* Pointer to file held open */
@@ -685,6 +689,8 @@ H5_DLL herr_t H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t
 #ifdef H5D_CHUNK_DEBUG
 H5_DLL herr_t H5D__chunk_stats(const H5D_t *dset, hbool_t headers);
 #endif /* H5D_CHUNK_DEBUG */
+
+/* format convert */
 H5_DLL herr_t H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info, H5D_chk_idx_info_t *new_idx_info);
 
 /* Functions that operate on compact dataset storage */

@@ -152,7 +152,7 @@ herr_t, SUCCEED, FAIL,
 H5FA__dblk_page_create(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t addr, size_t nelmts))
 
     /* Local variables */
-    H5FA_dblk_page_t *dblk_page = NULL;      /* Fixed array data block page */
+    H5FA_dblk_page_t *dblk_page = NULL; /* Fixed array data block page */
 
 #ifdef H5FA_DEBUG
 HDfprintf(stderr, "%s: Called, addr = %a\n", FUNC, addr);
@@ -210,7 +210,7 @@ H5FA__dblk_page_protect(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_page_addr,
     size_t dblk_page_nelmts, unsigned flags))
 
     /* Local variables */
-    H5FA_dblk_page_cache_ud_t udata;      /* Information needed for loading data block page */
+    H5FA_dblk_page_cache_ud_t udata;        /* Information needed for loading data block page */
 
 #ifdef H5FA_DEBUG
 HDfprintf(stderr, "%s: Called\n", FUNC);

@@ -644,9 +644,9 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
     old_size = oh->chunk[chunkno].size;
     oh->chunk[chunkno].size += delta + extra_prfx_size;
     oh->chunk[chunkno].image = H5FL_BLK_REALLOC(chunk_image, old_image, oh->chunk[chunkno].size);
-    oh->chunk[chunkno].gap = 0;
     if(NULL == oh->chunk[chunkno].image)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "can't reallocate extended object header chunk")
+    oh->chunk[chunkno].gap = 0;
 
     /* Wipe new space for chunk */
     HDmemset(oh->chunk[chunkno].image + old_size, 0, oh->chunk[chunkno].size - old_size);
@@ -664,8 +664,8 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno,
             oh->mesg[u].raw = oh->chunk[chunkno].image + extra_prfx_size + (oh->mesg[u].raw - old_image);
 
         /* Find continuation message which points to this chunk and adjust chunk's size */
-        /* (Chunk 0 doesn't have a continuation message that points to it and
-         * it's size is directly encoded in the object header) */
+        /* (Chunk 0 doesn't have a continuation message that points to it,
+         * its size is directly encoded in the object header) */
         if(chunkno > 0 && (H5O_CONT_ID == oh->mesg[u].type->id) &&
                 (((H5O_cont_t *)(oh->mesg[u].native))->chunkno == chunkno)) {
             H5O_chunk_proxy_t *chk_proxy2 = NULL;       /* Chunk that continuation message is in */
@@ -891,7 +891,7 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
     /*
      * The total chunk size must include the requested space plus enough
      * for the message header.  This must be at least some minimum and
-     * aligned propertly.
+     * aligned properly.
      */
     size = MAX(H5O_MIN_SIZE, size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
     HDassert(size == H5O_ALIGN_OH(oh, size));
@@ -903,20 +903,18 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
      */
     size +=  H5O_SIZEOF_CHKHDR_OH(oh);
 
-    /* allocate space in file to hold the new chunk */
+    /* Allocate space in file to hold the new chunk */
     new_chunk_addr = H5MF_alloc(f, H5FD_MEM_OHDR, dxpl_id, (hsize_t)size);
-    if(HADDR_UNDEF == new_chunk_addr)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate space for new chunk")
+    if(!H5F_addr_defined(new_chunk_addr))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "unable to allocate space for new chunk")
 
-    /*
-     * Create the new chunk giving it a file address.
-     */
+    /* Create the new chunk giving it a file address. */
     if(oh->nchunks >= oh->alloc_nchunks) {
         size_t na = MAX(H5O_NCHUNKS, oh->alloc_nchunks * 2);        /* Double # of chunks allocated */
         H5O_chunk_t *x;
 
         if(NULL == (x = H5FL_SEQ_REALLOC(H5O_chunk_t, oh->chunk, na)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "can't allocate larger chunk array, na = %zu", na)
         oh->alloc_nchunks = na;
         oh->chunk = x;
     } /* end if */
@@ -927,7 +925,7 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
     oh->chunk[chunkno].size = size;
     oh->chunk[chunkno].gap = 0;
     if(NULL == (oh->chunk[chunkno].image = p = H5FL_BLK_CALLOC(chunk_image, size)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "can't allocate image for chunk, size = %zu", size)
 
     /* If this is a later version of the object header format, put the magic
      *  # at the beginning of the chunk image.
@@ -1112,8 +1110,7 @@ done:
  *
  * Purpose:     Allocate enough space in the object header for this message.
  *
- * Return:      Success:        Index of message
- *              Failure:        Negative
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
  *              matzke@llnl.gov
@@ -1165,7 +1162,7 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
             htri_t	tri_result;     /* Status from attempting to extend chunk */
 
             if((tri_result = H5O_alloc_extend_chunk(f, dxpl_id, oh, chunkno, raw_size, &idx)) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTEXTEND, FAIL, "H5O_alloc_extend_chunk failed unexpectedly")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTEXTEND, FAIL, "can't extend existing chunk")
             if(tri_result == TRUE)
 		break;
         } /* end for */

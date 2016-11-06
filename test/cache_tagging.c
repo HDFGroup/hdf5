@@ -115,7 +115,6 @@ print_entry_type_to_screen(int id)
     HDfprintf(stdout, "Type = ");
     
     switch (id) {
-    
         case H5AC_BT_ID:
             HDfprintf(stdout, "v1 B-tree Node");
             break;
@@ -206,11 +205,9 @@ print_entry_type_to_screen(int id)
         default:
             HDfprintf(stdout, "BADNESS: *Unknown*");
             break;
-
     } /* end switch */
 
     HDfprintf(stdout, " (%d)", id);
-
 } /* print_entry_type_to_screen */
 
 
@@ -229,20 +226,21 @@ print_entry_type_to_screen(int id)
  *
  *-------------------------------------------------------------------------
  */
-static int print_index(hid_t fid) {
-
-    H5F_t * f = NULL;         /* File Pointer */
-    H5C_t * cache_ptr = NULL; /* Cache Pointer */
-    int i = 0; /* Iterator */
+static int print_index(hid_t fid)
+{
+    H5F_t *f;           /* File Pointer */
+    H5C_t *cache_ptr;   /* Cache Pointer */
+    int i;              /* Iterator */
     H5C_cache_entry_t *next_entry_ptr = NULL; /* entry pointer */
 
     /* Get Internal File / Cache Pointers */
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        TEST_ERROR;
     cache_ptr = f->shared->cache;
 
     /* Initial (debugging) loop */
     printf("CACHE SNAPSHOT:\n");
-    for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+    for(i = 0; i < H5C__HASH_TABLE_LEN; i++) {
         next_entry_ptr = cache_ptr->index[i];
 
         while (next_entry_ptr != NULL) {
@@ -252,18 +250,16 @@ static int print_index(hid_t fid) {
             printf("Protected = %d, ", (int)next_entry_ptr->is_protected);
             print_entry_type_to_screen(next_entry_ptr->type->id);
             printf("\n");
-            next_entry_ptr = next_entry_ptr->ht_next;
-        } /* end if */
 
+            next_entry_ptr = next_entry_ptr->ht_next;
+        } /* end while */
     } /* end for */
     printf("\n");
 
     return 0;
     
 error:
-
     return -1;
-
 } /* print_index */
 
 
@@ -281,23 +277,23 @@ error:
  * Programmer:  Mike McGreevy
  *              January 25, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static int verify_no_unknown_tags(hid_t fid)
+static int
+verify_no_unknown_tags(hid_t fid)
 {
 
-    H5F_t * f = NULL;         /* File Pointer */
-    H5C_t * cache_ptr = NULL; /* Cache Pointer */
-    int i = 0; /* Iterator */
+    H5F_t *f;           /* File Pointer */
+    H5C_t *cache_ptr;   /* Cache Pointer */
+    int i;              /* Iterator */
     H5C_cache_entry_t *next_entry_ptr = NULL; /* entry pointer */
 
     /* Get Internal File / Cache Pointers */
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        TEST_ERROR;
     cache_ptr = f->shared->cache;
 
-    for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+    for(i = 0; i < H5C__HASH_TABLE_LEN; i++) {
 
         next_entry_ptr = cache_ptr->index[i];
 
@@ -306,10 +302,8 @@ static int verify_no_unknown_tags(hid_t fid)
             if ( next_entry_ptr->tag != H5AC__IGNORE_TAG ) TEST_ERROR;
 
             next_entry_ptr = next_entry_ptr->ht_next;
-
-        } /* end if */
-
-    } /* for */
+        } /* end while */
+    } /* end for */
 
     return 0;
 
@@ -333,23 +327,22 @@ error:
  * Programmer:  Mike McGreevy
  *              February 3, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static int mark_all_entries_investigated(hid_t fid)
+static int
+mark_all_entries_investigated(hid_t fid)
 {
-
-    H5F_t * f = NULL;         /* File Pointer */
-    H5C_t * cache_ptr = NULL; /* Cache Pointer */
-    int i = 0; /* Iterator */
+    H5F_t *f;           /* File Pointer */
+    H5C_t *cache_ptr;   /* Cache Pointer */
+    int i;              /* Iterator */
     H5C_cache_entry_t *next_entry_ptr = NULL; /* entry pointer */
 
     /* Get Internal File / Cache Pointers */
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        TEST_ERROR;
     cache_ptr = f->shared->cache;
 
-    for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+    for(i = 0; i < H5C__HASH_TABLE_LEN; i++) {
 
         next_entry_ptr = cache_ptr->index[i];
 
@@ -362,9 +355,7 @@ static int mark_all_entries_investigated(hid_t fid)
             } /* end if */
 
             next_entry_ptr = next_entry_ptr->ht_next;
-
-        } /* end if */
-
+        } /* end while */
     } /* for */
 
     return 0;
@@ -390,23 +381,23 @@ error:
  * Programmer:  Mike McGreevy
  *              January 25, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static int verify_tag(hid_t fid, int id, haddr_t tag)
+static int
+verify_tag(hid_t fid, int id, haddr_t tag)
 {
-    int i = 0;                           /* Iterator */
     int found = FALSE;                   /* If Entry Found */
-    H5F_t * f = NULL;         /* File Pointer */
-    H5C_t * cache_ptr = NULL; /* Cache Pointer */
+    H5F_t *f;                   /* File Pointer */
+    H5C_t *cache_ptr;           /* Cache Pointer */
+    int i;                      /* Iterator */
     H5C_cache_entry_t *next_entry_ptr = NULL; /* entry pointer */
 
     /* Get Internal File / Cache Pointers */
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        TEST_ERROR;
     cache_ptr = f->shared->cache;
 
-    for (i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+    for(i = 0; i < H5C__HASH_TABLE_LEN; i++) {
 
         next_entry_ptr = cache_ptr->index[i];
 
@@ -443,13 +434,14 @@ error:
     return -1;
 } /* verify_tag */
 
-static int evict_entries(hid_t fid)
+static int
+evict_entries(hid_t fid)
 {
-
-    H5F_t * f = NULL;         /* File Pointer */
+    H5F_t *f;         /* File Pointer */
 
     /* Get Internal File / Cache Pointers */
-    if ( NULL == (f = (H5F_t *)H5I_object(fid)) ) TEST_ERROR;
+    if(NULL == (f = (H5F_t *)H5I_object(fid)))
+        TEST_ERROR;
 
     /* Mark all entries investigated */
     mark_all_entries_investigated(fid);
@@ -462,9 +454,7 @@ static int evict_entries(hid_t fid)
     return 0;
 
 error:
-
     return -1;
-
 } /* evict entries */
 
 
@@ -480,8 +470,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              January 25, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -544,8 +532,6 @@ error:
  * Programmer:  Mike McGreevy
  *              January 25, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static unsigned 
@@ -607,7 +593,6 @@ check_file_creation_tags(hid_t fcpl_id, int type)
 
 error:
     return 1;
-
 } /* check_file_creation_tags */
 
 
@@ -621,8 +606,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              January 25, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -730,8 +713,6 @@ error:
  * Programmer:  Mike McGreevy
  *              January 27, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static unsigned 
@@ -835,8 +816,6 @@ error:
  * Programmer:  Mike McGreevy
  *              March 2, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static unsigned 
@@ -849,8 +828,8 @@ check_multi_group_creation_tags(hid_t fcpl, int type)
     char gname[10];          /* group name buffer */
     int i = 0;               /* iterator */
     hid_t fapl = -1;         /* File access prop list */
-    haddr_t g_tag = 0;      /* Group tag value */
-    haddr_t root_tag = 0;   /* Root group tag value */
+    haddr_t g_tag = 0;       /* Group tag value */
+    haddr_t root_tag = 0;    /* Root group tag value */
     haddr_t sbe_tag = 0;   /* Root group tag value */
 
     /* Testing Macro */
@@ -887,9 +866,9 @@ check_multi_group_creation_tags(hid_t fcpl, int type)
     /* Clear Metadata Tags (don't care about them for this test */
     mark_all_entries_investigated(fid);
 
-    /* ============ */
-    /* Create Group */
-    /* ============ */
+    /* ============= */
+    /* Create Groups */
+    /* ============= */
 
     for (i = 0; i < MULTIGROUPS; i++) {
 
@@ -959,8 +938,6 @@ error:
  * Programmer:  Mike McGreevy
  *              March 2, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static unsigned 
@@ -1027,14 +1004,12 @@ check_link_iteration_tags(void)
     if ( verbose ) print_index(fid);
 
     /* Verify 112 symbol table nodes belonging to the root group */
-    for (i = 0; i < 112; i++) {
+    for (i = 0; i < 112; i++)
         if ( verify_tag(fid, H5AC_SNODE_ID, root_tag) < 0 ) TEST_ERROR;
-    }
 
     /* Verify 9 b-tree nodes belonging to the root group */
-    for (i = 0; i < 9; i++) {
+    for (i = 0; i < 9; i++)
         if ( verify_tag(fid, H5AC_BT_ID, root_tag) < 0 ) TEST_ERROR;
-    }
 
     /* verify no other entries present */
     if ( verify_no_unknown_tags(fid) < 0 ) TEST_ERROR;
@@ -1069,8 +1044,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              March 2, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1240,8 +1213,6 @@ error:
  * Programmer:  Mike McGreevy
  *              January 27, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static unsigned 
@@ -1351,8 +1322,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              February 24, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1491,8 +1460,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              February 24, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1634,10 +1601,6 @@ error:
  * Programmer:  Mike McGreevy
  *              March 3, 2010
  *
- * Modifications:
- *	Vailin Choi; July 2012
- *	Add verify_tag() calls because H5FD_FLMAP_DICHOTOMY is now the default free-list mapping.
- *
  *-------------------------------------------------------------------------
  */
 static unsigned 
@@ -1699,12 +1662,9 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     if ( (aid = H5Acreate2(gid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
  
     /* fill out data buffer */
-    for(i = 0; i < DIMS; i++) {
-        for(j = 0; j < DIMS; j++) {
-
+    for(i = 0; i < DIMS; i++)
+        for(j = 0; j < DIMS; j++)
             data[(DIMS * i) + j] = k++;
-        } /* end for */
-    } /* end for */
 
     /* Write to attribute */
     if ( H5Awrite(aid, H5T_NATIVE_INT, data) < 0 ) TEST_ERROR;
@@ -1814,10 +1774,6 @@ error:
  * Programmer:  Mike McGreevy
  *              March 3, 2010
  *
- * Modifications:
- *	Vailin Choi; July 2012
- *	Add verify_tag() call because H5FD_FLMAP_DICHOTOMY is now the default free-list mapping.
- *
  *-------------------------------------------------------------------------
  */
 static unsigned 
@@ -1879,12 +1835,9 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     if ( (aid = H5Acreate2(gid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
  
     /* fill out data buffer */
-    for(i = 0;i < DIMS; i++) {
-        for(j = 0;j < DIMS; j++) {
-
+    for(i = 0;i < DIMS; i++)
+        for(j = 0;j < DIMS; j++)
             data[(DIMS * i) + j] = k++;
-        } /* end for */
-    } /* end for */
 
     /* Write to attribute */
     if ( (H5Awrite(aid, H5T_NATIVE_INT, data)) < 0 ) TEST_ERROR;
@@ -1968,8 +1921,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              February 10, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2103,8 +2054,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              March 1, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2243,8 +2192,6 @@ error:
  * Programmer:  Mike McGreevy
  *              February 10, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static unsigned 
@@ -2373,8 +2320,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              February 10, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2520,8 +2465,6 @@ error:
  * Programmer:  Mike McGreevy
  *              March 3, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static unsigned 
@@ -2598,12 +2541,9 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* =========================== */
 
     /* fill out data buffer */
-    for(i = 0; i < DIMS; i++) {
-        for(j = 0;j < DIMS; j++) {
-
+    for(i = 0; i < DIMS; i++)
+        for(j = 0;j < DIMS; j++)
             data[(DIMS * i) + j] = k++;
-        } /* end for */
-    } /* end for */
 
     /* Write attribute */
     if ( (H5Awrite(aid, H5T_NATIVE_INT, data)) < 0 ) TEST_ERROR;
@@ -2682,8 +2622,6 @@ error:
  * Programmer:  Mike McGreevy
  *              February 10, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static unsigned 
@@ -2754,12 +2692,9 @@ check_dataset_read_tags(hid_t fcpl, int type)
     if ( get_new_object_header_tag(fid, &d_tag) < 0 ) TEST_ERROR;
 
     /* fill out data buffer */
-    for(i = 0; i < DIMS; i++) {
-        for(j = 0; j < DIMS; j++) {
-
+    for(i = 0; i < DIMS; i++)
+        for(j = 0; j < DIMS; j++)
             data[(DIMS * i) + j] = k++;
-        } /* end for */
-    } /* end for */
 
     /* Write to dataset */
     if( (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data)) < 0 ) TEST_ERROR;
@@ -2826,8 +2761,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              February 24, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2900,12 +2833,9 @@ check_dataset_size_retrieval(hid_t fcpl, int type)
     if ( get_new_object_header_tag(fid, &d_tag) < 0 ) TEST_ERROR;
 
     /* fill out data buffer */
-    for(i = 0; i < DIMS; i++) {
-        for(j = 0; j < DIMS; j++) {
-
+    for(i = 0; i < DIMS; i++)
+        for(j = 0; j < DIMS; j++)
             data[(DIMS * i) + j] = k++;
-        } /* end for */
-    } /* end for */
 
     /* Write to dataset */
     if( (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data)) < 0 ) TEST_ERROR;
@@ -2972,8 +2902,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              February 24, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3047,12 +2975,9 @@ check_dataset_extend_tags(hid_t fcpl, int type)
     if ( get_new_object_header_tag(fid, &d_tag) < 0 ) TEST_ERROR;
 
     /* fill out data buffer */
-    for(i = 0; i < DIMS; i++) {
-        for(j = 0; j < DIMS; j++) {
-
+    for(i = 0; i < DIMS; i++)
+        for(j = 0; j < DIMS; j++)
             data[(DIMS * i) + j] = k++;
-        } /* end for */
-    } /* end for */
 
     /* Write to dataset */
     if( (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data)) < 0 ) TEST_ERROR;
@@ -3119,8 +3044,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              March 1, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3234,8 +3157,6 @@ error:
  * Programmer:  Mike McGreevy
  *              March 3, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static unsigned 
@@ -3311,12 +3232,12 @@ check_object_copy_tags(hid_t fcpl, int type)
     if ( verify_tag(fid, H5AC_LHEAP_PRFX_ID, root_tag) < 0 ) TEST_ERROR;
     if ( verify_tag(fid, H5AC_BT_ID, root_tag) < 0 ) TEST_ERROR;
 
-    /* Verify dataset's tagged metadata */
+    /* Verify group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
     if ( verify_tag(fid, H5AC_BT_ID, g_tag) < 0 ) TEST_ERROR;
     if ( verify_tag(fid, H5AC_LHEAP_PRFX_ID, g_tag) < 0 ) TEST_ERROR;
 
-    /* Verify copied dataset's tagged metadata */
+    /* Verify copied group's tagged metadata */
     if ( get_new_object_header_tag(fid, &copy_tag) < 0 ) TEST_ERROR;
     if ( verify_tag(fid, H5AC_BT_ID, copy_tag) < 0 ) TEST_ERROR;
     if ( verify_tag(fid, H5AC_LHEAP_PRFX_ID, copy_tag) < 0 ) TEST_ERROR;
@@ -3352,8 +3273,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              March 1, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3436,12 +3355,9 @@ check_link_removal_tags(hid_t fcpl, int type)
     if ( get_new_object_header_tag(fid, &d_tag) < 0 ) TEST_ERROR;
 
     /* fill out data buffer */
-    for(i = 0; i < DIMS; i++) {
-        for(j = 0; j < DIMS; j++) {
-
+    for(i = 0; i < DIMS; i++)
+        for(j = 0; j < DIMS; j++)
             data[(DIMS * i) + j] = k++;
-        } /* end for */
-    } /* end for */
 
     /* Write to dataset */
     if( (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data)) < 0 ) TEST_ERROR;
@@ -3518,8 +3434,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              March 2, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3603,12 +3517,9 @@ check_link_getname_tags(hid_t fcpl, int type)
     if ( get_new_object_header_tag(fid, &d_tag) < 0 ) TEST_ERROR;
 
     /* fill out data buffer */
-    for(i = 0; i < DIMS; i++) {
-        for(j = 0; j < DIMS; j++) {
-
+    for(i = 0; i < DIMS; i++)
+        for(j = 0; j < DIMS; j++)
             data[(DIMS * i) + j] = k++;
-        } /* end for */
-    } /* end for */
 
     /* Write to dataset */
     if( (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, H5P_DEFAULT, data)) < 0 ) TEST_ERROR;
@@ -3677,8 +3588,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              February 24, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3786,8 +3695,6 @@ error:
  *
  * Programmer:  Mike McGreevy
  *              February 24, 2010
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -3901,8 +3808,6 @@ error:
  * Programmer:  Mike McGreevy
  *              May 27, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static unsigned
@@ -3917,7 +3822,7 @@ check_invalid_tag_application(void)
     /* Testing Macro */
     TESTING("failure on invalid tag application");
     
-    #if H5C_DO_TAGGING_SANITY_CHECKS
+#if H5C_DO_TAGGING_SANITY_CHECKS
     /* Create a test file */
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
@@ -3958,10 +3863,10 @@ check_invalid_tag_application(void)
 
     /* Finished Test. Print status and return. */
     PASSED();
-    #else
+#else
     SKIPPED();
     printf("    test skipped because sanity checking on tag value is disabled.\n");
-    #endif
+#endif
 
     return 0;
 
@@ -3982,11 +3887,8 @@ error:
  * Programmer:  Mike McGreevy
  *              January 15, 2009
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-
 int 
 main(void) 
 {

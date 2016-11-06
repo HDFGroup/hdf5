@@ -91,26 +91,23 @@ verify_tag_not_in_cache(H5F_t *f, haddr_t tag)
 {
     H5C_t *cache_ptr = NULL;                /* cache pointer                */
     int i = 0;                              /* iterator                     */
-    H5C_cache_entry_t *entry_ptr = NULL;    /* entry pointer                */
 
+    /* Get Internal Cache Pointers */
     cache_ptr = f->shared->cache;
 
     for(i = 0; i < H5C__HASH_TABLE_LEN; i++) {
+        H5C_cache_entry_t *entry_ptr;    /* entry pointer                */
 
         entry_ptr = cache_ptr->index[i];
-
         while(entry_ptr != NULL) {
-
             if(tag == entry_ptr->tag)
                 return TRUE;
             else
                 entry_ptr = entry_ptr->ht_next;
-
         } /* end while */
     } /* end for */
 
     return FALSE;
-
 } /* end verify_tag_not_in_cache() */
 
 

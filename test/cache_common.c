@@ -3076,57 +3076,46 @@ setup_cache(size_t max_cache_size,
     haddr_t actual_base_addr;
     hid_t fapl_id = H5P_DEFAULT;
 
-    if ( show_progress ) /* 1 */
+    if(show_progress) /* 1 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   FUNC, mile_stone++, (int)pass);
 
     saved_fid = -1;
 
     /* setup the file name */
-    if ( pass ) {
-
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
-            == NULL ) {
-
+    if(pass) {
+        if(NULL == h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))) {
             pass = FALSE;
             failure_mssg = "h5_fixname() failed.\n";
         }
     }
 
-    if ( show_progress ) /* 2 */
+    if(show_progress) /* 2 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   FUNC, mile_stone++, (int)pass);
 
-    if ( ( pass ) && ( try_core_file_driver ) ) {
-
-	if ( (fapl_id = H5Pcreate(H5P_FILE_ACCESS)) == FAIL ) {
-
+    if(pass && try_core_file_driver) {
+	if((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) == FAIL) {
 	    pass = FALSE;
 	    failure_mssg = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
         }
-	else if ( H5Pset_fapl_core(fapl_id, MAX_ADDR, FALSE) < 0 ) {
-
+	else if(H5Pset_fapl_core(fapl_id, MAX_ADDR, FALSE) < 0) {
 	    H5Pclose(fapl_id);
 	    fapl_id = H5P_DEFAULT;
 	    pass = FALSE;
 	    failure_mssg = "H5P_set_fapl_core() failed.\n";
         }
-	else if ( (fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id))
-	          < 0 ) {
-
+	else if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0) {
 	    core_file_driver_failed = TRUE;
 
-            if ( verbose ) {
+            if(verbose)
                 HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", FUNC);
-            }
-
         } else {
-
 	    saved_fapl_id = fapl_id;
 	}
     }
 
-    if ( show_progress ) /* 3 */
+    if(show_progress) /* 3 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   FUNC, mile_stone++, (int)pass);
 
@@ -3134,63 +3123,49 @@ setup_cache(size_t max_cache_size,
      * with the core file driver failed, try again with a regular file.
      * If this fails, we are cooked.
      */
-    if ( ( pass ) && ( fid < 0 ) ) {
-
+    if(pass && fid < 0) {
         fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-
 	saved_fid = fid;
 
-        if ( fid < 0 ) {
-
+        if(fid < 0) {
             pass = FALSE;
             failure_mssg = "H5Fcreate() failed.";
 
-            if ( verbose ) {
+            if(verbose)
                 HDfprintf(stdout, "%s: H5Fcreate() failed.\n", FUNC);
-            }
         }
     }
 
-    if ( show_progress ) /* 4 */
+    if(show_progress) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   FUNC, mile_stone++, (int)pass);
 
-    if ( pass ) {
-
-	HDassert( fid >= 0 );
-
+    if(pass) {
+	HDassert(fid >= 0);
 	saved_fid = fid;
-
-        if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
-
+        if(H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0) {
             pass = FALSE;
             failure_mssg = "H5Fflush() failed.";
 
-            if ( verbose ) {
+            if(verbose)
                 HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
-            }
-
         } else {
-
             file_ptr = (H5F_t *)H5I_object_verify(fid, H5I_FILE);
-
-	    if ( file_ptr == NULL ) {
-
+	    if(file_ptr == NULL) {
                 pass = FALSE;
                 failure_mssg = "Can't get file_ptr.";
 
-                if ( verbose ) {
+                if(verbose)
                     HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
-                }
 	    }
         }
     }
 
-    if ( show_progress ) /* 5 */
+    if(show_progress) /* 5 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   FUNC, mile_stone++, (int)pass);
 
-    if ( pass ) {
+    if(pass) {
 
         /* A bit of fancy footwork here:
 	 *
@@ -3220,10 +3195,8 @@ setup_cache(size_t max_cache_size,
 	 * instance, and then close the file normally.
 	 */
 
-        HDassert( saved_cache == NULL );
-
+        HDassert(saved_cache == NULL);
 	saved_cache = file_ptr->shared->cache;
-
 	file_ptr->shared->cache = NULL;
 
         cache_ptr = H5C_create(max_cache_size,
@@ -3238,52 +3211,41 @@ setup_cache(size_t max_cache_size,
         file_ptr->shared->cache = cache_ptr;
     }
 
-    if ( show_progress ) /* 6 */
+    if(show_progress) /* 6 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   FUNC, mile_stone++, (int)pass);
 
-    if ( pass ) {
-
-	if ( cache_ptr == NULL ) {
-
+    if(pass) {
+	if(cache_ptr == NULL) {
             pass = FALSE;
             failure_mssg = "H5C_create() failed.";
 
-            if ( verbose ) {
+            if(verbose)
                  HDfprintf(stdout, "%s: H5C_create() failed.\n", FUNC);
-            }
-
-        } else if ( cache_ptr->magic != H5C__H5C_T_MAGIC ) {
-
+        } else if(cache_ptr->magic != H5C__H5C_T_MAGIC) {
             pass = FALSE;
 	    failure_mssg = "Bad cache_ptr magic.";
 
-            if ( verbose ) {
+            if(verbose)
                 HDfprintf(stdout, "%s: Bad cache_ptr magic.\n", FUNC);
-            }
 	}
     }
 
-    if ( show_progress ) /* 7 */
+    if(show_progress) /* 7 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   FUNC, mile_stone++, (int)pass);
 
-    if ( pass ) { /* allocate space for test entries */
-
+    if(pass) { /* allocate space for test entries */
         actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, H5AC_ind_read_dxpl_id,
 			              (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
 
-	if ( actual_base_addr == HADDR_UNDEF ) {
-
+	if(actual_base_addr == HADDR_UNDEF) {
             pass = FALSE;
 	    failure_mssg = "H5MF_alloc() failed.";
 
-	    if ( verbose ) {
+	    if(verbose)
                 HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", FUNC);
-            }
-
-	} else if ( actual_base_addr > BASE_ADDR ) {
-
+	} else if(actual_base_addr > BASE_ADDR) {
 	    /* If this happens, must increase BASE_ADDR so that the
 	     * actual_base_addr is <= BASE_ADDR.  This should only happen
 	     * if the size of the superblock is increase.
@@ -3291,21 +3253,18 @@ setup_cache(size_t max_cache_size,
             pass = FALSE;
 	    failure_mssg = "actual_base_addr > BASE_ADDR";
 
-	    if ( verbose ) {
-                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n",
-			  FUNC);
-            }
+	    if(verbose)
+                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", FUNC);
         }
 
         saved_actual_base_addr = actual_base_addr;
     }
 
-    if ( show_progress ) /* 8 */
+    if(show_progress) /* 8 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   FUNC, mile_stone++, (int)pass);
 
-    if ( pass ) {
-
+    if(pass) {
         /* Need to set this else all cache tests will fail */
         cache_ptr->ignore_tags = TRUE;
 
@@ -3313,7 +3272,7 @@ setup_cache(size_t max_cache_size,
         ret_val = file_ptr;
     }
 
-    if ( show_progress ) /* 9 */
+    if(show_progress) /* 9 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   FUNC, mile_stone++, (int)pass);
 
@@ -3568,14 +3527,15 @@ flush_cache(H5F_t * file_ptr,
  *
  * Return:	void
  *
- * Programmer:	Vailin Choi; Jan 2014
+ * Programmer:	Vailin Choi
+ *		Jan 2014
  *
  *-------------------------------------------------------------------------
  */
 void
-cork_entry_type(H5F_t * file_ptr, int32_t type)
+cork_entry_type(H5F_t *file_ptr, int32_t type)
 {
-    H5C_t * cache_ptr;
+    H5C_t *cache_ptr;
     haddr_t baddrs;
     herr_t result;
 
@@ -3592,9 +3552,9 @@ cork_entry_type(H5F_t * file_ptr, int32_t type)
 
             pass = FALSE;
             failure_mssg = "error in H5C_cork().";
-        }
-    }
-    return;
+        } /* end if */
+    } /* end if */
+
 } /* cork_entry_type() */
 
 
@@ -3607,14 +3567,15 @@ cork_entry_type(H5F_t * file_ptr, int32_t type)
  *
  * Return:	void
  *
- * Programmer:	Vailin Choi; Jan 2014
+ * Programmer:	Vailin Choi
+ *		Jan 2014
  *
  *-------------------------------------------------------------------------
  */
 void
-uncork_entry_type(H5F_t * file_ptr, int32_t type)
+uncork_entry_type(H5F_t *file_ptr, int32_t type)
 {
-    H5C_t * cache_ptr;
+    H5C_t *cache_ptr;
     haddr_t baddrs;
     herr_t result;
 
@@ -3631,9 +3592,9 @@ uncork_entry_type(H5F_t * file_ptr, int32_t type)
 
             pass = FALSE;
             failure_mssg = "error in H5C_cork().";
-        }
-    }
-    return;
+        } /* end if */
+    } /* end if */
+
 } /* uncork_entry_type() */
 
 
@@ -3934,11 +3895,8 @@ move_entry(H5C_t * cache_ptr,
  *
  *-------------------------------------------------------------------------
  */
-
 void
-protect_entry(H5F_t * file_ptr,
-              int32_t type,
-              int32_t idx)
+protect_entry(H5F_t * file_ptr, int32_t type, int32_t idx)
 {
     H5C_t * cache_ptr;
     test_entry_t * base_addr;
@@ -3947,29 +3905,28 @@ protect_entry(H5F_t * file_ptr,
     hid_t xfer = H5AC_ind_read_dxpl_id;
     H5C_cache_entry_t * cache_entry_ptr;
 
-    if ( pass ) {
-
+    if(pass) {
         cache_ptr = file_ptr->shared->cache;
 
-        HDassert( cache_ptr );
-        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
-        HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
+        HDassert(cache_ptr);
+        HDassert((0 <= type) && (type < NUMBER_OF_ENTRY_TYPES));
+        HDassert((0 <= idx) && (idx <= max_indices[type]));
 
         base_addr = entries[type];
         entry_ptr = &(base_addr[idx]);
         baddrs = base_addrs[type];
 
-        HDassert( entry_ptr->index == idx );
-        HDassert( entry_ptr->type == type );
-        HDassert( entry_ptr == entry_ptr->self );
-        HDassert( !(entry_ptr->is_protected) );
+        HDassert(entry_ptr->index == idx);
+        HDassert(entry_ptr->type == type);
+        HDassert(entry_ptr == entry_ptr->self);
+        HDassert(!(entry_ptr->is_protected));
 
         /* Set the base address of the entry type into the property list as tag */
         /* Use to cork entries for the object */
         if(H5AC_tag(xfer, baddrs, NULL) < 0) {
             pass = FALSE;
             failure_mssg = "error in H5P_set().";
-        }
+        } /* end if */
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, xfer,
                 &(types[type]), entry_ptr->addr, &entry_ptr->addr, 
@@ -4006,7 +3963,8 @@ protect_entry(H5F_t * file_ptr,
             pass = FALSE;
             failure_mssg = "error in H5C_protect().";
 
-        } else {
+        } /* end if */
+        else {
 
 	    HDassert( ( entry_ptr->cache_ptr == NULL ) ||
 		      ( entry_ptr->cache_ptr == cache_ptr ) );
@@ -4015,15 +3973,13 @@ protect_entry(H5F_t * file_ptr,
 	    entry_ptr->file_ptr = file_ptr;
             entry_ptr->is_protected = TRUE;
 
-        }
+        } /* end else */
 
 	if(entry_ptr->header.is_corked)
 	    entry_ptr->is_corked = TRUE;
 
-        HDassert( ((entry_ptr->header).type)->id == type );
-    }
-
-    return;
+        HDassert(((entry_ptr->header).type)->id == type);
+    } /* end if */
 
 } /* protect_entry() */
 
@@ -4369,7 +4325,6 @@ unprotect_entry(H5F_t * file_ptr,
  *
  *-------------------------------------------------------------------------
  */
-
 void
 row_major_scan_forward(H5F_t * file_ptr,
                        int32_t max_index,
@@ -4391,343 +4346,274 @@ row_major_scan_forward(H5F_t * file_ptr,
     int32_t idx;
     int32_t local_max_index;
 
-    if ( verbose )
+    if(verbose)
         HDfprintf(stdout, "%s(): entering.\n", FUNC);
 
-    if ( pass ) {
-
+    if(pass) {
         cache_ptr = file_ptr->shared->cache;
+        HDassert(cache_ptr != NULL);
+        HDassert(lag >= 10);
 
-        HDassert( cache_ptr != NULL );
-
-        HDassert( lag >= 10 );
-
-        if ( reset_stats ) {
-
+        if(reset_stats)
             H5C_stats__reset(cache_ptr);
-        }
-    }
+    } /* end if */
 
-    while ( ( pass ) && ( type < NUMBER_OF_ENTRY_TYPES ) )
-    {
+    while(pass && type < NUMBER_OF_ENTRY_TYPES) {
         idx = -lag;
 
         local_max_index = MIN(max_index, max_indices[type]);
-
-        while ( ( pass ) && ( idx <= (local_max_index + lag) ) )
-        {
+        while(pass && idx <= (local_max_index + lag)) {
             int32_t tmp_idx;
 
-	    if ( verbose ) {
-
+	    if(verbose)
                 HDfprintf(stdout, "%d:%d: ", type, idx);
-	    }
 
             tmp_idx = idx + lag;
-            if ( ( pass ) && ( do_inserts ) && ( tmp_idx >= 0 ) &&
-                 ( tmp_idx <= local_max_index ) &&
-                 ( (tmp_idx % 2) == 0 ) &&
-                 ( ! entry_in_cache(cache_ptr, type, tmp_idx) ) ) {
+            if(pass && do_inserts && (tmp_idx >= 0) && (tmp_idx <= local_max_index) &&
+                     ((tmp_idx % 2) == 0 ) && !entry_in_cache(cache_ptr, type, tmp_idx)) {
 
-                if ( verbose )
+                if(verbose)
                     HDfprintf(stdout, "1(i, %d, %d) ", type, tmp_idx);
 
                 insert_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
-
 		HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-            }
+            } /* end if */
 
             tmp_idx--;
-            if ( ( pass ) && ( tmp_idx >= 0 ) &&
-                 ( tmp_idx <= local_max_index ) &&
-                 ( ( tmp_idx % 3 ) == 0 ) ) {
+            if(pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) &&
+                     (tmp_idx % 3) == 0) {
 
-                if ( verbose )
+                if(verbose)
                     HDfprintf(stdout, "2(p, %d, %d) ", type, tmp_idx);
 
                 protect_entry(file_ptr, type, tmp_idx);
-
 		HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-            }
+            } /* end if */
 
             tmp_idx--;
-            if ( ( pass ) && ( tmp_idx >= 0 ) &&
-                 ( tmp_idx <= local_max_index ) &&
-                 ( ( tmp_idx % 3 ) == 0 ) ) {
+            if(pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) &&
+                    (tmp_idx % 3) == 0) {
 
-                if ( verbose )
+                if(verbose)
                     HDfprintf(stdout, "3(u, %d, %d) ", type, tmp_idx);
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
-
 		HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-            }
+            } /* end if */
 
             /* (don't decrement tmp_idx) */
-            if ( ( pass ) && ( do_moves ) && ( tmp_idx >= 0 ) &&
-                 ( tmp_idx <= local_max_index ) &&
-                 ( ( tmp_idx % 3 ) == 0 ) ) {
+            if(pass && do_moves && (tmp_idx >= 0) && (tmp_idx <= local_max_index) &&
+                    (tmp_idx % 3) == 0) {
 
-                if ( verbose )
-                    HDfprintf(stdout, "4(r, %d, %d, %d) ",
-			      type, tmp_idx, (int)move_to_main_addr);
+                if(verbose)
+                    HDfprintf(stdout, "4(r, %d, %d, %d) ", type, tmp_idx, (int)move_to_main_addr);
 
                 move_entry(cache_ptr, type, tmp_idx, move_to_main_addr);
-
 		HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-            }
+            } /* end if */
 
             tmp_idx--;
-            if ( ( pass ) && ( tmp_idx >= 0 ) &&
-                 ( tmp_idx <= local_max_index ) &&
-                 ( ( tmp_idx % 5 ) == 0 ) ) {
+            if(pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) &&
+                    (tmp_idx % 5) == 0) {
 
-                if ( verbose )
+                if(verbose)
                     HDfprintf(stdout, "5(p, %d, %d) ", type, tmp_idx);
 
                 protect_entry(file_ptr, type, tmp_idx);
-
 		HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-            }
+            } /* end if */
 
             tmp_idx -= 2;
-            if ( ( pass ) && ( tmp_idx >= 0 ) &&
-                 ( tmp_idx <= local_max_index ) &&
-                 ( ( tmp_idx % 5 ) == 0 ) ) {
+            if(pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) &&
+                    (tmp_idx % 5) == 0) {
 
-                if ( verbose )
+                if(verbose)
                     HDfprintf(stdout, "6(u, %d, %d) ", type, tmp_idx);
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
-
 		HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-            }
+            } /* end if */
 
-	    if ( do_mult_ro_protects )
-	    {
+	    if(do_mult_ro_protects) {
                 /* (don't decrement tmp_idx) */
-		if ( ( pass ) && ( tmp_idx >= 0 ) &&
-		     ( tmp_idx < local_max_index ) &&
-		     ( tmp_idx % 9 == 0 ) ) {
+		if(pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) &&
+                        (tmp_idx % 9) == 0) {
 
-                    if ( verbose )
+                    if(verbose)
                         HDfprintf(stdout, "7(p-ro, %d, %d) ", type, tmp_idx);
 
 		    protect_entry_ro(file_ptr, type, tmp_idx);
-
  		    HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-		}
+		} /* end if */
 
                 tmp_idx--;
-		if ( ( pass ) && ( tmp_idx >= 0 ) &&
-		     ( tmp_idx < local_max_index ) &&
-		     ( tmp_idx % 11 == 0 ) ) {
+		if(pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) &&
+                        (tmp_idx % 11) == 0) {
 
-                    if ( verbose )
+                    if(verbose)
                         HDfprintf(stdout, "8(p-ro, %d, %d) ", type, tmp_idx);
 
 		    protect_entry_ro(file_ptr, type, tmp_idx);
-
  		    HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-		}
+		} /* end if */
 
                 tmp_idx--;
-		if ( ( pass ) && ( tmp_idx >= 0 ) &&
-		     ( tmp_idx < local_max_index ) &&
-		     ( tmp_idx % 13 == 0 ) ) {
+		if(pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) &&
+                        (tmp_idx % 13) == 0) {
 
-                    if ( verbose )
+                    if(verbose)
                         HDfprintf(stdout, "9(p-ro, %d, %d) ", type, tmp_idx);
 
 		    protect_entry_ro(file_ptr, type, tmp_idx);
-
  		    HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-		}
+		} /* end if */
 
                 /* (don't decrement tmp_idx) */
-		if ( ( pass ) && ( tmp_idx >= 0 ) &&
-		     ( tmp_idx < local_max_index ) &&
-		     ( tmp_idx % 9 == 0 ) ) {
+		if(pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) &&
+                        (tmp_idx % 9) == 0) {
 
-                    if ( verbose )
+                    if(verbose)
                         HDfprintf(stdout, "10(u-ro, %d, %d) ", type, tmp_idx);
 
 		    unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
-
  		    HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-		}
+		} /* end if */
 
                 tmp_idx--;
-		if ( ( pass ) && ( tmp_idx >= 0 ) &&
-		     ( tmp_idx < local_max_index ) &&
-		     ( tmp_idx % 11 == 0 ) ) {
+		if(pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) &&
+                        (tmp_idx % 11) == 0) {
 
-                    if ( verbose )
+                    if(verbose)
                         HDfprintf(stdout, "11(u-ro, %d, %d) ", type, tmp_idx);
 
 		    unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
-
  		    HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-		}
+		} /* end if */
 
                 tmp_idx--;
-		if ( ( pass ) && ( tmp_idx >= 0 ) &&
-		     ( tmp_idx < local_max_index ) &&
-		     ( tmp_idx % 13 == 0 ) ) {
+		if(pass && (tmp_idx >= 0) && (tmp_idx < local_max_index) &&
+                        (tmp_idx % 13) == 0) {
 
-                    if ( verbose )
+                    if(verbose)
                         HDfprintf(stdout, "12(u-ro, %d, %d) ", type, tmp_idx);
 
 		    unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
-
  		    HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-		}
+		} /* end if */
 	    } /* if ( do_mult_ro_protects ) */
 
-            if ( ( pass ) && ( idx >= 0 ) && ( idx <= local_max_index ) ) {
-
-                if ( verbose )
+            if(pass && (idx >= 0) && (idx <= local_max_index)) {
+                if(verbose)
                     HDfprintf(stdout, "13(p, %d, %d) ", type, idx);
 
                 protect_entry(file_ptr, type, idx);
-
 		HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-            }
+            } /* end if */
 
             tmp_idx = idx - lag + 2;
-            if ( ( pass ) && ( tmp_idx >= 0 ) &&
-                 ( tmp_idx <= local_max_index ) &&
-                 ( ( tmp_idx % 7 ) == 0 ) ) {
+            if(pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) &&
+                    (tmp_idx % 7) == 0) {
 
-                if ( verbose )
+                if(verbose)
                     HDfprintf(stdout, "14(u, %d, %d) ", type, tmp_idx);
 
                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
-
 		HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-            }
+            } /* end if */
 
             tmp_idx--;
-            if ( ( pass ) && ( tmp_idx >= 0 ) &&
-                 ( tmp_idx <= local_max_index ) &&
-                 ( ( tmp_idx % 7 ) == 0 ) ) {
+            if(pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index) &&
+                    (tmp_idx % 7) == 0) {
 
-                if ( verbose )
+                if(verbose)
                     HDfprintf(stdout, "15(p, %d, %d) ", type, tmp_idx);
 
                 protect_entry(file_ptr, type, tmp_idx);
-
 		HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-            }
+            } /* end if */
 
-
-            if ( do_destroys ) {
-
+            if(do_destroys) {
                 tmp_idx = idx - lag;
-                if ( ( pass ) && ( tmp_idx >= 0 ) &&
-                     ( tmp_idx <= local_max_index ) ) {
-
-                    switch ( tmp_idx %4 ) {
-
+                if(pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index)) {
+                    switch(tmp_idx % 4) {
                         case 0: /* we just did an insert */
-
-                            if ( verbose )
+                            if(verbose)
                                 HDfprintf(stdout, "16(u, %d, %d) ", type, tmp_idx);
 
                             unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
-
 			    HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
                             break;
 
                         case 1:
-                            if ( (entries[type])[tmp_idx].is_dirty ) {
-
-                                if ( verbose )
+                            if((entries[type])[tmp_idx].is_dirty) {
+                                if(verbose)
                                     HDfprintf(stdout, "17(u, %d, %d) ", type, tmp_idx);
 
                                 unprotect_entry(file_ptr, type, tmp_idx, H5C__NO_FLAGS_SET);
-
 				HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-                            } else {
-
-                                if ( verbose )
+                            } /* end if */
+                            else {
+                                if(verbose)
                                     HDfprintf(stdout, "18(u, %d, %d) ", type, tmp_idx);
 
-                                unprotect_entry(file_ptr, type, tmp_idx,
-                                        (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
-
+                                unprotect_entry(file_ptr, type, tmp_idx, (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
 				HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-                            }
+                            } /* end else */
                             break;
 
                         case 2: /* we just did an insert */
-
-                            if ( verbose )
+                            if(verbose)
                                 HDfprintf(stdout, "19(u-del, %d, %d) ", type, tmp_idx);
 
                             unprotect_entry(file_ptr, type, tmp_idx, H5C__DELETED_FLAG);
-
 			    HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
                             break;
 
                         case 3:
-                            if ( (entries[type])[tmp_idx].is_dirty ) {
-
-                                if ( verbose )
+                            if((entries[type])[tmp_idx].is_dirty) {
+                                if(verbose)
                                     HDfprintf(stdout, "20(u-del, %d, %d) ", type, tmp_idx);
 
                                 unprotect_entry(file_ptr, type, tmp_idx, H5C__DELETED_FLAG);
-
 			        HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-                            } else {
-
-                                if ( verbose )
+                            } /* end if */
+                            else {
+                                if(verbose)
                                     HDfprintf(stdout, "21(u-del, %d, %d) ", type, tmp_idx);
 
-                                unprotect_entry(file_ptr, type, tmp_idx,
-                                        (dirty_destroys ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET)
-                                        | H5C__DELETED_FLAG);
-
+                                unprotect_entry(file_ptr, type, tmp_idx, (dirty_destroys ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET) | H5C__DELETED_FLAG);
 			        HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-                            }
+                            } /* end else */
                             break;
 
                         default:
                             HDassert(0); /* this can't happen... */
                             break;
-                    }
-                }
-
-            } else {
-
+                    } /* end switch */
+                } /* end if */
+            } /* end if */
+            else {
                 tmp_idx = idx - lag;
-                if ( ( pass ) && ( tmp_idx >= 0 ) &&
-                     ( tmp_idx <= local_max_index ) ) {
-
-                    if ( verbose )
+                if(pass && (tmp_idx >= 0) && (tmp_idx <= local_max_index)) {
+                    if(verbose)
                         HDfprintf(stdout, "22(u, %d, %d) ", type, tmp_idx);
 
-                    unprotect_entry(file_ptr, type, tmp_idx,
-                            (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
-
+                    unprotect_entry(file_ptr, type, tmp_idx, (dirty_unprotects ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET));
 		    HDassert(cache_ptr->slist_size == cache_ptr->dirty_index_size);
-                }
-            }
+                } /* end if */
+            } /* end elsef */
 
-            if ( verbose )
+            if(verbose)
                 HDfprintf(stdout, "\n");
 
             idx++;
-        }
+        } /* end while */
+
         type++;
-    }
+    } /* end while */
 
-    if ( ( pass ) && ( display_stats ) ) {
-
+    if(pass && display_stats)
         H5C_stats(cache_ptr, "test cache", display_detailed_stats);
-    }
-
-    return;
 
 } /* row_major_scan_forward() */
 

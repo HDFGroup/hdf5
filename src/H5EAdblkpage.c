@@ -154,7 +154,7 @@ H5EA__dblk_page_create(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_sblock_t *parent,
     haddr_t addr))
 
     /* Local variables */
-    H5EA_dblk_page_t *dblk_page = NULL;      /* Extensible array data block page */
+    H5EA_dblk_page_t *dblk_page = NULL; /* Extensible array data block page */
 
     /* Sanity check */
     HDassert(hdr);
@@ -206,7 +206,7 @@ H5EA__dblk_page_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_sblock_t *parent,
     haddr_t dblk_page_addr, unsigned flags))
 
     /* Local variables */
-    H5EA_dblk_page_cache_ud_t udata;      /* Information needed for loading data block page */
+    H5EA_dblk_page_cache_ud_t udata;    /* Information needed for loading data block page */
 
     /* Sanity check */
     HDassert(hdr);

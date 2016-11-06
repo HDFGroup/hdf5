@@ -376,7 +376,7 @@ H5O__cache_deserialize(const void *_image, size_t len, void *_udata,
 done:
     /* Release the [possibly partially initialized] object header on errors */
     if(!ret_value && oh)
-        if(H5O_free(oh) < 0)
+        if(H5O__free(oh) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, NULL, "unable to destroy object header data")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -604,7 +604,7 @@ H5O__cache_free_icr(void *_thing)
     HDassert(oh->cache_info.type == H5AC_OHDR);
 
     /* Destroy object header */
-    if(H5O_free(oh) < 0)
+    if(H5O__free(oh) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't destroy object header")
 
 done:

@@ -756,8 +756,8 @@ END_FUNC(PRIV)  /* end H5EA_get() */
 /*-------------------------------------------------------------------------
  * Function:	H5EA_depend
  *
- * Purpose:	Make a child flush dependency between the extensible array's
- *              header and another piece of metadata in the file.
+ * Purpose:	Make a child flush dependency between the extensible array
+ *              and another piece of metadata in the file.
  *
  * Return:	SUCCEED/FAIL
  *
