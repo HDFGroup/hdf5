@@ -42,7 +42,6 @@
 /* Get needed headers */
 #include "H5Cprivate.h"         /* Cache                                */
 #include "H5FLprivate.h"        /* Free Lists                           */
-#include "H5SLprivate.h"        /* Skip lists */
 
 /*****************************/
 /* Package Private Variables */

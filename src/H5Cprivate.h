@@ -204,11 +204,6 @@
 #define H5C__EVICT_ALLOW_LAST_PINS_FLAG         0x4000
 #define H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG     0x8000
 
-/* Definitions for cache "tag" property */
-#define H5C_TAG_NAME           "H5C_tag"
-#define H5C_TAG_SIZE           sizeof(H5C_tag_t)
-#define H5C_TAG_DEF            {(haddr_t)0, H5C_GLOBALITY_NONE}
-
 /* Debugging/sanity checking/statistics settings */
 #ifndef NDEBUG
 #define H5C_DO_SANITY_CHECKS		1
@@ -270,19 +265,6 @@
 
 /* Typedef for the main structure for the cache (defined in H5Cpkg.h) */
 typedef struct H5C_t H5C_t;
-
-/* Define enum for cache entry tag 'globality' value */
-typedef enum {
-    H5C_GLOBALITY_NONE=0, /* Non-global tag */
-    H5C_GLOBALITY_MINOR,  /* global, not flushed during single object flush */
-    H5C_GLOBALITY_MAJOR   /* global, needs flushed during single obect flush */
-} H5C_tag_globality_t;
-
-/* Cache entry tag structure */
-typedef struct H5C_tag_t {
-    haddr_t value;
-    H5C_tag_globality_t globality;
-} H5C_tag_t;
 
 /*
  *
@@ -1288,9 +1270,6 @@ typedef int H5C_ring_t;
  *		The name is not particularly descriptive, but is retained
  *		to avoid changes in existing code.
  *
- * is_corked:	Boolean flag indicating whether the cache entry associated
- *		with an object is corked or not corked.
- *
  * is_dirty:	Boolean flag indicating whether the contents of the cache
  *		entry has been modified since the last time it was written
  *		to disk.
@@ -1609,9 +1588,6 @@ typedef struct H5C_cache_entry_t {
     void  		      *	image_ptr;
     hbool_t			image_up_to_date;
     const H5C_class_t	      *	type;
-    haddr_t		        tag;
-    H5C_tag_globality_t		globality;
-    hbool_t			is_corked;
     hbool_t			is_dirty;
     hbool_t			dirtied;
     hbool_t			is_protected;
@@ -1654,6 +1630,11 @@ typedef struct H5C_cache_entry_t {
     struct H5C_cache_entry_t  *	coll_next;
     struct H5C_cache_entry_t  *	coll_prev;
 #endif /* H5_HAVE_PARALLEL */
+
+    /* fields supporting tag lists */
+    struct H5C_cache_entry_t  *	tl_next;
+    struct H5C_cache_entry_t  *	tl_prev;
+    struct H5C_tag_info_t     * tag_info;
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     /* cache entry stats fields */
@@ -1980,7 +1961,7 @@ H5_DLL herr_t H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag);
 H5_DLL herr_t H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag, hbool_t match_global);
 H5_DLL herr_t H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
 #if H5C_DO_TAGGING_SANITY_CHECKS
-herr_t H5C_verify_tag(int id, haddr_t tag, H5C_tag_globality_t globality);
+herr_t H5C_verify_tag(int id, haddr_t tag);
 #endif
 H5_DLL herr_t H5C_flush_to_min_clean(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5C_get_cache_auto_resize_config(const H5C_t *cache_ptr,

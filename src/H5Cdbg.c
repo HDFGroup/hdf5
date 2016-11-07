@@ -923,7 +923,7 @@ H5C__dump_children_cb(H5C_cache_entry_t *entry_ptr, void *_ctx)
 {
     H5C__dump_child_ctx_t *ctx = (H5C__dump_child_ctx_t *)_ctx;
 
-    if(entry_ptr->tag != entry_ptr->addr) {
+    if(entry_ptr->tag_info->tag != entry_ptr->addr) {
         unsigned u;
 
         HDassert(entry_ptr->flush_dep_nparents);
@@ -941,12 +941,14 @@ H5C__dump_children(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr,
 {
     H5C__dump_child_ctx_t ctx;
 
+    HDassert(entry_ptr->tag_info);
+
     ctx.cache_ptr = cache_ptr;
     ctx.parent = entry_ptr;
     ctx.dump_parents = dump_parents;
     ctx.prefix = prefix;
     ctx.indent = indent;
-    H5C__iter_tagged_entries(cache_ptr, entry_ptr->tag, FALSE, H5C__dump_children_cb, &ctx);
+    H5C__iter_tagged_entries(cache_ptr, entry_ptr->tag_info->tag, FALSE, H5C__dump_children_cb, &ctx);
 }
 
 void
@@ -956,7 +958,7 @@ H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr,
     HDassert(cache_ptr);
     HDassert(entry_ptr);
 
-    HDfprintf(stderr, "%*s%s: entry_ptr = (%a, '%s', %a, %t, %u, %u/%u)\n", indent, "", prefix, entry_ptr->addr, entry_ptr->type->name, entry_ptr->tag, entry_ptr->is_dirty, entry_ptr->flush_dep_nparents, entry_ptr->flush_dep_nchildren, entry_ptr->flush_dep_ndirty_children);
+    HDfprintf(stderr, "%*s%s: entry_ptr = (%a, '%s', %a, %t, %u, %u/%u)\n", indent, "", prefix, entry_ptr->addr, entry_ptr->type->name, entry_ptr->tag_info ? entry_ptr->tag_info->tag : HADDR_UNDEF, entry_ptr->is_dirty, entry_ptr->flush_dep_nparents, entry_ptr->flush_dep_nchildren, entry_ptr->flush_dep_ndirty_children);
     if(dump_parents && entry_ptr->flush_dep_nparents)
         H5C__dump_parents(cache_ptr, entry_ptr, "Parent", indent);
     if(entry_ptr->flush_dep_nchildren)
