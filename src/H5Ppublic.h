@@ -311,7 +311,7 @@ H5_DLL herr_t H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
 H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id,
         const void *driver_info);
 H5_DLL hid_t H5Pget_driver(hid_t plist_id);
-H5_DLL void *H5Pget_driver_info(hid_t plist_id);
+H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
 H5_DLL herr_t H5Pset_family_offset(hid_t fapl_id, hsize_t offset);
 H5_DLL herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset);
 H5_DLL herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type);
