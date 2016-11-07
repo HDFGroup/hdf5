@@ -206,51 +206,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC__write_evict_cache_log_msg
- *
- * Purpose:     Write a log message for eviction of cache entries.
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:	Dana Robinson
- *              Sunday, March 16, 2014
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC__write_evict_cache_log_msg(const H5AC_t *cache,
-                                herr_t fxn_ret_value)
-{
-    char msg[MSG_SIZE];
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(cache);
-
-    /* Create the log message string */
-    HDsnprintf(msg, MSG_SIZE, 
-"\
-{\
-\"timestamp\":%lld,\
-\"action\":\"evict\",\
-\"returned\":%d\
-},\n\
-"
-    , (long long)HDtime(NULL), (int)fxn_ret_value);
-
-    /* Write the log message to the file */
-    if(H5C_write_log_message(cache, msg) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC__write_evict_cache_log_msg() */
-
-
-/*-------------------------------------------------------------------------
  * Function:    H5AC__write_expunge_entry_log_msg
  *
  * Purpose:     Write a log message for expunge of cache entries.
@@ -446,53 +401,6 @@ H5AC__write_mark_dirty_entry_log_msg(const H5AC_t *cache,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC__write_mark_dirty_entry_log_msg() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC__write_mark_clean_entry_log_msg
- *
- * Purpose:     Write a log message for marking cache entries as clean.
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:	Quincey Koziol
- *              Saturday, July 23, 2016
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC__write_mark_clean_entry_log_msg(const H5AC_t *cache, const H5AC_info_t *entry,
-    herr_t fxn_ret_value)
-{
-    char msg[MSG_SIZE];                 /* Log message buffer */
-    herr_t ret_value = SUCCEED;         /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(cache);
-    HDassert(entry);
-
-    /* Create the log message string */
-    HDsnprintf(msg, MSG_SIZE, 
-"\
-{\
-\"timestamp\":%lld,\
-\"action\":\"clean\",\
-\"address\":0x%lx,\
-\"returned\":%d\
-},\n\
-"
-    , (long long)HDtime(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
-
-    /* Write the log message to the file */
-    if(H5C_write_log_message(cache, msg) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC__write_mark_clean_entry_log_msg() */
 
 
 /*-------------------------------------------------------------------------
@@ -961,52 +869,4 @@ H5AC__write_set_cache_config_log_msg(const H5AC_t *cache,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC__write_set_cache_config_log_msg() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC__write_remove_entry_log_msg
- *
- * Purpose:     Write a log message for removing a cache entry.
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  Quincey Koziol
- *              September 17, 2016
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5AC__write_remove_entry_log_msg(const H5AC_t *cache, const H5AC_info_t *entry,
-    herr_t fxn_ret_value)
-{
-    char msg[MSG_SIZE];
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(cache);
-    HDassert(entry);
-
-    /* Create the log message string */
-    HDsnprintf(msg, MSG_SIZE, 
-"\
-{\
-\"timestamp\":%lld,\
-\"action\":\"remove\",\
-\"address\":0x%lx,\
-\"returned\":%d\
-},\n\
-"
-    , (long long)HDtime(NULL), (unsigned long)entry->addr, 
-      (int)fxn_ret_value);
-
-    /* Write the log message to the file */
-    if(H5C_write_log_message(cache, msg) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5AC__write_remove_entry_log_msg() */
 

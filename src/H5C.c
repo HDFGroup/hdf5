@@ -197,6 +197,9 @@ static void H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t * entry,
 /* Package initialization variable */
 hbool_t H5_PKG_INIT_VAR = FALSE;
 
+/* Declare a free list to manage the tag info struct */
+H5FL_DEFINE(H5C_tag_info_t);
+
 
 /*****************************/
 /* Library Private Variables */
@@ -215,9 +218,6 @@ H5FL_BLK_DEFINE_STATIC(parent);
 
 /* Declare extern free list to manage the H5C_collective_write_t struct */
 H5FL_EXTERN(H5C_collective_write_t);
-
-/* Declare a free list to manage corked object addresses */
-H5FL_DEFINE_STATIC(haddr_t);
 
 
 
@@ -280,8 +280,8 @@ H5C_create(size_t		      max_cache_size,
     if(NULL == (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list.")
 
-    if ( (cache_ptr->cork_list_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)) == NULL )
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list for corked object addresses.")
+    if(NULL == (cache_ptr->tag_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list for tagged entry addresses.")
 
     /* If we get this far, we should succeed.  Go ahead and initialize all
      * the fields.
@@ -457,8 +457,8 @@ done:
             if(cache_ptr->slist_ptr != NULL)
                 H5SL_close(cache_ptr->slist_ptr);
 
-            if ( cache_ptr->cork_list_ptr != NULL )
-                H5SL_close(cache_ptr->cork_list_ptr);
+            if(cache_ptr->tag_list != NULL)
+                H5SL_close(cache_ptr->tag_list);
 
             cache_ptr->magic = 0;
             cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
@@ -656,10 +656,9 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_free_cork_list_cb
+ * Function:    H5C_free_tag_list_cb
  *
- * Purpose:     Callback function to free the list of object addresses 
- *		on the skip list.
+ * Purpose:     Callback function to free tag nodes from the skip list.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -669,19 +668,19 @@ H5C_def_auto_resize_rpt_fcn(H5C_t * cache_ptr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_free_cork_list_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op_data)
+H5C_free_tag_list_cb(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op_data)
 {
-    haddr_t *addr = (haddr_t *)_item;
+    H5C_tag_info_t *tag_info = (H5C_tag_info_t *)_item;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(addr);
+    HDassert(tag_info);
 
     /* Release the item */
-    addr = H5FL_FREE(haddr_t, addr);
+    tag_info = H5FL_FREE(H5C_tag_info_t, tag_info);
 
     FUNC_LEAVE_NOAPI(0)
-}  /* H5C_free_cork_list_cb() */
+}  /* H5C_free_tag_list_cb() */
 
 
 /*-------------------------------------------------------------------------
@@ -729,9 +728,9 @@ H5C_dest(H5F_t * f, hid_t dxpl_id)
         cache_ptr->slist_ptr = NULL;
     } /* end if */
 
-    if(cache_ptr->cork_list_ptr != NULL) {
-        H5SL_destroy(cache_ptr->cork_list_ptr, H5C_free_cork_list_cb, NULL);
-        cache_ptr->cork_list_ptr = NULL;
+    if(cache_ptr->tag_list != NULL) {
+        H5SL_destroy(cache_ptr->tag_list, H5C_free_tag_list_cb, NULL);
+        cache_ptr->tag_list = NULL;
     } /* end if */
 
 #ifndef NDEBUG
@@ -1284,14 +1283,6 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->image_ptr = NULL;
     entry_ptr->image_up_to_date = FALSE;
 
-    /* Apply tag to newly inserted entry */
-    if(H5C__tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Cannot tag metadata entry")
-
-    /* Set the entry's cork status */
-    if(H5C_cork(cache_ptr, entry_ptr->tag, H5C__GET_CORKED, &entry_ptr->is_corked) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Cannot retrieve entry's cork status")
-
     entry_ptr->is_protected = FALSE;
     entry_ptr->is_read_only = FALSE;
     entry_ptr->ro_ref_count = 0;
@@ -1358,6 +1349,10 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->coll_next = NULL;
     entry_ptr->coll_prev = NULL;
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Apply tag to newly inserted entry */
+    if(H5C__tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Cannot tag metadata entry")
 
     H5C__RESET_CACHE_ENTRY_STATS(entry_ptr)
 
@@ -1858,8 +1853,9 @@ H5C_resize_entry(void *thing, size_t new_size)
         if(!entry_ptr->in_slist)
             H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
 
-        if(entry_ptr->is_pinned)
+        if(entry_ptr->is_pinned) {
             H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr)
+        } /* end if */
     } /* end if */
 
 done:
@@ -2190,22 +2186,21 @@ H5C_protect(H5F_t *		f,
 
 #if H5C_DO_TAGGING_SANITY_CHECKS
 {
-        H5C_tag_t tag;              /* Tag structure */
-
-        /* The entry is already in the cache, but make sure that the tag value 
-           being passed in via dxpl is still legal. This will ensure that had
-           the entry NOT been in the cache, tagging was still set up correctly
-           and it would have received a legal tag value after getting loaded
-           from disk. */
-
-        /* Get the tag from the DXPL */
-        if((H5P_get(dxpl, "H5C_tag", &tag)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to query property value");
-    
         /* Verify tag value */
         if(cache_ptr->ignore_tags != TRUE) {
-            /* Verify legal tag value */
-            if(H5C_verify_tag(entry_ptr->type->id, tag.value, tag.globality) < 0)
+            haddr_t tag;              /* Tag value */
+
+            /* The entry is already in the cache, but make sure that the tag value 
+               being passed in via dxpl is still legal. This will ensure that had
+               the entry NOT been in the cache, tagging was still set up correctly
+               and it would have received a legal tag value after getting loaded
+               from disk. */
+
+            /* Get the tag from the DXPL */
+            if((H5P_get(dxpl, H5AC_TAG_NAME, &tag)) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to query property value");
+    
+            if(H5C_verify_tag(entry_ptr->type->id, tag) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "tag verification failed")
         } /* end if */
 }
@@ -2237,10 +2232,6 @@ H5C_protect(H5F_t *		f,
         /* Apply tag to newly protected entry */
         if(H5C__tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, NULL, "Cannot tag metadata entry")
-
-	/* Set the entry's cork status */
-	if(H5C_cork(cache_ptr, entry_ptr->tag, H5C__GET_CORKED, &entry_ptr->is_corked) < 0)
-	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "Cannot retrieve entry's cork status")
 
         /* If the entry is very large, and we are configured to allow it,
          * we may wish to perform a flash cache size increase.
@@ -4342,31 +4333,30 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
 	    if(prev_ptr != NULL)
                 prev_is_dirty = prev_ptr->is_dirty;
 
-	    /* dirty corked entry is skipped */
-	    if(entry_ptr->is_corked && entry_ptr->is_dirty)
-		corked = TRUE;
-            else if ( entry_ptr->is_dirty ) {
+            if(entry_ptr->is_dirty ) {
+                /* dirty corked entry is skipped */
+                if(entry_ptr->tag_info && entry_ptr->tag_info->corked)
+                    corked = TRUE;
+                else {
+                    /* reset entries_removed_counter and
+                     * last_entry_removed_ptr prior to the call to
+                     * H5C__flush_single_entry() so that we can spot
+                     * unexpected removals of entries from the cache,
+                     * and set the restart_scan flag if proceeding
+                     * would be likely to cause us to scan an entry
+                     * that is no longer in the cache.
+                     */
+                    cache_ptr->entries_removed_counter = 0;
+                    cache_ptr->last_entry_removed_ptr  = NULL;
 
-                /* reset entries_removed_counter and
-                 * last_entry_removed_ptr prior to the call to
-                 * H5C__flush_single_entry() so that we can spot
-                 * unexpected removals of entries from the cache,
-                 * and set the restart_scan flag if proceeding
-                 * would be likely to cause us to scan an entry
-                 * that is no longer in the cache.
-                 */
-                cache_ptr->entries_removed_counter = 0;
-                cache_ptr->last_entry_removed_ptr  = NULL;
+                    if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__NO_FLAGS_SET, NULL, NULL) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
 
-                if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__NO_FLAGS_SET, NULL, NULL) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
-
-                if ( ( cache_ptr->entries_removed_counter > 1 ) ||
-                     ( cache_ptr->last_entry_removed_ptr == prev_ptr ) )
-
-                    restart_scan = TRUE;
-
-            } else {
+                    if(cache_ptr->entries_removed_counter > 1 || cache_ptr->last_entry_removed_ptr == prev_ptr)
+                        restart_scan = TRUE;
+                } /* end else */
+            } /* end if */
+            else {
 
                 bytes_evicted += entry_ptr->size;
 
@@ -6143,6 +6133,8 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
          *
          * 3) Update the replacement policy for eviction
          *
+         * 4) Remove it from the tag list for this object
+         *
          * Finally, if the destroy_entry flag is set, discard the 
          * entry.
          */
@@ -6153,6 +6145,10 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
             H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)
 
         H5C__UPDATE_RP_FOR_EVICTION(cache_ptr, entry_ptr, FAIL)
+
+        /* Remove entry from tag list */
+        if(H5C__untag_entry(cache_ptr, entry_ptr) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry from tag list")
 
 	/* verify that the entry is no longer part of any flush dependencies */
         HDassert(entry_ptr->flush_dep_nparents == 0);
@@ -6890,7 +6886,8 @@ H5C_make_space_in_cache(H5F_t *	f,
 	    if(prev_ptr != NULL)
 		prev_is_dirty = prev_ptr->is_dirty;
 
-	    if (entry_ptr->is_corked && entry_ptr->is_dirty) {
+	    if(entry_ptr->is_dirty &&
+                    (entry_ptr->tag_info && entry_ptr->tag_info->corked)) {
 
                 /* Skip "dirty" corked entries.  */
 		++num_corked_entries;
@@ -7615,8 +7612,8 @@ done:
 herr_t
 H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked) 
 {
-    haddr_t *ptr;		/* Points to an address */
-    herr_t ret_value = SUCCEED;	/* Return value */
+    H5C_tag_info_t *tag_info;	/* Points to a tag info struct */
+    herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -7626,61 +7623,69 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
     HDassert(action == H5C__SET_CORK || action == H5C__UNCORK || action == H5C__GET_CORKED);
 
     /* Search the list of corked object addresses in the cache */
-    ptr = (haddr_t *)H5SL_search(cache_ptr->cork_list_ptr, &obj_addr);
+    tag_info = (H5C_tag_info_t *)H5SL_search(cache_ptr->tag_list, &obj_addr);
 
     if(H5C__GET_CORKED == action) {
         HDassert(corked);
-        if(ptr != NULL && *ptr == obj_addr)
+        if(tag_info != NULL && tag_info->corked)
             *corked = TRUE;
         else
             *corked = FALSE;
     } /* end if */
     else {
-        hbool_t is_corked;		/* Cork status for an entry */
-
         /* Sanity check */
         HDassert(H5C__SET_CORK == action || H5C__UNCORK == action);
 
         /* Perform appropriate action */
         if(H5C__SET_CORK == action) {
-            haddr_t *addr_ptr = NULL;	/* Points to an address */
+            /* Check if this is the first entry for this tagged object */
+            if(NULL == tag_info) {
+                /* Allocate new tag info struct */
+                if(NULL == (tag_info = H5FL_CALLOC(H5C_tag_info_t)))
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "can't allocate tag info for cache entry")
 
-            if(ptr != NULL && *ptr == obj_addr)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't cork an already corked object")
+                /* Set the tag for all entries */
+                tag_info->tag = obj_addr;
 
-            /* Allocate address */
-            if(NULL == (addr_ptr = H5FL_MALLOC(haddr_t)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-            /* Insert into the list */
-            *addr_ptr = obj_addr;
-            if(H5SL_insert(cache_ptr->cork_list_ptr, addr_ptr, addr_ptr) < 0) {
-                addr_ptr = H5FL_FREE(haddr_t, addr_ptr);
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't insert address into cork list")
+                /* Insert tag info into skip list */
+                if(H5SL_insert(cache_ptr->tag_list, tag_info, &(tag_info->tag)) < 0 )
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert tag info in skip list")
             } /* end if */
+            else {
+                /* Check for object already corked */
+                if(tag_info->corked)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTCORK, FAIL, "object already corked")
+                HDassert(tag_info->entry_cnt > 0 && tag_info->head);
+            } /* end else */
 
-            /* Set the entry's cork status */
-            is_corked = TRUE;
+            /* Set the corked status for the entire object */
+            tag_info->corked = TRUE;
         } /* end if */
         else {
-            if(ptr == NULL)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't uncork an object that is not corked ")
+            /* Sanity check */
+            HDassert(tag_info);
 
-            /* Remove the object address from the list */
-            ptr = (haddr_t *)H5SL_remove(cache_ptr->cork_list_ptr, &obj_addr);
-            if(ptr == NULL || *ptr != obj_addr)
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't remove address from list")
+            /* Check for already uncorked */
+            if(!tag_info->corked)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNCORK, FAIL, "object already uncorked")
 
-            /* Free address */
-            ptr = H5FL_FREE(haddr_t, ptr);
+            /* Set the corked status for the entire object */
+            tag_info->corked = FALSE;
 
-            /* Set the entry's cork status */
-            is_corked = FALSE;
+            /* Remove the tag info from the tag list, if there's no more entries with this tag */
+            if(0 == tag_info->entry_cnt) {
+                /* Sanity check */
+                HDassert(NULL == tag_info->head);
+
+                if(H5SL_remove(cache_ptr->tag_list, &(tag_info->tag)) != tag_info)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove tag info from list")
+
+                /* Release the tag info */
+                tag_info = H5FL_FREE(H5C_tag_info_t, tag_info);
+            } /* end if */
+            else
+                HDassert(NULL != tag_info->head);
         } /* end else */
-
-        /* Mark existing cache entries with tag (obj_addr) to the cork status */
-        if(H5C__mark_tagged_entries_cork(cache_ptr, obj_addr, is_corked) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't mark cork status on entry")
     } /* end else */
 
 done:

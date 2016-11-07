@@ -100,7 +100,7 @@ verify_tag_not_in_cache(H5F_t *f, haddr_t tag)
 
         entry_ptr = cache_ptr->index[i];
         while(entry_ptr != NULL) {
-            if(tag == entry_ptr->tag)
+            if(tag == entry_ptr->tag_info->tag)
                 return TRUE;
             else
                 entry_ptr = entry_ptr->ht_next;

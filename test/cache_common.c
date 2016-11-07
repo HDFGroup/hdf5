@@ -3697,7 +3697,7 @@ insert_entry(H5F_t * file_ptr,
         entry_ptr->is_pinned = insert_pinned;
         entry_ptr->pinned_from_client = insert_pinned;
 
-        if(entry_ptr->header.is_corked)
+        if(entry_ptr->header.tag_info && entry_ptr->header.tag_info->corked)
             entry_ptr->is_corked = TRUE;
 
         HDassert(entry_ptr->header.is_dirty);
@@ -3975,7 +3975,7 @@ protect_entry(H5F_t * file_ptr, int32_t type, int32_t idx)
 
         } /* end else */
 
-	if(entry_ptr->header.is_corked)
+        if(entry_ptr->header.tag_info && entry_ptr->header.tag_info->corked)
 	    entry_ptr->is_corked = TRUE;
 
         HDassert(((entry_ptr->header).type)->id == type);

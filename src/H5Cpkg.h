@@ -3112,6 +3112,14 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 /* Package Private Typedefs */
 /****************************/
 
+/* Info about each set of tagged entries */
+typedef struct H5C_tag_info_t {
+    haddr_t tag;                /* Tag (address) of the entries (must be first, for skiplist) */
+    H5C_cache_entry_t *head;    /* Head of the list of entries for this tag */
+    size_t entry_cnt;           /* Number of entries on list */
+    hbool_t corked;             /* Whether this object is corked */
+} H5C_tag_info_t;
+
 /****************************************************************************
  *
  * structure H5C_t
@@ -4096,7 +4104,8 @@ struct H5C_t {
     int64_t			slist_size_increase;
 #endif /* H5C_DO_SANITY_CHECKS */
 
-    H5SL_t *                    cork_list_ptr; /* list of corked object addresses */
+    /* Fields for maintaining list of tagged entries */
+    H5SL_t *                    tag_list;
 
     /* Fields for tracking protected entries */
     int32_t                     pl_len;
@@ -4263,14 +4272,13 @@ H5_DLLVAR const H5C_class_t H5C__epoch_marker_class;
 H5_DLL herr_t H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id,
     H5C_cache_entry_t *entry_ptr, unsigned flags, int64_t *entry_size_change_ptr, H5SL_t *collective_write_list);
 H5_DLL herr_t H5C__flush_marked_entries(H5F_t * f, hid_t dxpl_id);
-H5_DLL int H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
+H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
     H5C_tag_iter_cb_t cb, void *cb_ctx);
 
 /* Routines for operating on entry tags */
 H5_DLL herr_t H5C__tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr,
     hid_t dxpl_id);
-H5_DLL herr_t H5C__mark_tagged_entries_cork(H5C_t *cache_ptr, haddr_t obj_addr,
-    hbool_t val);
+H5_DLL herr_t H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry);
 
 /* Testing functions */
 #ifdef H5C_TESTING

@@ -2269,7 +2269,6 @@ done:
 herr_t
 H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag)
 {
-    H5C_tag_t tag;                  /* Tag structure */
     H5P_genplist_t *dxpl;           /* Dataset transfer property list */
     herr_t ret_value = SUCCEED;     /* Return value */
 
@@ -2281,32 +2280,16 @@ H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag)
 
     /* Get the current tag value and return that (if prev_tag is NOT null) */
     if(prev_tag) {
-        if((H5P_get(dxpl, "H5C_tag", &tag)) < 0)
+        haddr_t tag;                    /* Tag value */
+
+        if((H5P_get(dxpl, H5AC_TAG_NAME, &tag)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query dxpl")
-        *prev_tag = tag.value;
+        *prev_tag = tag;
     } /* end if */
 
-    /* Add metadata_tag to tag structure */
-    tag.value = metadata_tag;
-
-    /* Determine globality of tag */
-    switch(metadata_tag) {
-        case H5AC__SUPERBLOCK_TAG:
-        case H5AC__SOHM_TAG:
-        case H5AC__GLOBALHEAP_TAG:
-            tag.globality = H5C_GLOBALITY_MAJOR;
-            break;
-        case H5AC__FREESPACE_TAG:
-            tag.globality = H5C_GLOBALITY_MINOR;
-            break;
-        default:
-            tag.globality = H5C_GLOBALITY_NONE;
-            break;
-    } /* end switch */
-
     /* Set the provided tag in the dxpl_id. */
-    if(H5P_set(dxpl, "H5C_tag", &tag) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set property in dxpl")
+    if(H5P_set(dxpl, H5AC_TAG_NAME, &metadata_tag) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set tag in dxpl")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2506,7 +2489,7 @@ static herr_t
 H5AC__verify_tag(hid_t dxpl_id, const H5AC_class_t *type)
 {
     H5P_genplist_t *dxpl;               /* DXPL for operation */
-    H5C_tag_t tag;                      /* Entry tag to validate */
+    haddr_t tag;                        /* Entry tag to validate */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -2516,11 +2499,11 @@ H5AC__verify_tag(hid_t dxpl_id, const H5AC_class_t *type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get the tag from the DXPL */
-    if((H5P_get(dxpl, "H5C_tag", &tag)) < 0)
+    if((H5P_get(dxpl, H5AC_TAG_NAME, &tag)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value")
 
     /* Verify legal tag value */
-    if(H5C_verify_tag(type->id, tag.value, tag.globality) < 0)
+    if(H5C_verify_tag(type->id, tag) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "tag verification failed")
 
 done:

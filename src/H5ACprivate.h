@@ -35,6 +35,7 @@
 #include "H5Cprivate.h"		/* Cache				*/
 #include "H5Fprivate.h"		/* File access				*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5SLprivate.h"        /* Skip lists 				*/
 
 #ifdef H5_METADATA_TRACE_FILE
 #define H5AC__TRACE_FILE_ENABLED	1
@@ -45,11 +46,16 @@
 /* Global metadata tag values */
 #define H5AC__INVALID_TAG      (haddr_t)0
 #define H5AC__IGNORE_TAG       (haddr_t)1
-#define H5AC__SUPERBLOCK_TAG   (haddr_t)2
-#define H5AC__FREESPACE_TAG    (haddr_t)3
-#define H5AC__SOHM_TAG         (haddr_t)4
-#define H5AC__GLOBALHEAP_TAG   (haddr_t)5
-#define H5AC__COPIED_TAG       (haddr_t)6
+#define H5AC__COPIED_TAG       (haddr_t)2
+#define H5AC__SUPERBLOCK_TAG   (haddr_t)3
+#define H5AC__FREESPACE_TAG    (haddr_t)4
+#define H5AC__SOHM_TAG         (haddr_t)5
+#define H5AC__GLOBALHEAP_TAG   (haddr_t)6
+
+/* Definitions for cache "tag" property */
+#define H5AC_TAG_NAME          "H5AC_tag"
+#define H5AC_TAG_SIZE          sizeof(haddr_t)
+#define H5AC_TAG_DEF           (H5AC__INVALID_TAG)
 
 /* Types of metadata objects cached */
 typedef enum {
