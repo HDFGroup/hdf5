@@ -204,9 +204,6 @@ H5EA__hdr_init(H5EA_hdr_t *hdr, void *ctx_udata))
     hdr->nsblks = 1 + (hdr->cparam.max_nelmts_bits - H5VM_log2_of2(hdr->cparam.data_blk_min_elmts));
     hdr->dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
     hdr->arr_off_size = (unsigned char)H5EA_SIZEOF_OFFSET_BITS(hdr->cparam.max_nelmts_bits);
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->nsblks = %Zu\n", FUNC, hdr->nsblks);
-#endif /* QAK */
 
     /* Allocate information for each super block */
     if(NULL == (hdr->sblk_info = H5FL_SEQ_MALLOC(H5EA_sblk_info_t, hdr->nsblks)))
@@ -220,9 +217,6 @@ HDfprintf(stderr, "%s: hdr->nsblks = %Zu\n", FUNC, hdr->nsblks);
         hdr->sblk_info[u].dblk_nelmts = H5EA_SBLK_DBLK_NELMTS(u, hdr->cparam.data_blk_min_elmts);
         hdr->sblk_info[u].start_idx = start_idx;
         hdr->sblk_info[u].start_dblk = start_dblk;
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->sblk_info[%Zu] = {%Zu, %Zu, %Hu, %Hu}\n", FUNC, u, hdr->sblk_info[u].ndblks, hdr->sblk_info[u].dblk_nelmts, hdr->sblk_info[u].start_idx, hdr->sblk_info[u].start_dblk);
-#endif /* QAK */
 
         /* Advance starting indices for next super block */
         start_idx += (hsize_t)hdr->sblk_info[u].ndblks * (hsize_t)hdr->sblk_info[u].dblk_nelmts;
@@ -271,9 +265,6 @@ H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts))
     /* Compute the index of the element buffer factory */
     H5_CHECK_OVERFLOW(nelmts, /*From:*/size_t, /*To:*/uint32_t);
     idx = H5VM_log2_of2((uint32_t)nelmts) - H5VM_log2_of2((uint32_t)hdr->cparam.data_blk_min_elmts);
-#ifdef QAK
-HDfprintf(stderr, "%s: nelmts = %Zu, hdr->data_blk_min_elmts = %u, idx = %u\n", FUNC, nelmts, (unsigned)hdr->data_blk_min_elmts, idx);
-#endif /* QAK */
 
     /* Check for needing to increase size of array of factories */
     if(idx >= hdr->elmt_fac.nalloc) {
@@ -341,9 +332,6 @@ H5EA__hdr_free_elmts(H5EA_hdr_t *hdr, size_t nelmts, void *elmts))
     /* Compute the index of the element buffer factory */
     H5_CHECK_OVERFLOW(nelmts, /*From:*/size_t, /*To:*/uint32_t);
     idx = H5VM_log2_of2((uint32_t)nelmts) - H5VM_log2_of2((uint32_t)hdr->cparam.data_blk_min_elmts);
-#ifdef QAK
-HDfprintf(stderr, "%s: nelmts = %Zu, hdr->data_blk_min_elmts = %u, idx = %u\n", FUNC, nelmts, (unsigned)hdr->data_blk_min_elmts, idx);
-#endif /* QAK */
 
     /* Free buffer for elements in index block */
     HDassert(idx < hdr->elmt_fac.nalloc);
@@ -373,10 +361,6 @@ H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
 
     /* Local variables */
     H5EA_hdr_t *hdr = NULL;     /* Extensible array header */
-
-#ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
 
     /* Check arguments */
     HDassert(f);
@@ -725,9 +709,6 @@ H5EA__hdr_delete(H5EA_hdr_t *hdr, hid_t dxpl_id))
 
     /* Check for index block */
     if(H5F_addr_defined(hdr->idx_blk_addr)) {
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->idx_blk_addr = %a\n", FUNC, hdr->idx_blk_addr);
-#endif /* QAK */
         /* Delete index block */
         if(H5EA__iblock_delete(hdr, dxpl_id) < 0)
             H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array index block")

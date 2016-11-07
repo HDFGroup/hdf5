@@ -1106,5 +1106,5 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5_combine_name() */
+} /* end H5_combine_path() */
 

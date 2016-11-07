@@ -32,7 +32,7 @@
 /****************/
 
 #include "H5ACmodule.h"         /* This source code file is part of the H5AC module */
-#define H5F_FRIEND		        /* Suppress error about including H5Fpkg            */
+#define H5F_FRIEND		/* Suppress error about including H5Fpkg            */
 
 
 /***********/
@@ -880,7 +880,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #if H5AC_DO_TAGGING_SANITY_CHECKS
-    if(!H5C_get_ignore_tags(f->shared->cache) && (H5AC__verify_tag(dxpl_id, type) < 0))
+    if(!H5C_get_ignore_tags(f->shared->cache) && H5AC__verify_tag(dxpl_id, type) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Bad tag value")
 #endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
 
@@ -966,8 +966,7 @@ H5AC_mark_entry_dirty(void *thing)
      * occult errors.
      */
     if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr_from_entry(thing)))
-        sprintf(trace, "%s 0x%lx", FUNC,
-	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
+        sprintf(trace, "%s 0x%lx", FUNC, (unsigned long)(entry_ptr->addr));
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     /* Check if log messages are being emitted */
@@ -1291,7 +1290,7 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 #endif /* H5_HAVE_PARALLEL */
 
     /* Check for invalid access request */
-    if((0 == (H5F_INTENT(f) & H5F_ACC_RDWR)) &&  (0 == (flags & H5C__READ_ONLY_FLAG)))
+    if((0 == (H5F_INTENT(f) & H5F_ACC_RDWR)) && (0 == (flags & H5C__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "no write intent on file")
 
 #if H5AC__TRACE_FILE_ENABLED
@@ -1305,7 +1304,7 @@ H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
 #if H5AC_DO_TAGGING_SANITY_CHECKS
-    if(!H5C_get_ignore_tags(f->shared->cache) && (H5AC__verify_tag(dxpl_id, type) < 0))
+    if(!H5C_get_ignore_tags(f->shared->cache) && H5AC__verify_tag(dxpl_id, type) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, NULL, "Bad tag value")
 #endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
 
@@ -2449,7 +2448,6 @@ H5AC_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC_expunge_tag_type_metadata*/
 
 

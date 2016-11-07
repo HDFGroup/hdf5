@@ -451,14 +451,11 @@ H5HF_man_iblock_root_create(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t min_dblock_si
 
 	/* destroy flush dependency between direct block and header */
 	if(H5AC_destroy_flush_dependency(dblock->hdr, dblock) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, \
-                        "unable to destroy flush dependency")
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
 
 	/* create flush dependency between direct block and new root indirect block */
 	if(H5AC_create_flush_dependency(dblock->parent, dblock) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEPEND, FAIL, \
-		        "unable to create flush dependency")
-
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
 
         if(H5HF_man_iblock_attach(iblock, 0, hdr->man_dtable.table_addr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTATTACH, FAIL, "can't attach root direct block to parent indirect block")

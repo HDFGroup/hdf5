@@ -182,12 +182,10 @@ H5C_get_ignore_tags(const H5C_t *cache_ptr)
  * Programmer:  Mike McGreevy
  *              January 14, 2010
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
+H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry, hid_t dxpl_id)
 {
     H5P_genplist_t *dxpl;       /* dataset transfer property list */
     H5C_tag_t tag;              /* Tag structure */
@@ -196,9 +194,9 @@ H5C__tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
     FUNC_ENTER_PACKAGE
 
     /* Assertions */
-    HDassert(cache_ptr != NULL);
-    HDassert(entry_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache != NULL);
+    HDassert(entry != NULL);
+    HDassert(cache->magic == H5C__H5C_T_MAGIC);
 
     /* Get the dataset transfer property list */
     if(NULL == (dxpl = (H5P_genplist_t *)H5I_object_verify(dxpl_id, H5I_GENPROP_LST)))
@@ -208,13 +206,7 @@ H5C__tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
     if((H5P_get(dxpl, "H5C_tag", &tag)) < 0)
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to query property value")
 
-    if(cache_ptr->ignore_tags != TRUE) {
-#if H5C_DO_TAGGING_SANITY_CHECKS
-        /* Perform some sanity checks to ensure that a correct tag is being applied */
-        if(H5C_verify_tag(entry_ptr->type->id, tag.value, tag.globality) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "tag verification failed")
-#endif
-    } else {
+    if(cache->ignore_tags) {
         /* if we're ignoring tags, it's because we're running
            tests on internal functions and may not have inserted a tag 
            value into a given dxpl_id before creating some metadata. Thus,
@@ -227,12 +219,19 @@ H5C__tag_entry(H5C_t * cache_ptr, H5C_cache_entry_t * entry_ptr, hid_t dxpl_id)
             tag.globality = H5C_GLOBALITY_NONE;
         } /* end if */
     } /* end if */
+#if H5C_DO_TAGGING_SANITY_CHECKS
+    else {
+        /* Perform some sanity checks to ensure that a correct tag is being applied */
+        if(H5C_verify_tag(entry->type->id, tag.value, tag.globality) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "tag verification failed")
+    } /* end else */
+#endif
 
     /* Apply the tag to the entry */
-    entry_ptr->tag = tag.value;
+    entry->tag = tag.value;
 
     /* Apply the tag globality to the entry */
-    entry_ptr->globality = tag.globality;
+    entry->globality = tag.globality;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

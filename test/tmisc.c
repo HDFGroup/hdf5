@@ -466,7 +466,7 @@ static void test_misc2_write_attribute(void)
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     ret = H5Aclose(att1);
-    CHECK(ret, FAIL, "HAclose");
+    CHECK(ret, FAIL, "H5Aclose");
 
     ret = H5Gclose(root1);
     CHECK(ret, FAIL, "H5Gclose");
@@ -492,7 +492,7 @@ static void test_misc2_write_attribute(void)
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     ret = H5Aclose(att2);
-    CHECK(ret, FAIL, "HAclose");
+    CHECK(ret, FAIL, "H5Aclose");
 
     ret = H5Gclose(root2);
     CHECK(ret, FAIL, "H5Gclose");
@@ -2928,18 +2928,18 @@ test_misc18(void)
         CHECK(aid, FAIL, "H5Acreate2");
 
         ret = H5Aclose(aid);
-        CHECK(ret, FAIL, "HAclose");
+        CHECK(ret, FAIL, "H5Aclose");
 
         /* Create & close attribute on second dataset */
         aid = H5Acreate2(did2, attr_name, H5T_STD_U32LE, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Acreate2");
 
         ret = H5Aclose(aid);
-        CHECK(ret, FAIL, "HAclose");
+        CHECK(ret, FAIL, "H5Aclose");
 
         /* Flush file, to 'fix' size of dataset object headers */
         ret = H5Fflush(fid,H5F_SCOPE_GLOBAL);
-        CHECK(ret, FAIL, "HAclose");
+        CHECK(ret, FAIL, "H5Fflush");
     } /* end for */
 
     /* Get object information for dataset #1 now */

@@ -730,11 +730,9 @@ H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr)
  *
  *		If mpi_rank is 0, we must first check to see if the entry
  *		appears in the dirty entries slist.  If it is, do nothing.
- *		If it isn't, add the size to th dirty_bytes count, add the
+ *		If it isn't, add the size to the dirty_bytes count, add the
  *		entry to the dirty entries slist, and remove it from the
  *		cleaned list (if it is present there).
- *
- *		Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
  *

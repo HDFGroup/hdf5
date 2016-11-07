@@ -524,21 +524,17 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	    (cache_ptr)->max_pel_size = (cache_ptr)->pel_size;
 
 #define H5C__UPDATE_STATS_FOR_MOVE(cache_ptr, entry_ptr)               \
-	if ( cache_ptr->flush_in_progress ) {                            \
+	if ( cache_ptr->flush_in_progress )                            \
             ((cache_ptr)->cache_flush_moves[(entry_ptr)->type->id])++; \
-	}                                                                \
-        if ( entry_ptr->flush_in_progress ) {                            \
+        if ( entry_ptr->flush_in_progress )                            \
             ((cache_ptr)->entry_flush_moves[(entry_ptr)->type->id])++; \
-	}                                                                \
 	(((cache_ptr)->moves)[(entry_ptr)->type->id])++;
 
 #define H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)\
-	if ( cache_ptr->flush_in_progress ) {                                  \
+	if ( cache_ptr->flush_in_progress )                                    \
             ((cache_ptr)->cache_flush_size_changes[(entry_ptr)->type->id])++;  \
-	}                                                                      \
-        if ( entry_ptr->flush_in_progress ) {                                  \
+        if ( entry_ptr->flush_in_progress )                                    \
             ((cache_ptr)->entry_flush_size_changes[(entry_ptr)->type->id])++;  \
-	}                                                                      \
 	if ( (entry_ptr)->size < (new_size) ) {                                \
 	    ((cache_ptr)->size_increases[(entry_ptr)->type->id])++;            \
             H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                        \
@@ -1002,7 +998,6 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->index_size <= 0 ) ||                                \
      ( (new_size) <= 0 ) ||                                             \
      ( (old_size) > (cache_ptr)->index_size ) ||                        \
-     ( (new_size) <= 0 ) ||                                             \
      ( ( (cache_ptr)->index_len == 1 ) &&                               \
        ( (cache_ptr)->index_size != (old_size) ) ) ||                   \
      ( (cache_ptr)->index_size !=                                       \
@@ -1175,19 +1170,17 @@ if ( ( (cache_ptr)->index_size !=                                           \
     int k;                                                    \
     H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)     \
     k = H5C__HASH_FCN((entry_ptr)->addr);                     \
-    if ( ((cache_ptr)->index)[k] == NULL )                    \
-        ((cache_ptr)->index)[k] = (entry_ptr);                \
-    else {                                                    \
+    if(((cache_ptr)->index)[k] != NULL) {                     \
         (entry_ptr)->ht_next = ((cache_ptr)->index)[k];       \
         (entry_ptr)->ht_next->ht_prev = (entry_ptr);          \
-        ((cache_ptr)->index)[k] = (entry_ptr);                \
     }                                                         \
+    ((cache_ptr)->index)[k] = (entry_ptr);                    \
     (cache_ptr)->index_len++;                                 \
     (cache_ptr)->index_size += (entry_ptr)->size;             \
     ((cache_ptr)->index_ring_len[entry_ptr->ring])++;         \
     ((cache_ptr)->index_ring_size[entry_ptr->ring])           \
-	+= (entry_ptr)->size;                                 \
-    if ( (entry_ptr)->is_dirty ) {                            \
+            += (entry_ptr)->size;                             \
+    if((entry_ptr)->is_dirty) {                               \
         (cache_ptr)->dirty_index_size += (entry_ptr)->size;   \
         ((cache_ptr)->dirty_index_ring_size[entry_ptr->ring]) \
 		+= (entry_ptr)->size;                         \
@@ -1221,8 +1214,8 @@ if ( ( (cache_ptr)->index_size !=                                           \
     (cache_ptr)->index_size -= (entry_ptr)->size;             \
     ((cache_ptr)->index_ring_len[entry_ptr->ring])--;         \
     ((cache_ptr)->index_ring_size[entry_ptr->ring])           \
-	-= (entry_ptr)->size;                                 \
-    if ( (entry_ptr)->is_dirty ) {                            \
+            -= (entry_ptr)->size;                             \
+    if((entry_ptr)->is_dirty) {                               \
         (cache_ptr)->dirty_index_size -= (entry_ptr)->size;   \
         ((cache_ptr)->dirty_index_ring_size[entry_ptr->ring]) \
 		-= (entry_ptr)->size;                         \
@@ -1231,7 +1224,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
         ((cache_ptr)->clean_index_ring_size[entry_ptr->ring]) \
 		-= (entry_ptr)->size;                         \
     }                                                         \
-    if ((entry_ptr)->flush_me_last) {                         \
+    if((entry_ptr)->flush_me_last) {                          \
         (cache_ptr)->num_last_entries--;                      \
         HDassert((cache_ptr)->num_last_entries <= 1);         \
     }                                                         \
@@ -1505,31 +1498,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
  * Return:      N/A
  *
  * Programmer:  John Mainzer, 5/10/04
- *
- * Modifications:
- *
- *		JRM -- 7/21/04
- *		Updated function for the addition of the hash table.
- *
- *		JRM - 7/27/04
- *		Converted from the function H5C_remove_entry_from_tree()
- *		to the macro H5C__REMOVE_ENTRY_FROM_TREE in the hopes of
- *		wringing a little more performance out of the cache.
- *
- *		QAK -- 11/27/04
- *		Switched over to using skip list routines.
- *
- *		JRM -- 3/28/07
- *		Updated sanity checks for the new is_read_only and
- *		ro_ref_count fields in H5C_cache_entry_t.
- *
- *		JRM -- 12/13/14
- *		Added code to set cache_ptr->slist_changed to TRUE 
- *		when an entry is removed from the slist.
- *
- *		JRM -- 9/1/15
- *		Added code to maintain the cache_ptr->slist_ring_len
- *		and cache_ptr->slist_ring_size arrays.
  *
  *-------------------------------------------------------------------------
  */
@@ -4240,7 +4208,7 @@ struct H5C_t {
     int32_t                     max_pel_len;
     size_t                      max_pel_size;
 
-    /* Fields for tacking 'make space in cache' (msic) operations */
+    /* Fields for tracking 'make space in cache' (msic) operations */
     int64_t                     calls_to_msic;
     int64_t                     total_entries_skipped_in_msic;
     int64_t                     total_entries_scanned_in_msic;

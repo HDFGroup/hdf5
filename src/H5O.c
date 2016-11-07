@@ -1388,6 +1388,8 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
     /* Cache object header */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_OHDR, oh_addr, oh, insert_flags) < 0)
         HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+
+    /* Reset object header pointer, now that it's been inserted into the cache */
     oh = NULL;
 
     /* Reset metadata tag in dxpl_id */
@@ -1403,7 +1405,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc,
 
 done:
     if(ret_value < 0 && oh)
-        if(H5O_free(oh) < 0)
+        if(H5O__free(oh) < 0)
 	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1978,7 +1980,7 @@ H5O_assert(oh);
 
 done:
     if(ret_value == NULL && oh)
-        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
+        if(H5O_unprotect(loc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
@@ -3627,7 +3629,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_free
+ * Function:	H5O__free
  *
  * Purpose:	Destroys an object header.
  *
@@ -3640,14 +3642,16 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_free(H5O_t *oh)
+H5O__free(H5O_t *oh)
 {
     unsigned	u;                      /* Local index variable */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(oh);
+    HDassert(0 == oh->rc);
 
     /* Destroy chunks */
     if(oh->chunk) {
@@ -3682,5 +3686,5 @@ H5O_free(H5O_t *oh)
     oh = H5FL_FREE(H5O_t, oh);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_free() */
+} /* end H5O__free() */
 

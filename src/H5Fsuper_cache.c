@@ -107,7 +107,7 @@ const H5AC_class_t H5AC_SUPERBLOCK[1] = {{
     H5F__cache_superblock_image_len,    /* 'image_len' callback */
     H5F__cache_superblock_pre_serialize,/* 'pre_serialize' callback */
     H5F__cache_superblock_serialize,    /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    NULL,       			/* 'notify' callback */
     H5F__cache_superblock_free_icr,     /* 'free_icr' callback */
     NULL,				/* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */

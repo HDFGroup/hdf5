@@ -152,11 +152,11 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     /* Point fixed array wrapper at header and bump it's ref count */
     fa->hdr = hdr;
     if(H5FA__hdr_incr(fa->hdr) < 0)
-        H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
+	H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
 
     /* Increment # of files using this array header */
     if(H5FA__hdr_fuse_incr(fa->hdr) < 0)
-        H5E_THROW(H5E_CANTINC, "can't increment file reference count on shared array header")
+	H5E_THROW(H5E_CANTINC, "can't increment file reference count on shared array header")
 
     /* Set file pointer for this array open context */
     fa->f = f;
@@ -167,7 +167,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 CATCH
 
     if(hdr && H5FA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
-        H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array header")
+	H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array header")
     if(!ret_value)
         if(fa && H5FA_close(fa, dxpl_id) < 0)
             H5E_THROW(H5E_CLOSEERROR, "unable to close fixed array")
@@ -261,10 +261,6 @@ H5FA_get_nelmts(const H5FA_t *fa, hsize_t *nelmts))
 
     /* Local variables */
 
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* H5FA_DEBUG */
-
     /*
      * Check arguments.
      */
@@ -294,10 +290,6 @@ herr_t, SUCCEED, -,
 H5FA_get_addr(const H5FA_t *fa, haddr_t *addr))
 
     /* Local variables */
-
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* H5FA_DEBUG */
 
     /*
      * Check arguments.
@@ -336,11 +328,6 @@ H5FA_set(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, const void *elmt))
     unsigned dblk_page_cache_flags = H5AC__NO_FLAGS_SET; /* Flags to unprotecting FIxed Array Data block page */
     hbool_t hdr_dirty = FALSE;          /* Whether header information changed */
 
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
-#endif /* H5FA_DEBUG */
-
     /*
      * Check arguments.
      */
@@ -352,9 +339,6 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
 
     /* Check if we need to create the fixed array data block */
     if(!H5F_addr_defined(hdr->dblk_addr)) {
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: fixed array data block address not defined!\n", FUNC, idx);
-#endif /* H5FA_DEBUG */
         /* Create the data block */
         hdr->dblk_addr = H5FA__dblock_create(hdr, dxpl_id, &hdr_dirty);
         if(!H5F_addr_defined(hdr->dblk_addr))
@@ -448,11 +432,6 @@ H5FA_get(const H5FA_t *fa, hid_t dxpl_id, hsize_t idx, void *elmt))
     H5FA_hdr_t *hdr = fa->hdr;          /* Header for FA */
     H5FA_dblock_t *dblock = NULL;       /* Pointer to data block for FA */
     H5FA_dblk_page_t *dblk_page = NULL; /* Pointer to data block page for FA */
-
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
-#endif /* H5FA_DEBUG */
 
     /*
      * Check arguments.
@@ -549,10 +528,6 @@ H5FA_close(H5FA_t *fa, hid_t dxpl_id))
     /* Local variables */
     hbool_t pending_delete = FALSE;     /* Whether the array is pending deletion */
     haddr_t fa_addr = HADDR_UNDEF;      /* Address of array (for deletion) */
-
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* H5FA_DEBUG */
 
     /*
      * Check arguments.
@@ -657,9 +632,6 @@ H5FA_delete(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata))
     HDassert(H5F_addr_defined(fa_addr));
 
     /* Lock the array header into memory */
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: fa_addr = %a\n", FUNC, fa_addr);
-#endif /* H5FA_DEBUG */
     if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, fa_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array header, address = %llu", (unsigned long long)fa_addr)
 
@@ -759,10 +731,6 @@ herr_t, SUCCEED, -,
 H5FA_patch_file(H5FA_t *fa, H5F_t *f))
 
     /* Local variables */
-
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* H5FA_DEBUG */
 
     /*
      * Check arguments.

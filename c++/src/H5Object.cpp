@@ -85,7 +85,6 @@ H5Object::H5Object() : H5Location() {}
 //--------------------------------------------------------------------------
 // H5Object::H5Object(const H5Object& original) : H5Location() {}
 
-
 //--------------------------------------------------------------------------
 // Function:	H5Object::createAttribute
 ///\brief	Creates an attribute for a group, dataset, or named datatype.

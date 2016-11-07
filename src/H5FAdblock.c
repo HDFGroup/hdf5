@@ -189,12 +189,8 @@ haddr_t, HADDR_UNDEF, HADDR_UNDEF,
 H5FA__dblock_create(H5FA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty))
 
     /* Local variables */
-    H5FA_dblock_t *dblock = NULL;       /* fixed array data block */
-    haddr_t dblock_addr;                /* fixed array data block address */
-
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called, hdr->stats.nelmts = %Zu, nelmts = %Zu\n", FUNC, hdr->stats.nelmts, hdr->cparam.nelmts);
-#endif /* H5FA_DEBUG */
+    H5FA_dblock_t *dblock = NULL;       /* Fixed array data block */
+    haddr_t dblock_addr;                /* Fixed array data block address */
 
     /* Sanity check */
     HDassert(hdr);
@@ -206,10 +202,6 @@ HDfprintf(stderr, "%s: Called, hdr->stats.nelmts = %Zu, nelmts = %Zu\n", FUNC, h
 
     /* Set size of data block on disk */
     hdr->stats.dblk_size = dblock->size = H5FA_DBLOCK_SIZE(dblock);
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
-#endif /* H5FA_DEBUG */
-
 
     /* Allocate space for the data block on disk */
     if(HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FARRAY_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
@@ -266,11 +258,7 @@ H5FA__dblock_protect(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_addr,
     unsigned flags))
 
     /* Local variables */
-    H5FA_dblock_cache_ud_t udata;      /* Information needed for loading data block */
-
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* H5FA_DEBUG */
+    H5FA_dblock_cache_ud_t udata;       /* Information needed for loading data block */
 
     /* Sanity check */
     HDassert(hdr);
@@ -310,10 +298,6 @@ H5FA__dblock_unprotect(H5FA_dblock_t *dblock, hid_t dxpl_id, unsigned cache_flag
 
     /* Local variables */
 
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* H5FA_DEBUG */
-
     /* Sanity check */
     HDassert(dblock);
 
@@ -345,10 +329,6 @@ H5FA__dblock_delete(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_addr))
     /* Local variables */
     H5FA_dblock_t *dblock = NULL;       /* Pointer to data block */
 
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* H5FA_DEBUG */
-
     /* Sanity check */
     HDassert(hdr);
     HDassert(H5F_addr_defined(dblk_addr));
@@ -367,16 +347,10 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
         /* Iterate over pages in data block */
         for(u = 0; u < dblock->npages; u++) {
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Expunging data block page from cache\n", FUNC);
-#endif /* H5FA_DEBUG */
             /* Evict the data block page from the metadata cache */
             /* (OK to call if it doesn't exist in the cache) */
             if(H5AC_expunge_entry(hdr->f, dxpl_id, H5AC_FARRAY_DBLK_PAGE, dblk_page_addr, H5AC__NO_FLAGS_SET) < 0)
                 H5E_THROW(H5E_CANTEXPUNGE, "unable to remove array data block page from metadata cache")
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Done expunging data block page from cache\n", FUNC);
-#endif /* H5FA_DEBUG */
 
             /* Advance to next page address */
             dblk_page_addr += dblock->dblk_page_size;

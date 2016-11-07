@@ -858,6 +858,10 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
         oh_dst->nlink += (unsigned)addr_map->inc_ref_count;
     } /* end if */
 
+    /* Retag all copied metadata to apply the destination object's tag */
+    if(H5AC_retag_copied_metadata(oloc_dst->file, oloc_dst->addr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to re-tag metadata entries")
+
     /* Set metadata tag for destination object's object header */
     H5_BEGIN_TAG(dxpl_id, oloc_dst->addr, FAIL);
 
@@ -869,10 +873,6 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 
     /* Reset metadat tag */
     H5_END_TAG(FAIL);
-
-    /* Retag all copied metadata to apply the destination object's tag */
-    if(H5AC_retag_copied_metadata(oloc_dst->file, oloc_dst->addr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to re-tag metadata entries")
 
     /* Set obj_type and udata, if requested */
     if(obj_type) {
@@ -892,7 +892,7 @@ done:
 
     /* Free destination object header on failure */
     if(ret_value < 0 && oh_dst && !inserted) {
-        if(H5O_free(oh_dst) < 0)
+        if(H5O__free(oh_dst) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
         if(H5O_loc_reset(oloc_dst) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")

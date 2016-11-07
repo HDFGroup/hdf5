@@ -145,7 +145,7 @@ static herr_t H5D__farray_idx_reset(H5O_storage_chunk_t *storage, hbool_t reset_
 static herr_t H5D__farray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream);
 static herr_t H5D__farray_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
-/* Generic extensible array routines */
+/* Generic fixed array routines */
 static herr_t H5D__farray_idx_open(const H5D_chk_idx_info_t *idx_info);
 
 /*********************/
