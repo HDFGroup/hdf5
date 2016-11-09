@@ -183,6 +183,14 @@
       ${HDF5_TOOLS_DIR}/testfiles/out3.h5import
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.ddl
   )
+  set (HDF5_N_REFERENCE_FILES
+      ${HDF5_TOOLS_DIR}/testfiles/tall-3
+      ${HDF5_TOOLS_DIR}/testfiles/tattr-2
+      ${HDF5_TOOLS_DIR}/testfiles/tcomp-2
+      ${HDF5_TOOLS_DIR}/testfiles/thlink-4
+      ${HDF5_TOOLS_DIR}/testfiles/thlink-5
+      ${HDF5_TOOLS_DIR}/testfiles/tslink-2
+  )
   set (HDF5_REFERENCE_EXP_FILES
       tall-6.exp
       tnoddlfile.exp
@@ -331,6 +339,10 @@
     get_filename_component (fname "${tst_h5_file}" NAME)
     HDFTEST_COPY_FILE("${tst_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
   endforeach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
+  foreach (tst_h5_file ${HDF5_N_REFERENCE_TEST_FILES})
+    get_filename_component (fname "${tst_h5_file}" NAME)
+    HDFTEST_COPY_FILE("${tst_h5_file}.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}-N.ddl" "h5dump_std_files")
+  endforeach (tst_h5_file ${HDF5_N_REFERENCE_TEST_FILES})
 
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
     if (WIN32)
@@ -466,7 +478,7 @@
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}-N.out"
               -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_REFERENCE=${resultfile}-N.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES DEPENDS "H5DUMP-N-${resultfile}-clear-objects")
