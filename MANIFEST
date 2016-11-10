@@ -84,6 +84,7 @@
 ./bin/output_filter.sh
 ./bin/README        _DO_NOT_DISTRIBUTE_
 ./bin/release
+./bin/restore.sh
 ./bin/runtest        _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
 ./bin/snapshot_version      _DO_NOT_DISTRIBUTE_
