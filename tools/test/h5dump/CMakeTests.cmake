@@ -183,6 +183,14 @@
       ${HDF5_TOOLS_DIR}/testfiles/out3.h5import
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.ddl
   )
+  set (HDF5_N_REFERENCE_FILES
+      tall-3
+      tattr-2
+      tcomp-2
+      thlink-4
+      thlink-5
+      tslink-2
+  )
   set (HDF5_REFERENCE_EXP_FILES
       tall-6.exp
       tnoddlfile.exp
@@ -330,26 +338,29 @@
   foreach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
     get_filename_component (fname "${tst_h5_file}" NAME)
     HDFTEST_COPY_FILE("${tst_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
-  endforeach (tst_h5_file ${HDF5_REFERENCE_TEST_FILES})
+  endforeach ()
 
   foreach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
     if (WIN32)
       file (READ ${HDF5_TOOLS_DIR}/testfiles/${tst_exp_file} TEST_STREAM)
       file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file} "${TEST_STREAM}")
-    else (WIN32)
+    else ()
       HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${tst_exp_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_exp_file}" "h5dump_std_files")
-    endif (WIN32)
-  endforeach (tst_exp_file ${HDF5_REFERENCE_EXP_FILES})
+    endif ()
+  endforeach ()
 
   foreach (tst_other_file ${HDF5_REFERENCE_FILES})
     get_filename_component (fname "${tst_other_file}" NAME)
     HDFTEST_COPY_FILE("${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
-  endforeach (tst_other_file ${HDF5_REFERENCE_FILES})
+  endforeach ()
+  foreach (tst_h5N_file ${HDF5_N_REFERENCE_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${tst_h5N_file}.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N.ddl" "h5dump_std_files")
+  endforeach ()
 
   foreach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
     get_filename_component (fname "${tst_error_file}" NAME)
     HDFTEST_COPY_FILE("${tst_error_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
-  endforeach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
+  endforeach ()
 
   # --------------------------------------------------------------------
   # Special file handling
@@ -359,9 +370,9 @@
   if (WIN32)
     file (READ ${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp TEST_STREAM)
     file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
-  else (WIN32)
+  else ()
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
-  endif (WIN32)
+  endif ()
   add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
 
 ##############################################################################
@@ -466,7 +477,7 @@
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
               -D "TEST_OUTPUT=${resultfile}-N.out"
               -D "TEST_EXPECT=${resultcode}"
-              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_REFERENCE=${resultfile}-N.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES DEPENDS "H5DUMP-N-${resultfile}-clear-objects")
