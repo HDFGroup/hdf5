@@ -1502,7 +1502,8 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *-------------------------------------------------------------------------
  */
 
-#define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)                  \
+#if H5C_DO_SANITY_CHECKS
+#define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)    \
 {                                                                           \
     HDassert( (cache_ptr) );                                                \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
@@ -1526,7 +1527,47 @@ if ( ( (cache_ptr)->index_size !=                                           \
                     "Can't delete entry from skip list.")                   \
                                                                             \
     HDassert( (cache_ptr)->slist_len > 0 );                                 \
-    (cache_ptr)->slist_changed = TRUE;                                      \
+    if(!(during_flush))                                                     \
+        (cache_ptr)->slist_changed = TRUE;                                  \
+    (cache_ptr)->slist_len--;                                               \
+    HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );               \
+    (cache_ptr)->slist_size -= (entry_ptr)->size;                           \
+    ((cache_ptr)->slist_ring_len[(entry_ptr)->ring])--;                     \
+    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr->ring)] >=            \
+              (entry_ptr)->size );                                          \
+    ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size; \
+    (cache_ptr)->slist_len_increase--;                                      \
+    (cache_ptr)->slist_size_increase -= (int64_t)((entry_ptr)->size);       \
+    (entry_ptr)->in_slist = FALSE;                                          \
+} /* H5C__REMOVE_ENTRY_FROM_SLIST */
+
+#else /* H5C_DO_SANITY_CHECKS */
+
+#define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)    \
+{                                                                           \
+    HDassert( (cache_ptr) );                                                \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
+    HDassert( (entry_ptr) );                                                \
+    HDassert( !((entry_ptr)->is_protected) );                               \
+    HDassert( !((entry_ptr)->is_read_only) );                               \
+    HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
+    HDassert( (entry_ptr)->in_slist );                                      \
+    HDassert( (cache_ptr)->slist_ptr );                                     \
+    HDassert( (entry_ptr)->ring > H5C_RING_UNDEFINED );                     \
+    HDassert( (entry_ptr)->ring < H5C_RING_NTYPES );                        \
+    HDassert( (cache_ptr)->slist_ring_len[(entry_ptr)->ring] <=             \
+              (cache_ptr)->slist_len );                                     \
+    HDassert( (cache_ptr)->slist_ring_size[(entry_ptr)->ring] <=            \
+              (cache_ptr)->slist_size );                                    \
+                                                                            \
+    if ( H5SL_remove((cache_ptr)->slist_ptr, &(entry_ptr)->addr)            \
+             != (entry_ptr) )                                               \
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL,                          \
+                    "Can't delete entry from skip list.")                   \
+                                                                            \
+    HDassert( (cache_ptr)->slist_len > 0 );                                 \
+    if(!(during_flush))                                                     \
+        (cache_ptr)->slist_changed = TRUE;                                  \
     (cache_ptr)->slist_len--;                                               \
     HDassert( (cache_ptr)->slist_size >= (entry_ptr)->size );               \
     (cache_ptr)->slist_size -= (entry_ptr)->size;                           \
@@ -1536,6 +1577,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
     ((cache_ptr)->slist_ring_size[(entry_ptr)->ring]) -= (entry_ptr)->size; \
     (entry_ptr)->in_slist = FALSE;                                          \
 } /* H5C__REMOVE_ENTRY_FROM_SLIST */
+#endif /* H5C_DO_SANITY_CHECKS */
 
 
 /*-------------------------------------------------------------------------
@@ -3379,6 +3421,13 @@ typedef struct H5C_tag_info_t {
  *		pointers don't match, and if entries_removed_counter is 
  *		one.
  *
+ * entry_watched_for_removal:	Pointer to an instance of H5C_cache_entry_t
+ *		which contains the 'next' entry for an iteration.  Removing
+ *              this entry must trigger a rescan of the iteration, so each
+ *              entry removed from the cache is compared against this pointer
+ *              and the pointer is reset to NULL if the watched entry is removed.
+ *              (This functions similarly to a "dead man's switch")
+ *
  *
  * With the addition of cache entry tagging, it is possible that 
  * an entry may be inserted into the cache without a tag during testing
@@ -3404,14 +3453,6 @@ typedef struct H5C_tag_info_t {
  *		conditions in which pre-serialize or serialize callbacks
  *		have modified the slist -- which obliges us to restart 
  *		the scan of the slist from the beginning.
- *
- * slist_change_in_pre_serialize: Boolean flag used to indicate that 
- *		a pre_serialize call has modified the slist since the 
- *		last time this flag was reset.
- *
- * slist_change_in_serialize: Boolean flag used to indicate that 
- *		a serialize call has modified the slist since the 
- *		last time this flag was reset.
  *
  * slist_len:   Number of entries currently in the skip list
  *              used to maintain a sorted list of dirty entries in the
@@ -4080,19 +4121,18 @@ struct H5C_t {
     size_t			clean_index_ring_size[H5C_RING_NTYPES];
     size_t			dirty_index_size;
     size_t			dirty_index_ring_size[H5C_RING_NTYPES];
-    H5C_cache_entry_t *		(index[H5C__HASH_TABLE_LEN]);
+    H5C_cache_entry_t *		index[H5C__HASH_TABLE_LEN];
 
     /* Fields to detect entries removed during scans */
     int64_t			entries_removed_counter;
     H5C_cache_entry_t *		last_entry_removed_ptr;
+    H5C_cache_entry_t *		entry_watched_for_removal;
 
     /* Field to disable tag validation */
     hbool_t                     ignore_tags;
 
     /* Fields for maintaining list of in-order entries, for flushing */
     hbool_t			slist_changed;
-    hbool_t			slist_change_in_pre_serialize;
-    hbool_t			slist_change_in_serialize;
     int32_t                     slist_len;
     size_t                      slist_size;
     int32_t			slist_ring_len[H5C_RING_NTYPES];
@@ -4270,7 +4310,7 @@ H5_DLLVAR const H5C_class_t H5C__epoch_marker_class;
 
 /* General routines */
 H5_DLL herr_t H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id,
-    H5C_cache_entry_t *entry_ptr, unsigned flags, int64_t *entry_size_change_ptr, H5SL_t *collective_write_list);
+    H5C_cache_entry_t *entry_ptr, unsigned flags, H5SL_t *collective_write_list);
 H5_DLL herr_t H5C__flush_marked_entries(H5F_t * f, hid_t dxpl_id);
 H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
     H5C_tag_iter_cb_t cb, void *cb_ctx);
