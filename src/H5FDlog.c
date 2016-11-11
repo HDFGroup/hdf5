@@ -1567,7 +1567,15 @@ static herr_t
 H5FD_log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
 {
     H5FD_log_t  *file = (H5FD_log_t *)_file;
-    herr_t      ret_value = SUCCEED;                /* Return value */
+#ifdef H5_HAVE_WIN32_API
+        LARGE_INTEGER   li;         /* 64-bit (union) integer for SetFilePointer() call */
+        DWORD           dwPtrLow;   /* Low-order pointer bits from SetFilePointer()
+                                     * Only used as an error code here.
+                                     */
+        DWORD           dwError;    /* DWORD error code from GetLastError() */
+        BOOL            bError;     /* Boolean error flag */
+#endif /* H5_HAVE_WIN32_API */
+herr_t      ret_value = SUCCEED;                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1584,13 +1592,6 @@ H5FD_log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_U
             HDgettimeofday(&timeval_start, NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
 #ifdef H5_HAVE_WIN32_API
-        LARGE_INTEGER   li;         /* 64-bit (union) integer for SetFilePointer() call */
-        DWORD           dwPtrLow;   /* Low-order pointer bits from SetFilePointer()
-                                     * Only used as an error code here.
-                                     */
-        DWORD           dwError;    /* DWORD error code from GetLastError() */
-        BOOL            bError;     /* Boolean error flag */
-
         /* Windows uses this odd QuadPart union for 32/64-bit portability */
         li.QuadPart = (__int64)file->eoa;
 
