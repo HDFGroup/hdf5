@@ -898,9 +898,6 @@ H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned type_id, const unsigned char *buf);
 H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned type_id, void *mesg);
-H5_DLL int H5O_msg_get_chunkno(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
-H5_DLL herr_t H5O_msg_lock(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
-H5_DLL herr_t H5O_msg_unlock(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 
 /* Object metadata flush/refresh routines */
 H5_DLL herr_t H5O_flush_common(H5O_loc_t *oloc, hid_t obj_id, hid_t dxpl_id);
