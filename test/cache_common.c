@@ -1461,7 +1461,8 @@ notify(H5C_notify_action_t action, void *thing, int32_t entry_type)
     HDassert(entry->type == entry_type);
     HDassert(entry == &(base_addr[entry->index]));
     HDassert(entry == entry->self);
-    HDassert(entry->header.addr == entry->addr);
+    if(!(action == H5C_NOTIFY_ACTION_ENTRY_DIRTIED && entry->action == TEST_ENTRY_ACTION_MOVE))
+        HDassert(entry->header.addr == entry->addr);
     HDassert((entry->type == VARIABLE_ENTRY_TYPE) || \
               (entry->size == entry_sizes[entry->type]));
 
@@ -1473,6 +1474,10 @@ notify(H5C_notify_action_t action, void *thing, int32_t entry_type)
             break;
 
         case H5C_NOTIFY_ACTION_AFTER_FLUSH:
+        case H5C_NOTIFY_ACTION_ENTRY_DIRTIED:
+        case H5C_NOTIFY_ACTION_ENTRY_CLEANED:
+        case H5C_NOTIFY_ACTION_CHILD_DIRTIED:
+        case H5C_NOTIFY_ACTION_CHILD_CLEANED:
 	    /* do nothing */
 	    break;
 
@@ -3843,7 +3848,9 @@ move_entry(H5C_t * cache_ptr,
             if(entry_ptr->flush_dep_npar > 0 && !was_dirty)
                 mark_flush_dep_dirty(entry_ptr);
 
+            entry_ptr->action = TEST_ENTRY_ACTION_MOVE;
             result = H5C_move_entry(cache_ptr, &(types[type]), old_addr, new_addr);
+            entry_ptr->action = TEST_ENTRY_ACTION_NUL;
         }
 
         if ( ! done ) {
