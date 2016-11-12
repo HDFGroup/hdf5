@@ -82,9 +82,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#ifdef H5_HAVE_PARALLEL
-#include "H5ACprivate.h"        /* Metadata cache                       */
-#endif /* H5_HAVE_PARALLEL */
 #include "H5Cpkg.h"		/* Cache				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* Files				*/
@@ -1209,6 +1206,7 @@ H5C_insert_entry(H5F_t *             f,
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( type );
+    HDassert( type->image_len );
     HDassert( H5F_addr_defined(addr) );
     HDassert( thing );
 
@@ -5843,13 +5841,11 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
 
         /* Finally, write the image to disk.  
          * 
-         * Note that if either the H5C__CLASS_NO_IO_FLAG or the 
-         * the H5AC__CLASS_SKIP_WRITES flag is set in the 
+         * Note that if the H5AC__CLASS_SKIP_WRITES flag is set in the 
          * in the entry's type, we silently skip the write.  This
          * flag should only be used in test code. 
          */
-        if ( ( ((entry_ptr->type->flags) & H5C__CLASS_NO_IO_FLAG) == 0 ) &&
-             ( ((entry_ptr->type->flags) & H5C__CLASS_SKIP_WRITES) == 0 ) )
+        if(((entry_ptr->type->flags) & H5C__CLASS_SKIP_WRITES) == 0)
         {
 	    /* If compression is not enabled, the size of the entry on 
              * disk is entry_prt->size.  However if entry_ptr->compressed
@@ -6198,9 +6194,6 @@ H5C_load_entry(H5F_t *              f,
     HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
-
-    /* verify absence of prohibited or unsupported type flag combinations */
-    HDassert(!(type->flags & H5C__CLASS_NO_IO_FLAG));
 
     /* for now, we do not combine the speculative load and compressed flags */
     HDassert(!((type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG) &&

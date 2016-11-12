@@ -170,7 +170,6 @@ typedef H5C_notify_action_t     H5AC_notify_action_t;
 #define H5AC__CLASS_COMPRESSED_FLAG	H5C__CLASS_COMPRESSED_FLAG
 
 /* The following flags should only appear in test code */
-#define H5AC__CLASS_NO_IO_FLAG		H5C__CLASS_NO_IO_FLAG
 #define H5AC__CLASS_SKIP_READS		H5C__CLASS_SKIP_READS
 #define H5AC__CLASS_SKIP_WRITES		H5C__CLASS_SKIP_WRITES
 
