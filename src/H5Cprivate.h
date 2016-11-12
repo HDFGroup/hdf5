@@ -70,9 +70,8 @@
 #define H5C__CLASS_SPECULATIVE_LOAD_FLAG	((unsigned)0x1)
 #define H5C__CLASS_COMPRESSED_FLAG		((unsigned)0x2)
 /* The following flags may only appear in test code */
-#define H5C__CLASS_NO_IO_FLAG			((unsigned)0x4)
-#define H5C__CLASS_SKIP_READS			((unsigned)0x8)
-#define H5C__CLASS_SKIP_WRITES			((unsigned)0x10)
+#define H5C__CLASS_SKIP_READS			((unsigned)0x4)
+#define H5C__CLASS_SKIP_WRITES			((unsigned)0x8)
 
 /* Flags for pre-serialize callback */
 #define H5C__SERIALIZE_NO_FLAGS_SET	((unsigned)0)
@@ -364,12 +363,6 @@ typedef struct H5C_t H5C_t;
  *		instance of H5C_class_t.
  *
  *      The following flags may only appear in test code.
- *
- *	H5C__CLASS_NO_IO_FLAG:  This flag is intended only for use in test 
- *		code.  When it is set, any attempt to load an entry of 
- *		the type with this flag set will trigger an assertion 
- *		failure, and any flush of an entry with this flag set 
- *		will not result in any write to file.
  *
  *	H5C__CLASS_SKIP_READS: This flags is intended only for use in test
  *		code.  When it is set, reads on load will be skipped,
@@ -1474,7 +1467,7 @@ typedef int H5C_ring_t;
  *
  * Fields supporting the hash table:
  *
- * Fields in the cache are indexed by a more or less conventional hash table.
+ * Entries in the cache are indexed by a more or less conventional hash table.
  * If there are multiple entries in any hash bin, they are stored in a doubly
  * linked list.
  *
@@ -1560,6 +1553,28 @@ typedef int H5C_ring_t;
  *
  *		In either case, when there is no previous item, it should 
  *		be NULL.
+ *
+ *
+ * Fields supporting tagged entries:
+ *
+ * Entries in the cache that belong to a single object in the file are
+ * joined into a doubly-linked list, and are "tagged" with the object header
+ * address for that object's base header "chunk" (which is used as the
+ * canonical address for the object).  Global and shared entries are
+ * not tagged.  Tagged entries have a pointer to the tag info for the object,
+ * which is shared state for all the entries for that object.
+ *
+ * tl_next:	Pointer to the next entry in the tag list for an object.
+ *		NULL for the tail entry in the list, as well as untagged
+ *		entries.
+ *
+ * tl_prev:	Pointer to the previous entry in the tag list for an object.
+ *		NULL for the head entry in the list, as well as untagged
+ *		entries.
+ *
+ * tag_info:	Pointer to the common tag state for all entries belonging to
+ *              an object.  NULL for untagged entries.
+ *
  *
  * Cache entry stats collection fields:
  *

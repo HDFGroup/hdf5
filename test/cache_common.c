@@ -3535,21 +3535,17 @@ flush_cache(H5F_t * file_ptr,
 void
 cork_entry_type(H5F_t *file_ptr, int32_t type)
 {
-    H5C_t *cache_ptr;
-    haddr_t baddrs;
-    herr_t result;
-
     if(pass) {
+        H5C_t *cache_ptr;
+        haddr_t baddrs;
+
         cache_ptr = file_ptr->shared->cache;
 
-        HDassert( cache_ptr );
-        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+        HDassert(cache_ptr);
+        HDassert((0 <= type) && (type < NUMBER_OF_ENTRY_TYPES));
 
         baddrs = base_addrs[type];
-
-	result = H5C_cork(cache_ptr, baddrs, H5C__SET_CORK, NULL);
-        if(result < 0) {
-
+        if(H5C_cork(cache_ptr, baddrs, H5C__SET_CORK, NULL) < 0) {
             pass = FALSE;
             failure_mssg = "error in H5C_cork().";
         } /* end if */
@@ -3575,21 +3571,17 @@ cork_entry_type(H5F_t *file_ptr, int32_t type)
 void
 uncork_entry_type(H5F_t *file_ptr, int32_t type)
 {
-    H5C_t *cache_ptr;
-    haddr_t baddrs;
-    herr_t result;
-
     if(pass) {
+        H5C_t *cache_ptr;
+        haddr_t baddrs;
+
         cache_ptr = file_ptr->shared->cache;
 
-        HDassert( cache_ptr );
-        HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+        HDassert(cache_ptr);
+        HDassert((0 <= type) && (type < NUMBER_OF_ENTRY_TYPES));
 
         baddrs = base_addrs[type];
-
-	result = H5C_cork(cache_ptr, baddrs, H5C__UNCORK, NULL);
-        if(result < 0) {
-
+        if(H5C_cork(cache_ptr, baddrs, H5C__UNCORK, NULL) < 0) {
             pass = FALSE;
             failure_mssg = "error in H5C_cork().";
         } /* end if */
