@@ -211,6 +211,11 @@ typedef struct flush_op
                                          */
 } flush_op;
 
+typedef enum test_entry_action_t {
+    TEST_ENTRY_ACTION_NUL = 0,          /* No action on entry */
+    TEST_ENTRY_ACTION_MOVE              /* Entry is beging moved */
+} test_entry_action_t;
+
 typedef struct test_entry_t
 {
     H5C_cache_entry_t	  header;	/* entry data used by the cache
@@ -219,6 +224,7 @@ typedef struct test_entry_t
     struct test_entry_t * self; 	/* pointer to this entry -- used for
 					 * sanity checking.
                                          */
+    test_entry_action_t action;         /* Action being performed on a test entry */
     H5F_t               * file_ptr;     /* pointer to the file in which the
                                          * entry resides, or NULL if the entry
                                          * is not in a file.

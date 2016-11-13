@@ -2608,8 +2608,13 @@ datum_notify(H5C_notify_action_t action, void *thing)
     }
 
     HDassert( entry_ptr->header.addr == entry_ptr->base_addr );
-    HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
-              ( entry_ptr->header.size == entry_ptr->local_len ) );
+    /* Skip this check when the entry is being dirtied, since the resize
+     * operation sends the message before the len/local_len is updated
+     * (after the resize operation completes successfully) (QAK - 2016/10/19)
+     */
+    if(H5AC_NOTIFY_ACTION_ENTRY_DIRTIED != action)
+        HDassert( ( entry_ptr->header.size == entry_ptr->len ) ||
+                  ( entry_ptr->header.size == entry_ptr->local_len ) );
 
     switch ( action )
     {
@@ -2863,6 +2868,54 @@ datum_notify(H5C_notify_action_t action, void *thing)
 
                 HDfprintf(stdout,
                       "%d: notify() action = evict, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fflush(stdout);
+            }
+
+            /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            if ( callbacks_verbose ) {
+
+                HDfprintf(stdout,
+                      "%d: notify() action = entry dirty, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fflush(stdout);
+            }
+
+            /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            if ( callbacks_verbose ) {
+
+                HDfprintf(stdout,
+                      "%d: notify() action = entry clean, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fflush(stdout);
+            }
+
+            /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            if ( callbacks_verbose ) {
+
+                HDfprintf(stdout,
+                      "%d: notify() action = child entry dirty, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fflush(stdout);
+            }
+
+            /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+            if ( callbacks_verbose ) {
+
+                HDfprintf(stdout,
+                      "%d: notify() action = child entry clean, idx = %d, addr = %ld.\n",
                       world_mpi_rank, idx, (long)entry_ptr->header.addr);
                 fflush(stdout);
             }

@@ -1379,19 +1379,9 @@ H5HF__cache_iblock_notify(H5C_notify_action_t action, void *_thing)
 
     if(action == H5AC_NOTIFY_ACTION_BEFORE_EVICT)
         HDassert((iblock->parent == iblock->fd_parent) || ((NULL == iblock->parent) && (iblock->fd_parent)));
-    else
-        HDassert(iblock->parent == iblock->fd_parent);
 
     /* further sanity checks */
     if(iblock->parent == NULL) {
-        /* Either this is the root iblock, or the parent pointer is     */
-        /* invalid.  Since we save a copy of the parent pointer on      */
-        /* the insertion event, it doesn't matter if the parent pointer */
-        /* is invalid just before eviction.  However, we will not be    */
-        /* able to function if it is invalid on the insertion event.    */
-        /* Scream and die if this is the case.                          */
-        HDassert((action == H5C_NOTIFY_ACTION_BEFORE_EVICT) || (iblock->block_off == 0));
-
         /* pointer from hdr to root iblock will not be set up unless */
         /* the fractal heap has already pinned the hdr.  Do what     */
         /* sanity checking we can.                                   */
@@ -1433,6 +1423,10 @@ H5HF__cache_iblock_notify(H5C_notify_action_t action, void *_thing)
             break;
 
 	case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+        case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+        case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+        case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+        case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
 	    /* do nothing */
 	    break;
 
@@ -1633,11 +1627,11 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
 
     /* Check for I/O filters on this heap */
     if(hdr->filter_len > 0) {
-        H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
-        size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
-        void *read_buf;         /* Pointer to buffer to read in */
-        size_t read_size;       /* Size of filtered direct block to read */
-        unsigned filter_mask;   /* Excluded filters for direct block */
+	H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+	size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
+	void *read_buf;         /* Pointer to buffer to read in */
+	size_t read_size;       /* Size of filtered direct block to read */
+	unsigned filter_mask;	/* Excluded filters for direct block */
 
         /* Check for root direct block */
         if(par_info->iblock == NULL)
@@ -2394,6 +2388,10 @@ H5HF__cache_dblock_notify(H5C_notify_action_t action, void *_thing)
             break;
 
 	case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+        case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+        case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+        case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+        case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
 	    /* do nothing */
 	    break;
 

@@ -1058,9 +1058,13 @@ typedef enum H5C_notify_action_t {
     H5C_NOTIFY_ACTION_AFTER_FLUSH,	/* Entry has just been flushed to
  					 * file.
                                          */
-    H5C_NOTIFY_ACTION_BEFORE_EVICT      /* Entry is about to be evicted 
+    H5C_NOTIFY_ACTION_BEFORE_EVICT,     /* Entry is about to be evicted 
                                          * from cache.
                                          */
+    H5C_NOTIFY_ACTION_ENTRY_DIRTIED,    /* Entry has been marked dirty. */
+    H5C_NOTIFY_ACTION_ENTRY_CLEANED,    /* Entry has been marked clean. */
+    H5C_NOTIFY_ACTION_CHILD_DIRTIED,    /* Dependent child has been marked dirty. */
+    H5C_NOTIFY_ACTION_CHILD_CLEANED     /* Dependent child has been marked clean. */
 } H5C_notify_action_t;
 
 /* Cache client callback function pointers */
