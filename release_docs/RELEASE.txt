@@ -17,11 +17,11 @@ can be found on the HDF5 web page at:
 
 The HDF5 1.8.18 release can be obtained from:
 
-     https://support.hdfgroup.org/HDF5/release/obtain5.html
+     https://support.hdfgroup.org/HDF5/release/obtain518.html
 
 User documentation for 1.8.18 can be accessed directly at this location:
 
-     https://support.hdfgroup.org/HDF5/doc/
+     https://support.hdfgroup.org/HDF5/doc1.8/
 
 New features in the HDF5-1.8.x release series, including brief general
 descriptions of some new and modified APIs, are described in the "What's New
