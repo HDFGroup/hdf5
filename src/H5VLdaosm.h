@@ -40,8 +40,15 @@ extern "C" {
 
 #ifdef H5_HAVE_EFF
 
-/* the file struct */
+/* Common object information */
+typedef struct H5VL_daosm_obj_t {
+    H5I_type_t type;
+    struct H5VL_daosm_file_t *file;
+} H5VL_daosm_obj_t;
+
+/* The file struct */
 typedef struct H5VL_daosm_file_t {
+    H5VL_daosm_obj_t common; /* Must be first */
     daos_handle_t poh;
     daos_handle_t coh;
     //daos_pool_info_t pool_info;
@@ -50,8 +57,9 @@ typedef struct H5VL_daosm_file_t {
     uuid_t uuid;
     unsigned flags;
     daos_handle_t glob_md_oh;
-    daos_handle_t root_oh;
-    daos_obj_id_t max_oid;
+    struct H5VL_daosm_group_t *root_grp;
+    uint64_t max_oid;
+    hbool_t max_oid_dirty;
     hid_t fcpl_id;
     hid_t fapl_id;
     MPI_Comm comm;
@@ -59,6 +67,25 @@ typedef struct H5VL_daosm_file_t {
     int my_rank;
     int num_procs;
 } H5VL_daosm_file_t;
+
+/* The group struct */
+typedef struct H5VL_daosm_group_t {
+    H5VL_daosm_obj_t common; /* Must be first */
+    daos_obj_id_t oid;
+    daos_handle_t obj_oh;
+    hid_t gapl_id;
+} H5VL_daosm_group_t;
+
+/* The dataset struct */
+typedef struct H5VL_daosm_dset_t {
+    H5VL_daosm_obj_t common; /* Must be first */
+    daos_obj_id_t oid;
+    daos_handle_t obj_oh;
+    hid_t type_id;
+    hid_t space_id;
+    hid_t dcpl_id;
+    hid_t dapl_id;
+} H5VL_daosm_dset_t;
 
 extern hid_t H5VL_DAOSM_g;
 

@@ -42,7 +42,8 @@
 #include "H5VLpublic.h"		/* VOL plugins			        */
 
 /* FastForward headers */
-//#include "H5FFpublic.h"         /* FastForward wrappers                 */ DSMINC
+#include "H5FFpublic.h"         /* FastForward wrappers                 */
+#include "H5TRpublic.h"         /* Transactions                         */
 #include "H5VLdaosm.h"          /* DAOS-M VOL plugin                    */
 
 /* Predefined VOL plugins */
