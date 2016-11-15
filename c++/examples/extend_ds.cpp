@@ -27,18 +27,12 @@
 #endif
 #include <string>
 
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::cout;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
+using std::cout;
+using std::endl;
 
+#include <string>
 #include "H5Cpp.h"
-
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
+using namespace H5;
 
 const H5std_string FILE_NAME( "SDSextendible.h5" );
 const H5std_string DATASET_NAME( "ExtendibleArray" );

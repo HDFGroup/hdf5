@@ -27,20 +27,12 @@
 #else
 #include <iostream>
 #endif
+using std::cout;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::cout;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
-
 #include "H5Cpp.h"
-
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
+using namespace H5;
 
 const H5std_string FILE_NAME( "Group.h5" );
 const int	   RANK = 2;

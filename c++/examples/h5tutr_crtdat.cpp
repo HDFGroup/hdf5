@@ -20,12 +20,8 @@
 
 #include <iostream>
 #include <string>
-
 #include "H5Cpp.h"
-
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
+using namespace H5;
 
 const H5std_string	FILE_NAME("h5tutr_dset.h5");
 const H5std_string	DATASET_NAME("dset");

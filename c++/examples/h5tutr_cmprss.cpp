@@ -19,17 +19,12 @@
  */
 
 #include <iostream>
+using std::cout;
+using std::endl;
+
 #include <string>
-
 #include "H5Cpp.h"
-
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#ifndef H5_NO_STD
-    using std::cout;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
+using namespace H5;
 
 const H5std_string	FILE_NAME("h5tutr_cmprss.h5");
 const H5std_string	DATASET_NAME("Compressed_Data");
