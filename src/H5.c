@@ -343,6 +343,11 @@ H5_term_library(void)
         if(pending == 0) {
             pending += DOWN(AC);
             pending += DOWN(Z);
+
+#ifdef H5_HAVE_EFF
+            pending += DOWN(TR);
+#endif /* H5_HAVE_EFF */
+
             pending += DOWN(FD);
             pending += DOWN(VL);
             pending += DOWN(PL);

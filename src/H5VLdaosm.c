@@ -1150,18 +1150,17 @@ H5VL_daosm_dataset_create(void *_obj,
     /* Set up dkey */
     /* For now always use dkey = const, akey = name. Add option to switch these
      * DSMINC */
-    dkey.iov_buf_len = dkey.iov_len = sizeof(const_key);
-    dkey.iov_buf = const_key;
+    daos_iov_set(&dkey, const_key, sizeof(const_key));
 
     /* Set up recx */
     recx.rx_rsize = (uint64_t)sizeof(daos_obj_id_t);
     recx.rx_idx = (uint64_t)0;
-    recx.rx_nr = (uint64_t)0;
-    recx.rx_cookie = (uint64_t)0;
+    recx.rx_nr = (uint64_t)1;
 
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
     daos_iov_set(&iod.vd_name, (void *)target_name, (daos_size_t)target_name_len);
+    daos_csum_set(&iod.vd_kcsum, NULL, 0);
     iod.vd_nr = 1u;
     iod.vd_recxs = &recx;
 
@@ -1175,7 +1174,6 @@ H5VL_daosm_dataset_create(void *_obj,
     /* Set up sgl */
     daos_iov_set(&sg_iov, oid_buf, (daos_size_t)sizeof(oid_buf));
     sgl.sg_nr.num = 1;
-    sgl.sg_nr.num_out = 0;
     sgl.sg_iovs = &sg_iov;
 
     /* Create link to dataset */
@@ -1286,25 +1284,23 @@ H5VL_daosm_dataset_open(void *_obj,
     /* Set up dkey */
     /* For now always use dkey = const, akey = name. Add option to switch these
      * DSMINC */
-    dkey.iov_buf_len = dkey.iov_len = sizeof(const_key);
-    dkey.iov_buf = const_key;
+    daos_iov_set(&dkey, const_key, sizeof(const_key));
 
     /* Set up recx */
     recx.rx_rsize = (uint64_t)sizeof(daos_obj_id_t);
     recx.rx_idx = (uint64_t)0;
-    recx.rx_nr = (uint64_t)0;
-    recx.rx_cookie = (uint64_t)0;
+    recx.rx_nr = (uint64_t)1;
 
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
     daos_iov_set(&iod.vd_name, (void *)target_name, (daos_size_t)target_name_len);
+    daos_csum_set(&iod.vd_kcsum, NULL, 0);
     iod.vd_nr = 1u;
     iod.vd_recxs = &recx;
 
     /* Set up sgl */
     daos_iov_set(&sg_iov, oid_buf, (daos_size_t)sizeof(oid_buf));
     sgl.sg_nr.num = 1;
-    sgl.sg_nr.num_out = 0;
     sgl.sg_iovs = &sg_iov;
 
     /* Read link to dataset */
