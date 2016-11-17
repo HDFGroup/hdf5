@@ -68,8 +68,7 @@
 static herr_t H5B2__cache_hdr_get_load_size(const void *udata, size_t *image_len);
 static void *H5B2__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5B2__cache_hdr_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5B2__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5B2__cache_hdr_free_icr(void *thing);
@@ -77,8 +76,7 @@ static herr_t H5B2__cache_hdr_free_icr(void *thing);
 static herr_t H5B2__cache_int_get_load_size(const void *udata, size_t *image_len);
 static void *H5B2__cache_int_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5B2__cache_int_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5B2__cache_int_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_int_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5B2__cache_int_free_icr(void *thing);
@@ -86,8 +84,7 @@ static herr_t H5B2__cache_int_free_icr(void *thing);
 static herr_t H5B2__cache_leaf_get_load_size(const void *udata, size_t *image_len);
 static void *H5B2__cache_leaf_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5B2__cache_leaf_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5B2__cache_leaf_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_leaf_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5B2__cache_leaf_free_icr(void *thing);
@@ -310,8 +307,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_hdr_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5B2__cache_hdr_image_len(const void *_thing, size_t *image_len)
 {
     const H5B2_hdr_t *hdr = (const H5B2_hdr_t *)_thing;      /* Pointer to the B-tree header */
 
@@ -601,8 +597,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_int_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5B2__cache_int_image_len(const void *_thing, size_t *image_len)
 {
     const H5B2_internal_t *internal = (const H5B2_internal_t *)_thing;      /* Pointer to the B-tree internal node */
 
@@ -721,17 +716,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_int_free_icr(void *thing)
+H5B2__cache_int_free_icr(void *_thing)
 {
+    H5B2_internal_t *internal = (H5B2_internal_t *)_thing;
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(thing);
+    HDassert(internal);
 
     /* Release v2 B-tree internal node */
-    if(H5B2__internal_free((H5B2_internal_t *)thing) < 0)
+    if(H5B2__internal_free(internal) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to release v2 B-tree internal node")
 
 done:
@@ -890,8 +886,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_leaf_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5B2__cache_leaf_image_len(const void *_thing, size_t *image_len)
 {
     const H5B2_leaf_t *leaf = (const H5B2_leaf_t *)_thing;      /* Pointer to the B-tree leaf node  */
 
@@ -996,17 +991,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_leaf_free_icr(void *thing)
+H5B2__cache_leaf_free_icr(void *_thing)
 {
+    H5B2_leaf_t *leaf = (H5B2_leaf_t *)_thing;
     herr_t ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Check arguments */
-    HDassert(thing);
+    HDassert(leaf);
 
     /* Destroy v2 B-tree leaf node */
-    if(H5B2__leaf_free((H5B2_leaf_t *)thing) < 0)
+    if(H5B2__leaf_free(leaf) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to destroy B-tree leaf node")
 
 done:
