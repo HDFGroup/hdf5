@@ -10129,75 +10129,75 @@ static void gent_compound_complex2(void)
         H5Sclose(space);
     }
 
-//    /* CompoundComplex2D */
-//    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
-//        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
-//        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
-//        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
-//        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
-//        if ((space = H5Screate_simple(F82_RANK2, &nelmts, NULL)) >= 0) {
-//            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-//                for(i = 0; i < nelmts; i++) {
-//                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
-//                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
-//                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
-//                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
-//                }
-//
-//                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
-//                H5Dclose(dset);
-//            }
-//            H5Sclose(space);
-//        }
-//        H5Tclose(type);
-//    }
-//
-//    /* CompoundComplex3D */
-//    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
-//        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
-//        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
-//        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
-//        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
-//        if ((space = H5Screate_simple(F82_RANK3, &nelmts, NULL)) >= 0) {
-//            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-//                for(i = 0; i < nelmts; i++) {
-//                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
-//                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
-//                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
-//                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
-//                }
-//
-//                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
-//                H5Dclose(dset);
-//            }
-//            H5Sclose(space);
-//        }
-//        H5Tclose(type);
-//    }
-//
-//    /* CompoundComplex4D */
-//    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
-//        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
-//        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
-//        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
-//        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
-//        if ((space = H5Screate_simple(F82_RANK4, &nelmts, NULL)) >= 0) {
-//            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-//                for(i = 0; i < nelmts; i++) {
-//                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
-//                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
-//                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
-//                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
-//                }
-//
-//                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
-//                H5Dclose(dset);
-//            }
-//            H5Sclose(space);
-//        }
-//        H5Tclose(type);
-//    }
+    /* CompoundComplex2D */
+/*   if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
+        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
+        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
+        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
+        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
+        if ((space = H5Screate_simple(F82_RANK2, &nelmts, NULL)) >= 0) {
+            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                for(i = 0; i < nelmts; i++) {
+                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
+                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                }
 
+                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+                H5Dclose(dset);
+            }
+            H5Sclose(space);
+        }
+        H5Tclose(type);
+    }
+*/
+    /* CompoundComplex3D */
+/*    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
+        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
+        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
+        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
+        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
+        if ((space = H5Screate_simple(F82_RANK3, &nelmts, NULL)) >= 0) {
+            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                for(i = 0; i < nelmts; i++) {
+                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
+                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                }
+
+                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+                H5Dclose(dset);
+            }
+            H5Sclose(space);
+        }
+        H5Tclose(type);
+    }
+*/
+    /* CompoundComplex4D */
+/*    if ((type = H5Tcreate(H5T_COMPOUND, sizeof(s_t))) >= 0) {
+        H5Tinsert(type, "a", HOFFSET(s_t, a), H5T_STD_B8LE);
+        H5Tinsert(type, "b", HOFFSET(s_t, b), H5T_STD_B16LE);
+        H5Tinsert(type, "c", HOFFSET(s_t, c), H5T_STD_B32LE);
+        H5Tinsert(type, "d", HOFFSET(s_t, d), H5T_STD_B64LE);
+        if ((space = H5Screate_simple(F82_RANK4, &nelmts, NULL)) >= 0) {
+            if ((dset = H5Dcreate2(file, "compound_1", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                for(i = 0; i < nelmts; i++) {
+                    buf5[i].a = (unsigned char)0xff ^ (unsigned char)i;
+                    buf5[i].b = (unsigned int)0xffff ^ (unsigned int)(i * 16);
+                    buf5[i].c = (unsigned long)0xffffffff ^ (unsigned long)(i * 32);
+                    buf5[i].d = (unsigned long long)0xffffffffffffffff ^ (unsigned long long)(i * 64);
+                }
+
+                H5Dwrite(dset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf5);
+                H5Dclose(dset);
+            }
+            H5Sclose(space);
+        }
+        H5Tclose(type);
+    }
+*/
     H5Fclose(file);
 
     HDfree(buf);
