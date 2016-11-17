@@ -397,10 +397,8 @@ static void * datum_deserialize(const void * image_ptr,
                                 void * udata_ptr,
                                 hbool_t * dirty_ptr);
 
-static herr_t datum_image_len(void *thing,
-                              size_t *image_len_ptr,
-                              hbool_t *compressed_ptr,
-                              size_t *compressed_len_ptr);
+static herr_t datum_image_len(const void *thing,
+                              size_t *image_len_ptr);
 
 static herr_t datum_serialize(const H5F_t *f,
                               void *image_ptr,
@@ -439,15 +437,15 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     /* name          */ "datum",
     /* mem_type      */ H5FD_MEM_DEFAULT,
     /* flags         */ H5AC__CLASS_SKIP_READS | H5AC__CLASS_SKIP_WRITES,
-    /* get_load_size */ (H5AC_get_load_size_func_t)datum_get_load_size,
-    /* deserialize   */ (H5AC_deserialize_func_t)datum_deserialize,
-    /* image_len     */ (H5AC_image_len_func_t)datum_image_len,
-    /* pre_serialize */ (H5AC_pre_serialize_func_t)NULL,
-    /* serialize     */ (H5AC_serialize_func_t)datum_serialize,
-    /* notify        */ (H5AC_notify_func_t)datum_notify,
-    /* free_icr      */ (H5AC_free_icr_func_t)datum_free_icr,
-    /* clear         */ (H5AC_clear_func_t)datum_clear,
-    /* fsf_size      */ (H5AC_get_fsf_size_t)NULL,
+    /* get_load_size */ datum_get_load_size,
+    /* deserialize   */ datum_deserialize,
+    /* image_len     */ datum_image_len,
+    /* pre_serialize */ NULL,
+    /* serialize     */ datum_serialize,
+    /* notify        */ datum_notify,
+    /* free_icr      */ datum_free_icr,
+    /* clear         */ datum_clear,
+    /* fsf_size      */ NULL,
   }
 };
 
@@ -2448,8 +2446,7 @@ datum_deserialize(const void * image_ptr,
  *-------------------------------------------------------------------------
  */
 static herr_t
-datum_image_len(void *thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+datum_image_len(const void *thing, size_t *image_len)
 {
     int idx;
     struct datum * entry_ptr;

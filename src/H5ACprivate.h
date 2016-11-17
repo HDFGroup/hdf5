@@ -142,7 +142,6 @@ typedef enum {
 
 #define H5AC__SERIALIZE_RESIZED_FLAG	H5C__SERIALIZE_RESIZED_FLAG
 #define H5AC__SERIALIZE_MOVED_FLAG	H5C__SERIALIZE_MOVED_FLAG
-#define H5AC__SERIALIZE_COMPRESSED_FLAG	H5C__SERIALIZE_COMPRESSED_FLAG
 
 /* Cork actions: cork/uncork/get cork status of an object */
 #define H5AC__SET_CORK             	H5C__SET_CORK
@@ -171,7 +170,6 @@ typedef H5C_notify_action_t     H5AC_notify_action_t;
 
 #define H5AC__CLASS_NO_FLAGS_SET 	H5C__CLASS_NO_FLAGS_SET
 #define H5AC__CLASS_SPECULATIVE_LOAD_FLAG H5C__CLASS_SPECULATIVE_LOAD_FLAG
-#define H5AC__CLASS_COMPRESSED_FLAG	H5C__CLASS_COMPRESSED_FLAG
 
 /* The following flags should only appear in test code */
 #define H5AC__CLASS_SKIP_READS		H5C__CLASS_SKIP_READS

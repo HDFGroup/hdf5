@@ -65,8 +65,7 @@
 static herr_t H5HG__cache_heap_get_load_size(const void *udata, size_t *image_len);
 static void *H5HG__cache_heap_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
-static herr_t H5HG__cache_heap_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5HG__cache_heap_image_len(const void *thing, size_t *image_len);
 static herr_t H5HG__cache_heap_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
 static herr_t H5HG__cache_heap_free_icr(void *thing);
@@ -331,8 +330,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG__cache_heap_image_len(const void *_thing, size_t *image_len, 
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5HG__cache_heap_image_len(const void *_thing, size_t *image_len)
 {
     const H5HG_heap_t *heap = (const H5HG_heap_t *)_thing;
 

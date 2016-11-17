@@ -71,8 +71,7 @@
 static herr_t H5O__cache_get_load_size(const void *udata, size_t *image_len);
 static void *H5O__cache_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
-static herr_t H5O__cache_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5O__cache_image_len(const void *thing, size_t *image_len);
 static herr_t H5O__cache_serialize(const H5F_t *f, void *image, size_t len,
     void *thing); 
 static herr_t H5O__cache_free_icr(void *thing);
@@ -81,8 +80,7 @@ static herr_t H5O__cache_clear(const H5F_t *f, void *thing, hbool_t about_to_des
 static herr_t H5O__cache_chk_get_load_size(const void *udata, size_t *image_len);
 static void *H5O__cache_chk_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
-static herr_t H5O__cache_chk_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5O__cache_chk_image_len(const void *thing, size_t *image_len);
 static herr_t H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5O__cache_chk_free_icr(void *thing);
@@ -165,7 +163,8 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi; Aug 2015
+ * Programmer:	Vailin Choi
+ *              Aug 2015
  *
  *-------------------------------------------------------------------------
  */
@@ -174,7 +173,6 @@ H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata)
 {
     H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;       /* User data for callback */
     const uint8_t *p = buf;   	/* Pointer into buffer to decode */
-    size_t prefix_size;    	/* Size of object header prefix */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -292,8 +290,7 @@ H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata)
     } /* end else */
 
     /* Determine object header prefix length */
-    prefix_size = (size_t)(p - buf);
-    HDassert((size_t)prefix_size == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+    HDassert((size_t)(p - buf) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -431,8 +428,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5O__cache_image_len(const void *_thing, size_t *image_len)
 {
     const H5O_t *oh = (const H5O_t *)_thing;    /* Object header to query */
 
@@ -452,10 +448,6 @@ H5O__cache_image_len(const void *_thing, size_t *image_len,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__cache_image_len() */
-
-/********************************/
-/* no H5O_cache_pre_serialize() */
-/********************************/
 
 
 /*-------------------------------------------------------------------------
@@ -848,8 +840,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_chk_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5O__cache_chk_image_len(const void *_thing, size_t *image_len)
 {
     const H5O_chunk_proxy_t * chk_proxy = (const H5O_chunk_proxy_t *)_thing;    /* Chunk proxy to query */
 
@@ -866,10 +857,6 @@ H5O__cache_chk_image_len(const void *_thing, size_t *image_len,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__cache_chk_image_len() */
-
-/************************************/
-/* no H5O_cache_chk_pre_serialize() */
-/************************************/
 
 
 /*-------------------------------------------------------------------------

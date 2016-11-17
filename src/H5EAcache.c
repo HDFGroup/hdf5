@@ -76,8 +76,7 @@
 static herr_t H5EA__cache_hdr_get_load_size(const void *udata, size_t *image_len);
 static void *H5EA__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5EA__cache_hdr_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5EA__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5EA__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5EA__cache_hdr_free_icr(void *thing);
@@ -85,9 +84,7 @@ static herr_t H5EA__cache_hdr_free_icr(void *thing);
 static herr_t H5EA__cache_iblock_get_load_size(const void *udata, size_t *image_len);
 static void *H5EA__cache_iblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5EA__cache_iblock_image_len(const void *thing, 
-    size_t *image_len, hbool_t *compressed_ptr, 
-    size_t *compressed_image_len_ptr);
+static herr_t H5EA__cache_iblock_image_len(const void *thing, size_t *image_len);
 static herr_t H5EA__cache_iblock_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *thing);
@@ -96,9 +93,7 @@ static herr_t H5EA__cache_iblock_free_icr(void *thing);
 static herr_t H5EA__cache_sblock_get_load_size(const void *udata, size_t *image_len);
 static void *H5EA__cache_sblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5EA__cache_sblock_image_len(const void *thing, 
-    size_t *image_len, hbool_t *compressed_ptr, 
-    size_t *compressed_image_len_ptr);
+static herr_t H5EA__cache_sblock_image_len(const void *thing, size_t *image_len);
 static herr_t H5EA__cache_sblock_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *thing);
@@ -107,9 +102,7 @@ static herr_t H5EA__cache_sblock_free_icr(void *thing);
 static herr_t H5EA__cache_dblock_get_load_size(const void *udata, size_t *image_len);
 static void *H5EA__cache_dblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
-static herr_t H5EA__cache_dblock_image_len(const void *thing, 
-    size_t *image_len, hbool_t *compressed_ptr, 
-    size_t *compressed_image_len_ptr);
+static herr_t H5EA__cache_dblock_image_len(const void *thing, size_t *image_len);
 static herr_t H5EA__cache_dblock_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *thing);
@@ -120,8 +113,7 @@ static herr_t H5EA__cache_dblk_page_get_load_size(const void *udata, size_t *ima
 static void *H5EA__cache_dblk_page_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5EA__cache_dblk_page_image_len(const void *thing, 
-    size_t *image_len, hbool_t *compressed_ptr, 
-    size_t *compressed_image_len_ptr);
+    size_t *image_len);
 static herr_t H5EA__cache_dblk_page_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *thing);
@@ -408,8 +400,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_deserialize() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_hdr_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr))
+H5EA__cache_hdr_image_len(const void *_thing, size_t *image_len))
 
     /* Local variables */
     const H5EA_hdr_t *hdr = (const H5EA_hdr_t *)_thing;      /* Pointer to the object */
@@ -690,8 +681,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_deserialize() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_iblock_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr))
+H5EA__cache_iblock_image_len(const void *_thing, size_t *image_len))
 
     /* Local variables */
     const H5EA_iblock_t *iblock = (const H5EA_iblock_t *)_thing;      /* Pointer to the object */
@@ -1061,8 +1051,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_deserialize() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_sblock_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr))
+H5EA__cache_sblock_image_len(const void *_thing, size_t *image_len))
 
     /* Local variables */
     const H5EA_sblock_t *sblock = (const H5EA_sblock_t *)_thing;      /* Pointer to the object */
@@ -1434,8 +1423,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_deserialize() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_dblock_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr))
+H5EA__cache_dblock_image_len(const void *_thing, size_t *image_len))
 
     /* Local variables */
     const H5EA_dblock_t *dblock = (const H5EA_dblock_t *)_thing;      /* Pointer to the object */
@@ -1632,7 +1620,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_free_icr() */
  *              file space block set.
  *
  *              This function is needed when the data block is paged, as
- *              the datablock header and all its pages are allocted as a
+ *              the datablock header and all its pages are allocated as a
  *              single contiguous chunk of file space, and must be
  *              deallocated the same way.
  *
@@ -1797,8 +1785,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_deserialize() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_dblk_page_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr))
+H5EA__cache_dblk_page_image_len(const void *_thing, size_t *image_len))
 
     /* Local variables */
     const H5EA_dblk_page_t *dblk_page = (const H5EA_dblk_page_t *)_thing;      /* Pointer to the object */
