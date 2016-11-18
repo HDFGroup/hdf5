@@ -1,4 +1,4 @@
-HDF5 version 1.8.18-snap2 currently under development
+HDF5 version 1.8.18 released on 2016-11-14
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 

@@ -19,21 +19,21 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 #            VS201264 * Visual Studio 11 2012 Win64
 #
 #     INSTALLDIR  -  root folder where hdf5 is installed
-#     CTEST_BUILD_CONFIGURATION  - Release, Debug, etc
+#     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
 #     STATIC_LIBRARIES  -  Build/use static libraries
 #     FORTRAN_LIBRARIES -  Build/use fortran libraries
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
-set(CTEST_SOURCE_VERSION 1.8.16)
+set(CTEST_SOURCE_VERSION 1.8.18)
 set(CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
 #INSTALLDIR - HDF5-1.8 root folder
-#CTEST_BUILD_CONFIGURATION - Release, Debug, RelWithDebInfo
+#CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.8.16
 #STATIC_LIBRARIES - Default is YES
 #FORTRAN_LIBRARIES - Default is NO
@@ -52,7 +52,7 @@ endif()
 
 # build generator must be defined
 if(NOT DEFINED BUILD_GENERATOR)
-  message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2013, VS201364, VS2012, or VS201264")
+  message(FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
 else()
   if(${BUILD_GENERATOR} STREQUAL "Unix")
     set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
@@ -69,28 +69,32 @@ else()
   elseif(${BUILD_GENERATOR} STREQUAL "VS201264")
     set(CTEST_CMAKE_GENERATOR "Visual Studio 11 2012 Win64")
   else()
-    message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2013, VS201364, VS2012, or VS201264")
+    message(FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2015, VS201564, VS2013, VS201364, VS2012, or VS201264")
   endif()
 endif()
 
 if(NOT DEFINED INSTALLDIR)
   if(WIN32)
-    set(INSTALLDIR "C:\\Program\ Files\\myhdf5")
+    set(INSTALLDIR "C:\\Program\ Files\\HDF_Group\\HDF5\\${CTEST_SOURCE_VERSION}")
   else()
-    set(INSTALLDIR "/usr/local/myhdf5")
+    set(INSTALLDIR "${CTEST_SCRIPT_DIRECTORY}/HDF_Group/HDF5/${CTEST_SOURCE_VERSION}")
   endif()
 endif()
-if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
-    set(CTEST_BUILD_CONFIGURATION "Release")
+if(NOT DEFINED CTEST_CONFIGURATION_TYPE)
+    set(CTEST_CONFIGURATION_TYPE "Release")
 endif()
 if(NOT DEFINED CTEST_SOURCE_NAME)
     set(CTEST_SOURCE_NAME "hdf5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
 endif()
 if(NOT DEFINED STATIC_LIBRARIES)
     set(STATICLIBRARIES "YES")
+else()
+    set(STATICLIBRARIES "NO")
 endif()
 if(NOT DEFINED FORTRAN_LIBRARIES)
     set(FORTRANLIBRARIES "NO")
+else()
+    set(FORTRANLIBRARIES "YES")
 endif()
 
 set(CTEST_BINARY_NAME "build")
@@ -162,7 +166,7 @@ set(MODEL "Experimental")
 #set(LOCAL_NO_PACKAGE "TRUE")
 #####       Following controls source update                  #####
 #set(LOCAL_UPDATE "TRUE")
-set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8_16")
+set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/branches/hdf5_1_8_18")
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
 ###################################################################
@@ -214,7 +218,8 @@ endif()
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 
 ### change install prefix
-set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALLDIR}")
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH='${INSTALLDIR}'")
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCTEST_CONFIGURATION_TYPE:STRING=$ENV{CMAKE_CONFIG_TYPE}")
 
 ###################################################################
 

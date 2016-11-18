@@ -1,39 +1,39 @@
-HDF5 version 1.8.18-snap2 currently under development
+HDF5 version 1.8.18 released on 2016-11-14
 ================================================================================
 
 INTRODUCTION
 ============
 
 This document describes the differences between HDF5-1.8.17 and
-HDF5-1.8.18-*, and contains information on the platforms tested and
-known problems in HDF5-1.8.18-*.
+HDF5-1.8.18, and contains information on the platforms tested and
+known problems in HDF5-1.8.18.
 For more details, see the files HISTORY-1_0-1_8_0_rc3.txt
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
 Links to the HDF5 1.8.18 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
-     http://www.hdfgroup.org/products/hdf5/
+     https://support.hdfgroup.org/HDF5/
 
 The HDF5 1.8.18 release can be obtained from:
 
-     http://www.hdfgroup.org/HDF5/release/obtain5.html
+     https://support.hdfgroup.org/HDF5/release/obtain518.html
 
 User documentation for 1.8.18 can be accessed directly at this location:
 
-     http://www.hdfgroup.org/HDF5/doc/
+     https://support.hdfgroup.org/HDF5/doc1.8/
 
 New features in the HDF5-1.8.x release series, including brief general
 descriptions of some new and modified APIs, are described in the "What's New
 in 1.8.0?" document:
 
-     http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
+     https://support.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes
 from Release to Release" document, in the section "Release 1.8.18 (current
 release) versus Release 1.8.17
 
-     http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
+     https://support.hdfgroup.org/HDF5/doc1.8/ADGuide/Changes.html
 
 If you have any questions or comments, please send them to the HDF Help Desk:
 
@@ -57,22 +57,33 @@ New Features
 
     Configuration
     -------------
-    - CMake
-      Added NAMESPACE hdf5:: to package configuration files
-    - CMake: change CTEST_BUILD_CONFIGURATION to CTEST_CONFIGURATION_TYPE, which is
-      recommended by CMake documentation.
-      HDFFV-9971 (ADB 2016/8/22)
 
+    - CMake: Added NAMESPACE hdf5:: to package configuration files to allow
+      projects using installed HDF5 binaries built with CMake to link with
+      them without specifying the HDF5 library location via IMPORTED_LOCATION.
+
+      (ADB, 2016/10/17, HDFFV-10003)
+
+
+    - CMake: Changed the CTEST_BUILD_CONFIGURATION option to
+      CTEST_CONFIGURATION_TYPE as recommended by the CMake documentation.
+
+      (ADB, 2016/10/17, HDFFV-9971)
+
+    - CMake: Added support for GIT
+
+      (ADB, 2016/07/12)
 
 
     Library
     -------
-    -None
+    - None
 
 
     Parallel Library
     ----------------
     - None
+
 
     Tools
     -----
@@ -81,9 +92,6 @@ New Features
 
     High-Level APIs
     ---------------
-
-    C Packet Table API
-    ------------------
     - None
 
 
@@ -99,36 +107,102 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-    
-    
+
+
 
 Bug Fixes since HDF5-1.8.17
 ===========================
 
     Configuration
     -------------
-    - None
+
+    - Fixed a problem preventing HDF5 to be built on 32-bit CYGWIN by
+      condensing cygwin configuration files into a single file and
+      removing outdated compiler settings.
+
+      (ABD, 2016/07/12, HDFFV-9946)
+
+
+    - CMake: Fixed a command length overflow error by converting custom
+      commands inside CMakeTest.cmake files into regular dependencies and
+      targets.
+
+      (ABD, 2016/07/12, HDFFV-9939)
+
+
+    - CMake: Fixed a timeout error that would occasionally occur when running
+      the virtual file driver tests simultaneously due to test directory and file
+      name collisions.
+
+      (ABD, 2016/09/19, HDFFV-9431)
 
 
     Library
     -------
-    - Fixed a bug that could occur when using H5Pset_alignment.
+
+    - Fixed a memory leak that would occur when the library allocated memory
+      for an external file prefix (H5Pset_efile_prefix) and failed to free it.
+
+      (DER, 2016/04/29)
+
+
+    - Fixed an error that would occur when calling H5Adelete on an attribute
+      which is attached to an externally linked object in the target file and
+      whose datatype is a committed datatype in the main file.
+
+      (VC, 2016-07-04, HDFFV-9940)
+
+
+    - Fixed a problem where a plugin compiled into a DLL in the default plugin
+      directory could not be found by the HDF5 library at runtime on Windows
+      when the HDF5_PLUGIN_PATH environment variable was not set.
+
+      (ABD, 2016/08/01, HDFFV-9706)
+
+
+    - Fixed an issue where H5Pset_alignment could result in misaligned blocks
+      with some input combinations, causing an assertion failure in debug mode.
 
       (NAF, 2016/08/11, HDFFV-9948)
 
-    - Fixed a memory bug that could occur when a message was improperly marked
-      as sharable on disk.
 
-      (NAF, 2016/07/01, HDFFV-9950)
+    - A number of issues were fixed when reading/writing from/to corrupted
+      files to ensure that the library fails gracefully in these cases:
+
+      * Writing to a corrupted file that has an object message which is
+        incorrectly marked as sharable on disk results in a buffer overflow /
+        invalid write instead of a clean error message.
+
+      * Decoding data from a corrupted file with a dataset encoded with the
+        H5Z_NBIT decoding can result in a code execution vulnerability under
+        the context of the application using the HDF5 library.
+
+      * When decoding an array datatype from a corrupted file, the HDF5 library
+        fails to return an error in production if the number of dimensions
+        decoded is greater than the maximum rank.
+
+      * When decoding an "old style" array datatype from a corrupted file, the
+        HDF5 library fails to return an error in production if the number of
+        dimensions decoded is greater than the maximum rank.
+
+      (NAF, 2016/10/06, HDFFV-9950, HDFFV-9951, HDFFV-9992, HDFFV-9993)
+
+
+    - Fixed an error that would occur when copying an object with an attribute
+      which is a compound datatype consisting of a variable length string.
+
+      (VC, 2016-10-17, HDFFV-7991)
 
 
     Parallel Library
     ----------------
+
     - Fixed a bug that could occur when allocating a chunked dataset in parallel
       with an alignment set and an alignment threshold greater than the chunk
       size but less than or equal to the raw data aggregator size.
 
       (NAF, 2016/08/11, HDFFV-9969)
+
 
     Performance
     -------------
@@ -137,6 +211,15 @@ Bug Fixes since HDF5-1.8.17
 
     Tools
     -----
+
+    - Fixed an error in the compiler wrapper scripts (h5cc, h5fc, et al.)
+      in which they would erroneously drop the file argument specified via
+      the -o flag when the -o flag was specified before the -c flag on the
+      command line, resulting in a failure to compile.
+
+      (LRK, 2016/06/08, HDFFV-9938, HDFFV-9530)
+
+
     - h5repack User Defined (UD) filter parameters were not parsed correctly.
 
       The UD filter parameters were not being parsed correctly. Reworked coding
@@ -147,17 +230,54 @@ Bug Fixes since HDF5-1.8.17
 
     Fortran API
     -----------
-    - None
+
+    - Fortran library fails to compile and fails tests with NAG compiler.
+
+      * Removed the non-standard assumption that KIND=SIZEOF, in the HDF5
+        configure programs.
+      * Removed Fortran 66 character/integer conversions from tests.
+      * Removed the use of C_SIZEOF in the test programs
+      * Changed to using STORAGE_SIZE in the test programs if available. Otherwise,
+        uses C_SIZEOF or SIZEOF.
+
+      (MSB, 2016/9/22, HDFFV-9973)
+
+
+    - Fortran segfaults for F03 tests with NAG compiler
+
+      * Removed INTENT(OUT) from 'fillvalue' in F2003 interface
+        for H5Pget_fill_value_f.
+
+      (MSB, 2016/9/22, HDFFV-9980)
 
 
     C++ API
     -------
-    - None
+
+    - The macro H5_NO_NAMESPACE is deprecated from the HDF5 C++ API library.
+      In future releases, the macros H5_NO_STD and OLD_HEADER_FILENAME may
+      also be removed.
+
+      (BMR, 2016/10/27, HDFFV-9532)
 
 
     High-Level APIs:
     ---------------
-    - None
+
+    - The high-level API Packet Table (PT) did not write data correctly when
+      the datatype is a compound type that has string type as one of the
+      members.  This problem started in 1.8.15, after the fix of HDFFV-9042
+      was applied, which caused the Packet Table to use native type to access
+      the data.  It should be up to the application to specify whether the
+      buffer to be read into memory in the machine’s native architecture.
+      Thus, the PT is fixed to not use native type but to make a copy of the
+      user's provided datatype during creation or the packet table's datatype
+      during opening.  If an application wishes to use native type to read the
+      data, then the application will request that.  However, the Packet Table
+      doesn't provide a way to specify memory datatype in this release.  This
+      feature will be available in future releases, HDFFV-10023.
+
+      (BMR, 2016/10/27, HDFFV-9758)
 
 
     Fortran High-Level APIs:
@@ -175,14 +295,10 @@ Supported Platforms
 The following platforms are supported and have been tested for this release.
 They are built with the configure process unless specified otherwise.
 
-    AIX 6.1                       xlc/xlc_r 10.1.0.5
-    (NASA G-ADA)                  xlC/xlC_r 10.1.0.5
-                                  xlf90/xlf90_r 12.1.0.6
-
-    Linux 2.6.32-573.3.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 2.6.32-573.22.1.el6     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (platypus)                       Version 4.4.7 20120313
-                                     Version 4.8.4, Version 5.2.0
+    (platypus/mayll)              Version 4.4.7 20120313
+                                     Versions 4.8.4, 4.9.3, 5.2.0
                                   PGI C, Fortran, C++ for 64-bit target on
                                   x86-64;
                                       Version 15.7-0
@@ -191,16 +307,16 @@ They are built with the configure process unless specified otherwise.
                                      Version 15.0.3.187 Build 20150407
                                   MPICH 3.1.4 compiled with GCC 4.9.3
 
-    Linux 2.6.32-504.8.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
-    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-11)
+    Linux 2.6.32-573.18.1.el6     gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
+    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
+    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
                                   IBM XL C/C++ V13.1
                                   IBM XL Fortran V15.1
 
-    Linux 3.10.0-229.14.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
+    Linux 3.10.0-327.10.1.el7     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
-    (kituo/moohan)                  Version 4.8.3 20140911 (Red Hat 4.8.3-9)
-                                    Version 5.2.0
+    (kituo/moohan)                  Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+                                    Versions 4.9.3, 5.2.0
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 15.0.3.187 Build 20150407
@@ -220,23 +336,25 @@ They are built with the configure process unless specified otherwise.
                                   Visual Studio 2013 w/ Intel Fortran 15 (cmake)
                                   Visual Studio 2015 w/ Intel Fortran 16  (cmake)
 
-    Windows 8.1                   Visual Studio 2012 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
+    Windows 10                    Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
-    Windows 8.1 x64               Visual Studio 2012 w/ Intel Fortran 15 (cmake)
-                                  Visual Studio 2013 w/ Intel Fortran 15 (cmake)
+    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 16 (cmake)
 
-    Mac OS X Mt. Lion 10.8.5      Apple clang/clang++ version 5.1 from Xcode 5.1
+    Mac OS X Mt. Lion 10.8.5      Apple LLVM version 5.1 (clang-503.0.40)
     64-bit                        gfortran GNU Fortran (GCC) 4.8.2
     (swallow/kite)                Intel icc/icpc/ifort version 15.0.3
 
-    Mac OS X Mavericks 10.9.5     Apple clang/clang++ version 6.0 from Xcode 6.2.0
+    Mac OS X Mavericks 10.9.5     Apple LLVM version 6.0 (clang-600.0.57)
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2
     (wren/quail)                  Intel icc/icpc/ifort version 15.0.3
 
-    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.0 from Xcode 7.0.0
+    Mac OS X Yosemite 10.10.5     Apple LLVM version 6.1 (clang-602.0.53)
     64-bit                        gfortran GNU Fortran (GCC) 4.9.2
     (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
+
+    Mac OS X El Capitan 10.11.4   Apple LLVM version 7.3.0 (clang-703.0.29)
+    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
+    (VM osx1011dev/osx1011test)   Intel icc/icpc/ifort version 16.0.2
 
 
 Tested Configuration Features Summary
@@ -259,11 +377,11 @@ SunOS 5.11 64-bit                       n        y/y    n        y    y     y
 Windows 7                               y        y/y    n        y    y     y
 Windows 7 x64                           y        y/y    n        y    y     y
 Windows 7 Cygwin                        n        y/y    n        y    y     n
-Windows 8.1                             n        y/y    n        y    y     y
-Windows 8.1 x64                         n        y/y    n        y    y     y
+Windows 10                              n        y/y    n        y    y     y
+Windows 10 x64                          n        y/y    n        y    y     y
 Mac OS X Mountain Lion 10.8.5 64-bit    n        y/y    n        y    y     y
 Mac OS X Mavericks 10.9.5 64-bit        n        y/y    n        y    y     y
-Mac OS X Yosemeti 10.10.5 64-bit        n        y/y    n        y    y     y
+Mac OS X Yosemite 10.10.5 64-bit        n        y/y    n        y    y     y
 AIX 6.1 32- and 64-bit                  n        y/n    n        y    y     y
 CentOS 6.7 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
 CentOS 6.7 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
@@ -279,11 +397,11 @@ SunOS 5.11 64-bit                          y       y         y         y
 Windows 7                                  y       y         y         y
 Windows 7 x64                              y       y         y         y
 Windows 7 Cygwin                           n       n         n         y
-Windows 8.1                                y       y         y         y
-Windows 8.1 x64                            y       y         y         y
+Windows 10                                 y       y         y         y
+Windows 10 x64                             y       y         y         y
 Mac OS X Mountain Lion 10.8.5 64-bit       y       n         y         y
 Mac OS X Mavericks 10.9.5 64-bit           y       n         y         y
-Mac OS X Yosemeti 10.10.5 64-bit           y       n         y         y
+Mac OS X Yosemite 10.10.5 64-bit           y       n         y         y
 AIX 6.1 32- and 64-bit                     y       n         n         y
 CentOS 6.7 Linux 2.6.32 x86_64 GNU         y       y         y         y
 CentOS 6.7 Linux 2.6.32 x86_64 Intel       y       y         y         y
@@ -300,46 +418,29 @@ More Tested Platforms
 =====================
 The following platforms are not supported but have been tested for this release.
 
-    Linux 2.6.18-431.11.2.el6     g95 (GCC 4.0.3 (g95 0.94!)
+    Linux 2.6.32-573.22.1.el6     g95 (GCC 4.0.3 (g95 0.94!)
     #1 SMP x86_64 GNU/Linux
     (platypus)
 
-    Mac OS X El Capitan 10.11     Apple clang/clang++ version 7.0.0 from Xcode 7.0.1
-    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
-    (VM)
-
-    Windows 7                     Visual Studio 2008  (cmake)
-
-    Windows 7 x64                 Visual Studio 2008  (cmake)
-
-    Windows 10                    Visual Studio 2013 w/ Intel Fortran 15 (cmake)
-
-    Windows 10 x64                Visual Studio 2013 w/ Intel Fortran 15 (cmake)
-
-    Debian7.5.0 3.2.0-4-amd64 #1 SMP Debian 3.2.51-1 x86_64 GNU/Linux
-                                  gcc (Debian 4.7.2-5) 4.7.2
-                                  GNU Fortran (Debian 4.7.2-5) 4.7.2
+    Debian8.4.0 3.16.0-4-amd64 #1 SMP Debian 3.16.36-1 x86_64 GNU/Linux
+                                  gcc (Debian 4.9.2-10) 4.9.2
+                                  GNU Fortran (Debian 4.9.2-10) 4.9.2
                                   (cmake and autotools)
 
-    Fedora20 3.15.3-200.fc20.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc (GCC) 4.8.3 20140624 (Red Hat 4.8.3-1)
-                                  GNU Fortran (GCC) 4.8.3 20140624 (Red Hat 4.8.3-1)
+    Fedora24 4.7.2-201.fc24.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (GCC) 6.1.1 20160621 (Red Hat 6.1.1-3)
+                                  GNU Fortran (GCC) 6.1.1 20160621 (Red Hat 6.1.1-3)
                                   (cmake and autotools)
 
-    SUSE 13.1 3.11.10-17-desktop #1 SMP PREEMPT x86_64 x86_64 x86_64 GNU/Linux
-                                  gcc (SUSE Linux) 4.8.1
-                                  GNU Fortran (SUSE Linux) 4.8.1
+    CentOS 7.2 3.10.0-327.28.2.el7.x86_64 #1 SMP x86_64 x86_64 x86_64 GNU/Linux
+                                  gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-4)
+                                  GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-4)
                                   (cmake and autotools)
 
-    Ubuntu 14.04 3.13.0-35-generic #62-Ubuntu SMP x86_64 GNU/Linux
-                                  gcc (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
-                                  GNU Fortran (Ubuntu/Linaro 4.9.1-0ubuntu1) 4.9.1
+    Ubuntu 16.04 4.4.0-38-generic #62-Ubuntu SMP x86_64 GNU/Linux
+                                  gcc (Ubuntu 5.4.0-6ubuntu1~16.04.2) 5.4.0
+                                  GNU Fortran (Ubuntu 5.4.0-6ubuntu1~16.04.2) 5.4.0
                                   (cmake and autotools)
-
-    hopper.nersc.gov              PrgEnv-gnu/5.2.40
-                                  gcc (GCC) 4.9.2 20141030 (Cray Inc.)
-                                  GNU Fortran (GCC) 4.9.2 20141030 (Cray Inc.)
-                                  g++ (GCC) 4.9.2 20141030 (Cray Inc.)
 
 
 Known Problems
