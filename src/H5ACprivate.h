@@ -187,7 +187,6 @@ typedef H5C_pre_serialize_func_t	H5AC_pre_serialize_func_t;
 typedef H5C_serialize_func_t		H5AC_serialize_func_t;
 typedef H5C_notify_func_t		H5AC_notify_func_t;
 typedef H5C_free_icr_func_t		H5AC_free_icr_func_t;
-typedef H5C_clear_func_t		H5AC_clear_func_t;
 typedef H5C_get_fsf_size_t		H5AC_get_fsf_size_t;
 
 typedef H5C_class_t			H5AC_class_t;

@@ -114,7 +114,6 @@ const H5AC_class_t H5AC_FARRAY_HDR[1] = {{
     H5FA__cache_hdr_serialize,          /* 'serialize' callback */
     NULL,                               /* 'notify' callback */
     H5FA__cache_hdr_free_icr,           /* 'free_icr' callback */
-    NULL,				/* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
 
@@ -131,7 +130,6 @@ const H5AC_class_t H5AC_FARRAY_DBLOCK[1] = {{
     H5FA__cache_dblock_serialize,       /* 'serialize' callback */
     NULL,                               /* 'notify' callback */
     H5FA__cache_dblock_free_icr,        /* 'free_icr' callback */
-    NULL,				/* 'clear' callback */
     H5FA__cache_dblock_fsf_size,        /* 'fsf_size' callback */
 }};
 
@@ -148,7 +146,6 @@ const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1] = {{
     H5FA__cache_dblk_page_serialize,    /* 'serialize' callback */
     NULL,                               /* 'notify' callback */
     H5FA__cache_dblk_page_free_icr,     /* 'free_icr' callback */
-    NULL,				/* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
 

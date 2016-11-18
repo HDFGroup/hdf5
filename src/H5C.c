@@ -776,8 +776,7 @@ H5C_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
     if(H5C_validate_lru_list(cache_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "LRU extreme sanity check failed on entry.\n");
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU extreme sanity check failed on entry.\n");
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     /* Look for entry in cache */
@@ -806,7 +805,7 @@ H5C_expunge_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
      * This will clear the entry, and then delete it from the cache.
      */
 
-    /* Pass along 'free file space' flag to  cache client.  */
+    /* Pass along 'free file space' flag */
     flush_flags |= (flags & H5C__FREE_FILE_SPACE_FLAG);
 
     /* Delete the entry from the skip list on destroy */
@@ -5960,7 +5959,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
 	/* verify that the entry is no longer part of any flush dependencies */
         HDassert(entry_ptr->flush_dep_nparents == 0);
 	HDassert(entry_ptr->flush_dep_nchildren == 0);
-    }
+    } /* end if */
     else {
         HDassert(clear_only || write_entry);
         HDassert(entry_ptr->is_dirty);
@@ -5986,9 +5985,6 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
         entry_ptr->is_dirty = FALSE;
 
         H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN(cache_ptr, entry_ptr);
-
-        if(entry_ptr->type->clear && (entry_ptr->type->clear)(f, (void *)entry_ptr, FALSE) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to clear entry")
 
         /* Check for entry changing status and do notifications, etc. */
         if(was_dirty) {
@@ -6088,18 +6084,9 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
         /* Check for actually destroying the entry in memory */
         /* (As opposed to taking ownership of it) */
         if(destroy_entry) {
-            /* if the entry is dirty and it has a clear callback,
-             * call this callback now.  Since this callback exists,
-             * it follows tht the client maintains its own dirty bits, 
-             * which must be cleared before the entry is freed to avoid 
-             * sanity check failures.  Also clear the dirty flag for 
-             * the same reason.
-             */
             if(entry_ptr->is_dirty) {
+                /* Reset dirty flag */
                 entry_ptr->is_dirty = FALSE;
-
-                if(entry_ptr->type->clear && (entry_ptr->type->clear)(f, (void *)entry_ptr, TRUE) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to clear entry")
 
                 /* If the entry's type has a 'notify' callback send a 'entry cleaned'
                  * notice now that the entry is fully integrated into the cache.
