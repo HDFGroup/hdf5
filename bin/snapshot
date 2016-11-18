@@ -317,7 +317,7 @@ ReleaseDir=${ReleaseDir:=${BASEDIR}/${ReleaseDir_default}}
 HOSTNAME=`hostname | cut -f1 -d.`	# no domain part
 HDFREPOS=hdf5
 GIT_URL=ssh://git@bitbucket.hdfgroup.org:7999/hdffv/hdf5.git
-GIT_BRANCH=hdf5_1_8
+GIT_BRANCH=hdf5_1_8_18
 
 # Try finding a version of diff that supports the -I option too.
 DIFF=diff
@@ -344,11 +344,10 @@ if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     # Create fresh clone of $GIT_URL from source repository in $BASEDIR/current
      (cd $BASEDIR; rm -rf current
       if test -n $GIT_BRANCH; then         # checkout the branch
-         git clone $GIT_URL -b $GIT_BRANCH
+         git clone $GIT_URL -b $GIT_BRANCH current
       else                                 # use the default (develop) version
-         git clone $GIT_URL
-      fi
-      mv $HDFREPOS current ) || exit 1
+         git clone $GIT_URL current
+      fi) || exit 1
 fi # Do source checkout
 
 
