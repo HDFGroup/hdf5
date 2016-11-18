@@ -507,10 +507,11 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     H5VL_daosm_file_t *file = NULL;
     daos_epoch_t epoch;
+    hid_t trans_id;
     daos_iov_t glob;
-    uint64_t gh_sizes[2];
+    uint64_t bcast_buf_64[6];
     char *gh_buf = NULL;
-    daos_obj_id_t oid = {0, 0, 0};
+    daos_obj_id_t gmd_oid = {0, 0, 0};
     hbool_t must_bcast = FALSE;
     int ret;
     void *ret_value = NULL;
@@ -551,6 +552,9 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
 
     /* Hash file name to create uuid */
     H5VL_daosm_hash128(name, &file->uuid);
+
+    /* Generate oid for global metadata object */
+    daos_obj_id_generate(&gmd_oid, DAOS_OC_REPLICA_RW);
 
     if(file->my_rank == 0) {
         daos_epoch_state_t epoch_state;
@@ -594,8 +598,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't hold epoch: %d", ret)
 
         /* Create global metadata object */
-        daos_obj_id_generate(&oid, DAOS_OC_REPLICA_RW);
-        if(0 != (ret = daos_obj_declare(file->coh, oid, 0, NULL /*oa*/, NULL /*event*/)))
+        if(0 != (ret = daos_obj_declare(file->coh, gmd_oid, 0, NULL /*oa*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create global metadata object: %d", ret)
 
         /* Create root group */
@@ -608,7 +611,8 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
         if(0 != (ret = daos_obj_open(file->coh, file->root_grp->oid, epoch, DAOS_OO_RW, &file->root_grp->obj_oh, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
 
-        /* Write root group OID to global metadata object DSMINC */
+        /* Write root group OID, max oid per process to global metadata object
+         * DSMINC */
 
         /* Bcast global handles if there are other processes */
         if(file->num_procs > 1) {
@@ -618,25 +622,34 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
             glob.iov_len = 0;
             if(0 != (ret = daos_pool_local2global(file->poh, &glob)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global pool handle size: %d", ret)
-            gh_sizes[0] = (uint64_t)glob.iov_buf_len;
+            bcast_buf_64[0] = (uint64_t)glob.iov_buf_len;
             glob.iov_buf = NULL;
             glob.iov_buf_len = 0;
             glob.iov_len = 0;
             if(0 != (ret = daos_cont_local2global(file->coh, &glob)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global container handle size: %d", ret)
-            gh_sizes[1] = (uint64_t)glob.iov_buf_len;
+            bcast_buf_64[1] = (uint64_t)glob.iov_buf_len;
+
+            /* Add root group oid to bcast_buf_64 */
+            bcast_buf_64[2] = file->root_grp->oid.lo;
+            bcast_buf_64[3] = file->root_grp->oid.mid;
+            bcast_buf_64[4] = file->root_grp->oid.hi;
+
+            /* Add epoch to bcast_buf_64 */
+            HDassert(sizeof(bcast_buf_64[5]) == sizeof(epoch));
+            bcast_buf_64[5] = (uint64_t)epoch;
 
             /* Retrieve global pool and container handles */
-            if(NULL == (gh_buf = (char *)H5MM_malloc(gh_sizes[0] + gh_sizes[1])))
+            if(NULL == (gh_buf = (char *)H5MM_malloc(bcast_buf_64[0] + bcast_buf_64[1])))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for global handles")
             glob.iov_buf = gh_buf;
-            glob.iov_buf_len = gh_sizes[0];
+            glob.iov_buf_len = bcast_buf_64[0];
             glob.iov_len = 0;
             if(0 != (ret = daos_pool_local2global(file->poh, &glob)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global pool handle: %d", ret)
             HDassert(glob.iov_len == glob.iov_buf_len);
-            glob.iov_buf = gh_buf + gh_sizes[0];
-            glob.iov_buf_len = gh_sizes[1];
+            glob.iov_buf = gh_buf + bcast_buf_64[0];
+            glob.iov_buf_len = bcast_buf_64[1];
             glob.iov_len = 0;
             if(0 != (ret = daos_cont_local2global(file->coh, &glob)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global container handle: %d", ret)
@@ -645,58 +658,64 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
             /* We are about to bcast so we no longer need to bcast on failure */
             must_bcast = FALSE;
 
-            /* MPI_Bcast gh_sizes */
-            if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
+            /* MPI_Bcast bcast_buf_64 */
+            if(MPI_SUCCESS != MPI_Bcast(bcast_buf_64, sizeof(bcast_buf_64)/sizeof(bcast_buf_64[0]), MPI_UINT64_T, 0, fa->comm))
                 HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
 
             /* MPI_Bcast gh_buf */
-            if(MPI_SUCCESS != MPI_Bcast(gh_buf, (int)(gh_sizes[0] + gh_sizes[1]), MPI_BYTE, 0, fa->comm))
+            if(MPI_SUCCESS != MPI_Bcast(gh_buf, (int)(bcast_buf_64[0] + bcast_buf_64[1]), MPI_BYTE, 0, fa->comm))
                 HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
         } /* end if */
-
-        /* Commit epoch DSMINC */
-        if(0 != (ret = daos_epoch_commit(file->coh, epoch, NULL /*state*/, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "can't commit epoch: %d", ret)
-        epoch++;
     } /* end if */
     else {
-        /* Receive gh_sizes */
-        if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
+        /* Receive bcast_buf_64 */
+        if(MPI_SUCCESS != MPI_Bcast(bcast_buf_64, sizeof(bcast_buf_64)/sizeof(bcast_buf_64[0]), MPI_UINT64_T, 0, fa->comm))
             HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
 
-        /* Check for gh_sizes set to 0 - indicates failure */
-        if(gh_sizes[0] == 0) {
-            HDassert(gh_sizes[1] == 0);
+        /* Check for bcast_buf_64[0] set to 0 - indicates failure */
+        if(bcast_buf_64[0] == 0) {
+            HDassert(bcast_buf_64[1] == 0);
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "lead process failed to open file")
         } /* end if */
 
+        /* Retrieve root group oid from bcast_buf_64 */
+        file->root_grp->oid.lo = bcast_buf_64[2];
+        file->root_grp->oid.mid = bcast_buf_64[3];
+        file->root_grp->oid.hi = bcast_buf_64[4];
+
+        /* Retrieve epoch from bcast_buf_64 */
+        HDassert(sizeof(bcast_buf_64[5]) == sizeof(epoch));
+        epoch = (daos_epoch_t)bcast_buf_64[5];
+
         /* Allocate global handle buffer */
-        if(NULL == (gh_buf = (char *)H5MM_malloc(gh_sizes[0] + gh_sizes[1])))
+        if(NULL == (gh_buf = (char *)H5MM_malloc(bcast_buf_64[0] + bcast_buf_64[1])))
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for global handles")
 
         /* Receive gh_buf */
-        if(MPI_SUCCESS != MPI_Bcast(gh_buf, (int)(gh_sizes[0] + gh_sizes[1]), MPI_BYTE, 0, fa->comm))
+        if(MPI_SUCCESS != MPI_Bcast(gh_buf, (int)(bcast_buf_64[0] + bcast_buf_64[1]), MPI_BYTE, 0, fa->comm))
             HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
 
         /* Create local pool and container handles */
         glob.iov_buf = gh_buf;
-        glob.iov_buf_len = gh_sizes[0];
-        glob.iov_len = gh_sizes[0];
+        glob.iov_buf_len = bcast_buf_64[0];
+        glob.iov_len = bcast_buf_64[0];
         if(0 != (ret = daos_pool_global2local(glob, &file->poh)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't get local pool handle: %d", ret)
-        glob.iov_buf = gh_buf + gh_sizes[0];
-        glob.iov_buf_len = gh_sizes[1];
-        glob.iov_len = gh_sizes[1];
+        glob.iov_buf = gh_buf + bcast_buf_64[0];
+        glob.iov_buf_len = bcast_buf_64[1];
+        glob.iov_len = bcast_buf_64[1];
         if(0 != (ret = daos_cont_global2local(file->poh, glob, &file->coh)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't get local container handle: %d", ret)
 
-        /* Leave root group handle empty for now */
+        /* Open root group */
+        if(0 != (ret = daos_obj_open(file->coh, file->root_grp->oid, epoch, DAOS_OO_RW, &file->root_grp->obj_oh, NULL /*event*/)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
 
         /* Handle pool_info and container_info DSMINC */
     } /* end else */
 
     /* Open global metadata object */
-    if(0 != (ret = daos_obj_open(file->glob_md_oh, oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+    if(0 != (ret = daos_obj_open(file->glob_md_oh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
 
     /* Finish setting up file struct */
@@ -718,6 +737,29 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");
 
+    /* Determine if we want to acquire a transaction for the file creation */
+    if(H5P_get(plist, H5VL_ACQUIRE_TR_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for trans id");
+
+    if(FAIL == trans_id) {
+        if(file->my_rank == 0)
+            /* Transaction not requested, commit the epoch */
+            if(0 != (ret = daos_epoch_commit(file->coh, epoch, NULL /*state*/, NULL /*event*/)))
+                HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL, "can't commit epoch: %d", ret)
+    } /* end if */
+    else {
+        /* Transaction requested, do not commit the epoch - it is up to the
+         * application */
+        H5TR_t *tr = NULL;
+
+        /* get the TR object */
+        if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a TRANSACTION ID");
+
+        tr->epoch = epoch;
+        tr->file = file;
+    } /* end else */
+
     ret_value = (void *)file;
 
 done:
@@ -727,12 +769,11 @@ done:
     /* If the operation is synchronous and it failed at the server, or it failed
      * locally, then cleanup and return fail */
     if(NULL == ret_value) {
-        /* Bcast gh_sizes as '0' if necessary - this will trigger failures in
-         * the other processes so we do not need to do the second bcast. */
+        /* Bcast bcast_buf_64 as '0' if necessary - this will trigger failures
+         * in the other processes so we do not need to do the second bcast. */
         if(must_bcast) {
-            gh_sizes[0] = 0;
-            gh_sizes[1] = 0;
-            if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
+            HDmemset(bcast_buf_64, 0, sizeof(bcast_buf_64));
+            if(MPI_SUCCESS != MPI_Bcast(bcast_buf_64, sizeof(bcast_buf_64)/sizeof(bcast_buf_64[0]), MPI_UINT64_T, 0, fa->comm))
                 HDONE_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
         } /* end if */
 
@@ -766,10 +807,11 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
     H5VL_daosm_file_t *file = NULL;
     daos_epoch_t epoch;
+    hid_t trans_id;
     daos_iov_t glob;
-    uint64_t gh_sizes[2];
+    uint64_t bcast_buf_64[6];
     char *gh_buf = NULL;
-    daos_obj_id_t oid = {0, 0, 0};
+    daos_obj_id_t gmd_oid = {0, 0, 0};
     hbool_t must_bcast = FALSE;
     int ret;
     void *ret_value = NULL;
@@ -802,6 +844,9 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Hash file name to create uuid */
     H5VL_daosm_hash128(name, &file->uuid);
 
+    /* Generate oid for global metadata object */
+    daos_obj_id_generate(&gmd_oid, DAOS_OC_REPLICA_RW);
+
     if(file->my_rank == 0) {
         daos_epoch_state_t epoch_state;
 
@@ -827,6 +872,9 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         if(0 != (ret = daos_epoch_hold(file->coh, &epoch, NULL /*state*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't hold epoch: %d", ret)
 
+        /* Read from the HCE */
+        epoch--;
+
         /* Open root group */
         /* Read root group OID from global metadata object DSMINC */
         file->root_grp->oid.lo = 1;
@@ -842,25 +890,34 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
             glob.iov_len = 0;
             if(0 != (ret = daos_pool_local2global(file->poh, &glob)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global pool handle size: %d", ret)
-            gh_sizes[0] = (uint64_t)glob.iov_buf_len;
+            bcast_buf_64[0] = (uint64_t)glob.iov_buf_len;
             glob.iov_buf = NULL;
             glob.iov_buf_len = 0;
             glob.iov_len = 0;
             if(0 != (ret = daos_cont_local2global(file->coh, &glob)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global container handle size: %d", ret)
-            gh_sizes[1] = (uint64_t)glob.iov_buf_len;
+            bcast_buf_64[1] = (uint64_t)glob.iov_buf_len;
+
+            /* Add root group oid to bcast_buf_64 */
+            bcast_buf_64[2] = file->root_grp->oid.lo;
+            bcast_buf_64[3] = file->root_grp->oid.mid;
+            bcast_buf_64[4] = file->root_grp->oid.hi;
+
+            /* Add epoch to bcast_buf_64 */
+            HDassert(sizeof(bcast_buf_64[5]) == sizeof(epoch));
+            bcast_buf_64[5] = (uint64_t)epoch;
 
             /* Retrieve global pool and container handles */
-            if(NULL == (gh_buf = (char *)malloc(gh_sizes[0] + gh_sizes[1])))
-                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for global handles")
+            if(NULL == (gh_buf = (char *)malloc(bcast_buf_64[0] + bcast_buf_64[1])))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, bcast_buf_64, "can't allocate space for global handles")
             glob.iov_buf = gh_buf;
-            glob.iov_buf_len = gh_sizes[0];
+            glob.iov_buf_len = bcast_buf_64[0];
             glob.iov_len = 0;
             if(0 != (ret = daos_pool_local2global(file->poh, &glob)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global pool handle: %d", ret)
             HDassert(glob.iov_len == glob.iov_buf_len);
-            glob.iov_buf = gh_buf + gh_sizes[0];
-            glob.iov_buf_len = gh_sizes[1];
+            glob.iov_buf = gh_buf + bcast_buf_64[0];
+            glob.iov_buf_len = bcast_buf_64[1];
             glob.iov_len = 0;
             if(0 != (ret = daos_cont_local2global(file->coh, &glob)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't get global container handle: %d", ret)
@@ -869,54 +926,64 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
             /* We are about to bcast so we no longer need to bcast on failure */
             must_bcast = FALSE;
 
-            /* MPI_Bcast gh_sizes */
-            if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
+            /* MPI_Bcast bcast_buf_64 */
+            if(MPI_SUCCESS != MPI_Bcast(bcast_buf_64, sizeof(bcast_buf_64)/sizeof(bcast_buf_64[0]), MPI_UINT64_T, 0, fa->comm))
                 HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
 
             /* MPI_Bcast gh_buf */
-            if(MPI_SUCCESS != MPI_Bcast(gh_buf, (int)(gh_sizes[0] + gh_sizes[1]), MPI_BYTE, 0, fa->comm))
-                HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
+            if(MPI_SUCCESS != MPI_Bcast(gh_buf, (int)(bcast_buf_64[0] + bcast_buf_64[1]), MPI_BYTE, 0, fa->comm))
+                HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handles")
         } /* end if */
     } /* end if */
     else {
-        /* Receive gh_sizes */
-        if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
+        /* Receive bcast_buf_64 */
+        if(MPI_SUCCESS != MPI_Bcast(bcast_buf_64, sizeof(bcast_buf_64)/sizeof(bcast_buf_64[0]), MPI_UINT64_T, 0, fa->comm))
             HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
 
-        /* Check for gh_sizes set to 0 - indicates failure */
-        if(gh_sizes[0] == 0) {
-            HDassert(gh_sizes[1] == 0);
+        /* Check for bcast_buf_64[0] set to 0 - indicates failure */
+        if(bcast_buf_64[0] == 0) {
+            HDassert(bcast_buf_64[1] == 0);
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "lead process failed to open file")
         } /* end if */
 
+        /* Retrieve root group oid from bcast_buf_64 */
+        file->root_grp->oid.lo = bcast_buf_64[2];
+        file->root_grp->oid.mid = bcast_buf_64[3];
+        file->root_grp->oid.hi = bcast_buf_64[4];
+
+        /* Retrieve epoch from bcast_buf_64 */
+        HDassert(sizeof(bcast_buf_64[5]) == sizeof(epoch));
+        epoch = (daos_epoch_t)bcast_buf_64[5];
+
         /* Allocate global handle buffer */
-        if(NULL == (gh_buf = (char *)malloc(gh_sizes[0] + gh_sizes[1])))
+        if(NULL == (gh_buf = (char *)malloc(bcast_buf_64[0] + bcast_buf_64[1])))
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for global handles")
 
         /* Receive gh_buf */
-        if(MPI_SUCCESS != MPI_Bcast(gh_buf, (int)(gh_sizes[0] + gh_sizes[1]), MPI_BYTE, 0, fa->comm))
-            HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
+        if(MPI_SUCCESS != MPI_Bcast(gh_buf, (int)(bcast_buf_64[0] + bcast_buf_64[1]), MPI_BYTE, 0, fa->comm))
+            HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handles")
 
         /* Create local pool and container handles */
         glob.iov_buf = gh_buf;
-        glob.iov_buf_len = gh_sizes[0];
-        glob.iov_len = gh_sizes[0];
+        glob.iov_buf_len = bcast_buf_64[0];
+        glob.iov_len = bcast_buf_64[0];
         if(0 != (ret = daos_pool_global2local(glob, &file->poh)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't get local pool handle: %d", ret)
-        glob.iov_buf = gh_buf + gh_sizes[0];
-        glob.iov_buf_len = gh_sizes[1];
-        glob.iov_len = gh_sizes[1];
+        glob.iov_buf = gh_buf + bcast_buf_64[0];
+        glob.iov_buf_len = bcast_buf_64[1];
+        glob.iov_len = bcast_buf_64[1];
         if(0 != (ret = daos_cont_global2local(file->poh, glob, &file->coh)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't get local container handle: %d", ret)
 
-        /* Leave root group handle empty for now */
+        /* Open root group */
+        if(0 != (ret = daos_obj_open(file->coh, file->root_grp->oid, epoch, DAOS_OO_RW, &file->root_grp->obj_oh, NULL /*event*/)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
 
         /* Handle pool_info and container_info DSMINC */
     } /* end else */
 
     /* Open global metadata object */
-    daos_obj_id_generate(&oid, DAOS_OC_REPLICA_RW);
-    if(0 != (ret = daos_obj_open(file->glob_md_oh, oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+    if(0 != (ret = daos_obj_open(file->glob_md_oh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
 
     /* Finish setting up file struct */
@@ -937,6 +1004,22 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
         HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");
 
+    /* Determine if we want to acquire a transaction for the opened file */
+    if(H5P_get(plist, H5VL_ACQUIRE_TR_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for trans id");
+
+    if(FAIL != trans_id) {
+        /* Transaction requested */
+        H5TR_t *tr = NULL;
+
+        /* get the TR object */
+        if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a TRANSACTION ID");
+
+        tr->epoch = epoch;
+        tr->file = file;
+    } /* end else */
+
     ret_value = (void *)file;
 
 done:
@@ -946,12 +1029,11 @@ done:
     /* If the operation is synchronous and it failed at the server, or it failed
      * locally, then cleanup and return fail */
     if(NULL == ret_value) {
-        /* Bcast gh_sizes as '0' if necessary - this will trigger failures in
-         * the other processes so we do not need to do the second bcast. */
+        /* Bcast bcast_buf_64 as '0' if necessary - this will trigger failures
+         * in the other processes so we do not need to do the second bcast. */
         if(must_bcast) {
-            gh_sizes[0] = 0;
-            gh_sizes[1] = 0;
-            if(MPI_SUCCESS != MPI_Bcast(gh_sizes, 2, MPI_UINT64_T, 0, fa->comm))
+            HDmemset(bcast_buf_64, 0, sizeof(bcast_buf_64));
+            if(MPI_SUCCESS != MPI_Bcast(bcast_buf_64, sizeof(bcast_buf_64)/sizeof(bcast_buf_64[0]), MPI_UINT64_T, 0, fa->comm))
                 HDONE_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
         } /* end if */
 

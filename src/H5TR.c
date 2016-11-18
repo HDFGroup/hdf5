@@ -373,6 +373,8 @@ H5TR_close(H5TR_t *tr)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
+    /*TODO: Keep track of lowest transaction number (LRE), slip daos epoch as it
+     * moves forward. */
     tr = H5FL_FREE(H5TR_t, tr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

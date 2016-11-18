@@ -24,11 +24,11 @@
 
 #include "H5FFmodule.h"         /* This source code file is part of the H5FF module */
 
-#define H5A_FRIEND		/*suppress error about including H5Apkg	  */
+//#define H5A_FRIEND		/*suppress error about including H5Apkg	  */
 #define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
 #define H5F_FRIEND		/*suppress error about including H5Fpkg	  */
-#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
-#define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
+//#define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
+//#define H5T_FRIEND		/*suppress error about including H5Tpkg	  */
 
 
 /***********/
@@ -45,6 +45,7 @@
 #include "H5MMprivate.h"        /* Memory management                    */
 #include "H5Pprivate.h"         /* Property lists                       */
 //#include "H5Tpkg.h"             /* Datatype access                      */
+#include "H5TRprivate.h"        /* Transactions                         */
 
 #include "H5VLdaosm.h"          /* IOD plugin - tmp                     */
 
@@ -52,7 +53,8 @@
 /****************/
 /* Local Macros */
 /****************/
-H5FL_EXTERN(H5RC_t);
+H5FL_EXTERN(H5TR_t);
+H5FL_EXTERN(H5VL_t);
 
 /******************/
 /* Local Typedefs */
@@ -91,22 +93,269 @@ H5FF__init_package(void)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init file interface")
 
     /*if(H5G_init() < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init group interface")
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init group interface")*/
 
     if(H5D_init() < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init dataset interface")
 
-    if(H5A_init() < 0)
+    /*if(H5A_init() < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init attribute interface")
 
     if(H5M_init() < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init map interface")
-
-    if(H5RC_init() < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init map interface") DSMINC*/
+
+    if(H5TR_init() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init map interface")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FF__init_package() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fcreate_ff
+ *
+ * Purpose:     Asynchronous wrapper around H5Fcreate(). If requested,
+ *              trans_id returns the transaction used to create the file,
+ *              uncommitted. If trans_id is NULL, the transaction used to
+ *              create the file will be committed.
+ *
+ * Return:      Success:        The placeholder ID for a new file.  When
+ *                              the asynchronous operation completes, this
+ *                              ID will transparently be modified to be a
+ *                              "normal" ID.
+ *              Failure:        FAIL
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, November 14, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
+    hid_t *trans_id)
+{
+    void    *file = NULL;            /* file token from VOL plugin */
+    H5P_genplist_t *plist;        /* Property list pointer */
+    H5VL_plugin_prop_t plugin_prop;         /* Property for vol plugin ID & info */
+    H5VL_class_t *vol_cls = NULL; /* VOL Class structure for callback info */
+    H5VL_t *vol_info = NULL;      /* VOL info struct */
+    hid_t    ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check/fix arguments */
+    if(!filename || !*filename)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+    /* In this routine, we only accept the following flags:
+     *          H5F_ACC_EXCL, H5F_ACC_TRUNC and H5F_ACC_DEBUG
+     */
+    if(flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_DEBUG))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
+    /* The H5F_ACC_EXCL and H5F_ACC_TRUNC flags are mutually exclusive */
+    if((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mutually exclusive flags for file creation")
+
+    /* Check file creation property list */
+    if(H5P_DEFAULT == fcpl_id)
+        fcpl_id = H5P_FILE_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(fcpl_id, H5P_FILE_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file create property list")
+
+    /* Check the file access property list */
+    if(H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
+
+    /* get the VOL info from the fapl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    /* Determine if we want to acquire the transaction used to create the file
+     */
+    if(trans_id) {
+        H5TR_t *tr = NULL;
+
+        /* Allocate transaction struct */
+        if(NULL == (tr = H5FL_CALLOC(H5TR_t)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate transaction structure")
+
+        tr->file = NULL;
+        tr->epoch = DAOS_EPOCH_MAX;
+        tr->vol_cls = vol_cls;
+
+        /* Get an atom for the transaction */
+        if((*trans_id = H5I_register(H5I_TR, tr, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize transaction handle");
+
+        /* Get the plist structure */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        if(H5P_set(plist, H5VL_ACQUIRE_TR_ID, trans_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans id")
+    } /* end if */
+
+    /* create a new file or truncate an existing file through the VOL */
+    if(NULL == (file = H5VL_file_create(vol_cls, filename, flags, fcpl_id, fapl_id, 
+                                        H5AC_ind_read_dxpl_id, NULL)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
+
+    /* setup VOL info struct */
+    if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
+    vol_info->vol_cls = vol_cls;
+    vol_info->vol_id = plugin_prop.plugin_id;
+    if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
+
+    /* Get an atom for the file */
+    if((ret_value = H5VL_register_id(H5I_FILE, file, vol_info, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fcreate_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fopen_ff
+ *
+ * Purpose:     Asynchronous wrapper around H5Fcreate(). If requested,
+ *              trans_id returns the highest committed transaction for the
+ *              file.
+ *
+ * Return:      Success:        The placeholder ID for a new file.  When
+ *                              the asynchronous operation completes, this
+ *                              ID will transparently be modified to be a
+ *                              "normal" ID.
+ *              Failure:        FAIL
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, November 14, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id, hid_t *trans_id)
+{
+    void    *file = NULL;            /* file token from VOL plugin */
+    H5P_genplist_t *plist;        /* Property list pointer */
+    H5VL_plugin_prop_t plugin_prop;         /* Property for vol plugin ID & info */
+    H5VL_class_t *vol_cls = NULL; /* VOL Class structure for callback info */
+    H5VL_t *vol_info = NULL;      /* VOL info struct */
+    hid_t    ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check/fix arguments */
+    if(!filename || !*filename)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+    /* Reject undefined flags (~H5F_ACC_PUBLIC_FLAGS) and the H5F_ACC_TRUNC & H5F_ACC_EXCL flags */
+    if((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
+            (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
+
+    /* Check the file access property list */
+    if(H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
+
+    /* get the VOL info from the fapl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+    if(H5P_peek(plist, H5F_ACS_VOL_NAME, &plugin_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get vol plugin info")
+
+    if(NULL == (vol_cls = (H5VL_class_t *)H5I_object_verify(plugin_prop.plugin_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL plugin ID")
+
+    /* Determine if we want to acquire the highest committed transaction when
+     * the file is opened */
+    if(trans_id) {
+        H5TR_t *tr = NULL;
+
+        /* Allocate transaction struct */
+        if(NULL == (tr = H5FL_CALLOC(H5TR_t)))
+            HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "can't allocate transaction structure")
+
+        tr->file = NULL;
+        tr->epoch = DAOS_EPOCH_MAX;
+        tr->vol_cls = vol_cls;
+
+        /* Get an atom for the transaction */
+        if((*trans_id = H5I_register(H5I_TR, tr, TRUE)) < 0)
+            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize transaction handle");
+
+        /* Get the plist structure */
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        if(H5P_set(plist, H5VL_ACQUIRE_TR_ID, trans_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans id")
+    } /* end if */
+
+    /* create a new file or truncate an existing file through the VOL */
+    if(NULL == (file = H5VL_file_open(vol_cls, filename, flags, fapl_id, 
+                                        H5AC_ind_read_dxpl_id, NULL)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
+
+    /* setup VOL info struct */
+    if(NULL == (vol_info = H5FL_CALLOC(H5VL_t)))
+        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate VL info struct")
+    vol_info->vol_cls = vol_cls;
+    vol_info->vol_id = plugin_prop.plugin_id;
+    if(H5I_inc_ref(vol_info->vol_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "unable to increment ref count on VOL plugin")
+
+    /* Get an atom for the file */
+    if((ret_value = H5VL_register_id(H5I_FILE, file, vol_info, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fopen_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fclose_ff
+ *
+ * Purpose:     This function closes the file specified by FILE_ID,
+ *              terminating access to the file through FILE_ID.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ * Programmer:  Neil Fortner
+ *              November 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fclose_ff(hid_t file_id, hid_t H5_ATTR_UNUSED trans_id)
+{
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+
+    /* flush file using trans_id? DSMINC */
+
+    /* Decrement reference count on atom.  When it reaches zero the file will be closed. */
+    if(H5I_dec_app_ref(file_id) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fclose_ff */
 
 
 /*-------------------------------------------------------------------------
@@ -127,8 +376,7 @@ H5FF__init_package(void)
  */
 hid_t
 H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, 
-             hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id, hid_t trans_id,
-             hid_t H5_ATTR_UNUSED estack_id)
+             hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id, hid_t trans_id)
 {
     void    *dset = NULL;       /* dset token from VOL plugin */
     H5VL_object_t *obj = NULL;        /* object token of loc_id */
@@ -138,8 +386,6 @@ H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE9("i", "i*siiiiiii", loc_id, name, type_id, space_id, lcpl_id, dcpl_id,
-             dapl_id, trans_id, estack_id);
 
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
@@ -224,7 +470,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t trans_id, hid_t H5_ATTR_UNUSED estack_id)
+H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t trans_id)
 {
     void    *dset = NULL;       /* dset token from VOL plugin */
     H5VL_object_t *obj = NULL;        /* object token of loc_id */
@@ -234,7 +480,6 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t trans_id, hid_t 
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("i", "i*siii", loc_id, name, dapl_id, trans_id, estack_id);
 
     /* Check args */
     if(!name || !*name)
@@ -292,13 +537,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dclose_ff(hid_t dset_id, hid_t H5_ATTR_UNUSED estack_id)
+H5Dclose_ff(hid_t dset_id, hid_t H5_ATTR_UNUSED trans_id)
 {
     H5VL_object_t *dset;
     herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "ii", dset_id, estack_id);
 
     /* Check args */
     if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))

@@ -32,6 +32,10 @@
 /* DXPL property to store the transaction ID from the FF wrappers */
 #define H5VL_TRANS_ID        "transaction_id"
 
+/* property to tell the VOL plugin to acquire a transaction on the container
+ * when the file is created or opened */
+#define H5VL_ACQUIRE_TR_ID   "acquire_transaction"
+
 /****************************/
 /* Library Private Typedefs */
 /****************************/

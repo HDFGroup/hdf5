@@ -49,17 +49,17 @@ extern "C" {
 /*********************/
 
 /* API wrappers */
-/*H5_DLL hid_t H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl,
-                          hid_t fapl, hid_t estack_id);
+H5_DLL hid_t H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl_id,
+    hid_t fapl_id, hid_t *trans_id);
 H5_DLL hid_t H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id,
-                        hid_t *rcxt_id, hid_t estack_id);
-H5_DLL herr_t H5Fclose_ff(hid_t file_id, hbool_t persist_flag, hid_t estack_id);*/
+    hid_t *trans_id);
+H5_DLL herr_t H5Fclose_ff(hid_t file_id, hid_t trans_id);
 H5_DLL hid_t H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id,
-    hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id, hid_t trans_id,
-    hid_t estack_id);
+    hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id,
+    hid_t trans_id);
 H5_DLL hid_t H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id,
-    hid_t trans_id, hid_t estack_id);
-H5_DLL herr_t H5Dclose_ff(hid_t dset_id, hid_t estack_id);
+    hid_t trans_id);
+H5_DLL herr_t H5Dclose_ff(hid_t dset_id, hid_t trans_id);
 
 #endif /* H5_HAVE_EFF */
 
