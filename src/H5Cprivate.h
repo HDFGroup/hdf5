@@ -733,65 +733,7 @@ typedef struct H5C_t H5C_t;
  *
  *	At least when compiled with debug, it would be useful if the
  *	free ICR call would fail if the in core representation has been
- *	modified since the last serialize of clear callback.
- *
- * CLEAR: Pointer to the clear callback.
- *
- *	In principle, there should be no need for the clear callback,
- *	as the dirty flag should be maintained by the metadata cache.
- *.  
- *	However, some clients maintain dirty bits on internal data, 
- *	and we need some way of keeping these dirty bits in sync with 
- *	those maintained by the metadata cache.  This callback exists
- *	to serve this purpose.  If defined, it is called whenever the 
- *	cache marks dirty entry clean, or when the cache is about to 
- *	discard a dirty entry without writing it to disk (This 
- *	happens as the result of an unprotect call with the 
- *	H5AC__DELETED_FLAG set, and the H5C__TAKE_OWNERSHIP_FLAG not
- *	set.)
- *
- *	Arguably, this functionality should be in the NOTIFY callback.
- *	However, this callback is specific to only a few clients, and 
- *	it will be called relatively frequently.  Hence it is made its
- *	own callback to minimize overhead.
- *
- *	The typedef for the clear callback is as follows:
- *
- *	typedef herr_t (*H5C_clear_func_t)(const H5F_t *f,
- *                                         void * thing, 
- *                                         hbool_t about_to_destroy);
- *
- *	The parameters of the clear callback are as follows:
- *
- *	f:	File pointer.
- *
- *	thing:  Pointer to void containing the address of the in core
- *		representation of the target metadata cache entry.  This
- *		is the same pointer that would be returned by a protect()
- *		call of the associated addr and len.
- *
- *	about_to_destroy: Boolean flag used to indicate whether the 
- *		metadata cache is about to destroy the target metadata
- *		cache entry.  The callback may use this flag to omit
- *		operations that are irrelevant it the entry is about 
- *		to be destroyed.
- *
- *	Processing in the clear function should proceed as follows:
- *
- *	Reset all internal dirty bits in the target metadata cache entry.
- *
- *	If the about_to_destroy flag is TRUE, the clear function may 
- *	ommit any dirty bit that will not trigger a sanity check failure 
- *	or otherwise cause problems in the subsequent free icr call.
- *	In particular, the call must ensure that the free icr call will
- *	not fail due to changes prior to this call, and after the 
- *	last serialize or clear call.
- *
- *	If the function is successful, it must return SUCCEED. 
- *
- *	If it fails for any reason, the function must return FAIL and
- *	push error information on the error stack with the error API
- *	routines. 
+ *	modified since the last serialize callback.
  *
  * GET_FSF_SIZE: Pointer to the get file space free size callback.
  *
@@ -888,8 +830,6 @@ typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f, void *image_ptr,
     size_t len, void *thing);
 typedef herr_t (*H5C_notify_func_t)(H5C_notify_action_t action, void *thing);
 typedef herr_t (*H5C_free_icr_func_t)(void *thing);
-typedef herr_t (*H5C_clear_func_t)(const H5F_t *f, void * thing, 
-    hbool_t about_to_destroy);
 typedef herr_t (*H5C_get_fsf_size_t)(const void * thing, size_t *fsf_size_ptr);
 
 /* Metadata cache client class definition */
@@ -905,7 +845,6 @@ typedef struct H5C_class_t {
     H5C_serialize_func_t	serialize;
     H5C_notify_func_t		notify;
     H5C_free_icr_func_t	        free_icr;
-    H5C_clear_func_t		clear;
     H5C_get_fsf_size_t		fsf_size;
 } H5C_class_t;
 

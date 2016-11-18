@@ -76,8 +76,6 @@ static herr_t H5C__epoch_marker_serialize(const H5F_t *f,
     void * image_ptr, size_t len, void * thing);
 static herr_t H5C__epoch_marker_notify(H5C_notify_action_t action, void *thing);
 static herr_t H5C__epoch_marker_free_icr(void * thing);
-static herr_t H5C__epoch_marker_clear(const H5F_t *f, void * thing, 
-    hbool_t about_to_destroy);
 static herr_t H5C__epoch_marker_fsf_size(const void H5_ATTR_UNUSED * thing, 
     size_t H5_ATTR_UNUSED * fsf_size_ptr);
 
@@ -110,7 +108,6 @@ const H5C_class_t H5C__epoch_marker_class =
     /* serialize        = */ H5C__epoch_marker_serialize,
     /* notify           = */ H5C__epoch_marker_notify,
     /* free_icr         = */ H5C__epoch_marker_free_icr,
-    /* clear            = */ H5C__epoch_marker_clear,
     /* fsf_size         = */ H5C__epoch_marker_fsf_size,
 };
 
@@ -208,17 +205,6 @@ H5C__epoch_marker_free_icr(void H5_ATTR_UNUSED * thing)
 
     FUNC_LEAVE_NOAPI(FAIL)
 } /* end H5C__epoch_marker_free_icr() */
-
-
-static herr_t 
-H5C__epoch_marker_clear(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED * thing, hbool_t H5_ATTR_UNUSED about_to_destroy)
-{
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
-
-    HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
-
-    FUNC_LEAVE_NOAPI(FAIL)
-} /* end H5C__epoch_marker_clear() */
 
 
 static herr_t 

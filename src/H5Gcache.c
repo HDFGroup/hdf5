@@ -99,7 +99,6 @@ const H5AC_class_t H5AC_SNODE[1] = {{
     H5G__cache_node_serialize,          /* 'serialize' callback */
     NULL,                               /* 'notify' callback */
     H5G__cache_node_free_icr,           /* 'free_icr' callback */
-    NULL,			        /* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
 

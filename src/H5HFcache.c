@@ -138,7 +138,6 @@ const H5AC_class_t H5AC_FHEAP_HDR[1] = {{
     H5HF__cache_hdr_serialize,          /* 'serialize' callback */
     NULL,                               /* 'notify' callback */
     H5HF__cache_hdr_free_icr,           /* 'free_icr' callback */
-    NULL,                               /* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
 
@@ -155,7 +154,6 @@ const H5AC_class_t H5AC_FHEAP_IBLOCK[1] = {{
     H5HF__cache_iblock_serialize,       /* 'serialize' callback */
     H5HF__cache_iblock_notify,          /* 'notify' callback */
     H5HF__cache_iblock_free_icr,        /* 'free_icr' callback */
-    NULL,                               /* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
 
@@ -172,7 +170,6 @@ const H5AC_class_t H5AC_FHEAP_DBLOCK[1] = {{
     H5HF__cache_dblock_serialize,       /* 'serialize' callback */
     H5HF__cache_dblock_notify,          /* 'notify' callback */
     H5HF__cache_dblock_free_icr,        /* 'free_icr' callback */
-    NULL,                               /* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
 

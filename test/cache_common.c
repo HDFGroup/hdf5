@@ -314,7 +314,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     NULL,
     pico_free_icr,
     NULL,
-    NULL,
   },
   {
     NANO_ENTRY_TYPE,
@@ -328,7 +327,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     nano_serialize,
     NULL,
     nano_free_icr,
-    NULL,
     NULL,
   },
   {
@@ -344,7 +342,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     NULL,
     micro_free_icr,
     NULL,
-    NULL,
   },
   {
     TINY_ENTRY_TYPE,
@@ -358,7 +355,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     tiny_serialize,
     NULL,
     tiny_free_icr,
-    NULL,
     NULL,
   },
   {
@@ -374,7 +370,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     NULL,
     small_free_icr,
     NULL,
-    NULL,
   },
   {
     MEDIUM_ENTRY_TYPE,
@@ -388,7 +383,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     medium_serialize,
     NULL,
     medium_free_icr,
-    NULL,
     NULL,
   },
   {
@@ -404,7 +398,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     NULL,
     large_free_icr,
     NULL,
-    NULL,
   },
   {
     HUGE_ENTRY_TYPE,
@@ -418,7 +411,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     huge_serialize,
     NULL,
     huge_free_icr,
-    NULL,
     NULL,
   },
   {
@@ -434,7 +426,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     NULL,
     monster_free_icr,
     NULL,
-    NULL,
   },
   {
     VARIABLE_ENTRY_TYPE,
@@ -449,7 +440,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     NULL,
     variable_free_icr,
     NULL,
-    NULL,
   },
   {
     NOTIFY_ENTRY_TYPE,
@@ -463,7 +453,6 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     notify_serialize,
     notify_notify,
     notify_free_icr,
-    NULL,
     NULL,
   }
 };
