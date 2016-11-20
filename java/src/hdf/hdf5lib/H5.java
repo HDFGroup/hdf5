@@ -2854,6 +2854,7 @@ public class H5 implements java.io.Serializable {
 
     // /////// unimplemented ////////
     // ssize_t H5Fget_file_image(hid_t file_id, void * buf_ptr, size_t buf_len);
+    // herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
     // ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects, H5F_sect_info_t *sect_info/*out*/);
 
     // /**
@@ -5670,6 +5671,41 @@ public class H5 implements java.io.Serializable {
      *
      **/
     public synchronized static native void H5Pset_elink_file_cache_size(long fapl_id, int efc_size)
+            throws HDF5LibraryException;
+
+    /**
+    /**
+     * H5Pget_metadata_read_attempts retrieves the number of read attempts that is set in the file access property list plist_id.
+     *
+     * @param plist_id
+     *            IN: File access property list identifier
+     *
+     * @return The number of read attempts.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native long H5Pget_metadata_read_attempts(long plist_id) throws HDF5LibraryException;
+
+    /**
+     * H5Pset_metadata_read_attempts sets the number of reads that the library will try when reading checksummed
+     * metadata in an HDF5 file opened with SWMR access. When reading such metadata, the library will compare the
+     * checksum computed for the metadata just read with the checksum stored within the piece of checksum. When
+     * performing SWMR operations on a file, the checksum check might fail when the library reads data on a system
+     * that is not atomic. To remedy such situations, the library will repeatedly read the piece of metadata until
+     * the check passes or finally fails the read when the allowed number of attempts is reached.
+     *
+     * @param plist_id
+     *            IN: File access property list identifier
+     * @param attempts
+     *            IN: The number of read attempts which is a value greater than 0.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native void H5Pset_metadata_read_attempts(long plist_id, long attempts)
             throws HDF5LibraryException;
 
     // Dataset creation property list (DCPL) routines //

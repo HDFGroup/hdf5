@@ -63,7 +63,7 @@
 /********************/
 
 /* Metadata cache (H5AC) callbacks */
-static herr_t H5G__cache_node_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5G__cache_node_get_initial_load_size(void *udata, size_t *image_len);
 static void *H5G__cache_node_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5G__cache_node_image_len(const void *thing, size_t *image_len);
@@ -92,7 +92,9 @@ const H5AC_class_t H5AC_SNODE[1] = {{
     "Symbol table node",                /* Metadata client name (for debugging) */
     H5FD_MEM_BTREE,                     /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5G__cache_node_get_load_size,      /* 'get_load_size' callback */
+    H5G__cache_node_get_initial_load_size,      /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    NULL,				/* 'verify_chksum' callback */
     H5G__cache_node_deserialize,        /* 'deserialize' callback */
     H5G__cache_node_image_len,          /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -111,17 +113,11 @@ H5FL_SEQ_EXTERN(H5G_entry_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5G__cache_node_get_load_size()
+ * Function:    H5G__cache_node_get_initial_load_size()
  *
- * Purpose:	Determine the size of the on disk image of the node, and 
+ * Purpose:	Determine the size of the on-disk image of the node, and 
  *		return this value in *image_len.
  *
- *		Note that this computation requires access to the file pointer,
- *		which is not provided in the parameter list for this callback.
- *		Finesse this issue by passing in the file pointer twice to the
- *		H5AC_protect() call -- once as the file pointer proper, and 
- *		again as the user data.
- *      
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
  *
@@ -131,9 +127,9 @@ H5FL_SEQ_EXTERN(H5G_entry_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G__cache_node_get_load_size(const void *_udata, size_t *image_len)
+H5G__cache_node_get_initial_load_size(void *_udata, size_t *image_len)
 {
-    const H5F_t	       *f = (const H5F_t *)_udata;   /* User data for callback */
+    H5F_t *f = (H5F_t *)_udata;   		/* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -141,11 +137,11 @@ H5G__cache_node_get_load_size(const void *_udata, size_t *image_len)
     HDassert(f);
     HDassert(image_len);
 
-    /* report image length */
+    /* Set the image length size */
     *image_len = (size_t)(H5G_NODE_SIZE(f));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G__cache_node_get_load_size() */
+} /* end H5G__cache_node_get_initial_load_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -256,11 +252,6 @@ H5G__cache_node_image_len(const void *_thing, size_t *image_len)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G__cache_node_image_len() */
 
-
-/*************************************/
-/* no H5G__cache_node_pre_serialize() */
-/*************************************/
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5G__cache_node_serialize
@@ -319,11 +310,6 @@ H5G__cache_node_serialize(const H5F_t *f, void *_image, size_t len,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__cache_node_serialize() */
-
-
-/***************************************/
-/* no H5G__cache_node_notify() function */
-/***************************************/
 
 
 /*-------------------------------------------------------------------------

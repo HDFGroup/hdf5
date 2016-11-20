@@ -73,7 +73,8 @@
 /********************/
 
 /* Metadata cache (H5AC) callbacks */
-static herr_t H5EA__cache_hdr_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5EA__cache_hdr_get_initial_load_size(void *udata, size_t *image_len);
+static htri_t H5EA__cache_hdr_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5EA__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5EA__cache_hdr_image_len(const void *thing, size_t *image_len);
@@ -81,7 +82,8 @@ static herr_t H5EA__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
 static herr_t H5EA__cache_hdr_free_icr(void *thing);
 
-static herr_t H5EA__cache_iblock_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5EA__cache_iblock_get_initial_load_size(void *udata, size_t *image_len);
+static htri_t H5EA__cache_iblock_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5EA__cache_iblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5EA__cache_iblock_image_len(const void *thing, size_t *image_len);
@@ -90,7 +92,8 @@ static herr_t H5EA__cache_iblock_serialize(const H5F_t *f, void *image, size_t l
 static herr_t H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5EA__cache_iblock_free_icr(void *thing);
 
-static herr_t H5EA__cache_sblock_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5EA__cache_sblock_get_initial_load_size(void *udata, size_t *image_len);
+static htri_t H5EA__cache_sblock_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5EA__cache_sblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5EA__cache_sblock_image_len(const void *thing, size_t *image_len);
@@ -99,7 +102,8 @@ static herr_t H5EA__cache_sblock_serialize(const H5F_t *f, void *image, size_t l
 static herr_t H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5EA__cache_sblock_free_icr(void *thing);
 
-static herr_t H5EA__cache_dblock_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5EA__cache_dblock_get_initial_load_size(void *udata, size_t *image_len);
+static htri_t H5EA__cache_dblock_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5EA__cache_dblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5EA__cache_dblock_image_len(const void *thing, size_t *image_len);
@@ -109,7 +113,8 @@ static herr_t H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *thing
 static herr_t H5EA__cache_dblock_free_icr(void *thing);
 static herr_t H5EA__cache_dblock_fsf_size(const void *thing, size_t *fsf_size);
 
-static herr_t H5EA__cache_dblk_page_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5EA__cache_dblk_page_get_initial_load_size(void *udata, size_t *image_len);
+static htri_t H5EA__cache_dblk_page_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5EA__cache_dblk_page_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5EA__cache_dblk_page_image_len(const void *thing, 
@@ -130,7 +135,9 @@ const H5AC_class_t H5AC_EARRAY_HDR[1] = {{
     "Extensible Array Header",          /* Metadata client name (for debugging) */
     H5FD_MEM_EARRAY_HDR,                /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5EA__cache_hdr_get_load_size,      /* 'get_load_size' callback */
+    H5EA__cache_hdr_get_initial_load_size,      /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    H5EA__cache_hdr_verify_chksum,	/* 'verify_chksum' callback */
     H5EA__cache_hdr_deserialize,        /* 'deserialize' callback */
     H5EA__cache_hdr_image_len,          /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -146,7 +153,9 @@ const H5AC_class_t H5AC_EARRAY_IBLOCK[1] = {{
     "Extensible Array Index Block",     /* Metadata client name (for debugging) */
     H5FD_MEM_EARRAY_IBLOCK,             /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5EA__cache_iblock_get_load_size,   /* 'get_load_size' callback */
+    H5EA__cache_iblock_get_initial_load_size,   /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    H5EA__cache_iblock_verify_chksum,	/* 'verify_chksum' callback */
     H5EA__cache_iblock_deserialize,     /* 'deserialize' callback */
     H5EA__cache_iblock_image_len,       /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -162,7 +171,9 @@ const H5AC_class_t H5AC_EARRAY_SBLOCK[1] = {{
     "Extensible Array Super Block",     /* Metadata client name (for debugging) */
     H5FD_MEM_EARRAY_SBLOCK,             /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5EA__cache_sblock_get_load_size,   /* 'get_load_size' callback */
+    H5EA__cache_sblock_get_initial_load_size,   /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    H5EA__cache_sblock_verify_chksum,	/* 'verify_chksum' callback */
     H5EA__cache_sblock_deserialize,     /* 'deserialize' callback */
     H5EA__cache_sblock_image_len,       /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -178,7 +189,9 @@ const H5AC_class_t H5AC_EARRAY_DBLOCK[1] = {{
     "Extensible Array Data Block",      /* Metadata client name (for debugging) */
     H5FD_MEM_EARRAY_DBLOCK,             /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5EA__cache_dblock_get_load_size,   /* 'get_load_size' callback */
+    H5EA__cache_dblock_get_initial_load_size,   /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    H5EA__cache_dblock_verify_chksum,	/* 'verify_chksum' callback */
     H5EA__cache_dblock_deserialize,     /* 'deserialize' callback */
     H5EA__cache_dblock_image_len,       /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -194,7 +207,9 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
     "Extensible Array Data Block Page", /* Metadata client name (for debugging) */
     H5FD_MEM_EARRAY_DBLK_PAGE,          /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5EA__cache_dblk_page_get_load_size, /* 'get_load_size' callback */
+    H5EA__cache_dblk_page_get_initial_load_size, /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    H5EA__cache_dblk_page_verify_chksum, /* 'verify_chksum' callback */
     H5EA__cache_dblk_page_deserialize,  /* 'deserialize' callback */
     H5EA__cache_dblk_page_image_len,    /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -217,7 +232,7 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5EA__cache_hdr_get_load_size
+ * Function:    H5EA__cache_hdr_get_initial_load_size
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -231,21 +246,54 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_hdr_get_load_size(const void *_udata, size_t *image_len))
+H5EA__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len))
 
     /* Local variables */
-    const H5EA_hdr_cache_ud_t *udata = (const H5EA_hdr_cache_ud_t *)_udata; /* User data for callback */
+    H5EA_hdr_cache_ud_t *udata = (H5EA_hdr_cache_ud_t *)_udata; /* User data for callback */
 
     /* Check arguments */
     HDassert(udata);
     HDassert(udata->f);
-    HDassert(H5F_addr_defined(udata->addr));
     HDassert(image_len);
 
     /* Set the image length size */
     *image_len = (size_t)H5EA_HEADER_SIZE_FILE(udata->f);
 
-END_FUNC(STATIC)   /* end H5EA__cache_hdr_get_load_size() */
+END_FUNC(STATIC)   /* end H5EA__cache_hdr_get_initial_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_hdr_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, NOERR,
+htri_t, TRUE, -,
+H5EA__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata))
+
+    /* Local variables */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+END_FUNC(STATIC) 	/* end H5EA__cache_hdr_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -273,7 +321,6 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     H5EA_hdr_cache_ud_t *udata = (H5EA_hdr_cache_ud_t *)_udata;
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
 
     /* Check arguments */
     HDassert(image);
@@ -348,16 +395,10 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     /* (allow for checksum not decoded yet) */
     HDassert((size_t)(image - (const uint8_t *)_image) == (len - H5EA_SIZEOF_CHKSUM));
 
-    /* Compute checksum on entire header */
-    /* (including the filter information, if present) */
-    computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for extensible array header")
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == len);
@@ -510,7 +551,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_free_icr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5EA__cache_iblock_get_load_size
+ * Function:    H5EA__cache_iblock_get_initial_load_size
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -524,11 +565,11 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_free_icr() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_iblock_get_load_size(const void *_udata, size_t *image_len))
+H5EA__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len))
 
     /* Local variables */
-    const H5EA_hdr_t *hdr = (const H5EA_hdr_t *)_udata; /* User data for callback */
-    H5EA_iblock_t iblock;           /* Fake index block for computing size */
+    H5EA_hdr_t *hdr = (H5EA_hdr_t *)_udata;   		/* User data for callback */
+    H5EA_iblock_t iblock;           			/* Fake index block for computing size */
 
     /* Check arguments */
     HDassert(hdr);
@@ -544,7 +585,41 @@ H5EA__cache_iblock_get_load_size(const void *_udata, size_t *image_len))
     /* Set the image length size */
     *image_len = (size_t)H5EA_IBLOCK_SIZE(&iblock);
 
-END_FUNC(STATIC)   /* end H5EA__cache_iblock_get_load_size() */
+END_FUNC(STATIC)   /* end H5EA__cache_iblock_get_initial_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_iblock_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, NOERR,
+htri_t, TRUE, -,
+H5EA__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata))
+
+    /* Local variables */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+END_FUNC(STATIC) 	/* end H5EA__cache_iblock_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -571,7 +646,6 @@ H5EA__cache_iblock_deserialize(const void *_image, size_t len,
     H5EA_hdr_t *hdr = (H5EA_hdr_t *)_udata;     /* User data for callback */
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     haddr_t             arr_addr;       /* Address of array header in the file */
     size_t              u;              /* Local index variable */
 
@@ -635,18 +709,13 @@ H5EA__cache_iblock_deserialize(const void *_image, size_t len,
     /* Save the index block's size */
     iblock->size = len;
 
-    /* Compute checksum on index block */
-    computed_chksum = H5_checksum_metadata((const uint8_t *)_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == iblock->size);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for extensible array index block")
 
     /* Set return value */
     ret_value = iblock;
@@ -863,7 +932,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_free_icr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5EA__cache_sblock_get_load_size
+ * Function:    H5EA__cache_sblock_get_initial_load_size
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -877,11 +946,11 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_free_icr() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_sblock_get_load_size(const void *_udata, size_t *image_len))
+H5EA__cache_sblock_get_initial_load_size(void *_udata, size_t *image_len))
 
     /* Local variables */
-    const H5EA_sblock_cache_ud_t *udata = (const H5EA_sblock_cache_ud_t *)_udata;      /* User data */
-    H5EA_sblock_t sblock;           /* Fake super block for computing size */
+    H5EA_sblock_cache_ud_t *udata = (H5EA_sblock_cache_ud_t *)_udata;      /* User data */
+    H5EA_sblock_t sblock;           			/* Fake super block for computing size */
 
     /* Check arguments */
     HDassert(udata);
@@ -917,7 +986,41 @@ H5EA__cache_sblock_get_load_size(const void *_udata, size_t *image_len))
     /* Set the image length size */
     *image_len = (size_t)H5EA_SBLOCK_SIZE(&sblock);
 
-END_FUNC(STATIC)   /* end H5EA__cache_sblock_get_load_size() */
+END_FUNC(STATIC)   /* end H5EA__cache_sblock_get_initial_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_sblock_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, NOERR,
+htri_t, TRUE, -,
+H5EA__cache_sblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata))
+
+    /* Local variables */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+END_FUNC(STATIC) 	/* end H5EA__cache_sblock_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -944,7 +1047,6 @@ H5EA__cache_sblock_deserialize(const void *_image, size_t len,
     H5EA_sblock_cache_ud_t *udata = (H5EA_sblock_cache_ud_t *)_udata;      /* User data */
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     haddr_t             arr_addr;       /* Address of array header in the file */
     size_t              u;              /* Local index variable */
 
@@ -1005,18 +1107,13 @@ H5EA__cache_sblock_deserialize(const void *_image, size_t len,
     /* Save the super block's size */
     sblock->size = len;
 
-    /* Compute checksum on super block */
-    computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == sblock->size);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for extensible array super block")
 
     /* Set return value */
     ret_value = sblock;
@@ -1235,7 +1332,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_free_icr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5EA__cache_dblock_get_load_size
+ * Function:    H5EA__cache_dblock_get_initial_load_size
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -1249,11 +1346,11 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_free_icr() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_dblock_get_load_size(const void *_udata, size_t *image_len))
+H5EA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len))
 
     /* Local variables */
-    const H5EA_dblock_cache_ud_t *udata = (const H5EA_dblock_cache_ud_t *)_udata;      /* User data */
-    H5EA_dblock_t dblock;           /* Fake data block for computing size */
+    H5EA_dblock_cache_ud_t *udata = (H5EA_dblock_cache_ud_t *)_udata;      /* User data */
+    H5EA_dblock_t dblock;           			/* Fake data block for computing size */
 
     /* Check arguments */
     HDassert(udata);
@@ -1290,7 +1387,41 @@ H5EA__cache_dblock_get_load_size(const void *_udata, size_t *image_len))
     else
         *image_len = H5EA_DBLOCK_PREFIX_SIZE(&dblock);
 
-END_FUNC(STATIC)   /* end H5EA__cache_dblock_get_load_size() */
+END_FUNC(STATIC)   /* end H5EA__cache_dblock_get_initial_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_dblock_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, NOERR,
+htri_t, TRUE, -,
+H5EA__cache_dblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata))
+
+    /* Local variables */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+END_FUNC(STATIC) 	/* end H5EA__cache_sblock_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -1317,7 +1448,6 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t len,
     H5EA_dblock_cache_ud_t *udata = (H5EA_dblock_cache_ud_t *)_udata;      /* User data */
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     haddr_t             arr_addr;       /* Address of array header in the file */
 
     /* Check arguments */
@@ -1377,18 +1507,13 @@ H5EA__cache_dblock_deserialize(const void *_image, size_t len,
     /* (Note: This is not the same as the image length, for paged data blocks) */
     dblock->size = H5EA_DBLOCK_SIZE(dblock);
 
-    /* Compute checksum on data block */
-    computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == len);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for extensible array data block")
 
     /* Set return value */
     ret_value = dblock;
@@ -1655,7 +1780,7 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_fsf_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5EA__cache_dblk_page_get_load_size
+ * Function:    H5EA__cache_dblk_page_get_initial_load_size
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -1669,10 +1794,10 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_fsf_size() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__cache_dblk_page_get_load_size(const void *_udata, size_t *image_len))
+H5EA__cache_dblk_page_get_initial_load_size(void *_udata, size_t *image_len))
 
     /* Local variables */
-    const H5EA_dblk_page_cache_ud_t *udata = (const H5EA_dblk_page_cache_ud_t *)_udata;      /* User data */
+    H5EA_dblk_page_cache_ud_t *udata = (H5EA_dblk_page_cache_ud_t *)_udata;      /* User data */
 
     /* Check arguments */
     HDassert(udata);
@@ -1680,9 +1805,44 @@ H5EA__cache_dblk_page_get_load_size(const void *_udata, size_t *image_len))
     HDassert(udata->parent);
     HDassert(image_len);
 
+    /* Set the image length size */
     *image_len = (size_t)H5EA_DBLK_PAGE_SIZE(udata->hdr);
 
-END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_get_load_size() */
+END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_get_initial_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_dblk_page_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, NOERR,
+htri_t, TRUE, -,
+H5EA__cache_dblk_page_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata))
+
+    /* Local variables */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+END_FUNC(STATIC) 	/* end H5EA__cache_dblk_page_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -1709,7 +1869,6 @@ H5EA__cache_dblk_page_deserialize(const void *_image, size_t len,
     H5EA_dblk_page_cache_ud_t *udata = (H5EA_dblk_page_cache_ud_t *)_udata;      /* User data for loading data block page */
     const uint8_t	*image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
 
     /* Sanity check */
     HDassert(udata);
@@ -1739,18 +1898,13 @@ H5EA__cache_dblk_page_deserialize(const void *_image, size_t len,
     /* Set the data block page's size */
     dblk_page->size = len;
 
-    /* Compute checksum on data block page */
-    computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done in verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == dblk_page->size);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for extensible array data block page")
 
     /* Set return value */
     ret_value = dblk_page;

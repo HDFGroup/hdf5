@@ -282,3 +282,46 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5F_evict_tagged_metadata */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_checksums
+ *
+ * Purpose:   	Decode checksum stored in the buffer
+ *		Calculate checksum for the data in the buffer
+ *
+ * Note:	Assumes that the checksum is the last data in the buffer
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *		Sept 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_checksums(const uint8_t *buf, size_t buf_size, uint32_t *s_chksum/*out*/, uint32_t *c_chksum/*out*/)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check arguments */
+    HDassert(buf);
+    HDassert(buf_size);
+
+    /* Return the stored checksum */
+    if(s_chksum) {
+        const uint8_t *chk_p;      	/* Pointer into raw data buffer */
+
+        /* Offset to the checksum in the buffer */
+        chk_p = buf + buf_size - H5_SIZEOF_CHKSUM;
+
+        /* Decode the checksum stored in the buffer */
+        UINT32DECODE(chk_p, *s_chksum);
+    } /* end if */
+
+    /* Return the computed checksum for the buffer */
+    if(c_chksum)
+	*c_chksum = H5_checksum_metadata(buf, buf_size - H5_SIZEOF_CHKSUM, 0);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5F_get_chksums() */
+

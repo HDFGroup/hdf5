@@ -58,7 +58,8 @@
 /********************/
 
 /* Metadata cache (H5AC) callbacks */
-static herr_t H5SM__cache_table_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5SM__cache_table_get_initial_load_size(void *udata, size_t *image_len);
+static htri_t H5SM__cache_table_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5SM__cache_table_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5SM__cache_table_image_len(const void *thing, size_t *image_len);
@@ -66,7 +67,8 @@ static herr_t H5SM__cache_table_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
 static herr_t H5SM__cache_table_free_icr(void *thing);
 
-static herr_t H5SM__cache_list_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5SM__cache_list_get_initial_load_size(void *udata, size_t *image_len);
+static htri_t H5SM__cache_list_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5SM__cache_list_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5SM__cache_list_image_len(const void *thing, size_t *image_len);
@@ -85,7 +87,9 @@ const H5AC_class_t H5AC_SOHM_TABLE[1] = {{
     "shared message table",             /* Metadata client name (for debugging) */
     H5FD_MEM_SOHM_TABLE,                /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5SM__cache_table_get_load_size,    /* 'get_load_size' callback */
+    H5SM__cache_table_get_initial_load_size,    /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    H5SM__cache_table_verify_chksum,	/* 'verify_chksum' callback */
     H5SM__cache_table_deserialize,      /* 'deserialize' callback */
     H5SM__cache_table_image_len,        /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -100,7 +104,9 @@ const H5AC_class_t H5AC_SOHM_LIST[1] = {{
     "shared message list",              /* Metadata client name (for debugging) */
     H5FD_MEM_SOHM_TABLE,                /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5SM__cache_list_get_load_size,     /* 'get_load_size' callback */
+    H5SM__cache_list_get_initial_load_size,     /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    H5SM__cache_list_verify_chksum,	/* 'verify_chksum' callback */
     H5SM__cache_list_deserialize,       /* 'deserialize' callback */
     H5SM__cache_list_image_len,         /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -123,11 +129,10 @@ const H5AC_class_t H5AC_SOHM_LIST[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5SM__cache_table_get_load_size()
+ * Function:    H5SM__cache_table_get_initial_load_size()
  *
  * Purpose:	Return the size of the master table of Shared Object Header 
- *		Message indexes on disk.  As this cache client doesn't use 
- *		speculative reads, this value should be accurate.
+ *		Message indexes on disk.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -138,9 +143,9 @@ const H5AC_class_t H5AC_SOHM_LIST[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__cache_table_get_load_size(const void *_udata, size_t *image_len)
+H5SM__cache_table_get_initial_load_size(void *_udata, size_t *image_len)
 {
-    const H5SM_table_cache_ud_t *udata = (const H5SM_table_cache_ud_t *)_udata;     /* User data for callback */
+    const H5SM_table_cache_ud_t *udata = (const H5SM_table_cache_ud_t *)_udata;  /* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -149,10 +154,47 @@ H5SM__cache_table_get_load_size(const void *_udata, size_t *image_len)
     HDassert(udata->f);
     HDassert(image_len);
 
+    /* Set the image length size */
     *image_len = H5SM_TABLE_SIZE(udata->f);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM__cache_table_get_load_size() */
+} /* end H5SM__cache_table_get_initial_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5SM__cache_table_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer: 	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5SM__cache_table_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+    htri_t ret_value = TRUE;	/* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+        ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SM__cache_table_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -180,7 +222,6 @@ H5SM__cache_table_deserialize(const void *_image, size_t len, void *_udata,
     H5SM_table_cache_ud_t  *udata = (H5SM_table_cache_ud_t *)_udata;    /* Pointer to user data */
     const uint8_t          *image = (const uint8_t *)_image;    /* Pointer into input buffer */
     uint32_t                stored_chksum;      /* Stored metadata checksum value */
-    uint32_t                computed_chksum;    /* Computed metadata checksum value */
     size_t                  u;                  /* Counter variable for index headers */
     void                   *ret_value = NULL;   /* Return value */
 
@@ -256,18 +297,13 @@ H5SM__cache_table_deserialize(const void *_image, size_t len, void *_udata,
         table->indexes[u].list_size = H5SM_LIST_SIZE(f, table->indexes[u].list_max);
     } /* end for */
 
+    /* checksum verification already done in verify_chksum cb */
+
     /* Read in checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == table->table_size);
-
-    /* Compute checksum on entire header */
-    computed_chksum = H5_checksum_metadata(_image, (table->table_size - H5SM_SIZEOF_CHECKSUM), 0);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, NULL, "incorrect metadata checksum for shared message table")
 
     /* Set return value */
     ret_value = table;
@@ -442,7 +478,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5SM__cache_list_get_load_size()
+ * Function:    H5SM__cache_list_get_initial_load_size()
  *
  * Purpose:	Return the on disk size of list of SOHM messages.  In this case,
  *		we simply look up the size in the user data, and return that value
@@ -457,9 +493,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM__cache_list_get_load_size(const void *_udata, size_t *image_len)
+H5SM__cache_list_get_initial_load_size(void *_udata, size_t *image_len)
 {
-    const H5SM_list_cache_ud_t *udata = (const H5SM_list_cache_ud_t *)_udata;        /* User data for callback */
+    const H5SM_list_cache_ud_t *udata = (const H5SM_list_cache_ud_t *)_udata;  	/* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -469,10 +505,53 @@ H5SM__cache_list_get_load_size(const void *_udata, size_t *image_len)
     HDassert(udata->header->list_size > 0);
     HDassert(image_len);
 
+    /* Set the image length size */
     *image_len = udata->header->list_size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM__cache_list_get_load_size() */
+} /* end H5SM__cache_list_get_initial_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5SM__cache_list_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:	Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5SM__cache_list_verify_chksum(const void *_image, size_t H5_ATTR_UNUSED len, void *_udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;       		/* Pointer into raw data buffer */
+    H5SM_list_cache_ud_t *udata = (H5SM_list_cache_ud_t *)_udata;    	/* User data for callback */
+    size_t chk_size;       	/* Exact size of the node with checksum at the end */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+    htri_t ret_value = TRUE;	/* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments */
+    HDassert(image);
+    HDassert(udata);
+
+    /* Exact size with checksum at the end */
+    chk_size = H5SM_LIST_SIZE(udata->f, udata->header->num_messages);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, chk_size, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+	ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SM__cache_list_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -499,7 +578,6 @@ H5SM__cache_list_deserialize(const void *_image, size_t len, void *_udata,
     H5SM_bt2_ctx_t        ctx;             /* Message encoding context */
     const uint8_t        *image = (const uint8_t *)_image;      /* Pointer into input buffer */
     uint32_t              stored_chksum;   /* Stored metadata checksum value */
-    uint32_t              computed_chksum; /* Computed metadata checksum value */
     size_t                u;               /* Counter variable for messages in list */
     void                 *ret_value = NULL;   /* Return value */
 
@@ -537,18 +615,13 @@ H5SM__cache_list_deserialize(const void *_image, size_t len, void *_udata,
         image += H5SM_SOHM_ENTRY_SIZE(udata->f);
     } /* end for */
 
+    /* checksum verification already done in verify_chksum cb */
+
     /* Read in checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) <= udata->header->list_size);
-
-    /* Compute checksum on entire header */
-    computed_chksum = H5_checksum_metadata(_image, ((size_t)(image - (const uint8_t *)_image) - H5SM_SIZEOF_CHECKSUM), 0);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_SOHM, H5E_BADVALUE, NULL, "incorrect metadata checksum for shared message list")
 
     /* Initialize the rest of the array */
     for(u = udata->header->num_messages; u < udata->header->list_max; u++)

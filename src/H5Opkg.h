@@ -292,9 +292,6 @@ struct H5O_t {
 
     /* Chunk management information (not stored) */
     size_t      rc;                     /* Reference count of [continuation] chunks using this structure */
-    size_t      chunk0_size;            /* Size of serialized first chunk    */
-    hbool_t     mesgs_modified;         /* Whether any messages were modified when the object header was deserialized */
-    hbool_t     prefix_modified;        /* Whether prefix was modified when the object header was deserialized */
 
     /* Object information (stored) */
     hbool_t     has_refcount_msg;       /* Whether the object has a ref. count message */
@@ -362,7 +359,6 @@ typedef struct H5O_common_cache_ud_t {
     hid_t dxpl_id;                      /* DXPL for operation */
     unsigned file_intent;               /* Read/write intent for file */
     unsigned merged_null_msgs;          /* Number of null messages merged together */
-    hbool_t mesgs_modified;             /* Whether any messages were modified when the object header was deserialized */
     H5O_cont_msgs_t *cont_msg_info;     /* Pointer to continuation messages to work on */
     haddr_t addr;                       /* Address of the prefix or chunk */
 } H5O_common_cache_ud_t;
@@ -371,6 +367,8 @@ typedef struct H5O_common_cache_ud_t {
 typedef struct H5O_cache_ud_t {
     hbool_t made_attempt;               /* Whether the deserialize routine was already attempted */
     unsigned v1_pfx_nmesgs;             /* Number of messages from v1 prefix header */
+    size_t chunk0_size;                 /* Size of serialized first chunk    */
+    H5O_t *oh;                          /* Partially deserialized object header, for later use */
     H5O_common_cache_ud_t common;       /* Common object header cache callback info */
 } H5O_cache_ud_t;
 

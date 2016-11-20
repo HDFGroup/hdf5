@@ -68,7 +68,10 @@
 /********************/
 
 /* Metadata cache callbacks */
-static herr_t H5O__cache_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5O__cache_get_initial_load_size(void *udata, size_t *image_len);
+static herr_t H5O__cache_get_final_load_size(const void *image_ptr, size_t image_len,
+    void *udata, size_t *actual_len);
+static htri_t H5O__cache_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5O__cache_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5O__cache_image_len(const void *thing, size_t *image_len);
@@ -77,7 +80,8 @@ static herr_t H5O__cache_serialize(const H5F_t *f, void *image, size_t len,
 static herr_t H5O__cache_notify(H5AC_notify_action_t action, void *_thing);
 static herr_t H5O__cache_free_icr(void *thing);
 
-static herr_t H5O__cache_chk_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5O__cache_chk_get_initial_load_size(void *udata, size_t *image_len);
+static htri_t H5O__cache_chk_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5O__cache_chk_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5O__cache_chk_image_len(const void *thing, size_t *image_len);
@@ -94,7 +98,6 @@ static herr_t H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno);
 /* Misc. routines */
 static herr_t H5O__add_cont_msg(H5O_cont_msgs_t *cont_msg_info,
     const H5O_cont_t *cont);
-static herr_t H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata);
 
 
 /*********************/
@@ -107,7 +110,9 @@ const H5AC_class_t H5AC_OHDR[1] = {{
     "object header",                    /* Metadata client name (for debugging) */
     H5FD_MEM_OHDR,                      /* File space memory type for client */
     H5AC__CLASS_SPECULATIVE_LOAD_FLAG,  /* Client class behavior flags */
-    H5O__cache_get_load_size,           /* 'get_load_size' callback */
+    H5O__cache_get_initial_load_size,   /* 'get_initial_load_size' callback */
+    H5O__cache_get_final_load_size,     /* 'get_final_load_size' callback */
+    H5O__cache_verify_chksum, 		/* 'verify_chksum' callback */
     H5O__cache_deserialize,             /* 'deserialize' callback */
     H5O__cache_image_len,               /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -123,7 +128,9 @@ const H5AC_class_t H5AC_OHDR_CHK[1] = {{
     "object header continuation chunk", /* Metadata client name (for debugging) */
     H5FD_MEM_OHDR,                      /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5O__cache_chk_get_load_size,       /* 'get_load_size' callback */
+    H5O__cache_chk_get_initial_load_size, /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    H5O__cache_chk_verify_chksum,	/* 'verify_chksum' callback */
     H5O__cache_chk_deserialize,         /* 'deserialize' callback */
     H5O__cache_chk_image_len,           /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
@@ -152,48 +159,88 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
 /* Local Variables */
 /*******************/
 
+
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_decode_prefix
+ * Function:    H5O__cache_get_initial_load_size()
  *
- * Purpose:	To decode the object header prefix.
- *		The coding is extracted fromt H5O__cache_deserialize() to this routine.
+ * Purpose:	Tell the metadata cache how much data to read from file in 
+ *		the first speculative read for the object header.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
  *
- * Programmer:	Vailin Choi
- *              Aug 2015
+ * Programmer:  John Mainzer
+ *              7/28/14
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata)
+H5O__cache_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
 {
-    H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;       /* User data for callback */
-    const uint8_t *p = buf;   	/* Pointer into buffer to decode */
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(f);
-    HDassert(oh);
-    HDassert(buf);
+    HDassert(image_len);
+
+    /* Set the image length size */
+    *image_len = H5O_SPEC_READ_SIZE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O__cache_get_initial_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O__cache_get_final_load_size()
+ *
+ * Purpose:	Tell the metadata cache the final size of an object header.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              November 18, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O__cache_get_final_load_size(const void *_image, size_t image_len,
+    void *_udata, size_t *actual_len)
+{
+    const uint8_t *image = (const uint8_t *)_image;   	/* Pointer into raw data buffer */
+    H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;   /* User data for callback */
+    H5O_t *oh = NULL;                   /* Object header read in */
+    htri_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    HDassert(image);
     HDassert(udata);
+    HDassert(actual_len);
+    HDassert(*actual_len == image_len);
+
+    /* Allocate space for the new object header data structure */
+    if(NULL == (oh = H5FL_CALLOC(H5O_t)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+
+    /* File-specific, non-stored information */
+    oh->sizeof_size = H5F_SIZEOF_SIZE(udata->common.f);
+    oh->sizeof_addr = H5F_SIZEOF_ADDR(udata->common.f);
 
     /* Check for presence of magic number */
     /* (indicates version 2 or later) */
-    if(!HDmemcmp(p, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+    if(!HDmemcmp(image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /* Magic number */
-        p += H5_SIZEOF_MAGIC;
+        image += H5_SIZEOF_MAGIC;
 
         /* Version */
-        oh->version = *p++;
+        oh->version = *image++;
         if(H5O_VERSION_2 != oh->version)
             HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad object header version number")
 
         /* Flags */
-        oh->flags = *p++;
+        oh->flags = *image++;
         if(oh->flags & ~H5O_HDR_ALL_FLAGS)
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unknown object header status flag(s)")
 
@@ -204,13 +251,13 @@ H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata)
         if(oh->flags & H5O_HDR_STORE_TIMES) {
             uint32_t tmp;       /* Temporary value */
 
-            UINT32DECODE(p, tmp);
+            UINT32DECODE(image, tmp);
             oh->atime = (time_t)tmp;
-            UINT32DECODE(p, tmp);
+            UINT32DECODE(image, tmp);
             oh->mtime = (time_t)tmp;
-            UINT32DECODE(p, tmp);
+            UINT32DECODE(image, tmp);
             oh->ctime = (time_t)tmp;
-            UINT32DECODE(p, tmp);
+            UINT32DECODE(image, tmp);
             oh->btime = (time_t)tmp;
         } /* end if */
         else
@@ -218,8 +265,8 @@ H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata)
 
         /* Attribute fields */
         if(oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) {
-            UINT16DECODE(p, oh->max_compact);
-            UINT16DECODE(p, oh->min_dense);
+            UINT16DECODE(image, oh->max_compact);
+            UINT16DECODE(image, oh->min_dense);
             if(oh->max_compact < oh->min_dense)
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header attribute phase change values")
         } /* end if */
@@ -231,30 +278,30 @@ H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata)
         /* First chunk size */
         switch(oh->flags & H5O_HDR_CHUNK0_SIZE) {
             case 0:     /* 1 byte size */
-                oh->chunk0_size = *p++;
+                udata->chunk0_size = *image++;
                 break;
 
             case 1:     /* 2 byte size */
-                UINT16DECODE(p, oh->chunk0_size);
+                UINT16DECODE(image, udata->chunk0_size);
                 break;
 
             case 2:     /* 4 byte size */
-                UINT32DECODE(p, oh->chunk0_size);
+                UINT32DECODE(image, udata->chunk0_size);
                 break;
 
             case 3:     /* 8 byte size */
-                UINT64DECODE(p, oh->chunk0_size);
+                UINT64DECODE(image, udata->chunk0_size);
                 break;
 
             default:
                 HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad size for chunk 0")
         } /* end switch */
-        if(oh->chunk0_size > 0 && oh->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh))
+        if(udata->chunk0_size > 0 && udata->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh))
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header chunk size")
     } /* end if */
     else {
         /* Version */
-        oh->version = *p++;
+        oh->version = *image++;
         if(H5O_VERSION_1 != oh->version)
             HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad object header version number")
 
@@ -262,13 +309,13 @@ H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata)
         oh->flags = H5O_CRT_OHDR_FLAGS_DEF;
 
         /* Reserved */
-        p++;
+        image++;
 
         /* Number of messages */
-        UINT16DECODE(p, udata->v1_pfx_nmesgs);
+        UINT16DECODE(image, udata->v1_pfx_nmesgs);
 
         /* Link count */
-        UINT32DECODE(p, oh->nlink);
+        UINT32DECODE(image, oh->nlink);
 
         /* Reset unused time fields */
         oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
@@ -278,51 +325,77 @@ H5O_decode_prefix(H5F_t *f, H5O_t *oh, const uint8_t *buf, void *_udata)
         oh->min_dense = 0;
 
         /* First chunk size */
-        UINT32DECODE(p, oh->chunk0_size);
-        if((udata->v1_pfx_nmesgs > 0 && oh->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh)) ||
-                (udata->v1_pfx_nmesgs == 0 && oh->chunk0_size > 0))
+        UINT32DECODE(image, udata->chunk0_size);
+        if((udata->v1_pfx_nmesgs > 0 && udata->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh)) ||
+                (udata->v1_pfx_nmesgs == 0 && udata->chunk0_size > 0))
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header chunk size")
 
         /* Reserved, in version 1 (for 8-byte alignment padding) */
-        p += 4;
+        image += 4;
     } /* end else */
 
     /* Determine object header prefix length */
-    HDassert((size_t)(p - buf) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+    HDassert((size_t)((const uint8_t *)image - (const uint8_t *)_image) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+
+    /* Set the final size for the cache image */
+    *actual_len = udata->chunk0_size + (size_t)H5O_SIZEOF_HDR(oh);
+
+    /* Save the object header for later use in 'deserialize' callback */
+    udata->oh = oh;
+    oh = NULL;
 
 done:
+    /* Release the [possibly partially initialized] object header on errors */
+    if(ret_value < 0 && oh)
+        if(H5O__free(oh) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to destroy object header data")
+
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_decode_prefix() */
+} /* end H5O__cache_get_final_load_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O__cache_get_load_size()
+ * Function:    H5O__cache_verify_chksum
  *
- * Purpose:	Tell the metadata cache how much data to read from file in 
- *		the first speculative read for the object header.  Note that we do 
- *		not have to be concerned about reading past the end of file, as the 
- *		cache will clamp the read to avoid this if needed.
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
  *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
  *
- * Programmer:  John Mainzer
- *              7/28/14
+ * Programmer:  Vailin Choi
+ *              Aug 2015
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5O__cache_get_load_size(const void H5_ATTR_UNUSED *_udata, size_t *image_len)
+static htri_t
+H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
 {
+    const uint8_t *image = (const uint8_t *)_image;    	/* Pointer into raw data buffer */
+    H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;  	/* User data for callback */
+    htri_t ret_value = TRUE;	/* Return value */
+
     FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
-    HDassert(image_len);
+    HDassert(image);
+    HDassert(udata);
+    HDassert(udata->oh);
 
-    *image_len = H5O_SPEC_READ_SIZE;
+    /* There is no checksum for version 1 */
+    if(udata->oh->version != H5O_VERSION_1) {
+        uint32_t stored_chksum;     /* Stored metadata checksum value */
+        uint32_t computed_chksum;   /* Computed metadata checksum value */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O__cache_get_load_size() */
+	/* Get stored and computed checksums */
+	H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+	if(stored_chksum != computed_chksum)
+	    ret_value = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O__cache_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -349,10 +422,9 @@ static void *
 H5O__cache_deserialize(const void *_image, size_t len, void *_udata,
     hbool_t *dirty)
 {
-    H5O_t          *oh = NULL;          /* Object header read in */
+    H5O_t          *oh;                 /* Object header read in */
     H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;   /* User data for callback */
     const uint8_t  *image = (const uint8_t *)_image;    /* Pointer into buffer to decode */
-    size_t          buf_size;           /* Size of prefix+chunk #0 buffer */
     void *          ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -361,38 +433,17 @@ H5O__cache_deserialize(const void *_image, size_t len, void *_udata,
     HDassert(image);
     HDassert(len > 0); 
     HDassert(udata);
+    HDassert(udata->oh);
     HDassert(udata->common.f);
     HDassert(udata->common.cont_msg_info);
     HDassert(dirty);
 
-    /* Allocate space for the object header data structure */
-    if(NULL == (oh = H5FL_CALLOC(H5O_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    /* Retrieve partially deserialized object header from user data */
+    oh = udata->oh;
 
-    /* File-specific, non-stored information */
-    oh->sizeof_size = H5F_SIZEOF_SIZE(udata->common.f);
-    oh->sizeof_addr = H5F_SIZEOF_ADDR(udata->common.f);
-
-    /* Decode header prefix */
-    if(H5O_decode_prefix(udata->common.f, oh, image, udata) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize object header prefix")
-
-    /* Compute the size of the buffer used */
-    buf_size = oh->chunk0_size + (size_t)H5O_SIZEOF_HDR(oh);
-
-
-    /* Check to see if the buffer provided is large enough to contain both 
-     * the prefix and the first chunk.  If it isn't, make note of the desired
-     * size, but otherwise do nothing.  H5C_load_entry() will notice the 
-     * discrepency, load the correct size buffer, and retry the deserialize.
-     */
-    if(len >= buf_size) {
-        /* Parse the first chunk */
-        if(H5O__chunk_deserialize(oh, udata->common.addr, oh->chunk0_size, (const uint8_t *)_image, &(udata->common), dirty) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize first object header chunk")
-    } /* end if */
-    else
-        HDassert(!udata->made_attempt);
+    /* Parse the first chunk */
+    if(H5O__chunk_deserialize(oh, udata->common.addr, udata->chunk0_size, (const uint8_t *)_image, &(udata->common), dirty) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize first object header chunk")
 
     /* Note that we've loaded the object header from the file */
     udata->made_attempt = TRUE;
@@ -439,10 +490,7 @@ H5O__cache_image_len(const void *_thing, size_t *image_len)
     HDassert(image_len);
 
     /* Report the object header's prefix+first chunk length */
-    if(oh->chunk0_size)
-       *image_len = (size_t)H5O_SIZEOF_HDR(oh) + oh->chunk0_size;
-    else
-       *image_len = oh->chunk[0].size;
+    *image_len = oh->chunk[0].size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__cache_image_len() */
@@ -698,12 +746,11 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5O__cache_chk_get_load_size()
+ * Function:    H5O__cache_chk_get_initial_load_size()
  *
  * Purpose:	Tell the metadata cache how large the on disk image of the 
  *		chunk proxy is, so it can load the image into a buffer for the 
- *		deserialize call.  In this case, we simply look up the size in 
- *		the user data, and return it in *image_len,
+ *		deserialize call.
  *
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -714,9 +761,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_chk_get_load_size(const void *_udata, size_t *image_len)
+H5O__cache_chk_get_initial_load_size(void *_udata, size_t *image_len)
 {
-    const H5O_chk_cache_ud_t *udata = (const H5O_chk_cache_ud_t *)_udata;       /* User data for callback */
+    const H5O_chk_cache_ud_t *udata = (const H5O_chk_cache_ud_t *)_udata; /* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -725,10 +772,53 @@ H5O__cache_chk_get_load_size(const void *_udata, size_t *image_len)
     HDassert(udata->oh);
     HDassert(image_len);
 
+    /* Set the image length size */
     *image_len = udata->size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O__cache_chk_get_load_size() */
+} /* end H5O__cache_chk_get_initial_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2__cache_chk_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi
+ *		Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;       	/* Pointer into raw data buffer */
+    H5O_chk_cache_ud_t *udata = (H5O_chk_cache_ud_t *)_udata;   /* User data for callback */
+    htri_t ret_value = TRUE;	/* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* There is no checksum for version 1 */
+    if(udata->oh->version != H5O_VERSION_1) {
+        uint32_t stored_chksum;     /* Stored metadata checksum value */
+        uint32_t computed_chksum;   /* Computed metadata checksum value */
+
+	/* Get stored and computed checksums */
+	H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+	if(stored_chksum != computed_chksum)
+	    ret_value = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O__cache_chk_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -1071,12 +1161,12 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
 {
     const uint8_t *chunk_image; /* Pointer into buffer to decode */
     uint8_t *eom_ptr;           /* Pointer to end of messages for a chunk */
-    size_t curmesg;             /* Current message being decoded in object header */
     unsigned merged_null_msgs = 0;  /* Number of null messages merged together */
     unsigned chunkno;           /* Current chunk's index */
 #ifndef NDEBUG
     unsigned nullcnt;           /* Count of null messages (for sanity checking gaps in chunks) */
 #endif /* NDEBUG */
+    hbool_t mesgs_modified = FALSE;     /* Whether any messages were modified when the object header was deserialized */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1102,15 +1192,12 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
     /* Init the chunk data info */
     chunkno = (unsigned)oh->nchunks++;
     oh->chunk[chunkno].gap = 0;
-    if(chunkno == 0) {
+    oh->chunk[chunkno].addr = addr;
+    if(chunkno == 0)
         /* First chunk's 'image' includes room for the object header prefix */
-        oh->chunk[0].addr = addr;
         oh->chunk[0].size = len + (size_t)H5O_SIZEOF_HDR(oh);
-    } /* end if */
-    else {
-        oh->chunk[chunkno].addr = addr;
+    else
         oh->chunk[chunkno].size = len;
-    } /* end else */
     if(NULL == (oh->chunk[chunkno].image = H5FL_BLK_MALLOC(chunk_image, oh->chunk[chunkno].size)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
@@ -1132,16 +1219,12 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
         chunk_image += H5_SIZEOF_MAGIC;
     } /* end if */
 
-    /* Save # of messages already inspected */
-    curmesg = oh->nmesgs;
-
     /* Decode messages from this chunk */
     eom_ptr = oh->chunk[chunkno].image + (oh->chunk[chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh));
 #ifndef NDEBUG
     nullcnt = 0;
 #endif /* NDEBUG */
     while(chunk_image < eom_ptr) {
-        size_t mesgno;          /* Current message to operate on */
         size_t mesg_size;       /* Size of message read in */
         unsigned id;            /* ID (type) of current message */
         uint8_t	flags;          /* Flags for current message */
@@ -1200,39 +1283,45 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                 H5O_NULL_ID == id && oh->nmesgs > 0 &&
                 H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
                 oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
+            size_t mesgno;          /* Current message to operate on */
 
             /* Combine adjacent null messages */
             mesgno = oh->nmesgs - 1;
             oh->mesg[mesgno].raw_size += (size_t)H5O_SIZEOF_MSGHDR_OH(oh) + mesg_size;
             oh->mesg[mesgno].dirty = TRUE;
             merged_null_msgs++;
-            udata->merged_null_msgs++;
         } /* end if */
         else {
+            H5O_mesg_t *mesg;       /* Pointer to new message */
+            unsigned ioflags = 0;   /* Flags for decode routine */
+
             /* Check if we need to extend message table to hold the new message */
             if(oh->nmesgs >= oh->alloc_nmesgs)
                 if(H5O_alloc_msgs(oh, (size_t)1) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "can't allocate more space for messages")
 
-            /* Get index for message */
-            mesgno = oh->nmesgs++;
+            /* Get pointer to message to set up */
+            mesg = &oh->mesg[oh->nmesgs];
+
+            /* Increment # of messages */
+            oh->nmesgs++;
 
             /* Initialize information about message */
-            oh->mesg[mesgno].dirty = FALSE;
-            oh->mesg[mesgno].flags = flags;
-            oh->mesg[mesgno].crt_idx = crt_idx;
-            oh->mesg[mesgno].native = NULL;
-            oh->mesg[mesgno].raw = (uint8_t *)chunk_image;        /* Casting away const OK - QAK */
-            oh->mesg[mesgno].raw_size = mesg_size;
-            oh->mesg[mesgno].chunkno = chunkno;
+            mesg->dirty = FALSE;
+            mesg->flags = flags;
+            mesg->crt_idx = crt_idx;
+            mesg->native = NULL;
+            mesg->raw = (uint8_t *)chunk_image;        /* Casting away const OK - QAK */
+            mesg->raw_size = mesg_size;
+            mesg->chunkno = chunkno;
 
             /* Point unknown messages at 'unknown' message class */
             /* (Usually from future versions of the library) */
 	    if(id >= H5O_UNKNOWN_ID ||
 #ifdef H5O_ENABLE_BOGUS
-	       id == H5O_BOGUS_VALID_ID ||
+                    id == H5O_BOGUS_VALID_ID ||
 #endif
-	       NULL == H5O_msg_class_g[id]) {
+                    NULL == H5O_msg_class_g[id]) {
 
 		H5O_unknown_t *unknown;     /* Pointer to "unknown" message info */
 
@@ -1244,10 +1333,10 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                 *unknown = id;
 
                 /* Save 'native' form of unknown message */
-                oh->mesg[mesgno].native = unknown;
+                mesg->native = unknown;
 
                 /* Set message to "unknown" class */
-                oh->mesg[mesgno].type = H5O_msg_class_g[H5O_UNKNOWN_ID];
+                mesg->type = H5O_msg_class_g[H5O_UNKNOWN_ID];
 
                 /* Check for "fail if unknown" message flags */
                 if(((udata->file_intent & H5F_ACC_RDWR) && 
@@ -1270,17 +1359,66 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
                      * the metadata cache in some other "weird" way, like
                      * using H5Ocopy() - QAK
                      */
-                    oh->mesg[mesgno].flags |= H5O_MSG_FLAG_WAS_UNKNOWN;
+                    mesg->flags |= H5O_MSG_FLAG_WAS_UNKNOWN;
 
                     /* Mark the message and chunk as dirty */
-                    oh->mesg[mesgno].dirty = TRUE;
-                    udata->mesgs_modified = TRUE;
-                    *dirty = TRUE;
+                    mesg->dirty = TRUE;
+                    mesgs_modified = TRUE;
                 } /* end if */
             } /* end if */
             else
                 /* Set message class for "known" messages */
-                oh->mesg[mesgno].type = H5O_msg_class_g[id];
+                mesg->type = H5O_msg_class_g[id];
+
+            /* Do some inspection/interpretation of new messages from this chunk */
+            /* (detect continuation messages, ref. count messages, etc.) */
+
+            /* Check if message is a continuation message */
+            if(H5O_CONT_ID == id) {
+                H5O_cont_t *cont;
+
+                /* Decode continuation message */
+                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, mesg->raw);
+                H5_CHECKED_ASSIGN(cont->chunkno, unsigned, udata->cont_msg_info->nmsgs + 1, size_t); /* the next continuation message/chunk */
+
+                /* Save 'native' form of continuation message */
+                mesg->native = cont;
+
+                /* Add to continuation messages left to interpret */
+                if(H5O__add_cont_msg(udata->cont_msg_info, cont) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add continuation message")
+            } /* end if */
+            /* Check if message is a ref. count message */
+            else if(H5O_REFCOUNT_ID == id) {
+                H5O_refcount_t *refcount;
+
+                /* Decode ref. count message */
+                HDassert(oh->version > H5O_VERSION_1);
+                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, mesg->raw);
+
+                /* Save 'native' form of ref. count message */
+                mesg->native = refcount;
+
+                /* Set object header values */
+                oh->has_refcount_msg = TRUE;
+                oh->nlink = *refcount;
+            } /* end if */
+            /* Check if message is a link message */
+            else if(H5O_LINK_ID == id) {
+                /* Increment the count of link messages */
+                oh->link_msgs_seen++;
+            } /* end if */
+            /* Check if message is an attribute message */
+            else if(H5O_ATTR_ID == id) {
+                /* Increment the count of attribute messages */
+                oh->attr_msgs_seen++;
+            } /* end if */
+
+            /* Mark the message & chunk as dirty if the message was changed by decoding */
+            if((ioflags & H5O_DECODEIO_DIRTY) && (udata->file_intent & H5F_ACC_RDWR)) {
+                mesg->dirty = TRUE;
+                mesgs_modified = TRUE;
+            } /* end if */
         } /* end else */
 
         /* Advance decode pointer past message */
@@ -1305,89 +1443,23 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
     /* Check for correct checksum on chunks, in later versions of the format */
     if(oh->version > H5O_VERSION_1) {
         uint32_t stored_chksum;     /* Checksum from file */
-        uint32_t computed_chksum;   /* Checksum computed in memory */
+
+	/* checksum verification already done in verify_chksum cb */
 
         /* Metadata checksum */
         UINT32DECODE(chunk_image, stored_chksum);
-
-        /* Compute checksum on chunk */
-        computed_chksum = H5_checksum_metadata(oh->chunk[chunkno].image, (oh->chunk[chunkno].size - H5O_SIZEOF_CHKSUM), 0);
-
-        /* Verify checksum */
-        if(stored_chksum != computed_chksum)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "incorrect metadata checksum for object header chunk")
     } /* end if */
 
     /* Sanity check */
     HDassert(chunk_image == oh->chunk[chunkno].image + oh->chunk[chunkno].size);
 
-    /* Do some inspection/interpretation of new messages from this chunk */
-    /* (detect continuation messages, ref. count messages, etc.) */
-    while(curmesg < oh->nmesgs) {
-        /* Check if next message to examine is a continuation message */
-        if(H5O_CONT_ID == oh->mesg[curmesg].type->id) {
-            H5O_cont_t *cont;
-            unsigned ioflags = 0;   /* Flags for decode routine */
-
-            /* Decode continuation message */
-            cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, oh->mesg[curmesg].raw);
-            H5_CHECKED_ASSIGN(cont->chunkno, unsigned, udata->cont_msg_info->nmsgs + 1, size_t); /* the next continuation message/chunk */
-
-            /* Save 'native' form of continuation message */
-            oh->mesg[curmesg].native = cont;
-
-            /* Add to continuation messages left to interpret */
-            if(H5O__add_cont_msg(udata->cont_msg_info, cont) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add continuation message")
-
-            /* Mark the message & chunk as dirty if the message was changed by decoding */
-            if((ioflags & H5O_DECODEIO_DIRTY) && (udata->file_intent & H5F_ACC_RDWR)) {
-                oh->mesg[curmesg].dirty = TRUE;
-                udata->mesgs_modified = TRUE;
-                *dirty = TRUE;
-            } /* end if */
-        } /* end if */
-        /* Check if next message to examine is a ref. count message */
-        else if(H5O_REFCOUNT_ID == oh->mesg[curmesg].type->id) {
-            H5O_refcount_t *refcount;
-            unsigned ioflags = 0;   /* Flags for decode routine */
-
-            /* Decode ref. count message */
-            HDassert(oh->version > H5O_VERSION_1);
-            refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(udata->f, udata->dxpl_id, NULL, 0, &ioflags, oh->mesg[curmesg].raw);
-
-            /* Save 'native' form of ref. count message */
-            oh->mesg[curmesg].native = refcount;
-
-            /* Set object header values */
-            oh->has_refcount_msg = TRUE;
-            oh->nlink = *refcount;
-
-            /* Mark the message & chunk as dirty if the message was changed by decoding */
-            if((ioflags & H5O_DECODEIO_DIRTY) && (udata->file_intent & H5F_ACC_RDWR)) {
-                oh->mesg[curmesg].dirty = TRUE;
-                udata->mesgs_modified = TRUE;
-                *dirty = TRUE;
-            } /* end if */
-        } /* end if */
-        /* Check if next message to examine is a link message */
-        else if(H5O_LINK_ID == oh->mesg[curmesg].type->id) {
-            /* Increment the count of link messages */
-            oh->link_msgs_seen++;
-        } /* end if */
-        /* Check if next message to examine is an attribute message */
-        else if(H5O_ATTR_ID == oh->mesg[curmesg].type->id) {
-            /* Increment the count of attribute messages */
-            oh->attr_msgs_seen++;
-        } /* end if */
-
-        /* Advance to next message */
-        curmesg++;
-    } /* end while */
+    /* Mark the chunk dirty if we've modified messages */
+    if(mesgs_modified)
+	*dirty = TRUE;
 
     /* Mark the chunk dirty if we've merged null messages */
-    if(merged_null_msgs) {
-        udata->mesgs_modified = TRUE;
+    if(merged_null_msgs > 0) {
+        udata->merged_null_msgs += merged_null_msgs;
 	*dirty = TRUE;
     } /* end if */
 
