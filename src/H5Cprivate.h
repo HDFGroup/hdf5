@@ -323,50 +323,124 @@ typedef struct H5C_t H5C_t;
  *		code.  When it is set, writes of buffers prepared by the 
  *		serialize callback will be skipped.
  *
- * GET_LOAD_SIZE: Pointer to the 'get load size' function.
+ * GET_INITIAL_LOAD_SIZE: Pointer to the 'get initial load size' function.
  *
- * 	This function must be able to determine the size of the disk image of
- *      a metadata cache entry, given the 'udata' that will be passed to the
- *      'deserialize' callback.
+ *	This function determines the size based on the information in the 
+ *	parameter "udata" or an initial speculative guess.  The size is
+ *	returned in the parameter "image_len_ptr".
  *
- *	Note that if either the H5C__CLASS_SPECULATIVE_LOAD_FLAG is set, the disk image size 
- *	returned by this callback is a first guess.
- *	In other cases, the value returned should be the correct 
- *	size of the entry.
+ * 	For an entry with H5C__CLASS_NO_FLAGS_SET:
+ *	  This function returns in "image_len_ptr" the on disk size of the
+ *              entry.
+ *	
+ * 	For an entry with H5C__CLASS_SPECULATIVE_LOAD_FLAG:
+ *	  This function returns in "image_len_ptr" an initial guess of the
+ *              entry's on disk size.  This many bytes will be loaded from
+ *              the file and then passed to 'get_final_load_size' callback
+ *              for the actual (final) image length to be determined.
  *
- *	The typedef for the deserialize callback is as follows:
+ *	The typedef for the get_initial_load_size callback is as follows:
  *
- * 	   typedef herr_t (*H5C_get_load_size_func_t)(void *udata_ptr,
- * 	                                           size_t *image_len_ptr);
+ * 	   typedef herr_t (*H5C_get_initial_load_size_func_t)(void *udata_ptr,
+ * 	                                              size_t *image_len_ptr);
  *
- *	The parameters of the deserialize callback are as follows:
+ *	The parameters of the get_initial_load_size callback are as follows:
  *
  *	udata_ptr: Pointer to user data provided in the protect call, which
- *         	will also be passed through to the deserialize callback.
+ *         	will also be passed through to the 'get_final_load_size',
+ *              'verify_chksum', and 'deserialize' callbacks.
  *
- *	image_len_ptr: Pointer to the location in which the length in bytes 
- *		of the in file image to be deserialized is to be returned.
+ *	image_len_ptr: Pointer to the length in bytes of the in-file image to
+ *              be deserialized is to be returned.
  *
  *              This value is used by the cache to determine the size of
  *              the disk image for the metadata, in order to read the disk
  *              image from the file.
- *
+ *	
  *	Processing in the get_load_size function should proceed as follows:
  *
- *	If successful, the function will place the length of the on disk
- *	image associated with supplied user data in *image_len_ptr, and 
- *	then return SUCCEED.
+ *	If successful, the function will place the length in the *image_len_ptr
+ *      associated with supplied user data and then return SUCCEED.
  *
  *	On failure, the function must return FAIL and push error information
  *	onto the error stack with the error API routines, without modifying
- *      the value pointed to by the image_len_ptr.
+ *      the value pointed to by image_len_ptr.
+ *
+ *
+ * GET_FINAL_LOAD_SIZE: Pointer to the 'get final load size' function.
+ *
+ * 	This function determines the final size of a speculatively loaded
+ *      metadata cache entry based on the parameter "image" and the "udata"
+ *      parameters.  This callback _must_ be implemented for cache clients
+ *      which set the H5C__CLASS_SPECULATIVE_LOAD_FLAG and must return the
+ *      actual length of on-disk image after being called once.
+ *
+ *	This function might deserialize the needed metadata information to
+ *	determine the actual size.  The size is returned in the parameter
+ *      "actual_len_ptr".
+ *
+ *	The typedef for the get_load_size callback is as follows:
+ *
+ * 	   typedef herr_t (*H5C_get_final_load_size_func_t)(const void *image_ptr,
+ * 	                                              size_t image_len,
+ *						      void *udata_ptr,
+ *						      size_t *actual_len_ptr);
+ *
+ *	The parameters of the get_load_size callback are as follows:
+ *
+ *	image_ptr: Pointer to a buffer containing the (possibly partial)
+ *              metadata read in.
+ *
+ *	image_len: The length in bytes of the (possibly partial) in-file image
+ *              to be queried for an actual length.
+ *
+ *	udata_ptr: Pointer to user data provided in the protect call, which
+ *         	will also be passed through to the 'verify_chksum' and
+ *              'deserialize' callbacks.
+ *
+ *	actual_len_ptr: Pointer to the location containing the actual length
+ *			of the metadata entry on disk.
+ *
+ *	Processing in the get_final_load_size function should proceed as follows:
+ *
+ *	If successful, the function will place the length in the *actual_len_ptr
+ *      associated with supplied image and/or user data and then return SUCCEED.
+ *
+ *	On failure, the function must return FAIL and push error information
+ *	onto the error stack with the error API routines, without modifying
+ *      the value pointed to by actual_len_ptr.
+ *
+ *
+ * VERIFY_CHKSUM: Pointer to the verify_chksum function.
+ *
+ *	This function verifies the checksum computed for the metadata is
+ *	the same as the checksum stored in the metadata.
+ *
+ *	It computes the checksum based on the metadata stored in the
+ *	parameter "image_ptr" and the actual length of the metadata in the 
+ * 	parameter "len"  which is obtained from the "get_load_size" callback.
+ *
+ *	The typedef for the verify_chksum callback is as follows:
+ *
+ *	   typedef htri_t (*H5C_verify_chksum_func_t)(const void *image_ptr, 
+ *						      size_t len, 
+ *						      void *udata_ptr);
+ *
+ *	The parameters of the verify_chksum callback are as follows:
+ *	
+ *	image_ptr: Pointer to a buffer containing the metadata read in.
+ *
+ *	len: The actual length of the metadata.
+ *
+ *	udata_ptr: Pointer to user data.
  *
  *
  * DESERIALIZE: Pointer to the deserialize function.
  *
- * 	This function must be able to read a buffer containing the on disk 
- *	image of a metadata cache entry, allocate and load the equivalent 
- *	in core representation, and return a pointer to that representation.
+ * 	This function must be able to deserialize a buffer containing the
+ *      on-disk image of a metadata cache entry, allocate and initialize the
+ *      equivalent in core representation, and return a pointer to that
+ *      representation.
  *
  *	The typedef for the deserialize callback is as follows:
  *
@@ -399,17 +473,17 @@ typedef struct H5C_t H5C_t;
  *	Processing in the deserialize function should proceed as follows:
  *
  *      If the image contains valid data, and is of the correct length,
- *      the deserialize function must allocate space for an in core
- *      representation of that data, load the contents of the image into
- *      the space allocated for the in core representation, and return
+ *      the deserialize function must allocate space for an in-core
+ *      representation of that data, deserialize the contents of the image
+ *      into the space allocated for the in-core representation, and return
  *      a pointer to the in core representation.  Observe that an
  *      instance of H5C_cache_entry_t must be the first item in this
  *      representation.  The cache will initialize it after the callback
  *      returns.
  *
- *      Note that the structure of the in core representation is otherwise
+ *      Note that the structure of the in-core representation is otherwise
  *      up to the cache client.  All that is required is that the pointer
- *      returned be sufficient for the clients purposes when it is returned
+ *      returned be sufficient for the client's purposes when it is returned
  *      on a protect call.
  *
  *      If the deserialize function has to clean up file corruption
@@ -420,30 +494,6 @@ typedef struct H5C_t H5C_t;
  *      If the operation fails for any reason (i.e. bad data in buffer, bad
  *      buffer length, malloc failure, etc.) the function must return NULL and
  *      push error information on the error stack with the error API routines.
- *
- *	Exceptions to the above:
- *
- *	If the H5C__CLASS_SPECULATIVE_LOAD_FLAG is set, the buffer supplied
- *	to the function need not be currect on the first invocation of the 
- *	callback in any single attempt to load the entry.
- *
- *	In this case, if the buffer is larger than necessary, the function
- *	should load the entry as described above and not flag an error due
- *	to the oversized buffer.  The cache will correct its mis-apprehension
- *	of the entry size with a subsequent call to the image_len callback.
- *
- *	If the buffer is too small, and this is the first deserialize call
- *	in the entry load operation, the function should not flag an error.
- *	Instead, it must compute the correct size of the entry, allocate an
- *	in core representation and initialize it to the extent that an 
- *	immediate call to the image len callback will return the correct 
- *	image size.
- *
- *	In this case, when the deserialize callback returns, the cache will
- *	call the image length callback, realize that the supplied buffer was
- *	too small, discard the returned in core representation, allocate
- *	and load a new buffer of the correct size from file, and then call
- *	the deserialize callback again.
  *
  *
  * IMAGE_LEN: Pointer to the image length callback.
@@ -472,6 +522,7 @@ typedef struct H5C_t H5C_t;
  *	If the function fails, it must return FAIL and push error information
  *      onto the error stack with the error API routines, and return without
  *      modifying the values pointed to by the image_len_ptr parameter.
+ *
  *
  * PRE_SERIALIZE: Pointer to the pre-serialize callback.
  *
@@ -818,8 +869,10 @@ typedef enum H5C_notify_action_t {
 } H5C_notify_action_t;
 
 /* Cache client callback function pointers */
-typedef herr_t (*H5C_get_load_size_func_t)(const void *udata_ptr,
-    size_t *image_len_ptr);
+typedef herr_t (*H5C_get_initial_load_size_func_t)(void *udata_ptr, size_t *image_len_ptr);
+typedef herr_t (*H5C_get_final_load_size_func_t)(const void *image_ptr,
+    size_t image_len, void *udata_ptr, size_t *actual_len_ptr);
+typedef htri_t (*H5C_verify_chksum_func_t)(const void *image_ptr, size_t len, void *udata_ptr);
 typedef void *(*H5C_deserialize_func_t)(const void *image_ptr,
     size_t len, void *udata_ptr, hbool_t *dirty_ptr);
 typedef herr_t (*H5C_image_len_func_t)(const void *thing, size_t *image_len_ptr);
@@ -838,7 +891,9 @@ typedef struct H5C_class_t {
     const char *		name;
     H5FD_mem_t			mem_type;
     unsigned			flags;
-    H5C_get_load_size_func_t 	get_load_size;
+    H5C_get_initial_load_size_func_t 	get_initial_load_size;
+    H5C_get_final_load_size_func_t 	get_final_load_size;
+    H5C_verify_chksum_func_t	verify_chksum;
     H5C_deserialize_func_t 	deserialize;
     H5C_image_len_func_t	image_len;
     H5C_pre_serialize_func_t	pre_serialize;

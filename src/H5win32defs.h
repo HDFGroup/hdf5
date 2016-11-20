@@ -42,6 +42,7 @@ typedef __int64             h5_stat_size_t;
 #define HDlseek(F,O,W)      _lseeki64(F,O,W)
 #define HDlstat(S,B)        _lstati64(S,B)
 #define HDmkdir(S,M)        _mkdir(S)
+#define HDnanosleep(S)      Wnanosleep(S)
 #define HDoff_t             __int64
 /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
  * transformations when performing I/O.
@@ -65,12 +66,22 @@ typedef __int64             h5_stat_size_t;
  */
 #define HDmemset(X,C,Z)     memset((void*)(X),C,Z)
 
-#endif /* H5_HAVE_VISUAL_STUDIO */
-
 struct timezone {
     int tz_minuteswest;
     int tz_dsttime;
 };
+
+/* time.h before VS2015 does not include timespec */
+#if (_MSC_VER < 1900)
+struct timespec
+{
+	time_t tv_sec;  // Seconds - >= 0
+	long   tv_nsec; // Nanoseconds - [0, 999999999]
+};
+#endif /* MSC_VER < 1900 */
+
+#endif /* H5_HAVE_VISUAL_STUDIO */
+
 
 #ifdef __cplusplus
 extern "C" {

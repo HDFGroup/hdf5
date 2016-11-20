@@ -17149,6 +17149,135 @@ check_protect_ro_rw_err(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	check_protect_retries()
+ *
+ * Purpose:	To exercise checksum verification retries for an entry with
+ *		a speculative load.
+ *
+ * Return:	
+ *
+ * Programmer:	
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+check_protect_retries(void)
+{
+    H5F_t * file_ptr = NULL;
+    H5C_t *cache_ptr = NULL;
+    test_entry_t *base_addr = NULL;
+    test_entry_t *entry_ptr = NULL;
+    H5C_cache_entry_t * cache_entry_ptr = NULL;
+    int32_t type;
+    int32_t idx;
+
+    TESTING("protect an entry to verify retries");
+
+    pass = TRUE;
+
+    /* Set up the cache */
+    if(pass) {
+
+        reset_entries();
+
+        file_ptr = setup_cache((size_t)(2 * 1024),
+                                (size_t)(1 * 1024));
+
+	/* Set up read attempts for verifying checksum */
+	file_ptr->shared->read_attempts = 10;
+        file_ptr->shared->retries_nbins = 1;
+    }
+
+    /* Test only for this type which has a speculative load */
+    type = VARIABLE_ENTRY_TYPE;
+    idx = 0;
+
+    if(pass) {
+
+	cache_ptr = file_ptr->shared->cache;
+	base_addr = entries[type];
+        entry_ptr = &(base_addr[idx]);
+
+	/* test case (1):
+	 * 	--actual_len is smaller the initial length from get_load_size()
+	 *	--verify_chksum() returns TRUE after max_verify_ct is reached
+	 *
+	 */
+	entry_ptr->actual_len = entry_ptr->size/2;
+        entry_ptr->max_verify_ct = 3;
+        entry_ptr->verify_ct = 0;
+
+	cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
+                &(types[type]), entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
+
+	if((cache_entry_ptr != (void *)entry_ptr) ||
+             (!(entry_ptr->header.is_protected)) ||
+             (!(entry_ptr->header.is_read_only)) ||
+             (entry_ptr->header.ro_ref_count <= 0) ||
+             (entry_ptr->header.type != &(types[type])) ||
+             (entry_ptr->size != entry_ptr->header.size) ||
+             (entry_ptr->addr != entry_ptr->header.addr) ||
+	     (entry_ptr->verify_ct != entry_ptr->max_verify_ct))  {
+
+            pass = FALSE;
+            failure_mssg = "error from H5C_protect().";
+
+        } else {
+
+            HDassert((entry_ptr->cache_ptr == NULL) ||
+                      (entry_ptr->cache_ptr == cache_ptr));
+
+            entry_ptr->cache_ptr = cache_ptr;
+            entry_ptr->file_ptr = file_ptr;
+            entry_ptr->is_protected = TRUE;
+            entry_ptr->is_read_only = TRUE;
+            entry_ptr->ro_ref_count++;
+        }
+
+        HDassert(((entry_ptr->header).type)->id == type);
+    }
+
+    if(pass)
+	unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, idx, H5C__NO_FLAGS_SET);
+
+    if(pass) {
+        entry_ptr = &(base_addr[++idx]);
+
+	/* test case (2):
+	 * 	--actual_len is greater the initial length from get_load_size()
+	 *	--verify_chksum() returns FALSE even after all tries is reached
+ 	 * 	  (file_ptr->shared->read_attempts is smaller then max_verify_ct)
+	 */
+	entry_ptr->actual_len = entry_ptr->size*2;
+        entry_ptr->max_verify_ct = 11;
+        entry_ptr->verify_ct = 0;
+
+	cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
+                &(types[type]), entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
+
+	/* H5C_protect() should fail after all retries fail */
+	if(cache_entry_ptr != NULL)
+	    pass = FALSE;
+    }
+
+
+    takedown_cache(file_ptr, FALSE, FALSE);
+    reset_entries();
+
+    if(pass) { PASSED(); } else { H5_FAILED(); }
+
+    if(!pass) {
+
+        HDfprintf(stdout, "%s: failure_msg = \"%s\".\n",
+                  FUNC, failure_mssg);
+    }
+
+    return (unsigned)!pass;
+
+} /* check_protect_retries() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	check_evictions_enabled_err()
  *
  * Purpose:	Verify that H5C_get_evictions_enabled() and
@@ -36190,6 +36319,7 @@ main(void)
     nerrs += check_resize_entry_errs();
     nerrs += check_unprotect_ro_dirty_err();
     nerrs += check_protect_ro_rw_err();
+    nerrs += check_protect_retries();
     nerrs += check_check_evictions_enabled_err();
     nerrs += check_auto_cache_resize(FALSE);
     nerrs += check_auto_cache_resize(TRUE);
