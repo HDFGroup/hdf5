@@ -68,16 +68,14 @@
 /* Flags for cache client class behavior */
 #define H5C__CLASS_NO_FLAGS_SET			((unsigned)0x0)
 #define H5C__CLASS_SPECULATIVE_LOAD_FLAG	((unsigned)0x1)
-#define H5C__CLASS_COMPRESSED_FLAG		((unsigned)0x2)
 /* The following flags may only appear in test code */
-#define H5C__CLASS_SKIP_READS			((unsigned)0x4)
-#define H5C__CLASS_SKIP_WRITES			((unsigned)0x8)
+#define H5C__CLASS_SKIP_READS			((unsigned)0x2)
+#define H5C__CLASS_SKIP_WRITES			((unsigned)0x4)
 
 /* Flags for pre-serialize callback */
 #define H5C__SERIALIZE_NO_FLAGS_SET	((unsigned)0)
 #define H5C__SERIALIZE_RESIZED_FLAG	((unsigned)0x1)
 #define H5C__SERIALIZE_MOVED_FLAG	((unsigned)0x2)
-#define H5C__SERIALIZE_COMPRESSED_FLAG  ((unsigned)0x4)
 
 /* Upper and lower limits on cache size.  These limits are picked
  * out of a hat -- you should be able to change them as necessary.
@@ -286,19 +284,12 @@ typedef struct H5C_t H5C_t;
  *
  * flags:  Flags indicating class-specific behavior.
  *
- *	Whoever created the flags field neglected to document the meanings 
- *      of the flags he created.  Hence the following discussion of the 
- *	H5C__CLASS_SPECULATIVE_LOAD_FLAG and (to a lesser extent) 
- *	H5C__CLASS_COMPRESSED_FLAG should be viewed with suspicion, 
- *	as the meanings are divined from the source code, and thus may be 
- *	inaccurate.  Please correct any errors you find.
- *
  *	Possible flags are:
  *
  *	H5C__CLASS_NO_FLAGS_SET: No special processing.
  *
- *	H5C__CLASS_SPECULATIVE_LOAD_FLAG: This flag appears to be used
- *		only in H5C_load_entry().  When it is set, entries are 
+ *	H5C__CLASS_SPECULATIVE_LOAD_FLAG: This flag is used only in
+ *              H5C_load_entry().  When it is set, entries are 
  *		permitted to change their sizes on the first attempt 
  *		to load.  
  *
@@ -312,55 +303,14 @@ typedef struct H5C_t H5C_t;
  *		entry in the cache.
  *
  *		If the new size is smaller than the old, no new loads 
- *		or desearializes are performed, but the new size becomes
+ *		or deserializes are performed, but the new size becomes
  *		the size of the entry in the cache.
  *
  *		When this flag is set, an attempt to read past the 
- *		end of file is pemitted.  In this case, if the size 
+ *		end of file could occur.  In this case, if the size 
  *		returned get_load_size callback would result in a 
- *		read past the end of file, the size is trunkated to 
+ *		read past the end of file, the size is truncated to 
  *		avoid this, and processing proceeds as normal.
- *
- *	H5C__CLASS_COMPRESSED_FLAG: This flags indicates that the entry 
- *		may be compressed -- i.e. its on disk image is run through 
- *		filters on the way to and from disk.  Thus the uncompressed 
- *		(or unfiltered) size of the entry may be different from the 
- *		size of the entry in file.  
- *
- *		This has the following implications:
- *
- *		On load, uncompressed size and load size may be different.  
- *		Presumably, load size will be smaller than uncompressed 
- *		size, but there is no requirement for this in the code 
- *		(but note that I have inserted an assertion to this effect, 
- *		which has not been triggered to date).
- *
- *		On insertion, compressed (AKA filtered, AKA on disk) size 
- *		is unknown, as the entry has yet to be run through filters.
- *		Compressed size is computed whenever the entry is 
- *		written (or the image is updated -- not relevant until 
- *		journaling is brought back).
- *
- *		On dirty (of a clean entry), compressed (AKA filtered, 
- *		AKA on disk) size becomes unknown.  Thus, compressed size
- *		must be computed by the pre-serialize callback before the 
- *		entry may be written.  
- *
- *		Once the compressed size becomes unknown, it remains so 
- *		until the on disk image is constructed.  
- *
- *		Observe that the cache needs to know the size of the entry
- *		for space allocation purposes.  Since the compressed size 
- *		can change or become unknown, it uses the uncompressed
- *		size which may change, but which should always be known.  
- *		The compressed size is used only for journaling and disk I/O.
- *
- *		While there is no logical reason why they could not be 
- *		combined, due to absence of need and for simplicity of code, 
- *		the cache does not permit both the the 
- *		H5C__CLASS_COMPRESSED_FLAG and the 
- *		H5C__CLASS_SPECULATIVE_LOAD_FLAG to be set in the same 
- *		instance of H5C_class_t.
  *
  *      The following flags may only appear in test code.
  *
@@ -379,14 +329,10 @@ typedef struct H5C_t H5C_t;
  *      a metadata cache entry, given the 'udata' that will be passed to the
  *      'deserialize' callback.
  *
- *	Note that if either the H5C__CLASS_SPECULATIVE_LOAD_FLAG or
- *	the H5C__CLASS_COMPRESSED_FLAG is set, the disk image size 
- *	returned by this callback is either a first guess (if the 
- *	H5C__CLASS_SPECULATIVE_LOAD_FLAG is set) or (if the
- *      H5C__CLASS_COMPRESSED_FLAG is set), the exact on disk size 
- *	of the entry whether it has been run through filters or not.
- *	In all other cases, the value returned should be the correct 
- *	uncompressed size of the entry.
+ *	Note that if either the H5C__CLASS_SPECULATIVE_LOAD_FLAG is set, the disk image size 
+ *	returned by this callback is a first guess.
+ *	In other cases, the value returned should be the correct 
+ *	size of the entry.
  *
  *	The typedef for the deserialize callback is as follows:
  *
@@ -499,37 +445,16 @@ typedef struct H5C_t H5C_t;
  *	and load a new buffer of the correct size from file, and then call
  *	the deserialize callback again.
  *
- *	If the H5C__CLASS_COMPRESSED_FLAG is set, exceptions are as per the
- *	H5C__CLASS_SPECULATIVE_LOAD_FLAG, save that only oversized buffers
- *	are permitted.
- *
  *
  * IMAGE_LEN: Pointer to the image length callback.
  *
- *	This callback exists primarily to support 
- *	H5C__CLASS_SPECULATIVE_LOAD_FLAG and H5C__CLASS_COMPRESSED_FLAG 
- *	discussed above, although it is also used to obtain the size of 
- *	newly inserted entries.
- *
- *	In the case of the H5C__CLASS_SPECULATIVE_LOAD_FLAG, it is used to
- *	allow the client to change the size of an entry in the deserialize
- *	callback.
- *
- *	For the H5C__CLASS_COMPRESSED_FLAG, it is used to allow the client
- *	to indicate whether the entry is compressed (i.e. whether entries
- *	are run through filters) and if so, to report both the uncompressed 
- *	and the compressed entry size (i.e. the actual on disk size after
- *	the entry has been run through filters) if that value is known.
- *
- *	The callback is also used in H5C_insert_entry() to obtain the 
- *	size of the newly inserted entry.
+ *	The image_len callback is used to obtain the size of newly inserted
+ *      entries and assert verification.
  *
  *      The typedef for the image_len callback is as follows:
  *
  *      typedef herr_t (*H5C_image_len_func_t)(void *thing,
- *                                           size_t *image_len_ptr,
- *                                           hbool_t *compressed_ptr,
- *                                           size_t *compressed_image_len_ptr);
+ *                                           size_t *image_len_ptr);
  *
  * 	The parameters of the image_len callback are as follows:
  *
@@ -538,84 +463,15 @@ typedef struct H5C_t H5C_t;
  *	image_len_ptr: Pointer to size_t in which the callback will return
  *		the length (in bytes) of the cache entry.
  *
- *		If the H5C__CLASS_COMPRESSED_FLAG is not set in the 
- *		associated instance of H5C_class_t, or if the flag is 
- *		set, and the callback sets *compressed_ptr to FALSE,
- *		this size is the actual size of the entry on disk.
- *
- *		Otherwise, this size is the uncompressed size of the 
- *		entry -- which the cache will use for all purposes OTHER
- *		than journal writes and disk I/O.
- *
- *	compressed_ptr: Pointer to a boolean flag indicating whether 
- *		the cache entry will be compressed / uncompressed on 
- *		disk writes / reads.
- *
- *		If the H5C__CLASS_COMPRESSED_FLAG is not set in the
- *              associated instance of H5C_class_t, *compressed_ptr 
- *		must be set to FALSE.
- *
- *		If the H5C__CLASS_COMPRESSED_FLAG is set in the
- *              associated instance of H5C_class_t, and filters are 
- *		not enabled, *compressed_ptr must be set to FALSE.
- *
- *		If the H5C__CLASS_COMPRESSED_FLAG is set in the
- *              associated instance of H5C_class_t, and filters are
- *		enabled, the callback must set *compressed_ptr to TRUE.
- *
- *		Note that *compressed_ptr will always be set to FALSE 
- *		by the caller prior to invocation of the callback.  Thus 
- *		callbacks for clients that don't set the 
- *		H5C__CLASS_COMPRESSED_FLAG can ignore this parameter.
- *
- *	compressed_image_len_ptr: Pointer to size_t in which the callback 
- *		may return the length (in bytes) of the compressed on 
- *		disk image of the entry, or the uncompressed size if the
- *		compressed size has not yet been calculated.
- *
- *		Since computing the compressed image len is expensive, 
- *		the callback should only report the most recently computed
- *		value -- which will typically be incorrect if the entry
- *		is dirty.
- *
- *		If *compressed_ptr is set to FALSE, *compressed_image_len_ptr
- *		should be set to zero.  However, as *compressed_image_len_ptr
- *		will be initialize to zero prior to the call, the callback 
- *		need not modify it if the H5C__CLASS_COMPRESSED_FLAG is 
- *		not set.
- *
- *	If the H5C__CLASS_COMPRESSED_FLAG is not set in the associated 
- *	instance of H5C_class_t, processing in the image_len function 
- *	should proceed as follows:
+ *	Processing in the image_len function should proceed as follows:
  *
  *	If successful, the function will place the length of the on disk
  *	image associated with the in core representation provided in the
- *	thing parameter in *image_len_ptr, and then return SUCCEED.  Since
- *	*compressed_ptr and *compressed_image_len_ptr will be initialized to 
- *	FALSE and zero respectively before the call, the callback need not
- *	modify these values, and may declare the associated parameters as 
- *	UNUSED.
+ *	thing parameter in *image_len_ptr, and then return SUCCEED.
  *
- *	If the H5C__CLASS_COMPRESSED_FLAG is set in the associated 
- *      instance of H5C_class_t, processing in the image_len function 
- *      should proceed as follows:
- *
- *	If successful, the function will place the uncompressed length of 
- *	the on disk image associated with the in core representation 
- *	provided in the thing parameter in *image_len_ptr.  If filters 
- *	are not enabled for the entry, it will set *compressed_ptr to FALSE,
- *      and *compressed_image_len_ptr to zero.  If filters are enabled, 
- *	it will set *compressed_ptr to TRUE.  In this case, it must set 
- *	*compressed_image_len_ptr equal to the last computed compressed
- *	if the compressed size, or to the uncompressed size if that value
- *	is yet to be computed.  In all cases, it will return SUCCEED if 
- *	successful.
- *
- *	In either case, if the function fails, it must return FAIL and 
- *	push error information onto the error stack with the error API 
- *	routines, and return without modifying the values pointed to by 
- *	the image_len_ptr, compressed_ptr, and compressed_image_len_ptr
- *	parameters.
+ *	If the function fails, it must return FAIL and push error information
+ *      onto the error stack with the error API routines, and return without
+ *      modifying the values pointed to by the image_len_ptr parameter.
  *
  * PRE_SERIALIZE: Pointer to the pre-serialize callback.
  *
@@ -623,11 +479,11 @@ typedef struct H5C_t H5C_t;
  *	it needs a current on-disk image of the metadata entry for purposes
  *	either constructing a journal or flushing the entry to disk.
  *
- *      If the client needs to change the address or compressed or 
- *	uncompressed length of the entry prior to flush, the pre-serialize 
- *	callback is responsible for these actions, so that the actual 
- *	serialize callback (described below) is only responsible for 
- *	serializing the data structure, not moving it on disk or resizing it.
+ *      If the client needs to change the address or length of the entry prior
+ *      to flush, the pre-serialize callback is responsible for these actions,
+ *      so that the actual serialize callback (described below) is only
+ *      responsible for serializing the data structure, not moving it on disk
+ *      or resizing it.
  *
  *	In addition, the client may use the pre-serialize callback to 
  *	ensure that the entry is ready to be flushed -- in particular, 
@@ -641,7 +497,7 @@ typedef struct H5C_t H5C_t;
  *	However, that need not be the case as free space section info
  *	entries will change size (and possibly location) depending on the 
  *	number of blocks of free space being manages, and fractal heap 
- *	direct blocks can change compressed size (and  possibly location) 
+ *	direct blocks can change compressed size (and possibly location) 
  *	on serialization if compression is enabled.  Similarly, it may
  *	be necessary to move entries from temporary to real file space.
  *
@@ -655,10 +511,8 @@ typedef struct H5C_t H5C_t;
  *                                             void * thing,
  *                                             haddr_t addr,
  *                                             size_t len,
- *					       size_t compressed_len,
  *                                             haddr_t * new_addr_ptr,
  *                                             size_t * new_len_ptr,
- *					       size_t * new_compressed_len_ptr,
  *                                             unsigned * flags_ptr);
  *
  *	The parameters of the pre-serialize callback are as follows:
@@ -686,22 +540,8 @@ typedef struct H5C_t H5C_t;
  *
  *	len:    Length in bytes of the in file image of the entry to be
  *		serialized.  Also the size the image passed to the 
- *		serialize callback (discussed below) unless either that 
- *		value is altered by this function, or the entry will be
- *		compressed.  In the latter case, the compressed size
- *		of the entry will be reported in *new_compressed_len_ptr.
- *
- *		This parameter is supplied mainly for sanity checking.
- *		Sanity checks should be performed when compiled in debug
- *		mode, but the parameter may be unused when compiled in
- *		production mode.
- *
- *	compressed_len: If the entry is to be compressed (i.e. run through 
- *		filters) prior to flush, Length in bytes of the last know 
- *		compressed size of the entry -- or the uncompressed size 
- *		if no such value exists (i.e. the entry has been inserted, 
- *		but never flushed).  This parameter should be set to zero
- *		in all other cases.
+ *		serialize callback (discussed below) unless that 
+ *		value is altered by this function.
  *
  *		This parameter is supplied mainly for sanity checking.
  *		Sanity checks should be performed when compiled in debug
@@ -726,20 +566,12 @@ typedef struct H5C_t H5C_t;
  *		*new_len_ptr is undefined on pre-serialize callback 
  *		return.
  *
- *	new_compressed_len_ptr: Pointer to size_t.  If the image will be
- *		compressed (i.e. run through filters) prior to being 
- *		written to disk, the compressed size (in bytes) of the
- *		on disk image must be stored in *new_compressed_len_ptr,
- *		and the appropriate flag set in *flags_ptr.  
- *
  *	flags_ptr:  Pointer to an unsigned integer used to return flags
  *		indicating whether the preserialize function resized or moved
- *		the entry, or computed its compressed size.  If the entry was 
- *		neither resized or moved, nor will be compressed,
- *		the serialize function must set *flags_ptr to zero. 
- *		H5C__SERIALIZE_RESIZED_FLAG, H5C__SERIALIZE_MOVED_FLAG
- *		and H5C__SERIALIZE_COMPRESSED_FLAG must be set to indicate 
- *		a resize, a move, or compression respectively.
+ *		the entry.  If the entry was neither resized or moved, the
+ *              serialize function must set *flags_ptr to zero.  The
+ *              H5C__SERIALIZE_RESIZED_FLAG or H5C__SERIALIZE_MOVED_FLAG must
+ *              be set to indicate a resize or move respectively.
  *
  *	        If the H5C__SERIALIZE_RESIZED_FLAG is set, the new length
  *	        must be stored in *new_len_ptr.
@@ -747,39 +579,20 @@ typedef struct H5C_t H5C_t;
  *	        If the H5C__SERIALIZE_MOVED_FLAG flag is set, the
  *	        new image base address must be stored in *new_addr_ptr. 
  *
- *		If the H5C__SERIALIZE_COMPRESSED_FLAG is set, the 
- *		compressed size of the new image must be stored in 
- *		*new_compressed_len_ptr. 
- *
  *	Processing in the pre-serialize function should proceed as follows:
  *
  *	The pre-serialize function must examine the in core representation
  *	indicated by the thing parameter, if the pre-serialize function does
- *      not need to change the size or location of the on-disk image, or
- *	compute its compress size, it must set *flags_ptr to zero. 
+ *      not need to change the size or location of the on-disk image, it must
+ *      set *flags_ptr to zero. 
  *
- *	If the (uncompressed) size of the on-disk image must be changed, 
- *	the pre-serialize function must load the length of the new image 
- *	into *new_len_ptr, and set the H5C__SERIALIZE_RESIZED_FLAG in 
- *	*flags_ptr. 
+ *	If the size of the on-disk image must be changed, the pre-serialize
+ *      function must load the length of the new image into *new_len_ptr, and
+ *      set the H5C__SERIALIZE_RESIZED_FLAG in *flags_ptr. 
  *
  *	If the base address of the on disk image must be changed, the
  *      pre-serialize function must set *new_addr_ptr to the new base address,
  *      and set the H5C__SERIALIZE_MOVED_FLAG in *flags_ptr.
- *
- *	If the H5C__CLASS_COMPRESSED_FLAG is set in the assocated instance
- *	of H5C_class_t, and filters (i.e. compression) are enabled, the 
- *	pre-serialize function must compute the compressed size of the 
- *	on disk image, and if it has changed, load this value into 
- *	*new_compressed_len_ptr, and set H5C__SERIALIZE_COMPRESSED_FLAG in 
- *	*flags_ptr.
- *
- *	Note that to do this, the preserialize function will typically have 
- *	to serialize the entry, and run it through the filters to obtain 
- *	the compressed size.  For efficiency, the compressed image may
- *	be stored to be copied into the supplied buffer by the 
- *	serialize callback.  Needless to say this is awkward.  We may
- *	want to re-work the API for cache clients to simplify this.
  *
  *	In addition, the pre-serialize callback may perform any other 
  *	processing required before the entry is written to disk
@@ -829,11 +642,7 @@ typedef struct H5C_t H5C_t;
  * 		the buffer.
  *
  *	len:    Length in bytes of the in file image of the entry to be
- *		serialized.  Also the size of *image_ptr (below).  If 
- *		compression is not enabled, this value is simply the 
- *		uncompressed size of the entry's image on disk.  If 
- *		compression is enabled, this value is the size of the 
- *		compressed image.
+ *		serialized.  Also the size of *image_ptr (below).
  *
  *		This parameter is supplied mainly for sanity checking.
  *		Sanity checks should be performed when compiled in debug
@@ -852,8 +661,7 @@ typedef struct H5C_t H5C_t;
  *
  *	The serialize function must then examine the in core 
  *	representation indicated by the thing parameter, and write a 
- *	serialized (and possibly compressed) image of its contents into 
- *	the provided buffer. 
+ *	serialized image of its contents into the provided buffer. 
  *
  *	If it is successful, the function must return SUCCEED. 
  *
@@ -925,65 +733,7 @@ typedef struct H5C_t H5C_t;
  *
  *	At least when compiled with debug, it would be useful if the
  *	free ICR call would fail if the in core representation has been
- *	modified since the last serialize of clear callback.
- *
- * CLEAR: Pointer to the clear callback.
- *
- *	In principle, there should be no need for the clear callback,
- *	as the dirty flag should be maintained by the metadata cache.
- *.  
- *	However, some clients maintain dirty bits on internal data, 
- *	and we need some way of keeping these dirty bits in sync with 
- *	those maintained by the metadata cache.  This callback exists
- *	to serve this purpose.  If defined, it is called whenever the 
- *	cache marks dirty entry clean, or when the cache is about to 
- *	discard a dirty entry without writing it to disk (This 
- *	happens as the result of an unprotect call with the 
- *	H5AC__DELETED_FLAG set, and the H5C__TAKE_OWNERSHIP_FLAG not
- *	set.)
- *
- *	Arguably, this functionality should be in the NOTIFY callback.
- *	However, this callback is specific to only a few clients, and 
- *	it will be called relatively frequently.  Hence it is made its
- *	own callback to minimize overhead.
- *
- *	The typedef for the clear callback is as follows:
- *
- *	typedef herr_t (*H5C_clear_func_t)(const H5F_t *f,
- *                                         void * thing, 
- *                                         hbool_t about_to_destroy);
- *
- *	The parameters of the clear callback are as follows:
- *
- *	f:	File pointer.
- *
- *	thing:  Pointer to void containing the address of the in core
- *		representation of the target metadata cache entry.  This
- *		is the same pointer that would be returned by a protect()
- *		call of the associated addr and len.
- *
- *	about_to_destroy: Boolean flag used to indicate whether the 
- *		metadata cache is about to destroy the target metadata
- *		cache entry.  The callback may use this flag to omit
- *		operations that are irrelevant it the entry is about 
- *		to be destroyed.
- *
- *	Processing in the clear function should proceed as follows:
- *
- *	Reset all internal dirty bits in the target metadata cache entry.
- *
- *	If the about_to_destroy flag is TRUE, the clear function may 
- *	ommit any dirty bit that will not trigger a sanity check failure 
- *	or otherwise cause problems in the subsequent free icr call.
- *	In particular, the call must ensure that the free icr call will
- *	not fail due to changes prior to this call, and after the 
- *	last serialize or clear call.
- *
- *	If the function is successful, it must return SUCCEED. 
- *
- *	If it fails for any reason, the function must return FAIL and
- *	push error information on the error stack with the error API
- *	routines. 
+ *	modified since the last serialize callback.
  *
  * GET_FSF_SIZE: Pointer to the get file space free size callback.
  *
@@ -1019,12 +769,12 @@ typedef struct H5C_t H5C_t;
  *	At present this callback is used only by the H5FA and H5EA dblock
  *	and dblock page client classes.
  *
- *      The typedef for the clear callback is as follows:
+ *      The typedef for the get_fsf_size callback is as follows:
  *
  *      typedef herr_t (*H5C_get_fsf_size_t)(const void * thing,
  *                                                size_t *fsf_size_ptr);
  *
- *      The parameters of the clear callback are as follows:
+ *      The parameters of the get_fsf_size callback are as follows:
  *
  *      thing:  Pointer to void containing the address of the in core
  *              representation of the target metadata cache entry.  This
@@ -1072,18 +822,14 @@ typedef herr_t (*H5C_get_load_size_func_t)(const void *udata_ptr,
     size_t *image_len_ptr);
 typedef void *(*H5C_deserialize_func_t)(const void *image_ptr,
     size_t len, void *udata_ptr, hbool_t *dirty_ptr);
-typedef herr_t (*H5C_image_len_func_t)(const void *thing,
-    size_t *image_len_ptr, hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+typedef herr_t (*H5C_image_len_func_t)(const void *thing, size_t *image_len_ptr);
 typedef herr_t (*H5C_pre_serialize_func_t)(const H5F_t *f, hid_t dxpl_id,
-    void *thing, haddr_t addr, size_t len, size_t compressed_len,
-    haddr_t *new_addr_ptr, size_t *new_len_ptr, size_t *new_compressed_len_ptr,
-    unsigned *flags_ptr);
+    void *thing, haddr_t addr, size_t len, haddr_t *new_addr_ptr,
+    size_t *new_len_ptr, unsigned *flags_ptr);
 typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f, void *image_ptr,
     size_t len, void *thing);
 typedef herr_t (*H5C_notify_func_t)(H5C_notify_action_t action, void *thing);
 typedef herr_t (*H5C_free_icr_func_t)(void *thing);
-typedef herr_t (*H5C_clear_func_t)(const H5F_t *f, void * thing, 
-    hbool_t about_to_destroy);
 typedef herr_t (*H5C_get_fsf_size_t)(const void * thing, size_t *fsf_size_ptr);
 
 /* Metadata cache client class definition */
@@ -1099,7 +845,6 @@ typedef struct H5C_class_t {
     H5C_serialize_func_t	serialize;
     H5C_notify_func_t		notify;
     H5C_free_icr_func_t	        free_icr;
-    H5C_clear_func_t		clear;
     H5C_get_fsf_size_t		fsf_size;
 } H5C_class_t;
 
@@ -1204,51 +949,11 @@ typedef int H5C_ring_t;
  *
  * addr:	Base address of the cache entry on disk.
  *
- * size:	Length of the cache entry on disk in bytes(exception: if 
- *		the entry is compressed on disk, this field contains the 
- *		uncompressed size of the entry -- see discussion of 
- *		compressed entries below).  Note that unlike normal 
- *		caches, the entries in this cache are of arbitrary size.
+ * size:	Length of the cache entry on disk in bytes Note that unlike
+ *              normal caches, the entries in this cache are of arbitrary size.
  *
- *		With the exception of compressed entries, the file space
- *		allocations for cache entries implied by the addr and size
- *		fields must be disjoint.  For compressed entries,
- *		the size field contains the uncompressed size -- thus in
- *		in this case, substitution of compressed size for size 
- *		must result in disjoint file space allocations.  However, 
- *		as discussed below, the compressed size may not be know.
- *
- *		Any entry whose associated instance of H5C_class_t has the
- *		H5C__CLASS_COMPRESSED_FLAG set may be compressed.  When
- *		an entry is compressed (that is, when filters are enabled
- *		on it), the compressed flag (see below) must be set, and 
- *		the compressed size (if known), must be stored in 
- *		the compressed_size field.
- *
- *		Since the compressed size will be unknown unless the 
- *		entry is clean, or has an up to date image (see the 
- *		image_ptr and image_up_to_date fields below), we use the 
- *		uncompressed size for all purposes other than disk I/O.  
- *		
- * compressed:	Boolean flag that is set iff the instance of H5C_class_t
- *		associated with the entry has the H5C__CLASS_COMPRESSED_FLAG
- *		set, and filters are enabled on the entry.
- *
- * compressed_size: If compressed is TRUE, this field contains the actual
- *		compressed size of the entry in bytes, which is also its 
- *		true size on disk -- or the uncompressed size if the 
- *		compressed size is unknown (i.e. the entry has been 
- *		inserted in the cache, but it has not been compressed yet).
- *              Note that this value will usually be incorrect if the 
- *		entry is dirty.
- *
- *		Since this value is frequently out of date and expensive to 
- *		compute, it is used only for disk I/O.  The uncompressed 
- *		size of the entry (stored in the size field above) is used 
- *		for all other purposes (i.e. computing the sum of the sizes 
- *		of all entries in the cache, etc.).
- *
- *		If compressed is FALSE, this field should contain 0.
+ *		The file space allocations for cache entries implied by the
+ *              addr and size fields must be disjoint.
  *
  * image_ptr:	Pointer to void.  When not NULL, this field points to a
  * 		dynamically allocated block of size bytes in which the
@@ -1272,25 +977,6 @@ typedef int H5C_ring_t;
  * is_dirty:	Boolean flag indicating whether the contents of the cache
  *		entry has been modified since the last time it was written
  *		to disk.
- *
- *		NOTE: For historical reasons, this field is not maintained
- *		      by the cache.  Instead, the module using the cache
- *		      sets this flag when it modifies the entry, and the
- *		      flush and clear functions supplied by that module
- *		      reset the dirty when appropriate.
- *
- *		      This is a bit quirky, so we may want to change this
- *		      someday.  However it will require a change in the
- *		      cache interface.
- *
- *		Update: Management of the is_dirty field has been largely
- *		      moved into the cache.  The only remaining exceptions
- *		      are the flush and clear functions supplied by the
- *		      modules using the cache.  These still clear the
- *		      is_dirty field as before.  -- JRM 7/5/05
- *
- *		Update: Management of the is_dirty field is now entirely
- *		      in the cache.		 -- JRM 7/5/07
  *
  * dirtied:	Boolean flag used to indicate that the entry has been
  * 		dirtied while protected.
@@ -1604,8 +1290,6 @@ typedef struct H5C_cache_entry_t {
     H5C_t                     * cache_ptr;
     haddr_t			addr;
     size_t			size;
-    hbool_t			compressed;
-    size_t			compressed_size;
     void  		      *	image_ptr;
     hbool_t			image_up_to_date;
     const H5C_class_t	      *	type;

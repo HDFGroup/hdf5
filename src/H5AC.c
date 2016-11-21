@@ -567,7 +567,7 @@ H5AC_dest(H5F_t *f, hid_t dxpl_id)
 
 #ifdef H5_HAVE_PARALLEL
     /* destroying the cache, so clear all collective entries */
-    if(H5C_clear_coll_entries(f->shared->cache, 0) < 0)
+    if(H5C_clear_coll_entries(f->shared->cache, FALSE) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
@@ -726,7 +726,7 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id)
 
 #ifdef H5_HAVE_PARALLEL
     /* flushing the cache, so clear all collective entries */
-    if(H5C_clear_coll_entries(f->shared->cache, 0) < 0)
+    if(H5C_clear_coll_entries(f->shared->cache, FALSE) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed.")
 
     /* Attempt to flush all entries from rank 0 & Bcast clean list to other ranks */
@@ -1639,11 +1639,9 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
      *  the entry.
      */
     if(dirtied && !deleted) {
-        hbool_t		curr_compressed = FALSE; /* dummy for call */
         size_t		curr_size = 0;
-        size_t		curr_compressed_size = 0; /* dummy for call */
 
-        if((type->image_len)(thing, &curr_size, &curr_compressed, &curr_compressed_size) < 0)
+        if((type->image_len)(thing, &curr_size) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTGETSIZE, FAIL, "Can't get size of thing")
 
         if(((H5AC_info_t *)thing)->size != curr_size)

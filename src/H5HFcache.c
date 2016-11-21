@@ -76,11 +76,9 @@ static herr_t H5HF__dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *d
 static herr_t H5HF__cache_hdr_get_load_size(const void *udata, size_t *image_len);
 static void *H5HF__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
-static herr_t H5HF__cache_hdr_image_len(const void *thing, size_t *image_len,
-    hbool_t *compressed_ptr, size_t *compressed_image_len_ptr);
+static herr_t H5HF__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5HF__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id,
-    void *thing, haddr_t addr, size_t len, size_t compressed_len, 
-    haddr_t *new_addr, size_t *new_len, size_t *new_compressed_len, 
+    void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len, 
     unsigned *flags); 
 static herr_t H5HF__cache_hdr_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
@@ -89,12 +87,9 @@ static herr_t H5HF__cache_hdr_free_icr(void *thing);
 static herr_t H5HF__cache_iblock_get_load_size(const void *udata, size_t *image_len);
 static void *H5HF__cache_iblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
-static herr_t H5HF__cache_iblock_image_len(const void *thing, 
-    size_t *image_len, hbool_t *compressed_ptr, 
-    size_t *compressed_image_len_ptr);
+static herr_t H5HF__cache_iblock_image_len(const void *thing, size_t *image_len);
 static herr_t H5HF__cache_iblock_pre_serialize(const H5F_t *f, hid_t dxpl_id,
-    void *thing, haddr_t addr, size_t len, size_t compressed_len, 
-    haddr_t *new_addr, size_t *new_len, size_t *new_compressed_len, 
+    void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len,
     unsigned *flags); 
 static herr_t H5HF__cache_iblock_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
@@ -104,12 +99,9 @@ static herr_t H5HF__cache_iblock_free_icr(void *thing);
 static herr_t H5HF__cache_dblock_get_load_size(const void *udata, size_t *image_len);
 static void *H5HF__cache_dblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
-static herr_t H5HF__cache_dblock_image_len(const void *thing, 
-    size_t *image_len, hbool_t *compressed_ptr, 
-    size_t *compressed_image_len_ptr);
+static herr_t H5HF__cache_dblock_image_len(const void *thing, size_t *image_len);
 static herr_t H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id,
-    void *thing, haddr_t addr, size_t len, size_t compressed_len,
-    haddr_t *new_addr, size_t *new_len, size_t *new_compressed_len, 
+    void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len,
     unsigned *flags); 
 static herr_t H5HF__cache_dblock_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
@@ -146,7 +138,6 @@ const H5AC_class_t H5AC_FHEAP_HDR[1] = {{
     H5HF__cache_hdr_serialize,          /* 'serialize' callback */
     NULL,                               /* 'notify' callback */
     H5HF__cache_hdr_free_icr,           /* 'free_icr' callback */
-    NULL,                               /* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
 
@@ -163,7 +154,6 @@ const H5AC_class_t H5AC_FHEAP_IBLOCK[1] = {{
     H5HF__cache_iblock_serialize,       /* 'serialize' callback */
     H5HF__cache_iblock_notify,          /* 'notify' callback */
     H5HF__cache_iblock_free_icr,        /* 'free_icr' callback */
-    NULL,                               /* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
 
@@ -172,7 +162,7 @@ const H5AC_class_t H5AC_FHEAP_DBLOCK[1] = {{
     H5AC_FHEAP_DBLOCK_ID,               /* Metadata client ID */
     "fractal heap direct block",        /* Metadata client name (for debugging) */
     H5FD_MEM_FHEAP_DBLOCK,              /* File space memory type for client */
-    H5C__CLASS_COMPRESSED_FLAG,         /* Client class behavior flags */
+    H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
     H5HF__cache_dblock_get_load_size,   /* 'get_load_size' callback */
     H5HF__cache_dblock_deserialize,     /* 'deserialize' callback */
     H5HF__cache_dblock_image_len,       /* 'image_len' callback */
@@ -180,7 +170,6 @@ const H5AC_class_t H5AC_FHEAP_DBLOCK[1] = {{
     H5HF__cache_dblock_serialize,       /* 'serialize' callback */
     H5HF__cache_dblock_notify,          /* 'notify' callback */
     H5HF__cache_dblock_free_icr,        /* 'free_icr' callback */
-    NULL,                               /* 'clear' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
 
@@ -578,8 +567,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_hdr_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5HF__cache_hdr_image_len(const void *_thing, size_t *image_len)
 {
     const H5HF_hdr_t  *hdr = (const H5HF_hdr_t *)_thing;    /* Fractal heap info */
 
@@ -619,9 +607,8 @@ H5HF__cache_hdr_image_len(const void *_thing, size_t *image_len,
  */
 static herr_t 
 H5HF__cache_hdr_pre_serialize(const H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id,
-    void *_thing, haddr_t addr, size_t len, size_t H5_ATTR_UNUSED compressed_len, 
-    haddr_t H5_ATTR_UNUSED *new_addr, size_t H5_ATTR_UNUSED *new_len,
-    size_t H5_ATTR_UNUSED *new_compressed_len, unsigned *flags)
+    void *_thing, haddr_t addr, size_t len, haddr_t H5_ATTR_UNUSED *new_addr,
+    size_t H5_ATTR_UNUSED *new_len, unsigned *flags)
 {
     H5HF_hdr_t *hdr = (H5HF_hdr_t *)_thing;     /* Fractal heap info */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -1083,8 +1070,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_iblock_image_len(const void *_thing, size_t *image_len,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_image_len_ptr)
+H5HF__cache_iblock_image_len(const void *_thing, size_t *image_len)
 {
     const H5HF_indirect_t *iblock = (const H5HF_indirect_t *)_thing;    /* Indirect block info */
 
@@ -1123,9 +1109,8 @@ H5HF__cache_iblock_image_len(const void *_thing, size_t *image_len,
  */
 static herr_t 
 H5HF__cache_iblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
-    haddr_t addr, size_t H5_ATTR_UNUSED len, size_t H5_ATTR_UNUSED compressed_len,
-    haddr_t *new_addr, size_t H5_ATTR_UNUSED *new_len,
-    size_t H5_ATTR_UNUSED *new_compressed_len, unsigned *flags)
+    haddr_t addr, size_t H5_ATTR_UNUSED len, haddr_t *new_addr,
+    size_t H5_ATTR_UNUSED *new_len, unsigned *flags)
 {
     H5HF_hdr_t          *hdr;                   /* Shared fractal heap information */
     H5HF_indirect_t     *iblock = (H5HF_indirect_t *)_thing;    /* Indirect block info */
@@ -1494,10 +1479,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_iblock_free_icr() */
 
-/*********************************************************/
-/* metadata cache callback definitions for direct blocks */
-/*********************************************************/
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__cache_dblock_get_load_size()
@@ -1752,14 +1733,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len, hbool_t *compressed_ptr, size_t *compressed_image_len_ptr)
+H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len)
 {
     const H5HF_direct_t    *dblock = (const H5HF_direct_t *)_thing;     /* Direct block info */
-    const H5HF_indirect_t  *par_iblock; /* Parent iblock */
     const H5HF_hdr_t  *hdr;             /* Shared fractal heap information */
-    hbool_t	      compressed;
     size_t            size;
-    size_t	      compressed_size;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1768,19 +1746,15 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len, hbool_t *com
     HDassert(dblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
     HDassert(image_len);
-    HDassert(compressed_ptr);
-    HDassert(compressed_image_len_ptr);
 
     /* Set up convenience variables */
     hdr = dblock->hdr;
-    par_iblock = dblock->parent;
+    HDassert(hdr);
 
     /* Check for I/O filters on this heap */
     if(hdr->filter_len > 0) {
-
-        /* Filters are enabled, so set compressed to TRUE, and set 
- 	 * size equal to the uncompressed size of the direct block.
-         * If the data is available, set compressed_size to the compressed
+        /* 
+         * If the data is available, set to the compressed
          * size of the direct block -- otherwise set it equal to the 
          * uncompressed size.  
          *
@@ -1790,7 +1764,7 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len, hbool_t *com
          * case, both dblock->file_size and the size stored in the 
          * parent (either the header or the parent iblock) will all 
          * be zero.  In this case, return the uncompressed size 
-         * stored in dblock->size as the compressed size.
+         * stored in dblock->size as the size.
          *
          * Second, the block may have just been serialized, in which
          * case, dblock->file_size should be zero, and the correct 
@@ -1804,42 +1778,26 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len, hbool_t *com
          * and thus looking up the parent will likely return incorrect
          * data.
          */
-        size            = dblock->size;
-        compressed      = TRUE;
-        compressed_size = dblock->size; /* will overwrite if compressed 
-                                         * size is available.
-                                         */
-
         if(dblock->file_size != 0) 
-            compressed_size = dblock->file_size;
+            size = dblock->file_size;
         else {
-            if(par_iblock) {
-                unsigned          par_entry;  /* Entry in parent indirect block */
+            const H5HF_indirect_t  *par_iblock = dblock->parent; /* Parent iblock */
 
-                par_entry = dblock->par_entry;
-                compressed_size = par_iblock->filt_ents[par_entry].size;
+            if(par_iblock)
+                size = par_iblock->filt_ents[dblock->par_entry].size;
+            else
+                size = hdr->pline_root_direct_size;
 
-            } /* end if */
-            else {
-                compressed_size = hdr->pline_root_direct_size;
-            }
-
-            if(compressed_size == 0)
-                compressed_size = dblock->size;
-
+            if(size == 0)
+                size = dblock->size;
         } /* end else */
     } /* end if */
-    else {
+    else
         size = dblock->size;
-        compressed = FALSE;
-        compressed_size = 0; /* a convenient, invalid value */
-    }
 
+    /* Set the image size */
     HDassert(size > 0);
-
-    *image_len                = size;
-    *compressed_ptr           = compressed;
-    *compressed_image_len_ptr = compressed_size;
+    *image_len = size;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF__cache_dblock_image_len() */
@@ -1851,7 +1809,7 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len, hbool_t *com
  * Purpose:	In principle, the purpose of this function is to determine
  *		the size and location of the disk image of the target direct 
  *		block.  In this case, the uncompressed size of the block is
- *		fixed, but sined the H5C__CLASS_COMPRESSED_FLAG is set, 
+ *		fixed, but since the direct block could be compressed, 
  *		we may need to compute and report the compressed size.
  *
  *		This is a bit sticky in the case of a direct block when I/O 
@@ -1863,8 +1821,8 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len, hbool_t *com
  *
  *		To complicate matters further, the direct block may have been 
  *		initially allocated in temporary (AKA imaginary) file space. 
- *		In this case, we must relocate the direct block's on disk 
- *		image to real file space regardless of whether it has changed 
+ *		In this case, we must relocate the direct block's on-disk 
+ *		image to "real" file space regardless of whether it has changed 
  *		size.
  *
  *		One simplifying factor is the direct block's "blk" field, 
@@ -1909,8 +1867,7 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len, hbool_t *com
  */
 static herr_t 
 H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr, 
-    size_t H5_ATTR_UNUSED *new_len, size_t *new_compressed_len, unsigned *flags)
+    haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len, unsigned *flags)
 {
     hbool_t 		 at_tmp_addr;  /* Flag to indicate direct block is */
                                        /* at temporary address */
@@ -1936,17 +1893,13 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
     HDassert(dblock->write_size == 0);
     HDassert(dblock->cache_info.size == len);
     HDassert(H5F_addr_defined(addr));
-    HDassert(len == dblock->size);
     HDassert(new_addr);
-    HDassert(new_compressed_len);
+    HDassert(new_len);
     HDassert(flags);
 
     /* Set up local variables */
     hdr = dblock->hdr;
     dblock_addr = addr;    /* will update dblock_addr if we move the block */
-
-    /* dblock->size must match dblock->cache_info.size */
-    HDassert(dblock->cache_info.size == dblock->size);
 
     /* Set the shared heap header's file context for this operation */
     hdr->f = (H5F_t *)f;
@@ -2035,9 +1988,10 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
 
         /* Allocate buffer to perform I/O filtering on */
         write_size = dblock->size;
-
         if(NULL == (write_buf = H5MM_malloc(write_size)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline buffer")
+
+        /* Copy the direct block's image into the buffer to compress */
         HDmemcpy(write_buf, dblock->blk, write_size);
 
         /* Push direct block data through I/O filter pipeline */
@@ -2074,7 +2028,7 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
              * size matches the heap's last record.  This value will
              * likely change shortly.
              */
-            HDassert(compressed_len == hdr->pline_root_direct_size);
+            HDassert(len == hdr->pline_root_direct_size);
 
             /* Check if we need to re-size the block on disk */
             if(hdr->pline_root_direct_size != write_size || at_tmp_addr) {
@@ -2083,26 +2037,20 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
                  *
                  * (temp. file space does not need to be freed) 
                  */
-                if(!at_tmp_addr) {
+                if(!at_tmp_addr)
                     /* Release direct block's current disk space */
                     if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, addr, (hsize_t)hdr->pline_root_direct_size) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
-                } /* end if */
 
                 /* Allocate space for the compressed direct block */
                 if(HADDR_UNDEF == (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 
-                /* Let the metadata cache know, if the block moved */
-                if(!H5F_addr_eq(hdr->man_dtable.table_addr, dblock_addr))
-                    if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock_addr, dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
-
                 /* Update information about compressed direct block's 
                  * location & size 
                  */
                 HDassert(hdr->man_dtable.table_addr == addr);
-                HDassert(hdr->pline_root_direct_size == compressed_len);
+                HDassert(hdr->pline_root_direct_size == len);
                 hdr->man_dtable.table_addr = dblock_addr;
                 hdr->pline_root_direct_size = write_size;
 
@@ -2132,7 +2080,7 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
              * size matches the heap's last record.  This value will
              * likely change shortly.
              */
-            HDassert(compressed_len == par_iblock->filt_ents[par_entry].size);
+            HDassert(len == par_iblock->filt_ents[par_entry].size);
 
             /* Check if we need to re-size the block on disk */
             if(par_iblock->filt_ents[par_entry].size != write_size || at_tmp_addr) {
@@ -2141,26 +2089,20 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
                  *
                  * (temp. file space does not need to be freed) 
                  */
-                if(!at_tmp_addr) {
+                if(!at_tmp_addr)
                     /* Release direct block's current disk space */
                     if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, addr, (hsize_t)par_iblock->filt_ents[par_entry].size) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
-                } /* end if */
 
                 /* Allocate space for the compressed direct block */
                 if(HADDR_UNDEF == (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
                     HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 
-                /* Let the metadata cache know, if the block moved */
-                if(!H5F_addr_eq(par_iblock->ents[par_entry].addr, dblock_addr))
-                    if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, dblock_addr, dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
-
                 /* Update information about compressed direct block's 
                  * location & size 
                  */
                 HDassert(par_iblock->ents[par_entry].addr == addr);
-                HDassert(par_iblock->filt_ents[par_entry].size == compressed_len);
+                HDassert(par_iblock->filt_ents[par_entry].size == len);
                 par_iblock->ents[par_entry].addr = dblock_addr;
                 par_iblock->filt_ents[par_entry].size = write_size;
 
@@ -2192,21 +2134,15 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
          * to 'normal' file space 
          */
         if(at_tmp_addr) {
+            /* Allocate 'normal' space for the direct block */
+            if(HADDR_UNDEF == (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
+                HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
+
             /* Check for root direct block */
             if(NULL == dblock->parent) {
-                /* Sanity check */
+                /* Sanity checks */
                 HDassert(H5F_addr_eq(hdr->man_dtable.table_addr, addr));
-
-                /* Allocate 'normal' space for the direct block */
-                if(HADDR_UNDEF == (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
-                    HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
-
-                /* Sanity check */
                 HDassert(!H5F_addr_eq(hdr->man_dtable.table_addr, dblock_addr));
-
-                /* Let the metadata cache know the block moved */
-                if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock_addr, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
 
                 /* Update information about direct block's location */
                 hdr->man_dtable.table_addr = dblock_addr;
@@ -2216,21 +2152,11 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
             } /* end if */
             else { /* the direct block's parent is an indirect block */
-                /* Sanity check */
+                /* Sanity checks */
                 HDassert(par_iblock);
                 HDassert(par_iblock->ents);
                 HDassert(H5F_addr_eq(par_iblock->ents[par_entry].addr, addr));
-
-                /* Allocate 'normal' space for the direct block */
-                if(HADDR_UNDEF == (dblock_addr = H5MF_alloc((H5F_t *)f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
-                    HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
-
-                /* Sanity check */
                 HDassert(!H5F_addr_eq(par_iblock->ents[par_entry].addr, dblock_addr));
-
-                /* Let the metadata cache know the block moved */
-                if(H5AC_move_entry((H5F_t *)f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, dblock_addr, dxpl_id) < 0)
-                    HGOTO_ERROR(H5E_HEAP, H5E_CANTMOVE, FAIL, "unable to move direct block")
 
                 /* Update information about direct block's location */
                 par_iblock->ents[par_entry].addr = dblock_addr;
@@ -2261,9 +2187,9 @@ H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
         *new_addr = dblock_addr;
     } /* end if */
 
-    if((hdr->filter_len > 0) && (compressed_len != write_size)) {
-        dblock_flags |= H5C__SERIALIZE_COMPRESSED_FLAG;
-        *new_compressed_len = write_size;
+    if((hdr->filter_len > 0) && (len != write_size)) {
+        dblock_flags |= H5C__SERIALIZE_RESIZED_FLAG;
+        *new_len = write_size;
     } /* end if */
 
     *flags = dblock_flags;

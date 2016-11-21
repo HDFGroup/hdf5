@@ -111,62 +111,51 @@ static void *variable_deserialize(const void *image_ptr, size_t len, void *udata
 static void *notify_deserialize(const void *image_ptr, size_t len, void *udata_ptr,
     hbool_t *dirty_ptr);
 
-static herr_t pico_image_len(void *thing, size_t *image_len_ptr, 
-    hbool_t *compressed_ptr, size_t * compressed_len_ptr);
-static herr_t nano_image_len(void *thing, size_t *image_len_ptr,
-    hbool_t *compressed_ptr, size_t * compressed_len_ptr);
-static herr_t micro_image_len(void *thing, size_t *image_len_ptr,
-    hbool_t *compressed_ptr, size_t * compressed_len_ptr);
-static herr_t tiny_image_len(void *thing, size_t *image_len_ptr,
-    hbool_t *compressed_ptr, size_t * compressed_len_ptr);
-static herr_t small_image_len(void *thing, size_t *image_len_ptr,
-    hbool_t *compressed_ptr, size_t * compressed_len_ptr);
-static herr_t medium_image_len(void *thing, size_t *image_len_ptr,
-    hbool_t *compressed_ptr, size_t * compressed_len_ptr);
-static herr_t large_image_len(void *thing, size_t *image_len_ptr,
-    hbool_t *compressed_ptr, size_t * compressed_len_ptr);
-static herr_t huge_image_len(void *thing, size_t *image_len_ptr,
-    hbool_t *compressed_ptr, size_t * compressed_len_ptr);
-static herr_t monster_image_len(void *thing, size_t *image_len_ptr,
-    hbool_t *compressed_ptr, size_t * compressed_len_ptr);
-static herr_t variable_image_len(void *thing, size_t *image_len_ptr,
-    hbool_t *compressed_ptr, size_t * compressed_len_ptr);
-static herr_t notify_image_len(void *thing, size_t *image_len_ptr,
-    hbool_t *compressed_ptr, size_t * compressed_len_ptr);
+static herr_t pico_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t nano_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t micro_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t tiny_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t small_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t medium_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t large_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t huge_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t monster_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t variable_image_len(const void *thing, size_t *image_len_ptr);
+static herr_t notify_image_len(const void *thing, size_t *image_len_ptr);
 
 static herr_t pico_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr_ptr, 
-    size_t *new_len_ptr, size_t *new_compressed_len_ptr, unsigned *flags_ptr);
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
+    size_t *new_len_ptr, unsigned *flags_ptr);
 static herr_t nano_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr_ptr, 
-    size_t *new_len_ptr, size_t *new_compressed_len_ptr, unsigned *flags_ptr);
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
+    size_t *new_len_ptr, unsigned *flags_ptr);
 static herr_t micro_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr_ptr, 
-    size_t *new_len_ptr, size_t *new_compressed_len_ptr, unsigned *flags_ptr);
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
+    size_t *new_len_ptr, unsigned *flags_ptr);
 static herr_t tiny_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr_ptr, 
-    size_t *new_len_ptr, size_t *new_compressed_len_ptr, unsigned *flags_ptr);
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
+    size_t *new_len_ptr, unsigned *flags_ptr);
 static herr_t small_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr_ptr, 
-    size_t *new_len_ptr, size_t *new_compressed_len_ptr, unsigned *flags_ptr);
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
+    size_t *new_len_ptr, unsigned *flags_ptr);
 static herr_t medium_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr_ptr, 
-    size_t *new_len_ptr, size_t *new_compressed_len_ptr, unsigned *flags_ptr);
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
+    size_t *new_len_ptr, unsigned *flags_ptr);
 static herr_t large_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr_ptr, 
-    size_t *new_len_ptr, size_t *new_compressed_len_ptr, unsigned *flags_ptr);
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
+    size_t *new_len_ptr, unsigned *flags_ptr);
 static herr_t huge_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr_ptr, 
-    size_t *new_len_ptr, size_t *new_compressed_len_ptr, unsigned *flags_ptr);
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
+    size_t *new_len_ptr, unsigned *flags_ptr);
 static herr_t monster_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr_ptr, 
-    size_t *new_len_ptr, size_t *new_compressed_len_ptr, unsigned *flags_ptr);
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
+    size_t *new_len_ptr, unsigned *flags_ptr);
 static herr_t variable_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr_ptr, 
-    size_t *new_len_ptr, size_t *new_compressed_len_ptr, unsigned *flags_ptr);
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
+    size_t *new_len_ptr, unsigned *flags_ptr);
 static herr_t notify_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
-    haddr_t addr, size_t len, size_t compressed_len, haddr_t *new_addr_ptr, 
-    size_t *new_len_ptr, size_t *new_compressed_len_ptr, unsigned *flags_ptr);
+    haddr_t addr, size_t len, haddr_t *new_addr_ptr, 
+    size_t *new_len_ptr, unsigned *flags_ptr);
 
 static herr_t pico_serialize(const H5F_t *f, void *image_ptr,
     size_t len, void *thing);
@@ -214,7 +203,7 @@ static herr_t get_load_size(const void *udata_ptr, size_t *image_len_ptr,
     int32_t entry_type);
 static void *deserialize(const void *image_ptr, size_t len, void *udata_ptr,
     hbool_t *dirty_ptr, int32_t entry_type);
-static herr_t image_len(void *thing, size_t *image_len_ptr, int32_t entry_type);
+static herr_t image_len(const void *thing, size_t *image_len_ptr, int32_t entry_type);
 static herr_t pre_serialize(const H5F_t *f, hid_t dxpl_id, void *thing,
     haddr_t addr, size_t len, haddr_t *new_addr_ptr, size_t *new_len_ptr, 
     unsigned *flags_ptr);
@@ -317,165 +306,154 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     "pico_entry",
     H5FD_MEM_DEFAULT,
     H5C__CLASS_NO_FLAGS_SET,
-    (H5C_get_load_size_func_t)pico_get_load_size,
-    (H5C_deserialize_func_t)pico_deserialize,
-    (H5C_image_len_func_t)pico_image_len,
-    (H5AC_pre_serialize_func_t)pico_pre_serialize,
-    (H5C_serialize_func_t)pico_serialize,
-    (H5C_notify_func_t)NULL,
-    (H5C_free_icr_func_t)pico_free_icr,
-    (H5C_clear_func_t)NULL,
-    (H5C_get_fsf_size_t)NULL,
+    pico_get_load_size,
+    pico_deserialize,
+    pico_image_len,
+    pico_pre_serialize,
+    pico_serialize,
+    NULL,
+    pico_free_icr,
+    NULL,
   },
   {
     NANO_ENTRY_TYPE,
     "nano_entry",
     H5FD_MEM_DEFAULT,
     H5C__CLASS_NO_FLAGS_SET,
-    (H5C_get_load_size_func_t)nano_get_load_size,
-    (H5C_deserialize_func_t)nano_deserialize,
-    (H5C_image_len_func_t)nano_image_len,
-    (H5AC_pre_serialize_func_t)nano_pre_serialize,
-    (H5C_serialize_func_t)nano_serialize,
-    (H5C_notify_func_t)NULL,
-    (H5C_free_icr_func_t)nano_free_icr,
-    (H5C_clear_func_t)NULL,
-    (H5C_get_fsf_size_t)NULL,
+    nano_get_load_size,
+    nano_deserialize,
+    nano_image_len,
+    nano_pre_serialize,
+    nano_serialize,
+    NULL,
+    nano_free_icr,
+    NULL,
   },
   {
     MICRO_ENTRY_TYPE,
     "micro_entry",
     H5FD_MEM_DEFAULT,
     H5C__CLASS_NO_FLAGS_SET,
-    (H5C_get_load_size_func_t)micro_get_load_size,
-    (H5C_deserialize_func_t)micro_deserialize,
-    (H5C_image_len_func_t)micro_image_len,
-    (H5AC_pre_serialize_func_t)micro_pre_serialize,
-    (H5C_serialize_func_t)micro_serialize,
-    (H5C_notify_func_t)NULL,
-    (H5C_free_icr_func_t)micro_free_icr,
-    (H5C_clear_func_t)NULL,
-    (H5C_get_fsf_size_t)NULL,
+    micro_get_load_size,
+    micro_deserialize,
+    micro_image_len,
+    micro_pre_serialize,
+    micro_serialize,
+    NULL,
+    micro_free_icr,
+    NULL,
   },
   {
     TINY_ENTRY_TYPE,
     "tiny_entry",
     H5FD_MEM_DEFAULT,
     H5C__CLASS_NO_FLAGS_SET,
-    (H5C_get_load_size_func_t)tiny_get_load_size,
-    (H5C_deserialize_func_t)tiny_deserialize,
-    (H5C_image_len_func_t)tiny_image_len,
-    (H5AC_pre_serialize_func_t)tiny_pre_serialize,
-    (H5C_serialize_func_t)tiny_serialize,
-    (H5C_notify_func_t)NULL,
-    (H5C_free_icr_func_t)tiny_free_icr,
-    (H5C_clear_func_t)NULL,
-    (H5C_get_fsf_size_t)NULL,
+    tiny_get_load_size,
+    tiny_deserialize,
+    tiny_image_len,
+    tiny_pre_serialize,
+    tiny_serialize,
+    NULL,
+    tiny_free_icr,
+    NULL,
   },
   {
     SMALL_ENTRY_TYPE,
     "small_entry",
     H5FD_MEM_DEFAULT,
     H5C__CLASS_NO_FLAGS_SET,
-    (H5C_get_load_size_func_t)small_get_load_size,
-    (H5C_deserialize_func_t)small_deserialize,
-    (H5C_image_len_func_t)small_image_len,
-    (H5AC_pre_serialize_func_t)small_pre_serialize,
-    (H5C_serialize_func_t)small_serialize,
-    (H5C_notify_func_t)NULL,
-    (H5C_free_icr_func_t)small_free_icr,
-    (H5C_clear_func_t)NULL,
-    (H5C_get_fsf_size_t)NULL,
+    small_get_load_size,
+    small_deserialize,
+    small_image_len,
+    small_pre_serialize,
+    small_serialize,
+    NULL,
+    small_free_icr,
+    NULL,
   },
   {
     MEDIUM_ENTRY_TYPE,
     "medium_entry",
     H5FD_MEM_DEFAULT,
     H5C__CLASS_NO_FLAGS_SET,
-    (H5C_get_load_size_func_t)medium_get_load_size,
-    (H5C_deserialize_func_t)medium_deserialize,
-    (H5C_image_len_func_t)medium_image_len,
-    (H5AC_pre_serialize_func_t)medium_pre_serialize,
-    (H5C_serialize_func_t)medium_serialize,
-    (H5C_notify_func_t)NULL,
-    (H5C_free_icr_func_t)medium_free_icr,
-    (H5C_clear_func_t)NULL,
-    (H5C_get_fsf_size_t)NULL,
+    medium_get_load_size,
+    medium_deserialize,
+    medium_image_len,
+    medium_pre_serialize,
+    medium_serialize,
+    NULL,
+    medium_free_icr,
+    NULL,
   },
   {
     LARGE_ENTRY_TYPE,
     "large_entry",
     H5FD_MEM_DEFAULT,
     H5C__CLASS_NO_FLAGS_SET,
-    (H5C_get_load_size_func_t)large_get_load_size,
-    (H5C_deserialize_func_t)large_deserialize,
-    (H5C_image_len_func_t)large_image_len,
-    (H5AC_pre_serialize_func_t)large_pre_serialize,
-    (H5C_serialize_func_t)large_serialize,
-    (H5C_notify_func_t)NULL,
-    (H5C_free_icr_func_t)large_free_icr,
-    (H5C_clear_func_t)NULL,
-    (H5C_get_fsf_size_t)NULL,
+    large_get_load_size,
+    large_deserialize,
+    large_image_len,
+    large_pre_serialize,
+    large_serialize,
+    NULL,
+    large_free_icr,
+    NULL,
   },
   {
     HUGE_ENTRY_TYPE,
     "huge_entry",
     H5FD_MEM_DEFAULT,
     H5C__CLASS_NO_FLAGS_SET,
-    (H5C_get_load_size_func_t)huge_get_load_size,
-    (H5C_deserialize_func_t)huge_deserialize,
-    (H5C_image_len_func_t)huge_image_len,
-    (H5AC_pre_serialize_func_t)huge_pre_serialize,
-    (H5C_serialize_func_t)huge_serialize,
-    (H5C_notify_func_t)NULL,
-    (H5C_free_icr_func_t)huge_free_icr,
-    (H5C_clear_func_t)NULL,
-    (H5C_get_fsf_size_t)NULL,
+    huge_get_load_size,
+    huge_deserialize,
+    huge_image_len,
+    huge_pre_serialize,
+    huge_serialize,
+    NULL,
+    huge_free_icr,
+    NULL,
   },
   {
     MONSTER_ENTRY_TYPE,
     "monster_entry",
     H5FD_MEM_DEFAULT,
     H5C__CLASS_NO_FLAGS_SET,
-    (H5C_get_load_size_func_t)monster_get_load_size,
-    (H5C_deserialize_func_t)monster_deserialize,
-    (H5C_image_len_func_t)monster_image_len,
-    (H5AC_pre_serialize_func_t)monster_pre_serialize,
-    (H5C_serialize_func_t)monster_serialize,
-    (H5C_notify_func_t)NULL,
-    (H5C_free_icr_func_t)monster_free_icr,
-    (H5C_clear_func_t)NULL,
-    (H5C_get_fsf_size_t)NULL,
+    monster_get_load_size,
+    monster_deserialize,
+    monster_image_len,
+    monster_pre_serialize,
+    monster_serialize,
+    NULL,
+    monster_free_icr,
+    NULL,
   },
   {
     VARIABLE_ENTRY_TYPE,
     "variable_entry",
     H5FD_MEM_DEFAULT,
     H5C__CLASS_SPECULATIVE_LOAD_FLAG,
-    (H5C_get_load_size_func_t)variable_get_load_size,
-    (H5C_deserialize_func_t)variable_deserialize,
-    (H5C_image_len_func_t)variable_image_len,
-    (H5AC_pre_serialize_func_t)variable_pre_serialize,
-    (H5C_serialize_func_t)variable_serialize,
-    (H5C_notify_func_t)NULL,
-    (H5C_free_icr_func_t)variable_free_icr,
-    (H5C_clear_func_t)NULL,
-    (H5C_get_fsf_size_t)NULL,
+    variable_get_load_size,
+    variable_deserialize,
+    variable_image_len,
+    variable_pre_serialize,
+    variable_serialize,
+    NULL,
+    variable_free_icr,
+    NULL,
   },
   {
     NOTIFY_ENTRY_TYPE,
     "notify_entry",
     H5FD_MEM_DEFAULT,
     H5C__CLASS_NO_FLAGS_SET,
-    (H5C_get_load_size_func_t)notify_get_load_size,
-    (H5C_deserialize_func_t)notify_deserialize,
-    (H5C_image_len_func_t)notify_image_len,
-    (H5AC_pre_serialize_func_t)notify_pre_serialize,
-    (H5C_serialize_func_t)notify_serialize,
-    (H5C_notify_func_t)notify_notify,
-    (H5C_free_icr_func_t)notify_free_icr,
-    (H5C_clear_func_t)NULL,
-    (H5C_get_fsf_size_t)NULL,
+    notify_get_load_size,
+    notify_deserialize,
+    notify_image_len,
+    notify_pre_serialize,
+    notify_serialize,
+    notify_notify,
+    notify_free_icr,
+    NULL,
   }
 };
 
@@ -872,9 +850,9 @@ notify_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty)
  *-------------------------------------------------------------------------
  */
 herr_t
-image_len(void *thing, size_t *image_length, int32_t entry_type)
+image_len(const void *thing, size_t *image_length, int32_t entry_type)
 {
-    test_entry_t *entry;
+    const test_entry_t *entry;
     test_entry_t *base_addr;
     int32_t type;
     int32_t idx;
@@ -882,7 +860,7 @@ image_len(void *thing, size_t *image_length, int32_t entry_type)
     HDassert(thing);
     HDassert(image_length);
 
-    entry = (test_entry_t *)thing;
+    entry = (const test_entry_t *)thing;
 
     HDassert(entry->self == entry);
 
@@ -909,78 +887,67 @@ image_len(void *thing, size_t *image_length, int32_t entry_type)
 } /* image_len() */
 
 herr_t
-pico_image_len(void *thing, size_t *image_length, 
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+pico_image_len(const void *thing, size_t *image_length)
 {
     return image_len(thing, image_length, PICO_ENTRY_TYPE);
 }
 
 herr_t
-nano_image_len(void *thing, size_t *image_length,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+nano_image_len(const void *thing, size_t *image_length)
 {
     return image_len(thing, image_length, NANO_ENTRY_TYPE);
 }
 
 herr_t
-micro_image_len(void *thing, size_t *image_length,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+micro_image_len(const void *thing, size_t *image_length)
 {
     return image_len(thing, image_length, MICRO_ENTRY_TYPE);
 }
 
 herr_t
-tiny_image_len(void *thing, size_t *image_length,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+tiny_image_len(const void *thing, size_t *image_length)
 {
     return image_len(thing, image_length, TINY_ENTRY_TYPE);
 }
 
 herr_t
-small_image_len(void *thing, size_t *image_length,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+small_image_len(const void *thing, size_t *image_length)
 {
     return image_len(thing, image_length, SMALL_ENTRY_TYPE);
 }
 
 herr_t
-medium_image_len(void *thing, size_t *image_length,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+medium_image_len(const void *thing, size_t *image_length)
 {
     return image_len(thing, image_length, MEDIUM_ENTRY_TYPE);
 }
 
 herr_t
-large_image_len(void *thing, size_t *image_length,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+large_image_len(const void *thing, size_t *image_length)
 {
     return image_len(thing, image_length, LARGE_ENTRY_TYPE);
 }
 
 herr_t
-huge_image_len(void *thing, size_t *image_length,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+huge_image_len(const void *thing, size_t *image_length)
 {
     return image_len(thing, image_length, HUGE_ENTRY_TYPE);
 }
 
 herr_t
-monster_image_len(void *thing, size_t *image_length,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+monster_image_len(const void *thing, size_t *image_length)
 {
     return image_len(thing, image_length, MONSTER_ENTRY_TYPE);
 }
 
 herr_t
-variable_image_len(void *thing, size_t *image_length,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+variable_image_len(const void *thing, size_t *image_length)
 {
     return image_len(thing, image_length, VARIABLE_ENTRY_TYPE);
 }
 
 herr_t
-notify_image_len(void *thing, size_t *image_length,
-    hbool_t H5_ATTR_UNUSED *compressed_ptr, size_t H5_ATTR_UNUSED *compressed_len_ptr)
+notify_image_len(const void *thing, size_t *image_length)
 {
     return image_len(thing, image_length, NOTIFY_ENTRY_TYPE);
 }
@@ -1095,10 +1062,8 @@ pico_pre_serialize(const H5F_t *f,
                    void *thing,
                    haddr_t addr,
                    size_t len,
-                   size_t H5_ATTR_UNUSED compressed_len,
                    haddr_t *new_addr_ptr,
                    size_t *new_len_ptr,
-                   size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
                    unsigned *flags_ptr)
 {
     return pre_serialize(f, dxpl_id, thing, addr, len, 
@@ -1111,10 +1076,8 @@ nano_pre_serialize(const H5F_t *f,
                    void *thing,
                    haddr_t addr,
                    size_t len,
-                   size_t H5_ATTR_UNUSED compressed_len,
                    haddr_t *new_addr_ptr,
                    size_t *new_len_ptr,
-                   size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
                    unsigned *flags_ptr)
 {
     return pre_serialize(f, dxpl_id, thing, addr, len, 
@@ -1127,10 +1090,8 @@ micro_pre_serialize(const H5F_t *f,
                     void *thing,
                     haddr_t addr,
                     size_t len,
-                    size_t H5_ATTR_UNUSED compressed_len,
                     haddr_t *new_addr_ptr,
                     size_t *new_len_ptr,
-                    size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
                     unsigned *flags_ptr)
 {
     return pre_serialize(f, dxpl_id, thing, addr, len, 
@@ -1143,10 +1104,8 @@ tiny_pre_serialize(const H5F_t *f,
                    void *thing,
                    haddr_t addr,
                    size_t len,
-                   size_t H5_ATTR_UNUSED compressed_len,
                    haddr_t *new_addr_ptr,
                    size_t *new_len_ptr,
-                   size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
                    unsigned *flags_ptr)
 {
     return pre_serialize(f, dxpl_id, thing, addr, len, 
@@ -1159,10 +1118,8 @@ small_pre_serialize(const H5F_t *f,
                     void *thing,
                     haddr_t addr,
                     size_t len,
-                    size_t H5_ATTR_UNUSED compressed_len,
                     haddr_t *new_addr_ptr,
                     size_t *new_len_ptr,
-                    size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
                     unsigned *flags_ptr)
 {
     return pre_serialize(f, dxpl_id, thing, addr, len, 
@@ -1175,10 +1132,8 @@ medium_pre_serialize(const H5F_t *f,
                      void *thing,
                      haddr_t addr,
                      size_t len,
-                     size_t H5_ATTR_UNUSED compressed_len,
                      haddr_t *new_addr_ptr,
                      size_t *new_len_ptr,
-                     size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
                      unsigned *flags_ptr)
 {
     return pre_serialize(f, dxpl_id, thing, addr, len, 
@@ -1191,10 +1146,8 @@ large_pre_serialize(const H5F_t *f,
                     void *thing,
                     haddr_t addr,
                     size_t len,
-                    size_t H5_ATTR_UNUSED compressed_len,
                     haddr_t *new_addr_ptr,
                     size_t *new_len_ptr,
-                    size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
                     unsigned *flags_ptr)
 {
     return pre_serialize(f, dxpl_id, thing, addr, len, 
@@ -1207,10 +1160,8 @@ huge_pre_serialize(const H5F_t *f,
                    void *thing,
                    haddr_t addr,
                    size_t len,
-                   size_t H5_ATTR_UNUSED compressed_len,
                    haddr_t *new_addr_ptr,
                    size_t *new_len_ptr,
-                   size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
                    unsigned *flags_ptr)
 {
     return pre_serialize(f, dxpl_id, thing, addr, len, 
@@ -1223,10 +1174,8 @@ monster_pre_serialize(const H5F_t *f,
                       void *thing,
                       haddr_t addr,
                       size_t len,
-                      size_t H5_ATTR_UNUSED compressed_len,
                       haddr_t *new_addr_ptr,
                       size_t *new_len_ptr,
-                      size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
                       unsigned *flags_ptr)
 {
     return pre_serialize(f, dxpl_id, thing, addr, len, 
@@ -1239,10 +1188,8 @@ variable_pre_serialize(const H5F_t *f,
                        void *thing,
                        haddr_t addr,
                        size_t len,
-                       size_t H5_ATTR_UNUSED compressed_len,
                        haddr_t *new_addr_ptr,
                        size_t *new_len_ptr,
-                       size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
                        unsigned *flags_ptr)
 {
     return pre_serialize(f, dxpl_id, thing, addr, len, 
@@ -1255,10 +1202,8 @@ notify_pre_serialize(const H5F_t *f,
                      void *thing,
                      haddr_t addr,
                      size_t len,
-                     size_t H5_ATTR_UNUSED compressed_len,
                      haddr_t *new_addr_ptr,
                      size_t *new_len_ptr,
-                     size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
                      unsigned *flags_ptr)
 {
     return pre_serialize(f, dxpl_id, thing, addr, len, 
