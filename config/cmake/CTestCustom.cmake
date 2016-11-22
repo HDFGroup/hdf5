@@ -211,6 +211,7 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK_VERIFY_LAYOUT_ALL-layout_long_switches     #uses grepTest.cmake
     H5REPACK_VERIFY_LAYOUT_ALL-layout_short_switches    #uses grepTest.cmake
     H5REPACK-plugin
+    H5REPACK_CMP-plugin_zero
     ######### tools/h5stat #########
     H5STAT-clearall-objects
     ######### tools/misc #########
