@@ -173,8 +173,8 @@ Bug Fixes since HDF5-1.8.17
       user's provided datatype during creation or the packet table's datatype
       during opening.  If an application wishes to use native type to read the
       data, then the application will request that.  However, the Packet Table
-      doesn't provide a way to specify memory datatype in this release.
-      Please refer to the Known Problems section for a work-around.
+      doesn't provide a way to specify memory datatype in this release.  This
+      feature will be available in future releases, HDFFV-10023.
       (BMR, 2016/10/27, HDFFV-9758)
 
 
@@ -362,18 +362,6 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
-* Currently, the Packet Table doesn't provide a way to specify memory datatype
-  when the packet table is read.  To work around this limitation, an
-  application can use the following approach:
-  + For the C API of the Packet Table
-    - call the PT API H5PTget_type to get the datatype of the packet table
-    - call the C API H5Tget_native_type to get the native type of that datatype
-  + For the C++ API of the Packet Table
-    - call the member function PacketTable::GetDatatype to get the datatype
-      of the packet table
-    - call the C API H5Tget_native_type to get the native type of that datatype
-  (BMR, 2016/10/27, HDFFV-9758)
-
 * On windows platforms in debug configurations, the VFD flush1 tests will fail
   with the split and multi VFD drivers. These tests will display a modal debug
   dialog which must be answered or wait for the test timeout to expire.
