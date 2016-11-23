@@ -1501,13 +1501,13 @@ H5VL_daosm_dataset_open(void *_obj,
     daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
 
     /* Set up recx */
-    recx[0].rx_rsize = (uint64_t)-1;
+    recx[0].rx_rsize = (uint64_t)0;
     recx[0].rx_idx = (uint64_t)0;
     recx[0].rx_nr = (uint64_t)1;
-    recx[1].rx_rsize = (uint64_t)-1;
+    recx[1].rx_rsize = (uint64_t)0;
     recx[1].rx_idx = (uint64_t)0;
     recx[1].rx_nr = (uint64_t)1;
-    recx[2].rx_rsize = (uint64_t)-1;
+    recx[2].rx_rsize = (uint64_t)0;
     recx[2].rx_idx = (uint64_t)0;
     recx[2].rx_nr = (uint64_t)1;
 
