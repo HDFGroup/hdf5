@@ -36,6 +36,13 @@
 
 hid_t H5VL_DAOSM_g = 0;
 
+/* Macros */
+#define H5VL_DAOSM_LINK_KEY "Link"
+#define H5VL_DAOSM_INT_MD_KEY "Internal Metadata"
+#define H5VL_DAOSM_TYPE_KEY "Datatype"
+#define H5VL_DAOSM_SPACE_KEY "Dataspace"
+#define H5VL_DAOSM_DCPL_KEY "Creation Property List"
+
 /* Prototypes */
 static void *H5VL_daosm_fapl_copy(const void *_old_fa);
 static herr_t H5VL_daosm_fapl_free(void *_fa);
@@ -1170,14 +1177,24 @@ H5VL_daosm_dataset_create(void *_obj,
     H5VL_daosm_group_t *target_grp = NULL;
     const char *target_name = NULL;
     size_t target_name_len;
-    char const_key[4] = {'L', 'i', 'n', 'k'};
+    char const_link_key[] = H5VL_DAOSM_LINK_KEY;
     daos_dkey_t dkey;
-    daos_vec_iod_t iod;
-    daos_recx_t recx;
-    daos_sg_list_t sgl;
-    daos_iov_t sg_iov;
+    daos_vec_iod_t iod[3];
+    daos_recx_t recx[3];
+    daos_sg_list_t sgl[3];
+    daos_iov_t sg_iov[3];
     uint8_t oid_buf[24];
     uint8_t *p;
+    size_t type_size = 0;
+    size_t space_size = 0;
+    size_t dcpl_size = 0;
+    void *type_buf = NULL;
+    void *space_buf = NULL;
+    void *dcpl_buf = NULL;
+    char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
+    char type_key[] = H5VL_DAOSM_TYPE_KEY;
+    char space_key[] = H5VL_DAOSM_SPACE_KEY;
+    char dcpl_key[] = H5VL_DAOSM_DCPL_KEY;
     int ret;
     void *ret_value = NULL;
 
@@ -1232,19 +1249,19 @@ H5VL_daosm_dataset_create(void *_obj,
     /* Set up dkey */
     /* For now always use dkey = const, akey = name. Add option to switch these
      * DSMINC */
-    daos_iov_set(&dkey, const_key, sizeof(const_key));
+    daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
 
     /* Set up recx */
-    recx.rx_rsize = (uint64_t)sizeof(daos_obj_id_t);
-    recx.rx_idx = (uint64_t)0;
-    recx.rx_nr = (uint64_t)1;
+    recx[0].rx_rsize = (uint64_t)sizeof(daos_obj_id_t);
+    recx[0].rx_idx = (uint64_t)0;
+    recx[0].rx_nr = (uint64_t)1;
 
     /* Set up iod */
-    HDmemset(&iod, 0, sizeof(iod));
-    daos_iov_set(&iod.vd_name, (void *)target_name, (daos_size_t)target_name_len);
-    daos_csum_set(&iod.vd_kcsum, NULL, 0);
-    iod.vd_nr = 1u;
-    iod.vd_recxs = &recx;
+    HDmemset(&iod[0], 0, sizeof(iod[0]));
+    daos_iov_set(&iod[0].vd_name, (void *)target_name, (daos_size_t)target_name_len);
+    daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
+    iod[0].vd_nr = 1u;
+    iod[0].vd_recxs = &recx[0];
 
     /* Encode dset oid */
     HDassert(sizeof(oid_buf) == sizeof(dset->oid));
@@ -1254,19 +1271,86 @@ H5VL_daosm_dataset_create(void *_obj,
     UINT64ENCODE(p, dset->oid.hi)
 
     /* Set up sgl */
-    daos_iov_set(&sg_iov, oid_buf, (daos_size_t)sizeof(oid_buf));
-    sgl.sg_nr.num = 1;
-    sgl.sg_iovs = &sg_iov;
+    daos_iov_set(&sg_iov[0], oid_buf, (daos_size_t)sizeof(oid_buf));
+    sgl[0].sg_nr.num = 1;
+    sgl[0].sg_iovs = &sg_iov[0];
 
     /* Create link to dataset */
-    if(0 != (ret = daos_obj_update(target_grp->obj_oh, tr->epoch, &dkey, 1, &iod, &sgl, NULL /*event*/)))
+    if(0 != (ret = daos_obj_update(target_grp->obj_oh, tr->epoch, &dkey, 1, iod, sgl, NULL /*event*/)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create link to dataset: %d", ret)
 
     /* Open dataset */
     if(0 != (ret = daos_obj_open(obj->file->coh, dset->oid, tr->epoch, DAOS_OO_RW, &dset->obj_oh, NULL /*event*/)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
 
-    /* Write datatype, dataspace, dcpl DSMINC */
+    /* Encode datatype */
+    if(H5Tencode(type_id, NULL, &type_size) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of datatype")
+    if(NULL == (type_buf = H5MM_malloc(type_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized datatype")
+    if(H5Tencode(type_id, type_buf, &type_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, NULL, "can't serialize datatype")
+
+    /* Encode dataspace */
+    if(H5Sencode(space_id, NULL, &space_size) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of dataaspace")
+    if(NULL == (space_buf = H5MM_malloc(space_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized dataaspace")
+    if(H5Sencode(space_id, space_buf, &space_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, NULL, "can't serialize dataaspace")
+
+    /* Encode DCPL */
+    if(H5Pencode(dcpl_id, NULL, &dcpl_size) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of dcpl")
+    if(NULL == (dcpl_buf = H5MM_malloc(dcpl_size)))
+        HGOTO_ERROR(dcpl_id, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized dcpl")
+    if(H5Pencode(dcpl_id, dcpl_buf, &dcpl_size) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTENCODE, NULL, "can't serialize dcpl")
+
+    /* Set up operation to write datatype, dataspace, and DCPL to dataset */
+    /* Set up dkey */
+    daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
+
+    /* Set up recx */
+    recx[0].rx_rsize = (uint64_t)type_size;
+    recx[0].rx_idx = (uint64_t)0;
+    recx[0].rx_nr = (uint64_t)1;
+    recx[1].rx_rsize = (uint64_t)space_size;
+    recx[1].rx_idx = (uint64_t)0;
+    recx[1].rx_nr = (uint64_t)1;
+    recx[2].rx_rsize = (uint64_t)dcpl_size;
+    recx[2].rx_idx = (uint64_t)0;
+    recx[2].rx_nr = (uint64_t)1;
+
+    /* Set up iod */
+    HDmemset(iod, 0, sizeof(iod));
+    daos_iov_set(&iod[0].vd_name, (void *)type_key, (daos_size_t)(sizeof(type_key) - 1));
+    daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
+    iod[0].vd_nr = 1u;
+    iod[0].vd_recxs = &recx[0];
+    daos_iov_set(&iod[1].vd_name, (void *)space_key, (daos_size_t)(sizeof(space_key) - 1));
+    daos_csum_set(&iod[1].vd_kcsum, NULL, 0);
+    iod[1].vd_nr = 1u;
+    iod[1].vd_recxs = &recx[1];
+    daos_iov_set(&iod[2].vd_name, (void *)dcpl_key, (daos_size_t)(sizeof(dcpl_key) - 1));
+    daos_csum_set(&iod[2].vd_kcsum, NULL, 0);
+    iod[2].vd_nr = 1u;
+    iod[2].vd_recxs = &recx[2];
+
+    /* Set up sgl */
+    daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)type_size);
+    sgl[0].sg_nr.num = 1;
+    sgl[0].sg_iovs = &sg_iov[0];
+    daos_iov_set(&sg_iov[1], space_buf, (daos_size_t)space_size);
+    sgl[1].sg_nr.num = 1;
+    sgl[1].sg_iovs = &sg_iov[1];
+    daos_iov_set(&sg_iov[2], dcpl_buf, (daos_size_t)dcpl_size);
+    sgl[2].sg_nr.num = 1;
+    sgl[2].sg_iovs = &sg_iov[2];
+
+    /* Write internal metadata to dataset */
+    if(0 != (ret = daos_obj_update(dset->obj_oh, tr->epoch, &dkey, 3, iod, sgl, NULL /*event*/)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't write metadata to dataset: %d", ret)
 
     /* Finish setting up dataset struct */
     dset->common.type = H5I_DATASET;
@@ -1283,6 +1367,11 @@ H5VL_daosm_dataset_create(void *_obj,
     ret_value = (void *)dset;
 
 done:
+    /* Free memory */
+    type_buf = H5MM_xfree(type_buf);
+    space_buf = H5MM_xfree(space_buf);
+    dcpl_buf = H5MM_xfree(dcpl_buf);
+
     /* If the operation is synchronous and it failed at the server, or it failed
      * locally, then cleanup and return fail */
     /* Destroy DAOS object if created before failure DSMINC */
@@ -1316,20 +1405,26 @@ H5VL_daosm_dataset_open(void *_obj,
     H5VL_daosm_obj_t *obj = (H5VL_daosm_obj_t *)_obj;
     H5VL_daosm_dset_t *dset = NULL;
     H5P_genplist_t *plist = NULL;      /* Property list pointer */
-    hid_t type_id, space_id;
     hid_t trans_id;
     H5TR_t *tr = NULL;
     H5VL_daosm_group_t *target_grp = NULL;
     const char *target_name = NULL;
     size_t target_name_len;
-    char const_key[4] = {'L', 'i', 'n', 'k'};
+    char const_link_key[] = H5VL_DAOSM_LINK_KEY;
     daos_dkey_t dkey;
-    daos_vec_iod_t iod;
-    daos_recx_t recx;
-    daos_sg_list_t sgl;
-    daos_iov_t sg_iov;
+    daos_vec_iod_t iod[3];
+    daos_recx_t recx[3];
+    daos_sg_list_t sgl[3];
+    daos_iov_t sg_iov[3];
     uint8_t oid_buf[24];
     uint8_t *p;
+    void *type_buf = NULL;
+    void *space_buf = NULL;
+    void *dcpl_buf = NULL;
+    char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
+    char type_key[] = H5VL_DAOSM_TYPE_KEY;
+    char space_key[] = H5VL_DAOSM_SPACE_KEY;
+    char dcpl_key[] = H5VL_DAOSM_DCPL_KEY;
     int ret;
     void *ret_value = NULL;
 
@@ -1366,27 +1461,27 @@ H5VL_daosm_dataset_open(void *_obj,
     /* Set up dkey */
     /* For now always use dkey = const, akey = name. Add option to switch these
      * DSMINC */
-    daos_iov_set(&dkey, const_key, sizeof(const_key));
+    daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
 
     /* Set up recx */
-    recx.rx_rsize = (uint64_t)sizeof(daos_obj_id_t);
-    recx.rx_idx = (uint64_t)0;
-    recx.rx_nr = (uint64_t)1;
+    recx[0].rx_rsize = (uint64_t)sizeof(daos_obj_id_t);
+    recx[0].rx_idx = (uint64_t)0;
+    recx[0].rx_nr = (uint64_t)1;
 
     /* Set up iod */
-    HDmemset(&iod, 0, sizeof(iod));
-    daos_iov_set(&iod.vd_name, (void *)target_name, (daos_size_t)target_name_len);
-    daos_csum_set(&iod.vd_kcsum, NULL, 0);
-    iod.vd_nr = 1u;
-    iod.vd_recxs = &recx;
+    HDmemset(&iod[0], 0, sizeof(iod[0]));
+    daos_iov_set(&iod[0].vd_name, (void *)target_name, (daos_size_t)target_name_len);
+    daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
+    iod[0].vd_nr = 1u;
+    iod[0].vd_recxs = &recx[0];
 
     /* Set up sgl */
-    daos_iov_set(&sg_iov, oid_buf, (daos_size_t)sizeof(oid_buf));
-    sgl.sg_nr.num = 1;
-    sgl.sg_iovs = &sg_iov;
+    daos_iov_set(&sg_iov[0], oid_buf, (daos_size_t)sizeof(oid_buf));
+    sgl[0].sg_nr.num = 1;
+    sgl[0].sg_iovs = &sg_iov[0];
 
     /* Read link to dataset */
-    if(0 != (ret = daos_obj_fetch(target_grp->obj_oh, tr->epoch, &dkey, 1, &iod, &sgl, NULL /*maps */, NULL /*event*/)))
+    if(0 != (ret = daos_obj_fetch(target_grp->obj_oh, tr->epoch, &dkey, 1, iod, sgl, NULL /*maps */, NULL /*event*/)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't read link to dataset: %d", ret)
 
     /* Decode dset oid */
@@ -1400,7 +1495,71 @@ H5VL_daosm_dataset_open(void *_obj,
     if(0 != (ret = daos_obj_open(obj->file->coh, dset->oid, tr->epoch, DAOS_OO_RW, &dset->obj_oh, NULL /*event*/)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
 
-    /* Read datatype, dataspace, dcpl DSMINC */
+    /* Set up operation to read datatype, dataspace, and DCPL sizes from dataset
+     */
+    /* Set up dkey */
+    daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
+
+    /* Set up recx */
+    recx[0].rx_rsize = (uint64_t)-1;
+    recx[0].rx_idx = (uint64_t)0;
+    recx[0].rx_nr = (uint64_t)1;
+    recx[1].rx_rsize = (uint64_t)-1;
+    recx[1].rx_idx = (uint64_t)0;
+    recx[1].rx_nr = (uint64_t)1;
+    recx[2].rx_rsize = (uint64_t)-1;
+    recx[2].rx_idx = (uint64_t)0;
+    recx[2].rx_nr = (uint64_t)1;
+
+    /* Set up iod */
+    HDmemset(iod, 0, sizeof(iod));
+    daos_iov_set(&iod[0].vd_name, (void *)type_key, (daos_size_t)(sizeof(type_key) - 1));
+    daos_csum_set(&iod[0].vd_kcsum, NULL, 0);
+    iod[0].vd_nr = 1u;
+    iod[0].vd_recxs = &recx[0];
+    daos_iov_set(&iod[1].vd_name, (void *)space_key, (daos_size_t)(sizeof(space_key) - 1));
+    daos_csum_set(&iod[1].vd_kcsum, NULL, 0);
+    iod[1].vd_nr = 1u;
+    iod[1].vd_recxs = &recx[1];
+    daos_iov_set(&iod[2].vd_name, (void *)dcpl_key, (daos_size_t)(sizeof(dcpl_key) - 1));
+    daos_csum_set(&iod[2].vd_kcsum, NULL, 0);
+    iod[2].vd_nr = 1u;
+    iod[2].vd_recxs = &recx[2];
+
+    /* Read internal metadata sizes from dataset */
+    if(0 != (ret = daos_obj_fetch(dset->obj_oh, tr->epoch, &dkey, 3, iod, NULL, NULL /*maps*/, NULL /*event*/)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata sizes from dataset: %d", ret)
+
+    /* Allocate buffers for datatype, dataspace, and DCPL */
+    if(NULL == (type_buf = H5MM_malloc(recx[0].rx_rsize)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized datatype")
+    if(NULL == (space_buf = H5MM_malloc(recx[1].rx_rsize)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized dataaspace")
+    if(NULL == (dcpl_buf = H5MM_malloc(recx[2].rx_rsize)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized dcpl")
+
+    /* Set up sgl */
+    daos_iov_set(&sg_iov[0], type_buf, (daos_size_t)recx[0].rx_rsize);
+    sgl[0].sg_nr.num = 1;
+    sgl[0].sg_iovs = &sg_iov[0];
+    daos_iov_set(&sg_iov[1], space_buf, (daos_size_t)recx[1].rx_rsize);
+    sgl[1].sg_nr.num = 1;
+    sgl[1].sg_iovs = &sg_iov[1];
+    daos_iov_set(&sg_iov[2], dcpl_buf, (daos_size_t)recx[2].rx_rsize);
+    sgl[2].sg_nr.num = 1;
+    sgl[2].sg_iovs = &sg_iov[2];
+
+    /* Read internal metadata from dataset */
+    if(0 != (ret = daos_obj_fetch(dset->obj_oh, tr->epoch, &dkey, 3, iod, sgl, NULL /*maps */, NULL /*event*/)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata from dataset: %d", ret)
+
+    /* Decode datatype, dataspace, and DCPL */
+    if((dset->type_id = H5Tdecode(type_buf)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTDECODE, NULL, "can't deserialize datatype")
+    if((dset->space_id = H5Sdecode(space_buf)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTDECODE, NULL, "can't deserialize datatype")
+    if((dset->dcpl_id = H5Pdecode(dcpl_buf)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTDECODE, NULL, "can't deserialize datatype")
 
     /* Finish setting up dataset struct */
     dset->common.type = H5I_DATASET;
@@ -1411,6 +1570,11 @@ H5VL_daosm_dataset_open(void *_obj,
     ret_value = (void *)dset;
 
 done:
+    /* Free memory */
+    type_buf = H5MM_xfree(type_buf);
+    space_buf = H5MM_xfree(space_buf);
+    dcpl_buf = H5MM_xfree(dcpl_buf);
+
     /* If the operation is synchronous and it failed at the server, or it failed
      * locally, then cleanup and return fail */
     if(NULL == ret_value)
