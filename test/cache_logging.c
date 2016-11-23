@@ -132,6 +132,7 @@ test_logging_api(void)
         TEST_ERROR;
 
     /* Clean up */
+    HDfree(location);
     if(H5Fclose(fid) < 0)
         TEST_ERROR;
 
