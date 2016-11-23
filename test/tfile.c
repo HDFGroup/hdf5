@@ -2268,12 +2268,11 @@ test_file_double_file_dataset_open(hbool_t new_format)
     CHECK(ret, FAIL, "H5Dwrite");
 
     /* Closing */
+    /* (Leave sid1 open for later use) */
     ret = H5Dclose(did1);
     CHECK(ret, FAIL, "H5Dclose");
     ret = H5Tclose(tid1);
     CHECK(ret, FAIL, "H5Tclose");
-    ret = H5Sclose(sid1);
-    CHECK(ret, FAIL, "H5Sclose");
     ret = H5Pclose(dcpl);
     CHECK(ret, FAIL, "H5Dclose");
 
@@ -2392,6 +2391,8 @@ test_file_double_file_dataset_open(hbool_t new_format)
     HDmemset(buffer, 0, sizeof(char*) * 5);
     ret = H5Dread(did2, tid2, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
     CHECK(ret, FAIL, "H5Dread");
+    ret = H5Dvlen_reclaim(tid2, sid1, H5P_DEFAULT, buffer);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Second file's dataset close */
     ret = H5Dclose(did2);
@@ -2404,6 +2405,9 @@ test_file_double_file_dataset_open(hbool_t new_format)
     /* First file's dataset read */
     HDmemset(buffer, 0, sizeof(char*) * 5);
     ret = H5Dread(did1, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
+    CHECK(ret, FAIL, "H5Dread");
+    ret = H5Dvlen_reclaim(tid2, sid1, H5P_DEFAULT, buffer);
+    CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* First file's dataset close */
     ret = H5Dclose(did1);
@@ -2416,6 +2420,8 @@ test_file_double_file_dataset_open(hbool_t new_format)
     /* Closing */
     ret = H5Tclose(tid1);
     CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
 
     ret = H5Tclose(tid2);
     CHECK(ret, FAIL, "H5Tclose");
