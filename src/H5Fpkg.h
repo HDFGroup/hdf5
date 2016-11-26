@@ -152,6 +152,9 @@ typedef struct H5F_superblock_cache_ud_t {
     unsigned btree_k[H5B_NUM_BTREE_ID]; /* B-tree key values for each type */
     haddr_t stored_eof;     /* End-of-file in file */
     hbool_t drvrinfo_removed; /* Indicate if the driver info was removed */
+    unsigned    super_vers;   /* Superblock version obtained in get_load_size callback. 
+			       * It will be used later in verify_chksum callback 
+			       */
 } H5F_superblock_cache_ud_t;
 
 /* Structure for passing 'user data' to driver info block cache callbacks */
@@ -298,6 +301,11 @@ struct H5F_file_t {
 
     /* Metadata accumulator information */
     H5F_meta_accum_t accum;     /* Metadata accumulator info           	*/
+
+    /* Metadata retry info */
+    unsigned 		read_attempts;	/* The # of reads to try when reading metadata with checksum */
+    unsigned		retries_nbins;		/* # of bins for each retries[] */
+    uint32_t		*retries[H5AC_NTYPES];  /* Track # of read retries for metdata items with checksum */
 
     /* Object flush info */
     H5F_object_flush_t 	object_flush;		/* Information for object flush callback */

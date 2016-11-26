@@ -118,10 +118,9 @@ H5HL__prfx_new(H5HL_t *heap))
 
 CATCH
     /* Ensure that the prefix memory is deallocated on errors */
-    if(!ret_value && prfx != NULL) {
+    if(!ret_value && prfx != NULL)
         /* H5FL_FREE always returns NULL so we can't check for errors */
         prfx = H5FL_FREE(H5HL_prfx_t, prfx);
-    }
 
 END_FUNC(PKG) /* end H5HL__prfx_new() */
 
@@ -164,3 +163,4 @@ CATCH
     prfx = H5FL_FREE(H5HL_prfx_t, prfx);
 
 END_FUNC(PKG) /* end H5HL__prfx_dest() */
+

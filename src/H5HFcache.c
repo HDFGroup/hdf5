@@ -73,7 +73,10 @@ static herr_t H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *d
 static herr_t H5HF__dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable);
 
 /* Metadata cache (H5AC) callbacks */
-static herr_t H5HF__cache_hdr_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5HF__cache_hdr_get_initial_load_size(void *udata, size_t *image_len);
+static herr_t H5HF__cache_hdr_get_final_load_size(const void *image_ptr,
+    size_t image_len, void *udata, size_t *actual_len);
+static htri_t H5HF__cache_hdr_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5HF__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5HF__cache_hdr_image_len(const void *thing, size_t *image_len);
@@ -84,7 +87,8 @@ static herr_t H5HF__cache_hdr_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
 static herr_t H5HF__cache_hdr_free_icr(void *thing);
 
-static herr_t H5HF__cache_iblock_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5HF__cache_iblock_get_initial_load_size(void *udata, size_t *image_len);
+static htri_t H5HF__cache_iblock_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5HF__cache_iblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5HF__cache_iblock_image_len(const void *thing, size_t *image_len);
@@ -96,7 +100,8 @@ static herr_t H5HF__cache_iblock_serialize(const H5F_t *f, void *image,
 static herr_t H5HF__cache_iblock_notify(H5C_notify_action_t action, void *thing); 
 static herr_t H5HF__cache_iblock_free_icr(void *thing);
 
-static herr_t H5HF__cache_dblock_get_load_size(const void *udata, size_t *image_len);
+static herr_t H5HF__cache_dblock_get_initial_load_size(void *udata, size_t *image_len);
+static htri_t H5HF__cache_dblock_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
 static void *H5HF__cache_dblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5HF__cache_dblock_image_len(const void *thing, size_t *image_len);
@@ -131,7 +136,9 @@ const H5AC_class_t H5AC_FHEAP_HDR[1] = {{
     "fractal heap header",              /* Metadata client name (for debugging) */
     H5FD_MEM_FHEAP_HDR,                 /* File space memory type for client */
     H5AC__CLASS_SPECULATIVE_LOAD_FLAG,  /* Client class behavior flags */
-    H5HF__cache_hdr_get_load_size,      /* 'get_load_size' callback */
+    H5HF__cache_hdr_get_initial_load_size, /* 'get_initial_load_size' callback */
+    H5HF__cache_hdr_get_final_load_size, /* 'get_final_load_size' callback */
+    H5HF__cache_hdr_verify_chksum, 	/* 'verify_chksum' callback */
     H5HF__cache_hdr_deserialize,        /* 'deserialize' callback */
     H5HF__cache_hdr_image_len,          /* 'image_len' callback */
     H5HF__cache_hdr_pre_serialize,      /* 'pre_serialize' callback */
@@ -147,7 +154,9 @@ const H5AC_class_t H5AC_FHEAP_IBLOCK[1] = {{
     "fractal heap indirect block",      /* Metadata client name (for debugging) */
     H5FD_MEM_FHEAP_IBLOCK,              /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5HF__cache_iblock_get_load_size,   /* 'get_load_size' callback */
+    H5HF__cache_iblock_get_initial_load_size,   /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    H5HF__cache_iblock_verify_chksum,	/* 'verify_chksum' callback */
     H5HF__cache_iblock_deserialize,     /* 'deserialize' callback */
     H5HF__cache_iblock_image_len,       /* 'image_len' callback */
     H5HF__cache_iblock_pre_serialize,   /* 'pre_serialize' callback */
@@ -163,7 +172,9 @@ const H5AC_class_t H5AC_FHEAP_DBLOCK[1] = {{
     "fractal heap direct block",        /* Metadata client name (for debugging) */
     H5FD_MEM_FHEAP_DBLOCK,              /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5HF__cache_dblock_get_load_size,   /* 'get_load_size' callback */
+    H5HF__cache_dblock_get_initial_load_size,   /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    H5HF__cache_dblock_verify_chksum,	/* 'verify_chksum' callback */
     H5HF__cache_dblock_deserialize,     /* 'deserialize' callback */
     H5HF__cache_dblock_image_len,       /* 'image_len' callback */
     H5HF__cache_dblock_pre_serialize,   /* 'pre_serialize' callback */
@@ -287,20 +298,12 @@ H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF__dtable_encode() */
 
-/**************************************************/
-/* metadata cache callback definitions for header */
-/**************************************************/
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF__cache_hdr_get_load_size()
+ * Function:	H5HF__cache_hdr_get_initial_load_size()
  *
  * Purpose:	Determine the size of the fractal heap header on disk,
  *		and set *image_len to this value.
- *
- *		This code is based on the old H5HF_cache_hdr_load() routine
- *		that was used with the version 2 metadata cache.  Note the 
- *		use of a dummy header to compute the on disk size of the header.
  *
  *		Note also that the value returned by this function presumes that 
  *		there is no I/O filtering data in the header.  If there is, the 
@@ -316,10 +319,10 @@ H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_hdr_get_load_size(const void *_udata, size_t *image_len)
+H5HF__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
 {
-    const H5HF_hdr_cache_ud_t *udata = (const H5HF_hdr_cache_ud_t *)_udata; /* pointer to user data */
-    H5HF_hdr_t  	dummy_hdr; 	/* dummy header -- to compute size */
+    H5HF_hdr_cache_ud_t *udata = (H5HF_hdr_cache_ud_t *)_udata; /* Pointer to user data */
+    H5HF_hdr_t dummy_hdr; 	/* Dummy header -- to compute size */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -336,7 +339,99 @@ H5HF__cache_hdr_get_load_size(const void *_udata, size_t *image_len)
     *image_len = (size_t)H5HF_HEADER_SIZE(&dummy_hdr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF__cache_hdr_get_load_size() */
+} /* end H5HF__cache_hdr_get_initial_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF__cache_hdr_get_final_load_size()
+ *
+ * Purpose:	Determine the final size of the fractal heap header on disk,
+ *		and set *actual_len to this value.
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		November 18, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5HF__cache_hdr_get_final_load_size(const void *_image, size_t image_len,
+    void *_udata, size_t *actual_len)
+{
+    const uint8_t *image = (const uint8_t *)_image;	/* Pointer into raw data buffer */
+    H5HF_hdr_cache_ud_t *udata = (H5HF_hdr_cache_ud_t *)_udata; /* pointer to user data */
+    unsigned filter_len;        /* Size of I/O filter information (in bytes) */
+    htri_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(image);
+    HDassert(udata);
+    HDassert(actual_len);
+    HDassert(*actual_len == image_len);
+
+    /* Magic number */
+    if(HDmemcmp(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "wrong fractal heap header signature")
+    image += H5_SIZEOF_MAGIC;
+
+    /* Version */
+    if(*image++ != H5HF_HDR_VERSION)
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong fractal heap header version")
+
+    /* General heap information */
+    image += 2;                               /* Heap ID length */
+    UINT16DECODE(image, filter_len);          /* I/O filters' encoded length */
+
+    /* Check for I/O filter info on this heap */
+    if(filter_len > 0)
+        /* Compute the extra heap header size */
+        *actual_len += (size_t)(H5F_SIZEOF_SIZE(udata->f)   /* Size of size for filtered root direct block */
+                            + (unsigned)4		/* Size of filter mask for filtered root direct block */
+                            + filter_len);         	/* Size of encoded I/O filter info */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF__cache_hdr_get_final_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HF__cache_hdr_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5HF__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+    htri_t ret_value = TRUE;	/* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+        ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF__cache_hdr_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -346,30 +441,6 @@ H5HF__cache_hdr_get_load_size(const void *_udata, size_t *image_len)
  *		header block, allocate an instance of H5HF_hdr_t, load the contents
  *		of the buffer into into the new instance of H5HF_hdr_t, and then
  *		return a pointer to the new instance.
- *
- *		Since H5HF__cache_hdr_get_load_size() reports header on disk size 
- *		base on the assumption that the header contains no I/O filtering 
- *		data, it is possible that the provided image will be too small.
- *
- *		In this case, we DO NOT flag an error when this is discovered.
- *		Instead, we make note of the correct image size, and report 
- *		success.
- *
- *		Since H5HF__cache_hdr_image_len() callback is defined, 
- *		H5C_load_entry() will call H5HF__cache_hdr_image_len() and 
- *		obtain the correct image length.  
- *
- *		Since the H5AC__CLASS_SPECULATIVE_LOAD_FLAG is set, 
- *		H5C_load_entry() will load an image of the correct size, and 
- *		then call this function again to deserialize it.  Before doing 
- *		so, it will also call H5HF__cache_hdr_free_icr() to discard the 
- *		result of the first deserialize call.
- *
- *		Note that the v2 B-tree and free space manager associated 
- *		with the fractal heap (roots stored in the huge_bt2 and fspace 
- *		fields respectively) are not loaded at this time.  As best I can
- *		tell from reviewing the code, they are loaded or created when 
- *		they are accessed.
  *
  * Return:	Success:	Pointer to in core representation
  *		Failure:	NULL
@@ -386,9 +457,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     H5HF_hdr_t          *hdr = NULL;     /* Fractal heap info */
     H5HF_hdr_cache_ud_t *udata = (H5HF_hdr_cache_ud_t *)_udata; /* User data for callback */
     const uint8_t       *image = (const uint8_t *)_image;       /* Pointer into into supplied image */
-    size_t              size;           /* Header size */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     uint8_t             heap_flags;     /* Status flags for heap */
     void *              ret_value = NULL;       /* Return value */
 
@@ -403,28 +472,6 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     /* Allocate space for the fractal heap data structure */
     if(NULL == (hdr = H5HF_hdr_alloc(udata->f)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* Compute the 'base' size of the fractal heap header on disk */
-    size = (size_t)H5HF_HEADER_SIZE(hdr);
-
-    /* the size we have just calculated presumes that there is no I/O 
-     * filter information in the header.  If there is no filter information,
-     * the deserialize operation should succeed.
-     *
-     * If there is filter information, the first attempt to deserialize 
-     * the header will reveal this.  In this case, we will be unable to 
-     * deserialize the header as the supplied image will be too small.
-     * However, we will make note of the correct size and report success 
-     * anyway.  
-     *
-     * When H5C_load_entry() calls H5HF__cache_hdr_image_len(), we will report 
-     * the correct size.  Since the H5C__CLASS_SPECULATIVE_LOAD_FLAG is set,
-     * this will prompt H5C_load_entry() to load the correct size image,
-     * discard the result of the first attempt at deserialization, and 
-     * call this routine a second time to deserialize the correct size 
-     * buffer.
-     */
-    HDassert(size <= len);
 
     /* Magic number */
     if(HDmemcmp(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
@@ -469,32 +516,24 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     if(H5HF__dtable_decode(hdr->f, &image, &(hdr->man_dtable)) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTENCODE, NULL, "unable to encode managed obj. doubling table info")
 
+    /* Set the fractal heap header's 'base' size */
+    hdr->heap_size = (size_t)H5HF_HEADER_SIZE(hdr);
+
     /* Sanity check */
     /* (allow for checksum not decoded yet) */
-    HDassert((size_t)(image - (const uint8_t *)_image) == (size - H5HF_SIZEOF_CHKSUM));
+    HDassert((size_t)(image - (const uint8_t *)_image) == (hdr->heap_size - H5HF_SIZEOF_CHKSUM));
 
     /* Check for I/O filter information to decode */
     if(hdr->filter_len > 0) {
-        size_t filter_info_size;    /* Size of filter information */
         H5O_pline_t *pline;         /* Pipeline information from the header on disk */
 
-        /* Compute the size of the extra filter information */
-        filter_info_size = (size_t)(hdr->sizeof_size     /* Size of size for filtered root direct block */
-            + (unsigned)4		/* Size of filter mask for filtered root direct block */
-            + hdr->filter_len);         /* Size of encoded I/O filter info */
+        /* Sanity check */
+        HDassert(len > hdr->heap_size);       /* A header with filter info is > than a standard header */
 
         /* Compute the heap header's size */
-        hdr->heap_size = size + filter_info_size;
-
-        if(size == len) 
-	    /* we were supplied with too small a buffer -- goto done
-             * and let H5C_load_entry() retry with a larger buffer
-             */
-	    HGOTO_DONE((void *)hdr)
-
-	else
-            if((size + filter_info_size) != len)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "bad image len")
+        hdr->heap_size += (size_t)(hdr->sizeof_size     /* Size of size for filtered root direct block */
+                + (unsigned)4           /* Size of filter mask for filtered root direct block */
+                + hdr->filter_len);     /* Size of encoded I/O filter info */
 
         /* Decode the size of a filtered root direct block */
         H5F_DECODE_LENGTH(udata->f, image, hdr->pline_root_direct_size);
@@ -506,6 +545,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
         if(NULL == (pline = (H5O_pline_t *)H5O_msg_decode(hdr->f, udata->dxpl_id, NULL, H5O_PLINE_ID, image)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode I/O pipeline filters")
 
+        /* Advance past filter info to checksum */
         image += hdr->filter_len;
 
         /* Copy the information into the header's I/O pipeline structure */
@@ -515,23 +555,12 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
         /* Release the space allocated for the I/O pipeline filters */
         H5O_msg_free(H5O_PLINE_ID, pline);
     } /* end if */
-    else
-        /* Set the heap header's size */
-        hdr->heap_size = size;
-
-    /* Compute checksum on entire header */
-    /* (including the filter information, if present) */
-    computed_chksum = H5_checksum_metadata(_image, (size_t)(image - (const uint8_t *)_image), 0);
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == hdr->heap_size);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap header")
 
     /* Finish initialization of heap header */
     if(H5HF_hdr_finish_init(hdr) < 0)
@@ -556,7 +585,7 @@ done:
  *		disk image.  
  *
  *		If the header contains filter information, this size will be 
- *		larger than the value returned by H5HF__cache_hdr_get_load_size().  
+ *		larger than the value returned by H5HF__cache_hdr_get_initial_load_size().  
  *
  * Return:	Success:	SUCCEED
  *		Failure:	FAIL
@@ -770,10 +799,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_hdr_serialize() */
 
-/***************************************/
-/* no H5HF__cache_hdr_notify() function */
-/***************************************/
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__cache_hdr_free_icr
@@ -820,13 +845,9 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF__cache_hdr_free_icr() */
 
-/***********************************************************/
-/* metadata cache callback definitions for indirect blocks */
-/***********************************************************/
-
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF__cache_iblock_get_load_size()
+ * Function:	H5HF__cache_iblock_get_initial_load_size()
  *
  * Purpose:	Compute the size of the on disk image of the indirect 
  *		block, and place this value in *image_len.
@@ -840,24 +861,60 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_iblock_get_load_size(const void *_udata, size_t *image_len)
+H5HF__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
 {
-    const H5HF_iblock_cache_ud_t *udata = (const H5HF_iblock_cache_ud_t *)_udata;   /* User data for callback */
+    H5HF_iblock_cache_ud_t *udata = (H5HF_iblock_cache_ud_t *)_udata;   /* User data for callback */
 
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(udata);
+    HDassert(udata->par_info);
+    HDassert(udata->par_info->hdr);
     HDassert(image_len);
    
+    /* Set the image length size */
     *image_len = (size_t)H5HF_MAN_INDIRECT_SIZE(udata->par_info->hdr, *udata->nrows);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF__cache_iblock_get_load_size() */
+} /* end H5HF__cache_iblock_get_initial_load_size() */
 
-/***********************************************************/
-/* metadata cache callback definitions for indirect blocks */
-/***********************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HF__cache_iblock_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5HF__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSED *_udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+    htri_t ret_value = TRUE;	/* Return value */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Check arguments */
+    HDassert(image);
+
+    /* Get stored and computed checksums */
+    H5F_get_checksums(image, len, &stored_chksum, &computed_chksum);
+
+    if(stored_chksum != computed_chksum)
+        ret_value = FALSE;
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF__cache_iblock_verify_chksum() */
+
 
 
 /*-------------------------------------------------------------------------
@@ -890,7 +947,6 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t len, void *_udata,
     const uint8_t       *image = (const uint8_t *)_image;       /* Pointer into raw data buffer */
     haddr_t             heap_addr;      /* Address of heap header in the file */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
-    uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned            u;              /* Local index variable */
     void *              ret_value = NULL;       /* Return value */
 
@@ -1017,18 +1073,13 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t len, void *_udata,
     /* Sanity check */
     HDassert(iblock->nchildren);   /* indirect blocks w/no children should have been deleted */
 
-    /* Compute checksum on indirect block */
-    computed_chksum = H5_checksum_metadata((const uint8_t *)_image, (size_t)(image - (const uint8_t *)_image), 0);
+    /* checksum verification already done by verify_chksum cb */
 
     /* Metadata checksum */
     UINT32DECODE(image, stored_chksum);
 
     /* Sanity check */
     HDassert((size_t)(image - (const uint8_t *)_image) == iblock->size);
-
-    /* Verify checksum */
-    if(stored_chksum != computed_chksum)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap indirect block")
 
     /* Check if we have any indirect block children */
     if(iblock->nrows > hdr->man_dtable.max_direct_rows) {
@@ -1481,7 +1532,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF__cache_dblock_get_load_size()
+ * Function:	H5HF__cache_dblock_get_initial_load_size()
  *
  * Purpose:	Determine the size of the direct block on disk image, and 
  *		return it in *image_len.
@@ -1495,44 +1546,158 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_dblock_get_load_size(const void *_udata, size_t *image_len)
+H5HF__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
 {
     const H5HF_dblock_cache_ud_t *udata = (const H5HF_dblock_cache_ud_t *)_udata;    /* User data for callback */
-    const H5HF_parent_t         *par_info; /* Pointer to parent information */
-    const H5HF_hdr_t            *hdr;     /* Shared fractal heap information */
-    size_t                      size;
+    const H5HF_parent_t *par_info; 	/* Pointer to parent information */
+    const H5HF_hdr_t  *hdr;     	/* Shared fractal heap information */
 
     FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(udata);
     HDassert(image_len);
+
+    /* Convenience variables */
     par_info = (const H5HF_parent_t *)(&(udata->par_info));
     HDassert(par_info);
     hdr = par_info->hdr;
     HDassert(hdr);
-    HDassert(hdr->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
 
     /* Check for I/O filters on this heap */
     if(hdr->filter_len > 0) {
         /* Check for root direct block */
         if(par_info->iblock == NULL)
-            size = hdr->pline_root_direct_size;
+            /* filtered root direct block */
+            *image_len = hdr->pline_root_direct_size;
         else
-            size = par_info->iblock->filt_ents[par_info->entry].size;
+            /* filtered direct block */
+            *image_len = par_info->iblock->filt_ents[par_info->entry].size;
+    }  /* end if */
+    else
+        *image_len = udata->dblock_size;
+    
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF__cache_dblock_get_initial_load_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HF__cache_dblock_verify_chksum
+ *
+ * Purpose:     Verify the computed checksum of the data structure is the
+ *              same as the stored chksum.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        Negative
+ *
+ * Programmer:  Vailin Choi; Aug 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;       		/* Pointer into raw data buffer */
+    H5HF_dblock_cache_ud_t *udata = (H5HF_dblock_cache_ud_t *)_udata;   /* User data for callback */
+    void *read_buf = NULL;     	/* Pointer to buffer to read in */
+    H5HF_hdr_t  *hdr;           /* Shared fractal heap information */
+    H5HF_parent_t *par_info;   	/* Pointer to parent information */
+    uint32_t stored_chksum;     /* Stored metadata checksum value */
+    uint32_t computed_chksum;   /* Computed metadata checksum value */
+    size_t chk_size;       	/* The size for validating checksum */
+    uint8_t *chk_p;         	/* Pointer to the area for validating checksum */
+    htri_t ret_value = TRUE;	/* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(image);
+    HDassert(udata);
+    par_info = (H5HF_parent_t *)(&(udata->par_info));
+    HDassert(par_info);
+    hdr = par_info->hdr;
+    HDassert(hdr);
+
+    /* Reset callback context info */
+    udata->decompressed = FALSE;
+    udata->dblk = NULL;
+
+    /* Get out if data block is not checksummed */
+    if(!(hdr->checksum_dblocks))
+	HGOTO_DONE(TRUE);
+
+    if(hdr->filter_len > 0) {
+	size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
+	unsigned filter_mask;	/* Excluded filters for direct block */
+	H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+
+        /* Allocate buffer to perform I/O filtering on and copy image into
+         * it.  Must do this as H5Z_pipeline() may re-size the buffer 
+         * provided to it.
+         */
+        if(NULL == (read_buf = H5MM_malloc(len)))
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline buffer")
+
+	/* Set up parameters for filter pipeline */
+	nbytes = len;
+	filter_mask = udata->filter_mask;
+        HDmemcpy(read_buf, image, len);
+
+	/* Push direct block data through I/O filter pipeline */
+	if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, FAIL, "output pipeline failed")
+
+        /* Update info about direct block */
+	udata->decompressed = TRUE;
+        len = nbytes;
     } /* end if */
     else
-        size = udata->dblock_size;
+        read_buf = (void *)image;       /* Casting away const OK - QAK */
 
-    *image_len = size;
+    /* Decode checksum */
+    chk_size = (size_t)(H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr) - H5HF_SIZEOF_CHKSUM);
+    chk_p = (uint8_t *)read_buf + chk_size;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF__cache_dblock_get_load_size() */
+    /* Metadata checksum */
+    UINT32DECODE(chk_p, stored_chksum);
 
-/*********************************************************/
-/* metadata cache callback definitions for direct blocks */
-/*********************************************************/
+    chk_p -= H5HF_SIZEOF_CHKSUM;
+
+    /* Reset checksum field, for computing the checksum */
+    /* (Casting away const OK - QAK) */
+    HDmemset(chk_p, 0, (size_t)H5HF_SIZEOF_CHKSUM);
+
+    /* Compute checksum on entire direct block */
+    computed_chksum = H5_checksum_metadata(read_buf, len, 0);
+
+    /* Restore the checksum */
+    UINT32ENCODE(chk_p, stored_chksum)
+
+    /* Verify checksum */
+    if(stored_chksum != computed_chksum)
+	HGOTO_DONE(FALSE);
+
+    /* Save the decompressed data to be used later in deserialize callback */
+    if(hdr->filter_len > 0) {
+        /* Sanity check */
+	HDassert(udata->decompressed);
+	HDassert(len == udata->dblock_size);
+
+	/* Allocate block buffer */
+	if(NULL == (udata->dblk = H5FL_BLK_MALLOC(direct_block, (size_t)len)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+	/* Copy un-filtered data into block's buffer */
+	HDmemcpy(udata->dblk, read_buf, len);
+    } /* end if */
+
+done:
+    /* Release the read buffer */
+    if(read_buf && read_buf != image)
+	H5MM_xfree(read_buf);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF__cache_dblock_verify_chksum() */
 
 
 /*-------------------------------------------------------------------------
@@ -1563,14 +1728,15 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
     H5HF_dblock_cache_ud_t *udata = (H5HF_dblock_cache_ud_t *)_udata;   /* User data for callback */
     H5HF_parent_t       *par_info;      /* Pointer to parent information */
     H5HF_direct_t       *dblock = NULL; /* Direct block info */
-    const uint8_t       *image;         /* Pointer into raw data buffer */
+    const uint8_t       *image = _image;/* Pointer into raw data buffer */
+    void                *read_buf = NULL; /* Pointer to buffer to decompress */
     haddr_t             heap_addr;      /* Address of heap header in the file */
     void *              ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity checks */
-    HDassert(_image);
+    HDassert(image);
     HDassert(udata);
     par_info = (H5HF_parent_t *)(&(udata->par_info));
     HDassert(par_info);
@@ -1581,7 +1747,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
     HDassert(dirty);
 
     /* Allocate space for the fractal heap direct block */
-    if(NULL == (dblock = H5FL_MALLOC(H5HF_direct_t)))
+    if(NULL == (dblock = H5FL_CALLOC(H5HF_direct_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemset(&dblock->cache_info, 0, sizeof(H5AC_info_t));
 
@@ -1595,61 +1761,62 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
 
     /* Set block's internal information */
     dblock->size = udata->dblock_size;
-    dblock->file_size = 0;
-
-    /* initialize fields used in serialization */
-    dblock->write_buf = NULL;
-    dblock->write_size = 0;
-
-    /* Allocate block buffer */
-/* XXX: Change to using free-list factories */
-    if(NULL == (dblock->blk = H5FL_BLK_MALLOC(direct_block, (size_t)dblock->size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Check for I/O filters on this heap */
     if(hdr->filter_len > 0) {
-	H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
-	size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
-	void *read_buf;         /* Pointer to buffer to read in */
-	size_t read_size;       /* Size of filtered direct block to read */
-	unsigned filter_mask;	/* Excluded filters for direct block */
+        /* Direct block is already decompressed in verify_chksum callback */
+        if(udata->decompressed) { 
+            /* Sanity check */
+            HDassert(udata->dblk);
 
-        /* Check for root direct block */
-        if(par_info->iblock == NULL)
-            /* Set up parameters to read filtered direct block */
-            read_size = hdr->pline_root_direct_size;
-        else
-            /* Set up parameters to read filtered direct block */
-            read_size = par_info->iblock->filt_ents[par_info->entry].size;
-        HDassert(len == read_size);
+            /* Take ownership of the decompressed direct block */
+            dblock->blk = udata->dblk;
+            udata->dblk = NULL;
+        } /* end if */
+        else {
+            H5Z_cb_t filter_cb = {NULL, NULL};  /* Filter callback structure */
+            size_t nbytes;          /* Number of bytes used in buffer, after applying reverse filters */
+            unsigned filter_mask;   /* Excluded filters for direct block */
 
-        /* Allocate buffer to perform I/O filtering on and copy image into
-         * it.  Must do this as H5Z_pipeline() may re-sized the buffer 
-         * provided to it.
-         */
-        if(NULL == (read_buf = H5MM_malloc(read_size)))
-            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "memory allocation failed for pipeline buffer")
-        HDmemcpy(read_buf, _image, len);
+            /* Sanity check */
+	    HDassert(udata->dblk == NULL);
 
-        /* Push direct block data through I/O filter pipeline */
-        nbytes = read_size;
-        filter_mask = udata->filter_mask;
-        if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &read_size, &read_buf) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "output pipeline failed")
+	    /* Allocate buffer to perform I/O filtering on and copy image into
+	     * it.  Must do this as H5Z_pipeline() may resize the buffer 
+	     * provided to it.
+	     */
+	    if(NULL == (read_buf = H5MM_malloc(len)))
+		HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "memory allocation failed for pipeline buffer")
 
-        /* Sanity check */
-        HDassert(nbytes == dblock->size);
+            /* Copy compressed image into buffer */
+	    HDmemcpy(read_buf, image, len);
 
-        /* Copy un-filtered data into block's buffer */
-        HDmemcpy(dblock->blk, read_buf, dblock->size);
+	    /* Push direct block data through I/O filter pipeline */
+	    nbytes = len;
+	    filter_mask = udata->filter_mask;
+	    if(H5Z_pipeline(&(hdr->pline), H5Z_FLAG_REVERSE, &filter_mask, H5Z_ENABLE_EDC, filter_cb, &nbytes, &len, &read_buf) < 0)
+		HGOTO_ERROR(H5E_HEAP, H5E_CANTFILTER, NULL, "output pipeline failed")
 
-        /* Release the read buffer */
-        H5MM_xfree(read_buf);
+	    /* Sanity check */
+	    HDassert(nbytes == dblock->size);
+
+	    /* Copy un-filtered data into block's buffer */
+	    HDmemcpy(dblock->blk, read_buf, dblock->size);
+	} /* end if */
     } /* end if */
     else {
-        /* copy image to dblock->blk */
+        /* Sanity checks */
+	HDassert(udata->dblk == NULL);
+	HDassert(!udata->decompressed);
+
+	/* Allocate block buffer */
+/* XXX: Change to using free-list factories */
+	if(NULL == (dblock->blk = H5FL_BLK_MALLOC(direct_block, (size_t)dblock->size)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+        /* Copy image to dblock->blk */
         HDassert(dblock->size == len);
-        HDmemcpy(dblock->blk, _image, dblock->size);
+        HDmemcpy(dblock->blk, image, dblock->size);
     } /* end else */
 
     /* Start decoding direct block */
@@ -1684,22 +1851,12 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
 
     /* Decode checksum on direct block, if requested */
     if(hdr->checksum_dblocks) {
-        uint32_t stored_chksum;         /* Metadata checksum value */
-        uint32_t computed_chksum;       /* Computed metadata checksum value */
+	uint32_t stored_chksum;         /* Metadata checksum value */
+
+	/* checksum verification already done in verify_chksum cb */
 
         /* Metadata checksum */
         UINT32DECODE(image, stored_chksum);
-
-        /* Reset checksum field, for computing the checksum */
-        /* (Casting away const OK - QAK) */
-        HDmemset((uint8_t *)image - H5HF_SIZEOF_CHKSUM, 0, (size_t)H5HF_SIZEOF_CHKSUM);
-
-        /* Compute checksum on entire direct block */
-        computed_chksum = H5_checksum_metadata(dblock->blk, dblock->size, 0);
-
-        /* Verify checksum */
-        if(stored_chksum != computed_chksum)
-            HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "incorrect metadata checksum for fractal heap direct block")
     } /* end if */
 
     /* Sanity check */
@@ -1709,6 +1866,11 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
     ret_value = (void *)dblock;
 
 done:
+    /* Release the read buffer */
+    if(read_buf)
+        H5MM_xfree(read_buf);
+
+    /* Cleanup on error */
     if(!ret_value && dblock)
         if(H5HF_man_dblock_dest(dblock) < 0)
             HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap direct block")

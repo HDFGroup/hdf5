@@ -175,7 +175,9 @@ typedef H5C_notify_action_t     H5AC_notify_action_t;
 #define H5AC__CLASS_SKIP_READS		H5C__CLASS_SKIP_READS
 #define H5AC__CLASS_SKIP_WRITES		H5C__CLASS_SKIP_WRITES
 
-typedef H5C_get_load_size_func_t	H5AC_get_load_size_func_t;
+typedef H5C_get_initial_load_size_func_t	H5AC_get_initial_load_size_func_t;
+typedef H5C_get_final_load_size_func_t	H5AC_get_final_load_size_func_t;
+typedef H5C_verify_chksum_func_t	H5AC_verify_chksum_func_t;
 typedef H5C_deserialize_func_t		H5AC_deserialize_func_t;
 typedef H5C_image_len_func_t		H5AC_image_len_func_t;
 

@@ -1820,11 +1820,12 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, unsigned prot_flags)
     /* Construct the user data for protect callback */
     udata.made_attempt = FALSE;
     udata.v1_pfx_nmesgs = 0;
+    udata.chunk0_size = 0;
+    udata.oh = NULL;
     udata.common.f = loc->file;
     udata.common.dxpl_id = dxpl_id;
     udata.common.file_intent = file_intent;
     udata.common.merged_null_msgs = 0;
-    udata.common.mesgs_modified = FALSE;
     HDmemset(&cont_msg_info, 0, sizeof(cont_msg_info));
     udata.common.cont_msg_info = &cont_msg_info;
     udata.common.addr = loc->addr;
@@ -1852,10 +1853,12 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, unsigned prot_flags)
         chk_udata.common.dxpl_id = dxpl_id;
         chk_udata.common.file_intent = file_intent;
         chk_udata.common.merged_null_msgs = udata.common.merged_null_msgs;
-        chk_udata.common.mesgs_modified = udata.common.mesgs_modified;
         chk_udata.common.cont_msg_info = &cont_msg_info;
 
         /* Read in continuation messages, until there are no more */
+        /* (Note that loading chunks could increase the # of continuation
+         *      messages if new ones are found - QAK, 19/11/2016)
+         */
         curr_msg = 0;
         while(curr_msg < cont_msg_info.nmsgs) {
             H5O_chunk_proxy_t *chk_proxy;       /* Proxy for chunk, to bring it into memory */
@@ -1888,16 +1891,12 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, unsigned prot_flags)
 
         /* Pass back out some of the chunk's user data */
         udata.common.merged_null_msgs = chk_udata.common.merged_null_msgs;
-        udata.common.mesgs_modified = chk_udata.common.mesgs_modified;
     } /* end if */
 
     /* Check for incorrect # of object header messages, if we've just loaded
      *  this object header from the file
      */
     if(udata.made_attempt) {
-        /* Check for incorrect # of messages in v1 object header */
-        if(oh->version == H5O_VERSION_1 &&
-                (oh->nmesgs + udata.common.merged_null_msgs) != udata.v1_pfx_nmesgs) {
 /* Don't enforce the error on an incorrect # of object header messages bug
  *      unless strict format checking is enabled.  This allows for older
  *      files, created with a version of the library that had a bug in tracking
@@ -1905,79 +1904,11 @@ H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, unsigned prot_flags)
  *      erroring out here. -QAK
  */
 #ifdef H5_STRICT_FORMAT_CHECKS
+        /* Check for incorrect # of messages in v1 object header */
+        if(oh->version == H5O_VERSION_1 &&
+                (oh->nmesgs + udata.common.merged_null_msgs) != udata.v1_pfx_nmesgs)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - incorrect # of messages")
-#else /* H5_STRICT_FORMAT_CHECKS */
-            /* Mark object header prefix dirty later if we don't have write access */
-            /* (object header will have been marked dirty during protect, if we
-             *  have write access -QAK)
-             */
-            if((prot_flags & H5AC__READ_ONLY_FLAG) != 0)
-                oh->prefix_modified = TRUE;
-#ifndef NDEBUG
-            else {
-                unsigned oh_status = 0;         /* Object header entry cache status */
-
-                /* Check the object header's status in the metadata cache */
-                if(H5AC_get_entry_status(loc->file, loc->addr, &oh_status) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to check metadata cache status for object header")
-
-                /* Make certain that object header is not dirty */
-                HDassert(!(oh_status & H5AC_ES__IS_DIRTY));
-            } /* end else */
-#endif /* NDEBUG */
 #endif /* H5_STRICT_FORMAT_CHECKS */
-        } /* end if */
-
-        /* Check for any messages that were modified while being read in */
-        if(udata.common.mesgs_modified && (0 == (prot_flags & H5AC__READ_ONLY_FLAG)))
-            oh->mesgs_modified = TRUE;
-
-        /* Reset the field that contained chunk 0's size during speculative load */
-        oh->chunk0_size = 0;
-    } /* end if */
-
-    /* Take care of loose ends for modifications made while bringing in the
-     *      object header & chunks.
-     */
-    if(0 == (prot_flags & H5AC__READ_ONLY_FLAG)) {
-        /* Check for the object header prefix being modified somehow */
-        /* (usually through updating the # of object header messages) */
-        if(oh->prefix_modified) {
-            /* Mark the header as dirty now */
-            if(H5AC_mark_entry_dirty(oh) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, NULL, "unable to mark object header as dirty")
-
-            /* Reset flag */
-            oh->prefix_modified = FALSE;
-        } /* end if */
-
-        /* Check for deferred dirty messages */
-        if(oh->mesgs_modified) {
-            unsigned u;         /* Local index variable */
-
-            /* Loop through all messages, marking their chunks as dirty */
-            /* (slightly inefficient, since we don't know exactly which messages
-             *  were modified when the object header & chunks were brought in
-             *  from the file, but this only can happen once per load -QAK)
-             */
-            for(u = 0; u < oh->nmesgs; u++) {
-                /* Mark each chunk with a dirty message as dirty also */
-                if(oh->mesg[u].dirty) {
-                    H5O_chunk_proxy_t *chk_proxy;        /* Chunk that message is in */
-
-                    /* Protect chunk */
-                    if(NULL == (chk_proxy = H5O_chunk_protect(loc->file, dxpl_id, oh, oh->mesg[u].chunkno)))
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header chunk")
-
-                    /* Unprotect chunk, marking it dirty */
-                    if(H5O_chunk_unprotect(loc->file, dxpl_id, chk_proxy, TRUE) < 0)
-                        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to unprotect object header chunk")
-                } /* end if */
-            } /* end for */
-
-            /* Reset flag */
-            oh->mesgs_modified = FALSE;
-        } /* end if */
     } /* end if */
 
 #ifdef H5O_DEBUG
@@ -3654,7 +3585,6 @@ herr_t
 H5O__free(H5O_t *oh)
 {
     unsigned	u;                      /* Local index variable */
-    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 

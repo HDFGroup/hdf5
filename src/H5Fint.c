@@ -686,6 +686,18 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
          */
         f->shared->use_tmp_space = !H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI);
 
+        /* Retrieve the # of read attempts here so that sohm in superblock will get the correct # of attempts */
+        if(H5P_get(plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, &f->shared->read_attempts) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get the # of read attempts")
+
+        /* If no value for read attempts has been set, use the default */
+        if(!f->shared->read_attempts)
+            f->shared->read_attempts = H5F_METADATA_READ_ATTEMPTS;
+
+        /* Determine the # of bins for metdata read retries */
+        if(H5F_set_retries(f) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't set retries and retries_nbins")
+
         /* Get the metadata cache log location (if we're logging) */
         {
             char *mdc_log_location = NULL;      /* location of metadata cache log location */
@@ -780,6 +792,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
     HDassert(f->shared);
 
     if(1 == f->shared->nrefs) {
+        int actype;                         /* metadata cache type (enum value) */
         H5F_io_info_t fio_info;             /* I/O info for operation */
 
         /* Flush at this point since the file will be closed.
@@ -896,6 +909,11 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         /* Free mount table */
         f->shared->mtab.child = (H5F_mount_t *)H5MM_xfree(f->shared->mtab.child);
         f->shared->mtab.nalloc = 0;
+
+        /* Clean up the metadata retries array */
+        for(actype = 0; actype < (int)H5AC_NTYPES; actype++)
+            if(f->shared->retries[actype])
+                f->shared->retries[actype] = (uint32_t *)H5MM_xfree(f->shared->retries[actype]);
 
         /* Destroy shared file struct */
         f->shared = (H5F_file_t *)H5FL_FREE(H5F_file_t, f->shared);
@@ -2125,6 +2143,96 @@ H5F_get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, hid_t dxpl_id)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_get_file_image() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_track_metadata_read_retries
+ *
+ * Purpose:     To track the # of a "retries" (log10) for a metadata item.
+ *		This routine should be used only when:
+ *		  "retries" > 0
+ *		  f->shared->read_attempts > 1 (does not have retry when 1)
+ *		  f->shared->retries_nbins > 0 (calculated based on f->shared->read_attempts)
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi; October 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_track_metadata_read_retries(H5F_t *f, unsigned actype, unsigned retries)
+{
+    unsigned log_ind;			/* Index to the array of retries based on log10 of retries */
+    double tmp;                         /* Temporary value, to keep compiler quiet */
+    herr_t ret_value = SUCCEED; 	/* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared->read_attempts > 1);
+    HDassert(f->shared->retries_nbins > 0);
+    HDassert(retries > 0);
+    HDassert(retries < f->shared->read_attempts);
+    HDassert(actype < H5AC_NTYPES);
+
+    /* Allocate memory for retries */
+    if(NULL == f->shared->retries[actype])
+        if(NULL == (f->shared->retries[actype] = (uint32_t *)H5MM_calloc((size_t)f->shared->retries_nbins * sizeof(uint32_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Index to retries based on log10 */
+    tmp = HDlog10((double)retries);
+    log_ind = (unsigned)tmp;
+    HDassert(log_ind < f->shared->retries_nbins);
+
+    /* Increment the # of the "retries" */
+    f->shared->retries[actype][log_ind]++;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_track_metadata_read_retries() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_retries
+ *
+ * Purpose:     To initialize data structures for read retries:
+ *		--zero out "retries"
+ *		--set up "retries_nbins" based on read_attempts
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi; November 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_retries(H5F_t *f)
+{
+    double tmp;				/* Temporary variable */
+
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(f);
+
+    /* Initialize the tracking for metadata read retries */
+    HDmemset(f->shared->retries, 0, sizeof(f->shared->retries));
+
+    /* Initialize the # of bins for retries */
+    f->shared->retries_nbins = 0;
+    if(f->shared->read_attempts > 1) {
+        tmp = HDlog10((double)(f->shared->read_attempts - 1));
+        f->shared->retries_nbins = (unsigned)tmp + 1;
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_retries() */
 
 
 /*-------------------------------------------------------------------------

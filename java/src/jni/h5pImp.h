@@ -1473,6 +1473,25 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Piterate
   (JNIEnv*, jclass, jlong, jintArray, jobject, jobject);
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_metadata_read_attempts
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1metadata_1read_1attempts
+(JNIEnv *, jclass, jlong);
+
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_metadata_read_attempts
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1metadata_1read_1attempts
+(JNIEnv *, jclass, jlong, jlong);
+
 
 #ifdef __cplusplus
 } /* end extern "C" */

@@ -167,6 +167,9 @@ static herr_t H5C__mark_flush_dep_dirty(H5C_cache_entry_t * entry);
 
 static herr_t H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry);
 
+static herr_t H5C__verify_len_eoa(H5F_t *f, const H5C_class_t * type,
+    haddr_t addr, size_t *len, hbool_t actual);
+
 static herr_t H5C__generate_image(const H5F_t *f, H5C_t * cache_ptr, H5C_cache_entry_t *entry_ptr, 
                                   hid_t dxpl_id);
 
@@ -6136,6 +6139,70 @@ done:
 
 /*-------------------------------------------------------------------------
  *
+ * Function:    H5C__verify_len_eoa
+ *
+ * Purpose:     Verify that 'len' does not exceed eoa when 'actual' is
+ *              false i.e. 'len" is the initial speculative length from
+ *              get_load_size callback with null image pointer.
+ *              If exceed, adjust 'len' accordingly.
+ *
+ *              Verify that 'len' should not exceed eoa when 'actual' is
+ *              true i.e. 'len' is the actual length from get_load_size 
+ *              callback with non-null image pointer.
+ *              If exceed, return error.
+ *
+ * Return:      FAIL if error is detected, SUCCEED otherwise.
+ *
+ * Programmer:  Vailin Choi
+ *              9/6/15
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C__verify_len_eoa(H5F_t *f, const H5C_class_t *type, haddr_t addr,
+    size_t *len, hbool_t actual)
+{
+    H5FD_mem_t cooked_type;             /* Modified type, accounting for switching global heaps */
+    haddr_t eoa;                	/* End-of-allocation in the file */
+    herr_t ret_value = SUCCEED;      	/* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* if type == H5FD_MEM_GHEAP, H5F_block_read() forces 
+     * type to H5FD_MEM_DRAW via its call to H5F__accum_read().
+     * Thus we do the same for purposes of computing the EOA
+     * for sanity checks.
+     */
+    cooked_type = (type->mem_type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type->mem_type;
+
+    /* Get the file's end-of-allocation value */
+    eoa = H5F_get_eoa(f, cooked_type);
+    if(!H5F_addr_defined(eoa))
+	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "invalid EOA address for file")
+
+    /* Check for bad address in general */
+    if(H5F_addr_gt(addr, eoa))
+	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "address of object past end of allocation")
+
+    /* Check if the amount of data to read will be past the EOA */
+    if(H5F_addr_gt((addr + *len), eoa)) {
+	if(actual)
+	    HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "actual len exceeds EOA.")
+	else
+	    /* Trim down the length of the metadata */
+	    *len = (size_t)(eoa - addr);
+    } /* end if */
+
+    if(*len <= 0)
+	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "len not positive after adjustment for EOA.")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__verify_len_eoa() */
+
+
+/*-------------------------------------------------------------------------
+ *
  * Function:    H5C_load_entry
  *
  * Purpose:     Attempt to load the entry at the specified disk address
@@ -6163,7 +6230,7 @@ H5C_load_entry(H5F_t *              f,
                 void *              udata)
 {
     hbool_t     dirty = FALSE;          /* Flag indicating whether thing was dirtied during deserialize */
-    void *      image = NULL;           /* Buffer for disk image                    */
+    uint8_t *   image = NULL;           /* Buffer for disk image                    */
     void *      thing = NULL;           /* Pointer to thing loaded                  */
     H5C_cache_entry_t *entry = NULL;    /* Alias for thing loaded, as cache entry   */
     size_t      len;                    /* Size of image in file                    */
@@ -6176,10 +6243,18 @@ H5C_load_entry(H5F_t *              f,
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity checks */
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
     HDassert(type);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(type->get_initial_load_size);
+    if(type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)
+        HDassert(type->get_final_load_size);
+    else
+        HDassert(NULL == type->get_final_load_size);
+    HDassert(type->deserialize);
 
     /* Can't see how skip reads could be usefully combined with
      * the speculative read flag.  Hence disallow.
@@ -6187,59 +6262,19 @@ H5C_load_entry(H5F_t *              f,
     HDassert(!((type->flags & H5C__CLASS_SKIP_READS) &&
                (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)));
 
-    HDassert(H5F_addr_defined(addr));
-    HDassert(type->get_load_size);
-    HDassert(type->deserialize);
-
-    /* Call the get_load_size callback, to retrieve the initial 
-     * size of image 
-     */
-    if(type->get_load_size(udata, &len) < 0)
+    /* Call the get_initial_load_size callback, to retrieve the initial size of image */
+    if(type->get_initial_load_size(udata, &len) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image size")
-
     HDassert(len > 0);
 
     /* Check for possible speculative read off the end of the file */
-    if(type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG) {
-
-        haddr_t eoa;                /* End-of-allocation in the file */
-        H5FD_mem_t  cooked_type;
-
-        /* if type == H5FD_MEM_GHEAP, H5F_block_read() forces 
-         * type to H5FD_MEM_DRAW via its call to H5F__accum_read().
-         * Thus we do the same for purposes of computing the eoa
-         * for sanity checks.
-         */
-        cooked_type = (type->mem_type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type->mem_type;
-
-        /* Get the file's end-of-allocation value */
-        eoa = H5F_get_eoa(f, cooked_type);
-
-        HDassert(H5F_addr_defined(eoa));
-
-        /* Check for bad address in general */
-        if ( H5F_addr_gt(addr, eoa) )
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "address of object past end of allocation")
-
-        /* Check if the amount of data to read will be past the eoa */
-        if( H5F_addr_gt((addr + len), eoa) ) {
-
-            /* Trim down the length of the metadata */
-            /* Note that for some cache clients, this will cause an 
-             * assertion failure.   JRM -- 8/29/14
-             */
-            len = (size_t)(eoa - addr);
-        } /* end if */
-
-        if ( len <= 0 )
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "len not positive after adjustment for EOA.")
-
-    } /* end if */
+    if(type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)
+        if(H5C__verify_len_eoa(f, type, addr, &len, FALSE) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid len with respect to EOA")
 
     /* Allocate the buffer for reading the on-disk entry image */
-    if(NULL == (image = H5MM_malloc(len + H5C_IMAGE_EXTRA_SPACE)))
+    if(NULL == (image = (uint8_t *)H5MM_malloc(len + H5C_IMAGE_EXTRA_SPACE)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for on disk image buffer.")
-
 #if H5C_DO_MEMORY_SANITY_CHECKS
     HDmemcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
@@ -6255,150 +6290,144 @@ H5C_load_entry(H5F_t *              f,
 
     /* Get the on-disk entry image */
     if(0 == (type->flags & H5C__CLASS_SKIP_READS)) {
-#ifdef H5_HAVE_PARALLEL
-        if(!coll_access || 0 == mpi_rank) {
-#endif /* H5_HAVE_PARALLEL */
+        unsigned tries, max_tries;      /* The # of read attempts               */
+        unsigned retries;               /* The # of retries                     */
+        htri_t chk_ret;                 /* return from verify_chksum callback   */
+        size_t actual_len = len;        /* The actual length, after speculative reads have been resolved */
+        uint64_t nanosec = 1;           /* # of nanoseconds to sleep between retries */
+        void *new_image;                /* Pointer to image                     */
+        hbool_t len_changed = TRUE;     /* Whether to re-check speculative entries */
 
-            if(H5F_block_read(f, type->mem_type, addr, len, dxpl_id, image) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
+        /* Get the # of read attempts */
+        max_tries = tries = H5F_GET_READ_ATTEMPTS(f);
 
-#ifdef H5_HAVE_PARALLEL
-        } /* end if */
-
-        /* if the collective metadata read optimization is turned on,
-         * bcast the metadata read from process 0 to all ranks in the file
-         * communicator
+        /* 
+         * This do/while loop performs the following till the metadata checksum
+         * is correct or the file's number of allowed read attempts are reached.
+         *   --read the metadata
+         *   --determine the actual size of the metadata
+         *   --perform checksum verification
          */
-        if(coll_access) {
-            int buf_size;
+        do {
+            if(actual_len != len) {
+                if(NULL == (new_image = H5MM_realloc(image, len + H5C_IMAGE_EXTRA_SPACE)))
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()")
+                image = (uint8_t *)new_image;
+#if H5C_DO_MEMORY_SANITY_CHECKS
+                HDmemcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
+            } /* end if */
 
-            H5_CHECKED_ASSIGN(buf_size, int, len, size_t);
-            if(MPI_SUCCESS != (mpi_code = MPI_Bcast(image, buf_size, MPI_BYTE, 0, comm)))
-                HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
-        } /* end if */
+#ifdef H5_HAVE_PARALLEL
+            if(!coll_access || 0 == mpi_rank) {
 #endif /* H5_HAVE_PARALLEL */
-    } /* end if */
+                if(H5F_block_read(f, type->mem_type, addr, len, dxpl_id, image) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
+#ifdef H5_HAVE_PARALLEL
+            } /* end if */
+            /* if the collective metadata read optimization is turned on,
+             * bcast the metadata read from process 0 to all ranks in the file
+             * communicator
+             */
+            if(coll_access) {
+                int buf_size;
+
+                H5_CHECKED_ASSIGN(buf_size, int, len, size_t);
+                if(MPI_SUCCESS != (mpi_code = MPI_Bcast(image, buf_size, MPI_BYTE, 0, comm)))
+                    HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
+            } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+
+            /* If the entry could be read speculatively and the length is still
+             *  changing, check for updating the actual size
+             */
+            if((type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG) && len_changed) {
+                /* Retrieve the actual length */
+                actual_len = len;
+                if(type->get_final_load_size(image, len, udata, &actual_len) < 0)
+                    continue;   /* Transfer control to while() and count towards retries */
+
+                /* Check for the length changing */
+                if(actual_len != len) {
+                    /* Verify that the length isn't past the EOA for the file */
+                    if(H5C__verify_len_eoa(f, type, addr, &actual_len, TRUE) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "actual_len exceeds EOA.")
+
+                    /* Expand buffer to new size */
+                    if(NULL == (new_image = H5MM_realloc(image, actual_len + H5C_IMAGE_EXTRA_SPACE)))
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()")
+                    image = (uint8_t *)new_image;
+#if H5C_DO_MEMORY_SANITY_CHECKS
+                    HDmemcpy(image + actual_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
+
+                    if(actual_len > len) {
+#ifdef H5_HAVE_PARALLEL
+                        if(!coll_access || 0 == mpi_rank) {
+#endif /* H5_HAVE_PARALLEL */
+                            /* If the thing's image needs to be bigger for a speculatively
+                             * loaded thing, go get the on-disk image again (the extra portion).
+                             */
+                            if(H5F_block_read(f, type->mem_type, addr + len, actual_len - len, dxpl_id, image + len) < 0)
+                                HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
+#ifdef H5_HAVE_PARALLEL
+                        }
+                        /* If the collective metadata read optimization is turned on,
+                         * Bcast the metadata read from process 0 to all ranks in the file
+                         * communicator */
+                        if(coll_access) {
+                            int buf_size;
+
+                            H5_CHECKED_ASSIGN(buf_size, int, actual_len - len, size_t);
+                            if(MPI_SUCCESS != (mpi_code = MPI_Bcast(image + len, buf_size, MPI_BYTE, 0, comm)))
+                                HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
+                        } /* end if */
+#endif /* H5_HAVE_PARALLEL */
+                    } /* end if */
+                } /* end if (actual_len != len) */
+                else {
+                    /* The length has stabilized */
+                    len_changed = FALSE;
+
+                    /* Set the final length */
+                    len = actual_len;
+                } /* else */
+            } /* end if */
+
+            /* If there's no way to verify the checksum for a piece of metadata
+             * (usually because there's no checksum in the file), leave now
+             */
+            if(type->verify_chksum == NULL)
+                break;
+
+            /* Verify the checksum for the metadata image */
+            if((chk_ret = type->verify_chksum(image, actual_len, udata)) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "failure from verify_chksum callback")
+            if(chk_ret == TRUE)
+                break;
+
+            /* Sleep for some time */
+            H5_nanosleep(nanosec);
+            nanosec *= 2;               /* Double the sleep time next time */
+        } while(--tries);
+
+        /* Check for too many tries */
+        if(tries == 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "incorrect metadatda checksum after all read attempts")
+
+        /* Calculate and track the # of retries */
+        retries = max_tries - tries;
+        if(retries)     /* Does not track 0 retry */
+            if(H5F_track_metadata_read_retries(f, (unsigned)type->mem_type, retries) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "cannot track read tries = %u ", retries)
+
+        /* Set the final length (in case it wasn't set earlier) */
+        len = actual_len;
+    } /* end if !H5C__CLASS_SKIP_READS */
 
     /* Deserialize the on-disk image into the native memory form */
     if(NULL == (thing = type->deserialize(image, len, udata, &dirty)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't deserialize image")
-
-    /* If the client's cache has an image_len callback, check it */
-    if(type->image_len) {
-        size_t	new_len;        /* New size of on-disk image */
-
-        /* set magic and type field in *entry_ptr.  While the image_len 
-         * callback shouldn't touch the cache specific fields, it may check 
-         * these fields to ensure that it it has received the expected 
-         * value.
-         *
-         * Note that this initialization is repeated below on the off 
-         * chance that we had to re-try the deserialization.
-         */
-        entry = (H5C_cache_entry_t *)thing;
-        entry->magic = H5C__H5C_CACHE_ENTRY_T_MAGIC;
-        entry->type  = type;
-
-        /* Get the actual image size for the thing */
-        if(type->image_len(thing, &new_len) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't retrieve image length")
-
-        if(new_len == 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "image length is 0")
-
-        if(new_len != len) {
-
-            if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG) {
-
-                void *new_image;       /* Buffer for disk image */
-
-                /* Adjust the size of the image to match new_len */
-                if(NULL == (new_image = H5MM_realloc(image, 
-                                            new_len + H5C_IMAGE_EXTRA_SPACE)))
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()")
-
-                image = new_image;
-
-#if H5C_DO_MEMORY_SANITY_CHECKS
-                HDmemcpy(((uint8_t *)image) + new_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
-#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
-
-                /* If the thing's image needs to be bigger for a speculatively
-                 *      loaded thing, free the thing and retry with new length
-                 */
-                if (new_len > len) {
-
-                    /* Release previous (possibly partially initialized) 
-                     * thing.  Note that we must set entry->magic to 
-                     * H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC and set one or 
-                     * two other fields before the call to free_icr
-                     * so as to avoid sanity check failures.
-                     */
-                    entry->magic = H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC;
-
-                    entry->addr  = addr;
-
-                    if ( type->free_icr(thing) < 0 )
-
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "free_icr callback failed")
-
-#ifdef H5_HAVE_PARALLEL
-                    if(!coll_access || 0 == mpi_rank) {
-#endif /* H5_HAVE_PARALLEL */
-
-                    /* Go get the on-disk image again */
-                    if(H5F_block_read(f, type->mem_type, addr, 
-                                      new_len, dxpl_id, image) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image")
-
-#ifdef H5_HAVE_PARALLEL
-                    }
-                    /* if the collective metadata read optimization is turned on,
-                       bcast the metadata read from process 0 to all ranks in the file
-                       communicator */
-                    if(coll_access) {
-                        int buf_size;
-
-                        H5_CHECKED_ASSIGN(buf_size, int, new_len, size_t);
-                        if(MPI_SUCCESS != (mpi_code = MPI_Bcast(image, buf_size, MPI_BYTE, 0, comm)))
-                            HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
-                    } /* end if */
-#endif /* H5_HAVE_PARALLEL */
-
-                    /* Deserialize on-disk image into native memory form again */
-                    if(NULL == (thing = type->deserialize(image, new_len, udata, &dirty)))
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't deserialize image")
-
-#ifndef NDEBUG
-                    {
-                        size_t new_new_len;
-
-                        /* Get the actual image size for the thing again.  Note
-                         * that since this is a new thing, we have to set 
-                         * the magic and type fields again so as to avoid
-                         * failing sanity checks.
-                         */
-                        entry = (H5C_cache_entry_t *)thing;
-                        entry->magic = H5C__H5C_CACHE_ENTRY_T_MAGIC;
-                        entry->type  = type;
-
-                        type->image_len(thing, &new_new_len);
-                        HDassert(new_new_len == new_len);
-                    } /* end block */
-#endif /* NDEBUG */
-                } /* end if (new_len > len) */
-
-                /* Retain adjusted size */
-                len = new_len;
-
-            } else { /* throw an error */
-
-                HGOTO_ERROR(H5E_CACHE, H5E_UNSUPPORTED, NULL, \
-                     "size of non-speculative object changed")
-            }
-        } /* end if (new_len != len) */
-    } /* end if */
 
     entry = (H5C_cache_entry_t *)thing;
 
@@ -6480,7 +6509,7 @@ done:
         if(thing && type->free_icr(thing) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, "free_icr callback failed")
         if(image)
-            image = H5MM_xfree(image);
+            image = (uint8_t *)H5MM_xfree(image);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)

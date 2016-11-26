@@ -813,7 +813,8 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
     /* NOTE: flock(2) is not present on all POSIX systems.
      * If it is not present, we try a flock() equivalent based on
      * fcntl(2), then fall back to a function that always fails if
-     * it is not present at all.
+     * it is not present at all (Windows uses a separate Wflock()
+     * function).
      */
     #if defined(H5_HAVE_FLOCK)
         #define HDflock(F,L)    flock(F,L)
@@ -1114,6 +1115,9 @@ typedef off_t               h5_stat_size_t;
 #ifndef HDmodf
     #define HDmodf(X,Y)    modf(X,Y)
 #endif /* HDmodf */
+#ifndef HDnanosleep
+    #define HDnanosleep(N, O)    nanosleep(N, O)
+#endif /* HDnanosleep */
 #ifndef HDopen
     #ifdef _O_BINARY
         #define HDopen(S,F,M)    open(S,F|_O_BINARY,M)
@@ -2597,6 +2601,8 @@ H5_DLL uint32_t H5_hash_string(const char *str);
 
 /* Time related routines */
 H5_DLL time_t H5_make_time(struct tm *tm);
+H5_DLL void H5_nanosleep(uint64_t nanosec);
+H5_DLL double H5_get_time(void);
 
 /* Functions for building paths, etc. */
 H5_DLL herr_t   H5_build_extpath(const char *name, char **extpath /*out*/);

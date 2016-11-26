@@ -390,7 +390,7 @@ static hbool_t serve_rw_count_reset_request(struct mssg_t * mssg_ptr);
 
 /* call back functions & related data structures */
 
-static herr_t datum_get_load_size(const void * udata_ptr,
+static herr_t datum_get_initial_load_size(void *udata_ptr,
                                   size_t *image_len_ptr);
 
 static void * datum_deserialize(const void * image_ptr,
@@ -436,7 +436,9 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     /* name          */ "datum",
     /* mem_type      */ H5FD_MEM_DEFAULT,
     /* flags         */ H5AC__CLASS_SKIP_READS | H5AC__CLASS_SKIP_WRITES,
-    /* get_load_size */ datum_get_load_size,
+    /* get_initial_load_size */ datum_get_initial_load_size,
+    /* get_final_load_size */ NULL,
+    /* verify_chksum */ NULL,
     /* deserialize   */ datum_deserialize,
     /* image_len     */ datum_image_len,
     /* pre_serialize */ NULL,
@@ -2318,7 +2320,7 @@ serve_rw_count_reset_request(struct mssg_t * mssg_ptr)
 
 
 /*-------------------------------------------------------------------------
- * Function:	datum_get_load_size
+ * Function:	datum_get_initial_load_size
  *
  * Purpose:	Query the image size for an entry before deserializing it
  *
@@ -2330,8 +2332,7 @@ serve_rw_count_reset_request(struct mssg_t * mssg_ptr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-datum_get_load_size(const void * udata_ptr,
-                  size_t *image_len_ptr)
+datum_get_initial_load_size(void *udata_ptr, size_t *image_len_ptr)
 {
     haddr_t addr = *(haddr_t *)udata_ptr;
     int idx;
@@ -2355,7 +2356,7 @@ datum_get_load_size(const void * udata_ptr,
     if ( callbacks_verbose ) {
 
         HDfprintf(stdout,
-	  "%d: get_load_size() idx = %d, addr = %ld, len = %d.\n",
+	  "%d: get_initial_load_size() idx = %d, addr = %ld, len = %d.\n",
               world_mpi_rank, idx, (long)addr, (int)entry_ptr->local_len);
 	fflush(stdout);
     }
@@ -2364,7 +2365,7 @@ datum_get_load_size(const void * udata_ptr,
     *image_len_ptr = entry_ptr->local_len;
 
     return(SUCCEED);
-} /* get_load_size() */
+} /* get_initial_load_size() */
 
 
 /*-------------------------------------------------------------------------

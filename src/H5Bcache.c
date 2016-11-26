@@ -54,13 +54,13 @@
 /********************/
 
 /* Metadata cache callbacks */
-static herr_t H5B__get_load_size(const void *udata, size_t *image_len);
-static void *H5B__deserialize(const void *image, size_t len, void *udata,
+static herr_t H5B__cache_get_initial_load_size(void *udata, size_t *image_len);
+static void *H5B__cache_deserialize(const void *image, size_t len, void *udata,
     hbool_t *dirty);
-static herr_t H5B__image_len(const void *thing, size_t *image_len);
-static herr_t H5B__serialize(const H5F_t *f, void *image, size_t len,
+static herr_t H5B__cache_image_len(const void *thing, size_t *image_len);
+static herr_t H5B__cache_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
-static herr_t H5B__free_icr(void *thing);
+static herr_t H5B__cache_free_icr(void *thing);
 
 
 /*********************/
@@ -73,13 +73,15 @@ const H5AC_class_t H5AC_BT[1] = {{
     "v1 B-tree",                        /* Metadata client name (for debugging) */
     H5FD_MEM_BTREE,                     /* File space memory type for client */
     H5AC__CLASS_NO_FLAGS_SET,           /* Client class behavior flags */
-    H5B__get_load_size,                 /* 'get_load_size' callback */
-    H5B__deserialize,                   /* 'deserialize' callback */
-    H5B__image_len,                     /* 'image_len' callback */
+    H5B__cache_get_initial_load_size,   /* 'get_initial_load_size' callback */
+    NULL,				/* 'get_final_load_size' callback */
+    NULL,				/* 'verify_chksum' callback */
+    H5B__cache_deserialize,             /* 'deserialize' callback */
+    H5B__cache_image_len,               /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
-    H5B__serialize,                     /* 'serialize' callback */
+    H5B__cache_serialize,               /* 'serialize' callback */
     NULL,                               /* 'notify' callback */
-    H5B__free_icr,                      /* 'free_icr' callback */
+    H5B__cache_free_icr,                /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
 
@@ -90,7 +92,7 @@ const H5AC_class_t H5AC_BT[1] = {{
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B__get_load_size
+ * Function:    H5B__cache_get_initial_load_size
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -103,9 +105,9 @@ const H5AC_class_t H5AC_BT[1] = {{
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B__get_load_size(const void *_udata, size_t *image_len)
+H5B__cache_get_initial_load_size(void *_udata, size_t *image_len)
 {
-    const H5B_cache_ud_t *udata = (const H5B_cache_ud_t *)_udata;       /* User data for callback */
+    H5B_cache_ud_t *udata = (H5B_cache_ud_t *)_udata;       /* User data for callback */
     H5B_shared_t *shared;       /* Pointer to shared B-tree info */
 
     FUNC_ENTER_STATIC_NOERR
@@ -122,11 +124,11 @@ H5B__get_load_size(const void *_udata, size_t *image_len)
     *image_len = shared->sizeof_rnode;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B__get_load_size() */
+} /* end H5B__cache_get_initial_load_size() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B__deserialize
+ * Function:    H5B__cache_deserialize
  *
  * Purpose:     Deserialize the data structure from disk.
  *
@@ -140,7 +142,7 @@ H5B__get_load_size(const void *_udata, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static void *
-H5B__deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void *_udata,
+H5B__cache_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void *_udata,
     hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5B_t *bt = NULL;           /* Pointer to the deserialized B-tree node */
@@ -229,11 +231,11 @@ done:
             HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, NULL, "unable to destroy B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B__deserialize() */
+} /* end H5B__cache_deserialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B__image_len
+ * Function:    H5B__cache_image_len
  *
  * Purpose:     Compute the size of the data structure on disk.
  *
@@ -246,7 +248,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B__image_len(const void *_thing, size_t *image_len)
+H5B__cache_image_len(const void *_thing, size_t *image_len)
 {
     const H5B_t *bt = (const H5B_t *)_thing;        /* Pointer to the B-tree node */
     H5B_shared_t *shared;       /* Pointer to shared B-tree info */
@@ -265,11 +267,11 @@ H5B__image_len(const void *_thing, size_t *image_len)
     *image_len = shared->sizeof_rnode;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5B__image_len() */
+} /* end H5B__cache_image_len() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B__serialize
+ * Function:    H5B__cache_serialize
  *
  * Purpose:     Serialize the data structure for writing to disk.
  *
@@ -282,7 +284,7 @@ H5B__image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B__serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
+H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
     void *_thing)
 {
     H5B_t *bt = (H5B_t *)_thing;        /* Pointer to the B-tree node */
@@ -351,11 +353,11 @@ H5B__serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B__serialize() */
+} /* end H5B__cache_serialize() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5B__free_icr
+ * Function:    H5B__cache_free_icr
  *
  * Purpose:     Destroy/release an "in core representation" of a data structure
  *
@@ -368,7 +370,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B__free_icr(void *thing)
+H5B__cache_free_icr(void *thing)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -383,5 +385,5 @@ H5B__free_icr(void *thing)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5B__free_icr() */
+} /* end H5B__cache_free_icr() */
 

@@ -322,6 +322,29 @@ H5F_get_nmounts(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_read_attempts
+ *
+ * Purpose:	Retrieve the file's 'read_attempts' value
+ *
+ * Return:	'# of read attempts' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Vaili Choi; Sept 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_read_attempts(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->shared->read_attempts)
+} /* end H5F_get_read_attempts() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_get_fcpl
  *
  * Purpose:	Retrieve the value of a file's FCPL.
