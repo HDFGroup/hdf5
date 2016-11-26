@@ -71,6 +71,7 @@ src/H5Einit.h
 src/H5Epubgen.h
 src/H5Eterm.h
 src/H5config.h.in
+src/H5config.h.in~
 src/H5overflow.h
 src/H5version.h
 src/Makefile.in
