@@ -5739,6 +5739,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     hbool_t		during_flush;		/* external flag */
     hbool_t		write_entry;		/* internal flag */
     hbool_t		destroy_entry;		/* internal flag */
+    hbool_t		generate_image;		/* internal flag */
     hbool_t		was_dirty;
     haddr_t             entry_addr = HADDR_UNDEF;
     herr_t		ret_value = SUCCEED;      /* Return value */
@@ -5759,6 +5760,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     take_ownership         = ((flags & H5C__TAKE_OWNERSHIP_FLAG) != 0);
     del_from_slist_on_destroy = ((flags & H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) != 0);
     during_flush           = ((flags & H5C__DURING_FLUSH_FLAG) != 0);
+    generate_image         = ((flags & H5C__GENERATE_IMAGE_FLAG) != 0);
 
     /* Set the flag for destroying the entry, based on the 'take ownership'
      * and 'destroy' flags
@@ -5818,28 +5820,12 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     entry_ptr->flush_in_progress = TRUE;
     entry_ptr->flush_marker = FALSE;
 
-    /* serialize the entry if necessary, and then write it to disk. */
-    if(write_entry) {
-
-	/* The entry is dirty, and we are doing either a flush,
-	 * or a flush destroy.  In either case, serialize the
-	 * entry and write it to disk.
-         *
-         * Note that this may cause the entry to be re-sized and/or
-         * moved in the cache.  
-	 *
-         * As we will not update the metadata cache's data structures 
-         * until we we finish the write, we must touch up these 
-         * data structures for size and location changes even if we 
-         * are about to delete the entry from the cache (i.e. on a 
-         * flush destroy).
-         */
+    /* The entry is dirty, and we are doing a flush, a flush destroy or have
+     * been requested to generate an image.  In those cases, serialize the
+     * entry.
+     */
+    if(write_entry || generate_image) {
         HDassert(entry_ptr->is_dirty);
-
-#if H5C_DO_SANITY_CHECKS
-        if(cache_ptr->check_write_permitted && !(cache_ptr->write_permitted))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Write when writes are always forbidden!?!?!")
-#endif /* H5C_DO_SANITY_CHECKS */
 
         if(NULL == entry_ptr->image_ptr) {
             if(NULL == (entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)))
@@ -5854,13 +5840,22 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
             if(H5C__generate_image(f, cache_ptr, entry_ptr, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't generate entry's image")
         } /* end if ( ! (entry_ptr->image_up_to_date) ) */
+    } /* end if */
 
-        /* Finally, write the image to disk.  
-         * 
-         * Note that if the H5AC__CLASS_SKIP_WRITES flag is set in the 
-         * in the entry's type, we silently skip the write.  This
-         * flag should only be used in test code. 
-         */
+    /* Finally, write the image to disk.  
+     * 
+     * Note that if the H5AC__CLASS_SKIP_WRITES flag is set in the 
+     * in the entry's type, we silently skip the write.  This
+     * flag should only be used in test code. 
+     */
+    if(write_entry) {
+        HDassert(entry_ptr->is_dirty);
+
+#if H5C_DO_SANITY_CHECKS
+        if(cache_ptr->check_write_permitted && !(cache_ptr->write_permitted))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Write when writes are always forbidden!?!?!")
+#endif /* H5C_DO_SANITY_CHECKS */
+
         if(((entry_ptr->type->flags) & H5C__CLASS_SKIP_WRITES) == 0) {
 #ifdef H5_HAVE_PARALLEL
             if(collective_write_list) {
@@ -7599,6 +7594,15 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t * entry,
  * Function:    H5C__generate_image
  *
  * Purpose:     Serialize an entry and generate its image.
+ *
+ * Note:	This may cause the entry to be re-sized and/or moved in
+ *              the cache.  
+ *
+ *              As we will not update the metadata cache's data structures 
+ *              until we we finish the write, we must touch up these 
+ *              data structures for size and location changes even if we 
+ *              are about to delete the entry from the cache (i.e. on a 
+ *              flush destroy).
  *
  * Return:      Non-negative on success/Negative on failure
  *

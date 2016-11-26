@@ -454,13 +454,37 @@ H5C_apply_candidate_list(H5F_t * f,
               (long long)clear_ptr->addr);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
-	    /* No need to check for the next entry in the scan being 
-             * removed from the cache, as this call to H5C__flush_single_entry()
-             * will not call either the pre_serialize or serialize callbacks.
+            /* reset entries_removed_counter and
+             * last_entry_removed_ptr prior to the call to
+             * H5C__flush_single_entry() so that we can spot
+             * unexpected removals of entries from the cache,
+             * and set the restart_scan flag if proceeding
+             * would be likely to cause us to scan an entry
+             * that is no longer in the cache.
+             *
+             * Note that as of this writing (April 2015) this 
+             * case cannot occur in the parallel case.  However 
+             * Quincey is making noises about changing this, hence 
+             * the insertion of this test.
+             *
+             * Note also that there is no test code to verify 
+             * that this code actually works (although similar code
+             * in the serial version exists and is tested).  
+             * 
+             * Implementing a test will likely require implementing
+             * flush op like facilities in the parallel tests.  At
+             * a guess this will not be terribly painful, but it 
+             * will take a bit of time.
              */
+            cache_ptr->entries_removed_counter = 0;
+            cache_ptr->last_entry_removed_ptr  = NULL;
 
-            if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
+            if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
+
+            if((cache_ptr->entries_removed_counter > 1) ||
+                    (cache_ptr->last_entry_removed_ptr == entry_ptr))
+                restart_scan = TRUE;
         } /* end if */
 
         /* Else, if this process needs to flush this entry. */
@@ -508,11 +532,9 @@ H5C_apply_candidate_list(H5F_t * f,
             if(H5C__flush_single_entry(f, dxpl_id, flush_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, collective_write_list) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry.")
 
-            if ( ( cache_ptr->entries_removed_counter > 1 ) ||
-                 ( cache_ptr->last_entry_removed_ptr == entry_ptr ) )
-
+            if((cache_ptr->entries_removed_counter > 1) ||
+                    (cache_ptr->last_entry_removed_ptr == entry_ptr))
                 restart_scan = TRUE;
-
         } /* end else-if */
 
         /* Otherwise, no action to be taken on this entry. Grab the next. */
@@ -663,7 +685,7 @@ H5C_apply_candidate_list(H5F_t * f,
                           (long long)clear_ptr->addr);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
-                if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
+                if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
             } /* end else-if */
 
@@ -714,7 +736,7 @@ H5C_apply_candidate_list(H5F_t * f,
     if (delayed_ptr) {
 
         if (delayed_ptr->clear_on_unprotect) {
-            if(H5C__flush_single_entry(f, dxpl_id, delayed_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG, NULL) < 0)
+            if(H5C__flush_single_entry(f, dxpl_id, delayed_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG, NULL) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry.")
 
             entry_ptr->clear_on_unprotect = FALSE;
