@@ -1050,7 +1050,7 @@ H5A_close(H5A_t *attr)
     HDassert(attr->shared);
 
     /* Close the object's symbol-table entry */
-    if(attr->obj_opened && (H5O_close(&(attr->oloc)) < 0))
+    if(attr->obj_opened && (H5O_close(&(attr->oloc), NULL) < 0))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release object header info")
 
     /* Reference count can be 0.  It only happens when H5A_create fails. */

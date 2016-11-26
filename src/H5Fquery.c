@@ -863,31 +863,6 @@ H5F_get_evict_on_close(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_get_closing
- *
- * Purpose:     Checks if the file is in the process of being closed.
- *
- * Return:      Success:    Flag indicating whether the file is closing.
- *              Failure:    (can't happen)
- *
- * Programmer:  Dana Robinson
- *              Fall 2016
- *
- *-------------------------------------------------------------------------
- */
-hbool_t
-H5F_get_closing(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(f);
-
-    FUNC_LEAVE_NOAPI(f->closing)
-} /* end H5F_get_closing() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5F_store_msg_crt_idx
  *
  * Purpose:	Retrieve the 'store message creation index' flag for the file.

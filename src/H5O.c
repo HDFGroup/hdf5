@@ -1558,7 +1558,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_close(H5O_loc_t *loc)
+H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
@@ -1568,6 +1568,15 @@ H5O_close(H5O_loc_t *loc)
     HDassert(loc);
     HDassert(loc->file);
     HDassert(H5F_NOPEN_OBJS(loc->file) > 0);
+
+    /* Set the file_closed flag to the default value.
+     * This flag lets downstream code know if the file struct is
+     * still accessible and/or likely to contain useful data.
+     * It's needed by the evict-on-close code. Clients can ignore
+     * this value by passing in NULL.
+     */
+    if(file_closed)
+        *file_closed = FALSE;
 
     /* Decrement open-lock counters */
     H5F_DECR_NOPEN_OBJS(loc->file);
@@ -1589,7 +1598,7 @@ H5O_close(H5O_loc_t *loc)
      */
     if(H5F_NOPEN_OBJS(loc->file) == H5F_NMOUNTS(loc->file))
         /* Attempt to close down the file hierarchy */
-        if(H5F_try_close(loc->file) < 0)
+        if(H5F_try_close(loc->file, file_closed) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "problem attempting file close")
 
     /* Release location information */
@@ -2782,7 +2791,7 @@ H5O_loc_free(H5O_loc_t *loc)
         H5F_DECR_NOPEN_OBJS(loc->file);
         loc->holding_file = FALSE;
         if(H5F_NOPEN_OBJS(loc->file) <= 0) {
-            if(H5F_try_close(loc->file) < 0)
+            if(H5F_try_close(loc->file, NULL) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
         } /* end if */
     } /* end if */

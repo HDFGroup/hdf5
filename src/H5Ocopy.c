@@ -277,7 +277,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 done:
     if(loc_found && H5G_loc_free(&src_loc) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
-    if(obj_open && H5O_close(&src_oloc) < 0)
+    if(obj_open && H5O_close(&src_oloc, NULL) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
     FUNC_LEAVE_API(ret_value)

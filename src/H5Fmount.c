@@ -69,7 +69,7 @@ H5F_close_mounts(H5F_t *f)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close child group")
 
             /* Close the child file */
-            if(H5F_try_close(f->shared->mtab.child[u].file) < 0)
+            if(H5F_try_close(f->shared->mtab.child[u].file, NULL) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close child file")
 
             /* Eliminate the mount point from the table */
@@ -386,7 +386,7 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
 
     /* Detach child file from parent & see if it should close */
     child->parent = NULL;
-    if(H5F_try_close(child) < 0)
+    if(H5F_try_close(child, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close unmounted file")
 
 done:

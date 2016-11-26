@@ -304,7 +304,6 @@
 #define H5F_FCPL(F)             ((F)->shared->fcpl_id)
 #define H5F_GET_FC_DEGREE(F)    ((F)->shared->fc_degree)
 #define H5F_EVICT_ON_CLOSE(F)   ((F)->shared->evict_on_close)
-#define H5F_CLOSING(F)          ((F)->closing)
 #define H5F_RDCC_NSLOTS(F)      ((F)->shared->rdcc_nslots)
 #define H5F_RDCC_NBYTES(F)      ((F)->shared->rdcc_nbytes)
 #define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
@@ -354,7 +353,6 @@
 #define H5F_FCPL(F)             (H5F_get_fcpl(F))
 #define H5F_GET_FC_DEGREE(F)    (H5F_get_fc_degree(F))
 #define H5F_EVICT_ON_CLOSE(F)   (H5F_get_evict_on_close(F))
-#define H5F_CLOSING(F)          (H5F_get_closing(F))
 #define H5F_RDCC_NSLOTS(F)      (H5F_rdcc_nslots(F))
 #define H5F_RDCC_NBYTES(F)      (H5F_rdcc_nbytes(F))
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
@@ -639,7 +637,7 @@ typedef struct H5F_block_t {
 /* Private functions */
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id);
-H5_DLL herr_t H5F_try_close(H5F_t *f);
+H5_DLL herr_t H5F_try_close(H5F_t *f, hbool_t *was_closed/*out*/);
 
 /* Functions than retrieve values from the file struct */
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);
@@ -675,7 +673,6 @@ H5_DLL herr_t H5F_set_sohm_nindexes(H5F_t *f, unsigned nindexes);
 H5_DLL hid_t H5F_get_fcpl(const H5F_t *f);
 H5_DLL H5F_close_degree_t H5F_get_fc_degree(const H5F_t *f);
 H5_DLL hbool_t H5F_get_evict_on_close(const H5F_t *f);
-H5_DLL hbool_t H5F_get_closing(const H5F_t *f);
 H5_DLL size_t H5F_rdcc_nbytes(const H5F_t *f);
 H5_DLL size_t H5F_rdcc_nslots(const H5F_t *f);
 H5_DLL double H5F_rdcc_w0(const H5F_t *f);

@@ -1303,7 +1303,7 @@ done:
             if(H5F_addr_defined(new_dset->oloc.addr)) {
                 if(H5O_dec_rc_by_loc(&(new_dset->oloc), dxpl_id) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement refcount on newly created object")
-                if(H5O_close(&(new_dset->oloc)) < 0)
+                if(H5O_close(&(new_dset->oloc), NULL) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release object header")
                 if(file) {
                     if(H5O_delete(file, dxpl_id, new_dset->oloc.addr) < 0)
@@ -1738,7 +1738,7 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
 
 done:
     if(ret_value < 0) {
-        if(H5F_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc)) < 0)
+        if(H5F_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc), NULL) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
         if(dataset->shared) {
 	    if(layout_init)
@@ -1782,6 +1782,7 @@ H5D_close(H5D_t *dataset)
 {
     hbool_t free_failed = FALSE;    /* Set if freeing sub-components failed */
     hbool_t corked;                 /* Whether the dataset is corked or not */
+    hbool_t file_closed = TRUE;     /* H5O_close also closed the file?      */
     herr_t ret_value = SUCCEED;     /* Return value                         */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1915,11 +1916,11 @@ H5D_close(H5D_t *dataset)
 
         /* Close the dataset object */
         /* (This closes the file, if this is the last object open) */
-        if(H5O_close(&(dataset->oloc)) < 0)
+        if(H5O_close(&(dataset->oloc), &file_closed) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
         /* Evict dataset metadata if evicting on close */
-        if(!H5F_CLOSING(dataset->oloc.file) && H5F_SHARED(dataset->oloc.file) && H5F_EVICT_ON_CLOSE(dataset->oloc.file)) {
+        if(!file_closed && H5F_SHARED(dataset->oloc.file) && H5F_EVICT_ON_CLOSE(dataset->oloc.file)) {
             if(H5AC_flush_tagged_metadata(dataset->oloc.file, dataset->oloc.addr, H5AC_ind_read_dxpl_id) < 0) 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
             if(H5AC_evict_tagged_metadata(dataset->oloc.file, dataset->oloc.addr, FALSE, H5AC_ind_read_dxpl_id) < 0) 
@@ -1943,7 +1944,7 @@ H5D_close(H5D_t *dataset)
 
         /* Check reference count for this object in the top file */
         if(H5FO_top_count(dataset->oloc.file, dataset->oloc.addr) == 0) {
-            if(H5O_close(&(dataset->oloc)) < 0)
+            if(H5O_close(&(dataset->oloc), NULL) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to close")
         } /* end if */
         else

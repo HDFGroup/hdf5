@@ -827,7 +827,7 @@ H5_DLL herr_t H5O_init(void);
 H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
     size_t initial_rc, hid_t ocpl_id, H5O_loc_t *loc/*out*/);
 H5_DLL herr_t H5O_open(H5O_loc_t *loc);
-H5_DLL herr_t H5O_close(H5O_loc_t *loc);
+H5_DLL herr_t H5O_close(H5O_loc_t *loc, hbool_t *file_closed/*out*/);
 H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
 H5_DLL H5O_t *H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, unsigned prot_flags);
 H5_DLL H5O_t *H5O_pin(const H5O_loc_t *loc, hid_t dxpl_id);

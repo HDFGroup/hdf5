@@ -1304,7 +1304,7 @@ H5F_close(H5F_t *f)
     f->file_id = -1;
 
     /* Attempt to close the file/mount hierarchy */
-    if(H5F_try_close(f) < 0)
+    if(H5F_try_close(f, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
 done:
@@ -1328,7 +1328,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_try_close(H5F_t *f)
+H5F_try_close(H5F_t *f, hbool_t *was_closed /*out*/)
 {
     unsigned            nopen_files = 0;        /* Number of open files in file/mount hierarchy */
     unsigned            nopen_objs = 0;         /* Number of open objects in file/mount hierarchy */
@@ -1340,9 +1340,21 @@ H5F_try_close(H5F_t *f)
     HDassert(f);
     HDassert(f->shared);
 
+    /* Set the was_closed flag to the default value.
+     * This flag lets downstream code know if the file struct is
+     * still accessible and/or likely to contain useful data.
+     * It's needed by the evict-on-close code. Clients can ignore
+     * this value by passing in NULL.
+     */
+    if(was_closed)
+        *was_closed = FALSE;
+
     /* Check if this file is already in the process of closing */
-    if(f->closing)
+    if(f->closing) {
+        if(was_closed)
+            *was_closed = TRUE;
         HGOTO_DONE(SUCCEED)
+    } /* end if */
 
     /* Get the number of open objects and open files on this file/mount hierarchy */
     if(H5F_mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
@@ -1443,7 +1455,7 @@ H5F_try_close(H5F_t *f)
      * hierarchy if so.
      */
     if(f->parent)
-        if(H5F_try_close(f->parent) < 0)
+        if(H5F_try_close(f->parent, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close parent file")
 
     /* Unmount and close each child before closing the current file. */
@@ -1469,6 +1481,9 @@ H5F_try_close(H5F_t *f)
     if(H5F_dest(f, H5AC_ind_read_dxpl_id, TRUE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
 
+    /* Since we closed the file, this should be set to TRUE */
+    if(was_closed)
+        *was_closed = TRUE;
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_try_close() */

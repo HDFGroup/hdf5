@@ -131,9 +131,9 @@ test_cont(char *filename, hid_t fapl)
     if(hdr_info.nchunks >= nchunks)
         TEST_ERROR
 
-    if(H5O_close(&oh_locA) < 0)
+    if(H5O_close(&oh_locA, NULL) < 0)
         FAIL_STACK_ERROR
-    if(H5O_close(&oh_locB) < 0)
+    if(H5O_close(&oh_locB, NULL) < 0)
         FAIL_STACK_ERROR
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
@@ -145,8 +145,8 @@ test_cont(char *filename, hid_t fapl)
 
 error:
     H5E_BEGIN_TRY {
-        H5O_close(&oh_locA);
-        H5O_close(&oh_locB);
+        H5O_close(&oh_locA, NULL);
+        H5O_close(&oh_locB, NULL);
         H5Fclose(file);
     } H5E_END_TRY;
 
@@ -272,7 +272,7 @@ test_ohdr_cache(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Close object header created */
-    if(H5O_close(&oh_loc) < 0)
+    if(H5O_close(&oh_loc, NULL) < 0)
         FAIL_STACK_ERROR
 
     /* Unprotect local heap (which actually unpins it from the cache) */
@@ -732,7 +732,7 @@ main(void)
          *  works correctly - QAK)
          */
         TESTING("close & re-open object header");
-        if(H5O_close(&oh_loc) < 0)
+        if(H5O_close(&oh_loc, NULL) < 0)
             FAIL_STACK_ERROR
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
@@ -807,7 +807,7 @@ main(void)
 
         /* release resources */
         TESTING("object header closing");
-        if(H5O_close(&oh_loc) < 0)
+        if(H5O_close(&oh_loc, NULL) < 0)
             FAIL_STACK_ERROR
         PASSED();
 
