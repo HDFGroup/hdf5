@@ -140,16 +140,6 @@ fi
 #(tail -4 $LOGFILE | grep -s "^*** finished .* in $HOSTNAME ***" > /dev/null 2>&1) ||
 #    (echo "****snaptest launcher FAILED to complete in $HOSTNAME****" >> $FAILEDLOG)
 
-#CURRENT_DIR=`pwd`
-#cd $HOME/snapshots-bin-${sw}${SWVERSTR}/current
-#pwd
-#SVN_URL=`svn info | grep URL`
-#BRANCHNAME=`echo $SVN_URL | sed -e 's/URL:.*\///' | sed -e 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
-#REVISION=`svn info | grep Revision`
-#LAST_INFO=`svn info | grep "Last Changed"`
-#TEST_TITLE="$HOSTNAME ${BRANCHNAME}${SWVERSTR}_Daily_Tests_${TODAY}"
-#TITLE="${BRANCHNAME} Tests on $TODAY"
-#cd $CURRENT_DIR
 
 # Check result
 if [ -f $FAILEDLOG ]; then
