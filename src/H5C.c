@@ -216,9 +216,6 @@ H5FL_DEFINE_STATIC(H5C_t);
 /* Declare a free list to manage flush dependency arrays */
 H5FL_BLK_DEFINE_STATIC(parent);
 
-/* Declare extern free list to manage the H5C_collective_write_t struct */
-H5FL_EXTERN(H5C_collective_write_t);
-
 
 
 /*-------------------------------------------------------------------------
@@ -5859,20 +5856,8 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
         if(((entry_ptr->type->flags) & H5C__CLASS_SKIP_WRITES) == 0) {
 #ifdef H5_HAVE_PARALLEL
             if(collective_write_list) {
-                H5C_collective_write_t *item;
-
-                if(NULL == (item = (H5C_collective_write_t *)H5FL_MALLOC(H5C_collective_write_t)))
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "unable to allocate skip list item")
-
-                item->length = entry_ptr->size;
-                item->free_buf = FALSE;
-                item->buf = entry_ptr->image_ptr;
-                item->offset = entry_ptr->addr;
-
-                if(H5SL_insert(collective_write_list, item, &item->offset) < 0) {
-                    H5MM_free(item);
+                if(H5SL_insert(collective_write_list, entry_ptr, &entry_ptr->addr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "unable to insert skip list item")
-                } /* end if */
             } /* end if */
             else
 #endif /* H5_HAVE_PARALLEL */

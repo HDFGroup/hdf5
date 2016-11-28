@@ -66,7 +66,6 @@
 /********************/
 static herr_t H5C__collective_write(H5F_t *f, hid_t dxpl_id,
     H5SL_t *collective_write_list);
-static herr_t H5C__collective_write_free(void *_item, void *key, void *op_data);
 
 
 /*********************/
@@ -82,9 +81,6 @@ static herr_t H5C__collective_write_free(void *_item, void *key, void *op_data);
 /*******************/
 /* Local Variables */
 /*******************/
-
-/* Declare a free list to manage the H5C_collective_write_t struct */
-H5FL_DEFINE(H5C_collective_write_t);
 
 
 
@@ -783,7 +779,7 @@ done:
         candidate_assignment_table = (int *)H5MM_xfree((void *)candidate_assignment_table);
 
     if(collective_write_list)
-        if(H5SL_destroy(collective_write_list, H5C__collective_write_free, NULL) < 0)
+        if(H5SL_close(collective_write_list) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "failed to destroy skip list")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1382,7 +1378,7 @@ H5C__collective_write(H5F_t *f, hid_t dxpl_id, H5SL_t *collective_write_list)
     if(count > 0) {
         H5FD_mpio_xfer_t    xfer_mode = H5FD_MPIO_COLLECTIVE;
         H5SL_node_t         *node;
-        H5C_collective_write_t *item;
+        H5C_cache_entry_t   *entry_ptr;
         void                *base_buf;
         int                 i;
 
@@ -1400,25 +1396,25 @@ H5C__collective_write(H5F_t *f, hid_t dxpl_id, H5SL_t *collective_write_list)
         /* Fill arrays */
         node = H5SL_first(collective_write_list);
         HDassert(node);
-        if(NULL == (item = (H5C_collective_write_t *)H5SL_item(node)))
+        if(NULL == (entry_ptr = (H5C_cache_entry_t *)H5SL_item(node)))
             HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't retrieve skip list item")
 
         /* Set up initial array position & buffer base address */
-        length_array[0] = (int)item->length;
-        base_buf = item->buf;
+        length_array[0] = (int)entry_ptr->size;
+        base_buf = entry_ptr->image_ptr;
         buf_array[0] = (MPI_Aint)0;
-        offset_array[0] = (MPI_Aint)item->offset;
+        offset_array[0] = (MPI_Aint)entry_ptr->addr;
 
         node = H5SL_next(node);
         i = 1;
         while(node) {
-            if(NULL == (item = (H5C_collective_write_t *)H5SL_item(node)))
+            if(NULL == (entry_ptr = (H5C_cache_entry_t *)H5SL_item(node)))
                 HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't retrieve skip list item")
 
             /* Set up array position */
-            length_array[i] = (int)item->length;
-            buf_array[i] = (MPI_Aint)item->buf - (MPI_Aint)base_buf;
-            offset_array[i] = (MPI_Aint)item->offset;
+            length_array[i] = (int)entry_ptr->size;
+            buf_array[i] = (MPI_Aint)entry_ptr->image_ptr - (MPI_Aint)base_buf;
+            offset_array[i] = (MPI_Aint)entry_ptr->addr;
 
             /* Advance to next node & array location */
             node = H5SL_next(node);
@@ -1491,36 +1487,5 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5C__collective_write() */
-
-
-/*-------------------------------------------------------------------------
- *
- * Function:    H5C__collective_write_free
- *
- * Purpose:     Release node on collective write skiplist
- *
- * Return:      FAIL if error is detected, SUCCEED otherwise.
- *
- * Programmer:  Mohamad Chaarawi
- *              February, 2016
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C__collective_write_free(void *_item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op_data)
-{
-    H5C_collective_write_t *item = (H5C_collective_write_t *)_item;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Sanity check */
-    HDassert(item);
-
-    if(item->free_buf)
-        item->buf = H5MM_xfree(item->buf);
-    H5FL_FREE(H5C_collective_write_t, item);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5C__collective_write_free() */
 #endif /* H5_HAVE_PARALLEL */
 
