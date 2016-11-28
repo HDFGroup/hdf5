@@ -72,40 +72,6 @@ herr_t H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn);
 /* Local Variables */
 /*******************/
 
-/* Constant names for the dump cache function.
- * Needs to be kept in sync with the H5AC_type_t enum in H5ACprivate.h!
- */
-static const char *type_names_g[] = {
-    "(H5AC_BT_ID)",                 /* 0 */
-    "(H5AC_SNODE_ID)",              /* 1 */
-    "(H5AC_LHEAP_PRFX_ID)",         /* 2 */
-    "(H5AC_LHEAP_DBLK_ID)",         /* 3 */
-    "(H5AC_GHEAP_ID)",              /* 4 */
-    "(H5AC_OHDR_ID)",               /* 5 */
-    "(H5AC_OHDR_CHK_ID)",           /* 6 */
-    "(H5AC_BT2_HDR_ID)",            /* 7 */
-    "(H5AC_BT2_INT_ID)",            /* 8 */
-    "(H5AC_BT2_LEAF_ID)",           /* 9 */
-    "(H5AC_FHEAP_HDR_ID)",          /* 10 */
-    "(H5AC_FHEAP_DBLOCK_ID)",       /* 11 */
-    "(H5AC_FHEAP_IBLOCK_ID)",       /* 12 */
-    "(H5AC_FSPACE_HDR_ID)",         /* 13 */
-    "(H5AC_FSPACE_SINFO_ID)",       /* 14 */
-    "(H5AC_SOHM_TABLE_ID)",         /* 15 */
-    "(H5AC_SOHM_LIST_ID)",          /* 16 */
-    "(H5AC_EARRAY_HDR_ID)",         /* 17 */
-    "(H5AC_EARRAY_IBLOCK_ID)",      /* 18 */
-    "(H5AC_EARRAY_SBLOCK_ID)",      /* 19 */
-    "(H5AC_EARRAY_DBLOCK_ID)",      /* 20 */
-    "(H5AC_EARRAY_DBLK_PAGE_ID)",   /* 21 */
-    "(H5AC_FARRAY_HDR_ID)",         /* 22 */
-    "(H5AC_FARRAY_DBLOCK_ID)",      /* 23 */
-    "(H5AC_FARRAY_DBLK_PAGE_ID)",   /* 24 */
-    "(H5AC_SUPERBLOCK_ID)",         /* 25 */
-    "(H5AC_DRVRINFO_ID)",           /* 26 */
-    "(H5AC_TEST_ID (BADNESS!))",    /* 27 */
-    "(H5AC_NTYPES (BADNESS!))"      /* 28 */
-};
 
 
 /*-------------------------------------------------------------------------
@@ -166,13 +132,13 @@ H5C_dump_cache(H5C_t * cache_ptr, const char *  cache_name)
     HDfprintf(stdout, "Entry ");
     HDfprintf(stdout, "|       Address      ");
     HDfprintf(stdout, "|         Tag        ");
-    HDfprintf(stdout, "|  Len  ");
+    HDfprintf(stdout, "|  Size ");
     HDfprintf(stdout, "| Ring ");
-    HDfprintf(stdout, "|           Type           ");
+    HDfprintf(stdout, "|              Type              ");
     HDfprintf(stdout, "| Prot/Pin/Dirty");
     HDfprintf(stdout, "\n");
 
-    HDfprintf(stdout, "----------------------------------------------------------------------------------------------------------\n");
+    HDfprintf(stdout, "----------------------------------------------------------------------------------------------------------------\n");
 
     i = 0;
     entry_ptr = (H5C_cache_entry_t *)H5SL_remove_first(slist_ptr);
@@ -188,7 +154,7 @@ H5C_dump_cache(H5C_t * cache_ptr, const char *  cache_name)
             HDfprintf(stdout, "  0x%16llx ", (long long)(entry_ptr->tag_info->tag));
         HDfprintf(stdout, "  %5lld ", (long long)(entry_ptr->size));
         HDfprintf(stdout, "    %d  ", (int)(entry_ptr->ring));
-        HDfprintf(stdout, "  %2d %-26s ", (int)(entry_ptr->type->id), type_names_g[(int)(entry_ptr->type->id)]);
+        HDfprintf(stdout, "  %2d %-32s ", (int)(entry_ptr->type->id), (entry_ptr->type->name));
         HDfprintf(stdout, " %d", (int)(entry_ptr->is_protected));
         HDfprintf(stdout, " %d", (int)(entry_ptr->is_pinned));
         HDfprintf(stdout, " %d", (int)(entry_ptr->is_dirty));
