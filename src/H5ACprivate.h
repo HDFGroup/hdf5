@@ -57,7 +57,11 @@
 #define H5AC_TAG_SIZE          sizeof(haddr_t)
 #define H5AC_TAG_DEF           (H5AC__INVALID_TAG)
 
-/* Types of metadata objects cached */
+/* Types of metadata objects cached
+ *
+ * NOTE: If you add types to this enum, please update
+ *       the list of types in type_names_g in H5Cdbg.c!
+ */
 typedef enum {
     H5AC_BT_ID = 0, 			/* ( 0) B-tree nodes				     */
     H5AC_SNODE_ID,			/* ( 1) symbol table nodes			     */
