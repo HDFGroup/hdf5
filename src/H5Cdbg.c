@@ -126,24 +126,39 @@ H5C_dump_cache(H5C_t * cache_ptr, const char *  cache_name)
      * skip list -- scan the skip list generating the desired output.
      */
 
-    HDfprintf(stdout, "\n\nDump of metadata cache \"%s\".\n", cache_name);
-    HDfprintf(stdout,
-        "Num:    Addr:                             Len:    Type:   Prot:   Pinned: Dirty:\n");
+    HDfprintf(stdout, "\n\nDump of metadata cache \"%s\"\n", cache_name);
+
+    /* Print header */
+    HDfprintf(stdout, "Entry ");
+    HDfprintf(stdout, "|       Address      ");
+    HDfprintf(stdout, "|         Tag        ");
+    HDfprintf(stdout, "|  Size ");
+    HDfprintf(stdout, "| Ring ");
+    HDfprintf(stdout, "|              Type              ");
+    HDfprintf(stdout, "| Prot/Pin/Dirty");
+    HDfprintf(stdout, "\n");
+
+    HDfprintf(stdout, "----------------------------------------------------------------------------------------------------------------\n");
 
     i = 0;
     entry_ptr = (H5C_cache_entry_t *)H5SL_remove_first(slist_ptr);
     while(entry_ptr != NULL) {
         HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
-        HDfprintf(stdout,
-            "%s%d       0x%16llx                0x%3llx      %2d     %d      %d      %d\n",
-             cache_ptr->prefix, i,
-             (long long)(entry_ptr->addr),
-             (long long)(entry_ptr->size),
-             (int)(entry_ptr->type->id),
-             (int)(entry_ptr->is_protected),
-             (int)(entry_ptr->is_pinned),
-             (int)(entry_ptr->is_dirty));
+        /* Print entry */
+        HDfprintf(stdout, "%s%5d ", cache_ptr->prefix, i);
+        HDfprintf(stdout, "  0x%16llx ", (long long)(entry_ptr->addr));
+        if(NULL == entry_ptr->tag_info)
+            HDfprintf(stdout, "    %16s ", "N/A");
+        else
+            HDfprintf(stdout, "  0x%16llx ", (long long)(entry_ptr->tag_info->tag));
+        HDfprintf(stdout, "  %5lld ", (long long)(entry_ptr->size));
+        HDfprintf(stdout, "    %d  ", (int)(entry_ptr->ring));
+        HDfprintf(stdout, "  %2d %-32s ", (int)(entry_ptr->type->id), (entry_ptr->type->name));
+        HDfprintf(stdout, " %d", (int)(entry_ptr->is_protected));
+        HDfprintf(stdout, " %d", (int)(entry_ptr->is_pinned));
+        HDfprintf(stdout, " %d", (int)(entry_ptr->is_dirty));
+        HDfprintf(stdout, "\n");
 
         /* remove the next (first) item in the skip list */
         entry_ptr = (H5C_cache_entry_t *)H5SL_remove_first(slist_ptr);
