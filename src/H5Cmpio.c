@@ -64,8 +64,7 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5C__collective_write(H5F_t *f, hid_t dxpl_id,
-    H5SL_t *collective_write_list);
+static herr_t H5C__collective_write(H5F_t *f, hid_t dxpl_id);
 
 
 /*********************/
@@ -226,7 +225,6 @@ H5C_apply_candidate_list(H5F_t * f,
     H5C_cache_entry_t *	entry_ptr = NULL;
     H5C_cache_entry_t *	flush_ptr = NULL;
     H5C_cache_entry_t * delayed_ptr = NULL;
-    H5SL_t            * collective_write_list = NULL;
 #if H5C_DO_SANITY_CHECKS
     haddr_t		last_addr;
 #endif /* H5C_DO_SANITY_CHECKS */
@@ -260,8 +258,11 @@ H5C_apply_candidate_list(H5F_t * f,
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
     if(f->coll_md_write) {
+        /* Sanity check */
+        HDassert(NULL == cache_ptr->coll_write_list);
+
         /* Create skip list of entries for collective write */
-        if(NULL == (collective_write_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
+        if(NULL == (cache_ptr->coll_write_list = H5SL_create(H5SL_TYPE_HADDR, NULL)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for entries")
     } /* end if */
 
@@ -475,7 +476,7 @@ H5C_apply_candidate_list(H5F_t * f,
             cache_ptr->entries_removed_counter = 0;
             cache_ptr->last_entry_removed_ptr  = NULL;
 
-            if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
+            if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
 
             if((cache_ptr->entries_removed_counter > 1) ||
@@ -525,7 +526,7 @@ H5C_apply_candidate_list(H5F_t * f,
             cache_ptr->last_entry_removed_ptr  = NULL;
 
             /* Add this entry to the list of entries to collectively write */
-            if(H5C__flush_single_entry(f, dxpl_id, flush_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, collective_write_list) < 0)
+            if(H5C__flush_single_entry(f, dxpl_id, flush_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry.")
 
             if((cache_ptr->entries_removed_counter > 1) ||
@@ -681,7 +682,7 @@ H5C_apply_candidate_list(H5F_t * f,
                           (long long)clear_ptr->addr);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
-                if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
+                if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
             } /* end else-if */
 
@@ -698,7 +699,7 @@ H5C_apply_candidate_list(H5F_t * f,
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
                 /* Add this entry to the list of entries to collectively write */
-                if(H5C__flush_single_entry(f, dxpl_id, flush_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, collective_write_list) < 0)
+                if(H5C__flush_single_entry(f, dxpl_id, flush_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
             } /* end else-if */
         } /* end if */
@@ -732,14 +733,14 @@ H5C_apply_candidate_list(H5F_t * f,
     if (delayed_ptr) {
 
         if (delayed_ptr->clear_on_unprotect) {
-            if(H5C__flush_single_entry(f, dxpl_id, delayed_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG, NULL) < 0)
+            if(H5C__flush_single_entry(f, dxpl_id, delayed_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry.")
 
             entry_ptr->clear_on_unprotect = FALSE;
             entries_cleared++;
         } else if (delayed_ptr->flush_immediately) {
             /* Add this entry to the list of entries to collectively write */
-            if(H5C__flush_single_entry(f, dxpl_id, delayed_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, collective_write_list) < 0)
+            if(H5C__flush_single_entry(f, dxpl_id, delayed_ptr, H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush entry collectively.")
 
             entry_ptr->flush_immediately = FALSE;
@@ -752,10 +753,11 @@ H5C_apply_candidate_list(H5F_t * f,
 
     /* If we've deferred writing to do it collectively, take care of that now */
     if(f->coll_md_write) {
-        HDassert(collective_write_list);
+        /* Sanity check */
+        HDassert(cache_ptr->coll_write_list);
 
         /* Write collective list */
-        if(H5C__collective_write(f, dxpl_id, collective_write_list) < 0)
+        if(H5C__collective_write(f, dxpl_id) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "Can't write metadata collectively")
     } /* end if */
 
@@ -778,9 +780,11 @@ done:
     if(candidate_assignment_table != NULL)
         candidate_assignment_table = (int *)H5MM_xfree((void *)candidate_assignment_table);
 
-    if(collective_write_list)
-        if(H5SL_close(collective_write_list) < 0)
+    if(cache_ptr->coll_write_list) {
+        if(H5SL_close(cache_ptr->coll_write_list) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "failed to destroy skip list")
+        cache_ptr->coll_write_list = NULL;
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_apply_candidate_list() */
@@ -1019,7 +1023,7 @@ done:
  *
  *		Note that unlike H5C_apply_candidate_list(), 
  *		H5C_mark_entries_as_clean() makes all its calls to 
- *		H6C_flush_single_entry() with the 
+ *		H5C__flush_single_entry() with the 
  *		H5C__FLUSH_CLEAR_ONLY_FLAG set.  As a result, 
  *		the pre_serialize() and serialize calls are not made.
  *
@@ -1178,7 +1182,7 @@ H5C_mark_entries_as_clean(H5F_t *  f,
      *
      * Note that unlike H5C_apply_candidate_list(), 
      * H5C_mark_entries_as_clean() makes all its calls to 
-     * H6C_flush_single_entry() with the H5C__FLUSH_CLEAR_ONLY_FLAG 
+     * H5C__flush_single_entry() with the H5C__FLUSH_CLEAR_ONLY_FLAG 
      * set.  As a result, the pre_serialize() and serialize calls are 
      * not made.
      *
@@ -1213,7 +1217,7 @@ H5C_mark_entries_as_clean(H5F_t *  f,
             entry_ptr = entry_ptr->prev;
             entries_cleared++;
 
-            if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0)
+            if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
         } else {
 
@@ -1241,7 +1245,7 @@ H5C_mark_entries_as_clean(H5F_t *  f,
             entry_ptr = entry_ptr->next;
             entries_cleared++;
 
-            if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG, NULL) < 0 )
+            if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0 )
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't clear entry.")
         } else {
 
@@ -1349,8 +1353,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__collective_write(H5F_t *f, hid_t dxpl_id, H5SL_t *collective_write_list)
+H5C__collective_write(H5F_t *f, hid_t dxpl_id)
 {
+    H5AC_t              *cache_ptr;
     H5P_genplist_t      *plist = NULL;
     H5FD_mpio_xfer_t    orig_xfer_mode = H5FD_MPIO_COLLECTIVE;
     int                 count;
@@ -1366,6 +1371,12 @@ H5C__collective_write(H5F_t *f, hid_t dxpl_id, H5SL_t *collective_write_list)
 
     FUNC_ENTER_STATIC
 
+    /* Sanity checks */
+    HDassert(f != NULL);
+    cache_ptr = f->shared->cache;
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->coll_write_list != NULL);
+
     /* Get original transfer mode */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
@@ -1373,7 +1384,7 @@ H5C__collective_write(H5F_t *f, hid_t dxpl_id, H5SL_t *collective_write_list)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI-I/O property")
 
     /* Get number of entries in collective write list */
-    count = (int)H5SL_count(collective_write_list);
+    count = (int)H5SL_count(cache_ptr->coll_write_list);
 
     if(count > 0) {
         H5FD_mpio_xfer_t    xfer_mode = H5FD_MPIO_COLLECTIVE;
@@ -1394,7 +1405,7 @@ H5C__collective_write(H5F_t *f, hid_t dxpl_id, H5SL_t *collective_write_list)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for collective offset table length array")
 
         /* Fill arrays */
-        node = H5SL_first(collective_write_list);
+        node = H5SL_first(cache_ptr->coll_write_list);
         HDassert(node);
         if(NULL == (entry_ptr = (H5C_cache_entry_t *)H5SL_item(node)))
             HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't retrieve skip list item")
