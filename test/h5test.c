@@ -1584,32 +1584,43 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
     ssize_t nread;                      /* Number of bytes read in */
-    void  *buf;                         /* Buffer for copying data */
-    const char *filename = H5_get_srcdir_filename(origfilename);;       /* Get the test file name to copy */
+    void  *buf = NULL;                  /* Buffer for copying data */
+    const char *filename = H5_get_srcdir_filename(origfilename);       /* Get the test file name to copy */
 
     /* Allocate copy buffer */
-    if(NULL == (buf = HDmalloc(READ_BUF_SIZE)))
-        return -1;
+    if(NULL == (buf = HDcalloc((size_t)1, (size_t)READ_BUF_SIZE)))
+        goto error;
 
     /* Copy old file into temporary file */
     if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0)
-        return -1;
+        goto error;
     if((fd_new = HDopen(local_copy_name, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
-        return -1;
+        goto error;
 
     /* Copy data */
     while((nread = HDread(fd_old, buf, (size_t)READ_BUF_SIZE)) > 0)
         if(HDwrite(fd_new, buf, (size_t)nread) < 0)
-            return -1;
+            goto error;
  
+    /* Close files */
+    if(HDclose(fd_old) < 0)
+        goto error;
+    if(HDclose(fd_new) < 0)
+        goto error;
+
     /* Release memory */
     HDfree(buf);
 
-    /* Close files */
-    if(HDclose(fd_old) < 0) return -1;
-    if(HDclose(fd_new) < 0) return -1;
-
     return 0;
+
+error:
+    /* ignore return values since we're already noted the problem */
+    if(fd_old > 0)
+        HDclose(fd_old);
+    if(fd_new > 0)
+        HDclose(fd_new);
+    HDfree(buf);
+    return -1;
 } /* end h5_make_local_copy() */
 
 

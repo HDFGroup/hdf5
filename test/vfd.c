@@ -997,7 +997,7 @@ test_family_compat(void)
         counter++;
         HDsnprintf(newname_individual, sizeof(newname_individual), newname, counter);
         HDsnprintf(pathname_individual, sizeof(pathname_individual), pathname, counter);
-    }
+    } /* end while */
 
     /* Make sure we can open the file.  Use the read and write mode to flush the
      * superblock. */

@@ -3430,7 +3430,7 @@ typedef struct H5C_tag_info_t {
  *		entry is removed from the cache by any means (eviction, 
  *		expungement, or take ownership at this point in time).
  *		Functions that perform scans on lists may set this field
- *		to zero prior to calling H5C_flush_single_entry().  
+ *		to zero prior to calling H5C__flush_single_entry().  
  *		Unexpected changes to the counter indicate that an entry 
  *		was removed from the cache as a side effect of the flush.
  *
@@ -3438,7 +3438,7 @@ typedef struct H5C_tag_info_t {
  *		which contained the last entry to be removed from the cache,
  *		or NULL if there either is no such entry, or if a function
  *		performing a scan of a list has set this field to NULL prior
- *		to calling H5C_flush_single_entry().
+ *		to calling H5C__flush_single_entry().
  *
  *		WARNING!!! This field must NEVER be dereferenced.  It is 
  *		maintained to allow functions that perform scans of lists
@@ -4069,17 +4069,17 @@ typedef struct H5C_tag_info_t {
  * obtain estimates of how frequently these restarts occur.
  *
  * slist_scan_restarts: Number of times a scan of the slist (that contains
- *		calls to H5C_flush_single_entry()) has been restarted to 
+ *		calls to H5C__flush_single_entry()) has been restarted to 
  *		avoid potential issues with change of status of the next 
  *		entry in the scan.
  *
  * LRU_scan_restarts: Number of times a scan of the LRU list (that contains
- *              calls to H5C_flush_single_entry()) has been restarted to 
+ *              calls to H5C__flush_single_entry()) has been restarted to 
  *              avoid potential issues with change of status of the next 
  *              entry in the scan.
  *
  * hash_bucket_scan_restarts: Number of times a scan of a hash bucket list
- *		(that contains calls to H5C_flush_single_entry()) has been 
+ *		(that contains calls to H5C__flush_single_entry()) has been 
  *		restarted to avoid potential issues with change of status 
  *		of the next entry in the scan.
  *
@@ -4205,10 +4205,14 @@ struct H5C_t {
     H5C_cache_entry_t *	        dLRU_tail_ptr;
 
 #ifdef H5_HAVE_PARALLEL
+    /* Fields for collective metadata reads */
     int32_t                     coll_list_len;
     size_t                      coll_list_size;
     H5C_cache_entry_t *		coll_head_ptr;
     H5C_cache_entry_t *		coll_tail_ptr;
+
+    /* Fields for collective metadata writes */
+    H5SL_t *                    coll_write_list;
 #endif /* H5_HAVE_PARALLEL */
 
     /* Fields for automatic cache size adjustment */
@@ -4310,15 +4314,6 @@ struct H5C_t {
     char			prefix[H5C__PREFIX_LEN];
 };
 
-#ifdef H5_HAVE_PARALLEL
-typedef struct H5C_collective_write_t {
-    size_t length;
-    hbool_t free_buf;
-    void *buf;
-    haddr_t offset;
-} H5C_collective_write_t;
-#endif /* H5_HAVE_PARALLEL */
-
 /* Define typedef for tagged cache entry iteration callbacks */
 typedef int (*H5C_tag_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
 
@@ -4337,7 +4332,7 @@ H5_DLLVAR const H5C_class_t H5C__epoch_marker_class;
 
 /* General routines */
 H5_DLL herr_t H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id,
-    H5C_cache_entry_t *entry_ptr, unsigned flags, H5SL_t *collective_write_list);
+    H5C_cache_entry_t *entry_ptr, unsigned flags);
 H5_DLL herr_t H5C__flush_marked_entries(H5F_t * f, hid_t dxpl_id);
 H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
     H5C_tag_iter_cb_t cb, void *cb_ctx);
