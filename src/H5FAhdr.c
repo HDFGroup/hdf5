@@ -119,6 +119,7 @@ H5FA__hdr_alloc(H5F_t *f))
     ret_value = hdr;
 
 CATCH
+
     if(!ret_value)
         if(hdr && H5FA__hdr_dest(hdr) < 0)
             H5E_THROW(H5E_CANTFREE, "unable to destroy fixed array header")
@@ -225,6 +226,7 @@ H5FA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5FA_create_t *cparam,
     ret_value = hdr->addr;
 
 CATCH
+
     if(!H5F_addr_defined(ret_value))
         if(hdr) {
             /* Release header's disk space */

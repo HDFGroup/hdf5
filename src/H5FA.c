@@ -64,6 +64,8 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static H5FA_t *H5FA__new(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr,
+    hbool_t from_open, void *ctx_udata);
 
 
 /*********************/
@@ -103,51 +105,44 @@ H5FL_BLK_DEFINE(fa_native_elmt);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FA_create
+ * Function:	H5FA__new
  *
- * Purpose:     Creates a new fixed array (header) in the file.
+ * Purpose:	Allocate and initialize a new fixe array wrapper in memory
  *
- * Return:      Pointer to fixed array wrapper on success
+ * Return:	Pointer to farray wrapper success
  *              NULL on failure
  *
- * Programmer:  Vailin Choi
- *              Thursday, April 30, 2009
+ * Programmer:	Quincey Koziol
+ *		koziol@lbl.gov
+ *		Oct 17 2016
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PRIV, ERR,
+BEGIN_FUNC(STATIC, ERR,
 H5FA_t *, NULL, NULL,
-H5FA_create(H5F_t *f, hid_t dxpl_id, const H5FA_create_t *cparam, void *ctx_udata))
+H5FA__new(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, hbool_t from_open, void *ctx_udata))
 
     /* Local variables */
     H5FA_t *fa = NULL;          /* Pointer to new fixed array */
     H5FA_hdr_t *hdr = NULL;     /* The fixed array header information */
-    haddr_t fa_addr;            /* Fixed Array header address */
-
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* H5FA_DEBUG */
 
     /*
      * Check arguments.
      */
     HDassert(f);
-    HDassert(cparam);
-
-    /* H5FA interface sanity check */
-    HDcompile_assert(H5FA_NUM_CLS_ID == NELMTS(H5FA_client_class_g));
-
-    /* Create fixed array header */
-    if(HADDR_UNDEF == (fa_addr = H5FA__hdr_create(f, dxpl_id, cparam, ctx_udata)))
-        H5E_THROW(H5E_CANTINIT, "can't create fixed array header")
+    HDassert(H5F_addr_defined(fa_addr));
 
     /* Allocate fixed array wrapper */
-    if(NULL == (fa = H5FL_MALLOC(H5FA_t)))
-        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array info")
+    if(NULL == (fa = H5FL_CALLOC(H5FA_t)))
+	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array info")
 
     /* Lock the array header into memory */
-    if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, fa_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to load fixed array header")
+    if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, fa_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
+	H5E_THROW(H5E_CANTPROTECT, "unable to load fixed array header")
+
+    /* Check for pending array deletion */
+    if(from_open && hdr->pending_delete)
+        H5E_THROW(H5E_CANTOPENOBJ, "can't open fixed array pending deletion")
 
     /* Point fixed array wrapper at header and bump it's ref count */
     fa->hdr = hdr;
@@ -168,6 +163,56 @@ CATCH
 
     if(hdr && H5FA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array header")
+    if(!ret_value)
+        if(fa && H5FA_close(fa, dxpl_id) < 0)
+            H5E_THROW(H5E_CLOSEERROR, "unable to close fixed array")
+
+END_FUNC(STATIC)  /* end H5FA__new() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FA_create
+ *
+ * Purpose:     Creates a new fixed array (header) in the file.
+ *
+ * Return:      Pointer to fixed array wrapper on success
+ *              NULL on failure
+ *
+ * Programmer:  Vailin Choi
+ *              Thursday, April 30, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+H5FA_t *, NULL, NULL,
+H5FA_create(H5F_t *f, hid_t dxpl_id, const H5FA_create_t *cparam, void *ctx_udata))
+
+    /* Local variables */
+    H5FA_t *fa = NULL;          /* Pointer to new fixed array */
+    haddr_t fa_addr;            /* Fixed array header address */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(cparam);
+
+    /* H5FA interface sanity check */
+    HDcompile_assert(H5FA_NUM_CLS_ID == NELMTS(H5FA_client_class_g));
+
+    /* Create fixed array header */
+    if(HADDR_UNDEF == (fa_addr = H5FA__hdr_create(f, dxpl_id, cparam, ctx_udata)))
+        H5E_THROW(H5E_CANTINIT, "can't create fixed array header")
+
+    /* Allocate and initialize new fixed array wrapper */
+    if(NULL == (fa = H5FA__new(f, dxpl_id, fa_addr, FALSE, ctx_udata)))
+	H5E_THROW(H5E_CANTINIT, "allocation and/or initialization failed for fixed array wrapper")
+
+    /* Set the return value */
+    ret_value = fa;
+
+CATCH
+
     if(!ret_value)
         if(fa && H5FA_close(fa, dxpl_id) < 0)
             H5E_THROW(H5E_CLOSEERROR, "unable to close fixed array")
@@ -194,7 +239,6 @@ H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata))
 
     /* Local variables */
     H5FA_t *fa = NULL;          /* Pointer to new fixed array wrapper */
-    H5FA_hdr_t *hdr = NULL;     /* The fixed array header information */
 
     /*
      * Check arguments.
@@ -202,40 +246,15 @@ H5FA_open(H5F_t *f, hid_t dxpl_id, haddr_t fa_addr, void *ctx_udata))
     HDassert(f);
     HDassert(H5F_addr_defined(fa_addr));
 
-    /* Load the array header into memory */
-#ifdef H5FA_DEBUG
-HDfprintf(stderr, "%s: fa_addr = %a\n", FUNC, fa_addr);
-#endif /* H5FA_DEBUG */
-    if(NULL == (hdr = H5FA__hdr_protect(f, dxpl_id, fa_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to load fixed array header, address = %llu", (unsigned long long)fa_addr)
-
-    /* Check for pending array deletion */
-    if(hdr->pending_delete)
-        H5E_THROW(H5E_CANTOPENOBJ, "can't open fixed array pending deletion")
-
-    /* Create fixed array info */
-    if(NULL == (fa = H5FL_MALLOC(H5FA_t)))
-        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for fixed array info")
-
-    /* Point fixed array wrapper at header */
-    fa->hdr = hdr;
-    if(H5FA__hdr_incr(fa->hdr) < 0)
-        H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
-
-    /* Increment # of files using this array header */
-    if(H5FA__hdr_fuse_incr(fa->hdr) < 0)
-        H5E_THROW(H5E_CANTINC, "can't increment file reference count on shared array header")
-
-    /* Set file pointer for this array open context */
-    fa->f = f;
+    /* Allocate and initialize new fixed array wrapper */
+    if(NULL == (fa = H5FA__new(f, dxpl_id, fa_addr, TRUE, ctx_udata)))
+	H5E_THROW(H5E_CANTINIT, "allocation and/or initialization failed for fixed array wrapper")
 
     /* Set the return value */
     ret_value = fa;
 
 CATCH
 
-    if(hdr && H5FA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
-        H5E_THROW(H5E_CANTUNPROTECT, "unable to release fixed array header")
     if(!ret_value)
         if(fa && H5FA_close(fa, dxpl_id) < 0)
             H5E_THROW(H5E_CLOSEERROR, "unable to close fixed array")
@@ -534,26 +553,28 @@ H5FA_close(H5FA_t *fa, hid_t dxpl_id))
      */
     HDassert(fa);
 
-    /* Decrement file reference & check if this is the last open fixed array using the shared array header */
-    if(0 == H5FA__hdr_fuse_decr(fa->hdr)) {
-        /* Set the shared array header's file context for this operation */
-        fa->hdr->f = fa->f;
+    /* Close the header, if it was set */
+    if(fa->hdr) {
+        /* Decrement file reference & check if this is the last open fixed array using the shared array header */
+        if(0 == H5FA__hdr_fuse_decr(fa->hdr)) {
+            /* Set the shared array header's file context for this operation */
+            fa->hdr->f = fa->f;
 
-        /* Shut down anything that can't be put in the header's 'flush' callback */
+            /* Shut down anything that can't be put in the header's 'flush' callback */
+
+            /* Check for pending array deletion */
+            if(fa->hdr->pending_delete) {
+                /* Set local info, so array deletion can occur after decrementing the
+                 *  header's ref count
+                 */
+                pending_delete = TRUE;
+                fa_addr = fa->hdr->addr;
+            } /* end if */
+        } /* end if */
 
         /* Check for pending array deletion */
-        if(fa->hdr->pending_delete) {
-            /* Set local info, so array deletion can occur after decrementing the
-             *  header's ref count
-             */
-            pending_delete = TRUE;
-            fa_addr = fa->hdr->addr;
-        } /* end if */
-    } /* end if */
-
-    /* Check for pending array deletion */
-    if(pending_delete) {
-        H5FA_hdr_t *hdr;            /* Another pointer to fixed array header */
+        if(pending_delete) {
+            H5FA_hdr_t *hdr;            /* Another pointer to fixed array header */
 
 #ifndef NDEBUG
 {
@@ -570,33 +591,34 @@ H5FA_close(H5FA_t *fa, hid_t dxpl_id))
 }
 #endif /* NDEBUG */
 
-        /* Lock the array header into memory */
-        /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-        if(NULL == (hdr = H5FA__hdr_protect(fa->f, dxpl_id, fa_addr, NULL, H5AC__NO_FLAGS_SET)))
-            H5E_THROW(H5E_CANTLOAD, "unable to load fixed array header")
+            /* Lock the array header into memory */
+            /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
+            if(NULL == (hdr = H5FA__hdr_protect(fa->f, dxpl_id, fa_addr, NULL, H5AC__NO_FLAGS_SET)))
+                H5E_THROW(H5E_CANTLOAD, "unable to load fixed array header")
 
-        /* Set the shared array header's file context for this operation */
-        hdr->f = fa->f;
+            /* Set the shared array header's file context for this operation */
+            hdr->f = fa->f;
 
-        /* Decrement the reference count on the array header */
-        /* (don't put in H5FA_hdr_fuse_decr() as the array header may be evicted
-         *  immediately -QAK)
-         */
-        if(H5FA__hdr_decr(fa->hdr) < 0)
-            H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
+            /* Decrement the reference count on the array header */
+            /* (don't put in H5FA_hdr_fuse_decr() as the array header may be evicted
+             *  immediately -QAK)
+             */
+            if(H5FA__hdr_decr(fa->hdr) < 0)
+                H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
 
-        /* Delete array, starting with header (unprotects header) */
-        if(H5FA__hdr_delete(hdr, dxpl_id) < 0)
-            H5E_THROW(H5E_CANTDELETE, "unable to delete fixed array")
+            /* Delete array, starting with header (unprotects header) */
+            if(H5FA__hdr_delete(hdr, dxpl_id) < 0)
+                H5E_THROW(H5E_CANTDELETE, "unable to delete fixed array")
+        } /* end if */
+        else {
+            /* Decrement the reference count on the array header */
+            /* (don't put in H5FA_hdr_fuse_decr() as the array header may be evicted
+             *  immediately -QAK)
+             */
+            if(H5FA__hdr_decr(fa->hdr) < 0)
+                H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
+        } /* end else */
     } /* end if */
-    else {
-        /* Decrement the reference count on the array header */
-        /* (don't put in H5FA_hdr_fuse_decr() as the array header may be evicted
-         *  immediately -QAK)
-         */
-        if(H5FA__hdr_decr(fa->hdr) < 0)
-            H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
-    } /* end else */
 
     /* Release the fixed array wrapper */
     fa = H5FL_FREE(H5FA_t, fa);
