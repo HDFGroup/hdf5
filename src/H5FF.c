@@ -142,6 +142,7 @@ H5Fcreate_ff(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     hid_t    ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE5("i", "*sIuii*i", filename, flags, fcpl_id, fapl_id, trans_id);
 
     /* Check/fix arguments */
     if(!filename || !*filename)
@@ -254,6 +255,7 @@ H5Fopen_ff(const char *filename, unsigned flags, hid_t fapl_id, hid_t *trans_id)
     hid_t    ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("i", "*sIui*i", filename, flags, fapl_id, trans_id);
 
     /* Check/fix arguments */
     if(!filename || !*filename)
@@ -346,6 +348,7 @@ H5Fclose_ff(hid_t file_id, hid_t H5_ATTR_UNUSED trans_id)
     herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", file_id, trans_id);
 
     /* flush file using trans_id? DSMINC */
 
@@ -386,6 +389,8 @@ H5Dcreate_ff(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id,
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE8("i", "i*siiiiii", loc_id, name, type_id, space_id, lcpl_id, dcpl_id,
+             dapl_id, trans_id);
 
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
@@ -480,6 +485,7 @@ H5Dopen_ff(hid_t loc_id, const char *name, hid_t dapl_id, hid_t trans_id)
     hid_t       ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE4("i", "i*sii", loc_id, name, dapl_id, trans_id);
 
     /* Check args */
     if(!name || !*name)
@@ -544,6 +550,8 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "iiiii*xi", dset_id, mem_type_id, mem_space_id, file_space_id,
+             dxpl_id, buf, trans_id);
 
     /* check arguments */
     if(!dset_id)
@@ -596,6 +604,8 @@ H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     herr_t      ret_value;              /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "iiiii*xi", dset_id, mem_type_id, mem_space_id, file_space_id,
+             dxpl_id, buf, rcxt_id);
 
     if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
@@ -647,6 +657,7 @@ H5Dclose_ff(hid_t dset_id, hid_t H5_ATTR_UNUSED trans_id)
     herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", dset_id, trans_id);
 
     /* Check args */
     if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
