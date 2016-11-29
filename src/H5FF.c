@@ -523,6 +523,110 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Dwrite_ff
+ *
+ * Purpose:     Asynchronous wrapper around H5Dwrite().
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, November 28, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+            hid_t file_space_id, hid_t dxpl_id, const void *buf, hid_t trans_id)
+{
+    H5VL_object_t   *dset = NULL;
+    H5P_genplist_t *plist;     /* Property list pointer */
+    herr_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* check arguments */
+    if(!dset_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+
+    /* Write the data through the VOL */
+    if((ret_value = H5VL_dataset_write(dset->vol_obj, dset->vol_info->vol_cls, mem_type_id, mem_space_id, 
+                                       file_space_id, dxpl_id, buf, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")=
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dwrite_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dread_ff
+ *
+ * Purpose:     Asynchronous wrapper around H5Dread().
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Neil Fortner
+ *              Monday, November 28, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
+           hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t rcxt_id)
+{
+    H5VL_object_t   *dset = NULL;
+    H5P_genplist_t *plist;     /* Property list pointer */
+    herr_t      ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+    if(mem_space_id < 0 || file_space_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+
+    /* Read the data through the VOL */
+    if((ret_value = H5VL_dataset_read(dset->vol_obj, dset->vol_info->vol_cls, mem_type_id, mem_space_id, 
+                                      file_space_id, dxpl_id, buf, H5_REQUEST_NULL)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dread_ff() */
+
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Dclose_ff
  *
  * Purpose:     Closes access to a dataset (DATASET_ID) and releases

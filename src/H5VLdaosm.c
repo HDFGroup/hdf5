@@ -42,6 +42,7 @@ hid_t H5VL_DAOSM_g = 0;
 #define H5VL_DAOSM_TYPE_KEY "Datatype"
 #define H5VL_DAOSM_SPACE_KEY "Dataspace"
 #define H5VL_DAOSM_DCPL_KEY "Creation Property List"
+#define H5VL_DAOSM_CHUNK_KEY 0u
 
 /* Prototypes */
 static void *H5VL_daosm_fapl_copy(const void *_old_fa);
@@ -59,11 +60,11 @@ static herr_t H5VL_daosm_group_close(void *grp, hid_t dxpl_id, void **req);
 /* Dataset callbacks */
 static void *H5VL_daosm_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_daosm_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
-/*static herr_t H5VL_daosm_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
+static herr_t H5VL_daosm_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                                     hid_t file_space_id, hid_t plist_id, void *buf, void **req);
 static herr_t H5VL_daosm_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
                                      hid_t file_space_id, hid_t plist_id, const void *buf, void **req);
-static herr_t H5VL_daosm_dataset_specific(void *_dset, H5VL_dataset_specific_t specific_type,
+/*static herr_t H5VL_daosm_dataset_specific(void *_dset, H5VL_dataset_specific_t specific_type,
                                         hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_daosm_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);*/
 static herr_t H5VL_daosm_dataset_close(void *dt, hid_t dxpl_id, void **req);
@@ -104,8 +105,8 @@ static H5VL_class_t H5VL_daosm_g = {
     {                                           /* dataset_cls */
         H5VL_daosm_dataset_create,              /* create */
         H5VL_daosm_dataset_open,                /* open */
-        NULL,//H5VL_iod_dataset_read,                  /* read */
-        NULL,//H5VL_iod_dataset_write,                 /* write */
+        H5VL_daosm_dataset_read,                /* read */
+        H5VL_daosm_dataset_write,               /* write */
         NULL,//H5VL_iod_dataset_get,                   /* get */
         NULL,//H5VL_iod_dataset_specific,              /* specific */
         NULL,                                   /* optional */
@@ -1584,6 +1585,214 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_dataset_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daos_dataset_read
+ *
+ * Purpose:     Reads raw data from a dataset into a buffer.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1, dataset not read.
+ *
+ * Programmer:  Neil Fortner
+ *              November, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_dataset_read(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_ATTR_UNUSED mem_space_id,
+    hid_t H5_ATTR_UNUSED file_space_id, hid_t dxpl_id, void *buf,
+    void H5_ATTR_UNUSED **req)
+{
+    H5VL_daosm_dset_t *dset = (H5VL_daosm_dset_t *)_dset;
+    H5P_genplist_t *plist = NULL;      /* Property list pointer */
+    hid_t trans_id;
+    H5TR_t *tr = NULL;
+    int ndims;
+    hsize_t dim[H5S_MAX_RANK];
+    uint64_t chunk_coords[H5S_MAX_RANK];
+    daos_dkey_t dkey;
+    daos_vec_iod_t iod;
+    daos_recx_t recx;
+    daos_sg_list_t sgl;
+    daos_iov_t sg_iov;
+    uint8_t dkey_buf[1 + H5S_MAX_RANK];
+    uint8_t akey = H5VL_DAOSM_CHUNK_KEY;
+    size_t type_size;
+    uint64_t chunk_size;
+    uint8_t *p;
+    int i;
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* get the transaction ID */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+    if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for trans_id");
+
+    /* get the TR object */
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a Transaction ID")
+
+    /* Get dataspace extent */
+    if((ndims = H5Sget_simple_extent_ndims(dset->space_id)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of dimensions")
+    if(ndims != H5Sget_simple_extent_dims(dset->space_id, dim, NULL))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dimensions")
+
+    /* Get datatype size */
+    if((type_size = H5Tget_size(dset->type_id)) == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get datatype size")
+
+    /* Calculate chunk size */
+    chunk_size = (uint64_t)1;
+    for(i = 0; i < ndims; i++)
+        chunk_size *= (uint64_t)dim[i];
+
+    /* Encode dkey (chunk coordinates).  Prefix with '/' to avoid accidental
+     * collisions with other d-keys in this object.  For now just 1 chunk,
+     * starting at 0. */
+    HDmemset(chunk_coords, 0, sizeof(chunk_coords)); //DSMINC
+    p = dkey_buf;
+    *p++ == (uint8_t)'/';
+    for(i = 0; i < ndims; i++)
+        UINT64ENCODE(p, chunk_coords[i])
+
+    /* Set up operation to write data */
+    /* Set up dkey */
+    daos_iov_set(&dkey, dkey_buf, (daos_size_t)(1 + (ndims * sizeof(chunk_coords[0]))));
+
+    /* Set up recx */
+    recx.rx_rsize = (uint64_t)type_size;
+    recx.rx_idx = (uint64_t)0;
+    recx.rx_nr = chunk_size;
+
+    /* Set up iod */
+    HDmemset(&iod, 0, sizeof(iod));
+    daos_iov_set(&iod.vd_name, (void *)&akey, (daos_size_t)(sizeof(akey)));
+    daos_csum_set(&iod.vd_kcsum, NULL, 0);
+    iod.vd_nr = 1u;
+    iod.vd_recxs = &recx;
+
+    /* Set up sgl */
+    daos_iov_set(&sg_iov, buf, (daos_size_t)(chunk_size * (uint64_t)type_size));
+    sgl.sg_nr.num = 1;
+    sgl.sg_iovs = &sg_iov;
+
+    /* Write data to dataset */
+    if(0 != (ret = daos_obj_fetch(dset->obj_oh, tr->epoch, &dkey, 1, &iod, &sgl, NULL /*maps*/, NULL /*event*/)))
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, NULL, "can't read data from dataset: %d", ret)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daos_dataset_write
+ *
+ * Purpose:     Writes raw data from a buffer into a dataset.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1, dataset not written.
+ *
+ * Programmer:  Neil Fortner
+ *              November, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_iod_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_ATTR_UNUSED mem_space_id,
+    hid_t H5_ATTR_UNUSED file_space_id, hid_t dxpl_id, const void *buf,
+    void H5_ATTR_UNUSED **req)
+{
+    H5VL_daosm_dset_t *dset = (H5VL_daosm_dset_t *)_dset;
+    H5P_genplist_t *plist = NULL;      /* Property list pointer */
+    hid_t trans_id;
+    H5TR_t *tr = NULL;
+    int ndims;
+    hsize_t dim[H5S_MAX_RANK];
+    uint64_t chunk_coords[H5S_MAX_RANK];
+    daos_dkey_t dkey;
+    daos_vec_iod_t iod;
+    daos_recx_t recx;
+    daos_sg_list_t sgl;
+    daos_iov_t sg_iov;
+    uint8_t dkey_buf[1 + H5S_MAX_RANK];
+    uint8_t akey = H5VL_DAOSM_CHUNK_KEY;
+    size_t type_size;
+    uint64_t chunk_size;
+    uint8_t *p;
+    int i;
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* get the transaction ID */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+    if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for trans_id");
+
+    /* get the TR object */
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a Transaction ID")
+
+    /* Get dataspace extent */
+    if((ndims = H5Sget_simple_extent_ndims(dset->space_id)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get number of dimensions")
+    if(ndims != H5Sget_simple_extent_dims(dset->space_id, dim, NULL))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dimensions")
+
+    /* Get datatype size */
+    if((type_size = H5Tget_size(dset->type_id)) == 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get datatype size")
+
+    /* Calculate chunk size */
+    chunk_size = (uint64_t)1;
+    for(i = 0; i < ndims; i++)
+        chunk_size *= (uint64_t)dim[i];
+
+    /* Encode dkey (chunk coordinates).  Prefix with '/' to avoid accidental
+     * collisions with other d-keys in this object.  For now just 1 chunk,
+     * starting at 0. */
+    HDmemset(chunk_coords, 0, sizeof(chunk_coords)); //DSMINC
+    p = dkey_buf;
+    *p++ == (uint8_t)'/';
+    for(i = 0; i < ndims; i++)
+        UINT64ENCODE(p, chunk_coords[i])
+
+    /* Set up operation to write data */
+    /* Set up dkey */
+    daos_iov_set(&dkey, dkey_buf, (daos_size_t)(1 + (ndims * sizeof(chunk_coords[0]))));
+
+    /* Set up recx */
+    recx.rx_rsize = (uint64_t)type_size;
+    recx.rx_idx = (uint64_t)0;
+    recx.rx_nr = chunk_size;
+
+    /* Set up iod */
+    HDmemset(&iod, 0, sizeof(iod));
+    daos_iov_set(&iod.vd_name, (void *)&akey, (daos_size_t)(sizeof(akey)));
+    daos_csum_set(&iod.vd_kcsum, NULL, 0);
+    iod.vd_nr = 1u;
+    iod.vd_recxs = &recx;
+
+    /* Set up sgl */
+    daos_iov_set(&sg_iov, (void *)buf, (daos_size_t)(chunk_size * (uint64_t)type_size));
+    sgl.sg_nr.num = 1;
+    sgl.sg_iovs = &sg_iov;
+
+    /* Write data to dataset */
+    if(0 != (ret = daos_obj_update(dset->obj_oh, tr->epoch, &dkey, 1, &iod, &sgl, NULL /*event*/)))
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, NULL, "can't write data to dataset: %d", ret)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_dataset_write() */
 
 
 /*-------------------------------------------------------------------------

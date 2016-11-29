@@ -41,7 +41,9 @@ EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
            h5_vol_external_log_native \
            h5_vds h5_vds-exc \
            h5_vds-exclim h5_vds-eiger h5_vds-simpleIO h5_vds-percival \
-           h5_vds-percival-unlim h5_vds-percival-unlim-maxmin
+           h5_vds-percival-unlim h5_vds-percival-unlim-maxmin \
+           h5dsm_file_create h5dsm_file_open h5dsm_dset_create h5dsm_dset_open
+           h5dsm_dset_write h5dsm_dset_read
 TEST_SCRIPT=testh5cc.sh 
 TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
 
@@ -54,9 +56,11 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
           h5_reference.c h5_drivers.c h5_extlink.c h5_elink_unix2win.c   \
           h5_ref2reg.c h5_shared_mesg.c ph5example.c \
           h5_vol_external_log_native.c \
-	  h5_vds.c h5_vds-exc.c \
+          h5_vds.c h5_vds-exc.c \
           h5_vds-exclim.c h5_vds-eiger.c h5_vds-simpleIO.c h5_vds-percival.c \
-          h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c
+          h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c \
+          h5dsm_file_create.c h5dsm_file_open.c h5dsm_dset_create.c \
+          h5dsm_dset_open.c h5dsm_dset_write.c h5dsm_dset_read.c
 
 
 
@@ -134,6 +138,12 @@ h5_vds-simpleIO: $(srcdir)/h5_vds-simpleIO.c
 h5_vds-percival: $(srcdir)/h5_vds-percival.c
 h5_vds-percival-unlim: $(srcdir)/h5_vds-percival-unlim.c
 h5_vds-percival-unlim-maxmin: $(srcdir)/h5_vds-percival-unlim-maxmin.c
+h5dsm_file_create: $(srcdir)/h5dsm_file_create.c
+h5dsm_file_open: $(srcdir)/h5dsm_file_open.c
+h5dsm_dset_create: $(srcdir)/h5dsm_dset_create.c
+h5dsm_dset_open: $(srcdir)/h5dsm_dset_open.c
+h5dsm_dset_write: $(srcdir)/h5dsm_dset_write.c
+h5dsm_dset_read: $(srcdir)/h5dsm_dset_read.c
 
 if BUILD_SHARED_SZIP_CONDITIONAL
 LD_LIBRARY_PATH=$(LL_PATH)
