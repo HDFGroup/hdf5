@@ -1588,7 +1588,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_daos_dataset_read
+ * Function:    H5VL_daosm_dataset_read
  *
  * Purpose:     Reads raw data from a dataset into a buffer.
  *
@@ -1601,7 +1601,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_dataset_read(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_ATTR_UNUSED mem_space_id,
+H5VL_daosm_dataset_read(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_ATTR_UNUSED mem_space_id,
     hid_t H5_ATTR_UNUSED file_space_id, hid_t dxpl_id, void *buf,
     void H5_ATTR_UNUSED **req)
 {
@@ -1622,20 +1622,21 @@ H5VL_iod_dataset_read(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_AT
     size_t type_size;
     uint64_t chunk_size;
     uint8_t *p;
+    int ret;
     int i;
-    void *ret_value = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* get the transaction ID */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for trans_id");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
 
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a Transaction ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
 
     /* Get dataspace extent */
     if((ndims = H5Sget_simple_extent_ndims(dset->space_id)) < 0)
@@ -1657,13 +1658,13 @@ H5VL_iod_dataset_read(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_AT
      * starting at 0. */
     HDmemset(chunk_coords, 0, sizeof(chunk_coords)); //DSMINC
     p = dkey_buf;
-    *p++ == (uint8_t)'/';
+    *p++ = (uint8_t)'/';
     for(i = 0; i < ndims; i++)
         UINT64ENCODE(p, chunk_coords[i])
 
     /* Set up operation to write data */
     /* Set up dkey */
-    daos_iov_set(&dkey, dkey_buf, (daos_size_t)(1 + (ndims * sizeof(chunk_coords[0]))));
+    daos_iov_set(&dkey, dkey_buf, (daos_size_t)(1 + ((size_t)ndims * sizeof(chunk_coords[0]))));
 
     /* Set up recx */
     recx.rx_rsize = (uint64_t)type_size;
@@ -1684,15 +1685,15 @@ H5VL_iod_dataset_read(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_AT
 
     /* Write data to dataset */
     if(0 != (ret = daos_obj_fetch(dset->obj_oh, tr->epoch, &dkey, 1, &iod, &sgl, NULL /*maps*/, NULL /*event*/)))
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, NULL, "can't read data from dataset: %d", ret)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %d", ret)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_dataset_read() */
+} /* end H5VL_daosm_dataset_read() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_daos_dataset_write
+ * Function:    H5VL_daosm_dataset_write
  *
  * Purpose:     Writes raw data from a buffer into a dataset.
  *
@@ -1705,7 +1706,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_iod_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_ATTR_UNUSED mem_space_id,
+H5VL_daosm_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_ATTR_UNUSED mem_space_id,
     hid_t H5_ATTR_UNUSED file_space_id, hid_t dxpl_id, const void *buf,
     void H5_ATTR_UNUSED **req)
 {
@@ -1726,20 +1727,21 @@ H5VL_iod_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_A
     size_t type_size;
     uint64_t chunk_size;
     uint8_t *p;
+    int ret;
     int i;
-    void *ret_value = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* get the transaction ID */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
     if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for trans_id");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for trans_id");
 
     /* get the TR object */
     if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a Transaction ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a Transaction ID")
 
     /* Get dataspace extent */
     if((ndims = H5Sget_simple_extent_ndims(dset->space_id)) < 0)
@@ -1761,13 +1763,13 @@ H5VL_iod_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_A
      * starting at 0. */
     HDmemset(chunk_coords, 0, sizeof(chunk_coords)); //DSMINC
     p = dkey_buf;
-    *p++ == (uint8_t)'/';
+    *p++ = (uint8_t)'/';
     for(i = 0; i < ndims; i++)
         UINT64ENCODE(p, chunk_coords[i])
 
     /* Set up operation to write data */
     /* Set up dkey */
-    daos_iov_set(&dkey, dkey_buf, (daos_size_t)(1 + (ndims * sizeof(chunk_coords[0]))));
+    daos_iov_set(&dkey, dkey_buf, (daos_size_t)(1 + ((size_t)ndims * sizeof(chunk_coords[0]))));
 
     /* Set up recx */
     recx.rx_rsize = (uint64_t)type_size;
@@ -1788,11 +1790,11 @@ H5VL_iod_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_A
 
     /* Write data to dataset */
     if(0 != (ret = daos_obj_update(dset->obj_oh, tr->epoch, &dkey, 1, &iod, &sgl, NULL /*event*/)))
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, NULL, "can't write data to dataset: %d", ret)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data to dataset: %d", ret)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_dataset_write() */
+} /* end H5VL_daosm_dataset_write() */
 
 
 /*-------------------------------------------------------------------------

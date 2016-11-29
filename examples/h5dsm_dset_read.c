@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
             buf[i][j] = -1;
 
     /* Read data */
-    if(H5Dread_ff(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Dread_ff(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf, trans) < 0)
         ERROR;
 
     /* Print buffer */
@@ -59,8 +59,6 @@ int main(int argc, char *argv[]) {
         ERROR;
     if(H5Fclose(file) < 0)
         ERROR;
-    if(H5Sclose(space) < 0)
-        ERROR;
     if(H5Pclose(fapl) < 0)
         ERROR;
 
@@ -75,7 +73,6 @@ error:
         H5Dclose_ff(dset, -1);
         H5TRclose(trans);
         H5Fclose(file);
-        H5Sclose(space);
         H5Pclose(fapl);
     } H5E_END_TRY;
 

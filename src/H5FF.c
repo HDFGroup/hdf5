@@ -570,12 +570,12 @@ H5Dwrite_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
     if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for trans_id")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set property value for trans_id")
 
     /* Write the data through the VOL */
     if((ret_value = H5VL_dataset_write(dset->vol_obj, dset->vol_info->vol_cls, mem_type_id, mem_space_id, 
                                        file_space_id, dxpl_id, buf, H5_REQUEST_NULL)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")=
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -597,7 +597,7 @@ done:
  */
 herr_t
 H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-           hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t rcxt_id)
+           hid_t file_space_id, hid_t dxpl_id, void *buf, hid_t trans_id)
 {
     H5VL_object_t   *dset = NULL;
     H5P_genplist_t *plist;     /* Property list pointer */
@@ -605,7 +605,7 @@ H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "iiiii*xi", dset_id, mem_type_id, mem_space_id, file_space_id,
-             dxpl_id, buf, rcxt_id);
+             dxpl_id, buf, trans_id);
 
     if(NULL == (dset = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
@@ -622,8 +622,8 @@ H5Dread_ff(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     /* store the transaction ID in the dxpl */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-    if(H5P_set(plist, H5VL_CONTEXT_ID, &rcxt_id) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for rcxt_id")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set property value for trans_id")
 
     /* Read the data through the VOL */
     if((ret_value = H5VL_dataset_read(dset->vol_obj, dset->vol_info->vol_cls, mem_type_id, mem_space_id, 

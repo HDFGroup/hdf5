@@ -37,8 +37,6 @@ int main(int argc, char *argv[]) {
         ERROR;
     if(H5Fclose(file) < 0)
         ERROR;
-    if(H5Sclose(space) < 0)
-        ERROR;
     if(H5Pclose(fapl) < 0)
         ERROR;
 
@@ -53,7 +51,6 @@ error:
         H5Dclose_ff(dset, -1);
         H5TRclose(trans);
         H5Fclose(file);
-        H5Sclose(space);
         H5Pclose(fapl);
     } H5E_END_TRY;
 

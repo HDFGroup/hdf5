@@ -5,6 +5,7 @@ int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
     char *pool_grp = "daos_tier0";
     hid_t file = -1, dset = -1, trans = -1, fapl = -1;
+    uint64_t trans_num;
     int buf[4][6];
     int i, j;
 
@@ -35,6 +36,14 @@ int main(int argc, char *argv[]) {
     if((dset = H5Dopen_ff(file, argv[3], H5P_DEFAULT, trans)) < 0)
         ERROR;
 
+    /* Get next transaction */
+    if(H5TRget_trans_num(trans, &trans_num) < 0)
+        ERROR;
+    if(H5TRclose(trans) < 0)
+        ERROR;
+    if((trans = H5TRcreate(file, trans_num + 1)) < 0)
+        ERROR;
+
     /* Fill and print buffer */
     printf("Writing data. Buffer is:\n");
     for(i = 0; i < 4; i++) {
@@ -46,7 +55,11 @@ int main(int argc, char *argv[]) {
     }
 
     /* Write data */
-    if(H5Dwrite_ff(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Dwrite_ff(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf, trans) < 0)
+        ERROR;
+
+    /* Commit transaction */
+    if(H5TRcommit(trans) < 0)
         ERROR;
 
     /* Close */
@@ -55,8 +68,6 @@ int main(int argc, char *argv[]) {
     if(H5TRclose(trans) < 0)
         ERROR;
     if(H5Fclose(file) < 0)
-        ERROR;
-    if(H5Sclose(space) < 0)
         ERROR;
     if(H5Pclose(fapl) < 0)
         ERROR;
@@ -72,7 +83,6 @@ error:
         H5Dclose_ff(dset, -1);
         H5TRclose(trans);
         H5Fclose(file);
-        H5Sclose(space);
         H5Pclose(fapl);
     } H5E_END_TRY;
 

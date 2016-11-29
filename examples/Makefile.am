@@ -42,7 +42,7 @@ EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
            h5_vds h5_vds-exc \
            h5_vds-exclim h5_vds-eiger h5_vds-simpleIO h5_vds-percival \
            h5_vds-percival-unlim h5_vds-percival-unlim-maxmin \
-           h5dsm_file_create h5dsm_file_open h5dsm_dset_create h5dsm_dset_open
+           h5dsm_file_create h5dsm_file_open h5dsm_dset_create h5dsm_dset_open \
            h5dsm_dset_write h5dsm_dset_read
 TEST_SCRIPT=testh5cc.sh 
 TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
@@ -67,10 +67,10 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
 # How to build examples, using installed version of h5cc
 if BUILD_PARALLEL_CONDITIONAL
 $(EXTRA_PROG): $(H5CC_PP)
-	$(H5CC_PP) $(H5CCFLAGS) $(CFLAGS) -o $@ $(srcdir)/$@.c;
+	$(H5CC_PP) $(H5CCFLAGS) $(CFLAGS) -luuid -o $@ $(srcdir)/$@.c;
 else
 $(EXTRA_PROG): $(H5CC)
-	$(H5CC) $(H5CCFLAGS) $(CFLAGS) -o $@ $(srcdir)/$@.c;
+	$(H5CC) $(H5CCFLAGS) $(CFLAGS) -luuid -o $@ $(srcdir)/$@.c;
 endif
 
 # Some examples depend on files created by other examples.

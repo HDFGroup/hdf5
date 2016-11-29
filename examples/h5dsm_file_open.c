@@ -36,5 +36,15 @@ int main(int argc, char *argv[]) {
     (void)MPI_Finalize();
 
     return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(file);
+        H5Pclose(fapl);
+    } H5E_END_TRY;
+
+    (void)daos_fini();
+    (void)MPI_Finalize();
+    return 1;
 }
 
