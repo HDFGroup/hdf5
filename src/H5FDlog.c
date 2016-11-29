@@ -1567,15 +1567,7 @@ static herr_t
 H5FD_log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
 {
     H5FD_log_t  *file = (H5FD_log_t *)_file;
-#ifdef H5_HAVE_WIN32_API
-        LARGE_INTEGER   li;         /* 64-bit (union) integer for SetFilePointer() call */
-        DWORD           dwPtrLow;   /* Low-order pointer bits from SetFilePointer()
-                                     * Only used as an error code here.
-                                     */
-        DWORD           dwError;    /* DWORD error code from GetLastError() */
-        BOOL            bError;     /* Boolean error flag */
-#endif /* H5_HAVE_WIN32_API */
-herr_t      ret_value = SUCCEED;                /* Return value */
+    herr_t      ret_value = SUCCEED;                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1586,6 +1578,14 @@ herr_t      ret_value = SUCCEED;                /* Return value */
 #ifdef H5_HAVE_GETTIMEOFDAY
         struct timeval timeval_start, timeval_stop;
 #endif /* H5_HAVE_GETTIMEOFDAY */
+#ifdef H5_HAVE_WIN32_API
+        LARGE_INTEGER   li;         /* 64-bit (union) integer for SetFilePointer() call */
+        DWORD           dwPtrLow;   /* Low-order pointer bits from SetFilePointer()
+                                     * Only used as an error code here.
+                                     */
+        DWORD           dwError;    /* DWORD error code from GetLastError() */
+        BOOL            bError;     /* Boolean error flag */
+#endif /* H5_HAVE_WIN32_API */
 
 #ifdef H5_HAVE_GETTIMEOFDAY
         if(file->fa.flags & H5FD_LOG_TIME_TRUNCATE)
@@ -1677,21 +1677,25 @@ done:
 static herr_t
 H5FD_log_lock(H5FD_t *_file, hbool_t rw)
 {
-    H5FD_log_t	*file = (H5FD_log_t *)_file;
-    int lock;
-    herr_t ret_value = SUCCEED;                 /* Return value */
+    H5FD_log_t	*file = (H5FD_log_t *)_file;    /* VFD file struct          */
+    int lock_flags;                             /* file locking flags       */
+    herr_t ret_value = SUCCEED;                 /* Return value             */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(file);
 
-    /* Determine the type of lock */
-    lock = rw ? LOCK_EX : LOCK_SH;
+    /* Set exclusive or shared lock based on rw status */
+    lock_flags = rw ? LOCK_EX : LOCK_SH;
 
-    /* Place the lock with non-blocking */
-    if(HDflock(file->fd, lock | LOCK_NB) < 0)
-        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock file")
+    /* Place a non-blocking lock on the file */
+    if(HDflock(file->fd, lock_flags | LOCK_NB) < 0) {
+        if(ENOSYS == errno)
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING environment variable to override)")
+        else
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1712,15 +1716,19 @@ done:
 static herr_t
 H5FD_log_unlock(H5FD_t *_file)
 {
-    H5FD_log_t  *file = (H5FD_log_t *)_file;       /* VFD file struct */
-    herr_t ret_value = SUCCEED;                         /* Return value */
+    H5FD_log_t  *file = (H5FD_log_t *)_file;    /* VFD file struct          */
+    herr_t ret_value = SUCCEED;                 /* Return value             */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file);
 
-    if(HDflock(file->fd, LOCK_UN) < 0)
-        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock (unlock) file")
+    if(HDflock(file->fd, LOCK_UN) < 0) {
+        if(ENOSYS == errno)
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING environment variable to override)")
+        else
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to unlock file")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

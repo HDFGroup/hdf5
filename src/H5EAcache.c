@@ -893,7 +893,11 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing))
             break;
 
         default:
+#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -955,7 +959,6 @@ H5EA__cache_sblock_get_initial_load_size(void *_udata, size_t *image_len))
     /* Check arguments */
     HDassert(udata);
     HDassert(udata->hdr);
-    HDassert(udata->parent);
     HDassert(udata->sblk_idx > 0);
     HDassert(H5F_addr_defined(udata->sblk_addr));
     HDassert(image_len);
@@ -1293,7 +1296,11 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing))
             break;
 
         default:
+#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -1355,7 +1362,6 @@ H5EA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len))
     /* Check arguments */
     HDassert(udata);
     HDassert(udata->hdr);
-    HDassert(udata->parent);
     HDassert(udata->nelmts > 0);
     HDassert(image_len);
 
@@ -1694,7 +1700,11 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing))
             break;
 
         default:
+#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
     } /* end switch */
 
 CATCH
@@ -1802,7 +1812,6 @@ H5EA__cache_dblk_page_get_initial_load_size(void *_udata, size_t *image_len))
     /* Check arguments */
     HDassert(udata);
     HDassert(udata->hdr);
-    HDassert(udata->parent);
     HDassert(image_len);
 
     /* Set the image length size */
@@ -2063,7 +2072,11 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing))
             break;
 
         default:
+#ifdef NDEBUG
             H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
     } /* end switch */
 
 CATCH

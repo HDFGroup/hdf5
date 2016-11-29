@@ -261,8 +261,8 @@ typedef struct H5B2_leaf_cache_ud_t {
 #ifdef H5B2_TESTING
 /* Node information for testing */
 typedef struct H5B2_node_info_test_t {
-    unsigned depth;             /* Depth of node */
-    unsigned nrec;              /* Number of records in node */
+    uint16_t depth;             /* Depth of node */
+    uint16_t nrec;              /* Number of records in node */
 } H5B2_node_info_test_t;
 #endif /* H5B2_TESTING */
 

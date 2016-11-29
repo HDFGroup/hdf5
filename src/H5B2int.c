@@ -1925,7 +1925,7 @@ H5B2__update_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr
         if((hdr->cls->store)(H5B2_LEAF_NREC(leaf, hdr, idx), udata) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to insert record into leaf node")
 
-        /* Mark the node as dirty if it changed */
+        /* Mark the node as dirty */
         leaf_flags |= H5AC__DIRTIED_FLAG;
 
         /* Indicate that the record was inserted */
