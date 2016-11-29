@@ -343,11 +343,11 @@ H5B2_update(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_modify_t op, void *op_
     /* Attempt to insert record into B-tree */
     if(hdr->depth > 0) {
         if(H5B2__update_internal(hdr, dxpl_id, hdr->depth, NULL, &hdr->root, &status, H5B2_POS_ROOT, udata, op, op_data) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to update record in B-tree internal node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update record in B-tree internal node")
     } /* end if */
     else {
         if(H5B2__update_leaf(hdr, dxpl_id, &hdr->root, &status, H5B2_POS_ROOT, udata, op, op_data) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, FAIL, "unable to update record in B-tree leaf node")
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTUPDATE, FAIL, "unable to update record in B-tree leaf node")
     } /* end else */
 
     /* Sanity check */

@@ -78,6 +78,8 @@ static herr_t
 H5EA__lookup_elmt(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, hbool_t will_extend,
     unsigned thing_acc, void **thing, uint8_t **thing_elmt_buf,
     hsize_t *thing_elmt_idx, H5EA__unprotect_func_t *thing_unprot_func);
+static H5EA_t *H5EA__new(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr,
+    hbool_t from_open, void *ctx_udata);
 
 
 /*********************/
@@ -116,48 +118,44 @@ H5FL_BLK_DEFINE(ea_native_elmt);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_create
+ * Function:	H5EA__new
  *
- * Purpose:	Creates a new empty extensible array in the file.
+ * Purpose:	Allocate and initialize a new extensible array wrapper in memory
  *
- * Return:	Pointer to earray wrapper on success
+ * Return:	Pointer to earray wrapper success
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Jun 17 2008
+ *		koziol@lbl.gov
+ *		Oct 10 2016
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(PRIV, ERR,
+BEGIN_FUNC(STATIC, ERR,
 H5EA_t *, NULL, NULL,
-H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam, void *ctx_udata))
+H5EA__new(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, hbool_t from_open, void *ctx_udata))
 
     /* Local variables */
     H5EA_t *ea = NULL;          /* Pointer to new extensible array */
     H5EA_hdr_t *hdr = NULL;     /* The extensible array header information */
-    haddr_t ea_addr;            /* Array header address */
 
     /*
      * Check arguments.
      */
     HDassert(f);
-    HDassert(cparam);
-
-    /* H5EA interface sanity check */
-    HDcompile_assert(H5EA_NUM_CLS_ID == NELMTS(H5EA_client_class_g));
-
-    /* Create extensible array header */
-    if(HADDR_UNDEF == (ea_addr = H5EA__hdr_create(f, dxpl_id, cparam, ctx_udata)))
-	H5E_THROW(H5E_CANTINIT, "can't create extensible array header")
+    HDassert(H5F_addr_defined(ea_addr));
 
     /* Allocate extensible array wrapper */
-    if(NULL == (ea = H5FL_MALLOC(H5EA_t)))
+    if(NULL == (ea = H5FL_CALLOC(H5EA_t)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array info")
 
     /* Lock the array header into memory */
-    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC__NO_FLAGS_SET)))
+    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
+
+    /* Check for pending array deletion */
+    if(from_open && hdr->pending_delete)
+        H5E_THROW(H5E_CANTOPENOBJ, "can't open extensible array pending deletion")
 
     /* Point extensible array wrapper at header and bump it's ref count */
     ea->hdr = hdr;
@@ -178,6 +176,57 @@ CATCH
 
     if(hdr && H5EA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
+    if(!ret_value)
+        if(ea && H5EA_close(ea, dxpl_id) < 0)
+            H5E_THROW(H5E_CLOSEERROR, "unable to close extensible array")
+
+END_FUNC(STATIC)  /* end H5EA__new() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA_create
+ *
+ * Purpose:	Creates a new empty extensible array in the file.
+ *
+ * Return:	Pointer to earray wrapper on success
+ *              NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Jun 17 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+H5EA_t *, NULL, NULL,
+H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam, void *ctx_udata))
+
+    /* Local variables */
+    H5EA_t *ea = NULL;          /* Pointer to new extensible array */
+    haddr_t ea_addr;            /* Array header address */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(cparam);
+
+    /* H5EA interface sanity check */
+    HDcompile_assert(H5EA_NUM_CLS_ID == NELMTS(H5EA_client_class_g));
+
+    /* Create extensible array header */
+    if(HADDR_UNDEF == (ea_addr = H5EA__hdr_create(f, dxpl_id, cparam, ctx_udata)))
+	H5E_THROW(H5E_CANTINIT, "can't create extensible array header")
+
+    /* Allocate and initialize new extensible array wrapper */
+    if(NULL == (ea = H5EA__new(f, dxpl_id, ea_addr, FALSE, ctx_udata)))
+	H5E_THROW(H5E_CANTINIT, "allocation and/or initialization failed for extensible array wrapper")
+
+    /* Set the return value */
+    ret_value = ea;
+
+CATCH
+
     if(!ret_value)
         if(ea && H5EA_close(ea, dxpl_id) < 0)
             H5E_THROW(H5E_CLOSEERROR, "unable to close extensible array")
@@ -205,7 +254,6 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
 
     /* Local variables */
     H5EA_t *ea = NULL;          /* Pointer to new extensible array wrapper */
-    H5EA_hdr_t *hdr = NULL;     /* The extensible array header information */
 
     /*
      * Check arguments.
@@ -213,37 +261,15 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata))
     HDassert(f);
     HDassert(H5F_addr_defined(ea_addr));
 
-    /* Load the array header into memory */
-    if(NULL == (hdr = H5EA__hdr_protect(f, dxpl_id, ea_addr, ctx_udata, H5AC__READ_ONLY_FLAG)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header, address = %llu", (unsigned long long)ea_addr)
-
-    /* Check for pending array deletion */
-    if(hdr->pending_delete)
-        H5E_THROW(H5E_CANTOPENOBJ, "can't open extensible array pending deletion")
-
-    /* Create fractal heap info */
-    if(NULL == (ea = H5FL_MALLOC(H5EA_t)))
-        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array info")
-
-    /* Point extensible array wrapper at header */
-    ea->hdr = hdr;
-    if(H5EA__hdr_incr(ea->hdr) < 0)
-        H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
-
-    /* Increment # of files using this array header */
-    if(H5EA__hdr_fuse_incr(ea->hdr) < 0)
-        H5E_THROW(H5E_CANTINC, "can't increment file reference count on shared array header")
-
-    /* Set file pointer for this array open context */
-    ea->f = f;
+    /* Allocate and initialize new extensible array wrapper */
+    if(NULL == (ea = H5EA__new(f, dxpl_id, ea_addr, TRUE, ctx_udata)))
+	H5E_THROW(H5E_CANTINIT, "allocation and/or initialization failed for extensible array wrapper")
 
     /* Set the return value */
     ret_value = ea;
 
 CATCH
 
-    if(hdr && H5EA__hdr_unprotect(hdr, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
-        H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
     if(!ret_value)
         if(ea && H5EA_close(ea, dxpl_id) < 0)
             H5E_THROW(H5E_CLOSEERROR, "unable to close extensible array")
@@ -818,26 +844,28 @@ H5EA_close(H5EA_t *ea, hid_t dxpl_id))
      */
     HDassert(ea);
 
-    /* Decrement file reference & check if this is the last open extensible array using the shared array header */
-    if(0 == H5EA__hdr_fuse_decr(ea->hdr)) {
-        /* Set the shared array header's file context for this operation */
-        ea->hdr->f = ea->f;
+    /* Close the header, if it was set */
+    if(ea->hdr) {
+        /* Decrement file reference & check if this is the last open extensible array using the shared array header */
+        if(0 == H5EA__hdr_fuse_decr(ea->hdr)) {
+            /* Set the shared array header's file context for this operation */
+            ea->hdr->f = ea->f;
 
-        /* Shut down anything that can't be put in the header's 'flush' callback */
+            /* Shut down anything that can't be put in the header's 'flush' callback */
+
+            /* Check for pending array deletion */
+            if(ea->hdr->pending_delete) {
+                /* Set local info, so array deletion can occur after decrementing the
+                 *  header's ref count
+                 */
+                pending_delete = TRUE;
+                ea_addr = ea->hdr->addr;
+            } /* end if */
+        } /* end if */
 
         /* Check for pending array deletion */
-        if(ea->hdr->pending_delete) {
-            /* Set local info, so array deletion can occur after decrementing the
-             *  header's ref count
-             */
-            pending_delete = TRUE;
-            ea_addr = ea->hdr->addr;
-        } /* end if */
-    } /* end if */
-
-    /* Check for pending array deletion */
-    if(pending_delete) {
-        H5EA_hdr_t *hdr;            /* Another pointer to extensible array header */
+        if(pending_delete) {
+            H5EA_hdr_t *hdr;            /* Another pointer to extensible array header */
 
 #ifndef NDEBUG
 {
@@ -854,33 +882,34 @@ H5EA_close(H5EA_t *ea, hid_t dxpl_id))
 }
 #endif /* NDEBUG */
 
-        /* Lock the array header into memory */
-        /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
-        if(NULL == (hdr = H5EA__hdr_protect(ea->f, dxpl_id, ea_addr, NULL, H5AC__NO_FLAGS_SET)))
-            H5E_THROW(H5E_CANTLOAD, "unable to load extensible array header")
+            /* Lock the array header into memory */
+            /* (OK to pass in NULL for callback context, since we know the header must be in the cache) */
+            if(NULL == (hdr = H5EA__hdr_protect(ea->f, dxpl_id, ea_addr, NULL, H5AC__NO_FLAGS_SET)))
+                H5E_THROW(H5E_CANTLOAD, "unable to load extensible array header")
 
-        /* Set the shared array header's file context for this operation */
-        hdr->f = ea->f;
+            /* Set the shared array header's file context for this operation */
+            hdr->f = ea->f;
 
-        /* Decrement the reference count on the array header */
-        /* (don't put in H5EA_hdr_fuse_decr() as the array header may be evicted
-         *  immediately -QAK)
-         */
-        if(H5EA__hdr_decr(ea->hdr) < 0)
-            H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
+            /* Decrement the reference count on the array header */
+            /* (don't put in H5EA_hdr_fuse_decr() as the array header may be evicted
+             *  immediately -QAK)
+             */
+            if(H5EA__hdr_decr(ea->hdr) < 0)
+                H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
 
-        /* Delete array, starting with header (unprotects header) */
-        if(H5EA__hdr_delete(hdr, dxpl_id) < 0)
-            H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array")
+            /* Delete array, starting with header (unprotects header) */
+            if(H5EA__hdr_delete(hdr, dxpl_id) < 0)
+                H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array")
+        } /* end if */
+        else {
+            /* Decrement the reference count on the array header */
+            /* (don't put in H5EA_hdr_fuse_decr() as the array header may be evicted
+             *  immediately -QAK)
+             */
+            if(H5EA__hdr_decr(ea->hdr) < 0)
+                H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
+        } /* end else */
     } /* end if */
-    else {
-        /* Decrement the reference count on the array header */
-        /* (don't put in H5EA_hdr_fuse_decr() as the array header may be evicted
-         *  immediately -QAK)
-         */
-        if(H5EA__hdr_decr(ea->hdr) < 0)
-            H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
-    } /* end else */
 
     /* Release the extensible array wrapper */
     ea = (H5EA_t *)H5FL_FREE(H5EA_t, ea);

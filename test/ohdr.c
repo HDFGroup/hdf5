@@ -609,9 +609,8 @@ main(void)
     H5F_t	*f = NULL;
     char	filename[1024];
     H5O_hdr_info_t hdr_info;            /* Object info */
-    H5O_loc_t	oh_loc, oh_loc2;        /* Object header locations */
+    H5O_loc_t	oh_loc;                 /* Object header locations */
     time_t	time_new, ro;
-    int         chunkno;                /* Chunk index for message */
     int		i;                      /* Local index variable */
     unsigned    b;                      /* Index for "new format" loop */
     herr_t      ret;                    /* Generic return value */
