@@ -900,7 +900,7 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_si
     hbool_t eoa_shrank;		/* Whether an EOA shrink occurs */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 
     /* check args */
     HDassert(f);
@@ -1007,7 +1007,7 @@ done:
     if(H5AC_reset_ring(dxpl, orig_ring) < 0)
         HDONE_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set property value")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5MF_get_freespace() */
 
 
