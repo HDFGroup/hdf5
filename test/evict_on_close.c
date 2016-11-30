@@ -294,12 +294,10 @@ generate_eoc_test_file(hid_t fapl_id)
         if(HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
             TEST_ERROR
 
-/* DER - Restore when EoC new-style group bug is resolved.
         if((gid2 = H5Gcreate2(gid1, subgroup_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if(H5Gclose(gid2) < 0)
             TEST_ERROR;
-*/
     } /* end for */
 
     if(H5Gclose(gid1) < 0)
@@ -955,10 +953,8 @@ main(void)
      */
     TESTING("evict on close with old-style groups");
         nerrors += check_group_layout(fid, GROUP_OLD_STYLE_NAME) < 0 ? 1 : 0;
-/* DER - Enable when EoC new-style groups bug is fixed
     TESTING("evict on close with new-style groups");
         nerrors += check_group_layout(fid, GROUP_NEW_STYLE_NAME) < 0 ? 1 : 0;
-*/
 
     /* Close the test file */
     if(H5Fclose(fid) < 0) {
