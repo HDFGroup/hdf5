@@ -254,7 +254,7 @@ CATCH
         if(iblock) {
             /* Release index block's disk space */
             if(H5F_addr_defined(iblock->addr) && H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_IBLOCK, dxpl_id, iblock->addr, (hsize_t)iblock->size) < 0)
-                H5E_THROW(H5E_CANTFREE, "unable to release extensible array index block")
+                H5E_THROW(H5E_CANTFREE, "unable to release file space for extensible array index block")
 
             /* Destroy index block */
             if(H5EA__iblock_dest(iblock) < 0)

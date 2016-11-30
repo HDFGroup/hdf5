@@ -236,14 +236,14 @@ typedef enum H5B2_update_status_t {
     H5B2_UPDATE_INSERT_CHILD_FULL   /* Update will insert record, but child is full */
 } H5B2_update_status_t;
 
-/* Callback info for loading a free space header into the cache */
+/* Callback info for loading a v2 B-tree header into the cache */
 typedef struct H5B2_hdr_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
     haddr_t addr;               /* Address of B-tree header in the file */
     void *ctx_udata;            /* User-data for protecting */
 } H5B2_hdr_cache_ud_t;
 
-/* Callback info for loading a free space internal node into the cache */
+/* Callback info for loading a v2 B-tree internal node into the cache */
 typedef struct H5B2_internal_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
     H5B2_hdr_t *hdr;            /* v2 B-tree header */
@@ -251,7 +251,7 @@ typedef struct H5B2_internal_cache_ud_t {
     uint16_t depth;             /* Depth of node to load */
 } H5B2_internal_cache_ud_t;
 
-/* Callback info for loading a free space leaf node into the cache */
+/* Callback info for loading a v2 B-tree leaf node into the cache */
 typedef struct H5B2_leaf_cache_ud_t {
     H5F_t *f;                   /* File that v2 b-tree header is within */
     H5B2_hdr_t *hdr;            /* v2 B-tree header */
