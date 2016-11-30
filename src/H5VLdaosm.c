@@ -1179,7 +1179,7 @@ H5VL_daosm_dataset_create(void *_obj,
     const char *target_name = NULL;
     size_t target_name_len;
     char const_link_key[] = H5VL_DAOSM_LINK_KEY;
-    daos_dkey_t dkey;
+    daos_key_t dkey;
     daos_vec_iod_t iod[3];
     daos_recx_t recx[3];
     daos_sg_list_t sgl[3];
@@ -1412,7 +1412,7 @@ H5VL_daosm_dataset_open(void *_obj,
     const char *target_name = NULL;
     size_t target_name_len;
     char const_link_key[] = H5VL_DAOSM_LINK_KEY;
-    daos_dkey_t dkey;
+    daos_key_t dkey;
     daos_vec_iod_t iod[3];
     daos_recx_t recx[3];
     daos_sg_list_t sgl[3];
@@ -1612,7 +1612,7 @@ H5VL_daosm_dataset_read(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_
     int ndims;
     hsize_t dim[H5S_MAX_RANK];
     uint64_t chunk_coords[H5S_MAX_RANK];
-    daos_dkey_t dkey;
+    daos_key_t dkey;
     daos_vec_iod_t iod;
     daos_recx_t recx;
     daos_sg_list_t sgl;
@@ -1717,7 +1717,7 @@ H5VL_daosm_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5
     int ndims;
     hsize_t dim[H5S_MAX_RANK];
     uint64_t chunk_coords[H5S_MAX_RANK];
-    daos_dkey_t dkey;
+    daos_key_t dkey;
     daos_vec_iod_t iod;
     daos_recx_t recx;
     daos_sg_list_t sgl;
