@@ -158,7 +158,7 @@ H5MF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, FILE *stream, int ind
     herr_t      ret_value = SUCCEED;    /* Return value */
     H5FD_mem_t 	type;                    /* Memory type for iteration */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 
     /*
      * Check arguments.
@@ -195,7 +195,7 @@ H5MF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, FILE *stream, int ind
 	}
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* H5MF_sects_debug() */
 
 #ifdef H5MF_ALLOC_DEBUG_DUMP
@@ -226,7 +226,7 @@ H5MF_sects_dump(H5F_t *f, hid_t dxpl_id, FILE *stream)
     int fwidth = 50;                    /* Field width */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Dumping file free space sections\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -300,7 +300,7 @@ HDfprintf(stderr, "%s: sda_addr = %a, sda_size = %Hu, end of sda = %a\n", FUNC, 
 
 done:
 HDfprintf(stderr, "%s: Done dumping file free space sections\n", FUNC);
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5MF_sects_dump() */
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
 
