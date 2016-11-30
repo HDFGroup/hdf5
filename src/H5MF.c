@@ -85,7 +85,7 @@ typedef struct {
 
 /* Allocator routines */
 static herr_t H5MF_alloc_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
-static herr_t H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
+static herr_t H5MF__alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
 static herr_t H5MF__close_delete(H5F_t *f, hid_t dxpl_id);
 
 
@@ -379,7 +379,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5MF_alloc_close
+ * Function:    H5MF__alloc_close
  *
  * Purpose:     Close an existing free space manager of TYPE for file
  *
@@ -391,7 +391,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
+H5MF__alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -414,7 +414,7 @@ H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* end H5MF_alloc_close() */
+} /* end H5MF__alloc_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -991,7 +991,7 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_si
     /* Close the free-space managers if they were opened earlier in this routine */
     for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
 	if(fs_started[type])
-            if(H5MF_alloc_close(f, dxpl_id, type) < 0)
+            if(H5MF__alloc_close(f, dxpl_id, type) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't close file free space")
     } /* end for */
 
@@ -1567,7 +1567,7 @@ H5MF_get_free_sections(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, size_t nsects, 
 
 	/* Close the free space manager of this type, if we started it here */
         if(fs_started)
-            if(H5MF_alloc_close(f, dxpl_id, ty) < 0)
+            if(H5MF__alloc_close(f, dxpl_id, ty) < 0)
 	        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCLOSEOBJ, FAIL, "can't close file free space")
     } /* end for */
 
