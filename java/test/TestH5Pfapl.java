@@ -1322,4 +1322,59 @@ public class TestH5Pfapl {
             }
         }
     }
+
+    @Test
+    public void testH5Fmdc_logging() {
+        boolean[] mdc_logging_status = {false, false};
+        boolean[] mdc_log_options = {false, false};
+
+        try {
+            boolean is_enabled = true;
+            boolean start_on_access = false;
+            H5.H5Pset_mdc_log_options(fapl_id, is_enabled, H5_LOG_FILE, start_on_access);
+
+            String location = H5.H5Pget_mdc_log_options(fapl_id, mdc_log_options);
+            assertTrue("H5.H5Pget_mdc_log_options: is_enabled", mdc_log_options[0]);
+            assertFalse("H5.H5Pget_mdc_log_options: start_on_access_out", mdc_log_options[1]);
+
+            H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST, HDF5Constants.H5F_LIBVER_LATEST);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("mdc_log_option: " + err);
+        }
+        _createH5File(fapl_id);
+
+        try {
+            H5.H5Fget_mdc_logging_status(H5fid, mdc_logging_status);
+        }
+        catch (Throwable err) {
+            fail("H5.H5Fget_mdc_logging_status: " + err);
+        }
+        assertTrue("initial: is_enabled", mdc_logging_status[0]);
+        assertFalse("initial: is_currently_logging", mdc_logging_status[1]);
+
+        try {
+            H5.H5Fstart_mdc_logging(H5fid);
+            H5.H5Fget_mdc_logging_status(H5fid, mdc_logging_status);
+        }
+        catch (Throwable err) {
+            fail("start H5.H5Fget_mdc_logging_status: " + err);
+        }
+        assertTrue("start: is_enabled", mdc_logging_status[0]);
+        assertTrue("start: is_currently_logging", mdc_logging_status[1]);
+
+        try {
+            H5.H5Fstop_mdc_logging(H5fid);
+            H5.H5Fget_mdc_logging_status(H5fid, mdc_logging_status);
+        }
+        catch (Throwable err) {
+            fail("stop H5.H5Fget_mdc_logging_status: " + err);
+        }
+//        assertFalse("stop: is_enabled", mdc_logging_status[0]);
+        assertFalse("stop: is_currently_logging", mdc_logging_status[1]);
+
+        deleteH5file();
+        _deleteLogFile();
+    }
 }

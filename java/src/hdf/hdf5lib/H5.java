@@ -2852,6 +2852,26 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native void H5Fclear_elink_file_cache(long file_id) throws HDF5LibraryException;
 
+    /**
+     * H5Fget_mdc_logging_status gets the current metadata cache logging status.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     *
+     * @param mdc_logging_status, the status
+     *             mdc_logging_status[0] = is_enabled, whether logging is enabled
+     *             mdc_logging_status[1] = is_currently_logging, whether events are currently being logged
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - mdc_logging_status is null.
+     **/
+    public synchronized static native void H5Fget_mdc_logging_status(long file_id, boolean[] mdc_logging_status)
+            throws HDF5LibraryException, NullPointerException;
+
+
+
     // /////// unimplemented ////////
     // ssize_t H5Fget_file_image(hid_t file_id, void * buf_ptr, size_t buf_len);
     // herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
@@ -5674,6 +5694,44 @@ public class H5 implements java.io.Serializable {
             throws HDF5LibraryException;
 
     /**
+     * H5Pset_mdc_log_options sets metadata cache logging options.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     * @param is_enabled
+     *            IN: Whether logging is enabled.
+     * @param location
+     *            IN: Location of log in UTF-8/ASCII (file path/name) (On Windows, this must be ASCII).
+     * @param start_on_access
+     *            IN: Whether the logging begins as soon as the file is opened or created.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *                - location is null.
+     *
+     **/
+    public synchronized static native void H5Pset_mdc_log_options(long fapl_id, boolean is_enabled, String location, boolean start_on_access)
+            throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * H5Pget_mdc_log_options gets metadata cache logging options.
+     *
+     * @param fapl_id
+     *            IN: File access property list identifier
+     * @param mdc_log_options, the options
+     *             mdc_logging_options[0] = is_enabled, whether logging is enabled
+     *             mdc_logging_options[1] = start_on_access, whether the logging begins as soon as the file is opened or created
+     *
+     * @return the location of log in UTF-8/ASCII (file path/name) (On Windows, this must be ASCII).
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native String H5Pget_mdc_log_options(long fapl_id, boolean[] mdc_log_options)
+            throws HDF5LibraryException;
+
     /**
      * H5Pget_metadata_read_attempts retrieves the number of read attempts that is set in the file access property list plist_id.
      *
