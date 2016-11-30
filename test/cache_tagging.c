@@ -56,8 +56,7 @@
 /* ===================== */
 
 /* Helper Functions */
-static void print_entry_type_to_screen(int id);
-static int print_index(hid_t fid);
+static int dump_cache(hid_t fid);
 static int verify_no_unknown_tags(hid_t fid);
 static int mark_all_entries_investigated(hid_t fid);
 static int reset_all_entries_investigated(hid_t fid);
@@ -98,126 +97,10 @@ static unsigned check_invalid_tag_application(void);
 /* Helper Functions */
 /* ================ */
 
-
-/*-------------------------------------------------------------------------
- *
- * Function:    print_entry_type_to_screen
- *
- * Purpose:     DEBUG CODE (for when verbose is set).
- *
- *              Prints type of entry to stdout.
- *
- * Return:      void
- *
- * Programmer:  Mike McGreevy
- *              September 3, 2009
- *
- *-------------------------------------------------------------------------
- */
-static void
-print_entry_type_to_screen(int id)
-{
-    HDfprintf(stdout, "Type = ");
-    
-    switch (id) {
-        case H5AC_BT_ID:
-            HDfprintf(stdout, "v1 B-tree Node");
-            break;
-        case H5AC_SNODE_ID: 
-            HDfprintf(stdout, "Symbol Table Node");
-            break;
-        case H5AC_LHEAP_PRFX_ID:
-            HDfprintf(stdout, "Local Heap Prefix");
-            break;
-        case H5AC_LHEAP_DBLK_ID:
-            HDfprintf(stdout, "Local Heap Data Block");
-            break;
-        case H5AC_GHEAP_ID:
-            HDfprintf(stdout, "Global Heap");
-            break;
-        case H5AC_OHDR_ID:
-            HDfprintf(stdout, "Object Header");
-            break;
-        case H5AC_OHDR_CHK_ID:
-            HDfprintf(stdout, "Object Header Chunk");
-            break;
-        case H5AC_BT2_HDR_ID:
-            HDfprintf(stdout, "v2 B-tree Header");
-            break;
-        case H5AC_BT2_INT_ID:
-            HDfprintf(stdout, "v2 B-tree Internal Node");
-            break;
-        case H5AC_BT2_LEAF_ID:
-            HDfprintf(stdout, "v2 B-tree Leaf Node");
-            break;
-        case H5AC_FHEAP_HDR_ID:
-            HDfprintf(stdout, "Fractal Heap Header");
-            break;
-        case H5AC_FHEAP_DBLOCK_ID:
-            HDfprintf(stdout, "Fractal Heap Direct Block");
-            break;
-        case H5AC_FHEAP_IBLOCK_ID:
-            HDfprintf(stdout, "Fractal Heap Indirect Block");
-            break;
-        case H5AC_FSPACE_HDR_ID:
-            HDfprintf(stdout, "Free Space Header");
-            break;
-        case H5AC_FSPACE_SINFO_ID:
-            HDfprintf(stdout, "Free Space Section");
-            break;
-        case H5AC_SOHM_TABLE_ID:
-            HDfprintf(stdout, "Shared Object Header Message Master Table");
-            break;
-        case H5AC_SOHM_LIST_ID:
-            HDfprintf(stdout, "Shared Message Index Stored As A List");
-            break;
-        case H5AC_EARRAY_HDR_ID:
-            HDfprintf(stdout, "Extensible Array Header");
-            break;
-        case H5AC_EARRAY_IBLOCK_ID:
-            HDfprintf(stdout, "Extensible Array Index Block");
-            break;
-        case H5AC_EARRAY_SBLOCK_ID:
-            HDfprintf(stdout, "Extensible Array Super Block");
-            break;
-        case H5AC_EARRAY_DBLOCK_ID:
-            HDfprintf(stdout, "Extensible Array Data Block");
-            break;
-        case H5AC_EARRAY_DBLK_PAGE_ID:
-            HDfprintf(stdout, "Extensible Array Data Block Page");
-            break;
-        case H5AC_FARRAY_HDR_ID:
-            HDfprintf(stdout, "Fixed Array Header");
-            break;
-        case H5AC_FARRAY_DBLOCK_ID:
-            HDfprintf(stdout, "Fixed Array Data Block");
-            break;
-        case H5AC_FARRAY_DBLK_PAGE_ID:
-            HDfprintf(stdout, "Fixed Array Data Block Page");
-            break;
-        case H5AC_SUPERBLOCK_ID:
-            HDfprintf(stdout, "File Superblock");
-            break;
-        case H5AC_DRVRINFO_ID:
-            HDfprintf(stdout, "Driver Info Block");
-            break;
-        case H5AC_TEST_ID:
-            HDfprintf(stdout, "Test Entry");
-            break;
-        case H5AC_NTYPES:
-            HDfprintf(stdout, "BADNESS: Number of Types");
-            break;
-        default:
-            HDfprintf(stdout, "BADNESS: *Unknown*");
-            break;
-    } /* end switch */
-
-    HDfprintf(stdout, " (%d)", id);
-} /* print_entry_type_to_screen */
 
 
 /*-------------------------------------------------------------------------
- * Function:    print_index()
+ * Function:    dump_cache()
  *
  * Purpose:     DEBUG CODE (for when verbose is set).
  *
@@ -231,41 +114,23 @@ print_entry_type_to_screen(int id)
  *
  *-------------------------------------------------------------------------
  */
-static int print_index(hid_t fid)
+static int dump_cache(hid_t fid)
 {
     H5F_t *f;           /* File Pointer */
-    H5C_t *cache_ptr;   /* Cache Pointer */
-    int i;              /* Iterator */
 
     /* Get Internal File / Cache Pointers */
     if(NULL == (f = (H5F_t *)H5I_object(fid)))
         TEST_ERROR;
-    cache_ptr = f->shared->cache;
 
-    /* Initial (debugging) loop */
-    printf("CACHE SNAPSHOT:\n");
-    for(i = 0; i < H5C__HASH_TABLE_LEN; i++) {
-        H5C_cache_entry_t *entry_ptr;      /* entry pointer */
-
-        entry_ptr = cache_ptr->index[i];
-        while(entry_ptr != NULL) {
-            HDfprintf(stdout, "Addr = %a, ", entry_ptr->addr);
-            HDfprintf(stdout, "Tag = %a, ", entry_ptr->tag_info ? entry_ptr->tag_info->tag : HADDR_UNDEF);
-            HDfprintf(stdout, "Dirty = %t, ", entry_ptr->is_dirty);
-            HDfprintf(stdout, "Dirtied = %t, ", entry_ptr->dirtied);
-            print_entry_type_to_screen(entry_ptr->type->id);
-            printf("\n");
-
-            entry_ptr = entry_ptr->ht_next;
-        } /* end while */
-    } /* end for */
-    printf("\n");
+    /* Dump the cache */
+    if(H5AC_dump_cache(f) < 0)
+        TEST_ERROR;
 
     return 0;
     
 error:
     return -1;
-} /* print_index */
+} /* dump_cache */
 
 
 /*-------------------------------------------------------------------------
@@ -584,7 +449,7 @@ check_file_creation_tags(hid_t fcpl_id, int type)
     if ( (fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 
     /* if verbose, print cache index to screen before verification . */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* verify there is a superblock entry with superblock tag */
     if ( verify_tag(fid, H5AC_SUPERBLOCK_ID, H5AC__SUPERBLOCK_TAG) < 0 ) TEST_ERROR;
@@ -690,7 +555,7 @@ check_file_open_tags(hid_t fcpl, int type)
     /* =================================== */
 
     /* if verbose, print cache index to screen before verification . */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* verify there is a superblock entry with superblock tag. */
     if ( verify_tag(fid, H5AC_SUPERBLOCK_ID, H5AC__SUPERBLOCK_TAG) < 0 ) TEST_ERROR;
@@ -792,7 +657,7 @@ check_group_creation_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
  
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -895,7 +760,7 @@ check_multi_group_creation_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify there is an object header for each group */
     for (i = 0; i < MULTIGROUPS; i++) {
@@ -919,8 +784,8 @@ check_multi_group_creation_tags(void)
     } /* end for */
 
     /* Verify free space header and section info */
-    if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
-    if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
+    if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, root_tag) < 0 ) TEST_ERROR;
+    if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, root_tag) < 0 ) TEST_ERROR;
 
     /* verify fractal heap header belonging to root group */
     if ( verify_tag(fid, H5AC_FHEAP_HDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -1027,7 +892,7 @@ check_link_iteration_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -1144,11 +1009,11 @@ check_dense_attribute_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify free space header and section info */
-    if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
-    if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
+    if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, d_tag) < 0 ) TEST_ERROR;
+    if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, d_tag) < 0 ) TEST_ERROR;
 
     /* verify object header belonging to dataset */
     if ( verify_tag(fid, H5AC_OHDR_ID, d_tag) < 0 ) TEST_ERROR;
@@ -1200,7 +1065,7 @@ check_dense_attribute_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* verify object header belonging to dataset */
     if ( verify_tag(fid, H5AC_OHDR_ID, d_tag) < 0 ) TEST_ERROR;
@@ -1308,7 +1173,7 @@ check_group_open_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -1412,7 +1277,7 @@ check_attribute_creation_tags(hid_t fcpl, int type)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* verify object header belonging to group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -1436,8 +1301,8 @@ check_attribute_creation_tags(hid_t fcpl, int type)
         if ( verify_tag(fid, H5AC_FHEAP_DBLOCK_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
         /* Verify free space header and free space section */
-        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
-        if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
+        if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
         /* verify btree header and leaf node belonging to group */
         if ( verify_tag(fid, H5AC_BT2_HDR_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
@@ -1546,7 +1411,7 @@ check_attribute_open_tags(hid_t fcpl, int type)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* verify object header belonging to group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -1688,7 +1553,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -1850,7 +1715,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* verify object header belonging to group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -1972,7 +1837,7 @@ check_dataset_creation_tags(hid_t fcpl, int type)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -2097,7 +1962,7 @@ check_dataset_creation_earlyalloc_tags(hid_t fcpl, int type)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -2235,7 +2100,7 @@ check_dataset_open_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -2366,7 +2231,7 @@ check_dataset_write_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
  
     /* Verify 10 b-tree nodes belonging to dataset  */
     for (i=0; i<10; i++)
@@ -2489,7 +2354,7 @@ check_attribute_write_tags(hid_t fcpl, int type)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
  
     /* Verify object header of group */
     if ( verify_tag(fid, H5AC_OHDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -2644,7 +2509,7 @@ check_dataset_read_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
  
     /* Verify 19 b-tree nodes belonging to dataset  */
     for (i=0; i<19; i++)
@@ -2774,7 +2639,7 @@ check_dataset_size_retrieval(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify 19 b-tree nodes belonging to dataset  */
     for (i=0; i<19; i++)
@@ -2907,7 +2772,7 @@ check_dataset_extend_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, d_tag) < 0 ) TEST_ERROR;
@@ -3004,7 +2869,7 @@ check_object_info_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3110,7 +2975,7 @@ check_object_copy_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3260,7 +3125,7 @@ check_link_removal_tags(hid_t fcpl, int type)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3409,7 +3274,7 @@ check_link_getname_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* Verify root group's tagged metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3509,7 +3374,7 @@ check_external_link_creation_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
  
     /* Verify root group metadata */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
@@ -3616,7 +3481,7 @@ check_external_link_open_tags(void)
     /* =================================== */
 
     /* if verbose, print cache index to screen for visual verification */
-    if ( verbose ) print_index(fid);
+    if ( verbose ) dump_cache(fid);
 
     /* verify tag value of first file's root group */
     if ( verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0 ) TEST_ERROR;
