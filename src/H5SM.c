@@ -2467,7 +2467,7 @@ done:
     if(oh && oh != open_oh) {
         if(oh && H5O_unprotect(&oloc, dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
             HDONE_ERROR(H5E_SOHM, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
-        if(H5O_close(&oloc) < 0)
+        if(H5O_close(&oloc, NULL) < 0)
             HDONE_ERROR(H5E_SOHM, H5E_CANTCLOSEOBJ, FAIL, "unable to close object header")
     } /* end if */
 

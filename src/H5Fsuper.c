@@ -208,7 +208,7 @@ H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hid_t dxpl_id,
 
     /* Twiddle the number of open objects to avoid closing the file. */
     f->nopen_objs++;
-    if(H5O_close(ext_ptr) < 0)
+    if(H5O_close(ext_ptr, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close superblock extension")
     f->nopen_objs--;
 
