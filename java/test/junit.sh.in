@@ -63,7 +63,7 @@ $HDFLIB_HOME/hamcrest-core.jar
 $HDFLIB_HOME/junit.jar
 $HDFLIB_HOME/slf4j-api-1.7.5.jar
 $HDFLIB_HOME/ext/slf4j-simple-1.7.5.jar
-top_builddir/java/src/$JARFILE
+$top_builddir/java/src/$JARFILE
 "
 LIST_DATA_FILES="
 $HDFTEST_HOME/JUnit-interface.txt
