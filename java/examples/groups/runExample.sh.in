@@ -35,7 +35,7 @@ nerrors=0
 
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
-BLDLIBDIR="./lib"
+BLDLIBDIR="$top_builddir/hdf5/lib"
 BLDREFDIR="./groups"
 BLDDIR="."
 HDFTEST_HOME="$top_srcdir/java/examples/groups"
