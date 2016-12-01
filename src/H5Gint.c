@@ -232,7 +232,7 @@ done:
         if(oloc_init) {
             if(H5O_dec_rc_by_loc(&(grp->oloc), dxpl_id) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, NULL, "unable to decrement refcount on newly created object")
-            if(H5O_close(&(grp->oloc)) < 0)
+            if(H5O_close(&(grp->oloc), NULL) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "unable to release object header")
             if(H5O_delete(file, dxpl_id, grp->oloc.addr) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDELETE, NULL, "unable to delete object header")
@@ -448,7 +448,7 @@ H5G_open_oid(H5G_t *grp, hid_t dxpl_id)
 done:
     if(ret_value < 0) {
         if(obj_opened)
-            H5O_close(&(grp->oloc));
+            H5O_close(&(grp->oloc), NULL);
         if(grp->shared)
             grp->shared = H5FL_FREE(H5G_shared_t, grp->shared);
     } /* end if */
@@ -472,8 +472,9 @@ done:
 herr_t
 H5G_close(H5G_t *grp)
 {
-    hbool_t	corked;			/* Whether the group is corked or not */
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    hbool_t	corked;			        /* Whether the group is corked or not   */
+    hbool_t file_closed = TRUE;     /* H5O_close also closed the file?      */
+    herr_t ret_value = SUCCEED;     /* Return value                         */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -498,11 +499,11 @@ H5G_close(H5G_t *grp)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
         if(H5FO_delete(grp->oloc.file, H5AC_ind_read_dxpl_id, grp->oloc.addr) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "can't remove group from list of open objects")
-        if(H5O_close(&(grp->oloc)) < 0)
+        if(H5O_close(&(grp->oloc), &file_closed) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")
 
         /* Evict group metadata if evicting on close */
-        if(!H5F_CLOSING(grp->oloc.file) && H5F_SHARED(grp->oloc.file) && H5F_EVICT_ON_CLOSE(grp->oloc.file)) {
+        if(!file_closed && H5F_SHARED(grp->oloc.file) && H5F_EVICT_ON_CLOSE(grp->oloc.file)) {
             if(H5AC_flush_tagged_metadata(grp->oloc.file, grp->oloc.addr, H5AC_ind_read_dxpl_id) < 0) 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
             if(H5AC_evict_tagged_metadata(grp->oloc.file, grp->oloc.addr, FALSE, H5AC_ind_read_dxpl_id) < 0) 
@@ -518,7 +519,7 @@ H5G_close(H5G_t *grp)
 
         /* Check reference count for this object in the top file */
         if(H5FO_top_count(grp->oloc.file, grp->oloc.addr) == 0) {
-            if(H5O_close(&(grp->oloc)) < 0)
+            if(H5O_close(&(grp->oloc), NULL) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")
         } /* end if */
         else
@@ -531,7 +532,7 @@ H5G_close(H5G_t *grp)
          */
         if(grp->shared->mounted && grp->shared->fo_count == 1) {
             /* Attempt to close down the file hierarchy */
-            if(H5F_try_close(grp->oloc.file) < 0)
+            if(H5F_try_close(grp->oloc.file, NULL) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problem attempting file close")
         } /* end if */
     } /* end else */

@@ -727,7 +727,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                     HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
 
                 /* Close new group */
-                if(H5O_close(obj_loc.oloc) < 0)
+                if(H5O_close(obj_loc.oloc, NULL) < 0)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to close")
 
                 /* If the parent group was holding the file open, the

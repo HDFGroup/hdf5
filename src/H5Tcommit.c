@@ -203,7 +203,7 @@ done:
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects")
 
             /* Close the datatype object */
-	    if(H5O_close(&(dt->oloc)) < 0)
+	    if(H5O_close(&(dt->oloc), NULL) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
             /* Remove the datatype's object header from the file */
@@ -401,7 +401,7 @@ done:
         if((type->shared->state == H5T_STATE_TRANSIENT || type->shared->state == H5T_STATE_RDONLY) && (type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED)) {
             if(H5O_dec_rc_by_loc(&(type->oloc), dxpl_id) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "unable to decrement refcount on newly created object")
-	    if(H5O_close(&(type->oloc)) < 0)
+	    if(H5O_close(&(type->oloc), NULL) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "unable to release object header")
             if(H5O_delete(file, dxpl_id, type->sh_loc.u.loc.oh_addr) < 0)
                 HDONE_ERROR(H5E_DATATYPE, H5E_CANTDELETE, FAIL, "unable to delete object header")
@@ -823,7 +823,7 @@ H5T_open_oid(const H5G_loc_t *loc, hid_t dxpl_id)
 done:
     if(ret_value == NULL)
         if(dt == NULL)
-            H5O_close(loc->oloc);
+            H5O_close(loc->oloc, NULL);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_open_oid() */
