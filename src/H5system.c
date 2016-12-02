@@ -932,6 +932,56 @@ Wnanosleep(uint64_t nanosec)
     FUNC_LEAVE_NOAPI_VOID
 } /* end Wnanosleep() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
+ *
+ * Purpose:     Wrapper function for round functions for use with VS2012
+ *              and earlier.
+ *
+ * Return:      The rounded value that was passed in.
+ *
+ * Programmer:  Dana Robinson
+ *              December 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+long long
+Wllround(double arg)
+{
+    return (long long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
+}
+
+long long
+Wllroundf(float arg)
+{
+    return (long long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
+}
+
+long
+Wlround(double arg)
+{
+    return (long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
+}
+
+long
+Wlroundf(float arg)
+{
+    return (long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
+}
+
+double
+Wround(double arg)
+{
+    return arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5);
+}
+
+float
+Wroundf(float arg)
+{
+    return arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F);
+}
+
 #endif /* H5_HAVE_WIN32_API */
 
 

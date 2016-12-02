@@ -75,10 +75,20 @@ struct timezone {
 #if (_MSC_VER < 1900)
 struct timespec
 {
-	time_t tv_sec;  // Seconds - >= 0
-	long   tv_nsec; // Nanoseconds - [0, 999999999]
+    time_t tv_sec;  // Seconds - >= 0
+    long   tv_nsec; // Nanoseconds - [0, 999999999]
 };
 #endif /* MSC_VER < 1900 */
+
+/* The round functions do not exist in VS2012 and earlier */
+#if (_MSC_VER <= 1700)
+#define HDllround(V)        Wllround(V)
+#define HDllroundf(V)       Wllroundf(V)
+#define HDlround(V)         Wlround(V)
+#define HDlroundf(V)        Wlroundf(V)
+#define HDround(V)          Wround(V)
+#define HDroundf(V)         Wroundf(V)
+#endif /* MSC_VER < 1700 */
 
 #endif /* H5_HAVE_VISUAL_STUDIO */
 
@@ -92,6 +102,18 @@ extern "C" {
     H5_DLL char* Wgetlogin(void);
     H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
     H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
+
+    /* Round functions only needed for VS2012 and earlier.
+    * They are always built to ensure they don't go stale and
+    * can be deleted (along with their #defines, above) when we
+    * drop VS2012 support.
+    */
+    H5_DLL long long Wllround(double arg);
+    H5_DLL long long Wllroundf(float arg);
+    H5_DLL long Wlround(double arg);
+    H5_DLL long Wlroundf(float arg);
+    H5_DLL double Wround(double arg);
+    H5_DLL float Wroundf(float arg);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
