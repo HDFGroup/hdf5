@@ -35,7 +35,7 @@ nerrors=0
 
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
-BLDLIBDIR="./lib"
+BLDLIBDIR="$top_builddir/hdf5/lib"
 BLDDIR="."
 HDFTEST_HOME="$top_srcdir/java/examples/intro"
 JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
