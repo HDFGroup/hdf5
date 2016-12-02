@@ -78,6 +78,7 @@ static void *H5FA__cache_hdr_deserialize(const void *image, size_t len,
 static herr_t H5FA__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5FA__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5FA__cache_hdr_free_icr(void *thing);
 
 static herr_t H5FA__cache_dblock_get_initial_load_size(void *udata, size_t *image_len);
@@ -87,6 +88,7 @@ static void *H5FA__cache_dblock_deserialize(const void *image, size_t len,
 static herr_t H5FA__cache_dblock_image_len(const void *thing, size_t *image_len);
 static herr_t H5FA__cache_dblock_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5FA__cache_dblock_free_icr(void *thing);
 static herr_t H5FA__cache_dblock_fsf_size(const void *thing, size_t *fsf_size);
 
@@ -97,6 +99,7 @@ static void *H5FA__cache_dblk_page_deserialize(const void *image, size_t len,
 static herr_t H5FA__cache_dblk_page_image_len(const void *thing, size_t *image_len);
 static herr_t H5FA__cache_dblk_page_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5FA__cache_dblk_page_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5FA__cache_dblk_page_free_icr(void *thing);
 
 
@@ -117,7 +120,7 @@ const H5AC_class_t H5AC_FARRAY_HDR[1] = {{
     H5FA__cache_hdr_image_len,          /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5FA__cache_hdr_serialize,          /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5FA__cache_hdr_notify,             /* 'notify' callback */
     H5FA__cache_hdr_free_icr,           /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
@@ -135,7 +138,7 @@ const H5AC_class_t H5AC_FARRAY_DBLOCK[1] = {{
     H5FA__cache_dblock_image_len,       /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5FA__cache_dblock_serialize,       /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5FA__cache_dblock_notify,		/* 'notify' callback */
     H5FA__cache_dblock_free_icr,        /* 'free_icr' callback */
     H5FA__cache_dblock_fsf_size,        /* 'fsf_size' callback */
 }};
@@ -153,7 +156,7 @@ const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1] = {{
     H5FA__cache_dblk_page_image_len,    /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5FA__cache_dblk_page_serialize,    /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5FA__cache_dblk_page_notify,	/* 'notify' callback */
     H5FA__cache_dblk_page_free_icr,     /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
@@ -437,6 +440,80 @@ H5FA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     HDassert((size_t)(image - (uint8_t *)_image) == len);
 
 END_FUNC(STATIC)   /* end H5FA__cache_hdr_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_hdr_notify
+ *
+ * Purpose:	Handle cache action notifications
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Dana Robinson
+ *              December 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
+
+    /* Local variables */
+    H5FA_hdr_t *hdr = (H5FA_hdr_t *)_thing;      /* Pointer to the object */
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+            case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+            case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+                /* do nothing */
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* If hdr->parent != NULL, hdr->parent is used to destroy
+                 * the flush dependency before the header is evicted.
+                 */
+                if(hdr->parent) {
+                    /* Sanity check */
+                    HDassert(hdr->top_proxy);
+
+		    /* Destroy flush dependency on object header proxy */
+		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr->top_proxy) < 0)
+		        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between fixed array and proxy")
+                    hdr->parent = NULL;
+		} /* end if */
+
+                /* Detach from 'top' proxy for fixed array */
+                if(hdr->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
+                        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between header and fixed array 'top' proxy")
+                    /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
+                } /* end if */
+                break;
+
+            default:
+#ifdef NDEBUG
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+    else
+        HDassert(NULL == hdr->parent);
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5FA__cache_hdr_notify() */
 
 
 /*-------------------------------------------------------------------------
@@ -765,6 +842,75 @@ END_FUNC(STATIC)   /* end H5FA__cache_dblock_serialize() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FA__cache_dblock_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing))
+
+    /* Local variables */
+    H5FA_dblock_t *dblock = (H5FA_dblock_t *)_thing;
+
+    /* Sanity check */
+    HDassert(dblock);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(dblock->hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+                /* Create flush dependency on parent */
+                if(H5FA__create_flush_depend((H5AC_info_t *)dblock->hdr, (H5AC_info_t *)dblock) < 0)
+                    H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block and header, address = %llu", (unsigned long long)dblock->addr)
+                break;
+
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+                /* do nothing */
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+		/* Destroy flush dependency on parent */
+                if(H5FA__destroy_flush_depend((H5AC_info_t *)dblock->hdr, (H5AC_info_t *)dblock) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency")
+
+                /* Detach from 'top' proxy for fixed array */
+                if(dblock->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(dblock->top_proxy, dblock) < 0)
+                        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and fixed array 'top' proxy")
+                    dblock->top_proxy = NULL;
+                } /* end if */
+                break;
+
+            default:
+#ifdef NDEBUG
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5FA__cache_dblock_notify() */
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FA__cache_dblock_free_icr
  *
  * Purpose:	Destroy/release an "in core representation" of a data
@@ -1062,6 +1208,66 @@ H5FA__cache_dblk_page_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNU
 CATCH
 
 END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FA__cache_dblk_page_notify
+ *
+ * Purpose:	Handle cache action notifications
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@lbl.gov
+ *		Oct 17 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing))
+
+    /* Local variables */
+    H5FA_dblk_page_t *dblk_page = (H5FA_dblk_page_t *)_thing;      /* Pointer to the object */
+
+    /* Sanity check */
+    HDassert(dblk_page);
+
+    /* Determine which action to take */
+    switch(action) {
+        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+        case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+        case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+            /* Detach from 'top' proxy for fixed array */
+            if(dblk_page->top_proxy) {
+                if(H5AC_proxy_entry_remove_child(dblk_page->top_proxy, dblk_page) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block page and fixed array 'top' proxy")
+                dblk_page->top_proxy = NULL;
+            } /* end if */
+            break;
+
+        case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+        case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+        case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+        case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+            /* do nothing */
+            break;
+
+        default:
+#ifdef NDEBUG
+            H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+    } /* end switch */
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5FA__cache_dblk_page_notify() */
 
 
 /*-------------------------------------------------------------------------

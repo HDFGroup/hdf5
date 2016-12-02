@@ -72,6 +72,7 @@ static void *H5B2__cache_hdr_deserialize(const void *image, size_t len,
 static herr_t H5B2__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5B2__cache_hdr_free_icr(void *thing);
 
 static herr_t H5B2__cache_int_get_initial_load_size(void *udata, size_t *image_len);
@@ -81,6 +82,7 @@ static void *H5B2__cache_int_deserialize(const void *image, size_t len,
 static herr_t H5B2__cache_int_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_int_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5B2__cache_int_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5B2__cache_int_free_icr(void *thing);
 
 static herr_t H5B2__cache_leaf_get_initial_load_size(void *udata, size_t *image_len);
@@ -90,6 +92,7 @@ static void *H5B2__cache_leaf_deserialize(const void *image, size_t len,
 static herr_t H5B2__cache_leaf_image_len(const void *thing, size_t *image_len);
 static herr_t H5B2__cache_leaf_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5B2__cache_leaf_free_icr(void *thing);
 
 /*********************/
@@ -109,7 +112,7 @@ const H5AC_class_t H5AC_BT2_HDR[1] = {{
     H5B2__cache_hdr_image_len,          /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5B2__cache_hdr_serialize,          /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5B2__cache_hdr_notify, 		/* 'notify' callback */
     H5B2__cache_hdr_free_icr,           /* 'free_icr' callback */
     NULL,				/* 'fsf_size' callback */
 }};
@@ -127,7 +130,7 @@ const H5AC_class_t H5AC_BT2_INT[1] = {{
     H5B2__cache_int_image_len,          /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5B2__cache_int_serialize,          /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5B2__cache_int_notify,		/* 'notify' callback */
     H5B2__cache_int_free_icr,           /* 'free_icr' callback */
     NULL,				/* 'fsf_size' callback */
 }};
@@ -145,7 +148,7 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     H5B2__cache_leaf_image_len,         /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5B2__cache_leaf_serialize,         /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5B2__cache_leaf_notify,		/* 'notify' callback */
     H5B2__cache_leaf_free_icr,          /* 'free_icr' callback */
     NULL,				/* 'fsf_size' callback */
 }};
@@ -433,6 +436,91 @@ H5B2__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5B2__cache_hdr_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              nfortne2@hdfgroup.org
+ *              Apr 24 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
+{
+    H5B2_hdr_t 	*hdr = (H5B2_hdr_t *)_thing;
+    herr_t 	ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(hdr->swmr_write) {
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+		/* do nothing */
+                break;
+
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+                /* Increment the shadow epoch, forcing new modifications to
+                 * internal and leaf nodes to create new shadow copies */
+                hdr->shadow_epoch++;
+                break;
+
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+		/* do nothing */
+                break;
+
+	    case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* If hdr->parent != NULL, hdr->parent is used to destroy
+                 * the flush dependency before the header is evicted.
+                 */
+                if(hdr->parent) {
+                    /* Sanity check */
+                    HDassert(hdr->top_proxy);
+
+		    /* Destroy flush dependency on object header proxy */
+		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr->top_proxy) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between v2 B-tree and proxy")
+                    hdr->parent = NULL;
+		} /* end if */
+
+                /* Detach from 'top' proxy for extensible array */
+                if(hdr->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between header and v2 B-tree 'top' proxy")
+                    /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
+                } /* end if */
+		break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+    else
+        HDassert(NULL == hdr->parent);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__cache_hdr_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2__cache_hdr_free_icr
  *
  * Purpose:	Destroy/release an "in core representation" of a data
@@ -573,9 +661,8 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     HDassert(udata);
 
     /* Allocate new internal node and reset cache info */
-    if(NULL == (internal = H5FL_MALLOC(H5B2_internal_t)))
+    if(NULL == (internal = H5FL_CALLOC(H5B2_internal_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&internal->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Increment ref. count on B-tree header */
     if(H5B2__hdr_incr(udata->hdr) < 0)
@@ -583,6 +670,8 @@ H5B2__cache_int_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
 
     /* Share B-tree information */
     internal->hdr = udata->hdr;
+    internal->parent = udata->parent;
+    internal->shadow_epoch = udata->hdr->shadow_epoch;
 
     /* Magic number */
     if(HDmemcmp(image, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC))
@@ -775,6 +864,80 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5B2__cache_int_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              nfortne2@hdfgroup.org
+ *              Apr 25 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2__cache_int_notify(H5AC_notify_action_t action, void *_thing)
+{
+    H5B2_internal_t 	*internal = (H5B2_internal_t *)_thing;
+    herr_t   		ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(internal);
+    HDassert(internal->hdr);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(internal->hdr->swmr_write) {
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+                /* Create flush dependency on parent */
+                if(H5B2__create_flush_depend((H5AC_info_t *)internal->parent, (H5AC_info_t *)internal) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                break;
+
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+		/* do nothing */
+		break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+		/* Destroy flush dependency on parent */
+		if(H5B2__destroy_flush_depend((H5AC_info_t *)internal->parent, (H5AC_info_t *)internal) < 0)
+		    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+
+                /* Detach from 'top' proxy for v2 B-tree */
+                if(internal->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(internal->top_proxy, internal) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between internal node and v2 B-tree 'top' proxy")
+                    internal->top_proxy = NULL;
+                } /* end if */
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+    else
+        HDassert(NULL == internal->top_proxy);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__cache_int_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5B2__cache_int_free_icr
  *
  * Purpose:	Destroy/release an "in core representation" of a data
@@ -915,9 +1078,8 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
     HDassert(udata);
 
     /* Allocate new leaf node and reset cache info */
-    if(NULL == (leaf = H5FL_MALLOC(H5B2_leaf_t)))
+    if(NULL == (leaf = H5FL_CALLOC(H5B2_leaf_t)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, NULL, "memory allocation failed")
-    HDmemset(&leaf->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Increment ref. count on B-tree header */
     if(H5B2__hdr_incr(udata->hdr) < 0)
@@ -925,6 +1087,8 @@ H5B2__cache_leaf_deserialize(const void *_image, size_t H5_ATTR_UNUSED len,
 
     /* Share B-tree header information */
     leaf->hdr = udata->hdr;
+    leaf->parent = udata->parent;
+    leaf->shadow_epoch = udata->hdr->shadow_epoch;
 
     /* Magic number */
     if(HDmemcmp(image, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC))
@@ -1027,7 +1191,7 @@ H5B2__cache_leaf_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2__cache_leaf_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len,
+H5B2__cache_leaf_serialize(const H5F_t H5_ATTR_UNUSED *f, void *_image, size_t H5_ATTR_UNUSED len,
     void *_thing)
 {
     H5B2_leaf_t *leaf = (H5B2_leaf_t *)_thing;      /* Pointer to the B-tree leaf node  */
@@ -1083,6 +1247,80 @@ H5B2__cache_leaf_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED l
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2__cache_leaf_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B2__cache_leaf_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              nfortne2@hdfgroup.org
+ *              Apr 25 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5B2__cache_leaf_notify(H5AC_notify_action_t action, void *_thing)
+{
+    H5B2_leaf_t 	*leaf = (H5B2_leaf_t *)_thing;
+    herr_t              ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /*
+     * Check arguments.
+     */
+    HDassert(leaf);
+    HDassert(leaf->hdr);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(leaf->hdr->swmr_write) {
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+                /* Create flush dependency on parent */
+                if(H5B2__create_flush_depend((H5AC_info_t *)leaf->parent, (H5AC_info_t *)leaf) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+                break;
+
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+                /* do nothing */
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+		/* Destroy flush dependency on parent */
+                if(H5B2__destroy_flush_depend((H5AC_info_t *)leaf->parent, (H5AC_info_t *)leaf) < 0)
+                    HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+
+                /* Detach from 'top' proxy for v2 B-tree */
+                if(leaf->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(leaf->top_proxy, leaf) < 0)
+                        HGOTO_ERROR(H5E_BTREE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency between leaf node and v2 B-tree 'top' proxy")
+                    leaf->top_proxy = NULL;
+                } /* end if */
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_BTREE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+    else
+        HDassert(NULL == leaf->top_proxy);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B2__cache_leaf_notify() */
 
 
 /*-------------------------------------------------------------------------

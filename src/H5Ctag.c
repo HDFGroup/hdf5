@@ -627,8 +627,10 @@ H5C_verify_tag(int id, haddr_t tag)
      * constraints are met. */
     if(tag == H5AC__IGNORE_TAG)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "cannot ignore a tag while doing verification.")
-    else if(tag == H5AC__INVALID_TAG)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "no metadata tag provided")
+    else if(tag == H5AC__INVALID_TAG) {
+        if(id != H5AC_PROXY_ENTRY_ID)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "no metadata tag provided")
+    } /* end else-if */
     else {
         /* Perform some sanity checks on tag value. Certain entry
          * types require certain tag values, so check that these

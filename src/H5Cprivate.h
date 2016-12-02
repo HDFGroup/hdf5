@@ -41,7 +41,7 @@
 /**************************/
 
 /* Cache configuration settings */
-#define H5C__MAX_NUM_TYPE_IDS   28
+#define H5C__MAX_NUM_TYPE_IDS   29
 #define H5C__PREFIX_LEN         32
 
 /* This sanity checking constant was picked out of the air.  Increase
@@ -168,6 +168,9 @@
  *
  * These flags apply to H5C_expunge_entry():
  * 	H5C__FREE_FILE_SPACE_FLAG
+ *
+ * These flags apply to H5C_evict():
+ * 	H5C__EVICT_ALLOW_LAST_PINS_FLAG
  *
  * These flags apply to H5C_flush_cache():
  * 	H5C__FLUSH_INVALIDATE_FLAG
@@ -1716,6 +1719,7 @@ H5_DLL void H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr, int32_t version,
     size_t old_max_cache_size, size_t new_max_cache_size,
     size_t old_min_clean_size, size_t new_min_clean_size);
 H5_DLL herr_t H5C_dest(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5C_evict(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5C_expunge_entry(H5F_t *f, hid_t dxpl_id,
     const H5C_class_t *type, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
@@ -1743,6 +1747,7 @@ H5_DLL FILE *H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_pt
 H5_DLL herr_t H5C_insert_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
     haddr_t addr, void *thing, unsigned int flags);
 H5_DLL herr_t H5C_mark_entry_dirty(void *thing);
+H5_DLL herr_t H5C_mark_entry_clean(void *thing);
 H5_DLL herr_t H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type,
     haddr_t old_addr, haddr_t new_addr);
 H5_DLL herr_t H5C_pin_protected_entry(void *thing);
@@ -1770,6 +1775,7 @@ H5_DLL hbool_t H5C_get_ignore_tags(const H5C_t *cache_ptr);
 H5_DLL herr_t H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
 H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
+H5_DLL herr_t H5C_remove_entry(void * thing);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,

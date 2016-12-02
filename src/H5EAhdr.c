@@ -135,6 +135,7 @@ H5EA__hdr_alloc(H5F_t *f))
 
     /* Set the internal parameters for the array */
     hdr->f = f;
+    hdr->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
     hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
     hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
 
@@ -361,6 +362,7 @@ H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
 
     /* Local variables */
     H5EA_hdr_t *hdr = NULL;     /* Extensible array header */
+    hbool_t inserted = FALSE;   /* Whether the header was inserted into cache */
 
     /* Check arguments */
     HDassert(f);
@@ -418,9 +420,20 @@ H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
     if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_EARRAY_HDR, dxpl_id, (hsize_t)hdr->size)))
         H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array header")
 
+    /* Create 'top' proxy for extensible array entries */
+    if(hdr->swmr_write)
+        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+            H5E_THROW(H5E_CANTCREATE, "can't create extensible array entry proxy")
+
     /* Cache the new extensible array header */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_EARRAY_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTINSERT, "can't add extensible array header to cache")
+    inserted = TRUE;
+
+    /* Add header as child of 'top' proxy */
+    if(hdr->top_proxy)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, dxpl_id, hdr) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
 
     /* Set address of array header to return */
     ret_value = hdr->addr;
@@ -428,6 +441,11 @@ H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
 CATCH
     if(!H5F_addr_defined(ret_value))
         if(hdr) {
+            /* Remove from cache, if inserted */
+            if(inserted)
+                if(H5AC_remove_entry(hdr) < 0)
+                    H5E_THROW(H5E_CANTREMOVE, "unable to remove extensible array header from cache")
+
             /* Release header's disk space */
             if(H5F_addr_defined(hdr->addr) && H5MF_xfree(f, H5FD_MEM_EARRAY_HDR, dxpl_id, hdr->addr, (hsize_t)hdr->size) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to free extensible array header")
@@ -614,6 +632,7 @@ H5EA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata,
     unsigned flags))
 
     /* Local variables */
+    H5EA_hdr_t *hdr;            /* Extensible array header */
     H5EA_hdr_cache_ud_t udata;  /* User data for cache callbacks */
 
     /* Sanity check */
@@ -629,9 +648,23 @@ H5EA__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, void *ctx_udata,
     udata.ctx_udata = ctx_udata;
 
     /* Protect the header */
-    if(NULL == (ret_value = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, &udata, flags)))
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, &udata, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
-    ret_value->f = f;   /* (Must be set again here, in case the header was already in the cache -QAK) */
+    hdr->f = f;   /* (Must be set again here, in case the header was already in the cache -QAK) */
+
+    /* Create top proxy, if it doesn't exist */
+    if(hdr->swmr_write && NULL == hdr->top_proxy) {
+        /* Create 'top' proxy for extensible array entries */
+        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+            H5E_THROW(H5E_CANTCREATE, "can't create extensible array entry proxy")
+
+        /* Add header as child of 'top' proxy */
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, dxpl_id, hdr) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
+    } /* end if */
+
+    /* Set return value */
+    ret_value = hdr;
 
 CATCH
 
@@ -778,6 +811,13 @@ H5EA__hdr_dest(H5EA_hdr_t *hdr))
     /* Free the super block info array */
     if(hdr->sblk_info)
         hdr->sblk_info = (H5EA_sblk_info_t *)H5FL_SEQ_FREE(H5EA_sblk_info_t, hdr->sblk_info);
+
+    /* Destroy the 'top' proxy */
+    if(hdr->top_proxy) {
+        if(H5AC_proxy_entry_dest(hdr->top_proxy) < 0)
+            H5E_THROW(H5E_CANTRELEASE, "unable to destroy extensible array 'top' proxy")
+        hdr->top_proxy = NULL;
+    } /* end if */
 
     /* Free the shared info itself */
     hdr = H5FL_FREE(H5EA_hdr_t, hdr);

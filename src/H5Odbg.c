@@ -578,7 +578,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     loc.addr = addr;
     loc.holding_file = FALSE;
 
-    if(NULL == (oh = H5O_protect(&loc, dxpl_id, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (oh = H5O_protect(&loc, dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* debug */

@@ -20,6 +20,12 @@
 
 #define RANK 2
 
+/* For superblock version 0, 1: the offset to "file consistency flags" is 20 with size of 4 bytes */
+/* The file consistency flags is the "status_flags" field in H5F_super_t */
+/* Note: the offset and size will be different when using superblock version 2 for the test file */
+#define SUPER_STATUS_FLAGS_OFF_V0_V1    20
+#define SUPER_STATUS_FLAGS_SIZE_V0_V1   4
+
 /* Test of file image operations.
 
    The following code provides a means to thoroughly test the file image
@@ -214,10 +220,32 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             else
                 VERIFY(*core_buf_ptr_ptr != buf_ptr[i], "vfd buffer and user buffer should be different");
 
-            /* test whether the contents of the user buffer and driver buffer */
-            /* are equal.                                                     */
-            if (HDmemcmp(*core_buf_ptr_ptr, buf_ptr[i], (size_t)buf_size[i]) != 0)
-                FAIL_PUTS_ERROR("comparison of vfd and user buffer failed");
+	    /*
+             *  When the vfd and user buffers are different and H5LT_FILE_IMAGE_OPEN_RW is enabled,
+             *  status_flags in the superblock needs to be cleared in the vfd buffer for
+             *  the comparison to proceed as expected.  The user buffer as returned from H5Fget_file_image()
+             *  has already cleared status_flags.  The superblock's status_flags is used for the
+             *  implementation of file locking.
+             */
+            if(input_flags[i] & H5LT_FILE_IMAGE_OPEN_RW && !(input_flags[i] & H5LT_FILE_IMAGE_DONT_COPY)) {
+
+                void *tmp_ptr = HDmalloc((size_t)buf_size[i]);
+                /* Copy vfd buffer to a temporary buffer */
+                HDmemcpy(tmp_ptr, (void *)*core_buf_ptr_ptr, (size_t)buf_size[i]);
+                /* Clear status_flags in the superblock for the vfd buffer: file locking is using status_flags */
+                HDmemset((uint8_t *)tmp_ptr + SUPER_STATUS_FLAGS_OFF_V0_V1, (int)0, (size_t)SUPER_STATUS_FLAGS_SIZE_V0_V1);
+                /* Does the comparision */
+                if(HDmemcmp(tmp_ptr, buf_ptr[i], (size_t)buf_size[i]) != 0)
+                    FAIL_PUTS_ERROR("comparison of TMP vfd and user buffer failed");
+                /* Free the temporary buffer */
+                if(tmp_ptr) HDfree(tmp_ptr);
+            } else {
+
+                /* test whether the contents of the user buffer and driver buffer */
+                /* are equal.                                                     */
+                if (HDmemcmp(*core_buf_ptr_ptr, buf_ptr[i], (size_t)buf_size[i]) != 0)
+                    FAIL_PUTS_ERROR("comparison of vfd and user buffer failed");
+            }
         } /* end else */
     } /* end for */
 

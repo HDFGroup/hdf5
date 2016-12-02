@@ -108,7 +108,7 @@ H5O_is_attr_dense_test(hid_t oid)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
     /* Get the object header */
-    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
@@ -173,7 +173,7 @@ H5O_is_attr_empty_test(hid_t oid)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
     /* Get the object header */
-    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
@@ -266,7 +266,7 @@ H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
     /* Get the object header */
-    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
@@ -361,7 +361,7 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
     H5_BEGIN_TAG(H5AC_ind_read_dxpl_id, loc->addr, FAIL);
 
     /* Get the object header */
-    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
 	HGOTO_ERROR_TAG(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
@@ -452,7 +452,7 @@ H5O_check_msg_marked_test(hid_t oid, hbool_t flag_val)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
 
     /* Get the object header */
-    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Locate "unknown" message  */
@@ -511,7 +511,7 @@ H5O_expunge_chunks_test(const H5O_loc_t *loc, hid_t dxpl_id)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the object header */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC__NO_FLAGS_SET)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC__NO_FLAGS_SET, FALSE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header")
 
     /* Safety check */
@@ -571,7 +571,7 @@ H5O_get_rc(const H5O_loc_t *loc, hid_t dxpl_id, unsigned *rc)
     HDassert(rc);
 
     /* Get the object header */
-    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to protect object header")
 
     /* Save the refcount for the object header */
@@ -584,4 +584,166 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5O_expunge_chunks_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5O_msg_get_chunkno_test
+ PURPOSE
+    Retrieve the chunk number for an object header message of a given type.
+ USAGE
+    herr_t H5O_check_msg_marked_test(oid, chunk_num)
+        hid_t oid;              IN: Object to check
+        unsigned msg_type;      IN: Object header message type to check
+        unsigned *chunk_num;    OUT: Object header chunk that the message is in
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the chunk number for the first object header message of a given
+    type found in an object's header.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5O_msg_get_chunkno_test(hid_t oid, unsigned msg_type, unsigned *chunk_num)
+{
+    H5O_t *oh = NULL;           /* Object header */
+    H5O_loc_t *loc;            /* Pointer to object's location */
+    H5O_mesg_t *idx_msg;        /* Pointer to message */
+    unsigned idx;               /* Index of message */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get object location for object */
+    if(NULL == (loc = H5O_get_loc(oid)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+
+    /* Get the object header */
+    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+
+    /* Locate first message of given type */
+    for(idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs; idx++, idx_msg++)
+	if(idx_msg->type->id == msg_type) {
+            /* Set the chunk number for the message */
+            *chunk_num = idx_msg->chunkno;
+
+            /* Break out of loop, to indicate that the message was found */
+            break;
+        } /* end if */
+
+    /* Check for not finding a message of the given type*/
+    if(idx == oh->nmesgs)
+        HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "message of type not found")
+
+done:
+    if(oh && H5O_unprotect(loc, H5AC_ind_read_dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5O_msg_get_chunkno_test() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5O_msg_move_to_new_chunk_test
+ PURPOSE
+    Move a message into a new chunk
+ USAGE
+    herr_t H5O_msg_move_to_new_chunk_test(oid, msg_type)
+        hid_t oid;              IN: Object to check
+        unsigned msg_type;      IN: Object header message type to check
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves the first message of the given type to a new object header chunk.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5O_msg_move_to_new_chunk_test(hid_t oid, unsigned msg_type)
+{
+    H5O_t *oh = NULL;           /* Object header */
+    H5O_loc_t *loc;             /* Pointer to object's location */
+    H5O_mesg_t *curr_msg;       /* Pointer to current message */
+    unsigned idx;               /* Index of message */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Get object location for object */
+    if(NULL == (loc = H5O_get_loc(oid)))
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+
+    /* Get the object header */
+    if(NULL == (oh = H5O_protect(loc, H5AC_ind_read_dxpl_id, H5AC__NO_FLAGS_SET, FALSE)))
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+
+    /* Locate first message of given type */
+    for(idx = 0, curr_msg = &oh->mesg[0]; idx < oh->nmesgs; idx++, curr_msg++)
+	if(curr_msg->type->id == msg_type) {
+            H5O_msg_alloc_info_t found_msg;     /* Information about message to move */
+            unsigned msg_chunkno = curr_msg->chunkno;         /* Chunk that the message is in */
+            uint8_t *end_chunk_data = (oh->chunk[msg_chunkno].image + oh->chunk[msg_chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[msg_chunkno].gap);     /* End of message data in chunk */
+            uint8_t *end_msg = curr_msg->raw + curr_msg->raw_size;  /* End of current message */
+            size_t gap_size = 0;            /* Size of gap after current message */
+            size_t null_size = 0;           /* Size of NULL message after current message */
+            unsigned null_msgno = 0;        /* Index of NULL message after current message */
+            size_t total_size;              /* Total size of available space "around" current message */
+            size_t new_idx;                 /* Index of new null message */
+
+            /* Check if the message is the last one in the chunk */
+            if(end_msg == end_chunk_data)
+                gap_size = oh->chunk[msg_chunkno].gap;
+            else {
+                H5O_mesg_t *tmp_msg;    /* Temp. pointer to message to operate on */
+                unsigned v;             /* Local index variable */
+
+                /* Check for null message after this message, in same chunk */
+                for(v = 0, tmp_msg = &oh->mesg[0]; v < oh->nmesgs; v++, tmp_msg++) {
+                    if(tmp_msg->type->id == H5O_NULL_ID && (tmp_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh)) == end_msg) {
+                        null_msgno = v;
+                        null_size = (size_t)H5O_SIZEOF_MSGHDR_OH(oh) + tmp_msg->raw_size;
+                        break;
+                    } /* end if */
+
+                    /* XXX: Should also check for NULL message in front of current message... */
+
+                } /* end for */
+            } /* end else */
+
+            /* Add up current message's total available space */
+            total_size = curr_msg->raw_size + gap_size + null_size;
+
+            /* Set up "found message" info for moving the message */
+            found_msg.msgno = (int)idx;
+            found_msg.id = curr_msg->type->id;
+            found_msg.chunkno = msg_chunkno;
+            found_msg.gap_size = gap_size;
+            found_msg.null_size = null_size;
+            found_msg.total_size = total_size;
+            found_msg.null_msgno = null_msgno;
+
+            /* Allocate and initialize new chunk in the file, moving the found message */
+            /* (*new_idx returned from this routine is unused here) */
+            if(H5O__alloc_chunk(loc->file, H5AC_ind_read_dxpl_id, oh, 40, oh->nmesgs, &found_msg, &new_idx) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "can't allocate new object header chunk")
+
+            /* Break out of loop, the message was found */
+            break;
+        } /* end if */
+
+done:
+    if(oh && H5O_unprotect(loc, H5AC_ind_read_dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5O_msg_get_chunkno_test() */
 

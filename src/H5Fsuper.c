@@ -250,6 +250,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
     haddr_t             super_addr;         /* Absolute address of superblock */
     haddr_t             eof;                /* End of file address */
     unsigned      	rw_flags;           /* Read/write permissions for file */
+    hbool_t 		skip_eof_check = FALSE; /* Whether to skip checking the EOF value */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
@@ -316,6 +317,14 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
     /* Look up the superblock */
     if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, &udata, rw_flags)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
+
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+       	if(sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "invalid superblock version for SWMR_WRITE")
+
+    /* Enable all latest version support when file has v3 superblock */
+    if(sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
+	f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
 
     /* Pin the superblock in the cache */
     if(H5AC_pin_protected_entry(sblock) < 0)
@@ -410,7 +419,22 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
      * Note: the aggregator is changed again after being reset
      * earlier before H5AC_flush due to allocation of tmp addresses.
      */
-    if(initial_read) {
+    /* The EOF check must be skipped when the file is opened for SWMR read,
+     * as the file can appear truncated if only part of it has been
+     * been flushed to disk by the SWMR writer process.
+     */
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_READ) {
+	/* 
+	 * When the file is opened for SWMR read access, skip the check if:
+	 * --the file is already marked for SWMR writing and
+	 * --the file has version 3 superblock for SWMR support
+	 */
+	if((sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS) &&
+               (sblock->status_flags & H5F_SUPER_WRITE_ACCESS) &&
+                sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
+	    skip_eof_check = TRUE;
+    } /* end if */
+    if(!skip_eof_check && initial_read) {
         if(HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine file size")
 

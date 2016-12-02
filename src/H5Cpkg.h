@@ -1508,7 +1508,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
     HDassert( (cache_ptr) );                                                \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
     HDassert( (entry_ptr) );                                                \
-    HDassert( !((entry_ptr)->is_protected) );                               \
     HDassert( !((entry_ptr)->is_read_only) );                               \
     HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
     HDassert( (entry_ptr)->size > 0 );                                      \
@@ -1548,7 +1547,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
     HDassert( (cache_ptr) );                                                \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                     \
     HDassert( (entry_ptr) );                                                \
-    HDassert( !((entry_ptr)->is_protected) );                               \
     HDassert( !((entry_ptr)->is_read_only) );                               \
     HDassert( ((entry_ptr)->ro_ref_count) == 0 );                           \
     HDassert( (entry_ptr)->in_slist );                                      \
@@ -2398,12 +2396,11 @@ if ( ( (cache_ptr)->index_size !=                                           \
     HDassert( (cache_ptr) );                                                 \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
-    HDassert( !((entry_ptr)->is_protected) );                                \
     HDassert( !((entry_ptr)->is_read_only) );                                \
     HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
     HDassert( (entry_ptr)->size > 0 );                                       \
                                                                              \
-    if ( ! ( (entry_ptr)->is_pinned ) ) {                                    \
+    if ( ! ( (entry_ptr)->is_pinned ) && ! ( (entry_ptr->is_protected ) ) ) { \
 	                                                                     \
         /* modified LRU specific code */                                     \
                                                                              \
@@ -2476,12 +2473,11 @@ if ( ( (cache_ptr)->index_size !=                                           \
     HDassert( (cache_ptr) );                                                 \
     HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                      \
     HDassert( (entry_ptr) );                                                 \
-    HDassert( !((entry_ptr)->is_protected) );                                \
     HDassert( !((entry_ptr)->is_read_only) );                                \
     HDassert( ((entry_ptr)->ro_ref_count) == 0 );                            \
     HDassert( (entry_ptr)->size > 0 );                                       \
                                                                              \
-    if ( ! ( (entry_ptr)->is_pinned ) ) {                                    \
+    if ( ! ( (entry_ptr)->is_pinned ) && ! ( (entry_ptr->is_protected ) ) ) { \
 	                                                                     \
         /* modified LRU specific code */                                     \
                                                                              \

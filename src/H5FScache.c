@@ -100,6 +100,7 @@ static herr_t H5FS__cache_sinfo_pre_serialize(const H5F_t *f, hid_t dxpl_id,
     unsigned *flags);
 static herr_t H5FS__cache_sinfo_serialize(const H5F_t *f, void *image,
     size_t len, void *thing);
+static herr_t H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5FS__cache_sinfo_free_icr(void *thing);
 
 
@@ -138,7 +139,7 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
     H5FS__cache_sinfo_image_len,        /* 'image_len' callback */
     H5FS__cache_sinfo_pre_serialize,    /* 'pre_serialize' callback */
     H5FS__cache_sinfo_serialize,        /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5FS__cache_sinfo_notify, 		/* 'notify' callback */
     H5FS__cache_sinfo_free_icr,         /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
@@ -1232,6 +1233,68 @@ H5FS__cache_sinfo_serialize(const H5F_t *f, void *_image, size_t len,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FS__cache_sinfo_serialize() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FS__cache_sinfo_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS__cache_sinfo_notify(H5AC_notify_action_t action, void *_thing)
+{
+    H5FS_sinfo_t *sinfo = (H5FS_sinfo_t *)_thing;
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+    
+    /* Sanity check */
+    HDassert(sinfo);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(sinfo->fspace->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+                /* Create flush dependency on parent */
+                if(H5FS__create_flush_depend((H5AC_info_t *)sinfo->fspace, (H5AC_info_t *)sinfo) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTDEPEND, FAIL, "unable to create flush dependency between data block and header, address = %llu", (unsigned long long)sinfo->fspace->sect_addr)
+                break;
+
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+                /* do nothing */
+                break;
+
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+		/* Destroy flush dependency on parent */
+                if(H5FS__destroy_flush_depend((H5AC_info_t *)sinfo->fspace, (H5AC_info_t *)sinfo) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                break;
+
+            default:
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5FS__cache_sinfo_notify() */
 
 
 /*-------------------------------------------------------------------------
