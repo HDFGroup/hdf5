@@ -109,8 +109,7 @@ H5FD_supports_swmr_test(const char *vfd_name)
     if(!vfd_name || !HDstrcmp(vfd_name, ""))
         ret_value = TRUE;
     else
-        ret_value = !HDstrcmp(vfd_name, "direct")
-            || !HDstrcmp(vfd_name, "log")
+        ret_value = !HDstrcmp(vfd_name, "log")
             || !HDstrcmp(vfd_name, "sec2");
 
     FUNC_LEAVE_NOAPI(ret_value)
