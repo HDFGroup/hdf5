@@ -68,7 +68,7 @@ if test "X-icc" = "X-$cc_vendor"; then
 
     # General
     # Default to C99 standard.
-    H5_CFLAGS="${H5_CFLAGS:--std=c99 $arch} -Wcheck -Wall"
+    H5_CFLAGS="$H5_CFLAGS $arch -std=c99 -Wcheck -Wall"
 
     # Production
     PROD_CFLAGS=
@@ -79,14 +79,14 @@ if test "X-icc" = "X-$cc_vendor"; then
 
     # Symbols
     SYMBOLS_CFLAGS="-g"
-    NO_SYMBOLS_CFLAGS=
+    NO_SYMBOLS_CFLAGS="-Wl,-s"
 
     # Profiling
     # Use this for profiling with gprof
     PROFILE_CFLAGS="-p"
 
     # Optimization
-    HIGH_OPT_CFLAGS="-O"
+    HIGH_OPT_CFLAGS="-O3"
     DEBUG_OPT_CFLAGS="-O0"
     NO_OPT_CFLAGS="-O0"
 
@@ -101,17 +101,17 @@ fi
 # the information from the previous version and adding modifications to that.
 # The default at the bottom will apply if no earlier version matches.
 case "$cc_vendor-$cc_version" in
+    icc-1[5-6]*)
+        H5_CFLAGS="$H5_CFLAGS -Wcomment -Wdeprecated -Wextra-tokens -Wformat -Wformat-security -Wmain -Wmissing-declarations -Wmissing-prototypes -Wp64 -Wpointer-arith -Wreturn-type -Wshadow -Wstrict-prototypes -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunused-function -Wunused-variable -Wwrite-strings"
+        ;;
     icc-10*)
-        PROD_CFLAGS="-O1 -Wl,-s"
+        HIGH_OPT_CFLAGS="-O1"
         ;;
     icc-8.0*)
-	# v8.0 -O3 infinite loops when compiling test/tselect.c. Use -O2.
-	PROD_CFLAGS="-O2 -Wl,-s"
-	;;
+        # v8.0 -O3 infinite loops when compiling test/tselect.c. Use -O2.
+        HIGH_OPT_CFLAGS="-O2"
+        ;;
     icc-*)
-        # -s became obsolete; we also fixed bugs that allow us to enable higher level
-        # of optimization starting with 1.8.7
-        PROD_CFLAGS="-O3"
         ;;
 esac
 
