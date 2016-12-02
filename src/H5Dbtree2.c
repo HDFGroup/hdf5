@@ -105,6 +105,7 @@ static herr_t H5D__bt2_filt_debug(FILE *stream, int indent, int fwidth,
 
 /* Helper routine */
 static herr_t H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info);
 
 /* Callback for H5B2_iterate() which is called in H5D__bt2_idx_iterate() */
 static int H5D__bt2_idx_iterate_cb(const void *_record, void *_udata);
@@ -152,6 +153,7 @@ static herr_t H5D__bt2_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* Chunked dataset I/O ops for v2 B-tree indexing */
 const H5D_chunk_ops_t H5D_COPS_BT2[1] = {{
+    TRUE,                               /* Fixed array indices support SWMR access */
     H5D__bt2_idx_init,                  /* init */
     H5D__bt2_idx_create,                /* create */
     H5D__bt2_idx_is_space_alloc,        /* is_space_alloc */
@@ -623,6 +625,68 @@ H5D__bt2_idx_init(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D__btree2_idx_depend
+ *
+ * Purpose:	Create flush dependency between v2 B-tree and dataset's
+ *              object header.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Friday, December 18, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__btree2_idx_depend(const H5D_chk_idx_info_t *idx_info)
+{
+    H5O_t *oh = NULL;                   /* Object header */
+    H5O_loc_t oloc;                     /* Temporary object header location for dataset */
+    H5AC_proxy_entry_t *oh_proxy;       /* Dataset's object header proxy */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+    HDassert(idx_info);
+    HDassert(idx_info->f);
+    HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
+    HDassert(idx_info->pline);
+    HDassert(idx_info->layout);
+    HDassert(H5D_CHUNK_IDX_BT2 == idx_info->layout->idx_type);
+    HDassert(idx_info->storage);
+    HDassert(H5D_CHUNK_IDX_BT2 == idx_info->storage->idx_type);
+    HDassert(H5F_addr_defined(idx_info->storage->idx_addr));
+    HDassert(idx_info->storage->u.btree2.bt2);
+
+    /* Set up object header location for dataset */
+    H5O_loc_reset(&oloc);
+    oloc.file = idx_info->f;
+    oloc.addr = idx_info->storage->u.btree.dset_ohdr_addr;
+
+    /* Get header */
+    if(NULL == (oh = H5O_protect(&oloc, idx_info->dxpl_id, H5AC__READ_ONLY_FLAG, TRUE)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect object header")
+
+    /* Retrieve the dataset's object header proxy */
+    if(NULL == (oh_proxy = H5O_get_proxy(oh)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset object header proxy")
+
+    /* Make the v2 B-tree a child flush dependency of the dataset's object header proxy */
+    if(H5B2_depend(idx_info->storage->u.btree2.bt2, idx_info->dxpl_id, oh_proxy) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header proxy")
+
+done:
+    /* Release the object header from the cache */
+    if(oh && H5O_unprotect(&oloc, idx_info->dxpl_id, oh, H5AC__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__btree2_idx_depend() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D__bt2_idx_open()
  *
  * Purpose:	Opens an existing v2 B-tree.
@@ -666,6 +730,11 @@ H5D__bt2_idx_open(const H5D_chk_idx_info_t *idx_info)
     /* Open v2 B-tree for the chunk index */
     if(NULL == (idx_info->storage->u.btree2.bt2 = H5B2_open(idx_info->f, idx_info->dxpl_id, idx_info->storage->idx_addr, &u_ctx)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open v2 B-tree for tracking chunked dataset")
+
+    /* Check for SWMR writes to the file */
+    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
+        if(H5D__btree2_idx_depend(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -737,6 +806,11 @@ H5D__bt2_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* Retrieve the v2 B-tree's address in the file */
     if(H5B2_get_addr(idx_info->storage->u.btree2.bt2, &(idx_info->storage->idx_addr)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get v2 B-tree address for tracking chunked dataset")
+
+    /* Check for SWMR writes to the file */
+    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
+        if(H5D__btree2_idx_depend(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1186,7 +1260,7 @@ H5D__bt2_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *u
 
     /* Remove the record for the "dataset chunk" object from the v2 B-tree */
     /* (space in the file for the object is freed in the 'remove' callback) */
-    if(H5B2_remove(bt2, idx_info->dxpl_id, &bt2_udata, H5D__bt2_remove_cb, &remove_udata) < 0)
+    if(H5B2_remove(bt2, idx_info->dxpl_id, &bt2_udata, (H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) ? NULL : H5D__bt2_remove_cb, &remove_udata) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't remove object from B-tree")
 
 done:
@@ -1243,8 +1317,11 @@ H5D__bt2_idx_delete(const H5D_chk_idx_info_t *idx_info)
 	remove_udata.f = idx_info->f;
 	remove_udata.dxpl_id = idx_info->dxpl_id;
 
-	/* Set remove operation. */
-        remove_op = H5D__bt2_remove_cb;
+	/* Set remove operation.  Do not remove chunks in SWMR_WRITE mode */
+        if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE)
+            remove_op = NULL;
+        else
+            remove_op = H5D__bt2_remove_cb;
 
 	/* Delete the v2 B-tree */
 	/*(space in the file for each object is freed in the 'remove' callback) */

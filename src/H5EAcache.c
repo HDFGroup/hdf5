@@ -80,6 +80,7 @@ static void *H5EA__cache_hdr_deserialize(const void *image, size_t len,
 static herr_t H5EA__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5EA__cache_hdr_serialize(const H5F_t *f, void *image, size_t len,
     void *thing);
+static herr_t H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5EA__cache_hdr_free_icr(void *thing);
 
 static herr_t H5EA__cache_iblock_get_initial_load_size(void *udata, size_t *image_len);
@@ -142,7 +143,7 @@ const H5AC_class_t H5AC_EARRAY_HDR[1] = {{
     H5EA__cache_hdr_image_len,          /* 'image_len' callback */
     NULL,                               /* 'pre_serialize' callback */
     H5EA__cache_hdr_serialize,          /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5EA__cache_hdr_notify,             /* 'notify' callback */
     H5EA__cache_hdr_free_icr,           /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
@@ -521,6 +522,80 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_serialize() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_hdr_notify
+ *
+ * Purpose:	Handle cache action notifications
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	John Mainzer
+ *              11/30/15
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing))
+
+    /* Local variables */
+    H5EA_hdr_t *hdr = (H5EA_hdr_t *)_thing;      /* Pointer to the object */
+
+    /* Sanity check */
+    HDassert(hdr);
+
+    /* Check if the file was opened with SWMR-write access */
+    if(hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+	    case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+	    case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+            case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+            case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+		/* do nothing */
+		break;
+
+	    case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* If hdr->parent != NULL, hdr->parent is used to destroy
+                 * the flush dependency before the header is evicted.
+                 */
+                if(hdr->parent) {
+                    /* Sanity check */
+                    HDassert(hdr->top_proxy);
+
+		    /* Destroy flush dependency on object header proxy */
+		    if(H5AC_proxy_entry_remove_child((H5AC_proxy_entry_t *)hdr->parent, (void *)hdr->top_proxy) < 0)
+		        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between extensible array and proxy")
+                    hdr->parent = NULL;
+		} /* end if */
+
+                /* Detach from 'top' proxy for extensible array */
+                if(hdr->top_proxy) {
+                    if(H5AC_proxy_entry_remove_child(hdr->top_proxy, hdr) < 0)
+                        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between header and extensible array 'top' proxy")
+                    /* Don't reset hdr->top_proxy here, it's destroyed when the header is freed -QAK */
+                } /* end if */
+		break;
+
+            default:
+#ifdef NDEBUG
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+                HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+        } /* end switch */
+    } /* end if */
+    else
+        HDassert(NULL == hdr->parent);
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5EA__cache_hdr_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5EA__cache_hdr_free_icr
  *
  * Purpose:	Destroy/release an "in core representation" of a data
@@ -890,6 +965,13 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing))
             /* Destroy flush dependency on extensible array header */
             if(H5EA__destroy_flush_depend((H5AC_info_t *)iblock->hdr, (H5AC_info_t *)iblock) < 0)
                 H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between index block and header, address = %llu", (unsigned long long)iblock->addr)
+
+            /* Detach from 'top' proxy for extensible array */
+            if(iblock->top_proxy) {
+                if(H5AC_proxy_entry_remove_child(iblock->top_proxy, iblock) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between index block and extensible array 'top' proxy")
+                iblock->top_proxy = NULL;
+            } /* end if */
             break;
 
         default:
@@ -1285,6 +1367,13 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing))
                 if(H5EA__destroy_flush_depend((H5AC_info_t *)sblock->hdr, (H5AC_info_t *)sblock) < 0)
                     H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between super block and header, address = %llu", (unsigned long long)sblock->addr)
                 sblock->has_hdr_depend = FALSE;
+            } /* end if */
+
+            /* Detach from 'top' proxy for extensible array */
+            if(sblock->top_proxy) {
+                if(H5AC_proxy_entry_remove_child(sblock->top_proxy, sblock) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between super block and extensible array 'top' proxy")
+                sblock->top_proxy = NULL;
             } /* end if */
             break;
 
@@ -1690,6 +1779,13 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing))
                     H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and header, address = %llu", (unsigned long long)dblock->addr)
                 dblock->has_hdr_depend = FALSE;
             } /* end if */
+
+            /* Detach from 'top' proxy for extensible array */
+            if(dblock->top_proxy) {
+                if(H5AC_proxy_entry_remove_child(dblock->top_proxy, dblock) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and extensible array 'top' proxy")
+                dblock->top_proxy = NULL;
+            } /* end if */
             break;
 
         case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
@@ -2061,6 +2157,13 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing))
                 if(H5EA__destroy_flush_depend((H5AC_info_t *)dblk_page->hdr, (H5AC_info_t *)dblk_page) < 0)
                     H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block page and header, address = %llu", (unsigned long long)dblk_page->addr)
                 dblk_page->has_hdr_depend = FALSE;
+            } /* end if */
+
+            /* Detach from 'top' proxy for extensible array */
+            if(dblk_page->top_proxy) {
+                if(H5AC_proxy_entry_remove_child(dblk_page->top_proxy, dblk_page) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block page and extensible array 'top' proxy")
+                dblk_page->top_proxy = NULL;
             } /* end if */
             break;
 

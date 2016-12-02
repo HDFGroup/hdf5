@@ -84,6 +84,7 @@ static herr_t H5D__single_idx_dump(const H5O_storage_chunk_t *storage, FILE *str
 
 /* Non Index chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_SINGLE[1] = {{
+    FALSE,                      	/* Single Chunk indexing doesn't current support SWMR access */
     H5D__single_idx_init,		/* init */
     H5D__single_idx_create,		/* create */
     H5D__single_idx_is_space_alloc, 	/* is_space_alloc */

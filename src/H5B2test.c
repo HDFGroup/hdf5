@@ -518,6 +518,7 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
 {
     H5B2_hdr_t	*hdr;                   /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;      /* Node pointer info for current node */
+    void        *parent = NULL;         /* Parent of current node */
     uint16_t    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
@@ -537,6 +538,10 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
     /* Make copy of the root node pointer to start search with */
     curr_node_ptr = hdr->root;
 
+        /* Set initial parent, if doing swmr writes */
+    if(hdr->swmr_write)
+        parent = hdr;
+
     /* Current depth of the tree */
     depth = hdr->depth;
 
@@ -551,8 +556,15 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
         H5B2_node_ptr_t next_node_ptr;      /* Node pointer info for next node */
 
         /* Lock B-tree current node */
-        if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, depth, H5AC__READ_ONLY_FLAG)))
+        if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, parent, &curr_node_ptr, depth, FALSE, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree internal node")
+
+        /* Unpin parent if necessary */
+        if(parent) {
+            if(parent != hdr && H5AC_unpin_entry(parent) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+            parent = NULL;
+        } /* end if */
 
         /* Locate node pointer for child */
         if(H5B2__locate_record(hdr->cls, internal->nrec, hdr->nat_off, internal->int_native, 
@@ -567,8 +579,12 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
             next_node_ptr = internal->node_ptrs[idx];
 
             /* Unlock current node */
-            if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+            if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, (unsigned)(hdr->swmr_write ? H5AC__PIN_ENTRY_FLAG : H5AC__NO_FLAGS_SET)) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+
+            /* Keep track of parent if necessary */
+            if(hdr->swmr_write)
+                parent = internal;
 
             /* Set pointer to next node to load */
             curr_node_ptr = next_node_ptr;
@@ -594,8 +610,15 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
         H5B2_leaf_t *leaf;          /* Pointer to leaf node in B-tree */
 
         /* Lock B-tree leaf node */
-        if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, curr_node_ptr.addr, curr_node_ptr.node_nrec, H5AC__READ_ONLY_FLAG)))
+        if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, parent, &curr_node_ptr, FALSE, H5AC__READ_ONLY_FLAG)))
             HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
+
+        /* Unpin parent if necessary */
+        if(parent) {
+            if(parent != hdr && H5AC_unpin_entry(parent) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+            parent = NULL;
+        } /* end if */
 
         /* Locate record */
         if(H5B2__locate_record(hdr->cls, leaf->nrec, hdr->nat_off, leaf->leaf_native, 
@@ -616,6 +639,12 @@ H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata,
     ninfo->nrec = curr_node_ptr.node_nrec;
 
 done:
+    if(parent) {
+        HDassert(ret_value < 0);
+        if(parent != hdr && H5AC_unpin_entry(parent) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPIN, FAIL, "unable to unpin parent entry")
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_get_node_info_test() */
 

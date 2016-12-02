@@ -132,6 +132,7 @@ HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, ncl
     fspace->expand_percent = fs_create->expand_percent;
     fspace->max_sect_addr = fs_create->max_sect_addr;
     fspace->max_sect_size = fs_create->max_sect_size;
+    fspace->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
 
     fspace->alignment = alignment;
     fspace->threshold = threshold;

@@ -168,6 +168,7 @@ H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     /* Local variables */
     H5EA_dblock_t *dblock = NULL;       /* Extensible array data block */
     haddr_t dblock_addr;                /* Extensible array data block address */
+    hbool_t inserted = FALSE;           /* Whether the header was inserted into cache */
 
     /* Sanity check */
     HDassert(hdr);
@@ -198,6 +199,14 @@ H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     /* Cache the new extensible array data block */
     if(H5AC_insert_entry(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array data block to cache")
+    inserted = TRUE;
+
+    /* Add data block as child of 'top' proxy */
+    if(hdr->top_proxy) {
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblock) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
+        dblock->top_proxy = hdr->top_proxy;
+    } /* end if */
 
     /* Update extensible array data block statistics */
     hdr->stats.stored.ndata_blks++;
@@ -215,6 +224,11 @@ H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
 CATCH
     if(!H5F_addr_defined(ret_value))
         if(dblock) {
+            /* Remove from cache, if inserted */
+            if(inserted)
+                if(H5AC_remove_entry(dblock) < 0)
+                    H5E_THROW(H5E_CANTREMOVE, "unable to remove extensible array data block from cache")
+
             /* Release data block's disk space */
             if(H5F_addr_defined(dblock->addr) && H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, dblock->addr, (hsize_t)dblock->size) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to release extensible array data block")
@@ -284,7 +298,8 @@ H5EA__dblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     haddr_t dblk_addr, size_t dblk_nelmts, unsigned flags))
 
     /* Local variables */
-    H5EA_dblock_cache_ud_t udata;      /* Information needed for loading data block */
+    H5EA_dblock_t *dblock;              /* Extensible array data block */
+    H5EA_dblock_cache_ud_t udata;       /* Information needed for loading data block */
 
     /* Sanity check */
     HDassert(hdr);
@@ -301,10 +316,28 @@ H5EA__dblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     udata.dblk_addr = dblk_addr;
 
     /* Protect the data block */
-    if(NULL == (ret_value = (H5EA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblk_addr, &udata, flags)))
+    if(NULL == (dblock = (H5EA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblk_addr, &udata, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)dblk_addr)
 
+    /* Create top proxy, if it doesn't exist */
+    if(hdr->top_proxy && NULL == dblock->top_proxy) {
+        /* Add data block as child of 'top' proxy */
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblock) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
+        dblock->top_proxy = hdr->top_proxy;
+    } /* end if */
+
+    /* Set return value */
+    ret_value = dblock;
+
 CATCH
+
+    /* Clean up on error */
+    if(!ret_value) {
+        /* Release the data block, if it was protected */
+        if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblock->addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+            H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array data block, address = %llu", (unsigned long long)dblock->addr)
+    } /* end if */
 
 END_FUNC(PKG)   /* end H5EA__dblock_protect() */
 
@@ -441,6 +474,9 @@ H5EA__dblock_dest(H5EA_dblock_t *dblock))
             H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
         dblock->hdr = NULL;
     } /* end if */
+
+    /* Sanity check */
+    HDassert(NULL == dblock->top_proxy);
 
     /* Free the data block itself */
     dblock = H5FL_FREE(H5EA_dblock_t, dblock);

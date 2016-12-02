@@ -403,7 +403,9 @@ H5O_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx)
     HDassert(chk_proxy->oh == oh);
     HDassert(chk_proxy->chunkno == idx);
 
-    cache_flags |= H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
+    /* Only free file space if not doing SWMR writes */
+    if(!oh->swmr_write)
+        cache_flags |= H5AC__DIRTIED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
     /* Release the chunk proxy from the cache, marking it deleted */
     if(H5AC_unprotect(f, dxpl_id, H5AC_OHDR_CHK, oh->chunk[idx].addr, chk_proxy, cache_flags) < 0)

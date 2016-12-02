@@ -183,6 +183,7 @@ H5EA__iblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *stats_changed))
     /* Local variables */
     H5EA_iblock_t *iblock = NULL;       /* Extensible array index block */
     haddr_t iblock_addr;                /* Extensible array index block address */
+    hbool_t inserted = FALSE;           /* Whether the header was inserted into cache */
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Called\n", FUNC);
@@ -233,6 +234,14 @@ HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
     /* Cache the new extensible array index block */
     if(H5AC_insert_entry(hdr->f, dxpl_id, H5AC_EARRAY_IBLOCK, iblock_addr, iblock, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array index block to cache")
+    inserted = TRUE;
+
+    /* Add index block as child of 'top' proxy */
+    if(hdr->top_proxy) {
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, iblock) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
+        iblock->top_proxy = hdr->top_proxy;
+    } /* end if */
 
     /* Update extensible array index block statistics */
     HDassert(0 == hdr->stats.computed.nindex_blks);
@@ -252,6 +261,11 @@ HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
 CATCH
     if(!H5F_addr_defined(ret_value))
         if(iblock) {
+            /* Remove from cache, if inserted */
+            if(inserted)
+                if(H5AC_remove_entry(iblock) < 0)
+                    H5E_THROW(H5E_CANTREMOVE, "unable to remove extensible array index block from cache")
+
             /* Release index block's disk space */
             if(H5F_addr_defined(iblock->addr) && H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_IBLOCK, dxpl_id, iblock->addr, (hsize_t)iblock->size) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to release file space for extensible array index block")
@@ -281,6 +295,9 @@ BEGIN_FUNC(PKG, ERR,
 H5EA_iblock_t *, NULL, NULL,
 H5EA__iblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, unsigned flags))
 
+    /* Local variables */
+    H5EA_iblock_t *iblock = NULL;       /* Pointer to index block */
+
 #ifdef QAK
 HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* QAK */
@@ -292,10 +309,27 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert((flags & (unsigned)(~H5AC__READ_ONLY_FLAG)) == 0);
 
     /* Protect the index block */
-    if(NULL == (ret_value = (H5EA_iblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_IBLOCK, hdr->idx_blk_addr, hdr, flags)))
+    if(NULL == (iblock = (H5EA_iblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_IBLOCK, hdr->idx_blk_addr, hdr, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long long)hdr->idx_blk_addr)
 
+    /* Create top proxy, if it doesn't exist */
+    if(hdr->top_proxy && NULL == iblock->top_proxy) {
+        /* Add index block as child of 'top' proxy */
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, iblock) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
+        iblock->top_proxy = hdr->top_proxy;
+    } /* end if */
+
+    /* Set return value */
+    ret_value = iblock;
+
 CATCH
+    /* Clean up on error */
+    if(!ret_value) {
+        /* Release the index block, if it was protected */
+        if(iblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_EARRAY_IBLOCK, iblock->addr, iblock, H5AC__NO_FLAGS_SET) < 0)
+            H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array index block, address = %llu", (unsigned long long)iblock->addr)
+    } /* end if */
 
 END_FUNC(PKG)   /* end H5EA__iblock_protect() */
 
@@ -469,6 +503,9 @@ H5EA__iblock_dest(H5EA_iblock_t *iblock))
             H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
         iblock->hdr = NULL;
     } /* end if */
+
+    /* Sanity check */
+    HDassert(NULL == iblock->top_proxy);
 
     /* Free the index block itself */
     iblock = H5FL_FREE(H5EA_iblock_t, iblock);

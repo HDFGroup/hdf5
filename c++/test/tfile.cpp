@@ -727,7 +727,7 @@ static void test_libver_bounds()
 
     /* Run the tests */
     test_libver_bounds_real(H5F_LIBVER_EARLIEST, H5O_VERSION_1, H5F_LIBVER_LATEST, H5O_VERSION_2);
-    test_libver_bounds_real(H5F_LIBVER_LATEST, H5O_VERSION_2, H5F_LIBVER_EARLIEST, H5O_VERSION_1);
+    test_libver_bounds_real(H5F_LIBVER_LATEST, H5O_VERSION_2, H5F_LIBVER_EARLIEST, H5O_VERSION_2);
     PASSED();
 } /* end test_libver_bounds() */
 

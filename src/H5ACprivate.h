@@ -86,7 +86,8 @@ typedef enum {
     H5AC_FARRAY_DBLK_PAGE_ID,		/* (24) fixed array data block page          	     */
     H5AC_SUPERBLOCK_ID, 		/* (25) file superblock                            */
     H5AC_DRVRINFO_ID,   		/* (26) driver info block (supplements superblock)*/
-    H5AC_TEST_ID,			/* (27) test entry -- not used for actual files    */
+    H5AC_PROXY_ENTRY_ID, 		/* (27) cache entry proxy                        */
+    H5AC_TEST_ID,			/* (28) test entry -- not used for actual files    */
     H5AC_NTYPES				/* Number of types, must be last              */
 } H5AC_type_t;
 
@@ -198,6 +199,25 @@ typedef H5C_cache_entry_t		H5AC_info_t;
 
 /* Typedef for metadata cache (defined in H5Cpkg.h) */
 typedef H5C_t	H5AC_t;
+
+/* Metadata cache proxy entry type */
+typedef struct H5AC_proxy_entry_t {
+    H5AC_info_t cache_info;             /* Information for H5AC cache functions */
+                                        /* (MUST be first field in structure) */
+
+    /* General fields */
+    haddr_t addr;                       /* Address of the entry in the file */
+                                        /* (Should be in 'temporary' address space) */
+
+    /* Parent fields */
+    H5SL_t *parents;                    /* Skip list to track parent addresses */
+
+    /* Child fields */
+    size_t nchildren;                   /* Number of children */
+    size_t ndirty_children;             /* Number of dirty children */
+                                        /* (Note that this currently duplicates some cache functionality) */
+} H5AC_proxy_entry_t;
+
 
 #define H5AC_RING_NAME  "H5AC_ring_type"
 
@@ -353,11 +373,14 @@ H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
     haddr_t addr, void *thing, unsigned flags);
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_mark_entry_dirty(void *thing);
+H5_DLL herr_t H5AC_mark_entry_clean(void *thing);
 H5_DLL herr_t H5AC_move_entry(H5F_t *f, const H5AC_class_t *type,
     haddr_t old_addr, haddr_t new_addr, hid_t dxpl_id);
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5AC_evict(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id,
     const H5AC_class_t *type, haddr_t addr, unsigned flags);
+H5_DLL herr_t H5AC_remove_entry(void *entry);
 H5_DLL herr_t H5AC_get_cache_auto_resize_config(const H5AC_t * cache_ptr,
     H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr,
@@ -380,6 +403,15 @@ H5_DLL herr_t H5AC_set_ring(hid_t dxpl_id, H5AC_ring_t ring, H5P_genplist_t **dx
     H5AC_ring_t *orig_ring);
 H5_DLL herr_t H5AC_reset_ring(H5P_genplist_t *dxpl, H5AC_ring_t orig_ring);
 H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
+
+/* Virtual entry routines */
+H5_DLL H5AC_proxy_entry_t *H5AC_proxy_entry_create(void);
+H5_DLL herr_t H5AC_proxy_entry_add_parent(H5AC_proxy_entry_t *pentry, void *parent);
+H5_DLL herr_t H5AC_proxy_entry_remove_parent(H5AC_proxy_entry_t *pentry, void *parent);
+H5_DLL herr_t H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f,
+    hid_t dxpl_id, void *child);
+H5_DLL herr_t H5AC_proxy_entry_remove_child(H5AC_proxy_entry_t *pentry, void *child);
+H5_DLL herr_t H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);

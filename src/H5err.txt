@@ -169,7 +169,9 @@ MINOR, CACHE, H5E_CANTUNPROTECT, Unable to unprotect metadata
 MINOR, CACHE, H5E_CANTPIN, Unable to pin cache entry
 MINOR, CACHE, H5E_CANTUNPIN, Unable to un-pin cache entry
 MINOR, CACHE, H5E_CANTMARKDIRTY, Unable to mark a pinned entry as dirty
+MINOR, CACHE, H5E_CANTMARKCLEAN, Unable to mark a pinned entry as clean
 MINOR, CACHE, H5E_CANTDIRTY, Unable to mark metadata as dirty
+MINOR, CACHE, H5E_CANTCLEAN, Unable to mark metadata as clean
 MINOR, CACHE, H5E_CANTEXPUNGE, Unable to expunge a metadata cache entry
 MINOR, CACHE, H5E_CANTRESIZE, Unable to resize a metadata cache entry
 MINOR, CACHE, H5E_CANTDEPEND, Unable to create a flush dependency

@@ -745,9 +745,8 @@ H5O__alloc_find_best_nonnull(const H5F_t *f, const H5O_t *oh, size_t *size,
     size_t      cont_size;              /* Continuation message size */
     size_t      multi_size;             /* Size of all the messages in the last chunk */
     unsigned    u;                      /* Local index variable */
-    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check args */
     HDassert(f);
@@ -865,8 +864,7 @@ H5O__alloc_find_best_nonnull(const H5F_t *f, const H5O_t *oh, size_t *size,
     else
         *size += (size_t)H5O_SIZEOF_MSGHDR_OH(oh) + oh->mesg[found_msg->msgno].raw_size;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5O__alloc_find_best_nonnull() */
 
 
@@ -949,6 +947,7 @@ H5O__alloc_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size,
     oh->chunk[chunkno].gap = 0;
     if(NULL == (oh->chunk[chunkno].image = p = H5FL_BLK_CALLOC(chunk_image, size)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "can't allocate image for chunk, size = %zu", size)
+    oh->chunk[chunkno].chunk_proxy = NULL;
 
     /* If this is a later version of the object header format, put the magic
      *  # at the beginning of the chunk image.
@@ -1221,10 +1220,9 @@ static herr_t
 H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
 {
     size_t idx;                 /* Index of message which fits allocation */
-    int found_null;             /* Best fit null message         */
-    herr_t ret_value = SUCCEED; /* Return value */
+    ssize_t found_null;         /* Best fit null message         */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(oh);
@@ -1239,11 +1237,11 @@ H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
             if(oh->mesg[idx].raw_size == size) {
                 /* Keep first exact fit */
                 if(found_null < 0)
-                    found_null = idx;
+                    found_null = (ssize_t)idx;
                 else
                     /* If we've got more than one exact fit, choose the one in the earliest chunk */
                     if(oh->mesg[idx].chunkno < oh->mesg[found_null].chunkno) {
-                        found_null = idx;
+                        found_null = (ssize_t)idx;
 
                         /* If we found an exact fit in object header chunk #0, we can get out */
                         /* (Could extend this to look for earliest message in
@@ -1257,29 +1255,26 @@ H5O__alloc_find_best_null(const H5O_t *oh, size_t size, size_t *mesg_idx)
             else if(oh->mesg[idx].raw_size > size) {
                 /* Keep first one found */
                 if(found_null < 0)
-                    found_null = idx;
+                    found_null = (ssize_t)idx;
                 else
                     /* Check for better fit */
                     if(oh->mesg[idx].raw_size < oh->mesg[found_null].raw_size)
-                        found_null = idx;
+                        found_null = (ssize_t)idx;
                     else {
                         /* If they are the same size, choose the one in the earliest chunk */
                         if(oh->mesg[idx].raw_size ==  oh->mesg[found_null].raw_size) {
                             if(oh->mesg[idx].chunkno < oh->mesg[found_null].chunkno)
-                                found_null = idx;
+                                found_null = (ssize_t)idx;
                         } /* end if */
                     } /* end else */
             } /* end else-if */
-            /* Ignore too-small null messages */
-            else 
-                ;
+            /* else: Ignore too-small null messages */
         } /* end if */
     } /* end for */
     if(found_null >= 0)
-        *mesg_idx = found_null;
+        *mesg_idx = (size_t)found_null;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5O__alloc_find_best_null() */
 
 
@@ -1627,6 +1622,7 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
 {
     H5O_chunk_proxy_t *null_chk_proxy = NULL;  /* Chunk that null message is in */
     H5O_chunk_proxy_t *curr_chk_proxy = NULL;  /* Chunk that message is in */
+    H5O_chunk_proxy_t *cont_targ_chk_proxy = NULL; /* Chunk that continuation message points to */
     hbool_t null_chk_dirtied = FALSE;  /* Flags for unprotecting null chunk */
     hbool_t curr_chk_dirtied = FALSE;  /* Flags for unprotecting curr chunk */
     hbool_t packed_msg;                 /* Flag to indicate that messages were packed */
@@ -1740,6 +1736,60 @@ H5O_move_msgs_forward(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
                         if(NULL == (curr_chk_proxy = H5O_chunk_protect(f, dxpl_id, oh, curr_msg->chunkno)))
                             HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
+
+                        /* If the message being moved is a continuation
+                         * message and we are doing SWMR writes, we must
+                         * update the flush dependencies */
+                        if(oh->swmr_write && (H5O_CONT_ID == curr_msg->type->id)) {
+                            void *null_chk_mdc_obj;     /* The metadata cache object for the null_msg chunk */
+
+                            /* Point to the metadata cache object for the
+                             * null message chunk, oh if in chunk 0 or the
+                             * proxy otherwise */
+                            null_chk_mdc_obj = (null_msg->chunkno == 0
+                                    ? (void *)oh
+                                    : (void *)null_chk_proxy);
+
+                            /* The other chunks involved should never be
+                             * chunk 0 */
+                            HDassert(curr_msg->chunkno > 0);
+                            HDassert(((H5O_cont_t *)(curr_msg->native))->chunkno > 0);
+
+                            /* Protect continuation message target chunk */
+                            if(NULL == (cont_targ_chk_proxy = H5O_chunk_protect(f, dxpl_id, oh, ((H5O_cont_t *)(curr_msg->native))->chunkno)))
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
+
+                            /* Remove flush dependency on old continuation
+                             * message chunk */
+                            HDassert(cont_targ_chk_proxy);
+                            HDassert(cont_targ_chk_proxy->parent);
+                            HDassert(curr_chk_proxy);
+                            HDassert((void *)curr_chk_proxy == cont_targ_chk_proxy->parent);
+
+                            if(H5AC_destroy_flush_dependency(curr_chk_proxy, cont_targ_chk_proxy) < 0)
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+
+                            cont_targ_chk_proxy->parent = NULL;
+
+                            /* Create flush dependency on new continuation
+                             * message chunk */
+                            if(H5AC_create_flush_dependency(null_chk_mdc_obj, cont_targ_chk_proxy) < 0)
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+
+                            HDassert(null_chk_mdc_obj);
+                            HDassert(((H5C_cache_entry_t *)null_chk_mdc_obj)->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                            HDassert(((H5C_cache_entry_t *)null_chk_mdc_obj)->type);
+                            HDassert((((H5C_cache_entry_t *)null_chk_mdc_obj)->type->id == H5AC_OHDR_ID) ||
+                                     (((H5C_cache_entry_t *)null_chk_mdc_obj)->type->id == H5AC_OHDR_CHK_ID));
+
+                            cont_targ_chk_proxy->parent = null_chk_mdc_obj;
+
+                            /* Unprotect continuation message target chunk
+                             */
+                            if(H5O_chunk_unprotect(f, dxpl_id, cont_targ_chk_proxy, FALSE) < 0)
+                                HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header chunk")
+                            cont_targ_chk_proxy = NULL;
+                        } /* end if */
 
                         /* Copy raw data for non-null message to new chunk */
                         HDmemcpy(null_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), curr_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), curr_msg->raw_size + (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
@@ -1889,9 +1939,11 @@ done:
             HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect null object header chunk")
         if(curr_chk_proxy && H5O_chunk_unprotect(f, dxpl_id, curr_chk_proxy, curr_chk_dirtied) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect current object header chunk")
+        if(cont_targ_chk_proxy && H5O_chunk_unprotect(f, dxpl_id, cont_targ_chk_proxy, FALSE) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect continuation message target object header chunk")
     } /* end if */
     else
-        HDassert(!null_chk_proxy && !curr_chk_proxy);
+        HDassert(!null_chk_proxy && !curr_chk_proxy && !cont_targ_chk_proxy);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_move_msgs_forward() */

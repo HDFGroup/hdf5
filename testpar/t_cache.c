@@ -480,7 +480,7 @@ static hbool_t setup_cache_for_test(hid_t * fid_ptr,
                              H5C_t ** cache_ptr_ptr, 
                              int metadata_write_strategy);
 static void setup_rand(void);
-static hbool_t take_down_cache(hid_t fid);
+static hbool_t take_down_cache(hid_t fid, H5C_t * cache_ptr);
 static hbool_t verify_entry_reads(haddr_t addr, int expected_entry_reads);
 static hbool_t verify_entry_writes(haddr_t addr, int expected_entry_writes);
 static hbool_t verify_total_reads(int expected_total_reads);
@@ -4491,35 +4491,77 @@ setup_rand(void)
  *
  *****************************************************************************/
 static hbool_t
-take_down_cache(hid_t fid)
+take_down_cache(hid_t fid, H5C_t * cache_ptr)
 {
-    hbool_t success = FALSE; /* will set to TRUE if appropriate. */
+    hbool_t success = TRUE; /* will set to FALSE if appropriate. */
 
-    /* close the file and delete it */
-    if ( H5Fclose(fid) < 0  ) {
+    /* flush the file -- this should write out any remaining test 
+     * entries in the cache.
+     */
+    if ( ( success ) && ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) ) {
 
+        success = FALSE;
+        nerrors++;
+        if ( verbose ) {
+            HDfprintf(stdout, "%d:%s: H5Fflush() failed.\n",
+                      world_mpi_rank, FUNC);
+        }
+    }
+
+    /* Now reset the sync point done callback.  Must do this as with 
+     * the SWMR mods, the cache will do additional I/O on file close
+     * un-related to the test entries, and thereby corrupt our counts
+     * of entry writes.
+     */
+    if ( success ) {
+
+        if ( H5AC__set_sync_point_done_callback(cache_ptr, NULL) != SUCCEED ) {
+
+            success = FALSE;
+            nerrors++;
+            if ( verbose ) {
+                HDfprintf(stdout,
+                          "%d:%s: H5AC__set_sync_point_done_callback failed.\n",
+                          world_mpi_rank, FUNC);
+            }
+        }
+
+
+    }
+
+    /* close the file */
+    if ( ( success ) && ( H5Fclose(fid) < 0 ) ) {
+
+        success = FALSE;
         nerrors++;
         if ( verbose ) {
             HDfprintf(stdout, "%d:%s: H5Fclose() failed.\n",
                       world_mpi_rank, FUNC);
         }
 
-    } else if ( world_mpi_rank == world_server_mpi_rank ) {
+    } 
 
-        if ( HDremove(filenames[0]) < 0 ) {
+    if ( success ) {
 
-            nerrors++;
-            if ( verbose ) {
-                HDfprintf(stdout, "%d:%s: HDremove() failed.\n",
-                          world_mpi_rank, FUNC);
+        if ( world_mpi_rank == world_server_mpi_rank ) {
+
+            if ( HDremove(filenames[0]) < 0 ) {
+
+                success = FALSE;
+                nerrors++;
+                if ( verbose ) {
+                    HDfprintf(stdout, "%d:%s: HDremove() failed.\n",
+                              world_mpi_rank, FUNC);
+                }
             }
         } else {
 
-	    success = TRUE;
+	    /* verify that there have been no further writes of test 
+             * entries during the close
+             */
+            success = verify_total_writes(0);
+ 
         }
-    } else {
-
-        success = TRUE;
     }
 
     return(success);
@@ -5576,7 +5618,7 @@ smoke_check_1(int metadata_write_strategy)
 
         if ( fid >= 0 ) {
 
-            if ( ! take_down_cache(fid) ) {
+            if ( ! take_down_cache(fid, cache_ptr) ) {
 
                 nerrors++;
                 if ( verbose ) {
@@ -5798,7 +5840,7 @@ smoke_check_2(int metadata_write_strategy)
 
         if ( fid >= 0 ) {
 
-            if ( ! take_down_cache(fid) ) {
+            if ( ! take_down_cache(fid, cache_ptr) ) {
 
                 nerrors++;
                 if ( verbose ) {
@@ -6121,7 +6163,7 @@ smoke_check_3(int metadata_write_strategy)
 
         if ( fid >= 0 ) {
 
-            if ( ! take_down_cache(fid) ) {
+            if ( ! take_down_cache(fid, cache_ptr) ) {
 
                 nerrors++;
                 if ( verbose ) {
@@ -6438,7 +6480,7 @@ smoke_check_4(int metadata_write_strategy)
 
         if ( fid >= 0 ) {
 
-            if ( ! take_down_cache(fid) ) {
+            if ( ! take_down_cache(fid, cache_ptr) ) {
 
                 nerrors++;
                 if ( verbose ) {
@@ -6648,7 +6690,7 @@ smoke_check_5(int metadata_write_strategy)
 
         if ( fid >= 0 ) {
 
-            if ( ! take_down_cache(fid) ) {
+            if ( ! take_down_cache(fid, cache_ptr) ) {
 
                 nerrors++;
                 if ( verbose ) {
@@ -6997,7 +7039,7 @@ trace_file_check(int metadata_write_strategy)
 
         if ( fid >= 0 ) {
 
-            if ( ! take_down_cache(fid) ) {
+            if ( ! take_down_cache(fid, cache_ptr) ) {
 
                 nerrors++;
                 if ( verbose ) {
@@ -7325,7 +7367,7 @@ smoke_check_6(int metadata_write_strategy)
 
         if ( fid >= 0 ) {
 
-            if ( ! take_down_cache(fid) ) {
+            if ( ! take_down_cache(fid, cache_ptr) ) {
 
                 nerrors++;
                 if ( verbose ) {

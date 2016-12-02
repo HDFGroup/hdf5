@@ -795,7 +795,7 @@ END_FUNC(PRIV)  /* end H5EA_get() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA_depend(H5AC_info_t *parent_entry, H5EA_t *ea))
+H5EA_depend(H5EA_t *ea, hid_t dxpl_id, H5AC_proxy_entry_t *parent))
 
     /* Local variables */
     H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
@@ -805,13 +805,25 @@ H5EA_depend(H5AC_info_t *parent_entry, H5EA_t *ea))
      */
     HDassert(ea);
     HDassert(hdr);
+    HDassert(parent);
 
-    /* Set the shared array header's file context for this operation */
-    hdr->f = ea->f;
+    /*
+     * Check to see if a flush dependency between the extensible array
+     * and another data structure in the file has already been set up.
+     * If it hasn't, do so now.
+     */
+    if(NULL == hdr->parent) {
+        /* Sanity check */
+        HDassert(hdr->top_proxy);
 
-    /* Set up flush dependency between parent entry and extensible array header */
-    if(H5EA__create_flush_depend(parent_entry, (H5AC_info_t *)hdr) < 0)
-        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on file metadata")
+        /* Set the shared array header's file context for this operation */
+        hdr->f = ea->f;
+
+        /* Add the extensible array as a child of the parent (proxy) */
+        if(H5AC_proxy_entry_add_child(parent, hdr->f, dxpl_id, hdr->top_proxy) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add extensible array as child of proxy")
+        hdr->parent = parent;
+    } /* end if */
 
 CATCH
 

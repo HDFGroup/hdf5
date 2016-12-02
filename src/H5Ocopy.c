@@ -381,7 +381,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     } /* end if */
 
     /* Get source object header */
-    if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve user data for particular type of object to copy */
@@ -450,6 +450,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     oh_dst->attr_msgs_seen = oh_src->attr_msgs_seen;
     oh_dst->sizeof_size = H5F_SIZEOF_SIZE(oloc_dst->file);
     oh_dst->sizeof_addr = H5F_SIZEOF_ADDR(oloc_dst->file);
+    oh_dst->swmr_write = !!(H5F_INTENT(oloc_dst->file) & H5F_ACC_SWMR_WRITE);
 
     /* Copy time fields */
     oh_dst->atime = oh_src->atime;
@@ -460,6 +461,15 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Copy attribute storage information */
     oh_dst->max_compact = oh_src->max_compact;
     oh_dst->min_dense = oh_src->min_dense;
+
+    /* Create object header proxy if doing SWMR writes */
+    if(oh_dst->swmr_write) {
+        /* Create virtual entry, for use as proxy */
+        if(NULL == (oh_dst->proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy")
+    } /* end if */
+    else
+        oh_dst->proxy = NULL;
 
     /* Initialize size of chunk array.  Start off with zero chunks so this field
      * is consistent with the current state of the chunk array.  This is

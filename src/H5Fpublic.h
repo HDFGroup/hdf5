@@ -55,6 +55,23 @@
 #define H5F_ACC_EXCL	(H5CHECK H5OPEN 0x0004u)	/*fail if file already exists*/
 /* NOTE: 0x0008u was H5F_ACC_DEBUG, now deprecated */
 #define H5F_ACC_CREAT	(H5CHECK H5OPEN 0x0010u)	/*create non-existing files  */
+#define H5F_ACC_SWMR_WRITE	(H5CHECK 0x0020u) /*indicate that this file is
+                                                 * open for writing in a
+                                                 * single-writer/multi-reader (SWMR)
+                                                 * scenario.  Note that the
+                                                 * process(es) opening the file
+                                                 * for reading must open the file
+                                                 * with RDONLY access, and use
+                                                 * the special "SWMR_READ" access
+                                                 * flag. */
+#define H5F_ACC_SWMR_READ	(H5CHECK 0x0040u) /*indicate that this file is
+                                                 * open for reading in a
+                                                 * single-writer/multi-reader (SWMR)
+                                                 * scenario.  Note that the
+                                                 * process(es) opening the file
+                                                 * for SWMR reading must also
+                                                 * open the file with the RDONLY
+                                                 * flag.  */
 
 /* Value passed to H5Pset_elink_acc_flags to cause flags to be taken from the
  * parent file. */
@@ -225,6 +242,7 @@ H5_DLL herr_t H5Freset_mdc_hit_rate_stats(hid_t file_id);
 H5_DLL ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
 H5_DLL herr_t H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo);
 H5_DLL herr_t H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info);
+H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
 H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
     size_t nsects, H5F_sect_info_t *sect_info/*out*/);
 H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);

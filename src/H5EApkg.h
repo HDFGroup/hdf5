@@ -206,6 +206,28 @@ typedef struct H5EA_hdr_t {
 
     /* Client information (not stored) */
     void *cb_ctx;                       /* Callback context */
+
+    /* SWMR / Flush dependency information (not stored) */
+    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all array entries */
+    void *parent;		        /* Pointer to 'top' proxy flush dependency
+                                         * parent, if it exists, otherwise NULL.
+                                         * If the extensible array is being used
+                                         * to index a chunked dataset and the
+                                         * dataset metadata is modified by a
+                                         * SWMR writer, this field will be set
+                                         * equal to the object header proxy
+                                         * that is the flush dependency parent
+                                         * of the extensible array header.
+ 					 *
+ 					 * The field is used to avoid duplicate
+					 * setups of the flush dependency 
+					 * relationship, and to allow the 
+					 * extensible array header to destroy
+					 * the flush dependency on receipt of 
+					 * an eviction notification from the
+					 * metadata cache.
+					 */
 } H5EA_hdr_t;
 
 /* The extensible array index block information */
@@ -222,6 +244,9 @@ typedef struct H5EA_iblock_t {
     H5EA_hdr_t	*hdr;	        /* Shared array header info                     */
     haddr_t     addr;           /* Address of this index block on disk          */
     size_t      size;           /* Size of index block on disk                  */
+
+    /* SWMR / Flush dependency information (not stored) */
+    H5AC_proxy_entry_t *top_proxy;      /* "Top" proxy cache entry for all array entries */
 
     /* Computed/cached values (not stored) */
     size_t      nsblks;         /* # of super blocks whose data block addresses are in index block */
@@ -244,8 +269,9 @@ typedef struct H5EA_sblock_t {
     haddr_t     addr;           /* Address of this index block on disk          */
     size_t      size;           /* Size of index block on disk                  */
 
-    /* Flush dependency information (not stored) */
+    /* SWMR / Flush dependency information (not stored) */
     hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
+    H5AC_proxy_entry_t *top_proxy;      /* "Top" proxy cache entry for all array entries */
     H5EA_iblock_t *parent;      /* Parent object for super block (index block)  */
 
     /* Computed/cached values (not stored) */
@@ -271,8 +297,9 @@ typedef struct H5EA_dblock_t {
     haddr_t     addr;           /* Address of this data block on disk                   */
     size_t      size;           /* Size of data block on disk                           */
 
-    /* Flush dependency information (not stored) */
+    /* SWMR / Flush dependency information (not stored) */
     hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all array entries */
     void        *parent;        /* Parent object for data block (index or super block)  */
 
     /* Computed/cached values (not stored) */
@@ -293,8 +320,9 @@ typedef struct H5EA_dbk_page_t {
     haddr_t     addr;           /* Address of this data block page on disk          */
     size_t      size;           /* Size of data block page on disk                  */
 
-    /* Flush dependency information (not stored) */
+    /* SWMR / Flush dependency information (not stored) */
     hbool_t     has_hdr_depend; /* Whether this object has a flush dependency on the header */
+    H5AC_proxy_entry_t *top_proxy;      /* "Top" proxy cache entry for all array entries */
     H5EA_sblock_t *parent;      /* Parent object for data block page (super block)  */
 
     /* Computed/cached values (not stored) */

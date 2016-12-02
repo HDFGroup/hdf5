@@ -191,6 +191,7 @@ H5FA__dblock_create(H5FA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty))
     /* Local variables */
     H5FA_dblock_t *dblock = NULL;       /* Fixed array data block */
     haddr_t dblock_addr;                /* Fixed array data block address */
+    hbool_t inserted = FALSE;           /* Whether the header was inserted into cache */
 
     /* Sanity check */
     HDassert(hdr);
@@ -217,6 +218,14 @@ H5FA__dblock_create(H5FA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty))
     /* Cache the new fixed array data block */
     if(H5AC_insert_entry(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTINSERT, "can't add fixed array data block to cache")
+    inserted = TRUE;
+
+    /* Add data block as child of 'top' proxy */
+    if(hdr->top_proxy) {
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblock) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add fixed array entry as child of array proxy")
+        dblock->top_proxy = hdr->top_proxy;
+    } /* end if */
 
     /* Mark the header dirty (for updating statistics) */
     *hdr_dirty = TRUE;
@@ -228,6 +237,11 @@ CATCH
 
     if(!H5F_addr_defined(ret_value))
         if(dblock) {
+            /* Remove from cache, if inserted */
+            if(inserted)
+                if(H5AC_remove_entry(dblock) < 0)
+                    H5E_THROW(H5E_CANTREMOVE, "unable to remove fixed array data block from cache")
+
             /* Release data block's disk space */
             if(H5F_addr_defined(dblock->addr) && H5MF_xfree(hdr->f, H5FD_MEM_FARRAY_DBLOCK, dxpl_id, dblock->addr, (hsize_t)dblock->size) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to release fixed array data block")
@@ -258,6 +272,7 @@ H5FA__dblock_protect(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_addr,
     unsigned flags))
 
     /* Local variables */
+    H5FA_dblock_t *dblock;              /* Fixed array data block */
     H5FA_dblock_cache_ud_t udata;       /* Information needed for loading data block */
 
     /* Sanity check */
@@ -272,10 +287,27 @@ H5FA__dblock_protect(H5FA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_addr,
     udata.dblk_addr = dblk_addr;
 
     /* Protect the data block */
-    if(NULL == (ret_value = (H5FA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblk_addr, &udata, flags)))
+    if(NULL == (dblock = (H5FA_dblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblk_addr, &udata, flags)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect fixed array data block, address = %llu", (unsigned long long)dblk_addr)
 
+    /* Create top proxy, if it doesn't exist */
+    if(hdr->top_proxy && NULL == dblock->top_proxy) {
+        /* Add data block as child of 'top' proxy */
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dxpl_id, dblock) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add fixed array entry as child of array proxy")
+        dblock->top_proxy = hdr->top_proxy;
+    } /* end if */
+
+    /* Set return value */
+    ret_value = dblock;
+
 CATCH
+
+    /* Clean up on error */
+    if(!ret_value)
+        /* Release the data block, if it was protected */
+        if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FARRAY_DBLOCK, dblock->addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+            H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect fixed array data block, address = %llu", (unsigned long long)dblock->addr)
 
 END_FUNC(PKG)   /* end H5FA__dblock_protect() */
 
@@ -407,6 +439,9 @@ H5FA__dblock_dest(H5FA_dblock_t *dblock))
             H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
         dblock->hdr = NULL;
     } /* end if */
+
+    /* Sanity check */
+    HDassert(NULL == dblock->top_proxy);
 
     /* Free the data block itself */
     dblock = H5FL_FREE(H5FA_dblock_t, dblock);

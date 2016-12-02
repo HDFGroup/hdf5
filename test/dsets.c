@@ -23,11 +23,16 @@
 #define H5D_FRIEND		/*suppress error about including H5Dpkg	  */
 #define H5D_TESTING
 
+#define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
+#define H5FD_TESTING
+
 #define H5Z_FRIEND		/*suppress error about including H5Zpkg	  */
 
 #include "h5test.h"
 #include "H5srcdir.h"
 #include "H5Dpkg.h"
+#include "H5FDpkg.h"
+#include "H5VMprivate.h"
 #include "H5Zpkg.h"
 #ifdef H5_HAVE_SZLIB_H
 #   include "szlib.h"
@@ -52,8 +57,12 @@ const char *FILENAME[] = {
     "layout_extend",    /* 15 */
     "zero_chunk",	/* 16 */
     "chunk_single",     /* 17 */
-    "storage_size",	/* 18 */
-    "dls_01_strings",   /* 19 */
+    "swmr_non_latest",  /* 18 */
+    "earray_hdr_fd",    /* 19 */
+    "farray_hdr_fd",    /* 20 */
+    "bt2_hdr_fd",       /* 21 */
+    "storage_size",	/* 22 */
+    "dls_01_strings",   /* 23 */
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -126,6 +135,11 @@ const char *FILENAME[] = {
 #define DSET_FIXED_BIG		"DSET_FIXED_BIG"
 #define POINTS 			72
 #define POINTS_BIG 		2500
+
+/* Dataset names used for testing header flush dependencies */
+#define DSET_EARRAY_HDR_FD  "earray_hdr_fd"
+#define DSET_FARRAY_HDR_FD  "farray_hdr_fd"
+#define DSET_BT2_HDR_FD  "bt2_hdr_fd"
 
 /* Dataset names for testing Implicit Indexing */
 #define DSET_SINGLE_MAX         "DSET_SINGLE_MAX"
@@ -8219,7 +8233,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_chunk_fast(hid_t fapl)
+test_chunk_fast(const char *env_h5_driver, hid_t fapl)
 {
     char        filename[FILENAME_BUF_SIZE];
     hid_t       fid = -1;       /* File ID */
@@ -8232,6 +8246,7 @@ test_chunk_fast(hid_t fapl)
     hsize_t     hs_size[EARRAY_MAX_RANK];   /* Hyperslab size */
     hsize_t     chunk_dim[EARRAY_MAX_RANK]; /* Chunk dimensions */
     H5F_libver_t low;           /* File format low bound */
+    unsigned    swmr;           /* Whether file should be written with SWMR access enabled */
 
     TESTING("datasets w/extensible array as chunk index");
 
@@ -8266,8 +8281,18 @@ test_chunk_fast(hid_t fapl)
     fill = 1;
     H5VM_array_fill(hs_size, &fill, sizeof(fill), EARRAY_MAX_RANK);
 
-    {
+    /* Loop over using SWMR access to write */
+    for(swmr = 0; swmr <= 1; swmr++) {
 	int     compress;       /* Whether chunks should be compressed */
+
+        /* SWMR is now supported with/without latest format:  */
+	/* (1) write+latest-format (2) SWMR-write+non-latest-format */
+
+        /* Skip this iteration if SWMR I/O is not supported for the VFD specified
+         * by the environment variable.
+         */
+        if(swmr && !H5FD_supports_swmr_test(env_h5_driver))
+            continue;
 
 #ifdef H5_HAVE_FILTER_DEFLATE
         /* Loop over compressing chunks */
@@ -8318,7 +8343,7 @@ test_chunk_fast(hid_t fapl)
                         hsize_t u;             /* Local index variable */
 
                         /* Create file */
-                        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) FAIL_STACK_ERROR
+                        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (swmr ? H5F_ACC_SWMR_WRITE : 0), H5P_DEFAULT, my_fapl)) < 0) FAIL_STACK_ERROR
 
                         /* Create n-D dataspace */
                         fill = EARRAY_DSET_DIM;
@@ -8345,7 +8370,7 @@ test_chunk_fast(hid_t fapl)
                         if(H5D__layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
 
                         /* Chunk index type expected depends on whether we are using the latest version of the format */
-                        if(low == H5F_LIBVER_LATEST) {
+                        if(low == H5F_LIBVER_LATEST || swmr) {
                             /* Verify index type */
                             if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
                         } /* end if */
@@ -8445,7 +8470,7 @@ test_chunk_fast(hid_t fapl)
 
 
                         /* Re-open file & dataset */
-                        if((fid = H5Fopen(filename, H5F_ACC_RDONLY, my_fapl)) < 0) FAIL_STACK_ERROR
+                        if((fid = H5Fopen(filename, H5F_ACC_RDONLY | (swmr ? H5F_ACC_SWMR_READ : 0), my_fapl)) < 0) FAIL_STACK_ERROR
 
                         /* Open dataset */
                         if((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -8454,7 +8479,7 @@ test_chunk_fast(hid_t fapl)
                         if(H5D__layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
 
                         /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
-                        if(low == H5F_LIBVER_LATEST) {
+                        if(low == H5F_LIBVER_LATEST || swmr) {
                             /* Verify index type */
                             if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
                         } /* end if */
@@ -10316,6 +10341,615 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function: test_swmr_non_latest
+ *
+ * Purpose: Checks that a file created with either:
+ *		(a) SWMR-write + non-latest-format
+ *		(b) write + latest format
+ *	    will generate datset with latest chunk indexing type.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_swmr_non_latest(const char *env_h5_driver, hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       		/* File ID */
+    hid_t       gid = -1;       		/* Group ID */
+    hid_t       dcpl = -1;      		/* Dataset creation property list ID */
+    hid_t       sid = -1;       		/* Dataspace ID */
+    hid_t       did = -1;       		/* Dataset ID */
+    hsize_t     dim[1], dims2[2];        	/* Size of dataset */
+    hsize_t     max_dim[1], max_dims2[2];    	/* Maximum size of dataset */
+    hsize_t     chunk_dim[1], chunk_dims2[2];  	/* Chunk dimensions */
+    H5D_chunk_index_t idx_type; 		/* Chunk index type */
+    int         data;      			/* Data to be written to the dataset */
+    H5F_libver_t low;           		/* File format low bound */
+
+    TESTING("File created with write+latest-format/SWMR-write+non-latest-format: dataset with latest chunk index");
+
+    /* Skip this test if SWMR I/O is not supported for the VFD specified
+     * by the environment variable.
+     */
+    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+        SKIPPED();
+        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        return 0;
+    } /* end if */
+
+    /* Check if we are using the latest version of the format */
+    if(H5Pget_libver_bounds(fapl, &low, NULL) < 0) 
+        FAIL_STACK_ERROR
+
+    h5_fixname(FILENAME[18], fapl, filename, sizeof filename);
+
+    if(low == H5F_LIBVER_LATEST) {
+        /* Create file with write+latest-format */
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) 
+            FAIL_STACK_ERROR
+    } else {
+        /* Create file with SWMR-write+non-latest-format */
+        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0) 
+            FAIL_STACK_ERROR
+    } /* end else */
+
+    /* Create a chunked dataset: this will use extensible array chunk indexing */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
+        FAIL_STACK_ERROR
+
+    chunk_dim[0] = 6;
+    if(H5Pset_chunk(dcpl, 1, chunk_dim) < 0) 
+        FAIL_STACK_ERROR
+
+    dim[0] = 1;
+    max_dim[0] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(1, dim, max_dim)) < 0) 
+        FAIL_STACK_ERROR
+
+    if((did = H5Dcreate2(fid, DSET_CHUNKED_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
+        FAIL_STACK_ERROR
+
+    /* Write to the dataset */
+    data = 100;
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+        FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_EARRAY) 
+        FAIL_PUTS_ERROR("created dataset not indexed by extensible array")
+
+    /* Closing */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    /* Open the file again */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) 
+        FAIL_STACK_ERROR
+
+    /* Open the dataset in the file */
+    if((did = H5Dopen2(fid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+        FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_EARRAY) 
+        FAIL_PUTS_ERROR("created dataset not indexed by extensible array")
+
+    /* Read from the dataset and verify data read is correct */
+    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
+        FAIL_STACK_ERROR
+    if(data != 100)
+        TEST_ERROR
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+
+    /* Create a group in the file */
+    if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a chunked dataset in the group: this will use v2 B-tree chunk indexing */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
+        FAIL_STACK_ERROR
+
+    chunk_dims2[0] = chunk_dims2[1] = 10;
+    if(H5Pset_chunk(dcpl, 2, chunk_dims2) < 0) 
+        FAIL_STACK_ERROR
+
+    dims2[0] = dims2[1] = 1;
+    max_dims2[0] = max_dims2[1] = H5S_UNLIMITED;
+    if((sid = H5Screate_simple(2, dims2, max_dims2)) < 0) 
+        FAIL_STACK_ERROR
+
+    if((did = H5Dcreate2(gid, DSET_CHUNKED_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
+        FAIL_STACK_ERROR
+
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+        FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_BT2) 
+        FAIL_PUTS_ERROR("created dataset not indexed by v2 B-tree")
+
+    /* Closing */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    /* Open the file again */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the group */
+    if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the dataset in the group */
+    if((did = H5Dopen2(gid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+        FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_BT2) 
+        FAIL_PUTS_ERROR("created dataset not indexed by v2 B-tree")
+
+    /* Closing */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+
+    /* Reopen the file with SWMR-write */
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the dataset in the file */
+    if((did = H5Dopen2(fid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+        FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_EARRAY) 
+        FAIL_PUTS_ERROR("created dataset not indexed by extensible array")
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+
+    /* Open the group */
+    if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the dataset in the group */
+    if((did = H5Dopen2(gid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the dataset's indexing type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+        FAIL_STACK_ERROR
+    if(idx_type != H5D_CHUNK_IDX_BT2) 
+        FAIL_PUTS_ERROR("created dataset not indexed by v2 B-tree")
+
+    /* Write to the dataset in the group */
+    data = 99;
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
+        FAIL_STACK_ERROR
+
+    /* Closing */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    /* Open the file again with SWMR read access */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0) 
+        FAIL_STACK_ERROR
+
+    if((gid = H5Gopen2(fid, "group", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the dataset */
+    if((did = H5Dopen2(gid, DSET_CHUNKED_NAME, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Read from the dataset and verify data read is correct */
+    data = 0;
+    if(H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data) < 0)
+        FAIL_STACK_ERROR
+    if(data != 99)
+        TEST_ERROR
+
+    /* Closing */
+    if(H5Dclose(did) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Gclose(gid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* test_swmr_non_latest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_earray_hdr_fd
+ *
+ * Purpose: Tests that extensible array header flush dependencies
+ *          are created and torn down correctly when used as a
+ *          chunk index.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_earray_hdr_fd(const char *env_h5_driver, hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t fid = -1;
+    hid_t sid = -1;
+    hid_t did = -1;
+    hid_t tid = -1;
+    hid_t dcpl = -1;
+    hid_t msid = -1;
+    H5D_chunk_index_t idx_type;
+    const hsize_t shape[1] = { 8 };
+    const hsize_t maxshape[1] = { H5S_UNLIMITED };
+    const hsize_t chunk[1] = { 8 };
+    const int buffer[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+    H5O_info_t info;
+
+    TESTING("Extensible array chunk index header flush dependencies handled correctly");
+
+    /* Skip this test if SWMR I/O is not supported for the VFD specified
+     * by the environment variable.
+     */
+    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+        SKIPPED();
+        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        return 0;
+    } /* end if */
+
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR;
+
+    h5_fixname(FILENAME[19], fapl, filename, sizeof(filename));
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create a dataset with one unlimited dimension */
+    if((sid = H5Screate_simple(1, shape, maxshape)) < 0)
+        FAIL_STACK_ERROR;
+    if((tid = H5Tcopy(H5T_NATIVE_INT32)) < 0)
+        FAIL_STACK_ERROR;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_chunk(dcpl, 1, chunk) < 0)
+        FAIL_STACK_ERROR;
+    if((did = H5Dcreate2(fid, DSET_EARRAY_HDR_FD, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT )) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Verify the chunk index type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+        FAIL_STACK_ERROR;
+    if(idx_type != H5D_CHUNK_IDX_EARRAY)
+        FAIL_PUTS_ERROR("should be using extensible array as index");
+
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR;
+
+    if(H5Fstart_swmr_write(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Write data to the dataset */
+    if((did = H5Dopen2(fid, DSET_EARRAY_HDR_FD, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if((tid = H5Dget_type(did)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
+    if(H5Oget_info_by_name(fid, DSET_EARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Oget_info_by_name(fid, DSET_EARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
+
+    if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Fclose(fid);
+        H5Dclose(did);
+        H5Pclose(dcpl);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Sclose(msid);
+    } H5E_END_TRY;
+    return -1;
+} /* test_earray_hdr_fd() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_farray_hdr_fd
+ *
+ * Purpose: Tests that fixed array header flush dependencies
+ *          are created and torn down correctly when used as a
+ *          chunk index.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_farray_hdr_fd(const char *env_h5_driver, hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t fid = -1;
+    hid_t sid = -1;
+    hid_t did = -1;
+    hid_t tid = -1;
+    hid_t dcpl = -1;
+    hid_t msid = -1;
+    H5D_chunk_index_t idx_type;
+    const hsize_t shape[1] = { 8 };
+    const hsize_t maxshape[1] = { 64 };
+    const hsize_t chunk[1] = { 8 };
+    const int buffer[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+    H5O_info_t info;
+
+    TESTING("Fixed array chunk index header flush dependencies handled correctly");
+
+    /* Skip this test if SWMR I/O is not supported for the VFD specified
+     * by the environment variable.
+     */
+    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+        SKIPPED();
+        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        return 0;
+    } /* end if */
+
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR;
+
+    h5_fixname(FILENAME[20], fapl, filename, sizeof(filename));
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create a chunked dataset with fixed dimensions */
+    if((sid = H5Screate_simple(1, shape, maxshape)) < 0)
+        FAIL_STACK_ERROR;
+    if((tid = H5Tcopy(H5T_NATIVE_INT32)) < 0)
+        FAIL_STACK_ERROR;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_chunk(dcpl, 1, chunk) < 0)
+        FAIL_STACK_ERROR;
+    if((did = H5Dcreate2(fid, DSET_FARRAY_HDR_FD, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT )) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Verify the chunk index type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+        FAIL_STACK_ERROR;
+    if(idx_type != H5D_CHUNK_IDX_FARRAY)
+        FAIL_PUTS_ERROR("should be using fixed array as index");
+
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR;
+
+    if(H5Fstart_swmr_write(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Write data to the dataset */
+    if((did = H5Dopen2(fid, DSET_FARRAY_HDR_FD, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if((tid = H5Dget_type(did)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
+    if(H5Oget_info_by_name(fid, DSET_FARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Oget_info_by_name(fid, DSET_FARRAY_HDR_FD, &info, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
+
+    if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Fclose(fid);
+        H5Dclose(did);
+        H5Pclose(dcpl);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Sclose(msid);
+    } H5E_END_TRY;
+    return -1;
+} /* test_farray_hdr_fd() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: test_bt2_hdr_fd
+ *
+ * Purpose: Tests that version 2 B-tree header flush dependencies
+ *          are created and torn down correctly when used as a
+ *          chunk index.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_bt2_hdr_fd(const char *env_h5_driver, hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t fid = -1;
+    hid_t sid = -1;
+    hid_t did = -1;
+    hid_t tid = -1;
+    hid_t dcpl = -1;
+    hid_t msid = -1;
+    H5D_chunk_index_t idx_type;
+    const hsize_t shape[2] = { 8, 8 };
+    const hsize_t maxshape[2] = { H5S_UNLIMITED, H5S_UNLIMITED };
+    const hsize_t chunk[2] = { 8, 8 };
+    const int buffer[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+    H5O_info_t info;
+
+    TESTING("Version 2 B-tree chunk index header flush dependencies handled correctly");
+
+    /* Skip this test if SWMR I/O is not supported for the VFD specified
+     * by the environment variable.
+     */
+    if(!H5FD_supports_swmr_test(env_h5_driver)) {
+        SKIPPED();
+        HDputs("    Test skipped due to VFD not supporting SWMR I/O.");
+        return 0;
+    } /* end if */
+
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        FAIL_STACK_ERROR;
+
+    h5_fixname(FILENAME[21], fapl, filename, sizeof(filename));
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Create a chunked dataset with fixed dimensions */
+    if((sid = H5Screate_simple(2, shape, maxshape)) < 0)
+        FAIL_STACK_ERROR;
+    if((tid = H5Tcopy(H5T_NATIVE_INT32)) < 0)
+        FAIL_STACK_ERROR;
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pset_chunk(dcpl, 2, chunk) < 0)
+        FAIL_STACK_ERROR;
+    if((did = H5Dcreate2(fid, DSET_BT2_HDR_FD, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT )) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Verify the chunk index type */
+    if(H5D__layout_idx_type_test(did, &idx_type) < 0) 
+        FAIL_STACK_ERROR;
+    if(idx_type != H5D_CHUNK_IDX_BT2)
+        FAIL_PUTS_ERROR("should be using fixed array as index");
+
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Pclose(dcpl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR;
+
+    if(H5Fstart_swmr_write(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Write data to the dataset */
+    if((did = H5Dopen2(fid, DSET_BT2_HDR_FD, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR;
+    if((tid = H5Dget_type(did)) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Tclose(tid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* The second call triggered a bug in the library (JIRA issue: SWMR-95) */
+    if(H5Oget_info_by_name(fid, DSET_BT2_HDR_FD, &info, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Oget_info_by_name(fid, DSET_BT2_HDR_FD, &info, H5P_DEFAULT) < 0)
+        FAIL_STACK_ERROR;
+
+    if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR;
+    if(H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl);
+        H5Fclose(fid);
+        H5Dclose(did);
+        H5Pclose(dcpl);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        H5Sclose(msid);
+    } H5E_END_TRY;
+    return -1;
+} /* test_bt2_hdr_fd() */
+
+
+/*-------------------------------------------------------------------------
  * Function: test_storage_size
  *
  * Purpose:     Tests results from querying the storage size of a dataset,
@@ -10345,7 +10979,7 @@ test_storage_size(hid_t fapl)
 
     TESTING("querying storage size");
 
-    h5_fixname(FILENAME[18], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[22], fapl, filename, sizeof filename);
 
     /* Create file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
@@ -11943,7 +12577,7 @@ dls_01_main( void ) {
 
     TESTING("Testing DLS bugfix 1");
 
-    if ( NULL == h5_fixname(FILENAME[19], H5P_DEFAULT, filename, 
+    if ( NULL == h5_fixname(FILENAME[23], H5P_DEFAULT, filename, 
                             sizeof(filename)) )
 	TEST_ERROR
 
@@ -12127,7 +12761,7 @@ main(void)
         nerrors += (test_huge_chunks(my_fapl) < 0		? 1 : 0);
         nerrors += (test_chunk_cache(my_fapl) < 0		? 1 : 0);
         nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0   ? 1 : 0);
-        nerrors += (test_chunk_fast(my_fapl) < 0	? 1 : 0);
+        nerrors += (test_chunk_fast(envval, my_fapl) < 0	? 1 : 0);
         nerrors += (test_reopen_chunk_fast(my_fapl) < 0		? 1 : 0);
         nerrors += (test_chunk_fast_bug1(my_fapl) < 0           ? 1 : 0);
         nerrors += (test_chunk_expand(my_fapl) < 0		? 1 : 0);
@@ -12138,6 +12772,10 @@ main(void)
         nerrors += (test_single_chunk(my_fapl) < 0              ? 1 : 0);	
         nerrors += (test_large_chunk_shrink(my_fapl) < 0        ? 1 : 0);
         nerrors += (test_zero_dim_dset(my_fapl) < 0             ? 1 : 0);
+        nerrors += (test_swmr_non_latest(envval, my_fapl) < 0   ? 1 : 0);
+        nerrors += (test_earray_hdr_fd(envval, my_fapl) < 0     ? 1 : 0);
+        nerrors += (test_farray_hdr_fd(envval, my_fapl) < 0     ? 1 : 0);
+        nerrors += (test_bt2_hdr_fd(envval, my_fapl) < 0        ? 1 : 0);
         nerrors += (test_storage_size(my_fapl) < 0              ? 1 : 0);
 
         if(H5Fclose(file) < 0)
