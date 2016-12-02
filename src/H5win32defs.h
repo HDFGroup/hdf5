@@ -104,10 +104,10 @@ extern "C" {
     H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
 
     /* Round functions only needed for VS2012 and earlier.
-    * They are always built to ensure they don't go stale and
-    * can be deleted (along with their #defines, above) when we
-    * drop VS2012 support.
-    */
+     * They are always built to ensure they don't go stale and
+     * can be deleted (along with their #defines, above) when we
+     * drop VS2012 support.
+     */
     H5_DLL long long Wllround(double arg);
     H5_DLL long long Wllroundf(float arg);
     H5_DLL long Wlround(double arg);
