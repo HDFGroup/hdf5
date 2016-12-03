@@ -73,6 +73,7 @@ typedef struct H5VL_daosm_group_t {
     H5VL_daosm_obj_t common; /* Must be first */
     daos_obj_id_t oid;
     daos_handle_t obj_oh;
+    hid_t gcpl_id;
     hid_t gapl_id;
 } H5VL_daosm_group_t;
 

@@ -41,7 +41,7 @@ hid_t H5VL_DAOSM_g = 0;
 #define H5VL_DAOSM_INT_MD_KEY "Internal Metadata"
 #define H5VL_DAOSM_TYPE_KEY "Datatype"
 #define H5VL_DAOSM_SPACE_KEY "Dataspace"
-#define H5VL_DAOSM_DCPL_KEY "Creation Property List"
+#define H5VL_DAOSM_CPL_KEY "Creation Property List"
 #define H5VL_DAOSM_CHUNK_KEY 0u
 
 /* Prototypes */
@@ -49,21 +49,37 @@ static void *H5VL_daosm_fapl_copy(const void *_old_fa);
 static herr_t H5VL_daosm_fapl_free(void *_fa);
 
 /* File callbacks */
-static void *H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
-static void *H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_daosm_file_create(const char *name, unsigned flags,
+    hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_daosm_file_open(const char *name, unsigned flags,
+    hid_t fapl_id, hid_t dxpl_id, void **req);
 //static herr_t H5VL_iod_file_get(void *file, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_daosm_file_close(void *file, hid_t dxpl_id, void **req);
 
 /* Group callbacks */
+static void *H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file,
+    hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req,
+    daos_epoch_t epoch);
+static void *H5VL_daosm_group_create(void *_obj, H5VL_loc_params_t loc_params,
+    const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
+static void * H5VL_daosm_group_open_helper(H5VL_daosm_file_t *file,
+    daos_obj_id_t oid, hid_t gapl_id, hid_t dxpl_id, void **req,
+    daos_epoch_t epoch);
+static void *H5VL_daosm_group_open(void *_obj, H5VL_loc_params_t loc_params,
+    const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_daosm_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Dataset callbacks */
-static void *H5VL_daosm_dataset_create(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
-static void *H5VL_daosm_dataset_open(void *obj, H5VL_loc_params_t loc_params, const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL_daosm_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                    hid_t file_space_id, hid_t plist_id, void *buf, void **req);
-static herr_t H5VL_daosm_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                     hid_t file_space_id, hid_t plist_id, const void *buf, void **req);
+static void *H5VL_daosm_dataset_create(void *obj, H5VL_loc_params_t loc_params,
+    const char *name, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
+static void *H5VL_daosm_dataset_open(void *obj, H5VL_loc_params_t loc_params,
+    const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL_daosm_dataset_read(void *dset, hid_t mem_type_id,
+    hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf,
+    void **req);
+static herr_t H5VL_daosm_dataset_write(void *dset, hid_t mem_type_id,
+    hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf,
+    void **req);
 /*static herr_t H5VL_daosm_dataset_specific(void *_dset, H5VL_dataset_specific_t specific_type,
                                         hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_daosm_dataset_get(void *dset, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);*/
@@ -129,12 +145,12 @@ static H5VL_class_t H5VL_daosm_g = {
         H5VL_daosm_file_close                     /* close */
     },
     {                                           /* group_cls */
-        NULL,//H5VL_iod_group_create,                  /* create */
-        NULL,//H5VL_iod_group_open,                    /* open */
+        H5VL_daosm_group_create,                /* create */
+        H5VL_daosm_group_open,                  /* open */
         NULL,//H5VL_iod_group_get,                     /* get */
         NULL,                                   /* specific */
         NULL,                                   /* optional */
-        NULL,//H5VL_iod_group_close                    /* close */
+        H5VL_daosm_group_close                  /* close */
     },
     {                                           /* link_cls */
         NULL,//H5VL_iod_link_create,                   /* create */
@@ -196,7 +212,7 @@ done:
  * Purpose:     Initialize this vol plugin by registering the driver with the
  *              library.
  *
- * Return:      Success:        The ID for the iod plugin.
+ * Return:      Success:        The ID for the DAOS-M plugin.
  *              Failure:        Negative.
  *
  * Programmer:  Neil Fortner
@@ -211,7 +227,7 @@ H5VL_daosm_init(void)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Register the IOD VOL, if it isn't already */
+    /* Register the DAOS-M VOL, if it isn't already */
     if(NULL == H5I_object_verify(H5VL_DAOSM_g, H5I_VOL)) {
         if((H5VL_DAOSM_g = H5VL_register((const H5VL_class_t *)&H5VL_daosm_g, 
                                           sizeof(H5VL_class_t), TRUE)) < 0)
@@ -296,7 +312,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL_daosm_fapl_copy
  *
- * Purpose:     Copies the iod-specific file access properties.
+ * Purpose:     Copies the daosm-specific file access properties.
  *
  * Return:      Success:        Ptr to a new property list
  *              Failure:        NULL
@@ -345,7 +361,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL_daosm_fapl_free
  *
- * Purpose:     Frees the iod-specific file access properties.
+ * Purpose:     Frees the daosm-specific file access properties.
  *
  * Return:      Success:    0
  *              Failure:    -1
@@ -549,11 +565,21 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     file->fcpl_id = FAIL;
     file->fapl_id = FAIL;
 
-    /* allocate the root group */
-    if(NULL == (file->root_grp = H5FL_CALLOC(H5VL_daosm_group_t)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate root group");
-    file->root_grp->obj_oh = DAOS_HDL_INVAL;
-    file->root_grp->gapl_id = FAIL;
+    /* Fill in fields of file we know */
+    file->common.type = H5I_FILE;
+    file->common.file = file;
+    file->file_name = HDstrdup(name);
+    file->flags = flags;
+    file->max_oid = 0;
+    file->max_oid_dirty = FALSE;
+    if((file->fcpl_id = H5Pcopy(fcpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy fcpl");
+    if((file->fapl_id = H5Pcopy(fapl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy fapl");
+
+    /* Duplicate communicator and Info object. */
+    if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");
 
     MPI_Comm_rank(fa->comm, &file->my_rank);
     MPI_Comm_size(fa->comm, &file->num_procs);
@@ -610,14 +636,8 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create global metadata object: %d", ret)
 
         /* Create root group */
-        file->root_grp->oid.lo = 1;
-        daos_obj_id_generate(&file->root_grp->oid, DAOS_OC_TINY_RW);
-        if(0 != (ret = daos_obj_declare(file->coh, file->root_grp->oid, epoch, NULL /*oa*/, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create root group: %d", ret)
-
-        /* Open root group */
-        if(0 != (ret = daos_obj_open(file->coh, file->root_grp->oid, epoch, DAOS_OO_RW, &file->root_grp->obj_oh, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
+        if(NULL == (file->root_grp = (H5VL_daosm_group_t *)H5VL_daosm_group_create_helper(file, fcpl_id, H5P_GROUP_ACCESS_DEFAULT, dxpl_id, req, epoch)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create root group")
 
         /* Write root group OID, max oid per process to global metadata object
          * DSMINC */
@@ -676,6 +696,8 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
         } /* end if */
     } /* end if */
     else {
+        daos_obj_id_t root_grp_oid;
+
         /* Receive bcast_buf_64 */
         if(MPI_SUCCESS != MPI_Bcast(bcast_buf_64, sizeof(bcast_buf_64)/sizeof(bcast_buf_64[0]), MPI_UINT64_T, 0, fa->comm))
             HGOTO_ERROR(H5E_FILE, H5E_MPI, NULL, "can't bcast global handle sizes")
@@ -687,9 +709,9 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
         } /* end if */
 
         /* Retrieve root group oid from bcast_buf_64 */
-        file->root_grp->oid.lo = bcast_buf_64[2];
-        file->root_grp->oid.mid = bcast_buf_64[3];
-        file->root_grp->oid.hi = bcast_buf_64[4];
+        root_grp_oid.lo = bcast_buf_64[2];
+        root_grp_oid.mid = bcast_buf_64[3];
+        root_grp_oid.hi = bcast_buf_64[4];
 
         /* Retrieve epoch from bcast_buf_64 */
         HDassert(sizeof(bcast_buf_64[5]) == sizeof(epoch));
@@ -716,8 +738,8 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't get local container handle: %d", ret)
 
         /* Open root group */
-        if(0 != (ret = daos_obj_open(file->coh, file->root_grp->oid, epoch, DAOS_OO_RW, &file->root_grp->obj_oh, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
+        if(NULL == (file->root_grp = (H5VL_daosm_group_t *)H5VL_daosm_group_open_helper(file, root_grp_oid, H5P_GROUP_ACCESS_DEFAULT, dxpl_id, req, epoch)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't open root group")
 
         /* Handle pool_info and container_info DSMINC */
     } /* end else */
@@ -725,25 +747,6 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     /* Open global metadata object */
     if(0 != (ret = daos_obj_open(file->glob_md_oh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
-
-    /* Finish setting up file struct */
-    file->common.type = H5I_FILE;
-    file->common.file = file;
-    file->file_name = HDstrdup(name);
-    file->flags = flags;
-    file->root_grp->common.type = H5I_GROUP;
-    file->root_grp->common.file = file;
-    if((file->root_grp->gapl_id = H5Pcopy(H5P_GROUP_ACCESS_DEFAULT)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy default gapl");
-    file->max_oid = 1;
-    if((file->fcpl_id = H5Pcopy(fcpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy fcpl");
-    if((file->fapl_id = H5Pcopy(fapl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy fapl");
-
-    /* Duplicate communicator and Info object. */
-    if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");
 
     /* Determine if we want to acquire a transaction for the file creation */
     if(H5P_get(plist, H5VL_ACQUIRE_TR_ID, &trans_id) < 0)
@@ -791,7 +794,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_file_create() */
+} /* end H5VL_daosm_file_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -820,6 +823,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     uint64_t bcast_buf_64[6];
     char *gh_buf = NULL;
     daos_obj_id_t gmd_oid = {0, 0, 0};
+    daos_obj_id_t root_grp_oid;
     hbool_t must_bcast = FALSE;
     int ret;
     void *ret_value = NULL;
@@ -830,21 +834,27 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
     if(NULL == (fa = (H5VL_daosm_fapl_t *)H5P_get_vol_info(plist)))
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get IOD info struct")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't get DAOS-M info struct")
 
     /* allocate the file object that is returned to the user */
     if(NULL == (file = H5FL_CALLOC(H5VL_daosm_file_t)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate IOD file struct");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate DAOS-M file struct");
     file->glob_md_oh = DAOS_HDL_INVAL;
     file->root_grp = NULL;
     file->fcpl_id = FAIL;
     file->fapl_id = FAIL;
 
-    /* allocate the root group */
-    if(NULL == (file->root_grp = H5FL_CALLOC(H5VL_daosm_group_t)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate root group");
-    file->root_grp->obj_oh = DAOS_HDL_INVAL;
-    file->root_grp->gapl_id = FAIL;
+    /* Fill in fields of file we know */
+    file->common.type = H5I_FILE;
+    file->common.file = file;
+    file->file_name = HDstrdup(name);
+    file->flags = flags;
+    if((file->fapl_id = H5Pcopy(fapl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy fapl");
+
+    /* Duplicate communicator and Info object. */
+    if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");
 
     MPI_Comm_rank(fa->comm, &file->my_rank);
     MPI_Comm_size(fa->comm, &file->num_procs);
@@ -882,13 +892,6 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
 
         /* Read from the HCE */
         epoch--;
-
-        /* Open root group */
-        /* Read root group OID from global metadata object DSMINC */
-        file->root_grp->oid.lo = 1;
-        daos_obj_id_generate(&file->root_grp->oid, DAOS_OC_TINY_RW);
-        if(0 != (ret = daos_obj_open(file->coh, file->root_grp->oid, epoch, DAOS_OO_RW, &file->root_grp->obj_oh, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
 
         /* Bcast global handles if there are other processes */
         if(file->num_procs > 1) {
@@ -983,10 +986,6 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         if(0 != (ret = daos_cont_global2local(file->poh, glob, &file->coh)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't get local container handle: %d", ret)
 
-        /* Open root group */
-        if(0 != (ret = daos_obj_open(file->coh, file->root_grp->oid, epoch, DAOS_OO_RW, &file->root_grp->obj_oh, NULL /*event*/)))
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
-
         /* Handle pool_info and container_info DSMINC */
     } /* end else */
 
@@ -995,22 +994,16 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
 
     /* Finish setting up file struct */
-    file->common.type = H5I_FILE;
-    file->common.file = file;
-    file->file_name = HDstrdup(name);
-    file->flags = flags;
-    file->root_grp->common.type = H5I_GROUP;
-    file->root_grp->common.file = file;
-    if((file->root_grp->gapl_id = H5Pcopy(H5P_GROUP_ACCESS_DEFAULT)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy default gapl");
-    HDmemset(&file->max_oid, 0, sizeof(file->max_oid));
-    file->max_oid = 1;
-    if((file->fapl_id = H5Pcopy(fapl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy fapl");
+    file->max_oid = 1; //DSMINC
+    file->max_oid_dirty = FALSE; //DSMINC
 
-    /* Duplicate communicator and Info object. */
-    if(FAIL == H5FD_mpi_comm_info_dup(fa->comm, fa->info, &file->comm, &file->info))
-        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed");
+    /* Open root group */
+    root_grp_oid.lo = 1; //DSMINC
+    root_grp_oid.mid = 0; //DSMINC
+    root_grp_oid.hi = 0; //DSMINC
+    daos_obj_id_generate(&root_grp_oid, DAOS_OC_TINY_RW); //DSMINC
+    if(NULL == (file->root_grp = (H5VL_daosm_group_t *)H5VL_daosm_group_open_helper(file, root_grp_oid, H5P_GROUP_ACCESS_DEFAULT, dxpl_id, req, epoch)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't open root group")
 
     /* Determine if we want to acquire a transaction for the opened file */
     if(H5P_get(plist, H5VL_ACQUIRE_TR_ID, &trans_id) < 0)
@@ -1051,7 +1044,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_iod_file_open() */
+} /* end H5VL_daosm_file_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -1114,6 +1107,440 @@ H5VL_daosm_file_close(void *_file, hid_t dxpl_id, void **req)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_group_create_helper
+ *
+ * Purpose:     Performs the actual group creation, but does not create a
+ *              link.
+ *
+ * Return:      Success:        group object. 
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              November, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
+    hid_t gapl_id, hid_t dxpl_id, void **req, daos_epoch_t epoch)
+{
+    H5VL_daosm_group_t *grp = NULL;
+    daos_key_t dkey;
+    daos_vec_iod_t iod;
+    daos_recx_t recx;
+    daos_sg_list_t sgl;
+    daos_iov_t sg_iov;
+    size_t gcpl_size = 0;
+    void *gcpl_buf = NULL;
+    char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
+    char gcpl_key[] = H5VL_DAOSM_CPL_KEY;
+    int ret;
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Allocate the group object that is returned to the user */
+    if(NULL == (grp = H5FL_CALLOC(H5VL_daosm_group_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate DAOS-M group struct");
+    grp->obj_oh = DAOS_HDL_INVAL;
+    grp->gcpl_id = FAIL;
+    grp->gapl_id = FAIL;
+
+    /* Create group */
+    grp->oid.lo = file->max_oid + (uint64_t)1;
+    daos_obj_id_generate(&grp->oid, DAOS_OC_TINY_RW);
+    if(0 != (ret = daos_obj_declare(file->coh, grp->oid, epoch, NULL /*oa*/, NULL /*event*/)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create dataset: %d", ret)
+    file->max_oid = grp->oid.lo;
+    file->max_oid_dirty = TRUE;
+
+    /* Open group */
+    if(0 != (ret = daos_obj_open(file->coh, grp->oid, epoch, DAOS_OO_RW, &grp->obj_oh, NULL /*event*/)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
+
+    /* Encode GCPL */
+    if(H5Pencode(gcpl_id, NULL, &gcpl_size) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "can't determine serialized length of gcpl")
+    if(NULL == (gcpl_buf = H5MM_malloc(gcpl_size)))
+        HGOTO_ERROR(gcpl_id, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized gcpl")
+    if(H5Pencode(gcpl_id, gcpl_buf, &gcpl_size) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTENCODE, NULL, "can't serialize gcpl")
+
+    /* Set up operation to write GCPL to group */
+    /* Set up dkey */
+    daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
+
+    /* Set up recx */
+    recx.rx_rsize = (uint64_t)gcpl_size;
+    recx.rx_idx = (uint64_t)0;
+    recx.rx_nr = (uint64_t)1;
+
+    /* Set up iod */
+    HDmemset(&iod, 0, sizeof(iod));
+    daos_iov_set(&iod.vd_name, (void *)gcpl_key, (daos_size_t)(sizeof(gcpl_key) - 1));
+    daos_csum_set(&iod.vd_kcsum, NULL, 0);
+    iod.vd_nr = 1u;
+    iod.vd_recxs = &recx;
+
+    /* Set up sgl */
+    daos_iov_set(&sg_iov, gcpl_buf, (daos_size_t)gcpl_size);
+    sgl.sg_nr.num = 1;
+    sgl.sg_iovs = &sg_iov;
+
+    /* Write internal metadata to group */
+    if(0 != (ret = daos_obj_update(grp->obj_oh, epoch, &dkey, 1, &iod, &sgl, NULL /*event*/)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't write metadata to group: %d", ret)
+
+    /* Finish setting up group struct */
+    grp->common.type = H5I_GROUP;
+    grp->common.file = file;
+    if((grp->gcpl_id = H5Pcopy(gcpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gcpl");
+    if((grp->gapl_id = H5Pcopy(gapl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gapl");
+
+    ret_value = (void *)grp;
+
+done:
+    /* Free memory */
+    gcpl_buf = H5MM_xfree(gcpl_buf);
+
+    /* If the operation is synchronous and it failed at the server, or it failed
+     * locally, then cleanup and return fail */
+    /* Destroy DAOS object if created before failure DSMINC */
+    if(NULL == ret_value)
+        /* Close group */
+        if(grp != NULL && H5VL_daosm_group_close(grp, dxpl_id, req) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, NULL, "can't close group")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_group_create_helper() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_group_create
+ *
+ * Purpose:     Sends a request to DAOS-M to create a group
+ *
+ * Return:      Success:        group object. 
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              November, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_daosm_group_create(void *_obj,
+    H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name,
+    hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req)
+{
+    H5VL_daosm_obj_t *obj = (H5VL_daosm_obj_t *)_obj;
+    H5VL_daosm_group_t *grp = NULL;
+    H5P_genplist_t *plist = NULL;      /* Property list pointer */
+    hid_t trans_id;
+    H5TR_t *tr = NULL;
+    H5VL_daosm_group_t *target_grp = NULL;
+    const char *target_name = NULL;
+    size_t target_name_len;
+    char const_link_key[] = H5VL_DAOSM_LINK_KEY;
+    daos_key_t dkey;
+    daos_vec_iod_t iod;
+    daos_recx_t recx;
+    daos_sg_list_t sgl;
+    daos_iov_t sg_iov;
+    uint8_t oid_buf[24];
+    uint8_t *p;
+    int ret;
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* get the transaction ID */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+    if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for trans_id");
+
+    /* get the TR object */
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a Transaction ID")
+
+    /* Traverse the path */
+    /* Just use obj for now DSMINC */
+    if(obj->type == H5I_FILE)
+        target_grp = ((H5VL_daosm_file_t *)obj)->root_grp;
+    else
+        target_grp = (H5VL_daosm_group_t *)obj;
+    target_name = name;
+    target_name_len = HDstrlen(target_name);
+
+    /* Create group */
+    if(NULL == (grp = (H5VL_daosm_group_t *)H5VL_daosm_group_create_helper(obj->file, gcpl_id, gapl_id, dxpl_id, req, tr->epoch)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create group")
+
+    /* Set up dkey */
+    /* For now always use dkey = const, akey = name. Add option to switch these
+     * DSMINC */
+    daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
+
+    /* Set up recx */
+    recx.rx_rsize = (uint64_t)sizeof(daos_obj_id_t);
+    recx.rx_idx = (uint64_t)0;
+    recx.rx_nr = (uint64_t)1;
+
+    /* Set up iod */
+    HDmemset(&iod, 0, sizeof(iod));
+    daos_iov_set(&iod.vd_name, (void *)target_name, (daos_size_t)target_name_len);
+    daos_csum_set(&iod.vd_kcsum, NULL, 0);
+    iod.vd_nr = 1u;
+    iod.vd_recxs = &recx;
+
+    /* Encode group oid */
+    HDassert(sizeof(oid_buf) == sizeof(grp->oid));
+    p = oid_buf;
+    UINT64ENCODE(p, grp->oid.lo)
+    UINT64ENCODE(p, grp->oid.mid)
+    UINT64ENCODE(p, grp->oid.hi)
+
+    /* Set up sgl */
+    daos_iov_set(&sg_iov, oid_buf, (daos_size_t)sizeof(oid_buf));
+    sgl.sg_nr.num = 1;
+    sgl.sg_iovs = &sg_iov;
+
+    /* Create link to group */
+    if(0 != (ret = daos_obj_update(target_grp->obj_oh, tr->epoch, &dkey, 1, &iod, &sgl, NULL /*event*/)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create link to group: %d", ret)
+
+    ret_value = (void *)grp;
+
+done:
+    /* If the operation is synchronous and it failed at the server, or it failed
+     * locally, then cleanup and return fail */
+    /* Destroy DAOS object if created before failure DSMINC */
+    if(NULL == ret_value)
+        /* Close group */
+        if(grp != NULL && H5VL_daosm_group_close(grp, dxpl_id, req) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, NULL, "can't close group")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_group_create() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_group_open_helper
+ *
+ * Purpose:     Performs the actual group open, given the oid.
+ *
+ * Return:      Success:        group object. 
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              December, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_daosm_group_open_helper(H5VL_daosm_file_t *file, daos_obj_id_t oid,
+    hid_t gapl_id, hid_t dxpl_id, void **req, daos_epoch_t epoch)
+{
+    H5VL_daosm_group_t *grp = NULL;
+    daos_key_t dkey;
+    daos_vec_iod_t iod;
+    daos_recx_t recx;
+    daos_sg_list_t sgl;
+    daos_iov_t sg_iov;
+    void *gcpl_buf = NULL;
+    char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
+    char gcpl_key[] = H5VL_DAOSM_CPL_KEY;
+    int ret;
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Allocate the group object that is returned to the user */
+    if(NULL == (grp = H5FL_CALLOC(H5VL_daosm_group_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate DAOS-M group struct");
+    grp->oid = oid;
+    grp->obj_oh = DAOS_HDL_INVAL;
+    grp->gcpl_id = FAIL;
+    grp->gapl_id = FAIL;
+
+    /* Open group */
+    if(0 != (ret = daos_obj_open(file->coh, oid, epoch, DAOS_OO_RW, &grp->obj_oh, NULL /*event*/)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't open root group: %d", ret)
+
+    /* Set up operation to read GCPL size from group */
+    /* Set up dkey */
+    daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
+
+    /* Set up recx */
+    recx.rx_rsize = (uint64_t)0;
+    recx.rx_idx = (uint64_t)0;
+    recx.rx_nr = (uint64_t)1;
+
+    /* Set up iod */
+    HDmemset(&iod, 0, sizeof(iod));
+    daos_iov_set(&iod.vd_name, (void *)gcpl_key, (daos_size_t)(sizeof(gcpl_key) - 1));
+    daos_csum_set(&iod.vd_kcsum, NULL, 0);
+    iod.vd_nr = 1u;
+    iod.vd_recxs = &recx;
+
+    /* Read internal metadata size from group */
+    if(0 != (ret = daos_obj_fetch(grp->obj_oh, epoch, &dkey, 1, &iod, NULL, NULL /*maps*/, NULL /*event*/)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata size from group: %d", ret)
+
+    /* Allocate buffer for GCPL */
+    if(NULL == (gcpl_buf = H5MM_malloc(recx.rx_rsize)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized gcpl")
+
+    /* Set up sgl */
+    daos_iov_set(&sg_iov, gcpl_buf, (daos_size_t)recx.rx_rsize);
+    sgl.sg_nr.num = 1;
+    sgl.sg_iovs = &sg_iov;
+
+    /* Read internal metadata from group */
+    if(0 != (ret = daos_obj_fetch(grp->obj_oh, epoch, &dkey, 1, &iod, &sgl, NULL /*maps*/, NULL /*event*/)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata from group: %d", ret)
+
+    /* Decode GCPL */
+    if((grp->gcpl_id = H5Pdecode(gcpl_buf)) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_CANTDECODE, NULL, "can't deserialize GCPL")
+
+    /* Finish setting up group struct */
+    grp->common.type = H5I_GROUP;
+    grp->common.file = file;
+    if((grp->gapl_id = H5Pcopy(gapl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, NULL, "failed to copy gapl");
+
+    ret_value = (void *)grp;
+
+done:
+    /* Free memory */
+    gcpl_buf = H5MM_xfree(gcpl_buf);
+
+    /* If the operation is synchronous and it failed at the server, or it failed
+     * locally, then cleanup and return fail */
+    if(NULL == ret_value)
+        /* Close group */
+        if(grp != NULL && H5VL_daosm_group_close(grp, dxpl_id, req) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, NULL, "can't close group")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_group_open_helper() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_group_open
+ *
+ * Purpose:     Sends a request to DAOS-M to open a group
+ *
+ * Return:      Success:        dataset object. 
+ *              Failure:        NULL
+ *
+ * Programmer:  Neil Fortner
+ *              November, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+H5VL_daosm_group_open(void *_obj,
+    H5VL_loc_params_t H5_ATTR_UNUSED loc_params, const char *name,
+    hid_t gapl_id, hid_t dxpl_id, void **req)
+{
+    H5VL_daosm_obj_t *obj = (H5VL_daosm_obj_t *)_obj;
+    H5VL_daosm_group_t *grp = NULL;
+    H5P_genplist_t *plist = NULL;      /* Property list pointer */
+    hid_t trans_id;
+    H5TR_t *tr = NULL;
+    H5VL_daosm_group_t *target_grp = NULL;
+    const char *target_name = NULL;
+    size_t target_name_len;
+    char const_link_key[] = H5VL_DAOSM_LINK_KEY;
+    daos_key_t dkey;
+    daos_vec_iod_t iod;
+    daos_recx_t recx;
+    daos_sg_list_t sgl;
+    daos_iov_t sg_iov;
+    daos_obj_id_t oid;
+    uint8_t oid_buf[24];
+    uint8_t *p;
+    int ret;
+    void *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* get the transaction ID */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+    if(H5P_get(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for trans_id");
+
+    /* get the TR object */
+    if(NULL == (tr = (H5TR_t *)H5I_object_verify(trans_id, H5I_TR)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "not a Transaction ID")
+
+    /* Traverse the path */
+    /* Just use obj for now DSMINC */
+    if(obj->type == H5I_FILE)
+        target_grp = ((H5VL_daosm_file_t *)obj)->root_grp;
+    else
+        target_grp = (H5VL_daosm_group_t *)obj;
+    target_name = name;
+    target_name_len = HDstrlen(target_name);
+
+    /* Set up dkey */
+    /* For now always use dkey = const, akey = name. Add option to switch these
+     * DSMINC */
+    daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
+
+    /* Set up recx */
+    recx.rx_rsize = (uint64_t)sizeof(daos_obj_id_t);
+    recx.rx_idx = (uint64_t)0;
+    recx.rx_nr = (uint64_t)1;
+
+    /* Set up iod */
+    HDmemset(&iod, 0, sizeof(iod));
+    daos_iov_set(&iod.vd_name, (void *)target_name, (daos_size_t)target_name_len);
+    daos_csum_set(&iod.vd_kcsum, NULL, 0);
+    iod.vd_nr = 1u;
+    iod.vd_recxs = &recx;
+
+    /* Set up sgl */
+    daos_iov_set(&sg_iov, oid_buf, (daos_size_t)sizeof(oid_buf));
+    sgl.sg_nr.num = 1;
+    sgl.sg_iovs = &sg_iov;
+
+    /* Read link to group */
+    if(0 != (ret = daos_obj_fetch(target_grp->obj_oh, tr->epoch, &dkey, 1, &iod, &sgl, NULL /*maps */, NULL /*event*/)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't read link to group: %d", ret)
+
+    /* Decode dset oid */
+    HDassert(sizeof(oid_buf) == sizeof(grp->oid));
+    p = oid_buf;
+    UINT64DECODE(p, oid.lo)
+    UINT64DECODE(p, oid.mid)
+    UINT64DECODE(p, oid.hi)
+
+    /* Open group */
+    if(NULL == (grp = (H5VL_daosm_group_t *)H5VL_daosm_group_open_helper(obj->file, oid, gapl_id, dxpl_id, req, tr->epoch)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't open group")
+
+    ret_value = (void *)grp;
+
+done:
+    /* If the operation is synchronous and it failed at the server, or it failed
+     * locally, then cleanup and return fail */
+    if(NULL == ret_value)
+        /* Close dataset */
+        if(grp != NULL && H5VL_daosm_group_close(grp, dxpl_id, req) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, NULL, "can't close group")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_group_open() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_daosm_group_close
  *
  * Purpose:     Closes a daos-m HDF5 group.
@@ -1140,11 +1567,13 @@ H5VL_daosm_group_close(void *_grp, hid_t H5_ATTR_UNUSED dxpl_id,
     HDassert(grp);
 
     /* Free group data structures */
-    if(grp->gapl_id != FAIL && H5I_dec_ref(grp->gapl_id) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
     if(HDmemcmp(&grp->obj_oh, &hdl_inval, sizeof(hdl_inval)))
         if(0 != (ret = daos_obj_close(grp->obj_oh, NULL /*event*/)))
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close group object: %d", ret)
+            HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close group DAOS object: %d", ret)
+    if(grp->gcpl_id != FAIL && H5I_dec_ref(grp->gcpl_id) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
+    if(grp->gapl_id != FAIL && H5I_dec_ref(grp->gapl_id) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist");
     grp = H5FL_FREE(H5VL_daosm_group_t, grp);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1195,7 +1624,7 @@ H5VL_daosm_dataset_create(void *_obj,
     char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
     char type_key[] = H5VL_DAOSM_TYPE_KEY;
     char space_key[] = H5VL_DAOSM_SPACE_KEY;
-    char dcpl_key[] = H5VL_DAOSM_DCPL_KEY;
+    char dcpl_key[] = H5VL_DAOSM_CPL_KEY;
     int ret;
     void *ret_value = NULL;
 
@@ -1232,7 +1661,7 @@ H5VL_daosm_dataset_create(void *_obj,
 
     /* Allocate the dataset object that is returned to the user */
     if(NULL == (dset = H5FL_CALLOC(H5VL_daosm_dset_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate IOD dataset struct");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate DAOS-M dataset struct");
     dset->obj_oh = DAOS_HDL_INVAL;
     dset->type_id = FAIL;
     dset->space_id = FAIL;
@@ -1240,11 +1669,11 @@ H5VL_daosm_dataset_create(void *_obj,
     dset->dapl_id = FAIL;
 
     /* Create dataset */
-    dset->oid.lo = obj->file->max_oid;
+    dset->oid.lo = obj->file->max_oid + (uint64_t)1;
     daos_obj_id_generate(&dset->oid, DAOS_OC_LARGE_RW);
     if(0 != (ret = daos_obj_declare(obj->file->coh, dset->oid, tr->epoch, NULL /*oa*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create dataset: %d", ret)
-    obj->file->max_oid = dset->oid.lo + (uint64_t)1;
+    obj->file->max_oid = dset->oid.lo;
     obj->file->max_oid_dirty = TRUE;
 
     /* Set up dkey */
@@ -1425,7 +1854,7 @@ H5VL_daosm_dataset_open(void *_obj,
     char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
     char type_key[] = H5VL_DAOSM_TYPE_KEY;
     char space_key[] = H5VL_DAOSM_SPACE_KEY;
-    char dcpl_key[] = H5VL_DAOSM_DCPL_KEY;
+    char dcpl_key[] = H5VL_DAOSM_CPL_KEY;
     int ret;
     void *ret_value = NULL;
 
@@ -1452,7 +1881,7 @@ H5VL_daosm_dataset_open(void *_obj,
 
     /* Allocate the dataset object that is returned to the user */
     if(NULL == (dset = H5FL_CALLOC(H5VL_daosm_dset_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate IOD dataset struct");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate DAOS-M dataset struct");
     dset->obj_oh = DAOS_HDL_INVAL;
     dset->type_id = FAIL;
     dset->space_id = FAIL;
@@ -1683,7 +2112,7 @@ H5VL_daosm_dataset_read(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5_
     sgl.sg_nr.num = 1;
     sgl.sg_iovs = &sg_iov;
 
-    /* Write data to dataset */
+    /* Read data from dataset */
     if(0 != (ret = daos_obj_fetch(dset->obj_oh, tr->epoch, &dkey, 1, &iod, &sgl, NULL /*maps*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data from dataset: %d", ret)
 
@@ -1826,7 +2255,7 @@ H5VL_daosm_dataset_close(void *_dset, hid_t H5_ATTR_UNUSED dxpl_id,
     /* Free dataset data structures */
     if(HDmemcmp(&dset->obj_oh, &hdl_inval, sizeof(hdl_inval)))
         if(0 != (ret = daos_obj_close(dset->obj_oh, NULL /*event*/)))
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close dataset DAOS object: %d", ret)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset DAOS object: %d", ret)
     if(dset->type_id != FAIL && H5I_dec_ref(dset->type_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close datatype");
     if(dset->space_id != FAIL && H5I_dec_ref(dset->space_id) < 0)
@@ -1838,5 +2267,5 @@ H5VL_daosm_dataset_close(void *_dset, hid_t H5_ATTR_UNUSED dxpl_id,
     dset = H5FL_FREE(H5VL_daosm_dset_t, dset);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_daosm_file_close() */
+} /* end H5VL_daosm_dataset_close() */
 

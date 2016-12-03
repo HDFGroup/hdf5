@@ -92,8 +92,8 @@ H5FF__init_package(void)
     if(H5F_init() < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init file interface")
 
-    /*if(H5G_init() < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init group interface")*/
+    if(H5G_init() < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init group interface")
 
     if(H5D_init() < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to init dataset interface")
@@ -359,6 +359,211 @@ H5Fclose_ff(hid_t file_id, hid_t H5_ATTR_UNUSED trans_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fclose_ff */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Gcreate_ff
+ *
+ * Purpose:     Asynchronous wrapper around H5Gcreate().
+ *
+ * Return:      Success:        The placeholder ID for a new group.  When
+ *                              the asynchronous operation completes, this
+ *                              ID will transparently be modified to be a
+ *                              "normal" ID.
+ *              Failure:        FAIL
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, December 2, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Gcreate_ff(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id,
+    hid_t gapl_id, hid_t trans_id)
+{
+    void    *grp = NULL;        /* group token from VOL plugin */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5VL_loc_params_t loc_params;
+    H5P_genplist_t  *plist;     /* Property list pointer */
+    hid_t       ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("i", "i*siiii", loc_id, name, lcpl_id, gcpl_id, gapl_id, trans_id);
+
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == gcpl_id)
+        gcpl_id = H5P_GROUP_CREATE_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group create property list ID")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == gapl_id)
+        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(gapl_id, H5P_DATASET_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group access property list")
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(gcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* set creation properties */
+    if(H5P_set(plist, H5VL_PROP_GRP_LCPL_ID, &lcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set property value for lcpl id")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set property value for trans_id")
+
+    /* get the location object */
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* Create the dataset through the VOL */
+    if(NULL == (grp = H5VL_group_create(obj->vol_obj, loc_params, obj->vol_info->vol_cls, 
+                                           name, gcpl_id, gapl_id, dxpl_id, H5_REQUEST_NULL)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
+
+    /* Get an atom for the group */
+    if((ret_value = H5VL_register_id(H5I_GROUP, grp, obj->vol_info, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
+
+done:
+    if (ret_value < 0 && grp)
+        if(H5VL_group_close (grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gcreate_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Gopen_ff
+ *
+ * Purpose:     Asynchronous wrapper around H5Gopen().
+ *
+ * Return:      Success:        The placeholder ID for a group.  When the
+ *                              asynchronous operation completes, this ID
+ *                              will transparently be modified to be a
+ *                              "normal" ID.
+ *              Failure:        FAIL
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, December 2, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Gopen_ff(hid_t loc_id, const char *name, hid_t gapl_id, hid_t trans_id)
+{
+    void    *grp = NULL;       /* grp token from VOL plugin */
+    H5VL_object_t *obj = NULL;        /* object token of loc_id */
+    hid_t dxpl_id = H5P_DATASET_XFER_DEFAULT; /* transfer property list to pass to the VOL plugin */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    H5VL_loc_params_t loc_params;
+    hid_t       ret_value;              /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("i", "i*sii", loc_id, name, gapl_id, trans_id);
+
+    /* Check args */
+    if(!name || !*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
+
+    /* Get correct property list */
+    if(H5P_DEFAULT == gapl_id)
+        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group access property list")
+
+    loc_params.type = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_get_type(loc_id);
+
+    /* get the location object */
+    if(NULL == (obj = (H5VL_object_t *)H5I_object(loc_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+    /* store the transaction ID in the dxpl */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(plist, H5VL_TRANS_ID, &trans_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set property value for trans_id")
+
+    /* Create the group through the VOL */
+    if(NULL == (grp = H5VL_group_open(obj->vol_obj, loc_params, obj->vol_info->vol_cls, name, 
+                                         gapl_id, dxpl_id, H5_REQUEST_NULL)))
+        HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+
+    /* Get an atom for the group */
+    if((ret_value = H5VL_register_id(H5I_GROUP, grp, obj->vol_info, TRUE)) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize group handle")
+
+done:
+    if (ret_value < 0 && grp)
+        if(H5VL_group_close (grp, obj->vol_info->vol_cls, dxpl_id, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release group")
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gopen_ff() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Gclose_ff
+ *
+ * Purpose:     Closes access to a group (GROUP_ID) and releases resources
+ *              used by it. It is illegal to subsequently use that same
+ *              dataset ID in calls to other dataset functions.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, December 2, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Gclose_ff(hid_t group_id, hid_t H5_ATTR_UNUSED trans_id)
+{
+    H5VL_object_t *grp;
+    herr_t       ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ii", group_id, trans_id);
+
+    /* Check args */
+    if(NULL == (grp = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid group identifier")
+
+    /*
+     * Decrement the counter on the group.  It will be freed if the count
+     * reaches zero.  
+     *
+     * Pass in TRUE for the 3rd parameter to tell the function to remove
+     * group's ID even though the freeing function might fail.  Please
+     * see the comments in H5I_dec_ref for details. (SLU - 2010/9/7)
+     */
+    if(H5I_dec_app_ref_always_close(group_id) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "can't decrement count on group ID")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Gclose_ff() */
 
 
 /*-------------------------------------------------------------------------
