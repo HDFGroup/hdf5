@@ -588,7 +588,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     H5VL_daosm_hash128(name, &file->uuid);
 
     /* Generate oid for global metadata object */
-    daos_obj_id_generate(&gmd_oid, DAOS_OC_REPLICA_RW);
+    daos_obj_id_generate(&gmd_oid, DAOS_OC_REPL_2_RW);
 
     if(file->my_rank == 0) {
         daos_epoch_state_t epoch_state;
@@ -863,7 +863,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     H5VL_daosm_hash128(name, &file->uuid);
 
     /* Generate oid for global metadata object */
-    daos_obj_id_generate(&gmd_oid, DAOS_OC_REPLICA_RW);
+    daos_obj_id_generate(&gmd_oid, DAOS_OC_REPL_2_RW);
 
     if(file->my_rank == 0) {
         daos_epoch_state_t epoch_state;
