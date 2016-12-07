@@ -25,6 +25,8 @@
 
 static size_t H5Z_filter_dynlib4(unsigned int flags, size_t cd_nelmts,
                 const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+herr_t H5Z_filter_can_apply(hid_t dcpl, hid_t type, hid_t space);
+herr_t H5Z_filter_set_local(hid_t dcpl, hid_t type, hid_t space);
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_DYNLIB4[1] = {{
@@ -32,13 +34,40 @@ const H5Z_class2_t H5Z_DYNLIB4[1] = {{
     H5Z_FILTER_DYNLIB4,             /* Filter id number        */
     1, 1,                            /* Encoding and decoding enabled   */
     "dynlib4",                 /* Filter name for debugging    */
-    NULL,                            /* The "can apply" callback        */
-    NULL,                            /* The "set local" callback        */
+    (H5Z_can_apply_func_t)(H5Z_filter_can_apply),                            /* The "can apply" callback        */
+    (H5Z_set_local_func_t)(H5Z_filter_set_local),                            /* The "set local" callback        */
     (H5Z_func_t)H5Z_filter_dynlib4,    /* The actual filter function    */
 }};
 
 H5PL_type_t   H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
 const void    *H5PLget_plugin_info(void) {return H5Z_DYNLIB4;}
+
+herr_t H5Z_filter_can_apply(hid_t dcpl, hid_t type, hid_t space) {
+    H5I_type_t dcpl_type;
+
+    dcpl_type = H5Iget_type(dcpl);
+    if (dcpl_type < 0) {
+        PUSH_ERR("H5Z_filter_can_apply", H5E_CALLBACK, "dcpl not valid");
+        return -1;
+    }
+
+    return 1;
+}
+
+herr_t H5Z_filter_set_local(hid_t dcpl, hid_t type, hid_t space) {
+    herr_t r;
+    unsigned int flags;
+    size_t nelements = 4;
+    unsigned int values[] = {0,0,0,0};
+
+    r = H5Pget_filter_by_id2(dcpl, H5Z_FILTER_DYNLIB4, &flags, &nelements, values, 0, NULL, NULL);
+    if (r < 0) {
+        PUSH_ERR("H5Z_filter_set_local", H5E_CALLBACK, "dcpl fails get_filter_by_id2");
+        return -1;
+    }
+
+    return 1;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5Z_filter_dynlib4
