@@ -269,6 +269,7 @@ typedef struct H5O_chunk_t {
     size_t	size;			/*chunk size			     */
     size_t	gap;			/*space at end of chunk too small for null message */
     uint8_t	*image;			/*image of file			     */
+    struct H5O_chunk_proxy_t *chunk_proxy;    /* Pointer to a chunk's proxy when chunk protected */
 } H5O_chunk_t;
 
 struct H5O_t {
@@ -278,6 +279,7 @@ struct H5O_t {
     /* File-specific information (not stored) */
     size_t      sizeof_size;            /* Size of file sizes 		     */
     size_t      sizeof_addr;            /* Size of file addresses	     */
+    hbool_t     swmr_write;             /* Whether we are doing SWMR writes  */
 
     /* Debugging information (not stored) */
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
@@ -320,6 +322,10 @@ struct H5O_t {
     size_t	nchunks;		/*number of chunks		     */
     size_t	alloc_nchunks;		/*chunks allocated		     */
     H5O_chunk_t *chunk;			/*array of chunks		     */
+    hbool_t     chunks_pinned;          /* Whether chunks are pinned from ohdr protect */
+
+    /* Object header proxy information (not stored) */
+    H5AC_proxy_entry_t *proxy;          /* Proxy cache entry for all ohdr entries */
 };
 
 /* Class for types of objects in file */
@@ -381,6 +387,20 @@ typedef struct H5O_chunk_proxy_t {
     H5O_t       *oh;                    /* Object header for this chunk */
     unsigned    chunkno;                /* Chunk number for this chunk */
     unsigned    cont_chunkno;           /* Chunk number for the chunk containing the continuation message that points to this chunk */
+
+    /* Flush depencency parent information (not stored) 
+     *
+     * The following field is used to store a pointer 
+     * to the in-core representation of the chunk proxy's flush dependency
+     * parent -- if it exists.  If it does not exist, this field will
+     * contain NULL.
+     *
+     * If the file is opened in SWMR write mode, the flush dependency 
+     * parent of the chunk proxy will be either its object header 
+     * (if cont_chunkno == 0) or the chunk proxy indicated by the 
+     * cont_chunkno field (if cont_chunkno > 0).
+     */
+    void *parent;                       /* Pointer to flush dependency parent */
 } H5O_chunk_proxy_t;
 
 /* Callback information for loading object header chunk from disk */
@@ -621,9 +641,6 @@ H5_DLL herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg
 H5_DLL herr_t H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     hsize_t *nattrs);
 
-/* These functions operate on object locations */
-H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);
-
 /* Testing functions */
 #ifdef H5O_TESTING
 H5_DLL htri_t H5O_is_attr_empty_test(hid_t oid);
@@ -633,6 +650,9 @@ H5_DLL herr_t H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *
 H5_DLL herr_t H5O_check_msg_marked_test(hid_t oid, hbool_t flag_val);
 H5_DLL herr_t H5O_expunge_chunks_test(const H5O_loc_t *oloc, hid_t dxpl_id);
 H5_DLL herr_t H5O_get_rc(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc);
+H5_DLL herr_t H5O_msg_get_chunkno_test(hid_t oid, unsigned msg_type,
+    unsigned *chunk_num);
+H5_DLL herr_t H5O_msg_move_to_new_chunk_test(hid_t oid, unsigned msg_type);
 #endif /* H5O_TESTING */
 
 /* Object header debugging routines */

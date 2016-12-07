@@ -768,7 +768,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset,
     /* Check if we need to open the source file */
     if(HDstrcmp(source_dset->file_name, ".")) {
         /* Open the source file */
-        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & H5F_ACC_RDWR, H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
+        if(NULL == (src_file = H5F_open(source_dset->file_name, H5F_INTENT(vdset->oloc.file) & (H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ), H5P_FILE_CREATE_DEFAULT, vdset->shared->layout.storage.u.virt.source_fapl, dxpl_id)))
             H5E_clear_stack(NULL); /* Quick hack until proper support for H5Fopen with missing file is implemented */
         else
             src_file_open = TRUE;

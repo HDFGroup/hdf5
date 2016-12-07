@@ -6292,8 +6292,13 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
             /* Check for chunk being same size */
 	    if(new_chunk->length != old_chunk->length) {
 		/* Release previous chunk */
-		if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, old_chunk->offset, old_chunk->length) < 0)
-		    HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
+		/* Only free the old location if not doing SWMR writes - otherwise
+                 * we must keep the old chunk around in case a reader has an
+                 * outdated version of the B-tree node
+                 */
+		if(!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE))
+		    if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, old_chunk->offset, old_chunk->length) < 0)
+			HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
 		alloc_chunk = TRUE;
 	    } /* end if */
             else {

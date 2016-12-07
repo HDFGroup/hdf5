@@ -135,6 +135,7 @@ static const char *H5AC_entry_type_names[H5AC_NTYPES] =
     "fixed array data block pages",
     "superblock",
     "driver info",
+    "proxy entry",
     "test entry"	/* for testing only -- not used for actual files */
 };
 
@@ -604,6 +605,52 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC_evict
+ *
+ * Purpose:     Evict all entries except the pinned entries
+ *		in the cache.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *		Dec 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_evict(H5F_t *f, hid_t dxpl_id)
+{
+    hbool_t log_enabled;             /* TRUE if logging was set up */
+    hbool_t curr_logging;            /* TRUE if currently logging */
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
+
+    /* Evict all entries in the cache except the pinned superblock entry */
+    if(H5C_evict(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't evict cache")
+
+done:
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_evict_cache_log_msg(f->shared->cache, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_LOGFAIL, FAIL, "unable to emit log message")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_evict() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_expunge_entry
  *
  * Purpose:	Expunge the target entry from the cache without writing it
@@ -1001,6 +1048,84 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_dirty() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_mark_entry_clean
+ *
+ * Purpose:	Mark a pinned entry as dirty.  The target
+ * 		entry MUST be pinned.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              7/23/16
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_mark_entry_clean(void *thing)
+{
+#if H5AC__TRACE_FILE_ENABLED
+    char          	trace[128] = "";
+    FILE *        	trace_file_ptr = NULL;
+#endif /* H5AC__TRACE_FILE_ENABLED */
+    hbool_t log_enabled;              /* TRUE if logging was set up */
+    hbool_t curr_logging;             /* TRUE if currently logging */
+    H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
+    H5C_t *cache_ptr = NULL;          /* Pointer to the entry's associated metadata cache */
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(thing);
+
+#if H5AC__TRACE_FILE_ENABLED
+    /* For the mark pinned or protected entry clean call, only the addr
+     * is really necessary in the trace file.  Write the result to catch
+     * occult errors.
+     */
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr_from_entry(thing)))
+        sprintf(trace, "%s 0x%lx", FUNC,
+	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    entry_ptr = (H5AC_info_t *)thing;
+    cache_ptr = entry_ptr->cache_ptr;
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(cache_ptr, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to get logging status")
+
+#ifdef H5_HAVE_PARALLEL
+{
+    H5AC_aux_t *aux_ptr;
+
+    aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
+    if((!entry_ptr->is_dirty) && (!entry_ptr->is_protected) &&
+             (entry_ptr->is_pinned) && (NULL != aux_ptr))
+        if(H5AC__log_cleaned_entry(entry_ptr) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKCLEAN, FAIL, "can't log cleaned entry")
+}
+#endif /* H5_HAVE_PARALLEL */
+
+    if(H5C_mark_entry_clean(thing) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKCLEAN, FAIL, "can't mark pinned or protected entry clean")
+
+done:
+#if H5AC__TRACE_FILE_ENABLED
+    if(trace_file_ptr)
+	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_mark_clean_entry_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_LOGFAIL, FAIL, "unable to emit log message")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_mark_entry_clean() */
 
 
 /*-------------------------------------------------------------------------
@@ -2618,4 +2743,68 @@ H5AC_reset_ring(H5P_genplist_t *dxpl, H5AC_ring_t orig_ring)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC_reset_ring() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_remove_entry()
+ *
+ * Purpose:     Remove an entry from the cache.  Must be not protected, pinned,
+ *		dirty, involved in flush dependencies, etc.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              September 17, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_remove_entry(void *_entry)
+{
+    H5AC_info_t *entry = (H5AC_info_t *)_entry; /* Entry to remove */
+    H5C_t *cache = NULL;                /* Pointer to the entry's associated metadata cache */
+#if H5AC__TRACE_FILE_ENABLED
+    char                trace[128] = "";
+    FILE *              trace_file_ptr = NULL;
+#endif /* H5AC__TRACE_FILE_ENABLED */
+    hbool_t log_enabled;                /* TRUE if logging was set up */
+    hbool_t curr_logging;               /* TRUE if currently logging */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(entry);
+    cache = entry->cache_ptr;
+    HDassert(cache);
+
+#if H5AC__TRACE_FILE_ENABLED
+    /* For the remove entry call, only the addr is really necessary
+     * in the trace file.  Also write the result to catch occult errors.
+     */
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr_from_entry(entry)))
+        sprintf(trace, "%s 0x%lx", FUNC, (unsigned long)(entry->addr));
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(cache, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get logging status")
+
+    /* Remove the entry from the cache*/
+    if(H5C_remove_entry(entry) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry")
+
+done:
+#if H5AC__TRACE_FILE_ENABLED
+    if(trace_file_ptr)
+	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_remove_entry_log_msg(cache, entry, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_LOGFAIL, FAIL, "unable to emit log message")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_remove_entry() */
 

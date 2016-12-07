@@ -212,6 +212,33 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Fclear_1elink_1file_1cache
   (JNIEnv *, jclass, jlong);
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fstart_mdc_logging
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL 
+Java_hdf_hdf5lib_H5_H5Fstart_1mdc_1logging
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fstop_mdc_logging
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL 
+Java_hdf_hdf5lib_H5_H5Fstop_1mdc_1logging
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fget_mdc_logging_status
+ * Signature: (J[Z)V
+ */
+JNIEXPORT void JNICALL 
+Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status
+  (JNIEnv *, jclass, jlong, jbooleanArray);
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */

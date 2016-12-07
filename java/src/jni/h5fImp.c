@@ -536,6 +536,70 @@ Java_hdf_hdf5lib_H5_H5Fclear_1elink_1file_1cache
         h5libraryError(env);
 } /* end Java_hdf_hdf5lib_H5_H5Fclear_1elink_1file_1cache */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fstart_mdc_logging
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fstart_1mdc_1logging
+	(JNIEnv *env, jclass cls, jlong file_id)
+{
+    if (H5Fstart_mdc_logging((hid_t)file_id) < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Fstart_1mdc_1logging */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fstop_mdc_logging
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fstop_1mdc_1logging
+    (JNIEnv *env, jclass cls, jlong file_id)
+{
+    if (H5Fstop_mdc_logging((hid_t)file_id) < 0)
+        h5libraryError(env);
+} /* end Java_hdf_hdf5lib_H5_H5Fstop_1mdc_1logging */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fget_mdc_logging_status
+ * Signature: (J[Z)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status
+	(JNIEnv *env, jclass cls, jlong file_id, jbooleanArray mdc_logging_status)
+{
+    hbool_t    is_enabled;
+    hbool_t    is_currently_logging;
+    jboolean  *mdc_logging_status_ptr;
+    jint       size;
+    jboolean   isCopy;
+
+    if (mdc_logging_status == NULL) {
+        h5nullArgument(env, "H5Fget_mdc_logging_status:  mdc_logging_status is NULL");
+    } /* end if */
+    else {
+        size = (int)ENVPTR->GetArrayLength(ENVPAR mdc_logging_status);
+        if (size < 2) {
+            h5badArgument(env, "H5Fget_mdc_logging_status:  length of mdc_logging_status < 2.");
+        } /* end if */
+        else {
+            if (H5Fget_mdc_logging_status((hid_t)file_id, &is_enabled, &is_currently_logging) < 0) {
+                h5libraryError(env);
+            } /* end if */
+            else {
+                mdc_logging_status_ptr = ENVPTR->GetBooleanArrayElements(ENVPAR mdc_logging_status, &isCopy);
+                mdc_logging_status_ptr[0] = (jboolean)is_enabled;
+                mdc_logging_status_ptr[1] = (jboolean)is_currently_logging;
+                ENVPTR->ReleaseBooleanArrayElements(ENVPAR mdc_logging_status, mdc_logging_status_ptr, 0);
+            } /* end else */
+        } /* end else */
+    } /* end else */
+} /* end Java_hdf_hdf5lib_H5_H5Fget_1mdc_1logging_1status */
+
+
 
 #ifdef __cplusplus
 } /* end extern "C" */

@@ -188,6 +188,7 @@ H5B2__int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header */
     H5B2_internal_t	*internal = NULL;   /* B-tree internal node */
+    H5B2_node_ptr_t node_ptr;           /* Fake node pointer for protect */
     unsigned	u;                      /* Local index variable */
     char        temp_str[128];          /* Temporary string, for formatting */
     herr_t      ret_value=SUCCEED;      /* Return value */
@@ -217,9 +218,10 @@ H5B2__int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /*
      * Load the B-tree internal node
      */
-    H5_CHECK_OVERFLOW(nrec, unsigned, uint16_t);
     H5_CHECK_OVERFLOW(depth, unsigned, uint16_t);
-    if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, addr, (uint16_t)nrec, (uint16_t)depth, H5AC__READ_ONLY_FLAG)))
+    node_ptr.addr = addr;
+    H5_CHECKED_ASSIGN(node_ptr.node_nrec, unsigned, nrec, uint16_t)
+    if(NULL == (internal = H5B2__protect_internal(hdr, dxpl_id, NULL, &node_ptr, (uint16_t)depth, FALSE, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree internal node")
 
     /* Print opening message */
@@ -298,6 +300,7 @@ H5B2__leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent
 {
     H5B2_hdr_t	*hdr = NULL;            /* B-tree header */
     H5B2_leaf_t	*leaf = NULL;           /* B-tree leaf node */
+    H5B2_node_ptr_t node_ptr;           /* Fake node pointer for protect */
     unsigned	u;                      /* Local index variable */
     char        temp_str[128];          /* Temporary string, for formatting */
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -328,7 +331,9 @@ H5B2__leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent
      * Load the B-tree leaf node
      */
     H5_CHECK_OVERFLOW(nrec, unsigned, uint16_t);
-    if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, addr, (uint16_t)nrec, H5AC__READ_ONLY_FLAG)))
+    node_ptr.addr = addr;
+    H5_CHECKED_ASSIGN(node_ptr.node_nrec, unsigned, nrec, uint16_t)
+    if(NULL == (leaf = H5B2__protect_leaf(hdr, dxpl_id, NULL, &node_ptr, FALSE, H5AC__READ_ONLY_FLAG)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to protect B-tree leaf node")
 
     /* Print opening message */

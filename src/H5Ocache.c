@@ -441,6 +441,18 @@ H5O__cache_deserialize(const void *_image, size_t len, void *_udata,
     /* Retrieve partially deserialized object header from user data */
     oh = udata->oh;
 
+    /* Set SWMR flag, if appropriate */
+    oh->swmr_write = !!(H5F_INTENT(udata->common.f) & H5F_ACC_SWMR_WRITE);
+
+    /* Create object header proxy if doing SWMR writes */
+    if(oh->swmr_write) {
+        /* Create virtual entry, for use as proxy */
+        if(NULL == (oh->proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, NULL, "can't create object header proxy")
+    } /* end if */
+    else
+        oh->proxy = NULL;
+
     /* Parse the first chunk */
     if(H5O__chunk_deserialize(oh, udata->common.addr, udata->chunk0_size, (const uint8_t *)_image, &(udata->common), dirty) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize first object header chunk")
@@ -667,6 +679,16 @@ H5O__cache_notify(H5AC_notify_action_t action, void *_thing)
     switch(action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
         case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+            if(oh->swmr_write) {
+                /* Sanity check */
+                HDassert(oh->proxy);
+
+                /* Register the object header as a parent of the virtual entry */
+                if(H5AC_proxy_entry_add_parent(oh->proxy, oh) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add object header as parent of proxy")
+            } /* end if */
+            break;
+
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
         case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
             /* do nothing */
@@ -689,8 +711,15 @@ H5O__cache_notify(H5AC_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
-        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
             /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+            if(oh->swmr_write) {
+                /* Unregister the object header as a parent of the virtual entry */
+                if(H5AC_proxy_entry_remove_parent(oh->proxy, oh) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't remove object header as parent of proxy")
+            } /* end if */
             break;
 
         default:
@@ -998,7 +1027,6 @@ static herr_t
 H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 {
     H5O_chunk_proxy_t *chk_proxy = (H5O_chunk_proxy_t *)_thing;
-    void *parent = NULL;                /* Chunk containing continuation message that points to this chunk */
     H5O_chunk_proxy_t *cont_chk_proxy = NULL; /* Proxy for chunk containing continuation message that points to this chunk, if not chunk 0 */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1013,6 +1041,51 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
     switch(action) {
         case H5AC_NOTIFY_ACTION_AFTER_INSERT:
         case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+            if(chk_proxy->oh->swmr_write) {
+                /* Add flush dependency on chunk parent */
+                {
+                    void *parent;       /* Chunk containing continuation message that points to this chunk */
+
+                    /* Determine the parent of the chunk */
+                    if(chk_proxy->cont_chunkno == 0)
+                        parent = chk_proxy->oh;
+                    else {
+                        if(NULL == (cont_chk_proxy = H5O_chunk_protect(chk_proxy->f, H5AC_ind_read_dxpl_id, chk_proxy->oh, chk_proxy->cont_chunkno)))
+                            HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
+                        parent = cont_chk_proxy;
+                    } /* end else */
+
+                    /* Sanity checks */
+                    HDassert(parent);
+                    HDassert(((H5C_cache_entry_t *)parent)->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                    HDassert(((H5C_cache_entry_t *)parent)->type);
+                    HDassert((((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_ID)
+                             || (((H5C_cache_entry_t *)(parent))->type->id == H5AC_OHDR_CHK_ID));
+
+                    /* Add flush dependency from chunk containing the continuation message
+                     * that points to this chunk (either oh or another chunk proxy object)
+                     */
+                    if(H5AC_create_flush_dependency(parent, chk_proxy) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+
+                    /* Make note of the address and pointer of the flush dependency
+                     * parent so we can take the dependency down on eviction.
+                     */
+                    chk_proxy->parent = parent;
+                }
+
+                /* Add flush dependency on object header proxy, if proxy exists */
+                {
+                    /* Sanity check */
+                    HDassert(chk_proxy->oh->proxy);
+
+                    /* Register the object header chunk as a parent of the virtual entry */
+                    if(H5AC_proxy_entry_add_parent(chk_proxy->oh->proxy, chk_proxy) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't add object header chunk as parent of proxy")
+                }
+            } /* end if */
+            break;
+
         case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
         case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
             /* do nothing */
@@ -1031,8 +1104,27 @@ H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing)
 
         case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
         case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
-        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
             /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+            if(chk_proxy->oh->swmr_write) {
+                /* Remove flush dependency on parent object header chunk */
+                {
+                    /* Sanity checks */
+                    HDassert(chk_proxy->parent != NULL);
+                    HDassert(((H5C_cache_entry_t *)(chk_proxy->parent))->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+                    HDassert(((H5C_cache_entry_t *)(chk_proxy->parent))->type);
+                    HDassert((((H5C_cache_entry_t *)(chk_proxy->parent))->type->id == H5AC_OHDR_ID) || (((H5C_cache_entry_t *)(chk_proxy->parent))->type->id == H5AC_OHDR_CHK_ID));
+
+                    if(H5AC_destroy_flush_dependency(chk_proxy->parent, chk_proxy) < 0)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+                }
+
+                /* Unregister the object header chunk as a parent of the virtual entry */
+                if(H5AC_proxy_entry_remove_parent(chk_proxy->oh->proxy, chk_proxy) < 0)
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't remove object header chunk as parent of proxy")
+            } /* end if */
             break;
 
         default:
@@ -1200,6 +1292,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
         oh->chunk[chunkno].size = len;
     if(NULL == (oh->chunk[chunkno].image = H5FL_BLK_MALLOC(chunk_image, oh->chunk[chunkno].size)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+    oh->chunk[chunkno].chunk_proxy = NULL;
 
     /* Copy disk image into chunk's image */
     HDmemcpy(oh->chunk[chunkno].image, image, oh->chunk[chunkno].size);

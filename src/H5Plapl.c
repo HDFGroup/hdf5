@@ -1168,7 +1168,9 @@ H5Pset_elink_acc_flags(hid_t lapl_id, unsigned flags)
     H5TRACE2("e", "iIu", lapl_id, flags);
 
     /* Check that flags are valid */
-    if((flags != H5F_ACC_RDWR) && (flags != H5F_ACC_RDONLY) && (flags != H5F_ACC_DEFAULT))
+    if((    flags != H5F_ACC_RDWR)      && (flags != (H5F_ACC_RDWR   | H5F_ACC_SWMR_WRITE))
+        && (flags != H5F_ACC_RDONLY)    && (flags != (H5F_ACC_RDONLY | H5F_ACC_SWMR_READ))
+        && (flags != H5F_ACC_DEFAULT))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
 
     /* Get the plist structure */

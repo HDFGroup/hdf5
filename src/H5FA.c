@@ -737,6 +737,56 @@ END_FUNC(PRIV)  /* end H5FA_iterate() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FA_depend
+ *
+ * Purpose:     Make a child flush dependency between the fixed array
+ *              and another piece of metadata in the file.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5FA_depend(H5FA_t *fa, hid_t dxpl_id, H5AC_proxy_entry_t *parent))
+
+    /* Local variables */
+    H5FA_hdr_t *hdr = fa->hdr;          /* Header for FA */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(fa);
+    HDassert(hdr);
+    HDassert(parent);
+
+    /*
+     * Check to see if a flush dependency between the fixed array
+     * and another data structure in the file has already been set up.
+     * If it hasn't, do so now.
+     */
+    if(NULL == hdr->parent) {
+        /* Sanity check */
+        HDassert(hdr->top_proxy);
+
+        /* Set the shared array header's file context for this operation */
+        hdr->f = fa->f;
+
+        /* Add the fixed array as a child of the parent (proxy) */
+        if(H5AC_proxy_entry_add_child(parent, hdr->f, dxpl_id, hdr->top_proxy) < 0)
+            H5E_THROW(H5E_CANTSET, "unable to add fixed array as child of proxy")
+        hdr->parent = parent;
+    } /* end if */
+
+CATCH
+
+END_FUNC(PRIV)  /* end H5FA_depend() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5FA_patch_file
  *
  * Purpose:     Patch the top-level file pointer contained in fa

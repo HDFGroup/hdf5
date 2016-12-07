@@ -251,6 +251,7 @@ set (H5_TESTS
     unregister
     cache_logging
     cork
+    swmr
 )
 
 foreach (test ${H5_TESTS})

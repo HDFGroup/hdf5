@@ -146,6 +146,11 @@ test_obj_count_and_id(hid_t, hid_t, hid_t, hid_t, hid_t, hid_t);
 static void
 check_file_id(hid_t, hid_t);
 
+/* Helper routine used by test_rw_noupdate() */
+static int cal_chksum(const char *file, uint32_t *chksum);
+
+static void test_rw_noupdate(void);
+
 /****************************************************************
 **
 **  test_file_create(): Low-level file creation I/O test routine.
@@ -2731,93 +2736,101 @@ test_cached_stab_info(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_cached_stab_info() */
 
+/*
+ * To calculate the checksum for a file.
+ * This is a helper routine for test_rw_noupdate().
+ */
+static int
+cal_chksum(const char *file, uint32_t *chksum)
+{
+    int curr_num_errs = GetTestNumErrs();       /* Retrieve the current # of errors */
+    int fdes = -1;                              /* File descriptor */
+    void *file_data = NULL;                     /* Copy of file data */
+    ssize_t bytes_read;                         /* # of bytes read */
+    h5_stat_t sb;                               /* Stat buffer for file */
+    herr_t ret;                                 /* Generic return value */
+
+    /* Open the file */
+    fdes = HDopen(file, O_RDONLY, 0);
+    CHECK(fdes, FAIL, "HDopen");
+
+    /* Retrieve the file's size */
+    ret = HDfstat(fdes, &sb);
+    CHECK(fdes, FAIL, "HDfstat");
+
+    /* Allocate space for the file data */
+    file_data = HDmalloc((size_t)sb.st_size);
+    CHECK(file_data, NULL, "HDmalloc");
+
+    if(file_data) {
+        /* Read file's data into memory */
+        bytes_read = HDread(fdes, file_data, (size_t)sb.st_size);
+        CHECK(bytes_read == sb.st_size, FALSE, "HDmalloc");
+
+        /* Calculate checksum */
+        *chksum = H5_checksum_lookup3(file_data, sizeof(file_data), 0);
+
+        /* Free memory */
+        HDfree(file_data);
+    }
+
+    /* Close the file */
+    ret = HDclose(fdes);
+    CHECK(ret, FAIL, "HDclose");
+
+    return((GetTestNumErrs() == curr_num_errs) ? 0 : -1);
+} /* cal_chksum() */
+
 /****************************************************************
 **
 **  test_rw_noupdate(): low-level file test routine.
 **      This test checks to ensure that opening and closing a file
 **      with read/write permissions does not write anything to the
 **      file if the file does not change.
+**	Due to the implementation of file locking (status_flags in 
+**	the superblock is used), this test is changed to use checksum 
+**	instead of timestamp to verify the file is not changed.
 **
-**  Programmer: Mike McGreevy
-**              mamcgree@hdfgroup.org
-**              June 29, 2009
+**  Programmer: Vailin Choi; July 2013
 **
 *****************************************************************/
 static void
 test_rw_noupdate(void)
 {
-    int fd;             /* File Descriptor */
-    h5_stat_t sb1, sb2; /* Info from 'stat' call */
-    double diff;        /* Difference in modification times */
     herr_t ret;         /* Generic return value */
+    hid_t fid;			/* File ID */
+    uint32_t chksum1, chksum2; 	/* Checksum value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing to verify that nothing is written if nothing is changed.\n"));
 
-    /* First make sure the stat function behaves as we expect - the modification time
-     * is the time that the file was modified last time. */
-    fd = HDopen(SFILE1, O_RDWR | O_CREAT | O_TRUNC, 0666);
-    CHECK(fd, FAIL, "HDopen");
-    ret = HDclose(fd);
-    CHECK(ret, FAIL, "HDclose");
+    /* Create and Close a HDF5 File */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
 
-    /* Determine File's Initial Timestamp */
-    ret = HDstat(SFILE1, &sb1);
-    VERIFY(ret, 0, "HDstat");
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
 
-    /* Wait for 2 seconds */
-    /* (This ensures a system time difference between the two file accesses) */
-    HDsleep(2);
+    /* Calculate checksum for the file */
+    ret = cal_chksum(FILE1, &chksum1);
+    CHECK(ret, FAIL, "HDopen");
 
-    fd = HDopen(SFILE1, O_RDWR, 0666);
-    CHECK(fd, FAIL, "HDopen");
-    ret = HDclose(fd);
-    CHECK(ret, FAIL, "HDclose");
+    /* Open and close File With Read/Write Permission */
+    fid = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fopen");
 
-    /* Determine File's New Timestamp */
-    ret = HDstat(SFILE1, &sb2);
-    VERIFY(ret, 0, "HDstat");
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
 
-    /* Get difference between timestamps */
-    diff = HDdifftime(sb2.st_mtime, sb1.st_mtime);
+    /* Calculate checksum for the file */
+    ret = cal_chksum(FILE1, &chksum2);
+    CHECK(ret, FAIL, "HDopen");
 
-    /* Check That Timestamps Are Equal */
-    if(diff > (double)0.0F) {
-        /* Output message about test being performed */
-        MESSAGE(1, ("Testing to verify that nothing is written if nothing is changed: This test is skipped on this system because the modification time from stat is the same as the last access time.\n"));
-    } /* end if */
-    else {
-        hid_t file_id;      /* HDF5 File ID */
+    /* The two checksums are the same, i.e. the file is not changed */
+    VERIFY(chksum1, chksum2, "Checksum");
 
-        /* Create and Close a HDF5 File */
-        file_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-        CHECK(file_id, FAIL, "H5Fcreate");
-        ret = H5Fclose(file_id);
-        CHECK(ret, FAIL, "H5Fclose");
-
-        /* Determine File's Initial Timestamp */
-        ret = HDstat(FILE1, &sb1);
-        VERIFY(ret, 0, "HDfstat");
-
-        /* Wait for 2 seconds */
-        /* (This ensures a system time difference between the two file accesses) */
-        HDsleep(2);
-
-        /* Open and Close File With Read/Write Permission */
-        file_id = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
-        CHECK(file_id, FAIL, "H5Fopen");
-        ret = H5Fclose(file_id);
-        CHECK(ret, FAIL, "H5Fclose");
-
-        /* Determine File's New Timestamp */
-        ret = HDstat(FILE1, &sb2);
-        VERIFY(ret, 0, "HDstat");
-
-        /* Ensure That Timestamps Are Equal */
-        diff = HDdifftime(sb2.st_mtime, sb1.st_mtime);
-        ret = (diff > (double)0.0F);
-        VERIFY(ret, 0, "Timestamp");
-    } /* end else */
 } /* end test_rw_noupdate() */
 
 /****************************************************************
@@ -3809,7 +3822,7 @@ test_libver_bounds(void)
 
     /* Run the tests */
     test_libver_bounds_real(H5F_LIBVER_EARLIEST, 1, H5F_LIBVER_LATEST, 2);
-    test_libver_bounds_real(H5F_LIBVER_LATEST, 2, H5F_LIBVER_EARLIEST, 1);
+    test_libver_bounds_real(H5F_LIBVER_LATEST, 2, H5F_LIBVER_EARLIEST, 2);
 } /* end test_libver_bounds() */
 
 /****************************************************************

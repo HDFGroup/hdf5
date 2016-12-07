@@ -412,6 +412,7 @@ typedef struct H5AC_aux_t
 /* Parallel I/O routines */
 H5_DLL herr_t H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr);
+H5_DLL herr_t H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr);
 H5_DLL herr_t H5AC__log_flushed_entry(H5C_t *cache_ptr, haddr_t addr,
     hbool_t was_dirty, unsigned flags);
 H5_DLL herr_t H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr);
@@ -432,6 +433,8 @@ H5_DLL herr_t H5AC__open_trace_file(H5AC_t *cache_ptr, const char *trace_file_na
 /* Cache logging routines */
 H5_DLL herr_t H5AC__write_create_cache_log_msg(H5AC_t *cache);
 H5_DLL herr_t H5AC__write_destroy_cache_log_msg(H5AC_t *cache);
+H5_DLL herr_t H5AC__write_evict_cache_log_msg(const H5AC_t *cache,
+                                        herr_t fxn_ret_value);
 H5_DLL herr_t H5AC__write_expunge_entry_log_msg(const H5AC_t *cache,
                                                 haddr_t address,
                                                 int type_id,
@@ -447,6 +450,8 @@ H5_DLL herr_t H5AC__write_insert_entry_log_msg(const H5AC_t *cache,
 H5_DLL herr_t H5AC__write_mark_dirty_entry_log_msg(const H5AC_t *cache,
                                                    const H5AC_info_t *entry,
                                                    herr_t fxn_ret_value);
+H5_DLL herr_t H5AC__write_mark_clean_entry_log_msg(const H5AC_t *cache,
+    const H5AC_info_t *entry, herr_t fxn_ret_value);
 H5_DLL herr_t H5AC__write_move_entry_log_msg(const H5AC_t *cache,
                                              haddr_t old_addr,
                                              haddr_t new_addr,
@@ -482,6 +487,9 @@ H5_DLL herr_t H5AC__write_unprotect_entry_log_msg(const H5AC_t *cache,
 H5_DLL herr_t H5AC__write_set_cache_config_log_msg(const H5AC_t *cache,
                                                    const H5AC_cache_config_t *config,
                                                    herr_t fxn_ret_value);
+H5_DLL herr_t H5AC__write_remove_entry_log_msg(const H5AC_t *cache,
+                                              const H5AC_info_t *entry,
+                                              herr_t fxn_ret_value);
 
 #endif /* _H5ACpkg_H */
 

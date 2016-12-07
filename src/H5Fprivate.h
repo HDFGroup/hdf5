@@ -473,6 +473,7 @@
 #define H5F_ACS_OBJECT_FLUSH_CB_NAME     	"object_flush_cb" 	 /* Object flush callback */
 #define H5F_ACS_EFC_SIZE_NAME                   "efc_size"      /* Size of external file cache */
 #define H5F_ACS_FILE_IMAGE_INFO_NAME            "file_image_info" /* struct containing initial file image and callback info */
+#define H5F_ACS_CLEAR_STATUS_FLAGS_NAME         "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) */
 #define H5F_ACS_USE_MDC_LOGGING_NAME            "use_mdc_logging" /* Whether to use metadata cache logging */
 #define H5F_ACS_MDC_LOG_LOCATION_NAME           "mdc_log_location" /* Name of metadata cache log location */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME    "start_mdc_log_on_access" /* Whether logging starts on file create/open */
@@ -498,7 +499,8 @@
 #define HDF5_SUPERBLOCK_VERSION_DEF	0	/* The default super block format	  */
 #define HDF5_SUPERBLOCK_VERSION_1	1	/* Version with non-default B-tree 'K' value */
 #define HDF5_SUPERBLOCK_VERSION_2	2	/* Revised version with superblock extension and checksum */
-#define HDF5_SUPERBLOCK_VERSION_LATEST	HDF5_SUPERBLOCK_VERSION_2	/* The maximum super block format    */
+#define HDF5_SUPERBLOCK_VERSION_3	3	/* With file locking and consistency flags (at least this version for SWMR support) */
+#define HDF5_SUPERBLOCK_VERSION_LATEST	HDF5_SUPERBLOCK_VERSION_3	/* The maximum super block format    */
 #define HDF5_SUPERBLOCK_VERSION_V18_LATEST HDF5_SUPERBLOCK_VERSION_2    /* The latest superblock version for v18 */
 #define HDF5_FREESPACE_VERSION	        0	/* of the Free-Space Info	  */
 #define HDF5_OBJECTDIR_VERSION	        0	/* of the Object Directory format */
@@ -523,6 +525,7 @@
 
 /* Metadata read attempt values */
 #define H5F_METADATA_READ_ATTEMPTS		1	/* Default # of read attempts for non-SWMR access */
+#define H5F_SWMR_METADATA_READ_ATTEMPTS		100	/* Default # of read attempts for SWMR access */
 
 /* Macros to define signatures of all objects in the file */
 

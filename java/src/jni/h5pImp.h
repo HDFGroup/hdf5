@@ -1404,6 +1404,24 @@ Java_hdf_hdf5lib_H5_H5Pset_1file_1space
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_mdc_log_options
+ * Signature: (JZLjava/lang/String;Z)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1mdc_1log_1options
+(JNIEnv *, jclass, jlong, jboolean, jstring, jboolean);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_mdc_log_options
+ * Signature: (J[Z)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1mdc_1log_1options
+(JNIEnv *, jclass, jlong, jbooleanArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_append_flush
  * Signature: (JI[JLjava/lang/Object;Ljava/lang/Object;)V
  */
