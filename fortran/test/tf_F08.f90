@@ -45,11 +45,12 @@ MODULE TH5_MISC_PROVISIONAL
   INTEGER, PARAMETER :: dp = SELECTED_REAL_KIND(10) ! This should map to REAL*8 on most modern processors
 
   ! generic compound datatype
-  TYPE, BIND(C) :: comp_datatype
+  TYPE :: comp_datatype
+    SEQUENCE
     REAL :: a
     INTEGER :: x
     DOUBLE PRECISION :: y
-    CHARACTER(LEN=1) :: z
+    CHARACTER(KIND=C_CHAR) :: z
   END TYPE comp_datatype
 
   PUBLIC :: H5_SIZEOF
