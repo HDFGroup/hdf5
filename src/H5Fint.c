@@ -1185,8 +1185,15 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             } /* end if */
 
         /* Create the 'top' file structure */
-        if(NULL == (file = H5F_new(NULL, flags, fcpl_id, fapl_id, lf)))
+        if(NULL == (file = H5F_new(NULL, flags, fcpl_id, fapl_id, lf))) {
+            /* If the file has not been opened yet and the struct returned is
+             * NULL, H5FD_close() will never be called via H5F_dest() so we
+             * have to close lf here before heading to the error handling.
+             */
+            if(H5FD_close(lf) < 0) 
+                HDONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to initialize file structure")
+        } /* end if */
 
         /* Need to set status_flags in the superblock if the driver has a 'lock' method */
         if(drvr->lock)
@@ -1342,10 +1349,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     ret_value = file;
 
 done:
-    if(!ret_value && file)
+    if((NULL == ret_value) && file)
         if(H5F_dest(file, dxpl_id, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
 
