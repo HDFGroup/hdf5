@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     uint64_t trans_num;
     int buf[4][6];
     int rank, mpi_size;
-    char *file_sel_str[2] = {"XXX...", "...XXX");
+    char *file_sel_str[2] = {"XXX...", "...XXX"};
     int i, j;
 
     (void)MPI_Init(&argc, &argv);
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     if(rank == 1)
         MPI_Barrier(MPI_COMM_WORLD);
 
-    printf("Rank %d:\n");
+    printf("---------------Rank %d---------------\n", rank);
     printf("Selecting elements denoted with X\n");
     printf("Memory File\n");
     printf("...... %s\n", file_sel_str[rank]);
@@ -96,13 +96,23 @@ int main(int argc, char *argv[]) {
     if(H5Sselect_hyperslab(mem_space, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
         ERROR;
 
+    if(rank == 1) {
+        MPI_Barrier(MPI_COMM_WORLD);
+        if(H5TRclose(trans) < 0)
+            ERROR;
+        if((trans = H5TRcreate(file, trans_num + 2)) < 0)
+            ERROR;
+    }
+
     /* Write data */
     if(H5Dwrite_ff(dset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, buf, trans) < 0)
         ERROR;
 
-    /* Commit transaction */
     if(H5TRcommit(trans) < 0)
         ERROR;
+
+    if(rank == 0)
+        MPI_Barrier(MPI_COMM_WORLD);
 
     /* Close */
     if(H5Dclose_ff(dset, -1) < 0)

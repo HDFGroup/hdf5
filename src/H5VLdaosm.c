@@ -898,6 +898,12 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         /* Read from the HCE */
         epoch--;
 
+        /* Generate roor group ID */
+        root_grp_oid.lo = 1; //DSMINC
+        root_grp_oid.mid = 0; //DSMINC
+        root_grp_oid.hi = 0; //DSMINC
+        daos_obj_id_generate(&root_grp_oid, DAOS_OC_TINY_RW); //DSMINC
+
         /* Bcast global handles if there are other processes */
         if(file->num_procs > 1) {
             /* Calculate sizes of global pool and container handles */
@@ -915,9 +921,9 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
             bcast_buf_64[1] = (uint64_t)glob.iov_buf_len;
 
             /* Add root group oid to bcast_buf_64 */
-            bcast_buf_64[2] = file->root_grp->oid.lo;
-            bcast_buf_64[3] = file->root_grp->oid.mid;
-            bcast_buf_64[4] = file->root_grp->oid.hi;
+            bcast_buf_64[2] = root_grp_oid.lo;
+            bcast_buf_64[3] = root_grp_oid.mid;
+            bcast_buf_64[4] = root_grp_oid.hi;
 
             /* Add epoch to bcast_buf_64 */
             HDassert(sizeof(bcast_buf_64[5]) == sizeof(epoch));
@@ -963,9 +969,9 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         } /* end if */
 
         /* Retrieve root group oid from bcast_buf_64 */
-        file->root_grp->oid.lo = bcast_buf_64[2];
-        file->root_grp->oid.mid = bcast_buf_64[3];
-        file->root_grp->oid.hi = bcast_buf_64[4];
+        root_grp_oid.lo = bcast_buf_64[2];
+        root_grp_oid.mid = bcast_buf_64[3];
+        root_grp_oid.hi = bcast_buf_64[4];
 
         /* Retrieve epoch from bcast_buf_64 */
         HDassert(sizeof(bcast_buf_64[5]) == sizeof(epoch));
@@ -1003,10 +1009,6 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     file->max_oid_dirty = FALSE; //DSMINC
 
     /* Open root group */
-    root_grp_oid.lo = 1; //DSMINC
-    root_grp_oid.mid = 0; //DSMINC
-    root_grp_oid.hi = 0; //DSMINC
-    daos_obj_id_generate(&root_grp_oid, DAOS_OC_TINY_RW); //DSMINC
     if(NULL == (file->root_grp = (H5VL_daosm_group_t *)H5VL_daosm_group_open_helper(file, root_grp_oid, H5P_GROUP_ACCESS_DEFAULT, dxpl_id, req, epoch)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't open root group")
 
@@ -2376,6 +2378,11 @@ H5VL_daosm_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id, hid_t H5
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data to dataset: %d", ret)
 
 done:
+    if(recxs != &recx)
+        H5MM_free(recxs);
+    if(sg_iovs != &sg_iov)
+        H5MM_free(sg_iovs);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_dataset_write() */
 
