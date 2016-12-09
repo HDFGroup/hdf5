@@ -37,11 +37,12 @@
 hid_t H5VL_DAOSM_g = 0;
 
 /* Macros */
-#define H5VL_DAOSM_LINK_KEY "Link"
 #define H5VL_DAOSM_INT_MD_KEY "Internal Metadata"
+#define H5VL_DAOSM_MAX_OID_KEY "Max OID"
+#define H5VL_DAOSM_CPL_KEY "Creation Property List"
+#define H5VL_DAOSM_LINK_KEY "Link"
 #define H5VL_DAOSM_TYPE_KEY "Datatype"
 #define H5VL_DAOSM_SPACE_KEY "Dataspace"
-#define H5VL_DAOSM_CPL_KEY "Creation Property List"
 #define H5VL_DAOSM_CHUNK_KEY 0u
 #define H5VL_DAOSM_SEQ_LIST_LEN 128
 
@@ -81,6 +82,8 @@ static herr_t H5VL_daosm_dataset_get(void *dset, H5VL_dataset_get_t get_type, hi
 static herr_t H5VL_daosm_dataset_close(void *dt, hid_t dxpl_id, void **req);
 
 /* Helper routines */
+static herr_t H5VL_daosm_write_max_oid(H5VL_daosm_file_t *file,
+    daos_epoch_t epoch);
 static void *H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file,
     hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req,
     daos_epoch_t epoch);
@@ -593,7 +596,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     H5VL_daosm_hash128(name, &file->uuid);
 
     /* Generate oid for global metadata object */
-    daos_obj_id_generate(&gmd_oid, DAOS_OC_REPL_2_RW);
+    daos_obj_id_generate(&gmd_oid, DAOS_OC_TINY_RW);
 
     if(file->my_rank == 0) {
         daos_epoch_state_t epoch_state;
@@ -640,12 +643,15 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
         if(0 != (ret = daos_obj_declare(file->coh, gmd_oid, 0, NULL /*oa*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create global metadata object: %d", ret)
 
+        /* Open global metadata object */
+        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
+
         /* Create root group */
         if(NULL == (file->root_grp = (H5VL_daosm_group_t *)H5VL_daosm_group_create_helper(file, fcpl_id, H5P_GROUP_ACCESS_DEFAULT, dxpl_id, req, epoch)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create root group")
 
-        /* Write root group OID, max oid per process to global metadata object
-         * DSMINC */
+        /* Write root group OID DSMINC */
 
         /* Bcast global handles if there are other processes */
         if(file->num_procs > 1) {
@@ -747,11 +753,11 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't open root group")
 
         /* Handle pool_info and container_info DSMINC */
-    } /* end else */
 
-    /* Open global metadata object */
-    if(0 != (ret = daos_obj_open(file->glob_md_oh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
+        /* Open global metadata object */
+        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
+    } /* end else */
 
     /* Determine if we want to acquire a transaction for the file creation */
     if(H5P_get(plist, H5VL_ACQUIRE_TR_ID, &trans_id) < 0)
@@ -825,7 +831,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     daos_epoch_t epoch;
     hid_t trans_id;
     daos_iov_t glob;
-    uint64_t bcast_buf_64[6];
+    uint64_t bcast_buf_64[7];
     char *gh_buf = NULL;
     daos_obj_id_t gmd_oid = {0, 0, 0};
     daos_obj_id_t root_grp_oid;
@@ -868,10 +874,17 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     H5VL_daosm_hash128(name, &file->uuid);
 
     /* Generate oid for global metadata object */
-    daos_obj_id_generate(&gmd_oid, DAOS_OC_REPL_2_RW);
+    daos_obj_id_generate(&gmd_oid, DAOS_OC_TINY_RW);
 
     if(file->my_rank == 0) {
         daos_epoch_state_t epoch_state;
+        daos_key_t dkey;
+        daos_vec_iod_t iod;
+        daos_recx_t recx;
+        daos_sg_list_t sgl;
+        daos_iov_t sg_iov;
+        char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
+        char max_oid_key[] = H5VL_DAOSM_MAX_OID_KEY;
 
         /* If there are other processes and we fail we must bcast anyways so they
          * don't hang */
@@ -898,11 +911,40 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         /* Read from the HCE */
         epoch--;
 
-        /* Generate roor group ID */
+        /* Generate root group ID */
         root_grp_oid.lo = 1; //DSMINC
         root_grp_oid.mid = 0; //DSMINC
         root_grp_oid.hi = 0; //DSMINC
         daos_obj_id_generate(&root_grp_oid, DAOS_OC_TINY_RW); //DSMINC
+
+        /* Open global metadata object */
+        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
+
+        /* Read max OID from gmd obj */
+        /* Set up dkey */
+        daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
+
+        /* Set up recx */
+        recx.rx_rsize = (uint64_t)8;
+        recx.rx_idx = (uint64_t)0;
+        recx.rx_nr = (uint64_t)1;
+
+        /* Set up iod */
+        HDmemset(&iod, 0, sizeof(iod));
+        daos_iov_set(&iod.vd_name, (void *)max_oid_key, (daos_size_t)(sizeof(max_oid_key) - 1));
+        daos_csum_set(&iod.vd_kcsum, NULL, 0);
+        iod.vd_nr = 1u;
+        iod.vd_recxs = &recx;
+
+        /* Set up sgl */
+        daos_iov_set(&sg_iov, &file->max_oid, (daos_size_t)8);
+        sgl.sg_nr.num = 1;
+        sgl.sg_iovs = &sg_iov;
+
+        /* Read max OID from gmd obj */
+        if(0 != (ret = daos_obj_fetch(file->glob_md_oh, epoch, &dkey, 1, &iod, &sgl, NULL /*maps*/, NULL /*event*/)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, NULL, "can't read max OID from global metadata object: %d", ret)
 
         /* Bcast global handles if there are other processes */
         if(file->num_procs > 1) {
@@ -928,6 +970,10 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
             /* Add epoch to bcast_buf_64 */
             HDassert(sizeof(bcast_buf_64[5]) == sizeof(epoch));
             bcast_buf_64[5] = (uint64_t)epoch;
+
+            /* Add max OID to bcast_buf_64 */
+            HDassert(sizeof(bcast_buf_64[6]) == sizeof(file->max_oid));
+            bcast_buf_64[6] = file->max_oid;
 
             /* Retrieve global pool and container handles */
             if(NULL == (gh_buf = (char *)malloc(bcast_buf_64[0] + bcast_buf_64[1])))
@@ -977,6 +1023,10 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         HDassert(sizeof(bcast_buf_64[5]) == sizeof(epoch));
         epoch = (daos_epoch_t)bcast_buf_64[5];
 
+        /* Retrieve max OID from bcast_buf_64 */
+        HDassert(sizeof(bcast_buf_64[6]) == sizeof(file->max_oid));
+        file->max_oid = bcast_buf_64[6];
+
         /* Allocate global handle buffer */
         if(NULL == (gh_buf = (char *)malloc(bcast_buf_64[0] + bcast_buf_64[1])))
             HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, NULL, "can't allocate space for global handles")
@@ -998,15 +1048,11 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, NULL, "can't get local container handle: %d", ret)
 
         /* Handle pool_info and container_info DSMINC */
+
+        /* Open global metadata object */
+        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
     } /* end else */
-
-    /* Open global metadata object */
-    if(0 != (ret = daos_obj_open(file->glob_md_oh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
-
-    /* Finish setting up file struct */
-    file->max_oid = 1; //DSMINC
-    file->max_oid_dirty = FALSE; //DSMINC
 
     /* Open root group */
     if(NULL == (file->root_grp = (H5VL_daosm_group_t *)H5VL_daosm_group_open_helper(file, root_grp_oid, H5P_GROUP_ACCESS_DEFAULT, dxpl_id, req, epoch)))
@@ -1082,7 +1128,7 @@ H5VL_daosm_file_close(void *_file, hid_t dxpl_id, void **req)
 #if 0 /* DSMINC */
     /* Flush the epoch */
     if(0 != (ret = daos_epoch_flush(file->coh, epoch, NULL /*state*/, NULL /*event*/)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "can't flush epoch: %d", ret)
+        HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, NULL, "can't flush epoch: %d", ret)
 #endif
 
     /* Free file data structures */
@@ -1111,6 +1157,63 @@ H5VL_daosm_file_close(void *_file, hid_t dxpl_id, void **req)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_file_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_write_max_oid
+ *
+ * Purpose:     Writes the max OID to the global metadata object
+ *
+ * Return:      Success:        0
+ *              Failure:        1
+ *
+ * Programmer:  Neil Fortner
+ *              December, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_daosm_write_max_oid(H5VL_daosm_file_t *file, daos_epoch_t epoch)
+{
+    daos_key_t dkey;
+    daos_vec_iod_t iod;
+    daos_recx_t recx;
+    daos_sg_list_t sgl;
+    daos_iov_t sg_iov;
+    char int_md_key[] = H5VL_DAOSM_INT_MD_KEY;
+    char max_oid_key[] = H5VL_DAOSM_MAX_OID_KEY;
+    int ret;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Set up dkey */
+    daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
+
+    /* Set up recx */
+    recx.rx_rsize = (uint64_t)8;
+    recx.rx_idx = (uint64_t)0;
+    recx.rx_nr = (uint64_t)1;
+
+    /* Set up iod */
+    HDmemset(&iod, 0, sizeof(iod));
+    daos_iov_set(&iod.vd_name, (void *)max_oid_key, (daos_size_t)(sizeof(max_oid_key) - 1));
+    daos_csum_set(&iod.vd_kcsum, NULL, 0);
+    iod.vd_nr = 1u;
+    iod.vd_recxs = &recx;
+
+    /* Set up sgl */
+    daos_iov_set(&sg_iov, &file->max_oid, (daos_size_t)8);
+    sgl.sg_nr.num = 1;
+    sgl.sg_iovs = &sg_iov;
+
+    /* Write max OID to gmd obj */
+    if(0 != (ret = daos_obj_update(file->glob_md_oh, epoch, &dkey, 1, &iod, &sgl, NULL /*event*/)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTENCODE, FAIL, "can't write max OID to global metadata object: %d", ret)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_write_max_oid() */
 
 
 /*-------------------------------------------------------------------------
@@ -1159,7 +1262,10 @@ H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file, hid_t gcpl_id,
     if(0 != (ret = daos_obj_declare(file->coh, grp->oid, epoch, NULL /*oa*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create dataset: %d", ret)
     file->max_oid = grp->oid.lo;
-    file->max_oid_dirty = TRUE;
+
+    /* Write max OID */
+    if(H5VL_daosm_write_max_oid(file, epoch) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't write max OID")
 
     /* Open group */
     if(0 != (ret = daos_obj_open(file->coh, grp->oid, epoch, DAOS_OO_RW, &grp->obj_oh, NULL /*event*/)))
@@ -1681,7 +1787,10 @@ H5VL_daosm_dataset_create(void *_obj,
     if(0 != (ret = daos_obj_declare(obj->file->coh, dset->oid, tr->epoch, NULL /*oa*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create dataset: %d", ret)
     obj->file->max_oid = dset->oid.lo;
-    obj->file->max_oid_dirty = TRUE;
+
+    /* Write max OID */
+    if(H5VL_daosm_write_max_oid(obj->file, tr->epoch) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't write max OID")
 
     /* Set up dkey */
     /* For now always use dkey = const, akey = name. Add option to switch these

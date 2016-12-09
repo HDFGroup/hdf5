@@ -83,8 +83,8 @@ int main(int argc, char *argv[]) {
         ERROR;
     if((mem_space = H5Screate_simple(2, dims, NULL)) < 0)
         ERROR;
-    start[0] = 3 * rank;
-    start[1] = 0;
+    start[0] = 0;
+    start[1] = 3 * rank;
     count[0] = 4;
     count[1] = 3;
     if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
