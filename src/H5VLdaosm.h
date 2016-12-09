@@ -44,6 +44,7 @@ extern "C" {
 typedef struct H5VL_daosm_obj_t {
     H5I_type_t type;
     struct H5VL_daosm_file_t *file;
+    int rc;
 } H5VL_daosm_obj_t;
 
 /* The file struct */
