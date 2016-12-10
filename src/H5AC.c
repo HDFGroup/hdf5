@@ -2557,6 +2557,40 @@ done:
 } /* H5AC_expunge_tag_type_metadata*/
 
 
+/*------------------------------------------------------------------------------
+ * Function:    H5AC_get_tag()
+ *
+ * Purpose:     Get the tag for a metadata cache entry.
+ * 
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2016
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_get_tag(const void *thing, haddr_t *tag)
+{
+    /* Variable Declarations */
+    herr_t ret_value = SUCCEED;
+ 
+    /* Function Enter Macro */   
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Assertions */
+    HDassert(thing);
+    HDassert(tag);
+
+    /* Call cache level function to get the tag */
+    if(H5C_get_tag(thing, tag) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "Cannot get tag for metadata cache entry")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5AC_get_tag() */
+
+
 /*-------------------------------------------------------------------------
  * Function:    H5AC_cork
  *

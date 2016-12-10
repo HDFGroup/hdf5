@@ -647,20 +647,13 @@ H5C_verify_tag(int id, haddr_t tag)
         } /* end else */
     
         /* Free Space Manager */
-        if((id == H5AC_FSPACE_HDR_ID) || (id == H5AC_FSPACE_SINFO_ID)) {
-            if(tag != H5AC__FREESPACE_TAG)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "freespace entry not tagged with H5AC__FREESPACE_TAG")
-        } /* end if */
-        else {
-            if(tag == H5AC__FREESPACE_TAG)
+        if(tag == H5AC__FREESPACE_TAG && ((id != H5AC_FSPACE_HDR_ID) && (id != H5AC_FSPACE_SINFO_ID)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "H5AC__FREESPACE_TAG applied to non-freespace entry")
-        } /* end else */
     
         /* SOHM */
-        if((id == H5AC_SOHM_TABLE_ID) || (id == H5AC_SOHM_LIST_ID)) { 
+        if((id == H5AC_SOHM_TABLE_ID) || (id == H5AC_SOHM_LIST_ID))
             if(tag != H5AC__SOHM_TAG)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "sohm entry not tagged with H5AC__SOHM_TAG")
-        } /* end if */
     
         /* Global Heap */
         if(id == H5AC_GHEAP_ID) {
@@ -845,4 +838,35 @@ H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_expunge_tag_type_metadata() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_get_tag()
+ *
+ * Purpose:     Get the tag for a metadata cache entry.
+ *
+ * Return:      SUCCEED (can't fail)
+ *
+ * Programmer:  Dana Robinson
+ *              Fall 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t 
+H5C_get_tag(const void *thing, haddr_t *tag /*OUT*/)
+{
+    const H5C_cache_entry_t *entry = (const H5C_cache_entry_t *)thing;  /* Pointer to cache entry */
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    HDassert(entry);
+    HDassert(entry->tag_info);
+    HDassert(tag);
+
+    /* Return the tag */
+    *tag = entry->tag_info->tag;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5C_get_tag() */
 

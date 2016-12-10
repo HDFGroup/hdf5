@@ -85,7 +85,7 @@ typedef struct {
 
 /* Allocator routines */
 static herr_t H5MF_alloc_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
-static herr_t H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
+static herr_t H5MF__alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type);
 static herr_t H5MF__close_delete(H5F_t *f, hid_t dxpl_id);
 
 
@@ -245,7 +245,7 @@ H5MF_alloc_open(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
     H5AC_ring_t orig_ring = H5AC_RING_INV;      /* Original ring value */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 
     /*
      * Check arguments.
@@ -274,7 +274,7 @@ done:
     if(H5AC_reset_ring(dxpl, orig_ring) < 0)
         HDONE_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set property value")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5MF_alloc_open() */
 
 
@@ -301,7 +301,7 @@ H5MF_alloc_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
     herr_t ret_value = SUCCEED;         /* Return value */
     H5FS_create_t fs_create; 		/* Free space creation parameters */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 
     /*
      * Check arguments.
@@ -329,7 +329,7 @@ H5MF_alloc_create(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
         f->shared->fs_state[type] = H5F_FS_STATE_OPEN;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5MF_alloc_create() */
 
 
@@ -379,7 +379,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5MF_alloc_close
+ * Function:    H5MF__alloc_close
  *
  * Purpose:     Close an existing free space manager of TYPE for file
  *
@@ -391,11 +391,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
+H5MF__alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 
     /*
      * Check arguments.
@@ -413,8 +413,8 @@ H5MF_alloc_close(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
     f->shared->fs_state[type] = H5F_FS_STATE_CLOSED;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MF_alloc_close() */
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+} /* end H5MF__alloc_close() */
 
 
 /*-------------------------------------------------------------------------
@@ -442,7 +442,7 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, hsize_t size)
     H5FD_mem_t  fs_type;                /* Free space type (mapped from allocation type) */
     haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
-    FUNC_ENTER_NOAPI(HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, HADDR_UNDEF)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_type, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -543,7 +543,7 @@ HDfprintf(stderr, "%s: Leaving: ret_value = %a, size = %Hu\n", FUNC, ret_value, 
 H5MF_sects_dump(f, dxpl_id, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, HADDR_UNDEF)
 } /* end H5MF_alloc() */
 
 
@@ -633,7 +633,7 @@ H5MF_xfree(const H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     H5FD_mem_t fs_type;                 /* Free space type (mapped from allocation type) */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUNC, (unsigned)alloc_type, addr, size);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -774,7 +774,7 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
 #ifdef H5MF_ALLOC_DEBUG_DUMP
 H5MF_sects_dump(f, dxpl_id, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5MF_xfree() */
 
 
@@ -802,7 +802,7 @@ H5MF_try_extend(H5F_t *f, hid_t dxpl_id, H5FD_mem_t alloc_type, haddr_t addr,
     H5FD_mem_t  map_type;       /* Mapped type */
     htri_t	ret_value = FAIL;       /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_requested = %Hu\n", FUNC, (unsigned)alloc_type, addr, size, extra_requested);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -861,7 +861,7 @@ HDfprintf(stderr, "%s: Leaving: ret_value = %t\n", FUNC, ret_value);
 H5MF_sects_dump(f, dxpl_id, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5MF_try_extend() */
 
 
@@ -900,7 +900,7 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_si
     hbool_t eoa_shrank;		/* Whether an EOA shrink occurs */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 
     /* check args */
     HDassert(f);
@@ -991,7 +991,7 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_si
     /* Close the free-space managers if they were opened earlier in this routine */
     for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
 	if(fs_started[type])
-            if(H5MF_alloc_close(f, dxpl_id, type) < 0)
+            if(H5MF__alloc_close(f, dxpl_id, type) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't close file free space")
     } /* end for */
 
@@ -1007,7 +1007,7 @@ done:
     if(H5AC_reset_ring(dxpl, orig_ring) < 0)
         HDONE_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set property value")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5MF_get_freespace() */
 
 
@@ -1108,7 +1108,7 @@ H5MF_close_shrink_eoa(H5F_t *f, hid_t dxpl_id)
     H5MF_sect_ud_t udata;	/* User data for callback */
     herr_t ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 
     /* check args */
     HDassert(f);
@@ -1143,7 +1143,7 @@ H5MF_close_shrink_eoa(H5F_t *f, hid_t dxpl_id)
     } while(eoa_shrank);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5MF_close_shrink_eoa() */
 
 
@@ -1166,7 +1166,7 @@ H5MF__close_delete(H5F_t *f, hid_t dxpl_id)
     H5FD_mem_t type;                    /* Memory type for iteration */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -1229,7 +1229,7 @@ done:
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Leaving\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* H5MF__close_delete() */
 
 
@@ -1308,7 +1308,7 @@ H5MF_close(H5F_t *f, hid_t dxpl_id)
     H5FD_mem_t type;                    /* Memory type for iteration */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Entering\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
@@ -1446,7 +1446,7 @@ done:
 #ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Leaving\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* end H5MF_close() */
 
 
@@ -1506,7 +1506,7 @@ H5MF_get_free_sections(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, size_t nsects, 
     H5FD_mem_t 	ty;     		/* Memory type for iteration */
     ssize_t 	ret_value = -1;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 
     /* check args */
     HDassert(f);
@@ -1567,7 +1567,7 @@ H5MF_get_free_sections(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, size_t nsects, 
 
 	/* Close the free space manager of this type, if we started it here */
         if(fs_started)
-            if(H5MF_alloc_close(f, dxpl_id, ty) < 0)
+            if(H5MF__alloc_close(f, dxpl_id, ty) < 0)
 	        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCLOSEOBJ, FAIL, "can't close file free space")
     } /* end for */
 
@@ -1579,6 +1579,6 @@ done:
     if(H5AC_reset_ring(dxpl, orig_ring) < 0)
         HDONE_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set property value")
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* H5MF_get_free_sections() */
 

@@ -1726,6 +1726,7 @@ H5_DLL herr_t H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag); 
 H5_DLL herr_t H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag, hbool_t match_global);
 H5_DLL herr_t H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
+H5_DLL herr_t H5C_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
 #if H5C_DO_TAGGING_SANITY_CHECKS
 herr_t H5C_verify_tag(int id, haddr_t tag);
 #endif
