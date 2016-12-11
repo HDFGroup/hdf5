@@ -1387,6 +1387,7 @@
 
 ./tools/src/misc/Makefile.am
 ./tools/src/misc/h5cc.in
+./tools/src/misc/h5clear.c
 ./tools/src/misc/h5debug.c
 ./tools/src/misc/h5mkgrp.c
 ./tools/src/misc/h5redeploy.in
@@ -1412,6 +1413,9 @@
 ./tools/test/misc/vds/UC_5.h
 ./tools/test/misc/vds/UC_5_stride_gen.c
 ./tools/test/misc/vds/UC_common.h
+./tools/test/misc/h5clear_gentest.c
+./tools/test/misc/clear_open_chk.c
+./tools/test/misc/testh5clear.sh.in
 
 # h5stat sources
 ./tools/src/h5stat/Makefile.am
@@ -1583,6 +1587,7 @@
 ./tools/testfiles/tdset.h5
 ./tools/testfiles/tdset2.h5
 ./tools/testfiles/tdset_idx.ls
+./tools/testfiles/tdset_idx.ddl
 ./tools/testfiles/tdset_idx.h5
 ./tools/testfiles/tempty.ddl
 ./tools/testfiles/tempty.h5
@@ -2208,6 +2213,7 @@
 ./tools/test/h5diff/testfiles/h5diff_457.txt
 ./tools/test/h5diff/testfiles/h5diff_458.txt
 ./tools/test/h5diff/testfiles/h5diff_459.txt
+./tools/test/h5diff/testfiles/h5diff_idx.txt
 ./tools/test/h5diff/testfiles/h5diff_465.txt
 ./tools/test/h5diff/testfiles/h5diff_466.txt
 ./tools/test/h5diff/testfiles/h5diff_467.txt
@@ -2256,6 +2262,8 @@
 ./tools/test/h5diff/testfiles/h5diff_basic2.h5
 ./tools/test/h5diff/testfiles/h5diff_dset1.h5
 ./tools/test/h5diff/testfiles/h5diff_dset2.h5
+./tools/test/h5diff/testfiles/h5diff_dset_idx1.h5
+./tools/test/h5diff/testfiles/h5diff_dset_idx2.h5
 ./tools/test/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/test/h5diff/testfiles/h5diff_empty.h5
 ./tools/test/h5diff/testfiles/h5diff_hyper1.h5
@@ -2528,6 +2536,51 @@
 ./hl/tools/gif2h5/testfiles/ex_image2.h5
 ./hl/tools/gif2h5/testfiles/image1.gif
 ./hl/tools/gif2h5/testfiles/h52giftst.h5
+#
+./hl/tools/h5watch/Makefile.am
+./hl/tools/h5watch/extend_dset.c
+./hl/tools/h5watch/h5watch.c
+./hl/tools/h5watch/h5watchgentest.c
+./hl/tools/h5watch/swmr_check_compat_vfd.c
+./hl/tools/h5watch/testh5watch.sh.in
+
+# expected test output from testing h5watch
+#
+./hl/tools/testfiles/w-err-cmpd1.ddl
+./hl/tools/testfiles/w-err-cmpd2.ddl
+./hl/tools/testfiles/w-err-cmpd3.ddl
+./hl/tools/testfiles/w-err-cmpd4.ddl
+./hl/tools/testfiles/w-err-cmpd5.ddl
+./hl/tools/testfiles/w-err-dset1.ddl
+./hl/tools/testfiles/w-err-dset2.ddl
+./hl/tools/testfiles/w-err-dset-nomax.ddl
+./hl/tools/testfiles/w-err-dset-none.ddl
+./hl/tools/testfiles/w-err-file.ddl
+./hl/tools/testfiles/w-err-poll0.ddl
+./hl/tools/testfiles/w-err-poll.ddl
+./hl/tools/testfiles/w-err-width.ddl
+./hl/tools/testfiles/w-ext-cmpd.ddl
+./hl/tools/testfiles/w-ext-cmpd-esc.ddl
+./hl/tools/testfiles/w-ext-cmpd-esc-f1.ddl
+./hl/tools/testfiles/w-ext-cmpd-esc-f3.ddl
+./hl/tools/testfiles/w-ext-cmpd-esc-ff2.ddl
+./hl/tools/testfiles/w-ext-cmpd-f1.ddl
+./hl/tools/testfiles/w-ext-cmpd-f2.ddl
+./hl/tools/testfiles/w-ext-cmpd-ff3.ddl
+./hl/tools/testfiles/w-ext-cmpd-label.ddl
+./hl/tools/testfiles/w-ext-cmpd-two.ddl
+./hl/tools/testfiles/w-ext-cmpd-two-f1.ddl
+./hl/tools/testfiles/w-ext-cmpd-two-f3.ddl
+./hl/tools/testfiles/w-ext-cmpd-two-ff2.ddl
+./hl/tools/testfiles/w-ext-early.ddl
+./hl/tools/testfiles/w-ext-late.ddl
+./hl/tools/testfiles/w-ext-one-d.ddl
+./hl/tools/testfiles/w-ext-one.ddl
+./hl/tools/testfiles/w-ext-one-simple.ddl
+./hl/tools/testfiles/w-ext-two-d.ddl
+./hl/tools/testfiles/w-ext-two.ddl
+./hl/tools/testfiles/w-ext-two-width.ddl
+./hl/tools/testfiles/w-help1.ddl
 
 # hl fortran
 ./hl/fortran/COPYING
@@ -2963,6 +3016,8 @@
 ./hl/tools/CMakeLists.txt
 ./hl/tools/gif2h5/CMakeLists.txt
 ./hl/tools/gif2h5/CMakeTests.cmake
+./hl/tools/h5watch/CMakeLists.txt
+./hl/tools/h5watch/CMakeTests.cmake
 ./src/CMakeLists.txt
 ./test/CMakeLists.txt
 ./test/CMakeTests.cmake
@@ -3048,6 +3103,7 @@
 ./hl/src/Makefile.in
 ./hl/test/Makefile.in
 ./hl/tools/gif2h5/Makefile.in
+./hl/tools/h5watch/Makefile.in
 ./hl/tools/Makefile.in
 ./m4/libtool.m4
 ./m4/lt~obsolete.m4

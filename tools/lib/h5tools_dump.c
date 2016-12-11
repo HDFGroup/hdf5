@@ -61,6 +61,7 @@ NULL, /*fmt_ullong */
 "{", /*cmpd_pre */
 "}", /*cmpd_suf */
 "\n", /*cmpd_end */
+NULL, /* cmpd_listv */
 
 ", ", /*vlen_sep */
 "(", /*vlen_pre */
@@ -1484,6 +1485,9 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, h5tools_co
     if(H5Sget_simple_extent_dims(f_space, total_size, NULL) < 0)
         H5E_THROW(FAIL, H5E_tools_min_id_g, "H5Sget_simple_extent_dims failed");
     ctx->size_last_dim = total_size[ctx->ndims - 1];
+
+    /* Set the compound datatype field list for display */
+    ctx->cmpd_listv = info->cmpd_listv;
 
     h5tools_display_simple_subset(stream, info, ctx, dset, p_type, sset, f_space, total_size);
 

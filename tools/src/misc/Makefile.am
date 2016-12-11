@@ -24,13 +24,14 @@ include $(top_srcdir)/config/commence.am
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # These are our main targets, the tools
-bin_PROGRAMS=h5debug h5repart h5mkgrp
+bin_PROGRAMS=h5debug h5repart h5mkgrp h5clear
 bin_SCRIPTS=h5redeploy
 
 # Add h5debug, h5repart, and h5mkgrp specific linker flags here
 h5debug_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 h5repart_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 h5mkgrp_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+h5clear_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # Tell automake to clean h5redeploy script
 CLEANFILES=h5redeploy

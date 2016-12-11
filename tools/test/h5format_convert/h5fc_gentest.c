@@ -44,6 +44,8 @@ const char *FILENAME[] = {
 
 #define GROUP			"GROUP"
 
+#define DSET_BT1		"DSET_BT1"
+#define DSET_NDATA_BT1		"DSET_NDATA_BT1"
 #define DSET_COMPACT		"DSET_COMPACT"
 #define DSET_CONTIGUOUS		"DSET_CONTIGUOUS"
 
@@ -68,8 +70,7 @@ const char *FILENAME[] = {
 /*
  * Function: gen_non() 
  *
- * Create empty file with latest-format--this will result in v3 superbock
- * Close and re-open file with non-latest-format--v3 superblock will result in latest version support:
+ * Create a file with SWMR write+non-latest-format--this will result in v3 superbock+latest version support:
  *	1) 1 chunked dataset with extensible array chunk indexing type (without data)
  *	2) 1 chunked dataset with version 2 B-tree chunk indexing type (with data)
  * Re-open the file with write+non-latest-format and create:
@@ -82,7 +83,6 @@ gen_non(const char *fname)
 {
     hid_t	fid = -1;		/* file id */
     hid_t	fcpl = -1;		/* file creation property list */
-    hid_t	fapl = -1;		/* file access property list */
     hid_t	gid = -1;		/* group id */
     hid_t   	sid = -1;       	/* space id */
     hid_t	dcpl = -1;		/* dataset creation property id */
@@ -101,13 +101,8 @@ gen_non(const char *fname)
     if(H5Pset_istore_k(fcpl, 64) < 0)
         goto error;
 
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-	goto error;
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	goto error;
-
     /* Create an empty file with latest-format */
-    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, fcpl, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Create a group */
@@ -172,7 +167,12 @@ gen_non(const char *fname)
         goto error;
     if(H5Gclose(gid) < 0)
         goto error;
+    if(H5Fclose(fid) < 0)
+        goto error;
 
+    /* Re-open the file with old format */
+    if((fid = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+        goto error;
 
     /* Open the group */
     if((gid = H5Gopen2(fid, GROUP, H5P_DEFAULT)) < 0)
@@ -285,8 +285,6 @@ gen_non(const char *fname)
 	goto error;
     if(H5Pclose(fcpl) < 0)
 	goto error;
-    if(H5Pclose(fapl) < 0)
-        goto error;
     if(H5Fclose(fid) < 0)
         goto error;
 
@@ -773,7 +771,6 @@ error:
         H5Dclose(did2);
         H5Gclose(gid);
         H5Fclose(fid);
-        H5Pclose(fapl);
         H5Pclose(fcpl);
     } H5E_END_TRY;
 

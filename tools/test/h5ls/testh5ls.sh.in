@@ -421,7 +421,7 @@ else
 fi 
 
 # test for file with datasets that use Fixed Array chunk indices
-#echo "***skip testing tdset_idx.h5"
+echo "***skip testing tdset_idx.h5"
 TOOLTEST tdset_idx.ls 0 -w80 -d tdset_idx.h5
 
 # Clean up temporary files/directories

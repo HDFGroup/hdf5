@@ -1,0 +1,112 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+#
+# Tests for the h5clear tool
+#
+srcdir=@srcdir@
+TESTNAME=h5clear
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+H5CLEAR=../../src/misc/h5clear
+H5CLEAR_BIN=`pwd`/$H5CLEAR        # The path of the tool binary
+
+OPENCHK=clear_open_chk        # Try opening the test file
+OPENCHK_BIN=`pwd`/$OPENCHK    # The path to the binary
+
+SUCCEED=0
+FAIL=1
+
+nerrors=0
+verbose=yes
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+
+
+# (1)Use "clear_open_chk" to check if the file open succeeds or fails
+# $1 is the filename to open
+# $2 is the expected return from "clear_open_chk"
+# (2) Use "h5clear" to clear the status_flags in the test file
+# (3) Open the test file via "clear_open_chk"
+TOOLTEST() {
+    fname=$1
+    expected=$2
+    # (1)
+    $OPENCHK_BIN $fname 2>/dev/null
+    actual=$?
+    if test $actual -ne $expected; then
+       echo "Unexpected return from $OPENCHK"
+       nerrors=`expr $nerrors + 1`
+    fi
+    # (2)
+    TESTING $H5CLEAR $1
+    fname=$1
+    # Use "h5clear" to clear the status_flags in the test file
+    $RUNSERIAL $H5CLEAR_BIN $fname
+    if test $? -ne $SUCCEED; then
+    echo ".....$H5CLEAR: should succeed"
+    nerrors=`expr $nerrors + 1`
+    else
+    # (3) Open the test file via "clear_open_chk"
+    $OPENCHK_BIN $fname
+    if test $? -ne $SUCCEED; then
+        echo "......$OPENCHK: should succeed"
+        nerrors=`expr $nerrors + 1`
+    else
+        echo "PASSED"
+    fi
+    fi
+}
+
+##############################################################################
+##############################################################################
+###              T H E   T E S T S                                ###
+##############################################################################
+##############################################################################
+#
+# Initial file open fails
+# After "h5clear" the file, the subsequent file open succeeds
+TOOLTEST h5clear_sec2_v3.h5 $FAIL
+#
+TOOLTEST h5clear_log_v3.h5 $FAIL
+#
+TOOLTEST latest_h5clear_sec2_v3.h5 $FAIL
+#
+TOOLTEST latest_h5clear_log_v3.h5 $FAIL
+#
+#
+# File open succeeds because the library does not check status_flags for file with < v3 superblock
+TOOLTEST h5clear_sec2_v0.h5 $SUCCEED
+TOOLTEST h5clear_sec2_v2.h5 $SUCCEED
+#
+# Clean up test files
+if test -z "$HDF5_NOCLEANUP"; then
+   rm -f h5clear_*.h5 latest_h5clear*.h5
+fi
+
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors error(s)."
+    exit $EXIT_FAILURE
+fi

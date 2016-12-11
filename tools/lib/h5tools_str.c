@@ -29,6 +29,15 @@
 #include "h5tools_ref.h"
 #include "h5tools_str.h"        /*function prototypes       */
 
+/* Copied from hl/src/H5LDprivate.h */
+/* Info about the list of comma-separated compound fields */
+typedef struct H5LD_memb_t {
+   size_t tot_offset;
+   size_t last_tsize;
+   hid_t last_tid;
+   char **names;
+} H5LD_memb_t;
+
 /*
  * If REPEAT_VERBOSE is defined then character strings will be printed so
  * that repeated character sequences like "AAAAAAAAAA" are displayed as
@@ -730,6 +739,9 @@ h5tools_str_indent(h5tools_str_t *str, const h5tool_format_t *info,
  *  PVN, 28 March 2006
  *  added H5T_NATIVE_LDOUBLE case
  *
+ *  Vailin Choi; August 2010
+ *	Modified to handle printing of selected compound fields for h5watch.
+ *
  *  Raymond Lu, 2011-09-01
  *  CLANG compiler complained about the line (about 800):
  *    tempint = (tempint >> packed_data_offset) & packed_data_mask;
@@ -1024,7 +1036,57 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 break;
 
             case H5T_COMPOUND:
-                {
+                if(ctx->cmpd_listv) { /* there is <list_of_fields> */
+                    int save_indent_level;  	/* The indentation level */
+                    size_t curr_field;          /* Current field to display */
+                    int i = 0, x = 0; 		/* Local index variable */
+                    H5LD_memb_t **listv;  	/* Vector of information for <list_of_fields> */
+
+                    listv = ctx->cmpd_listv;	    
+                    ctx->cmpd_listv = NULL;
+
+                    h5tools_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
+
+                    /* 
+                     * Go through the vector containing info about the comma-separated list of
+                     * compound fields and then members in each field: 
+                     *	   put in "{", "}", ",", member name and value accordingly.
+                     */
+                    save_indent_level = ctx->indent_level;
+                    for(curr_field = 0; listv[curr_field] != NULL; curr_field++) {
+                        if (curr_field)
+                            h5tools_str_append(str, "%s", OPT(info->cmpd_sep, ", "OPTIONAL_LINE_BREAK));
+                        else 
+                            h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
+
+                        if(info->arr_linebreak)
+                            h5tools_str_indent(str, info, ctx);
+                        
+                        /* Process members of each field */
+                        for(i = 0; listv[curr_field]->names[i] != NULL; i++) {
+                            h5tools_str_append(str, OPT(info->cmpd_name, ""), listv[curr_field]->names[i]);
+                            if(i) {
+                                ctx->indent_level++;
+                                h5tools_str_append(str, "%s", OPT(info->cmpd_pre, "{"));
+                            }
+                        }
+                        h5tools_str_sprint(str, info, container, listv[curr_field]->last_tid, cp_vp + listv[curr_field]->tot_offset, ctx);
+                        if(ctx->indent_level > 0)
+                            for(x = ctx->indent_level; x > 0; x--)
+                                h5tools_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
+                        ctx->indent_level = save_indent_level;
+                    }
+
+
+                    if(info->arr_linebreak) {
+                        h5tools_str_append(str, "%s", OPT(info->cmpd_end, ""));
+                        h5tools_str_indent(str, info, ctx);
+                    }
+                    h5tools_str_append(str, "%s", OPT(info->cmpd_suf, "}"));
+
+                    ctx->cmpd_listv = info->cmpd_listv;
+
+                } else {
                     unsigned nmembs;
                     unsigned j;
 
