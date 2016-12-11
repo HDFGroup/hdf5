@@ -1702,6 +1702,13 @@ H5C_move_entry(H5C_t *	     cache_ptr,
     HDassert(entry_ptr->addr == old_addr);
     HDassert(entry_ptr->type == type);
 
+    /* Check for R/W status, otherwise error */
+    /* (Moving a R/O entry would mark it dirty, which shouldn't
+     *  happen. QAK - 2016/12/02)
+     */
+    if(entry_ptr->is_read_only)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMOVE, FAIL, "can't move R/O entry")
+
     H5C__SEARCH_INDEX(cache_ptr, new_addr, test_entry_ptr, FAIL)
 
     if(test_entry_ptr != NULL) { /* we are hosed */
@@ -5066,16 +5073,38 @@ H5C_flush_invalidate_cache(const H5F_t * f, hid_t dxpl_id, unsigned flags)
     if(!(flags & H5C__EVICT_ALLOW_LAST_PINS_FLAG)) {
         HDassert(cache_ptr->index_size == 0);
         HDassert(cache_ptr->clean_index_size == 0);
-        HDassert(cache_ptr->dirty_index_size == 0);
-        HDassert(cache_ptr->slist_len == 0);
-        HDassert(cache_ptr->slist_size == 0);
         HDassert(cache_ptr->pel_len == 0);
         HDassert(cache_ptr->pel_size == 0);
-        HDassert(cache_ptr->pl_len == 0);
-        HDassert(cache_ptr->pl_size == 0);
-        HDassert(cache_ptr->LRU_list_len == 0);
-        HDassert(cache_ptr->LRU_list_size == 0);
     } /* end if */
+    else {
+        H5C_cache_entry_t *entry_ptr;   /* Cache entry */
+        unsigned u;                     /* Local index variable */
+
+        /* All rings except ring 4 should be empty now */
+        /* (Ring 4 has the superblock) */
+        for(u = H5C_RING_USER; u < H5C_RING_SB; u++) {
+            HDassert(cache_ptr->index_ring_len[u] == 0);
+            HDassert(cache_ptr->index_ring_size[u] == 0);
+            HDassert(cache_ptr->clean_index_ring_size[u] == 0);
+        } /* end for */
+
+        /* Check that any remaining pinned entries are in the superblock ring */
+        entry_ptr = cache_ptr->pel_head_ptr;
+        while(entry_ptr) {
+            /* Check ring */
+            HDassert(entry_ptr->ring == H5C_RING_SB);
+            
+            /* Advance to next entry in pinned entry list */
+            entry_ptr = entry_ptr->next;
+        } /* end while */
+    } /* end else */
+    HDassert(cache_ptr->dirty_index_size == 0);
+    HDassert(cache_ptr->slist_len == 0);
+    HDassert(cache_ptr->slist_size == 0);
+    HDassert(cache_ptr->pl_len == 0);
+    HDassert(cache_ptr->pl_size == 0);
+    HDassert(cache_ptr->LRU_list_len == 0);
+    HDassert(cache_ptr->LRU_list_size == 0);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

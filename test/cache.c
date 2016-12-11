@@ -93,8 +93,8 @@ struct move_entry_test_spec
 {
     int			entry_type;
     int			entry_index;
-    hbool_t		is_dirty;
     hbool_t		is_pinned;
+    hbool_t             is_protected;
 };
 
 
@@ -154,7 +154,7 @@ static void check_flush_cache__flush_op_test(H5F_t * file_ptr,
                                         int test_num,
                                         unsigned int flush_flags,
                                         int spec_size,
-                                        struct fo_flush_cache_test_spec spec[],
+                                        const struct fo_flush_cache_test_spec spec[],
 				        int init_expected_index_len,
 				        size_t init_expected_index_size,
 				        int expected_index_len,
@@ -166,8 +166,8 @@ static unsigned check_get_entry_status(void);
 static unsigned check_expunge_entry(void);
 static unsigned check_multiple_read_protect(void);
 static unsigned check_move_entry(void);
-static void check_move_entry__run_test(H5F_t * file_ptr, int test_num,
-                                      struct move_entry_test_spec * spec_ptr);
+static void check_move_entry__run_test(H5F_t * file_ptr, unsigned test_num,
+    struct move_entry_test_spec * spec_ptr);
 static unsigned check_pin_protected_entry(void);
 static unsigned check_resize_entry(void);
 static unsigned check_evictions_enabled(void);
@@ -175,7 +175,6 @@ static unsigned check_flush_protected_err(void);
 static unsigned check_destroy_pinned_err(void);
 static unsigned check_destroy_protected_err(void);
 static unsigned check_duplicate_insert_err(void);
-static unsigned check_move_err(void);
 static unsigned check_double_pin_err(void);
 static unsigned check_double_unpin_err(void);
 static unsigned check_pin_entry_errs(void);
@@ -183,6 +182,7 @@ static unsigned check_double_protect_err(void);
 static unsigned check_double_unprotect_err(void);
 static unsigned check_mark_entry_dirty_errs(void);
 static unsigned check_expunge_entry_errs(void);
+static unsigned check_move_entry_errs(void);
 static unsigned check_resize_entry_errs(void);
 static unsigned check_unprotect_ro_dirty_err(void);
 static unsigned check_protect_ro_rw_err(void);
@@ -9069,7 +9069,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
                                  int test_num,
                                  unsigned int flush_flags,
                                  int spec_size,
-                                 struct fo_flush_cache_test_spec spec[],
+                                 const struct fo_flush_cache_test_spec spec[],
 				 int init_expected_index_len,
 				 size_t init_expected_index_size,
 				 int expected_index_len,
@@ -13692,42 +13692,40 @@ check_multiple_read_protect(void)
  * Programmer:	John Mainzer
  *              4/26/06
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 
 static unsigned
 check_move_entry(void)
 {
-    int          i;
+    unsigned          u;
     H5F_t *      file_ptr = NULL;
-    struct move_entry_test_spec test_specs[4] =
+    struct move_entry_test_spec test_specs[8] =
     {
       {
-        /* int     entry_type  = */ PICO_ENTRY_TYPE,
-        /* int     entry_index = */ 10,
-	/* hbool_t is_dirty    = */ FALSE,
-	/* hbool_t is_pinned   = */ FALSE
+        /* int     entry_type      = */ PICO_ENTRY_TYPE,
+        /* int     entry_index     = */ 10,
+	/* hbool_t is_pinned       = */ FALSE,
+	/* hbool_t is_protected    = */ FALSE
       },
       {
-        /* int     entry_type  = */ PICO_ENTRY_TYPE,
-        /* int     entry_index = */ 20,
-	/* hbool_t is_dirty    = */ TRUE,
-	/* hbool_t is_pinned   = */ FALSE
+        /* int     entry_type      = */ PICO_ENTRY_TYPE,
+        /* int     entry_index     = */ 20,
+	/* hbool_t is_pinned       = */ TRUE,
+	/* hbool_t is_protected    = */ FALSE
       },
       {
-        /* int     entry_type  = */ PICO_ENTRY_TYPE,
-        /* int     entry_index = */ 30,
-	/* hbool_t is_dirty    = */ FALSE,
-	/* hbool_t is_pinned   = */ TRUE
+        /* int     entry_type      = */ PICO_ENTRY_TYPE,
+        /* int     entry_index     = */ 30,
+	/* hbool_t is_pinned       = */ FALSE,
+	/* hbool_t is_protected    = */ TRUE
       },
       {
-        /* int     entry_type  = */ PICO_ENTRY_TYPE,
-        /* int     entry_index = */ 40,
-	/* hbool_t is_dirty    = */ TRUE,
-	/* hbool_t is_pinned   = */ TRUE
-      }
+        /* int     entry_type      = */ PICO_ENTRY_TYPE,
+        /* int     entry_index     = */ 40,
+	/* hbool_t is_pinned       = */ TRUE,
+	/* hbool_t is_protected    = */ TRUE
+      },
     };
 
     TESTING("H5C_move_entry() functionality");
@@ -13740,13 +13738,13 @@ check_move_entry(void)
      *
      * At present, we should do the following tests:
      *
-     * 1) Move a clean, unprotected, unpinned entry.
+     * 1) Move an unprotected, unpinned entry.
      *
-     * 2) Move a dirty, unprotected, unpinned entry.
+     * 2) Move an unprotected, pinned entry.
      *
-     * 3) Move a clean, unprotected, pinned entry.
+     * 3) Move a protected, unpinned entry.
      *
-     * 4) Move a dirty, unprotected, pinned entry.
+     * 4) Move a protected, pinned entry.
      *
      * In all cases, the entry should have moved to its
      * new location, and have been marked dirty if it wasn't
@@ -13767,28 +13765,26 @@ check_move_entry(void)
                                 (size_t)(1 * 1024 * 1024));
     }
 
-    i = 0;
-    while(pass && (i < 4))
+    u = 0;
+    while(pass && (u < NELMTS(test_specs)))
     {
-        check_move_entry__run_test(file_ptr, i, &(test_specs[i]));
-	i++;
+        check_move_entry__run_test(file_ptr, u, &(test_specs[u]));
+	u++;
     }
 
-    if(pass) {
-
+    if(pass)
         takedown_cache(file_ptr, FALSE, FALSE);
-    }
 
-    if(pass) { PASSED(); } else { H5_FAILED(); }
+    if(pass)
+        PASSED()
+    else
+        H5_FAILED()
 
-    if(!pass) {
-
+    if(!pass)
         HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
                   FUNC, failure_mssg);
-    }
 
     return (unsigned)!pass;
-
 } /* check_move_entry() */
 
 
@@ -13813,7 +13809,7 @@ check_move_entry(void)
 
 static void
 check_move_entry__run_test(H5F_t * file_ptr,
-                             int test_num,
+                             unsigned test_num,
                              struct move_entry_test_spec * spec_ptr)
 {
     H5C_t *       cache_ptr = file_ptr->shared->cache;
@@ -13827,7 +13823,7 @@ check_move_entry__run_test(H5F_t * file_ptr,
 
         pass = FALSE;
         HDsnprintf(msg, (size_t)128,
-                   "cache_ptr NULL on entry to move test #%d.",
+                   "cache_ptr NULL on entry to move test #%u.",
                    test_num);
         failure_mssg = msg;
 
@@ -13835,7 +13831,7 @@ check_move_entry__run_test(H5F_t * file_ptr,
 
         pass = FALSE;
         HDsnprintf(msg, (size_t)128,
-                   "spec_ptr NULL on entry to move test #%d.",
+                   "spec_ptr NULL on entry to move test #%u.",
                    test_num);
         failure_mssg = msg;
 
@@ -13854,13 +13850,10 @@ check_move_entry__run_test(H5F_t * file_ptr,
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "bad entry_ptr in move test #%d.",
+                       "bad entry_ptr in move test #%u.",
                        test_num);
             failure_mssg = msg;
 
-        } else if(spec_ptr->is_pinned) {
-
-            flags |= H5C__PIN_ENTRY_FLAG;
         }
     }
 
@@ -13868,10 +13861,11 @@ check_move_entry__run_test(H5F_t * file_ptr,
 
         protect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index);
 
-        if(spec_ptr->is_dirty)
-            flags |= H5C__DIRTIED_FLAG;
+        if(spec_ptr->is_pinned)
+            pin_entry(spec_ptr->entry_type, spec_ptr->entry_index);
 
-        unprotect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index, flags);
+        if(!spec_ptr->is_protected)
+            unprotect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index, flags);
 
         move_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, FALSE);
 
@@ -13890,29 +13884,31 @@ check_move_entry__run_test(H5F_t * file_ptr,
 
                 pass = FALSE;
                 HDsnprintf(msg, (size_t)128,
-                           "Pinned entry not pinned after move in test #%d.",
+                           "Pinned entry not pinned after move in test #%u.",
                            test_num);
                 failure_mssg = msg;
             }
 
             if(pass) {
 
-                test_ptr = cache_ptr->pel_head_ptr;
+                if(spec_ptr->is_protected) {
+                } /* end if */
+                else {
+                    /* Scan through the pinned entry list, looking for the entry */
+                    test_ptr = cache_ptr->pel_head_ptr;
+                    while((test_ptr != NULL) &&
+                            (test_ptr != (H5C_cache_entry_t *)entry_ptr))
+                        test_ptr = test_ptr->next;
 
-                while((test_ptr != NULL) &&
-                        (test_ptr != (H5C_cache_entry_t *)entry_ptr))
-                {
-                    test_ptr = test_ptr->next;
-                }
+                    if(test_ptr == NULL) {
 
-                if(test_ptr == NULL) {
-
-                    pass = FALSE;
-                    HDsnprintf(msg, (size_t)128,
-                           "Pinned entry not in pel after move in test #%d.",
-                           test_num);
-                    failure_mssg = msg;
-                }
+                        pass = FALSE;
+                        HDsnprintf(msg, (size_t)128,
+                               "Pinned entry not in pel after move in test #%u.",
+                               test_num);
+                        failure_mssg = msg;
+                    }
+                } /* end else */
             }
 
             unpin_entry(spec_ptr->entry_type, spec_ptr->entry_index);
@@ -13923,21 +13919,49 @@ check_move_entry__run_test(H5F_t * file_ptr,
 
                 pass = FALSE;
                 HDsnprintf(msg, (size_t)128,
-                           "Unpinned entry pinned after move in test #%d.",
+                           "Unpinned entry pinned after move in test #%u.",
                            test_num);
                 failure_mssg = msg;
             }
 
-            if((entry_ptr->header.prev != NULL) ||
-                 (cache_ptr->LRU_head_ptr != (H5C_cache_entry_t *)entry_ptr))
-            {
+            if(spec_ptr->is_protected) {
+            } /* end if */
+            else {
+                if((entry_ptr->header.prev != NULL) ||
+                     (cache_ptr->LRU_head_ptr != (H5C_cache_entry_t *)entry_ptr))
+                {
+                    pass = FALSE;
+                    HDsnprintf(msg, (size_t)128,
+                               "Entry not at head of LRU after move in test #%u.",
+                               test_num);
+                    failure_mssg = msg;
+                }
+            } /* end else */
+        }
+
+        if(spec_ptr->is_protected) {
+            if(!(entry_ptr->header.is_protected)) {
+
                 pass = FALSE;
                 HDsnprintf(msg, (size_t)128,
-                           "Entry not at head of LRU after move in test #%d.",
+                           "Protected entry not protected after move in test #%u.",
                            test_num);
                 failure_mssg = msg;
             }
-        }
+
+            unprotect_entry(file_ptr, spec_ptr->entry_type, spec_ptr->entry_index, flags);
+
+        } /* end if */
+        else {
+            if(entry_ptr->header.is_protected) {
+
+                pass = FALSE;
+                HDsnprintf(msg, (size_t)128,
+                           "Unprotected entry not unprotected after move in test #%u.",
+                           test_num);
+                failure_mssg = msg;
+            }
+        } /* end else */
     }
 
     /* put the entry back where it started from */
@@ -16100,100 +16124,6 @@ check_duplicate_insert_err(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	check_move_err()
- *
- * Purpose:	Verify that an attempt to move an entry to the address
- *		of an existing entry will generate an error.
- *
- * Return:	void
- *
- * Programmer:	John Mainzer
- *              6/24/04
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static unsigned
-check_move_err(void)
-{
-    herr_t result;
-    H5F_t * file_ptr = NULL;
-    H5C_t * cache_ptr = NULL;
-    test_entry_t * entry_0_0_ptr;
-    test_entry_t * entry_0_1_ptr;
-    test_entry_t * entry_1_0_ptr;
-
-    TESTING("move to existing entry errors");
-
-    pass = TRUE;
-
-    /* allocate a cache, and insert several entries.  Try to move
-     * entries to other entries resident in the cache.  This should
-     * fail.  Destroy the cache -- should succeed.
-     */
-
-    if(pass) {
-
-        reset_entries();
-
-        file_ptr = setup_cache((size_t)(2 * 1024),
-                                (size_t)(1 * 1024));
-        cache_ptr = file_ptr->shared->cache;
-
-        insert_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
-        insert_entry(file_ptr, 0, 1, H5C__NO_FLAGS_SET);
-        insert_entry(file_ptr, 1, 0, H5C__NO_FLAGS_SET);
-
-        entry_0_0_ptr = &((entries[0])[0]);
-        entry_0_1_ptr = &((entries[0])[1]);
-        entry_1_0_ptr = &((entries[1])[0]);
-    }
-
-    if(pass) {
-
-        result = H5C_move_entry(cache_ptr, &(types[0]),
-                                  entry_0_0_ptr->addr, entry_0_1_ptr->addr);
-
-        if(result >= 0) {
-
-            pass = FALSE;
-            failure_mssg = "move to addr of same type succeeded.\n";
-        }
-    }
-
-    if(pass) {
-
-        result = H5C_move_entry(cache_ptr, &(types[0]),
-                                  entry_0_0_ptr->addr, entry_1_0_ptr->addr);
-
-        if(result >= 0) {
-
-            pass = FALSE;
-            failure_mssg = "move to addr of different type succeeded.\n";
-        }
-    }
-
-    if(pass) {
-
-        takedown_cache(file_ptr, FALSE, FALSE);
-    }
-
-    if(pass) { PASSED(); } else { H5_FAILED(); }
-
-    if(!pass) {
-
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
-                  FUNC, failure_mssg);
-    }
-
-    return (unsigned)!pass;
-
-} /* check_move_err() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	check_double_pin_err()
  *
  * Purpose:	Verify that an attempt to pin an entry that is already
@@ -16750,7 +16680,7 @@ check_expunge_entry_errs(void)
     /* Allocate a cache, protect an entry, and then call H5C_expunge_entry()
      * to expunge it -- this should fail
      *
-     * Unprotect the the entry with the pinned flag, and then call
+     * Unprotect the entry with the pinned flag, and then call
      * H5C_expunge_entry() again.  This should fail too.
      *
      * Finally, unpin the entry and call H5C_expunge_entry() yet again.
@@ -16842,6 +16772,140 @@ check_expunge_entry_errs(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	check_move_entry_errs()
+ *
+ * Purpose:	Verify that invalid calls to H5C_move_entry()
+ * 		generates errors as expected.
+ *
+ * Return:	void
+ *
+ * Programmer:	Quincey Koziol
+ *              12/10/16
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static unsigned
+check_move_entry_errs(void)
+{
+    herr_t result;
+    H5F_t * file_ptr = NULL;
+    H5C_t * cache_ptr = NULL;
+    test_entry_t * entry_ptr = NULL;
+    test_entry_t * entry_0_0_ptr;
+    test_entry_t * entry_0_1_ptr;
+    test_entry_t * entry_1_0_ptr;
+
+    TESTING("move entry related errors");
+
+    pass = TRUE;
+
+    /* allocate a cache, and insert several entries.  Try to move
+     * entries to other entries resident in the cache.  This should
+     * fail.  Destroy the cache -- should succeed.
+     */
+
+    if(pass) {
+
+        reset_entries();
+
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024));
+        cache_ptr = file_ptr->shared->cache;
+
+        insert_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, 0, 1, H5C__NO_FLAGS_SET);
+        insert_entry(file_ptr, 1, 0, H5C__NO_FLAGS_SET);
+
+        entry_0_0_ptr = &((entries[0])[0]);
+        entry_0_1_ptr = &((entries[0])[1]);
+        entry_1_0_ptr = &((entries[1])[0]);
+    }
+
+    if(pass) {
+
+        result = H5C_move_entry(cache_ptr, &(types[0]),
+                                  entry_0_0_ptr->addr, entry_0_1_ptr->addr);
+
+        if(result >= 0) {
+
+            pass = FALSE;
+            failure_mssg = "move to addr of same type succeeded.\n";
+        }
+    }
+
+    if(pass) {
+
+        result = H5C_move_entry(cache_ptr, &(types[0]),
+                                  entry_0_0_ptr->addr, entry_1_0_ptr->addr);
+
+        if(result >= 0) {
+
+            pass = FALSE;
+            failure_mssg = "move to addr of different type succeeded.\n";
+        }
+    }
+
+    if(pass)
+        takedown_cache(file_ptr, FALSE, FALSE);
+
+
+    /* Allocate a cache, protect an entry R/O, and then call
+     * H5C_move_entry() to move it -- this should fail.
+     *
+     * Finally, unprotect the entry and destroy the cache.
+     * This should succeed.
+     */
+
+    if(pass) {
+
+        reset_entries();
+
+        file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024));
+
+        cache_ptr = file_ptr->shared->cache;
+
+        insert_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+
+        protect_entry_ro(file_ptr, 0, 0);
+
+        entry_ptr = &((entries[0])[0]);
+
+    }
+
+    if(pass) {
+
+	result = H5C_move_entry(cache_ptr, &(types[0]), entry_ptr->header.addr, entry_ptr->header.addr + 10);
+
+        if(result >= 0) {
+
+            pass = FALSE;
+            failure_mssg =
+                "Call to H5C_move_entry on a R/O protected entry succeeded.\n";
+
+        } else {
+
+            unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+
+	}
+    }
+
+    if(pass)
+        takedown_cache(file_ptr, FALSE, FALSE);
+
+    if(pass)
+        PASSED()
+    else {
+        H5_FAILED()
+
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  FUNC, failure_mssg);
+    } /* end else */
+
+    return (unsigned)!pass;
+} /* check_move_entry_errs() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	check_resize_entry_errs()
  *
  * Purpose:	Verify that invalid calls to H5C_resize_entry()
@@ -16869,7 +16933,7 @@ check_resize_entry_errs(void)
     /* Allocate a cache, protect an entry, and then call
      * H5C_resize_entry() to resize it -- this should succeed.
      *
-     * Unprotect the the entry with the pinned flag, and then call
+     * Unprotect the entry with the pinned flag, and then call
      * H5C_resize_entry() again with new size of zero.
      * This should fail.
      *
@@ -36308,7 +36372,6 @@ main(void)
     nerrs += check_destroy_pinned_err();
     nerrs += check_destroy_protected_err();
     nerrs += check_duplicate_insert_err();
-    nerrs += check_move_err();
     nerrs += check_double_pin_err();
     nerrs += check_double_unpin_err();
     nerrs += check_pin_entry_errs();
@@ -36316,6 +36379,7 @@ main(void)
     nerrs += check_double_unprotect_err();
     nerrs += check_mark_entry_dirty_errs();
     nerrs += check_expunge_entry_errs();
+    nerrs += check_move_entry_errs();
     nerrs += check_resize_entry_errs();
     nerrs += check_unprotect_ro_dirty_err();
     nerrs += check_protect_ro_rw_err();
