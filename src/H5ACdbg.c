@@ -72,7 +72,6 @@
 /*******************/
 
 
-#ifndef NDEBUG  /* debugging functions */
 
 /*-------------------------------------------------------------------------
  * Function:    H5AC_stats
@@ -134,7 +133,6 @@ H5AC_dump_cache(const H5F_t *f)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_dump_cache() */
-#endif /* NDEBUG */
 
 
 /*-------------------------------------------------------------------------
