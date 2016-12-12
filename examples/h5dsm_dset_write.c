@@ -54,6 +54,8 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
 
+    printf("Transaction number = %llu\n", (long long unsigned)(trans_num + 1));
+
     /* Write data */
     if(H5Dwrite_ff(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf, trans) < 0)
         ERROR;
@@ -67,7 +69,7 @@ int main(int argc, char *argv[]) {
         ERROR;
     if(H5TRclose(trans) < 0)
         ERROR;
-    if(H5Fclose(file) < 0)
+    if(H5Fclose_ff(file, -1) < 0)
         ERROR;
     if(H5Pclose(fapl) < 0)
         ERROR;
@@ -82,7 +84,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose_ff(dset, -1);
         H5TRclose(trans);
-        H5Fclose(file);
+        H5Fclose_ff(file, -1);
         H5Pclose(fapl);
     } H5E_END_TRY;
 

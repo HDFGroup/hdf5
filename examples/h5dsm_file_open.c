@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
         ERROR;
 
     /* Close */
-    if(H5Fclose(file) < 0)
+    if(H5Fclose_ff(file, -1) < 0)
         ERROR;
     if(H5Pclose(fapl) < 0)
         ERROR;
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
 error:
     H5E_BEGIN_TRY {
-        H5Fclose(file);
+        H5Fclose_ff(file, -1);
         H5Pclose(fapl);
     } H5E_END_TRY;
 

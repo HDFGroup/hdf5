@@ -39,6 +39,8 @@ int main(int argc, char *argv[]) {
     if((trans = H5TRcreate(file, trans_num + 1)) < 0)
         ERROR;
 
+    printf("Creating dataset - transaction number = %llu\n", (long long unsigned)(trans_num + 1));
+
     /* Create dataset */
     if((dset = H5Dcreate_ff(file, argv[3], H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, trans)) < 0)
         ERROR;
@@ -52,7 +54,7 @@ int main(int argc, char *argv[]) {
         ERROR;
     if(H5TRclose(trans) < 0)
         ERROR;
-    if(H5Fclose(file) < 0)
+    if(H5Fclose_ff(file, -1) < 0)
         ERROR;
     if(H5Sclose(space) < 0)
         ERROR;
@@ -69,7 +71,7 @@ error:
     H5E_BEGIN_TRY {
         H5Dclose_ff(dset, -1);
         H5TRclose(trans);
-        H5Fclose(file);
+        H5Fclose_ff(file, -1);
         H5Sclose(space);
         H5Pclose(fapl);
     } H5E_END_TRY;

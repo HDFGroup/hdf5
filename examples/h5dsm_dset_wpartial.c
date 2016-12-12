@@ -75,8 +75,7 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
 
-    if(rank == 0)
-        MPI_Barrier(MPI_COMM_WORLD);
+    printf("Transaction number = %llu\n", (long long unsigned)(trans_num + 1));
 
     /* Set up dataspaces */
     if((file_space = H5Screate_simple(2, dims, NULL)) < 0)
@@ -96,23 +95,17 @@ int main(int argc, char *argv[]) {
     if(H5Sselect_hyperslab(mem_space, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
         ERROR;
 
-    if(rank == 1) {
-        MPI_Barrier(MPI_COMM_WORLD);
-        if(H5TRclose(trans) < 0)
-            ERROR;
-        if((trans = H5TRcreate(file, trans_num + 2)) < 0)
-            ERROR;
-    }
-
     /* Write data */
     if(H5Dwrite_ff(dset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, buf, trans) < 0)
         ERROR;
 
-    if(H5TRcommit(trans) < 0)
-        ERROR;
+    MPI_Barrier(MPI_COMM_WORLD);
 
     if(rank == 0)
-        MPI_Barrier(MPI_COMM_WORLD);
+        if(H5TRcommit(trans) < 0)
+            ERROR;
+
+    MPI_Barrier(MPI_COMM_WORLD);
 
     /* Close */
     if(H5Dclose_ff(dset, -1) < 0)

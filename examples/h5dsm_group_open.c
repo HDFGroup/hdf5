@@ -5,12 +5,13 @@ int main(int argc, char *argv[]) {
     char *pool_grp = "daos_tier0";
     hid_t file = -1, grp = -1, trans = -1, fapl = -1;
     hsize_t dims[1] = {1};
+    uint64_t trans_num;
 
     (void)MPI_Init(&argc, &argv);
     (void)daos_init();
 
-    if(argc != 4)
-        PRINTF_ERROR("argc != 4\n");
+    if(argc < 4 || argc > 5)
+        PRINTF_ERROR("argc must be 4 or 5\n");
 
     /* Parse UUID */
     if(0 != uuid_parse(argv[1], pool_uuid))
@@ -23,8 +24,20 @@ int main(int argc, char *argv[]) {
         ERROR;
 
     /* Open file */
-    if((file = H5Fopen_ff(argv[2], H5F_ACC_RDONLY, fapl, &trans)) < 0)
+    if((file = H5Fopen_ff(argv[2], H5F_ACC_RDONLY, fapl, argc == 4 ? &trans : NULL)) < 0)
         ERROR;
+
+    /* Create transaction if specified */
+    if(argc == 5) {
+        trans_num = (uint64_t)atoi(argv[4]);
+        if((trans = H5TRcreate(file, trans_num)) < 0)
+            ERROR;
+    }
+    else
+        if(H5TRget_trans_num(trans, &trans_num) < 0)
+        ERROR;
+
+    printf("Opening group - transaction number = %llu\n", (long long unsigned)trans_num);
 
     /* Open group */
     if((grp = H5Gopen_ff(file, argv[3], H5P_DEFAULT, trans)) < 0)
