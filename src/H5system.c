@@ -923,13 +923,12 @@ Wflock(int fd, int operation) {
   *              Fall 2016
   *--------------------------------------------------------------------------
   */
-void
-Wnanosleep(uint64_t nanosec)
+int
+Wnanosleep(const struct timespec *req, struct timespec *rem)
 {
     /* XXX: Currently just a placeholder */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    return 0;
 
-    FUNC_LEAVE_NOAPI_VOID
 } /* end Wnanosleep() */
 
 
