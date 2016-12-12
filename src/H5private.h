@@ -1973,7 +1973,7 @@ extern hbool_t H5_MPEinit_g;   /* Has the MPE Library been initialized? */
                                                                               \
         if(!func_check) {                                                     \
             /* Check function naming status */                                \
-            HDassert(asrt);                                                   \
+            HDassert(asrt && "Function naming conventions are incorrect - check H5_IS_API|PUB|PRIV|PKG macros in H5private.h (this is usually due to an incorrect number of underscores)");                                                   \
                                                                               \
             /* Don't check again */                                           \
             func_check = TRUE;                                                \
