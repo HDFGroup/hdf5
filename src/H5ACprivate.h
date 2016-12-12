@@ -419,10 +419,8 @@ H5_DLL herr_t H5AC_add_candidate(H5AC_t * cache_ptr, haddr_t addr);
 #endif /* H5_HAVE_PARALLEL */
 
 /* Debugging functions */
-#ifndef NDEBUG
 H5_DLL herr_t H5AC_stats(const H5F_t *f);
 H5_DLL herr_t H5AC_dump_cache(const H5F_t *f);
-#endif /* NDEBUG */ /* end debugging functions */
 
 #endif /* !_H5ACprivate_H */
 
