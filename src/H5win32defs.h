@@ -42,7 +42,7 @@ typedef __int64             h5_stat_size_t;
 #define HDlseek(F,O,W)      _lseeki64(F,O,W)
 #define HDlstat(S,B)        _lstati64(S,B)
 #define HDmkdir(S,M)        _mkdir(S)
-#define HDnanosleep(S)      Wnanosleep(S)
+#define HDnanosleep(N, O)   Wnanosleep(N, O)
 #define HDoff_t             __int64
 /* _O_BINARY must be set in Windows to avoid CR-LF <-> LF EOL
  * transformations when performing I/O.
@@ -102,6 +102,7 @@ extern "C" {
     H5_DLL char* Wgetlogin(void);
     H5_DLL int c99_snprintf(char* str, size_t size, const char* format, ...);
     H5_DLL int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap);
+    H5_DLL int Wnanosleep(const struct timespec *req, struct timespec *rem);
 
     /* Round functions only needed for VS2012 and earlier.
      * They are always built to ensure they don't go stale and
