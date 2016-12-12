@@ -721,8 +721,8 @@ notify_get_initial_load_size(void *udata, size_t *image_length)
  *-------------------------------------------------------------------------
  */
 static herr_t
-get_final_load_size(const void *image, size_t image_len, void *udata,
-    size_t *actual_len, int32_t entry_type)
+get_final_load_size(const void H5_ATTR_UNUSED *image, size_t H5_ATTR_UNUSED image_len,
+    void *udata, size_t *actual_len, int32_t entry_type)
 {
     test_entry_t *entry;
     test_entry_t *base_addr;
@@ -3906,8 +3906,8 @@ move_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
         HDassert( entry_ptr->cache_ptr == cache_ptr );
-        HDassert( !(entry_ptr->is_protected) );
-        HDassert( !(entry_ptr->header.is_protected) );
+        HDassert( !entry_ptr->is_read_only );
+        HDassert( !entry_ptr->header.is_read_only );
 
 
         if ( entry_ptr->at_main_addr && !main_addr ) {

@@ -360,9 +360,9 @@ typedef struct test_entry_t
 
     unsigned              notify_after_insert_count;    /* Count of times that entry was inserted in cache */
     unsigned              notify_before_evict_count;    /* Count of times that entry was removed in cache */
-    unsigned		actual_len;	/* Simulate the entry's actual size for a speculative load */
-    unsigned		max_verify_ct;  /* Maximum # of times to verify an entry's checksum */
-    unsigned		verify_ct;	/* Count the # of checksum verification for an entry */
+    size_t		  actual_len;	  /* Simulate the entry's actual size for a speculative load */
+    unsigned		  max_verify_ct;  /* Maximum # of times to verify an entry's checksum */
+    unsigned		  verify_ct;	  /* Count the # of checksum verification for an entry */
 } test_entry_t;
 
 /* The following are cut down test versions of the hash table manipulation
