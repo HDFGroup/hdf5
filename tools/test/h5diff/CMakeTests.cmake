@@ -46,10 +46,15 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_comp_vl_strs.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr_v_level1.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr_v_level2.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_enum_invalid_values.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/compounds_array_vlen1.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/compounds_array_vlen2.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/non_comparables1.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/non_comparables2.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmptest.he5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmptest2.he5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmpSingleSiteBethe.reference.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmpSingleSiteBethe.output.h5
       # tools/testfiles/vds
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_a.h5
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_b.h5
@@ -115,6 +120,7 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_26.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_27.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_28.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_30.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_300.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_400.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_401.txt
@@ -251,6 +257,8 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_710.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_80.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_tmp1.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_tmp2.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v1.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v2.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v3.txt
@@ -867,6 +875,15 @@ ADD_H5_TEST (h5diff_27 1 -v ${FILE3} ${FILE3} t1 t2)
 ADD_H5_TEST (h5diff_28 1 -v ${FILE3} ${FILE3} l1 l2)
 
 # ##############################################################################
+# # Enum value tests (may become more comprehensive in the future)
+# ##############################################################################
+
+# 3.0
+# test enum types which may have invalid values
+ADD_H5_TEST (h5diff_30 1 -v h5diff_enum_invalid_values.h5 h5diff_enum_invalid_values.h5 dset1 dset2)
+
+
+# ##############################################################################
 # # Dataset datatypes
 # ##############################################################################
 
@@ -1010,6 +1027,10 @@ ADD_H5_TEST (h5diff_631 0 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp18 g1/f
 # 7.  attributes
 # ##############################################################################
 ADD_H5_TEST (h5diff_70 1 -v ${FILE5} ${FILE6})
+# temporary test to verify HDF5-8625
+ADD_H5_TEST (h5diff_tmp1 0 tmptest2.he5 tmptest.he5)
+# temporary test to verify HDF5-8639
+ADD_H5_TEST (h5diff_tmp2 1 tmpSingleSiteBethe.output.h5 tmpSingleSiteBethe.reference.h5)
 
 # ##################################################
 #  attrs with verbose option level

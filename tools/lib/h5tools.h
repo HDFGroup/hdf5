@@ -203,6 +203,10 @@ typedef struct h5tools_dump_header_t {
 
 } h5tools_dump_header_t;
 
+/* Forward declaration (see declaration in h5tools_str.c) */
+struct H5LD_memb_t;
+
+
 /*
  * Information about how to format output.
  */
@@ -338,12 +342,16 @@ typedef struct h5tool_format_t {
      *
      *   end:       a string to print after we reach the last element of
      *              each compound type. prints out before the suf.
+     *
+     *   listv:    h5watch: vector containing info about the list of compound fields to be printed.
      */
     const char  *cmpd_name;
     const char  *cmpd_sep;
     const char  *cmpd_pre;
     const char  *cmpd_suf;
     const char  *cmpd_end;
+    const struct H5LD_memb_t * const *cmpd_listv;
+
 
     /*
      * Fields associated with vlen data types.
@@ -516,6 +524,7 @@ typedef struct h5tools_context_t {
     hsize_t acc[H5S_MAX_RANK];        /* accumulator position */
     hsize_t pos[H5S_MAX_RANK];        /* matrix position */
     hsize_t sm_pos;                   /* current stripmine element position */
+    struct H5LD_memb_t **cmpd_listv;  /* h5watch: vector containing info about the list of compound fields to be printed */
 } h5tools_context_t;
 
 typedef struct subset_d {

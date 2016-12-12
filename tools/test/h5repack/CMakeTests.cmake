@@ -57,6 +57,8 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout3.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_layout.UD.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_named_dtypes.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_nested_8bit_enum.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_nested_8bit_enum_deflated.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_nbit.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_objs.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_refs.h5
@@ -763,6 +765,13 @@
   ADD_H5_TEST (hlink "TEST" ${FILE3})
   ADD_H5_TEST (layout "TEST" ${FILE4})
   ADD_H5_TEST (early "TEST" ${FILE5})
+
+# nested 8bit enum in both deflated and non-deflated datafiles
+  if (NOT USE_FILTER_DEFLATE)
+  ADD_H5_TEST (nested_8bit_enum "TEST" h5repack_nested_8bit_enum.h5)
+  else (NOT USE_FILTER_DEFLATE)
+  ADD_H5_TEST (nested_8bit_enum "TEST" h5repack_nested_8bit_enum_deflated.h5)
+  endif (NOT USE_FILTER_DEFLATE)
 
 # use $FILE4 to write some filters  (this file has  no filters)
 

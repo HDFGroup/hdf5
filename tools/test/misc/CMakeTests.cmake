@@ -177,6 +177,93 @@
         h5repart_test
   )
 
+  ###################### H5CLEAR #########################
+  # Remove any output file left over from previous test run
+  add_test (
+    NAME H5CLEAR-clearall-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        h5clear_log_v3.h5
+        h5clear_sec2_v0.h5
+        h5clear_sec2_v2.h5
+        h5clear_sec2_v3.h5
+        latest_h5clear_log_v3.h5
+        latest_h5clear_sec2_v3.h5
+  )
+  if (NOT "${last_test}" STREQUAL "")
+    set_tests_properties (H5CLEAR-clearall-objects PROPERTIES DEPENDS ${last_test})
+  endif (NOT "${last_test}" STREQUAL "")
+  set (last_test "H5CLEAR-clearall-objects")
+
+  # create the output files to be used.
+  add_test (NAME H5CLEAR-h5clear_gentest COMMAND $<TARGET_FILE:h5clear_gentest>)
+  set_tests_properties (H5CLEAR-h5clear_gentest PROPERTIES DEPENDS "H5CLEAR-clearall-objects")
+
+  # Initial file open fails
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v3_F COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v3_F PROPERTIES WILL_FAIL "true")
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v3_F PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-sec2_v3 COMMAND $<TARGET_FILE:h5clear> h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-h5clear-sec2_v3 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-sec2_v3_F)
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v3 COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v3 PROPERTIES DEPENDS H5CLEAR-h5clear-sec2_v3)
+
+  # Initial file open fails
+  add_test (NAME H5CLEAR-clear_open_chk-log_v3_F COMMAND $<TARGET_FILE:clear_open_chk> h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-log_v3_F PROPERTIES WILL_FAIL "true")
+  set_tests_properties (H5CLEAR-clear_open_chk-log_v3_F PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-log_v3 COMMAND $<TARGET_FILE:h5clear> h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-h5clear-log_v3 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-log_v3_F)
+  add_test (NAME H5CLEAR-clear_open_chk-log_v3 COMMAND $<TARGET_FILE:clear_open_chk> h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-log_v3 PROPERTIES DEPENDS H5CLEAR-h5clear-log_v3)
+
+  # Initial file open fails
+  add_test (NAME H5CLEAR-clear_open_chk-latest_sec2_v3_F COMMAND $<TARGET_FILE:clear_open_chk> latest_h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_sec2_v3_F PROPERTIES WILL_FAIL "true")
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_sec2_v3_F PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-latest_sec2_v3 COMMAND $<TARGET_FILE:h5clear> latest_h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-h5clear-latest_sec2_v3 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-latest_sec2_v3_F)
+  add_test (NAME H5CLEAR-clear_open_chk-latest_sec2_v3 COMMAND $<TARGET_FILE:clear_open_chk> latest_h5clear_sec2_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_sec2_v3 PROPERTIES DEPENDS H5CLEAR-h5clear-latest_sec2_v3)
+
+  # Initial file open fails
+  add_test (NAME H5CLEAR-clear_open_chk-latest_log_v3_F COMMAND $<TARGET_FILE:clear_open_chk> latest_h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_log_v3_F PROPERTIES WILL_FAIL "true")
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_log_v3_F PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-latest_log_v3 COMMAND $<TARGET_FILE:h5clear> latest_h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-h5clear-latest_log_v3 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-latest_log_v3_F)
+  add_test (NAME H5CLEAR-clear_open_chk-latest_log_v3 COMMAND $<TARGET_FILE:clear_open_chk> latest_h5clear_log_v3.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-latest_log_v3 PROPERTIES DEPENDS H5CLEAR-h5clear-latest_log_v3)
+
+  #
+  # File open succeeds because the library does not check status_flags for file with < v3 superblock
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v0_P COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v0.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v0_P PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-sec2_v0 COMMAND $<TARGET_FILE:h5clear> h5clear_sec2_v0.h5)
+  set_tests_properties (H5CLEAR-h5clear-sec2_v0 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-sec2_v0_P)
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v0 COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v0.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v0 PROPERTIES DEPENDS H5CLEAR-h5clear-sec2_v0)
+
+  #
+  # File open succeeds because the library does not check status_flags for file with < v3 superblock
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v2_P COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v2.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v2_P PROPERTIES DEPENDS H5CLEAR-h5clear_gentest)
+  # After "h5clear" the file, the subsequent file open succeeds
+  add_test (NAME H5CLEAR-h5clear-sec2_v2 COMMAND $<TARGET_FILE:h5clear> h5clear_sec2_v2.h5)
+  set_tests_properties (H5CLEAR-h5clear-sec2_v2 PROPERTIES DEPENDS H5CLEAR-clear_open_chk-sec2_v2_P)
+  add_test (NAME H5CLEAR-clear_open_chk-sec2_v2 COMMAND $<TARGET_FILE:clear_open_chk> h5clear_sec2_v2.h5)
+  set_tests_properties (H5CLEAR-clear_open_chk-sec2_v2 PROPERTIES DEPENDS H5CLEAR-h5clear-sec2_v2)
+
+  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}
+        h5clear_gentest
+  )
+
+  ###################### H5MKGRP #########################
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (
         NAME H5MKGRP-clearall-objects

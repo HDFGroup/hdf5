@@ -40,6 +40,9 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     HL_FORTRAN_test-clear-objects
     FORTRAN_testhdf5-clear-objects
     CPP_testhdf5-clear-objects
+    ######### tools/h5clear #########
+    H5CLEAR-clearall-objects
+    H5CLEAR-h5clear_gentest      # does not close ids by design
     ######### tools/h5copy #########
     H5COPY-clearall-objects
     ######### tools/h5diff #########
@@ -217,6 +220,8 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     ######### tools/misc #########
     H5REPART-clearall-objects
     H5MKGRP-clearall-objects
+    ######### hl/tools/h5watch #########
+    H5WATCH-clearall-objects
     ######### examples #########
     EXAMPLES-clear-objects
     CPP_ex-clear-objects
