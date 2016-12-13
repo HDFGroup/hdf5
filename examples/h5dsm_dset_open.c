@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     }
     else
         if(H5TRget_trans_num(trans, &trans_num) < 0)
-        ERROR;
+            ERROR;
 
     printf("Opening dataset - transaction number = %llu\n", (long long unsigned)trans_num);
 

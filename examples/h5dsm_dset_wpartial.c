@@ -75,7 +75,11 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
 
-    printf("Transaction number = %llu\n", (long long unsigned)(trans_num + 1));
+    if(rank == 0)
+        MPI_Barrier(MPI_COMM_WORLD);
+    else
+        printf("Transaction number = %llu\n", (long long unsigned)(trans_num + 1));
+
 
     /* Set up dataspaces */
     if((file_space = H5Screate_simple(2, dims, NULL)) < 0)

@@ -17,12 +17,15 @@
  * Programmer:  Neil Fortner <nfortne2@hdfgroup.gov>
  *              September, 2016
  *
- * Purpose:	The public header file for the DAOS-M VOL plugin.
+ * Purpose:	The private header file for the DAOS-M VOL plugin.
  */
 #ifndef H5VLdaosm_H
 #define H5VLdaosm_H
 
 #define H5_HAVE_EFF 1 /* DSMINC */
+
+/* Include package's public header */
+#include "H5VLdaosm_public.h"
 
 #ifdef H5_HAVE_EFF
 
@@ -92,10 +95,6 @@ typedef struct H5VL_daosm_dset_t {
 extern hid_t H5VL_DAOSM_g;
 
 H5_DLL hid_t H5VL_daosm_init(void);
-H5_DLL herr_t H5Pset_fapl_daosm(hid_t fapl_id, MPI_Comm comm, MPI_Info info,
-    uuid_t pool_uuid, char *pool_grp);
-//H5_DLL herr_t EFF_init(void); DSMINC
-//H5_DLL herr_t EFF_finalize(void); DSMINC
 
 #endif /* H5_HAVE_EFF */
 

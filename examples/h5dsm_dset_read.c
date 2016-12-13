@@ -32,10 +32,6 @@ int main(int argc, char *argv[]) {
     if((file = H5Fopen_ff(argv[2], H5F_ACC_RDONLY, fapl, argc == 4 ? &trans : NULL)) < 0)
         ERROR;
 
-    /* Open dataset */
-    if((dset = H5Dopen_ff(file, argv[3], H5P_DEFAULT, trans)) < 0)
-        ERROR;
-
     /* Create transaction if specified */
     if(argc == 5) {
         trans_num = (uint64_t)atoi(argv[4]);
@@ -44,6 +40,10 @@ int main(int argc, char *argv[]) {
     }
     else
         if(H5TRget_trans_num(trans, &trans_num) < 0)
+            ERROR;
+
+    /* Open dataset */
+    if((dset = H5Dopen_ff(file, argv[3], H5P_DEFAULT, trans)) < 0)
         ERROR;
 
     printf("Reading dataset - transaction number = %llu\n", (long long unsigned)trans_num);
