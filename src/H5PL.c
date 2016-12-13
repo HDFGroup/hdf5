@@ -84,7 +84,7 @@ typedef const void *(__cdecl *H5PL_get_plugin_info_t)(void);
 #define H5PL_HANDLE void *
 
 /* Get a handle to a plugin library.  Windows: TEXT macro handles Unicode strings */
-#define H5PL_OPEN_DLIB(S) dlopen(S, RTLD_NOW)
+#define H5PL_OPEN_DLIB(S) dlopen(S, RTLD_LAZY)
 
 /* Get the address of a symbol in dynamic library */
 #define H5PL_GET_LIB_FUNC(H,N) dlsym(H,N)
