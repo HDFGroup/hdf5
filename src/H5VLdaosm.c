@@ -1398,15 +1398,24 @@ H5VL_daosm_group_traverse(H5VL_daosm_obj_t *obj, const char *path,
     HDassert(path);
     HDassert(obj_name);
 
-    /* Open starting group */
-    if(obj->type == H5I_GROUP)
-        grp = (H5VL_daosm_group_t *)obj;
-    else
-        grp = obj->file->root_grp;
-    grp->common.rc++;
-
     /* Initialize obj_name */
     *obj_name = path;
+
+    /* Open starting group */
+    if((*obj_name)[0] == '/') {
+        grp = obj->file->root_grp;
+        (*obj_name)++;
+    } /* end if */
+    else {
+        if(obj->type == H5I_GROUP)
+            grp = (H5VL_daosm_group_t *)obj;
+        else if(obj->type == H5I_FILE)
+            grp = obj->file->root_grp;
+        else
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "obj not a file or group")
+    } /* end else */
+        
+    grp->common.rc++;
 
     /* Search for '/' */
     next_obj = strchr(*obj_name, '/');
@@ -1432,6 +1441,7 @@ H5VL_daosm_group_traverse(H5VL_daosm_obj_t *obj, const char *path,
         next_obj = strchr(*obj_name, '/');
     } /* end while */
 
+    /* Set return value */
     ret_value = grp;
 
 done:
