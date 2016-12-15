@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
     hid_t file = -1, dset = -1, trans = -1, fapl = -1;
     hid_t nfile = -1, ndset = -1;
     hsize_t dims[1] = {256 * 1024};
-    int *buf = NULL, nbuf = NULL;
+    int *buf = NULL, *nbuf = NULL;
     int i;
 
     (void)MPI_Init(&argc, &argv);
@@ -33,8 +33,8 @@ int main(int argc, char *argv[]) {
     if((file = H5Fopen_ff(argv[2], H5F_ACC_RDWR, fapl, &trans)) < 0)
         ERROR;
 
-    /* Create native file */
-    if((file = H5Fopen(argv[2], H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
+    /* Open native file */
+    if((nfile = H5Fopen(argv[2], H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         ERROR;
 
     /* Create dataset */
@@ -56,9 +56,9 @@ int main(int argc, char *argv[]) {
     if(H5Dread_ff(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf, trans) < 0)
         ERROR;
     
-    /* Write native data */
+    /* Read native data */
     printf("Reading native dataset\n");
-    if(H5Dread(ndset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Dread(ndset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nbuf) < 0)
         ERROR;
 
     /* Compare data */

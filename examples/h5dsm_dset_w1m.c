@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
         ERROR;
 
     /* Create native file */
-    if((file = H5Fcreate(argv[2], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if((nfile = H5Fcreate(argv[2], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         ERROR;
 
     /* Set up dataspace */
