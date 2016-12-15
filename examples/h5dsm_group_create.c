@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
     if((trans = H5TRcreate(file, trans_num + 1)) < 0)
         ERROR;
 
-    printf("Creating dataset - transaction number = %llu\n", (long long unsigned)(trans_num + 1));
+    printf("Creating group - transaction number = %llu\n", (long long unsigned)(trans_num + 1));
 
     /* Create group */
     if((grp = H5Gcreate_ff(file, argv[3], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, trans)) < 0)

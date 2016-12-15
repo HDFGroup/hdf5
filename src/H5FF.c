@@ -350,6 +350,10 @@ H5Fclose_ff(hid_t file_id, hid_t H5_ATTR_UNUSED trans_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ii", file_id, trans_id);
 
+    /* Check/fix arguments. */
+    if(H5I_FILE != H5I_get_type(file_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file ID")
+
     /* flush file using trans_id? DSMINC */
 
     /* Decrement reference count on atom.  When it reaches zero the file will be closed. */

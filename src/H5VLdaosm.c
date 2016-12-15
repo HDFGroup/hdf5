@@ -1067,6 +1067,12 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     if(NULL == (file->root_grp = (H5VL_daosm_group_t *)H5VL_daosm_group_open_helper(file, root_grp_oid, H5P_GROUP_ACCESS_DEFAULT, dxpl_id, req, epoch)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't open root group")
 
+    /* FCPL was stored as root group's GCPL (as GCPL is the parent of FCPL).
+     * Point to it. */
+    file->fcpl_id = file->root_grp->gcpl_id;
+    if(H5Iinc_ref(file->fcpl_id) < 0)
+        HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, NULL, "can't increment FCPL ref count")
+
     /* Determine if we want to acquire a transaction for the opened file */
     if(H5P_get(plist, H5VL_ACQUIRE_TR_ID, &trans_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get property value for trans id")
