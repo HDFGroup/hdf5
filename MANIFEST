@@ -3105,6 +3105,15 @@
 ./hl/tools/gif2h5/Makefile.in
 ./hl/tools/h5watch/Makefile.in
 ./hl/tools/Makefile.in
+./java/examples/intro/Makefile.in
+./java/examples/datasets/Makefile.in
+./java/examples/datatypes/Makefile.in
+./java/examples/Makefile.in
+./java/examples/groups/Makefile.in
+./java/Makefile.in
+./java/test/Makefile.in
+./java/src/Makefile.in
+./java/src/jni/Makefile.in
 ./m4/libtool.m4
 ./m4/lt~obsolete.m4
 ./m4/ltoptions.m4
