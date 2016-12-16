@@ -261,6 +261,19 @@
     set (last_test "H5LS-clearall-objects")
   endif (HDF5_ENABLE_USING_MEMCHECKER)
 
+# See which filters are usable (and skip tests for filters we
+# don't have).  Do this by searching H5pubconf.h to see which
+# filters are defined.
+
+# detect whether the encoder is present.
+  if (H5_HAVE_FILTER_DEFLATE)
+    set (USE_FILTER_DEFLATE "true")
+  endif (H5_HAVE_FILTER_DEFLATE)
+
+  if (H5_HAVE_FILTER_SZIP)
+    set (USE_FILTER_SZIP "true")
+  endif (H5_HAVE_FILTER_SZIP)
+
   # test the help syntax
   ADD_H5_TEST (help-1 0 -w80 -h)
   ADD_H5_TEST (help-2 0 -w80 --help)
@@ -392,6 +405,8 @@
   endif (H5_WORDS_BIGENDIAN)
 
 # test for file with datasets that use Fixed Array chunk indices
-#echo "***skip testing tdset_idx.h5"
-ADD_H5_TEST (tdset_idx 0 -w80 -d tdset_idx.h5)
-  
+  if (USE_FILTER_DEFLATE)
+    # data read internal filters
+    ADD_H5_TEST (tdset_idx 0 -w80 -d tdset_idx.h5)
+  endif (USE_FILTER_DEFLATE)
+
