@@ -40,9 +40,12 @@
 USAGE()
 {
 cat << EOF
-Usage: $0 -d <dir> [-h] [--nocheck] [--private] <methods> ...
+Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--nocheck] [--private] <methods> ...
    -d DIR	The name of the directory where the releas(es) should be
                 placed.
+   --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
+                        version of documentation files from the hdf5docs
+                        repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
    -h           print the help page.
    --nocheck	Ignore errors in MANIFEST file.
    --private	Make a private release with today's date in version information.
@@ -203,6 +206,10 @@ while [ -n "$1" ]; do
 	--private)
 	    pmode=yes
 	    ;;
+        --docver)
+            DOCVERSION=$1
+            shift
+            ;;
 	-*)
 	    echo "Unknown switch: $arg" 1>&2
 	    USAGE
@@ -282,6 +289,11 @@ for f in README.txt release_docs/RELEASE.txt; do
     chmod 644 $f
 done
 
+# trunk is different than branches.
+if [ "${DOCVERSION}" ]; then
+    DOC_URL="$DOC_URL -b ${DOCVERSION}"
+fi
+
 # Create the tar file
 test "$verbose" && echo "   Running tar..." 1>&2
 ( \
@@ -315,16 +327,19 @@ for comp in $methods; do
 	    (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file) 
 	    ;;
 	doc)
+            if [ "${DOCVERSION}" = "" ]; then
+                DOCVERSION=master
+            fi
 	    test "$verbose" && echo "   Creating docs..." 1>&2
 	    # Check out docs from git repo
-	    (cd $tmpdir; git clone $DOC_URL > /dev/null) || exit 1
+	    (cd $tmpdir; git clone -q $DOC_URL ${DOCVERSION} > /dev/null) || exit 1
 	    # Create doxygen C++ RM
 	    (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
 	    # Replace version of C++ RM with just-created version
-	    rm -rf $tmpdir/trunk/html/$CPPLUS_RM_NAME
-	    mv c++/src/$CPPLUS_RM_NAME $tmpdir/trunk/html/$CPPLUS_RM_NAME
+	    rm -rf $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
+	    mv c++/src/$CPPLUS_RM_NAME $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
 	    # Compress the docs and move them to the release area
-	    mv $tmpdir/trunk $tmpdir/${HDF5_VERS}_docs
+	    mv $tmpdir/${DOCVERSION} $tmpdir/${HDF5_VERS}_docs
 	    (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs)
 	    mv $tmpdir/${HDF5_VERS}_docs.tar $DEST
 	    ;;
