@@ -53,12 +53,13 @@ TEST_PROG= testhdf5 cache cache_api cache_tagging lheap ohdr stab gheap \
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
 # tcheck_version is used by testcheck_version.sh.
+# accum_swmr_reader is used by accum.c.
 # links_env is used by testlinks_env.sh
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
-    testmeta \
+    testmeta accum_swmr_reader \
     links_env 
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= plugin
@@ -162,6 +163,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
     vds_virt.h5 vds_dapl.h5 vds_src_[0-1].h5 \
+    accum_swmr_big.h5 \
     cache_logging.h5 cache_logging.out \
     swmr[0-2].h5
 # Sources for testhdf5 executable
