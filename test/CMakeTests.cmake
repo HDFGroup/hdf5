@@ -509,6 +509,7 @@ set (test_CLEANFILES
     vds_src_1.h5
     tbogus.h5.copy
     accum_swmr_big.h5
+    ohdr_swmr.h5
     cache_logging.h5
     cache_logging.out
 )

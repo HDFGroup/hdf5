@@ -163,7 +163,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
     vds_virt.h5 vds_dapl.h5 vds_src_[0-1].h5 \
-    accum_swmr_big.h5 \
+    accum_swmr_big.h5 ohdr_swmr.h5 \
     cache_logging.h5 cache_logging.out \
     swmr[0-2].h5
 # Sources for testhdf5 executable

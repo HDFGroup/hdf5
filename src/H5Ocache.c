@@ -46,12 +46,6 @@
 /* Local Macros */
 /****************/
 
-/* Set the object header size to speculatively read in */
-/* (needs to be more than the object header prefix size to work at all and
- *      should be larger than the largest object type's default object header
- *      size to save the extra I/O operations) */
-#define H5O_SPEC_READ_SIZE 512
-
 
 /******************/
 /* Local Typedefs */
