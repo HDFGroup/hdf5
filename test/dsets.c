@@ -12667,7 +12667,7 @@ main(void)
     /* Don't run this test using certain file drivers */
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
-        envval = "nomatch";
+        envval = "sec2";
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
