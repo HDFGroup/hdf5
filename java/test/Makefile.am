@@ -43,6 +43,7 @@ noinst_JAVA = \
     TestH5Fparams.java \
     TestH5Fbasic.java \
     TestH5F.java \
+    TestH5Fswmr.java \
     TestH5Gbasic.java \
     TestH5G.java \
     TestH5Giterate.java \

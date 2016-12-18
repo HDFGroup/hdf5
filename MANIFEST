@@ -2882,6 +2882,7 @@
 ./java/test/TestH5Fparams.java
 ./java/test/TestH5Fbasic.java
 ./java/test/TestH5F.java
+./java/test/TestH5Fswmr.java
 ./java/test/TestH5Gbasic.java
 ./java/test/TestH5G.java
 ./java/test/TestH5Giterate.java
