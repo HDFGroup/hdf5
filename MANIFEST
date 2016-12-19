@@ -884,6 +884,7 @@
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
 ./test/accum.c
+./test/accum_swmr_reader.c
 ./test/app_ref.c
 ./test/bad_compound.h5
 ./test/be_data.h5
@@ -2882,6 +2883,7 @@
 ./java/test/TestH5Fparams.java
 ./java/test/TestH5Fbasic.java
 ./java/test/TestH5F.java
+./java/test/TestH5Fswmr.java
 ./java/test/TestH5Gbasic.java
 ./java/test/TestH5G.java
 ./java/test/TestH5Giterate.java
