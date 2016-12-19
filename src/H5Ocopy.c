@@ -277,7 +277,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 done:
     if(loc_found && H5G_loc_free(&src_loc) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "can't free location")
-    if(obj_open && H5O_close(&src_oloc) < 0)
+    if(obj_open && H5O_close(&src_oloc, NULL) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CLOSEERROR, FAIL, "unable to release object header")
 
     FUNC_LEAVE_API(ret_value)
@@ -381,7 +381,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     } /* end if */
 
     /* Get source object header */
-    if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC__READ_ONLY_FLAG)))
+    if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve user data for particular type of object to copy */
@@ -450,6 +450,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     oh_dst->attr_msgs_seen = oh_src->attr_msgs_seen;
     oh_dst->sizeof_size = H5F_SIZEOF_SIZE(oloc_dst->file);
     oh_dst->sizeof_addr = H5F_SIZEOF_ADDR(oloc_dst->file);
+    oh_dst->swmr_write = !!(H5F_INTENT(oloc_dst->file) & H5F_ACC_SWMR_WRITE);
 
     /* Copy time fields */
     oh_dst->atime = oh_src->atime;
@@ -460,6 +461,15 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
     /* Copy attribute storage information */
     oh_dst->max_compact = oh_src->max_compact;
     oh_dst->min_dense = oh_src->min_dense;
+
+    /* Create object header proxy if doing SWMR writes */
+    if(oh_dst->swmr_write) {
+        /* Create virtual entry, for use as proxy */
+        if(NULL == (oh_dst->proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create object header proxy")
+    } /* end if */
+    else
+        oh_dst->proxy = NULL;
 
     /* Initialize size of chunk array.  Start off with zero chunks so this field
      * is consistent with the current state of the chunk array.  This is
@@ -858,6 +868,10 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
         oh_dst->nlink += (unsigned)addr_map->inc_ref_count;
     } /* end if */
 
+    /* Retag all copied metadata to apply the destination object's tag */
+    if(H5AC_retag_copied_metadata(oloc_dst->file, oloc_dst->addr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to re-tag metadata entries")
+
     /* Set metadata tag for destination object's object header */
     H5_BEGIN_TAG(dxpl_id, oloc_dst->addr, FAIL);
 
@@ -869,10 +883,6 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/,
 
     /* Reset metadat tag */
     H5_END_TAG(FAIL);
-
-    /* Retag all copied metadata to apply the destination object's tag */
-    if(H5AC_retag_copied_metadata(oloc_dst->file, oloc_dst->addr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTTAG, FAIL, "unable to re-tag metadata entries")
 
     /* Set obj_type and udata, if requested */
     if(obj_type) {
@@ -892,7 +902,7 @@ done:
 
     /* Free destination object header on failure */
     if(ret_value < 0 && oh_dst && !inserted) {
-        if(H5O_free(oh_dst) < 0)
+        if(H5O__free(oh_dst) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
         if(H5O_loc_reset(oloc_dst) < 0)
             HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")

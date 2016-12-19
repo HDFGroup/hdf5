@@ -2219,7 +2219,7 @@ main (int argc, char *argv[])
     if (argc>1) {
 	if (argc>2 || strcmp("--noopt", argv[1])) {
 	    fprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
-	    exit(1);
+	    exit(EXIT_FAILURE);
 	}
 	H5Tunregister(H5T_PERS_DONTCARE, NULL, (hid_t)-1, (hid_t)-1, H5T__conv_struct_opt);
     }
@@ -2252,7 +2252,7 @@ main (int argc, char *argv[])
     if (nerrors) {
         printf("***** %u FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
 
     h5_cleanup(FILENAME, fapl_id);

@@ -44,7 +44,10 @@ IDE_GENERATED_PROPERTIES ("H5A" "${H5A_HDRS}" "${H5A_SOURCES}" )
 
 set (H5AC_SOURCES
     ${HDF5_SRC_DIR}/H5AC.c
+    ${HDF5_SRC_DIR}/H5ACdbg.c
+    ${HDF5_SRC_DIR}/H5AClog.c
     ${HDF5_SRC_DIR}/H5ACmpio.c
+    ${HDF5_SRC_DIR}/H5ACproxy_entry.c
 )
 
 set (H5AC_HDRS
@@ -71,6 +74,8 @@ set (H5B2_SOURCES
     ${HDF5_SRC_DIR}/H5B2dbg.c
     ${HDF5_SRC_DIR}/H5B2hdr.c
     ${HDF5_SRC_DIR}/H5B2int.c
+    ${HDF5_SRC_DIR}/H5B2internal.c
+    ${HDF5_SRC_DIR}/H5B2leaf.c
     ${HDF5_SRC_DIR}/H5B2stat.c
     ${HDF5_SRC_DIR}/H5B2test.c
 )
@@ -83,7 +88,9 @@ IDE_GENERATED_PROPERTIES ("H5B2" "${H5B2_HDRS}" "${H5B2_SOURCES}" )
 
 set (H5C_SOURCES
     ${HDF5_SRC_DIR}/H5C.c
+    ${HDF5_SRC_DIR}/H5Cdbg.c
     ${HDF5_SRC_DIR}/H5Cepoch.c
+    ${HDF5_SRC_DIR}/H5Clog.c
     ${HDF5_SRC_DIR}/H5Cmpio.c
     ${HDF5_SRC_DIR}/H5Cquery.c
     ${HDF5_SRC_DIR}/H5Ctag.c
@@ -205,6 +212,7 @@ set (H5FA_SOURCES
     ${HDF5_SRC_DIR}/H5FAdblkpage.c
     ${HDF5_SRC_DIR}/H5FAdblock.c
     ${HDF5_SRC_DIR}/H5FAhdr.c
+    ${HDF5_SRC_DIR}/H5FAint.c
     ${HDF5_SRC_DIR}/H5FAstat.c
     ${HDF5_SRC_DIR}/H5FAtest.c
 )
@@ -227,6 +235,7 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDsec2.c
     ${HDF5_SRC_DIR}/H5FDspace.c
     ${HDF5_SRC_DIR}/H5FDstdio.c
+    ${HDF5_SRC_DIR}/H5FDtest.c
     ${HDF5_SRC_DIR}/H5FDwindows.c
 )
 
@@ -267,6 +276,7 @@ set (H5FS_SOURCES
     ${HDF5_SRC_DIR}/H5FS.c
     ${HDF5_SRC_DIR}/H5FScache.c
     ${HDF5_SRC_DIR}/H5FSdbg.c
+    ${HDF5_SRC_DIR}/H5FSint.c
     ${HDF5_SRC_DIR}/H5FSsection.c
     ${HDF5_SRC_DIR}/H5FSstat.c
     ${HDF5_SRC_DIR}/H5FStest.c
@@ -959,5 +969,6 @@ if (HDF5_EXPORTED_TARGETS)
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT libraries
       FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT libraries
+      INCLUDES DESTINATION include
   )
 endif (HDF5_EXPORTED_TARGETS)

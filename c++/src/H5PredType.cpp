@@ -19,15 +19,15 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
+#include "H5OcreatProp.h"
+#include "H5DcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
@@ -887,9 +887,7 @@ const PredType& PredType::NATIVE_UINT_FAST64 = *NATIVE_UINT_FAST64_;
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif
 
 /***************************************************************************
 				Design Note

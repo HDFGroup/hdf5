@@ -24,14 +24,14 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
-#include "H5DataSpace.h"
-#include "H5Location.h"
-#include "H5Object.h"
 #include "H5FaccProp.h"
 #include "H5FcreatProp.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5DataSpace.h"
+#include "H5Location.h"
+#include "H5Object.h"
 #include "H5DataType.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
@@ -42,13 +42,9 @@
 #include "H5File.h"
 #include "H5Attribute.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
+using std::cerr;
+using std::endl;
 
 //--------------------------------------------------------------------------
 // Function:	DataType default constructor
@@ -133,7 +129,7 @@ DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, 
 
 //--------------------------------------------------------------------------
 // Function:	DataType copy constructor
-///\brief	Copy constructor: makes a copy of the original DataType object.
+///\brief	Copy constructor: makes a copy of the original DataType object
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataType::DataType(const DataType& original) : H5Object(), id(original.id)
@@ -783,6 +779,4 @@ DataType::~DataType()
 	cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;
     }
 }
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

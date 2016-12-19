@@ -17,9 +17,7 @@
 #ifndef __H5PredType_H
 #define __H5PredType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class PredType
     \brief Class PredType holds the definition of all the HDF5 predefined
@@ -27,6 +25,8 @@ namespace H5 {
 
     These types can only be made copy of, not created by H5Tcreate or
     closed by H5Tclose.  They are treated as constants.
+
+    Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
 */
 class H5_DLLCPP PredType : public AtomType {
    public:
@@ -439,7 +439,5 @@ class H5_DLLCPP PredType : public AtomType {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5PredType_H

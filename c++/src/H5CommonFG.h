@@ -17,9 +17,7 @@
 #ifndef __CommonFG_H
 #define __CommonFG_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class CommonFG
     \brief \a CommonFG was an abstract base class of H5File and H5Group.
@@ -43,9 +41,6 @@ class H5_DLLCPP CommonFG {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end of CommonFG declaration
-
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __CommonFG_H
 

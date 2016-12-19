@@ -208,7 +208,7 @@ H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hid_t dxpl_id,
 
     /* Twiddle the number of open objects to avoid closing the file. */
     f->nopen_objs++;
-    if(H5O_close(ext_ptr) < 0)
+    if(H5O_close(ext_ptr, NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close superblock extension")
     f->nopen_objs--;
 
@@ -250,6 +250,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
     haddr_t             super_addr;         /* Absolute address of superblock */
     haddr_t             eof;                /* End of file address */
     unsigned      	rw_flags;           /* Read/write permissions for file */
+    hbool_t 		skip_eof_check = FALSE; /* Whether to skip checking the EOF value */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
@@ -316,6 +317,14 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
     /* Look up the superblock */
     if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, &udata, rw_flags)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
+
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
+       	if(sblock->super_vers < HDF5_SUPERBLOCK_VERSION_3)
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "invalid superblock version for SWMR_WRITE")
+
+    /* Enable all latest version support when file has v3 superblock */
+    if(sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
+	f->shared->latest_flags |= H5F_LATEST_ALL_FLAGS;
 
     /* Pin the superblock in the cache */
     if(H5AC_pin_protected_entry(sblock) < 0)
@@ -401,7 +410,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
      * individually.
      */
     /* Can skip this test when it is not the initial file open--
-     * H5F_super_read() call from H5F_evict_tagged_metadata() for
+     * H5F__super_read() call from H5F_evict_tagged_metadata() for
      * refreshing object.
      * When flushing file buffers and fractal heap is involved,
      * the library will allocate actual space for tmp addresses
@@ -410,7 +419,22 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
      * Note: the aggregator is changed again after being reset
      * earlier before H5AC_flush due to allocation of tmp addresses.
      */
-    if(initial_read) {
+    /* The EOF check must be skipped when the file is opened for SWMR read,
+     * as the file can appear truncated if only part of it has been
+     * been flushed to disk by the SWMR writer process.
+     */
+    if(H5F_INTENT(f) & H5F_ACC_SWMR_READ) {
+	/* 
+	 * When the file is opened for SWMR read access, skip the check if:
+	 * --the file is already marked for SWMR writing and
+	 * --the file has version 3 superblock for SWMR support
+	 */
+	if((sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS) &&
+               (sblock->status_flags & H5F_SUPER_WRITE_ACCESS) &&
+                sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3)
+	    skip_eof_check = TRUE;
+    } /* end if */
+    if(!skip_eof_check && initial_read) {
         if(HADDR_UNDEF == (eof = H5FD_get_eof(f->shared->lf, H5FD_MEM_DEFAULT)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to determine file size")
 
@@ -448,8 +472,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
          * portion of the driver info block 
          */
         if(H5FD_set_eoa(f->shared->lf, H5FD_MEM_SUPER, sblock->driver_addr + H5F_DRVINFOBLOCK_HDR_SIZE) < 0) /* will extend eoa later if required */ 
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, \
-                        "set end of space allocation request failed")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
 
         /* Look up the driver info block */
         if(NULL == (drvinfo = (H5O_drvinfo_t *)H5AC_protect(f, dxpl_id, H5AC_DRVRINFO, sblock->driver_addr, &drvrinfo_udata, rw_flags)))
@@ -458,11 +481,8 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
         /* Loading the driver info block is enough to set up the right info */
 
         /* Check if we need to rewrite the driver info block info */
-        if ( ( (rw_flags & H5AC__READ_ONLY_FLAG) == 0 ) &&
-             ( H5F_HAS_FEATURE(f, H5FD_FEAT_DIRTY_DRVRINFO_LOAD) ) ) {
-
+        if(((rw_flags & H5AC__READ_ONLY_FLAG) == 0) && H5F_HAS_FEATURE(f, H5FD_FEAT_DIRTY_DRVRINFO_LOAD))
             drvinfo_flags |= H5AC__DIRTIED_FLAG;
-        } /* end if */
 
         /* set the pin entry flag so that the driver information block 
          * cache entry will be pinned in the cache.
@@ -478,7 +498,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
     } /* end if */
 
     /* (Account for the stored EOA being absolute offset -NAF) */
-    if(H5F__set_eoa(f, H5FD_MEM_SUPER, udata.stored_eof - sblock->base_addr) < 0)
+    if(H5F__set_eoa(f, H5FD_MEM_DEFAULT, udata.stored_eof - sblock->base_addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set end-of-address marker for file")
 
     /* Decode the optional superblock extension info */

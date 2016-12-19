@@ -17,6 +17,7 @@ add_test (
             tattr_multi.h5
             tattr_scalar.h5
             tfattrs.h5
+            titerate.h5
 )
 
 add_test (NAME CPP_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
@@ -50,6 +51,7 @@ if (HDF5_TEST_VFD)
                   tattr_multi.h5
                   tattr_scalar.h5
                   tfattrs.h5
+                  titerate.h5
       )
       add_test (
         NAME CPP_VFD-${vfdname}-cpp_testhdf5

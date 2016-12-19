@@ -25,18 +25,16 @@
 #include "H5FcreatProp.h"
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
+#include "H5DcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
-#include "H5DcreatProp.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
 #include "H5DataSpace.h"
 #include "H5Library.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	H5Library::open (static)
@@ -82,7 +80,7 @@ void H5Library::close()
 //--------------------------------------------------------------------------
 void H5Library::dontAtExit()
 {
-   herr_t ret_value = H5dont_atexit();
+   (void)H5dont_atexit();
 }
 
 //--------------------------------------------------------------------------
@@ -255,12 +253,20 @@ void H5Library::setFreeListLimits(int reg_global_lim, int reg_list_lim,
    }
 }
 
-// Default constructor - private
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+//--------------------------------------------------------------------------
+// Function:	H5Library default constructor - private
+///\brief	Default constructor: Creates a stub H5Library object
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5Library::H5Library(){}
 
-// Destructor - private
+//--------------------------------------------------------------------------
+// Function:	H5Library destructor
+///\brief	Noop destructor
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
 H5Library::~H5Library(){}
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

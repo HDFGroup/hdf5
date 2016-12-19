@@ -17,11 +17,14 @@
 #ifndef __H5FloatType_H
 #define __H5FloatType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
-//! Class FloatType operates on HDF5 floating point datatype.
+/*! \class FloatType
+    \brief FloatType is a derivative of a DataType and operates on HDF5
+    floating point datatype.
+
+    Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
+*/
 class H5_DLLCPP FloatType : public AtomType {
    public:
 	// Creates a floating-point type using a predefined type.
@@ -69,7 +72,5 @@ class H5_DLLCPP FloatType : public AtomType {
 	// Noop destructor.
 	virtual ~FloatType();
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5FloatType_H

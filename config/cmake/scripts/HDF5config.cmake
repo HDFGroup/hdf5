@@ -75,11 +75,16 @@ else()
   endif()
 endif()
 
+###################################################################
+### Following Line is one of [Release, RelWithDebInfo, Debug] #####
+set(CTEST_CONFIGURATION_TYPE "$ENV{CMAKE_CONFIG_TYPE}")
+###################################################################
+
 if(NOT DEFINED INSTALLDIR)
   if(WIN32)
-    set(INSTALLDIR "C:\\Program\ Files\\myhdf5")
+    set(INSTALLDIR "C:/Program Files/HDF_Group/HDF5/${CTEST_SOURCE_VERSION}")
   else()
-    set(INSTALLDIR "/usr/local/myhdf5")
+    set(INSTALLDIR "${CTEST_SCRIPT_DIRECTORY}/HDF_Group/HDF5/${CTEST_SOURCE_VERSION}")
   endif()
 endif()
 if(NOT DEFINED CTEST_CONFIGURATION_TYPE)
@@ -227,7 +232,8 @@ endif()
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 
 ### change install prefix
-set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALLDIR}")
+set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALLDIR}")
+set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_CONFIGURATION_TYPE:STRING=$ENV{CMAKE_CONFIG_TYPE}")
 
 ###################################################################
 

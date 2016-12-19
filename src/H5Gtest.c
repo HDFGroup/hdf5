@@ -701,7 +701,7 @@ H5G_verify_cached_stabs_test_cb(H5F_t *f, hid_t dxpl_id,
         targ_oloc.addr = sn->entry[i].header;
 
         /* Load target object header */
-        if(NULL == (targ_oh = H5O_protect(&targ_oloc, dxpl_id, H5AC__READ_ONLY_FLAG)))
+        if(NULL == (targ_oh = H5O_protect(&targ_oloc, dxpl_id, H5AC__READ_ONLY_FLAG, FALSE)))
             HGOTO_ERROR(H5E_SYM, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to protect target object header")
 
         /* Check if a symbol table message exists */

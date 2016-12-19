@@ -811,6 +811,9 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if(NULL == (file = (driver->open)(name, flags, fapl_id, maxaddr)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed")
 
+    /* Set the file access flags */
+    file->access_flags = flags;
+
     /*
      * Fill in public fields. We must increment the reference count on the
      * driver ID to prevent it from being freed while this file is open.
@@ -1438,6 +1441,32 @@ H5FD_get_feature_flags(const H5FD_t *file, unsigned long *feature_flags)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_get_feature_flags() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_set_feature_flags
+ *
+ * Purpose:	Set the feature flags for the VFD
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Vailin Choi; Oct 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_set_feature_flags(H5FD_t *file, unsigned long feature_flags)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(file);
+
+    /* Set the file's feature flags */
+    file->feature_flags = feature_flags;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD_set_feature_flags() */
 
 
 /*-------------------------------------------------------------------------

@@ -17,28 +17,33 @@
 #ifndef __H5Object_H
 #define __H5Object_H
 
-//#include "H5Location.h"
-//#include "H5Classes.h"		// constains forward class declarations
-
-// H5Object is a baseclass.  It has these subclasses:
-// Group, DataSet, and DataType.
-// DataType, in turn, has several specific datatypes as subclasses.
-// Modification:
-//	Sept 18, 2012: Added class H5Location in between IdComponent and
-//		H5Object.  An H5File now inherits from H5Location.  All HDF5
-//		wrappers in H5Object are moved up to H5Location.  H5Object
-//		is left mostly empty for future wrappers that are only for
-//		group, dataset, and named datatype.  Note that the reason for
-//		adding H5Location instead of simply moving H5File to be under
-//		H5Object is H5File is not an HDF5 object, and renaming H5Object
-//		to H5Location will risk breaking user applications.
-//		-BMR
-//	Apr 2, 2014: Added wrapper getObjName for H5Iget_name 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
+/*! \class H5Object
+    \brief Class H5Object is a bridge between H5Location and DataSet, DataType,
+     and Group.
+
+    Modification:
+	Sept 18, 2012: Added class H5Location in between IdComponent and
+		H5Object.  An H5File now inherits from H5Location.  All HDF5
+		wrappers in H5Object are moved up to H5Location.  H5Object
+		is left mostly empty for future wrappers that are only for
+		group, dataset, and named datatype.  Note that the reason for
+		adding H5Location instead of simply moving H5File to be under
+		H5Object is H5File is not an HDF5 object, and renaming H5Object
+		to H5Location will risk breaking user applications.
+		-BMR
+	Apr 2, 2014: Added wrapper getObjName for H5Iget_name 
+	Sep 21, 2016: Rearranging classes (HDFFV-9920) moved H5A wrappers back
+		into H5Object.  This way, C functions that takes attribute id
+		can be in H5Location and those that cannot take attribute id
+		can be in H5Object.
+
+    Inheritance: H5Location -> IdComponent
+*/
+// Class forwarding
 class H5_DLLCPP H5Object;
+class H5_DLLCPP Attribute;
 
 // Define the operator function pointer for H5Aiterate().
 typedef void (*attr_operator_t)( H5Object& loc/*in*/,
@@ -53,18 +58,8 @@ class UserData4Aiterate {
 	H5Object* location;
 };
 
-/*! \class H5Object
-    \brief Class H5Object is a bridge between H5Location and DataSet, DataType,
-     and Group.
-
-    All the wrappers in H5Object were moved to H5Location.
-*/
 class H5_DLLCPP H5Object : public H5Location {
    public:
-// Rearranging classes (HDFFV-9920) moved H5A wrappers back into H5Object.
-// That way, C functions that takes attribute id can be in
-// H5Location and those that cannot take attribute id can be in H5Object.
-
 	// Creates an attribute for the specified object
 	// PropList is currently not used, so always be default.
 	Attribute createAttribute( const char* name, const DataType& type, const DataSpace& space, const PropList& create_plist = PropList::DEFAULT ) const;
@@ -135,7 +130,5 @@ class H5_DLLCPP H5Object : public H5Location {
 
 }; /* end class H5Object */
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5Object_H

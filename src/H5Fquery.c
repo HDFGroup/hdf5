@@ -322,6 +322,29 @@ H5F_get_nmounts(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_read_attempts
+ *
+ * Purpose:	Retrieve the file's 'read_attempts' value
+ *
+ * Return:	'# of read attempts' on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Vaili Choi; Sept 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+unsigned
+H5F_get_read_attempts(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->shared->read_attempts)
+} /* end H5F_get_read_attempts() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_get_fcpl
  *
  * Purpose:	Retrieve the value of a file's FCPL.
@@ -835,6 +858,34 @@ H5F_get_fc_degree(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_get_evict_on_close
+ *
+ * Purpose:     Checks if evict-on-close is desired for objects in the
+ *              file.
+ *
+ * Return:      Success:    Flag indicating whether the evict-on-close
+ *                          property was set for the file.
+ *              Failure:    (can't happen)
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_evict_on_close(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->evict_on_close)
+} /* end H5F_get_evict_on_close() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_store_msg_crt_idx
  *
  * Purpose:	Retrieve the 'store message creation index' flag for the file.
@@ -1099,4 +1150,88 @@ H5F_coll_md_read(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->coll_md_read)
 } /* end H5F_coll_md_read() */
 #endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_use_mdc_logging
+ *
+ * Purpose:	Quick and dirty routine to determine if using MDC logging
+ *		is enabled for this file.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		June  5, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_use_mdc_logging(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->use_mdc_logging)
+} /* end H5F_use_mdc_logging() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_start_mdc_log_on_access
+ *
+ * Purpose:	Quick and dirty routine to determine if we should start MDC
+ *		logging on access for this file.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		June  5, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_start_mdc_log_on_access(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->start_mdc_log_on_access)
+} /* end H5F_start_mdc_log_on_access() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_mdc_log_location
+ *
+ * Purpose:	Quick and dirty routine to retrieve the MDC log location
+ *		for this file.
+ *          (Mainly added to stop non-file routines from poking about in the
+ *          H5F_t data structure)
+ *
+ * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		June  5, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5F_mdc_log_location(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->mdc_log_location)
+} /* end H5F_mdc_log_location() */
 

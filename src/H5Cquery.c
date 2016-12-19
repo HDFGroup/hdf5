@@ -275,7 +275,7 @@ H5C_get_entry_status(const H5F_t *f,
         if(is_pinned_ptr != NULL)
             *is_pinned_ptr = entry_ptr->is_pinned;
         if(is_corked_ptr != NULL)
-            *is_corked_ptr = entry_ptr->is_corked;
+            *is_corked_ptr = entry_ptr->tag_info ? entry_ptr->tag_info->corked : FALSE;
         if(is_flush_dep_parent_ptr != NULL)
             *is_flush_dep_parent_ptr = (entry_ptr->flush_dep_nchildren > 0);
         if(is_flush_dep_child_ptr != NULL)

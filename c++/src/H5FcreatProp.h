@@ -17,11 +17,14 @@
 #ifndef __H5FileCreatPropList_H
 #define __H5FileCreatPropList_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
-//! Class FileCreatPropList represents the HDF5 file create property list.
+/*! \class FileCreatPropList
+    \brief Class FileCreatPropList inherits from PropList and provides
+    wrappers for the HDF5 file create property list.
+
+    Inheritance: PropList -> IdComponent
+*/
 class H5_DLLCPP FileCreatPropList : public PropList {
    public:
 	///\brief Default file creation property list.
@@ -89,7 +92,5 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5FileCreatPropList_H

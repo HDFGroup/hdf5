@@ -133,10 +133,6 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
     HDassert(cparam->split_percent > 0 && cparam->split_percent <= 100);
     HDassert(cparam->merge_percent < (cparam->split_percent / 2));
 
-    /* Initialize basic information */
-    hdr->rc = 0;
-    hdr->pending_delete = FALSE;
-
     /* Assign dynamic information */
     hdr->depth = depth;
 
@@ -206,6 +202,13 @@ H5B2__hdr_init(H5B2_hdr_t *hdr, const H5B2_create_t *cparam, void *ctx_udata,
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't create internal 'branch' node node pointer block factory")
         } /* end for */
     } /* end if */
+
+    /* Determine if we are doing SWMR writes.  Only enable for data chunks for now. */
+    hdr->swmr_write = (H5F_INTENT(hdr->f) & H5F_ACC_SWMR_WRITE) > 0
+            && (hdr->cls->id == H5B2_CDSET_ID || hdr->cls->id == H5B2_CDSET_FILT_ID);
+
+    /* Reset the shadow epoch */
+    hdr->shadow_epoch = 0;
 
     /* Create the callback context, if the callback exists */
     if(hdr->cls->crt_context)
@@ -285,6 +288,7 @@ H5B2__hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     void *ctx_udata)
 {
     H5B2_hdr_t *hdr = NULL;             /* The new v2 B-tree header information */
+    hbool_t inserted = FALSE;           /* Whether the header was inserted into cache */
     haddr_t ret_value = HADDR_UNDEF;    /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -307,17 +311,40 @@ H5B2__hdr_create(H5F_t *f, hid_t dxpl_id, const H5B2_create_t *cparam,
     if(HADDR_UNDEF == (hdr->addr = H5MF_alloc(f, H5FD_MEM_BTREE, dxpl_id, (hsize_t)hdr->hdr_size)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTALLOC, HADDR_UNDEF, "file allocation failed for B-tree header")
 
+    /* Create 'top' proxy for extensible array entries */
+    if(hdr->swmr_write)
+        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, HADDR_UNDEF, "can't create v2 B-tree proxy")
+
     /* Cache the new B-tree node */
     if(H5AC_insert_entry(f, dxpl_id, H5AC_BT2_HDR, hdr->addr, hdr, H5AC__NO_FLAGS_SET) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINSERT, HADDR_UNDEF, "can't add B-tree header to cache")
+    inserted = TRUE;
+
+    /* Add header as child of 'top' proxy */
+    if(hdr->top_proxy)
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, dxpl_id, hdr) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, HADDR_UNDEF, "unable to add v2 B-tree header as child of array proxy")
 
     /* Set address of v2 B-tree header to return */
     ret_value = hdr->addr;
 
 done:
-    if(!H5F_addr_defined(ret_value) && hdr)
-        if(H5B2__hdr_free(hdr) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release v2 B-tree header")
+    if(!H5F_addr_defined(ret_value))
+        if(hdr) {
+            /* Remove from cache, if inserted */
+            if(inserted)
+                if(H5AC_remove_entry(hdr) < 0)
+                    HDONE_ERROR(H5E_BTREE, H5E_CANTREMOVE, HADDR_UNDEF, "unable to remove v2 B-tree header from cache")
+
+            /* Release header's disk space */
+            if(H5F_addr_defined(hdr->addr) && H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, hdr->addr, (hsize_t)hdr->hdr_size) < 0)
+                HDONE_ERROR(H5E_BTREE, H5E_CANTFREE, HADDR_UNDEF, "unable to free v2 B-tree header")
+
+            /* Destroy header */
+            if(H5B2__hdr_free(hdr) < 0)
+                HDONE_ERROR(H5E_BTREE, H5E_CANTRELEASE, HADDR_UNDEF, "unable to release v2 B-tree header")
+        } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__hdr_create() */
@@ -503,6 +530,7 @@ H5B2__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t hdr_addr, void *ctx_udata,
     unsigned flags)
 {
     H5B2_hdr_cache_ud_t udata;          /* User data for cache callbacks */
+    H5B2_hdr_t *hdr = NULL;             /* v2 B-tree header */
     H5B2_hdr_t *ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -520,11 +548,32 @@ H5B2__hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t hdr_addr, void *ctx_udata,
     udata.ctx_udata = ctx_udata;
 
     /* Protect the header */
-    if(NULL == (ret_value = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &udata, flags)))
+    if(NULL == (hdr = (H5B2_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_BT2_HDR, hdr_addr, &udata, flags)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, NULL, "unable to load v2 B-tree header, address = %llu", (unsigned long long)hdr_addr)
-    ret_value->f = f;   /* (Must be set again here, in case the header was already in the cache -QAK) */
+    hdr->f = f;   /* (Must be set again here, in case the header was already in the cache -QAK) */
+
+    /* Create top proxy, if it doesn't exist */
+    if(hdr->swmr_write && NULL == hdr->top_proxy) {
+        /* Create 'top' proxy for v2 B-tree entries */
+        if(NULL == (hdr->top_proxy = H5AC_proxy_entry_create()))
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTCREATE, NULL, "can't create v2 B-tree proxy")
+
+        /* Add header as child of 'top' proxy */
+        if(H5AC_proxy_entry_add_child(hdr->top_proxy, f, dxpl_id, hdr) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTSET, NULL, "unable to add v2 B-tree header as child of proxy")
+    } /* end if */
+
+    /* Set return value */
+    ret_value = hdr;
 
 done:
+    /* Clean up on error */
+    if(!ret_value) {
+        /* Release the header, if it was protected */
+        if(hdr && H5AC_unprotect(hdr->f, dxpl_id, H5AC_BT2_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, NULL, "unable to unprotect v2 B-tree header, address = %llu", (unsigned long long)hdr_addr)
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2__hdr_protect() */
 
@@ -623,6 +672,13 @@ H5B2__hdr_free(H5B2_hdr_t *hdr)
     if(hdr->max_native_rec)
 	hdr->max_native_rec = H5MM_xfree(hdr->max_native_rec);
 
+    /* Destroy the 'top' proxy */
+    if(hdr->top_proxy) {
+        if(H5AC_proxy_entry_dest(hdr->top_proxy) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTRELEASE, FAIL, "unable to destroy v2 B-tree 'top' proxy")
+        hdr->top_proxy = NULL;
+    } /* end if */
+
     /* Free B-tree header info */
     hdr = H5FL_FREE(H5B2_hdr_t, hdr);
 
@@ -671,7 +727,7 @@ H5B2__hdr_delete(H5B2_hdr_t *hdr, hid_t dxpl_id)
 
     /* Delete all nodes in B-tree */
     if(H5F_addr_defined(hdr->root.addr))
-        if(H5B2__delete_node(hdr, dxpl_id, hdr->depth, &hdr->root, hdr->remove_op, hdr->remove_op_data) < 0)
+        if(H5B2__delete_node(hdr, dxpl_id, hdr->depth, &hdr->root, hdr, hdr->remove_op, hdr->remove_op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree nodes")
 
     /* Indicate that the heap header should be deleted & file space freed */

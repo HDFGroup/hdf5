@@ -93,7 +93,11 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_addr)
+H5FD_locate_signature(H5FD_t *file,
+#ifndef H5_DEBUG_BUILD
+const
+#endif /* H5_DEBUG_BUILD */
+H5P_genplist_t *dxpl, haddr_t *sig_addr)
 {
     haddr_t         addr, eoa, eof;
     uint8_t         buf[H5F_SIGNATURE_LEN];
@@ -158,7 +162,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
+H5FD_read(H5FD_t *file,
+#ifndef H5_DEBUG_BUILD
+const
+#endif /* H5_DEBUG_BUILD */
+H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
     size_t size, void *buf/*out*/)
 {
     haddr_t     eoa = HADDR_UNDEF;
@@ -199,9 +207,16 @@ H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t add
 
     if(HADDR_UNDEF == (eoa = (file->cls->get_eoa)(file, type)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
-    if((addr + file->base_addr + size) > eoa)
-        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size=%llu, eoa=%llu", 
-                    (unsigned long long)(addr+ file->base_addr), (unsigned long long)size, (unsigned long long)eoa)
+
+    /* 
+     * If the file is open for SWMR read access, allow access to data past
+     * the end of the allocated space (the 'eoa').  This is done because the
+     * eoa stored in the file's superblock might be out of sync with the
+     * objects being written within the file by the application performing
+     * SWMR write operations.
+     */
+    if(!(file->access_flags & H5F_ACC_SWMR_READ) && ((addr + file->base_addr + size) > eoa))
+        HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu, eoa = %llu", (unsigned long long)(addr + file->base_addr), (unsigned long long)size, (unsigned long long)eoa)
 
     /* Dispatch to driver */
     if((file->cls->read)(file, type, H5P_PLIST_ID(dxpl), addr + file->base_addr, size, buf) < 0)
@@ -226,7 +241,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
+H5FD_write(H5FD_t *file,
+#ifndef H5_DEBUG_BUILD
+const
+#endif /* H5_DEBUG_BUILD */
+H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
     size_t size, const void *buf)
 {
     haddr_t     eoa = HADDR_UNDEF;

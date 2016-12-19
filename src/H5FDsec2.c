@@ -530,6 +530,7 @@ H5FD_sec2_query(const H5FD_t *_file, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_DATA_SIEVE;             /* OK to perform data sieving for faster raw data reads & writes    */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations                     */
         *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE;    /* VFD handle is POSIX I/O call compatible                          */
+        *flags |= H5FD_FEAT_SUPPORTS_SWMR_IO;       /* VFD supports the single-writer/multiple-readers (SWMR) pattern   */
 
         /* Check for flags that are set by h5repart */
         if(file && file->fam_to_sec2)
@@ -922,20 +923,24 @@ done:
 static herr_t
 H5FD_sec2_lock(H5FD_t *_file, hbool_t rw)
 {
-    H5FD_sec2_t *file = (H5FD_sec2_t *)_file;	/* VFD file struct */
-    int lock;					/* The type of lock */
-    herr_t ret_value = SUCCEED;                 /* Return value */
+    H5FD_sec2_t *file = (H5FD_sec2_t *)_file;   /* VFD file struct          */
+    int lock_flags;                             /* file locking flags       */
+    herr_t ret_value = SUCCEED;                 /* Return value             */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file);
 
-    /* Determine the type of lock */
-    lock = rw ? LOCK_EX : LOCK_SH;
-    
-    /* Place the lock with non-blocking */
-    if(HDflock(file->fd, lock | LOCK_NB) < 0)
-        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock file")
+    /* Set exclusive or shared lock based on rw status */
+    lock_flags = rw ? LOCK_EX : LOCK_SH;
+
+    /* Place a non-blocking lock on the file */
+    if(HDflock(file->fd, lock_flags | LOCK_NB) < 0) {
+        if(ENOSYS == errno)
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING environment variable to override)")
+        else
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -956,15 +961,19 @@ done:
 static herr_t
 H5FD_sec2_unlock(H5FD_t *_file)
 {
-    H5FD_sec2_t *file = (H5FD_sec2_t *)_file;	/* VFD file struct */
-    herr_t ret_value = SUCCEED;                 /* Return value */
+    H5FD_sec2_t *file = (H5FD_sec2_t *)_file;   /* VFD file struct          */
+    herr_t ret_value = SUCCEED;                 /* Return value             */
 
     FUNC_ENTER_NOAPI_NOINIT
 
     HDassert(file);
 
-    if(HDflock(file->fd, LOCK_UN) < 0)
-        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to flock (unlock) file")
+    if(HDflock(file->fd, LOCK_UN) < 0) {
+        if(ENOSYS == errno)
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING environment variable to override)")
+        else
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to unlock file")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

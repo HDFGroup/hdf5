@@ -7479,7 +7479,7 @@ main(void)
     if(nerrors) {
         printf("***** %lu FAILURE%s! *****\n",
                nerrors, 1==nerrors?"":"S");
-        HDexit(1);
+        HDexit(EXIT_FAILURE);
     }
 
     printf("All datatype tests passed.\n");

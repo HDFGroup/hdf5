@@ -18,14 +18,13 @@
 #define __H5File_H
 
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class H5File
-    \brief Class H5File represents an HDF5 file.
+    \brief Class H5File represents an HDF5 file and inherits from class Group
+    as file is a root group.
 
-    It inherits from H5Location and CommonFG.
+    Inheritance: Group -> H5Object -> H5Location -> IdComponent
 */
 class H5_DLLCPP H5File : public Group {
    public:
@@ -122,8 +121,6 @@ class H5_DLLCPP H5File : public Group {
 	void p_get_file( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist );
 
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5File_H
 

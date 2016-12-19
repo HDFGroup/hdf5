@@ -1404,6 +1404,24 @@ Java_hdf_hdf5lib_H5_H5Pset_1file_1space
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_mdc_log_options
+ * Signature: (JZLjava/lang/String;Z)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1mdc_1log_1options
+(JNIEnv *, jclass, jlong, jboolean, jstring, jboolean);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_mdc_log_options
+ * Signature: (J[Z)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1mdc_1log_1options
+(JNIEnv *, jclass, jlong, jbooleanArray);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Pset_append_flush
  * Signature: (JI[JLjava/lang/Object;Ljava/lang/Object;)V
  */
@@ -1472,6 +1490,25 @@ Java_hdf_hdf5lib_H5_H5Pinsert2
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Piterate
   (JNIEnv*, jclass, jlong, jintArray, jobject, jobject);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_metadata_read_attempts
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1metadata_1read_1attempts
+(JNIEnv *, jclass, jlong);
+
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_metadata_read_attempts
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1metadata_1read_1attempts
+(JNIEnv *, jclass, jlong, jlong);
 
 
 #ifdef __cplusplus

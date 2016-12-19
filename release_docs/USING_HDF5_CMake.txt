@@ -183,15 +183,19 @@ source root. Include the following text in the file:
 cmake_minimum_required (VERSION 3.1.0)
 project (HDF5MyApp C CXX)
 
-find_package (HDF5 NAMES hdf5 COMPONENTS C static)
+set (LIB_TYPE STATIC) # or SHARED
+string(TOLOWER ${LIB_TYPE} SEARCH_TYPE)
+
+find_package (HDF5 NAMES hdf5 COMPONENTS C ${SEARCH_TYPE})
 # find_package (HDF5) # Find non-cmake built HDF5
 INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIR})
-set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_STATIC_LIBRARY})
+set (LINK_LIBS ${LINK_LIBS} ${HDF5_C_${LIB_TYPE}_LIBRARY})
 
 set (example hdf_example)
 
 add_executable (${example} ${PROJECT_SOURCE_DIR}/${example}.c)
-TARGET_C_PROPERTIES (${example} " " " ")
+TARGET_NAMING (${example} ${LIB_TYPE})
+TARGET_C_PROPERTIES (${example} ${LIB_TYPE} " " " ")
 target_link_libraries (${example} ${LINK_LIBS})
 
 enable_testing ()

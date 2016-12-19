@@ -102,6 +102,7 @@ CONTAINS
             i_H5P_flags_int, &
             i_H5R_flags, &
             i_H5S_flags, &
+            i_H5S_hid_flags, &
             i_H5S_hsize_flags, &
             i_H5T_flags, &
             i_H5Z_flags, &
@@ -114,7 +115,7 @@ CONTAINS
               H5F_FLAGS_LEN, H5G_FLAGS_LEN, H5FD_FLAGS_LEN, &
               H5FD_HID_FLAGS_LEN, H5I_FLAGS_LEN, H5L_FLAGS_LEN, &
               H5O_FLAGS_LEN, H5P_FLAGS_LEN, H5P_FLAGS_INT_LEN, &
-              H5R_FLAGS_LEN, H5S_FLAGS_LEN, H5S_HSIZE_FLAGS_LEN, &
+              H5R_FLAGS_LEN, H5S_FLAGS_LEN, H5S_HID_FLAGS_LEN, H5S_HSIZE_FLAGS_LEN, &
               H5T_FLAGS_LEN, H5Z_FLAGS_LEN, H5generic_FLAGS_LEN, H5generic_haddr_FLAGS_LEN
          IMPLICIT NONE
          INTEGER i_H5D_flags(H5D_FLAGS_LEN)
@@ -132,6 +133,7 @@ CONTAINS
          INTEGER i_H5P_flags_int(H5P_FLAGS_INT_LEN)
          INTEGER i_H5R_flags(H5R_FLAGS_LEN)
          INTEGER i_H5S_flags(H5S_FLAGS_LEN)
+         INTEGER(HID_T) i_H5S_hid_flags(H5S_HID_FLAGS_LEN)
          INTEGER(HSIZE_T) i_H5S_hsize_flags(H5S_HSIZE_FLAGS_LEN)
          INTEGER i_H5T_flags(H5T_FLAGS_LEN)
          INTEGER i_H5Z_flags(H5Z_FLAGS_LEN)
@@ -163,6 +165,7 @@ CONTAINS
          H5P_flags_int, &
          H5R_flags, &
          H5S_flags, &
+         H5S_hid_flags, &
          H5S_hsize_flags, &
          H5T_flags, &
          H5Z_flags, &
@@ -379,27 +382,23 @@ CONTAINS
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: ikind
     INTEGER, INTENT(IN) :: flag
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
-    INTEGER :: Fortran_INTEGER_16
-    Fortran_INTEGER_16=SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
-#endif
-    
-
+    INTEGER :: i
 !*****
+
+!#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+!    ! (1) The array index assumes INTEGER*16 the last integer in the series, and
+!    ! (2) it should map to INTEGER*16 on most modern processors
+!    H5T_NATIVE_INTEGER_KIND(H5_FORTRAN_NUM_INTEGER_KINDS)=SELECTED_INT_KIND(36)
+!#endif
+
+    h5_type = -1
     IF(flag.EQ.H5_INTEGER_KIND)THEN
-       IF(ikind.EQ.Fortran_INTEGER_1)THEN
-          h5_type = H5T_NATIVE_INTEGER_1
-       ELSE IF(ikind.EQ.Fortran_INTEGER_2)THEN
-          h5_type = H5T_NATIVE_INTEGER_2
-       ELSE IF(ikind.EQ.Fortran_INTEGER_4)THEN
-          h5_type = H5T_NATIVE_INTEGER_4
-       ELSE IF(ikind.EQ.Fortran_INTEGER_8)THEN
-          h5_type = H5T_NATIVE_INTEGER_8
-#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
-       ELSE IF(ikind.EQ.Fortran_INTEGER_16)THEN
-          h5_type = H5T_NATIVE_INTEGER_16
-#endif
-       ENDIF
+       do_kind: DO i = 1, H5_FORTRAN_NUM_INTEGER_KINDS
+          IF(ikind.EQ.Fortran_INTEGER_AVAIL_KINDS(i))THEN
+             h5_type = H5T_NATIVE_INTEGER_KIND(i)
+             EXIT do_kind
+          ENDIF
+       END DO do_kind
     ELSE IF(flag.EQ.H5_REAL_KIND)THEN
        IF(ikind.EQ.KIND(1.0_C_FLOAT))THEN
           h5_type = H5T_NATIVE_REAL_C_FLOAT
@@ -409,14 +408,11 @@ CONTAINS
        ELSE IF(ikind.EQ.KIND(1.0_C_LONG_DOUBLE))THEN
           h5_type = H5T_NATIVE_REAL_C_LONG_DOUBLE
 #endif
-#if H5_PAC_FC_MAX_REAL_PRECISION > 28 
+#if H5_PAC_FC_MAX_REAL_PRECISION > 28
 #if H5_HAVE_FLOAT128 == 1
        ELSE
           h5_type = H5T_NATIVE_FLOAT_128
 #endif
-#else
-       ELSE
-          h5_type = -1
 #endif
        ENDIF
     ENDIF

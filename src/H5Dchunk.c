@@ -4851,7 +4851,6 @@ H5D__chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dim)
      * will never change. */
     chk_store.chunk.scaled = scaled;
     H5D_BUILD_IO_INFO_RD(&chk_io_info, dset, dxpl_cache, dxpl_id, H5AC_rawdata_dxpl_id, &chk_store, NULL);
-    chk_io_info.raw_dxpl_id = H5AC_rawdata_dxpl_id;
 
     /* Compose chunked index info struct */
     idx_info.f = dset->oloc.file;
@@ -6293,8 +6292,13 @@ H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old
             /* Check for chunk being same size */
 	    if(new_chunk->length != old_chunk->length) {
 		/* Release previous chunk */
-		if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, old_chunk->offset, old_chunk->length) < 0)
-		    HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
+		/* Only free the old location if not doing SWMR writes - otherwise
+                 * we must keep the old chunk around in case a reader has an
+                 * outdated version of the B-tree node
+                 */
+		if(!(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE))
+		    if(H5MF_xfree(idx_info->f, H5FD_MEM_DRAW, idx_info->dxpl_id, old_chunk->offset, old_chunk->length) < 0)
+			HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to free chunk")
 		alloc_chunk = TRUE;
 	    } /* end if */
             else {

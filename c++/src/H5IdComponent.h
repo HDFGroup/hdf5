@@ -17,11 +17,7 @@
 #ifndef __IdComponent_H
 #define __IdComponent_H
 
-// IdComponent represents an HDF5 object that has an identifier.
-
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 class DataSpace;
 /*! \class IdComponent
@@ -120,7 +116,5 @@ class H5_DLLCPP IdComponent {
 
 }; // end class IdComponent
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __IdComponent_H

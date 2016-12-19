@@ -130,7 +130,11 @@ struct H5P_genplist_t;
 struct H5F_t;
 
 H5_DLL int H5FD_term_interface(void);
-H5_DLL herr_t H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_addr);
+H5_DLL herr_t H5FD_locate_signature(H5FD_t *file,
+#ifndef H5_DEBUG_BUILD
+const
+#endif /* H5_DEBUG_BUILD */
+H5P_genplist_t *dxpl, haddr_t *sig_addr);
 H5_DLL H5FD_class_t *H5FD_get_class(hid_t id);
 H5_DLL hsize_t H5FD_sb_size(H5FD_t *file);
 H5_DLL herr_t H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf);
@@ -153,10 +157,19 @@ H5_DLL herr_t H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr);
 H5_DLL haddr_t H5FD_get_eof(const H5FD_t *file, H5FD_mem_t type);
 H5_DLL haddr_t H5FD_get_maxaddr(const H5FD_t *file);
 H5_DLL herr_t H5FD_get_feature_flags(const H5FD_t *file, unsigned long *feature_flags);
+H5_DLL herr_t H5FD_set_feature_flags(H5FD_t *file, unsigned long feature_flags);
 H5_DLL herr_t H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map);
-H5_DLL herr_t H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type,
+H5_DLL herr_t H5FD_read(H5FD_t *file,
+#ifndef H5_DEBUG_BUILD
+const
+#endif /* H5_DEBUG_BUILD */
+H5P_genplist_t *dxpl, H5FD_mem_t type,
     haddr_t addr, size_t size, void *buf/*out*/);
-H5_DLL herr_t H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type,
+H5_DLL herr_t H5FD_write(H5FD_t *file,
+#ifndef H5_DEBUG_BUILD
+const
+#endif /* H5_DEBUG_BUILD */
+H5P_genplist_t *dxpl, H5FD_mem_t type,
     haddr_t addr, size_t size, const void *buf);
 H5_DLL herr_t H5FD_flush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FD_truncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);

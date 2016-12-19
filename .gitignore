@@ -1,7 +1,22 @@
-/Makefile.in
+# .gitignore file for HDF5
+
+# Makefile.in files
+**/Makefile.in
+
+# Java .classes files
+**/java/.classes
+
+# Backup files
+# Editor-specific extensions should go in your ~/.gitconfig, but we
+# include the standard Unix backup '~' extension since autoheader
+# backs up H5config.h.in when it creates a new one and the
+# extension is always '~'.
+**/*~
+
+# Other files, most of which are created by the Autotools though
+# some are created by scripts in bin/
 /aclocal.m4
 /autom4te.cache
-bin/Makefile.in
 bin/compile
 bin/config.guess
 bin/config.sub
@@ -11,61 +26,12 @@ bin/ltmain.sh
 bin/missing
 bin/test-driver
 /build*
-c++/Makefile.in
-c++/examples/Makefile.in
-c++/src/Makefile.in
-c++/src/header_files/Makefile.in
-c++/test/Makefile.in
-config/Makefile.in
-config/cmake/Makefile.in
-config/cmake/UserMacros/Makefile.in
-config/cmake/scripts/Makefile.in
-config/cmake_ext_mod/Makefile.in
-config/site-specific/Makefile.in
 /configure
-examples/Makefile.in
-fortran/Makefile.in
-fortran/examples/Makefile.in
-fortran/src/Makefile.in
-fortran/test/Makefile.in
-fortran/testpar/Makefile.in
-hl/Makefile.in
-hl/c++/Makefile.in
-hl/c++/examples/Makefile.in
-hl/c++/src/Makefile.in
-hl/c++/test/Makefile.in
-hl/examples/Makefile.in
-hl/fortran/Makefile.in
-hl/fortran/examples/Makefile.in
-hl/fortran/src/Makefile.in
-hl/fortran/test/Makefile.in
-hl/src/Makefile.in
-hl/test/Makefile.in
-hl/tools/Makefile.in
-hl/tools/gif2h5/Makefile.in
-hl/tools/gif2h5/testfiles/Makefile.in
-java/Makefile.in
-java/examples/Makefile.in
-java/examples/datasets/.classes
-java/examples/datasets/Makefile.in
-java/examples/datatypes/.classes
-java/examples/datatypes/Makefile.in
-java/examples/groups/.classes
-java/examples/groups/Makefile.in
-java/examples/intro/.classes
-java/examples/intro/Makefile.in
-java/src/.classes
-java/src/Makefile.in
-java/src/jni/Makefile.in
-java/test/.classes
-java/test/Makefile.in
-m4/Makefile.in
 m4/libtool.m4
 m4/ltoptions.m4
 m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
-release_docs/Makefile.in
 src/H5Edefin.h
 src/H5Einit.h
 src/H5Epubgen.h
@@ -73,33 +39,4 @@ src/H5Eterm.h
 src/H5config.h.in
 src/H5overflow.h
 src/H5version.h
-src/Makefile.in
-test/Makefile.in
-test/testfiles/Makefile.in
-test/testfiles/plist_files/Makefile.in
-testpar/Makefile.in
-tools/Makefile.in
-tools/h5copy/Makefile.in
-tools/h5copy/testfiles/Makefile.in
-tools/h5diff/Makefile.in
-tools/h5diff/testfiles/Makefile.in
-tools/h5dump/Makefile.in
-tools/h5dump/errfiles/Makefile.in
-tools/h5format_convert/Makefile.in
-tools/h5import/Makefile.in
-tools/h5import/testfiles/Makefile.in
-tools/h5jam/Makefile.in
-tools/h5jam/testfiles/Makefile.in
-tools/h5ls/Makefile.in
-tools/h5repack/Makefile.in
-tools/h5repack/testfiles/Makefile.in
-tools/h5stat/Makefile.in
-tools/h5stat/testfiles/Makefile.in
-tools/lib/Makefile.in
-tools/misc/Makefile.in
-tools/misc/testfiles/Makefile.in
-tools/misc/vds/Makefile.in
-tools/perform/Makefile.in
-tools/testfiles/Makefile.in
-tools/testfiles/pbits/Makefile.in
-tools/testfiles/vds/Makefile.in
+

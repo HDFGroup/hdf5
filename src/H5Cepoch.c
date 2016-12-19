@@ -63,22 +63,23 @@
  * epochs so that they can be evicted from the cache.
  *
  ****************************************************************************/
-static herr_t H5C__epoch_marker_get_load_size(const void *udata_ptr,
+static herr_t H5C__epoch_marker_get_initial_load_size(void *udata_ptr,
     size_t *image_len_ptr);
+static herr_t H5C__epoch_marker_get_final_load_size(const void *image_ptr,
+    size_t image_len_ptr, void *udata_ptr, size_t *actual_len);
+static htri_t H5C__epoch_marker_verify_chksum(const void *image_ptr, 
+    size_t len, void *udata_ptr);
 static void * H5C__epoch_marker_deserialize(const void * image_ptr,
     size_t len, void * udata, hbool_t * dirty_ptr);
 static herr_t H5C__epoch_marker_image_len(const void * thing,
-    size_t *image_len_ptr, hbool_t *compressed_ptr, size_t *compressed_len_ptr);
+    size_t *image_len_ptr);
 static herr_t H5C__epoch_marker_pre_serialize(const H5F_t *f,
     hid_t dxpl_id, void * thing, haddr_t addr, size_t len,
-    size_t compressed_len, haddr_t * new_addr_ptr, size_t * new_len_ptr,
-    size_t * new_compressed_len_ptr, unsigned * flags_ptr);
+    haddr_t * new_addr_ptr, size_t * new_len_ptr, unsigned * flags_ptr);
 static herr_t H5C__epoch_marker_serialize(const H5F_t *f,
     void * image_ptr, size_t len, void * thing);
 static herr_t H5C__epoch_marker_notify(H5C_notify_action_t action, void *thing);
 static herr_t H5C__epoch_marker_free_icr(void * thing);
-static herr_t H5C__epoch_marker_clear(const H5F_t *f, void * thing, 
-    hbool_t about_to_destroy);
 static herr_t H5C__epoch_marker_fsf_size(const void H5_ATTR_UNUSED * thing, 
     size_t H5_ATTR_UNUSED * fsf_size_ptr);
 
@@ -104,14 +105,15 @@ const H5C_class_t H5C__epoch_marker_class =
     /* name             = */ "epoch marker",
     /* mem_type         = */ H5FD_MEM_DEFAULT, /* value doesn't matter */
     /* flags		= */ H5C__CLASS_NO_FLAGS_SET,
-    /* get_load_size    = */ H5C__epoch_marker_get_load_size,
+    /* get_initial_load_size = */ H5C__epoch_marker_get_initial_load_size,
+    /* get_final_load_size = */ H5C__epoch_marker_get_final_load_size,
+    /* verify_chksum    = */ H5C__epoch_marker_verify_chksum,
     /* deserialize      = */ H5C__epoch_marker_deserialize,
     /* image_len        = */ H5C__epoch_marker_image_len,
     /* pre_serialize    = */ H5C__epoch_marker_pre_serialize,
     /* serialize        = */ H5C__epoch_marker_serialize,
     /* notify           = */ H5C__epoch_marker_notify,
     /* free_icr         = */ H5C__epoch_marker_free_icr,
-    /* clear            = */ H5C__epoch_marker_clear,
     /* fsf_size         = */ H5C__epoch_marker_fsf_size,
 };
 
@@ -127,7 +129,7 @@ const H5C_class_t H5C__epoch_marker_class =
 
 
 static herr_t
-H5C__epoch_marker_get_load_size(const void H5_ATTR_UNUSED *udata_ptr,
+H5C__epoch_marker_get_initial_load_size(void H5_ATTR_UNUSED *udata_ptr,
     size_t H5_ATTR_UNUSED *image_len_ptr)
 {
     FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
@@ -135,7 +137,32 @@ H5C__epoch_marker_get_load_size(const void H5_ATTR_UNUSED *udata_ptr,
     HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
 
     FUNC_LEAVE_NOAPI(FAIL)
-} /* end H5C__epoch_marker_get_load_size() */
+} /* end H5C__epoch_marker_get_initial_load_size() */
+
+
+static herr_t
+H5C__epoch_marker_get_final_load_size(const void H5_ATTR_UNUSED *image_ptr,
+    size_t H5_ATTR_UNUSED image_len, void H5_ATTR_UNUSED *udata_ptr,
+    size_t H5_ATTR_UNUSED *actual_len)
+{
+    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+
+    HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
+
+    FUNC_LEAVE_NOAPI(FAIL)
+} /* end H5C__epoch_marker_final_get_load_size() */
+
+
+static htri_t 
+H5C__epoch_marker_verify_chksum(const void H5_ATTR_UNUSED *image_ptr, size_t H5_ATTR_UNUSED len, 
+    void H5_ATTR_UNUSED *udata_ptr)
+{
+    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
+
+    HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
+
+    FUNC_LEAVE_NOAPI(FALSE)
+} /* end H5C__epoch_marker_verify_chksum() */
 
 
 static void *
@@ -152,8 +179,7 @@ H5C__epoch_marker_deserialize(const void H5_ATTR_UNUSED * image_ptr, size_t H5_A
 
 static herr_t
 H5C__epoch_marker_image_len(const void H5_ATTR_UNUSED *thing,
-    size_t H5_ATTR_UNUSED *image_len_ptr, hbool_t H5_ATTR_UNUSED *compressed_ptr,
-    size_t H5_ATTR_UNUSED *compressed_len_ptr)
+    size_t H5_ATTR_UNUSED *image_len_ptr)
 {
     FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
 
@@ -166,8 +192,7 @@ H5C__epoch_marker_image_len(const void H5_ATTR_UNUSED *thing,
 static herr_t
 H5C__epoch_marker_pre_serialize(const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED *thing, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED len,
-    size_t H5_ATTR_UNUSED compressed_len, haddr_t H5_ATTR_UNUSED *new_addr_ptr, 
-    size_t H5_ATTR_UNUSED *new_len_ptr, size_t H5_ATTR_UNUSED *new_compressed_len_ptr,
+    haddr_t H5_ATTR_UNUSED *new_addr_ptr, size_t H5_ATTR_UNUSED *new_len_ptr,
     unsigned H5_ATTR_UNUSED *flags_ptr)
 {
     FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
@@ -211,17 +236,6 @@ H5C__epoch_marker_free_icr(void H5_ATTR_UNUSED * thing)
 
     FUNC_LEAVE_NOAPI(FAIL)
 } /* end H5C__epoch_marker_free_icr() */
-
-
-static herr_t 
-H5C__epoch_marker_clear(const H5F_t H5_ATTR_UNUSED *f, void H5_ATTR_UNUSED * thing, hbool_t H5_ATTR_UNUSED about_to_destroy)
-{
-    FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */
-
-    HERROR(H5E_CACHE, H5E_SYSTEM, "called unreachable fcn.");
-
-    FUNC_LEAVE_NOAPI(FAIL)
-} /* end H5C__epoch_marker_clear() */
 
 
 static herr_t 

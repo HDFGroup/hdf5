@@ -730,11 +730,9 @@ H5AC__log_deleted_entry(const H5AC_info_t *entry_ptr)
  *
  *		If mpi_rank is 0, we must first check to see if the entry
  *		appears in the dirty entries slist.  If it is, do nothing.
- *		If it isn't, add the size to th dirty_bytes count, add the
+ *		If it isn't, add the size to the dirty_bytes count, add the
  *		entry to the dirty entries slist, and remove it from the
  *		cleaned list (if it is present there).
- *
- *		Return SUCCEED on success, and FAIL on failure.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -803,6 +801,63 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC__log_dirtied_entry() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC__log_cleaned_entry()
+ *
+ * Purpose:     Treat this operation as a 'clear' and remove the entry
+ * 		from both the cleaned and dirtied lists if it is present.
+ *		Reduces the dirty_bytes count by the size of the entry.
+ *
+ * Return:      Non-negative on success/Negative on failure.
+ *
+ * Programmer:  Quincey Koziol
+ *              7/23/16
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC__log_cleaned_entry(const H5AC_info_t *entry_ptr)
+{
+    H5AC_t             * cache_ptr;
+    H5AC_aux_t         * aux_ptr;
+    herr_t               ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->is_dirty == FALSE);
+    cache_ptr = entry_ptr->cache_ptr;
+    HDassert(cache_ptr != NULL);
+    aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
+    HDassert(aux_ptr != NULL);
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+
+    if(aux_ptr->mpi_rank == 0) {
+        H5AC_slist_entry_t *slist_entry_ptr;
+        haddr_t addr = entry_ptr->addr;
+
+        /* Sanity checks */
+        HDassert(aux_ptr->d_slist_ptr != NULL);
+        HDassert(aux_ptr->c_slist_ptr != NULL);
+
+        /* Remove it from both the cleaned list and the dirtied list.  */
+        if(NULL != (slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(aux_ptr->c_slist_ptr, (void *)(&addr))))
+            slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
+        if(NULL != (slist_entry_ptr = (H5AC_slist_entry_t *)H5SL_remove(aux_ptr->d_slist_ptr, (void *)(&addr))))
+            slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
+
+    } /* end if */
+
+    /* Decrement the dirty byte count */
+    aux_ptr->dirty_bytes -= entry_ptr->size;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC__log_cleaned_entry() */
 
 
 /*-------------------------------------------------------------------------

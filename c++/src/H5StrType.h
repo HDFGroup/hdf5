@@ -17,11 +17,14 @@
 #ifndef __H5StrType_H
 #define __H5StrType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
-//! Class StrType operates on HDF5 string datatypes.
+/*! \class StrType
+    \brief StrType is a derivative of a DataType and operates on HDF5
+    string datatype.
+
+    Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
+*/
 class H5_DLLCPP StrType : public AtomType {
    public:
 	// Creates a string type using a predefined type
@@ -63,7 +66,5 @@ class H5_DLLCPP StrType : public AtomType {
 	// Noop destructor.
 	virtual ~StrType();
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5StrType_H

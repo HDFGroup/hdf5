@@ -1,0 +1,14 @@
+
+file1     file2
+---------------------------------------
+    x      x    /              
+    x      x    /dset          
+    x      x    /dset_filter   
+
+group  : </> and </>
+0 differences found
+dataset: </dset> and </dset>
+0 differences found
+dataset: </dset_filter> and </dset_filter>
+0 differences found
+EXIT CODE: 0

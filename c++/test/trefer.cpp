@@ -19,20 +19,19 @@
 		Reference interface (H5R)
 
  ***************************************************************************/
-
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
 #include "H5Cpp.h"      // C++ API header file
+using namespace H5;
 
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
-
+#include "h5test.h"
 #include "h5cpputil.h"  // C++ utilility header file
 
 const H5std_string      FILE1("trefer1.h5");
@@ -808,9 +807,7 @@ static void test_reference_compat(void)
 **  test_reference(): Main reference testing routine.
 **
 ****************************************************************/
-#ifdef __cplusplus
 extern "C"
-#endif
 void test_reference(void)
 {
     // Output message about test being performed
@@ -830,9 +827,7 @@ void test_reference(void)
 ** Purpose:	Cleanup temporary test files
 ** Return:	none
 ****************************************************************/
-#ifdef __cplusplus
 extern "C"
-#endif
 void cleanup_reference(void)
 {
     HDremove(FILE1.c_str());

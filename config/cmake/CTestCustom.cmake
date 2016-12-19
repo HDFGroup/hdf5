@@ -40,6 +40,9 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     HL_FORTRAN_test-clear-objects
     FORTRAN_testhdf5-clear-objects
     CPP_testhdf5-clear-objects
+    ######### tools/h5clear #########
+    H5CLEAR-clearall-objects
+    H5CLEAR-h5clear_gentest      # does not close ids by design
     ######### tools/h5copy #########
     H5COPY-clearall-objects
     ######### tools/h5diff #########
@@ -49,6 +52,8 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5DUMP_PACKED_BITS-clearall-objects
     H5DUMP-XML-clearall-objects
     H5DUMP_VDS-clearall-objects
+    ######### tools/h5format_convert #########
+    H5FC-clearall-objects
     ######### tools/h5import #########
     H5IMPORT-h5importtest-clear-objects
     H5IMPORT-clear-objects
@@ -185,6 +190,7 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5JAM-NONE_COPY-ta_u513
     ######### tools/h5ls #########
     H5LS-clearall-objects
+    H5LS_VDS-clearall-objects
     ######### tools/h5repack #########
     H5REPACK-clearall-objects
     H5REPACK-gzip_verbose_filters                       #uses runTest.cmake
@@ -208,11 +214,14 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK_VERIFY_LAYOUT_ALL-layout_long_switches     #uses grepTest.cmake
     H5REPACK_VERIFY_LAYOUT_ALL-layout_short_switches    #uses grepTest.cmake
     H5REPACK-plugin
+    H5REPACK_CMP-plugin_zero
     ######### tools/h5stat #########
     H5STAT-clearall-objects
     ######### tools/misc #########
     H5REPART-clearall-objects
     H5MKGRP-clearall-objects
+    ######### hl/tools/h5watch #########
+    H5WATCH-clearall-objects
     ######### examples #########
     EXAMPLES-clear-objects
     CPP_ex-clear-objects

@@ -20,14 +20,12 @@
 #include "H5IdComponent.h"
 #include "H5PropList.h"
 #include "H5OcreatProp.h"
+#include "H5DcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
-#include "H5DcreatProp.h"
 #include "H5DataType.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // This DOXYGEN_SHOULD_SKIP_THIS block is a work-around approach to control
@@ -747,6 +745,4 @@ void DSetCreatPropList::getExternal( unsigned idx, size_t name_size, char* name,
 //--------------------------------------------------------------------------
 DSetCreatPropList::~DSetCreatPropList () {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

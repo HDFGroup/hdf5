@@ -19,16 +19,14 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
-#include "H5Location.h"
-#include "H5Object.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
+#include "H5Location.h"
+#include "H5Object.h"
 #include "H5DataType.h"
 #include "H5ArrayType.h"
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	ArrayType default constructor
@@ -154,6 +152,4 @@ int ArrayType::getArrayDims(hsize_t* dims) const
 //--------------------------------------------------------------------------
 ArrayType::~ArrayType() {}
 
-#ifndef H5_NO_NAMESPACE
 } // end namespace
-#endif

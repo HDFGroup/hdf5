@@ -19,13 +19,13 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
-#include "H5Location.h"
-#include "H5Object.h"
 #include "H5FaccProp.h"
 #include "H5FcreatProp.h"
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
+#include "H5Location.h"
+#include "H5Object.h"
 #include "H5CommonFG.h"
 #include "H5Group.h"
 #include "H5AbstractDs.h"
@@ -48,10 +48,7 @@
 //   GroupIException.
 // December 2000
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-using namespace std;
-#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
@@ -70,7 +67,4 @@ CommonFG::~CommonFG() {}
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-#ifndef H5_NO_NAMESPACE
 }
-#endif
-

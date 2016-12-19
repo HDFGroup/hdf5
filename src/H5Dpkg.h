@@ -325,6 +325,7 @@ typedef herr_t (*H5D_chunk_dest_func_t)(const H5D_chk_idx_info_t *idx_info);
 
 /* Typedef for grouping chunk I/O routines */
 typedef struct H5D_chunk_ops_t {
+    hbool_t can_swim;                       /* Flag to indicate that the index supports SWMR access */
     H5D_chunk_init_func_t init;             /* Routine to initialize indexing information in memory */
     H5D_chunk_create_func_t create;         /* Routine to create chunk index */
     H5D_chunk_is_space_alloc_func_t is_space_alloc;    /* Query routine to determine if storage/index is allocated */
@@ -393,6 +394,10 @@ typedef struct H5D_chunk_cached_t {
     hsize_t     chunk_idx;			/*index of chunk in dataset */
     unsigned	filter_mask;			/*excluded filters	*/
 } H5D_chunk_cached_t;
+
+/****************************/
+/* Virtual dataset typedefs */
+/****************************/
 
 /* List of files held open during refresh operations */
 typedef struct H5D_virtual_held_file_t {
@@ -685,6 +690,8 @@ H5_DLL herr_t H5D__chunk_direct_write(const H5D_t *dset, hid_t dxpl_id, uint32_t
 #ifdef H5D_CHUNK_DEBUG
 H5_DLL herr_t H5D__chunk_stats(const H5D_t *dset, hbool_t headers);
 #endif /* H5D_CHUNK_DEBUG */
+
+/* format convert */
 H5_DLL herr_t H5D__chunk_format_convert(H5D_t *dset, H5D_chk_idx_info_t *idx_info, H5D_chk_idx_info_t *new_idx_info);
 
 /* Functions that operate on compact dataset storage */
@@ -770,6 +777,7 @@ H5_DLL htri_t H5D__mpio_opt_possible(const H5D_io_info_t *io_info,
 H5_DLL herr_t H5D__layout_version_test(hid_t did, unsigned *version);
 H5_DLL herr_t H5D__layout_contig_size_test(hid_t did, hsize_t *size);
 H5_DLL herr_t H5D__layout_idx_type_test(hid_t did, H5D_chunk_index_t *idx_type);
+H5_DLL herr_t H5D__layout_type_test(hid_t did, H5D_layout_t *layout_type);
 H5_DLL herr_t H5D__current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused);
 #endif /* H5D_TESTING */
 

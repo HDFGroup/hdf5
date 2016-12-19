@@ -26,25 +26,16 @@
 #else
 #include <iostream>
 #endif
-#include <string>
+using std::cerr;
+using std::endl;
 
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
+#include <string>
+#include "H5Cpp.h"      // C++ API header file
+using namespace H5;
 
 #include "h5test.h"
-#include "H5Cpp.h"
+#include "h5cpputil.h"  // C++ utilility header file
 
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
-
-#include "h5cpputil.h"
-
-
 /*-------------------------------------------------------------------------
  * Function:	test_report
  *
@@ -162,6 +153,32 @@ int check_values (hsize_t i, hsize_t j, int apoint, int acheck)
     }
     return 0;
 } // check_values
+
+/*-------------------------------------------------------------------------
+ * Function:	check_values
+ *
+ * Purpose:	Checks a char string pointer for NULL.  If it is NULL,
+ *		the function will print out a message
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Binh-Minh Ribler (using C code segment for checking values)
+ *		Friday, September 16, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+void check_values(const char *value, const char* msg, int line, const char* file_name)
+{
+    if (value == NULL)
+    {
+	cerr << endl;
+        cerr << "*** ERROR: " << msg << ", at line " << line << endl;
+	IncTestNumErrs();
+	throw TestFailedException(file_name, msg);
+    }
+}
 
 /*-------------------------------------------------------------------------
  * Function:	verify_val (const char*, const char*,...)

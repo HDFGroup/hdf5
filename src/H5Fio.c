@@ -264,21 +264,108 @@ H5F_evict_tagged_metadata(H5F_t * f, haddr_t tag, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Unpin the superblock, as this will be marked for eviction and it can't 
-        be pinned. */
-    if(H5AC_unpin_entry(f->shared->sblock) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
-    f->shared->sblock = NULL;
-
     /* Evict the object's metadata */
-    if(H5AC_evict_tagged_metadata(f, tag, dxpl_id)<0)
+    if(H5AC_evict_tagged_metadata(f, tag, TRUE, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict tagged metadata")
-
-    /* Re-read the superblock. */
-    if(H5F__super_read(f, dxpl_id, FALSE) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "unable to read superblock")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5F_evict_tagged_metadata */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__evict_cache_entries
+ *
+ * Purpose:     To evict all cache entries except the pinned superblock entry
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi
+ *		Dec 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__evict_cache_entries(H5F_t *f, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Evict all except pinned entries in the cache */
+    if(H5AC_evict(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "unable to evict all except pinned entries")
+
+#ifndef NDEBUG
+{
+    unsigned status = 0;
+    int32_t    cur_num_entries;
+
+    /* Retrieve status of the superblock */
+    if(H5AC_get_entry_status(f, (haddr_t)0, &status) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to get entry status")
+
+    /* Verify status of the superblock entry in the cache */
+    if(!(status & H5AC_ES__IN_CACHE) || !(status & H5AC_ES__IS_PINNED))
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to get entry status")
+
+    /* Get the number of cache entries */
+    if(H5AC_get_cache_size(f->shared->cache, NULL, NULL, NULL, &cur_num_entries) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_cache_size() failed.")
+
+    /* Should be the only one left in the cache (the superblock) */
+    if(cur_num_entries != 1)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "number of cache entries is not correct")
+}
+#endif /* NDEBUG */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5F__evict_cache_entries() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_get_checksums
+ *
+ * Purpose:   	Decode checksum stored in the buffer
+ *		Calculate checksum for the data in the buffer
+ *
+ * Note:	Assumes that the checksum is the last data in the buffer
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:	Vailin Choi
+ *		Sept 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_checksums(const uint8_t *buf, size_t buf_size, uint32_t *s_chksum/*out*/, uint32_t *c_chksum/*out*/)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Check arguments */
+    HDassert(buf);
+    HDassert(buf_size);
+
+    /* Return the stored checksum */
+    if(s_chksum) {
+        const uint8_t *chk_p;      	/* Pointer into raw data buffer */
+
+        /* Offset to the checksum in the buffer */
+        chk_p = buf + buf_size - H5_SIZEOF_CHKSUM;
+
+        /* Decode the checksum stored in the buffer */
+        UINT32DECODE(chk_p, *s_chksum);
+    } /* end if */
+
+    /* Return the computed checksum for the buffer */
+    if(c_chksum)
+	*c_chksum = H5_checksum_metadata(buf, buf_size - H5_SIZEOF_CHKSUM, 0);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5F_get_chksums() */
 

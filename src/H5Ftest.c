@@ -186,3 +186,37 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_maxaddr_test() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_sbe_addr_test
+ *
+ * Purpose:     Retrieve the address of a superblock extension's object header
+ *		for a file
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        Jul 10, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr)
+{
+    H5F_t	*file;                  /* File info */
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check arguments */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+    /* Retrieve maxaddr for file */
+    *sbe_addr = file->shared->sblock->ext_addr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_sbe_addr_test() */
+

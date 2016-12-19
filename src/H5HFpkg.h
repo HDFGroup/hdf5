@@ -544,6 +544,14 @@ typedef struct H5HF_dblock_cache_ud_t {
 				 * calls to it.
 				 */
     unsigned filter_mask;	/* Excluded filters for direct block */
+    uint8_t *dblk;  /* Pointer to the buffer containing the decompressed
+                     * direct block data obtained in verify_chksum callback.
+                     * It will be used later in deserialize callback.
+                     */
+    htri_t decompressed;    /* Indicate that the direct block has been
+                             * decompressed in verify_chksum callback.
+                             * It will be used later in deserialize callback.
+                             */
 } H5HF_dblock_cache_ud_t;
 
 

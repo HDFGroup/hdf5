@@ -17,9 +17,7 @@
 #ifndef __H5DataSet_H
 #define __H5DataSet_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class DataSet
     \brief Class DataSet operates on HDF5 datasets.
@@ -27,6 +25,8 @@ namespace H5 {
     An datasets has many characteristics similar to an attribute, thus both
     Attribute and DataSet are derivatives of AbstractDs.  DataSet also
     inherits from H5Object because a dataset is an HDF5 object.
+
+    Inheritance: multiple H5Object/AbstractDs -> H5Location -> IdComponent
 */
 class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
    public:
@@ -131,7 +131,5 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 	friend void f_DataSet_setId(DataSet* dset, hid_t new_id);
 
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5DataSet_H

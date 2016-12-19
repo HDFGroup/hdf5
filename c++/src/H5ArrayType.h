@@ -17,13 +17,13 @@
 #ifndef __H5ArrayType_H
 #define __H5ArrayType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class ArrayType
     \brief Class ArrayType inherits from DataType and provides wrappers for
      the HDF5's Array Datatypes.
+
+    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
 class H5_DLLCPP ArrayType : public DataType {
    public:
@@ -57,7 +57,5 @@ class H5_DLLCPP ArrayType : public DataType {
 	// Default constructor
 	ArrayType();
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5ArrayType_H

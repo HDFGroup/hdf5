@@ -18,27 +18,19 @@
    tarray.cpp - HDF5 C++ testing the array datatype functionality
 
  ***************************************************************************/
-
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
+
 #include <string>
-
-#ifndef H5_NO_NAMESPACE
-#ifndef H5_NO_STD
-    using std::cerr;
-    using std::endl;
-#endif  // H5_NO_STD
-#endif
-
 #include "H5Cpp.h"      // C++ API header file
+using namespace H5;
 
-#ifndef H5_NO_NAMESPACE
-    using namespace H5;
-#endif
-
+#include "h5test.h"
 #include "h5cpputil.h"  // C++ utilility header file
 
 const H5std_string    FILENAME("tarray.h5");
@@ -478,9 +470,7 @@ static void test_array_info()
 **  test_array(): Main datatypes testing routine.
 **
 ****************************************************************/
-#ifdef __cplusplus
 extern "C"
-#endif
 void test_array()
 {
     // Output message about test being performed
@@ -512,9 +502,7 @@ void test_array()
  *
  *-------------------------------------------------------------------------
  */
-#ifdef __cplusplus
 extern "C"
-#endif
 void cleanup_array()
 {
     HDremove(FILENAME.c_str());

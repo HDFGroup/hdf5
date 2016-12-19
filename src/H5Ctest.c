@@ -97,6 +97,7 @@ static int
 H5C__verify_cork_tag_test_cb(H5C_cache_entry_t *entry, void *_ctx)
 {
     H5C_tag_iter_vct_ctx_t *ctx = (H5C_tag_iter_vct_ctx_t *)_ctx; /* Get pointer to iterator context */
+    hbool_t is_corked;                  /* Corked status for entry */
     int ret_value = H5_ITER_CONT;       /* Return value */
 
     /* Function enter macro */
@@ -106,8 +107,11 @@ H5C__verify_cork_tag_test_cb(H5C_cache_entry_t *entry, void *_ctx)
     HDassert(entry);
     HDassert(ctx);
 
+    /* Retrieve corked status for entry */
+    is_corked = entry->tag_info ? entry->tag_info->corked : FALSE;
+
     /* Verify corked status for entry */
-    if(entry->is_corked != ctx->status)
+    if(is_corked != ctx->status)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, H5_ITER_ERROR, "bad cork status")
 
 done:

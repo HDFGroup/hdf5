@@ -20,13 +20,15 @@
 #ifndef __H5DSCreatPropList_H
 #define __H5DSCreatPropList_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
+
+class DataType;
 
 /*! \class DSetCreatPropList
-    \brief Class DSetCreatPropList represents the dataset creation property
-    list.
+    \brief Class DSetCreatPropList inherits from ObjCreatPropList and provides
+    wrappers for the HDF5 dataset creation property functions.
+
+    Inheritance: ObjCreatPropList -> PropList -> IdComponent
 */
 class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
    public:
@@ -143,7 +145,5 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5DSCreatPropList_H

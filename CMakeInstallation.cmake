@@ -31,6 +31,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
       EXPORT ${HDF5_EXPORTED_TARGETS}
       DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
       FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+      NAMESPACE ${HDF5_PACKAGE}::
       COMPONENT configinstall
   )
 endif (NOT HDF5_EXTERNALLY_CONFIGURED)
@@ -40,8 +41,9 @@ endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
   export (
-      TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES}
+      TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
       FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+      NAMESPACE ${HDF5_PACKAGE}::
   )
 endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 
@@ -73,21 +75,6 @@ configure_package_config_file (
     PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
     INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
 )
-
-#-----------------------------------------------------------------------------
-# Configure the FindHDF5.cmake file for the install directory
-#-----------------------------------------------------------------------------
-if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  configure_file (
-      ${HDF_RESOURCES_DIR}/FindHDF5.cmake.in
-      ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindHDF5${HDF_PACKAGE_EXT}.cmake @ONLY
-  )
-  install (
-      FILES ${HDF5_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindHDF5${HDF_PACKAGE_EXT}.cmake
-      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
-      COMPONENT configinstall
-  )
-endif (NOT HDF5_EXTERNALLY_CONFIGURED)
 
 #-----------------------------------------------------------------------------
 # Configure the hdf5-config.cmake file for the install directory
@@ -383,6 +370,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED AND NOT HDF5_NO_PACKAGES)
       set(CPACK_WIX_PATCH_FILE "${HDF_RESOURCES_DIR}/patch.xml")
     endif (BUILD_SHARED_LIBS)
   elseif (APPLE)
+    list (APPEND CPACK_GENERATOR "STGZ")
     list (APPEND CPACK_GENERATOR "DragNDrop")
     set (CPACK_COMPONENTS_ALL_IN_ONE_PACKAGE ON)
     set (CPACK_PACKAGING_INSTALL_PREFIX "/${CPACK_PACKAGE_INSTALL_DIRECTORY}")

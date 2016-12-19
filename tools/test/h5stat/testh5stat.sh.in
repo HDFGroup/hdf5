@@ -1,0 +1,318 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# Copyright by the Board of Trustees of the University of Illinois.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+#
+# Tests for the h5stat tool
+#
+# Modifcations:
+# 	Vailin Choi; July 2013
+# 	Add tests for -l, -m, -a options
+#
+
+srcdir=@srcdir@
+
+# Determine which filters are available
+USE_FILTER_SZIP="@USE_FILTER_SZIP@"
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+
+TESTNAME=h5stat
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+STAT=../../src/h5stat/h5stat               # The tool name
+STAT_BIN=`pwd`/$STAT    # The path of the tool binary
+
+RM='rm -rf'
+CMP='cmp -s'
+DIFF='diff -c'
+CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+
+nerrors=0
+verbose=yes
+
+# source dirs
+SRC_TOOLS="$srcdir/../.."
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
+# testfiles source dirs for tools
+SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
+SRC_H5COPY_TESTFILES="$SRC_TOOLS/test/h5copy/testfiles"
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/test/h5repack/testfiles"
+SRC_H5JAM_TESTFILES="$SRC_TOOLS/test/h5jam/testfiles"
+SRC_H5STAT_TESTFILES="$SRC_TOOLS/test/h5stat/testfiles"
+SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/test/h5import/testfiles"
+
+TESTDIR=./testfiles
+test -d $TESTDIR || mkdir $TESTDIR
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_HDF5_TEST_FILES="
+$SRC_H5STAT_TESTFILES/h5stat_filters.h5
+$SRC_H5STAT_TESTFILES/h5stat_tsohm.h5
+$SRC_H5STAT_TESTFILES/h5stat_newgrat.h5
+$SRC_H5STAT_TESTFILES/h5stat_idx.h5
+$SRC_H5STAT_TESTFILES/h5stat_threshold.h5
+"
+
+LIST_OTHER_TEST_FILES="
+$SRC_H5STAT_TESTFILES/h5stat_help1.ddl
+$SRC_H5STAT_TESTFILES/h5stat_help2.ddl
+$SRC_H5STAT_TESTFILES/h5stat_notexist.ddl
+$SRC_H5STAT_TESTFILES/h5stat_nofile.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-file.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-F.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-d.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-g.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-dT.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-UD.ddl
+$SRC_H5STAT_TESTFILES/h5stat_filters-UT.ddl
+$SRC_H5STAT_TESTFILES/h5stat_tsohm.ddl
+$SRC_H5STAT_TESTFILES/h5stat_newgrat.ddl
+$SRC_H5STAT_TESTFILES/h5stat_newgrat-UG.ddl
+$SRC_H5STAT_TESTFILES/h5stat_newgrat-UA.ddl
+$SRC_H5STAT_TESTFILES/h5stat_idx.ddl
+$SRC_H5STAT_TESTFILES/h5stat_err1_links.ddl
+$SRC_H5STAT_TESTFILES/h5stat_links1.ddl
+$SRC_H5STAT_TESTFILES/h5stat_links2.ddl
+$SRC_H5STAT_TESTFILES/h5stat_links3.ddl
+$SRC_H5STAT_TESTFILES/h5stat_links4.ddl
+$SRC_H5STAT_TESTFILES/h5stat_links5.ddl
+$SRC_H5STAT_TESTFILES/h5stat_err1_dims.ddl
+$SRC_H5STAT_TESTFILES/h5stat_dims1.ddl
+$SRC_H5STAT_TESTFILES/h5stat_dims2.ddl
+$SRC_H5STAT_TESTFILES/h5stat_err1_numattrs.ddl
+$SRC_H5STAT_TESTFILES/h5stat_err2_numattrs.ddl
+$SRC_H5STAT_TESTFILES/h5stat_numattrs1.ddl
+$SRC_H5STAT_TESTFILES/h5stat_numattrs2.ddl
+$SRC_H5STAT_TESTFILES/h5stat_numattrs3.ddl
+$SRC_H5STAT_TESTFILES/h5stat_numattrs4.ddl
+"
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+    	        $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+                
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=$SRC_H5STAT_TESTFILES
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $TESTDIR
+    fi
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Source in the output filter function definitions.
+. $srcdir/../../../bin/output_filter.sh
+
+# Run a test and print PASS or *FAIL*.  If a test fails then increment
+# the `nerrors' global variable and (if $verbose is set) display the
+# difference between the actual output and the expected output. The
+# expected output is given as the first argument to this function and
+# the actual output file is calculated by replacing the `.ddl' with
+# `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
+# non-zero value.
+#
+TOOLTEST() {
+   expect="$TESTDIR/$1"
+   actual="$TESTDIR/`basename $1 .ddl`.out"
+   actual_err="$TESTDIR/`basename $1 .ddl`.err"
+   actual_sav=${actual}-sav
+   actual_err_sav=${actual_err}-sav
+   shift
+
+   # Run test.
+   TESTING $STAT $@
+   (
+      cd $TESTDIR
+      $RUNSERIAL $STAT_BIN $@
+   ) >$actual 2>$actual_err
+
+   # save actual and actual_err in case they are needed later.
+   cp $actual $actual_sav
+   STDOUT_FILTER $actual
+   cp $actual_err $actual_err_sav
+   STDERR_FILTER $actual_err
+   cat $actual_err >> $actual
+
+   if [ ! -f $expect ]; then
+    # Create the expect file if it doesn't yet exist.
+    echo " CREATED"
+    cp $actual $expect
+   elif $CMP $expect $actual; then
+      echo " PASSED"
+   else
+      echo "*FAILED*"
+      echo "    Expected result (*.ddl) differs from actual result (*.out)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+   fi
+
+   # Clean up output file
+   if test -z "$HDF5_NOCLEANUP"; then
+      rm -f $actual $actual_err $actual_sav $actual_err_sav
+   fi
+}
+
+
+# Print a "SKIP" message
+SKIP() {
+	 TESTING $STAT $@
+	  echo  " -SKIP-"
+}
+  
+
+
+##############################################################################
+##############################################################################
+###			  T H E   T E S T S                                ###
+##############################################################################
+##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
+
+# Test for help flag
+TOOLTEST h5stat_help1.ddl -h
+TOOLTEST h5stat_help2.ddl --help
+# Test when h5stat a file that does not exist
+TOOLTEST h5stat_notexist.ddl notexist.h5
+TOOLTEST h5stat_nofile.ddl ''
+
+# Test file with groups, compressed datasets, user-applied fileters, etc.
+# h5stat_filters.h5 is a copy of ../../testfiles/tfilters.h5 as of release 1.8.0-alpha4
+TOOLTEST h5stat_filters.ddl h5stat_filters.h5
+TOOLTEST h5stat_filters-file.ddl  -f   h5stat_filters.h5
+TOOLTEST h5stat_filters-F.ddl  -F   h5stat_filters.h5
+TOOLTEST h5stat_filters-d.ddl  -d   h5stat_filters.h5
+TOOLTEST h5stat_filters-g.ddl  -g   h5stat_filters.h5
+TOOLTEST h5stat_filters-dT.ddl -dT  h5stat_filters.h5
+TOOLTEST h5stat_filters-UD.ddl -D h5stat_filters.h5
+TOOLTEST h5stat_filters-UT.ddl -T h5stat_filters.h5
+#
+# h5stat_tsohm.h5 is a copy of ../../../test/tsohm.h5 generated by tsohm.c 
+# as of release 1.8.7-snap0 (on a 64-bit machine)
+TOOLTEST h5stat_tsohm.ddl h5stat_tsohm.h5
+# h5stat_newgrat.h5 is generated by h5stat_gentest.c
+TOOLTEST h5stat_newgrat.ddl h5stat_newgrat.h5
+TOOLTEST h5stat_newgrat-UG.ddl -G h5stat_newgrat.h5
+TOOLTEST h5stat_newgrat-UA.ddl -A h5stat_newgrat.h5
+# h5stat_idx.h5 is generated by h5stat_gentest.c
+TOOLTEST h5stat_idx.ddl h5stat_idx.h5
+#
+# Tests for -l (--links) option on h5stat_threshold.h5: 
+# 	-l 0 (incorrect threshold value)
+# 	-g -l 8
+# 	--links=8
+# 	--links=20 -g
+TOOLTEST h5stat_err1_links.ddl -l 0 h5stat_threshold.h5
+TOOLTEST h5stat_links1.ddl -g -l 8 h5stat_threshold.h5
+TOOLTEST h5stat_links2.ddl --links=8 h5stat_threshold.h5
+TOOLTEST h5stat_links3.ddl --links=20 -g h5stat_threshold.h5
+#
+# Tests for -l (--links) option on h5stat_newgrat.h5: 
+# 	-g
+# 	-g -l 40000
+TOOLTEST h5stat_links4.ddl -g h5stat_newgrat.h5
+TOOLTEST h5stat_links5.ddl -g -l 40000 h5stat_newgrat.h5
+#
+# Tests for -m (--dims) option on h5stat_threshold.h5
+# 	-d --dims=-1 (incorrect threshold value)
+# 	-gd -m 5
+# 	-d --di=15
+TOOLTEST h5stat_err1_dims.ddl -d --dims=-1 h5stat_threshold.h5
+TOOLTEST h5stat_dims1.ddl -gd -m 5 h5stat_threshold.h5
+TOOLTEST h5stat_dims2.ddl -d --di=15 h5stat_threshold.h5
+#
+# Tests for -a option on h5stat_threshold.h5
+# 	-a -2 (incorrect threshold value)
+#	--numattrs (without threshold value)
+#	-AS -a 10
+#	-a 1
+#	-A --numattrs=25
+TOOLTEST h5stat_err1_numattrs.ddl -a -2 h5stat_threshold.h5
+TOOLTEST h5stat_err2_numattrs.ddl --numattrs h5stat_threshold.h5
+TOOLTEST h5stat_numattrs1.ddl -AS -a 10 h5stat_threshold.h5
+TOOLTEST h5stat_numattrs2.ddl -a 1 h5stat_threshold.h5
+TOOLTEST h5stat_numattrs3.ddl -A --numattrs=25 h5stat_threshold.h5
+#
+# Tests for -a option on h5stat_newgrat.h5
+#	-A -a 100
+TOOLTEST h5stat_numattrs4.ddl -A -a 100 h5stat_newgrat.h5
+#
+
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
+
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
+fi
+

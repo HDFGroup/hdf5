@@ -20,9 +20,7 @@
 #ifndef __H5DataType_H
 #define __H5DataType_H
 
-#ifndef H5_NO_NAMESPACE
 namespace H5 {
-#endif
 
 /*! \class DataType
     \brief Class DataType provides generic operations on HDF5 datatypes.
@@ -30,6 +28,8 @@ namespace H5 {
     DataType inherits from H5Object because a named datatype is an HDF5
     object and is a base class of ArrayType, AtomType, CompType, EnumType,
     and VarLenType.
+
+    Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 */
 class H5_DLLCPP DataType : public H5Object {
    public:
@@ -144,7 +144,5 @@ class H5_DLLCPP DataType : public H5Object {
 
 	void p_commit(hid_t loc_id, const char* name);
 };
-#ifndef H5_NO_NAMESPACE
 }
-#endif
 #endif // __H5DataType_H

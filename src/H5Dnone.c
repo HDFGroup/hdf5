@@ -82,6 +82,7 @@ static herr_t H5D__none_idx_dump(const H5O_storage_chunk_t *storage, FILE *strea
 
 /* Non Index chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
+    FALSE,                      	/* Non-indexed chunking don't current support SWMR access */
     NULL,				/* init */
     H5D__none_idx_create,		/* create */
     H5D__none_idx_is_space_alloc, 	/* is_space_alloc */

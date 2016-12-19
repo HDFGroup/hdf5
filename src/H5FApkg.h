@@ -144,6 +144,28 @@ typedef struct H5FA_hdr_t {
 
     /* Client information (not stored) */
     void *cb_ctx;                       /* Callback context */
+
+    /* SWMR / Flush dependency information (not stored) */
+    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access    */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all array entries */
+    void *parent;		        /* Pointer to 'top' proxy flush dependency
+                                         * parent, if it exists, otherwise NULL.
+                                         * If the fixed array is being used
+                                         * to index a chunked dataset and the
+                                         * dataset metadata is modified by a
+                                         * SWMR writer, this field will be set
+                                         * equal to the object header proxy
+                                         * that is the flush dependency parent
+                                         * of the fixed array header.
+ 					 *
+ 					 * The field is used to avoid duplicate
+					 * setups of the flush dependency 
+					 * relationship, and to allow the 
+					 * fixed array header to destroy
+					 * the flush dependency on receipt of 
+					 * an eviction notification from the
+					 * metadata cache.
+					 */
 } H5FA_hdr_t;
 
 /* The fixed array data block information */
@@ -157,6 +179,9 @@ typedef struct H5FA_dblock_t {
 
     /* Internal array information (not stored) */
     H5FA_hdr_t    *hdr;            /* Shared array header info                              */
+
+    /* SWMR / Flush dependency information (not stored) */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all array entries */
 
     /* Computed/cached values (not stored) */
     haddr_t     addr;               /* Address of this data block on disk                   */
@@ -180,6 +205,9 @@ typedef struct H5FA_dbk_page_t {
 
     /* Internal array information (not stored) */
     H5FA_hdr_t    *hdr;         /* Shared array header info                     */
+
+    /* SWMR / Flush dependency information (not stored) */
+    H5AC_proxy_entry_t *top_proxy;      /* 'Top' proxy cache entry for all array entries */
 
     /* Computed/cached values (not stored) */
     haddr_t     addr;           /* Address of this data block page on disk      */
@@ -240,6 +268,12 @@ H5_DLLVAR const H5FA_class_t *const H5FA_client_class_g[H5FA_NUM_CLS_ID];
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+
+/* Generic routines */
+H5_DLL herr_t H5FA__create_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5FA__destroy_flush_depend(H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
 
 /* Header routines */
 H5_DLL H5FA_hdr_t *H5FA__hdr_alloc(H5F_t *f);
