@@ -25,6 +25,8 @@ namespace H5 {
 	class PropList;
 	class FileCreatPropList;
 	class FileAccPropList;
+	 /* class LinkAccPropList;
+ */ 
 	class DSetCreatPropList;
 	class DSetMemXferPropList;
 	class DTypePropList;

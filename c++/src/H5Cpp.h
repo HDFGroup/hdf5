@@ -27,6 +27,8 @@
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
+ /* #include "H5LaccProp.h"
+ */ 
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5AbstractDs.h"
@@ -42,6 +44,7 @@
 #include "H5ArrayType.h"
 #include "H5VarLenType.h"
 #include "H5DataSet.h"
+#include "H5CommonFG.h"
 #include "H5Group.h"
 #include "H5File.h"
 #include "H5Library.h"

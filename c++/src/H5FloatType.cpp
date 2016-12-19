@@ -91,6 +91,42 @@ FloatType::FloatType( const DataSet& dataset ) : AtomType()
 }
 
 //--------------------------------------------------------------------------
+// Function:	FloatType overloaded constructor
+///\brief	Creates an FloatType instance by opening an HDF5 float datatype
+///		given its name, provided as a C character string.
+///\param	dtype_name - IN: Float type name
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Dec 2016
+// Description
+//		In 1.10.1, this constructor was introduced and will replace the
+//		existing function CommonFG::openFloatType(const char*)
+//		to improve usability.
+//		-BMR, Dec 2016
+//--------------------------------------------------------------------------
+FloatType::FloatType(const H5Location& loc, const char *dtype_name) : AtomType()
+{
+    id = p_opentype(loc, dtype_name);
+}
+
+//--------------------------------------------------------------------------
+// Function:	FloatType overloaded constructor
+///\brief	Creates an FloatType instance by opening an HDF5 float datatype
+///		given its name, provided as an \c H5std_string.
+///\param	dtype_name - IN: Float type name
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Dec 2016
+// Description
+//		In 1.10.1, this constructor was introduced and will replace the
+//		existing function CommonFG::openFloatType(const H5std_string&)
+//		to improve usability.
+//		-BMR, Dec 2016
+//--------------------------------------------------------------------------
+FloatType::FloatType(const H5Location& loc, const H5std_string& dtype_name) : AtomType()
+{
+   id = p_opentype(loc, dtype_name.c_str());
+}
+
+//--------------------------------------------------------------------------
 // Function:	FloatType::getFields
 ///\brief	Retrieves floating point datatype bit field information.
 ///\param	spos  - OUT: Retrieved floating-point sign bit

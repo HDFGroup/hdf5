@@ -15,6 +15,7 @@
 
 #include <string>
 
+#include "H5private.h"			// for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -31,7 +32,6 @@
 #include "H5AtomType.h"
 #include "H5IntType.h"
 #include "H5EnumType.h"
-#include "H5private.h"			// for HDmemset
 
 namespace H5 {
 
@@ -106,6 +106,42 @@ EnumType::EnumType( const IntType& data_type ) : DataType()
    {
       throw DataSetIException("EnumType constructor", "H5Tenum_create failed");
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	EnumType overloaded constructor
+///\brief	Creates an EnumType instance by opening an HDF5 enum datatype
+///		given its name, provided as a C character string.
+///\param	dtype_name - IN: Enum datatype name
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Dec 2016
+// Description
+//		In 1.10.1, this constructor was introduced and will replace the
+//		existing function CommonFG::openEnumType(const char*) to
+//		improve usability.
+//		-BMR, Dec 2016
+//--------------------------------------------------------------------------
+EnumType::EnumType(const H5Location& loc, const char *dtype_name) : DataType()
+{
+   id = p_opentype(loc, dtype_name);
+}
+
+//--------------------------------------------------------------------------
+// Function:	EnumType overloaded constructor
+///\brief	Creates an EnumType instance by opening an HDF5 enum datatype
+///		given its name, provided as an \c H5std_string.
+///\param	dtype_name - IN: Enum datatype name
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Dec 2016
+// Description
+//		In 1.10.1, this constructor was introduced and will replace the
+//		existing function CommonFG::openEnumType(const H5std_string&)
+//		to improve usability.
+//		-BMR, Dec 2016
+//--------------------------------------------------------------------------
+EnumType::EnumType(const H5Location& loc, const H5std_string& dtype_name) : DataType()
+{
+   id = p_opentype(loc, dtype_name.c_str());
 }
 
 //--------------------------------------------------------------------------

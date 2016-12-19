@@ -120,6 +120,14 @@ class H5_DLLCPP DataTypeIException : public Exception {
 	virtual ~DataTypeIException() throw();
 };
 
+ /* class H5_DLLCPP ObjHeaderIException : public Exception {
+   public:
+	ObjHeaderIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);
+	ObjHeaderIException();
+	virtual ~ObjHeaderIException() throw();
+};
+ */ 
+
 class H5_DLLCPP PropListIException : public Exception {
    public:
 	PropListIException(const H5std_string& func_name, const H5std_string& message = DEFAULT_MSG);

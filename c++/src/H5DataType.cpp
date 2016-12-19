@@ -23,13 +23,13 @@
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
+#include "H5DataSpace.h"
 #include "H5PropList.h"
 #include "H5FaccProp.h"
 #include "H5FcreatProp.h"
 #include "H5OcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5DxferProp.h"
-#include "H5DataSpace.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -38,8 +38,6 @@
 #include "H5private.h"
 #include "H5AbstractDs.h"
 #include "H5DataSet.h"
-#include "H5Group.h"
-#include "H5File.h"
 #include "H5Attribute.h"
 
 namespace H5 {
@@ -122,10 +120,11 @@ DataType::DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type, 
 //	Jul, 2008
 //		Added for application convenience.
 //--------------------------------------------------------------------------
-DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID)
+ /* DataType::DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist) : H5Object(), id(H5I_INVALID_HID)
 {
     id = H5Location::p_dereference(attr.getId(), ref, ref_type, plist, "constructor - by dereference");
 }
+ */ 
 
 //--------------------------------------------------------------------------
 // Function:	DataType copy constructor
@@ -152,10 +151,46 @@ DataType::DataType(const DataType& original) : H5Object(), id(original.id)
 //--------------------------------------------------------------------------
 DataType::DataType(const PredType& pred_type) : H5Object()
 {
-    // call C routine to copy the datatype
+    // Call C routine to copy the datatype
     id = H5Tcopy( pred_type.getId() );
     if (id < 0)
 	throw DataTypeIException("DataType constructor", "H5Tcopy failed");
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType overloaded constructor
+///\brief       Creates a DataType instance by opening an HDF5 datatype given
+///		its name as a char*.
+///\param       dtype_name - IN: Datatype name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Dec 2016
+// Description
+//		In 1.10.1, this constructor was introduced and will replace the
+//		existing function CommonFG::openDataType(const char*) to
+//		improve usability.
+//		-BMR, Dec 2016
+//--------------------------------------------------------------------------
+DataType::DataType(const H5Location& loc, const char *dtype_name) : H5Object()
+{
+    id = p_opentype(loc, dtype_name);
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType overloaded constructor
+///\brief	Creates a DataType instance by opening an HDF5 datatype given
+///		its name as an \c H5std_string.
+///\param       dtype_name - IN: Datatype name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Dec 2016
+// Description
+//		In 1.10.1, this constructor was introduced and will replace the
+//		existing function CommonFG::openDataType(const H5std_string&) to
+//		improve usability.
+//		-BMR, Dec 2016
+//--------------------------------------------------------------------------
+DataType::DataType(const H5Location& loc, const H5std_string& dtype_name) : H5Object()
+{
+    id = p_opentype(loc, dtype_name.c_str());
 }
 
 //--------------------------------------------------------------------------
@@ -261,6 +296,27 @@ bool DataType::operator==(const DataType& compared_type ) const
    {
       throw DataTypeIException(inMemFunc("operator=="), "H5Tequal returns negative value");
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataType::p_opentype (private)
+///\brief       Opens an HDF5 datatype given its name
+///\param       dtype_name - IN: Datatype name
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - Dec 2016
+// Description
+//		This function was introduced in 1.10.1 to be used by the new
+//		XxxType constructors that were introduced to replace the
+//		existing functions CommonFG::openXxxType(), which is awkward
+//		to use.  -BMR, Dec 2016
+//--------------------------------------------------------------------------
+hid_t DataType::p_opentype(const H5Location& loc, const char *dtype_name) const
+{
+    // Call C function to open the named datatype at this location
+    hid_t ret_value = H5Topen2(loc.getId(), dtype_name, H5P_DEFAULT);
+    if (ret_value < 0)
+	throw DataTypeIException("DataType constructor", "H5Topen2 failed");
+    return(ret_value);
 }
 
 //--------------------------------------------------------------------------

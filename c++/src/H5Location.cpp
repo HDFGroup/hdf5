@@ -15,9 +15,11 @@
 
 #include <string>
 
+#include "H5private.h"		// for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
+#include "H5DataSpace.h"
 #include "H5PropList.h"
 #include "H5FaccProp.h"
 #include "H5FcreatProp.h"
@@ -26,14 +28,12 @@
 #include "H5DxferProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
+#include "H5DataType.h"
 #include "H5AbstractDs.h"
-#include "H5DataSpace.h"
 #include "H5DataSet.h"
-#include "H5Attribute.h"
+#include "H5CommonFG.h"
 #include "H5Group.h"
 #include "H5File.h"
-#include "H5Alltypes.h"
-#include "H5private.h"		// for HDmemset
 
 namespace H5 {
 
@@ -75,6 +75,45 @@ H5Location::H5Location() : IdComponent() {}
 // H5Location::H5Location(const H5Location& original) : IdComponent() {}
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
+
+ /* //--------------------------------------------------------------------------
+// Function:	H5Location::exists
+///\brief	Checks if a link of a given name exists in a location
+///\param	name - IN: Searched name
+///\param	lapl - IN: Link access property list
+///\exception	H5::LocationException
+// Programmer	Binh-Minh Ribler - Nov, 2016
+// Modification
+//--------------------------------------------------------------------------
+bool H5Location::exists(const char* name, const LinkAccPropList& lapl) const
+{
+    htri_t ret_value = H5Lexists(getId(), name, lapl.getId());
+    if (ret_value > 0)
+	return true;
+    else if (ret_value == 0)
+	return false;
+    else // Raise exception when H5Lexists returns a negative value
+    {
+	throwException("exists", "H5Lexists failed");
+    }
+    return false; // warning: control reaches end of non-void function
+}
+ */ 
+
+ /* //--------------------------------------------------------------------------
+// Function:	H5Location::exists
+///\brief	Checks if a link of a given name exists in a location
+///\param	name - IN: Searched name
+///\param	lapl - IN: Link access property list
+///\exception	H5::LocationException
+// Programmer	Binh-Minh Ribler - Dec, 2016
+// Modification
+//--------------------------------------------------------------------------
+bool H5Location::exists(const H5std_string& name, const LinkAccPropList& lapl) const
+{
+    return(exists(name.c_str(), lapl));
+}
+ */ 
 
 //--------------------------------------------------------------------------
 // Function:	H5Location::flush
@@ -498,10 +537,11 @@ void H5Location::dereference(const H5Location& loc, const void* ref, H5R_type_t 
 //	May, 2008
 //		Corrected missing parameters. - BMR
 //--------------------------------------------------------------------------
-void H5Location::dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist)
+ /* void H5Location::dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type, const PropList& plist)
 {
    p_setId(p_dereference(attr.getId(), ref, ref_type, plist, "dereference"));
 }
+ */ 
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
@@ -1206,294 +1246,6 @@ void H5Location::unmount( const H5std_string& name ) const
    unmount( name.c_str() );
 }
 
-//--------------------------------------------------------------------------
-// Function:	H5Location::openDataType
-///\brief	Opens the named generic datatype at this location.
-///\param	name  - IN: Name of the datatype to open
-///\return	DataType instance
-///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-DataType H5Location::openDataType( const char* name ) const
-{
-   // Call C function H5Topen2 to open the named datatype in this group,
-   // given either the file or group id
-   hid_t type_id = H5Topen2(getId(), name, H5P_DEFAULT);
-
-   // If the datatype's opening failed, throw an exception
-   if( type_id < 0 )
-      throwException("openDataType", "H5Topen2 failed");
-
-   // No failure, create and return the DataType object
-   DataType data_type;
-   f_DataType_setId(&data_type, type_id);
-   return(data_type);
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openDataType
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-DataType H5Location::openDataType( const H5std_string& name ) const
-{
-   return( openDataType( name.c_str()) );
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openArrayType
-///\brief	Opens the named array datatype at this location.
-///\param	name  - IN: Name of the array datatype to open
-///\return	ArrayType instance
-///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - Jul, 2005
-//--------------------------------------------------------------------------
-ArrayType H5Location::openArrayType( const char* name ) const
-{
-   // Call C function H5Topen2 to open the named datatype in this group,
-   // given either the file or group id
-   hid_t type_id = H5Topen2(getId(), name, H5P_DEFAULT);
-
-   // If the datatype's opening failed, throw an exception
-   if( type_id < 0 )
-      throwException("openArrayType", "H5Topen2 failed");
-
-   // No failure, create and return the ArrayType object
-   ArrayType array_type;
-   f_DataType_setId(&array_type, type_id);
-   return(array_type);
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openArrayType
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - Jul, 2005
-//--------------------------------------------------------------------------
-ArrayType H5Location::openArrayType( const H5std_string& name ) const
-{
-   return( openArrayType( name.c_str()) );
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openCompType
-///\brief	Opens the named compound datatype at this location.
-///\param	name  - IN: Name of the compound datatype to open
-///\return	CompType instance
-///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-CompType H5Location::openCompType( const char* name ) const
-{
-   // Call C function H5Topen2 to open the named datatype in this group,
-   // given either the file or group id
-   hid_t type_id = H5Topen2(getId(), name, H5P_DEFAULT);
-
-   // If the datatype's opening failed, throw an exception
-   if( type_id < 0 )
-      throwException("openCompType", "H5Topen2 failed");
-
-   // No failure, create and return the CompType object
-   CompType comp_type;
-   f_DataType_setId(&comp_type, type_id);
-   return(comp_type);
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openCompType
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-CompType H5Location::openCompType( const H5std_string& name ) const
-{
-   return( openCompType( name.c_str()) );
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openEnumType
-///\brief	Opens the named enumeration datatype at this location.
-///\param	name  - IN: Name of the enumeration datatype to open
-///\return	EnumType instance
-///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-EnumType H5Location::openEnumType( const char* name ) const
-{
-   // Call C function H5Topen2 to open the named datatype in this group,
-   // given either the file or group id
-   hid_t type_id = H5Topen2(getId(), name, H5P_DEFAULT);
-
-   // If the datatype's opening failed, throw an exception
-   if( type_id < 0 )
-      throwException("openEnumType", "H5Topen2 failed");
-
-   // No failure, create and return the EnumType object
-   EnumType enum_type;
-   f_DataType_setId(&enum_type, type_id);
-   return(enum_type);
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openEnumType
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-EnumType H5Location::openEnumType( const H5std_string& name ) const
-{
-   return( openEnumType( name.c_str()) );
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openIntType
-///\brief	Opens the named integer datatype at this location.
-///\param	name  - IN: Name of the integer datatype to open
-///\return	IntType instance
-///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-IntType H5Location::openIntType( const char* name ) const
-{
-   // Call C function H5Topen2 to open the named datatype in this group,
-   // given either the file or group id
-   hid_t type_id = H5Topen2(getId(), name, H5P_DEFAULT);
-
-   // If the datatype's opening failed, throw an exception
-   if( type_id < 0 )
-      throwException("openIntType", "H5Topen2 failed");
-
-   // No failure, create and return the IntType object
-   IntType int_type;
-   f_DataType_setId(&int_type, type_id);
-   return(int_type);
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openIntType
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-IntType H5Location::openIntType( const H5std_string& name ) const
-{
-   return( openIntType( name.c_str()) );
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openFloatType
-///\brief	Opens the named floating-point datatype at this location.
-///\param	name  - IN: Name of the floating-point datatype to open
-///\return	FloatType instance
-///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-FloatType H5Location::openFloatType( const char* name ) const
-{
-   // Call C function H5Topen2 to open the named datatype in this group,
-   // given either the file or group id
-   hid_t type_id = H5Topen2(getId(), name, H5P_DEFAULT);
-
-   // If the datatype's opening failed, throw an exception
-   if( type_id < 0 )
-      throwException("openFloatType", "H5Topen2 failed");
-
-   // No failure, create and return the FloatType object
-   FloatType float_type;
-   f_DataType_setId(&float_type, type_id);
-   return(float_type);
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openFloatType
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-FloatType H5Location::openFloatType( const H5std_string& name ) const
-{
-   return( openFloatType( name.c_str()) );
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openStrType
-///\brief	Opens the named string datatype at this location.
-///\param	name  - IN: Name of the string datatype to open
-///\return	StrType instance
-///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-StrType H5Location::openStrType( const char* name ) const
-{
-   // Call C function H5Topen2 to open the named datatype in this group,
-   // given either the file or group id
-   hid_t type_id = H5Topen2(getId(), name, H5P_DEFAULT);
-
-   // If the datatype's opening failed, throw an exception
-   if( type_id < 0 )
-      throwException("openStrType", "H5Topen2 failed");
-
-   // No failure, create and return the StrType object
-   StrType str_type;
-   f_DataType_setId(&str_type, type_id);
-   return(str_type);
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openStrType
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-StrType H5Location::openStrType( const H5std_string& name ) const
-{
-   return( openStrType( name.c_str()) );
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openVarLenType
-///\brief	Opens the named variable length datatype at this location.
-///\param	name  - IN: Name of the variable length datatype to open
-///\return	VarLenType instance
-///\exception	H5::FileIException or H5::GroupIException
-// Programmer	Binh-Minh Ribler - Jul, 2005
-//--------------------------------------------------------------------------
-VarLenType H5Location::openVarLenType( const char* name ) const
-{
-   // Call C function H5Topen2 to open the named datatype in this group,
-   // given either the file or group id
-   hid_t type_id = H5Topen2(getId(), name, H5P_DEFAULT);
-
-   // If the datatype's opening failed, throw an exception
-   if( type_id < 0 )
-      throwException("openVarLenType", "H5Topen2 failed");
-
-   // No failure, create and return the VarLenType object
-   VarLenType varlen_type;
-   f_DataType_setId(&varlen_type, type_id);
-   return(varlen_type);
-}
-
-//--------------------------------------------------------------------------
-// Function:	H5Location::openVarLenType
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes an
-///		\c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - Jul, 2005
-//--------------------------------------------------------------------------
-VarLenType H5Location::openVarLenType( const H5std_string& name ) const
-{
-   return( openVarLenType( name.c_str()) );
-}
-
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
 // Function:	H5Location::iterateElems
@@ -1899,51 +1651,20 @@ void H5Location::throwException(const H5std_string& func_name, const H5std_strin
 }
 
 //--------------------------------------------------------------------------
-// Function:    f_DataType_setId - friend
-// Purpose:     This function is friend to class H5::DataType so that it
-//              can set DataType::id in order to work around a problem
-//              described in the JIRA issue HDFFV-7947.
-//              Applications shouldn't need to use it.
-// param        dtype   - IN/OUT: DataType object to be changed
-// param        new_id - IN: New id to set
-// Programmer   Binh-Minh Ribler - 2015
+// Function:	f_DataSet_setId - friend
+// Modification:
+//		Moved to H5CommonFG.cpp after the rearrangement of classes
+//		-BMR, Dec 2016
 //--------------------------------------------------------------------------
-void f_DataType_setId(DataType* dtype, hid_t new_id)
-{
-    dtype->p_setId(new_id);
-}
-
-//--------------------------------------------------------------------------
-// Function:    f_DataSet_setId - friend
-// Purpose:     This function is friend to class H5::DataSet so that it
-//              can set DataSet::id in order to work around a problem
-//              described in the JIRA issue HDFFV-7947.
-//              Applications shouldn't need to use it.
-// param        dset   - IN/OUT: DataSet object to be changed
-// param        new_id - IN: New id to set
-// Programmer   Binh-Minh Ribler - 2015
-//--------------------------------------------------------------------------
-void f_DataSet_setId(DataSet* dset, hid_t new_id)
-{
-    dset->p_setId(new_id);
-}
 
 // end of From H5CommonFG.cpp
 
 //--------------------------------------------------------------------------
 // Function:	f_Attribute_setId - friend
-// Purpose:	This function is friend to class H5::Attribute so that it
-//		can set Attribute::id in order to work around a problem
-//		described in the JIRA issue HDFFV-7947.
-//		Applications shouldn't need to use it.
-// param	attr   - IN/OUT: Attribute object to be changed
-// param	new_id - IN: New id to set
-// Programmer	Binh-Minh Ribler - 2015
+// Modification:
+//		Moved to H5Object.cpp after the rearrangement of classes
+//		-BMR, Dec 2016
 //--------------------------------------------------------------------------
-void f_Attribute_setId(Attribute* attr, hid_t new_id)
-{
-    attr->p_setId(new_id);
-}
 
 //--------------------------------------------------------------------------
 // Function:	f_DataSpace_setId - friend

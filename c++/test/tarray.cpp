@@ -34,6 +34,7 @@ using namespace H5;
 #include "h5cpputil.h"  // C++ utilility header file
 
 const H5std_string    FILENAME("tarray.h5");
+const H5std_string    ARRAYTYPE_NAME("/Array type 1");
 const int SPACE1_RANK = 1;
 const hsize_t SPACE1_DIM1 = 4;
 const int ARRAY1_RANK = 1;
@@ -130,9 +131,22 @@ static void test_array_compound_array()
 	// Write dataset to disk
 	dataset.write(wdata, arrtype);
 
+	// Test opening ArrayType with opening constructor (Dec 2016)
+
+	// Commit the arrtype to give it a name
+	arrtype.commit(file1, ARRAYTYPE_NAME);
+
+	// Close it, then re-open with the opening constructor
+	arrtype.close();
+	ArrayType named_type(file1, ARRAYTYPE_NAME);
+
+	// Get and verify the type's name
+	H5std_string type_name = named_type.getObjName();
+	verify_val(type_name, ARRAYTYPE_NAME, "DataType::getObjName tests constructor", __LINE__, __FILE__);
+	named_type.close();
+
 	// Close all
 	dataset.close();
-	arrtype.close();
 	space.close();
 	file1.close();
 

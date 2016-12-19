@@ -21,11 +21,11 @@
 
 #include <string>
 
+#include "H5private.h"		// for HDfree
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
-#include "H5private.h"		// for HDfree
 
 
 namespace H5 {

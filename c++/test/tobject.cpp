@@ -23,8 +23,6 @@
 #else
 #include <iostream>
 #endif
-using std::cerr;
-using std::endl;
 
 #include <string>
 #include "H5Cpp.h"      // C++ API header file
@@ -184,6 +182,16 @@ static void test_get_objname_ontypes()
 	H5std_string inttype_name = inttype.getObjName();
 	verify_val(inttype_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
 
+	// Close the type then open it again to test getting its name with
+	// the constructor
+	inttype.close();
+	IntType newtype(file, "INT type of STD_B8LE");
+
+	// Get and verify its name
+	H5std_string type_name = newtype.getObjName();
+	verify_val(type_name, "/INT type of STD_B8LE", "DataType::getObjName tests constructor", __LINE__, __FILE__);
+	newtype.close();
+
 	// Make copy of a predefined type and save it
 	DataType dtype(PredType::STD_B8LE);
 	dtype.commit(file, "STD_B8LE");
@@ -197,7 +205,14 @@ static void test_get_objname_ontypes()
 	dtype = file.openDataType("STD_B8LE");
 
 	// Get and verify its name
-	H5std_string type_name = dtype.getObjName();
+	type_name = dtype.getObjName();
+	verify_val(type_name, "/STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
+
+	// Repeat the test with openDataType's replacement
+	DataType dtype2(file, "STD_B8LE");
+
+	// Get and verify its name
+	type_name = dtype2.getObjName();
 	verify_val(type_name, "/STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
 
 	// Test getting type's name from copied type
