@@ -440,6 +440,13 @@ set (test_CLEANFILES
     tvlstr.h5
     tvlstr2.h5
     flush.h5
+    flush-swmr.h5
+    noflush.h5
+    noflush-swmr.h5
+    flush_extend.h5
+    flush_extend-swmr.h5
+    noflush_extend.h5
+    noflush_extend-swmr.h5
     enum1.h5
     titerate.h5
     ttsafe.h5
@@ -508,6 +515,11 @@ set (test_CLEANFILES
     vds_src_0.h5
     vds_src_1.h5
     tbogus.h5.copy
+    flushrefresh.h5
+    flushrefresh_VERIFICATION_START
+    flushrefresh_VERIFICATION_CHECKPOINT1
+    flushrefresh_VERIFICATION_CHECKPOINT2
+    flushrefresh_VERIFICATION_DONE
     accum_swmr_big.h5
     ohdr_swmr.h5
     cache_logging.h5
@@ -869,6 +881,11 @@ set_tests_properties (H5PLUGIN-plugin PROPERTIES
     ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir1${CMAKE_SEP}${CMAKE_BINARY_DIR}/testdir2;srcdir=${HDF5_TEST_BINARY_DIR}"
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
 )
+
+##############################################################################
+###    S W M R  T E S T S
+##############################################################################
+#       testflushrefresh.sh: flushrefresh
 
 ##############################################################################
 ##############################################################################

@@ -37,6 +37,14 @@ h5watch_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 # Programs all depend on the hdf5 library, the tools library, and the HL
 # library.
 LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
+
+# Add extend_dset specific preprocessor flags here
+# (add the main test subdirectory to the include file path)
+extend_dset_CPPFLAGS=$(AM_CPPFLAGS) -I$(top_srcdir)/test
+# Add extend_dset specific library flags here
+# (add the main test library to the list of libraries)
+extend_dset_LDADD=$(LDADD) $(LIBH5TEST)
+
 #
 CHECK_CLEANFILES+=*.h5
 DISTCLEANFILES=testh5watch.sh

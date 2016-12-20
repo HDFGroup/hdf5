@@ -197,6 +197,9 @@ H5TEST_DLL char* getenv_all(MPI_Comm comm, int root, const char* name);
 /* Extern global variables */
 H5TEST_DLLVAR int TestVerbosity;
 
+H5TEST_DLL void h5_send_message(const char *file, const char *arg1, const char *arg2);
+H5TEST_DLL herr_t h5_wait_message(const char *file);
+
 #ifdef __cplusplus
 }
 #endif
