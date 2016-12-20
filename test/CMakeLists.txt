@@ -319,6 +319,7 @@ set (H5_CHECK_TESTS
     tcheck_version
     testmeta
     links_env
+    flushrefresh
 )
 
 foreach (test ${H5_CHECK_TESTS})

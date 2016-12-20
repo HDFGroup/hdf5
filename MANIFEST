@@ -943,6 +943,7 @@
 ./test/filter_fail.c
 ./test/flush1.c
 ./test/flush2.c
+./test/flushrefresh.c
 ./test/gen_bad_ohdr.c
 ./test/gen_bad_compound.c
 ./test/gen_bogus.c
@@ -1010,6 +1011,7 @@
 ./test/testcheck_version.sh.in
 ./test/testerror.sh.in
 ./test/testlinks_env.sh.in
+./test/testflushrefresh.sh.in
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
