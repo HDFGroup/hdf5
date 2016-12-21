@@ -2853,6 +2853,17 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Fclear_elink_file_cache(long file_id) throws HDF5LibraryException;
 
     /**
+     * H5Fstart_swmr_write will activate SWMR writing mode for a file associated with file_id. This routine will
+     * prepare and ensure the file is safe for SWMR writing.
+     *
+     * @param file_id
+     *            IN: Identifier of the target file.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Fstart_swmr_write(long file_id) throws HDF5LibraryException;
+
     /**
      * H5Fstart_mdc_logging starts logging metadata cache events if logging was previously enabled.
      *
