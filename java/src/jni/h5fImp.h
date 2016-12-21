@@ -214,6 +214,15 @@ Java_hdf_hdf5lib_H5_H5Fclear_1elink_1file_1cache
 
 /*
  * Class:     hdf_hdf5lib_H5
+ * Method:    H5Fstart_swmr_write
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL 
+Java_hdf_hdf5lib_H5_H5Fstart_1swmr_1write
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     hdf_hdf5lib_H5
  * Method:    H5Fstart_mdc_logging
  * Signature: (J)V
  */

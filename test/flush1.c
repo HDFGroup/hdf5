@@ -27,8 +27,13 @@
 
 const char *FILENAME[] = {
     "flush",
+    "flush-swmr",
     "noflush",
+    "noflush-swmr",
+    "flush_extend",
+    "flush_extend-swmr",
     "noflush_extend",
+    "noflush_extend-swmr",
     NULL
 };
 
@@ -51,14 +56,17 @@ static double	the_data[100][100];
  *-------------------------------------------------------------------------
  */
 static hid_t
-create_file(char* name, hid_t fapl)
+create_file(char* name, hid_t fapl, hbool_t swmr)
 {
     hid_t	file, dcpl, space, dset, groups, grp;
     hsize_t	ds_size[2] = {100, 100};
     hsize_t	ch_size[2] = {5, 5};
+    unsigned    flags;
     size_t	i, j;
 
-    if((file = H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+    flags = H5F_ACC_TRUNC | (swmr ? H5F_ACC_SWMR_WRITE : 0);
+
+    if((file = H5Fcreate(name, flags, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Create a chunked dataset */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
@@ -156,30 +164,43 @@ main(void)
 {
     hid_t file, fapl;
     char	name[1024];
+    unsigned swmr;
 
     h5_reset();
     fapl = h5_fileaccess();
 
     TESTING("H5Fflush (part1)");
 
-    /* Create the file */
-    h5_fixname(FILENAME[0], fapl, name, sizeof name);
-    file = create_file(name, fapl);
-    /* Flush and exit without closing the library */
-    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
+    /* Loop over SWMR & non-SWMR opens for the file */
+    for(swmr = 0; swmr <= 1; swmr++) {
+        /* Create the file */
+        h5_fixname(FILENAME[0 + swmr], fapl, name, sizeof name);
+        file = create_file(name, fapl, swmr);
+        /* Flush and exit without closing the library */
+        if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
 
-    /* Create the file */
-    h5_fixname(FILENAME[2], fapl, name, sizeof name);
-    file = create_file(name, fapl);
-    /* Flush and exit without closing the library */
-    if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
-    /* Add a bit to the file and don't flush the new part */
-    extend_file(file);
+        /* Create the other file which will not be flushed */
+        h5_fixname(FILENAME[2 + swmr], fapl, name, sizeof name);
+        file = create_file(name, fapl, swmr);
 
-    /* Create the other file which will not be flushed */
-    h5_fixname(FILENAME[1], fapl, name, sizeof name);
-    file = create_file(name, fapl);
+        /* Create the file */
+        h5_fixname(FILENAME[4 + swmr], fapl, name, sizeof name);
+        file = create_file(name, fapl, swmr);
+        /* Flush and exit without closing the library */
+        if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
+        /* Add a bit to the file and don't flush the new part */
+        extend_file(file);
+        /* Flush and exit without closing the library */
+        if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
 
+        /* Create the file */
+        h5_fixname(FILENAME[6 + swmr], fapl, name, sizeof name);
+        file = create_file(name, fapl, swmr);
+        /* Flush and exit without closing the library */
+        if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
+        /* Add a bit to the file and don't flush the new part */
+        extend_file(file);
+    } /* end for */
 
     PASSED();
     fflush(stdout);

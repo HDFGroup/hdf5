@@ -217,6 +217,12 @@
 #define H5O_SHARE_IS_SHARABLE   0x01
 #define H5O_SHARE_IN_OHDR       0x02
 
+/* Set the object header size to speculatively read in */
+/* (needs to be more than the object header prefix size to work at all and
+ *      should be larger than the largest object type's default object header
+ *      size to save the extra I/O operations) */
+#define H5O_SPEC_READ_SIZE 512
+
 
 /* The "message class" type */
 struct H5O_msg_class_t {

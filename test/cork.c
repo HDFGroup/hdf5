@@ -66,14 +66,14 @@
 /* ===================== */
 
 /* Tests */
-static unsigned test_objs_cork(hbool_t new_format);
-static unsigned test_dset_cork(hbool_t new_format);
+static unsigned test_objs_cork(hbool_t swmr, hbool_t new_format);
+static unsigned test_dset_cork(hbool_t swmr, hbool_t new_format);
 static unsigned verify_old_dset_cork(void);
-static unsigned verify_obj_dset_cork(void);
-static unsigned verify_dset_cork(hbool_t new_format);
-static unsigned verify_group_cork(void);
-static unsigned verify_named_cork(void);
-static unsigned verify_multiple_cork(void);
+static unsigned verify_obj_dset_cork(hbool_t swmr);
+static unsigned verify_dset_cork(hbool_t swmr, hbool_t new_format);
+static unsigned verify_group_cork(hbool_t swmr);
+static unsigned verify_named_cork(hbool_t swmr);
+static unsigned verify_multiple_cork(hbool_t swmr);
 
 
 /*-------------------------------------------------------------------------
@@ -284,7 +284,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-verify_obj_dset_cork(void)
+verify_obj_dset_cork(hbool_t swmr)
 {
     /* Variable Declarations */
     hid_t fid = -1;     /* File ID */
@@ -301,7 +301,11 @@ verify_obj_dset_cork(void)
     char attrname[500];         /* Name of attribute */
     unsigned flags;     /* File access flags */
 
-    TESTING("cork status for dataset objects with attributes");
+    if(swmr) {
+        TESTING("cork status for dataset objects with attributes (SWMR)");
+    } else {
+        TESTING("cork status for dataset objects with attributes");
+    }
 
     /* Create fapl */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -312,6 +316,8 @@ verify_obj_dset_cork(void)
 
     /* Create the file with/without SWMR access */
     flags = H5F_ACC_TRUNC;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fcreate(FILENAME, flags, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
 
@@ -405,6 +411,8 @@ verify_obj_dset_cork(void)
 
     /* Re-open the file */
     flags = H5F_ACC_RDWR;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fopen(FILENAME, flags, fapl)) < 0) 
         TEST_ERROR
 
@@ -478,7 +486,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-verify_dset_cork(hbool_t new_format)
+verify_dset_cork(hbool_t swmr, hbool_t new_format)
 {
     /* Variable Declarations */
     hid_t fid = -1;                     /* File ID */
@@ -494,10 +502,18 @@ verify_dset_cork(hbool_t new_format)
     unsigned flags;             /* File access flags */
 
     /* Testing Macro */
-    if(new_format) {
-        TESTING("cork status for chunked datasets with different indexing types (latest)");
+    if(swmr) {
+        if(new_format) {
+            TESTING("cork status for chunked datasets with different indexing types (SWMR & latest)");
+        } else {
+            TESTING("cork status for chunked datasets with different indexing types (SWMR & non-latest)");
+        } /* end if */
     } else {
-        TESTING("cork status for chunked datasets with different indexing types (non-latest)");
+        if(new_format) {
+            TESTING("cork status for chunked datasets with different indexing types (non-SWMR & latest)");
+        } else {
+            TESTING("cork status for chunked datasets with different indexing types (non-SWMR & non-latest)");
+        } /* end if */
     } /* end if */
 
     /* Create fapl */
@@ -511,6 +527,8 @@ verify_dset_cork(hbool_t new_format)
 
     /* Create the file */
     flags = H5F_ACC_TRUNC;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fcreate(FILENAME, flags, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
 
@@ -608,6 +626,8 @@ verify_dset_cork(hbool_t new_format)
 
     /* Reopen the file */
     flags = H5F_ACC_RDWR;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fopen(FILENAME, flags, fapl)) < 0)
         TEST_ERROR
 
@@ -704,7 +724,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-verify_group_cork(void)
+verify_group_cork(hbool_t swmr)
 {
     /* Variable Declarations */
     hid_t fid = -1;                     /* File ID */
@@ -718,7 +738,11 @@ verify_group_cork(void)
     int i = 0;                          /* Local index variable */
 
     /* Testing Macro */
-    TESTING("cork status for groups");
+    if(swmr) {
+        TESTING("cork status for groups (SWMR)");
+    } else {
+        TESTING("cork status for groups");
+    }
 
     /* Create fapl */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -729,6 +753,8 @@ verify_group_cork(void)
 
     /* Create the file */
     flags = H5F_ACC_TRUNC;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fcreate(FILENAME, flags, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
 
@@ -784,6 +810,8 @@ verify_group_cork(void)
 
     /* Re-open the file and the three groups */
     flags = H5F_ACC_RDWR;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fopen(FILENAME, flags, fapl)) < 0)
         FAIL_STACK_ERROR
     if((gid = H5Gopen2(fid, GRP, H5P_DEFAULT)) < 0) 
@@ -863,7 +891,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-verify_named_cork(void)
+verify_named_cork(hbool_t swmr)
 {
     /* Variable Declarations */
     hid_t fid = -1;                     /* File ID */
@@ -879,7 +907,11 @@ verify_named_cork(void)
     int i = 0;                          /* Local index variable */
 
     /* Testing Macro */
-    TESTING("cork status for named datatypes");
+    if(swmr) {
+        TESTING("cork status for named datatypes (SWMR)");
+    } else {
+        TESTING("cork status for named datatypes");
+    }
 
     /* Create fapl */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -890,6 +922,8 @@ verify_named_cork(void)
 
     /* Create the file */
     flags = H5F_ACC_TRUNC;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fcreate(FILENAME, flags, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
 
@@ -982,6 +1016,8 @@ verify_named_cork(void)
 
     /* Re-open the file and the three groups */
     flags = H5F_ACC_RDWR;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
     if((fid = H5Fopen(FILENAME, flags, fapl)) < 0)
         FAIL_STACK_ERROR
     if((gid = H5Gopen2(fid, GRP, H5P_DEFAULT)) < 0) 
@@ -1131,7 +1167,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-verify_multiple_cork(void)
+verify_multiple_cork(hbool_t swmr)
 {
     /* Variable Declarations */
     hid_t fid1 = -1, fid2 = -1;     /* File ID */
@@ -1150,7 +1186,11 @@ verify_multiple_cork(void)
     herr_t ret;                     /* Return value */
 
     /* Testing Macro */
-    TESTING("cork status for multiple opens");
+    if(swmr) {
+        TESTING("cork status for multiple opens (SWMR)");
+    } else {
+        TESTING("cork status for multiple opens");
+    }
 
     /* Create fapl */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -1161,6 +1201,8 @@ verify_multiple_cork(void)
 
     /* Create the file */
     flags = H5F_ACC_TRUNC;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
     if((fid1 = H5Fcreate(FILENAME, flags, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
 
@@ -1212,6 +1254,8 @@ verify_multiple_cork(void)
 
     /* Open the file twice: fid1, fid2 */
     flags = H5F_ACC_RDWR;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
     if((fid1 = H5Fopen(FILENAME, flags, fapl)) < 0)
         TEST_ERROR
     if((fid2 = H5Fopen(FILENAME, flags, fapl)) < 0)
@@ -1484,7 +1528,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_objs_cork(hbool_t new_format)
+test_objs_cork(hbool_t swmr, hbool_t new_format)
 {
     hid_t       fid;                    /* HDF5 File ID */
     hid_t       fapl;                   /* File access property list */
@@ -1493,14 +1537,25 @@ test_objs_cork(hbool_t new_format)
     hid_t   aid;            /* Attribute ID */
     hsize_t     dims[RANK];     /* Dataset dimension sizes */
     hbool_t     corked;         /* Cork status of an object */
+    unsigned flags;             /* File access flags */
     herr_t      ret;                    /* Return value */
 
     /* Testing Macro */
     if(new_format) {
-        TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (new library format)");
+        if(swmr) {
+            TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (new library format) (SWMR)");
+        } /* end if */
+        else {
+            TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (new library format)");
+        } /* end else */
     } else {
-        TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (old library format)");
-    } /* end if */
+        if(swmr) {
+            TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (old library format) (SWMR)");
+        } /* end if */
+        else {
+            TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled (old library format)");
+        } /* end else */
+    } /* end else */
 
     /* Create fapl */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -1512,8 +1567,11 @@ test_objs_cork(hbool_t new_format)
             TEST_ERROR
     } /* end if */
 
-    /* Create an HDF5 file */
-    if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    /* Create the file with/without SWMR access */
+    flags = H5F_ACC_TRUNC;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
+    if((fid = H5Fcreate(FILENAME, flags, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
 
     /* Create group */
@@ -1753,7 +1811,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_dset_cork(hbool_t new_format)
+test_dset_cork(hbool_t swmr, hbool_t new_format)
 {
     hid_t       fid;                            /* File ID */
     hid_t       fapl;                           /* File access property list */
@@ -1770,12 +1828,23 @@ test_dset_cork(hbool_t new_format)
     int     data[DIMS0][DIMS1];     /* Data buffer */
     int     rbuf[DIMS0][DIMS1];     /* Data buffer */
     hbool_t     corked;             /* Cork status of an object */
+    unsigned flags;                 /* File access flags */
 
     /* Testing Macro */
     if(new_format) {
-        TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled on datasets (new library format)");
+        if(swmr) {
+            TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled on datasets (new library format) (SWMR)");
+        } /* end if */
+        else {
+            TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled on datasets (new library format)");
+        } /* end else */
     } else {
-        TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled on datasets (old library format)");
+        if(swmr) {
+            TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled on datasets (old library format) (SWMR)");
+        } /* end if */
+        else {
+            TESTING("H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled on datasets (old library format)");
+        } /* end else */
     } /* end if */
 
     /* Create fapl */
@@ -1788,8 +1857,11 @@ test_dset_cork(hbool_t new_format)
             TEST_ERROR
     } /* end if */
 
-    /* Create a new HDF5 file */
-    if((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+    /* Create the file with/without SWMR access */
+    flags = H5F_ACC_TRUNC;
+    if(swmr)
+        flags |= H5F_ACC_SWMR_WRITE;
+    if((fid = H5Fcreate(FILENAME, flags, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
 
     /* Create a group */
@@ -2070,26 +2142,29 @@ error:
 int 
 main(void) 
 {
+    unsigned swmr;              /* Loop over SWMR/non-SWMR */
     unsigned nerrs = 0;         /* Error Encountered */
     
     /* Test for dataset created with old library format */
     nerrs += verify_old_dset_cork();
 
-    /* Tests with new/old library format */
-    /* This is the test moved from th5o.c: test_h5o_cork() */
-    nerrs += test_objs_cork(TRUE);
-    nerrs += test_objs_cork(FALSE);
-    /* This is the test moved from th5o.c: test_h5o_cork_dataset() */
-    nerrs += test_dset_cork(TRUE);
-    nerrs += test_dset_cork(FALSE);
+    for(swmr = 0; swmr <= 1; swmr++) {
+        /* Tests with new/old library format */
+        /* This is the test moved from th5o.c: test_h5o_cork() */
+        nerrs += test_objs_cork(swmr, TRUE);
+        nerrs += test_objs_cork(swmr, FALSE);
+        /* This is the test moved from th5o.c: test_h5o_cork_dataset() */
+        nerrs += test_dset_cork(swmr, TRUE);
+        nerrs += test_dset_cork(swmr, FALSE);
 
-    /* Tests with/without SWMR access */
-    nerrs += verify_obj_dset_cork();
-    nerrs += verify_dset_cork(TRUE); 
-    nerrs += verify_dset_cork(FALSE); 
-    nerrs += verify_group_cork(); 
-    nerrs += verify_named_cork();
-    nerrs += verify_multiple_cork();
+        /* Tests with/without SWMR access */
+        nerrs += verify_obj_dset_cork(swmr);
+        nerrs += verify_dset_cork(swmr, TRUE); 
+        nerrs += verify_dset_cork(swmr, FALSE); 
+        nerrs += verify_group_cork(swmr); 
+        nerrs += verify_named_cork(swmr); 
+        nerrs += verify_multiple_cork(swmr);
+    } /* end for */
 
     /* Delete test files */
     HDremove(FILENAME);

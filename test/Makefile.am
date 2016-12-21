@@ -28,8 +28,11 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       testlibinfo.sh:
 #       testcheck_version.sh: tcheck_version
 #       tetlinks_env.sh: links_env
-TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT)
+#       testflushrefresh.sh: flushrefresh
+TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh \
+    testflushrefresh.sh
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
+     testflushrefresh.sh
 if HAVE_SHARED_CONDITIONAL
   TEST_SCRIPT += test_plugin.sh
   SCRIPT_DEPEND += plugin$(EXEEXT)
@@ -53,13 +56,15 @@ TEST_PROG= testhdf5 cache cache_api cache_tagging lheap ohdr stab gheap \
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
 # tcheck_version is used by testcheck_version.sh.
+# accum_swmr_reader is used by accum.c.
 # links_env is used by testlinks_env.sh
+# flushrefresh is used by testflushrefresh.sh.
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
-    testmeta \
-    links_env 
+    testmeta accum_swmr_reader \
+    links_env flushrefresh
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= plugin
 endif
@@ -147,7 +152,9 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
     fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
-    trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 flush.h5         \
+    trefer[1-3].h5 tvltypes.h5 tvlstr.h5 tvlstr2.h5 \
+    flush.h5 flush-swmr.h5 noflush.h5 noflush-swmr.h5 flush_extend.h5 \
+    flush_extend-swmr.h5 noflush_extend.h5 noflush_extend-swmr.h5 \
     enum1.h5 titerate.h5 ttsafe.h5 tarray1.h5 tgenprop.h5            \
     tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin           \
     getname.h5 getname[1-3].h5 sec2_file.h5 direct_file.h5           \
@@ -162,6 +169,9 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
     vds_virt.h5 vds_dapl.h5 vds_src_[0-1].h5 \
+    flushrefresh.h5 flushrefresh_VERIFICATION_START                  \
+    flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
+    flushrefresh_VERIFICATION_DONE accum_swmr_big.h5 ohdr_swmr.h5 \
     cache_logging.h5 cache_logging.out \
     swmr[0-2].h5
 # Sources for testhdf5 executable
@@ -171,5 +181,7 @@ testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tvlstr.c tvltypes.c
 
 # Temporary files.
-DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh
+DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_plugin.sh \
+    testflushrefresh.sh
+
 include $(top_srcdir)/config/conclude.am

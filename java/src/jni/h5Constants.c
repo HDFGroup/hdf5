@@ -363,6 +363,10 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5F_1ACC_1TRUNC(JNIEnv *env, jclass cls) { return H5F_ACC_TRUNC; }
 JNIEXPORT jint JNICALL 
 Java_hdf_hdf5lib_HDF5Constants_H5F_1ACC_1DEFAULT(JNIEnv *env, jclass cls) { return H5F_ACC_DEFAULT; }
+JNIEXPORT jint JNICALL 
+Java_hdf_hdf5lib_HDF5Constants_H5F_1ACC_1SWMR_1READ(JNIEnv *env, jclass cls) { return H5F_ACC_SWMR_READ; }
+JNIEXPORT jint JNICALL 
+Java_hdf_hdf5lib_HDF5Constants_H5F_1ACC_1SWMR_1WRITE(JNIEnv *env, jclass cls) { return H5F_ACC_SWMR_WRITE; }
 #pragma GCC diagnostic pop
 
 JNIEXPORT jint JNICALL 
