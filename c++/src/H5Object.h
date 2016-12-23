@@ -77,10 +77,6 @@ class H5_DLLCPP H5Object : public H5Location {
 	// Iterate user's function over the attributes of this object.
 	int iterateAttrs(attr_operator_t user_op, unsigned* idx = NULL, void* op_data = NULL);
 
-	// Returns the object header version of an object
-	 /* unsigned objVersion() const;
- */ 
-
 	// Determines the number of attributes belong to this object.
 	int getNumAttrs() const;
 

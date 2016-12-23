@@ -40,7 +40,7 @@ class H5_DLLCPP VarLenType : public DataType {
 	// Constructor that takes an existing id
 	VarLenType( const hid_t existing_id );
 
-	// Constructors that opens a variable-length datatype, given a location.
+	// Constructors that open a variable-length datatype, given a location.
 	VarLenType(const H5Location& loc, const char* name);
 	VarLenType(const H5Location& loc, const H5std_string& name);
 

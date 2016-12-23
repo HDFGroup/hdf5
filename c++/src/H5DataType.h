@@ -14,9 +14,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class DataType inherits from H5Object and has several subclasses for
-// specific HDF5 data types.
-
 #ifndef __H5DataType_H
 #define __H5DataType_H
 

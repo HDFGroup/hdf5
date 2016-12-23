@@ -39,7 +39,7 @@ class H5_DLLCPP StrType : public AtomType {
         // Gets the string datatype of the specified dataset
 	StrType(const DataSet& dataset);
 
-	// Constructors that opens an HDF5 string datatype, given a location.
+	// Constructors that open an HDF5 string datatype, given a location.
 	StrType(const H5Location& loc, const char* name);
 	StrType(const H5Location& loc, const H5std_string& name);
 

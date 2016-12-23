@@ -14,9 +14,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class DSetCreatPropList represents the HDF5 dataset creation property list
-// and inherits from PropList.
-
 #ifndef __H5DSCreatPropList_H
 #define __H5DSCreatPropList_H
 

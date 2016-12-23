@@ -42,7 +42,7 @@ class H5_DLLCPP CompType : public DataType {
 	// Copy constructor - makes a copy of original object
 	CompType( const CompType& original );
 
-	// Constructors that opens a compound datatype, given a location.
+	// Constructors that open a compound datatype, given a location.
 	CompType(const H5Location& loc, const char* name);
 	CompType(const H5Location& loc, const H5std_string& name);
 

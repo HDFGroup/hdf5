@@ -28,7 +28,6 @@
 #include "H5AbstractDs.h"
 #include "H5DataSpace.h"
 #include "H5DataSet.h"
-#include "H5private.h"
 
 namespace H5 {
 

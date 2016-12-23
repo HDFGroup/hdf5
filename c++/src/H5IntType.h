@@ -33,7 +33,7 @@ class H5_DLLCPP IntType : public AtomType {
 	// Gets the integer datatype of the specified dataset
 	IntType(const DataSet& dataset);
 
-	// Constructors that opens an HDF5 integer datatype, given a location.
+	// Constructors that open an HDF5 integer datatype, given a location.
 	IntType(const H5Location& loc, const char* name);
 	IntType(const H5Location& loc, const H5std_string& name);
 

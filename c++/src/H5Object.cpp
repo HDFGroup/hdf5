@@ -257,40 +257,6 @@ int H5Object::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_da
 }
 
 //--------------------------------------------------------------------------
-// Function:    H5Object::objVersion
-///\brief       Returns the header version of this HDF5 object.
-///\return      Object version, which can have the following values:
-///             \li \c H5O_VERSION_1
-///             \li \c H5O_VERSION_2
-///\exception   H5::ObjHeaderIException
-///             Exception will be thrown when:
-///             - an error returned by the C API
-///             - version number is not one of the valid values above
-// Programmer   Binh-Minh Ribler - December, 2016
-//--------------------------------------------------------------------------
- /* unsigned H5Object::objVersion() const
-{
-    H5O_info_t objinfo;
-    unsigned version = 0;
-
-    // Use C API to get information of the object
-    herr_t ret_value = H5Oget_info(getId(), &objinfo);
-
-    // Throw exception if C API returns failure
-    if (ret_value < 0)
-        throw Exception(inMemFunc("objVersion"), "H5Oget_info failed");
-    // Return a valid version or throw an exception for invalid value
-    else
-    {
-        version = objinfo.hdr.version;
-        if (version != H5O_VERSION_1 && version != H5O_VERSION_2)
-            throw ObjHeaderIException("objVersion", "Invalid version for object");
-    }
-    return(version);
-}
- */ 
-
-//--------------------------------------------------------------------------
 // Function:	H5Object::getNumAttrs
 ///\brief	Returns the number of attributes attached to this HDF5 object.
 ///\return	Number of attributes

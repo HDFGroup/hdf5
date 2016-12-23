@@ -34,7 +34,7 @@ class H5_DLLCPP ArrayType : public DataType {
 	// Assignment operator
 	ArrayType& operator=(const ArrayType& rhs);
 
-	// Constructors that opens a named array datatype, given a location.
+	// Constructors that open an array datatype, given a location.
 	ArrayType(const H5Location& loc, const char* name);
 	ArrayType(const H5Location& loc, const H5std_string& name);
 

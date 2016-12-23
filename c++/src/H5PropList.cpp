@@ -21,7 +21,7 @@
 
 #include <string>
 
-#include "H5private.h"		// for HDfree
+#include "H5private.h"		// for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
