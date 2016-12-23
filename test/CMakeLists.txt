@@ -196,7 +196,6 @@ MACRO (ADD_H5_EXE file)
 ENDMACRO (ADD_H5_EXE file)
 
 set (H5_TESTS
-    #testhdf5
     cache
     cache_api
     cache_tagging
@@ -211,7 +210,6 @@ set (H5_TESTS
     fheap
     pool
     accum
-    #hyperslab
     istore
     bittests
     dt_arith
@@ -234,7 +232,6 @@ set (H5_TESTS
     app_ref
     enum
     set_extent
-    #ttsafe
     enc_dec_plist
     enc_dec_plist_cross_platform
     getname
@@ -322,11 +319,27 @@ set (H5_CHECK_TESTS
     tcheck_version
     testmeta
     links_env
+    flushrefresh
 )
 
 foreach (test ${H5_CHECK_TESTS})
   ADD_H5_EXE(${test})
 endforeach (test ${H5_CHECK_TESTS})
+
+#-- Adding test for accum_swmr_reader
+#   This has to be copied to the test directory for execve() to find it
+#   and it can't be renamed (i.e., no <foo>-shared).
+add_executable (accum_swmr_reader ${HDF5_TEST_SOURCE_DIR}/accum_swmr_reader.c)
+TARGET_NAMING (accum_swmr_reader STATIC)
+TARGET_C_PROPERTIES (accum_swmr_reader STATIC " " " ")
+target_link_libraries (accum_swmr_reader ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (accum_swmr_reader PROPERTIES FOLDER test)
+
+#-- Set accum dependencies
+set_target_properties (accum PROPERTIES DEPENDS accum_swmr_reader)
+if (BUILD_SHARED_LIBS)
+  set_target_properties (accum-shared PROPERTIES DEPENDS accum_swmr_reader)
+endif (BUILD_SHARED_LIBS)
 
 #-- Adding test for libinfo
 set (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)

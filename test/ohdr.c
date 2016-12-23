@@ -44,6 +44,11 @@ const char *FILENAME[] = {
  */
 #define FILE_BOGUS "tbogus.h5"
 
+/*  */
+#define FILE_OHDR_SWMR "ohdr_swmr.h5"
+#define DSET_NAME "COMPACT_DSET"
+#define OBJ_VERSION_LATEST 2
+
 /*
  *  Verify that messages are moved forward into a "continuation message":
  *	Create an object header with several continuation chunks
@@ -295,6 +300,152 @@ error:
 
     return FAIL;
 } /* test_ohdr_cache() */
+
+/*
+ *  To exercise the coding for the re-read of the object header for SWMR access.
+ *  When the object header is read in H5O_load() of H5Ocache.c, the library initially reads
+ *  H5O_SPEC_READ_SIZE (512, currently)  bytes for decoding, then reads the
+ *  remaining bytes later if the object header is greater than H5O_SPEC_READ_SIZE
+ *  bytes.  For SWMR access, the read should be done all at one time.
+ */
+static herr_t
+test_ohdr_swmr(hbool_t new_format)
+{
+    hid_t fid = -1;			    /* File ID */
+    hid_t fapl = -1;			/* File access property list */
+    hid_t did = -1;			    /* Dataset ID */
+    hid_t sid = -1;             /* Dataspace ID */
+    hid_t plist = -1;			/* Dataset creation property list */
+    size_t compact_size = 1024;	/* The size of compact dataset */
+    int *wbuf = NULL;			/* Buffer for writing */
+    hsize_t dims[1];			/* Dimension sizes */
+    size_t u;		            /* Iterator */
+    int n;                      /* Data variable */
+    H5O_info_t obj_info;		/* Information for the object */
+
+    if(new_format) {
+        TESTING("exercise the coding for the re-read of the object header for SWMR access: latest-format");
+    } else {
+        TESTING("exercise the coding for the re-read of the object header for SWMR access: non-latest-format");
+    } /* end if */
+
+    /* File access property list */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create the file with/without latest format: ensure version 2 object header for SWMR */
+    if(new_format)  {
+        /* Set to use latest library format */
+        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            FAIL_STACK_ERROR
+
+        if((fid = H5Fcreate(FILE_OHDR_SWMR, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR
+    } /* end if */
+    else {
+        if((fid = H5Fcreate(FILE_OHDR_SWMR, H5F_ACC_TRUNC|H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR
+    } /* end else */
+
+    /* Initialize data */
+    wbuf = (int *)HDcalloc(compact_size, sizeof(int));
+    n = 0;
+    for(u = 0; u < compact_size; u++)
+        wbuf[u] = n++;
+
+    /* Create a small data space for compact dataset */
+    dims[0] = (hsize_t)compact_size;
+    if((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        FAIL_STACK_ERROR
+    
+    /* Create property list for compact dataset creation */
+    if((plist = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Set the layout for the compact dataset */
+    if(H5Pset_layout(plist, H5D_COMPACT) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a compact dataset */
+    if((did = H5Dcreate2(fid, DSET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, plist, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Write to the compact dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the file for SWMR write with/without latest format */
+    if((fid = H5Fopen(FILE_OHDR_SWMR, H5F_ACC_RDWR|H5F_ACC_SWMR_WRITE, fapl)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Open the compact dataset */
+    if((did = H5Dopen2(fid, DSET_NAME, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the object information */
+    if(H5Oget_info(did, &obj_info) < 0)
+        FAIL_STACK_ERROR
+
+    if(obj_info.hdr.version != OBJ_VERSION_LATEST)
+        FAIL_STACK_ERROR
+
+    /* The size of object header should be greater than the speculative read size of H5O_SPEC_READ_SIZE */
+    /* This will exercise the coding for the re-read of the object header for SWMR access */
+    if(obj_info.hdr.space.total < H5O_SPEC_READ_SIZE)
+        TEST_ERROR;
+
+    /* Close the dataset */
+    if(H5Dclose(did) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file */
+    if(H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataspace */
+    if(H5Sclose(sid) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the dataset creation property list */
+    if(H5Pclose(plist) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close the file access property list */
+    if(H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR
+
+    /* Remove the test file */
+    if(HDremove(FILE_OHDR_SWMR) < 0)
+        FAIL_STACK_ERROR
+
+    /* Free the buffer */
+    HDfree(wbuf);
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+        H5Dclose(did);
+        H5Sclose(sid);
+        H5Pclose(plist);
+        H5Pclose(fapl);
+        HDremove(FILE_OHDR_SWMR);
+        HDfree(wbuf);
+    } H5E_END_TRY;
+
+    return FAIL;
+} /* test_ohdr_swmr() */
 
 /*
  *  To test objects with unknown messages in a file with:
@@ -831,6 +982,10 @@ main(void)
 
     /* Verify symbol table messages are cached */
     if(h5_verify_cached_stabs(FILENAME, fapl) < 0) TEST_ERROR
+
+    /* A test to exercise the re-read of the object header for SWMR access */
+    if(test_ohdr_swmr(TRUE) < 0) TEST_ERROR
+    if(test_ohdr_swmr(FALSE) < 0) TEST_ERROR
 
     HDputs("All object header tests passed.");
     h5_cleanup(FILENAME, fapl);
