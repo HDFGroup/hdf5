@@ -72,6 +72,42 @@ VarLenType::VarLenType(const DataType* base_type) : DataType()
 }
 
 //--------------------------------------------------------------------------
+// Function:	VarLenType overloaded constructor
+///\brief	Creates an VarLenType instance by opening an HDF5 variable
+///		length datatype given its name, provided as a C char*.
+///\param	dtype_name - IN: Variable length type name
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Dec 2016
+// Description
+//		In 1.10.1, this constructor was introduced and will replace the
+//		existing function CommonFG::openVarLenType(const char*) to
+//		improve usability.
+//		-BMR, Dec 2016
+//--------------------------------------------------------------------------
+VarLenType::VarLenType(const H5Location& loc, const char *dtype_name) : DataType()
+{
+   id = p_opentype(loc, dtype_name);
+}
+
+//--------------------------------------------------------------------------
+// Function:	VarLenType overloaded constructor
+///\brief	Creates an VarLenType instance by opening an HDF5 variable
+///		length datatype given its name, provided as an \c H5std_string.
+///\param	dtype_name - IN: Variable length type name
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Dec 2016
+// Description
+//		In 1.10.1, this constructor was introduced and will replace the
+//		existing function CommonFG::openVarLenType(const H5std_string&)
+//		to improve usability.
+//		-BMR, Dec 2016
+//--------------------------------------------------------------------------
+VarLenType::VarLenType(const H5Location& loc, const H5std_string& dtype_name) : DataType()
+{
+   id = p_opentype(loc, dtype_name.c_str());
+}
+
+//--------------------------------------------------------------------------
 // Function:	VarLenType destructor
 ///\brief	Properly terminates access to this datatype.
 // Programmer	Binh-Minh Ribler - May, 2004

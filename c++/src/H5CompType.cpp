@@ -28,7 +28,6 @@
 #include "H5AbstractDs.h"
 #include "H5DataSpace.h"
 #include "H5DataSet.h"
-#include "H5private.h"
 
 namespace H5 {
 
@@ -85,6 +84,42 @@ CompType::CompType( const DataSet& dataset ) : DataType()
    {
       throw DataSetIException("CompType constructor", "H5Dget_type failed");
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	CompType overloaded constructor
+///\brief	Creates an CompType instance by opening an HDF5 compound
+///		given its name, provided as a C character string.
+///\param	dtype_name - IN: Compound type name
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Dec 2016
+// Description
+//		In 1.10.1, this constructor was introduced and will replace the
+//		existing function CommonFG::openCompType(const char*) to
+//		improve usability.
+//		-BMR, Dec 2016
+//--------------------------------------------------------------------------
+CompType::CompType(const H5Location& loc, const char *dtype_name) : DataType()
+{
+   id = p_opentype(loc, dtype_name);
+}
+
+//--------------------------------------------------------------------------
+// Function:	CompType overloaded constructor
+///\brief	Creates an CompType instance by opening an HDF5 compound
+///		datatype given its name, provided as an \c H5std_string.
+///\param	dtype_name - IN: Compound type name
+///\exception	H5::DataTypeIException
+// Programmer	Binh-Minh Ribler - Dec 2016
+// Description
+//		In 1.10.1, this constructor was introduced and will replace the
+//		existing function CommonFG::openCompType(const H5Location&)
+//		to improve usability.
+//		-BMR, Dec 2016
+//--------------------------------------------------------------------------
+CompType::CompType(const H5Location& loc, const H5std_string& dtype_name) : DataType()
+{
+   id = p_opentype(loc, dtype_name.c_str());
 }
 
 //--------------------------------------------------------------------------

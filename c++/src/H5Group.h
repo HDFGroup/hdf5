@@ -28,7 +28,7 @@ namespace H5 {
 class ArrayType;
 class VarLenType;
 
-class H5_DLLCPP Group : public H5Object {
+class H5_DLLCPP Group : public H5Object, public CommonFG {
    public:
 	// Group constructor to create a group or file (aka root group).
 	Group(const char* name, size_t size_hint = 0);
@@ -52,7 +52,7 @@ class H5_DLLCPP Group : public H5Object {
 
 	// Creates a group by way of dereference.
 	Group(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
-        Group(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+//        Group(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
 	// default constructor
 	Group();

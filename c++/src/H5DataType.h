@@ -14,9 +14,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class DataType inherits from H5Object and has several subclasses for
-// specific HDF5 data types.
-
 #ifndef __H5DataType_H
 #define __H5DataType_H
 
@@ -44,7 +41,7 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Creates a datatype by way of dereference.
 	DataType(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
-	DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+//	DataType(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
 	// Closes this datatype.
 	virtual void close();
@@ -62,6 +59,7 @@ class H5_DLLCPP DataType : public H5Object {
 	// a named datatype which can be accessed from the location.
 	void commit(const H5Location& loc, const char* name);
 	void commit(const H5Location& loc, const H5std_string& name);
+
 	// These two overloaded functions are kept for backward compatibility
 	// only; they missed the const - removed from 1.8.18 and 1.10.1
 	//void commit(H5Location& loc, const char* name);
@@ -118,6 +116,13 @@ class H5_DLLCPP DataType : public H5Object {
 	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("DataType"); }
 
+// From CommonFG then H5Location
+	// Constructors to open a generic named datatype at a given location.
+	DataType(const H5Location& loc, const char* name);
+	DataType(const H5Location& loc, const H5std_string& name);
+
+// End of From CommonFG then H5Location
+
 	// Creates a copy of an existing DataType using its id
 	DataType( const hid_t type_id );
 
@@ -136,6 +141,10 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Sets the datatype id.
 	virtual void p_setId(const hid_t new_id);
+
+	// Opens a datatype and returns the id.
+	hid_t p_opentype(const H5Location& loc, const char* dtype_name) const;
+
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
    private:

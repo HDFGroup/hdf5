@@ -20,6 +20,7 @@
 #endif
 #include <string>
 
+#include "H5private.h"		// for HDfree
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -33,10 +34,7 @@
 #include "H5AbstractDs.h"
 #include "H5DataType.h"
 #include "H5DataSpace.h"
-#include "H5Group.h"
-#include "H5File.h"
 #include "H5Attribute.h"
-#include "H5private.h"		// for HDfree
 
 namespace H5 {
 using std::cerr;

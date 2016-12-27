@@ -31,6 +31,7 @@
 #include "H5DcreatProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
+#include "H5CommonFG.h"
 #include "H5Group.h"
 #include "H5AbstractDs.h"
 #include "H5DataSpace.h"

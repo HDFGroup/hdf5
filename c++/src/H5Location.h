@@ -33,9 +33,16 @@ namespace H5 {
 */
 // Class forwarding
 class H5_DLLCPP ArrayType;
+ /* class H5_DLLCPP LinkAccPropList; // remove when done
+ */ 
 class H5_DLLCPP VarLenType;
 class H5_DLLCPP H5Location : public IdComponent {
    public:
+ /* 	// Checks if a link of a given name exists in a location
+	bool exists(const char* name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+	bool exists(const H5std_string& name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
+ */ 
+
 	// Flushes all buffers associated with this location to disk.
 	void flush( H5F_scope_t scope ) const;
 
@@ -81,7 +88,7 @@ class H5_DLLCPP H5Location : public IdComponent {
 	// Open a referenced object whose location is specified by either
 	// a file, an HDF5 object, or an attribute.
 	void dereference(const H5Location& loc, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
-	void dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
+	//void dereference(const Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT, const PropList& plist = PropList::DEFAULT);
 
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
@@ -172,38 +179,6 @@ class H5_DLLCPP H5Location : public IdComponent {
 	void move(const char* src, const char* dst) const;
 	void move(const H5std_string& src, const H5std_string& dst) const;
 
-	// Opens a generic named datatype in this location.
-	DataType openDataType(const char* name) const;
-	DataType openDataType(const H5std_string& name) const;
-
-	// Opens a named array datatype in this location.
-	ArrayType openArrayType(const char* name) const;
-	ArrayType openArrayType(const H5std_string& name) const;
-
-	// Opens a named compound datatype in this location.
-	CompType openCompType(const char* name) const;
-	CompType openCompType(const H5std_string& name) const;
-
-	// Opens a named enumeration datatype in this location.
-	EnumType openEnumType(const char* name) const;
-	EnumType openEnumType(const H5std_string& name) const;
-
-	// Opens a named integer datatype in this location.
-	IntType openIntType(const char* name) const;
-	IntType openIntType(const H5std_string& name) const;
-
-	// Opens a named floating-point datatype in this location.
-	FloatType openFloatType(const char* name) const;
-	FloatType openFloatType(const H5std_string& name) const;
-
-	// Opens a named string datatype in this location.
-	StrType openStrType(const char* name) const;
-	StrType openStrType(const H5std_string& name) const;
-
-	// Opens a named variable length datatype in this location.
-	VarLenType openVarLenType(const char* name) const;
-	VarLenType openVarLenType(const H5std_string& name) const;
-
 // end From CommonFG
 
 	/// For subclasses, H5File and Group, to throw appropriate exception.
@@ -240,7 +215,7 @@ class H5_DLLCPP H5Location : public IdComponent {
 
         // Sets the identifier of this object to a new value. - this one
         // doesn't increment reference count
-        virtual void p_setId(const hid_t new_id) = 0;
+        //virtual void p_setId(const hid_t new_id);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

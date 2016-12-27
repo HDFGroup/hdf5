@@ -42,6 +42,7 @@
 #include "H5ArrayType.h"
 #include "H5VarLenType.h"
 #include "H5DataSet.h"
+#include "H5CommonFG.h"
 #include "H5Group.h"
 #include "H5File.h"
 #include "H5Library.h"

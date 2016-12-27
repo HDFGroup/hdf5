@@ -424,6 +424,30 @@ DataTypeIException::DataTypeIException(const H5std_string& func, const H5std_str
 //--------------------------------------------------------------------------
 DataTypeIException::~DataTypeIException() throw() {}
 
+ /* //--------------------------------------------------------------------------
+// Subclass:	ObjHeaderIException
+// Programmer	Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+//--------------------------------------------------------------------------
+// Function:	ObjHeaderIException default constructor
+///\brief	Default constructor.
+//--------------------------------------------------------------------------
+ObjHeaderIException::ObjHeaderIException():Exception(){}
+//--------------------------------------------------------------------------
+// Function:	ObjHeaderIException overloaded constructor
+///\brief	Creates an ObjHeaderIException with the name of the function,
+///		in which the failure occurs, and an optional detailed message.
+///\param	func - IN: Name of the function where failure occurs
+///\param	message   - IN: Message on the failure
+//--------------------------------------------------------------------------
+ObjHeaderIException::ObjHeaderIException(const H5std_string& func, const H5std_string& message) : Exception(func, message) {}
+//--------------------------------------------------------------------------
+// Function:	ObjHeaderIException destructor
+///\brief	Noop destructor.
+//--------------------------------------------------------------------------
+ObjHeaderIException::~ObjHeaderIException() throw() {}
+ */ 
+
 //--------------------------------------------------------------------------
 // Subclass:	PropListIException
 // Programmer	Binh-Minh Ribler - 2000

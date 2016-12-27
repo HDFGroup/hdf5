@@ -14,9 +14,6 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-// Class DSetMemXferPropList represents the HDF5 dataset transfer property list
-// and inherits from PropList.
-
 #ifndef __H5DSetMemXferPropList_H
 #define __H5DSetMemXferPropList_H
 
