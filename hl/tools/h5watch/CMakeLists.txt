@@ -39,7 +39,7 @@ if (BUILD_TESTING)
   add_executable (extend_dset ${extend_dset_SOURCES})
   TARGET_NAMING (extend_dset STATIC)
   TARGET_C_PROPERTIES (extend_dset STATIC " " " ")
-  target_link_libraries (extend_dset ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
+  target_link_libraries (extend_dset ${HDF5_HL_LIB_TARGET} ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (extend_dset PROPERTIES FOLDER tools/hl)
 
   add_executable (h5watchgentest ${HDF5_HL_TOOLS_H5WATCH_SOURCE_DIR}/h5watchgentest.c)
