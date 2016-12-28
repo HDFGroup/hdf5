@@ -14,8 +14,8 @@ PROJECT (HDF5_HL_TEST)
 set (srcdir ${CMAKE_CURRENT_SOURCE_DIR})
 configure_file (${HDF5_HL_TEST_SOURCE_DIR}/H5srcdir_str.h.in H5srcdir_str.h  @ONLY)
 
-INCLUDE_DIRECTORIES (${CMAKE_CURRENT_BINARY_DIR})
-INCLUDE_DIRECTORIES (${HDF5_TEST_SRC_DIR})
+include_directories (${CMAKE_CURRENT_BINARY_DIR})
+include_directories (${HDF5_TEST_SRC_DIR})
 
 # --------------------------------------------------------------------
 #  Macro used to add a unit test

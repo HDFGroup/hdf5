@@ -21,7 +21,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src and tools/lib directories
-AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src -I$(top_srcdir)/hl/test
 
 # These are our main targets, the tools
 TEST_SCRIPT=testh5watch.sh
@@ -43,7 +43,7 @@ LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
 extend_dset_CPPFLAGS=$(AM_CPPFLAGS) -I$(top_srcdir)/test
 # Add extend_dset specific library flags here
 # (add the main test library to the list of libraries)
-extend_dset_LDADD=$(LDADD) $(LIBH5TEST)
+extend_dset_LDADD=$(LDADD) $(LIBH5TEST) $(LIBHDF5)
 
 #
 CHECK_CLEANFILES+=*.h5
