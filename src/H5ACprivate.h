@@ -59,36 +59,36 @@
 
 /* Types of metadata objects cached */
 typedef enum {
-    H5AC_BT_ID = 0, 			/* ( 0) B-tree nodes				     */
-    H5AC_SNODE_ID,			/* ( 1) symbol table nodes			     */
-    H5AC_LHEAP_PRFX_ID, 		/* ( 2) local heap prefix			     */
-    H5AC_LHEAP_DBLK_ID, 		/* ( 3) local heap data block			     */
-    H5AC_GHEAP_ID,			/* ( 4) global heap				     */
-    H5AC_OHDR_ID,			/* ( 5) object header				     */
-    H5AC_OHDR_CHK_ID,			/* ( 6) object header chunk			     */
-    H5AC_BT2_HDR_ID,			/* ( 7) v2 B-tree header			     */
-    H5AC_BT2_INT_ID,			/* ( 8) v2 B-tree internal node		     */
-    H5AC_BT2_LEAF_ID,			/* ( 9) v2 B-tree leaf node			     */
-    H5AC_FHEAP_HDR_ID,			/* (10) fractal heap header			     */
-    H5AC_FHEAP_DBLOCK_ID, 		/* (11) fractal heap direct block		     */
-    H5AC_FHEAP_IBLOCK_ID, 		/* (12) fractal heap indirect block		     */
-    H5AC_FSPACE_HDR_ID,			/* (13) free space header			     */
-    H5AC_FSPACE_SINFO_ID,		/* (14) free space sections			     */
-    H5AC_SOHM_TABLE_ID, 		/* (15) shared object header message master table  */
-    H5AC_SOHM_LIST_ID,  		/* (16) shared message index stored as a list      */
-    H5AC_EARRAY_HDR_ID,			/* (17) extensible array header		     */
-    H5AC_EARRAY_IBLOCK_ID, 		/* (18) extensible array index block	             */
-    H5AC_EARRAY_SBLOCK_ID, 		/* (19) extensible array super block	             */
-    H5AC_EARRAY_DBLOCK_ID, 		/* (20) extensible array data block	             */
-    H5AC_EARRAY_DBLK_PAGE_ID, 		/* (21) extensible array data block page           */
-    H5AC_FARRAY_HDR_ID,			/* (22) fixed array header		     	     */
-    H5AC_FARRAY_DBLOCK_ID, 		/* (23) fixed array data block	     	     */
-    H5AC_FARRAY_DBLK_PAGE_ID,		/* (24) fixed array data block page          	     */
-    H5AC_SUPERBLOCK_ID, 		/* (25) file superblock                            */
-    H5AC_DRVRINFO_ID,   		/* (26) driver info block (supplements superblock)*/
-    H5AC_PROXY_ENTRY_ID, 		/* (27) cache entry proxy                        */
-    H5AC_TEST_ID,			/* (28) test entry -- not used for actual files    */
-    H5AC_NTYPES				/* Number of types, must be last              */
+    H5AC_BT_ID = 0,             /* ( 0) B-tree nodes                                */
+    H5AC_SNODE_ID,              /* ( 1) symbol table nodes                          */
+    H5AC_LHEAP_PRFX_ID,         /* ( 2) local heap prefix                           */
+    H5AC_LHEAP_DBLK_ID,         /* ( 3) local heap data block                       */
+    H5AC_GHEAP_ID,              /* ( 4) global heap                                 */
+    H5AC_OHDR_ID,               /* ( 5) object header                               */
+    H5AC_OHDR_CHK_ID,           /* ( 6) object header chunk                         */
+    H5AC_BT2_HDR_ID,            /* ( 7) v2 B-tree header                            */
+    H5AC_BT2_INT_ID,            /* ( 8) v2 B-tree internal node                     */
+    H5AC_BT2_LEAF_ID,           /* ( 9) v2 B-tree leaf node                         */
+    H5AC_FHEAP_HDR_ID,          /* (10) fractal heap header                         */
+    H5AC_FHEAP_DBLOCK_ID,       /* (11) fractal heap direct block                   */
+    H5AC_FHEAP_IBLOCK_ID,       /* (12) fractal heap indirect block                 */
+    H5AC_FSPACE_HDR_ID,         /* (13) free space header                           */
+    H5AC_FSPACE_SINFO_ID,       /* (14) free space sections                         */
+    H5AC_SOHM_TABLE_ID,         /* (15) shared object header message master table   */
+    H5AC_SOHM_LIST_ID,          /* (16) shared message index stored as a list       */
+    H5AC_EARRAY_HDR_ID,         /* (17) extensible array header                     */
+    H5AC_EARRAY_IBLOCK_ID,      /* (18) extensible array index block                */
+    H5AC_EARRAY_SBLOCK_ID,      /* (19) extensible array super block                */
+    H5AC_EARRAY_DBLOCK_ID,      /* (20) extensible array data block                 */
+    H5AC_EARRAY_DBLK_PAGE_ID,   /* (21) extensible array data block page            */
+    H5AC_FARRAY_HDR_ID,         /* (22) fixed array header                          */
+    H5AC_FARRAY_DBLOCK_ID,      /* (23) fixed array data block                      */
+    H5AC_FARRAY_DBLK_PAGE_ID,   /* (24) fixed array data block page                 */
+    H5AC_SUPERBLOCK_ID,         /* (25) file superblock                             */
+    H5AC_DRVRINFO_ID,           /* (26) driver info block (supplements superblock)  */
+    H5AC_PROXY_ENTRY_ID,        /* (27) cache entry proxy                           */
+    H5AC_TEST_ID,               /* (28) test entry -- not used for actual files     */
+    H5AC_NTYPES                 /* Number of types, must be last                    */
 } H5AC_type_t;
 
 /* H5AC_DUMP_STATS_ON_CLOSE should always be FALSE when
@@ -173,8 +173,8 @@ typedef H5C_notify_action_t     H5AC_notify_action_t;
 #define H5AC__CLASS_SPECULATIVE_LOAD_FLAG H5C__CLASS_SPECULATIVE_LOAD_FLAG
 
 /* The following flags should only appear in test code */
-#define H5AC__CLASS_SKIP_READS		H5C__CLASS_SKIP_READS
-#define H5AC__CLASS_SKIP_WRITES		H5C__CLASS_SKIP_WRITES
+#define H5AC__CLASS_SKIP_READS              H5C__CLASS_SKIP_READS
+#define H5AC__CLASS_SKIP_WRITES             H5C__CLASS_SKIP_WRITES
 
 typedef H5C_get_initial_load_size_func_t	H5AC_get_initial_load_size_func_t;
 typedef H5C_get_final_load_size_func_t	H5AC_get_final_load_size_func_t;
@@ -345,13 +345,13 @@ H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
  * H5AC_get_entry_status() call.
  */
 
-#define H5AC_ES__IN_CACHE	0x0001
-#define H5AC_ES__IS_DIRTY	0x0002
-#define H5AC_ES__IS_PROTECTED	0x0004
-#define H5AC_ES__IS_PINNED	0x0008
-#define H5AC_ES__IS_FLUSH_DEP_PARENT	0x0010
-#define H5AC_ES__IS_FLUSH_DEP_CHILD	0x0020
-#define H5AC_ES__IS_CORKED	0x0040
+#define H5AC_ES__IN_CACHE               0x0001
+#define H5AC_ES__IS_DIRTY               0x0002
+#define H5AC_ES__IS_PROTECTED           0x0004
+#define H5AC_ES__IS_PINNED              0x0008
+#define H5AC_ES__IS_FLUSH_DEP_PARENT    0x0010
+#define H5AC_ES__IS_FLUSH_DEP_CHILD     0x0020
+#define H5AC_ES__IS_CORKED              0x0040
 
 
 /* external function declarations: */
