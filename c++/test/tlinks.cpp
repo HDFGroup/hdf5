@@ -419,10 +419,10 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 	H5File file(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
 
 	// Verify link existence
-	if(H5Lexists(file.getId(), "dset1", H5P_DEFAULT) != TRUE)
-	    throw InvalidActionException("H5Lexists", "dset1 doesn't exist");
-	if(H5Lexists(file.getId(), "grp1/soft", H5P_DEFAULT) != TRUE)
-	    throw InvalidActionException("H5Lexists", "grp1/soft doesn't exist");
+	if(file.exists("dset1", LinkAccPropList::DEFAULT) != TRUE)
+	    throw InvalidActionException("H5File::exists", "dset1 doesn't exist");
+	if(file.exists("grp1/soft", LinkAccPropList::DEFAULT) != TRUE)
+	    throw InvalidActionException("H5File::exists", "grp1/soft doesn't exist");
 
 	// Verify link values
 	H5std_string softlink_val = file.getLinkval("grp1/soft");

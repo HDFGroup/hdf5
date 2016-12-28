@@ -424,7 +424,7 @@ DataTypeIException::DataTypeIException(const H5std_string& func, const H5std_str
 //--------------------------------------------------------------------------
 DataTypeIException::~DataTypeIException() throw() {}
 
- /* //--------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 // Subclass:	ObjHeaderIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
@@ -446,7 +446,6 @@ ObjHeaderIException::ObjHeaderIException(const H5std_string& func, const H5std_s
 ///\brief	Noop destructor.
 //--------------------------------------------------------------------------
 ObjHeaderIException::~ObjHeaderIException() throw() {}
- */ 
 
 //--------------------------------------------------------------------------
 // Subclass:	PropListIException

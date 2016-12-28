@@ -639,6 +639,10 @@ const H5std_string	SUBGROUP3("/G1/G3");
 static void test_libver_bounds_real(
 		H5F_libver_t libver_create, unsigned oh_vers_create,
 		H5F_libver_t libver_mod, unsigned oh_vers_mod)
+ /* (H5F_LIBVER_EARLIEST, H5O_VERSION_1, H5F_LIBVER_LATEST, H5O_VERSION_2);
+(H5F_LIBVER_LATEST, H5O_VERSION_2, H5F_LIBVER_EARLIEST, H5O_VERSION_2);
+ */ 
+
 {
     try {
 
@@ -674,8 +678,8 @@ static void test_libver_bounds_real(
      */
     Group group = file.createGroup(GROUP1);
 
-    obj_version = file.childObjVersion(GROUP1);
-    verify_val(obj_version, oh_vers_mod, "H5File::childObjVersion", __LINE__, __FILE__);
+    obj_version = group.objVersion();
+    verify_val(obj_version, oh_vers_mod, "Group::objVersion", __LINE__, __FILE__);
 
     group.close(); // close "/G1"
 
@@ -685,8 +689,8 @@ static void test_libver_bounds_real(
      */
     group = file.createGroup(SUBGROUP3);
 
-    obj_version = group.childObjVersion(SUBGROUP3);
-    verify_val(obj_version, oh_vers_mod, "H5File::childObjVersion", __LINE__, __FILE__);
+    obj_version = group.objVersion();
+    verify_val(obj_version, oh_vers_mod, "Group::objVersion", __LINE__, __FILE__);
 
     group.close(); // close "/G1/G3"
 

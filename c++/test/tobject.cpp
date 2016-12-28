@@ -23,6 +23,8 @@
 #else
 #include <iostream>
 #endif
+using std::cerr;
+using std::endl;
 
 #include <string>
 #include "H5Cpp.h"      // C++ API header file
@@ -41,15 +43,25 @@ const H5std_string	GROUP1_2_PATH("/Top Group/Sub-Group 1.2");
 const H5std_string	DSET_DEFAULT_NAME("default");
 const H5std_string	DSET_IN_FILE("Dataset in File");
 const H5std_string	DSET_IN_FILE_PATH("/Dataset in File");
-const H5std_string	DSET_IN_GRP1("Dataset in Group 1");
-const H5std_string	DSET_IN_GRP1_PATH("/Top Group/Dataset in Group 1");
-const H5std_string	DSET_IN_GRP1_2("Dataset in Group 1.2");
-const H5std_string	DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset in Group 1.2");
+const H5std_string	DSET_IN_GRP1("Dataset_in_Group_1");
+const H5std_string	DSET_IN_GRP1_PATH("/Top Group/Dataset_in_Group_1");
+const H5std_string	DSET_IN_GRP1_2("Dataset_in_Group_1.2");
+const H5std_string	DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset_in_Group_1.2");
 
 /*-------------------------------------------------------------------------
  * Function:	test_get_objname
  *
  * Purpose:	Tests getting object name of groups and datasets.
+ *
+ * Description:
+ *	File structure:
+ *		GROUP1
+ *		    GROUP1_1
+ *		    GROUP1_2
+ *			DSET_IN_GRP1_2
+ *		    DSET_IN_GRP1
+ *		DSET_IN_FILE
+ *
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -143,6 +155,81 @@ static void test_get_objname()
 	issue_fail_msg("test_get_objname", __LINE__, __FILE__);
     }
 }   // test_get_objname
+/*-------------------------------------------------------------------------
+ * Function:	test_existance
+ *
+ * Purpose:	Tests getting object name of groups and datasets.
+ *
+ * Description:
+ *	File structure:
+ *		GROUP1
+ *		    GROUP1_1
+ *		    GROUP1_2
+ *			DSET_IN_GRP1_2
+ *		    DSET_IN_GRP1
+ *		DSET_IN_FILE
+ *
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Binh-Minh Ribler
+ *		Friday, March 4, 2014
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_existance()
+{
+    SUBTEST("H5File::exists and Group::exists");
+
+    try {
+	// Open file
+	H5File file(FILE_OBJECTS, H5F_ACC_RDONLY);
+
+	// Check if GROUP1 exists in the file
+	bool exists = file.exists(GROUP1);
+
+	// Open GROUP1
+	Group grp1 = file.openGroup(GROUP1);
+
+	// Check if GROUP1_1 and GROUP1_2 exist in GROUP1
+	exists = grp1.exists(GROUP1_1);
+	verify_val(exists, TRUE, "Group::exists GROUP1_1", __LINE__, __FILE__);
+	exists = grp1.exists(GROUP1_2);
+	verify_val(exists, TRUE, "Group::exists GROUP1_2", __LINE__, __FILE__);
+
+	// Check if DSET_IN_GRP1 exists in GROUP1
+	exists = grp1.exists(DSET_IN_GRP1);
+	verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
+
+	// Open GROUP1_2
+	Group grp1_2 = grp1.openGroup(GROUP1_2);
+
+	// Check if DSET_IN_GRP1_2 exists in GROUP1_2
+	exists = grp1_2.exists(DSET_IN_GRP1_2);
+	verify_val(exists, TRUE, "Group::exists DSET_IN_GRP1_2", __LINE__, __FILE__);
+
+	// Check if a dataset exists given dataset as location with full path name
+	DataSet dset1 = file.openDataSet(DSET_IN_FILE);
+	exists = dset1.exists("/Top Group/Dataset_in_Group_1");
+	verify_val(exists, TRUE, "Group::exists given dataset with full path name", __LINE__, __FILE__);
+
+	exists = grp1_2.exists(DSET_IN_GRP1);
+	verify_val(exists, FALSE, "Group::exists DSET_IN_GRP1", __LINE__, __FILE__);
+
+	// Everything will be closed as they go out of scope
+
+	PASSED();
+    }	// try block
+
+    // catch all other exceptions
+    catch (Exception& E)
+    {
+	issue_fail_msg("test_existance", __LINE__, __FILE__);
+    }
+}   // test_existance
 
 /*-------------------------------------------------------------------------
  * Function:	test_get_objname_ontypes
@@ -182,16 +269,6 @@ static void test_get_objname_ontypes()
 	H5std_string inttype_name = inttype.getObjName();
 	verify_val(inttype_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
 
-	// Close the type then open it again to test getting its name with
-	// the constructor
-	inttype.close();
-	IntType newtype(file, "INT type of STD_B8LE");
-
-	// Get and verify its name
-	H5std_string type_name = newtype.getObjName();
-	verify_val(type_name, "/INT type of STD_B8LE", "DataType::getObjName tests constructor", __LINE__, __FILE__);
-	newtype.close();
-
 	// Make copy of a predefined type and save it
 	DataType dtype(PredType::STD_B8LE);
 	dtype.commit(file, "STD_B8LE");
@@ -205,14 +282,7 @@ static void test_get_objname_ontypes()
 	dtype = file.openDataType("STD_B8LE");
 
 	// Get and verify its name
-	type_name = dtype.getObjName();
-	verify_val(type_name, "/STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
-
-	// Repeat the test with openDataType's replacement
-	DataType dtype2(file, "STD_B8LE");
-
-	// Get and verify its name
-	type_name = dtype2.getObjName();
+	H5std_string type_name = dtype.getObjName();
 	verify_val(type_name, "/STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
 
 	// Test getting type's name from copied type
@@ -333,6 +403,7 @@ void test_object()
     MESSAGE(5, ("Testing Object Functions\n"));
 
     test_get_objname();    // Test get object name from groups/datasets
+    test_existance();      // Test check for object existance
     test_get_objname_ontypes();	// Test get object name from types
     test_get_objtype();    // Test get object type
 
