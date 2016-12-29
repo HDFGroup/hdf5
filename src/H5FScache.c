@@ -519,7 +519,6 @@ H5FS__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
             HDassert(fspace->sect_size > 0);
 
             if(!H5F_addr_defined(fspace->sect_addr)) { /* case 1 */
-
                 haddr_t tag = HADDR_UNDEF;
 
                 /* allocate file space for the section info, and insert it

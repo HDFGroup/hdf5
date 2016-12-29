@@ -693,7 +693,7 @@ HDfprintf(stderr, "%s: Trying to avoid starting up free space manager\n", FUNC);
 HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, addr, size);
 #endif /* H5MF_ALLOC_DEBUG_MORE */
 		HGOTO_DONE(SUCCEED)
-	    }
+	    } /* end else-if */
         } /* end if */
 
         /* If we are deleting the free space manager, leave now, to avoid
@@ -847,7 +847,7 @@ HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_r
                 if((ret_value = H5FS_sect_try_extend(f, dxpl_id, f->shared->fs_man[fs_type], addr, size, extra_requested)) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTEXTEND, FAIL, "error extending block in free space manager")
         } /* end if */
-    } /* end if */
+    } /* end else-if */
 
 done:
     /* Reset the ring in the DXPL */

@@ -102,6 +102,7 @@ hid_t H5AC_rawdata_dxpl_id = (-1);
 hbool_t H5_coll_api_sanity_check_g = false;
 #endif /* H5_HAVE_PARALLEL */
 
+
 /*******************/
 /* Local Variables */
 /*******************/
@@ -135,6 +136,7 @@ static const char *H5AC_entry_type_names[H5AC_NTYPES] =
     "fixed array data block pages",
     "superblock",
     "driver info",
+    "epoch marker",     /* internal to cache only */
     "proxy entry",
     "test entry"	/* for testing only -- not used for actual files */
 };
@@ -2213,11 +2215,6 @@ H5AC_validate_config(H5AC_cache_config_t *config_ptr)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_validate_config() */
-
-
-/*************************************************************************/
-/**************************** Private Functions: *************************/
-/*************************************************************************/
 
 
 /*-------------------------------------------------------------------------

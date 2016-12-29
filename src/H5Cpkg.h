@@ -45,18 +45,15 @@
 /* Package Private Macros */
 /**************************/
 
+/* Number of epoch markers active */
+#define H5C__MAX_EPOCH_MARKERS                  10
+
 /* Cache configuration settings */
 #define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
 #define H5C__H5C_T_MAGIC	0x005CAC0E
 
 /* Initial allocated size of the "flush_dep_parent" array */
 #define H5C_FLUSH_DEP_PARENT_INIT 8
-
-/* Cache client ID for epoch markers */
-/* Note that H5C__MAX_EPOCH_MARKERS is defined in H5Cprivate.h, not here because
- * it is needed to dimension arrays in H5C_t.
- */
-#define H5C__EPOCH_MARKER_TYPE	H5C__MAX_NUM_TYPE_IDS
 
 /****************************************************************************
  *

@@ -136,8 +136,7 @@ static herr_t H5C__autoadjust__ageout__remove_all_markers(H5C_t * cache_ptr);
 static herr_t H5C__autoadjust__ageout__remove_excess_markers(H5C_t * cache_ptr);
 
 static herr_t H5C__flash_increase_cache_size(H5C_t * cache_ptr,
-                                             size_t old_entry_size,
-                                             size_t new_entry_size);
+    size_t old_entry_size, size_t new_entry_size);
 
 static herr_t H5C_flush_invalidate_cache(const H5F_t *  f,
                                           hid_t    dxpl_id,
@@ -4391,7 +4390,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
         entry_ptr = cache_ptr->LRU_tail_ptr;
 
         while ( ( entry_ptr != NULL ) &&
-                ( (entry_ptr->type)->id != H5C__EPOCH_MARKER_TYPE ) &&
+                ( (entry_ptr->type)->id != H5AC_EPOCH_MARKER_ID ) &&
                 ( bytes_evicted < eviction_size_limit ) )
         {
 	    hbool_t		corked = FALSE;
@@ -4509,7 +4508,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
         entry_ptr = cache_ptr->LRU_tail_ptr;
 
         while ( ( entry_ptr != NULL ) &&
-                ( (entry_ptr->type)->id != H5C__EPOCH_MARKER_TYPE ) &&
+                ( (entry_ptr->type)->id != H5AC_EPOCH_MARKER_ID ) &&
                 ( bytes_evicted < eviction_size_limit ) )
         {
             HDassert( ! (entry_ptr->is_protected) );
@@ -5875,6 +5874,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(entry_ptr);
+    HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(entry_ptr->ring != H5C_RING_UNDEFINED);
 
     /* setup external flags from the flags parameter */
@@ -6776,7 +6776,7 @@ H5C_make_space_in_cache(H5F_t *	f,
 		++num_corked_entries;
                 didnt_flush_entry = TRUE;
 
-	    } else if ( ( (entry_ptr->type)->id != H5C__EPOCH_MARKER_TYPE ) &&
+	    } else if ( ( (entry_ptr->type)->id != H5AC_EPOCH_MARKER_ID ) &&
                  ( ! entry_ptr->flush_in_progress ) ) {
 
                 didnt_flush_entry = FALSE;
@@ -7433,7 +7433,6 @@ H5C_entry_in_skip_list(H5C_t * cache_ptr, H5C_cache_entry_t *target_ptr)
     return(in_slist);
 
 } /* H5C_entry_in_skip_list() */
-
 #endif /* H5C_DO_SLIST_SANITY_CHECKS */
 
 

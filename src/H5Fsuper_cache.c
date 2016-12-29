@@ -982,7 +982,7 @@ done:
  *
  * Purpose:	Loads an object from the disk.
  *
- * Return:	Success:	Pointer to a new B-tree.
+ * Return:	Success:	Pointer to a new driver info struct
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol

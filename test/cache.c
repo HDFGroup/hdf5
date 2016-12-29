@@ -15888,7 +15888,6 @@ check_flush_protected_err(void)
  *
  *-------------------------------------------------------------------------
  */
-
 static unsigned
 check_destroy_pinned_err(void)
 {
@@ -15917,43 +15916,35 @@ check_destroy_pinned_err(void)
 
             pass = FALSE;
             failure_mssg = "destroy succeeded on cache with pinned entry.\n";
-
-        } else {
-
+        } /* end if */
+	else {
 	    unpin_entry(0, 0);
 
             if(H5C_dest(file_ptr, H5AC_ind_read_dxpl_id) < 0) {
-
                 pass = FALSE;
                 failure_mssg = "destroy failed after unpin.\n";
-
-            } else {
+            } /* end if */
+	    else {
                 file_ptr->shared->cache = NULL;
-	    }
-        }
+	    } /* end else */
+        } /* end else */
 
         if(saved_cache != NULL) {
-
             file_ptr->shared->cache = saved_cache;
             saved_cache = NULL;
-
-        }
+        } /* end if */
 
 	/* call takedown_cache() with a NULL file_ptr parameter.
 	 * This causes the function to close and delete the file,
 	 * while skipping the call to H5C_dest().
 	 */
 	takedown_cache(NULL, FALSE, FALSE);
-
-    }
+    } /* end if */
 
     if(pass) { PASSED(); } else { H5_FAILED(); }
 
-    if(!pass) {
-
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
-                  FUNC, failure_mssg);
-    }
+    if(!pass)
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return (unsigned)!pass;
 
@@ -16000,45 +15991,36 @@ check_destroy_protected_err(void)
         protect_entry(file_ptr, 0, 0);
 
         if(H5C_dest(file_ptr, H5AC_ind_read_dxpl_id) >= 0) {
-
             pass = FALSE;
             failure_mssg = "destroy succeeded on cache with protected entry.\n";
-
-        } else {
-
+        } /* end if */
+	else {
             unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
-
             if(H5C_dest(file_ptr, H5AC_ind_read_dxpl_id) < 0) {
-
                 pass = FALSE;
                 failure_mssg = "destroy failed after unprotect.\n";
-
-            } else {
+            } /* end if */
+	    else {
                 file_ptr->shared->cache = NULL;
-	    }
-        }
+	    } /* end else */
+	} /* end else */
 
         if(saved_cache != NULL) {
-
             file_ptr->shared->cache = saved_cache;
             saved_cache = NULL;
-
-        }
+        } /* end if */
 
 	/* call takedown_cache() with a NULL file_ptr parameter.
 	 * This causes the function to close and delete the file,
 	 * while skipping the call to H5C_dest().
 	 */
 	takedown_cache(NULL, FALSE, FALSE);
-    }
+    } /* end if */
 
     if(pass) { PASSED(); } else { H5_FAILED(); }
 
-    if(!pass) {
-
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n",
-                  FUNC, failure_mssg);
-    }
+    if(!pass)
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return (unsigned)!pass;
 
@@ -34532,8 +34514,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t * file_ptr)
     /* If we are collecting stats, check to see if we get the expected
      * values.
      */
-    if(pass) {
-
+    if(pass)
 	if((cache_ptr->insertions[HUGE_ENTRY_TYPE] != 0) ||
              (cache_ptr->pinned_insertions[HUGE_ENTRY_TYPE] != 0) ||
              (cache_ptr->clears[HUGE_ENTRY_TYPE] != 1) ||
@@ -34555,31 +34536,23 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected huge size entry stats in cedds__expunge_dirty_entry_in_flush_test().";
-        }
-    }
+        } /* end if */
 
-    if(pass) {
-
+    if(pass)
 	if((cache_ptr->slist_scan_restarts != 1) ||
              (cache_ptr->LRU_scan_restarts != 0) ||
              (cache_ptr->hash_bucket_scan_restarts != 0)) {
-
             pass = FALSE;
             failure_mssg = "unexpected scan restart stats in cedds__expunge_dirty_entry_in_flush_test().";
-        }
-    }
+        } /* end if */
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    if(pass) {
+    if(pass)
+        reset_entries();
 
-	reset_entries();
-    }
-
-    if(pass) {
-
-	/* reset cache min clean size to its expected value */
+    if(pass)
+        /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
-    }
 
     return;
 
@@ -34920,8 +34893,7 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
         }
     }
 
-    if(pass) {
-
+    if(pass)
 	if((cache_ptr->insertions[MONSTER_ENTRY_TYPE] != 0) ||
              (cache_ptr->pinned_insertions[MONSTER_ENTRY_TYPE] != 0) ||
              (cache_ptr->clears[MONSTER_ENTRY_TYPE] != 0) ||
@@ -34943,31 +34915,25 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected monster entry stats in cedds__H5C_make_space_in_cache().";
-        }
-    }
+        } /* end if */
 
-    if(pass) {
-
+    if(pass)
 	if((cache_ptr->slist_scan_restarts != 0) ||
              (cache_ptr->LRU_scan_restarts != 1) ||
              (cache_ptr->hash_bucket_scan_restarts != 0)) {
 
             pass = FALSE;
             failure_mssg = "unexpected scan restart stats in cedds__H5C_make_space_in_cache().";
-        }
-    }
+        } /* end if */
+
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    if(pass) {
+    if(pass)
+        reset_entries();
 
-	reset_entries();
-    } 
-
-    if(pass) {
-
-	/* reset cache min clean size to its expected value */
+    if(pass)
+        /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
-    }
 
     return;
 
@@ -35337,8 +35303,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * file_ptr)
      * values.
      */
 
-    if(pass) {
-
+    if(pass)
 	if((cache_ptr->insertions[MONSTER_ENTRY_TYPE] != 0) ||
              (cache_ptr->pinned_insertions[MONSTER_ENTRY_TYPE] != 0) ||
              (cache_ptr->clears[MONSTER_ENTRY_TYPE] != 0) ||
@@ -35360,31 +35325,25 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected monster entry stats in cedds__H5C__autoadjust__ageout__evict_aged_out_entries().";
-        }
-    }
+        } /* end if */
 
-    if(pass) {
-
+    if(pass)
 	if((cache_ptr->slist_scan_restarts != 0) ||
              (cache_ptr->LRU_scan_restarts != 1) ||
              (cache_ptr->hash_bucket_scan_restarts != 0)) {
 
             pass = FALSE;
             failure_mssg = "unexpected scan restart stats in cedds__H5C__autoadjust__ageout__evict_aged_out_entries().";
-        }
-    }
+        } /* end if */
+
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    if(pass) {
+    if(pass)
+        reset_entries();
 
-	reset_entries();
-    }
-
-    if(pass) {
-
-	/* reset cache min clean size to its expected value */
+    if(pass)
+        /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
-    }
 
     return;
 
@@ -35712,8 +35671,7 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t * file_ptr)
      * values.
      */
 
-    if(pass) {
-
+    if(pass)
 	if((cache_ptr->insertions[MONSTER_ENTRY_TYPE] != 0) ||
              (cache_ptr->pinned_insertions[MONSTER_ENTRY_TYPE] != 0) ||
              (cache_ptr->clears[MONSTER_ENTRY_TYPE] != 0) ||
@@ -35735,31 +35693,24 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected monster entry stats in cedds__H5C_flush_invalidate_cache__bucket_scan().";
-        }
-    }
+        } /* end if */
 
-    if(pass) {
-
+    if(pass)
 	if((cache_ptr->slist_scan_restarts != 0) ||
              (cache_ptr->LRU_scan_restarts != 0) ||
              (cache_ptr->hash_bucket_scan_restarts != 1)) {
-
             pass = FALSE;
             failure_mssg = "unexpected scan restart stats in cedds__H5C_flush_invalidate_cache__bucket_scan().";
         }
-    }
+
 #endif /* H5C_COLLECT_CACHE_STATS */
 
-    if(pass) {
+    if(pass)
+        reset_entries();
 
-	reset_entries();
-    }
-
-    if(pass) {
-
-	/* reset cache min clean size to its expected value */
+    if(pass)
+        /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
-    }
 
     return;
 
@@ -35875,47 +35826,39 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
     int		   i;
     herr_t	   result;
 
-    if(pass) {
-
-         if(cache_ptr == NULL) {
+    if(pass)
+        if(cache_ptr == NULL) {
 
             pass = FALSE;
             failure_mssg = "cache_ptr NULL on entry to check_stats__smoke_check_1().";
-        }
+        } /* end if */
         else if((cache_ptr->index_len != 0) ||
                   (cache_ptr->index_size != 0)) {
 
             pass = FALSE;
             failure_mssg = "cache not empty on entry to check_stats__smoke_check_1().";
-        }
+        } /* end else-if */
         else if((cache_ptr->max_cache_size != (2 * 1024 * 1024)) ||
                   (cache_ptr->min_clean_size != (1 * 1024 * 1024))) {
 
 	    pass = FALSE;
-	    failure_mssg =
-	        "unexpected cache config at start of check_stats__smoke_check_1().";
+	    failure_mssg = "unexpected cache config at start of check_stats__smoke_check_1().";
 
-        } else {
+        } /* end else-if */
+	else {
 
             /* set min clean size to zero for this test as it simplifies
 	     * computing the expected cache size after each operation.
 	     */
-
             cache_ptr->min_clean_size = 0;
-        }
-    }
+        } /* end else */
 
-    if(pass) {
-
+    if(pass)
         /* first fill the cache with monster entryies via insertion */
-
-        for (i = 0; i < 32; i++)
-
+        for(i = 0; i < 32; i++)
             insert_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
-    }
 
-    if(pass) {
-
+    if(pass)
         if((cache_ptr->hits[MONSTER_ENTRY_TYPE] != 0) ||
              (cache_ptr->misses[MONSTER_ENTRY_TYPE] != 0) ||
              (cache_ptr->write_protects[MONSTER_ENTRY_TYPE] != 0) ||
@@ -35942,11 +35885,9 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(1).";
-        }
-    }
+        } /* end if */
 
-    if(pass) {
-
+    if(pass)
         if((cache_ptr->total_ht_insertions != 32) ||
              (cache_ptr->total_ht_deletions != 0) ||
              (cache_ptr->successful_ht_searches != 0) ||
@@ -35975,14 +35916,11 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(1).";
-        }
-    }
+        } /* end if */
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
-    if(pass) {
-
+    if(pass)
         /* Note that most entry level stats are only updated on entry eviction */
-
         if((cache_ptr->max_accesses[MONSTER_ENTRY_TYPE] != 0) ||
              (cache_ptr->min_accesses[MONSTER_ENTRY_TYPE] != 1000000) || /* initial value */
              (cache_ptr->max_clears[MONSTER_ENTRY_TYPE] != 0) ||
@@ -35992,26 +35930,20 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected monster entry level stats in check_stats__smoke_check_1(1).";
-        }
-    }
+        } /* end if */
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
-    if(pass) {
-
+    if(pass)
         /* protect and unprotect each entry once. Note 
          * that all entries are already dirty, as they
          * entered the cache via insertion
          */
-
-        for (i = 0; i < 32; i++)
-        {
+        for(i = 0; i < 32; i++) {
 	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
 	    unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, i, H5C__NO_FLAGS_SET);
-        }
-    }
+        } /* end for */
 
-    if(pass) {
-
+    if(pass)
         if((cache_ptr->hits[MONSTER_ENTRY_TYPE] != 32) ||
              (cache_ptr->misses[MONSTER_ENTRY_TYPE] != 0) ||
              (cache_ptr->write_protects[MONSTER_ENTRY_TYPE] != 32) ||
@@ -36038,11 +35970,9 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(2).";
-        }
-    }
+        } /* end if */
 
-    if(pass) {
-
+    if(pass)
         if((cache_ptr->total_ht_insertions != 32) ||
              (cache_ptr->total_ht_deletions != 0) ||
              (cache_ptr->successful_ht_searches != 32) ||
@@ -36071,14 +36001,11 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(2).";
-        }
-    }
+        } /* end if */
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
-    if(pass) {
-
+    if(pass)
         /* Note that most entry level stats are only updated on entry eviction */
-
         if((cache_ptr->max_accesses[MONSTER_ENTRY_TYPE] != 0) ||
              (cache_ptr->min_accesses[MONSTER_ENTRY_TYPE] != 1000000) || /* initial value */
              (cache_ptr->max_clears[MONSTER_ENTRY_TYPE] != 0) ||
@@ -36088,12 +36015,10 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected monster entry level stats in check_stats__smoke_check_1(2).";
-        }
-    }
+        } /* end if */
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
     if(pass) {
-
         /* protect and unprotect an entry that is not currently
          * in the cache.  Since the cache is full and all entries
          * are dirty, this will force a flush of each entry, and 
@@ -36101,10 +36026,9 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
          */
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 32);
         unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 32, H5C__DIRTIED_FLAG);
-    }
+    } /* end if */
 
-    if(pass) {
-
+    if(pass)
         if((cache_ptr->hits[MONSTER_ENTRY_TYPE] != 32) ||
              (cache_ptr->misses[MONSTER_ENTRY_TYPE] != 1) ||
              (cache_ptr->write_protects[MONSTER_ENTRY_TYPE] != 33) ||
@@ -36131,11 +36055,9 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(3).";
-        }
-    }
+        } /* end if */
 
-    if(pass) {
-
+    if(pass)
         if((cache_ptr->total_ht_insertions != 33) ||
              (cache_ptr->total_ht_deletions != 1) ||
              (cache_ptr->successful_ht_searches != 32) ||
@@ -36164,14 +36086,11 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(3).";
-        }
-    }
+        } /* end if */
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
-    if(pass) {
-
+    if(pass)
         /* Note that most entry level stats are only updated on entry eviction */
-
         if((cache_ptr->max_accesses[MONSTER_ENTRY_TYPE] != 1) ||
              (cache_ptr->min_accesses[MONSTER_ENTRY_TYPE] != 1) ||
              (cache_ptr->max_clears[MONSTER_ENTRY_TYPE] != 0) ||
@@ -36181,18 +36100,17 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected monster entry level stats in check_stats__smoke_check_1(3).";
-        }
-    }
+        } /* end if */
+
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
     if(pass) {
-
         /* protect and unprotect dirty (MET, 1), and then flush destroy
          * the cache.
          */
         protect_entry(file_ptr, MONSTER_ENTRY_TYPE, 1);
         unprotect_entry(file_ptr, MONSTER_ENTRY_TYPE, 1, H5C__DIRTIED_FLAG);
-    }
+    } /* end if */
 
     /* flush the cache to end the test and collect all entry stats */
 
@@ -36204,18 +36122,17 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Cache flush invalidate failed in check_stats__smoke_check_1()";
-        }
+        } /* end if */
         else if((cache_ptr->index_len != 0) ||
                   (cache_ptr->index_size != 0)) {
 
             pass = FALSE;
             failure_mssg = "Unexpected cache len/size after check_stats__smoke_check_1()";
 
-        }
-    }
+        } /* end else-if */
+    } /* end if */
 
-    if(pass) {
-
+    if(pass)
         if((cache_ptr->hits[MONSTER_ENTRY_TYPE] != 33) ||
              (cache_ptr->misses[MONSTER_ENTRY_TYPE] != 1) ||
              (cache_ptr->write_protects[MONSTER_ENTRY_TYPE] != 34) ||
@@ -36242,11 +36159,9 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(4).";
-        }
-    }
+        } /* end if */
 
-    if(pass) {
-
+    if(pass)
         if((cache_ptr->total_ht_insertions != 33) ||
              (cache_ptr->total_ht_deletions != 33) ||
              (cache_ptr->successful_ht_searches != 33) ||
@@ -36275,14 +36190,11 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(4).";
-        }
-    }
+        } /* end if */
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
-    if(pass) {
-
+    if(pass)
         /* Note that most entry level stats are only updated on entry eviction */
-
         if((cache_ptr->max_accesses[MONSTER_ENTRY_TYPE] != 2) ||
              (cache_ptr->min_accesses[MONSTER_ENTRY_TYPE] != 1) ||
              (cache_ptr->max_clears[MONSTER_ENTRY_TYPE] != 0) ||
@@ -36292,20 +36204,16 @@ check_stats__smoke_check_1(H5F_t * file_ptr)
 
             pass = FALSE;
             failure_mssg = "Unexpected monster entry level stats in check_stats__smoke_check_1(4).";
-        }
-    }
+        } /* end if */
+
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 
-    if(pass) {
+    if(pass)
+        reset_entries();
 
-	reset_entries();
-    }
-
-    if(pass) {
-
-	/* reset cache min clean size to its expected value */
+    if(pass)
+        /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
-    }
 
     return;
 

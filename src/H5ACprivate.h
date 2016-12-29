@@ -86,8 +86,9 @@ typedef enum {
     H5AC_FARRAY_DBLK_PAGE_ID,   /* (24) fixed array data block page                 */
     H5AC_SUPERBLOCK_ID,         /* (25) file superblock                             */
     H5AC_DRVRINFO_ID,           /* (26) driver info block (supplements superblock)  */
-    H5AC_PROXY_ENTRY_ID,        /* (27) cache entry proxy                           */
-    H5AC_TEST_ID,               /* (28) test entry -- not used for actual files     */
+    H5AC_EPOCH_MARKER_ID,       /* (27) epoch marker - always internal to cache     */
+    H5AC_PROXY_ENTRY_ID,        /* (28) cache entry proxy                           */
+    H5AC_TEST_ID,               /* (29) test entry -- not used for actual files     */
     H5AC_NTYPES                 /* Number of types, must be last                    */
 } H5AC_type_t;
 

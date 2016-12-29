@@ -34,9 +34,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Cpkg.h"		/* Cache				*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5private.h"      /* Generic Functions            */
+#include "H5Cpkg.h"         /* Cache                        */
+#include "H5Eprivate.h"     /* Error Handling               */
 
 
 /****************/
@@ -342,19 +342,6 @@ done:
  * Programmer:  John Mainzer
  *              6/2/04
  *
- *		JRM -- 11/13/08
- *		Added code displaying the max_clean_index_size and
- *		max_dirty_index_size.
- *
- *              MAM -- 01/06/09
- *              Added code displaying the calls_to_msic,
- *              total_entries_skipped_in_msic, total_entries_scanned_in_msic,
- *              and max_entries_skipped_in_msic fields.
- *
- *		JRM -- 4/11/15
- *		Added code displaying the new slist_scan_restarts,
- *		LRU_scan_restarts, and hash_bucket_scan_restarts fields;
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -625,11 +612,10 @@ H5C_stats(H5C_t * cache_ptr,
               cache_ptr->prefix,
               (long long)(cache_ptr->calls_to_msic));
 
-    if (cache_ptr->calls_to_msic > 0) {
+    if (cache_ptr->calls_to_msic > 0)
         average_entries_skipped_per_calls_to_msic =
             (((double)(cache_ptr->total_entries_skipped_in_msic)) /
             ((double)(cache_ptr->calls_to_msic)));
-    }
 
     HDfprintf(stdout, "%s  MSIC: Average/max entries skipped  = %lf / %ld\n",
               cache_ptr->prefix,
@@ -804,20 +790,6 @@ done:
  *
  * Programmer:  John Mainzer, 4/28/04
  *
- *		JRM 11/13/08
- *		Added initialization for the new max_clean_index_size and
- *		max_dirty_index_size fields.
- *
- *              MAM -- 01/06/09
- *              Added code to initalize the calls_to_msic,
- *              total_entries_skipped_in_msic, total_entries_scanned_in_msic,
- *              and max_entries_skipped_in_msic fields.
- *
- *		JRM 4/11/15
- *		Added code to initialize the new slist_scan_restarts,
- *		LRU_scan_restarts, hash_bucket_scan_restarts, and 
- *		take_ownerships fields.
- *
  *-------------------------------------------------------------------------
  */
 void
@@ -910,6 +882,7 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED * cache_ptr)
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 #endif /* H5C_COLLECT_CACHE_STATS */
 
+    return;
 } /* H5C_stats__reset() */
 
 extern void
@@ -948,7 +921,7 @@ H5C__dump_children_cb(H5C_cache_entry_t *entry_ptr, void *_ctx)
     } /* end if */
 
     return(H5_ITER_CONT);
-}
+} /* end H5C__dump_children_cb() */
 
 static void
 H5C__dump_children(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr,
@@ -964,7 +937,7 @@ H5C__dump_children(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr,
     ctx.prefix = prefix;
     ctx.indent = indent;
     H5C__iter_tagged_entries(cache_ptr, entry_ptr->tag_info->tag, FALSE, H5C__dump_children_cb, &ctx);
-}
+} /* end H5C__dump_children() */
 
 void
 H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr,
@@ -978,4 +951,4 @@ H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr,
         H5C__dump_parents(cache_ptr, entry_ptr, "Parent", indent);
     if(entry_ptr->flush_dep_nchildren)
         H5C__dump_children(cache_ptr, entry_ptr, FALSE, "Child", indent);
-}
+} /* end H5C__dump_entry() */

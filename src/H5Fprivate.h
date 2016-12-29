@@ -527,6 +527,7 @@
 #define H5F_METADATA_READ_ATTEMPTS		1	/* Default # of read attempts for non-SWMR access */
 #define H5F_SWMR_METADATA_READ_ATTEMPTS		100	/* Default # of read attempts for SWMR access */
 
+
 /* Macros to define signatures of all objects in the file */
 
 /* Size of signature information (on disk) */

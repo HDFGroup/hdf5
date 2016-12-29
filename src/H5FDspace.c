@@ -19,7 +19,7 @@
  *			Jan  3 2008
  *			Quincey Koziol <koziol@hdfgroup.org>
  *
- * Purpose:		Space allocation routines for the file.
+ * Purpose:		Space allocation routines for the file driver code.
  *
  *-------------------------------------------------------------------------
  */

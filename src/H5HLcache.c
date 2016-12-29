@@ -309,7 +309,7 @@ H5HL__cache_prefix_get_final_load_size(const void *_image, size_t image_len,
     const uint8_t *image = (const uint8_t *)_image;   			/* Pointer into raw data buffer */
     H5HL_cache_prfx_ud_t *udata = (H5HL_cache_prfx_ud_t *)_udata; 	/* User data for callback */
     H5HL_t heap;        	/* Local heap */
-    htri_t ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 

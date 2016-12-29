@@ -190,7 +190,6 @@ struct H5FS_t {
     hsize_t    threshold;      	/* Threshold for alignment              */
     hsize_t    alignment;      	/* Alignment                            */
 
-
 /* Memory data structures (not stored directly) */
     H5FS_section_class_t *sect_cls; /* Array of section classes for this free list */
 };

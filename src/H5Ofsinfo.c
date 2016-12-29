@@ -19,7 +19,7 @@
  *                      Feb 2009
  *			Vailin Choi
  *
- * Purpose:             Free space manager info message.
+ * Purpose:             File space info message.
  *
  *-------------------------------------------------------------------------
  */
