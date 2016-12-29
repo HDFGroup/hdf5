@@ -41,7 +41,7 @@
 /**************************/
 
 /* Cache configuration settings */
-#define H5C__MAX_NUM_TYPE_IDS   29
+#define H5C__MAX_NUM_TYPE_IDS   30
 #define H5C__PREFIX_LEN         32
 
 /* This sanity checking constant was picked out of the air.  Increase
@@ -66,11 +66,11 @@
 #endif /* H5_HAVE_PARALLEL */
 
 /* Flags for cache client class behavior */
-#define H5C__CLASS_NO_FLAGS_SET			((unsigned)0x0)
-#define H5C__CLASS_SPECULATIVE_LOAD_FLAG	((unsigned)0x1)
+#define H5C__CLASS_NO_FLAGS_SET             ((unsigned)0x0)
+#define H5C__CLASS_SPECULATIVE_LOAD_FLAG    ((unsigned)0x1)
 /* The following flags may only appear in test code */
-#define H5C__CLASS_SKIP_READS			((unsigned)0x2)
-#define H5C__CLASS_SKIP_WRITES			((unsigned)0x4)
+#define H5C__CLASS_SKIP_READS               ((unsigned)0x2)
+#define H5C__CLASS_SKIP_WRITES              ((unsigned)0x4)
 
 /* Flags for pre-serialize callback */
 #define H5C__SERIALIZE_NO_FLAGS_SET	((unsigned)0)
@@ -114,9 +114,6 @@
 /* Cache configuration versions */
 #define H5C__CURR_AUTO_SIZE_CTL_VER		1
 #define H5C__CURR_AUTO_RESIZE_RPT_FCN_VER	1
-
-/* Number of epoch markers active */
-#define H5C__MAX_EPOCH_MARKERS  		10
 
 /* Default configuration settings */
 #define H5C__DEF_AR_UPPER_THRESHHOLD		0.9999f
@@ -958,12 +955,12 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr,
  * debugging.
  */
 
-#define H5C_RING_UNDEFINED	0 /* shouldn't appear in the cache */
-#define H5C_RING_USER		1 /* outermost ring */
-#define H5C_RING_FSM		2
-#define H5C_RING_SBE		4 /* temporarily merged with H5C_RING_SB */
-#define H5C_RING_SB		4 /* innermost ring */
-#define H5C_RING_NTYPES		5 
+#define H5C_RING_UNDEFINED  0 /* shouldn't appear in the cache */
+#define H5C_RING_USER       1 /* outermost ring */
+#define H5C_RING_FSM	    2
+#define H5C_RING_SBE        4 /* temporarily merged with H5C_RING_SB */
+#define H5C_RING_SB         4 /* innermost ring */
+#define H5C_RING_NTYPES     5
 
 typedef int H5C_ring_t;
 
@@ -1347,12 +1344,12 @@ typedef int H5C_ring_t;
  ****************************************************************************/
 typedef struct H5C_cache_entry_t {
     uint32_t			magic;
-    H5C_t                     * cache_ptr;
+    H5C_t                      *cache_ptr;
     haddr_t			addr;
     size_t			size;
-    void  		      *	image_ptr;
+    void  		       *image_ptr;
     hbool_t			image_up_to_date;
-    const H5C_class_t	      *	type;
+    const H5C_class_t	       *type;
     hbool_t			is_dirty;
     hbool_t			dirtied;
     hbool_t			is_protected;
@@ -1383,23 +1380,23 @@ typedef struct H5C_cache_entry_t {
     hbool_t			pinned_from_cache;
 
     /* fields supporting the hash table: */
-    struct H5C_cache_entry_t  *	ht_next;
-    struct H5C_cache_entry_t  *	ht_prev;
+    struct H5C_cache_entry_t   *ht_next;
+    struct H5C_cache_entry_t   *ht_prev;
 
     /* fields supporting replacement policies: */
-    struct H5C_cache_entry_t  *	next;
-    struct H5C_cache_entry_t  *	prev;
-    struct H5C_cache_entry_t  *	aux_next;
-    struct H5C_cache_entry_t  *	aux_prev;
+    struct H5C_cache_entry_t   *next;
+    struct H5C_cache_entry_t   *prev;
+    struct H5C_cache_entry_t   *aux_next;
+    struct H5C_cache_entry_t   *aux_prev;
 #ifdef H5_HAVE_PARALLEL
-    struct H5C_cache_entry_t  *	coll_next;
-    struct H5C_cache_entry_t  *	coll_prev;
+    struct H5C_cache_entry_t   *coll_next;
+    struct H5C_cache_entry_t   *coll_prev;
 #endif /* H5_HAVE_PARALLEL */
 
     /* fields supporting tag lists */
-    struct H5C_cache_entry_t  *	tl_next;
-    struct H5C_cache_entry_t  *	tl_prev;
-    struct H5C_tag_info_t     * tag_info;
+    struct H5C_cache_entry_t   *tl_next;
+    struct H5C_cache_entry_t   *tl_prev;
+    struct H5C_tag_info_t      *tag_info;
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     /* cache entry stats fields */

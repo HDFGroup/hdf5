@@ -192,7 +192,7 @@ H5MF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, FILE *stream, int ind
 		    HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
 	    } /* end if */
 	    break;
-	}
+	} /* end if */
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
@@ -267,9 +267,7 @@ HDfprintf(stderr, "%s: sda_addr = %a, sda_size = %Hu, end of sda = %a\n", FUNC, 
             /* Retrieve the 'eoa' for this file memory type */
             if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, type)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-            HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3),
-                      "eoa:",
-                      eoa);
+            HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3), "eoa:", eoa);
 
             /* Print header for sections */
             HDfprintf(stream, "%*sSections:\n", indent + 3, "");
@@ -288,14 +286,13 @@ HDfprintf(stderr, "%s: sda_addr = %a, sda_size = %Hu, end of sda = %a\n", FUNC, 
                 if(H5FS_sect_iterate(f, dxpl_id, f->shared->fs_man[type], H5MF_sects_debug_cb, &udata) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
             } /* end if */
-            else {
+            else
                 /* No sections of this type */
                 HDfprintf(stream, "%*s<none>\n", indent + 6, "");
-            } /* end else */
         } /* end if */
-        else {
+        else
             HDfprintf(stream, "%*sMapped to type = %u\n", indent, "", (unsigned)f->shared->fs_type_map[type]);
-        } /* end else */
+
     } /* end for */
 
 done:

@@ -1725,10 +1725,10 @@ HDfprintf(stderr, "%s: bin = %u\n", FUNC, bin);
                         HDassert(alignment);
                         HDassert(cls);
 
-                        if ((mis_align = curr_sect->addr % alignment))
+                        if((mis_align = curr_sect->addr % alignment))
                             frag_size = alignment - mis_align;
 
-                        if ((curr_sect->size >= (request + frag_size)) && (cls->split)) {
+                        if((curr_sect->size >= (request + frag_size)) && (cls->split)) {
                             /* remove the section with aligned address */
                             if(NULL == (*node = (H5FS_section_info_t *)H5SL_remove(curr_fspace_node->sect_list, &curr_sect->addr)))
                                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTREMOVE, FAIL, "can't remove free space node from skip list")
@@ -1745,17 +1745,17 @@ HDfprintf(stderr, "%s: bin = %u\n", FUNC, bin);
                              *  NODE's addr & size are updated to point to the remaining aligned section
                              * split_sect is re-added to free-space
                              */
-                            if (mis_align) {
+                            if(mis_align) {
                                 split_sect = cls->split(*node, frag_size);
                                 if((H5FS_sect_link(fspace, split_sect, 0) < 0))
                                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't insert free space section into skip list")
                                 /* sanity check */
                                 HDassert(split_sect->addr < (*node)->addr);
                                 HDassert(request <= (*node)->size);
-                            }
+                            } /* end if */
                             /* Indicate that we found a node for the request */
                             HGOTO_DONE(TRUE)
-                        }
+                        } /* end if */
 
                         /* Get the next section node in the list */
                         curr_sect_node = H5SL_next(curr_sect_node);
@@ -1831,7 +1831,7 @@ HDfprintf(stderr, "%s: fspace->ghost_sect_count = %Hu\n", FUNC, fspace->ghost_se
 #ifdef QAK
 HDfprintf(stderr, "%s: (*node)->size = %Hu, (*node)->addr = %a, (*node)->type = %u\n", FUNC, (*node)->size, (*node)->addr, (*node)->type);
 #endif /* QAK */
-        }
+        } /* end if */
     } /* end if */
 
 done:

@@ -221,14 +221,15 @@ HDfprintf(stderr, "%s: aggr = {%a, %Hu, %Hu}\n", FUNC, aggr->addr, aggr->tot_siz
                 if(H5F_addr_gt((aggr->addr + aggr->size + ext_size), f->shared->tmp_addr))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "'normal' file space allocation request will overlap into 'temporary' file space")
 
-		if ((aggr->addr > 0) && (was_extended = H5FD_try_extend(f->shared->lf, alloc_type, f, aggr->addr + aggr->size, ext_size)) < 0)
+		if((aggr->addr > 0) && (was_extended = H5FD_try_extend(f->shared->lf, alloc_type, f, aggr->addr + aggr->size, ext_size)) < 0)
 		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't extending space")
-		else if (was_extended) {
+		else if(was_extended) {
 		    /* aggr->size is unchanged */
 		    ret_value = aggr->addr + aggr_frag_size;
 		    aggr->addr += ext_size;
 		    aggr->tot_size += ext_size;
-		} else {
+		} /* end else-if */
+		else {
                     /* Check for overlapping into file's temporary allocation space */
                     if(H5F_addr_gt((eoa + size), f->shared->tmp_addr))
                         HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "'normal' file space allocation request will overlap into 'temporary' file space")
@@ -237,10 +238,10 @@ HDfprintf(stderr, "%s: aggr = {%a, %Hu, %Hu}\n", FUNC, aggr->addr, aggr->tot_siz
                      * has allocated more than one block and the unallocated space is greater than its
                      * allocation block size.
                      */
-		    if ((other_aggr->size > 0) && (H5F_addr_eq((other_aggr->addr + other_aggr->size), eoa)) &&
-			(other_aggr->tot_size > other_aggr->size) && ((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
-                            if(H5MF_aggr_free(f, dxpl_id, other_alloc_type, other_aggr) < 0)
-                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF, "can't free aggregation block")
+		    if((other_aggr->size > 0) && (H5F_addr_eq((other_aggr->addr + other_aggr->size), eoa)) &&
+			    (other_aggr->tot_size > other_aggr->size) && ((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
+                        if(H5MF_aggr_free(f, dxpl_id, other_alloc_type, other_aggr) < 0)
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF, "can't free aggregation block")
 		    } /* end if */
 
                     /* Allocate space from the VFD (i.e. at the end of the file) */
@@ -265,11 +266,12 @@ HDfprintf(stderr, "%s: Allocating block\n", FUNC);
 
 		if((aggr->addr > 0) && (was_extended = H5FD_try_extend(f->shared->lf, alloc_type, f, aggr->addr + aggr->size, ext_size)) < 0)
 		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't extending space")
-		else if (was_extended) {
+		else if(was_extended) {
 		    aggr->addr += aggr_frag_size;
 		    aggr->size += (ext_size - aggr_frag_size);
 		    aggr->tot_size += ext_size;
-		} else {
+		} /* end else-if */
+		else {
                     haddr_t new_space;          /* Address of new space allocated */
 
                     /* Check for overlapping into file's temporary allocation space */
@@ -281,9 +283,9 @@ HDfprintf(stderr, "%s: Allocating block\n", FUNC);
                      * allocation block size.
                      */
 		    if((other_aggr->size > 0) && (H5F_addr_eq((other_aggr->addr + other_aggr->size), eoa)) &&
-			(other_aggr->tot_size > other_aggr->size) && ((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
-                            if(H5MF_aggr_free(f, dxpl_id, other_alloc_type, other_aggr) < 0)
-                                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF, "can't free aggregation block")
+			    (other_aggr->tot_size > other_aggr->size) && ((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
+                        if(H5MF_aggr_free(f, dxpl_id, other_alloc_type, other_aggr) < 0)
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, HADDR_UNDEF, "can't free aggregation block")
 		    } /* end if */
 
                     /* Allocate space from the VFD (i.e. at the end of the file) */
@@ -314,7 +316,7 @@ HDfprintf(stderr, "%s: Allocating block\n", FUNC);
                         aggr->addr = new_space;
                         aggr->size = aggr->alloc_size;
                         aggr->tot_size = aggr->alloc_size;
-                    }
+                    } /* end else */
                 } /* end else */
 
 		/* Allocate space out of the metadata block */
@@ -436,8 +438,8 @@ H5MF_aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr, H5FD_mem_t type,
 
 		    /* Indicate success */
 		    HGOTO_DONE(TRUE);
-		} 
-		/* 
+		} /* end if */
+		/*
 		 * If extra_requested is above percentage threshold:
 		 * 1) "bubble" up the aggregator by aggr->alloc_size or extra_requested
 		 * 2) extend the block into the aggregator 
@@ -461,8 +463,8 @@ H5MF_aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr, H5FD_mem_t type,
                          */
 			aggr->size += extra;
 			aggr->size -= extra_requested;
-		    } /* end if */
-		} /* end if */
+		    } /* end else-if */
+		} /* end else */
 	    } /* end if */
             else { /* The aggreator is not at end of file */
                 /* Check if aggregator has enough internal space to satisfy the extension. */

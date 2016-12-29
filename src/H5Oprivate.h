@@ -99,7 +99,7 @@ typedef struct H5O_t H5O_t;
 #define H5O_BOGUS_MSG_FLAGS_NAME        "bogus msg flags"       /* Flags for 'bogus' message */
 #define H5O_BOGUS_MSG_FLAGS_SIZE        sizeof(uint8_t)
 
-/* bogus ID can be either (a) H5O_BOGUS_VALID_ID 0x0009 or (b) H5O_BOGUS_INVALID_ID 0x0019 */
+/* bogus ID can be either (a) H5O_BOGUS_VALID_ID or (b) H5O_BOGUS_INVALID_ID */
 #define H5O_BOGUS_MSG_ID_NAME        "bogus msg id" 		/* ID for 'bogus' message */
 #define H5O_BOGUS_MSG_ID_SIZE        sizeof(unsigned)
 
@@ -206,6 +206,14 @@ typedef struct H5O_copy_t {
 #define H5O_FSINFO_ID   0x0017          /* Free-space manager info message.  */
 #define H5O_UNKNOWN_ID  0x0018          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
+/* 
+ * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
+ *      in H5O.c when creating a new message type.  Also bump the value of
+ *      H5O_BOGUS_INVALID_ID, below, to be one greater than the value of
+ *      H5O_UNKNOWN_ID.
+ *
+ * (this should never exist in a file)
+ */
 #define H5O_BOGUS_INVALID_ID	0x0019  /* "Bogus invalid" Message.  */
 
 /* Shared object message types.
@@ -775,7 +783,7 @@ typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 
 typedef unsigned H5O_unknown_t;         /* Original message type ID */
 
 /*
- * Free space manager info Message.
+ * File space info Message.
  * Contains file space management info and
  * addresses of free space managers for file memory
  * (Data structure in memory)

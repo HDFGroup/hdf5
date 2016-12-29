@@ -498,8 +498,7 @@ H5FD_sb_encode(H5FD_t *file, char *name/*out*/, uint8_t *buf)
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(file && file->cls);
-    if(file->cls->sb_encode &&
-            (file->cls->sb_encode)(file, name/*out*/, buf/*out*/) < 0)
+    if(file->cls->sb_encode && (file->cls->sb_encode)(file, name/*out*/, buf/*out*/) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver sb_encode request failed")
 
 done:

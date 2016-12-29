@@ -25,18 +25,11 @@
  */
 
 
-/****************/
-/* Module Setup */
-/****************/
-
-#include "H5Cmodule.h"          /* This source code file is part of the H5C module */
-
-
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Cpkg.h"		/* Cache				*/
+#include "H5ACprivate.h"        /* Metadata cache                       */
 
 
 /****************/
@@ -101,10 +94,10 @@ static herr_t H5C__epoch_marker_fsf_size(const void H5_ATTR_UNUSED * thing,
 
 const H5C_class_t H5C__epoch_marker_class =
 {
-    /* id               = */ H5C__EPOCH_MARKER_TYPE,
+    /* id               = */ H5AC_EPOCH_MARKER_ID,
     /* name             = */ "epoch marker",
     /* mem_type         = */ H5FD_MEM_DEFAULT, /* value doesn't matter */
-    /* flags		= */ H5C__CLASS_NO_FLAGS_SET,
+    /* flags		= */ H5AC__CLASS_NO_FLAGS_SET,
     /* get_initial_load_size = */ H5C__epoch_marker_get_initial_load_size,
     /* get_final_load_size = */ H5C__epoch_marker_get_final_load_size,
     /* verify_chksum    = */ H5C__epoch_marker_verify_chksum,

@@ -653,7 +653,6 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
 		HDassert(f->shared->sblock == NULL);
 		f->shared->sblock = sblock;
 #endif /* JRM */
-
 		if(H5F_super_ext_write_msg(f, dxpl_id, H5O_DRVINFO_ID, &drvinfo, FALSE) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension")
 
