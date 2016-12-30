@@ -384,7 +384,7 @@ if ( ( (cache_ptr) == NULL ) ||                              \
     HDfprintf(stdout, "Pre HT search SC failed.\n");         \
 }
 
-#define H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k) \
+#define H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k)  \
 if ( ( (cache_ptr) == NULL ) ||                                   \
      ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                \
      ( (cache_ptr)->index_len < 1 ) ||                            \
@@ -392,7 +392,6 @@ if ( ( (cache_ptr) == NULL ) ||                                   \
      ( (cache_ptr)->index_size < (entry_ptr)->size ) ||           \
      ( (cache_ptr)->index_size !=                                 \
        ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ) || \
-     ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                \
      ( (entry_ptr)->size <= 0 ) ||                                \
      ( ((cache_ptr)->index)[k] == NULL ) ||                       \
      ( ( ((cache_ptr)->index)[k] != (entry_ptr) ) &&              \
@@ -416,32 +415,29 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
 #define H5C_TEST__SEARCH_INDEX(cache_ptr, Addr, entry_ptr)              \
 {                                                                       \
     int k;                                                              \
-    int depth = 0;                                                      \
     H5C_TEST__PRE_HT_SEARCH_SC(cache_ptr, Addr)                         \
     k = H5C__HASH_FCN(Addr);                                            \
     entry_ptr = ((cache_ptr)->index)[k];                                \
-    while ( ( entry_ptr ) && ( H5F_addr_ne(Addr, (entry_ptr)->addr) ) ) \
+    while ( entry_ptr )                                                 \
     {                                                                   \
-        (entry_ptr) = (entry_ptr)->ht_next;                             \
-        (depth)++;                                                      \
-    }                                                                   \
-    if ( entry_ptr )                                                    \
-    {                                                                   \
-        H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k)  \
-        if ( entry_ptr != ((cache_ptr)->index)[k] )                     \
+        if ( H5F_addr_eq(Addr, (entry_ptr)->addr) )                     \
         {                                                               \
-            if ( (entry_ptr)->ht_next )                                 \
+            H5C_TEST__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k)    \
+            if ( entry_ptr != ((cache_ptr)->index)[k] )                 \
             {                                                           \
-                (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;   \
+                if ( (entry_ptr)->ht_next )                             \
+                    (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev; \
+                HDassert( (entry_ptr)->ht_prev != NULL );               \
+                (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;   \
+                ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);         \
+                (entry_ptr)->ht_next = ((cache_ptr)->index)[k];         \
+                (entry_ptr)->ht_prev = NULL;                            \
+                ((cache_ptr)->index)[k] = (entry_ptr);                  \
+                H5C_TEST__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k) \
             }                                                           \
-            HDassert( (entry_ptr)->ht_prev != NULL );                   \
-            (entry_ptr)->ht_prev->ht_next = (entry_ptr)->ht_next;       \
-            ((cache_ptr)->index)[k]->ht_prev = (entry_ptr);             \
-            (entry_ptr)->ht_next = ((cache_ptr)->index)[k];             \
-            (entry_ptr)->ht_prev = NULL;                                \
-            ((cache_ptr)->index)[k] = (entry_ptr);                      \
-            H5C_TEST__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k)   \
+            break;                                                      \
         }                                                               \
+        (entry_ptr) = (entry_ptr)->ht_next;                             \
     }                                                                   \
 }
 

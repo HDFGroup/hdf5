@@ -69,6 +69,7 @@
 /********************/
 
 /* Local encode/decode routines */
+static herr_t H5HF__hdr_prefix_decode(H5HF_hdr_t *hdr, const uint8_t **image_ref);
 static herr_t H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable);
 static herr_t H5HF__dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable);
 
@@ -197,6 +198,52 @@ const H5AC_class_t H5AC_FHEAP_DBLOCK[1] = {{
 /* Declare a free list to manage heap direct block data to/from disk */
 H5FL_BLK_DEFINE(direct_block);
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF__hdr_prefix_decode()
+ *
+ * Purpose:	Decode a fractal heap header's prefix
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		December 15, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t 
+H5HF__hdr_prefix_decode(H5HF_hdr_t *hdr, const uint8_t **image_ref)
+{
+    const uint8_t *image = *image_ref;  /* Pointer into into supplied image */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(hdr);
+    HDassert(image);
+
+    /* Magic number */
+    if(HDmemcmp(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "wrong fractal heap header signature")
+    image += H5_SIZEOF_MAGIC;
+
+    /* Version */
+    if(*image++ != H5HF_HDR_VERSION)
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong fractal heap header version")
+
+    /* General heap information */
+    UINT16DECODE(image, hdr->id_len);              /* Heap ID length */
+    UINT16DECODE(image, hdr->filter_len);          /* I/O filters' encoded length */
+
+    /* Update the image buffer pointer */
+    *image_ref = image;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF__hdr_prefix_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -360,10 +407,10 @@ static herr_t
 H5HF__cache_hdr_get_final_load_size(const void *_image, size_t image_len,
     void *_udata, size_t *actual_len)
 {
-    const uint8_t *image = (const uint8_t *)_image;	/* Pointer into raw data buffer */
-    H5HF_hdr_cache_ud_t *udata = (H5HF_hdr_cache_ud_t *)_udata; /* pointer to user data */
-    unsigned filter_len;        /* Size of I/O filter information (in bytes) */
-    htri_t ret_value = SUCCEED; /* Return value */
+    H5HF_hdr_t hdr;             /* Temporary fractal heap header */
+    const uint8_t *image = (const uint8_t *)_image;       /* Pointer into into supplied image */
+    H5HF_hdr_cache_ud_t *udata = (H5HF_hdr_cache_ud_t *)_udata; /* User data for callback */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -373,25 +420,16 @@ H5HF__cache_hdr_get_final_load_size(const void *_image, size_t image_len,
     HDassert(actual_len);
     HDassert(*actual_len == image_len);
 
-    /* Magic number */
-    if(HDmemcmp(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "wrong fractal heap header signature")
-    image += H5_SIZEOF_MAGIC;
-
-    /* Version */
-    if(*image++ != H5HF_HDR_VERSION)
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong fractal heap header version")
-
-    /* General heap information */
-    image += 2;                               /* Heap ID length */
-    UINT16DECODE(image, filter_len);          /* I/O filters' encoded length */
+    /* Deserialize the fractal heap header's prefix */
+    if(H5HF__hdr_prefix_decode(&hdr, &image) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode fractal heap header prefix")
 
     /* Check for I/O filter info on this heap */
-    if(filter_len > 0)
+    if(hdr.filter_len > 0)
         /* Compute the extra heap header size */
         *actual_len += (size_t)(H5F_SIZEOF_SIZE(udata->f)   /* Size of size for filtered root direct block */
                             + (unsigned)4		/* Size of filter mask for filtered root direct block */
-                            + filter_len);         	/* Size of encoded I/O filter info */
+                            + hdr.filter_len);         	/* Size of encoded I/O filter info */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -473,18 +511,9 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     if(NULL == (hdr = H5HF_hdr_alloc(udata->f)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* Magic number */
-    if(HDmemcmp(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "wrong fractal heap header signature")
-    image += H5_SIZEOF_MAGIC;
-
-    /* Version */
-    if(*image++ != H5HF_HDR_VERSION)
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, NULL, "wrong fractal heap header version")
-
-    /* General heap information */
-    UINT16DECODE(image, hdr->id_len);              /* Heap ID length */
-    UINT16DECODE(image, hdr->filter_len);          /* I/O filters' encoded length */
+    /* Deserialize the fractal heap header's prefix */
+    if(H5HF__hdr_prefix_decode(hdr, &image) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode fractal heap header prefix")
 
     /* Heap status flags */
     /* (bit 0: "huge" object IDs have wrapped) */
@@ -1618,10 +1647,6 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
     hdr = par_info->hdr;
     HDassert(hdr);
 
-    /* Reset callback context info */
-    udata->decompressed = FALSE;
-    udata->dblk = NULL;
-
     /* Get out if data block is not checksummed */
     if(!(hdr->checksum_dblocks))
 	HGOTO_DONE(TRUE);
@@ -1728,7 +1753,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata,
     H5HF_dblock_cache_ud_t *udata = (H5HF_dblock_cache_ud_t *)_udata;   /* User data for callback */
     H5HF_parent_t       *par_info;      /* Pointer to parent information */
     H5HF_direct_t       *dblock = NULL; /* Direct block info */
-    const uint8_t       *image = _image;/* Pointer into raw data buffer */
+    const uint8_t       *image = (const uint8_t *)_image;/* Pointer into raw data buffer */
     void                *read_buf = NULL; /* Pointer to buffer to decompress */
     haddr_t             heap_addr;      /* Address of heap header in the file */
     void *              ret_value = NULL;       /* Return value */

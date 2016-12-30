@@ -642,11 +642,11 @@ H5C_stats(H5C_t * cache_ptr,
                             cache_ptr->entries_scanned_to_make_space));
 
     HDfprintf(stdout, 
-              "%s  slist/LRU/hash bkt scan restarts   = %lld / %lld / %lld.\n",
+              "%s  slist/LRU/index scan restarts   = %lld / %lld / %lld.\n",
               cache_ptr->prefix, 
               (long long)(cache_ptr->slist_scan_restarts),
               (long long)(cache_ptr->LRU_scan_restarts),
-              (long long)(cache_ptr->hash_bucket_scan_restarts));
+              (long long)(cache_ptr->index_scan_restarts));
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
@@ -867,7 +867,7 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED * cache_ptr)
 
     cache_ptr->slist_scan_restarts		= 0;
     cache_ptr->LRU_scan_restarts		= 0;
-    cache_ptr->hash_bucket_scan_restarts	= 0;
+    cache_ptr->index_scan_restarts              = 0;
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     for(i = 0; i <= cache_ptr->max_type_id; i++) {

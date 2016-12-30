@@ -173,7 +173,7 @@
 #define H5D_XFER_DIRECT_CHUNK_WRITE_DATASIZE_DEF	0
 /* Ring type - private property */
 #define H5AC_XFER_RING_SIZE      sizeof(unsigned)
-#define H5AC_XFER_RING_DEF       H5AC_RING_US
+#define H5AC_XFER_RING_DEF       H5AC_RING_USER
 #define H5AC_XFER_RING_ENC       H5P__encode_unsigned
 #define H5AC_XFER_RING_DEC       H5P__decode_unsigned
 #ifdef H5_DEBUG_BUILD

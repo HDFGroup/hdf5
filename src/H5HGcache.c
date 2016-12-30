@@ -72,6 +72,10 @@ static herr_t H5HG__cache_heap_serialize(const H5F_t *f, void *image,
     size_t len, void *thing); 
 static herr_t H5HG__cache_heap_free_icr(void *thing);
 
+/* Prefix deserialization */
+static herr_t H5HG__hdr_deserialize(H5HG_heap_t *heap, const uint8_t *image,
+    const H5F_t *f);
+
 
 /*********************/
 /* Package Variables */
@@ -105,6 +109,52 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
 /* Local Variables */
 /*******************/
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HG__hdr_deserialize()
+ *
+ * Purpose:	Decode a global heap's header
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              December 15, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HG__hdr_deserialize(H5HG_heap_t *heap, const uint8_t *image, const H5F_t *f)
+{
+    herr_t ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(heap);
+    HDassert(image);
+    HDassert(f);
+
+    /* Magic number */
+    if(HDmemcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad global heap collection signature")
+    image += H5_SIZEOF_MAGIC;
+
+    /* Version */
+    if(H5HG_VERSION != *image++)
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong version number in global heap")
+
+    /* Reserved */
+    image += 3;
+
+    /* Size */
+    H5F_DECODE_LENGTH(f, image, heap->size);
+    HDassert(heap->size >= H5HG_MINSIZE);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HG__hdr_deserialize() */
 
 
 /*-------------------------------------------------------------------------
@@ -154,41 +204,27 @@ H5HG__cache_heap_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *imag
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HG__cache_heap_get_final_load_size(const void *_image, size_t image_len,
-    void *_udata, size_t *actual_len)
+H5HG__cache_heap_get_final_load_size(const void *image, size_t image_len,
+    void *udata, size_t *actual_len)
 {
-    const uint8_t *image = (const uint8_t *)_image;   	/* Pointer into raw data buffer */
-    H5F_t *f = (H5F_t *)_udata;                 /* File pointer -- obtained from user data */
-    size_t heap_size = 0;                       /* Total size of collection      */
-    herr_t ret_value = SUCCEED;                 /* Return value */
+    H5HG_heap_t heap;                   /* Global heap */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(image);
-    HDassert(f);
+    HDassert(udata);
     HDassert(actual_len);
     HDassert(*actual_len == image_len);
-
-    /* Magic number */
-    if(HDmemcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad global heap collection signature")
-    image += H5_SIZEOF_MAGIC;
-
-    /* Version */
-    if(H5HG_VERSION != *image++)
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong version number in global heap")
-
-    /* Reserved */
-    image += 3;
-
-    /* Size */
-    H5F_DECODE_LENGTH(f, image, heap_size);
-    HDassert(heap_size >= H5HG_MINSIZE);
     HDassert(image_len == H5HG_MINSIZE);
 
+    /* Deserialize the heap's header */
+    if(H5HG__hdr_deserialize(&heap, (const uint8_t *)image, (const H5F_t *)udata) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode global heap prefix")
+
     /* Set the final size for the cache image */
-    *actual_len = heap_size;
+    *actual_len = heap.size;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -236,29 +272,13 @@ H5HG__cache_heap_deserialize(const void *_image, size_t len, void *_udata,
     if(NULL == (heap->chunk = H5FL_BLK_MALLOC(gheap_chunk, len)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    /* copy the image buffer into the newly allocate chunk */
+    /* Copy the image buffer into the newly allocate chunk */
     HDmemcpy(heap->chunk, _image, len);
 
-    image = heap->chunk;
+    /* Deserialize the heap's header */
+    if(H5HG__hdr_deserialize(heap, (const uint8_t *)heap->chunk, f) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode global heap header")
 
-    /* Magic number */
-    if(HDmemcmp(image, H5HG_MAGIC, (size_t)H5_SIZEOF_MAGIC))
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad global heap collection signature")
-    image += H5_SIZEOF_MAGIC;
-
-    /* Version */
-    if(H5HG_VERSION != *image++) 
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong version number in global heap")
-
-    /* Reserved */
-    image += 3;
-
-    /* Size */
-    H5F_DECODE_LENGTH(f, image, heap->size);
-    HDassert(heap->size >= H5HG_MINSIZE);
-    HDassert((len == H5HG_MINSIZE) /* first try */ || 
-             ((len == heap->size) && (len > H5HG_MINSIZE))); /* second try */
-    
     /* Decode each object */
     image = heap->chunk + H5HG_SIZEOF_HDR(f);
     nalloc = H5HG_NOBJS(f, heap->size);

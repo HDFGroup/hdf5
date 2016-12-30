@@ -84,6 +84,10 @@ static herr_t H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len,
 static herr_t H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing);
 static herr_t H5O__cache_chk_free_icr(void *thing);
 
+/* Prefix routines */
+static herr_t H5O__prefix_deserialize(const uint8_t *image,
+    H5O_cache_ud_t *udata);
+
 /* Chunk routines */
 static herr_t H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len,
     const uint8_t *image, H5O_common_cache_ud_t *udata, hbool_t *dirty);
@@ -198,13 +202,11 @@ H5O__cache_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__cache_get_final_load_size(const void *_image, size_t image_len,
+H5O__cache_get_final_load_size(const void *image, size_t image_len,
     void *_udata, size_t *actual_len)
 {
-    const uint8_t *image = (const uint8_t *)_image;   	/* Pointer into raw data buffer */
     H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;   /* User data for callback */
-    H5O_t *oh = NULL;                   /* Object header read in */
-    htri_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -214,136 +216,17 @@ H5O__cache_get_final_load_size(const void *_image, size_t image_len,
     HDassert(actual_len);
     HDassert(*actual_len == image_len);
 
-    /* Allocate space for the new object header data structure */
-    if(NULL == (oh = H5FL_CALLOC(H5O_t)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+    /* Deserialize the object header prefix */
+    if(H5O__prefix_deserialize((const uint8_t *)image, udata) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't deserialize object header prefix")
 
-    /* File-specific, non-stored information */
-    oh->sizeof_size = H5F_SIZEOF_SIZE(udata->common.f);
-    oh->sizeof_addr = H5F_SIZEOF_ADDR(udata->common.f);
-
-    /* Check for presence of magic number */
-    /* (indicates version 2 or later) */
-    if(!HDmemcmp(image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
-        /* Magic number */
-        image += H5_SIZEOF_MAGIC;
-
-        /* Version */
-        oh->version = *image++;
-        if(H5O_VERSION_2 != oh->version)
-            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad object header version number")
-
-        /* Flags */
-        oh->flags = *image++;
-        if(oh->flags & ~H5O_HDR_ALL_FLAGS)
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unknown object header status flag(s)")
-
-        /* Number of links to object (unless overridden by refcount message) */
-        oh->nlink = 1;
-
-        /* Time fields */
-        if(oh->flags & H5O_HDR_STORE_TIMES) {
-            uint32_t tmp;       /* Temporary value */
-
-            UINT32DECODE(image, tmp);
-            oh->atime = (time_t)tmp;
-            UINT32DECODE(image, tmp);
-            oh->mtime = (time_t)tmp;
-            UINT32DECODE(image, tmp);
-            oh->ctime = (time_t)tmp;
-            UINT32DECODE(image, tmp);
-            oh->btime = (time_t)tmp;
-        } /* end if */
-        else
-            oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
-
-        /* Attribute fields */
-        if(oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) {
-            UINT16DECODE(image, oh->max_compact);
-            UINT16DECODE(image, oh->min_dense);
-            if(oh->max_compact < oh->min_dense)
-                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header attribute phase change values")
-        } /* end if */
-        else {
-            oh->max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;
-            oh->min_dense = H5O_CRT_ATTR_MIN_DENSE_DEF;
-        } /* end else */
-
-        /* First chunk size */
-        switch(oh->flags & H5O_HDR_CHUNK0_SIZE) {
-            case 0:     /* 1 byte size */
-                udata->chunk0_size = *image++;
-                break;
-
-            case 1:     /* 2 byte size */
-                UINT16DECODE(image, udata->chunk0_size);
-                break;
-
-            case 2:     /* 4 byte size */
-                UINT32DECODE(image, udata->chunk0_size);
-                break;
-
-            case 3:     /* 8 byte size */
-                UINT64DECODE(image, udata->chunk0_size);
-                break;
-
-            default:
-                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad size for chunk 0")
-        } /* end switch */
-        if(udata->chunk0_size > 0 && udata->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header chunk size")
-    } /* end if */
-    else {
-        /* Version */
-        oh->version = *image++;
-        if(H5O_VERSION_1 != oh->version)
-            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad object header version number")
-
-        /* Flags */
-        oh->flags = H5O_CRT_OHDR_FLAGS_DEF;
-
-        /* Reserved */
-        image++;
-
-        /* Number of messages */
-        UINT16DECODE(image, udata->v1_pfx_nmesgs);
-
-        /* Link count */
-        UINT32DECODE(image, oh->nlink);
-
-        /* Reset unused time fields */
-        oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
-
-        /* Reset unused attribute fields */
-        oh->max_compact = 0;
-        oh->min_dense = 0;
-
-        /* First chunk size */
-        UINT32DECODE(image, udata->chunk0_size);
-        if((udata->v1_pfx_nmesgs > 0 && udata->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh)) ||
-                (udata->v1_pfx_nmesgs == 0 && udata->chunk0_size > 0))
-            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header chunk size")
-
-        /* Reserved, in version 1 (for 8-byte alignment padding) */
-        image += 4;
-    } /* end else */
-
-    /* Determine object header prefix length */
-    HDassert((size_t)((const uint8_t *)image - (const uint8_t *)_image) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+    /* Sanity check */
+    HDassert(udata->oh);
 
     /* Set the final size for the cache image */
-    *actual_len = udata->chunk0_size + (size_t)H5O_SIZEOF_HDR(oh);
-
-    /* Save the object header for later use in 'deserialize' callback */
-    udata->oh = oh;
-    oh = NULL;
+    *actual_len = udata->chunk0_size + (size_t)H5O_SIZEOF_HDR(udata->oh);
 
 done:
-    /* Release the [possibly partially initialized] object header on errors */
-    if(ret_value < 0 && oh)
-        if(H5O__free(oh) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to destroy object header data")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__cache_get_final_load_size() */
 
@@ -413,12 +296,11 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
  *-------------------------------------------------------------------------
  */
 static void *
-H5O__cache_deserialize(const void *_image, size_t len, void *_udata,
+H5O__cache_deserialize(const void *image, size_t len, void *_udata,
     hbool_t *dirty)
 {
-    H5O_t          *oh;                 /* Object header read in */
+    H5O_t          *oh = NULL;          /* Object header read in */
     H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata;   /* User data for callback */
-    const uint8_t  *image = (const uint8_t *)_image;    /* Pointer into buffer to decode */
     void *          ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -427,10 +309,23 @@ H5O__cache_deserialize(const void *_image, size_t len, void *_udata,
     HDassert(image);
     HDassert(len > 0); 
     HDassert(udata);
-    HDassert(udata->oh);
     HDassert(udata->common.f);
     HDassert(udata->common.cont_msg_info);
     HDassert(dirty);
+
+    /* Check for partially deserialized object header */
+    /* (Object header prefix will be deserialized if the object header came
+     *  through the 'get_final_load_size' callback and not deserialized if
+     *  the object header is coming from a cache image - QAK, 2016/12/14)
+     */
+    if(NULL == udata->oh) {
+        /* Deserialize the object header prefix */
+        if(H5O__prefix_deserialize((const uint8_t *)image, udata) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't deserialize object header prefix")
+
+        /* Sanity check */
+        HDassert(udata->oh);
+    } /* end if */
 
     /* Retrieve partially deserialized object header from user data */
     oh = udata->oh;
@@ -448,7 +343,7 @@ H5O__cache_deserialize(const void *_image, size_t len, void *_udata,
         oh->proxy = NULL;
 
     /* Parse the first chunk */
-    if(H5O__chunk_deserialize(oh, udata->common.addr, udata->chunk0_size, (const uint8_t *)_image, &(udata->common), dirty) < 0)
+    if(H5O__chunk_deserialize(oh, udata->common.addr, udata->chunk0_size, (const uint8_t *)image, &(udata->common), dirty) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize first object header chunk")
 
     /* Note that we've loaded the object header from the file */
@@ -717,11 +612,7 @@ H5O__cache_notify(H5AC_notify_action_t action, void *_thing)
             break;
 
         default:
-#ifdef NDEBUG
             HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
-#else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
-#endif /* NDEBUG */
     } /* end switch */
 
 done:
@@ -1225,6 +1116,163 @@ H5O__add_cont_msg(H5O_cont_msgs_t *cont_msg_info, const H5O_cont_t *cont)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__add_cont_msg() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O__prefix_deserialize()
+ *
+ * Purpose:	Deserialize an object header prefix
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              December 14, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
+{
+    const uint8_t *image = (const uint8_t *)_image;   	/* Pointer into raw data buffer */
+    H5O_t *oh = NULL;                   /* Object header read in */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    HDassert(image);
+    HDassert(udata);
+
+    /* Allocate space for the new object header data structure */
+    if(NULL == (oh = H5FL_CALLOC(H5O_t)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+
+    /* File-specific, non-stored information */
+    oh->sizeof_size = H5F_SIZEOF_SIZE(udata->common.f);
+    oh->sizeof_addr = H5F_SIZEOF_ADDR(udata->common.f);
+
+    /* Check for presence of magic number */
+    /* (indicates version 2 or later) */
+    if(!HDmemcmp(image, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+        /* Magic number */
+        image += H5_SIZEOF_MAGIC;
+
+        /* Version */
+        oh->version = *image++;
+        if(H5O_VERSION_2 != oh->version)
+            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad object header version number")
+
+        /* Flags */
+        oh->flags = *image++;
+        if(oh->flags & ~H5O_HDR_ALL_FLAGS)
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "unknown object header status flag(s)")
+
+        /* Number of links to object (unless overridden by refcount message) */
+        oh->nlink = 1;
+
+        /* Time fields */
+        if(oh->flags & H5O_HDR_STORE_TIMES) {
+            uint32_t tmp;       /* Temporary value */
+
+            UINT32DECODE(image, tmp);
+            oh->atime = (time_t)tmp;
+            UINT32DECODE(image, tmp);
+            oh->mtime = (time_t)tmp;
+            UINT32DECODE(image, tmp);
+            oh->ctime = (time_t)tmp;
+            UINT32DECODE(image, tmp);
+            oh->btime = (time_t)tmp;
+        } /* end if */
+        else
+            oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
+
+        /* Attribute fields */
+        if(oh->flags & H5O_HDR_ATTR_STORE_PHASE_CHANGE) {
+            UINT16DECODE(image, oh->max_compact);
+            UINT16DECODE(image, oh->min_dense);
+            if(oh->max_compact < oh->min_dense)
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header attribute phase change values")
+        } /* end if */
+        else {
+            oh->max_compact = H5O_CRT_ATTR_MAX_COMPACT_DEF;
+            oh->min_dense = H5O_CRT_ATTR_MIN_DENSE_DEF;
+        } /* end else */
+
+        /* First chunk size */
+        switch(oh->flags & H5O_HDR_CHUNK0_SIZE) {
+            case 0:     /* 1 byte size */
+                udata->chunk0_size = *image++;
+                break;
+
+            case 1:     /* 2 byte size */
+                UINT16DECODE(image, udata->chunk0_size);
+                break;
+
+            case 2:     /* 4 byte size */
+                UINT32DECODE(image, udata->chunk0_size);
+                break;
+
+            case 3:     /* 8 byte size */
+                UINT64DECODE(image, udata->chunk0_size);
+                break;
+
+            default:
+                HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad size for chunk 0")
+        } /* end switch */
+        if(udata->chunk0_size > 0 && udata->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh))
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header chunk size")
+    } /* end if */
+    else {
+        /* Version */
+        oh->version = *image++;
+        if(H5O_VERSION_1 != oh->version)
+            HGOTO_ERROR(H5E_OHDR, H5E_VERSION, FAIL, "bad object header version number")
+
+        /* Flags */
+        oh->flags = H5O_CRT_OHDR_FLAGS_DEF;
+
+        /* Reserved */
+        image++;
+
+        /* Number of messages */
+        UINT16DECODE(image, udata->v1_pfx_nmesgs);
+
+        /* Link count */
+        UINT32DECODE(image, oh->nlink);
+
+        /* Reset unused time fields */
+        oh->atime = oh->mtime = oh->ctime = oh->btime = 0;
+
+        /* Reset unused attribute fields */
+        oh->max_compact = 0;
+        oh->min_dense = 0;
+
+        /* First chunk size */
+        UINT32DECODE(image, udata->chunk0_size);
+        if((udata->v1_pfx_nmesgs > 0 && udata->chunk0_size < H5O_SIZEOF_MSGHDR_OH(oh)) ||
+                (udata->v1_pfx_nmesgs == 0 && udata->chunk0_size > 0))
+            HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "bad object header chunk size")
+
+        /* Reserved, in version 1 (for 8-byte alignment padding) */
+        image += 4;
+    } /* end else */
+
+    /* Verify object header prefix length */
+    HDassert((size_t)(image - _image) == (size_t)(H5O_SIZEOF_HDR(oh) - H5O_SIZEOF_CHKSUM_OH(oh)));
+
+    /* Save the object header for later use in 'deserialize' callback */
+    udata->oh = oh;
+    oh = NULL;
+
+done:
+    /* Release the [possibly partially initialized] object header on errors */
+    if(ret_value < 0 && oh)
+        if(H5O__free(oh) < 0)
+            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to destroy object header data")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O__prefix_deserialize() */
 
 
 /*-------------------------------------------------------------------------
