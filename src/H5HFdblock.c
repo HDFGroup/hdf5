@@ -493,6 +493,10 @@ H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr,
         udata.filter_mask = 0;
     } /* end else */
 
+    /* Reset compression context info */
+    udata.decompressed = FALSE;
+    udata.dblk = NULL;
+
     /* Protect the direct block */
     if(NULL == (dblock = (H5HF_direct_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, &udata, flags)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap direct block")

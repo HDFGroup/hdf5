@@ -91,6 +91,10 @@ static herr_t H5HL__cache_datablock_serialize(const H5F_t *f, void *image,
 static herr_t H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing);
 static herr_t H5HL__cache_datablock_free_icr(void *thing);
 
+/* Header deserialization */
+static herr_t H5HL__hdr_deserialize(H5HL_t *heap, const uint8_t *image,
+    H5HL_cache_prfx_ud_t *udata);
+
 /* Free list de/serialization */
 static herr_t H5HL__fl_deserialize(H5HL_t *heap);
 static void H5HL__fl_serialize(const H5HL_t *heap);
@@ -144,6 +148,64 @@ const H5AC_class_t H5AC_LHEAP_DBLK[1] = {{
 /* Local Variables */
 /*******************/
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5HL__hdr_deserialize()
+ *
+ * Purpose:	Decode a local heap's header
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              December 15, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5HL__hdr_deserialize( H5HL_t *heap, const uint8_t *image,
+    H5HL_cache_prfx_ud_t *udata)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(heap);
+    HDassert(image);
+    HDassert(udata);
+
+    /* Check magic number */
+    if(HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC)) 
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad local heap signature")
+    image += H5_SIZEOF_MAGIC;
+
+    /* Version */
+    if(H5HL_VERSION != *image++) 
+        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong version number in local heap")
+
+    /* Reserved */
+    image += 3;
+
+    /* Store the prefix's address & length */
+    heap->prfx_addr = udata->prfx_addr;
+    heap->prfx_size = udata->sizeof_prfx;
+
+    /* Heap data size */
+    H5F_DECODE_LENGTH_LEN(image, heap->dblk_size, udata->sizeof_size);
+
+    /* Free list head */
+    H5F_DECODE_LENGTH_LEN(image, heap->free_block, udata->sizeof_size);
+    if(heap->free_block != H5HL_FREE_NULL && heap->free_block >= heap->dblk_size)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad heap free list")
+
+    /* Heap data address */
+    H5F_addr_decode_len(udata->sizeof_addr, &image, &(heap->dblk_addr));
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HL__hdr_deserialize() */
 
 
 /*-------------------------------------------------------------------------
@@ -319,32 +381,9 @@ H5HL__cache_prefix_get_final_load_size(const void *_image, size_t image_len,
     HDassert(actual_len);
     HDassert(*actual_len == image_len);
 
-    /* Check magic number */
-    if(HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC)) 
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad local heap signature")
-    image += H5_SIZEOF_MAGIC;
-
-    /* Version */
-    if(H5HL_VERSION != *image++) 
-        HGOTO_ERROR(H5E_HEAP, H5E_VERSION, FAIL, "wrong version number in local heap")
-
-    /* Reserved */
-    image += 3;
-
-    /* Store the prefix's address & length */
-    heap.prfx_addr = udata->prfx_addr; /* NEED */
-    heap.prfx_size = udata->sizeof_prfx; /* NEED */
-
-    /* Heap data size */
-    H5F_DECODE_LENGTH_LEN(image, heap.dblk_size, udata->sizeof_size); /* NEED */
-
-    /* Free list head */
-    H5F_DECODE_LENGTH_LEN(image, heap.free_block, udata->sizeof_size);
-    if(heap.free_block != H5HL_FREE_NULL && heap.free_block >= heap.dblk_size)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "bad heap free list");
-
-    /* Heap data address */
-    H5F_addr_decode_len(udata->sizeof_addr, &image, &(heap.dblk_addr)); /* NEED */
+    /* Deserialize the heap's header */
+    if(H5HL__hdr_deserialize(&heap, (const uint8_t *)image, udata) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode local heap header")
 
     /* Set the final size for the cache image */
     *actual_len = heap.prfx_size;
@@ -398,40 +437,17 @@ H5HL__cache_prefix_deserialize(const void *_image, size_t len, void *_udata,
     HDassert(H5F_addr_defined(udata->prfx_addr));
     HDassert(dirty);
 
-    /* Check magic number */
-    if(HDmemcmp(image, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC)) 
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad local heap signature")
-    image += H5_SIZEOF_MAGIC;
-
-    /* Version */
-    if(H5HL_VERSION != *image++) 
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "wrong version number in local heap")
-
-    /* Reserved */
-    image += 3;
-    
     /* Allocate space in memory for the heap */
     if(NULL == (heap = H5HL__new(udata->sizeof_size, udata->sizeof_addr, udata->sizeof_prfx)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate local heap structure");
 
+    /* Deserialize the heap's header */
+    if(H5HL__hdr_deserialize(heap, (const uint8_t *)image, udata) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, NULL, "can't decode local heap header")
+
     /* Allocate the heap prefix */
     if(NULL == (prfx = H5HL__prfx_new(heap)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, NULL, "can't allocate local heap prefix");
-
-    /* Store the prefix's address & length */
-    heap->prfx_addr = udata->prfx_addr;
-    heap->prfx_size = udata->sizeof_prfx;
-
-    /* Heap data size */
-    H5F_DECODE_LENGTH_LEN(image, heap->dblk_size, udata->sizeof_size);
-
-    /* Free list head */
-    H5F_DECODE_LENGTH_LEN(image, heap->free_block, udata->sizeof_size);
-    if((heap->free_block != H5HL_FREE_NULL) && (heap->free_block >= heap->dblk_size))
-        HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "bad heap free list")
-
-    /* Heap data address */
-    H5F_addr_decode_len(udata->sizeof_addr, &image, &(heap->dblk_addr));
 
     /* Check if heap block exists */
     if(heap->dblk_size) {
