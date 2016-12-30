@@ -999,6 +999,7 @@
 ./test/specmetaread.h5
 ./test/stab.c
 ./test/swmr.c
+./test/swmr_check_compat_vfd.c
 ./test/tarray.c
 ./test/tarrold.h5
 ./test/tattr.c

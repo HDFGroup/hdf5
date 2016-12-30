@@ -64,7 +64,8 @@ TEST_PROG= testhdf5 cache cache_api cache_tagging lheap ohdr stab gheap \
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     testmeta accum_swmr_reader \
-    links_env flushrefresh
+    links_env flushrefresh \
+    swmr_check_compat_vfd
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= plugin
 endif

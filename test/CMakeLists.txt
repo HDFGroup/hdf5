@@ -255,6 +255,14 @@ foreach (test ${H5_TESTS})
   ADD_H5_EXE(${test})
 endforeach (test ${H5_TESTS})
 
+set (H5_SWMR_TESTS
+    swmr_check_compat_vfd
+)
+
+foreach (test ${H5_SWMR_TESTS})
+  ADD_H5_EXE(${test})
+endforeach (test ${H5_SWMR_TESTS})
+
 ##############################################################################
 ##############################################################################
 ###           A D D I T I O N A L   T E S T S                              ###
