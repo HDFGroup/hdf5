@@ -329,6 +329,11 @@ H5C_create(size_t		      max_cache_size,
     for(i = 0; i < H5C__HASH_TABLE_LEN; i++)
         (cache_ptr->index)[i] = NULL;
 
+    cache_ptr->il_len				= 0;
+    cache_ptr->il_size				= (size_t)0;
+    cache_ptr->il_head				= NULL;
+    cache_ptr->il_tail				= NULL;
+
     /* Tagging Field Initializations */
     cache_ptr->ignore_tags                      = FALSE;
 
@@ -1330,6 +1335,8 @@ H5C_insert_entry(H5F_t *             f,
 
     entry_ptr->ht_next = NULL;
     entry_ptr->ht_prev = NULL;
+    entry_ptr->il_next = NULL;
+    entry_ptr->il_prev = NULL;
 
     entry_ptr->next = NULL;
     entry_ptr->prev = NULL;
@@ -1733,7 +1740,7 @@ H5C_move_entry(H5C_t *	     cache_ptr,
      * don't mark it as dirty either, lest we confuse the flush call back.
      */
     if(!entry_ptr->destroy_in_progress) {
-        H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
+        H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL)
 
         if(entry_ptr->in_slist) {
             HDassert(cache_ptr->slist_ptr);
@@ -5464,7 +5471,7 @@ H5C_flush_invalidate_ring(const H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
                              *                   -- JRM 
                              */
                             next_entry_ptr = cache_ptr->index[i];
-                            H5C__UPDATE_STATS_FOR_HASH_BUCKET_SCAN_RESTART(cache_ptr)
+                            H5C__UPDATE_STATS_FOR_INDEX_SCAN_RESTART(cache_ptr)
                         } /* end if */
                         else
                             cache_ptr->entry_watched_for_removal = NULL;
@@ -6059,7 +6066,7 @@ H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_
          * Finally, if the destroy_entry flag is set, discard the 
          * entry.
          */
-        H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr)
+        H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL)
 
         if(entry_ptr->in_slist && del_from_slist_on_destroy)
             H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)
@@ -6569,7 +6576,7 @@ H5C_load_entry(H5F_t *              f,
     entry->size                         = len;
     HDassert(entry->size < H5C_MAX_ENTRY_SIZE);
     entry->image_ptr                    = image;
-    entry->image_up_to_date             = TRUE;
+    entry->image_up_to_date             = !dirty;
     entry->type                         = type;
     entry->is_dirty	                    = dirty;
     entry->dirtied                      = FALSE;
@@ -6597,6 +6604,8 @@ H5C_load_entry(H5F_t *              f,
     entry->flush_dep_ndirty_children    = 0;
     entry->ht_next                      = NULL;
     entry->ht_prev                      = NULL;
+    entry->il_next                      = NULL;
+    entry->il_prev             	        = NULL;
 
     entry->next                         = NULL;
     entry->prev                         = NULL;
@@ -7832,7 +7841,7 @@ H5C__generate_image(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_p
             /* We must update cache data structures for the change in address */
             if(entry_ptr->addr == old_addr) {
                 /* Delete the entry from the hash table and the slist */
-                H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr);
+                H5C__DELETE_FROM_INDEX(cache_ptr, entry_ptr, FAIL);
                 H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE);
 
                 /* update the entry for its new address */
@@ -7928,7 +7937,7 @@ H5C_remove_entry(void *_entry)
      *	3) Remove it from the tag list for this object
      */
 
-    H5C__DELETE_FROM_INDEX(cache, entry)
+    H5C__DELETE_FROM_INDEX(cache, entry, FAIL)
 
     H5C__UPDATE_RP_FOR_EVICTION(cache, entry, FAIL)
 

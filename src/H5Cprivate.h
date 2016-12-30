@@ -1218,6 +1218,15 @@ typedef int H5C_ring_t;
  * If there are multiple entries in any hash bin, they are stored in a doubly
  * linked list.
  *
+ * Addendum:  JRM -- 10/14/15
+ *
+ * We have come to scan all entries in the cache frequently enough that 
+ * the cost of doing so by scanning the hash table has become unacceptable.
+ * To reduce this cost, the index now also maintains a doubly linked list
+ * of all entries in the index.  This list is known as the index list.
+ * The il_next and il_prev fields discussed below were added to support
+ * the index list.
+ *
  * ht_next:	Next pointer used by the hash table to store multiple
  *		entries in a single hash bin.  This field points to the
  *		next entry in the doubly linked list of entries in the
@@ -1227,6 +1236,16 @@ typedef int H5C_ring_t;
  *              entries in a single hash bin.  This field points to the
  *              previous entry in the doubly linked list of entries in
  *		the hash bin, or NULL if there is no previuos entry.
+ *
+ * il_next:	Next pointer used by the index to maintain a doubly linked
+ *		list of all entries in the index (and thus in the cache).
+ *		This field contains a pointer to the next entry in the 
+ *		index list, or NULL if there is no next entry.
+ *
+ * il_prev:	Prev pointer used by the index to maintain a doubly linked
+ *		list of all entries in the index (and thus in the cache).
+ *		This field contains a pointer to the previous entry in the 
+ *		index list, or NULL if there is no previous entry.
  *
  *
  * Fields supporting replacement policies:
@@ -1382,6 +1401,8 @@ typedef struct H5C_cache_entry_t {
     /* fields supporting the hash table: */
     struct H5C_cache_entry_t   *ht_next;
     struct H5C_cache_entry_t   *ht_prev;
+    struct H5C_cache_entry_t   *il_next;
+    struct H5C_cache_entry_t   *il_prev;
 
     /* fields supporting replacement policies: */
     struct H5C_cache_entry_t   *next;
