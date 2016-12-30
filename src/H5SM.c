@@ -144,7 +144,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t * fc_plist, const H5O_loc_t *ext_loc, hid_t d
     HDassert(!H5F_addr_defined(H5F_SOHM_ADDR(f)));
 
     /* Set the ring type in the DXPL */
-    if(H5AC_set_ring(dxpl_id, H5AC_RING_US, &dxpl, &orig_ring) < 0)
+    if(H5AC_set_ring(dxpl_id, H5AC_RING_USER, &dxpl, &orig_ring) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTSET, FAIL, "unable to set ring value")
 
     /* Initialize master table */
@@ -2021,7 +2021,7 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
         cache_udata.f = f;
 
         /* Set the ring type in the DXPL */
-        if(H5AC_set_ring(dxpl_id, H5AC_RING_US, &dxpl, &orig_ring) < 0)
+        if(H5AC_set_ring(dxpl_id, H5AC_RING_USER, &dxpl, &orig_ring) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTSET, FAIL, "unable to set ring value")
 
         /* Read the rest of the SOHM table information from the cache */

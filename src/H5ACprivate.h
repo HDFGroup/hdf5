@@ -153,7 +153,7 @@ typedef enum {
 /* Aliases for the "ring" type and values */
 typedef H5C_ring_t       H5AC_ring_t;
 #define H5AC_RING_INV    H5C_RING_UNDEFINED
-#define H5AC_RING_US     H5C_RING_USER
+#define H5AC_RING_USER   H5C_RING_USER
 #define H5AC_RING_FSM    H5C_RING_FSM
 #define H5AC_RING_SBE    H5C_RING_SBE
 #define H5AC_RING_SB     H5C_RING_SB
