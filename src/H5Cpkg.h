@@ -656,7 +656,8 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
             ((cache_ptr)->cache_flush_moves[(entry_ptr)->type->id])++; \
         if ( entry_ptr->flush_in_progress )                            \
             ((cache_ptr)->entry_flush_moves[(entry_ptr)->type->id])++; \
-	(((cache_ptr)->moves)[(entry_ptr)->type->id])++;
+	(((cache_ptr)->moves)[(entry_ptr)->type->id])++;               \
+        (cache_ptr)->entries_relocated_counter++;
 
 #define H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)\
 	if ( cache_ptr->flush_in_progress )                                    \
@@ -782,6 +783,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
             ((cache_ptr)->max_size)[(entry_ptr)->type->id] )         \
         ((cache_ptr)->max_size)[(entry_ptr)->type->id]               \
              = (entry_ptr)->size;                                    \
+    cache_ptr->entries_inserted_counter++;                           \
 }
 
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)            \
@@ -866,6 +868,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
         (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;         \
     if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
         (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;       \
+    cache_ptr->entries_inserted_counter++;                           \
 }
 
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)            \
@@ -4057,6 +4060,15 @@ typedef struct H5C_tag_info_t {
  *	this field will be reset every automatic resize epoch.
  *
  *
+ * entries_loaded_counter: Number of entries loaded into the cache 
+ *		since the last time this field was reset.
+ *
+ * entries_inserted_counter: Number of entries inserted into the cache 
+ *		since the last time this field was reset.
+ *
+ * entries relocated_counter: Number of entries whose base address has
+ *		been changed since the last time this field was reset.
+ *
  * Statistics collection fields:
  *
  * When enabled, these fields are used to collect statistics as described
@@ -4439,6 +4451,9 @@ struct H5C_t {
     int64_t			cache_hits;
     int64_t			cache_accesses;
 
+    int64_t			entries_loaded_counter;
+    int64_t			entries_inserted_counter;
+    int64_t			entries_relocated_counter;
 #if H5C_COLLECT_CACHE_STATS
     /* stats fields */
     int64_t                     hits[H5C__MAX_NUM_TYPE_IDS + 1];
