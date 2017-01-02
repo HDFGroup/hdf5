@@ -1298,7 +1298,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
 #define H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)
 #define H5C__POST_HT_REMOVE_SC(cache_ptr, entry_ptr)
 #define H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)
-#define H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val)
+#define H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, k, fail_val)
 #define H5C__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val)
 #define H5C__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr)
 #define H5C__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr)
