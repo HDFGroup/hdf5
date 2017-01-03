@@ -257,28 +257,35 @@ static void test_query()
 	tid2.close();
 
 	// Open the datatypes for query
+
+	// Deprecated functions
 	tid1 = file.openCompType(CompT_NAME);
+	tid1.close();
 	tid2 = file.openEnumType(EnumT_NAME);
+	tid2.close();
+
+	CompType comptype(file, CompT_NAME);
+	EnumType enumtype(file, EnumT_NAME);
 
 	// Query member number and member index by name, for compound type
-	nmembs = tid1.getNmembers();
+	nmembs = comptype.getNmembers();
 	verify_val(nmembs, 4, "CompType::getNmembers()", __LINE__, __FILE__);
-	index = tid1.getMemberIndex("c");
+	index = comptype.getMemberIndex("c");
 	verify_val(index, 2, "CompType::getMemberIndex()", __LINE__, __FILE__);
 
 	// Query member number and member index by name, for enumeration type
-	nmembs = tid2.getNmembers();
+	nmembs = enumtype.getNmembers();
 	verify_val(nmembs, 5, "EnumType::getNmembers()", __LINE__, __FILE__);
-	index = tid2.getMemberIndex("ORANGE");
+	index = enumtype.getMemberIndex("ORANGE");
 	verify_val(index, 3, "EnumType::getMemberIndex()", __LINE__, __FILE__);
 
 	// Close datatypes and file
-	tid1.close();
-	tid2.close();
+	comptype.close();
+	enumtype.close();
 	file.close();
 
 	// Try truncating the file to make sure reference counting is good.
-	// If any references to ids of tid1 and tid2 are left unterminated,
+	// If any references to ids of the accessed types are left unterminated,
 	// the truncating will fail, because the file will not be closed in
 	// the file.close() above.
 	H5File file1(FILENAME[2], H5F_ACC_TRUNC);

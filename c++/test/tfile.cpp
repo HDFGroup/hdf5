@@ -639,10 +639,6 @@ const H5std_string	SUBGROUP3("/G1/G3");
 static void test_libver_bounds_real(
 		H5F_libver_t libver_create, unsigned oh_vers_create,
 		H5F_libver_t libver_mod, unsigned oh_vers_mod)
- /* (H5F_LIBVER_EARLIEST, H5O_VERSION_1, H5F_LIBVER_LATEST, H5O_VERSION_2);
-(H5F_LIBVER_LATEST, H5O_VERSION_2, H5F_LIBVER_EARLIEST, H5O_VERSION_2);
- */ 
-
 {
     try {
 

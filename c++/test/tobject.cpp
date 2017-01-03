@@ -23,8 +23,6 @@
 #else
 #include <iostream>
 #endif
-using std::cerr;
-using std::endl;
 
 #include <string>
 #include "H5Cpp.h"      // C++ API header file
@@ -155,6 +153,7 @@ static void test_get_objname()
 	issue_fail_msg("test_get_objname", __LINE__, __FILE__);
     }
 }   // test_get_objname
+
 /*-------------------------------------------------------------------------
  * Function:	test_existance
  *
@@ -263,11 +262,20 @@ static void test_get_objname_ontypes()
 
 	// Close the type then open it again to test getting its name
 	inttype.close();
-	inttype = file.openIntType("INT type of STD_B8LE");
+	inttype = file.openIntType("INT type of STD_B8LE"); // deprecated
 
 	// Get and verify its name
 	H5std_string inttype_name = inttype.getObjName();
 	verify_val(inttype_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
+
+	// Close the type then open it again to test getting its name, but
+	// with the constructor this time
+	inttype.close();
+	IntType std_b8le(file, "INT type of STD_B8LE");
+
+	// Get and verify its name
+	H5std_string std_b8le_name = std_b8le.getObjName();
+	verify_val(std_b8le_name, "/INT type of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
 
 	// Make copy of a predefined type and save it
 	DataType dtype(PredType::STD_B8LE);
@@ -279,15 +287,22 @@ static void test_get_objname_ontypes()
 
 	// Re-open the file and the data type to test getting its name
 	file.openFile(FILE_OBJECTS, H5F_ACC_RDWR);
-	dtype = file.openDataType("STD_B8LE");
+	dtype = file.openDataType("STD_B8LE"); // deprecated
 
 	// Get and verify its name
 	H5std_string type_name = dtype.getObjName();
 	verify_val(type_name, "/STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
 
+	// Close the type and open it again with the constructor then test
+	// getting its name
+	dtype.close();
+	DataType dtype2(file, "STD_B8LE");
+	type_name = dtype2.getObjName();
+	verify_val(type_name, "/STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
+
 	// Test getting type's name from copied type
 	DataType copied_type;
-	copied_type.copy(dtype);
+	copied_type.copy(dtype2);
 	copied_type.commit(file, "copy of STD_B8LE");
 	type_name = copied_type.getObjName();
 	verify_val(type_name, "/copy of STD_B8LE", "DataType::getObjName", __LINE__, __FILE__);
@@ -302,7 +317,7 @@ static void test_get_objname_ontypes()
 	verify_val(type_name, "/typetests/IntType NATIVE_INT", "DataType::getObjName", __LINE__, __FILE__);
 
 	// Close everything or they can be closed when objects go out of scope
-	dtype.close();
+	dtype2.close();
 	copied_type.close();
 	new_int_type.close();
 	grp.close();

@@ -479,10 +479,14 @@ static void test_vlstring_type()
 	vlst.close();
 
 	// Try opening datatype again.
-	vlst = file1->openStrType(VLSTR_TYPE);
+	vlst = file1->openStrType(VLSTR_TYPE); // deprecated
+
+	// Close again and reopen with constructor.
+	vlst.close();
+	StrType vlst1(*file1, VLSTR_TYPE);
 
 	// Close datatype and file.
-	vlst.close();
+	vlst1.close();
 	file1->close();
         delete file1;
 
@@ -490,16 +494,16 @@ static void test_vlstring_type()
 	file1 = new H5File(FILENAME, H5F_ACC_RDWR);
 
 	// Open the variable-length string datatype just created
-	vlst = file1->openStrType(VLSTR_TYPE);
+	StrType vlst2(*file1, VLSTR_TYPE);
 
 	// Verify character set and padding
-	cset = vlst.getCset();
+	cset = vlst2.getCset();
 	verify_val(cset, H5T_CSET_ASCII, "StrType::getCset", __LINE__, __FILE__);
-	pad = vlst.getStrpad();
+	pad = vlst2.getStrpad();
 	verify_val(pad, H5T_STR_NULLPAD, "StrType::getStrpad", __LINE__, __FILE__);
 
 	// Close datatype and file
-	vlst.close();
+	vlst2.close();
 	file1->close();
 
 	PASSED();
