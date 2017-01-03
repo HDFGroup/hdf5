@@ -66,7 +66,7 @@ static void * H5C__epoch_marker_deserialize(const void * image_ptr,
     size_t len, void * udata, hbool_t * dirty_ptr);
 static herr_t H5C__epoch_marker_image_len(const void * thing,
     size_t *image_len_ptr);
-static herr_t H5C__epoch_marker_pre_serialize(const H5F_t *f,
+static herr_t H5C__epoch_marker_pre_serialize(H5F_t *f,
     hid_t dxpl_id, void * thing, haddr_t addr, size_t len,
     haddr_t * new_addr_ptr, size_t * new_len_ptr, unsigned * flags_ptr);
 static herr_t H5C__epoch_marker_serialize(const H5F_t *f,
@@ -183,7 +183,7 @@ H5C__epoch_marker_image_len(const void H5_ATTR_UNUSED *thing,
 
 
 static herr_t
-H5C__epoch_marker_pre_serialize(const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
+H5C__epoch_marker_pre_serialize(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
     void H5_ATTR_UNUSED *thing, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED len,
     haddr_t H5_ATTR_UNUSED *new_addr_ptr, size_t H5_ATTR_UNUSED *new_len_ptr,
     unsigned H5_ATTR_UNUSED *flags_ptr)

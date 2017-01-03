@@ -980,7 +980,7 @@ test_mf_fs_start(hid_t fapl)
     frspace_state_t 	state;
 
 
-    TESTING("H5MF_alloc_create()/H5MF_alloc_open() of free-space manager");
+    TESTING("H5MF_alloc_create()/H5MF__alloc_open() of free-space manager");
 
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
@@ -1014,7 +1014,7 @@ test_mf_fs_start(hid_t fapl)
     /* Start up free-space manager */
     type = H5FD_MEM_SUPER;
 
-    if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
         TEST_ERROR
 
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -1131,7 +1131,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     type = H5FD_MEM_SUPER;
 
-    if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
         TEST_ERROR
 
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -1218,7 +1218,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     type = H5FD_MEM_SUPER;
 
-    if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
         TEST_ERROR
 
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -1303,7 +1303,7 @@ test_mf_fs_alloc_free(hid_t fapl)
 
     type = H5FD_MEM_SUPER;
 
-    if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
         TEST_ERROR
 
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -1489,7 +1489,7 @@ test_mf_fs_extend(hid_t fapl)
 
     type = H5FD_MEM_SUPER;
 
-    if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
         TEST_ERROR
 
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -1607,7 +1607,7 @@ test_mf_fs_extend(hid_t fapl)
 
     type = H5FD_MEM_SUPER;
 
-    if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
         TEST_ERROR
 
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -1720,7 +1720,7 @@ test_mf_fs_extend(hid_t fapl)
 
     type = H5FD_MEM_SUPER;
 
-    if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
         TEST_ERROR
 
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -1833,7 +1833,7 @@ test_mf_fs_extend(hid_t fapl)
 
     type = H5FD_MEM_SUPER;
 
-    if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
         TEST_ERROR
 
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -2025,7 +2025,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
 
         type = H5FD_MEM_SUPER;
 
-        if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+        if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
             TEST_ERROR
 
         if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -2095,7 +2095,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
 
         type = H5FD_MEM_SUPER;
 
-        if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+        if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
             TEST_ERROR
 
         if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -4083,7 +4083,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
     type = H5FD_MEM_SUPER;
 
-    if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
         TEST_ERROR
 
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -4153,7 +4153,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
     type = H5FD_MEM_SUPER;
 
-    if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
         TEST_ERROR
 
     if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -4243,7 +4243,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         type = H5FD_MEM_SUPER;
 
-        if(H5MF_alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
+        if(H5MF__alloc_start(f, H5AC_ind_read_dxpl_id, type) < 0)
             TEST_ERROR
 
         if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
@@ -6223,7 +6223,7 @@ test_mf_fs_persist(hid_t fapl_new, hid_t fcpl)
         TEST_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
-    if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
         FAIL_STACK_ERROR
 
     /* Get info for free-space manager */
@@ -6368,7 +6368,7 @@ test_mf_fs_gone(hid_t fapl_new, hid_t fcpl)
         TEST_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
-    if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
         FAIL_STACK_ERROR
 
     /* Get info for H5FD_MEM_SUPER free-space manager */
@@ -6495,7 +6495,7 @@ test_mf_fs_split(hid_t fapl_new, hid_t fcpl)
         TEST_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
-    if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
         FAIL_STACK_ERROR
 
     /* Get free-space info */
@@ -6519,7 +6519,7 @@ test_mf_fs_split(hid_t fapl_new, hid_t fcpl)
         TEST_ERROR
 
     /* Start up H5FD_MEM_DRAW free-space manager */
-    if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, stype) < 0)
+    if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, stype) < 0)
         FAIL_STACK_ERROR
 
     /* Get free-space info */
@@ -6583,7 +6583,7 @@ test_mf_fs_split(hid_t fapl_new, hid_t fcpl)
         TEST_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
-    if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
         FAIL_STACK_ERROR
 
     /* Get free-space info */
@@ -6623,7 +6623,7 @@ test_mf_fs_split(hid_t fapl_new, hid_t fcpl)
 	TEST_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
-    if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
         FAIL_STACK_ERROR
 
     /* Get free-space info */
@@ -6730,7 +6730,7 @@ test_mf_fs_multi(hid_t fapl_new, hid_t fcpl)
         TEST_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
-    if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
         FAIL_STACK_ERROR
 
     /* Get free-space info */
@@ -6754,7 +6754,7 @@ test_mf_fs_multi(hid_t fapl_new, hid_t fcpl)
         TEST_ERROR
 
     /* Start up H5FD_MEM_DRAW free-space manager */
-    if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, stype) < 0)
+    if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, stype) < 0)
         FAIL_STACK_ERROR
 
     /* Get free-space info */
@@ -6812,7 +6812,7 @@ test_mf_fs_multi(hid_t fapl_new, hid_t fcpl)
         TEST_ERROR
 
     /* Start up H5FD_MEM_SUPER free-space manager */
-    if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
+    if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
         FAIL_STACK_ERROR
 
     /* Get free-space info */
@@ -6838,7 +6838,7 @@ test_mf_fs_multi(hid_t fapl_new, hid_t fcpl)
         TEST_ERROR
 
     /* Start up H5FD_MEM_BTREE free-space manager */
-    if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, btype) < 0)
+    if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, btype) < 0)
         FAIL_STACK_ERROR
 
     /* Get free-space info */
@@ -6876,7 +6876,7 @@ test_mf_fs_multi(hid_t fapl_new, hid_t fcpl)
     /* If H5FD_MEM_SUPER is there, should not find block #1 & #3 */
     if(H5F_addr_defined(f->shared->fs_addr[type])) {
 	/* Start up H5FD_MEM_SUPER free-space manager */
-	if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
+	if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
 	    FAIL_STACK_ERROR
 
 	if((node_found = H5FS_sect_find(f, H5AC_ind_read_dxpl_id, f->shared->fs_man[type],
@@ -6895,7 +6895,7 @@ test_mf_fs_multi(hid_t fapl_new, hid_t fcpl)
 	TEST_ERROR
 
     /* Start up H5FD_MEM_GHEAP free-space manager */
-    if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, gtype) < 0)
+    if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, gtype) < 0)
 	FAIL_STACK_ERROR
 
     /* Get free-space info */
@@ -7189,7 +7189,7 @@ test_filespace_strategy_threshold(hid_t fapl_new)
 			    TEST_ERROR
 
 			/* Open the free-space manager */
-			if(H5MF_alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
+			if(H5MF__alloc_open(f, H5AC_ind_read_dxpl_id, type) < 0)
 			    FAIL_STACK_ERROR
 
 			/* Retrieve the total amount of free space and # of free-space sections */

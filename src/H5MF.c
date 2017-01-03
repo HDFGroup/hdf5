@@ -222,7 +222,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_alloc_open
+ * Function:	H5MF__alloc_open
  *
  * Purpose:	Open an existing free space manager of TYPE for file by
  *		creating a free-space structure
@@ -237,7 +237,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_alloc_open(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
+H5MF__alloc_open(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
 {
     const H5FS_section_class_t *classes[] = { /* Free space section classes implemented for file */
         H5MF_FSPACE_SECT_CLS_SIMPLE};
@@ -275,7 +275,7 @@ done:
         HDONE_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set property value")
 
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* end H5MF_alloc_open() */
+} /* end H5MF__alloc_open() */
 
 
 /*-------------------------------------------------------------------------
@@ -334,7 +334,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5MF_alloc_start
+ * Function:	H5MF__alloc_start
  *
  * Purpose:	Open or create a free space manager of a given type
  *
@@ -348,7 +348,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_alloc_start(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
+H5MF__alloc_start(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -364,7 +364,7 @@ H5MF_alloc_start(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
     /* Check if the free space manager exists already */
     if(H5F_addr_defined(f->shared->fs_addr[type])) {
         /* Open existing free space manager */
-        if(H5MF_alloc_open(f, dxpl_id, type) < 0)
+        if(H5MF__alloc_open(f, dxpl_id, type) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, FAIL, "can't initialize file free space")
     } /* end if */
     else {
@@ -375,7 +375,7 @@ H5MF_alloc_start(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MF_alloc_start() */
+} /* end H5MF__alloc_start() */
 
 
 /*-------------------------------------------------------------------------
@@ -464,7 +464,7 @@ HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_typ
     if(H5F_HAVE_FREE_SPACE_MANAGER(f)) {
         /* Check if the free space manager for the file has been initialized */
         if(!f->shared->fs_man[fs_type] && H5F_addr_defined(f->shared->fs_addr[fs_type]))
-            if(H5MF_alloc_open(f, dxpl_id, fs_type) < 0)
+            if(H5MF__alloc_open(f, dxpl_id, fs_type) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, HADDR_UNDEF, "can't initialize file free space")
 
         /* Search for large enough space in the free space manager */
@@ -622,7 +622,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5MF_xfree(const H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
+H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     hsize_t size)
 {
     H5F_io_info_t fio_info;             /* I/O info for operation */
@@ -717,7 +717,7 @@ HDfprintf(stderr, "%s: dropping addr = %a, size = %Hu, on the floor!\n", FUNC, a
          *  space isn't at the end of the file, so start up (or create)
          *  the file space manager
          */
-        if(H5MF_alloc_start(f, dxpl_id, fs_type) < 0)
+        if(H5MF__alloc_start(f, dxpl_id, fs_type) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
     } /* end if */
 
@@ -839,7 +839,7 @@ HDfprintf(stderr, "%s: Entering: alloc_type = %u, addr = %a, size = %Hu, extra_r
 
             /* Check if the free space for the file has been initialized */
             if(!f->shared->fs_man[fs_type] && H5F_addr_defined(f->shared->fs_addr[fs_type]))
-                if(H5MF_alloc_open(f, dxpl_id, fs_type) < 0)
+                if(H5MF__alloc_open(f, dxpl_id, fs_type) < 0)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
 
             /* Check for test block able to block in free space manager */
@@ -930,7 +930,7 @@ H5MF_get_freespace(H5F_t *f, hid_t dxpl_id, hsize_t *tot_space, hsize_t *meta_si
 
 	/* Check if the free space for the file has been initialized */
         if(!f->shared->fs_man[type] && H5F_addr_defined(f->shared->fs_addr[type])) {
-            if(H5MF_alloc_open(f, dxpl_id, type) < 0)
+            if(H5MF__alloc_open(f, dxpl_id, type) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
             HDassert(f->shared->fs_man[type]);
             fs_started[type] = TRUE;
@@ -1088,7 +1088,7 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5MF_close_shrink_eoa
+ * Function:    H5MF__close_shrink_eoa
  *
  * Purpose:     Shrink the EOA while closing
  *
@@ -1100,7 +1100,7 @@ HDfprintf(stderr, "%s: Leaving, ret_value = %d\n", FUNC, ret_value);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5MF_close_shrink_eoa(H5F_t *f, hid_t dxpl_id)
+H5MF__close_shrink_eoa(H5F_t *f, hid_t dxpl_id)
 {
     H5FD_mem_t type;            /* Memory type for iteration */
     hbool_t eoa_shrank;		/* Whether an EOA shrink occurs */
@@ -1108,7 +1108,7 @@ H5MF_close_shrink_eoa(H5F_t *f, hid_t dxpl_id)
     H5MF_sect_ud_t udata;	/* User data for callback */
     herr_t ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
+    FUNC_ENTER_STATIC_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 
     /* check args */
     HDassert(f);
@@ -1144,7 +1144,7 @@ H5MF_close_shrink_eoa(H5F_t *f, hid_t dxpl_id)
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
-} /* end H5MF_close_shrink_eoa() */
+} /* end H5MF__close_shrink_eoa() */
 
 
 /*-------------------------------------------------------------------------
@@ -1329,7 +1329,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
         HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "can't free aggregators")
 
     /* Trying shrinking the EOA for the file */
-    if(H5MF_close_shrink_eoa(f, dxpl_id) < 0)
+    if(H5MF__close_shrink_eoa(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
 
     /* Making free-space managers persistent for superblock version >= 2 */
@@ -1435,7 +1435,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
 
     /* Trying shrinking the EOA for the file */
     /* (in case any free space is now at the EOA) */
-    if(H5MF_close_shrink_eoa(f, dxpl_id) < 0)
+    if(H5MF__close_shrink_eoa(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
 
 done:
@@ -1538,7 +1538,7 @@ H5MF_get_free_sections(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type, size_t nsects, 
 
 	/* Open free space manager of this type, if it isn't already */
         if(!f->shared->fs_man[ty] && H5F_addr_defined(f->shared->fs_addr[ty])) {
-	    if(H5MF_alloc_open(f, dxpl_id, ty) < 0)
+	    if(H5MF__alloc_open(f, dxpl_id, ty) < 0)
 		HGOTO_ERROR(H5E_RESOURCE, H5E_CANTOPENOBJ, FAIL, "can't initialize file free space")
             HDassert(f->shared->fs_man[ty]);
 	    fs_started = TRUE;

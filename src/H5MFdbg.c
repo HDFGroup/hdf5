@@ -171,7 +171,7 @@ H5MF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, FILE *stream, int ind
     for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
 	if(H5F_addr_eq(f->shared->fs_addr[type], fs_addr)) {
 	    if(!f->shared->fs_man[type])
-		if(H5MF_alloc_open(f, dxpl_id, type) < 0)
+		if(H5MF__alloc_open(f, dxpl_id, type) < 0)
 		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
 
 	    if(f->shared->fs_man[type]) {

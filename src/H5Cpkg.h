@@ -4547,7 +4547,7 @@ H5_DLLVAR const H5C_class_t H5C__epoch_marker_class;
 /******************************/
 
 /* General routines */
-H5_DLL herr_t H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id,
+H5_DLL herr_t H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id,
     H5C_cache_entry_t *entry_ptr, unsigned flags);
 H5_DLL herr_t H5C__flush_marked_entries(H5F_t * f, hid_t dxpl_id);
 H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,

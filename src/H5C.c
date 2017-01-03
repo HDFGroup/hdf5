@@ -169,7 +169,7 @@ static herr_t H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry);
 static herr_t H5C__verify_len_eoa(H5F_t *f, const H5C_class_t * type,
     haddr_t addr, size_t *len, hbool_t actual);
 
-static herr_t H5C__generate_image(const H5F_t *f, H5C_t * cache_ptr, H5C_cache_entry_t *entry_ptr, 
+static herr_t H5C__generate_image(H5F_t *f, H5C_t * cache_ptr, H5C_cache_entry_t *entry_ptr, 
                                   hid_t dxpl_id);
 
 #if H5C_DO_SLIST_SANITY_CHECKS
@@ -5887,7 +5887,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
+H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
     unsigned flags)
 {
     H5C_t *	     	cache_ptr;              /* Cache for file */
@@ -7766,7 +7766,7 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t * entry,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__generate_image(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, 
+H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, 
     hid_t dxpl_id)
 {
     haddr_t		new_addr = HADDR_UNDEF;

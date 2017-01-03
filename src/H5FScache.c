@@ -83,7 +83,7 @@ static htri_t H5FS__cache_hdr_verify_chksum(const void *image_ptr, size_t len, v
 static void *H5FS__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5FS__cache_hdr_image_len(const void *thing, size_t *image_len);
-static herr_t H5FS__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id,
+static herr_t H5FS__cache_hdr_pre_serialize(H5F_t *f, hid_t dxpl_id,
     void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len,
     unsigned *flags);
 static herr_t H5FS__cache_hdr_serialize(const H5F_t *f, void *image, 
@@ -95,7 +95,7 @@ static htri_t H5FS__cache_sinfo_verify_chksum(const void *image_ptr, size_t len,
 static void *H5FS__cache_sinfo_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5FS__cache_sinfo_image_len(const void *thing, size_t *image_len);
-static herr_t H5FS__cache_sinfo_pre_serialize(const H5F_t *f, hid_t dxpl_id,
+static herr_t H5FS__cache_sinfo_pre_serialize(H5F_t *f, hid_t dxpl_id,
     void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len,
     unsigned *flags);
 static herr_t H5FS__cache_sinfo_serialize(const H5F_t *f, void *image,
@@ -404,7 +404,7 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5FS__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
+H5FS__cache_hdr_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
     haddr_t addr, size_t H5_ATTR_UNUSED len, haddr_t *new_addr, size_t *new_len,
     unsigned *flags)
 {
@@ -1091,7 +1091,7 @@ H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5FS__cache_sinfo_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
+H5FS__cache_sinfo_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
     haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len, unsigned *flags)
 {
     H5FS_sinfo_t 	*sinfo = (H5FS_sinfo_t *)_thing;        /* Pointer to the object */

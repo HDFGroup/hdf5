@@ -193,7 +193,7 @@ H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, uint16_t nclasses,
     H5FS_hdr_cache_ud_t cache_udata;    /* User-data for metadata cache callback */
     H5FS_t *ret_value = NULL;           /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__FREESPACE_TAG, NULL)
 #ifdef H5FS_DEBUG
 HDfprintf(stderr, "%s: Opening free space manager, fs_addr = %a, nclasses = %Zu\n", FUNC, fs_addr, nclasses);
 #endif /* H5FS_DEBUG */
@@ -237,7 +237,7 @@ HDfprintf(stderr, "%s: fspace->rc = %u\n", FUNC, fspace->rc);
     ret_value = fspace;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
 } /* H5FS_open() */
 
 
@@ -409,7 +409,7 @@ H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
 
     /* Check arguments. */
     HDassert(f);
@@ -570,7 +570,7 @@ done:
 #ifdef H5FS_DEBUG
 HDfprintf(stderr, "%s: Leaving, ret_value = %d, fspace->rc = %u\n", FUNC, ret_value, fspace->rc);
 #endif /* H5FS_DEBUG */
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
 } /* H5FS_close() */
 
 
@@ -888,6 +888,10 @@ H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
         if(H5AC_insert_entry(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache")
 
+        /* Since space has been allocated for the section info and the sinfo
+         * has been inserted into the cache, relinquish owership (i.e. float)
+         * the section info.
+         */
         fspace->sinfo = NULL;
     } /* end if */
 
@@ -923,6 +927,7 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
 
     cache_flags = H5AC__DELETED_FLAG | H5AC__TAKE_OWNERSHIP_FLAG;;
 
+    /* Free space for section info */
     if(H5F_addr_defined(fspace->sect_addr)) {
         hsize_t	saved_size;     /* Size of previous section info */
         unsigned sinfo_status = 0;      /* Section info cache status */
@@ -964,6 +969,7 @@ H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
     } /* end if */
 
+    /* Free space for header */
     if(H5F_addr_defined(fspace->addr)) {
         unsigned hdr_status = 0;        /* Header entry status */
 

@@ -74,7 +74,7 @@ static htri_t H5F__cache_superblock_verify_chksum(const void *image_ptr, size_t 
 static void *H5F__cache_superblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5F__cache_superblock_image_len(const void *thing, size_t *image_len);
-static herr_t H5F__cache_superblock_pre_serialize(const H5F_t *f, 
+static herr_t H5F__cache_superblock_pre_serialize(H5F_t *f, 
     hid_t dxpl_id, void *thing, haddr_t addr, size_t len, 
     haddr_t *new_addr, size_t *new_len, unsigned *flags);
 static herr_t H5F__cache_superblock_serialize(const H5F_t *f, void *image, size_t len,
@@ -685,7 +685,7 @@ H5F__cache_superblock_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F__cache_superblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, 
+H5F__cache_superblock_pre_serialize(H5F_t *f, hid_t dxpl_id, 
     void *_thing, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED len, 
     haddr_t H5_ATTR_UNUSED *new_addr, size_t H5_ATTR_UNUSED *new_len, 
     unsigned H5_ATTR_UNUSED *flags)
