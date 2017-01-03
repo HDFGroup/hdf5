@@ -193,7 +193,7 @@ H5FS_open(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr, uint16_t nclasses,
     H5FS_hdr_cache_ud_t cache_udata;    /* User-data for metadata cache callback */
     H5FS_t *ret_value = NULL;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__FREESPACE_TAG, NULL)
+    FUNC_ENTER_NOAPI(NULL)
 #ifdef H5FS_DEBUG
 HDfprintf(stderr, "%s: Opening free space manager, fs_addr = %a, nclasses = %Zu\n", FUNC, fs_addr, nclasses);
 #endif /* H5FS_DEBUG */
@@ -237,7 +237,7 @@ HDfprintf(stderr, "%s: fspace->rc = %u\n", FUNC, fspace->rc);
     ret_value = fspace;
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value, NULL)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_open() */
 
 
@@ -409,7 +409,7 @@ H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check arguments. */
     HDassert(f);
@@ -570,7 +570,7 @@ done:
 #ifdef H5FS_DEBUG
 HDfprintf(stderr, "%s: Leaving, ret_value = %d, fspace->rc = %u\n", FUNC, ret_value, fspace->rc);
 #endif /* H5FS_DEBUG */
-    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FS_close() */
 
 
