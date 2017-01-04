@@ -937,11 +937,13 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr,
  * ring.  
  *
  * Free space managers managing file space must be flushed next,
- * and are assigned to the second outermost ring.
+ * and are assigned to the second and third outermost rings.  Two rings
+ * are used here as the raw data free space manager must be flushed before
+ * the metadata free space manager.
  *
  * The object header and associated chunks used to implement superblock 
  * extension messages must be flushed next, and are thus assigned to 
- * the third outermost ring.
+ * the fourth outermost ring.
  *
  * The superblock proper must be flushed last, and is thus assigned to 
  * the innermost ring.
@@ -957,10 +959,11 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr,
 
 #define H5C_RING_UNDEFINED  0 /* shouldn't appear in the cache */
 #define H5C_RING_USER       1 /* outermost ring */
-#define H5C_RING_FSM	    2
-#define H5C_RING_SBE        4 /* temporarily merged with H5C_RING_SB */
-#define H5C_RING_SB         4 /* innermost ring */
-#define H5C_RING_NTYPES     5
+#define H5C_RING_RDFSM      2
+#define H5C_RING_MDFSM      3
+#define H5C_RING_SBE        4
+#define H5C_RING_SB         5 /* innermost ring */
+#define H5C_RING_NTYPES     6
 
 typedef int H5C_ring_t;
 

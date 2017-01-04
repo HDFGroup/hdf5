@@ -138,12 +138,10 @@ static herr_t H5C__autoadjust__ageout__remove_excess_markers(H5C_t * cache_ptr);
 static herr_t H5C__flash_increase_cache_size(H5C_t * cache_ptr,
     size_t old_entry_size, size_t new_entry_size);
 
-static herr_t H5C_flush_invalidate_cache(const H5F_t *  f,
-                                          hid_t    dxpl_id,
-			                  unsigned flags);
+static herr_t H5C_flush_invalidate_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
 
-static herr_t H5C_flush_invalidate_ring(const H5F_t * f, hid_t dxpl_id,
-    H5C_ring_t ring, unsigned flags);
+static herr_t H5C_flush_invalidate_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,
+    unsigned flags);
 
 static herr_t H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,
     unsigned flags);
@@ -5005,7 +5003,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_flush_invalidate_cache(const H5F_t * f, hid_t dxpl_id, unsigned flags)
+H5C_flush_invalidate_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
 {
     H5C_t *		cache_ptr;
     H5C_ring_t		ring;
@@ -5150,7 +5148,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C_flush_invalidate_ring(const H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
+H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
     unsigned flags)
 {
     H5C_t              *cache_ptr;
