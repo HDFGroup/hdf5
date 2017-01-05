@@ -14,9 +14,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  
+ * Programmer:
  *
- * Purpose:	
+ * Purpose:
  */
 
 #include "hdf5.h"
@@ -25,7 +25,7 @@
 #include "h5tools_utils.h"
 
 /* Name of tool */
-#define PROGRAMNAME 	"h5clear"
+#define PROGRAMNAME     "h5clear"
 
 /* Make this private property (defined in H5Fprivate.h) available to h5clear. */
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME            "clear_status_flags"
@@ -35,7 +35,7 @@
  *
  * Purpose:     Close the tools library and exit
  *
- * Return:   	Does not return
+ * Return:       Does not return
  *
  *-------------------------------------------------------------------------
  */
@@ -48,11 +48,11 @@ leave(int ret)
 } /* leave() */
 
 /*-------------------------------------------------------------------------
- * Function: 	usage
+ * Function:     usage
  *
- * Purpose: 	Prints a usage message
+ * Purpose:     Prints a usage message
  *
- * Return: 	void
+ * Return:     void
  *
  *-------------------------------------------------------------------------
  */
@@ -66,28 +66,28 @@ usage(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	
+ * Purpose:
  *
- * Return:	Success:
- *		Failure:
+ * Return:    Success:
+ *        Failure:
  *
- * Programmer:	
+ * Programmer:
  *
  *-------------------------------------------------------------------------
  */
 int
 main (int argc, char *argv[])
 {
-    char *fname;		/* File name */
-    hbool_t clear = TRUE;  	/* To clear the status_flags in the file's superblock */
-    hid_t fapl = -1;   		/* File access property list */
-    hid_t fid = -1;		/* File ID */
+    char *fname;        /* File name */
+    hbool_t clear = TRUE;      /* To clear the status_flags in the file's superblock */
+    hid_t fapl = -1;           /* File access property list */
+    hid_t fid = -1;        /* File ID */
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
-    
+
     /* Disable the HDF5 library's error reporting */
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
@@ -100,9 +100,6 @@ main (int argc, char *argv[])
         leave(EXIT_FAILURE);
     }
 
-    /* Duplicate the file name */
-    fname = HDstrdup(argv[opt_ind]);
-
     /* Get a copy of the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         error_msg("H5Pcreate\n");
@@ -112,25 +109,30 @@ main (int argc, char *argv[])
     /* Set to clear the status_flags in the file's superblock */
     /* This is a private property used by h5clear only */
     if(H5Pset(fapl, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, &clear) < 0) {
-	error_msg("H5Pset\n");
-	exit(EXIT_FAILURE);
+        error_msg("H5Pset\n");
+        exit(EXIT_FAILURE);
     }
 
+    /* Duplicate the file name */
+    fname = HDstrdup(argv[opt_ind]);
+
     if((fid = h5tools_fopen(fname, H5F_ACC_RDWR, fapl, NULL, NULL, (size_t)0)) < 0) {
-	error_msg("h5tools_fopen\n");
-	exit(EXIT_FAILURE);
+        error_msg("h5tools_fopen\n");
+        HDfree(fname);
+        exit(EXIT_FAILURE);
     }
+    HDfree(fname);
 
     /* Close the file */
     if(H5Fclose(fid) < 0) {
-	error_msg("H5Fclose\n");
-	exit(EXIT_FAILURE);
+        error_msg("H5Fclose\n");
+        exit(EXIT_FAILURE);
     }
 
     /* CLose the property list */
     if(H5Pclose(fapl) < 0) {
-	error_msg("H5Pclose\n");
-	exit(EXIT_FAILURE);
+        error_msg("H5Pclose\n");
+        exit(EXIT_FAILURE);
     }
 
     return EXIT_SUCCESS;
