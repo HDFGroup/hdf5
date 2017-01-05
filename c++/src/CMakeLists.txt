@@ -32,6 +32,7 @@ set (CPP_SOURCES
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Group.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5IdComponent.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5IntType.cpp
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5LaccProp.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Library.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Location.cpp
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Object.cpp
@@ -68,6 +69,7 @@ set (CPP_HDRS
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5IdComponent.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Include.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5IntType.h
+    ${HDF5_CPP_SRC_SOURCE_DIR}/H5LaccProp.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Library.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Location.h
     ${HDF5_CPP_SRC_SOURCE_DIR}/H5Object.h
