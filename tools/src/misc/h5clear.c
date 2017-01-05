@@ -44,7 +44,6 @@ leave(int ret)
 {
     h5tools_close();
     HDexit(ret);
-
 } /* leave() */
 
 /*-------------------------------------------------------------------------
@@ -103,14 +102,14 @@ main (int argc, char *argv[])
     /* Get a copy of the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         error_msg("H5Pcreate\n");
-        exit(EXIT_FAILURE);
+        leave(EXIT_FAILURE);
     }
 
     /* Set to clear the status_flags in the file's superblock */
     /* This is a private property used by h5clear only */
     if(H5Pset(fapl, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, &clear) < 0) {
         error_msg("H5Pset\n");
-        exit(EXIT_FAILURE);
+        leave(EXIT_FAILURE);
     }
 
     /* Duplicate the file name */
@@ -119,21 +118,21 @@ main (int argc, char *argv[])
     if((fid = h5tools_fopen(fname, H5F_ACC_RDWR, fapl, NULL, NULL, (size_t)0)) < 0) {
         error_msg("h5tools_fopen\n");
         HDfree(fname);
-        exit(EXIT_FAILURE);
+        leave(EXIT_FAILURE);
     }
     HDfree(fname);
 
     /* Close the file */
     if(H5Fclose(fid) < 0) {
         error_msg("H5Fclose\n");
-        exit(EXIT_FAILURE);
+        leave(EXIT_FAILURE);
     }
 
     /* CLose the property list */
     if(H5Pclose(fapl) < 0) {
         error_msg("H5Pclose\n");
-        exit(EXIT_FAILURE);
+        leave(EXIT_FAILURE);
     }
 
-    return EXIT_SUCCESS;
+    leave(h5tools_getstatus());
 } /* main() */
