@@ -15912,6 +15912,11 @@ check_destroy_pinned_err(void)
         protect_entry(file_ptr, 0, 0);
 	unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
+        if(H5C_prep_for_file_close(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0 ) {
+            pass = FALSE;
+            failure_mssg = "unexpected failure of prep for file close.\n";
+        } /* end if */
+
         if(H5C_dest(file_ptr, H5AC_ind_read_dxpl_id) >= 0) {
             pass = FALSE;
             failure_mssg = "destroy succeeded on cache with pinned entry.\n";
@@ -15986,6 +15991,20 @@ check_destroy_protected_err(void)
 
         file_ptr = setup_cache((size_t)(2 * 1024),
                                 (size_t)(1 * 1024));
+
+        /* Note: normally this call would go just before the series of 
+         * flushes prior to file close -- in particular, all entries 
+         * should be unprotected when this call is made.
+         *
+         * Thus H5C_prep_for_file_close() contains an assert to verify
+         * this.  Since this assert would be triggered by the condition 
+         * we are trying to test, put the call to H5C_prep_for_file_close()
+         * prior to the final protect call.
+         */
+        if(H5C_prep_for_file_close(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0 ) {
+            pass = FALSE;
+            failure_mssg = "unexpected failure of prep for file close.\n";
+        } /* end if */
 
         protect_entry(file_ptr, 0, 0);
 

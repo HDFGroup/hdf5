@@ -559,7 +559,7 @@ typedef struct H5C_t H5C_t;
  *
  *	The typedef for the pre-serialize callback is as follows:
  *
- *	typedef herr_t (*H5C_pre_serialize_func_t)(const H5F_t *f,
+ *	typedef herr_t (*H5C_pre_serialize_func_t)(H5F_t *f,
  *                                             hid_t dxpl_id,
  *                                             void * thing,
  *                                             haddr_t addr,
@@ -878,7 +878,7 @@ typedef htri_t (*H5C_verify_chksum_func_t)(const void *image_ptr, size_t len, vo
 typedef void *(*H5C_deserialize_func_t)(const void *image_ptr,
     size_t len, void *udata_ptr, hbool_t *dirty_ptr);
 typedef herr_t (*H5C_image_len_func_t)(const void *thing, size_t *image_len_ptr);
-typedef herr_t (*H5C_pre_serialize_func_t)(const H5F_t *f, hid_t dxpl_id,
+typedef herr_t (*H5C_pre_serialize_func_t)(H5F_t *f, hid_t dxpl_id,
     void *thing, haddr_t addr, size_t len, haddr_t *new_addr_ptr,
     size_t *new_len_ptr, unsigned *flags_ptr);
 typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f, void *image_ptr,
@@ -937,11 +937,13 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr,
  * ring.  
  *
  * Free space managers managing file space must be flushed next,
- * and are assigned to the second outermost ring.
+ * and are assigned to the second and third outermost rings.  Two rings
+ * are used here as the raw data free space manager must be flushed before
+ * the metadata free space manager.
  *
  * The object header and associated chunks used to implement superblock 
  * extension messages must be flushed next, and are thus assigned to 
- * the third outermost ring.
+ * the fourth outermost ring.
  *
  * The superblock proper must be flushed last, and is thus assigned to 
  * the innermost ring.
@@ -957,10 +959,11 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr,
 
 #define H5C_RING_UNDEFINED  0 /* shouldn't appear in the cache */
 #define H5C_RING_USER       1 /* outermost ring */
-#define H5C_RING_FSM	    2
-#define H5C_RING_SBE        4 /* temporarily merged with H5C_RING_SB */
-#define H5C_RING_SB         4 /* innermost ring */
-#define H5C_RING_NTYPES     5
+#define H5C_RING_RDFSM      2
+#define H5C_RING_MDFSM      3
+#define H5C_RING_SBE        4
+#define H5C_RING_SB         5 /* innermost ring */
+#define H5C_RING_NTYPES     6
 
 typedef int H5C_ring_t;
 
@@ -1770,6 +1773,7 @@ H5_DLL herr_t H5C_mark_entry_clean(void *thing);
 H5_DLL herr_t H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type,
     haddr_t old_addr, haddr_t new_addr);
 H5_DLL herr_t H5C_pin_protected_entry(void *thing);
+H5_DLL herr_t H5C_prep_for_file_close(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5C_create_flush_dependency(void *parent_thing, void *child_thing);
 H5_DLL void * H5C_protect(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
     haddr_t addr, void *udata, unsigned flags);
@@ -1794,7 +1798,8 @@ H5_DLL hbool_t H5C_get_ignore_tags(const H5C_t *cache_ptr);
 H5_DLL herr_t H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest_tag);
 H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
-H5_DLL herr_t H5C_remove_entry(void * thing);
+H5_DLL herr_t H5C_unsettle_entry_ring(void *thing);
+H5_DLL herr_t H5C_remove_entry(void *thing);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,
@@ -1806,6 +1811,10 @@ H5_DLL herr_t H5C_clear_coll_entries(H5C_t * cache_ptr, hbool_t partial);
 H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, int32_t ce_array_len,
     haddr_t *ce_array_ptr);
 #endif /* H5_HAVE_PARALLEL */
+
+#ifndef NDEBUG	/* debugging functions */
+H5_DLL hbool_t H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring);
+#endif /* NDEBUG */
 
 #endif /* !_H5Cprivate_H */
 

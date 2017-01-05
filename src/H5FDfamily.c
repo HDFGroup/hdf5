@@ -1357,7 +1357,7 @@ H5FD_family_lock(H5FD_t *_file, hbool_t rw)
     if(u < file->nmembs) {
         unsigned v;                         /* Local index variable */
 
-        for(v = 0; v < v; v++) {
+        for(v = 0; v < u; v++) {
             if(H5FD_unlock(file->memb[v]) < 0)
                 /* Push error, but keep going */
                 HDONE_ERROR(H5E_IO, H5E_CANTUNLOCK, FAIL, "unable to unlock member files")

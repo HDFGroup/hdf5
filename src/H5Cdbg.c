@@ -952,3 +952,46 @@ H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr,
     if(entry_ptr->flush_dep_nchildren)
         H5C__dump_children(cache_ptr, entry_ptr, FALSE, "Child", indent);
 } /* end H5C__dump_entry() */
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_cache_is_clean()
+ *
+ * Purpose:     Debugging function that verifies that all rings in the 
+ *		metadata cache are clean from the outermost ring, inwards
+ *		to the inner ring specified.
+ *
+ *		Returns TRUE if all specified rings are clean, and FALSE
+ *		if not.  Throws an assertion failure on error.
+ *
+ * Return:      TRUE if the indicated ring(s) are clean, and FALSE otherwise.
+ *
+ * Programmer:  John Mainzer, 6/18/16
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifndef NDEBUG
+hbool_t
+H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring)
+{
+    H5C_ring_t		ring = H5C_RING_USER;
+    hbool_t             ret_value = TRUE;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity checks */
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(inner_ring >= H5C_RING_USER);
+    HDassert(inner_ring <= H5C_RING_SB);
+
+    while(ring <= inner_ring) {
+	if(cache_ptr->dirty_index_ring_size[ring] > 0)
+            ret_value = FALSE;
+
+	ring++;
+    } /* end while */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_cache_is_clean() */
+#endif /* NDEBUG */
+

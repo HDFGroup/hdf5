@@ -756,6 +756,7 @@ H5_DLL herr_t H5F_fake_free(H5F_t *f);
 
 /* Superblock related routines */
 H5_DLL herr_t H5F_super_dirty(H5F_t *f);
+H5_DLL herr_t H5F_eoa_dirty(H5F_t *f, hid_t dxpl_id);
 
 /* Parallel I/O (i.e. MPI) related routines */
 #ifdef H5_HAVE_PARALLEL

@@ -83,11 +83,12 @@ static htri_t H5FS__cache_hdr_verify_chksum(const void *image_ptr, size_t len, v
 static void *H5FS__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5FS__cache_hdr_image_len(const void *thing, size_t *image_len);
-static herr_t H5FS__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id,
+static herr_t H5FS__cache_hdr_pre_serialize(H5F_t *f, hid_t dxpl_id,
     void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len,
     unsigned *flags);
 static herr_t H5FS__cache_hdr_serialize(const H5F_t *f, void *image, 
     size_t len, void *thing);
+static herr_t H5FS__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
 static herr_t H5FS__cache_hdr_free_icr(void *thing);
 
 static herr_t H5FS__cache_sinfo_get_initial_load_size(void *udata, size_t *image_len);
@@ -95,7 +96,7 @@ static htri_t H5FS__cache_sinfo_verify_chksum(const void *image_ptr, size_t len,
 static void *H5FS__cache_sinfo_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty);
 static herr_t H5FS__cache_sinfo_image_len(const void *thing, size_t *image_len);
-static herr_t H5FS__cache_sinfo_pre_serialize(const H5F_t *f, hid_t dxpl_id,
+static herr_t H5FS__cache_sinfo_pre_serialize(H5F_t *f, hid_t dxpl_id,
     void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len,
     unsigned *flags);
 static herr_t H5FS__cache_sinfo_serialize(const H5F_t *f, void *image,
@@ -121,7 +122,7 @@ const H5AC_class_t H5AC_FSPACE_HDR[1] = {{
     H5FS__cache_hdr_image_len,          /* 'image_len' callback */
     H5FS__cache_hdr_pre_serialize,      /* 'pre_serialize' callback */
     H5FS__cache_hdr_serialize,          /* 'serialize' callback */
-    NULL,                               /* 'notify' callback */
+    H5FS__cache_hdr_notify, 		/* 'notify' callback */
     H5FS__cache_hdr_free_icr,           /* 'free_icr' callback */
     NULL,                               /* 'fsf_size' callback */
 }};
@@ -404,7 +405,7 @@ H5FS__cache_hdr_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5FS__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
+H5FS__cache_hdr_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
     haddr_t addr, size_t H5_ATTR_UNUSED len, haddr_t *new_addr, size_t *new_len,
     unsigned *flags)
 {
@@ -768,6 +769,63 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t len,
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FS__cache_hdr_notify
+ *
+ * Purpose:     Handle cache action notifications
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              koziol@lbl.gov
+ *              January 3, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
+{
+    H5FS_t *fspace = (H5FS_t *)_thing;  /* Pointer to the object */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+    
+    /* Sanity check */
+    HDassert(fspace);
+
+    /* Determine which action to take */
+    switch(action) {
+        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+        case H5AC_NOTIFY_ACTION_AFTER_LOAD:
+        case H5AC_NOTIFY_ACTION_AFTER_FLUSH:
+            /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_ENTRY_DIRTIED:
+            if(H5AC_unsettle_entry_ring(fspace) < 0)
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTFLUSH, FAIL, "unable to mark FSM ring as unsettled")
+            break;
+
+        case H5AC_NOTIFY_ACTION_ENTRY_CLEANED:
+        case H5AC_NOTIFY_ACTION_CHILD_DIRTIED:
+        case H5AC_NOTIFY_ACTION_CHILD_CLEANED:
+        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+            /* do nothing */
+            break;
+
+        default:
+#ifdef NDEBUG
+            HGOTO_ERROR(H5E_FSPACE, H5E_BADVALUE, FAIL, "unknown action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* end H5FS__cache_hdr_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FS__cache_hdr_free_icr
  *
  * Purpose:	Destroys a free space header in memory.
@@ -1091,7 +1149,7 @@ H5FS__cache_sinfo_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5FS__cache_sinfo_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
+H5FS__cache_sinfo_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
     haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len, unsigned *flags)
 {
     H5FS_sinfo_t 	*sinfo = (H5FS_sinfo_t *)_thing;        /* Pointer to the object */

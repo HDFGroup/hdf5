@@ -81,7 +81,7 @@ static htri_t H5HF__cache_hdr_verify_chksum(const void *image_ptr, size_t len, v
 static void *H5HF__cache_hdr_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5HF__cache_hdr_image_len(const void *thing, size_t *image_len);
-static herr_t H5HF__cache_hdr_pre_serialize(const H5F_t *f, hid_t dxpl_id,
+static herr_t H5HF__cache_hdr_pre_serialize(H5F_t *f, hid_t dxpl_id,
     void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len, 
     unsigned *flags); 
 static herr_t H5HF__cache_hdr_serialize(const H5F_t *f, void *image,
@@ -93,7 +93,7 @@ static htri_t H5HF__cache_iblock_verify_chksum(const void *image_ptr, size_t len
 static void *H5HF__cache_iblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5HF__cache_iblock_image_len(const void *thing, size_t *image_len);
-static herr_t H5HF__cache_iblock_pre_serialize(const H5F_t *f, hid_t dxpl_id,
+static herr_t H5HF__cache_iblock_pre_serialize(H5F_t *f, hid_t dxpl_id,
     void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len,
     unsigned *flags); 
 static herr_t H5HF__cache_iblock_serialize(const H5F_t *f, void *image,
@@ -106,7 +106,7 @@ static htri_t H5HF__cache_dblock_verify_chksum(const void *image_ptr, size_t len
 static void *H5HF__cache_dblock_deserialize(const void *image, size_t len,
     void *udata, hbool_t *dirty); 
 static herr_t H5HF__cache_dblock_image_len(const void *thing, size_t *image_len);
-static herr_t H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id,
+static herr_t H5HF__cache_dblock_pre_serialize(H5F_t *f, hid_t dxpl_id,
     void *thing, haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len,
     unsigned *flags); 
 static herr_t H5HF__cache_dblock_serialize(const H5F_t *f, void *image,
@@ -664,7 +664,7 @@ H5HF__cache_hdr_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_hdr_pre_serialize(const H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id,
+H5HF__cache_hdr_pre_serialize(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id,
     void *_thing, haddr_t addr, size_t len, haddr_t H5_ATTR_UNUSED *new_addr,
     size_t H5_ATTR_UNUSED *new_len, unsigned *flags)
 {
@@ -1188,7 +1188,7 @@ H5HF__cache_iblock_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_iblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
+H5HF__cache_iblock_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
     haddr_t addr, size_t H5_ATTR_UNUSED len, haddr_t *new_addr,
     size_t H5_ATTR_UNUSED *new_len, unsigned *flags)
 {
@@ -2053,7 +2053,7 @@ H5HF__cache_dblock_image_len(const void *_thing, size_t *image_len)
  *-------------------------------------------------------------------------
  */
 static herr_t 
-H5HF__cache_dblock_pre_serialize(const H5F_t *f, hid_t dxpl_id, void *_thing,
+H5HF__cache_dblock_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
     haddr_t addr, size_t len, haddr_t *new_addr, size_t *new_len, unsigned *flags)
 {
     hbool_t 		 at_tmp_addr;  /* Flag to indicate direct block is */

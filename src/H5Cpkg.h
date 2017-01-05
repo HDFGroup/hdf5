@@ -656,7 +656,8 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
             ((cache_ptr)->cache_flush_moves[(entry_ptr)->type->id])++; \
         if ( entry_ptr->flush_in_progress )                            \
             ((cache_ptr)->entry_flush_moves[(entry_ptr)->type->id])++; \
-	(((cache_ptr)->moves)[(entry_ptr)->type->id])++;
+	(((cache_ptr)->moves)[(entry_ptr)->type->id])++;               \
+        (cache_ptr)->entries_relocated_counter++;
 
 #define H5C__UPDATE_STATS_FOR_ENTRY_SIZE_CHANGE(cache_ptr, entry_ptr, new_size)\
 	if ( cache_ptr->flush_in_progress )                                    \
@@ -782,6 +783,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
             ((cache_ptr)->max_size)[(entry_ptr)->type->id] )         \
         ((cache_ptr)->max_size)[(entry_ptr)->type->id]               \
              = (entry_ptr)->size;                                    \
+    cache_ptr->entries_inserted_counter++;                           \
 }
 
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)            \
@@ -866,6 +868,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
         (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;         \
     if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
         (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;       \
+    cache_ptr->entries_inserted_counter++;                           \
 }
 
 #define H5C__UPDATE_STATS_FOR_PROTECT(cache_ptr, entry_ptr, hit)            \
@@ -3465,6 +3468,9 @@ typedef struct H5C_tag_info_t {
  *              clean data so as to avoid case b) above.  Again, this is
  *              a soft limit.
  *
+ * close_warning_received: Boolean flag indicating that a file closing 
+ *		warning has been received.
+ *
  *
  * In addition to the call back functions required for each entry, the
  * cache requires the following call back functions for this instance of
@@ -4057,6 +4063,52 @@ typedef struct H5C_tag_info_t {
  *	this field will be reset every automatic resize epoch.
  *
  *
+ * entries_loaded_counter: Number of entries loaded into the cache 
+ *		since the last time this field was reset.
+ *
+ * entries_inserted_counter: Number of entries inserted into the cache 
+ *		since the last time this field was reset.
+ *
+ * entries relocated_counter: Number of entries whose base address has
+ *		been changed since the last time this field was reset.
+ *
+ * Free Space Manager Related fields:
+ *
+ * The free space managers must be informed when we are about to close 
+ * or flush the file so that they order themselves accordingly.  This used
+ * to be done much later in the close process, but with cache image and 
+ * page buffering, this is no longer viable, as we must finalize the on 
+ * disk image of all metadata much sooner.
+ *
+ * This is handled by the H5FS_settle_raw_data_fsm() and 
+ * H5FS_settle_meta_data_fsm() routines.  As these calls are expensive,
+ * the following fields are used to track whether the target free space
+ * managers are clean.  
+ *
+ * They are also used in sanity checking, as once a free space manager is
+ * settled, it should not become unsettled (i.e. be asked to allocate or
+ * free file space) either ever (in the case of a file close) or until the
+ * flush is complete.
+ *
+ * rdfsm_settled:  Boolean flag indicating whether the raw data free space
+ *		manager is settled -- i.e. whether the correct space has 
+ *		been allocated for it in the file.
+ *
+ *		Note that the name of this field is deceptive.  In the 
+ *		multi file case, the flag applies to all free space 
+ *		managers that are not involved in allocating space for
+ *		free space manager metadata.
+ *
+ * mdfsm_settled:  Boolean flag indicating whether the meta data free space
+ *              manager is settled -- i.e. whether the correct space has 
+ *              been allocated for it in the file.
+ *
+ *              Note that the name of this field is deceptive.  In the 
+ *              multi file case, the flag applies only to free space 
+ *		managers that are involved in allocating space for free 
+ *		space managers.
+ *
+ *
  * Statistics collection fields:
  *
  * When enabled, these fields are used to collect statistics as described
@@ -4337,6 +4389,7 @@ struct H5C_t {
     hbool_t			write_permitted;
     H5C_log_flush_func_t	log_flush;
     hbool_t			evictions_enabled;
+    hbool_t			close_warning_received;
 
     /* Fields for maintaining [hash table] index of entries */
     int32_t                     index_len;
@@ -4439,6 +4492,13 @@ struct H5C_t {
     int64_t			cache_hits;
     int64_t			cache_accesses;
 
+    int64_t			entries_loaded_counter;
+    int64_t			entries_inserted_counter;
+    int64_t			entries_relocated_counter;
+    /* Free Space Manager Related fields */
+    hbool_t 			rdfsm_settled;
+    hbool_t			mdfsm_settled;
+
 #if H5C_COLLECT_CACHE_STATS
     /* stats fields */
     int64_t                     hits[H5C__MAX_NUM_TYPE_IDS + 1];
@@ -4532,7 +4592,7 @@ H5_DLLVAR const H5C_class_t H5C__epoch_marker_class;
 /******************************/
 
 /* General routines */
-H5_DLL herr_t H5C__flush_single_entry(const H5F_t *f, hid_t dxpl_id,
+H5_DLL herr_t H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id,
     H5C_cache_entry_t *entry_ptr, unsigned flags);
 H5_DLL herr_t H5C__flush_marked_entries(H5F_t * f, hid_t dxpl_id);
 H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
