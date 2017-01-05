@@ -27,28 +27,28 @@ usage(void)
 } /* usage() */
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	To open the file which has zero or nonzero status_flags in 
- *		the superblock.
+ * Purpose:    To open the file which has zero or nonzero status_flags in
+ *        the superblock.
  *
- * Return:	0 on success
- *		1 on failure
+ * Return:    0 on success
+ *        1 on failure
  *
- * Programmer:	Vailin Choi; July 2013
+ * Programmer:    Vailin Choi; July 2013
  *
  *-------------------------------------------------------------------------
  */
 int
 main(int argc, char *argv[])
 {
-    char *fname;	/* The HDF5 file name */
-    hid_t fid;		/* File ID */
+    char *fname;    /* The HDF5 file name */
+    hid_t fid;        /* File ID */
 
     /* Check the # of arguments */
     if(argc != 2) {
-	usage();
-	return(EXIT_FAILURE);
+        usage();
+        return(EXIT_FAILURE);
     }
 
     /* Get the file name */
@@ -56,14 +56,16 @@ main(int argc, char *argv[])
 
     /* Try opening the file */
     if((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
-	HDfprintf(stderr, "clear_open_chk: unable to open the file\n");
-	return EXIT_FAILURE;
+        HDfprintf(stderr, "clear_open_chk: unable to open the file\n");
+        HDfree(fname);
+        return EXIT_FAILURE;
     }
+    HDfree(fname);
 
     /* Close the file */
     if(H5Fclose(fid) < 0) {
-	HDfprintf(stderr, "clear_open_chk: cannot close the file\n");
-	return EXIT_FAILURE;
+        HDfprintf(stderr, "clear_open_chk: cannot close the file\n");
+        return EXIT_FAILURE;
     }
 
     /* Return success */
