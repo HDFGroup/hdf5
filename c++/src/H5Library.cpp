@@ -26,6 +26,7 @@
 #include "H5OcreatProp.h"
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
+#include "H5LaccProp.h"
 #include "H5Location.h"
 #include "H5Object.h"
 #include "H5DataType.h"
@@ -185,28 +186,27 @@ void H5Library::initH5cpp()
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating PropList::deleteConstants failed");
 
-      /* ret_value = std::atexit(LinkAccPropList::deleteConstants);
+    ret_value = std::atexit(LinkAccPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating LinkAccPropList::deleteConstants failed");
- */ 
 
-     ret_value = std::atexit(FileAccPropList::deleteConstants);
+    ret_value = std::atexit(FileAccPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating FileAccPropList::deleteConstants failed");
 
-     ret_value = std::atexit(FileCreatPropList::deleteConstants);
+    ret_value = std::atexit(FileCreatPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating FileCreatPropList::deleteConstants failed");
 
-     ret_value = std::atexit(DSetMemXferPropList::deleteConstants);
+    ret_value = std::atexit(DSetMemXferPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating DSetMemXferPropList::deleteConstants failed");
 
-     ret_value = std::atexit(DSetCreatPropList::deleteConstants);
+    ret_value = std::atexit(DSetCreatPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating DSetCreatPropList::deleteConstants failed");
 
-     ret_value = std::atexit(ObjCreatPropList::deleteConstants);
+    ret_value = std::atexit(ObjCreatPropList::deleteConstants);
     if (ret_value != 0)
         throw LibraryIException("H5Library::initH5cpp", "Registrating ObjCreatPropList::deleteConstants failed");
 

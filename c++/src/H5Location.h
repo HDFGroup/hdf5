@@ -33,15 +33,13 @@ namespace H5 {
 */
 // Class forwarding
 class H5_DLLCPP ArrayType;
- /* class H5_DLLCPP LinkAccPropList; // remove when done
- */ 
+class H5_DLLCPP LinkAccPropList;
 class H5_DLLCPP VarLenType;
 class H5_DLLCPP H5Location : public IdComponent {
    public:
- /* 	// Checks if a link of a given name exists in a location
+	// Checks if a link of a given name exists in a location
 	bool exists(const char* name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
 	bool exists(const H5std_string& name, const LinkAccPropList& lapl = LinkAccPropList::DEFAULT) const;
- */ 
 
 	// Flushes all buffers associated with this location to disk.
 	void flush( H5F_scope_t scope ) const;
@@ -213,9 +211,9 @@ class H5_DLLCPP H5Location : public IdComponent {
 	// Retrieves the type of object that an object reference points to.
 	H5O_type_t p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const;
 
-        // Sets the identifier of this object to a new value. - this one
-        // doesn't increment reference count
-        //virtual void p_setId(const hid_t new_id);
+	// Sets the identifier of this object to a new value. - this one
+	// doesn't increment reference count
+	//virtual void p_setId(const hid_t new_id);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
