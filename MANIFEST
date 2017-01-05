@@ -374,6 +374,8 @@
 ./c++/src/H5Include.h
 ./c++/src/H5IntType.cpp
 ./c++/src/H5IntType.h
+./c++/src/H5LaccProp.cpp
+./c++/src/H5LaccProp.h
 ./c++/src/H5Library.cpp
 ./c++/src/H5Library.h
 ./c++/src/H5Location.cpp
