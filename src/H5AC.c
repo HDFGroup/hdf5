@@ -1287,6 +1287,44 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_prep_for_file_close
+ *
+ * Purpose:     This function should be called just prior to the cache
+ *              flushes at file close.  
+ *
+ *              The objective of the call is to allow the metadata cache
+ *              to do any preparatory work prior to generation of a
+ *              cache image.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              7/3/15
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_prep_for_file_close(H5F_t *f, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if(H5C_prep_for_file_close(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "cache prep for file close failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_prep_for_file_close() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_create_flush_dependency()
  *
  * Purpose:	Create a flush dependency between two entries in the metadata
@@ -2774,6 +2812,54 @@ H5AC_reset_ring(H5P_genplist_t *dxpl, H5AC_ring_t orig_ring)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC_reset_ring() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_unsettle_entry_ring()
+ *
+ * Purpose:     Advise the metadata cache that the specified entry's metadata
+ *              cache manager ring is no longer settled (if it was on entry).
+ *
+ *              If the target metadata cache manager ring is already
+ *              unsettled, do nothing, and return SUCCEED.
+ *
+ *              If the target metadata cache manager ring is settled, and
+ *              we are not in the process of a file shutdown, mark
+ *              the ring as unsettled, and return SUCCEED.
+ *
+ *              If the target metadata cache  manager is settled, and we
+ *              are in the process of a file shutdown, post an error
+ *              message, and return FAIL.
+ *
+ *		Note that this function simply passes the call on to
+ *		the metadata cache proper, and returns the result.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              September 17, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_unsettle_entry_ring(void *_entry)
+{
+    H5AC_info_t *entry = (H5AC_info_t *)_entry; /* Entry to remove */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(entry);
+
+    /* Unsettle the entry's ring */
+    if(H5C_unsettle_entry_ring(entry) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_unsettle_entry_ring() */
 
 
 /*-------------------------------------------------------------------------

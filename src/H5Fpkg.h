@@ -259,6 +259,14 @@ struct H5F_file_t {
                                  * block is present.  At all other times
                                  * it should be NULL.
                                  */
+    hbool_t drvinfo_sb_msg_exists;  /* Convenience field used to track 
+                                     * whether the driver info superblock 
+                                     * extension message has been created 
+                                     * yet. This field should be TRUE iff the
+                                     * superblock extension exists and contains
+                                     * a driver info message.  Under all other
+                                     * circumstances, it must be set to FALSE.
+                                     */
     unsigned	nrefs;		/* Ref count for times file is opened	*/
     unsigned	flags;		/* Access Permissions for file          */
     H5F_mtab_t	mtab;		/* File mount table                     */

@@ -53,6 +53,7 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5F_super_ext_create(H5F_t *f, hid_t dxpl_id, H5O_loc_t *ext_ptr);
+static herr_t H5F__update_super_ext_driver_msg(H5F_t *f, hid_t dxpl_id);
 
 
 /*********************/
@@ -219,6 +220,86 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_super_ext_close() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F__update_super_ext_driver_msg
+ *
+ * Purpose:	Update the superblock extension file driver info message if 
+ *		we are using a V 2 superblock.  Observe that the function
+ *		is a NO-OP if the file driver info message does not exist.
+ *              This is necessary, as the function is called whenever the 
+ *		EOA is updated, and were it to create the file driver info
+ *		message, it would find itself in an infinite recursion.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              11/10/15
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__update_super_ext_driver_msg(H5F_t *f, hid_t dxpl_id)
+{
+    H5F_super_t *sblock;        /* Pointer to the super block */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    sblock = f->shared->sblock;
+    HDassert(sblock);
+    HDassert(sblock->cache_info.magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(sblock->cache_info.type == H5AC_SUPERBLOCK);
+
+    /* Update the driver information message in the superblock extension
+     * if appropriate.
+     */
+    if(sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
+        if(H5F_addr_defined(sblock->ext_addr)) {
+            /* Check for ignoring the driver info for this file */
+            if(!H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO)) {
+                size_t     driver_size;    /* Size of driver info block (bytes)*/
+
+                /* Check for driver info */
+                H5_CHECKED_ASSIGN(driver_size, size_t, H5FD_sb_size(f->shared->lf), hsize_t);
+
+		/* Nothing to do unless there is both driver info and 
+                 * the driver info superblock extension message has 
+                 * already been created.
+                 */
+                if(driver_size > 0) {
+                    H5O_drvinfo_t drvinfo;      /* Driver info */
+                    uint8_t dbuf[H5F_MAX_DRVINFOBLOCK_SIZE];  /* Driver info block encoding buffer */
+
+                    /* Sanity check */
+                    HDassert(driver_size <= H5F_MAX_DRVINFOBLOCK_SIZE);
+
+                    /* Encode driver-specific data */
+                    if(H5FD_sb_encode(f->shared->lf, drvinfo.name, dbuf) < 0)
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode driver information")
+
+                    /* Write the message to the superblock extension.
+                     *
+                     * Note that the superblock extension and the 
+                     * file driver info message must already exist.
+                     */
+                    drvinfo.len = driver_size;
+                    drvinfo.buf = dbuf;
+                    if(H5F_super_ext_write_msg(f, dxpl_id, H5O_DRVINFO_ID, &drvinfo, FALSE) < 0)
+                        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "unable to update driver info header message")
+                } /* end if driver_size > 0 */
+            } /* end if !H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO) */
+        } /* end if superblock extension exists */
+    } /* end if sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_2 */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__update_super_ext_driver_msg() */
 
 
 /*-------------------------------------------------------------------------
@@ -549,6 +630,9 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
 
                 /* Reset driver info message */
                 H5O_msg_reset(H5O_DRVINFO_ID, &drvinfo);
+
+		HDassert(FALSE == f->shared->drvinfo_sb_msg_exists);
+		f->shared->drvinfo_sb_msg_exists = TRUE;
             } /* end else */
         } /* end if */
 
@@ -844,8 +928,18 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
 
     /* Compute the size of the driver information block */
     H5_CHECKED_ASSIGN(driver_size, size_t, H5FD_sb_size(f->shared->lf), hsize_t);
+
+    /* The following code sets driver_size to the valued needed 
+     * for the driver info block, and sets the driver info block
+     * address regardless of the version of the superblock.
+     */
     if(driver_size > 0) {
-        driver_size += H5F_DRVINFOBLOCK_HDR_SIZE;
+        /* Add in the driver info header, for older superblocks */
+        /* Superblock versions >= 2 will put the driver info in a message
+         *      and don't need the header -QAK, 1/4/2017
+         */
+        if(super_vers < HDF5_SUPERBLOCK_VERSION_2)
+            driver_size += H5F_DRVINFOBLOCK_HDR_SIZE;
 
         /*
          * The file driver information block begins immediately after the
@@ -976,6 +1070,9 @@ H5F__super_init(H5F_t *f, hid_t dxpl_id)
             info.buf = dbuf;
             if(H5O_msg_create(&ext_loc, H5O_DRVINFO_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &info, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update driver info header message")
+
+            HDassert(FALSE == f->shared->drvinfo_sb_msg_exists);
+            f->shared->drvinfo_sb_msg_exists = TRUE;
         } /* end if */
 
         /* Check for non-default free space settings */
@@ -1077,6 +1174,54 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_eoa_dirty
+ *
+ * Purpose:     Mark the file's EOA info dirty
+ *
+ * Return:      Success:        non-negative on success
+ *              Failure:        Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              January 4, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_eoa_dirty(H5F_t *f, hid_t dxpl_id)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->sblock);
+
+    /* Mark superblock dirty in cache, so change to EOA will get encoded */
+    if(H5F_super_dirty(f) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
+
+    /* If the driver information block exists, mark it dirty as well 
+     * so that the change in eoa will be reflected there as well if 
+     * appropriate.
+     */
+    if(f->shared->drvinfo) {
+        if(H5AC_mark_entry_dirty(f->shared->drvinfo) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark drvinfo as dirty")
+    } /* end if */
+    /* If the driver info is stored as a message, update that instead */
+    else if(f->shared->drvinfo_sb_msg_exists) {
+        if(H5F__update_super_ext_driver_msg(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark drvinfo message as dirty")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_eoa_dirty() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5F_super_dirty
  *
  * Purpose:     Mark the file's superblock dirty
@@ -1104,14 +1249,6 @@ H5F_super_dirty(H5F_t *f)
     /* Mark superblock dirty in cache, so change to EOA will get encoded */
     if(H5AC_mark_entry_dirty(f->shared->sblock) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark superblock as dirty")
-
-    /* if the driver information block exists, mark it dirty as well 
-     * so that the change in eoa will be reflected there as well if 
-     * appropriate.
-     */
-    if ( f->shared->drvinfo )
-        if(H5AC_mark_entry_dirty(f->shared->drvinfo) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTMARKDIRTY, FAIL, "unable to mark drvinfo as dirty")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

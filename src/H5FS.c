@@ -901,6 +901,169 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FS_alloc_vfd_alloc_hdr_and_section_info
+ *
+ * Purpose:	This function is part of a hack to patch over a design
+ *              flaw in the free space managers for file space allocation.  
+ *		Specifically, if a free space manager allocates space for 
+ *		its own section info, it is possible for it to 
+ *		go into an infinite loop as it:
+ *
+ *                      1) computes the size of the section info
+ *
+ *                      2) allocates file space for the section info
+ *
+ *                      3) notices that the size of the section info
+ *                         has changed
+ *
+ *                      4) deallocates the section info file space and
+ *                         returns to 1) above.
+ *
+ *		Similarly, if it allocates space for its own header, it 
+ *		can go into an infinte loop as it:
+ *
+ *			1) allocates space for the header
+ *
+ *			2) notices that the free space manager is empty
+ *			   and thus should not have file space allocated 
+ *			   to its header
+ *
+ *			3) frees the space allocated to the header
+ *
+ *			4) notices that the free space manager is not 
+ *			   empty and thus must have file space allocated
+ *			   to it, and thus returns to 1) above.
+ *
+ *              In a nutshell, the solution applied in this hack is to
+ *		deallocate file space for the free space manager(s) that
+ *		handle FSM header and/or section info file space allocations,
+ *              wait until all other allocation/deallocation requests have
+ *              been handled, and then test to see if the free space manager(s)
+ *		in question are empty.  If they are, do nothing.  If they 
+ *		are not, allocate space for them at end of file bypassing the
+ *		usual file space allocation calls, and thus avoiding the 
+ *		potential infinite loops.
+ *
+ *		The purpose of this function is to allocate file space for 
+ *		the header and section info of the target free space manager 
+ *		directly from the VFD if needed.  In this case the function 
+ *		also re-inserts the header and section info in the metadata 
+ *		cache with this allocation.
+ *
+ *		Note that if f->shared->alignment > 1, and EOA is not a 
+ *		multiple of the alignment, it is possible that performing 
+ *		this allocation may generate a fragment of file space in 
+ *		addition to the space allocated for the section info.
+ *
+ *		At present we deal with this by screaming and dying.  
+ *		Obviously, this is not acceptatable, but it should do 
+ *		for now.
+ *
+ *		
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	John Mainzer
+ *		6/6/16
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FS_alloc_vfd_alloc_hdr_and_section_info(H5F_t *f, hid_t dxpl_id, 
+    H5FS_t *fspace, haddr_t *fs_addr_ptr)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_TAG(dxpl_id, H5AC__FREESPACE_TAG, FAIL)
+
+    /* Check arguments */
+    HDassert(f);
+    HDassert(fspace);
+    HDassert(fs_addr_ptr);
+
+    /* The section info should be unlocked */
+    HDassert(fspace->sinfo_lock_count == 0);
+
+    /* No space should be allocated */
+    HDassert(*fs_addr_ptr == HADDR_UNDEF);
+    HDassert(fspace->addr == HADDR_UNDEF);
+    HDassert(fspace->sect_addr == HADDR_UNDEF);
+    HDassert(fspace->alloc_sect_size == 0);
+
+    /* Check if any space will be needed */
+    if(fspace->serial_sect_count > 0) {
+        haddr_t sect_addr;      /* Address of sinfo */
+
+        /* The section info is floating, so fspace->sinfo should be defined */
+        HDassert(fspace->sinfo);
+
+        /* Start by allocating file space for the header */
+        if(HADDR_UNDEF == (fspace->addr = H5MF_vfd_alloc(f, dxpl_id, H5FD_MEM_FSPACE_HDR,
+                (hsize_t)H5FS_HEADER_SIZE(f), FALSE)))
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTALLOC, FAIL, "can't allocate file space for hdr")
+
+        /* Cache the new free space header (pinned) */
+        if(H5AC_insert_entry(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't add free space header to cache")
+
+
+        /* Now allocate file space for the section info */
+        if(HADDR_UNDEF == (sect_addr = H5MF_vfd_alloc(f, dxpl_id, H5FD_MEM_FSPACE_SINFO,
+                fspace->sect_size, FALSE)))
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTALLOC, FAIL, "can't allocate file space")
+
+        /* Update fspace->alloc_sect_size and fspace->sect_addr to reflect 
+         * the allocation 
+         */
+        fspace->alloc_sect_size = fspace->sect_size;
+        fspace->sect_addr = sect_addr;
+
+        /* We have changed the sinfo address -- Mark free space header dirty */
+        if(H5AC_mark_entry_dirty(fspace) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
+
+        /* Insert the new section info into the metadata cache.  */
+
+        /* Question: Do we need to worry about this insertion causing an 
+         * eviction from the metadata cache?  Think on this.  If so, add a 
+         * flag to H5AC_insert() to force it to skip the call to make space in
+         * cache.
+         *
+         * On reflection, no.
+         *
+         * On a regular file close, any eviction will not change the 
+         * the contents of the free space manger(s), as all entries 
+         * should have correct file space allocated by the time this 
+         * function is called.
+         *
+         * In the cache image case, the selection of entries for inclusion
+         * in the cache image will not take place until after this call.
+         * (Recall that this call is made during the metadata fsm settle
+         * routine, which is called during the serialization routine in 
+         * the cache image case.  Entries are not selected for inclusion
+         * in the image until after the cache is serialized.)  
+         *
+         *                                        JRM -- 11/4/16
+         */
+        if(H5AC_insert_entry(f, dxpl_id, H5AC_FSPACE_SINFO, sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, FAIL, "can't add free space sinfo to cache")
+
+        /* Since space has been allocated for the section info and the sinfo
+         * has been inserted into the cache, relinquish owership (i.e. float)
+         * the section info.
+         */
+        fspace->sinfo = NULL;
+
+        /* Set the address of the free space header, on success */
+        *fs_addr_ptr = fspace->addr;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI_TAG(ret_value, FAIL)
+} /* H5FS_alloc_vfd_alloc_hdr_and_section_info() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5FS_free()
  *
  * Purpose:     Free space for free-space manager header and section info header

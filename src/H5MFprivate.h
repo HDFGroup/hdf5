@@ -58,7 +58,10 @@ H5_DLL herr_t H5MF_try_close(H5F_t *f, hid_t dxpl_id);
 
 /* File space allocation routines */
 H5_DLL haddr_t H5MF_alloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
-H5_DLL haddr_t H5MF_aggr_vfd_alloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
+H5_DLL haddr_t H5MF_aggr_vfd_alloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id,
+    hsize_t size);
+H5_DLL haddr_t H5MF_vfd_alloc(H5F_t *f, hid_t dxpl_id, H5FD_mem_t alloc_type,
+    hsize_t size, hbool_t keep_fragment);
 H5_DLL herr_t H5MF_xfree(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
     hsize_t size);
 H5_DLL herr_t H5MF_try_extend(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
@@ -74,6 +77,10 @@ H5_DLL haddr_t H5MF_alloc_tmp(H5F_t *f, hsize_t size);
 /* 'block aggregator' routines */
 H5_DLL herr_t H5MF_free_aggrs(H5F_t *f, hid_t dxpl_id);
 H5_DLL htri_t H5MF_aggrs_try_shrink_eoa(H5F_t *f, hid_t dxpl_id);
+
+/* Settling routines */
+H5_DLL herr_t H5MF_settle_raw_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled);
+H5_DLL herr_t H5MF_settle_meta_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled);
 
 /* Debugging routines */
 #ifdef H5MF_DEBUGGING

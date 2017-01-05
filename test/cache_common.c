@@ -3408,6 +3408,12 @@ takedown_cache(H5F_t * file_ptr,
             H5C_stats(cache_ptr, "test cache", dump_detailed_stats);
         }
 
+	if ( H5C_prep_for_file_close(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "unexpected failure of prep for file close.\n";
+        }
+
         flush_cache(file_ptr, TRUE, FALSE, FALSE);
 
         H5C_dest(file_ptr, H5AC_ind_read_dxpl_id);

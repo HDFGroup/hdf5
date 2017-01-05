@@ -2869,7 +2869,7 @@ test_fs_sect_iterate(hid_t fapl)
 	if(H5FS_sect_add(f, dxpl_id, frsp, (H5FS_section_info_t *)sect_node,
 		H5FS_ADD_RETURNED_SPACE, NULL) < 0)
 	    FAIL_STACK_ERROR
-    }
+    } /* end for */
 
     if(H5FS_sect_iterate(f, dxpl_id, frsp, TEST_sects_cb, &udata) < 0)
 	TEST_ERROR
@@ -2905,7 +2905,7 @@ error:
     H5E_BEGIN_TRY {
         if(frsp)
             H5FS_close(f, dxpl_id, frsp);
-	    H5Fclose(file);
+        H5Fclose(file);
         H5Pclose(dxpl_id);
     } H5E_END_TRY;
     return 1;
@@ -2915,9 +2915,9 @@ error:
 int
 main(void)
 {
-    hid_t       	fapl = -1;	/* File access property list for data files */
-    unsigned    	nerrors = 0;    /* Cumulative error count */
-    const char *env_h5_drvr = NULL;     /* File Driver value from environment */
+    hid_t           fapl = -1;              /* File access property list for data files */
+    unsigned        nerrors = 0;            /* Cumulative error count */
+    const char     *env_h5_drvr = NULL;     /* File Driver value from environment */
 
     /* Get the VFD to use */
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
@@ -2926,11 +2926,16 @@ main(void)
 
     h5_reset();
 
-    fapl = h5_fileaccess();
+    if((fapl = h5_fileaccess()) < 0) {
+        nerrors++;
+        PUTS_ERROR("Can't get VFD-dependent fapl")
+    } /* end if */
 
     /* make sure alignment is not set for tests to succeed */
-    if(H5Pset_alignment(fapl, (hsize_t)1, (hsize_t)1) < 0)
-        TEST_ERROR
+    if(H5Pset_alignment(fapl, (hsize_t)1, (hsize_t)1) < 0) {
+        nerrors++;
+        PUTS_ERROR("Can't set alignment")
+    } /* end if */
 
     nerrors += test_fs_create(fapl);
     nerrors += test_fs_sect_add(fapl);
@@ -2946,16 +2951,16 @@ main(void)
 
     if(nerrors)
         goto error;
-    puts("All free-space tests passed.");
+    HDputs("All free-space tests passed.");
 
     h5_cleanup(FILENAME, fapl);
-    return 0;
+    HDexit(EXIT_SUCCESS);
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     H5E_BEGIN_TRY {
         H5Pclose(fapl);
     } H5E_END_TRY;
-    return 1;
+    HDexit(EXIT_FAILURE);
 } /* main() */
 

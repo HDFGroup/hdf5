@@ -182,6 +182,8 @@ H5_DLL herr_t H5FS_delete(H5F_t *f, hid_t dxpl_id, haddr_t fs_addr);
 H5_DLL herr_t H5FS_close(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace);
 H5_DLL herr_t H5FS_alloc_hdr(H5F_t *f, H5FS_t *fspace, haddr_t *fs_addr, hid_t dxpl_id);
 H5_DLL herr_t H5FS_alloc_sect(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id);
+H5_DLL herr_t H5FS_alloc_vfd_alloc_hdr_and_section_info(H5F_t *f, hid_t dxpl_id, 
+    H5FS_t *fspace, haddr_t *fs_addr_ptr);
 H5_DLL herr_t H5FS_free(H5F_t *f, H5FS_t *fspace, hid_t dxpl_id);
 
 /* Free space section routines */
