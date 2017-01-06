@@ -354,6 +354,7 @@ H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
 #define H5AC_ES__IS_FLUSH_DEP_PARENT    0x0010
 #define H5AC_ES__IS_FLUSH_DEP_CHILD     0x0020
 #define H5AC_ES__IS_CORKED              0x0040
+#define H5AC_ES__IMAGE_IS_UP_TO_DATE    0x0080
 
 
 /* external function declarations: */

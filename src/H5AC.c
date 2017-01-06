@@ -834,6 +834,7 @@ H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
     hbool_t	is_corked;
     hbool_t	is_flush_dep_child;     /* Entry @ addr is in the cache and is a flush dependency child */
     hbool_t	is_flush_dep_parent;    /* Entry @ addr is in the cache and is a flush dependency parent */
+    hbool_t	image_is_up_to_date;    /* Entry @ addr is in the cache and has an up to date image */
     herr_t      ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -842,7 +843,7 @@ H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry.")
 
     if(H5C_get_entry_status(f, addr, NULL, &in_cache, &is_dirty,
-            &is_protected, &is_pinned, &is_corked, &is_flush_dep_parent, &is_flush_dep_child) < 0)
+            &is_protected, &is_pinned, &is_corked, &is_flush_dep_parent, &is_flush_dep_child, &image_is_up_to_date) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_entry_status() failed.")
 
     if(in_cache) {
@@ -859,6 +860,8 @@ H5AC_get_entry_status(const H5F_t *f, haddr_t addr, unsigned *status)
 	    *status |= H5AC_ES__IS_FLUSH_DEP_PARENT;
 	if(is_flush_dep_child)
 	    *status |= H5AC_ES__IS_FLUSH_DEP_CHILD;
+	if(image_is_up_to_date)
+	    *status |= H5AC_ES__IMAGE_IS_UP_TO_DATE;
     } /* end if */
     else
         *status = 0;

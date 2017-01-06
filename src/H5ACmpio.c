@@ -1071,7 +1071,7 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
 
     /* get entry status, size, etc here */
     if(H5C_get_entry_status(f, old_addr, &entry_size, &entry_in_cache,
-            &entry_dirty, NULL, NULL, NULL, NULL, NULL) < 0)
+            &entry_dirty, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get entry status.")
     if(!entry_in_cache)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry not in cache.")

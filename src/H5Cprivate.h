@@ -1761,7 +1761,8 @@ H5_DLL herr_t H5C_get_cache_hit_rate(H5C_t *cache_ptr, double *hit_rate_ptr);
 H5_DLL herr_t H5C_get_entry_status(const H5F_t *f, haddr_t addr,
     size_t *size_ptr, hbool_t *in_cache_ptr, hbool_t *is_dirty_ptr,
     hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr, hbool_t *is_corked_ptr,
-    hbool_t *is_flush_dep_parent_ptr, hbool_t *is_flush_dep_child_ptr);
+    hbool_t *is_flush_dep_parent_ptr, hbool_t *is_flush_dep_child_ptr,
+    hbool_t *image_up_to_date_ptr);
 H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictions_enabled_ptr);
 H5_DLL void * H5C_get_aux_ptr(const H5C_t *cache_ptr);
 H5_DLL FILE *H5C_get_trace_file_ptr(const H5C_t *cache_ptr);
