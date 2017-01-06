@@ -1565,6 +1565,8 @@ notify(H5C_notify_action_t action, void *thing, int32_t entry_type)
         case H5C_NOTIFY_ACTION_ENTRY_CLEANED:
         case H5C_NOTIFY_ACTION_CHILD_DIRTIED:
         case H5C_NOTIFY_ACTION_CHILD_CLEANED:
+        case H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED:
+        case H5C_NOTIFY_ACTION_CHILD_SERIALIZED:
 	    /* do nothing */
 	    break;
 

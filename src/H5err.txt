@@ -157,6 +157,7 @@ MINOR, ATOM, H5E_NOIDS, Out of IDs for group
 
 # Cache related errors
 MINOR, CACHE, H5E_CANTFLUSH, Unable to flush data from cache
+MINOR, CACHE, H5E_CANTUNSERIALIZE, Unable to mark metadata as unserialized
 MINOR, CACHE, H5E_CANTSERIALIZE, Unable to serialize data from cache
 MINOR, CACHE, H5E_CANTTAG, Unable to tag metadata in the cache
 MINOR, CACHE, H5E_CANTLOAD, Unable to load metadata into cache
@@ -170,6 +171,8 @@ MINOR, CACHE, H5E_CANTPIN, Unable to pin cache entry
 MINOR, CACHE, H5E_CANTUNPIN, Unable to un-pin cache entry
 MINOR, CACHE, H5E_CANTMARKDIRTY, Unable to mark a pinned entry as dirty
 MINOR, CACHE, H5E_CANTMARKCLEAN, Unable to mark a pinned entry as clean
+MINOR, CACHE, H5E_CANTMARKUNSERIALIZED, Unable to mark an entry as unserialized
+MINOR, CACHE, H5E_CANTMARKSERIALIZED, Unable to mark an entry as serialized
 MINOR, CACHE, H5E_CANTDIRTY, Unable to mark metadata as dirty
 MINOR, CACHE, H5E_CANTCLEAN, Unable to mark metadata as clean
 MINOR, CACHE, H5E_CANTEXPUNGE, Unable to expunge a metadata cache entry

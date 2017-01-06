@@ -308,6 +308,7 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->log_flush			= log_flush;
 
     cache_ptr->evictions_enabled		= TRUE;
+    cache_ptr->close_warning_received		= FALSE;
 
     cache_ptr->index_len			= 0;
     cache_ptr->index_size			= (size_t)0;
@@ -1439,6 +1440,7 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->flush_dep_parent_nalloc      = 0;
     entry_ptr->flush_dep_nchildren          = 0;
     entry_ptr->flush_dep_ndirty_children    = 0;
+    entry_ptr->flush_dep_nunser_children    = 0;
 
     entry_ptr->ht_next = NULL;
     entry_ptr->ht_prev = NULL;
@@ -1645,11 +1647,24 @@ H5C_mark_entry_dirty(void *thing)
         /* set the dirtied flag */
         entry_ptr->dirtied = TRUE;
 
-    } else if ( entry_ptr->is_pinned ) {
+        /* reset image_up_to_date */
+        if(entry_ptr->image_up_to_date) {
+            entry_ptr->image_up_to_date = FALSE;
+
+            if(entry_ptr->flush_dep_nparents > 0)
+                if(H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "Can't propagate serialization status to fd parents")
+        }/* end if */
+    } /* end if */
+    else if ( entry_ptr->is_pinned ) {
         hbool_t		was_clean;      /* Whether the entry was previously clean */
+        hbool_t		image_was_up_to_date;
 
         /* Remember previous dirty status */
 	was_clean = !entry_ptr->is_dirty;
+
+        /* Check if image is up to date */
+        image_was_up_to_date = entry_ptr->image_up_to_date;
 
         /* Mark the entry as dirty if it isn't already */
         entry_ptr->is_dirty = TRUE;
@@ -1678,6 +1693,10 @@ H5C_mark_entry_dirty(void *thing)
                 if(H5C__mark_flush_dep_dirty(entry_ptr) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Can't propagate flush dep dirty flag")
         } /* end if */
+        if(image_was_up_to_date)
+            if(entry_ptr->flush_dep_nparents > 0)
+                if(H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "Can't propagate serialization status to fd parents")
     } /* end if */
     else
         HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, "Entry is neither pinned nor protected??")
@@ -1764,6 +1783,99 @@ H5C_mark_entry_clean(void *_thing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_mark_entry_clean() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_mark_entry_unserialized
+ *
+ * Purpose:	Mark a pinned or protected entry as unserialized.  The target
+ *		entry MUST be either pinned or protected, and MAY be both.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              12/23/16
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_mark_entry_unserialized(void *thing)
+{
+    H5C_cache_entry_t  *entry = (H5C_cache_entry_t *)thing;
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(entry);
+    HDassert(H5F_addr_defined(entry->addr));
+
+    if(entry->is_protected || entry->is_pinned) {
+        HDassert(!entry->is_read_only);
+
+        /* Reset image_up_to_date */
+        if(entry->image_up_to_date) {
+	    entry->image_up_to_date = FALSE;
+
+            if(entry->flush_dep_nparents > 0)
+                if(H5C__mark_flush_dep_unserialized(entry) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "Can't propagate serialization status to fd parents")
+        }/* end if */
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKUNSERIALIZED, FAIL, "Entry to unserialize is neither pinned nor protected??")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_mark_entry_unserialized() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_mark_entry_serialized
+ *
+ * Purpose:	Mark a pinned entry as serialized.  The target entry MUST be
+ *		pinned.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              12/23/16
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_mark_entry_serialized(void *_thing)
+{
+    H5C_cache_entry_t  *entry = (H5C_cache_entry_t *)_thing;
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(entry);
+    HDassert(H5F_addr_defined(entry->addr));
+
+    /* Operate on pinned entry */
+    if(entry->is_protected)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKSERIALIZED, FAIL, "entry is protected")
+    else if(entry->is_pinned) {
+        /* Check for entry changing status and do notifications, etc. */
+        if(!entry->image_up_to_date) {
+	    /* Set the image_up_to_date flag */
+            entry->image_up_to_date = TRUE;
+
+            /* Propagate the serialize up the flush dependency chain, if appropriate */
+            if(entry->flush_dep_nparents > 0)
+                if(H5C__mark_flush_dep_serialized(entry) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKSERIALIZED, FAIL, "Can't propagate flush dep serialize")
+        } /* end if */
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKSERIALIZED, FAIL, "Entry is not pinned??")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_mark_entry_serialized() */
 
 
 /*-------------------------------------------------------------------------
@@ -1867,7 +1979,12 @@ H5C_move_entry(H5C_t *	     cache_ptr,
 	entry_ptr->is_dirty = TRUE;
 
 	/* This shouldn't be needed, but it keeps the test code happy */
-        entry_ptr->image_up_to_date = FALSE;
+        if(entry_ptr->image_up_to_date) {
+            entry_ptr->image_up_to_date = FALSE;
+            if(entry_ptr->flush_dep_nparents > 0)
+                if(H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "Can't propagate serialization status to fd parents")
+        } /* end if */
 
         /* Modify cache data structures */
         H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
@@ -1965,7 +2082,14 @@ H5C_resize_entry(void *thing, size_t new_size)
 
         /* mark the entry as dirty if it isn't already */
         entry_ptr->is_dirty = TRUE;
-        entry_ptr->image_up_to_date = FALSE;
+
+        /* Reset the image up-to-date status */
+        if(entry_ptr->image_up_to_date) {
+            entry_ptr->image_up_to_date = FALSE;
+            if(entry_ptr->flush_dep_nparents > 0)
+                if(H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "Can't propagate serialization status to fd parents")
+        } /* end if */
 
         /* Release the current image */
         if(entry_ptr->image_ptr)
@@ -3229,18 +3353,13 @@ H5C_unprotect(H5F_t *		  f,
         /* Mark the entry as dirty if appropriate */
         entry_ptr->is_dirty = (entry_ptr->is_dirty || dirtied);
 
-        /* the image_up_to_date field was introduced to support 
-         * journaling.  Until we re-introduce journaling, this 
-         * field should be equal to !entry_ptr->is_dirty.  
-         *
-         * When journaling is re-enabled it should be set 
-         * to FALSE if dirtied is TRUE.
-         */
-#if 1 /* JRM */
-	entry_ptr->image_up_to_date = FALSE;
-#else /* JRM */
-	entry_ptr->image_up_to_date = !entry_ptr->is_dirty;
-#endif /* JRM */
+	if(dirtied)
+	    if(entry_ptr->image_up_to_date) {
+	        entry_ptr->image_up_to_date = FALSE;
+	        if(entry_ptr->flush_dep_nparents > 0)
+		    if(H5C__mark_flush_dep_unserialized(entry_ptr) < 0)
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "Can't propagate serialization status to fd parents")
+            } /* end if */
 
         /* Check for newly dirtied entry */
         if(was_clean && entry_ptr->is_dirty) {
@@ -3782,6 +3901,20 @@ H5C_create_flush_dependency(void * parent_thing, void * child_thing)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry dirty flag set")
     } /* end if */
 
+    /* adjust the parent's number of unserialized children.  Note
+     * that it is possible for and entry to be clean and unserialized.
+     */
+    if(!child_entry->image_up_to_date) {
+        HDassert(parent_entry->flush_dep_nunser_children < parent_entry->flush_dep_nchildren);
+
+        parent_entry->flush_dep_nunser_children++;
+
+        /* If the parent has a 'notify' callback, send a 'child entry unserialized' notice */
+        if(parent_entry->type->notify &&
+                (parent_entry->type->notify)(H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED, parent_entry) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry serialized flag reset")
+    } /* end if */
+
     /* Post-conditions, for successful operation */
     HDassert(parent_entry->is_pinned);
     HDassert(parent_entry->flush_dep_nchildren > 0);
@@ -3891,6 +4024,18 @@ H5C_destroy_flush_dependency(void *parent_thing, void * child_thing)
         if(parent_entry->type->notify &&
                 (parent_entry->type->notify)(H5C_NOTIFY_ACTION_CHILD_CLEANED, parent_entry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry dirty flag reset")
+    } /* end if */
+
+    /* adjust parent entry's number of unserialized children */
+    if(!child_entry->image_up_to_date) {
+        HDassert(parent_entry->flush_dep_nunser_children > 0);
+
+        parent_entry->flush_dep_nunser_children--;
+
+        /* If the parent has a 'notify' callback, send a 'child entry serialized' notice */
+        if(parent_entry->type->notify &&
+                (parent_entry->type->notify)(H5C_NOTIFY_ACTION_CHILD_SERIALIZED, parent_entry) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry serialized flag set")
     } /* end if */
 
     /* Shrink or free the parent array if apporpriate */
@@ -5950,6 +6095,9 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
                     && (entry_ptr->flush_dep_nchildren == 0
                         || entry_ptr->flush_dep_ndirty_children == 0) 
                     && entry_ptr->ring == ring) {
+
+                HDassert(entry_ptr->flush_dep_nunser_children == 0);
+
                 if(entry_ptr->is_protected) {
                     /* we probably have major problems -- but lets 
                      * flush everything we can before we decide 
@@ -6811,6 +6959,7 @@ H5C_load_entry(H5F_t *              f,
     entry->flush_dep_parent_nalloc      = 0;
     entry->flush_dep_nchildren          = 0;
     entry->flush_dep_ndirty_children    = 0;
+    entry->flush_dep_nunser_children    = 0;
     entry->ht_next                      = NULL;
     entry->ht_prev                      = NULL;
     entry->il_next                      = NULL;
@@ -7882,8 +8031,101 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__mark_flush_dep_clean() */
 
-#ifndef NDEBUG
 
+/*-------------------------------------------------------------------------
+ * Function:    H5C__mark_flush_dep_serialized()
+ *
+ * Purpose:     Decrement the flush_dep_nunser_children fields of all the 
+ *		target entry's flush dependency parents in response to 
+ *		the target entry becoming serialized.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              8/30/16
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C__mark_flush_dep_serialized(H5C_cache_entry_t * entry_ptr)
+{
+    unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(entry_ptr);
+
+    /* Iterate over the parent entries, if any */
+    for(u = 0; u < entry_ptr->flush_dep_nparents; u++) {
+
+        HDassert(entry_ptr->flush_dep_parent);
+        HDassert(entry_ptr->flush_dep_parent[u]->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+        HDassert(entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children > 0);
+
+        /* decrement the parents number of unserialized children */
+        entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children--;
+
+        /* If the parent has a 'notify' callback, send a 'child entry serialized' notice */
+        if(entry_ptr->flush_dep_parent[u]->type->notify &&
+                (entry_ptr->flush_dep_parent[u]->type->notify)(H5C_NOTIFY_ACTION_CHILD_SERIALIZED, entry_ptr->flush_dep_parent[u]) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry serialized flag set")
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__mark_flush_dep_serialized() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C__mark_flush_dep_unserialized()
+ *
+ * Purpose:     Decrement the flush_dep_nunser_children fields of all the 
+ *              target entry's flush dependency parents in response to 
+ *              the target entry becoming unserialized.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              8/30/16
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C__mark_flush_dep_unserialized(H5C_cache_entry_t * entry_ptr)
+{
+    unsigned u;                         /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(entry_ptr);
+
+    /* Iterate over the parent entries, if any */
+    for(u = 0; u < entry_ptr->flush_dep_nparents; u++) {
+        /* Sanity check */
+        HDassert(entry_ptr->flush_dep_parent);
+        HDassert(entry_ptr->flush_dep_parent[u]->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+        HDassert(entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children < 
+                 entry_ptr->flush_dep_parent[u]->flush_dep_nchildren);
+
+        /* increment parents number of usserialized children */
+        entry_ptr->flush_dep_parent[u]->flush_dep_nunser_children++;
+
+        /* If the parent has a 'notify' callback, send a 'child entry unserialized' notice */
+        if(entry_ptr->flush_dep_parent[u]->type->notify &&
+                (entry_ptr->flush_dep_parent[u]->type->notify)(H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED, entry_ptr->flush_dep_parent[u]) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify parent about child entry serialized flag reset")
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C__mark_flush_dep_unserialized() */
+
+
+#ifndef NDEBUG
 /*-------------------------------------------------------------------------
  * Function:    H5C__assert_flush_dep_nocycle()
  *
@@ -8073,6 +8315,10 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
     HDassert(0 == HDmemcmp(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE));
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
     entry_ptr->image_up_to_date = TRUE;
+
+    if(entry_ptr->flush_dep_nparents > 0)
+        if(H5C__mark_flush_dep_serialized(entry_ptr) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "Can't propagate serialization status to fd parents")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
