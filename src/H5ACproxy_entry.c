@@ -312,6 +312,10 @@ H5AC_proxy_entry_add_child(H5AC_proxy_entry_t *pentry, H5F_t *f, hid_t dxpl_id,
         if(H5AC_mark_entry_clean(pentry) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean")
 
+        /* Proxies start out serialized (insertions are automatically marked unserialized) */
+        if(H5AC_mark_entry_serialized(pentry) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "can't mark proxy entry clean")
+
         /* If there are currently parents, iterate over the list of parents, creating flush dependency on them */
         if(pentry->parents)
             if(H5SL_iterate(pentry->parents, H5AC__proxy_entry_add_child_cb, pentry) < 0)
@@ -438,6 +442,7 @@ H5AC_proxy_entry_dest(H5AC_proxy_entry_t *pentry)
     HDassert(NULL == pentry->parents);
     HDassert(0 == pentry->nchildren);
     HDassert(0 == pentry->ndirty_children);
+    HDassert(0 == pentry->nunser_children);
 
     /* Free the proxy entry object */
     pentry = H5FL_FREE(H5AC_proxy_entry_t, pentry);
@@ -549,6 +554,7 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
         case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
             /* Sanity checks */
             HDassert(0 == pentry->ndirty_children);
+            HDassert(0 == pentry->nunser_children);
 
             /* No action */
             break;
@@ -588,6 +594,29 @@ H5AC__proxy_entry_notify(H5AC_notify_action_t action, void *_thing)
             if(0 == pentry->ndirty_children)
                 if(H5AC_mark_entry_clean(pentry) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTCLEAN, FAIL, "can't mark proxy entry clean")
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
+            /* Increment # of unserialized children */
+            pentry->nunser_children++;
+
+            /* Check for first unserialized child */
+            if(1 == pentry->nunser_children)
+                if(H5AC_mark_entry_unserialized(pentry) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTUNSERIALIZE, FAIL, "can't mark proxy entry unserialized")
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+            /* Sanity check */
+            HDassert(pentry->nunser_children > 0);
+
+            /* Decrement # of unserialized children */
+            pentry->nunser_children--;
+
+            /* Check for last unserialized child */
+            if(0 == pentry->nunser_children)
+                if(H5AC_mark_entry_serialized(pentry) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "can't mark proxy entry serialized")
             break;
 
         default:

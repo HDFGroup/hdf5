@@ -452,6 +452,10 @@ H5_DLL herr_t H5AC__write_mark_dirty_entry_log_msg(const H5AC_t *cache,
                                                    herr_t fxn_ret_value);
 H5_DLL herr_t H5AC__write_mark_clean_entry_log_msg(const H5AC_t *cache,
     const H5AC_info_t *entry, herr_t fxn_ret_value);
+H5_DLL herr_t H5AC__write_mark_unserialized_entry_log_msg(const H5AC_t *cache,
+        const H5AC_info_t *entry, herr_t fxn_ret_value);
+H5_DLL herr_t H5AC__write_mark_serialized_entry_log_msg(const H5AC_t *cache,
+    const H5AC_info_t *entry, herr_t fxn_ret_value);
 H5_DLL herr_t H5AC__write_move_entry_log_msg(const H5AC_t *cache,
                                              haddr_t old_addr,
                                              haddr_t new_addr,

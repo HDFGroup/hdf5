@@ -170,6 +170,8 @@ typedef H5C_notify_action_t     H5AC_notify_action_t;
 #define H5AC_NOTIFY_ACTION_ENTRY_CLEANED H5C_NOTIFY_ACTION_ENTRY_CLEANED
 #define H5AC_NOTIFY_ACTION_CHILD_DIRTIED H5C_NOTIFY_ACTION_CHILD_DIRTIED
 #define H5AC_NOTIFY_ACTION_CHILD_CLEANED H5C_NOTIFY_ACTION_CHILD_CLEANED
+#define H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED
+#define H5AC_NOTIFY_ACTION_CHILD_SERIALIZED H5C_NOTIFY_ACTION_CHILD_SERIALIZED
 
 #define H5AC__CLASS_NO_FLAGS_SET 	H5C__CLASS_NO_FLAGS_SET
 #define H5AC__CLASS_SPECULATIVE_LOAD_FLAG H5C__CLASS_SPECULATIVE_LOAD_FLAG
@@ -217,6 +219,8 @@ typedef struct H5AC_proxy_entry_t {
     /* Child fields */
     size_t nchildren;                   /* Number of children */
     size_t ndirty_children;             /* Number of dirty children */
+                                        /* (Note that this currently duplicates some cache functionality) */
+    size_t nunser_children;             /* Number of unserialized children */
                                         /* (Note that this currently duplicates some cache functionality) */
 } H5AC_proxy_entry_t;
 
@@ -378,6 +382,8 @@ H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
 H5_DLL herr_t H5AC_flush(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC_mark_entry_dirty(void *thing);
 H5_DLL herr_t H5AC_mark_entry_clean(void *thing);
+H5_DLL herr_t H5AC_mark_entry_unserialized(void *thing);
+H5_DLL herr_t H5AC_mark_entry_serialized(void *thing);
 H5_DLL herr_t H5AC_move_entry(H5F_t *f, const H5AC_class_t *type,
     haddr_t old_addr, haddr_t new_addr, hid_t dxpl_id);
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);

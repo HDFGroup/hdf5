@@ -1134,6 +1134,138 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC_mark_entry_unserialized
+ *
+ * Purpose:	Mark a pinned or protected entry as unserialized.  The target
+ * 		entry MUST be either pinned, protected, or both.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              12/22/16
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_mark_entry_unserialized(void *thing)
+{
+#if H5AC__TRACE_FILE_ENABLED
+    char          	trace[128] = "";
+    FILE *        	trace_file_ptr = NULL;
+#endif /* H5AC__TRACE_FILE_ENABLED */
+    hbool_t log_enabled;              /* TRUE if logging was set up */
+    hbool_t curr_logging;             /* TRUE if currently logging */
+    H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
+    H5C_t *cache_ptr = NULL;          /* Pointer to the entry's associated metadata cache */
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(thing);
+
+    /* Set up entry & cache pointers */
+    entry_ptr = (H5AC_info_t *)thing;
+    cache_ptr = entry_ptr->cache_ptr;
+
+#if H5AC__TRACE_FILE_ENABLED
+    /* For the mark entry unserialized call, only the addr
+     * is really necessary in the trace file.  Write the result to catch
+     * occult errors.
+     */
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr_from_entry(thing)))
+        sprintf(trace, "%s 0x%lx", FUNC, (unsigned long)(entry_ptr->addr));
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(cache_ptr, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get logging status")
+
+    if(H5C_mark_entry_unserialized(thing) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKUNSERIALIZED, FAIL, "can't mark entry unserialized")
+
+done:
+#if H5AC__TRACE_FILE_ENABLED
+    if(trace_file_ptr)
+	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_mark_unserialized_entry_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_LOGFAIL, FAIL, "unable to emit log message")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_mark_entry_unserialized() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_mark_entry_serialized
+ *
+ * Purpose:	Mark a pinned entry as serialized.  The target
+ * 		entry MUST be pinned.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              12/22/16
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_mark_entry_serialized(void *thing)
+{
+#if H5AC__TRACE_FILE_ENABLED
+    char          	trace[128] = "";
+    FILE *        	trace_file_ptr = NULL;
+#endif /* H5AC__TRACE_FILE_ENABLED */
+    hbool_t log_enabled;              /* TRUE if logging was set up */
+    hbool_t curr_logging;             /* TRUE if currently logging */
+    H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
+    H5C_t *cache_ptr = NULL;          /* Pointer to the entry's associated metadata cache */
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(thing);
+
+#if H5AC__TRACE_FILE_ENABLED
+    /* For the mark entry serializedn call, only the addr
+     * is really necessary in the trace file.  Write the result to catch
+     * occult errors.
+     */
+    if(NULL != (trace_file_ptr = H5C_get_trace_file_ptr_from_entry(thing)))
+        sprintf(trace, "%s 0x%lx", FUNC,
+	        (unsigned long)(((H5C_cache_entry_t *)thing)->addr));
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    entry_ptr = (H5AC_info_t *)thing;
+    cache_ptr = entry_ptr->cache_ptr;
+
+    /* Check if log messages are being emitted */
+    if(H5C_get_logging_status(cache_ptr, &log_enabled, &curr_logging) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get logging status")
+
+    if(H5C_mark_entry_serialized(thing) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKSERIALIZED, FAIL, "can't mark entry serialized")
+
+done:
+#if H5AC__TRACE_FILE_ENABLED
+    if(trace_file_ptr)
+	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    /* If currently logging, generate a message */
+    if(curr_logging)
+        if(H5AC__write_mark_serialized_entry_log_msg(cache_ptr, entry_ptr, ret_value) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_LOGFAIL, FAIL, "unable to emit log message")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_mark_entry_serialized() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_move_entry
  *
  * Purpose:     Use this function to notify the cache that an object's

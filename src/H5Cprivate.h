@@ -867,7 +867,9 @@ typedef enum H5C_notify_action_t {
     H5C_NOTIFY_ACTION_ENTRY_DIRTIED,    /* Entry has been marked dirty. */
     H5C_NOTIFY_ACTION_ENTRY_CLEANED,    /* Entry has been marked clean. */
     H5C_NOTIFY_ACTION_CHILD_DIRTIED,    /* Dependent child has been marked dirty. */
-    H5C_NOTIFY_ACTION_CHILD_CLEANED     /* Dependent child has been marked clean. */
+    H5C_NOTIFY_ACTION_CHILD_CLEANED,    /* Dependent child has been marked clean. */
+    H5C_NOTIFY_ACTION_CHILD_UNSERIALIZED, /* Dependent child has been marked unserialized. */
+    H5C_NOTIFY_ACTION_CHILD_SERIALIZED  /* Dependent child has been marked serialized. */
 } H5C_notify_action_t;
 
 /* Cache client callback function pointers */
@@ -1214,6 +1216,19 @@ typedef int H5C_ring_t;
  *              either dirty or have a nonzero flush_dep_ndirty_children.  If
  *              this field is nonzero, then this entry cannot be flushed.
  *
+ * flush_dep_nunser_children:  Number of flush dependency children
+ *		that are either unserialized, or have a non-zero number of 
+ *		positive number of unserialized children.
+ *
+ *		Note that since there is no requirement that a clean entry
+ *		be serialized, it is possible that flush_dep_nunser_children
+ *		to be greater than flush_dep_ndirty_children.
+ *
+ *		This field exist to facilitate correct ordering of entry
+ *		serializations when it is necessary to serialize all the 
+ *		entries in the metadata cache.  Thus in the cache
+ *		serialization, no entry can be serialized unless this
+ *		field contains 0.
  *
  * Fields supporting the hash table:
  *
@@ -1398,6 +1413,7 @@ typedef struct H5C_cache_entry_t {
     unsigned                    flush_dep_parent_nalloc;
     unsigned                    flush_dep_nchildren;
     unsigned                    flush_dep_ndirty_children;
+    unsigned                    flush_dep_nunser_children;
     hbool_t			pinned_from_client;
     hbool_t			pinned_from_cache;
 
@@ -1771,6 +1787,8 @@ H5_DLL herr_t H5C_insert_entry(H5F_t *f, hid_t dxpl_id, const H5C_class_t *type,
     haddr_t addr, void *thing, unsigned int flags);
 H5_DLL herr_t H5C_mark_entry_dirty(void *thing);
 H5_DLL herr_t H5C_mark_entry_clean(void *thing);
+H5_DLL herr_t H5C_mark_entry_unserialized(void *thing);
+H5_DLL herr_t H5C_mark_entry_serialized(void *thing);
 H5_DLL herr_t H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type,
     haddr_t old_addr, haddr_t new_addr);
 H5_DLL herr_t H5C_pin_protected_entry(void *thing);

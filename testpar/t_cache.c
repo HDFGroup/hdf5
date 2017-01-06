@@ -2927,6 +2927,30 @@ datum_notify(H5C_notify_action_t action, void *thing)
             /* do nothing */
             break;
 
+        case H5AC_NOTIFY_ACTION_CHILD_UNSERIALIZED:
+            if ( callbacks_verbose ) {
+
+                HDfprintf(stdout,
+                      "%d: notify() action = child entry unserialized, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fflush(stdout);
+            }
+
+            /* do nothing */
+            break;
+
+        case H5AC_NOTIFY_ACTION_CHILD_SERIALIZED:
+            if ( callbacks_verbose ) {
+
+                HDfprintf(stdout,
+                      "%d: notify() action = child entry serialized, idx = %d, addr = %ld.\n",
+                      world_mpi_rank, idx, (long)entry_ptr->header.addr);
+                fflush(stdout);
+            }
+
+            /* do nothing */
+            break;
+
 	default:
             nerrors++;
             ret_value = FAIL;

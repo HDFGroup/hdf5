@@ -496,6 +496,101 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC__write_mark_unserialized_entry_log_msg
+ *
+ * Purpose:     Write a log message for marking cache entries as unserialized.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, December 22, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC__write_mark_unserialized_entry_log_msg(const H5AC_t *cache,
+                                     const H5AC_info_t *entry,
+                                     herr_t fxn_ret_value)
+{
+    char msg[MSG_SIZE];
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(cache);
+    HDassert(entry);
+
+    /* Create the log message string */
+    HDsnprintf(msg, MSG_SIZE, 
+"\
+{\
+\"timestamp\":%lld,\
+\"action\":\"unserialized\",\
+\"address\":0x%lx,\
+\"returned\":%d\
+},\n\
+"
+    , (long long)HDtime(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
+
+    /* Write the log message to the file */
+    if(H5C_write_log_message(cache, msg) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC__write_mark_unserialized_entry_log_msg() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC__write_mark_serialize_entry_log_msg
+ *
+ * Purpose:     Write a log message for marking cache entries as serialize.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, December 22, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC__write_mark_serialized_entry_log_msg(const H5AC_t *cache, const H5AC_info_t *entry,
+    herr_t fxn_ret_value)
+{
+    char msg[MSG_SIZE];                 /* Log message buffer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(cache);
+    HDassert(entry);
+
+    /* Create the log message string */
+    HDsnprintf(msg, MSG_SIZE, 
+"\
+{\
+\"timestamp\":%lld,\
+\"action\":\"serialized\",\
+\"address\":0x%lx,\
+\"returned\":%d\
+},\n\
+"
+    , (long long)HDtime(NULL), (unsigned long)entry->addr, (int)fxn_ret_value);
+
+    /* Write the log message to the file */
+    if(H5C_write_log_message(cache, msg) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unable to emit log message")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC__write_mark_serialized_entry_log_msg() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC__write_move_entry_log_msg
  *
  * Purpose:     Write a log message for moving a cache entry.
