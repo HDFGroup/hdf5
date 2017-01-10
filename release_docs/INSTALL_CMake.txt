@@ -30,7 +30,7 @@ Obtaining HDF5 source code
 
 CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site.
-      The HDF5 1.10."X" product requires a minimum CMake version 3.1.0,
+      The HDF5 1.10."X" product requires a minimum CMake version 3.2.2,
       where "X" is the current HDF5 release version.
 
 Note:
@@ -249,7 +249,7 @@ IV. Further considerations
 ========================================================================
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.10."X" product requires a minimum CMake version 3.1.0.
+      web site. The HDF5 1.10."X" product requires a minimum CMake version 3.2.2.
 
    2. If you plan to use Zlib or Szip:
       A. Download the binary packages and install them in a central location.
@@ -624,9 +624,9 @@ if (HDF5_ENABLE_SZIP_SUPPORT)
     HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding"      OFF
 if (WINDOWS)
     H5_DEFAULT_PLUGINDIR    "%ALLUSERSPROFILE%/hdf5/lib/plugin"
-else (WINDOWS)
+else ()
     H5_DEFAULT_PLUGINDIR    "/usr/local/hdf5/lib/plugin"
-endif (WINDOWS)
+endif ()
 
 
 
@@ -660,7 +660,7 @@ adding an option (${CTEST_SCRIPT_ARG}) to the platform configuration script.
 ### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf5.log          ###
 #############################################################################################
 
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2.2 FATAL_ERROR)
 ############################################################################
 # Usage:
 #     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log

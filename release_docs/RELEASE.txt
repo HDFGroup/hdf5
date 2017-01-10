@@ -41,6 +41,7 @@ New Features
 
     Configuration:
     -------------
+    - CMake minimum is now 3.2.2. (ADB 2016/01/10)
     - CMake
       Added NAMESPACE hdf5:: to package configuration files
     - CMake: change CTEST_BUILD_CONFIGURATION to CTEST_CONFIGURATION_TYPE, which is

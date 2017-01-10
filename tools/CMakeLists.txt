@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_TOOLS)
 
 #-----------------------------------------------------------------------------
@@ -11,7 +11,7 @@ add_definitions (${HDF_EXTRA_C_FLAGS})
 # --------------------------------------------------------------------
 if (NOT BUILD_TESTING)
   add_subdirectory (${HDF5_TOOLS_SOURCE_DIR}/lib)
-endif (NOT BUILD_TESTING)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Setup include Directories
@@ -24,4 +24,4 @@ add_subdirectory (${HDF5_TOOLS_SOURCE_DIR}/src)
 #-- Add the tests
 if (BUILD_TESTING)
   add_subdirectory (${HDF5_TOOLS_SOURCE_DIR}/test)
-endif (BUILD_TESTING)
+endif ()

@@ -22,7 +22,7 @@ I. Preconditions
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
       web site. The HDF5 1.10.x product requires a minimum CMake version
-      of 3.1.0.
+      of 3.2.2.
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for

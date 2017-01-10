@@ -67,18 +67,18 @@
   foreach (vds_h5_file ${HDF5_REFERENCE_TEST_VDS})
     get_filename_component(fname "${vds_h5_file}" NAME)
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${vds_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5dump_vds_files")
-  endforeach (vds_h5_file ${HDF5_REFERENCE_TEST_VDS})
+  endforeach ()
 
 
   foreach (ddl_vds ${HDF5_REFERENCE_VDS})
     get_filename_component(fname "${ddl_vds}" NAME)
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5dump_vds_files")
-  endforeach (ddl_vds ${HDF5_REFERENCE_VDS})
+  endforeach ()
 
   foreach (ddl_vds ${HDF5_ERROR_REFERENCE_VDS})
     get_filename_component(fname "${ddl_vds}" NAME)
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/${ddl_vds}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5dump_vds_files")
-  endforeach (ddl_vds ${HDF5_ERROR_REFERENCE_VDS})
+  endforeach ()
   add_custom_target(h5dump_vds_files ALL COMMENT "Copying files needed by h5dump_vds tests" DEPENDS ${h5dump_vds_files_list})
 
 ##############################################################################
@@ -98,7 +98,7 @@
       if (NOT "${last_vds_test}" STREQUAL "")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_VDS_test})
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else ()
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -110,8 +110,8 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_VDS_TEST file)
+    endif ()
+  ENDMACRO ()
 
   MACRO (ADD_H5_VDS_LAYOUT resultfile resultcode)
     # If using memchecker add tests without using scripts
@@ -124,7 +124,7 @@
       if (NOT "${last_vds_test}" STREQUAL "")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_VDS_test})
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else ()
       add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -137,8 +137,8 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_VDS_LAYOUT file)
+    endif ()
+  ENDMACRO ()
 
 ##############################################################################
 ##############################################################################
@@ -190,9 +190,9 @@
     set_tests_properties (H5DUMP_VDS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
     if (NOT "${last_vds_test}" STREQUAL "")
       set_tests_properties (H5DUMP_VDS-clearall-objects PROPERTIES DEPENDS ${last_vds_test})
-    endif (NOT "${last_vds_test}" STREQUAL "")
+    endif ()
     set (last_VDS_test "H5DUMP_VDS-clearall-objects")
-  endif (HDF5_ENABLE_USING_MEMCHECKER)
+  endif ()
 
 # See which filters are usable (and skip tests for filters we
 # don't have).  Do this by searching H5pubconf.h to see which
@@ -201,11 +201,11 @@
 # detect whether the encoder is present.
   if (H5_HAVE_FILTER_DEFLATE)
     set (USE_FILTER_DEFLATE "true")
-  endif (H5_HAVE_FILTER_DEFLATE)
+  endif ()
 
   if (H5_HAVE_FILTER_SZIP)
     set (USE_FILTER_SZIP "true")
-  endif (H5_HAVE_FILTER_SZIP)
+  endif ()
 
   # Data read
   if (USE_FILTER_DEFLATE)
@@ -218,7 +218,7 @@
     ADD_H5_VDS_TEST (vds-first 0 --vds-view-first-missing --enable-error-stack vds-percival-unlim-maxmin.h5)
     ADD_H5_VDS_TEST (vds-gap1 0 -d /VDS-Eiger --vds-gap-size=1 --enable-error-stack vds-eiger.h5)
     ADD_H5_VDS_TEST (vds-gap2 0 --vds-gap-size=2 --enable-error-stack vds-eiger.h5)
-  endif (USE_FILTER_DEFLATE)
+  endif ()
 
   # Layout read
   if (USE_FILTER_DEFLATE)
@@ -230,4 +230,4 @@
     ADD_H5_VDS_LAYOUT (tvds_layout-5 0 --enable-error-stack 5_vds.h5)
     ADD_H5_VDS_LAYOUT (vds_layout-eiger 0 --enable-error-stack vds-eiger.h5)
     ADD_H5_VDS_LAYOUT (vds_layout-maxmin 0 --enable-error-stack vds-percival-unlim-maxmin.h5)
-  endif (USE_FILTER_DEFLATE)
+  endif ()

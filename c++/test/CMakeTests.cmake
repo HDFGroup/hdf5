@@ -36,7 +36,7 @@ if (HDF5_TEST_VFD)
 
   if (DIRECT_VFD)
     set (VFD_LIST ${VFD_LIST} direct)
-  endif (DIRECT_VFD)
+  endif ()
 
   MACRO (ADD_VFD_TEST vfdname resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -66,12 +66,12 @@ if (HDF5_TEST_VFD)
       )
       set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES DEPENDS CPP_VFD-${vfdname}-cpp_testhdf5-clear-objects)
       set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES TIMEOUT 30)
-    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_VFD_TEST)
+    endif ()
+  ENDMACRO ()
 
   # Run test with different Virtual File Driver
   foreach (vfd ${VFD_LIST})
     ADD_VFD_TEST (${vfd} 0)
-  endforeach (vfd ${VFD_LIST})
+  endforeach ()
 
-endif (HDF5_TEST_VFD)
+endif ()

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_HL_TOOLS_H5WATCH)
 
 #-----------------------------------------------------------------------------
@@ -49,7 +49,7 @@ if (BUILD_TESTING)
   set_target_properties (h5watchgentest PROPERTIES FOLDER generator/tools/hl)
 
   include (CMakeTests.cmake)
-endif (BUILD_TESTING)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install

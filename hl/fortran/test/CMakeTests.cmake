@@ -63,4 +63,4 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
 
   add_test (NAME HL_FORTRAN_f90_tsttable-shared COMMAND $<TARGET_FILE:hl_f90_tsttable-shared>)
   set_tests_properties (HL_FORTRAN_f90_tsttable-shared PROPERTIES DEPENDS HL_FORTRAN_test-shared-clear-objects)
-endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+endif ()

@@ -4,19 +4,19 @@
 # arguments checking
 if (NOT TEST_PROGRAM)
   message (FATAL_ERROR "Require TEST_PROGRAM to be defined")
-endif (NOT TEST_PROGRAM)
+endif ()
 #if (NOT TEST_ARGS)
 #  message (STATUS "Require TEST_ARGS to be defined")
-#endif (NOT TEST_ARGS)
+#endif ()
 #if (NOT TEST_EXPECT)
 #  message (STATUS "Require TEST_EXPECT to be defined")
-#endif (NOT TEST_EXPECT)
+#endif ()
 if (NOT TEST_FOLDER)
   message ( FATAL_ERROR "Require TEST_FOLDER to be defined")
-endif (NOT TEST_FOLDER)
+endif ()
 if (NOT TEST_VFD)
   message (FATAL_ERROR "Require TEST_VFD to be defined")
-endif (NOT TEST_VFD)
+endif ()
 
 set (ERROR_APPEND 1)
 
@@ -38,13 +38,12 @@ message (STATUS "COMMAND Result: ${TEST_RESULT}")
 if (ERROR_APPEND AND EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.err)
   file (READ ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.err TEST_STREAM)
   file (APPEND ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.out "${TEST_STREAM}")
-endif (ERROR_APPEND AND EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}_${TEST_VFD}.err)
+endif ()
 
 # if the return value is !=${TEST_EXPECT} bail out
 if (NOT ${TEST_RESULT} STREQUAL ${TEST_EXPECT})
   message ( FATAL_ERROR "Failed: Test program ${TEST_PROGRAM} exited != ${TEST_EXPECT}.\n${TEST_ERROR}")
-endif (NOT ${TEST_RESULT} STREQUAL ${TEST_EXPECT})
+endif ()
 
 # everything went fine...
 message ("Passed: The ${TEST_PROGRAM} program used vfd ${TEST_VFD}")
-

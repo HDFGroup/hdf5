@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_TOOLS_SRC_H5DIFF)
 
 #-----------------------------------------------------------------------------
@@ -31,7 +31,7 @@ if (H5_HAVE_PARALLEL)
   target_link_libraries (ph5diff  ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (ph5diff PROPERTIES FOLDER tools)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};ph5diff")
-endif (H5_HAVE_PARALLEL)
+endif ()
 
 ##############################################################################
 ##############################################################################
@@ -64,4 +64,4 @@ if (H5_HAVE_PARALLEL)
           ${HDF5_EXPORTED_TARGETS}
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
   )
-endif (H5_HAVE_PARALLEL)
+endif ()

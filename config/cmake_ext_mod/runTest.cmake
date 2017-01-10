@@ -23,15 +23,15 @@ endif ()
 #endif ()
 if (NOT TEST_SKIP_COMPARE AND NOT TEST_REFERENCE)
   message (FATAL_ERROR "Require TEST_REFERENCE to be defined")
-endif (NOT TEST_SKIP_COMPARE AND NOT TEST_REFERENCE)
+endif ()
 
 if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT})
-endif (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT})
+endif ()
 
 if (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
   file (REMOVE ${TEST_FOLDER}/${TEST_OUTPUT}.err)
-endif (EXISTS ${TEST_FOLDER}/${TEST_OUTPUT}.err)
+endif ()
 
 # if there is not an error reference file add the error output to the stdout file
 if (NOT TEST_ERRREF)
@@ -125,7 +125,7 @@ if (TEST_MASK_ERROR)
   else ()
     file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT}.err "${TEST_STREAM}")
   endif ()
-endif (TEST_MASK_ERROR)
+endif ()
 
 # remove text from the output file
 if (TEST_FILTER)
@@ -175,7 +175,7 @@ if (NOT TEST_SKIP_COMPARE)
     if (NOT ${len_act} STREQUAL ${len_ref})
       set (TEST_RESULT 1)
     endif ()
-  endif (NOT ${TEST_RESULT} STREQUAL 0)
+  endif ()
 
   message (STATUS "COMPARE Result: ${TEST_RESULT}")
 
@@ -234,8 +234,8 @@ if (NOT TEST_SKIP_COMPARE)
     if (NOT ${TEST_RESULT} STREQUAL 0)
       message (FATAL_ERROR "Failed: The error output of ${TEST_OUTPUT}.err did not match ${TEST_ERRREF}")
     endif ()
-  endif (TEST_ERRREF)
-endif (NOT TEST_SKIP_COMPARE)
+  endif ()
+endif ()
 
 # everything went fine...
 message ("Passed: The output of ${TEST_PROGRAM} matches ${TEST_REFERENCE}")

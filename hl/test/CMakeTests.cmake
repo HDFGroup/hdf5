@@ -43,7 +43,7 @@ MACRO (HL_ADD_TEST hl_name)
       WORKING_DIRECTORY ${HDF5_HL_TEST_BINARY_DIR}
     )
   endif ()
-ENDMACRO (HL_ADD_TEST)
+ENDMACRO ()
 
 # Remove any output file left over from previous test run
 add_test (
@@ -82,7 +82,7 @@ add_test (
 )
 if (NOT "${last_test}" STREQUAL "")
   set_tests_properties (HL_test-clear-objects PROPERTIES DEPENDS ${last_test})
-endif (NOT "${last_test}" STREQUAL "")
+endif ()
 set (last_test "HL_test-clear-objects")
 
 HL_add_test (test_lite )

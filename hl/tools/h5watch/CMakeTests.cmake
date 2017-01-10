@@ -56,7 +56,7 @@ foreach (h5watch_file ${H5WATCH_TEST_FILES})
       COMMAND    ${CMAKE_COMMAND}
       ARGS       -E copy_if_different ${HDF5_HL_TOOLS_DIR}/testfiles/${h5watch_file} ${dest}
   )
-endforeach (h5watch_file ${H5WATCH_TEST_FILES})
+endforeach ()
 
 ##############################################################################
 ##############################################################################
@@ -76,7 +76,7 @@ endforeach (h5watch_file ${H5WATCH_TEST_FILES})
       set_tests_properties (H5WATCH_ARGS-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5WATCH_ARGS-${resultfile}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       set (last_test "H5WATCH_ARGS-${resultfile}-clearall-objects")
       add_test (
           NAME H5WATCH_ARGS-h5watch-${resultfile}
@@ -91,8 +91,8 @@ endforeach (h5watch_file ${H5WATCH_TEST_FILES})
       )
       set_tests_properties (H5WATCH_ARGS-h5watch-${resultfile} PROPERTIES DEPENDS H5WATCH_ARGS-${resultfile}-clear-objects)
       set (last_test "H5WATCH_ARGS-${resultfile}")
-    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_TEST resultfile resultcode resultoption)
+    endif ()
+  ENDMACRO ()
 
   MACRO (ADD_H5_WATCH resultfile resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -117,8 +117,8 @@ endforeach (h5watch_file ${H5WATCH_TEST_FILES})
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5WATCH-${resultfile} PROPERTIES DEPENDS H5WATCH-${resultfile}-clear-objects)
-    endif (NOTHDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_WATCH resultfile resultcode)
+    endif ()
+  ENDMACRO ()
 
 ##############################################################################
 ##############################################################################
@@ -140,7 +140,7 @@ IF (NOT SWMR_INCOMPAT)
   )
   if (NOT "${last_test}" STREQUAL "")
     set_tests_properties (H5WATCH-clearall-objects PROPERTIES DEPENDS ${last_test})
-  endif (NOT "${last_test}" STREQUAL "")
+  endif ()
   set (last_test "H5WATCH-clearall-objects")
 
 #################################################################################################
@@ -188,4 +188,4 @@ IF (NOT SWMR_INCOMPAT)
   ADD_H5_TEST(w-err-cmpd4 1 --fields=field1,field2.b.k WATCH.h5/DSET_CMPD)
   ADD_H5_TEST(w-err-cmpd5 1 --fields=field1 --fields=field2.b.k WATCH.h5/DSET_CMPD)
 #
-ENDIF (NOT SWMR_INCOMPAT)
+ENDIF ()

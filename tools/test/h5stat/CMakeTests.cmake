@@ -52,11 +52,11 @@
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${ddl_file}" "${PROJECT_BINARY_DIR}/${ddl_file}" "h5stat_files")
-  endforeach (ddl_file ${HDF5_REFERENCE_FILES})
+  endforeach ()
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5STAT_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "h5stat_files")
-  endforeach (h5_file ${HDF5_REFERENCE_TEST_FILES})
+  endforeach ()
   add_custom_target(h5stat_files ALL COMMENT "Copying files needed by h5stat tests" DEPENDS ${h5stat_files_list})
 
 ##############################################################################
@@ -71,10 +71,10 @@
       add_test (NAME H5STAT-${resultfile} COMMAND $<TARGET_FILE:h5stat> ${ARGN})
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5STAT-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif (NOT ${resultcode} STREQUAL "0")
+      endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5STAT-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5STAT-${resultfile}
@@ -87,8 +87,8 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_TEST file)
+    endif ()
+  ENDMACRO ()
 
 ##############################################################################
 ##############################################################################
@@ -167,9 +167,9 @@
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (H5STAT-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif (NOT "${last_test}" STREQUAL "")
+    endif ()
     set (last_test "H5STAT-clearall-objects")
-  endif (HDF5_ENABLE_USING_MEMCHECKER)
+  endif ()
 
 # Test for help flag
   ADD_H5_TEST (h5stat_help1 0 -h)

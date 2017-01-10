@@ -316,7 +316,7 @@
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else ()
       add_test (
           NAME H5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -329,11 +329,11 @@
               -D "TEST_APPEND=EXIT CODE:"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
+    endif ()
     if (H5_HAVE_PARALLEL)
       ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
     endif ()
-  ENDMACRO (ADD_H5_TEST file)
+  ENDMACRO ()
 
   MACRO (ADD_PH5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
@@ -346,7 +346,7 @@
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (PH5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else ()
       add_test (
           NAME PH5DIFF-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -361,8 +361,8 @@
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_EXT_DIR}/prunTest.cmake"
       )
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_PH5_TEST file)
+    endif ()
+  ENDMACRO ()
 
 ##############################################################################
 ##############################################################################
@@ -789,9 +789,9 @@
     set_tests_properties (H5DIFF-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (H5DIFF-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif (NOT "${last_test}" STREQUAL "")
+    endif ()
     set (last_test "H5DIFF-clearall-objects")
-  endif (HDF5_ENABLE_USING_MEMCHECKER)
+  endif ()
 
 # ############################################################################
 # # Common usage

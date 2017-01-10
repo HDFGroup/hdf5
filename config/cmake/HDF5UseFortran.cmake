@@ -7,7 +7,7 @@ if (${C_HAVE_QUADMATH})
   set(HAVE_QUADMATH 1)
 else ()
   set(HAVE_QUADMATH 0)
-endif()
+endif ()
 
 #
 # This file provides functions for HDF5 specific Fortran support.
@@ -20,14 +20,14 @@ ENABLE_LANGUAGE (Fortran)
 #-----------------------------------------------------------------------------
 MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
 #
-#  if (NOT DEFINED ${RUN_RESULT_VAR}) 
+#  if (NOT DEFINED ${RUN_RESULT_VAR})
     message (STATUS "Detecting Fortran ${FUNCTION}")
     if (CMAKE_REQUIRED_LIBRARIES)
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
           "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
-    else (CMAKE_REQUIRED_LIBRARIES)
+    else ()
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
-    endif (CMAKE_REQUIRED_LIBRARIES)
+    endif ()
     file (WRITE
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         "${CODE}"
@@ -40,7 +40,7 @@ MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
     )
 
     set(${RETURN} ${OUTPUT})
-	
+
     #message ( "Test result1 ${RETURN} ")
     #message ( "Test result3 ${RESULT} ")
     #message ( "Test result2 ${CMAKE_MATCH_0} ")
@@ -65,15 +65,15 @@ MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
           "${OUTPUT}\n\n")
       endif ()
     endif ()
-#  endif (NOT DEFINED ${RUN_RESULT_VAR})
-ENDMACRO (FORTRAN_RUN)
+#  endif ()
+ENDMACRO ()
 
 # Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
 MACRO (READ_SOURCE START END RETURN)
-  file(READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" CODE)
-  string(REGEX MATCH "${START}[\\\t\\\n\\\r[].+]*${END}" CODE ${CODE})	
-  set(RETURN "${CODE}")
-ENDMACRO (READ_SOURCE START END RETURN)
+  file (READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" CODE)
+  string (REGEX MATCH "${START}[\\\t\\\n\\\r[].+]*${END}" CODE ${CODE})
+  set (RETURN "${CODE}")
+ENDMACRO ()
 
 #-----------------------------------------------------------------------------
 #  Check to see C_LONG_DOUBLE is available
@@ -85,10 +85,10 @@ CHECK_FORTRAN_FEATURE(c_long_double
 )
 
 if (${FORTRAN_HAVE_C_LONG_DOUBLE})
-  set(FORTRAN_HAVE_C_LONG_DOUBLE 1)
+  set (FORTRAN_HAVE_C_LONG_DOUBLE 1)
 else ()
-  set(FORTRAN_HAVE_C_LONG_DOUBLE 0)
-endif()
+  set (FORTRAN_HAVE_C_LONG_DOUBLE 0)
+endif ()
 
 # Check to see C_LONG_DOUBLE is different from C_DOUBLE
 
@@ -98,23 +98,23 @@ CHECK_FORTRAN_FEATURE(c_long_double
   FORTRAN_C_LONG_DOUBLE_IS_UNIQUE
 )
 if (${FORTRAN_C_LONG_DOUBLE_IS_UNIQUE})
-  set(FORTRAN_C_LONG_DOUBLE_IS_UNIQUE 1)
+  set (FORTRAN_C_LONG_DOUBLE_IS_UNIQUE 1)
 else ()
-  set(FORTRAN_C_LONG_DOUBLE_IS_UNIQUE 0)
-endif()
+  set (FORTRAN_C_LONG_DOUBLE_IS_UNIQUE 0)
+endif ()
 
 ## Set the sizeof function for use later in the fortran tests
-if(FORTRAN_HAVE_STORAGE_SIZE)
-  set(FC_SIZEOF_A "STORAGE_SIZE(a, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)")
-  set(FC_SIZEOF_B "STORAGE_SIZE(b, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)")
-  set(FC_SIZEOF_C "STORAGE_SIZE(c, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)")
-elseif(FORTRAN_HAVE_C_SIZEOF)
-  set(FC_SIZEOF_A "SIZEOF(a)")
-  set(FC_SIZEOF_B "SIZEOF(b)")
-  set(FC_SIZEOF_C "SIZEOF(c)")
-else(FORTRAN_HAVE_STORAGE_SIZE)
+if (FORTRAN_HAVE_STORAGE_SIZE)
+  set (FC_SIZEOF_A "STORAGE_SIZE(a, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)")
+  set (FC_SIZEOF_B "STORAGE_SIZE(b, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)")
+  set (FC_SIZEOF_C "STORAGE_SIZE(c, c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)")
+elseif (FORTRAN_HAVE_C_SIZEOF)
+  set (FC_SIZEOF_A "SIZEOF(a)")
+  set (FC_SIZEOF_B "SIZEOF(b)")
+  set (FC_SIZEOF_C "SIZEOF(c)")
+else ()
   message (FATAL_ERROR "Fortran compiler requires either intrinsic functions SIZEOF or STORAGE_SIZE")
-endif(FORTRAN_HAVE_STORAGE_SIZE)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Determine the available KINDs for REALs and INTEGERs
@@ -134,35 +134,35 @@ FORTRAN_RUN("REAL and INTEGER KINDs"
 # dnl    -- LINE 4 --  number of valid integer kinds
 # dnl    -- LINE 5 --  number of valid real kinds
 
-file(READ "${CMAKE_BINARY_DIR}/pac_fconftest.out" PROG_OUTPUT)
+file (READ "${CMAKE_BINARY_DIR}/pac_fconftest.out" PROG_OUTPUT)
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
-string(REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
+string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
 
-list(GET PROG_OUTPUT 0 pac_validIntKinds)
-list(GET PROG_OUTPUT 1 pac_validRealKinds)
-list(GET PROG_OUTPUT 2 H5_PAC_FC_MAX_REAL_PRECISION)
+list (GET PROG_OUTPUT 0 pac_validIntKinds)
+list (GET PROG_OUTPUT 1 pac_validRealKinds)
+list (GET PROG_OUTPUT 2 H5_PAC_FC_MAX_REAL_PRECISION)
 
 # If the lists are empty then something went wrong.
-if( NOT pac_validIntKinds)
+if (NOT pac_validIntKinds)
     message (FATAL_ERROR "Failed to find available INTEGER KINDs for Fortran")
-endif()
-if( NOT pac_validRealKinds)
+endif ()
+if (NOT pac_validRealKinds)
     message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
-endif()
-if( NOT H5_PAC_FC_MAX_REAL_PRECISION)
+endif ()
+if (NOT H5_PAC_FC_MAX_REAL_PRECISION)
     message (FATAL_ERROR "No output from Fortran decimal precision program")
-endif()
+endif ()
 
-set(PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
-set(PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
+set (PAC_FC_ALL_INTEGER_KINDS "\{${pac_validIntKinds}\}")
+set (PAC_FC_ALL_REAL_KINDS "\{${pac_validRealKinds}\}")
 
-list(GET PROG_OUTPUT 3 NUM_IKIND)
-list(GET PROG_OUTPUT 4 NUM_RKIND)
+list (GET PROG_OUTPUT 3 NUM_IKIND)
+list (GET PROG_OUTPUT 4 NUM_RKIND)
 
-set(PAC_FORTRAN_NUM_INTEGER_KINDS "${NUM_IKIND}")
+set (PAC_FORTRAN_NUM_INTEGER_KINDS "${NUM_IKIND}")
 
-set(H5CONFIG_F_NUM_IKIND "INTEGER, PARAMETER :: num_ikinds = ${NUM_IKIND}")
-set(H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/${pac_validIntKinds}/)")
+set (H5CONFIG_F_NUM_IKIND "INTEGER, PARAMETER :: num_ikinds = ${NUM_IKIND}")
+set (H5CONFIG_F_IKIND "INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/${pac_validIntKinds}/)")
 
 message (STATUS "....NUMBER OF INTEGER KINDS FOUND ${PAC_FORTRAN_NUM_INTEGER_KINDS}")
 message (STATUS "....REAL KINDS FOUND ${PAC_FC_ALL_REAL_KINDS}")
@@ -175,10 +175,10 @@ message (STATUS "....MAX DECIMAL PRECISION ${H5_PAC_FC_MAX_REAL_PRECISION}")
 # **********
 # INTEGERS
 # **********
-string(REGEX REPLACE "," ";" VAR "${pac_validIntKinds}")
+string (REGEX REPLACE "," ";" VAR "${pac_validIntKinds}")
 
-foreach( KIND ${VAR} )
-  set(PROG_SRC 
+foreach (KIND ${VAR} )
+  set (PROG_SRC
     "
         PROGRAM main
         USE ISO_C_BINDING
@@ -193,37 +193,36 @@ foreach( KIND ${VAR} )
   YY
   PROG_OUTPUT1
   )
-  string(REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
-  set(pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
-endforeach(KIND)
+  string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
+  set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
+endforeach ()
 
 if (pack_int_sizeof STREQUAL "")
    message (FATAL_ERROR "Failed to find available INTEGER KINDs for Fortran")
-endif()
+endif ()
 
-string(STRIP ${pack_int_sizeof} pack_int_sizeof)
-
+string (STRIP ${pack_int_sizeof} pack_int_sizeof)
 
 #Remove trailing comma
-string(REGEX REPLACE ",$" "" pack_int_sizeof "${pack_int_sizeof}")
+string (REGEX REPLACE ",$" "" pack_int_sizeof "${pack_int_sizeof}")
 #Remove spaces
-string(REGEX REPLACE " " "" pack_int_sizeof "${pack_int_sizeof}")
+string (REGEX REPLACE " " "" pack_int_sizeof "${pack_int_sizeof}")
 
-set(PAC_FC_ALL_INTEGER_KINDS_SIZEOF "\{${pack_int_sizeof}\}")
+set (PAC_FC_ALL_INTEGER_KINDS_SIZEOF "\{${pack_int_sizeof}\}")
 
-message(STATUS "....FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
+message (STATUS "....FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
 # **********
 # REALS
 # **********
-string(REGEX REPLACE "," ";" VAR "${pac_validRealKinds}")
+string (REGEX REPLACE "," ";" VAR "${pac_validRealKinds}")
 
 #find the maximum kind of the real
-list(LENGTH VAR LEN_VAR)
+list (LENGTH VAR LEN_VAR)
 MATH (EXPR _LEN "${LEN_VAR}-1")
-list(GET VAR ${_LEN} max_real_fortran_kind)
+list (GET VAR ${_LEN} max_real_fortran_kind)
 
-foreach( KIND ${VAR} )
-  set(PROG_SRC 
+foreach (KIND ${VAR} )
+  set(PROG_SRC
     "
         PROGRAM main
         USE ISO_C_BINDING
@@ -238,32 +237,32 @@ foreach( KIND ${VAR} )
   YY
   PROG_OUTPUT1
   )
-  string(REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
-  set(pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
-endforeach(KIND)
+  string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
+  set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
+endforeach ()
 
 if (pack_int_sizeof STREQUAL "")
    message (FATAL_ERROR "Failed to find available REAL KINDs for Fortran")
-endif()
+endif ()
 
 string(STRIP ${pack_real_sizeof} pack_real_sizeof)
 
 #Remove trailing comma
-string(REGEX REPLACE ",$" "" pack_real_sizeof "${pack_real_sizeof}")
+string (REGEX REPLACE ",$" "" pack_real_sizeof "${pack_real_sizeof}")
 #Remove spaces
-string(REGEX REPLACE " " "" pack_real_sizeof "${pack_real_sizeof}")
+string (REGEX REPLACE " " "" pack_real_sizeof "${pack_real_sizeof}")
 
-set(H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${pack_real_sizeof}/)")
+set (H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${pack_real_sizeof}/)")
 
-message(STATUS "....FOUND SIZEOF for REAL KINDs \{${pack_real_sizeof}\}")
+message (STATUS "....FOUND SIZEOF for REAL KINDs \{${pack_real_sizeof}\}")
 
-set(PAC_FC_ALL_REAL_KINDS_SIZEOF "\{${pack_real_sizeof}\}")
+set (PAC_FC_ALL_REAL_KINDS_SIZEOF "\{${pack_real_sizeof}\}")
 
 #find the maximum kind of the real
-string(REGEX REPLACE "," ";" VAR "${pack_real_sizeof}")
-list(LENGTH VAR LEN_VAR)
+string (REGEX REPLACE "," ";" VAR "${pack_real_sizeof}")
+list (LENGTH VAR LEN_VAR)
 MATH (EXPR _LEN "${LEN_VAR}-1")
-list(GET VAR ${_LEN} max_real_fortran_sizeof)
+list (GET VAR ${_LEN} max_real_fortran_sizeof)
 
 #-----------------------------------------------------------------------------
 # Find sizeof of native kinds
@@ -277,9 +276,9 @@ FORTRAN_RUN("SIZEOF NATIVE KINDs"
           REAL b
           DOUBLE PRECISION c
           WRITE(*,*) ${FC_SIZEOF_A}
-	  WRITE(*,*) kind(a)
-	  WRITE(*,*) ${FC_SIZEOF_B}
-	  WRITE(*,*) kind(b)
+    WRITE(*,*) kind(a)
+    WRITE(*,*) ${FC_SIZEOF_B}
+    WRITE(*,*) kind(b)
           WRITE(*,*) ${FC_SIZEOF_C}
           WRITE(*,*) kind(c)
        END
@@ -297,63 +296,63 @@ FORTRAN_RUN("SIZEOF NATIVE KINDs"
 # dnl    -- LINE 6 --  kind of DOUBLE PRECISION
 
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
-string(REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
+string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
 
-list(GET PROG_OUTPUT 0 PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
-list(GET PROG_OUTPUT 1 PAC_FORTRAN_NATIVE_INTEGER_KIND)
-list(GET PROG_OUTPUT 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
-list(GET PROG_OUTPUT 3 PAC_FORTRAN_NATIVE_REAL_KIND)
-list(GET PROG_OUTPUT 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
-list(GET PROG_OUTPUT 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
+list (GET PROG_OUTPUT 0 PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
+list (GET PROG_OUTPUT 1 PAC_FORTRAN_NATIVE_INTEGER_KIND)
+list (GET PROG_OUTPUT 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
+list (GET PROG_OUTPUT 3 PAC_FORTRAN_NATIVE_REAL_KIND)
+list (GET PROG_OUTPUT 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
+list (GET PROG_OUTPUT 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
 
 if (NOT PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
    message (FATAL_ERROR "Failed to find SIZEOF NATIVE INTEGER KINDs for Fortran")
-endif()
+endif ()
 if (NOT PAC_FORTRAN_NATIVE_REAL_SIZEOF)
    message (FATAL_ERROR "Failed to find SIZEOF NATIVE REAL KINDs for Fortran")
-endif()
+endif ()
 if (NOT PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
    message (FATAL_ERROR "Failed to find SIZEOF NATIVE DOUBLE KINDs for Fortran")
-endif()
+endif ()
 if (NOT PAC_FORTRAN_NATIVE_INTEGER_KIND)
    message (FATAL_ERROR "Failed to find KIND of NATIVE INTEGER for Fortran")
-endif()
+endif ()
 if (NOT PAC_FORTRAN_NATIVE_REAL_KIND)
    message (FATAL_ERROR "Failed to find KIND of NATIVE REAL for Fortran")
 endif()
 if (NOT PAC_FORTRAN_NATIVE_DOUBLE_KIND)
    message (FATAL_ERROR "Failed to find KIND of NATIVE DOUBLE for Fortran")
-endif()
+endif ()
 
 
-set(FORTRAN_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
-#set(H5_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
+set (FORTRAN_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
+#set (H5_SIZEOF_LONG_DOUBLE ${${HDF_PREFIX}_SIZEOF_LONG_DOUBLE})
 
 # remove the invalid kind from the list
-if(NOT(${SIZEOF___FLOAT128} EQUAL 0))
-   if(NOT(${SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof}) 
-     AND NOT(${FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof})
-     # account for the fact that the C compiler can have 16-byte __float128 and the fortran compiler only has 8-byte doubles,
-     # so we don't want to remove the 8-byte fortran doubles.
-     AND NOT(${PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF} EQUAL ${max_real_fortran_sizeof}))
-     message(WARNING "
+if (NOT(${SIZEOF___FLOAT128} EQUAL 0))
+   if (NOT(${SIZEOF___FLOAT128} EQUAL ${max_real_fortran_sizeof})
+       AND NOT(${FORTRAN_SIZEOF_LONG_DOUBLE} EQUAL ${max_real_fortran_sizeof})
+       # account for the fact that the C compiler can have 16-byte __float128 and the fortran compiler only has 8-byte doubles,
+       # so we don't want to remove the 8-byte fortran doubles.
+       AND NOT(${PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF} EQUAL ${max_real_fortran_sizeof}))
+     message (WARNING "
           Fortran REAL(KIND=${max_real_fortran_kind}) is $max_real_fortran_sizeof Bytes, but no corresponding C float type exists of that size
                                            !!! Fortran interfaces will not be generated for REAL(KIND=${max_real_fortran_kind}) !!!")
-     string(REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS ${PAC_FC_ALL_REAL_KINDS})
-     string(REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS_SIZEOF ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
+     string (REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS ${PAC_FC_ALL_REAL_KINDS})
+     string (REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS_SIZEOF ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
      MATH (EXPR NUM_RKIND "${NUM_RKIND} - 1")
-   endif()
-endif(NOT(${SIZEOF___FLOAT128} EQUAL 0))
+   endif ()
+endif ()
 
-set(H5CONFIG_F_NUM_RKIND "INTEGER, PARAMETER :: num_rkinds = ${NUM_RKIND}")
+set (H5CONFIG_F_NUM_RKIND "INTEGER, PARAMETER :: num_rkinds = ${NUM_RKIND}")
 
-string(REGEX REPLACE "{" "" OUT_VAR ${PAC_FC_ALL_REAL_KINDS})
-string(REGEX REPLACE "}" "" OUT_VAR ${OUT_VAR})
-set(H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${OUT_VAR}/)")
+string (REGEX REPLACE "{" "" OUT_VAR ${PAC_FC_ALL_REAL_KINDS})
+string (REGEX REPLACE "}" "" OUT_VAR ${OUT_VAR})
+set (H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${OUT_VAR}/)")
 
-string(REGEX REPLACE "{" "" OUT_VAR ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
-string(REGEX REPLACE "}" "" OUT_VAR ${OUT_VAR})
-set(H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR}/)")
+string (REGEX REPLACE "{" "" OUT_VAR ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
+string (REGEX REPLACE "}" "" OUT_VAR ${OUT_VAR})
+set (H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR}/)")
 
 ENABLE_LANGUAGE (C)
 
@@ -366,9 +365,9 @@ MACRO (C_RUN FUNCTION CODE RETURN)
     if (CMAKE_REQUIRED_LIBRARIES)
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
           "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
-    else (CMAKE_REQUIRED_LIBRARIES)
+    else ()
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
-    endif (CMAKE_REQUIRED_LIBRARIES)
+    endif ()
     file (WRITE
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
         ${CODE}
@@ -380,8 +379,8 @@ MACRO (C_RUN FUNCTION CODE RETURN)
         RUN_OUTPUT_VARIABLE OUTPUT
     )
 
-    set(${RETURN} ${OUTPUT})
-	
+    set (${RETURN} ${OUTPUT})
+
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
     #message ( "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
     #message ( "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
@@ -405,10 +404,10 @@ MACRO (C_RUN FUNCTION CODE RETURN)
       endif ()
     else ()
         message (FATAL_ERROR "Compilation of C ${FUNCTION} - Failed")
-    endif()
-ENDMACRO (C_RUN)
+    endif ()
+ENDMACRO ()
 
-set(PROG_SRC 
+set (PROG_SRC
     "
 #include <float.h>
 #include <stdio.h>
@@ -426,7 +425,7 @@ set(PROG_SRC
 #define C_FLT128_DIG 0
 #endif
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#define C_LDBL_DIG DECIMAL_DIG 
+#define C_LDBL_DIG DECIMAL_DIG
 #else
 #define C_LDBL_DIG LDBL_DIG
 #endif
@@ -444,24 +443,24 @@ C_RUN("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT)
 # dnl    -- LINE 2 --  __float128 decimal precision
 
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
-string(REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
+string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
 
-list(GET PROG_OUTPUT 0 LDBL_DIG)
-list(GET PROG_OUTPUT 1 FLT128_DIG)
+list (GET PROG_OUTPUT 0 LDBL_DIG)
+list (GET PROG_OUTPUT 1 FLT128_DIG)
 
-if(SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
-  SET(H5_HAVE_FLOAT128 0)
-  SET(SIZEOF___FLOAT128 0)
-  set(H5_PAC_C_MAX_REAL_PRECISION ${LDBL_DIG})
+if (SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
+  set (H5_HAVE_FLOAT128 0)
+  set (SIZEOF___FLOAT128 0)
+  set (H5_PAC_C_MAX_REAL_PRECISION ${LDBL_DIG})
 else ()
   set(H5_PAC_C_MAX_REAL_PRECISION ${FLT128_DIG})
-endif()
+endif ()
 
 
 # Setting definition if there is a 16 byte fortran integer
-string(FIND ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF} "16" pos)
-if(${pos} EQUAL -1)
-  set(HAVE_Fortran_INTEGER_SIZEOF_16 0)
+string (FIND ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF} "16" pos)
+if (${pos} EQUAL -1)
+  set (HAVE_Fortran_INTEGER_SIZEOF_16 0)
 else ()
-  set(HAVE_Fortran_INTEGER_SIZEOF_16 1)
+  set (HAVE_Fortran_INTEGER_SIZEOF_16 1)
 endif ()

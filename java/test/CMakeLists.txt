@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_JAVA_TEST Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
@@ -70,21 +70,21 @@ set (HDF_JAVA_TEST_FILES
 
 foreach (h5_file ${HDF_JAVA_TEST_FILES})
   HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "${HDF5_JAVA_TEST_LIB_TARGET}_files")
-endforeach (h5_file ${HDF_JAVA_TEST_FILES})
+endforeach ()
 
 HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/h5ex_g_iterate.orig" "${PROJECT_BINARY_DIR}/h5ex_g_iterate.hdf" "${HDF5_JAVA_TEST_LIB_TARGET}_files")
 add_custom_target(${HDF5_JAVA_TEST_LIB_TARGET}_files ALL COMMENT "Copying files needed by ${HDF5_JAVA_TEST_LIB_TARGET} tests" DEPENDS ${${HDF5_JAVA_TEST_LIB_TARGET}_files_list})
 
 if (WIN32)
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
-else (WIN32)
+else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
-endif (WIN32)
+endif ()
 
 set (CMAKE_JAVA_CLASSPATH ".")
 foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
   set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
-endforeach (CMAKE_INCLUDE_PATH)
+endforeach ()
 set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${${HDF5_JAVA_TEST_LIB_TARGET}_JAR_FILE}")
 set (testfilter "OK (598 tests)")
 
@@ -94,7 +94,7 @@ if (CMAKE_BUILD_TYPE MATCHES Debug)
   else()
     set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
   endif()
-endif(CMAKE_BUILD_TYPE MATCHES Debug)
+endif()
 
 add_test (
   NAME JUnit-interface-clearall-objects
