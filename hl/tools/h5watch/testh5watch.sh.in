@@ -30,6 +30,10 @@ if [[ $rc != 0 ]] ; then
     exit 0
 fi
 
+echo "h5watch tests are skipped temporarily."
+echo
+exit 0
+
 H5WATCH=h5watch               	# The tool name
 H5WATCH_BIN=`pwd`/$H5WATCH    	# The path of H5WATCH
 EXTEND_DSET=extend_dset 	# Routine to extend the dataset when watching
