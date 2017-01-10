@@ -23,20 +23,25 @@ include $(top_srcdir)/config/commence.am
 # Include src, test, and tools/lib directories
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
+# A convenience library for the h5repack tool and the h5repack tests
+noinst_LTLIBRARIES=libh5repack.la
+
+libh5repack_la_SOURCES=h5repack.c h5repack_copy.c h5repack_filters.c \
+                       h5repack_opttable.c h5repack_parse.c h5repack_refs.c \
+                       h5repack_verify.c
+libh5repack_la_LDFLAGS = $(AM_LDFLAGS)
+libh5repack_la_LIBADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+
+
 # Our main target, h5repack tool
 bin_PROGRAMS=h5repack
+
+h5repack_SOURCES=h5repack_main.c
 
 # Add h5repack specific linker flags here
 h5repack_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
-# Depend on the hdf5 library, the tools library, the test library
-LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-
-# Source files
-COMMON_SOURCES=h5repack.c h5repack_copy.c h5repack_filters.c \
-               h5repack_opttable.c h5repack_parse.c h5repack_refs.c \
-               h5repack_verify.c
-
-h5repack_SOURCES=$(COMMON_SOURCES) h5repack_main.c
+# Depend on the hdf5 library, the tools library, the h5repack library
+h5repack_LDADD=libh5repack.la $(LIBH5TOOLS) $(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am

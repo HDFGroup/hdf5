@@ -37,16 +37,12 @@ endif
 
 check_SCRIPTS=$(TEST_SCRIPT)
 
-# Depend on the hdf5 library, the tools library, the test library
-LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+# Depend on the h5repack library, the hdf5 library, the tools library, the test library
+LDADD=../../src/h5repack/libh5repack.la $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 
 testh5repack_detect_szip_SOURCES=testh5repack_detect_szip.c
 
-# Source files
-COMMON_SOURCES=../../src/h5repack/h5repack.c ../../src/h5repack/h5repack_copy.c ../../src/h5repack/h5repack_filters.c \
-               ../../src/h5repack/h5repack_opttable.c ../../src/h5repack/h5repack_parse.c ../../src/h5repack/h5repack_refs.c \
-               ../../src/h5repack/h5repack_verify.c
-h5repacktst_SOURCES=$(COMMON_SOURCES) h5repacktst.c 
+h5repacktst_SOURCES=h5repacktst.c 
 
 
 if HAVE_SHARED_CONDITIONAL
