@@ -124,6 +124,9 @@ $SRC_H5DIFF_TESTFILES/tmptest.he5
 $SRC_H5DIFF_TESTFILES/tmptest2.he5
 $SRC_H5DIFF_TESTFILES/tmpSingleSiteBethe.reference.h5
 $SRC_H5DIFF_TESTFILES/tmpSingleSiteBethe.output.h5
+"
+
+LIST_HDF5_VDS_TEST_FILES="
 $SRC_TOOLS_TESTFILES/vds/1_a.h5
 $SRC_TOOLS_TESTFILES/vds/1_b.h5
 $SRC_TOOLS_TESTFILES/vds/1_c.h5
@@ -339,7 +342,7 @@ $SRC_H5DIFF_TESTFILES/h5diff_v3.txt
 #
 # copy test files and expected output files from source dirs to test dir
 #
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_HDF5_TEST_FILES_XML $LIST_OTHER_TEST_FILES_XML"
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES $LIST_HDF5_VDS_TEST_FILES $LIST_OTHER_TEST_FILES $LIST_HDF5_TEST_FILES_XML $LIST_OTHER_TEST_FILES_XML"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
@@ -387,24 +390,24 @@ CLEAN_TESTFILES_AND_TESTDIR()
 #   -h   print help page
 while [ $# -gt 0 ]; do
     case "$1" in
-    -p)	# reset the tool name and bin to run ph5diff tests
-	TESTNAME=ph5diff
-	H5DIFF=../../src/h5diff/ph5diff  # The tool name
-	H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the tool binary
-	pmode=yes
-	shift
-	;;
+    -p)    # reset the tool name and bin to run ph5diff tests
+    TESTNAME=ph5diff
+    H5DIFF=../../src/h5diff/ph5diff  # The tool name
+    H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the tool binary
+    pmode=yes
+    shift
+    ;;
     -h) # print help page
-	echo "$0 [-p] [-h]"
-	echo "    -p   run ph5diff tests"
-	echo "    -h   print help page"
-	shift
-	exit 0
-	;;
+    echo "$0 [-p] [-h]"
+    echo "    -p   run ph5diff tests"
+    echo "    -h   print help page"
+    shift
+    exit 0
+    ;;
     *)  # unknown option
         echo "$0: Unknown option ($1)"
-	exit 1
-	;;
+    exit 1
+    ;;
     esac
 done
 
@@ -455,11 +458,11 @@ TOOLTEST() {
     # Run test.
     TESTING $H5DIFF $@
     (
-	#echo "#############################"
-	#echo "Expected output for '$H5DIFF $@'" 
-	#echo "#############################"
-	cd $TESTDIR
-	eval $RUNCMD $H5DIFF_BIN "$@"
+    #echo "#############################"
+    #echo "Expected output for '$H5DIFF $@'"
+    #echo "#############################"
+    cd $TESTDIR
+    eval $RUNCMD $H5DIFF_BIN "$@"
     ) >$actual 2>$actual_err
     EXIT_CODE=$?
     # save actual and actual_err in case they are needed later.
@@ -499,22 +502,22 @@ TOOLTEST() {
         # is done by serial mode.
         grep -v "EXIT CODE:" $expect_sorted > $expect_sorted.noexit
         mv $expect_sorted.noexit $expect_sorted
-	if $CMP $expect_sorted $actual_sorted; then
-	    echo " PASSED"
-	else
-	    echo "*FAILED*"
-	    nerrors="`expr $nerrors + 1`"
-	    if test yes = "$verbose"; then
-		echo "====Expected result ($expect_sorted) differs from actual result ($actual_sorted)"
-		$DIFF $expect_sorted $actual_sorted |sed 's/^/    /'
-		echo "====The actual output ($actual_sav)"
-		sed 's/^/    /' < $actual_sav 
-		echo "====The actual stderr ($actual_err_sav)"
-		sed 's/^/    /' < $actual_err_sav 
-		echo "====End of actual stderr ($actual_err_sav)"
-		echo ""
-	    fi
-	fi
+    if $CMP $expect_sorted $actual_sorted; then
+        echo " PASSED"
+    else
+        echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
+        if test yes = "$verbose"; then
+        echo "====Expected result ($expect_sorted) differs from actual result ($actual_sorted)"
+        $DIFF $expect_sorted $actual_sorted |sed 's/^/    /'
+        echo "====The actual output ($actual_sav)"
+        sed 's/^/    /' < $actual_sav
+        echo "====The actual stderr ($actual_err_sav)"
+        sed 's/^/    /' < $actual_err_sav
+        echo "====End of actual stderr ($actual_err_sav)"
+        echo ""
+        fi
+    fi
     fi
 
     # Clean up output file
