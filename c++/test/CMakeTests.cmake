@@ -20,7 +20,20 @@ add_test (
             titerate.h5
 )
 
-add_test (NAME CPP_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
+if (HDF5_ENABLE_USING_MEMCHECKER)
+  add_test (NAME CPP_testhdf5 COMMAND $<TARGET_FILE:cpp_testhdf5>)
+else ()
+  add_test (NAME CPP_testhdf5 COMMAND "${CMAKE_COMMAND}"
+      -D "TEST_PROGRAM=$<TARGET_FILE:cpp_testhdf5>"
+      -D "TEST_ARGS:STRING="
+      -D "TEST_EXPECT=0"
+      -D "TEST_SKIP_COMPARE=TRUE"
+      -D "TEST_OUTPUT=cpp_testhdf5.txt"
+      #-D "TEST_REFERENCE=cpp_testhdf5.out"
+      -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+  )
+endif ()
 set_tests_properties (CPP_testhdf5 PROPERTIES DEPENDS CPP_testhdf5-clear-objects)
 
 if (HDF5_TEST_VFD)

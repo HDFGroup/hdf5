@@ -36,7 +36,20 @@ add_custom_target(hl_test_files ALL COMMENT "Copying files needed by hl_test tes
 #  Macro used to add a unit test
 # --------------------------------------------------------------------
 MACRO (HL_ADD_TEST hl_name)
-  add_test (NAME HL_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
+  if (HDF5_ENABLE_USING_MEMCHECKER)
+    add_test (NAME HL_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
+  else ()
+    add_test (NAME HL_${hl_name} COMMAND "${CMAKE_COMMAND}"
+        -D "TEST_PROGRAM=$<TARGET_FILE:hl_${hl_name}>"
+        -D "TEST_ARGS:STRING="
+        -D "TEST_EXPECT=0"
+        -D "TEST_SKIP_COMPARE=TRUE"
+        -D "TEST_OUTPUT=hl_${hl_name}.txt"
+        #-D "TEST_REFERENCE=hl_${hl_name}.out"
+        -D "TEST_FOLDER=${HDF5_HL_TEST_BINARY_DIR}"
+        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+    )
+  endif ()
   if (NOT "${last_test}" STREQUAL "")
     set_tests_properties (HL_${hl_name} PROPERTIES DEPENDS ${last_test}
       ENVIRONMENT "srcdir=${HDF5_HL_TEST_BINARY_DIR}"

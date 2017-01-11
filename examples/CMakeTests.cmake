@@ -66,7 +66,20 @@
   set (last_test "EXAMPLES-clear-objects")
 
   foreach (example ${examples})
-    add_test (NAME EXAMPLES-${example} COMMAND $<TARGET_FILE:${example}>)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME EXAMPLES-${example} COMMAND $<TARGET_FILE:${example}>)
+    else ()
+      add_test (NAME EXAMPLES-${example} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:${example}>"
+          -D "TEST_ARGS:STRING="
+          -D "TEST_EXPECT=0"
+          -D "TEST_SKIP_COMPARE=TRUE"
+          -D "TEST_OUTPUT=${example}.txt"
+          #-D "TEST_REFERENCE=${example}.out"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+    endif ()
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (EXAMPLES-${example} PROPERTIES DEPENDS ${last_test})
     endif ()
@@ -132,7 +145,20 @@
     set (last_test "EXAMPLES-shared-clear-objects")
 
     foreach (example ${examples})
-      add_test (NAME EXAMPLES-shared-${example} COMMAND $<TARGET_FILE:${example}-shared>)
+      if (HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (NAME EXAMPLES-shared-${example} COMMAND $<TARGET_FILE:${example}-shared>)
+      else ()
+        add_test (NAME EXAMPLES-shared-${example} COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:${example}>"
+            -D "TEST_ARGS:STRING="
+            -D "TEST_EXPECT=0"
+            -D "TEST_SKIP_COMPARE=TRUE"
+            -D "TEST_OUTPUT=${example}.txt"
+            #-D "TEST_REFERENCE=${example}.out"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5EX-shared"
+            -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
       set_tests_properties (EXAMPLES-shared-${example} PROPERTIES WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/H5EX-shared)
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (EXAMPLES-shared-${example} PROPERTIES DEPENDS ${last_test})
@@ -143,13 +169,39 @@
 
 ### Windows pops up a modal permission dialog on this test
   if (H5_HAVE_PARALLEL AND NOT WIN32)
-    add_test (NAME EXAMPLES-ph5example COMMAND $<TARGET_FILE:ph5example>)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME EXAMPLES-ph5example COMMAND $<TARGET_FILE:ph5example>)
+    else ()
+      add_test (NAME EXAMPLES-ph5example COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:ph5example>"
+          -D "TEST_ARGS:STRING="
+          -D "TEST_EXPECT=0"
+          -D "TEST_SKIP_COMPARE=TRUE"
+          -D "TEST_OUTPUT=ph5example.txt"
+          #-D "TEST_REFERENCE=ph5example.out"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+    endif ()
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (EXAMPLES-ph5example PROPERTIES DEPENDS ${last_test})
     endif ()
     set (last_test "EXAMPLES-ph5example")
     if (BUILD_SHARED_LIBS)
-      add_test (NAME EXAMPLES-shared-ph5example COMMAND $<TARGET_FILE:ph5example-shared>)
+      if (HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (NAME EXAMPLES-shared-ph5example COMMAND $<TARGET_FILE:ph5example-shared>)
+      else ()
+        add_test (NAME EXAMPLES-shared-ph5example COMMAND "${CMAKE_COMMAND}"
+            -D "TEST_PROGRAM=$<TARGET_FILE:ph5example-shared>"
+            -D "TEST_ARGS:STRING="
+            -D "TEST_EXPECT=0"
+            -D "TEST_SKIP_COMPARE=TRUE"
+            -D "TEST_OUTPUT=ph5example-shared.txt"
+            #-D "TEST_REFERENCE=ph5example-shared.out"
+            -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5EX-shared"
+            -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
       set_tests_properties (EXAMPLES-shared-ph5example PROPERTIES WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/H5EX-shared)
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (EXAMPLES-shared-ph5example PROPERTIES DEPENDS ${last_test})

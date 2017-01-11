@@ -273,6 +273,9 @@
 
   # Make testfiles dir under build dir
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+  if (H5_HAVE_PARALLEL)
+    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
+  endif ()
 
   #
   # copy test files from source to build dir
@@ -280,6 +283,9 @@
   foreach (h5_tstfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     get_filename_component(fname "${h5_tstfiles}" NAME)
     HDFTEST_COPY_FILE("${h5_tstfiles}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5diff_files")
+    if (H5_HAVE_PARALLEL)
+      HDFTEST_COPY_FILE("${h5_tstfiles}" "${PROJECT_BINARY_DIR}/PAR/testfiles/${fname}" "h5diff_files")
+    endif ()
   endforeach ()
 
 
@@ -290,11 +296,17 @@
     foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
       get_filename_component(fname "${h5_tstfiles}" NAME)
       HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/testfiles/${fname}.txt" "h5diff_files")
+      if (H5_HAVE_PARALLEL)
+        HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/${h5_tstfiles}w.txt" "${PROJECT_BINARY_DIR}/PAR/testfiles/${fname}.txt" "h5diff_files")
+      endif ()
     endforeach ()
   else ()
     foreach (h5_tstfiles ${LIST_WIN_TEST_FILES})
       get_filename_component(fname "${h5_tstfiles}" NAME)
       HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/testfiles/${fname}.txt" "h5diff_files")
+      if (H5_HAVE_PARALLEL)
+        HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/${h5_tstfiles}.txt" "${PROJECT_BINARY_DIR}/PAR/testfiles/${fname}.txt" "h5diff_files")
+      endif ()
     endforeach ()
   endif ()
   add_custom_target(h5diff_files ALL COMMENT "Copying files needed by h5diff tests" DEPENDS ${h5diff_files_list})
@@ -339,7 +351,7 @@
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME PH5DIFF-${resultfile} COMMAND $<TARGET_FILE:ph5diff> ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} ${ARGN})
-      set_tests_properties (PH5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+      set_tests_properties (PH5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/PAR/testfiles")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (PH5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
@@ -352,14 +364,14 @@
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=${MPIEXEC};${MPIEXEC_PREFLAGS};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_POSTFLAGS};$<TARGET_FILE:ph5diff>"
               -D "TEST_ARGS:STRING=${ARGN}"
-              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-              -D "TEST_OUTPUT=P_${resultfile}.out"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
+              -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
 #              -D "TEST_APPEND=EXIT CODE: [0-9]"
 #              -D "TEST_REF_FILTER=EXIT CODE: 0"
               -D "TEST_SKIP_COMPARE=TRUE"
-              -P "${HDF_RESOURCES_EXT_DIR}/prunTest.cmake"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
   ENDMACRO ()

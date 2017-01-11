@@ -21,7 +21,20 @@
   set (last_test "CPP_ex-clear-objects")
 
   foreach (example ${examples})
-    add_test (NAME CPP_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME CPP_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
+    else ()
+      add_test (NAME CPP_ex_${example} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:cpp_ex_${example}>"
+          -D "TEST_ARGS:STRING="
+          -D "TEST_EXPECT=0"
+          -D "TEST_SKIP_COMPARE=TRUE"
+          -D "TEST_OUTPUT=cpp_ex_${example}.txt"
+          #-D "TEST_REFERENCE=cpp_ex_${example}.out"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+    endif ()
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (CPP_ex_${example} PROPERTIES DEPENDS ${last_test})
     endif ()
@@ -48,7 +61,20 @@
   set (last_test "CPP_ex_tutr-clear-objects")
 
   foreach (example ${tutr_examples})
-    add_test (NAME CPP_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME CPP_ex_${example} COMMAND $<TARGET_FILE:cpp_ex_${example}>)
+    else ()
+      add_test (NAME CPP_ex_${example} COMMAND "${CMAKE_COMMAND}"
+          -D "TEST_PROGRAM=$<TARGET_FILE:cpp_ex_${example}>"
+          -D "TEST_ARGS:STRING="
+          -D "TEST_EXPECT=0"
+          -D "TEST_SKIP_COMPARE=TRUE"
+          -D "TEST_OUTPUT=cpp_ex_${example}.txt"
+          #-D "TEST_REFERENCE=cpp_ex_${example}.out"
+          -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
+          -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+    endif ()
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (CPP_ex_${example} PROPERTIES DEPENDS ${last_test})
     endif ()
