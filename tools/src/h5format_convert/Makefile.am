@@ -25,11 +25,14 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # These are our main targets, the tools
 bin_PROGRAMS=h5format_convert
+bin_SCRIPTS=
 
 # Add h5format_convert specific linker flags here
 h5format_convert_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # All programs rely on hdf5 library and h5tools library
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+
+CLEANFILES=
 
 include $(top_srcdir)/config/conclude.am

@@ -31,6 +31,8 @@ check_PROGRAMS=$(TEST_PROG) h5fc_chk_idx
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=../../src/h5format_convert/h5format_convert$(EXEEXT)
 
+CLEANFILES=
+
 # Tell automake to clean h5redeploy script
 CHECK_CLEANFILES+=*.h5
 

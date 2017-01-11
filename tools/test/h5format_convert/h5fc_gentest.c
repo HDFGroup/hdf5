@@ -296,7 +296,6 @@ error:
         H5Dclose(did2);
         H5Gclose(gid);
         H5Fclose(fcpl);
-        H5Fclose(fapl);
         H5Fclose(fid);
     } H5E_END_TRY;
 
