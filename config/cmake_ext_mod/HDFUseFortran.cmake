@@ -63,7 +63,6 @@ MACRO (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
           "Determining if the Fortran ${FUNCTION} exists failed with the following output:\n"
           "${OUTPUT}\n\n")
     endif ()
-
 ENDMACRO ()
 
 #-----------------------------------------------------------------------------
@@ -75,7 +74,7 @@ ENDMACRO ()
 #-----------------------------------------------------------------------------
 
 # Check for Non-standard extension intrinsic function SIZEOF
-set(FORTRAN_HAVE_SIZEOF FALSE)
+set (FORTRAN_HAVE_SIZEOF FALSE)
 CHECK_FORTRAN_FEATURE(sizeof
   "
        PROGRAM main
@@ -86,7 +85,7 @@ CHECK_FORTRAN_FEATURE(sizeof
 )
 
 # Check for F2008 standard intrinsic function C_SIZEOF
-set(FORTRAN_HAVE_C_SIZEOF FALSE)
+set (FORTRAN_HAVE_C_SIZEOF FALSE)
 CHECK_FORTRAN_FEATURE(c_sizeof
   "
        PROGRAM main
@@ -112,7 +111,7 @@ CHECK_FORTRAN_FEATURE(storage_size
 )
 
 # Check for F2008 standard intrinsic module "ISO_FORTRAN_ENV"
-set(HAVE_ISO_FORTRAN_ENV FALSE)
+set (HAVE_ISO_FORTRAN_ENV FALSE)
 CHECK_FORTRAN_FEATURE(ISO_FORTRAN_ENV
   "
        PROGRAM main
@@ -122,7 +121,7 @@ CHECK_FORTRAN_FEATURE(ISO_FORTRAN_ENV
   HAVE_ISO_FORTRAN_ENV
 )
 
-set(FORTRAN_DEFAULT_REAL_NOT_DOUBLE FALSE)
+set (FORTRAN_DEFAULT_REAL_NOT_DOUBLE FALSE)
 CHECK_FORTRAN_FEATURE(RealIsNotDouble
   "
        MODULE type_mod
@@ -152,7 +151,7 @@ CHECK_FORTRAN_FEATURE(RealIsNotDouble
 #-----------------------------------------------------------------------------
 # Checks if the ISO_C_BINDING module meets all the requirements
 #-----------------------------------------------------------------------------
-set(FORTRAN_HAVE_ISO_C_BINDING FALSE)
+set (FORTRAN_HAVE_ISO_C_BINDING FALSE)
 CHECK_FORTRAN_FEATURE(iso_c_binding
   "
        PROGRAM main

@@ -58,7 +58,6 @@ MACRO (SZIP_ADJUST_LIB_VARS basename)
     if (${basename}_LIBRARY)
       set (${basename}_FOUND 1)
     endif ()
-
   endif ()
 
   # Make variables changeble to the advanced user
@@ -120,7 +119,7 @@ if (SZIP_INCLUDE_DIR AND SZIP_LIBRARY)
   if (SZIP_LIBRARY_DEBUG)
     get_filename_component (SZIP_LIBRARY_PATH ${SZIP_LIBRARY_DEBUG} PATH)
     set (SZIP_LIB_DIR  ${SZIP_LIBRARY_PATH})
-  elseif (SZIP_LIBRARY_RELEASE)
+  elseif ()
     get_filename_component (SZIP_LIBRARY_PATH ${SZIP_LIBRARY_RELEASE} PATH)
     set (SZIP_LIB_DIR  ${SZIP_LIBRARY_PATH})
   endif ()

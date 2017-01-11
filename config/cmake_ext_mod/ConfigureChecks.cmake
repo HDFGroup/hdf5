@@ -11,9 +11,9 @@ include (${CMAKE_ROOT}/Modules/CheckTypeSize.cmake)
 include (${CMAKE_ROOT}/Modules/CheckVariableExists.cmake)
 include (${CMAKE_ROOT}/Modules/CheckFortranFunctionExists.cmake)
 include (${CMAKE_ROOT}/Modules/TestBigEndian.cmake)
-if(CMAKE_CXX_COMPILER_LOADED)
+if (CMAKE_CXX_COMPILER AND CMAKE_CXX_COMPILER_LOADED)
   include (${CMAKE_ROOT}/Modules/TestForSTDNamespace.cmake)
-endif()
+endif ()
 
 #-----------------------------------------------------------------------------
 # APPLE/Darwin setup
@@ -307,7 +307,7 @@ if (NOT WINDOWS)
               "Test TEST_LFS_WORKS Run failed with the following output and exit code:\n ${OUTPUT}\n"
         )
       endif ()
-    else ( )
+    else ()
       set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
       message (STATUS "${msg}... no")
       file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
