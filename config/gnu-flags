@@ -94,7 +94,7 @@ case "$cc_vendor-$cc_version" in
     esac
 
     # General
-    H5_CFLAGS="$H5_CFLAGS $arch -std=c99 -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline"
+    H5_CFLAGS="$H5_CFLAGS $arch -std=c99 -pedantic -Wall -W -Wundef -Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Waggregate-return -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs"
 
     # Production
     # NDEBUG is handled explicitly by the configure script
@@ -124,6 +124,10 @@ case "$cc_vendor-$cc_version" in
         ;;
     esac
     #DEBUG_CFLAGS="-fsanitize=undefined"
+
+    # Developer warnings (suggestions from gcc, not code problems)
+    NO_DEVELOPER_WARNING_CFLAGS="-Wno-suggest-attribute=const -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn -Wno-suggest-attribute=format -Wno-inline"
+    DEVELOPER_WARNING_CFLAGS="-Wsuggest-attribute=const -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn -Wsuggest-attribute=format -Winline"
 
     # Symbols
     NO_SYMBOLS_CFLAGS="-s"
@@ -223,13 +227,10 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
     # Append more extra warning flags that only gcc 4.6+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
+    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
 
     # Append more extra warning flags that only gcc 4.7+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-
-    # Append more extra warning flags that only gcc 4.8+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wsuggest-attribute=format"
+    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
 
     # Append more extra warning flags that only gcc 4.9+ know about
     H5_CFLAGS="$H5_CFLAGS -Wdate-time"
@@ -297,13 +298,10 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
     # Append more extra warning flags that only gcc 4.6+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
+    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
 
     # Append more extra warning flags that only gcc 4.7+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-
-    # Append more extra warning flags that only gcc 4.8+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wsuggest-attribute=format"
+    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
 
     # Append more extra warning flags that only gcc 4.9+ know about
     H5_CFLAGS="$H5_CFLAGS -Wdate-time"
@@ -368,13 +366,10 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
     # Append more extra warning flags that only gcc 4.6+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
+    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
 
     # Append more extra warning flags that only gcc 4.7+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-
-    # Append more extra warning flags that only gcc 4.8+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wsuggest-attribute=format"
+    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
 
     # Append more extra warning flags that only gcc 4.9+ know about
     H5_CFLAGS="$H5_CFLAGS -Wdate-time"
@@ -436,13 +431,10 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init"
 
     # Append more extra warning flags that only gcc 4.6+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
+    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
 
     # Append more extra warning flags that only gcc 4.7+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-
-    # Append more extra warning flags that only gcc 4.8+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wsuggest-attribute=format"
+    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
     ;;
 
   gcc-4.7*)
@@ -502,10 +494,10 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
     # Append more extra warning flags that only gcc 4.6+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
+    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
 
     # Append more extra warning flags that only gcc 4.7+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
+    H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
     ;;
 
   gcc-4.6*)
@@ -561,7 +553,7 @@ case "$cc_vendor-$cc_version" in
     H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
 
     # Append more extra warning flags that only gcc 4.6+ know about
-    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wsuggest-attribute=const -Wtrampolines"
+    H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
     ;;
 
   gcc-4.5*)
