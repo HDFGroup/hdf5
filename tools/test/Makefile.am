@@ -24,7 +24,7 @@ include $(top_srcdir)/config/commence.am
 CONFIG=ordered
 
 # All subdirectories
-SUBDIRS=h5diff h5ls h5dump misc h5import h5repack h5jam h5copy h5stat \
-	perform
+SUBDIRS=h5diff h5ls h5dump misc h5import h5repack h5jam h5copy \
+	h5format_convert h5stat perform
 
 include $(top_srcdir)/config/conclude.am
