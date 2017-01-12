@@ -194,8 +194,8 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
         -D "TEST_SKIP_COMPARE=TRUE"
         -D "TEST_REGEX= 0 error.s."
         -D "TEST_MATCH= 0 error(s)"
-        -D "TEST_OUTPUT=testhdf5_fortran.txt"
-        #-D "TEST_REFERENCE=testhdf5_fortran.out"
+        -D "TEST_OUTPUT=testhdf5_fortran_1_8.txt"
+        #-D "TEST_REFERENCE=testhdf5_fortran_1_8.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/fshared"
         -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
     )
