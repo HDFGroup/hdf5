@@ -75,9 +75,9 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
     #-----------------------------------------------------------------------------
     option (HDF5_ENABLE_DEV_WARNINGS "Enable developer group warnings" OFF)
     if (HDF5_ENABLE_DEV_WARNINGS)
-      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsuggest-attribute=const -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn -Wsuggest-attribute=format -Winline")
+      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline -Waggregate-return")
     else ()
-      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter -Wno-discarded-qualifiers -Wno-suggest-attribute=const -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn -Wno-suggest-attribute=format -Wno-inline")
+      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-inline -Wno-aggregate-return")
     endif ()
 
     # Append warning flags
@@ -95,7 +95,12 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
     set (H5_CFLAGS1 "${H5_CFLAGS1} -Wfloat-equal -Wmissing-format-attribute")
 
     # Append warning flags from gcc-3.2* case
-    set (H5_CFLAGS1 "${H5_CFLAGS1} -Wmissing-noreturn -Wpacked -Wdisabled-optimization")
+    set (H5_CFLAGS1 "${H5_CFLAGS1} -Wpacked -Wdisabled-optimization")
+    if (HDF5_ENABLE_DEV_WARNINGS)
+      set (H5_CFLAGS1 "${H5_CFLAGS1} -Wmissing-noreturn")
+    else ()
+      set (H5_CFLAGS1 "${H5_CFLAGS1} -Wno-missing-noreturn")
+    endif ()
 
     # Enable more format checking flags, beyond the basic -Wformat included
     # in -Wall
@@ -136,6 +141,11 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
     # Append more extra warning flags that only gcc 4.6+ know about
     if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
       set (H5_CFLAGS2 "${H5_CFLAGS2} -Wdouble-promotion -Wtrampolines")
+      if (HDF5_ENABLE_DEV_WARNINGS)
+        set (H5_CFLAGS2 "${H5_CFLAGS2} -Wsuggest-attribute=const")
+      else ()
+        set (H5_CFLAGS2 "${H5_CFLAGS2} -Wno-suggest-attribute=const")
+      endif ()
     endif ()
 
     # The "unreachable code" warning appears to be reliable now...
@@ -147,6 +157,20 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
     # Append more extra warning flags that only gcc 4.7+ know about
     if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
       set (H5_CFLAGS2 "${H5_CFLAGS2} -Wstack-usage=8192 -Wvector-operation-performance")
+      if (HDF5_ENABLE_DEV_WARNINGS)
+        set (H5_CFLAGS2 "${H5_CFLAGS2} -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn")
+      else ()
+        set (H5_CFLAGS2 "${H5_CFLAGS2} -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn")
+      endif ()
+    endif ()
+
+    # Append more extra warning flags that only gcc 4.8+ know about
+    if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
+      if (HDF5_ENABLE_DEV_WARNINGS)
+        set (H5_CFLAGS2 "${H5_CFLAGS2} -Wsuggest-attribute=format")
+      else ()
+        set (H5_CFLAGS2 "${H5_CFLAGS2} -Wno-suggest-attribute=format")
+      endif ()
     endif ()
 
     # Append more extra warning flags that only gcc 4.9+ know about
