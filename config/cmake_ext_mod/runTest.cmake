@@ -69,7 +69,7 @@ if (TEST_REGEX)
   string (REGEX MATCH "${TEST_REGEX}" REGEX_MATCH ${TEST_STREAM})
   string (COMPARE EQUAL "${REGEX_MATCH}" "${TEST_MATCH}" REGEX_RESULT)
   if (${REGEX_RESULT} STREQUAL "0")
-    message (FATAL_ERROR "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_MATCH}")
+    message (STATUS "Failed: The output of ${TEST_PROGRAM} did not contain ${TEST_MATCH}")
   endif ()
 endif ()
 
