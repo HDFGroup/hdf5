@@ -106,7 +106,6 @@ typedef struct H5D_filtered_collective_io_info_t {
   H5F_block_t      old_chunk;
   H5F_block_t      new_chunk;
   int              num_writers;
-  int              owner;
   void            *buf;
 } H5D_filtered_collective_io_info_t;
 
@@ -413,7 +412,6 @@ H5D__mpio_array_gather(H5D_io_info_t *io_info, void *local_array,
         HDfprintf(debug_file, "| Chunk Entry %zd:\n", j);
         HDfprintf(debug_file, "|  - Chunk Address: %a\n", ((H5D_filtered_collective_io_info_t *) gathered_array)[j].old_chunk.offset);
         HDfprintf(debug_file, "|  - Chunk Length: %zd\n", ((H5D_filtered_collective_io_info_t *) gathered_array)[j].old_chunk.length);
-        HDfprintf(debug_file, "|  - Chunk Owner: %d\n", ((H5D_filtered_collective_io_info_t *) gathered_array)[j].owner);
         HDfprintf(debug_file, "|  - Address of mspace: %x\n", ((H5D_filtered_collective_io_info_t *) gathered_array)[j].chunk_info.mspace);
     }
     HDfprintf(debug_file, "------------------------------\n\n");
@@ -2985,7 +2983,6 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     H5D_filtered_collective_io_info_t *local_info_array = NULL;
     H5SL_node_t                       *chunk_node;
     hbool_t                            no_overlap = FALSE;
-    size_t                             i;
     size_t                             num_chunks_selected;
     size_t                            *num_chunks_selected_array = NULL;
     int                                mpi_rank, mpi_size, mpi_code;
@@ -3006,17 +3003,17 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     /* Get the no overlap property */
 
 
-    num_chunks_selected = H5SL_count(fm->sel_chunks);
-
+    /* Redistribute chunks to new owners as necessary */
     if (!no_overlap) {
-        /* Redistribute chunks so that no more than 1 process is writing to a given chunk */
+
     }
 
-    if (NULL == (local_info_array = (H5D_filtered_collective_io_info_t *) H5MM_malloc(num_chunks_selected * sizeof(*local_info_array))))
+    if (NULL == (local_info_array = (H5D_filtered_collective_io_info_t *) H5MM_malloc(H5SL_count(fm->sel_chunks) * sizeof(*local_info_array))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate local io info array buffer")
 
+    num_chunks_selected = 0;
     chunk_node = H5SL_first(fm->sel_chunks);
-    for (i = 0; chunk_node; i++) {
+    while (chunk_node) {
         H5D_chunk_info_t *chunk_info = (H5D_chunk_info_t *) H5SL_item(chunk_node);
         H5D_chunk_ud_t    udata;
 
@@ -3025,16 +3022,16 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 
 #ifdef PARALLEL_COMPRESS_DEBUG
-        local_info_array[i].owner = mpi_rank;
-        local_info_array[i].num_writers = 0;
+        local_info_array[num_chunks_selected].num_writers = 0;
 #endif
 
-        local_info_array[i].old_chunk = local_info_array[i].new_chunk = udata.chunk_block;
-        local_info_array[i].chunk_info = *chunk_info;
-        local_info_array[i].buf = NULL;
+        local_info_array[num_chunks_selected].old_chunk = local_info_array[num_chunks_selected].new_chunk = udata.chunk_block;
+        local_info_array[num_chunks_selected].chunk_info = *chunk_info;
+        local_info_array[num_chunks_selected].buf = NULL;
 
+        num_chunks_selected++;
         chunk_node = H5SL_next(chunk_node);
-    } /* end for */
+    } /* end while */
 
 #ifdef PARALLEL_COMPRESS_DEBUG
     HDfprintf(debug_file, " Contents of local info array\n");
@@ -3043,7 +3040,6 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
         HDfprintf(debug_file, "| Chunk Entry %zd:\n", j);
         HDfprintf(debug_file, "|  - Chunk Address: %a\n", local_info_array[j].old_chunk.offset);
         HDfprintf(debug_file, "|  - Chunk Length: %zd\n", local_info_array[j].old_chunk.length);
-        HDfprintf(debug_file, "|  - Chunk Owner: %d\n", local_info_array[j].owner);
         HDfprintf(debug_file, "|  - Address of mspace: %x\n", local_info_array[j].chunk_info.mspace);
         HDfprintf(debug_file, "|  - Chunk Selection Type: %d\n", H5S_GET_SELECT_TYPE(local_info_array[j].chunk_info.mspace));
         HDfprintf(debug_file, "|  - Chunk Num Elmts Sel.: %zd\n", H5S_GET_SELECT_NPOINTS(local_info_array[j].chunk_info.mspace));
