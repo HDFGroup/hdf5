@@ -77,7 +77,7 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
     if (HDF5_ENABLE_DEV_WARNINGS)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline -Waggregate-return")
     else ()
-      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-inline -Wno-aggregate-return")
+      set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter -Wno-inline -Wno-aggregate-return")
     endif ()
 
     # Append warning flags
