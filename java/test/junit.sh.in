@@ -183,7 +183,16 @@ CLEAN_DATAFILES_AND_BLDDIR()
         $RM $BLDDIR/JUnit-interface.out
         $RM $BLDDIR/JUnit-interface.err
         $RM $BLDDIR/JUnit-interface.ext
+    # skip rm if srcdir is same as destdir
+    # this occurs when build/test performed in source dir and
+    # make cp fail
+    SDIR=`$DIRNAME $tstfile`
+    INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+    INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
+    if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+        $RM $BLDDIR/JUnit-interface.ert
         $RM $BLDDIR/JUnit-interface.txt
+    fi        
 }
 
 # Print a line-line message left justified in a field of 70 characters

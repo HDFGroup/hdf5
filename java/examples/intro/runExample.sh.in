@@ -147,6 +147,7 @@ CLEAN_DATAFILES_AND_BLDDIR()
 {
         $RM $BLDDIR/examples.intro.H5_*.txt
         $RM $BLDDIR/H5_*.out
+        $RM $BLDDIR/H5_*.h5
 }
 
 # Print a line-line message left justified in a field of 70 characters

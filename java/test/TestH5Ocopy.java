@@ -239,6 +239,7 @@ public class TestH5Ocopy {
             try {H5.H5Pclose(ocp_plist_id);} catch (Exception ex) {}
             try {H5.H5Fclose(H5fid2);} catch (Exception ex) {}
         }
+        _deleteFile("copy.h5");
     }
 
     @Test
