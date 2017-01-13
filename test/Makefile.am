@@ -174,7 +174,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
     flushrefresh_VERIFICATION_DONE accum_swmr_big.h5 ohdr_swmr.h5 \
     cache_logging.h5 cache_logging.out \
-    swmr[0-2].h5
+    swmr[0-2].h5 tbogus.h5.copy
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c tcoords.c theap.c tid.c titerate.c tmeta.c tmisc.c \

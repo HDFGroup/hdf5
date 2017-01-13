@@ -382,6 +382,21 @@ CLEAN_TESTFILES_AND_TESTDIR()
     INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
         $RM $TESTDIR
+    else
+        # files in $LIST_HDF5_VDS_TEST_FILES are copied in from a different
+        # directory, so when srcdir is the same as destdir and $TESTDIR is
+        # not deleted, the copy n $TESTDIR of each file from
+        # $LIST_HDF5_VDS_TEST_FILES will need to be deleted.
+        for tstfile in $LIST_HDF5_VDS_TEST_FILES
+        do
+            # ignore '#' comment
+            echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+            RET=$?
+            if [ $RET -eq 1 ]; then
+                fname=`basename $tstfile`
+                rm $TESTDIR/$fname
+            fi
+        done
     fi
 }
 
