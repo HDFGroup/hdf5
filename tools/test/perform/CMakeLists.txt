@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_TOOLS_TEST_PERFORM )
 
 #-----------------------------------------------------------------------------
@@ -40,7 +40,7 @@ if (HDF5_BUILD_PERFORM_STANDALONE)
   set_property (TARGET h5perf_serial_alone
       APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
   )
-endif (HDF5_BUILD_PERFORM_STANDALONE)
+endif ()
 
 #-- Adding test for chunk
 set (chunk_SOURCES
@@ -118,7 +118,7 @@ if (H5_HAVE_PARALLEL AND BUILD_TESTING)
     set_property (TARGET h5perf_alone
         APPEND PROPERTY COMPILE_DEFINITIONS STANDALONE
     )
-  endif (HDF5_BUILD_PERFORM_STANDALONE)
-endif (H5_HAVE_PARALLEL AND BUILD_TESTING)
+  endif ()
+endif ()
 
 include (CMakeTests.cmake)

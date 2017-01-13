@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_TOOLS_TEST_H5JAM)
 
 #-----------------------------------------------------------------------------
@@ -17,7 +17,7 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
     set_target_properties (h5jamgentest PROPERTIES FOLDER generator/tools)
 
     #add_test (NAME h5jamgentest COMMAND $<TARGET_FILE:h5jamgentest>)
-  endif (HDF5_BUILD_GENERATORS)
+  endif ()
 
 add_executable (getub ${HDF5_TOOLS_TEST_H5JAM_SOURCE_DIR}/getub.c)
 TARGET_NAMING (getub STATIC)

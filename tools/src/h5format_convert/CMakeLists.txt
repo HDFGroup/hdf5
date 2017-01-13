@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_TOOLS_SRC_H5FC)
 
 #-----------------------------------------------------------------------------

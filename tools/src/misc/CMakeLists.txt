@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_TOOLS_SRC_MISC)
 
 #-----------------------------------------------------------------------------
@@ -50,7 +50,7 @@ set (H5_DEP_EXECUTABLES
 #-----------------------------------------------------------------------------
 #if (NOT WIN32)
 #  configure_file (${HDF5_TOOLS_SRC_MISC_SOURCE_DIR}/h5cc.in ${HDF5_BINARY_DIR}/h5cc @ONLY)
-#endif (NOT WIN32)
+#endif ()
 
 ##############################################################################
 ##############################################################################

@@ -100,7 +100,7 @@
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     get_filename_component(fname "${listfiles}" NAME)
     HDFTEST_COPY_FILE("${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5ls_files")
-  endforeach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+  endforeach ()
   add_custom_target(h5ls_files ALL COMMENT "Copying files needed by h5ls tests" DEPENDS ${h5ls_files_list})
 
 ##############################################################################
@@ -120,7 +120,7 @@
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else ()
       add_test (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -132,8 +132,8 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_TEST file)
+    endif ()
+  ENDMACRO ()
 
 ##############################################################################
 ##############################################################################
@@ -257,9 +257,9 @@
     set_tests_properties (H5LS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (H5LS-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif (NOT "${last_test}" STREQUAL "")
+    endif ()
     set (last_test "H5LS-clearall-objects")
-  endif (HDF5_ENABLE_USING_MEMCHECKER)
+  endif ()
 
 # See which filters are usable (and skip tests for filters we
 # don't have).  Do this by searching H5pubconf.h to see which
@@ -268,11 +268,11 @@
 # detect whether the encoder is present.
   if (H5_HAVE_FILTER_DEFLATE)
     set (USE_FILTER_DEFLATE "true")
-  endif (H5_HAVE_FILTER_DEFLATE)
+  endif ()
 
   if (H5_HAVE_FILTER_SZIP)
     set (USE_FILTER_SZIP "true")
-  endif (H5_HAVE_FILTER_SZIP)
+  endif ()
 
   # test the help syntax
   ADD_H5_TEST (help-1 0 -w80 -h)

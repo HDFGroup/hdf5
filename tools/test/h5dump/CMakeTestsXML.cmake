@@ -130,12 +130,12 @@
   foreach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
     get_filename_component(fname "${tst_xml_h5_file}" NAME)
     HDFTEST_COPY_FILE("${tst_xml_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}" "h5dump_xml_files")
-  endforeach (tst_xml_h5_file ${HDF5_XML_REFERENCE_TEST_FILES})
+  endforeach ()
 
   foreach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
     get_filename_component(fname "${tst_xml_other_file}" NAME)
     HDFTEST_COPY_FILE("${tst_xml_other_file}" "${PROJECT_BINARY_DIR}/testfiles/xml/${fname}" "h5dump_xml_files")
-  endforeach (tst_xml_other_file ${HDF5_XML_REFERENCE_FILES})
+  endforeach ()
   add_custom_target(h5dump_xml_files ALL COMMENT "Copying files needed by h5dump_xml tests" DEPENDS ${h5dump_xml_files_list})
 
 ##############################################################################
@@ -151,11 +151,11 @@
             NAME H5DUMP-XML-${skipresultfile}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile}.xml --xml ${ARGN}"
         )
-      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else (${testtype} STREQUAL "SKIP")
+      endif ()
+    else ()
       ADD_XML_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
-    endif (${testtype} STREQUAL "SKIP")
-  ENDMACRO (ADD_XML_SKIP_H5_TEST)
+    endif ()
+  ENDMACRO ()
 
   MACRO (ADD_XML_H5_TEST resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -167,7 +167,7 @@
       if (NOT "${last_xml_test}" STREQUAL "")
         set_tests_properties (H5DUMP-XML-${resultfile} PROPERTIES DEPENDS ${last_xml_test})
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else ()
       add_test (
           NAME H5DUMP-XML-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -179,8 +179,8 @@
               -D "TEST_REFERENCE=${resultfile}.xml"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_XML_H5_TEST file)
+    endif ()
+  ENDMACRO ()
 
 ##############################################################################
 ##############################################################################
@@ -326,9 +326,9 @@
     set_tests_properties (H5DUMP-XML-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml")
     if (NOT "${last_xml_test}" STREQUAL "")
       set_tests_properties (H5DUMP-XML-clearall-objects PROPERTIES DEPENDS ${last_xml_test})
-    endif (NOT "${last_xml_test}" STREQUAL "")
+    endif ()
     set (last_test "H5DUMP-XML-clearall-objects")
-  endif (HDF5_ENABLE_USING_MEMCHECKER)
+  endif ()
 
   ########## test XML
   ADD_XML_H5_TEST (tall.h5 0 tall.h5)

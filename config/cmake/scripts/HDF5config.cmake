@@ -4,7 +4,7 @@
 ### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf5.log          ###
 #############################################################################################
 
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2.2 FATAL_ERROR)
 ############################################################################
 # Usage:
 #     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log

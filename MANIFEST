@@ -2967,7 +2967,6 @@
 ./config/cmake_ext_mod/HDFUseFortran.cmake
 ./config/cmake_ext_mod/NSIS.InstallOptions.ini.in
 ./config/cmake_ext_mod/NSIS.template.in
-./config/cmake_ext_mod/prunTest.cmake
 ./config/cmake_ext_mod/runTest.cmake
 ./config/cmake_ext_mod/version.plist.in
 
