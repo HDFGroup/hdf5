@@ -73,7 +73,7 @@ if (NOT MSVC AND CMAKE_COMPILER_IS_GNUCC)
     #-----------------------------------------------------------------------------
     # Option to allow the user to enable developer warnings
     #-----------------------------------------------------------------------------
-    option (HDF5_ENABLE_DEV_WARNINGS "Enable developer group warnings" OFF)
+    option (HDF5_ENABLE_DEV_WARNINGS "Enable HDF5 developer group warnings" OFF)
     if (HDF5_ENABLE_DEV_WARNINGS)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Winline -Waggregate-return")
     else ()
