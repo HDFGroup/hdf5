@@ -49,9 +49,6 @@ static herr_t H5D__scatter_file(const H5D_io_info_t *io_info,
 static size_t H5D__gather_file(const H5D_io_info_t *io_info,
     const H5S_t *file_space, H5S_sel_iter_t *file_iter, size_t nelmts,
     void *buf);
-static size_t H5D__gather_mem(const void *_buf,
-    const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
-    const H5D_dxpl_cache_t *dxpl_cache, void *_tgath_buf/*out*/);
 static herr_t H5D__compound_opt_read(size_t nelmts, const H5S_t *mem_space,
     H5S_sel_iter_t *iter, const H5D_dxpl_cache_t *dxpl_cache,
     const H5D_type_info_t *type_info, void *user_buf/*out*/);
@@ -305,6 +302,7 @@ H5D__scatter_mem (const void *_tscat_buf, const H5S_t *space,
     HDassert(space);
     HDassert(iter);
     HDassert(nelmts > 0);
+    HDassert(dxpl_cache);
     HDassert(buf);
 
     /* Allocate the vector I/O arrays */
@@ -366,7 +364,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static size_t
+size_t
 H5D__gather_mem(const void *_buf, const H5S_t *space,
     H5S_sel_iter_t *iter, size_t nelmts, const H5D_dxpl_cache_t *dxpl_cache,
     void *_tgath_buf/*out*/)
@@ -389,6 +387,7 @@ H5D__gather_mem(const void *_buf, const H5S_t *space,
     HDassert(space);
     HDassert(iter);
     HDassert(nelmts > 0);
+    HDassert(dxpl_cache);
     HDassert(tgath_buf);
 
     /* Allocate the vector I/O arrays */
