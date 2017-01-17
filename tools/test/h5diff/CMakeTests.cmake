@@ -55,6 +55,8 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmptest2.he5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmpSingleSiteBethe.reference.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tmpSingleSiteBethe.output.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tudfilter.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/tudfilter2.h5
       # tools/testfiles/vds
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_a.h5
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_b.h5
@@ -259,6 +261,8 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_tmp1.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_tmp2.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_ud.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_udfail.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v1.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v2.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_v3.txt
@@ -373,6 +377,51 @@
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
+    endif ()
+  ENDMACRO ()
+
+  MACRO (ADD_H5_UD_TEST testname resultcode resultfile)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5DIFF_UD-${testname}-clearall-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/${resultfile}.out
+              testfiles/${resultfile}.out.err
+      )
+      if (${resultcode} STREQUAL "2")
+        add_test (
+            NAME H5DIFF_UD-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+                -D "TEST_ARGS:STRING=${ARGN}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${resultfile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${resultfile}.txt"
+                -D "TEST_APPEND=EXIT CODE:"
+                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      else ()
+        add_test (
+            NAME H5DIFF_UD-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff>"
+                -D "TEST_ARGS:STRING=${ARGN}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${resultfile}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${resultfile}.txt"
+                -D "TEST_APPEND=EXIT CODE:"
+                -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+                -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+      endif ()
+      set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DEPENDS H5DIFF_UD-${testname}-clearall-objects)
     endif ()
   ENDMACRO ()
 
@@ -1393,3 +1442,8 @@ ADD_H5_TEST (h5diff_v1 0 -v ${FILEV1} ${FILEV2})
 ADD_H5_TEST (h5diff_v2 0 -r ${FILEV1} ${FILEV2})
 ADD_H5_TEST (h5diff_v3 0 -c ${FILEV1} ${FILEV2})
 
+##############################################################################
+###    P L U G I N  T E S T S
+##############################################################################
+ADD_H5_UD_TEST (h5diff_plugin_test 0 h5diff_ud -v tudfilter.h5 tudfilter2.h5)
+ADD_H5_UD_TEST (h5diff_plugin_fail 2 h5diff_udfail -v tudfilter.h5 tudfilter2.h5)

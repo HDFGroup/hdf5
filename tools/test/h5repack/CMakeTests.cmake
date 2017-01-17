@@ -1151,7 +1151,7 @@
   set (TESTRETVAL 255)
   if (WIN32)
     set (TESTRETVAL -1)
-  endif()
+  endif ()
   ADD_H5_CMP_TEST (plugin_zero "" "TEST" ${TESTRETVAL} h5repack_layout.h5 -v -f UD=250,0)
 
   if (HDF5_TEST_VFD)

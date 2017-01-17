@@ -29,6 +29,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tslink.h5
       ${HDF5_TOOLS_DIR}/testfiles/tsoftlinks.h5
       ${HDF5_TOOLS_DIR}/testfiles/tstr.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tudfilter.h5
       ${HDF5_TOOLS_DIR}/testfiles/tudlink.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.h5
       ${HDF5_TOOLS_DIR}/testfiles/tdset_idx.h5
@@ -132,6 +133,33 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
+    endif ()
+  ENDMACRO ()
+
+  MACRO (ADD_H5_UD_TEST testname resultcode resultfile)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5LS_UD-${testname}-clearall-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/${resultfile}.out
+              testfiles/${resultfile}.out.err
+      )
+      add_test (
+          NAME H5LS_UD-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5ls>"
+              -D "TEST_ARGS=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ls"
+              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5LS_UD-${testname} PROPERTIES DEPENDS H5LS_UD-${testname}-clearall-objects)
     endif ()
   ENDMACRO ()
 
@@ -410,3 +438,8 @@
     ADD_H5_TEST (tdset_idx 0 -w80 -d tdset_idx.h5)
   endif (USE_FILTER_DEFLATE)
 
+
+##############################################################################
+###    P L U G I N  T E S T S
+##############################################################################
+ADD_H5_UD_TEST (h5ls_plugin_test 0 tudfilter -w80 -v -d tudfilter.h5)
