@@ -1203,6 +1203,7 @@
 ./tools/test/h5dump/Makefile.am
 ./tools/test/h5dump/dynlib_dump.c
 ./tools/test/h5dump/h5dumpgentest.c
+./tools/test/h5dump/h5dump_plugin.sh.in
 ./tools/test/h5dump/testh5dump.sh.in
 ./tools/test/h5dump/testh5dumppbits.sh.in
 ./tools/test/h5dump/testh5dumpxml.sh.in
@@ -1276,6 +1277,7 @@
 ./tools/test/h5diff/Makefile.am
 ./tools/test/h5diff/dynlib_diff.c
 ./tools/test/h5diff/h5diffgentest.c
+./tools/test/h5diff/h5diff_plugin.sh.in
 ./tools/test/h5diff/testh5diff.sh.in
 ./tools/test/h5diff/testph5diff.sh.in
 
@@ -1357,6 +1359,7 @@
 ./tools/src/h5ls/h5ls.c
 ./tools/test/h5ls/Makefile.am
 ./tools/test/h5ls/dynlib_ls.c
+./tools/test/h5ls/h5ls_plugin.sh.in
 ./tools/test/h5ls/testh5ls.sh.in
 ./tools/test/h5ls/testh5lsvds.sh.in
 
