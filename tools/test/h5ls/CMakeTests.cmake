@@ -88,6 +88,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tsaf.ls
       ${HDF5_TOOLS_DIR}/testfiles/tslink-1.ls
       ${HDF5_TOOLS_DIR}/testfiles/tstr-1.ls
+      ${HDF5_TOOLS_DIR}/testfiles/tudfilter.ls
       ${HDF5_TOOLS_DIR}/testfiles/tudlink-1.ls
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.ls
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes2le.ls
