@@ -166,6 +166,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tstring2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tstringe.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tszip.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tudfilter.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tudlink-1.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tudlink-2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tuserfilter.ddl
@@ -291,6 +292,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tstr.h5
       ${HDF5_TOOLS_DIR}/testfiles/tstr2.h5
       ${HDF5_TOOLS_DIR}/testfiles/tstr3.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tudfilter.h5
       ${HDF5_TOOLS_DIR}/testfiles/tudlink.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes2.h5
@@ -680,9 +682,36 @@
     endif ()
   ENDMACRO ()
 
+  MACRO (ADD_H5_UD_TEST testname resultcode resultfile)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5DUMP_UD-${testname}-clearall-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/std/${resultfile}.out
+              testfiles/std/${resultfile}.out.err
+      )
+      add_test (
+          NAME H5DUMP_UD-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5DUMP_UD-${testname} PROPERTIES DEPENDS H5DUMP_UD-${testname}-clearall-objects)
+    endif ()
+  ENDMACRO ()
+
 ##############################################################################
 ##############################################################################
-###           T H E   T E S T S                                          HDF5_ENABLE_USING_MEMCHECKER  ###
+###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
 
@@ -1421,3 +1450,8 @@
 
   # test for non-existing file
   ADD_H5_TEST (non_existing 1 --enable-error-stack tgroup.h5 non_existing.h5)
+
+##############################################################################
+###    P L U G I N  T E S T S
+##############################################################################
+ADD_H5_UD_TEST (h5dump_plugin_test 0 tudfilter --enable-error-stack tudfilter.h5)

@@ -114,6 +114,7 @@
 #define FILE81  "tints4dims.h5"
 #define FILE82  "tcompound_complex2.h5"
 #define FILE83  "tvlenstr_array.h5"
+#define FILE84  "tudfilter.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -151,6 +152,23 @@ const H5Z_class2_t H5Z_MYFILTER[1] = {{
         NULL,                /* The "can apply" callback     */
         set_local_myfilter,  /* The "set local" callback     */
         myfilter,            /* The actual filter function */
+}};
+
+#define H5Z_FILTER_DYNLIB2      258
+#define MULTIPLIER              3
+
+static size_t H5Z_filter_dynlib2(unsigned int flags, size_t cd_nelmts,
+                const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+
+/* This message derives from H5Z */
+const H5Z_class2_t H5Z_DYNLIB2[1] = {{
+    H5Z_CLASS_T_VERS,                /* H5Z_class_t version             */
+    H5Z_FILTER_DYNLIB2,             /* Filter id number        */
+    1, 1,                            /* Encoding and decoding enabled   */
+    "dynlib2",                 /* Filter name for debugging    */
+    NULL,                            /* The "can apply" callback        */
+    NULL,                            /* The "set local" callback        */
+    (H5Z_func_t)H5Z_filter_dynlib2,    /* The actual filter function    */
 }};
 
 
@@ -10286,6 +10304,118 @@ static void gent_vlenstr_array(void)
     H5Fclose(file);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    gent_udfilter
+ *
+ * Purpose:     Generate a file to be used in testing user defined filter plugin3.
+ *-------------------------------------------------------------------------
+ */
+static void gent_udfilter(void)
+{
+    hid_t    fid;  /* file id */
+    hid_t    dcpl; /* dataset creation property list */
+    hid_t    sid;  /* dataspace ID */
+    hid_t    tid;  /* datatype ID */
+
+    hsize_t  dims1[RANK]      = {DIM1,DIM2};
+    hsize_t  chunk_dims[RANK] = {CDIM1,CDIM2};
+    int      buf1[DIM1][DIM2];
+    int      i, j, n, ret;
+
+    for(i=n=0; i<DIM1; i++){
+        for(j=0; j<DIM2; j++){
+            buf1[i][j]=n++;
+        }
+    }
+
+    /* create a file */
+    fid  = H5Fcreate(FILE84, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    HDassert(fid>=0);
+
+    /* create a space */
+    sid = H5Screate_simple(SPACE2_RANK, dims1, NULL);
+
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    HDassert(dcpl>=0);
+
+    ret = H5Pset_layout(dcpl, H5D_CHUNKED);
+    HDassert(ret >= 0);
+
+    ret = H5Pset_chunk(dcpl, SPACE2_RANK, chunk_dims);
+    HDassert(ret >= 0);
+
+    ret = H5Zregister (H5Z_DYNLIB2);
+    HDassert(ret >= 0);
+
+    ret = H5Pset_filter (dcpl, H5Z_FILTER_DYNLIB2, H5Z_FLAG_MANDATORY, 0, NULL);
+    HDassert(ret >= 0);
+
+    ret=make_dset(fid, "dynlib2", sid, H5T_NATIVE_INT, dcpl, buf1);
+    HDassert(ret >= 0);
+
+    /* remove the filters from the dcpl */
+    ret = H5Premove_filter(dcpl, H5Z_FILTER_ALL);
+    HDassert(ret >= 0);
+
+    /*-------------------------------------------------------------------------
+     * close
+     *-------------------------------------------------------------------------
+     */
+    ret = H5Sclose(sid);
+    HDassert(ret >= 0);
+
+    ret = H5Pclose(dcpl);
+    HDassert(ret >= 0);
+
+    ret = H5Fclose(fid);
+    HDassert(ret >= 0);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_filter_dynlib2
+ *
+ * Purpose:    A dynlib2 filter method that multiplies the original value
+ *              during write and divide the original value during read. It
+ *              will be built as a shared library.  tools tests will load
+ *              and use this filter as a plugin library.
+ *
+ * Return:    Success:    Data chunk size
+ *
+ *        Failure:    0
+ *-------------------------------------------------------------------------
+ */
+static size_t
+H5Z_filter_dynlib2(unsigned int flags, size_t cd_nelmts,
+      const unsigned int *cd_values, size_t nbytes,
+      size_t *buf_size, void **buf)
+{
+    int *int_ptr = (int *)*buf;          /* Pointer to the data values */
+    size_t buf_left = *buf_size;  /* Amount of data buffer left to process */
+
+    /* Check for the correct number of parameters */
+    if(cd_nelmts > 0)
+        return(0);
+
+    /* Assignment to eliminate unused parameter warning. */
+    cd_values = cd_values;
+
+    if(flags & H5Z_FLAG_REVERSE) { /*read*/
+        /* Divide the original value with MULTIPLIER */
+        while(buf_left > 0) {
+            *int_ptr++ /= MULTIPLIER;
+            buf_left -= sizeof(int);
+        } /* end while */
+    } /* end if */
+    else { /*write*/
+        /* Multiply the original value with MULTIPLIER */
+        while(buf_left > 0) {
+            *int_ptr++ *= MULTIPLIER;
+            buf_left -= sizeof(int);
+        } /* end while */
+    } /* end else */
+
+    return nbytes;
+} /* end H5Z_filter_dynlib2() */
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -10382,6 +10512,8 @@ int main(void)
     gent_bitnopaquefields();
 
     gent_intsfourdims();
+
+    gent_udfilter();
 
     return 0;
 }
