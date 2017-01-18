@@ -34,6 +34,7 @@ PLUGIN_LIB="$FROM_DIR/libdynlibls.*"
 PLUGIN_LIBDIR=testdir3
 RM='rm -rf'
 
+RM='rm -rf'
 GREP='grep'
 CMP='cmp -s'
 DIFF='diff -c'
@@ -49,7 +50,7 @@ SRC_TOOLS="$srcdir/../.."
 SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
 
-TESTDIR=./testfiles
+TESTDIR=./testplug
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################

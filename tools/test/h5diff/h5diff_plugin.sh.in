@@ -48,7 +48,7 @@ SRC_TOOLS="$srcdir/../.."
 # testfiles source dirs for tools
 SRC_H5DIFF_TESTFILES="$SRC_TOOLS/test/h5diff/testfiles"
 
-TESTDIR=./testfiles
+TESTDIR=./testplug
 test -d $TESTDIR || mkdir $TESTDIR
 
 ######################################################################
@@ -67,11 +67,6 @@ $SRC_H5DIFF_TESTFILES/h5diff_ud.txt
 $SRC_H5DIFF_TESTFILES/h5diff_udfail.txt
 "
 
-#
-# copy test files and expected output files from source dirs to test dir
-#
-COPY_TESTFILES="$LIST_HDF5_TEST_FILES"
-
 # Main Body
 # Create test directories if not exists yet.
 test -d $PLUGIN_LIBDIR || mkdir -p $PLUGIN_LIBDIR
@@ -89,6 +84,11 @@ fi
 
 # setup plugin path
 ENVCMD="env HDF5_PLUGIN_PATH=../${PLUGIN_LIBDIR}"
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_HDF5_TEST_FILES"
 
 COPY_TESTFILES_TO_TESTDIR()
 {
