@@ -51,7 +51,7 @@ macro (EXTERNAL_JPEG_LIBRARY compress_type jpeg_pic)
             -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
             -DCMAKE_ANSI_CFLAGS:STRING=${jpeg_pic}
     )
-  endif (${compress_type} MATCHES "SVN")
+  endif ()
   externalproject_get_property (JPEG BINARY_DIR SOURCE_DIR)
 
 ##include (${BINARY_DIR}/${JPEG_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
@@ -68,13 +68,13 @@ macro (EXTERNAL_JPEG_LIBRARY compress_type jpeg_pic)
     add_dependencies (JPEG jpeg-shared)
     set (JPEG_SHARED_LIBRARY "jpeg-shared")
     set (JPEG_LIBRARIES ${JPEG_LIBRARIES} ${JPEG_shared_LIBRARY})
-  endif (BUILD_SHARED_LIBS)
+  endif ()
 
   set (JPEG_INCLUDE_DIR_GEN "${BINARY_DIR}")
   set (JPEG_INCLUDE_DIR "${SOURCE_DIR}/src")
   set (JPEG_FOUND 1)
   set (JPEG_INCLUDE_DIRS ${JPEG_INCLUDE_DIR_GEN} ${JPEG_INCLUDE_DIR})
-endmacro (EXTERNAL_JPEG_LIBRARY)
+endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (PACKAGE_JPEG_LIBRARY compress_type)
@@ -85,8 +85,8 @@ macro (PACKAGE_JPEG_LIBRARY compress_type)
   set (EXTERNAL_HEADER_LIST ${EXTERNAL_HEADER_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/jconfig.h)
   if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
     add_dependencies (JPEG-GenHeader-Copy JPEG)
-  endif (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
-endmacro (PACKAGE_JPEG_LIBRARY)
+  endif ()
+endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
@@ -141,7 +141,7 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
             -DCMAKE_ANSI_CFLAGS:STRING=${CMAKE_ANSI_CFLAGS}
             -DSZIP_ENABLE_ENCODING:BOOL=${encoding}
     )
-  endif (${compress_type} MATCHES "SVN")
+  endif ()
   externalproject_get_property (SZIP BINARY_DIR SOURCE_DIR)
 
 ##include (${BINARY_DIR}/${SZIP_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
@@ -158,13 +158,13 @@ macro (EXTERNAL_SZIP_LIBRARY compress_type encoding)
     add_dependencies (SZIP szip-shared)
     set (SZIP_SHARED_LIBRARY "szip-shared")
     set (SZIP_LIBRARIES ${SZIP_LIBRARIES} ${SZIP_shared_LIBRARY})
-  endif (BUILD_SHARED_LIBS)
+  endif ()
 
   set (SZIP_INCLUDE_DIR_GEN "${BINARY_DIR}")
   set (SZIP_INCLUDE_DIR "${SOURCE_DIR}/src")
   set (SZIP_FOUND 1)
   set (SZIP_INCLUDE_DIRS ${SZIP_INCLUDE_DIR_GEN} ${SZIP_INCLUDE_DIR})
-endmacro (EXTERNAL_SZIP_LIBRARY)
+endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (PACKAGE_SZIP_LIBRARY compress_type)
@@ -175,8 +175,8 @@ macro (PACKAGE_SZIP_LIBRARY compress_type)
   set (EXTERNAL_HEADER_LIST ${EXTERNAL_HEADER_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/SZconfig.h)
   if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
     add_dependencies (SZIP-GenHeader-Copy SZIP)
-  endif (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
-endmacro (PACKAGE_SZIP_LIBRARY)
+  endif ()
+endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (EXTERNAL_ZLIB_LIBRARY compress_type)
@@ -228,14 +228,14 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
             -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
             -DCMAKE_ANSI_CFLAGS:STRING=${CMAKE_ANSI_CFLAGS}
     )
-  endif (${compress_type} MATCHES "SVN")
+  endif ()
   externalproject_get_property (ZLIB BINARY_DIR SOURCE_DIR)
 
   if (WIN32)
     set (ZLIB_LIB_NAME "zlib")
-  else (WIN32)
+  else ()
     set (ZLIB_LIB_NAME "z")
-  endif (WIN32)
+  endif ()
 ##include (${BINARY_DIR}/${ZLIB_PACKAGE_NAME}${HDF_PACKAGE_EXT}-targets.cmake)
 # Create imported target zlib-static
   add_library(zlib-static STATIC IMPORTED)
@@ -250,13 +250,13 @@ macro (EXTERNAL_ZLIB_LIBRARY compress_type)
     add_dependencies (ZLIB zlib-shared)
     set (ZLIB_SHARED_LIBRARY "zlib-shared")
     set (ZLIB_LIBRARIES ${ZLIB_LIBRARIES} ${ZLIB_SHARED_LIBRARY})
-  endif (BUILD_SHARED_LIBS)
+  endif ()
 
   set (ZLIB_INCLUDE_DIR_GEN "${BINARY_DIR}")
   set (ZLIB_INCLUDE_DIR "${SOURCE_DIR}")
   set (ZLIB_FOUND 1)
   set (ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDE_DIR_GEN} ${ZLIB_INCLUDE_DIR})
-endmacro (EXTERNAL_ZLIB_LIBRARY)
+endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (PACKAGE_ZLIB_LIBRARY compress_type)
@@ -267,5 +267,5 @@ macro (PACKAGE_ZLIB_LIBRARY compress_type)
   set (EXTERNAL_HEADER_LIST ${EXTERNAL_HEADER_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/zconf.h)
   if (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
     add_dependencies (ZLIB-GenHeader-Copy ZLIB)
-  endif (${compress_type} MATCHES "GIT" OR ${compress_type} MATCHES "SVN" OR ${compress_type} MATCHES "TGZ")
-endmacro (PACKAGE_ZLIB_LIBRARY)
+  endif ()
+endmacro ()

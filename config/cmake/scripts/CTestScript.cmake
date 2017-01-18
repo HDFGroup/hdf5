@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2.2 FATAL_ERROR)
 ########################################################
 # This dashboard is maintained by The HDF Group
 # For any comments please contact cdashhelp@hdfgroup.org

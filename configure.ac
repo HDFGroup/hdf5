@@ -2929,13 +2929,17 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  testpar/Makefile
                  tools/Makefile
                  tools/h5dump/Makefile
+                 tools/h5dump/h5dump_plugin.sh
                  tools/h5dump/testh5dump.sh
                  tools/h5dump/testh5dumppbits.sh
                  tools/h5dump/testh5dumpxml.sh
+                 tools/h5ls/Makefile
+                 tools/h5ls/h5ls_plugin.sh
                  tools/h5ls/testh5ls.sh
                  tools/h5import/Makefile
                  tools/h5import/h5importtestutil.sh
                  tools/h5diff/Makefile
+                 tools/h5diff/h5diff_plugin.sh
                  tools/h5diff/testh5diff.sh
                  tools/h5diff/testph5diff.sh
                  tools/h5jam/Makefile
@@ -2943,7 +2947,6 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5repack/Makefile
                  tools/h5repack/h5repack.sh
                  tools/h5repack/h5repack_plugin.sh
-                 tools/h5ls/Makefile
                  tools/h5copy/Makefile
                  tools/h5copy/testh5copy.sh
                  tools/lib/Makefile

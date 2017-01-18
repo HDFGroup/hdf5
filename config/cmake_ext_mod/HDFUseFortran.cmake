@@ -31,9 +31,9 @@ MACRO (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
     if (CMAKE_REQUIRED_LIBRARIES)
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
           "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
-    else (CMAKE_REQUIRED_LIBRARIES)
+    else ()
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
-    endif (CMAKE_REQUIRED_LIBRARIES)
+    endif ()
     file (WRITE
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler.f90
         "${CODE}"
@@ -63,8 +63,7 @@ MACRO (CHECK_FORTRAN_FEATURE FUNCTION CODE VARIABLE)
           "Determining if the Fortran ${FUNCTION} exists failed with the following output:\n"
           "${OUTPUT}\n\n")
     endif ()
-
-ENDMACRO (CHECK_FORTRAN_FEATURE)
+ENDMACRO ()
 
 #-----------------------------------------------------------------------------
 # Configure Checks which require Fortran compilation must go in here
@@ -75,7 +74,7 @@ ENDMACRO (CHECK_FORTRAN_FEATURE)
 #-----------------------------------------------------------------------------
 
 # Check for Non-standard extension intrinsic function SIZEOF
-set(FORTRAN_HAVE_SIZEOF FALSE)
+set (FORTRAN_HAVE_SIZEOF FALSE)
 CHECK_FORTRAN_FEATURE(sizeof
   "
        PROGRAM main
@@ -86,7 +85,7 @@ CHECK_FORTRAN_FEATURE(sizeof
 )
 
 # Check for F2008 standard intrinsic function C_SIZEOF
-set(FORTRAN_HAVE_C_SIZEOF FALSE)
+set (FORTRAN_HAVE_C_SIZEOF FALSE)
 CHECK_FORTRAN_FEATURE(c_sizeof
   "
        PROGRAM main
@@ -112,7 +111,7 @@ CHECK_FORTRAN_FEATURE(storage_size
 )
 
 # Check for F2008 standard intrinsic module "ISO_FORTRAN_ENV"
-set(HAVE_ISO_FORTRAN_ENV FALSE)
+set (HAVE_ISO_FORTRAN_ENV FALSE)
 CHECK_FORTRAN_FEATURE(ISO_FORTRAN_ENV
   "
        PROGRAM main
@@ -122,7 +121,7 @@ CHECK_FORTRAN_FEATURE(ISO_FORTRAN_ENV
   HAVE_ISO_FORTRAN_ENV
 )
 
-set(FORTRAN_DEFAULT_REAL_NOT_DOUBLE FALSE)
+set (FORTRAN_DEFAULT_REAL_NOT_DOUBLE FALSE)
 CHECK_FORTRAN_FEATURE(RealIsNotDouble
   "
        MODULE type_mod
@@ -152,7 +151,7 @@ CHECK_FORTRAN_FEATURE(RealIsNotDouble
 #-----------------------------------------------------------------------------
 # Checks if the ISO_C_BINDING module meets all the requirements
 #-----------------------------------------------------------------------------
-set(FORTRAN_HAVE_ISO_C_BINDING FALSE)
+set (FORTRAN_HAVE_ISO_C_BINDING FALSE)
 CHECK_FORTRAN_FEATURE(iso_c_binding
   "
        PROGRAM main
@@ -175,5 +174,5 @@ if (CMAKE_Fortran_COMPILER MATCHES ifort)
     if (WIN32)
         set (CMAKE_Fortran_FLAGS_DEBUG "/debug:full /dbglibs " CACHE "flags" STRING FORCE)
         set (CMAKE_EXE_LINKER_FLAGS_DEBUG "/DEBUG" CACHE "flags" STRING FORCE)
-    endif (WIN32)
-endif (CMAKE_Fortran_COMPILER MATCHES ifort)
+    endif ()
+endif ()

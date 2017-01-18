@@ -180,7 +180,7 @@ Given the preconditions in section I, create a CMakeLists.txt file at the
 source root. Include the following text in the file:
 
 ##########################################################
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 project (HDF5MyApp C CXX)
 
 set (LIB_TYPE STATIC) # or SHARED
@@ -226,7 +226,7 @@ NOTE: this file is available at the HDF web site:
 ========================================================================
 ctest
 ========================================================================
-cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.2.2 FATAL_ERROR)
 
 ############################################################################
 # Usage:
