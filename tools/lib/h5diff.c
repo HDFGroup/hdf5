@@ -479,7 +479,7 @@ static herr_t trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
                 tinfo->symlink_visited.dangle_link = TRUE;
                 trav_info_visit_lnk(path, linfo, tinfo);
                 if (opts->no_dangle_links)
-                    opts->err_stat = 1; /* make dgangling link is error */
+                    opts->err_stat = 1; /* make dangling link is error */
                 goto done;
             }
 
@@ -511,7 +511,7 @@ static herr_t trav_grp_symlinks(const char *path, const H5L_info_t *linfo,
                 tinfo->symlink_visited.dangle_link = TRUE;
                 trav_info_visit_lnk(path, linfo, tinfo);
                 if (opts->no_dangle_links)
-                    opts->err_stat = 1; /* make dgangling link is error */
+                    opts->err_stat = 1; /* make dangling link is error */
                 goto done;
             }
 
@@ -592,8 +592,8 @@ hsize_t h5diff(const char *fname1,
     trav_info_t  *info1_grp = NULL;
     trav_info_t  *info2_grp = NULL;
     /* local pointer */
-    trav_info_t  *info1_lp;
-    trav_info_t  *info2_lp;
+    trav_info_t  *info1_lp = NULL;
+    trav_info_t  *info2_lp = NULL;
     /* link info from specified object */
     H5L_info_t src_linfo1;
     H5L_info_t src_linfo2;
@@ -1555,7 +1555,7 @@ hsize_t diff(hid_t file1_id,
         {
             if (options->no_dangle_links)
             {
-                /* gangling link is error */
+                /* dangling link is error */
                 if(options->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", path1);
                 goto out;
@@ -1573,7 +1573,7 @@ hsize_t diff(hid_t file1_id,
         {
             if (options->no_dangle_links)
             {
-                /* gangling link is error */
+                /* dangling link is error */
                 if(options->m_verbose)
                     parallel_print("Warning: <%s> is a dangling link.\n", path2);
                 goto out;

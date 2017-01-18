@@ -3156,7 +3156,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
                     break;
                 case H5Z_FILTER_SZIP:
-                    {
                         szip_options_mask = cd_values[0];;
                         szip_pixels_per_block = cd_values[1];
 
@@ -3219,7 +3218,6 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
                         h5tools_str_reset(&buffer);
                         h5tools_str_append(&buffer, "%s", END);
                         h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0, (hsize_t)0);
-                    }
                     break;
                 case H5Z_FILTER_NBIT:
                     h5tools_str_append(&buffer, "%s", NBIT);
@@ -3389,6 +3387,8 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info,
         case H5D_ALLOC_TIME_LATE:
             h5tools_str_append(&buffer, "%s", "H5D_ALLOC_TIME_LATE");
             break;
+            case H5D_ALLOC_TIME_ERROR:
+            case H5D_ALLOC_TIME_DEFAULT:
         default:
             HDassert(0);
             break;

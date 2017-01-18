@@ -88,18 +88,18 @@
   foreach (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
     get_filename_component(fname "${pbits_h5_file}" NAME)
     HDFTEST_COPY_FILE("${pbits_h5_file}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}" "h5dump_pbits_files")
-  endforeach (pbits_h5_file ${HDF5_REFERENCE_TEST_PBITS})
+  endforeach ()
 
 
   foreach (ddl_pbits ${HDF5_REFERENCE_PBITS})
     get_filename_component(fname "${ddl_pbits}" NAME)
     HDFTEST_COPY_FILE("${HDF5_TOOLS_SRC_DIR}/testfiles/pbits/${ddl_pbits}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}" "h5dump_pbits_files")
-  endforeach (ddl_pbits ${HDF5_REFERENCE_PBITS})
+  endforeach ()
 
   foreach (ddl_pbits ${HDF5_ERROR_REFERENCE_PBITS})
     get_filename_component(fname "${ddl_pbits}" NAME)
     HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/errfiles/${ddl_pbits}" "${PROJECT_BINARY_DIR}/testfiles/pbits/${fname}" "h5dump_pbits_files")
-  endforeach (ddl_pbits ${HDF5_ERROR_REFERENCE_PBITS})
+  endforeach ()
   add_custom_target(h5dump_pbits_files ALL COMMENT "Copying files needed by h5dump_pbits tests" DEPENDS ${h5dump_pbits_files_list})
 
 ##############################################################################
@@ -121,12 +121,6 @@
       endif ()
     else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
-          NAME H5DUMP-${resultfile}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove ${resultfile}.out ${resultfile}.out.err
-      )
-      set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/pbits")
-      add_test (
           NAME H5DUMP-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
@@ -137,9 +131,8 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_PBITS_TEST file)
+    endif ()
+  ENDMACRO ()
 
 ##############################################################################
 ##############################################################################
@@ -263,9 +256,9 @@
     set_tests_properties (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/pbits")
     if (NOT "${last_pbits_test}" STREQUAL "")
       set_tests_properties (H5DUMP_PACKED_BITS-clearall-objects PROPERTIES DEPENDS ${last_pbits_test})
-    endif (NOT "${last_pbits_test}" STREQUAL "")
+    endif ()
     set (last_pbits_test "H5DUMP_PACKED_BITS-clearall-objects")
-  endif (HDF5_ENABLE_USING_MEMCHECKER)
+  endif ()
 
   # test failure handling
   # Missing file name

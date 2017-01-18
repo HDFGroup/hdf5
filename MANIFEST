@@ -1485,6 +1485,9 @@
 ./tools/testfiles/tstring2.ddl
 ./tools/testfiles/tstringe.ddl
 ./tools/testfiles/tszip.ddl
+./tools/testfiles/tudfilter.ddl
+./tools/testfiles/tudfilter.h5
+./tools/testfiles/tudfilter.ls
 ./tools/testfiles/tudlink.h5
 ./tools/testfiles/tudlink.h5.xml
 ./tools/testfiles/tudlink-1.ddl
@@ -1996,6 +1999,10 @@
 ./tools/h5diff/testfiles/tmptest.he5
 ./tools/h5diff/testfiles/h5diff_tmp2.txt
 ./tools/h5diff/testfiles/tmpSingleSiteBethe.output.h5
+./tools/h5diff/testfiles/tudfilter.h5
+./tools/h5diff/testfiles/tudfilter2.h5
+./tools/h5diff/testfiles/h5diff_ud.txt
+./tools/h5diff/testfiles/h5diff_udfail.txt
 
 #test files for h5repack
 ./tools/h5repack/testfiles/README

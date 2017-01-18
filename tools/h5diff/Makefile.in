@@ -31,6 +31,7 @@
 # HDF5 Library Makefile(.in)
 #
 
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -107,6 +108,7 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = h5diff$(EXEEXT) $(am__EXEEXT_1)
 check_PROGRAMS = $(am__EXEEXT_2)
+@HAVE_SHARED_CONDITIONAL_TRUE@@USE_PLUGINS_CONDITIONAL_TRUE@am__append_1 = h5diff_plugin.sh
 TESTS = $(am__EXEEXT_2) $(TEST_SCRIPT)
 subdir = tools/h5diff
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -117,20 +119,55 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = testh5diff.sh testph5diff.sh
+CONFIG_CLEAN_FILES = h5diff_plugin.sh testh5diff.sh testph5diff.sh
 CONFIG_CLEAN_VPATH_FILES =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libdynlibdiff_la_LIBADD =
+am__libdynlibdiff_la_SOURCES_DIST = dynlib_diff.c
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibdiff_la_OBJECTS =  \
+@HAVE_SHARED_CONDITIONAL_TRUE@	dynlib_diff.lo
+libdynlibdiff_la_OBJECTS = $(am_libdynlibdiff_la_OBJECTS)
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
+@HAVE_SHARED_CONDITIONAL_TRUE@am_libdynlibdiff_la_rpath = -rpath \
+@HAVE_SHARED_CONDITIONAL_TRUE@	$(libdir)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@am__EXEEXT_1 = ph5diff$(EXEEXT)
-am__installdirs = "$(DESTDIR)$(bindir)"
 am__EXEEXT_2 = h5diffgentest$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 am_h5diff_OBJECTS = h5diff_main.$(OBJEXT) h5diff_common.$(OBJEXT)
 h5diff_OBJECTS = $(am_h5diff_OBJECTS)
 h5diff_LDADD = $(LDADD)
 h5diff_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-am__v_lt_1 = 
 h5diff_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(h5diff_LDFLAGS) $(LDFLAGS) -o $@
@@ -176,10 +213,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(h5diff_SOURCES) $(h5diffgentest_SOURCES) \
-	$(ph5diff_SOURCES)
-DIST_SOURCES = $(h5diff_SOURCES) $(h5diffgentest_SOURCES) \
-	$(ph5diff_SOURCES)
+SOURCES = $(libdynlibdiff_la_SOURCES) $(h5diff_SOURCES) \
+	$(h5diffgentest_SOURCES) $(ph5diff_SOURCES)
+DIST_SOURCES = $(am__libdynlibdiff_la_SOURCES_DIST) $(h5diff_SOURCES) \
+	$(h5diffgentest_SOURCES) $(ph5diff_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -226,33 +263,6 @@ am__tty_colors = { \
     std='[m'; \
   fi; \
 }
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
 am__recheck_rx = ^[ 	]*:recheck:[ 	]*
 am__global_test_result_rx = ^[ 	]*:global-test-result:[ 	]*
 am__copy_in_global_log_rx = ^[ 	]*:copy-in-global-log:[ 	]*
@@ -406,10 +416,10 @@ am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
 TEST_LOGS = $(am__test_logs2:.sh.log=.log)
 SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
 SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
-am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/testh5diff.sh.in \
-	$(srcdir)/testph5diff.sh.in $(top_srcdir)/bin/depcomp \
-	$(top_srcdir)/bin/mkinstalldirs $(top_srcdir)/bin/test-driver \
-	$(top_srcdir)/config/commence.am \
+am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/h5diff_plugin.sh.in \
+	$(srcdir)/testh5diff.sh.in $(srcdir)/testph5diff.sh.in \
+	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/mkinstalldirs \
+	$(top_srcdir)/bin/test-driver $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -696,7 +706,7 @@ h5diff_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 
 # Test programs and scripts
 TEST_PROG = h5diffgentest
-TEST_SCRIPT = testh5diff.sh
+TEST_SCRIPT = testh5diff.sh $(am__append_1)
 check_SCRIPTS = $(TEST_SCRIPT) $(TEST_SCRIPT_PARA)
 # The parallel test script testph5diff.sh actually depends on testh5diff.sh.
 SCRIPT_DEPEND = h5diff$(EXEEXT) $(H5PDIFF) testh5diff.sh
@@ -708,6 +718,9 @@ h5diffgentest_SOURCES = h5diffgentest.c
 
 # Programs depend on the main HDF5 library and tools library
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
+@HAVE_SHARED_CONDITIONAL_TRUE@lib_LTLIBRARIES = libdynlibdiff.la
+@HAVE_SHARED_CONDITIONAL_TRUE@libdynlibdiff_la_SOURCES = dynlib_diff.c
+DISTCLEANFILES = h5diff_plugin.sh
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -762,10 +775,50 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+h5diff_plugin.sh: $(top_builddir)/config.status $(srcdir)/h5diff_plugin.sh.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testh5diff.sh: $(top_builddir)/config.status $(srcdir)/testh5diff.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 testph5diff.sh: $(top_builddir)/config.status $(srcdir)/testph5diff.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(libdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(libdir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
+	}
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
+
+libdynlibdiff.la: $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_DEPENDENCIES) $(EXTRA_libdynlibdiff_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK) $(am_libdynlibdiff_la_rpath) $(libdynlibdiff_la_OBJECTS) $(libdynlibdiff_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -843,6 +896,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynlib_diff.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5diff_common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5diff_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5diffgentest.Po@am__quote@
@@ -1113,9 +1167,11 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS) all-local
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1147,14 +1203,16 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+@HAVE_SHARED_CONDITIONAL_FALSE@install-exec-hook:
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool mostlyclean-am
+	clean-libLTLIBRARIES clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1180,8 +1238,9 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS
-
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-am
 
 install-html-am:
@@ -1220,25 +1279,26 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
-.MAKE: check-am install-am install-strip
+.MAKE: check-am install-am install-exec-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
 	check-am clean clean-binPROGRAMS clean-checkPROGRAMS \
-	clean-generic clean-libtool cscopelist-am ctags ctags-am \
-	distclean distclean-compile distclean-generic \
+	clean-generic clean-libLTLIBRARIES clean-libtool cscopelist-am \
+	ctags ctags-am distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-binPROGRAMS \
 	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	install-exec install-exec-am install-exec-hook install-html \
+	install-html-am install-info install-info-am \
+	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
 	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am \
-	uninstall-binPROGRAMS
+	uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .PRECIOUS: Makefile
 
@@ -1253,6 +1313,11 @@ uninstall-am: uninstall-binPROGRAMS
 
 help:
 	@$(top_srcdir)/bin/makehelp
+
+@HAVE_SHARED_CONDITIONAL_TRUE@  # Build it as shared library if configure is enabled for shared library.
+
+@HAVE_SHARED_CONDITIONAL_TRUE@install-exec-hook:
+@HAVE_SHARED_CONDITIONAL_TRUE@	$(RM) $(DESTDIR)$(libdir)/*dynlib*
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
