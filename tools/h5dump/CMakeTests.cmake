@@ -183,6 +183,14 @@
       ${HDF5_TOOLS_SRC_DIR}/testfiles/out3.h5import
       ${HDF5_TOOLS_SRC_DIR}/testfiles/zerodim.ddl
   )
+  set (HDF5_N_REFERENCE_FILES
+      tall-3
+      tattr-2
+      tcomp-2
+      thlink-4
+      thlink-5
+      tslink-2
+  )
   set (HDF5_REFERENCE_EXP_FILES
       tall-6.exp
       tnoddlfile.exp
@@ -344,6 +352,9 @@
   foreach (tst_other_file ${HDF5_REFERENCE_FILES})
     get_filename_component (fname "${tst_other_file}" NAME)
     HDFTEST_COPY_FILE("${tst_other_file}" "${PROJECT_BINARY_DIR}/testfiles/std/${fname}" "h5dump_std_files")
+  endforeach ()
+  foreach (tst_h5N_file ${HDF5_N_REFERENCE_FILES})
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_SOURCE_DIR}/testfiles/${tst_h5N_file}.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/${tst_h5N_file}-N.ddl" "h5dump_std_files")
   endforeach ()
 
   foreach (tst_error_file ${HDF5_ERROR_REFERENCE_TEST_FILES})
