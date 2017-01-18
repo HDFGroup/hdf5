@@ -1260,36 +1260,38 @@ if(H5DEBUG(D))
  *                 operation
  *                 A. If any chunk is being written to by more than 1
  *                    process, the process writing the most data to the
- *                    chunk will take ownership of the chunk (ties are
- *                    broken randomly)
+ *                    chunk will take ownership of the chunk (the first
+ *                    process seen that is writing the most data becomes
+ *                    the new owner in the case of ties)
  *              2. If the operation is a write operation
  *                 A. Loop through each chunk in the operation
- *                    I. Determine if this is a full overwrite of the chunk
- *                       a)  If it is not, read the chunk from file and
- *                           pass the chunk through the filter pipeline in
- *                           reverse order (Unfilter the chunk)
- *                       b)  Else copy the owning process' modification
- *                           data into a buffer of size large enough to
- *                           completely overwrite the chunk
- *                    II.  Receive any modification data from other
+ *                    I. If this is not a full overwrite of the chunk
+ *                       a) Read the chunk from file and pass the chunk
+ *                          through the filter pipeline in reverse order
+ *                          (Unfilter the chunk)
+ *                    II. Update the chunk data with the modifications from
+ *                        the owning process
+ *                    III. Receive any modification data from other
  *                         processes and update the chunk data with these
  *                         modifications
- *                    III. Filter the chunk
+ *                    IV. Filter the chunk
  *                 B. Contribute the modified chunks to an array gathered
  *                    by all processes which contains the new sizes of
  *                    every chunk modified in the collective IO operation
  *                 C. All processes collectively re-allocate each chunk
  *                    from the gathered array with their new sizes after
  *                    the filter operation
- *                 D. Create an MPI derived type for memory and file to
- *                    write out the process' selected chunks to the file
+ *                 D. If this process has any chunks selected in the IO
+ *                    operation, create an MPI derived type for memory and
+ *                    file to write out the process' selected chunks to the
+ *                    file
+ *                 E. Perform the collective write
+ *                 F. All processes collectively re-insert each modified
+ *                    chunk from the gathered array into the chunk index
  *              3. If the operation is a read operation
  *                 A. Loop through each chunk in the operation
  *                    I.
- *              3. Proceeed with the collective IO operation
- *              4. If the collective operation was a write operation,
- *                 all processes collectively re-insert each modified
- *                 chunk from the gathered array into the chunk index
+ *
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1747,35 +1749,36 @@ done:
  *                 operation
  *                 A. If any chunk is being written to by more than 1
  *                    process, the process writing the most data to the
- *                    chunk will take ownership of the chunk (ties are
- *                    broken randomly)
- *              2. Loop through each chunk in the operation
- *                 A. If the operation is a write operation
- *                    I. Determine if this is a full overwrite of the chunk
- *                       a)  If it is not, read the chunk from file and
- *                           pass the chunk through the filter pipeline in
- *                           reverse order (Unfilter the chunk)
- *                       b)  Else copy the owning process' modification
- *                           data into a buffer of size large enough to
- *                           completely overwrite the chunk
- *                    II.  Receive any modification data from other
+ *                    chunk will take ownership of the chunk (the first
+ *                    process seen that is writing the most data becomes
+ *                    the new owner in the case of ties)
+ *              2. If the operation is a write operation
+ *                 A. Loop through each chunk in the operation
+ *                    I. If this is not a full overwrite of the chunk
+ *                       a) Read the chunk from file and pass the chunk
+ *                          through the filter pipeline in reverse order
+ *                          (Unfilter the chunk)
+ *                    II. Update the chunk data with the modifications from
+ *                        the owning process
+ *                    III. Receive any modification data from other
  *                         processes and update the chunk data with these
  *                         modifications
  *                    III. Filter the chunk
- *                    IV.  Contribute the chunk to an array gathered by
- *                         all processes which contains every chunk
- *                         modified in this iteration (up to one chunk
- *                         per process, some processes may not have a
- *                         selection/may have less chunks to work on than
- *                         other processes)
- *                    II.  All processes collectively re-allocate each
- *                         chunk from the gathered array with their new
- *                         sizes after the filter operation
- *                    IV.  Proceed with the collective write operation
- *                    V.   All processes collectively re-insert each
- *                         chunk from the gathered array into the chunk
- *                         index
- *                 B. If the operation is a read operation
+ *                    IV. Contribute the chunk to an array gathered by
+ *                        all processes which contains every chunk
+ *                        modified in this iteration (up to one chunk
+ *                        per process, some processes may not have a
+ *                        selection/may have less chunks to work on than
+ *                        other processes)
+ *                    II. All processes collectively re-allocate each
+ *                        chunk from the gathered array with their new
+ *                        sizes after the filter operation
+ *                    IV. Proceed with the collective write operation
+ *                        for the chunks modified on this iteration
+ *                    V. All processes collectively re-insert each
+ *                       chunk from the gathered array into the chunk
+ *                       index
+ *              3. If the operation is a read operation
  *                    I.
  *
  * Return:      Non-negative on success/Negative on failure
