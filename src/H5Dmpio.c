@@ -817,8 +817,19 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         case H5D_ONE_LINK_CHUNK_IO:
         case H5D_ONE_LINK_CHUNK_IO_MORE_OPT:
             if(io_info->dset->shared->dcpl_cache.pline.nused > 0) {
-                if(H5D__link_chunk_filtered_collective_io(io_info, type_info, fm, dx_plist) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish filtered linked chunk MPI-IO")
+                if (io_info->op_type == H5D_IO_OP_READ) {
+                    /* XXX: For now, Multi-chunk IO must be forced for parallel filtered read,
+                     * so that data can be unfiltered as it is received. There is complexity
+                     * in unfiltering the data when it is read all at once into a single
+                     * buffer.
+                     */
+                    if(H5D__multi_chunk_filtered_collective_io(io_info, type_info, fm, dx_plist) < 0)
+                        HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish optimized multiple filtered chunk MPI-IO")
+                }
+                else {
+                    if(H5D__link_chunk_filtered_collective_io(io_info, type_info, fm, dx_plist) < 0)
+                        HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish filtered linked chunk MPI-IO")
+                }
             }
             else {
                 if(H5D__link_chunk_collective_io(io_info, type_info, fm, sum_chunk, dx_plist) < 0)
