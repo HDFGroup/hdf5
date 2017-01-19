@@ -1018,6 +1018,7 @@
 
 ./tools/h5dump/Makefile.am
 ./tools/h5dump/Makefile.in
+./tools/h5dump/dynlib_dump.c
 ./tools/h5dump/h5dump.c
 ./tools/h5dump/h5dump.h
 ./tools/h5dump/h5dump_defines.h
@@ -1027,6 +1028,7 @@
 ./tools/h5dump/h5dump_xml.c
 ./tools/h5dump/h5dump_xml.h
 ./tools/h5dump/h5dumpgentest.c
+./tools/h5dump/h5dump_plugin.sh.in
 ./tools/h5dump/testh5dump.sh.in
 ./tools/h5dump/testh5dumppbits.sh.in
 ./tools/h5dump/testh5dumpxml.sh.in
@@ -1094,11 +1096,13 @@
 # h5diff sources
 ./tools/h5diff/Makefile.am
 ./tools/h5diff/Makefile.in
+./tools/h5diff/dynlib_diff.c
 ./tools/h5diff/h5diff_common.c
 ./tools/h5diff/h5diff_common.h
 ./tools/h5diff/h5diff_main.c
 ./tools/h5diff/ph5diff_main.c
 ./tools/h5diff/h5diffgentest.c
+./tools/h5diff/h5diff_plugin.sh.in
 ./tools/h5diff/testh5diff.sh.in
 ./tools/h5diff/testph5diff.sh.in
 
@@ -1124,7 +1128,9 @@
 # h5ls sources
 ./tools/h5ls/Makefile.am
 ./tools/h5ls/Makefile.in
+./tools/h5ls/dynlib_ls.c
 ./tools/h5ls/h5ls.c
+./tools/h5ls/h5ls_plugin.sh.in
 ./tools/h5ls/testh5ls.sh.in
 
 # h5copy sources
@@ -2308,7 +2314,6 @@
 ./config/cmake_ext_mod/HDFUseFortran.cmake
 ./config/cmake_ext_mod/NSIS.InstallOptions.ini.in
 ./config/cmake_ext_mod/NSIS.template.in
-./config/cmake_ext_mod/prunTest.cmake
 ./config/cmake_ext_mod/runTest.cmake
 ./config/cmake_ext_mod/version.plist.in
 
