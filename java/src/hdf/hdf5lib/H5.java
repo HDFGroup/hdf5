@@ -151,7 +151,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * layout of the source and destination, and the data for the array passed as a block of bytes, for instance,
  *
  * <pre>
- *      herr_t H5Dread(int fid, int filetype, int memtype, int memspace,
+ *      herr_t H5Dread(long fid, long filetype, long memtype, long memspace,
  *      void * data);
  * </pre>
  *
@@ -171,7 +171,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * library. So the function above would be declared:
  *
  * <pre>
- * public synchronized static native int H5Dread(int fid, int filetype, int memtype, int memspace, Object data);
+ * public synchronized static native int H5Dread(long fid, long filetype, long memtype, long memspace, Object data);
  * </pre>
  *            OPEN_IDS.addElement(id);
 
@@ -192,7 +192,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * can be accessed as public variables of the Java class, such as:
  *
  * <pre>
- * int data_type = HDF5CDataTypes.JH5T_NATIVE_INT;
+ * long data_type = HDF5CDataTypes.JH5T_NATIVE_INT;
  * </pre>
  *
  * The Java application uses both types of constants the same way, the only difference is that the

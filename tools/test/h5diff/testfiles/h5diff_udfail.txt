@@ -2,11 +2,11 @@
 file1     file2
 ---------------------------------------
     x      x    /              
-    x      x    /dynlib2       
+    x      x    /dynlibud      
 
 group  : </> and </>
 0 differences found
-dataset: </dynlib2> and </dynlib2>
+dataset: </dynlibud> and </dynlibud>
 0 differences found
-warning: dataset </dynlib2> cannot be read, user defined filter is not available
+warning: dataset </dynlibud> cannot be read, user defined filter is not available
 EXIT CODE: 2
