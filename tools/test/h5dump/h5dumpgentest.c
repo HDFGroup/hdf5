@@ -154,21 +154,21 @@ const H5Z_class2_t H5Z_MYFILTER[1] = {{
         myfilter,            /* The actual filter function */
 }};
 
-#define H5Z_FILTER_DYNLIB2      258
+#define H5Z_FILTER_DYNLIBUD      300
 #define MULTIPLIER              3
 
-static size_t H5Z_filter_dynlib2(unsigned int flags, size_t cd_nelmts,
+static size_t H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
                 const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class2_t H5Z_DYNLIB2[1] = {{
+const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
     H5Z_CLASS_T_VERS,                /* H5Z_class_t version             */
-    H5Z_FILTER_DYNLIB2,             /* Filter id number        */
+    H5Z_FILTER_DYNLIBUD,             /* Filter id number        */
     1, 1,                            /* Encoding and decoding enabled   */
-    "dynlib2",                 /* Filter name for debugging    */
+    "dynlibud",                 /* Filter name for debugging    */
     NULL,                            /* The "can apply" callback        */
     NULL,                            /* The "set local" callback        */
-    (H5Z_func_t)H5Z_filter_dynlib2,    /* The actual filter function    */
+    (H5Z_func_t)H5Z_filter_dynlibud,    /* The actual filter function    */
 }};
 
 
@@ -10314,6 +10314,7 @@ static void gent_udfilter(void)
 {
     hid_t    fid;  /* file id */
     hid_t    dcpl; /* dataset creation property list */
+    hid_t    dsid;  /* dataset ID */
     hid_t    sid;  /* dataspace ID */
     hid_t    tid;  /* datatype ID */
 
@@ -10344,13 +10345,22 @@ static void gent_udfilter(void)
     ret = H5Pset_chunk(dcpl, SPACE2_RANK, chunk_dims);
     HDassert(ret >= 0);
 
-    ret = H5Zregister (H5Z_DYNLIB2);
+    ret = H5Zregister (H5Z_DYNLIBUD);
     HDassert(ret >= 0);
 
-    ret = H5Pset_filter (dcpl, H5Z_FILTER_DYNLIB2, H5Z_FLAG_MANDATORY, 0, NULL);
+    ret = H5Pset_filter (dcpl, H5Z_FILTER_DYNLIBUD, H5Z_FLAG_MANDATORY, 0, NULL);
     HDassert(ret >= 0);
 
-    ret=make_dset(fid, "dynlib2", sid, H5T_NATIVE_INT, dcpl, buf1);
+    /* create the dataset */
+    dsid = H5Dcreate2(fid, "dynlibud", H5T_STD_I32LE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    HDassert(dsid >= 0);
+
+    /* write */
+    ret = H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf1);
+    HDassert(ret >= 0);
+
+    /* close */
+    ret = H5Dclose(dsid);
     HDassert(ret >= 0);
 
     /* remove the filters from the dcpl */
@@ -10372,9 +10382,9 @@ static void gent_udfilter(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5Z_filter_dynlib2
+ * Function:    H5Z_filter_dynlibud
  *
- * Purpose:    A dynlib2 filter method that multiplies the original value
+ * Purpose:    A dynlibud filter method that multiplies the original value
  *              during write and divide the original value during read. It
  *              will be built as a shared library.  tools tests will load
  *              and use this filter as a plugin library.
@@ -10385,11 +10395,11 @@ static void gent_udfilter(void)
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_dynlib2(unsigned int flags, size_t cd_nelmts,
+H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts,
       const unsigned int *cd_values, size_t nbytes,
       size_t *buf_size, void **buf)
 {
-    int *int_ptr = (int *)*buf;          /* Pointer to the data values */
+    char *int_ptr = (char *)*buf;          /* Pointer to the data values */
     size_t buf_left = *buf_size;  /* Amount of data buffer left to process */
 
     /* Check for the correct number of parameters */
@@ -10400,22 +10410,26 @@ H5Z_filter_dynlib2(unsigned int flags, size_t cd_nelmts,
     cd_values = cd_values;
 
     if(flags & H5Z_FLAG_REVERSE) { /*read*/
-        /* Divide the original value with MULTIPLIER */
+        /* Subtract the original value with MULTIPLIER */
         while(buf_left > 0) {
-            *int_ptr++ /= MULTIPLIER;
-            buf_left -= sizeof(int);
+            char temp = *int_ptr;
+            *int_ptr = temp - MULTIPLIER;
+            int_ptr++;
+            buf_left -= sizeof(*int_ptr);
         } /* end while */
     } /* end if */
     else { /*write*/
-        /* Multiply the original value with MULTIPLIER */
+        /* Add the original value with MULTIPLIER */
         while(buf_left > 0) {
-            *int_ptr++ *= MULTIPLIER;
-            buf_left -= sizeof(int);
+            char temp = *int_ptr;
+            *int_ptr = temp + MULTIPLIER;
+            int_ptr++;
+            buf_left -= sizeof(*int_ptr);
         } /* end while */
     } /* end else */
 
     return nbytes;
-} /* end H5Z_filter_dynlib2() */
+} /* end H5Z_filter_dynlibud() */
 
 /*-------------------------------------------------------------------------
  * Function: main

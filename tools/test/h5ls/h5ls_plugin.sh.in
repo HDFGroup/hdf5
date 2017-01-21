@@ -233,7 +233,7 @@ TOOLTEST() {
 COPY_TESTFILES_TO_TESTDIR
 
 # Run the test
-TOOLTEST tudfilter.ls 0 -w80 -v -d tudfilter.h5
+TOOLTEST tudfilter.ls 0 -w80 -d tudfilter.h5
 
 # print results
 if test $nerrors -ne 0 ; then

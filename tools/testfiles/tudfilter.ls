@@ -1,11 +1,4 @@
-Opened "tudfilter.h5" with sec2 driver.
-dynlib2                  Dataset {20/20, 10/10}
-    Location:  1:800
-    Links:     1
-    Chunks:    {10, 5} 200 bytes
-    Storage:   800 logical bytes, 800 allocated bytes, 100.00% utilization
-    Filter-0:  dynlib2-258  {}
-    Type:      native int
+dynlibud                 Dataset {20, 10}
     Data:
         (0,0) 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
         (1,9) 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34,
