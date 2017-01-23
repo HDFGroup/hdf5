@@ -397,9 +397,9 @@ typedef struct s1_t {
 /* Dataset dimensions                                                 */
 #define F82_DIM32          32
 #define F82_RANK           1
-//#define F82_RANK2          2
-//#define F82_RANK3          3
-//#define F82_RANK4          4
+/* #define F82_RANK2          2 */
+/* #define F82_RANK3          3 */
+/* #define F82_RANK4          4 */
 
 /* "File 83" macros */
 /* Name of dataset to create in datafile                              */
