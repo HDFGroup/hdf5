@@ -179,10 +179,11 @@ H5O_mtime_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
     int	i;
     struct tm	tm;
     void        *ret_value = NULL;      /* Return value */
-#if _MSC_VER >= 1900  // VS 2015
-// In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
-// variable declared in time.h. That variable was deprecated and in VS 2015
-// is removed, with _get_timezone replacing it.
+#if _MSC_VER >= 1900 /* VS 2015 */
+    /* In gcc and in Visual Studio prior to VS 2015 'timezone' is a global
+     * variable declared in time.h. That variable was deprecated and in VS 2015
+     * is removed, with _get_timezone replacing it.
+     */
     long timezone = 0;
 #endif
 
@@ -225,7 +226,7 @@ H5O_mtime_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
     /* BSD-like systems */
     the_time += tm.tm_gmtoff;
 #elif defined(H5_HAVE_TIMEZONE)
-    #if _MSC_VER >= 1900  // VS 2015
+    #if _MSC_VER >= 1900  /* VS 2015 */
         HDget_timezone(&timezone);
     #endif
     /* GNU/Linux systems */
