@@ -819,7 +819,7 @@ add_test (NAME H5TEST-testlibinfo
 
 if (BUILD_SHARED_LIBS)
   #-- Adding test for cache
-  if (NOT CYGWIN)
+  if (NOT CYGWIN AND NOT WIN32)
     add_test (NAME H5TEST-shared-clear-cache-objects
         COMMAND    ${CMAKE_COMMAND}
             -E remove
@@ -1022,7 +1022,7 @@ if (HDF5_TEST_VFD)
 #      links_env
       unregister
   )
-  if (NOT CYGWIN)
+  if (NOT CYGWIN AND NOT WIN32)
     set (H5_VFD_TESTS ${H5_VFD_TESTS} big cache)
   endif ()
 
@@ -1185,7 +1185,7 @@ if (HDF5_TEST_VFD)
       set_tests_properties (VFD-${vfdname}-flush1-shared PROPERTIES TIMEOUT 10)
       set_tests_properties (VFD-${vfdname}-flush2-shared PROPERTIES TIMEOUT 10)
       set_tests_properties (VFD-${vfdname}-istore-shared PROPERTIES TIMEOUT 1800)
-      if (NOT CYGWIN)
+      if (NOT CYGWIN AND NOT WIN32)
         set_tests_properties (VFD-${vfdname}-cache-shared PROPERTIES TIMEOUT 1800)
       endif ()
     endif ()
