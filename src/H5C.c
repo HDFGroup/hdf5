@@ -1594,6 +1594,11 @@ done:
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on exit.\n")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
+    if(ret_value < 0 && entry_ptr->tag_info) {
+        if(H5C__untag_entry(cache_ptr, entry_ptr) < 0)
+            HDONE_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove entry from tag list")
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_insert_entry() */
 
