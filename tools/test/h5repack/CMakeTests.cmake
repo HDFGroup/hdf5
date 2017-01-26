@@ -1080,7 +1080,10 @@
   ADD_H5_TEST (upgrade_layout "TEST" ${FILE14})
 
 # test for datum size > H5TOOLS_MALLOCSIZE
-  ADD_H5_TEST (gt_mallocsize "TEST" ${FILE1} -f GZIP=1)
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif ()
+  ADD_H5_TEST (gt_mallocsize ${TESTTYPE} ${FILE1} -f GZIP=1)
 
 # Check repacking file with committed datatypes in odd configurations
   ADD_H5_TEST (committed_dt "TEST" ${FILE15})
