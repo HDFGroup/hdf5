@@ -3363,7 +3363,10 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
+                 test/testswmr.sh
                  test/test_plugin.sh
+                 test/test_usecases.sh
+                 test/testvdsswmr.sh
                  testpar/Makefile
                  tools/Makefile
                  tools/lib/Makefile

@@ -18,12 +18,13 @@
  *              
  *              It is intended for use in shell scripts.
  */
+
 #include "h5test.h"
 
 /* This file needs to access the file driver testing code */
-#define H5FD_FRIEND     /*suppress error about including H5FDpkg      */
+#define H5FD_FRIEND     /*suppress error about including H5FDpkg            */
 #define H5FD_TESTING
-#include "H5FDpkg.h"    /* File drivers             */
+#include "H5FDpkg.h"    /* File drivers                                     */
 
 
 /*-------------------------------------------------------------------------
