@@ -149,8 +149,7 @@ static herr_t H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info,
     const H5D_chunk_map_t *fm, int *sum_chunkf);
 static herr_t H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm,
-    H5D_filtered_collective_io_info_t **chunk_list, size_t *num_entries,
-    size_t **_num_chunks_selected_array);
+    H5D_filtered_collective_io_info_t **chunk_list, size_t *num_entries);
 static herr_t H5D__mpio_array_gather(const H5D_io_info_t *io_info, void *local_array,
     size_t local_array_num_entries, size_t array_entry_size,
     void **gathered_array, size_t *gathered_array_num_entries,
@@ -1353,7 +1352,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
 
     /* Build a list of selected chunks in the collective io operation */
     /* XXX: Not sure about correct minor error code */
-    if (H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries, &num_chunks_selected_array) < 0)
+    if (H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTRECV, FAIL, "couldn't construct filtered I/O info list")
 
 #ifdef PARALLEL_COMPRESS_DEBUG
@@ -1434,6 +1433,22 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
 
 #ifdef PARALLEL_COMPRESS_DEBUG
         HDfprintf(debug_file, "------------------------------\n\n");
+#endif
+
+        if (NULL == (num_chunks_selected_array = (size_t *) H5MM_malloc((size_t) mpi_size * sizeof(*num_chunks_selected_array))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate num chunks selected array")
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Allgather(&chunk_list_num_entries, 1, MPI_UNSIGNED_LONG_LONG, num_chunks_selected_array,
+                1, MPI_UNSIGNED_LONG_LONG, io_info->comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code)
+
+#ifdef PARALLEL_COMPRESS_DEBUG
+        HDfprintf(debug_file, " Num Chunks Selected Array\n");
+        HDfprintf(debug_file, "------------------------------------\n");
+        for (size_t j = 0; j < (size_t) mpi_size; j++) {
+            HDfprintf(debug_file, "| Process %d has %zd chunks selected.\n", j, num_chunks_selected_array[j]);
+        }
+        HDfprintf(debug_file, "------------------------------------\n\n");
 #endif
 
         /* If this process has any chunks selected, create a MPI type for collectively
@@ -1815,7 +1830,6 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
     hbool_t                           *mem_type_is_derived_array = NULL;
     size_t                             chunk_list_num_entries;
     size_t                             collective_chunk_list_num_entries;
-    size_t                            *num_chunks_selected_array = NULL; /* Array of number of chunks selected on each process */
     size_t                             i, j;                    /* Local index variable */
     int                                mpi_rank, mpi_size, mpi_code;
     herr_t                             ret_value = SUCCEED;
@@ -1840,7 +1854,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
 
     /* Build a list of selected chunks in the collective IO operation */
     /* XXX: change minor error code */
-    if (H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries, &num_chunks_selected_array) < 0)
+    if (H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTRECV, FAIL, "couldn't construct filtered I/O info list")
 
     /* Set up contiguous I/O info object */
@@ -2073,8 +2087,6 @@ done:
         H5MM_free(file_type_is_derived_array);
     if (mem_type_is_derived_array)
         H5MM_free(mem_type_is_derived_array);
-    if (num_chunks_selected_array)
-        H5MM_free(num_chunks_selected_array);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__multi_chunk_filtered_collective_io() */
@@ -2665,8 +2677,7 @@ done:
  */
 static herr_t
 H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-    const H5D_chunk_map_t *fm, H5D_filtered_collective_io_info_t **chunk_list, size_t *num_entries,
-    size_t **_num_chunks_selected_array)
+    const H5D_chunk_map_t *fm, H5D_filtered_collective_io_info_t **chunk_list, size_t *num_entries)
 {
     H5D_filtered_collective_io_info_t *local_info_array = NULL; /* The list of initially select chunks for this process */
     H5D_filtered_collective_io_info_t *overlap_info_array = NULL; /* The list of all chunks selected in the operation by all processes */
@@ -2680,7 +2691,6 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     size_t                             num_send_requests = 0;
     size_t                             num_chunks_selected;
     size_t                             overlap_info_array_num_entries;
-    size_t                            *num_chunks_selected_array = NULL; /* Array of number of chunks selected on each process */
     int                                mpi_rank, mpi_size, mpi_code;
     herr_t                             ret_value = SUCCEED;
 
@@ -2691,7 +2701,6 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     HDassert(fm);
     HDassert(chunk_list);
     HDassert(num_entries);
-    HDassert(_num_chunks_selected_array);
 
     if ((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank")
@@ -2933,26 +2942,8 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
 #endif
     } /* end if */
 
-    /* Gather the number of chunks each process is writing to all processes */
-    if (NULL == (num_chunks_selected_array = (size_t *) H5MM_malloc((size_t) mpi_size * sizeof(*num_chunks_selected_array))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate num chunks selected array")
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Allgather(&num_chunks_selected, 1, MPI_UNSIGNED_LONG_LONG, num_chunks_selected_array,
-            1, MPI_UNSIGNED_LONG_LONG, io_info->comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code)
-
-#ifdef PARALLEL_COMPRESS_DEBUG
-    HDfprintf(debug_file, " Num Chunks Selected Array\n");
-    HDfprintf(debug_file, "------------------------------------\n");
-    for (size_t j = 0; j < (size_t) mpi_size; j++) {
-        HDfprintf(debug_file, "| Process %d has %zd chunks selected.\n", j, num_chunks_selected_array[j]);
-    }
-    HDfprintf(debug_file, "------------------------------------\n\n");
-#endif
-
     *chunk_list = local_info_array;
     *num_entries = num_chunks_selected;
-    *_num_chunks_selected_array = num_chunks_selected_array;
 
     /* Wait for all async send requests to complete before returning */
     if (!no_overlap && num_send_requests) {
