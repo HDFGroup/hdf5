@@ -209,7 +209,6 @@ if ( ( (entry_ptr) == NULL ) ||                                              \
      ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&               \
        ( (head_ptr) != (tail_ptr) )                                          \
      ) ||                                                                    \
-     ( (len) < 0 ) ||                                                        \
      ( ( (len) == 1 ) &&                                                     \
        ( ( (head_ptr) != (tail_ptr) ) ||                                     \
          ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )            \
@@ -494,7 +493,6 @@ if ( ( (entry_ptr) == NULL ) ||                                               \
      ( ( ( (hd_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&                  \
        ( (hd_ptr) != (tail_ptr) )                                             \
      ) ||                                                                     \
-     ( (len) < 0 ) ||                                                         \
      ( ( (len) == 1 ) &&                                                      \
        ( ( (hd_ptr) != (tail_ptr) ) || ( (Size) <= 0 ) ||                     \
          ( (hd_ptr) == NULL ) || ( (hd_ptr)->size != (Size) )                 \
@@ -514,7 +512,6 @@ if ( ( (entry_ptr) == NULL ) ||                                               \
 if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
        ( (head_ptr) != (tail_ptr) )                                        \
      ) ||                                                                  \
-     ( (len) < 0 ) ||                                                      \
      ( ( (len) == 1 ) &&                                                   \
        ( ( (head_ptr) != (tail_ptr) ) ||                                   \
          ( (head_ptr) == NULL ) || ( (head_ptr)->size != (Size) )          \
@@ -2500,7 +2497,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
                         (cache_ptr)->pel_tail_ptr, 			  \
 			(cache_ptr)->pel_len,                             \
                         (cache_ptr)->pel_size, (fail_val))                \
-        HDassert( (cache_ptr)->pel_len >= 0 );                            \
                                                                           \
     } else {                                                              \
                                                                           \
@@ -2901,7 +2897,6 @@ if ( ( (cache_ptr)->index_size !=                                           \
     H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,            \
                     (cache_ptr)->pel_tail_ptr, (cache_ptr)->pel_len,   \
                     (cache_ptr)->pel_size, (fail_val))                 \
-    HDassert( (cache_ptr)->pel_len >= 0 );                             \
                                                                        \
         /* modified LRU specific code */                               \
                                                                        \
@@ -4392,16 +4387,16 @@ struct H5C_t {
     hbool_t			close_warning_received;
 
     /* Fields for maintaining [hash table] index of entries */
-    int32_t                     index_len;
+    uint32_t                    index_len;
     size_t                      index_size;
-    int32_t			index_ring_len[H5C_RING_NTYPES];
+    uint32_t			index_ring_len[H5C_RING_NTYPES];
     size_t			index_ring_size[H5C_RING_NTYPES];
     size_t 			clean_index_size;
     size_t			clean_index_ring_size[H5C_RING_NTYPES];
     size_t			dirty_index_size;
     size_t			dirty_index_ring_size[H5C_RING_NTYPES];
     H5C_cache_entry_t *	        index[H5C__HASH_TABLE_LEN];
-    int32_t                     il_len;
+    uint32_t                    il_len;
     size_t                      il_size;
     H5C_cache_entry_t *	        il_head;
     H5C_cache_entry_t *	        il_tail;
@@ -4413,12 +4408,12 @@ struct H5C_t {
 
     /* Fields for maintaining list of in-order entries, for flushing */
     hbool_t			slist_changed;
-    int32_t                     slist_len;
+    uint32_t                    slist_len;
     size_t                      slist_size;
-    int32_t			slist_ring_len[H5C_RING_NTYPES];
+    uint32_t			slist_ring_len[H5C_RING_NTYPES];
     size_t			slist_ring_size[H5C_RING_NTYPES];
     H5SL_t *                    slist_ptr;
-    int32_t                     num_last_entries;
+    uint32_t                    num_last_entries;
 #if H5C_DO_SANITY_CHECKS
     int64_t			slist_len_increase;
     int64_t			slist_size_increase;
@@ -4429,38 +4424,38 @@ struct H5C_t {
     hbool_t                     ignore_tags;
 
     /* Fields for tracking protected entries */
-    int32_t                     pl_len;
+    uint32_t                    pl_len;
     size_t                      pl_size;
     H5C_cache_entry_t *	        pl_head_ptr;
     H5C_cache_entry_t *  	pl_tail_ptr;
 
     /* Fields for tracking pinned entries */
-    int32_t                     pel_len;
+    uint32_t                    pel_len;
     size_t                      pel_size;
     H5C_cache_entry_t *	        pel_head_ptr;
     H5C_cache_entry_t *  	pel_tail_ptr;
 
     /* Fields for complete LRU list of entries */
-    int32_t                     LRU_list_len;
+    uint32_t                    LRU_list_len;
     size_t                      LRU_list_size;
     H5C_cache_entry_t *		LRU_head_ptr;
     H5C_cache_entry_t *		LRU_tail_ptr;
 
     /* Fields for clean LRU list of entries */
-    int32_t                     cLRU_list_len;
+    uint32_t                    cLRU_list_len;
     size_t                      cLRU_list_size;
     H5C_cache_entry_t *		cLRU_head_ptr;
     H5C_cache_entry_t *		cLRU_tail_ptr;
 
     /* Fields for dirty LRU list of entries */
-    int32_t                     dLRU_list_len;
+    uint32_t                    dLRU_list_len;
     size_t                      dLRU_list_size;
     H5C_cache_entry_t *		dLRU_head_ptr;
     H5C_cache_entry_t *	        dLRU_tail_ptr;
 
 #ifdef H5_HAVE_PARALLEL
     /* Fields for collective metadata reads */
-    int32_t                     coll_list_len;
+    uint32_t                    coll_list_len;
     size_t                      coll_list_size;
     H5C_cache_entry_t *		coll_head_ptr;
     H5C_cache_entry_t *		coll_tail_ptr;
@@ -4532,21 +4527,21 @@ struct H5C_t {
     int64_t			total_successful_ht_search_depth;
     int64_t			failed_ht_searches;
     int64_t			total_failed_ht_search_depth;
-    int32_t                     max_index_len;
+    uint32_t                    max_index_len;
     size_t                      max_index_size;
     size_t                      max_clean_index_size;
     size_t                      max_dirty_index_size;
 
     /* Fields for in-order skip list */
-    int32_t                     max_slist_len;
+    uint32_t                    max_slist_len;
     size_t                      max_slist_size;
 
     /* Fields for protected entry list */
-    int32_t                     max_pl_len;
+    uint32_t                    max_pl_len;
     size_t                      max_pl_size;
 
     /* Fields for pinned entry list */
-    int32_t                     max_pel_len;
+    uint32_t                    max_pel_len;
     size_t                      max_pel_size;
 
     /* Fields for tracking 'make space in cache' (msic) operations */

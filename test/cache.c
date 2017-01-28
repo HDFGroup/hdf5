@@ -118,12 +118,12 @@ static void check_flush_cache__multi_entry(H5F_t * file_ptr);
 static void check_flush_cache__multi_entry_test(H5F_t * file_ptr,
                                           int test_num,
                                           unsigned int flush_flags,
-                                          int spec_size,
+                                          unsigned int spec_size,
                                           struct flush_cache_test_spec spec[]);
 static void check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
                                         int test_num,
                                         unsigned int flush_flags,
-                                        int spec_size,
+                                        unsigned int spec_size,
                                         struct pe_flush_cache_test_spec spec[]);
 static void check_flush_cache__single_entry(H5F_t * file_ptr);
 static void check_flush_cache__single_entry_test(H5F_t * file_ptr,
@@ -155,9 +155,9 @@ static void check_flush_cache__flush_op_test(H5F_t * file_ptr,
                                         unsigned int flush_flags,
                                         int spec_size,
                                         const struct fo_flush_cache_test_spec spec[],
-				        int init_expected_index_len,
+				        unsigned init_expected_index_len,
 				        size_t init_expected_index_size,
-				        int expected_index_len,
+				        unsigned expected_index_len,
 				        size_t expected_index_size,
 					int check_size,
                                         struct fo_flush_entry_check check[]);
@@ -3312,7 +3312,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                         = 1;
         unsigned int flush_flags             = H5C__NO_FLAGS_SET;
-        int spec_size                        = 8;
+        unsigned int spec_size               = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3406,7 +3406,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                         = 2;
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG;
-        int spec_size                        = 8;
+        unsigned int spec_size               = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3500,7 +3500,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                         = 3;
         unsigned int flush_flags             = H5C__FLUSH_CLEAR_ONLY_FLAG;
-        int spec_size                        = 8;
+        unsigned int spec_size               = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3594,7 +3594,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                         = 4;
         unsigned int flush_flags             = H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        int spec_size                        = 8;
+        unsigned int spec_size               = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3689,7 +3689,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         int test_num                         = 5;
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG |
                                                H5C__FLUSH_CLEAR_ONLY_FLAG;
-        int spec_size                        = 8;
+        unsigned int spec_size               = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3784,7 +3784,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         int test_num                         = 6;
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG |
                                                H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        int spec_size                        = 8;
+        unsigned int spec_size               = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3879,7 +3879,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         int test_num                         = 7;
         unsigned int flush_flags             = H5C__FLUSH_CLEAR_ONLY_FLAG |
                                                H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        int spec_size                        = 8;
+        unsigned int spec_size               = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3975,7 +3975,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG |
                                                H5C__FLUSH_CLEAR_ONLY_FLAG |
                                                H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        int spec_size                        = 8;
+        unsigned int spec_size               = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -4073,7 +4073,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
                                                ~(H5C__FLUSH_INVALIDATE_FLAG |
                                                 H5C__FLUSH_CLEAR_ONLY_FLAG |
                                                 H5C__FLUSH_MARKED_ENTRIES_FLAG);
-        int spec_size                        = 8;
+        unsigned int spec_size               = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -4172,7 +4172,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                            = 1;
         unsigned int flush_flags                = H5C__NO_FLAGS_SET;
-        int spec_size                           = 8;
+        unsigned int spec_size               = 8;
         struct pe_flush_cache_test_spec spec[8] =
         {
           {
@@ -4318,7 +4318,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                            = 2;
         unsigned int flush_flags                = H5C__FLUSH_INVALIDATE_FLAG;
-        int spec_size                           = 8;
+        unsigned int spec_size               = 8;
         struct pe_flush_cache_test_spec spec[8] =
         {
           {
@@ -4448,7 +4448,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         int test_num                            = 3;
         unsigned int flush_flags                = H5C__FLUSH_INVALIDATE_FLAG |
                                                   H5C__FLUSH_CLEAR_ONLY_FLAG;
-        int spec_size                           = 8;
+        unsigned int spec_size               = 8;
         struct pe_flush_cache_test_spec spec[8] =
         {
           {
@@ -4570,7 +4570,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         int test_num                            = 4;
         unsigned int flush_flags                = H5C__FLUSH_INVALIDATE_FLAG |
                                                  H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        int spec_size                           = 8;
+        unsigned int spec_size               = 8;
         struct pe_flush_cache_test_spec spec[8] =
         {
           {
@@ -4701,7 +4701,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         unsigned int flush_flags                = H5C__FLUSH_INVALIDATE_FLAG |
                                                   H5C__FLUSH_CLEAR_ONLY_FLAG |
                                                  H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        int spec_size                           = 8;
+        unsigned int spec_size               = 8;
         struct pe_flush_cache_test_spec spec[8] =
         {
           {
@@ -4845,13 +4845,13 @@ static void
 check_flush_cache__multi_entry_test(H5F_t * file_ptr,
                                     int test_num,
                                     unsigned int flush_flags,
-                                    int spec_size,
+                                    unsigned int spec_size,
                                     struct flush_cache_test_spec spec[])
 {
     H5C_t * cache_ptr = file_ptr->shared->cache;
     static char    msg[128];
     herr_t	   result;
-    int            i;
+    unsigned       u;
     size_t	   total_entry_size = 0;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -4890,43 +4890,43 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
         failure_mssg = msg;
     }
 
-    i = 0;
-    while(pass && (i < spec_size))
+    u = 0;
+    while(pass && (u < spec_size))
     {
-        if((spec[i].entry_num != i) ||
-             (spec[i].entry_type < 0) ||
-             (spec[i].entry_type >= NUMBER_OF_ENTRY_TYPES) ||
-             (spec[i].entry_index < 0) ||
-             (spec[i].entry_index > max_indices[spec[i].entry_type])) {
+        if(((unsigned)spec[u].entry_num != u) ||
+             (spec[u].entry_type < 0) ||
+             (spec[u].entry_type >= NUMBER_OF_ENTRY_TYPES) ||
+             (spec[u].entry_index < 0) ||
+             (spec[u].entry_index > max_indices[spec[u].entry_type])) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "bad data in spec[%d] on entry to multi entry test #%d.",
-                       i, test_num);
+                       "bad data in spec[%u] on entry to multi entry test #%d.",
+                       u, test_num);
             failure_mssg = msg;
         }
-        i++;
+        u++;
     }
 
-    i = 0;
-    while(pass && (i < spec_size))
+    u = 0;
+    while(pass && (u < spec_size))
     {
-        if(spec[i].insert_flag) {
+        if(spec[u].insert_flag) {
 
-            insert_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
-                    spec[i].flags);
+            insert_entry(file_ptr, spec[u].entry_type, spec[u].entry_index,
+                    spec[u].flags);
 
         } else {
 
-            protect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index);
+            protect_entry(file_ptr, spec[u].entry_type, spec[u].entry_index);
 
-            unprotect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
-                    spec[i].flags);
+            unprotect_entry(file_ptr, spec[u].entry_type, spec[u].entry_index,
+                    spec[u].flags);
         }
 
-        total_entry_size += entry_sizes[spec[i].entry_type];
+        total_entry_size += entry_sizes[spec[u].entry_type];
 
-        i++;
+        u++;
     }
 
     if(pass) {
@@ -4943,36 +4943,36 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
         }
     }
 
-    i = 0;
-    while(pass && (i < spec_size))
+    u = 0;
+    while(pass && (u < spec_size))
     {
-        base_addr = entries[spec[i].entry_type];
-        entry_ptr = &(base_addr[spec[i].entry_index]);
+        base_addr = entries[spec[u].entry_type];
+        entry_ptr = &(base_addr[spec[u].entry_index]);
 
-        if((entry_ptr->deserialized != spec[i].expected_deserialized) ||
-             (entry_ptr->serialized != spec[i].expected_serialized) ||
-             (entry_ptr->destroyed != spec[i].expected_destroyed)) {
+        if((entry_ptr->deserialized != spec[u].expected_deserialized) ||
+             (entry_ptr->serialized != spec[u].expected_serialized) ||
+             (entry_ptr->destroyed != spec[u].expected_destroyed)) {
 
 #if 0 /* This is useful debugging code.  Lets keep it around. */
 
             HDfprintf(stdout,
               "deslzd = %d(%d), slzd = %d(%d), dest = %d(%d)\n",
               (int)(entry_ptr->deserialized),
-              (int)(spec[i].expected_deserialized),
+              (int)(spec[u].expected_deserialized),
               (int)(entry_ptr->serialized),
-              (int)(spec[i].expected_serialized),
+              (int)(spec[u].expected_serialized),
               (int)(entry_ptr->destroyed),
-              (int)(spec[i].expected_destroyed));
+              (int)(spec[u].expected_destroyed));
 
 #endif
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-                "Bad status on entry %d after flush in multi entry test #%d.",
-                i, test_num);
+                "Bad status on entry %u after flush in multi entry test #%d.",
+                u, test_num);
             failure_mssg = msg;
         }
-        i++;
+        u++;
     }
 
     if(pass) {
@@ -5027,17 +5027,17 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
         }
     }
 
-    i = 0;
-    while(pass && (i < spec_size))
+    u = 0;
+    while(pass && (u < spec_size))
     {
-        base_addr = entries[spec[i].entry_type];
-        entry_ptr = &(base_addr[spec[i].entry_index]);
+        base_addr = entries[spec[u].entry_type];
+        entry_ptr = &(base_addr[spec[u].entry_index]);
 
         entry_ptr->deserialized = FALSE;
         entry_ptr->serialized   = FALSE;
         entry_ptr->destroyed    = FALSE;
 
-        i++;
+        u++;
     }
 
     return;
@@ -5064,13 +5064,13 @@ static void
 check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
                                        int test_num,
                                        unsigned int flush_flags,
-                                       int spec_size,
+                                       unsigned int spec_size,
                                        struct pe_flush_cache_test_spec spec[])
 {
     H5C_t *cache_ptr = file_ptr->shared->cache;
     static char    msg[128];
     herr_t	   result;
-    int            i;
+    unsigned       u;
     int            j;
     size_t	   total_entry_size = 0;
     test_entry_t * base_addr;
@@ -5110,54 +5110,54 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
         failure_mssg = msg;
     }
 
-    i = 0;
-    while(pass && (i < spec_size))
+    u = 0;
+    while(pass && (u < spec_size))
     {
-        if((spec[i].entry_num != i) ||
-             (spec[i].entry_type < 0) ||
-             (spec[i].entry_type >= NUMBER_OF_ENTRY_TYPES) ||
-             (spec[i].entry_index < 0) ||
-             (spec[i].entry_index > max_indices[spec[i].entry_type]) ||
-	     (spec[i].num_pins < 0) ||
-	     (spec[i].num_pins > MAX_PINS)) {
+        if(((unsigned)spec[u].entry_num != u) ||
+             (spec[u].entry_type < 0) ||
+             (spec[u].entry_type >= NUMBER_OF_ENTRY_TYPES) ||
+             (spec[u].entry_index < 0) ||
+             (spec[u].entry_index > max_indices[spec[u].entry_type]) ||
+	     (spec[u].num_pins < 0) ||
+	     (spec[u].num_pins > MAX_PINS)) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-                    "bad data in spec[%d] on entry to pe multi entry test #%d.",
-                    i, test_num);
+                    "bad data in spec[%u] on entry to pe multi entry test #%d.",
+                    u, test_num);
             failure_mssg = msg;
         }
-        i++;
+        u++;
     }
 
-    i = 0;
-    while(pass && (i < spec_size))
+    u = 0;
+    while(pass && (u < spec_size))
     {
-        if(spec[i].insert_flag) {
+        if(spec[u].insert_flag) {
 
-            insert_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
-                    spec[i].flags);
+            insert_entry(file_ptr, spec[u].entry_type, spec[u].entry_index,
+                    spec[u].flags);
 
         } else {
 
-            protect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index);
+            protect_entry(file_ptr, spec[u].entry_type, spec[u].entry_index);
 
-            unprotect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
-                    spec[i].flags);
+            unprotect_entry(file_ptr, spec[u].entry_type, spec[u].entry_index,
+                    spec[u].flags);
         }
 
-        total_entry_size += entry_sizes[spec[i].entry_type];
+        total_entry_size += entry_sizes[spec[u].entry_type];
 
-	for (j = 0; j < spec[i].num_pins; j++)
+	for (j = 0; j < spec[u].num_pins; j++)
 	{
             create_pinned_entry_dependency(file_ptr,
-		                           spec[i].entry_type,
-					   spec[i].entry_index,
-					   spec[i].pin_type[j],
-					   spec[i].pin_idx[j]);
+		                           spec[u].entry_type,
+					   spec[u].entry_index,
+					   spec[u].pin_type[j],
+					   spec[u].pin_idx[j]);
 	}
 
-        i++;
+        u++;
     }
 
     if(pass) {
@@ -5174,36 +5174,36 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
         }
     }
 
-    i = 0;
-    while(pass && (i < spec_size))
+    u = 0;
+    while(pass && (u < spec_size))
     {
-        base_addr = entries[spec[i].entry_type];
-        entry_ptr = &(base_addr[spec[i].entry_index]);
+        base_addr = entries[spec[u].entry_type];
+        entry_ptr = &(base_addr[spec[u].entry_index]);
 
-        if((entry_ptr->deserialized != spec[i].expected_deserialized) ||
-             (entry_ptr->serialized != spec[i].expected_serialized) ||
-             (entry_ptr->destroyed != spec[i].expected_destroyed)) {
+        if((entry_ptr->deserialized != spec[u].expected_deserialized) ||
+             (entry_ptr->serialized != spec[u].expected_serialized) ||
+             (entry_ptr->destroyed != spec[u].expected_destroyed)) {
 
 #if 0 /* This is useful debugging code.  Lets keep it around. */
 
             HDfprintf(stdout,
               "desrlzd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
               (int)(entry_ptr->deserialized),
-              (int)(spec[i].expected_deserialized),
+              (int)(spec[u].expected_deserialized),
               (int)(entry_ptr->serialized),
-              (int)(spec[i].expected_serialized),
+              (int)(spec[u].expected_serialized),
               (int)(entry_ptr->destroyed),
-              (int)(spec[i].expected_destroyed));
+              (int)(spec[u].expected_destroyed));
 
 #endif
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-               "Bad status on entry %d after flush in pe multi entry test #%d.",
-               i, test_num);
+               "Bad status on entry %u after flush in pe multi entry test #%d.",
+               u, test_num);
             failure_mssg = msg;
         }
-        i++;
+        u++;
     }
 
     if(pass) {
@@ -5258,17 +5258,17 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
         }
     }
 
-    i = 0;
-    while(pass && (i < spec_size))
+    u = 0;
+    while(pass && (u < spec_size))
     {
-        base_addr = entries[spec[i].entry_type];
-        entry_ptr = &(base_addr[spec[i].entry_index]);
+        base_addr = entries[spec[u].entry_type];
+        entry_ptr = &(base_addr[spec[u].entry_index]);
 
         entry_ptr->deserialized = FALSE;
         entry_ptr->serialized   = FALSE;
         entry_ptr->destroyed    = FALSE;
 
-        i++;
+        u++;
     }
 
     return;
@@ -5323,9 +5323,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 1;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 2;
-	int init_expected_index_len	= 2;
+	unsigned init_expected_index_len	= 2;
 	size_t init_expected_index_size	= 2 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 2;
+	unsigned expected_index_len		= 2;
 	size_t expected_index_size	= 2 * PICO_ENTRY_SIZE;
 	struct fo_flush_cache_test_spec spec[2] =
 	{
@@ -5430,9 +5430,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 2;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 2;
-	int init_expected_index_len	= 2;
+	unsigned init_expected_index_len	= 2;
 	size_t init_expected_index_size	= 2 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 0;
+	unsigned expected_index_len		= 0;
 	size_t expected_index_size	= 0;
 	struct fo_flush_cache_test_spec spec[2] =
 	{
@@ -5534,9 +5534,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 3;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
-	int expected_index_len		= 1;
+	unsigned expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -5612,9 +5612,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 4;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
-	int expected_index_len		= 0;
+	unsigned expected_index_len		= 0;
 	size_t expected_index_size	= 0;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -5697,9 +5697,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 5; /* and 6 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 1;
+	unsigned expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -5814,9 +5814,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 7; /* and 8 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 1;
+	unsigned expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -5927,9 +5927,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 9; /* and 10 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
-	int expected_index_len		= 1;
+	unsigned expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -6038,9 +6038,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 11; /* and 12 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
-	int expected_index_len		= 1;
+	unsigned expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -6152,9 +6152,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 13;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 3;
+	unsigned expected_index_len		= 3;
 	size_t expected_index_size	= 3 * PICO_ENTRY_SIZE;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -6248,9 +6248,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 14;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 0;
+	unsigned expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -6341,9 +6341,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 15;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 3;
+	unsigned expected_index_len		= 3;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2);
@@ -6438,9 +6438,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 16;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 0;
+	unsigned expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -6531,9 +6531,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 17; /* and 18 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 3;
+	unsigned expected_index_len		= 3;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2);
@@ -6658,9 +6658,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 19; /* and 20 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	int init_expected_index_len	= 1;
+	unsigned init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 3;
+	unsigned expected_index_len		= 3;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2);
@@ -6796,9 +6796,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 21;
 	unsigned int flush_flags	= H5C__FLUSH_MARKED_ENTRIES_FLAG;
 	int spec_size			= 4;
-	int init_expected_index_len	= 4;
+	unsigned init_expected_index_len	= 4;
 	size_t init_expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) + (2 * PICO_ENTRY_SIZE);
-	int expected_index_len		= 6;
+	unsigned expected_index_len		= 6;
 	size_t expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) +
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2) +
@@ -7007,9 +7007,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 22;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 6;
-	int init_expected_index_len	= 6;
+	unsigned init_expected_index_len	= 6;
 	size_t init_expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
-	int expected_index_len		= 10;
+	unsigned expected_index_len		= 10;
 	size_t expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) +
 		                          (2 * (VARIABLE_ENTRY_SIZE / 4)) +
 					  (2 * (VARIABLE_ENTRY_SIZE / 2)) +
@@ -7276,9 +7276,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 23;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 6;
-	int init_expected_index_len	= 6;
+	unsigned init_expected_index_len	= 6;
 	size_t init_expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
-	int expected_index_len		= 0;
+	unsigned expected_index_len		= 0;
 	size_t expected_index_size	= 0;
 	struct fo_flush_cache_test_spec spec[6] =
 	{
@@ -7538,9 +7538,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 24;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 3;
-	int init_expected_index_len	= 3;
+	unsigned init_expected_index_len	= 3;
 	size_t init_expected_index_size	= 3 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 3;
+	unsigned expected_index_len		= 3;
 	size_t expected_index_size	= 3 * PICO_ENTRY_SIZE;
 	struct fo_flush_cache_test_spec spec[3] =
 	{
@@ -7671,9 +7671,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 25;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 3;
-	int init_expected_index_len	= 3;
+	unsigned init_expected_index_len	= 3;
 	size_t init_expected_index_size	= 3 * PICO_ENTRY_SIZE;
-	int expected_index_len		= 0;
+	unsigned expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
 	struct fo_flush_cache_test_spec spec[3] =
 	{
@@ -7874,9 +7874,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 26;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 10;
-	int init_expected_index_len	= 10;
+	unsigned init_expected_index_len	= 10;
 	size_t init_expected_index_size	= 10 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 13;
+	unsigned expected_index_len		= 13;
 	size_t expected_index_size	= 9 * VARIABLE_ENTRY_SIZE;
 	struct fo_flush_cache_test_spec spec[10] =
 	{
@@ -8308,9 +8308,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 27;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 10;
-	int init_expected_index_len	= 10;
+	unsigned init_expected_index_len	= 10;
 	size_t init_expected_index_size	= 10 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 0;
+	unsigned expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
 	struct fo_flush_cache_test_spec spec[10] =
 	{
@@ -8667,9 +8667,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 28;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 5;
-	int init_expected_index_len	= 5;
+	unsigned init_expected_index_len	= 5;
 	size_t init_expected_index_size	= 3 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 5;
+	unsigned expected_index_len		= 5;
 	size_t expected_index_size	= 4 * VARIABLE_ENTRY_SIZE;
 	struct fo_flush_cache_test_spec spec[5] =
 	{
@@ -8859,9 +8859,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 29;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 5;
-	int init_expected_index_len	= 5;
+	unsigned init_expected_index_len	= 5;
 	size_t init_expected_index_size	= 3 * VARIABLE_ENTRY_SIZE;
-	int expected_index_len		= 0;
+	unsigned expected_index_len		= 0;
 	size_t expected_index_size	= 0;
 	struct fo_flush_cache_test_spec spec[5] =
 	{
@@ -9070,9 +9070,9 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
                                  unsigned int flush_flags,
                                  int spec_size,
                                  const struct fo_flush_cache_test_spec spec[],
-				 int init_expected_index_len,
+				 unsigned init_expected_index_len,
 				 size_t init_expected_index_size,
-				 int expected_index_len,
+				 unsigned expected_index_len,
 				 size_t expected_index_size,
 				 int check_size,
 				 struct fo_flush_entry_check check[])
@@ -27433,7 +27433,7 @@ check_auto_cache_resize_aux_fcns(void)
     size_t max_size;
     size_t min_clean_size;
     size_t cur_size;
-    int32_t cur_num_entries;
+    uint32_t cur_num_entries;
     H5C_auto_size_ctl_t auto_size_ctl =
     {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,

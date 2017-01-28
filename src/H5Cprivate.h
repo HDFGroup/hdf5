@@ -1772,7 +1772,7 @@ H5_DLL herr_t H5C_get_cache_auto_resize_config(const H5C_t *cache_ptr,
     H5C_auto_size_ctl_t *config_ptr);
 H5_DLL herr_t H5C_get_cache_size(H5C_t *cache_ptr, size_t *max_size_ptr,
     size_t *min_clean_size_ptr, size_t *cur_size_ptr,
-    int32_t *cur_num_entries_ptr);
+    uint32_t *cur_num_entries_ptr);
 H5_DLL herr_t H5C_get_cache_hit_rate(H5C_t *cache_ptr, double *hit_rate_ptr);
 H5_DLL herr_t H5C_get_entry_status(const H5F_t *f, haddr_t addr,
     size_t *size_ptr, hbool_t *in_cache_ptr, hbool_t *is_dirty_ptr,

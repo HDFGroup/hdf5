@@ -1177,7 +1177,7 @@ H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
     size_t *cur_size_ptr, int *cur_num_entries_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
-    int32_t    cur_num_entries;
+    uint32_t   cur_num_entries;
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)

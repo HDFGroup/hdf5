@@ -6128,7 +6128,7 @@ check_and_validate_cache_size(hid_t file_id,
     size_t min_clean_size;
     size_t expected_cur_size;
     size_t cur_size;
-    int32_t expected_cur_num_entries;
+    uint32_t expected_cur_num_entries;
     int cur_num_entries;
     H5F_t * file_ptr = NULL;
     H5C_t * cache_ptr = NULL;

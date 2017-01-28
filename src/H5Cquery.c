@@ -131,7 +131,7 @@ H5C_get_cache_size(H5C_t * cache_ptr,
                    size_t * max_size_ptr,
                    size_t * min_clean_size_ptr,
                    size_t * cur_size_ptr,
-                   int32_t * cur_num_entries_ptr)
+                   uint32_t * cur_num_entries_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
