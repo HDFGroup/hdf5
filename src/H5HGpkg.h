@@ -40,9 +40,6 @@
 /* Package Private Variables */
 /*****************************/
 
-/* The cache subclass */
-H5_DLLVAR const H5AC_class_t H5AC_GHEAP[1];
-
 /* Declare extern the free list to manage the H5HG_t struct */
 H5FL_EXTERN(H5HG_heap_t);
 

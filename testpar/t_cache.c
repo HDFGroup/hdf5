@@ -410,7 +410,8 @@ static herr_t datum_notify(H5C_notify_action_t action, void *thing);
 
 static herr_t datum_free_icr(void * thing);
 
-#define DATUM_ENTRY_TYPE	H5AC_TEST_ID
+/* Masquerade as object header entries to the cache */
+#define DATUM_ENTRY_TYPE	H5AC_OHDR_ID
 
 #define NUMBER_OF_ENTRY_TYPES	1
 
@@ -434,7 +435,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
   {
     /* id            */ DATUM_ENTRY_TYPE,
     /* name          */ "datum",
-    /* mem_type      */ H5FD_MEM_DEFAULT,
+    /* mem_type      */ H5FD_MEM_OHDR,
     /* flags         */ H5AC__CLASS_SKIP_READS | H5AC__CLASS_SKIP_WRITES,
     /* get_initial_load_size */ datum_get_initial_load_size,
     /* get_final_load_size */ NULL,

@@ -596,23 +596,6 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
  * H5C__UPDATE_CACHE_HIT_RATE_STATS(), which is always active as
  * the cache hit rate stats are always collected and available.
  *
- * Changes:
- *
- * 	JRM -- 3/21/06
- * 	Added / updated macros for pinned entry related stats.
- *
- * 	JRM -- 8/9/06
- * 	More pinned entry stats related updates.
- *
- * 	JRM -- 3/31/07
- * 	Updated H5C__UPDATE_STATS_FOR_PROTECT() to keep stats on
- * 	read and write protects.
- *
- *      MAM -- 1/15/09
- *      Created H5C__UPDATE_MAX_INDEX_SIZE_STATS to contain
- *      common code within macros that update the maximum
- *      index, clean_index, and dirty_index statistics fields.
- *
  ***********************************************************************/
 
 #define H5C__UPDATE_CACHE_HIT_RATE_STATS(cache_ptr, hit) \
@@ -3428,10 +3411,8 @@ typedef struct H5C_tag_info_t {
  *		types are stored in the type_name_table discussed below, and
  *		indexed by the ids.
  *
- * type_name_table_ptr: Pointer to an array of pointer to char of length
- *              max_type_id + 1.  The strings pointed to by the entries
- *              in the array are the names of the entry types associated
- *              with the indexing type IDs.
+ * class_table_ptr: Pointer to an array of H5C_class_t of length
+ *              max_type_id + 1.  Entry classes for the cache.
  *
  * max_cache_size:  Nominal maximum number of bytes that may be stored in the
  *              cache.  This value should be viewed as a soft limit, as the
@@ -4377,7 +4358,7 @@ struct H5C_t {
     FILE *			log_file_ptr;
     void *			aux_ptr;
     int32_t			max_type_id;
-    const char *                (* type_name_table_ptr);
+    const H5C_class_t * const   *class_table_ptr;
     size_t                      max_cache_size;
     size_t                      min_clean_size;
     H5C_write_permitted_func_t	check_write_permitted;
@@ -4577,9 +4558,6 @@ typedef int (*H5C_tag_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
 /*****************************/
 /* Package Private Variables */
 /*****************************/
-
-/* Metadata cache epoch class */
-H5_DLLVAR const H5C_class_t H5C__epoch_marker_class;
 
 
 /******************************/

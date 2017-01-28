@@ -559,15 +559,6 @@ typedef struct H5HF_dblock_cache_ud_t {
 /* Package Private Variables */
 /*****************************/
 
-/* H5HF header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FHEAP_HDR[1];
-
-/* H5HF indirect block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FHEAP_IBLOCK[1];
-
-/* H5HF direct block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FHEAP_DBLOCK[1];
-
 /* The v2 B-tree class for tracking indirectly accessed 'huge' objects */
 H5_DLLVAR const H5B2_class_t H5HF_HUGE_BT2_INDIR[1];
 

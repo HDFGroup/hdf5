@@ -16093,7 +16093,7 @@ check_duplicate_insert_err(void)
             entry_ptr = &(base_addr[0]);
 
             result = H5C_insert_entry(file_ptr, H5AC_ind_read_dxpl_id,
-                                      &(types[0]), entry_ptr->addr,
+                                      types[0], entry_ptr->addr,
                                       (void *)entry_ptr, H5C__NO_FLAGS_SET);
 
             if(result >= 0) {
@@ -16461,7 +16461,7 @@ check_double_protect_err(void)
     if(pass) {
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
-			               &(types[0]), entry_ptr->addr,
+			               types[0], entry_ptr->addr,
 				       &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(cache_entry_ptr != NULL) {
@@ -16705,7 +16705,7 @@ check_expunge_entry_errs(void)
     if(pass) {
 
 	result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
-                &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
+                types[0], entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(result > 0) {
 
@@ -16723,7 +16723,7 @@ check_expunge_entry_errs(void)
     if(pass) {
 
 	result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
-                &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
+                types[0], entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(result > 0) {
 
@@ -16741,7 +16741,7 @@ check_expunge_entry_errs(void)
     if(pass) {
 
 	result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
-                &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
+                types[0], entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(result < 0) {
 
@@ -16823,7 +16823,7 @@ check_move_entry_errs(void)
 
     if(pass) {
 
-        result = H5C_move_entry(cache_ptr, &(types[0]),
+        result = H5C_move_entry(cache_ptr, types[0],
                                   entry_0_0_ptr->addr, entry_0_1_ptr->addr);
 
         if(result >= 0) {
@@ -16835,7 +16835,7 @@ check_move_entry_errs(void)
 
     if(pass) {
 
-        result = H5C_move_entry(cache_ptr, &(types[0]),
+        result = H5C_move_entry(cache_ptr, types[0],
                                   entry_0_0_ptr->addr, entry_1_0_ptr->addr);
 
         if(result >= 0) {
@@ -16874,7 +16874,7 @@ check_move_entry_errs(void)
 
     if(pass) {
 
-	result = H5C_move_entry(cache_ptr, &(types[0]), entry_ptr->header.addr, entry_ptr->header.addr + 10);
+	result = H5C_move_entry(cache_ptr, types[0], entry_ptr->header.addr, entry_ptr->header.addr + 10);
 
         if(result >= 0) {
 
@@ -17179,7 +17179,7 @@ check_protect_ro_rw_err(void)
     if(pass) {
 
         thing_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
-			         &(types[0]), entry_ptr->addr,
+			         types[0], entry_ptr->addr,
 				 &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(thing_ptr != NULL) {
@@ -17272,13 +17272,13 @@ check_protect_retries(void)
         entry_ptr->verify_ct = 0;
 
 	cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
-                &(types[type]), entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
+                types[type], entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
 
 	if((cache_entry_ptr != (void *)entry_ptr) ||
              (!(entry_ptr->header.is_protected)) ||
              (!(entry_ptr->header.is_read_only)) ||
              (entry_ptr->header.ro_ref_count <= 0) ||
-             (entry_ptr->header.type != &(types[type])) ||
+             (entry_ptr->header.type != types[type]) ||
              (entry_ptr->size != entry_ptr->header.size) ||
              (entry_ptr->addr != entry_ptr->header.addr) ||
 	     (entry_ptr->verify_ct != entry_ptr->max_verify_ct))  {
@@ -17317,7 +17317,7 @@ check_protect_retries(void)
         entry_ptr->verify_ct = 0;
 
 	cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
-                &(types[type]), entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
+                types[type], entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
 
 	/* H5C_protect() should fail after all retries fail */
 	if(cache_entry_ptr != NULL)

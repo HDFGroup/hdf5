@@ -369,9 +369,6 @@ H5FL_EXTERN(H5F_t);
 /* Declare a free list to manage the H5F_file_t struct */
 H5FL_EXTERN(H5F_file_t);
 
-H5_DLLVAR const H5AC_class_t H5AC_SUPERBLOCK[1];
-H5_DLLVAR const H5AC_class_t H5AC_DRVRINFO[1];
-
 
 /******************************/
 /* Package Private Prototypes */

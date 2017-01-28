@@ -88,7 +88,6 @@ typedef enum {
     H5AC_DRVRINFO_ID,           /* (26) driver info block (supplements superblock)  */
     H5AC_EPOCH_MARKER_ID,       /* (27) epoch marker - always internal to cache     */
     H5AC_PROXY_ENTRY_ID,        /* (28) cache entry proxy                           */
-    H5AC_TEST_ID,               /* (29) test entry -- not used for actual files     */
     H5AC_NTYPES                 /* Number of types, must be last                    */
 } H5AC_type_t;
 
@@ -358,6 +357,37 @@ H5_DLLVAR hid_t H5AC_rawdata_dxpl_id;
 #define H5AC_ES__IS_FLUSH_DEP_CHILD     0x0020
 #define H5AC_ES__IS_CORKED              0x0040
 #define H5AC_ES__IMAGE_IS_UP_TO_DATE    0x0080
+
+/* Metadata entry class declarations */
+H5_DLLVAR const H5AC_class_t H5AC_BT[1];
+H5_DLLVAR const H5AC_class_t H5AC_SNODE[1];
+H5_DLLVAR const H5AC_class_t H5AC_LHEAP_PRFX[1];
+H5_DLLVAR const H5AC_class_t H5AC_LHEAP_DBLK[1];
+H5_DLLVAR const H5AC_class_t H5AC_GHEAP[1];
+H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_OHDR_CHK[1];
+H5_DLLVAR const H5AC_class_t H5AC_BT2_HDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_BT2_INT[1];
+H5_DLLVAR const H5AC_class_t H5AC_BT2_LEAF[1];
+H5_DLLVAR const H5AC_class_t H5AC_FHEAP_HDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_FHEAP_DBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_FHEAP_IBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_FSPACE_HDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_FSPACE_SINFO[1];
+H5_DLLVAR const H5AC_class_t H5AC_SOHM_TABLE[1];
+H5_DLLVAR const H5AC_class_t H5AC_SOHM_LIST[1];
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_HDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_IBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_SBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_DBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1];
+H5_DLLVAR const H5AC_class_t H5AC_FARRAY_HDR[1];
+H5_DLLVAR const H5AC_class_t H5AC_FARRAY_DBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1];
+H5_DLLVAR const H5AC_class_t H5AC_SUPERBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_DRVRINFO[1];
+H5_DLLVAR const H5AC_class_t H5AC_EPOCH_MARKER[1];
+H5_DLLVAR const H5AC_class_t H5AC_PROXY_ENTRY[1];
 
 
 /* external function declarations: */

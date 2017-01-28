@@ -243,7 +243,7 @@ H5C_t *
 H5C_create(size_t		      max_cache_size,
            size_t		      min_clean_size,
            int			      max_type_id,
-           const char *		      (* type_name_table_ptr),
+           const H5C_class_t * const * class_table_ptr,
            H5C_write_permitted_func_t check_write_permitted,
            hbool_t		      write_permitted,
            H5C_log_flush_func_t       log_flush,
@@ -261,11 +261,11 @@ H5C_create(size_t		      max_cache_size,
 
     HDassert( max_type_id >= 0 );
     HDassert( max_type_id < H5C__MAX_NUM_TYPE_IDS );
-    HDassert( type_name_table_ptr );
+    HDassert( class_table_ptr );
 
     for ( i = 0; i <= max_type_id; i++ ) {
-        HDassert( (type_name_table_ptr)[i] );
-        HDassert( HDstrlen(( type_name_table_ptr)[i]) > 0 );
+        HDassert( (class_table_ptr)[i] );
+        HDassert(HDstrlen((class_table_ptr)[i]->name) > 0);
     } /* end for */
 
     if(NULL == (cache_ptr = H5FL_CALLOC(H5C_t)))
@@ -297,7 +297,7 @@ H5C_create(size_t		      max_cache_size,
 
     cache_ptr->max_type_id			= max_type_id;
 
-    cache_ptr->type_name_table_ptr		= type_name_table_ptr;
+    cache_ptr->class_table_ptr			= class_table_ptr;
 
     cache_ptr->max_cache_size			= max_cache_size;
     cache_ptr->min_clean_size			= min_clean_size;
@@ -434,7 +434,7 @@ H5C_create(size_t		      max_cache_size,
         ((cache_ptr->epoch_markers)[i]).magic		 =
 					       H5C__H5C_CACHE_ENTRY_T_MAGIC;
         ((cache_ptr->epoch_markers)[i]).addr		 = (haddr_t)i;
-        ((cache_ptr->epoch_markers)[i]).type		 = &H5C__epoch_marker_class;
+        ((cache_ptr->epoch_markers)[i]).type		 = H5AC_EPOCH_MARKER;
     }
 
     cache_ptr->entries_loaded_counter		= 0;
@@ -2303,32 +2303,6 @@ done:
  *              Failure:        NULL
  *
  * Programmer:  John Mainzer -  6/2/04
- *
- * 		JRM -- 11/13/08
- * 		Modified function to call H5C_make_space_in_cache() when
- * 		the min_clean_size is violated, not just when there isn't
- * 		enough space for and entry that has just been loaded.
- *
- *              The purpose of this modification is to avoid "metadata
- *              blizzards" in the write only case.  In such instances,
- *              the cache was allowed to fill with dirty metadata.  When
- *              we finally needed to evict an entry to make space, we had
- *              to flush out a whole cache full of metadata -- which has
- *              interesting performance effects.  We hope to avoid (or
- *              perhaps more accurately hide) this effect by maintaining
- *              the min_clean_size, which should force us to start flushing
- *              entries long before we actually have to evict something
- *              to make space.
- *
- *		JRM -- 9/1/14
- *		Replace the old rw parameter with the flags parameter.
- *		This allows H5C_protect to accept flags other than 
- *		H5C__READ_ONLY_FLAG.  
- *
- *		Added support for the H5C__FLUSH_LAST_FLAG.
- *		At present, this flag is only applied if the entry is 
- *              not in cache, and is loaded into the cache as a result of 
- *              this call.
  *
  *-------------------------------------------------------------------------
  */
@@ -6145,34 +6119,6 @@ done:
  *
  * Programmer:  John Mainzer, 5/5/04
  *
- * Changes:	Refactored function to remove the type_ptr parameter.
- *
- *						JRM -- 8/7/14
- *
- *              Added code to check for slist changes in pre_serialize and
- *              serialize calls, and set 
- *              cache_ptr->slist_change_in_pre_serialize and 
- *		cache_ptr->slist_change_in_serialize as appropriate.
- *
- *                                              JRM -- 12/13/14
- *
- *		Refactored function to delay all modifications of the 
- *		metadata cache data structures until after any calls 
- *		to the pre-serialize or serialize callbacks.
- *
- *		Need to do this, as some pre-serialize or serialize 
- *		calls result in calls to the metadata cache and 
- *		modifications to its data structures.  Thus, at the
- *		time of any such call, the target entry flags and 
- *		the metadata cache must all be consistant.
- *
- *		Also added the entry_size_change_ptr parameter, which 
- *              allows the function to report back any change in the size 
- *		of the entry during the flush.  Such size changes may 
- *		occur during the pre-serialize callback.
- *
- *						JRM -- 12/24/14
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7023,11 +6969,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-H5C_make_space_in_cache(H5F_t *	f,
-                        hid_t	dxpl_id,
-		        size_t	space_needed,
-                        hbool_t	write_permitted)
+herr_t
+H5C_make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
+    hbool_t	write_permitted)
 {
     H5C_t *		cache_ptr = f->shared->cache;
 #if H5C_COLLECT_CACHE_STATS
@@ -7043,16 +6987,16 @@ H5C_make_space_in_cache(H5F_t *	f,
     H5C_cache_entry_t *	entry_ptr;
     H5C_cache_entry_t *	prev_ptr;
     H5C_cache_entry_t *	next_ptr;
-    int32_t 		num_corked_entries = 0;
+    uint32_t 		num_corked_entries = 0;
     herr_t		ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert( f );
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
-    HDassert( cache_ptr->index_size ==
-	      (cache_ptr->clean_index_size + cache_ptr->dirty_index_size) );
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->index_size == (cache_ptr->clean_index_size + cache_ptr->dirty_index_size));
 
     if ( write_permitted ) {
 

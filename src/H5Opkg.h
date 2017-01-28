@@ -419,12 +419,6 @@ typedef struct H5O_chk_cache_ud_t {
 } H5O_chk_cache_ud_t;
 
 
-/* H5O object header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_OHDR[1];
-
-/* H5O object header chunk inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_OHDR_CHK[1];
-
 /* Header message ID to class mapping */
 H5_DLLVAR const H5O_msg_class_t *const H5O_msg_class_g[H5O_MSG_TYPES];
 

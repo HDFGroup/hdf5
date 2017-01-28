@@ -673,7 +673,7 @@ H5C_stats(H5C_t * cache_ptr,
 
             HDfprintf(stdout, "%s  Stats on %s:\n",
                       cache_ptr->prefix,
-                      ((cache_ptr->type_name_table_ptr))[i]);
+                      ((cache_ptr->class_table_ptr))[i]->name);
 
             if((cache_ptr->hits[i] > 0) || (cache_ptr->misses[i] > 0))
                 hit_rate = (double)100.0f * ((double)(cache_ptr->hits[i])) /
