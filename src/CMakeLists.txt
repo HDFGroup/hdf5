@@ -90,8 +90,10 @@ set (H5C_SOURCES
     ${HDF5_SRC_DIR}/H5C.c
     ${HDF5_SRC_DIR}/H5Cdbg.c
     ${HDF5_SRC_DIR}/H5Cepoch.c
+    ${HDF5_SRC_DIR}/H5Cimage.c
     ${HDF5_SRC_DIR}/H5Clog.c
     ${HDF5_SRC_DIR}/H5Cmpio.c
+    ${HDF5_SRC_DIR}/H5Cprefetched.c
     ${HDF5_SRC_DIR}/H5Cquery.c
     ${HDF5_SRC_DIR}/H5Ctag.c
     ${HDF5_SRC_DIR}/H5Ctest.c
@@ -439,6 +441,7 @@ set (H5O_SOURCES
     ${HDF5_SRC_DIR}/H5Obogus.c
     ${HDF5_SRC_DIR}/H5Obtreek.c
     ${HDF5_SRC_DIR}/H5Ocache.c
+    ${HDF5_SRC_DIR}/H5Ocache_image.c
     ${HDF5_SRC_DIR}/H5Ochunk.c
     ${HDF5_SRC_DIR}/H5Ocont.c
     ${HDF5_SRC_DIR}/H5Ocopy.c

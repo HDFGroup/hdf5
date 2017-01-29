@@ -1489,7 +1489,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
             fsinfo.fs_addr[type-1] = HADDR_UNDEF;
         fsinfo.strategy = f->shared->fs_strategy;
         fsinfo.threshold = f->shared->fs_threshold;
-        if(H5F_super_ext_write_msg(f, dxpl_id, H5O_FSINFO_ID, &fsinfo, TRUE) < 0)
+        if(H5F_super_ext_write_msg(f, dxpl_id, H5O_FSINFO_ID, &fsinfo, TRUE, H5O_MSG_NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension")
 
 
@@ -2113,7 +2113,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
 	fsinfo.threshold = f->shared->fs_threshold;
 
         /* Write the free space manager message -- message must already exist */
-        if(H5F_super_ext_write_msg(f, dxpl_id, H5O_FSINFO_ID, &fsinfo, FALSE) < 0)
+        if(H5F_super_ext_write_msg(f, dxpl_id, H5O_FSINFO_ID, &fsinfo, FALSE, H5O_MSG_NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension")
 
 	/* Final close of free-space managers */

@@ -34580,7 +34580,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t * file_ptr)
 /*-------------------------------------------------------------------------
  * Function:	cedds__H5C_make_space_in_cache()
  *
- * Purpose:	Verify that H5C_make_space_in_cache() can handle the 
+ * Purpose:	Verify that H5C__make_space_in_cache() can handle the 
  *		removal from the cache of the next item in its reverse scan
  *		of the LRU list.  
  *
@@ -34590,7 +34590,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t * file_ptr)
  *		load an additional entry, triggering the flush of the last
  *		item, and thereby the deletion of the second to last item.
  *
- *		H5C_make_space_in_cache() should detect this deletion, and 
+ *		H5C__make_space_in_cache() should detect this deletion, and 
  *		restart its scan of the LRU from the tail, instead of 
  *		examining the now deleted next item up on the LRU.
  *
@@ -34668,7 +34668,7 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
          if(cache_ptr == NULL) {
 
             pass = FALSE;
-            failure_mssg = "cache_ptr NULL on entry to cedds for H5C_make_space_in_cache() test.";
+            failure_mssg = "cache_ptr NULL on entry to cedds for H5C__make_space_in_cache() test.";
         }
         else if((cache_ptr->index_len != 0) ||
                   (cache_ptr->index_size != 0)) {
@@ -34808,7 +34808,7 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
          * and HET 0, 2, and 3 will be evicted to make room for the new 
          * monster entry (MET, 31).
          *
-         * Verify this.  If H5C_make_space_in_cache() chokes, failure will
+         * Verify this.  If H5C__make_space_in_cache() chokes, failure will
          * be detected in protect_entry().  Thus end the "if(pass)" clause
          * there so the error message will not be overwritten.
          */
@@ -34971,7 +34971,7 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
  *		access the first item in the LRU repeatedly until the 
  *		item, and thereby the deletion of the second to last item.
  *
- *		H5C_make_space_in_cache() should detect this deletion, and 
+ *		H5C__make_space_in_cache() should detect this deletion, and 
  *		restart its scan of the LRU from the tail, instead of 
  *		examining the now deleted next item up on the LRU.
  *

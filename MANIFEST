@@ -504,10 +504,12 @@
 ./src/H5C.c
 ./src/H5Cdbg.c
 ./src/H5Cepoch.c
+./src/H5Cimage.c
 ./src/H5Clog.c
 ./src/H5Cmodule.h
 ./src/H5Cmpio.c
 ./src/H5Cpkg.h
+./src/H5Cprefetched.c
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h
 ./src/H5Cquery.c
@@ -737,6 +739,7 @@
 ./src/H5Obogus.c
 ./src/H5Obtreek.c
 ./src/H5Ocache.c
+./src/H5Ocache_image.c
 ./src/H5Ochunk.c
 ./src/H5Ocont.c
 ./src/H5Ocopy.c
@@ -901,6 +904,7 @@
 ./test/cache_api.c
 ./test/cache_common.c
 ./test/cache_common.h
+./test/cache_image.c
 ./test/cache_logging.c
 ./test/cache_tagging.c
 ./test/cmpd_dset.c
@@ -946,6 +950,8 @@
 ./test/flush1.c
 ./test/flush2.c
 ./test/flushrefresh.c
+./test/genall5.c
+./test/genall5.h
 ./test/gen_bad_ohdr.c
 ./test/gen_bad_compound.c
 ./test/gen_bogus.c
