@@ -20,11 +20,13 @@ set (TEST_LIB_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/h5test.c
     ${HDF5_TEST_SOURCE_DIR}/testframe.c
     ${HDF5_TEST_SOURCE_DIR}/cache_common.c
+    ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
 )
 
 set (TEST_LIB_HEADERS
     ${HDF5_TEST_SOURCE_DIR}/h5test.h
     ${HDF5_TEST_SOURCE_DIR}/cache_common.h
+    ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
 )
 
 add_library (${HDF5_TEST_LIB_TARGET} STATIC ${TEST_LIB_SOURCES} ${TEST_LIB_HEADERS})
@@ -223,6 +225,7 @@ set (H5_TESTS
     objcopy
     links
     unlink
+    twriteorder
     big
     mtime
     fillval
@@ -256,12 +259,31 @@ foreach (test ${H5_TESTS})
 endforeach ()
 
 set (H5_SWMR_TESTS
+    swmr_addrem_writer
     swmr_check_compat_vfd
+    swmr_generator
+    swmr_reader
+    swmr_remove_reader
+    swmr_remove_writer
+    swmr_sparse_reader
+    swmr_sparse_writer
+    swmr_start_write
+    swmr_writer
 )
 
 foreach (test ${H5_SWMR_TESTS})
   ADD_H5_EXE(${test})
 endforeach ()
+
+set (H5_VDS_SWMR_TESTS
+    vds_swmr_gen
+    vds_swmr_reader
+    vds_swmr_writer
+)
+
+foreach (test ${H5_VDS_SWMR_TESTS})
+  ADD_H5_EXE(${test})
+endforeach (test ${H5_VDS_SWMR_TESTS})
 
 ##############################################################################
 ##############################################################################
@@ -348,6 +370,8 @@ set (H5_CHECK_TESTS
     err_compat
     tcheck_version
     testmeta
+    atomic_writer
+    atomic_reader
     links_env
     flushrefresh
 )
@@ -398,6 +422,51 @@ else ()
   TARGET_C_PROPERTIES (plugin STATIC " " " ")
   target_link_libraries (plugin ${HDF5_TEST_LIB_TARGET})
   set_target_properties (plugin PROPERTIES FOLDER test)
+endif ()
+
+##############################################################################
+###    U S E  C A S E S  T E S T S
+##############################################################################
+set (use_append_chunk_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_append_chunk.c ${HDF5_TEST_SOURCE_DIR}/use_common.c)
+add_executable (use_append_chunk ${use_append_chunk_SOURCES})
+TARGET_NAMING (use_append_chunk STATIC)
+TARGET_C_PROPERTIES (use_append_chunk STATIC " " " ")
+target_link_libraries (use_append_chunk ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (use_append_chunk PROPERTIES FOLDER test)
+if (BUILD_SHARED_LIBS)
+  add_executable (use_append_chunk-shared ${use_append_chunk_SOURCES})
+  TARGET_NAMING (use_append_chunk-shared SHARED)
+  TARGET_C_PROPERTIES (use_append_chunk-shared SHARED " " " ")
+  target_link_libraries (use_append_chunk-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (use_append_chunk-shared PROPERTIES FOLDER test)
+endif ()
+
+set (use_append_mchunks_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_append_mchunks.c ${HDF5_TEST_SOURCE_DIR}/use_common.c)
+add_executable (use_append_mchunks ${use_append_mchunks_SOURCES})
+TARGET_NAMING (use_append_mchunks STATIC)
+TARGET_C_PROPERTIES (use_append_mchunks STATIC " " " ")
+target_link_libraries (use_append_mchunks ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (use_append_mchunks PROPERTIES FOLDER test)
+if (BUILD_SHARED_LIBS)
+  add_executable (use_append_mchunks-shared ${use_append_mchunks_SOURCES})
+  TARGET_NAMING (use_append_mchunks-shared SHARED)
+  TARGET_C_PROPERTIES (use_append_mchunks-shared SHARED " " " ")
+  target_link_libraries (use_append_mchunks-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (use_append_mchunks-shared PROPERTIES FOLDER test)
+endif ()
+
+set (use_disable_mdc_flushes_SOURCES ${HDF5_TEST_SOURCE_DIR}/use_disable_mdc_flushes.c)
+add_executable (use_disable_mdc_flushes ${use_disable_mdc_flushes_SOURCES})
+TARGET_NAMING (use_disable_mdc_flushes STATIC)
+TARGET_C_PROPERTIES (use_disable_mdc_flushes STATIC " " " ")
+target_link_libraries (use_disable_mdc_flushes ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
+set_target_properties (use_disable_mdc_flushes PROPERTIES FOLDER test)
+if (BUILD_SHARED_LIBS)
+  add_executable (use_disable_mdc_flushes-shared ${use_disable_mdc_flushes_SOURCES})
+  TARGET_NAMING (use_disable_mdc_flushes-shared SHARED)
+  TARGET_C_PROPERTIES (use_disable_mdc_flushes-shared SHARED " " " ")
+  target_link_libraries (use_disable_mdc_flushes-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (use_disable_mdc_flushes-shared PROPERTIES FOLDER test)
 endif ()
 
 include (CMakeTests.cmake)

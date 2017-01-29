@@ -364,6 +364,10 @@ set (test_CLEANFILES
     layout_extend.h5
     zero_chunk.h5
     chunk_single.h5
+    swmr_non_latest.h5
+    earray_hdr_fd.h5
+    farray_hdr_fd.h5
+    bt2_hdr_fd.h5
     storage_size.h5
     dls_01_strings.h5
     extend.h5
@@ -457,6 +461,7 @@ set (test_CLEANFILES
     tvltypes.h5
     tvlstr.h5
     tvlstr2.h5
+    twriteorder.dat
     flush.h5
     flush-swmr.h5
     noflush.h5
@@ -532,16 +537,24 @@ set (test_CLEANFILES
     vds_dapl.h5
     vds_src_0.h5
     vds_src_1.h5
+    swmr_data.h5
+    use_use_append_chunk.h5
+    use_append_mchunks.h5
+    use_disable_mdc_flushes.h5
     tbogus.h5.copy
     flushrefresh.h5
     flushrefresh_VERIFICATION_START
     flushrefresh_VERIFICATION_CHECKPOINT1
     flushrefresh_VERIFICATION_CHECKPOINT2
     flushrefresh_VERIFICATION_DONE
+    atomic_data
     accum_swmr_big.h5
     ohdr_swmr.h5
+    test_swmr*.h5
     cache_logging.h5
     cache_logging.out
+    vds_swmr.h5
+    vds_swmr_src_*.h5
 )
 
 # Remove any output file left over from previous test run
@@ -583,6 +596,7 @@ set (H5TEST_TESTS
     objcopy
     links
     unlink
+    twriteorder
     big
     mtime
     fillval
@@ -973,6 +987,9 @@ set_tests_properties (H5PLUGIN-plugin PROPERTIES
 ###    S W M R  T E S T S
 ##############################################################################
 #       testflushrefresh.sh: flushrefresh
+#       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
+#       testswmr.sh: swmr*
+#       testvdsswmr.sh: vds_swmr*
 
 ##############################################################################
 ##############################################################################
@@ -1270,6 +1287,7 @@ if (HDF5_BUILD_GENERATORS)
       gen_cross
       gen_deflate
       gen_filters
+      gen_idx
       gen_new_array
       gen_new_fill
       gen_new_group

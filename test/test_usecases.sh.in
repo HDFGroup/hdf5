@@ -1,0 +1,170 @@
+#! /bin/bash
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the files COPYING and Copyright.html.  COPYING can be found at the root
+# of the source code distribution tree; Copyright.html can be found at the
+# root level of an installed copy of the electronic HDF5 document set and
+# is linked from the top-level documents page.  It can also be found at
+# http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
+# access to either file, you may request a copy from help@hdfgroup.org.
+#
+# Tests the use cases of swmr features.
+#
+# Created:
+#   Albert Cheng, 2013/06/01.
+# Modified:
+#
+
+# This is work in progress.
+# For now, it shows how to run the test cases programs. It only verifies the
+# exit codes are okay (0).
+
+srcdir=@srcdir@
+
+# Check to see if the VFD specified by the HDF5_DRIVER environment variable
+# supports SWMR.
+./swmr_check_compat_vfd
+rc=$?
+if [[ $rc != 0 ]] ; then
+    echo
+    echo "The VFD specified by the HDF5_DRIVER environment variable"
+    echo "does not support SWMR"
+    echo
+    echo "SWMR use case tests skipped"
+    echo
+    exit 0
+fi
+
+# Define symbols
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+EXIT_VALUE=$EXIT_SUCCESS	# Default all tests succeed
+RESULT_PASSED=" PASSED"
+RESULT_FAILED="*FAILED*"
+RESULT_SKIP="-SKIP-"
+USECASES_PROGRAMS="use_append_chunk use_append_mchunks"
+TESTNAME="Use Case"
+
+# Define variables
+nerrors=0
+verbose=yes
+
+# Source in the output filter function definitions.
+. $srcdir/../bin/output_filter.sh
+
+# Define functions
+# Print a line-line message left justified in a field of 72 characters.
+# Results can be " PASSED", "*FAILED*", "-SKIP-", up to 8 characters
+# wide.
+# SPACES should be at least 71 spaces. ($* + ' ' + 71 + 8 >= 80)
+#
+TESTING() {
+   SPACES="                                                                        "
+   echo "$* $SPACES" | cut -c1-72 | tr -d '\012'
+}
+
+# Run a test and print PASS or *FAIL*.  If a test fails then increment
+# the `nerrors' global variable and (if $verbose is set) display the
+# difference between the actual output and the expected output. The
+# expected output is given as the first argument to this function and
+# the actual output file is calculated by replacing the `.ddl' with
+# `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
+# non-zero value.
+# ADD_H5_TEST
+TOOLTEST() {
+    program=$1
+    shift
+
+    actual="$program.out"
+    actual_err="$program.err"
+    actual_sav=${actual}-sav
+    actual_err_sav=${actual_err}-sav
+
+    # Run test.
+    TESTING $program $@
+    (
+      $RUNSERIAL ./$program "$@"
+    ) >$actual 2>$actual_err
+    exit_code=$?
+
+    # save actual and actual_err in case they are needed later.
+    cp $actual $actual_sav
+    STDOUT_FILTER $actual
+    cp $actual_err $actual_err_sav
+    STDERR_FILTER $actual_err
+    cat $actual_err >> $actual
+
+    if [ $exit_code -eq 0 ];then
+	echo "$RESULT_PASSED"
+	test yes = "$verbose" && sed 's/^/    /' < $actual
+    else
+	echo "$RESULT_FAILED"
+	nerrors="`expr $nerrors + 1`"
+	test yes = "$verbose" && sed 's/^/    /' < $actual
+    fi
+
+    # Clean up output file
+    if test -z "$HDF5_NOCLEANUP"; then
+	rm -f $actual $actual_err $actual_sav $actual_err_sav $actual_ext
+    fi
+}
+
+# run tests for H5Odisable_mdc_flushes/H5Oenable_mdc_flushes/H5Oare_mdc_flushes_disabled here temporary
+USECORK=use_disable_mdc_flushes
+for p in $USECORK; do
+    TOOLTEST $p
+    TOOLTEST $p -y 3
+    TOOLTEST $p -n 3000
+    TOOLTEST $p -n 5000
+done
+
+# run write order test here temporary
+WRITEORDER=twriteorder
+for p in $WRITEORDER; do
+    TOOLTEST $p
+    TOOLTEST $p -b 1000
+    TOOLTEST $p -p 3000
+    TOOLTEST $p -n 2000
+    TOOLTEST $p -l w
+    TOOLTEST $p -l r
+done
+
+# Report test results
+if test $nerrors -eq 0 ; then
+    echo "$WRITEORDER test passed."
+else
+    echo "$WRITEORDER test failed with $nerrors errors."
+    EXIT_VALUE=$EXIT_FAILURE
+    nerrors=0           # reset nerror for the regular tests below.
+fi
+
+# main body
+for p in $USECASES_PROGRAMS; do
+    TOOLTEST ./$p
+    TOOLTEST ./$p -z 256
+    tmpfile=/tmp/datatfile.$$
+    TOOLTEST ./$p -f $tmpfile; rm -f $tmpfile
+    TOOLTEST ./$p -l w
+    TOOLTEST ./$p -l r
+    # use case 1.9, testing with multi-planes chunks
+    TOOLTEST ./$p -z 256 -y 5	# 5 planes chunks
+    # cleanup temp datafile
+    if test -z "$HDF5_NOCLEANUP"; then
+	rm -f $p.h5
+    fi
+done
+
+
+# Report test results and exit
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    EXIT_VALUE=$EXIT_FAILURE
+fi
+
+exit $EXIT_VALUE

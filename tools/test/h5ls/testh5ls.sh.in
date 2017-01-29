@@ -427,9 +427,9 @@ fi
 if test $USE_FILTER_DEFLATE = "yes" ; then
   # data read internal filters
   TOOLTEST tdset_idx.ls 0 -w80 -d tdset_idx.h5
+else
+  echo "***skip testing tdset_idx.h5"
 fi
-echo "***skip testing tdset_idx.h5"
-TOOLTEST tdset_idx.ls 0 -w80 -d tdset_idx.h5
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR
