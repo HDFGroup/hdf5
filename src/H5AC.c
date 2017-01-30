@@ -107,38 +107,43 @@ hbool_t H5_coll_api_sanity_check_g = false;
 /* Local Variables */
 /*******************/
 
-static const char *H5AC_entry_type_names[H5AC_NTYPES] =
-{
-    "B-tree nodes",
-    "symbol table nodes",
-    "local heap prefixes",
-    "local heap data blocks",
-    "global heaps",
-    "object headers",
-    "object header chunks",
-    "v2 B-tree headers",
-    "v2 B-tree internal nodes",
-    "v2 B-tree leaf nodes",
-    "fractal heap headers",
-    "fractal heap direct blocks",
-    "fractal heap indirect blocks",
-    "free space headers",
-    "free space sections",
-    "shared OH message master table",
-    "shared OH message index",
-    "extensible array headers",
-    "extensible array index blocks",
-    "extensible array super blocks",
-    "extensible array data blocks",
-    "extensible array data block pages",
-    "fixed array headers",
-    "fixed array data block",
-    "fixed array data block pages",
-    "superblock",
-    "driver info",
-    "epoch marker",     /* internal to cache only */
-    "proxy entry",
-    "test entry"	/* for testing only -- not used for actual files */
+/* Metadata entry class list */
+
+/* Remember to add new type ID to the H5AC_type_t enum in H5ACprivate.h when
+ *      adding a new class.
+ */
+
+static const H5AC_class_t *const H5AC_class_s[] = {
+    H5AC_BT,                    /* ( 0) B-tree nodes                    */
+    H5AC_SNODE,                 /* ( 1) symbol table nodes              */
+    H5AC_LHEAP_PRFX,            /* ( 2) local heap prefix               */
+    H5AC_LHEAP_DBLK,            /* ( 3) local heap data block           */
+    H5AC_GHEAP,                 /* ( 4) global heap                     */
+    H5AC_OHDR,                  /* ( 5) object header                   */
+    H5AC_OHDR_CHK,              /* ( 6) object header chunk             */
+    H5AC_BT2_HDR,               /* ( 7) v2 B-tree header                */
+    H5AC_BT2_INT,               /* ( 8) v2 B-tree internal node         */
+    H5AC_BT2_LEAF,              /* ( 9) v2 B-tree leaf node             */
+    H5AC_FHEAP_HDR,             /* (10) fractal heap header             */
+    H5AC_FHEAP_DBLOCK,          /* (11) fractal heap direct block       */
+    H5AC_FHEAP_IBLOCK,          /* (12) fractal heap indirect block     */
+    H5AC_FSPACE_HDR,            /* (13) free space header               */
+    H5AC_FSPACE_SINFO,          /* (14) free space sections             */
+    H5AC_SOHM_TABLE,            /* (15) shared object header message master table */
+    H5AC_SOHM_LIST,             /* (16) shared message index stored as a list */
+    H5AC_EARRAY_HDR,            /* (17) extensible array header         */
+    H5AC_EARRAY_IBLOCK,         /* (18) extensible array index block    */
+    H5AC_EARRAY_SBLOCK,         /* (19) extensible array super block    */
+    H5AC_EARRAY_DBLOCK,         /* (20) extensible array data block     */
+    H5AC_EARRAY_DBLK_PAGE,      /* (21) extensible array data block page */
+    H5AC_FARRAY_HDR,            /* (22) fixed array header              */
+    H5AC_FARRAY_DBLOCK,         /* (23) fixed array data block          */
+    H5AC_FARRAY_DBLK_PAGE,      /* (24) fixed array data block page     */
+    H5AC_SUPERBLOCK,            /* (25) file superblock                 */
+    H5AC_DRVRINFO,              /* (26) driver info block (supplements superblock) */
+    H5AC_EPOCH_MARKER,          /* (27) epoch marker - always internal to cache */
+    H5AC_PROXY_ENTRY,           /* (28) cache entry proxy               */
+    H5AC_PREFETCHED_ENTRY  	/* (29) prefetched entry - always internal to cache */
 };
 
 
@@ -366,12 +371,13 @@ H5AC_term_package(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr)
+H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_config_t * image_config_ptr)
 {
 #ifdef H5_HAVE_PARALLEL
     char 	 prefix[H5C__PREFIX_LEN] = "";
     H5AC_aux_t * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
+    struct H5C_cache_image_ctl_t int_ci_config = H5C__DEFAULT_CACHE_IMAGE_CTL;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -380,11 +386,16 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr)
     HDassert(f);
     HDassert(NULL == f->shared->cache);
     HDassert(config_ptr != NULL) ;
-    HDcompile_assert(NELMTS(H5AC_entry_type_names) == H5AC_NTYPES);
+    HDassert(image_config_ptr != NULL) ;
+    HDassert(image_config_ptr->version == H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION);
+    HDcompile_assert(NELMTS(H5AC_class_s) == H5AC_NTYPES);
     HDcompile_assert(H5C__MAX_NUM_TYPE_IDS == H5AC_NTYPES);
 
+    /* Validate configurations */
     if(H5AC_validate_config(config_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad cache configuration")
+    if(H5AC_validate_cache_image_config(image_config_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad cache image configuration")
 
 #ifdef H5_HAVE_PARALLEL
     if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
@@ -426,6 +437,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr)
         aux_ptr->candidate_slist_ptr = NULL;
         aux_ptr->write_done = NULL;
         aux_ptr->sync_point_done = NULL;
+        aux_ptr->p0_image_len = 0;
 
         sprintf(prefix, "%d:", mpi_rank);
 
@@ -448,19 +460,19 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr)
             if(aux_ptr->mpi_rank == 0)
                 f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE,
                         H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                        (const char **)H5AC_entry_type_names,
+                        H5AC_class_s,
                         H5AC__check_if_write_permitted, TRUE, H5AC__log_flushed_entry,
                         (void *)aux_ptr);
             else
                 f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE,
                         H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                        (const char **)H5AC_entry_type_names,
+                        H5AC_class_s,
                         H5AC__check_if_write_permitted, TRUE, NULL,
                         (void *)aux_ptr);
         else
             f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE,
                     H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                    (const char **)H5AC_entry_type_names,
+                    H5AC_class_s,
                     H5AC__check_if_write_permitted, TRUE, NULL, NULL);
     } /* end if */
     else {
@@ -471,7 +483,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr)
          */
         f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE,
                 H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                (const char **)H5AC_entry_type_names,
+                H5AC_class_s,
                 H5AC__check_if_write_permitted, TRUE, NULL, NULL);
 #ifdef H5_HAVE_PARALLEL
     } /* end else */
@@ -498,6 +510,20 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr)
 
     /* Set the cache parameters */
     if(H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "auto resize configuration failed")
+
+    /* don't need to get the current H5C image config here since the
+     * cache has just been created, and thus f->shared->cache->image_ctl 
+     * must still set to its initial value (H5C__DEFAULT_CACHE_IMAGE_CTL).  
+     * Note that this not true as soon as control returns to the application
+     * program, as some test code modifies f->shared->cache->image_ctl.
+     */
+    int_ci_config.version            = image_config_ptr->version;
+    int_ci_config.generate_image     = image_config_ptr->generate_image;
+    int_ci_config.save_resize_status = image_config_ptr->save_resize_status;
+    int_ci_config.entry_ageout       = image_config_ptr->entry_ageout;
+
+    if(H5C_set_cache_image_config(f, f->shared->cache, &int_ci_config) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "auto resize configuration failed")
 
 done:
@@ -975,6 +1001,41 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_insert_entry() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_load_cache_image_on_next_protect
+ *
+ * Purpose:     Load the cache image block at the specified location,
+ *              decode it, and insert its contents into the metadata
+ *              cache.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              7/6/15
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_load_cache_image_on_next_protect(H5F_t * f, haddr_t addr, hsize_t len,
+    hbool_t rw)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if(H5C_load_cache_image_on_next_protect(f, addr, len, rw) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "call to H5C_load_cache_image_on_next_protect failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_load_cache_image_on_next_protect() */
 
 
 /*-------------------------------------------------------------------------
@@ -2094,7 +2155,7 @@ done:
  */
 herr_t
 H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
-    size_t *cur_size_ptr, int32_t *cur_num_entries_ptr)
+    size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -2388,6 +2449,61 @@ H5AC_validate_config(H5AC_cache_config_t *config_ptr)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_validate_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_validate_cache_image_config()
+ *
+ * Purpose:     Run a sanity check on the contents of the supplied
+ *		instance of H5AC_cache_image_config_t.
+ *
+ *              Do nothing and return SUCCEED if no errors are detected,
+ *              and flag an error and return FAIL otherwise.
+ *
+ *		At present, this function operates by packing the data
+ *		from the instance of H5AC_cache_image_config_t into an 
+ *		instance of H5C_cache_image_ctl_t, and then calling
+ *		H5C_validate_cache_image_config().  If and when 
+ *              H5AC_cache_image_config_t and H5C_cache_image_ctl_t 
+ *		diverge, we may have to change this.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              6/25/15
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_validate_cache_image_config(H5AC_cache_image_config_t *config_ptr)
+{
+    H5C_cache_image_ctl_t internal_config = H5C__DEFAULT_CACHE_IMAGE_CTL;
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check args */
+    if(config_ptr == NULL)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "NULL config_ptr on entry")
+
+    if(config_ptr->version != H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Unknown image config version")
+
+    /* don't need to get the current H5C image config here since the
+     * default values of fields not in the H5AC config will always be 
+     * valid.
+     */
+    internal_config.version            = config_ptr->version;
+    internal_config.generate_image     = config_ptr->generate_image;
+    internal_config.save_resize_status = config_ptr->save_resize_status;
+    internal_config.entry_ageout       = config_ptr->entry_ageout;
+
+    if(H5C_validate_cache_image_config(&internal_config) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "error(s) in new cache image config")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_validate_cache_image_config() */
 
 
 /*-------------------------------------------------------------------------

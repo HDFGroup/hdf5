@@ -51,7 +51,8 @@ check_SCRIPTS = $(TEST_SCRIPT)
 # executed, generally most specific tests to least specific tests.
 # As an exception, long-running tests should occur earlier in the list.
 # This gives them more time to run when tests are executing in parallel.
-TEST_PROG= testhdf5 cache cache_api cache_tagging lheap ohdr stab gheap \
+TEST_PROG= testhdf5 \
+           cache cache_api cache_image cache_tagging lheap ohdr stab gheap \
            evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith \
            dtypes dsets cmpd_dset filter_fail extend external efc objcopy links unlink \
@@ -127,6 +128,7 @@ LDADD=libh5test.la $(LIBHDF5)
 # List the source files for tests that have more than one
 ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c
+cache_image_SOURCES=cache_image.c genall5.c
 
 VFD_LIST = sec2 stdio core core_paged split multi family
 if DIRECT_VFD_CONDITIONAL
@@ -189,7 +191,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 \
     test_swmr*.h5 cache_logging.h5 cache_logging.out vds_swmr.h5 vds_swmr_src_*.h5 \
     swmr[0-2].h5 swmr_writer.out swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
-    tbogus.h5.copy
+    tbogus.h5.copy cache_image_test.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

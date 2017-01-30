@@ -69,6 +69,7 @@ typedef struct H5O_t H5O_t;
 #define H5O_FIRST	(-2)		/* Operate on first message of type  */
 
 /* Flags needed when encoding messages */
+#define H5O_MSG_NO_FLAGS_SET	0x00u
 #define H5O_MSG_FLAG_CONSTANT	0x01u
 #define H5O_MSG_FLAG_SHARED	0x02u
 #define H5O_MSG_FLAG_DONTSHARE	0x04u
@@ -204,7 +205,8 @@ typedef struct H5O_copy_t {
 #define H5O_AINFO_ID    0x0015          /* Attribute info message.  */
 #define H5O_REFCOUNT_ID 0x0016          /* Reference count message.  */
 #define H5O_FSINFO_ID   0x0017          /* File space info message.  */
-#define H5O_UNKNOWN_ID  0x0018          /* Placeholder message ID for unknown message.  */
+#define H5O_MDCI_MSG_ID 0x0018		/* Metadata Cache Image Message */
+#define H5O_UNKNOWN_ID  0x0019          /* Placeholder message ID for unknown message.  */
                                         /* (this should never exist in a file) */
 /* 
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
@@ -214,7 +216,7 @@ typedef struct H5O_copy_t {
  *
  * (this should never exist in a file)
  */
-#define H5O_BOGUS_INVALID_ID	0x0019  /* "Bogus invalid" Message.  */
+#define H5O_BOGUS_INVALID_ID	0x001A  /* "Bogus invalid" Message.  */
 
 /* Shared object message types.
  * Shared objects can be committed, in which case the shared message contains
@@ -793,6 +795,16 @@ typedef struct H5O_fsinfo_t {
     hsize_t		  threshold;	/* Free space section threshold */
     haddr_t     	  fs_addr[H5FD_MEM_NTYPES-1]; /* Addresses of free space managers */
 } H5O_fsinfo_t;
+
+/*
+ * Metadata Cache Image Message.
+ * Contains base address and length of the metadata cache image.
+ * (Data structure in memory)
+ */
+typedef struct H5O_mdci_t {
+    haddr_t	addr;			/* address of MDC image block */
+    hsize_t	size;			/* size of MDC image block    */
+} H5O_mdci_t;
 
 /* Typedef for "application" iteration operations */
 typedef herr_t (*H5O_operator_t)(const void *mesg/*in*/, unsigned idx,

@@ -39,12 +39,6 @@
 /* Package Private Variables */
 /*****************************/
 
-/* The local heap prefix cache subclass */
-H5_DLLVAR const H5AC_class_t H5AC_LHEAP_PRFX[1];
-
-/* The local heap data block cache subclass */
-H5_DLLVAR const H5AC_class_t H5AC_LHEAP_DBLK[1];
-
 /* Declare extern the free list to manage the H5HL_free_t struct */
 H5FL_EXTERN(H5HL_free_t);
 

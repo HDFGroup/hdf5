@@ -743,6 +743,22 @@ if (NOT CYGWIN)
   set_tests_properties (H5TEST-cache PROPERTIES TIMEOUT 1800)
 endif ()
 
+#-- Adding test for cache_image
+add_test (
+    NAME H5TEST-clear-cache_image-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        cache_image_test.h5
+    WORKING_DIRECTORY
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+add_test (NAME H5TEST-cache_image COMMAND $<TARGET_FILE:cache_image>)
+set_tests_properties (H5TEST-cache_image PROPERTIES
+    DEPENDS H5TEST-clear-cache_image-objects
+    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+)
+
 #-- Adding test for err_compat
 if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
   add_test (NAME H5TEST-clear-err_compat-objects

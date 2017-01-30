@@ -73,9 +73,6 @@ typedef struct H5B_cache_ud_t {
 /* Package Private Variables */
 /*****************************/
 
-/* H5B header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_BT[1];
-
 /* Declare a free list to manage the haddr_t sequence information */
 H5FL_SEQ_EXTERN(haddr_t);
 

@@ -445,6 +445,8 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
+    hbool_t      ci_load = FALSE;       /* whether MDC ci load requested */
+    hbool_t      ci_write = FALSE;      /* whether MDC CI write requested */
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t        dxpl_id = H5AC_ind_read_dxpl_id; /*dxpl used by library        */
     hid_t	 ret_value;	        /*return value			*/
@@ -490,6 +492,14 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
+   /* check to see if both SWMR and cache image are requested.  Fail if so */
+   if ( H5C_cache_image_status(new_file, &ci_load, &ci_write) < 0 )
+       HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't get MDC CI status")
+
+   if ( ( ( ci_load ) || ( ci_write ) ) &&
+        ( flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE) ) )
+       HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't have both SWMR and cache image.")
+
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
@@ -498,9 +508,29 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     new_file->file_id = ret_value;
 
 done:
+#if 0
+    /* Quincy: please review this.  With the original cleanup code (below)
+     * my code (above) to disable the combination of SWMR and cache image,
+     * triggering results in an assertion failure in H5F_close() either 
+     * immediately or on library shutdown depending on the exact location 
+     * of my code.
+     *
+     * I noticed that the issue did not appear in H5Fopen().  As that function 
+     * calls H5F_try_close() instead of H5F_close(), I tried copying that 
+     * cleanup code here.  It seems to work -- but since I'm not familiar
+     * with this section of the code, it would be good if you would check me.
+     *
+     * Please delete the old version if you buy the fix.
+     *
+     *                                           JRM -- 12/29/16
+     */
     if(ret_value < 0 && new_file)
         if(H5F_close(new_file) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
+#else
+    if(ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
+#endif
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
@@ -549,6 +579,8 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
+    hbool_t      ci_load = FALSE;       /* whether MDC ci load requested */
+    hbool_t      ci_write = FALSE;      /* whether MDC CI write requested */
     H5F_t	*new_file = NULL;	/*file struct for new file	*/
     hid_t        dxpl_id = H5AC_ind_read_dxpl_id; /*dxpl used by library        */
     hid_t	 ret_value;	        /*return value			*/
@@ -577,6 +609,14 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* Open the file */
     if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
+
+    /* check to see if both SWMR and cache image are requested.  Fail if so */
+    if ( H5C_cache_image_status(new_file, &ci_load, &ci_write) < 0 )
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't get MDC CI status")
+
+    if ( ( ( ci_load ) || ( ci_write ) ) &&
+         ( flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE) ) )
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't have both SWMR and cache image")
 
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
@@ -1177,7 +1217,7 @@ H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr,
     size_t *cur_size_ptr, int *cur_num_entries_ptr)
 {
     H5F_t      *file;                   /* File object for file ID */
-    int32_t    cur_num_entries;
+    uint32_t   cur_num_entries;
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1593,6 +1633,8 @@ done:
 herr_t
 H5Fstart_swmr_write(hid_t file_id)
 {
+    hbool_t ci_load = FALSE;    /* whether MDC ci load requested */
+    hbool_t ci_write = FALSE;   /* whether MDC CI write requested */
     H5F_t *file = NULL;         /* File info */
     size_t grp_dset_count=0; 	/* # of open objects: groups & datasets */
     size_t nt_attr_count=0; 	/* # of opened named datatypes  + opened attributes */
@@ -1625,6 +1667,13 @@ H5Fstart_swmr_write(hid_t file_id)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file already in SWMR writing mode")
 
     HDassert(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS);
+
+    /* check to see if cache image is enabled.  Fail if so */
+    if ( H5C_cache_image_status(file, &ci_load, &ci_write) < 0 )
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't get MDC CI status")
+
+    if ( ( ci_load ) || ( ci_write ) )
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't have both SWMR and MDC cache image.")
 
     /* Flush data buffers */
     if(H5F_flush(file, H5AC_ind_read_dxpl_id, FALSE) < 0)
@@ -1868,7 +1917,48 @@ H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled,
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* H5Fstop_mdc_logging() */
+} /* H5Fget_mdc_logging_status() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:   H5Fset_latest_format
+ *
+ * Purpose:    Enable switching the "latest format" flag while a file is open.
+ *
+ * Return:     Non-negative on success/Negative on failure
+ *
+ * Programmer: Quincey Koziol
+ *             Monday, September 21, 2015
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
+{
+    H5F_t *f;                           /* File */
+    unsigned latest_flags;              /* Latest format flags for file */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", file_id, latest_format);
+
+    /* Check args */
+    if(NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "not a file ID")
+
+    /* Check if the value is changing */
+    latest_flags = H5F_USE_LATEST_FLAGS(f, H5F_LATEST_ALL_FLAGS);
+    if(latest_format != (H5F_LATEST_ALL_FLAGS == latest_flags)) {
+        /* Call the flush routine, for this file */
+        if(H5F_flush(f, H5AC_ind_read_dxpl_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
+
+        /* Toggle the 'latest format' flag */
+        H5F_SET_LATEST_FLAGS(f, latest_format ? H5F_LATEST_ALL_FLAGS : 0);
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Fset_latest_format() */
 
 
 /*-------------------------------------------------------------------------
