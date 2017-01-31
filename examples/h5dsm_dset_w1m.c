@@ -3,10 +3,11 @@
 
 int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
-    char *pool_grp = "daos_tier0";
-    hid_t file = -1, dset = -1, trans = -1, space = -1, fapl = -1;
+    char *pool_grp = NULL;
+    hid_t file = -1, dset = -1, space = -1, fapl = -1;
     hid_t nfile = -1, ndset = -1;
     hsize_t dims[1] = {256 * 1024};
+    H5VL_daosm_snap_id_t snap_id;
     int *buf = NULL;
     int i;
 
@@ -16,8 +17,8 @@ int main(int argc, char *argv[]) {
     /* Seed random number generator */
     srand(time(NULL));
 
-    if(argc != 4)
-        PRINTF_ERROR("argc != 4\n");
+    if(argc < 4 || argc > 5)
+        PRINTF_ERROR("argc must be 4 or 5\n");
 
     /* Parse UUID */
     if(0 != uuid_parse(argv[1], pool_uuid))
@@ -30,7 +31,7 @@ int main(int argc, char *argv[]) {
         ERROR;
 
     /* Create file */
-    if((file = H5Fcreate_ff(argv[2], H5F_ACC_TRUNC, H5P_DEFAULT, fapl, &trans)) < 0)
+    if((file = H5Fcreate(argv[2], H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         ERROR;
 
     /* Create native file */
@@ -42,7 +43,7 @@ int main(int argc, char *argv[]) {
         ERROR;
 
     /* Create dataset */
-    if((dset = H5Dcreate_ff(file, argv[3], H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT, trans)) < 0)
+    if((dset = H5Dcreate2(file, argv[3], H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         ERROR;
 
     /* Create native dataset */
@@ -59,7 +60,7 @@ int main(int argc, char *argv[]) {
 
     /* Write data */
     printf("Writing daos-m dataset\n");
-    if(H5Dwrite_ff(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf, trans) < 0)
+    if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         ERROR;
     
     /* Write native data */
@@ -67,18 +68,20 @@ int main(int argc, char *argv[]) {
     if(H5Dwrite(ndset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         ERROR;
 
-    /* Commit transaction */
-    if(H5TRcommit(trans) < 0)
-        ERROR;
+    /* Save snapshot if requested */
+    if(argc == 5) {
+        if(H5VLdaosm_snap_create(file, &snap_id) < 0)
+            ERROR;
+        printf("Saved snapshot: snap_id = %llu\n", (long long unsigned)snap_id);
+    } /* end if */
 
     /* Close */
-    if(H5Dclose_ff(dset, -1) < 0)
+    if(H5Dclose(dset) < 0)
         ERROR;
     if(H5Dclose(ndset) < 0)
         ERROR;
-    if(H5TRclose(trans) < 0)
-        ERROR;
-    if(H5Fclose_ff(file, -1) < 0)
+    if(H5Fclose(file) < 0)
+    if(H5Fclose(file) < 0)
         ERROR;
     if(H5Fclose(nfile) < 0)
         ERROR;
@@ -95,10 +98,9 @@ int main(int argc, char *argv[]) {
 
 error:
     H5E_BEGIN_TRY {
-        H5Dclose_ff(dset, -1);
+        H5Dclose(dset);
         H5Dclose(ndset);
-        H5TRclose(trans);
-        H5Fclose_ff(file, -1);
+        H5Fclose(file);
         H5Fclose(nfile);
         H5Pclose(fapl);
     } H5E_END_TRY;

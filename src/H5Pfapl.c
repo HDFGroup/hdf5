@@ -53,6 +53,9 @@
 /* Includes needed to set as default VOL driver */
 #include "H5VLnative.h" 	/* Native H5 VOL plugin	*/
 
+/* Includes needed to handle DAOS-M driver */
+#include "H5VLdaosm.h"          /* DAOS-M VOL plugin */
+
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Windows buffered I/O                 */
 #endif
@@ -344,6 +347,7 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
     const H5VL_plugin_prop_t def_vol_prop = H5F_ACS_VOL_DEF;    /* Default VOL plugin ID & info (initialized from a variable) */
 
     hid_t trans_id = FAIL;
+    H5VL_daosm_snap_id_t snap_id = H5VL_DAOSM_SNAP_ID_INVAL;
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
@@ -492,6 +496,12 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the transaction ID acquire property*/
     if(H5P_register_real(pclass, H5VL_ACQUIRE_TR_ID, sizeof(hid_t), &trans_id, 
+                         NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the DAOS-M snapshot open property*/
+    /* Need to add encode/decode callbacks DSMINC */
+    if(H5P_register_real(pclass, H5VL_DAOSM_SNAP_OPEN_ID, sizeof(H5VL_daosm_snap_id_t), &snap_id, 
                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 

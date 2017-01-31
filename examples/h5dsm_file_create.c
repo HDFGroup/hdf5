@@ -2,7 +2,7 @@
 
 int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
-    char *pool_grp = "daos_tier0";
+    char *pool_grp = NULL;
     hid_t file = -1, fapl = -1;
 
     (void)MPI_Init(&argc, &argv);
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
         ERROR;
 
     /* Create file */
-    if((file = H5Fcreate_ff(argv[2], H5F_ACC_TRUNC, H5P_DEFAULT, fapl, NULL)) < 0)
+    if((file = H5Fcreate(argv[2], H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         ERROR;
 
     /* Close */

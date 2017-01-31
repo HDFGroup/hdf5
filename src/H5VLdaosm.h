@@ -43,6 +43,10 @@ extern "C" {
 
 #ifdef H5_HAVE_EFF
 
+/* FAPL property to tell the VOL plugin to open a saved snapshot when opening a
+ * file */
+#define H5VL_DAOSM_SNAP_OPEN_ID "daosm_snap_open"
+
 /* Common object information */
 typedef struct H5VL_daosm_obj_t {
     H5I_type_t type;
@@ -55,8 +59,8 @@ typedef struct H5VL_daosm_file_t {
     H5VL_daosm_obj_t common; /* Must be first */
     daos_handle_t poh;
     daos_handle_t coh;
-    //daos_pool_info_t pool_info;
-    //daos_co_info_t co_info;
+    daos_epoch_t epoch;
+    hbool_t snap_epoch;
     char *file_name;
     uuid_t uuid;
     unsigned flags;

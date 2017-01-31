@@ -2,7 +2,7 @@
 
 int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
-    char *pool_grp = "daos_tier0";
+    char *pool_grp = NULL;
     hid_t file = -1, fapl = -1;
 
     (void)MPI_Init(&argc, &argv);

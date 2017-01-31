@@ -37,8 +37,16 @@ extern "C" {
 
 #ifdef H5_HAVE_EFF
 
+#define H5VL_DAOSM_SNAP_ID_INVAL (uint64_t)(int64_t)-1
+
+typedef uint64_t H5VL_daosm_snap_id_t;
+
 H5_DLL herr_t H5Pset_fapl_daosm(hid_t fapl_id, MPI_Comm comm, MPI_Info info,
     uuid_t pool_uuid, char *pool_grp);
+H5_DLL herr_t H5VLdaosm_snap_create(hid_t loc_id,
+    H5VL_daosm_snap_id_t *snap_id);
+H5_DLL herr_t H5Pset_daosm_snap_open(hid_t fapl_id,
+    H5VL_daosm_snap_id_t snap_id);
 //H5_DLL herr_t EFF_init(void); DSMINC
 //H5_DLL herr_t EFF_finalize(void); DSMINC
 

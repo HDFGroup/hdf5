@@ -4,11 +4,11 @@
 
 int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
-    char *pool_grp = "daos_tier0";
-    hid_t file = -1, dset = -1, file_space = -1, mem_space = -1, trans = -1, fapl = -1;
+    char *pool_grp = NULL;
+    hid_t file = -1, dset = -1, file_space = -1, mem_space = -1, fapl = -1;
     hsize_t dims[2] = {4, 6};
     hsize_t start[2], count[2];
-    uint64_t trans_num;
+    H5VL_daosm_snap_id_t snap_id;
     int buf[4][6];
     int rank, mpi_size;
     char *file_sel_str[2] = {"XXX...", "...XXX"};
@@ -26,8 +26,8 @@ int main(int argc, char *argv[]) {
     /* Seed random number generator */
     srand(time(NULL));
 
-    if(argc != 4)
-        PRINTF_ERROR("argc != 4\n");
+    if(argc < 4 || argc > 5)
+        PRINTF_ERROR("argc must be 4 or 5\n");
 
     /* Parse UUID */
     if(0 != uuid_parse(argv[1], pool_uuid))
@@ -40,19 +40,11 @@ int main(int argc, char *argv[]) {
         ERROR;
 
     /* Open file */
-    if((file = H5Fopen_ff(argv[2], H5F_ACC_RDWR, fapl, &trans)) < 0)
+    if((file = H5Fopen(argv[2], H5F_ACC_RDWR, fapl)) < 0)
         ERROR;
 
     /* Open dataset */
-    if((dset = H5Dopen_ff(file, argv[3], H5P_DEFAULT, trans)) < 0)
-        ERROR;
-
-    /* Get next transaction */
-    if(H5TRget_trans_num(trans, &trans_num) < 0)
-        ERROR;
-    if(H5TRclose(trans) < 0)
-        ERROR;
-    if((trans = H5TRcreate(file, trans_num + 1)) < 0)
+    if((dset = H5Dopen2(file, argv[3], H5P_DEFAULT)) < 0)
         ERROR;
 
     if(rank == 1)
@@ -77,8 +69,6 @@ int main(int argc, char *argv[]) {
 
     if(rank == 0)
         MPI_Barrier(MPI_COMM_WORLD);
-    else
-        printf("Transaction number = %llu\n", (long long unsigned)(trans_num + 1));
 
 
     /* Set up dataspaces */
@@ -100,23 +90,21 @@ int main(int argc, char *argv[]) {
         ERROR;
 
     /* Write data */
-    if(H5Dwrite_ff(dset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, buf, trans) < 0)
+    if(H5Dwrite(dset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, buf) < 0)
         ERROR;
 
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    if(rank == 0)
-        if(H5TRcommit(trans) < 0)
+    /* Save snapshot if requested */
+    if(argc == 5) {
+        if(H5VLdaosm_snap_create(file, &snap_id) < 0)
             ERROR;
-
-    MPI_Barrier(MPI_COMM_WORLD);
+        if(rank == 0)
+            printf("Saved snapshot: snap_id = %llu\n", (long long unsigned)snap_id);
+    } /* end if */
 
     /* Close */
-    if(H5Dclose_ff(dset, -1) < 0)
+    if(H5Dclose(dset) < 0)
         ERROR;
-    if(H5TRclose(trans) < 0)
-        ERROR;
-    if(H5Fclose_ff(file, -1) < 0)
+    if(H5Fclose(file) < 0)
         ERROR;
     if(H5Sclose(file_space) < 0)
         ERROR;
@@ -133,9 +121,8 @@ int main(int argc, char *argv[]) {
 
 error:
     H5E_BEGIN_TRY {
-        H5Dclose_ff(dset, -1);
-        H5TRclose(trans);
-        H5Fclose_ff(file, -1);
+        H5Dclose(dset);
+        H5Fclose(file);
         H5Sclose(file_space);
         H5Sclose(mem_space);
         H5Pclose(fapl);
