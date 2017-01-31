@@ -1390,7 +1390,6 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
          * updating each chunk with the data modifications from other processes,
          * then re-filtering the chunk.
          */
-        /* XXX: Not sure about minor error code */
         for (i = 0; i < chunk_list_num_entries; i++)
             if (H5D__filtered_collective_chunk_entry_io(&chunk_list[i], io_info, type_info) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "couldn't process chunk entry")
@@ -3117,9 +3116,10 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
     hssize_t        iter_nelmts;     /* Number of points to iterate over for the chunk IO operation */
     hbool_t         mem_iter_init = FALSE;
     size_t          buf_size;
+    size_t          mod_data_alloced_bytes = 0;
     H5S_t          *dataspace = NULL; /* Other process' dataspace for the chunk */
     herr_t          ret_value = SUCCEED;
-    
+
     FUNC_ENTER_STATIC
 
     HDassert(chunk_entry);
@@ -3236,9 +3236,17 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
                 HDfprintf(debug_file, "| - Message size is %d bytes.\n", count);
 #endif
 
-                if (NULL == (mod_data = (unsigned char *) H5MM_malloc((size_t) count)))
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate modification data receive buffer")
-                mod_data_p = mod_data;
+                if ((size_t) count > mod_data_alloced_bytes) {
+                    if (NULL == (mod_data = (unsigned char *) H5MM_realloc(mod_data, (size_t) count)))
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate modification data receive buffer")
+
+                    mod_data_alloced_bytes = (size_t) count;
+
+#ifdef PARALLEL_COMPRESS_DEBUG
+                    HDfprintf(debug_file, "| - Re-alloced buffer.\n");
+                    HDfprintf(debug_file, "| - New size is: %zu.\n", mod_data_alloced_bytes);
+#endif
+                }
 
                 if (MPI_SUCCESS != (mpi_code = MPI_Recv(mod_data, count, MPI_BYTE, MPI_ANY_SOURCE,
                         (int) chunk_entry->chunk_info.index, io_info->comm, &status)))
@@ -3249,6 +3257,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
 #endif
 
                 /* Decode the process' chunk file dataspace */
+                mod_data_p = mod_data;
                 if (NULL == (dataspace = H5S_decode(&mod_data_p)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, FAIL, "unable to decode dataspace")
 
@@ -3289,8 +3298,6 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
 
                 chunk_entry->num_writers--;
 
-                if (mod_data)
-                    H5MM_free(mod_data);
                 if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
                 if (dataspace) {
@@ -3328,17 +3335,19 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
 
             break;
         default:
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unknown I/O operation")
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "invalid I/O operation")
     }
 
 done:
+    if (mod_data)
+        H5MM_free(mod_data);
     if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
+    if (mem_iter)
+        H5MM_free(mem_iter);
     if (dataspace)
         if (H5S_close(dataspace) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
-    if (mem_iter)
-        H5MM_free(mem_iter)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__filtered_collective_chunk_entry_io() */
