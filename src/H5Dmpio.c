@@ -2673,12 +2673,13 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
 {
     H5D_filtered_collective_io_info_t *local_info_array = NULL; /* The list of initially select chunks for this process */
     H5D_filtered_collective_io_info_t *overlap_info_array = NULL; /* The list of all chunks selected in the operation by all processes */
+    /* H5D_mpio_filtered_write_mode_t     filtered_write_mode = H5D_MPIO_UNSAFE_FILTERED_WRITE; */
+    /* H5P_genplist_t                    *dx_plist; */
     H5S_sel_iter_t                    *mem_iter = NULL; /* Memory iterator for H5D__gather_mem */
     unsigned char                     *mod_data = NULL; /* Chunk modification data sent by a process to a chunk's owner */
     H5SL_node_t                       *chunk_node;
     MPI_Request                       *send_requests = NULL; /* Array of MPI_Isend chunk modification data send requests */
     MPI_Status                        *send_statuses = NULL; /* Array of MPI_Isend chunk modification send statuses */
-    hbool_t                            no_overlap = FALSE; /* Whether or not the user guarantees a one-process-only-per-chunk write style */
     hbool_t                            mem_iter_init = FALSE;
     size_t                             num_send_requests = 0;
     size_t                             num_chunks_selected;
@@ -2694,13 +2695,12 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     HDassert(fm);
     HDassert(chunk_list);
     HDassert(num_entries);
+    HDassert(TRUE == H5P_isa_class(io_info->raw_dxpl_id, H5P_DATASET_XFER));
 
     if ((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank")
     if ((mpi_size = H5F_mpi_get_size(io_info->dset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size")
-
-    /* Get the no overlap property */
 
     if ((num_chunks_selected = H5SL_count(fm->sel_chunks))) {
         H5D_chunk_info_t *chunk_info;
@@ -2772,8 +2772,16 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     HDfprintf(debug_file, "-----------------------------------\n\n");
 #endif
 
+    /* XXX: Add SAFE_FILTERED_CHUNK_WRITE to property lists */
+    /* Get the no overlap property */
+    /* if (NULL == (dx_plist = (H5P_genplist_t *) H5I_object(io_info->raw_dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+
+    if (H5P_get(dx_plist, H5D_MPIO_FILTERED_WRITE_MODE, &filtered_write_mode))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "couldn't get filtered chunk write mode property") */
+
     /* Redistribute shared chunks to new owners as necessary */
-    if (!no_overlap && (io_info->op_type == H5D_IO_OP_WRITE)) {
+    if (io_info->op_type == H5D_IO_OP_WRITE /* && (filtered_write_mode != H5D_MPIO_SAFE_FILTERED_WRITE) */) {
         if (num_chunks_selected)
             if (NULL == (send_requests = (MPI_Request *) H5MM_malloc(num_chunks_selected * sizeof(*send_requests))))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate send requests buffer")
@@ -2959,7 +2967,7 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
     *num_entries = num_chunks_selected;
 
     /* Wait for all async send requests to complete before returning */
-    if (!no_overlap && num_send_requests) {
+    if (/* (filtered_write_mode != H5D_MPIO_SAFE_FILTERED_WRITE) && */ num_send_requests) {
         if (NULL == (send_statuses = (MPI_Status *) H5MM_malloc(num_send_requests * sizeof(*send_statuses))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate send statuses buffer")
 
@@ -3279,9 +3287,9 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
 
 #ifdef PARALLEL_COMPRESS_DEBUG
                 HDfprintf(debug_file, "| Contents of message:\n| [");
-                for (size_t j = 0; j < iter_nelmts; j++) {
+                for (size_t j = 0; j < (size_t) iter_nelmts; j++) {
                     if (j > 0) HDfprintf(debug_file, ", ");
-                    HDfprintf(debug_file, "%lld", ((long *) mod_data_p)[j]);
+                    HDfprintf(debug_file, "%lld", ((const long *) mod_data_p)[j]);
                 }
                 HDfprintf(debug_file, "]\n");
 #endif
