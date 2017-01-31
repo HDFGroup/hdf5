@@ -3645,7 +3645,9 @@ H5D__refresh(hid_t dset_id, H5D_t *dset, hid_t dxpl_id)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Sanity check */
     HDassert(dset);
+    HDassert(dset->shared);
 
     /* If the layout is virtual... */
     if(dset->shared->layout.type == H5D_VIRTUAL) {
@@ -3666,9 +3668,6 @@ H5D__refresh(hid_t dset_id, H5D_t *dset, hid_t dxpl_id)
 done:
     /* Release hold on virtual datasets' files */
     if(virt_dsets_held) {
-        /* Sanity check */
-        HDassert(dset->shared->layout.type == H5D_VIRTUAL);
-
         /* Release the hold on source datasets' files */
         if(H5D__virtual_release_source_dset_files(head) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "can't release VDS source files held open")
