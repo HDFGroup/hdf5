@@ -492,13 +492,11 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if(NULL == (new_file = H5F_open(filename, flags, fcpl_id, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
-   /* check to see if both SWMR and cache image are requested.  Fail if so */
-   if ( H5C_cache_image_status(new_file, &ci_load, &ci_write) < 0 )
-       HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't get MDC CI status")
-
-   if ( ( ( ci_load ) || ( ci_write ) ) &&
-        ( flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE) ) )
-       HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't have both SWMR and cache image.")
+   /* Check to see if both SWMR and cache image are requested.  Fail if so */
+   if(H5C_cache_image_status(new_file, &ci_load, &ci_write) < 0)
+       HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MDC cache image status")
+   if((ci_load || ci_write) && (flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE)))
+       HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and cache image")
 
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
@@ -508,29 +506,8 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     new_file->file_id = ret_value;
 
 done:
-#if 0
-    /* Quincy: please review this.  With the original cleanup code (below)
-     * my code (above) to disable the combination of SWMR and cache image,
-     * triggering results in an assertion failure in H5F_close() either 
-     * immediately or on library shutdown depending on the exact location 
-     * of my code.
-     *
-     * I noticed that the issue did not appear in H5Fopen().  As that function 
-     * calls H5F_try_close() instead of H5F_close(), I tried copying that 
-     * cleanup code here.  It seems to work -- but since I'm not familiar
-     * with this section of the code, it would be good if you would check me.
-     *
-     * Please delete the old version if you buy the fix.
-     *
-     *                                           JRM -- 12/29/16
-     */
-    if(ret_value < 0 && new_file)
-        if(H5F_close(new_file) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
-#else
     if(ret_value < 0 && new_file && H5F_try_close(new_file, NULL) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "problems closing file")
-#endif
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate() */
@@ -610,13 +587,11 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     if(NULL == (new_file = H5F_open(filename, flags, H5P_FILE_CREATE_DEFAULT, fapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
 
-    /* check to see if both SWMR and cache image are requested.  Fail if so */
-    if ( H5C_cache_image_status(new_file, &ci_load, &ci_write) < 0 )
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't get MDC CI status")
-
-    if ( ( ( ci_load ) || ( ci_write ) ) &&
-         ( flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE) ) )
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "can't have both SWMR and cache image")
+    /* Check to see if both SWMR and cache image are requested.  Fail if so */
+    if(H5C_cache_image_status(new_file, &ci_load, &ci_write) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MDC cache image status")
+    if((ci_load || ci_write) && (flags & (H5F_ACC_SWMR_READ | H5F_ACC_SWMR_WRITE)))
+        HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and cache image")
 
     /* Get an atom for the file */
     if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
@@ -1668,12 +1643,11 @@ H5Fstart_swmr_write(hid_t file_id)
 
     HDassert(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS);
 
-    /* check to see if cache image is enabled.  Fail if so */
-    if ( H5C_cache_image_status(file, &ci_load, &ci_write) < 0 )
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't get MDC CI status")
-
-    if ( ( ci_load ) || ( ci_write ) )
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't have both SWMR and MDC cache image.")
+    /* Check to see if cache image is enabled.  Fail if so */
+    if(H5C_cache_image_status(file, &ci_load, &ci_write) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MDC cache image status")
+    if(ci_load || ci_write )
+        HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and MDC cache image")
 
     /* Flush data buffers */
     if(H5F_flush(file, H5AC_ind_read_dxpl_id, FALSE) < 0)
