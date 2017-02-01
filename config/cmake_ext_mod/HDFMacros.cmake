@@ -59,10 +59,9 @@ endmacro ()
 macro (INSTALL_PROGRAM_PDB progtarget targetdestination targetcomponent)
   if (WIN32 AND MSVC)
     get_target_property (target_name ${progtarget} OUTPUT_NAME_RELWITHDEBINFO)
-    get_target_property (target_prefix ${progtarget} PREFIX)
     install (
       FILES
-          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${target_prefix}${target_name}.pdb
+          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${target_name}.pdb
       DESTINATION
           ${targetdestination}
       CONFIGURATIONS RelWithDebInfo
