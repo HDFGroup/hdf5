@@ -714,20 +714,16 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
         if(0 != (ret = daos_pool_connect(fa->pool_uuid, fa->pool_grp, NULL /*pool_svc*/, DAOS_PC_RW, &file->poh, NULL /*&file->pool_info*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't connect to pool: %d", ret)
 
+        /* Delete the container if H5F_ACC_TRUNC is set.  This shouldn't cause a
+         * problem even if the container doesn't exist. */
+        /* Need to handle EXCL correctly DSMINC */
+        if(flags & H5F_ACC_TRUNC)
+            if(0 != (ret = daos_cont_destroy(file->poh, file->uuid, 1, NULL /*event*/)))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't destroy container: %d", ret)
+
         /* Create the container for the file */
-        if(0 != (ret = daos_cont_create(file->poh, file->uuid, NULL /*event*/))) {
-            /* Check for failure due to the container already existing and
-             * opening with H5F_ACC_TRUNC */
-            if((ret == -(int)DER_EXIST) && (flags & H5F_ACC_TRUNC)) {
-                /* Destroy and re-create container */
-                if(0 != (ret = daos_cont_destroy(file->poh, file->uuid, 0, NULL /*event*/)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't destroy container: %d", ret)
-                if(0 != (ret = daos_cont_create(file->poh, file->uuid, NULL /*event*/)))
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create container: %d", ret)
-            } /* end if */
-            else
-                HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create container: %d", ret)
-        } /* end if */
+        if(0 != (ret = daos_cont_create(file->poh, file->uuid, NULL /*event*/)))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create container: %d", ret)
 
         /* Open the container */
         if(0 != (ret = daos_cont_open(file->poh, file->uuid, DAOS_COO_RW, &file->coh, NULL /*&file->co_info*/, NULL /*event*/)))
