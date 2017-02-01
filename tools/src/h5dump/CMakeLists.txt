@@ -22,6 +22,21 @@ set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5dump")
 
 set (H5_DEP_EXECUTABLES h5dump)
 
+if (BUILD_SHARED_LIBS)
+  add_executable (h5dump-shared
+      ${HDF5_TOOLS_SRC_H5DUMP_SOURCE_DIR}/h5dump.c
+      ${HDF5_TOOLS_SRC_H5DUMP_SOURCE_DIR}/h5dump_ddl.c
+      ${HDF5_TOOLS_SRC_H5DUMP_SOURCE_DIR}/h5dump_xml.c
+  )
+  TARGET_NAMING (h5dump-shared SHARED)
+  TARGET_C_PROPERTIES (h5dump-shared SHARED " " " ")
+  target_link_libraries (h5dump-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (h5dump-shared PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5dump-shared")
+
+  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5dump-shared)
+endif ()
+
 ##############################################################################
 ##############################################################################
 ###           I N S T A L L A T I O N                                      ###
@@ -32,11 +47,13 @@ set (H5_DEP_EXECUTABLES h5dump)
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
 
-#INSTALL_PROGRAM_PDB (h5dump ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+if (BUILD_SHARED_LIBS)
+  INSTALL_PROGRAM_PDB (h5dump-shared ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+endif ()
 
 install (
     TARGETS
-        h5dump
+        ${H5_DEP_EXECUTABLES}
     EXPORT
         ${HDF5_EXPORTED_TARGETS}
     RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications

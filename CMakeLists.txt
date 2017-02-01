@@ -427,6 +427,12 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
   )
   if (WIN32)
     set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
+    set (CMAKE_PDB_OUTPUT_DIRECTORY_
+        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
+    )
+    set (CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY_
+        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb filess."
+    )
   else ()
     set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
   endif ()
