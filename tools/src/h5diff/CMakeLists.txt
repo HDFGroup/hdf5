@@ -22,7 +22,7 @@ set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5diff")
 set (H5_DEP_EXECUTABLES h5diff)
 
 if (BUILD_SHARED_LIBS)
-  add_executable (h5diff
+  add_executable (h5diff-shared
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_common.c
       ${HDF5_TOOLS_SRC_H5DIFF_SOURCE_DIR}/h5diff_main.c
   )
