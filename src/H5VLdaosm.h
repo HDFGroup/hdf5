@@ -60,7 +60,7 @@ typedef struct H5VL_daosm_file_t {
     daos_handle_t poh;
     daos_handle_t coh;
     daos_epoch_t epoch;
-    hbool_t snap_epoch;
+    int snap_epoch;
     char *file_name;
     uuid_t uuid;
     unsigned flags;

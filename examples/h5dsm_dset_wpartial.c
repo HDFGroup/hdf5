@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     printf("Memory File\n");
     printf("...... %s\n", file_sel_str[rank]);
     for(i = 1; i < 4; i++)
-        printf(".XXXXX. %s\n", file_sel_str[rank]);
+        printf(".XXXX. %s\n", file_sel_str[rank]);
 
     /* Fill and print buffer */
     printf("Writing data. Buffer is:\n");

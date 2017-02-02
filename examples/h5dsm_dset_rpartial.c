@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
     printf("Memory File\n");
     printf("...... %s\n", file_sel_str[rank]);
     for(i = 1; i < 4; i++)
-        printf(".XXXXX. %s\n", file_sel_str[rank]);
+        printf(".XXXX. %s\n", file_sel_str[rank]);
 
     if(rank == 0)
         MPI_Barrier(MPI_COMM_WORLD);

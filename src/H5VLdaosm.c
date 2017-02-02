@@ -362,8 +362,12 @@ H5VLdaosm_snap_create(hid_t loc_id, H5VL_daosm_snap_id_t *snap_id)
     /* Get file object */
     file = ((H5VL_daosm_obj_t *)obj->vol_obj)->file;
 
+    /* Check for write access */
+    if(!(file->flags & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "no write intent on file")
+
     /* Tell the file to save a snapshot next time it is flushed (committed) */
-    file->snap_epoch = TRUE;
+    file->snap_epoch = (int)TRUE;
 
     /* Return epoch in snap_id */
     *snap_id = (uint64_t)file->epoch;
@@ -676,7 +680,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
     file->common.type = H5I_FILE;
     file->common.file = file;
     file->common.rc = 1;
-    file->snap_epoch = FALSE;
+    file->snap_epoch = (int)FALSE;
     file->file_name = HDstrdup(name);
     file->flags = flags;
     file->max_oid = 0;
@@ -940,7 +944,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
     file->common.type = H5I_FILE;
     file->common.file = file;
     file->common.rc = 1;
-    file->snap_epoch = FALSE;
+    file->snap_epoch = (int)FALSE;
     file->file_name = HDstrdup(name);
     file->flags = flags;
     if((file->fapl_id = H5Pcopy(fapl_id)) < 0)
@@ -1217,26 +1221,32 @@ H5VL_daosm_file_flush(H5VL_daosm_file_t *file)
 
     FUNC_ENTER_NOAPI_NOINIT
 
+    /* Nothing to do if no write intent */
+    if(!(file->flags & H5F_ACC_RDWR))
+        HGOTO_DONE(SUCCEED)
+
+    /* Collectively determine if anyone requested a snapshot of the epoch */
+    if(MPI_SUCCESS != MPI_Reduce(file->my_rank == 0 ? MPI_IN_PLACE : &file->snap_epoch, &file->snap_epoch, 1, MPI_INT, MPI_LOR, 0, file->comm))
+        HGOTO_ERROR(H5E_FILE, H5E_MPI, FAIL, "failed to determine whether to take snapshot (MPI_Reduce)")
+
     /* Barrier on all ranks so we don't commit before all ranks are
      * finished writing. H5Fflush must be called collectively. */
     if(MPI_SUCCESS != MPI_Barrier(file->comm))
         HGOTO_ERROR(H5E_FILE, H5E_MPI, FAIL, "MPI_Barrier failed")
 
-    /* Commit the epoch if the file is open with write access */
-    if((file->my_rank == 0) && (file->flags & H5F_ACC_RDWR)) {
+    /* Commit the epoch */
+    if(file->my_rank == 0) {
         /* Commit the epoch */
         if(0 != (ret = daos_epoch_commit(file->coh, file->epoch, NULL /*state*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to commit epoch: %d", ret)
 
         /* Save a snapshot of this epoch if requested */
-        if(file->snap_epoch) {
-            /* Disabled until snapshots are supported in DAOS DSMINC */
+        /* Disabled until snapshots are supported in DAOS DSMINC */
 #if 0
+        if(file->snap_epoch)
             if(0 != (ret = daos_snap_create(file->coh, file->epoch, NULL /*event*/)))
                 HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "can't create snapshot: %d", ret)
 #endif
-            file->snap_epoch = FALSE;
-        } /* end if */
 
         /* Slip the epoch, indicating we don't need to reference
          * anything prior */
@@ -1245,10 +1255,13 @@ H5VL_daosm_file_flush(H5VL_daosm_file_t *file)
         if(0 != (ret = daos_epoch_slip(file->coh, file->epoch, NULL /*state*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "failed to slip epoch: %d", ret)
 #endif
-
-        /* Advance the epoch */
-        file->epoch++;
     } /* end if */
+
+    /* Advance the epoch */
+    file->epoch++;
+
+    /* Reset snap_epoch */
+    file->snap_epoch = (int)FALSE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
