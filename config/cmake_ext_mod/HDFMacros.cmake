@@ -52,7 +52,7 @@ macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
     endif ()
     install (
       FILES
-          ${targetfilename}>
+          ${targetfilename}
       DESTINATION
           ${targetdestination}
       CONFIGURATIONS RelWithDebInfo
