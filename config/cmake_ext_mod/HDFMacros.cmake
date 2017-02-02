@@ -43,9 +43,17 @@ endmacro ()
 #-------------------------------------------------------------------------------
 macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
   if (WIN32 AND MSVC)
+    get_target_property (target_type ${libtarget} TYPE)
+    if (target_type MATCHES "STATIC_LIBRARY")
+      get_property (target_name TARGET ${libtarget} PROPERTY OUTPUT_NAME_RELWITHDEBINFO)
+      get_property (target_dir TARGET ${libtarget} PROPERTY COMPILE_PDB_OUTPUT_DIRECTORY)
+      set (targetfilename ${target_dir}/${target_name}.pdb)
+    else ()
+      set (targetfilename $<TARGET_PDB_FILE:${libtarget}>)
+    endif ()
     install (
       FILES
-          $<TARGET_PDB_FILE:${libtarget}>
+          ${targetfilename}>
       DESTINATION
           ${targetdestination}
       CONFIGURATIONS RelWithDebInfo
@@ -95,6 +103,15 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
       OUTPUT_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
       OUTPUT_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
   )
+  if (WIN32 AND NOT ${libtype} MATCHES "SHARED")
+    set_target_properties (${libtarget}
+        PROPERTIES
+        COMPILE_PDB_NAME_DEBUG          ${LIB_DEBUG_NAME}
+        COMPILE_PDB_NAME_RELEASE        ${LIB_RELEASE_NAME}
+        COMPILE_PDB_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
+        COMPILE_PDB_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
+    )
+  endif ()
 
   #----- Use MSVC Naming conventions for Shared Libraries
   if (MINGW AND ${libtype} MATCHES "SHARED")

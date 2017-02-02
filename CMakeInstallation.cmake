@@ -27,24 +27,26 @@ endif ()
 # Add Target(s) to CMake Install for import into other projects
 #-----------------------------------------------------------------------------
 if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  install (
-      EXPORT ${HDF5_EXPORTED_TARGETS}
-      DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
-      FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
-      NAMESPACE ${HDF5_PACKAGE}::
-      COMPONENT configinstall
-  )
-endif ()
+  if (HDF5_EXPORTED_TARGETS)
+    install (
+        EXPORT ${HDF5_EXPORTED_TARGETS}
+        DESTINATION ${HDF5_INSTALL_CMAKE_DIR}
+        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+        NAMESPACE ${HDF5_PACKAGE}::
+        COMPONENT configinstall
+    )
+  endif ()
 
-#-----------------------------------------------------------------------------
-# Export all exported targets to the build tree for use by parent project
-#-----------------------------------------------------------------------------
-if (NOT HDF5_EXTERNALLY_CONFIGURED)
-  export (
-      TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
-      FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
-      NAMESPACE ${HDF5_PACKAGE}::
-  )
+  #-----------------------------------------------------------------------------
+  # Export all exported targets to the build tree for use by parent project
+  #-----------------------------------------------------------------------------
+  if (NOT HDF5_EXTERNALLY_CONFIGURED)
+    export (
+        TARGETS ${HDF5_LIBRARIES_TO_EXPORT} ${HDF5_LIB_DEPENDENCIES} ${HDF5_UTILS_TO_EXPORT}
+        FILE ${HDF5_PACKAGE}${HDF_PACKAGE_EXT}-targets.cmake
+        NAMESPACE ${HDF5_PACKAGE}::
+    )
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
