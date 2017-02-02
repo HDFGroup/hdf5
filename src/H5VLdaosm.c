@@ -61,6 +61,11 @@ static herr_t H5VL_daosm_file_specific(void *obj,
     va_list arguments);
 static herr_t H5VL_daosm_file_close(void *file, hid_t dxpl_id, void **req);
 
+/* Link callbacks */
+static herr_t H5VL_daosm_link_specific(void *_obj, H5VL_loc_params_t loc_params,
+    H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req,
+    va_list arguments);
+
 /* Group callbacks */
 static void *H5VL_daosm_group_create(void *_obj, H5VL_loc_params_t loc_params,
     const char *name, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
@@ -174,7 +179,7 @@ static H5VL_class_t H5VL_daosm_g = {
         NULL,//H5VL_iod_link_copy,                     /* copy */
         NULL,//H5VL_iod_link_move,                     /* move */
         NULL,//H5VL_iod_link_get,                      /* get */
-        NULL,//H5VL_iod_link_specific,                 /* specific */
+        H5VL_daosm_link_specific,               /* specific */
         NULL                                    /* optional */
     },
     {                                           /* object_cls */
@@ -1520,11 +1525,11 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
     sgl.sg_nr.num = 1;
     sgl.sg_iovs = &sg_iov;
 
-    /* Read link to group */
-    if(0 != (ret = daos_obj_fetch(grp->obj_oh, grp->common.file->epoch, &dkey, 1, &iod, &sgl, NULL /*maps */, NULL /*event*/)))
+    /* Read link */
+    if(0 != (ret = daos_obj_fetch(grp->obj_oh, grp->common.file->epoch, &dkey, 1, &iod, &sgl, NULL /*maps*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link: %d", ret)
 
-    /* Decode dset oid */
+    /* Decode target oid */
     HDassert(sizeof(oid_buf) == sizeof(grp->oid));
     p = oid_buf;
     UINT64DECODE(p, oid->lo)
@@ -1610,6 +1615,96 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_link_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_link_specific
+ *
+ * Purpose:     Specific operations with links
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              February, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_daosm_link_specific(void *_obj, H5VL_loc_params_t loc_params,
+    H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req,
+    va_list arguments)
+{
+    H5VL_daosm_obj_t *obj = (H5VL_daosm_obj_t *)_obj;
+    H5VL_daosm_group_t *target_grp = NULL;
+    const char *target_name = NULL;
+    int ret;
+    herr_t ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Determine the target group */
+    if(H5VL_OBJECT_BY_SELF == loc_params.type) {
+        target_grp = (H5VL_daosm_group_t *)obj;
+        target_grp->common.rc++;
+    } /* end if */
+    else {
+        HDassert(H5VL_OBJECT_BY_NAME == loc_params.type);
+
+        /* Traverse the path */
+        if(NULL == (target_grp = H5VL_daosm_group_traverse(obj, loc_params.loc_data.loc_by_name.name, dxpl_id, req, &target_name)))
+            HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't traverse path")
+    } /* end else */
+
+    switch (specific_type) {
+        /* H5Lexists */
+        case H5VL_LINK_EXISTS:
+            {
+                htri_t *lexists_ret = va_arg(arguments, htri_t *);
+                char const_link_key[] = H5VL_DAOSM_LINK_KEY;
+                daos_key_t dkey;
+                daos_vec_iod_t iod;
+                daos_recx_t recx;
+
+                /* Set up dkey */
+                /* For now always use dkey = const, akey = name. Add option to switch these
+                 * DSMINC */
+                daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
+
+                /* Set up recx */
+                recx.rx_rsize = DAOS_REC_ANY;
+                recx.rx_idx = (uint64_t)0;
+                recx.rx_nr = (uint64_t)1;
+
+                /* Set up iod */
+                HDmemset(&iod, 0, sizeof(iod));
+                daos_iov_set(&iod.vd_name, (void *)target_name, HDstrlen(target_name));
+                daos_csum_set(&iod.vd_kcsum, NULL, 0);
+                iod.vd_nr = 1u;
+                iod.vd_recxs = &recx;
+
+                /* Read link */
+                if(0 != (ret = daos_obj_fetch(target_grp->obj_oh, target_grp->common.file->epoch, &dkey, 1, &iod, NULL /*sgl*/, NULL /*maps*/, NULL /*event*/)))
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link: %d", ret)
+
+                /* Set return value */
+                *lexists_ret = recx.rx_rsize != (uint64_t)0;
+
+                break;
+            } /* end block */
+        case H5VL_LINK_DELETE:
+        case H5VL_LINK_ITER:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unsupported specific operation")
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
+    } /* end switch */
+
+done:
+    if(target_grp != NULL && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, FAIL, "can't close group")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_iod_link_specific() */
 
 
 /*-------------------------------------------------------------------------
@@ -1927,7 +2022,7 @@ H5VL_daosm_group_open_helper(H5VL_daosm_file_t *file, daos_obj_id_t oid,
     daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
 
     /* Set up recx */
-    recx.rx_rsize = (uint64_t)0;
+    recx.rx_rsize = DAOS_REC_ANY;
     recx.rx_idx = (uint64_t)0;
     recx.rx_nr = (uint64_t)1;
 
@@ -2346,13 +2441,13 @@ H5VL_daosm_dataset_open(void *_obj,
     daos_iov_set(&dkey, int_md_key, (daos_size_t)(sizeof(int_md_key) - 1));
 
     /* Set up recx */
-    recx[0].rx_rsize = (uint64_t)0;
+    recx[0].rx_rsize = DAOS_REC_ANY;
     recx[0].rx_idx = (uint64_t)0;
     recx[0].rx_nr = (uint64_t)1;
-    recx[1].rx_rsize = (uint64_t)0;
+    recx[1].rx_rsize = DAOS_REC_ANY;
     recx[1].rx_idx = (uint64_t)0;
     recx[1].rx_nr = (uint64_t)1;
-    recx[2].rx_rsize = (uint64_t)0;
+    recx[2].rx_rsize = DAOS_REC_ANY;
     recx[2].rx_idx = (uint64_t)0;
     recx[2].rx_nr = (uint64_t)1;
 
@@ -2395,7 +2490,7 @@ H5VL_daosm_dataset_open(void *_obj,
     sgl[2].sg_iovs = &sg_iov[2];
 
     /* Read internal metadata from dataset */
-    if(0 != (ret = daos_obj_fetch(dset->obj_oh, obj->file->epoch, &dkey, 3, iod, sgl, NULL /*maps */, NULL /*event*/)))
+    if(0 != (ret = daos_obj_fetch(dset->obj_oh, obj->file->epoch, &dkey, 3, iod, sgl, NULL /*maps*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata from dataset: %d", ret)
 
     /* Decode datatype, dataspace, and DCPL */
