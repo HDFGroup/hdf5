@@ -430,9 +430,6 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
     set (CMAKE_PDB_OUTPUT_DIRECTORY
         ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb files."
     )
-    set (CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY
-        ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all pdb filess."
-    )
   else ()
     set (CMAKE_TEST_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
   endif ()
@@ -479,7 +476,7 @@ if (HDF5_BUILD_FRAMEWORKS AND NOT BUILD_SHARED_LIBS)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to Build Shared and Static libs, default is static
+# Option to Build Shared and Static libs, default is both
 #-----------------------------------------------------------------------------
 option (BUILD_SHARED_LIBS "Build Shared Libraries" ON)
 set (H5_ENABLE_SHARED_LIB NO)
