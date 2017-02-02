@@ -162,9 +162,6 @@ static herr_t H5C__mark_flush_dep_clean(H5C_cache_entry_t * entry);
 static herr_t H5C__verify_len_eoa(H5F_t *f, const H5C_class_t * type,
     haddr_t addr, size_t *len, hbool_t actual);
 
-static herr_t H5C__generate_image(H5F_t *f, H5C_t * cache_ptr, H5C_cache_entry_t *entry_ptr, 
-                                  hid_t dxpl_id);
-
 #if H5C_DO_SLIST_SANITY_CHECKS
 static hbool_t H5C_entry_in_skip_list(H5C_t * cache_ptr, 
                                       H5C_cache_entry_t *target_ptr);
@@ -869,14 +866,12 @@ done:
 herr_t
 H5C_evict(H5F_t * f, hid_t dxpl_id)
 {
-    H5C_t *cache_ptr = f->shared->cache;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(f);
 
     /* Flush and invalidate all cache entries except the pinned entries */
     if(H5C_flush_invalidate_cache(f, dxpl_id, H5C__EVICT_ALLOW_LAST_PINS_FLAG) < 0 )
@@ -6264,6 +6259,7 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
     HDassert(entry_ptr);
     HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(entry_ptr->ring != H5C_RING_UNDEFINED);
+    HDassert(entry_ptr->type);
 
     /* setup external flags from the flags parameter */
     destroy                = ((flags & H5C__FLUSH_INVALIDATE_FLAG) != 0);
@@ -6339,20 +6335,17 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
         HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, FAIL, "Attempt to flush a protected entry.")
     } /* end if */
 
-    /* set entry_ptr->flush_in_progress = TRUE and set
+    /* Set entry_ptr->flush_in_progress = TRUE and set
      * entry_ptr->flush_marker = FALSE
      *
-     * in the parallel case, do some sanity checking in passing.
-     */
-    HDassert(entry_ptr->type);
-
-    was_dirty = entry_ptr->is_dirty;  /* needed later for logging */
-
-    /* We will set flush_in_progress back to FALSE at the end if the
+     * We will set flush_in_progress back to FALSE at the end if the
      * entry still exists at that point.
      */
     entry_ptr->flush_in_progress = TRUE;
     entry_ptr->flush_marker = FALSE;
+
+    /* Preserve current dirty state for later */
+    was_dirty = entry_ptr->is_dirty;
 
     /* The entry is dirty, and we are doing a flush, a flush destroy or have
      * been requested to generate an image.  In those cases, serialize the
@@ -8277,10 +8270,6 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t * entry,
  *              are about to delete the entry from the cache (i.e. on a 
  *              flush destroy).
  *
- * Note:	This routine is very similar to H5C__serialize_single_entry
- *		and changes to one should probably be reflected in the other.
- *		Ideally, one should be eliminated.
- *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Mohamad Chaarawi
@@ -8288,7 +8277,7 @@ H5C__assert_flush_dep_nocycle(const H5C_cache_entry_t * entry,
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr, 
     hid_t dxpl_id)
 {
@@ -8298,10 +8287,18 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
     unsigned            serialize_flags = H5C__SERIALIZE_NO_FLAGS_SET;
     herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
+    HDassert(f);
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(!entry_ptr->image_up_to_date);
+    HDassert(entry_ptr->is_dirty);
+    HDassert(!entry_ptr->is_protected);
+    HDassert(entry_ptr->type);
 
     /* make note of the entry's current address */
     old_addr = entry_ptr->addr;
@@ -8352,6 +8349,9 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
         /* If required, resize the buffer and update the entry and the cache
          * data structures */
         if(serialize_flags & H5C__SERIALIZE_RESIZED_FLAG) {
+            /* Sanity check */
+            HDassert(new_len > 0);
+
             /* Allocate a new image buffer */
             if(NULL == (entry_ptr->image_ptr = H5MM_realloc(entry_ptr->image_ptr, new_len + H5C_IMAGE_EXTRA_SPACE)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for on disk image buffer")
@@ -8417,6 +8417,13 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr,
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
     entry_ptr->image_up_to_date = TRUE;
 
+    /* Propagate the fact that the entry is serialized up the 
+     * flush dependency chain if appropriate.  Since the image must
+     * have been out of date for this function to have been called
+     * (see assertion on entry), no need to check that -- only check
+     * for flush dependency parents.
+     */
+    HDassert(entry_ptr->flush_dep_nunser_children == 0);
     if(entry_ptr->flush_dep_nparents > 0)
         if(H5C__mark_flush_dep_serialized(entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "Can't propagate serialization status to fd parents")
