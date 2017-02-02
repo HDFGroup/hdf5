@@ -916,7 +916,11 @@ H5D__chunk_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_
 
     snprintf(name, 10, "out - %d", H5F_mpi_get_rank(io_info->dset->oloc.file));
 
-    debug_file = fopen(name, "w");
+    debug_file = fopen(name, "a");
+
+    HDfprintf(debug_file, "**************************\n");
+    HDfprintf(debug_file, "* Starting write\n");
+    HDfprintf(debug_file, "**************************\n\n");
 #endif
 
     /* Call generic selection operation */
@@ -924,6 +928,14 @@ H5D__chunk_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_
         HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
 
 done:
+#ifdef PARALLEL_COMPRESS_DEBUG
+    HDfprintf(debug_file, "**************************\n");
+    HDfprintf(debug_file, "* Finished write\n");
+    HDfprintf(debug_file, "**************************\n\n");
+
+    fclose(debug_file);
+#endif
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_collective_write() */
 
@@ -2249,7 +2261,7 @@ if(H5DEBUG(D))
 static int
 H5D__cmp_chunk_addr(const void *chunk_addr_info1, const void *chunk_addr_info2)
 {
-   haddr_t addr1, addr2;
+   haddr_t addr1 = HADDR_UNDEF, addr2 = HADDR_UNDEF;
 
    FUNC_ENTER_STATIC_NOERR
 
@@ -2279,7 +2291,7 @@ H5D__cmp_chunk_addr(const void *chunk_addr_info1, const void *chunk_addr_info2)
 static int
 H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_info_entry1, const void *filtered_collective_io_info_entry2)
 {
-    haddr_t addr1, addr2;
+    haddr_t addr1 = HADDR_UNDEF, addr2 = HADDR_UNDEF;
 
     FUNC_ENTER_STATIC_NOERR
 
