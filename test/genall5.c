@@ -21,11 +21,6 @@
  *		of the same name.
  */
 
-#include <assert.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include "hdf5.h"
 #include "cache_common.h"
 #include "genall5.h"
 
