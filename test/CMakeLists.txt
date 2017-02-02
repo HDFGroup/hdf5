@@ -294,7 +294,6 @@ endforeach (test ${H5_VDS_SWMR_TESTS})
 #-- Adding test for cache_image
 add_executable (cache_image
     ${HDF5_TEST_SOURCE_DIR}/cache_image.c
-    ${HDF5_TEST_SOURCE_DIR}/cache_common.c
     ${HDF5_TEST_SOURCE_DIR}/genall5.c
 )
 TARGET_NAMING (cache_image STATIC)
@@ -304,7 +303,6 @@ set_target_properties (cache_image PROPERTIES FOLDER test)
 if (BUILD_SHARED_LIBS)
   add_executable (cache_image-shared
     ${HDF5_TEST_SOURCE_DIR}/cache_image.c
-    ${HDF5_TEST_SOURCE_DIR}/cache_common.c
     ${HDF5_TEST_SOURCE_DIR}/genall5.c
   )
   TARGET_NAMING (cache_image-shared SHARED)
