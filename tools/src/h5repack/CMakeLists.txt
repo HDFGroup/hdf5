@@ -49,15 +49,17 @@ endif ()
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
+if (HDF5_EXPORTED_TARGETS)
+  if (BUILD_SHARED_LIBS)
+    INSTALL_PROGRAM_PDB (h5repack-shared ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  endif ()
+  INSTALL_PROGRAM_PDB (h5repack ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 
-if (BUILD_SHARED_LIBS)
-  INSTALL_PROGRAM_PDB (h5repack-shared ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  install (
+      TARGETS
+          ${H5_DEP_EXECUTABLES}
+      EXPORT
+          ${HDF5_EXPORTED_TARGETS}
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
+  )
 endif ()
-
-install (
-    TARGETS
-        ${H5_DEP_EXECUTABLES}
-    EXPORT
-        ${HDF5_EXPORTED_TARGETS}
-    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
-)

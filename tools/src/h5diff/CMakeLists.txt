@@ -56,28 +56,29 @@ endif ()
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
-
-if (BUILD_SHARED_LIBS)
-  INSTALL_PROGRAM_PDB (h5diff-shared ${HDF5_INSTALL_BIN_DIR} toolsapplications)
-endif ()
-
-install (
-    TARGETS
-        ${H5_DEP_EXECUTABLES}
-    EXPORT
-        ${HDF5_EXPORTED_TARGETS}
-    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
-)
-
-if (H5_HAVE_PARALLEL)
-
-  #INSTALL_PROGRAM_PDB (ph5diff ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+if (HDF5_EXPORTED_TARGETS)
+  if (BUILD_SHARED_LIBS)
+    INSTALL_PROGRAM_PDB (h5diff-shared ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  endif ()
+  INSTALL_PROGRAM_PDB (h5diff ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 
   install (
       TARGETS
-          ph5diff
+          ${H5_DEP_EXECUTABLES}
       EXPORT
           ${HDF5_EXPORTED_TARGETS}
       RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
   )
+
+  if (H5_HAVE_PARALLEL)
+    #INSTALL_PROGRAM_PDB (ph5diff ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+
+    install (
+        TARGETS
+            ph5diff
+        EXPORT
+            ${HDF5_EXPORTED_TARGETS}
+        RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
+    )
+  endif ()
 endif ()

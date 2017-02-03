@@ -43,9 +43,16 @@ endmacro ()
 #-------------------------------------------------------------------------------
 macro (INSTALL_TARGET_PDB libtarget targetdestination targetcomponent)
   if (WIN32 AND MSVC)
+    get_target_property (target_type ${libtarget} TYPE)
+    if (${libtype} MATCHES "SHARED")
+      set (targetfilename $<TARGET_PDB_FILE:${libtarget}>)
+    else ()
+      get_property (target_name TARGET ${libtarget} PROPERTY OUTPUT_NAME_RELWITHDEBINFO)
+      set (targetfilename $<TARGET_FILE_DIR:${libtarget}>/${target_name}.pdb)
+    endif ()
     install (
       FILES
-          $<TARGET_PDB_FILE:${libtarget}>
+          ${targetfilename}
       DESTINATION
           ${targetdestination}
       CONFIGURATIONS RelWithDebInfo
@@ -95,6 +102,18 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
       OUTPUT_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
       OUTPUT_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
   )
+  if (${libtype} MATCHES "STATIC")
+    if (WIN32)
+      set_target_properties (${libtarget}
+          PROPERTIES
+          COMPILE_PDB_NAME_DEBUG          ${LIB_DEBUG_NAME}
+          COMPILE_PDB_NAME_RELEASE        ${LIB_RELEASE_NAME}
+          COMPILE_PDB_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
+          COMPILE_PDB_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
+          COMPILE_PDB_OUTPUT_DIRECTORY    "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+      )
+    endif ()
+  endif ()
 
   #----- Use MSVC Naming conventions for Shared Libraries
   if (MINGW AND ${libtype} MATCHES "SHARED")
@@ -105,7 +124,6 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
         PREFIX ""
     )
   endif ()
-
 endmacro ()
 
 #-------------------------------------------------------------------------------
@@ -132,7 +150,7 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
         set_target_properties (${libtarget} PROPERTIES
             IMPORTED_IMPLIB "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
             IMPORTED_LOCATION "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/${CMAKE_IMPORT_LIBRARY_PREFIX}${IMPORT_LIB_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX}"
-         )
+        )
       endif ()
     else ()
       if (CYGWIN)
@@ -161,7 +179,6 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
       )
     endif ()
   endif ()
-
 endmacro ()
 
 #-------------------------------------------------------------------------------
@@ -169,22 +186,14 @@ macro (TARGET_C_PROPERTIES wintarget libtype addcompileflags addlinkflags)
   if (MSVC)
     TARGET_MSVC_PROPERTIES (${wintarget} ${libtype} "${addcompileflags} ${WIN_COMPILE_FLAGS}" "${addlinkflags} ${WIN_LINK_FLAGS}")
   else ()
-    set_target_properties (${wintarget}
-        PROPERTIES
-            COMPILE_FLAGS "${addcompileflags}"
-            LINK_FLAGS "${addlinkflags}"
-    )
+    set_target_properties (${wintarget} PROPERTIES COMPILE_FLAGS "${addcompileflags}" LINK_FLAGS "${addlinkflags}")
   endif ()
 endmacro ()
 
 #-------------------------------------------------------------------------------
 macro (TARGET_MSVC_PROPERTIES wintarget libtype addcompileflags addlinkflags)
   if (MSVC)
-    set_target_properties (${wintarget}
-        PROPERTIES
-            COMPILE_FLAGS "${addcompileflags}"
-            LINK_FLAGS "${addlinkflags}"
-    )
+    set_target_properties (${wintarget} PROPERTIES COMPILE_FLAGS "${addcompileflags}" LINK_FLAGS "${addlinkflags}")
   endif ()
 endmacro ()
 
@@ -199,17 +208,9 @@ endmacro ()
 macro (TARGET_FORTRAN_WIN_PROPERTIES forttarget libtype addcompileflags addlinkflags)
   if (MSVC)
     if (${libtype} MATCHES "SHARED")
-      set_target_properties (${forttarget}
-          PROPERTIES
-              COMPILE_FLAGS "/dll ${addcompileflags}"
-              LINK_FLAGS "/SUBSYSTEM:CONSOLE ${addlinkflags}"
-      )
+      set_target_properties (${forttarget} PROPERTIES COMPILE_FLAGS "/dll ${addcompileflags}" LINK_FLAGS "/SUBSYSTEM:CONSOLE ${addlinkflags}")
     else ()
-      set_target_properties (${forttarget}
-          PROPERTIES
-              COMPILE_FLAGS "${addcompileflags}"
-              LINK_FLAGS "/SUBSYSTEM:CONSOLE ${addlinkflags}"
-      )
+      set_target_properties (${forttarget} PROPERTIES COMPILE_FLAGS "${addcompileflags}" LINK_FLAGS "/SUBSYSTEM:CONSOLE ${addlinkflags}")
     endif ()
   endif ()
 endmacro ()
