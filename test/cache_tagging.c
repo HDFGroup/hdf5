@@ -21,11 +21,8 @@
 #include "H5Fpkg.h"
 
 #include "testhdf5.h"
-#include "h5test.h"
 #include "cache_common.h"
 
-#include "H5Iprivate.h"
-#include "H5ACprivate.h"
 #include "H5HLprivate.h"
 
 /* ============ */

@@ -20,9 +20,6 @@
  *		with the cache implemented in H5C.c
  */
 
-#include "h5test.h"
-#include "H5Iprivate.h"
-#include "H5ACprivate.h"
 #include "cache_common.h"
 
 /* extern declarations */
