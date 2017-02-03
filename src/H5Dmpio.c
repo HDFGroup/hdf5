@@ -377,34 +377,37 @@ H5D__mpio_array_gather(const H5D_io_info_t *io_info, void *local_array,
     if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&local_array_num_entries, &gathered_array_num_entries, 1, MPI_INT, MPI_SUM, io_info->comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
 
-    if (NULL == (gathered_array = H5MM_malloc(gathered_array_num_entries * array_entry_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate gathered array")
+    /* If 0 entries resulted from the collective operation, no one is writing anything */
+    if (gathered_array_num_entries > 0) {
+        if (NULL == (gathered_array = H5MM_malloc(gathered_array_num_entries * array_entry_size)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate gathered array")
 
-    if (NULL == (receive_counts_array = (int *) H5MM_malloc((size_t) mpi_size * sizeof(*receive_counts_array))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate receive counts array")
+        if (NULL == (receive_counts_array = (int *) H5MM_malloc((size_t) mpi_size * sizeof(*receive_counts_array))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate receive counts array")
 
-    if (NULL == (displacements_array = (int *) H5MM_malloc((size_t) mpi_size * sizeof(*displacements_array))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate receive displacements array")
+        if (NULL == (displacements_array = (int *) H5MM_malloc((size_t) mpi_size * sizeof(*displacements_array))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate receive displacements array")
 
-    /* Inform each process of how many entries each other process is contributing to the resulting array */
-    if (MPI_SUCCESS != (mpi_code = MPI_Allgather(&local_array_num_entries, 1, MPI_INT, receive_counts_array, 1, MPI_INT, io_info->comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code)
+        /* Inform each process of how many entries each other process is contributing to the resulting array */
+        if (MPI_SUCCESS != (mpi_code = MPI_Allgather(&local_array_num_entries, 1, MPI_INT, receive_counts_array, 1, MPI_INT, io_info->comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code)
 
-    /* Multiply each receive count by the size of the array entry, since the data is sent as bytes */
-    for (i = 0; i < (size_t) mpi_size; i++)
-        H5_CHECKED_ASSIGN(receive_counts_array[i], int, (size_t) receive_counts_array[i] * array_entry_size, size_t);
+        /* Multiply each receive count by the size of the array entry, since the data is sent as bytes */
+        for (i = 0; i < (size_t) mpi_size; i++)
+            H5_CHECKED_ASSIGN(receive_counts_array[i], int, (size_t) receive_counts_array[i] * array_entry_size, size_t);
 
-    /* Set receive buffer offsets for MPI_Allgatherv */
-    displacements_array[0] = 0;
-    for (i = 1; i < (size_t) mpi_size; i++)
-        displacements_array[i] = displacements_array[i - 1] + receive_counts_array[i - 1];
+        /* Set receive buffer offsets for MPI_Allgatherv */
+        displacements_array[0] = 0;
+        for (i = 1; i < (size_t) mpi_size; i++)
+            displacements_array[i] = displacements_array[i - 1] + receive_counts_array[i - 1];
 
-    H5_CHECKED_ASSIGN(sendcount, int, local_array_num_entries * array_entry_size, size_t);
-    if (MPI_SUCCESS != (mpi_code = MPI_Allgatherv(local_array, sendcount, MPI_BYTE,
-            gathered_array, receive_counts_array, displacements_array, MPI_BYTE, io_info->comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Allgatherv failed", mpi_code)
+        H5_CHECKED_ASSIGN(sendcount, int, local_array_num_entries * array_entry_size, size_t);
+        if (MPI_SUCCESS != (mpi_code = MPI_Allgatherv(local_array, sendcount, MPI_BYTE,
+                gathered_array, receive_counts_array, displacements_array, MPI_BYTE, io_info->comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Allgatherv failed", mpi_code)
 
-    if (sort_func) HDqsort(gathered_array, gathered_array_num_entries, array_entry_size, sort_func);
+        if (sort_func) HDqsort(gathered_array, gathered_array_num_entries, array_entry_size, sort_func);
+    } /* end if */
 
     *_gathered_array = gathered_array;
     *_gathered_array_num_entries = gathered_array_num_entries;
@@ -853,7 +856,7 @@ H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                     HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish optimized multiple chunk MPI-IO")
             }
             break;
-    }
+    } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1914,6 +1917,9 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
         if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&chunk_list_num_entries, &max_num_chunks,
                 1, MPI_UNSIGNED_LONG_LONG, MPI_MAX, io_info->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
+
+        /* If no one is writing anything at all, end the operation */
+        if (!(max_num_chunks > 0)) HGOTO_DONE(SUCCEED);
 
         /* Allocate arrays for storing MPI file and mem types and whether or not the
          * types were derived.
