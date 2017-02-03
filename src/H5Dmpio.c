@@ -1945,7 +1945,6 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
             /* Gather the new chunk sizes to all processes for a collective re-allocation
              * of the chunks in the file
              */
-            /* XXX: May access unavailable memory on processes with no selection */
             if (H5D__mpio_array_gather(io_info, &chunk_list[i], have_chunk_to_process ? 1 : 0, sizeof(*chunk_list),
                     (void **) &collective_chunk_list, &collective_chunk_list_num_entries, NULL) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather new chunk sizes")
@@ -3148,6 +3147,8 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
     size_t          buf_size;
     size_t          mod_data_alloced_bytes = 0;
     H5S_t          *dataspace = NULL; /* Other process' dataspace for the chunk */
+    void           *tmp_gath_buf = NULL; /* Temporary gather buffer for owner of the chunk to gather into from
+                                            application write buffer before scattering out to the chunk data buffer */
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -3241,13 +3242,36 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
             break;
 
         case H5D_IO_OP_WRITE:
-            /* Update the chunk data with the modifications from the current (owning) process */
+            if (NULL == (tmp_gath_buf = H5MM_malloc((hsize_t) iter_nelmts * type_info->src_type_size)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate temporary gather buffer")
+
+            /* Gather modification data from the application write buffer into a temporary buffer */
             if (!H5D__gather_mem(io_info->u.wbuf, chunk_entry->chunk_info.mspace, mem_iter,
-                    (size_t) iter_nelmts, io_info->dxpl_cache, chunk_entry->buf))
+                    (size_t) iter_nelmts, io_info->dxpl_cache, tmp_gath_buf))
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "couldn't gather from write buffer")
 
-            if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+            if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
+            mem_iter_init = FALSE;
+
+            /* Initialize iterator for file selection */
+            if (H5S_select_iter_init(mem_iter, chunk_entry->chunk_info.fspace, type_info->dst_type_size) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information")
+            mem_iter_init = TRUE;
+
+            if ((iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_entry->chunk_info.fspace)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "dataspace is invalid")
+
+            /* Scatter the owner's modification data into the chunk data buffer according to
+             * the file space.
+             */
+            if (H5D__scatter_mem(tmp_gath_buf, chunk_entry->chunk_info.fspace, mem_iter,
+                    (size_t) iter_nelmts, io_info->dxpl_cache, chunk_entry->buf) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't scatter to chunk data buffer")
+
+            if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
+            mem_iter_init = FALSE;
 
             /* Update the chunk data with any modifications from other processes */
             while (chunk_entry->num_writers > 1) {
@@ -3336,14 +3360,14 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
 
                 chunk_entry->num_writers--;
 
-                if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
+                if (H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
+                mem_iter_init = FALSE;
                 if (dataspace) {
                     if (H5S_close(dataspace) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
                     dataspace = NULL;
                 }
-                mem_iter_init = FALSE;
             } /* end while */
 
 
@@ -3374,11 +3398,13 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
             break;
         default:
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "invalid I/O operation")
-    }
+    } /* end switch */
 
 done:
     if (mod_data)
         H5MM_free(mod_data);
+    if (tmp_gath_buf)
+        H5MM_free(tmp_gath_buf);
     if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
     if (mem_iter)
