@@ -102,6 +102,18 @@ macro (HDF_SET_LIB_OPTIONS libtarget libname libtype)
       OUTPUT_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
       OUTPUT_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
   )
+  if (${libtype} MATCHES "STATIC")
+    if (WIN32)
+      set_target_properties (${libtarget}
+          PROPERTIES
+          COMPILE_PDB_NAME_DEBUG          ${LIB_DEBUG_NAME}
+          COMPILE_PDB_NAME_RELEASE        ${LIB_RELEASE_NAME}
+          COMPILE_PDB_NAME_MINSIZEREL     ${LIB_RELEASE_NAME}
+          COMPILE_PDB_NAME_RELWITHDEBINFO ${LIB_RELEASE_NAME}
+          COMPILE_PDB_OUTPUT_DIRECTORY    "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+      )
+    endif ()
+  endif ()
 
   #----- Use MSVC Naming conventions for Shared Libraries
   if (MINGW AND ${libtype} MATCHES "SHARED")
@@ -167,7 +179,6 @@ macro (HDF_IMPORT_SET_LIB_OPTIONS libtarget libname libtype libversion)
       )
     endif ()
   endif ()
-
 endmacro ()
 
 #-------------------------------------------------------------------------------
