@@ -23,4 +23,4 @@ set_target_properties (ptExampleFL PROPERTIES FOLDER examples/hl/cpp)
 
 if (BUILD_TESTING)
   include (CMakeTests.cmake)
-endif (BUILD_TESTING)
+endif ()

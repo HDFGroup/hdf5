@@ -73,10 +73,10 @@ if(CTEST_USE_TAR_SOURCE)
   ## Uncompress source if tar file provided
   ## --------------------------
   if(WIN32)
-    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} x ${CTEST_DASHBOARD_ROOT}\\${CTEST_USE_TAR_SOURCE}.zip]")
+    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} x ${CTEST_USE_TAR_SOURCE}.zip]")
     execute_process(COMMAND ${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}\\${CTEST_USE_TAR_SOURCE}.zip RESULT_VARIABLE rv)
   else()
-    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}/${CTEST_USE_TAR_SOURCE}.tar]")
+    message(STATUS "extracting... [${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_USE_TAR_SOURCE}.tar]")
     execute_process(COMMAND ${CMAKE_EXECUTABLE_NAME} -E tar -xvf ${CTEST_DASHBOARD_ROOT}/${CTEST_USE_TAR_SOURCE}.tar RESULT_VARIABLE rv)
   endif()
 
@@ -201,7 +201,7 @@ else()
       "${CTEST_CMAKE_COMMAND} -C \"${CTEST_SOURCE_DIRECTORY}/config/cmake/cacheinit.cmake\" -DCMAKE_BUILD_TYPE:STRING=${CTEST_CONFIGURATION_TYPE} ${BUILD_OPTIONS} \"-G${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\""
   )
 endif()
-
+ 
 #-----------------------------------------------------------------------------
 ## -- set output to english
 set($ENV{LC_MESSAGES}  "en_EN")

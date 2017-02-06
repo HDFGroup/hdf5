@@ -54,11 +54,11 @@ if (BUILD_TESTING)
     set_target_properties (h5jamgentest PROPERTIES FOLDER generator/tools)
 
     #add_test (NAME h5jamgentest COMMAND $<TARGET_FILE:h5jamgentest>)
-  endif (HDF5_BUILD_GENERATORS)
+  endif ()
 
   include (CMakeTests.cmake)
 
-endif (BUILD_TESTING)
+endif ()
 
 ##############################################################################
 ##############################################################################
@@ -69,13 +69,14 @@ endif (BUILD_TESTING)
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
+if (HDF5_EXPORTED_TARGETS)
+  INSTALL_PROGRAM_PDB (h5jam ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 
-#INSTALL_PROGRAM_PDB (h5jam ${HDF5_INSTALL_BIN_DIR} toolsapplications)
-
-install (
-    TARGETS
-        h5jam h5unjam
-    EXPORT
-        ${HDF5_EXPORTED_TARGETS}
-    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
-)
+  install (
+      TARGETS
+          h5jam h5unjam
+      EXPORT
+          ${HDF5_EXPORTED_TARGETS}
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
+  )
+endif ()
