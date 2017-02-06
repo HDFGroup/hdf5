@@ -672,7 +672,7 @@ if (GENERATE_ERROR_HEADERS)
     add_custom_target(run_perl_scripts ALL
         DEPENDS ${HDF5_BINARY_DIR}/H5Edefin.h ${HDF5_BINARY_DIR}/H5version.h ${HDF5_BINARY_DIR}/H5overflow.h
     )
-  else (PERL_FOUND)
+  else ()
     message (STATUS "Cannot generate headers - perl not found")
   endif ()
 endif ()
@@ -696,7 +696,7 @@ TARGET_C_PROPERTIES (${HDF5_LIB_TARGET} STATIC " " " ")
 target_link_libraries (${HDF5_LIB_TARGET} ${LINK_LIBS})
 if (NOT WIN32)
   target_link_libraries (${HDF5_LIB_TARGET} dl)
-endif (
+endif ()
 if (H5_HAVE_PARALLEL AND MPI_C_FOUND)
   target_link_libraries (${HDF5_LIB_TARGET} ${MPI_C_LIBRARIES})
 endif ()
