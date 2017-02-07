@@ -52,8 +52,8 @@ static struct long_options l_opts[] = {
     { "metadata_block_size", require_arg, 'M' },
     { "threshold", require_arg, 't' },
     { "alignment", require_arg, 'a' },
-    { "infile", require_arg, 'i' }, /* -i for backward compability */
-    { "outfile", require_arg, 'o' }, /* -o for backward compability */
+    { "infile", require_arg, 'i' },   /* -i for backward compability */
+    { "outfile", require_arg, 'o' },  /* -o for backward compability */
     { "fs_strategy", require_arg, 'S' },
     { "fs_threshold", require_arg, 'T' },
     { "enable-error-stack", no_arg, 'E' },
@@ -208,13 +208,11 @@ static void usage(const char *prog) {
  * Programmer:  Quincey Koziol
  *              Saturday, 31. January 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-static void leave(int ret) {
+static void leave(int ret)
+{
     h5tools_close();
-
     HDexit(ret);
 }
 
@@ -231,10 +229,9 @@ static void leave(int ret) {
  *
  *-------------------------------------------------------------------------
  */
-
 static
-int read_info(const char *filename, pack_opt_t *options) {
-
+int read_info(const char *filename, pack_opt_t *options)
+{
     char stype[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     char comp_info[1024];
     FILE *fp = NULL;
@@ -368,10 +365,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 static
-int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
-
+int parse_command_line(int argc, const char **argv, pack_opt_t* options)
+{
     int opt;
     int ret_value = 0;
 
@@ -379,185 +375,180 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options) {
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char) opt) {
 
-        /* -i for backward compability */
-        case 'i':
-            infile = opt_arg;
-            has_i_o = 1;
-            break;
+            /* -i for backward compability */
+            case 'i':
+                infile = opt_arg;
+                has_i_o = 1;
+                break;
 
-        /* -o for backward compability */
-        case 'o':
-            outfile = opt_arg;
-            has_i_o = 1;
-            break;
+            /* -o for backward compability */
+            case 'o':
+                outfile = opt_arg;
+                has_i_o = 1;
+                break;
 
-        case 'h':
-            usage(h5tools_getprogname());
-            h5tools_setstatus(EXIT_SUCCESS);
-            ret_value = -1;
-            goto done;
-
-        case 'V':
-            print_version(h5tools_getprogname());
-            h5tools_setstatus(EXIT_SUCCESS);
-            ret_value = -1;
-            goto done;
-
-        case 'v':
-            options->verbose = 1;
-            break;
-
-        case 'f':
-            /* parse the -f filter option */
-            if (h5repack_addfilter(opt_arg, options) < 0) {
-                error_msg("in parsing filter\n");
-                h5tools_setstatus(EXIT_FAILURE);
+            case 'h':
+                usage(h5tools_getprogname());
+                h5tools_setstatus(EXIT_SUCCESS);
                 ret_value = -1;
                 goto done;
-            }
-            break;
 
-        case 'l':
-            /* parse the -l layout option */
-            if (h5repack_addlayout(opt_arg, options) < 0) {
-                error_msg("in parsing layout\n");
-                h5tools_setstatus(EXIT_FAILURE);
+            case 'V':
+                print_version(h5tools_getprogname());
+                h5tools_setstatus(EXIT_SUCCESS);
                 ret_value = -1;
                 goto done;
-            }
-            break;
 
-        case 'm':
-            options->min_comp = HDstrtoull(opt_arg , NULL, 0);
-            if ((int) options->min_comp <= 0) {
-                error_msg("invalid minimum compress size <%s>\n", opt_arg);
-                h5tools_setstatus(EXIT_FAILURE);
-                ret_value = -1;
-                goto done;
-            }
-            break;
+            case 'v':
+                options->verbose = 1;
+                break;
 
-        case 'e':
-            ret_value = read_info(opt_arg, options);
-            if (ret_value < 0)
-                goto done;
-            break;
-
-        case 'n':
-            options->use_native = 1;
-            break;
-
-        case 'L':
-            options->latest = TRUE;
-            break;
-
-        case 'c':
-            options->grp_compact = HDatoi( opt_arg );
-            if (options->grp_compact > 0)
-                options->latest = TRUE; /* must use latest format */
-            break;
-
-        case 'd':
-            options->grp_indexed = HDatoi( opt_arg );
-            if (options->grp_indexed > 0)
-                options->latest = TRUE; /* must use latest format */
-            break;
-
-        case 's':
-            {
-                int idx = 0;
-                int ssize = 0;
-                char *msgPtr = HDstrchr( opt_arg, ':');
-                options->latest = TRUE; /* must use latest format */
-                if (msgPtr == NULL) {
-                    ssize = HDatoi( opt_arg );
-                    for (idx = 0; idx < 5; idx++)
-                        options->msg_size[idx] = ssize;
-                }
-                else {
-                    char msgType[10];
-                    HDstrcpy(msgType, msgPtr + 1);
-                    msgPtr[0] = '\0';
-                    ssize = HDatoi( opt_arg );
-                    if (HDstrncmp(msgType, "dspace",6) == 0) {
-                        options->msg_size[0] = ssize;
-                    }
-                    else if (HDstrncmp(msgType, "dtype", 5) == 0) {
-                        options->msg_size[1] = ssize;
-                    }
-                    else if (HDstrncmp(msgType, "fill", 4) == 0) {
-                        options->msg_size[2] = ssize;
-                    }
-                    else if (HDstrncmp(msgType, "pline", 5) == 0) {
-                        options->msg_size[3] = ssize;
-                    }
-                    else if (HDstrncmp(msgType, "attr", 4) == 0) {
-                        options->msg_size[4] = ssize;
-                    }
-                }
-            }
-            break;
-
-        case 'u':
-            options->ublock_filename = opt_arg;
-            break;
-
-        case 'b':
-            options->ublock_size = (hsize_t) HDatol( opt_arg );
-            break;
-
-        case 'M':
-            options->meta_block_size = (hsize_t) HDatol( opt_arg );
-            break;
-
-        case 't':
-            options->threshold = (hsize_t) HDatol( opt_arg );
-            break;
-
-        case 'a':
-            options->alignment = HDstrtoull(opt_arg , NULL, 0);
-            if (options->alignment < 1) {
-                error_msg("invalid alignment size\n", opt_arg);
-                h5tools_setstatus(EXIT_FAILURE);
-                ret_value = -1;
-                goto done;
-            }
-            break;
-
-        case 'S':
-            {
-                char strategy[MAX_NC_NAME];
-
-                HDstrcpy(strategy, opt_arg);
-                if (!HDstrcmp(strategy, "ALL_PERSIST"))
-                    options->fs_strategy = H5F_FILE_SPACE_ALL_PERSIST;
-                else if (!HDstrcmp(strategy, "ALL"))
-                    options->fs_strategy = H5F_FILE_SPACE_ALL;
-                else if (!HDstrcmp(strategy, "AGGR_VFD"))
-                    options->fs_strategy = H5F_FILE_SPACE_AGGR_VFD;
-                else if (!HDstrcmp(strategy, "VFD"))
-                    options->fs_strategy = H5F_FILE_SPACE_VFD;
-                else {
-                    error_msg("invalid file space management strategy\n", opt_arg);
+            case 'f':
+                /* parse the -f filter option */
+                if (h5repack_addfilter(opt_arg, options) < 0) {
+                    error_msg("in parsing filter\n");
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
                     goto done;
                 }
-            }
-            break;
+                break;
 
-        case 'T':
-            options->fs_threshold = (hsize_t) HDatol( opt_arg );
-            break;
+            case 'l':
+                /* parse the -l layout option */
+                if (h5repack_addlayout(opt_arg, options) < 0) {
+                    error_msg("in parsing layout\n");
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
+                }
+                break;
 
-        case 'E':
-            enable_error_stack = TRUE;
-            break;
+            case 'm':
+                options->min_comp = HDstrtoull(opt_arg , NULL, 0);
+                if ((int) options->min_comp <= 0) {
+                    error_msg("invalid minimum compress size <%s>\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
+                }
+                break;
 
-        default:
-            break;
+            case 'e':
+                ret_value = read_info(opt_arg, options);
+                if (ret_value < 0)
+                    goto done;
+                break;
+
+            case 'n':
+                options->use_native = 1;
+                break;
+
+            case 'L':
+                options->latest = TRUE;
+                break;
+
+            case 'c':
+                options->grp_compact = HDatoi( opt_arg );
+                if (options->grp_compact > 0)
+                    options->latest = TRUE; /* must use latest format */
+                break;
+
+            case 'd':
+                options->grp_indexed = HDatoi( opt_arg );
+                if (options->grp_indexed > 0)
+                    options->latest = TRUE; /* must use latest format */
+                break;
+
+            case 's':
+                {
+                    int idx = 0;
+                    int ssize = 0;
+                    char *msgPtr = HDstrchr( opt_arg, ':');
+                    options->latest = TRUE; /* must use latest format */
+                    if (msgPtr == NULL) {
+                        ssize = HDatoi( opt_arg );
+                        for (idx = 0; idx < 5; idx++)
+                            options->msg_size[idx] = ssize;
+                    }
+                    else {
+                        char msgType[10];
+
+                        HDstrcpy(msgType, msgPtr + 1);
+                        msgPtr[0] = '\0';
+                        ssize = HDatoi( opt_arg );
+                        if (HDstrncmp(msgType, "dspace",6) == 0)
+                            options->msg_size[0] = ssize;
+                        else if (HDstrncmp(msgType, "dtype", 5) == 0)
+                            options->msg_size[1] = ssize;
+                        else if (HDstrncmp(msgType, "fill", 4) == 0)
+                            options->msg_size[2] = ssize;
+                        else if (HDstrncmp(msgType, "pline", 5) == 0)
+                            options->msg_size[3] = ssize;
+                        else if (HDstrncmp(msgType, "attr", 4) == 0)
+                            options->msg_size[4] = ssize;
+                    }
+                }
+                break;
+
+            case 'u':
+                options->ublock_filename = opt_arg;
+                break;
+
+            case 'b':
+                options->ublock_size = (hsize_t) HDatol( opt_arg );
+                break;
+
+            case 'M':
+                options->meta_block_size = (hsize_t) HDatol( opt_arg );
+                break;
+
+            case 't':
+                options->threshold = (hsize_t) HDatol( opt_arg );
+                break;
+
+            case 'a':
+                options->alignment = HDstrtoull(opt_arg , NULL, 0);
+                if (options->alignment < 1) {
+                    error_msg("invalid alignment size\n", opt_arg);
+                    h5tools_setstatus(EXIT_FAILURE);
+                    ret_value = -1;
+                    goto done;
+                }
+                break;
+
+            case 'S':
+                {
+                    char strategy[MAX_NC_NAME];
+
+                    HDstrcpy(strategy, opt_arg);
+                    if(!HDstrcmp(strategy, "ALL_PERSIST"))
+                        options->fs_strategy = H5F_FILE_SPACE_ALL_PERSIST;
+                    else if(!HDstrcmp(strategy, "ALL"))
+                        options->fs_strategy = H5F_FILE_SPACE_ALL;
+                    else if(!HDstrcmp(strategy, "AGGR_VFD"))
+                        options->fs_strategy = H5F_FILE_SPACE_AGGR_VFD;
+                    else if(!HDstrcmp(strategy, "VFD"))
+                        options->fs_strategy = H5F_FILE_SPACE_VFD;
+                    else {
+                        error_msg("invalid file space management strategy\n", opt_arg);
+                        h5tools_setstatus(EXIT_FAILURE);
+                        ret_value = -1;
+                        goto done;
+                    }
+                }
+                break;
+
+            case 'T':
+                options->fs_threshold = (hsize_t) HDatol( opt_arg );
+                break;
+
+	    case 'E':
+		enable_error_stack = TRUE;
+		break;
+
+            default:
+                break;
         } /* switch */
-
     } /* while */
 
     if (has_i_o == 0) {
@@ -591,13 +582,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-int main(int argc, const char **argv) {
+int main(int argc, const char **argv)
+{
+    pack_opt_t options; /*the global options */
     H5E_auto2_t         func;
     H5E_auto2_t         tools_func;
     void               *edata;
     void               *tools_edata;
-
-    pack_opt_t options; /*the global options */
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);

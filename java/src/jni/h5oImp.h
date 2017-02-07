@@ -191,7 +191,7 @@ Java_hdf_hdf5lib_H5__1H5Oopen_1by_1idx
  * Method:    H5Oflush
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL 
+JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Oflush
   (JNIEnv*, jclass, jlong);
 
@@ -200,7 +200,7 @@ Java_hdf_hdf5lib_H5_H5Oflush
  * Method:    H5Orefresh
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL 
+JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Orefresh
   (JNIEnv*, jclass, jlong);
 
