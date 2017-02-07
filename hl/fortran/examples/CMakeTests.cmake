@@ -7,4 +7,4 @@
 
 foreach (example ${examples})
   add_test (NAME HL_FORTRAN_f90_ex_${example} COMMAND $<TARGET_FILE:hl_f90_ex_${example}>)
-endforeach (example ${examples})
+endforeach ()

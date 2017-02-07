@@ -30,10 +30,10 @@ add_library (${HDF5_TEST_LIB_TARGET} STATIC ${TEST_LIB_SRCS} ${TEST_LIB_HEADERS}
 TARGET_C_PROPERTIES (${HDF5_TEST_LIB_TARGET} STATIC " " " ")
 if (MSVC)
   target_link_libraries (${HDF5_TEST_LIB_TARGET} "ws2_32.lib")
-endif (MSVC)
+endif ()
 if (MINGW)
   target_link_libraries (${HDF5_TEST_LIB_TARGET} "wsock32.lib")
-endif (MINGW)
+endif ()
 target_link_libraries (${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
 H5_SET_LIB_OPTIONS (${HDF5_TEST_LIB_TARGET} ${HDF5_TEST_LIB_NAME} STATIC)
 set_target_properties (${HDF5_TEST_LIB_TARGET} PROPERTIES
@@ -46,10 +46,10 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (${HDF5_TEST_LIBSH_TARGET} SHARED " " " ")
   if (MSVC)
     target_link_libraries (${HDF5_TEST_LIBSH_TARGET} "ws2_32.lib")
-  endif (MSVC)
+  endif ()
   if (MINGW)
     target_link_libraries (${HDF5_TEST_LIBSH_TARGET} "wsock32.lib")
-  endif (MINGW)
+  endif ()
   target_link_libraries (${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   H5_SET_LIB_OPTIONS (${HDF5_TEST_LIBSH_TARGET} ${HDF5_TEST_LIB_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
   set_target_properties (${HDF5_TEST_LIBSH_TARGET} PROPERTIES
@@ -63,8 +63,8 @@ if (BUILD_SHARED_LIBS)
         APPEND PROPERTY COMPILE_DEFINITIONS
             "H5_HAVE_THREADSAFE"
     )
-  endif (HDF5_ENABLE_THREADSAFE)
-endif (BUILD_SHARED_LIBS)
+  endif ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # If plugin library tests can be tested
@@ -95,10 +95,7 @@ endif (BUILD_SHARED_LIBS)
     add_library (${HDF5_TEST_PLUGIN_LIB_TARGET} SHARED ${HDF5_TEST_SOURCE_DIR}/${test_lib}.c)
     TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} SHARED " " " ")
     target_link_libraries (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-    H5_SET_LIB_OPTIONS (
-        ${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME}
-        SHARED ${HDF5_PACKAGE_SOVERSION}
-    )
+    H5_SET_LIB_OPTIONS (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
     set_target_properties (${HDF5_TEST_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
 
     #-----------------------------------------------------------------------------
@@ -112,7 +109,7 @@ endif (BUILD_SHARED_LIBS)
           "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/testdir1/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
     )
-  endforeach (test_lib ${TEST_PLUGIN_LIBS})
+  endforeach ()
 
   foreach (test_lib ${TEST2_PLUGIN_LIBS})
     set (HDF5_TEST_PLUGIN_LIB_CORENAME         "${test_lib}")
@@ -124,10 +121,7 @@ endif (BUILD_SHARED_LIBS)
     add_library (${HDF5_TEST_PLUGIN_LIB_TARGET} SHARED ${HDF5_TEST_SOURCE_DIR}/${test_lib}.c)
     TARGET_C_PROPERTIES (${HDF5_TEST_PLUGIN_LIB_TARGET} SHARED " " " ")
     target_link_libraries (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-    H5_SET_LIB_OPTIONS (
-        ${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME}
-        SHARED ${HDF5_PACKAGE_SOVERSION}
-    )
+    H5_SET_LIB_OPTIONS (${HDF5_TEST_PLUGIN_LIB_TARGET} ${HDF5_TEST_PLUGIN_LIB_NAME} SHARED ${HDF5_PACKAGE_SOVERSION})
     set_target_properties (${HDF5_TEST_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
 
     #-----------------------------------------------------------------------------
@@ -141,7 +135,7 @@ endif (BUILD_SHARED_LIBS)
           "$<TARGET_FILE:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
           "${CMAKE_BINARY_DIR}/testdir2/$<TARGET_FILE_NAME:${HDF5_TEST_PLUGIN_LIB_TARGET}>"
     )
-  endforeach (test_lib ${TEST2_PLUGIN_LIBS})
+  endforeach ()
 
 set (testhdf5_SRCS
     ${HDF5_TEST_SOURCE_DIR}/testhdf5.c
@@ -183,7 +177,7 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (testhdf5-shared SHARED " " " ")
   target_link_libraries (testhdf5-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (testhdf5-shared PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
+endif ()
 
 MACRO (ADD_H5_EXE file)
   add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
@@ -197,8 +191,8 @@ MACRO (ADD_H5_EXE file)
     TARGET_C_PROPERTIES (${file}-shared SHARED " " " ")
     target_link_libraries (${file}-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
     set_target_properties (${file}-shared PROPERTIES FOLDER test)
-  endif (BUILD_SHARED_LIBS)
-ENDMACRO (ADD_H5_EXE file)
+  endif ()
+ENDMACRO ()
 
 set (H5_TESTS
     accum
@@ -255,7 +249,7 @@ set (H5_TESTS
 
 foreach (test ${H5_TESTS})
   ADD_H5_EXE(${test})
-endforeach (test ${H5_TESTS})
+endforeach ()
 
 ##############################################################################
 ##############################################################################
@@ -275,7 +269,7 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (cache-shared SHARED " " " ")
   target_link_libraries (cache-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (cache-shared PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
+endif ()
 
 #-- Adding test for cache_api
 add_executable (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
@@ -289,7 +283,7 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (cache_api-shared SHARED " " " ")
   target_link_libraries (cache_api-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (cache_api-shared PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
+endif ()
 
 #-- Adding test for hyperslab
 add_executable (hyperslab ${HDF5_TEST_SOURCE_DIR}/hyperslab.c)
@@ -308,8 +302,8 @@ if (BUILD_SHARED_LIBS)
         APPEND PROPERTY COMPILE_DEFINITIONS
             "H5_HAVE_THREADSAFE"
     )
-  endif (HDF5_ENABLE_THREADSAFE)
-endif (BUILD_SHARED_LIBS)
+  endif ()
+endif ()
 
 #-- Adding test for ttsafe
 add_executable (ttsafe
@@ -340,8 +334,8 @@ if (BUILD_SHARED_LIBS)
         APPEND PROPERTY COMPILE_DEFINITIONS
             "H5_HAVE_THREADSAFE"
     )
-  endif (HDF5_ENABLE_THREADSAFE)
-endif (BUILD_SHARED_LIBS)
+  endif ()
+endif ()
 
 #-- Adding test for err_compat
 if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
@@ -356,8 +350,8 @@ if (HDF5_ENABLE_DEPRECATED_SYMBOLS)
     TARGET_C_PROPERTIES (err_compat-shared SHARED " " " ")
     target_link_libraries (err_compat-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
     set_target_properties (err_compat-shared PROPERTIES FOLDER test)
-  endif (BUILD_SHARED_LIBS)
-endif (HDF5_ENABLE_DEPRECATED_SYMBOLS)
+  endif ()
+endif ()
 
 #-- Adding test for error_test
 add_executable (error_test ${HDF5_TEST_SOURCE_DIR}/error_test.c)
@@ -371,7 +365,7 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (error_test-shared SHARED " " " ")
   target_link_libraries (error_test-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (error_test-shared PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
+endif ()
 
 #-- Adding test for links_env
 add_executable (links_env ${HDF5_TEST_SOURCE_DIR}/links_env.c)
@@ -385,7 +379,7 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (links_env-shared SHARED " " " ")
   target_link_libraries (links_env-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (links_env-shared PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
+endif ()
 
 #-- Adding test for libinfo
 set (GREP_RUNNER ${PROJECT_BINARY_DIR}/GrepRunner.cmake)
@@ -393,9 +387,9 @@ file (WRITE ${GREP_RUNNER}
   "file (STRINGS \${TEST_PROGRAM} TEST_RESULT REGEX \"SUMMARY OF THE HDF5 CONFIGURATION\")
 if (\${TEST_RESULT} STREQUAL \"0\")
   message (FATAL_ERROR \"Failed: The output: \${TEST_RESULT} of \${TEST_PROGRAM} did not contain SUMMARY OF THE HDF5 CONFIGURATION\")
-else (\${TEST_RESULT} STREQUAL \"0\")
+else ()
   message (STATUS \"COMMAND Result: \${TEST_RESULT}\")
-endif (\${TEST_RESULT} STREQUAL \"0\")
+endif ()
 "
 )
 
@@ -408,12 +402,12 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (plugin SHARED " " " ")
   target_link_libraries (plugin ${HDF5_TEST_LIB_TARGET})
   set_target_properties (plugin PROPERTIES FOLDER test)
-else (BUILD_SHARED_LIBS)
+else ()
   add_executable (plugin ${HDF5_TEST_SOURCE_DIR}/plugin.c)
   TARGET_NAMING (plugin STATIC)
   TARGET_C_PROPERTIES (plugin STATIC " " " ")
   target_link_libraries (plugin ${HDF5_TEST_LIB_TARGET})
   set_target_properties (plugin PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
+endif ()
 
 include (CMakeTests.cmake)

@@ -17,7 +17,7 @@
 
     if (DIRECT_VFD)
       set (VFD_LIST ${VFD_LIST} direct)
-    endif (DIRECT_VFD)
+    endif ()
 
     MACRO (ADD_VFD_TEST vfdname resultcode)
       add_test (
@@ -33,10 +33,10 @@
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK-VFD-${vfdname}-h5repacktest PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       set (last_test "H5REPACK-VFD-${vfdname}-h5repacktest")
-    ENDMACRO (ADD_VFD_TEST)
-  endif (HDF5_TEST_VFD)
+    ENDMACRO ()
+  endif ()
 
   # --------------------------------------------------------------------
   # Copy all the HDF5 files from the source directory into the test directory
@@ -100,7 +100,7 @@
   foreach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     get_filename_component(fname "${h5_file}" NAME)
     HDFTEST_COPY_FILE("${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5repack_files")
-  endforeach (h5_file ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+  endforeach ()
   add_custom_target(h5repack_files ALL COMMENT "Copying files needed by h5repack tests" DEPENDS ${h5repack_files_list})
 
 ##############################################################################
@@ -118,7 +118,7 @@
         set_tests_properties (H5REPACK-${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
       set (last_test "H5REPACK-${testname}")
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else ()
       add_test (
           NAME H5REPACK-h5repack-${testname}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -137,8 +137,8 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES DEPENDS "H5REPACK-h5repack-${testname}-clear-objects")
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_HELP_TEST)
+    endif ()
+  ENDMACRO ()
 
   MACRO (ADD_H5_TEST_OLD testname testtype testfile)
     if ("${testtype}" STREQUAL "SKIP")
@@ -147,8 +147,8 @@
             NAME H5REPACK_OLD-${testname}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
         )
-      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else ("${testtype}" STREQUAL "SKIP")
+      endif ()
+    else ()
       add_test (
           NAME H5REPACK_OLD-${testname}
           COMMAND $<TARGET_FILE:h5repack> ${ARGN} -i ${PROJECT_BINARY_DIR}/testfiles/${testfile} -o ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
@@ -161,8 +161,8 @@
           COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK_OLD-${testname}_DFF PROPERTIES DEPENDS H5REPACK_OLD-${testname})
-    endif ("${testtype}" STREQUAL "SKIP")
-  ENDMACRO (ADD_H5_TEST_OLD)
+    endif ()
+  ENDMACRO ()
 
   MACRO (ADD_H5_TEST testname testtype testfile)
     if ("${testtype}" STREQUAL "SKIP")
@@ -171,8 +171,8 @@
             NAME H5REPACK-${testname}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
         )
-      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else ("${testtype}" STREQUAL "SKIP")
+      endif ()
+    else ()
       add_test (
           NAME H5REPACK-${testname}
           COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
@@ -185,8 +185,8 @@
           COMMAND $<TARGET_FILE:h5diff> ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
       )
       set_tests_properties (H5REPACK-${testname}_DFF PROPERTIES DEPENDS H5REPACK-${testname})
-    endif ("${testtype}" STREQUAL "SKIP")
-  ENDMACRO (ADD_H5_TEST)
+    endif ()
+  ENDMACRO ()
 
   MACRO (ADD_H5_CMP_TEST testname testfilter testtype resultcode resultfile)
     if ("${testtype}" STREQUAL "SKIP")
@@ -195,14 +195,14 @@
             NAME H5REPACK_CMP-${testname}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
         )
-      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else ("${testtype}" STREQUAL "SKIP")
+      endif ()
+    else ()
       # If using memchecker add tests without using scripts
       if (HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_CMP-${testname}
             COMMAND $<TARGET_FILE:h5repack> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile})
-      else (HDF5_ENABLE_USING_MEMCHECKER)
+      else ()
         add_test (
             NAME H5REPACK_CMP-${testname}
             COMMAND "${CMAKE_COMMAND}"
@@ -215,12 +215,12 @@
                 -D "TEST_REFERENCE=${resultfile}-${testname}.tst"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
-      endif (HDF5_ENABLE_USING_MEMCHECKER)
+      endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5REPACK_CMP-${testname} PROPERTIES DEPENDS ${last_test})
       endif ()
-    endif ("${testtype}" STREQUAL "SKIP")
-  ENDMACRO (ADD_H5_CMP_TEST)
+    endif ()
+  ENDMACRO ()
 
   MACRO (ADD_H5_DMP_TEST testname testtype resultcode resultfile)
     if ("${testtype}" STREQUAL "SKIP")
@@ -229,8 +229,8 @@
             NAME H5REPACK_DMP-${testname}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
         )
-      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else ("${testtype}" STREQUAL "SKIP")
+      endif ()
+    else ()
       # If using memchecker add tests without using scripts
       add_test (
           NAME H5REPACK_DMP-${testname}
@@ -251,9 +251,9 @@
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
         )
         set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES DEPENDS "H5REPACK_DMP-${testname}")
-      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    endif ("${testtype}" STREQUAL "SKIP")
-  ENDMACRO (ADD_H5_DMP_TEST)
+      endif ()
+    endif ()
+  ENDMACRO ()
 
   MACRO (ADD_H5_VERIFY_TEST testname testtype resultcode testfile testdset testfilter)
     if ("${testtype}" STREQUAL "SKIP")
@@ -262,8 +262,8 @@
             NAME H5REPACK_VERIFY_LAYOUT-${testname}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP -d ${testdset} -pH ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
         )
-      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else ("${testtype}" STREQUAL "SKIP")
+      endif ()
+    else ()
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5REPACK_VERIFY_LAYOUT-${testname}
@@ -291,7 +291,7 @@
                   -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
           )
           set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF)
-        else ("${resultcode}" STREQUAL "0")
+        else ()
           if ("${testfilter}" STREQUAL "CHUNKED")
             set (nottestfilter "(CONTIGUOUS|COMPACT)")
           endif ()
@@ -314,10 +314,10 @@
                   -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
           )
           set_tests_properties (H5REPACK_VERIFY_LAYOUT-${testname}_DMP PROPERTIES DEPENDS H5REPACK_VERIFY_LAYOUT-${testname}_DFF)
-        endif ("${resultcode}" STREQUAL "0")
-      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    endif ("${testtype}" STREQUAL "SKIP")
-  ENDMACRO (ADD_H5_VERIFY_TEST)
+        endif ()
+      endif ()
+    endif ()
+  ENDMACRO ()
 
   MACRO (ADD_H5_TEST_META testname testfile)
       add_test (
@@ -336,7 +336,7 @@
       add_test (NAME H5REPACK_META-${testname} COMMAND ${CMAKE_COMMAND} -E compare_files ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_N.${testname}.h5 ${PROJECT_BINARY_DIR}/testfiles/out-${testname}_M.${testname}.h5)
       set_tests_properties (H5REPACK_META-${testname} PROPERTIES WILL_FAIL "true")
       set_tests_properties (H5REPACK_META-${testname} PROPERTIES DEPENDS H5REPACK_META-${testname}_M)
-  ENDMACRO (ADD_H5_TEST_META)
+  ENDMACRO ()
 
   MACRO (ADD_H5_UD_TEST testname resultcode resultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
@@ -380,8 +380,8 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5REPACK_UD-h5dump-${testname} PROPERTIES DEPENDS "H5REPACK_UD-${testname}")
-    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_UD_TEST)
+    endif ()
+  ENDMACRO ()
 
 ##############################################################################
 ##############################################################################
@@ -597,7 +597,7 @@
   )
   if (NOT "${last_test}" STREQUAL "")
     set_tests_properties (H5REPACK-clearall-objects PROPERTIES DEPENDS ${last_test})
-  endif (NOT "${last_test}" STREQUAL "")
+  endif ()
 
   ADD_HELP_TEST(help 0 -h)
 
@@ -606,14 +606,14 @@
     if (HDF5_ENABLE_SZIP_ENCODING)
       set (passRegex "yes")
       set_tests_properties (H5REPACK-testh5repack_detect_szip PROPERTIES PASS_REGULAR_EXPRESSION "yes")
-    else (HDF5_ENABLE_SZIP_ENCODING)
+    else ()
       set (passRegex "no")
       set_tests_properties (H5REPACK-testh5repack_detect_szip PROPERTIES PASS_REGULAR_EXPRESSION "no")
-    endif (HDF5_ENABLE_SZIP_ENCODING)
-  else (HDF5_ENABLE_SZIP_SUPPORT)
+    endif ()
+  else ()
     set (passRegex "no")
     set_tests_properties (H5REPACK-testh5repack_detect_szip PROPERTIES PASS_REGULAR_EXPRESSION "no")
-  endif (HDF5_ENABLE_SZIP_SUPPORT)
+  endif ()
   set_tests_properties (H5REPACK-testh5repack_detect_szip PROPERTIES DEPENDS H5REPACK-clearall-objects)
 
   add_test (NAME H5REPACK-h5repacktest COMMAND $<TARGET_FILE:h5repacktest>)
@@ -637,15 +637,15 @@
   set (USE_FILTER_SZIP_ENCODER "no")
   if (HDF5_ENABLE_SZIP_ENCODING)
     set (USE_FILTER_SZIP_ENCODER ${testh5repack_detect_szip})
-  endif (HDF5_ENABLE_SZIP_ENCODING)
+  endif ()
 
   if (H5_HAVE_FILTER_DEFLATE)
     set (USE_FILTER_DEFLATE "true")
-  endif (H5_HAVE_FILTER_DEFLATE)
+  endif ()
 
   if (H5_HAVE_FILTER_SZIP)
     set (USE_FILTER_SZIP "true")
-  endif (H5_HAVE_FILTER_SZIP)
+  endif ()
 
 # copy files (these files have no filters)
   ADD_H5_TEST (fill "TEST" ${FILE0})
@@ -662,7 +662,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_TEST (gzip_individual ${TESTTYPE} ${arg})
 
 # gzip for all
@@ -670,7 +670,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_TEST (gzip_all ${TESTTYPE} ${arg})
 
 # szip with individual object
@@ -678,7 +678,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
+  endif ()
   ADD_H5_TEST (szip_individual ${TESTTYPE} ${arg})
 
 # szip for all
@@ -686,7 +686,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
+  endif ()
   ADD_H5_TEST (szip_all ${TESTTYPE} ${arg})
 
 # shuffle with individual object
@@ -710,7 +710,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_TEST (all_filters ${TESTTYPE} ${arg})
 
 # verbose gzip with individual object
@@ -718,7 +718,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_CMP_TEST (gzip_verbose_filters "O?...ing file[^\n]+\n" ${TESTTYPE} 0 ${arg})
 
 ###########################################################
@@ -730,7 +730,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
+  endif ()
   ADD_H5_TEST (szip_copy ${TESTTYPE} ${arg})
 
 # szip remove
@@ -738,7 +738,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP)
+  endif ()
   ADD_H5_TEST (szip_remove ${TESTTYPE} ${arg})
 
 # deflate copy
@@ -746,7 +746,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_TEST (deflate_copy ${TESTTYPE} ${arg})
 
 # deflate remove
@@ -754,7 +754,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_TEST (deflate_remove ${TESTTYPE} ${arg})
 
 # shuffle copy
@@ -802,7 +802,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER)
+  endif ()
   ADD_H5_TEST (remove_all ${TESTTYPE} ${arg})
 
 #filter conversions
@@ -810,14 +810,14 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_SZIP OR NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_TEST (deflate_convert ${TESTTYPE} ${arg})
 
   set (arg ${FILE7} -f dset_szip:GZIP=1)
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_SZIP OR NOT USE_FILTER_SZIP_ENCODER OR NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_TEST (szip_convert ${TESTTYPE} ${arg})
 
 #limit
@@ -825,7 +825,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_DMP_TEST (deflate_limit ${TESTTYPE} 0 ${arg})
 
 #file
@@ -833,7 +833,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_TEST (deflate_file ${TESTTYPE} ${arg})
 
 #########################################################
@@ -920,7 +920,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_VERIFY_TEST (layout_long_switches ${TESTTYPE} 1 ${FILE4} null CHUNKED ${arg})
 
 # latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
@@ -928,7 +928,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_VERIFY_TEST (layout_short_switches ${TESTTYPE} 1 ${FILE4} null CHUNKED ${arg})
 
 # several global filters
@@ -936,7 +936,7 @@
   set (TESTTYPE "TEST")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_TEST (global_filters ${TESTTYPE} ${arg})
 
 # syntax of -i infile -o outfile
@@ -945,7 +945,7 @@
   set (TESTTYPE "LEGACY")
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
   ADD_H5_TEST_OLD (old_style_layout_short_switches ${TESTTYPE} ${arg})
 
 # add a userblock to file
@@ -1005,4 +1005,4 @@
     foreach (vfd ${VFD_LIST})
       ADD_VFD_TEST (${vfd} 0)
     endforeach (vfd ${VFD_LIST})
-  endif (HDF5_TEST_VFD)
+  endif ()

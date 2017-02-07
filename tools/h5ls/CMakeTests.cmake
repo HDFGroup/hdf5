@@ -410,9 +410,9 @@
   # ( HDFFV-7838, )
   if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tattrreg_be 0 -w80 -v -d tattrreg.h5)
-  else (H5_WORDS_BIGENDIAN)
+  else ()
     ADD_H5_TEST (tattrreg_le 0 -w80 -v -d tattrreg.h5)
-  endif (H5_WORDS_BIGENDIAN)
+  endif ()
 
   # test for non-existing file
   ADD_H5_TEST (nosuchfile 1 nosuchfile.h5)
@@ -420,19 +420,19 @@
   # test for variable length data types in verbose mode
   if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tvldtypes2be 0 -v tvldtypes1.h5)
-  else (H5_WORDS_BIGENDIAN)
+  else ()
     ADD_H5_TEST (tvldtypes2le 0 -v tvldtypes1.h5)
-  endif (H5_WORDS_BIGENDIAN)
+  endif ()
 
   # test for dataset region references data types in verbose mode
   if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tdataregbe 0 -v tdatareg.h5)
-  else (H5_WORDS_BIGENDIAN)
+  else ()
     ADD_H5_TEST (tdataregle 0 -v tdatareg.h5)
-  endif (H5_WORDS_BIGENDIAN)
+  endif ()
 
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
 ADD_H5_UD_TEST (h5ls_plugin_test 0 tudfilter -w80 -d tudfilter.h5)
-  
+

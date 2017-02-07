@@ -18,6 +18,17 @@ set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5copy")
 
 set (H5_DEP_EXECUTABLES h5copy)
 
+if (BUILD_SHARED_LIBS)
+  add_executable (h5copy-shared ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copy.c)
+  TARGET_NAMING (h5copy-shared SHARED)
+  TARGET_C_PROPERTIES (h5copy-shared SHARED " " " ")
+  target_link_libraries (h5copy-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (h5copy-shared PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5copy-shared")
+
+  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5copy-shared)
+endif ()
+
 if (BUILD_TESTING)
   if (HDF5_BUILD_GENERATORS)
     add_executable (h5copygentest ${HDF5_TOOLS_H5COPY_SOURCE_DIR}/h5copygentest.c)
@@ -27,10 +38,10 @@ if (BUILD_TESTING)
     set_target_properties (h5copygentest PROPERTIES FOLDER generator/tools)
 
     #add_test (NAME h5copygentest COMMAND $<TARGET_FILE:h5copygentest>)
-  endif (HDF5_BUILD_GENERATORS)
+  endif ()
 
   include (CMakeTests.cmake)
-endif (BUILD_TESTING)
+endif ()
 
 ##############################################################################
 ##############################################################################
@@ -41,13 +52,17 @@ endif (BUILD_TESTING)
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
+if (HDF5_EXPORTED_TARGETS)
+  if (BUILD_SHARED_LIBS)
+    INSTALL_PROGRAM_PDB (h5copy-shared ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  endif ()
+  INSTALL_PROGRAM_PDB (h5copy ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 
-#INSTALL_PROGRAM_PDB (h5copy ${HDF5_INSTALL_BIN_DIR} toolsapplications)
-
-install (
-    TARGETS
-        h5copy
-    EXPORT
-        ${HDF5_EXPORTED_TARGETS}
-    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
-)
+  install (
+      TARGETS
+          ${H5_DEP_EXECUTABLES}
+      EXPORT
+          ${HDF5_EXPORTED_TARGETS}
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
+  )
+endif ()

@@ -16,7 +16,7 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_SOURCE_DIR}/lib)
 # --------------------------------------------------------------------
 if (NOT BUILD_TESTING)
   add_subdirectory (${HDF5_TOOLS_SOURCE_DIR}/lib)
-endif (NOT BUILD_TESTING)
+endif ()
 
 #-- Add the h5diff and test executables
 add_subdirectory (${HDF5_TOOLS_SOURCE_DIR}/h5diff)

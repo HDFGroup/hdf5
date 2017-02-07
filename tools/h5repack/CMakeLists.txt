@@ -29,6 +29,17 @@ set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5repack")
 
 set (H5_DEP_EXECUTABLES h5repack)
 
+if (BUILD_SHARED_LIBS)
+  add_executable (h5repack-shared ${REPACK_COMMON_SRCS} ${HDF5_TOOLS_H5REPACK_SOURCE_DIR}/h5repack_main.c)
+  TARGET_NAMING (h5repack-shared SHARED)
+  TARGET_C_PROPERTIES (h5repack-shared SHARED " " " ")
+  target_link_libraries (h5repack-shared  ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+  set_target_properties (h5repack-shared PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5repack-shared")
+
+  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5repack-shared)
+endif ()
+
 if (BUILD_TESTING)
   # --------------------------------------------------------------------
   # Add h5Repack test executables
@@ -91,7 +102,7 @@ if (BUILD_TESTING)
 
   include (CMakeTests.cmake)
 
-endif (BUILD_TESTING)
+endif ()
 
 ##############################################################################
 ##############################################################################
@@ -102,13 +113,17 @@ endif (BUILD_TESTING)
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
+if (HDF5_EXPORTED_TARGETS)
+  if (BUILD_SHARED_LIBS)
+    INSTALL_PROGRAM_PDB (h5repack-shared ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+  endif ()
+  INSTALL_PROGRAM_PDB (h5repack ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 
-#INSTALL_PROGRAM_PDB (h5repack ${HDF5_INSTALL_BIN_DIR} toolsapplications)
-
-install (
-    TARGETS
-        h5repack
-    EXPORT
-        ${HDF5_EXPORTED_TARGETS}
-    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
-)
+  install (
+      TARGETS
+          ${H5_DEP_EXECUTABLES}
+      EXPORT
+          ${HDF5_EXPORTED_TARGETS}
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
+  )
+endif ()
