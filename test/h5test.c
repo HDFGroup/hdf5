@@ -1744,9 +1744,7 @@ error:
 void
 h5_send_message(const char *send, const char *arg1, const char *arg2)
 {
-    FILE *signalfile;
-
-    HDremove(TMP_SIGNAL_FILE);
+    FILE *signalfile = NULL;
 
     /* Create signal file (which will send signal to some other process) */
     signalfile = HDfopen(TMP_SIGNAL_FILE, "w+");
