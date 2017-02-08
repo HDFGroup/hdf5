@@ -107,6 +107,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
     }
 #endif /* QAK */
 
+#ifdef QAK
     if(verbose) {
         char verbose_name[1024];
 
@@ -114,6 +115,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
 
         H5Pset_fapl_log(fapl, verbose_name, H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
     } /* end if */
+#endif /* QAK */
 
     /* Open the file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
