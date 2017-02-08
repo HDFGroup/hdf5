@@ -278,6 +278,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     if((fapl = h5_fileaccess()) < 0)
         return -1;
 
+#ifdef QAK
     /* Log I/O when verbose output it enbabled */
     if(verbose) {
         char verbose_name[1024];
@@ -286,7 +287,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
 
         H5Pset_fapl_log(fapl, verbose_name, H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
     } /* end if */
-
+#endif /* QAK */
 
     /* Loop over reading records until [at least] the correct # of seconds have passed */
     while(curr_time < (time_t)(start_time + (time_t)nseconds)) {
