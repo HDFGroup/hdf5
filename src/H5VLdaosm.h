@@ -47,16 +47,23 @@ extern "C" {
  * file */
 #define H5VL_DAOSM_SNAP_OPEN_ID "daosm_snap_open"
 
-/* Common object information */
-typedef struct H5VL_daosm_obj_t {
+/* Common object and attribute information */
+typedef struct H5VL_daosm_item_t {
     H5I_type_t type;
     struct H5VL_daosm_file_t *file;
     int rc;
+} H5VL_daosm_item_t;
+
+/* Common object information */
+typedef struct H5VL_daosm_obj_t {
+    H5VL_daosm_item_t item; /* Must be first */
+    daos_obj_id_t oid;
+    daos_handle_t obj_oh;
 } H5VL_daosm_obj_t;
 
 /* The file struct */
 typedef struct H5VL_daosm_file_t {
-    H5VL_daosm_obj_t common; /* Must be first */
+    H5VL_daosm_item_t item; /* Must be first */
     daos_handle_t poh;
     daos_handle_t coh;
     daos_epoch_t epoch;
@@ -78,23 +85,28 @@ typedef struct H5VL_daosm_file_t {
 
 /* The group struct */
 typedef struct H5VL_daosm_group_t {
-    H5VL_daosm_obj_t common; /* Must be first */
-    daos_obj_id_t oid;
-    daos_handle_t obj_oh;
+    H5VL_daosm_obj_t obj; /* Must be first */
     hid_t gcpl_id;
     hid_t gapl_id;
 } H5VL_daosm_group_t;
 
 /* The dataset struct */
 typedef struct H5VL_daosm_dset_t {
-    H5VL_daosm_obj_t common; /* Must be first */
-    daos_obj_id_t oid;
-    daos_handle_t obj_oh;
+    H5VL_daosm_obj_t obj; /* Must be first */
     hid_t type_id;
     hid_t space_id;
     hid_t dcpl_id;
     hid_t dapl_id;
 } H5VL_daosm_dset_t;
+
+/* The attribute struct */
+typedef struct H5VL_daosm_attr_t {
+    H5VL_daosm_item_t item; /* Must be first */
+    H5VL_daosm_obj_t *parent;
+    char *name;
+    hid_t type_id;
+    hid_t space_id;
+} H5VL_daosm_attr_t;
 
 extern hid_t H5VL_DAOSM_g;
 

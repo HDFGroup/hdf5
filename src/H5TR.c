@@ -251,7 +251,7 @@ H5TR_create(void *_obj, const H5VL_class_t *vol_cls, daos_epoch_t epoch)
     if(NULL == (tr = H5FL_CALLOC(H5TR_t)))
         HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, NULL, "can't allocate top transaction structure")
 
-    tr->file = obj->file;
+    tr->file = obj->item.file;
     tr->epoch = epoch;
     tr->vol_cls = vol_cls;
 
