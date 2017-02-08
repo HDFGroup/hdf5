@@ -87,8 +87,9 @@ static herr_t H5VL_daosm_dataset_write(void *_dset, hid_t mem_type_id,
     hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf,
     void **req);
 /*static herr_t H5VL_daosm_dataset_specific(void *_dset, H5VL_dataset_specific_t specific_type,
-                                        hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_daosm_dataset_get(void *_dset, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);*/
+                                        hid_t dxpl_id, void **req, va_list arguments);*/
+static herr_t H5VL_daosm_dataset_get(void *_dset, H5VL_dataset_get_t get_type,
+    hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_daosm_dataset_close(void *_dset, hid_t dxpl_id, void **req);
 
 /* Datatype callbacks */
@@ -166,7 +167,7 @@ static H5VL_class_t H5VL_daosm_g = {
         H5VL_daosm_dataset_open,                /* open */
         H5VL_daosm_dataset_read,                /* read */
         H5VL_daosm_dataset_write,               /* write */
-        NULL,//H5VL_iod_dataset_get,                   /* get */
+        H5VL_daosm_dataset_get,                 /* get */
         NULL,//H5VL_iod_dataset_specific,              /* specific */
         NULL,                                   /* optional */
         H5VL_daosm_dataset_close                /* close */
@@ -2901,6 +2902,83 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_dataset_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_dataset_get
+ *
+ * Purpose:     Gets certain information about a dataset
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              February, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_daosm_dataset_get(void *_dset, H5VL_dataset_get_t get_type, 
+    hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+{
+    H5VL_daosm_dset_t *dset = (H5VL_daosm_dset_t *)_dset;
+    herr_t       ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    switch (get_type) {
+        case H5VL_DATASET_GET_DCPL:
+            {
+                hid_t *plist_id = va_arg(arguments, hid_t *);
+
+                /* Retrieve the file's access property list */
+                if((*plist_id = H5Pcopy(dset->dcpl_id)) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dset creation property list")
+
+                break;
+            }
+        case H5VL_DATASET_GET_DAPL:
+            {
+                hid_t *plist_id = va_arg(arguments, hid_t *);
+
+                /* Retrieve the file's access property list */
+                if((*plist_id = H5Pcopy(dset->dapl_id)) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dset access property list")
+
+                break;
+            }
+        case H5VL_DATASET_GET_SPACE:
+            {
+                hid_t *ret_id = va_arg(arguments, hid_t *);
+
+                if((*ret_id = H5Scopy(dset->space_id)) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get dataspace ID of dataset");
+                break;
+            }
+        case H5VL_DATASET_GET_SPACE_STATUS:
+            {
+                H5D_space_status_t *allocation = va_arg(arguments, H5D_space_status_t *);
+
+                *allocation = H5D_SPACE_STATUS_NOT_ALLOCATED;
+                break;
+            }
+        case H5VL_DATASET_GET_TYPE:
+            {
+                hid_t *ret_id = va_arg(arguments, hid_t *);
+
+                if((*ret_id = H5Tcopy(dset->type_id)) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, FAIL, "can't get datatype ID of dataset")
+                break;
+            }
+        case H5VL_DATASET_GET_STORAGE_SIZE:
+        case H5VL_DATASET_GET_OFFSET:
+        default:
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get this type of information from dataset")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_dataset_get() */
 
 
 /*-------------------------------------------------------------------------
