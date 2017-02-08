@@ -1154,6 +1154,13 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id,
             io_info->io_ops.single_write = H5D__mpio_select_write;
         } /* end if */
         else {
+            /* Check if there are any filters in the pipeline. If there are,
+             * we cannot break to independent I/O if this is a write operation;
+             * otherwise there will be metadata inconsistencies in the file.
+             */
+            if (io_info->op_type == H5D_IO_OP_WRITE && io_info->dset->shared->dcpl_cache.pline.nused > 0)
+                HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL, "can't perform independent write with filters in pipeline")
+
             /* If we won't be doing collective I/O, but the user asked for
              * collective I/O, change the request to use independent I/O, but
              * mark it so that we remember to revert the change.
