@@ -475,7 +475,7 @@ hbool_t
 H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring)
 {
     H5C_t *cache_ptr;
-    hbool_t ret_value;          /* Return value */
+    hbool_t ret_value = FALSE;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

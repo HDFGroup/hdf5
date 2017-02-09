@@ -91,17 +91,17 @@ int setup_parameters(int argc, char * const argv[])
 	return(-1);
     }
     /* set chunk dims */
-    UC_opts.chunkdims[0] = UC_opts.chunkplanes;
-    UC_opts.chunkdims[1]=UC_opts.chunkdims[2]=UC_opts.chunksize;
+    UC_opts.chunkdims[0] = (hsize_t)UC_opts.chunkplanes;
+    UC_opts.chunkdims[1] = UC_opts.chunkdims[2] = (hsize_t)UC_opts.chunksize;
 
     /* set dataset initial and max dims */
     UC_opts.dims[0] = 0;
     UC_opts.max_dims[0] = H5S_UNLIMITED;
-    UC_opts.dims[1] = UC_opts.dims[2] = UC_opts.max_dims[1]=UC_opts.max_dims[2]=UC_opts.chunksize;
+    UC_opts.dims[1] = UC_opts.dims[2] = UC_opts.max_dims[1] = UC_opts.max_dims[2] = (hsize_t)UC_opts.chunksize;
 
     /* set nplanes */
     if (UC_opts.nplanes == 0)
-        UC_opts.nplanes = UC_opts.chunksize;
+        UC_opts.nplanes = (hsize_t)UC_opts.chunksize;
 
     /* show parameters and return */
     show_parameters();

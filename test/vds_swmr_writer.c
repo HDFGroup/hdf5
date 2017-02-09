@@ -80,7 +80,7 @@ main(int argc, char *argv[])
     /* Write planes to the dataset */
     for(i = 0; i < N_PLANES_TO_WRITE; i++) {
 
-        unsigned delay;     /* Time interval between plane writes */
+        time_t delay;           /* Time interval between plane writes */
 
         /* Cork the dataset's metadata in the cache */
         if(H5Odisable_mdc_flushes(did) < 0)
@@ -118,7 +118,7 @@ main(int argc, char *argv[])
             TEST_ERROR
 
         /* Wait one second between writing planes */
-        delay = HDtime(0) + 1;
+        delay = HDtime(0) + (time_t)1;
         while(HDtime(0) < delay)
             ;
 

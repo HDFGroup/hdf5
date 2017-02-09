@@ -78,6 +78,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
     hid_t fid;          /* File ID for new HDF5 file */
     hid_t fapl;         /* File access property list */
     unsigned u, v;      /* Local index variable */
+    hbool_t use_log_vfd = FALSE;    /* Use the log VFD (set this manually) */
 
     HDassert(filename);
 
@@ -107,15 +108,13 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file,
     }
 #endif /* QAK */
 
-#ifdef QAK
-    if(verbose) {
+    if(use_log_vfd) {
         char verbose_name[1024];
 
         HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_writer.log.%u", random_seed);
 
         H5Pset_fapl_log(fapl, verbose_name, H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
     } /* end if */
-#endif /* QAK */
 
     /* Open the file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl)) < 0)
