@@ -205,8 +205,8 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     hid_t fid;                  /* SWMR test file ID */
     hid_t fapl;                 /* file access property list */
     symbol_t record;            /* The record to read from the dataset */
-    unsigned read_attempts;     /* The number of read attempts for metadata */
     unsigned v;                 /* Local index variable */
+    hbool_t use_log_vfd = FALSE;    /* Use the log VFD (set this manually) */
 
     HDassert(filename);
     HDassert(nseconds != 0);
@@ -278,16 +278,14 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file,
     if((fapl = h5_fileaccess()) < 0)
         return -1;
 
-#ifdef QAK
     /* Log I/O when verbose output it enbabled */
-    if(verbose) {
+    if(use_log_vfd) {
         char verbose_name[1024];
 
         HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_reader.log.%u", random_seed);
 
         H5Pset_fapl_log(fapl, verbose_name, H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
     } /* end if */
-#endif /* QAK */
 
     /* Loop over reading records until [at least] the correct # of seconds have passed */
     while(curr_time < (time_t)(start_time + (time_t)nseconds)) {
