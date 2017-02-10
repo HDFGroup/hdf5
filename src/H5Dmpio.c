@@ -3009,7 +3009,7 @@ done:
     if (mod_data)
         H5MM_free(mod_data);
     if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
     if (mem_iter)
         H5MM_free(mem_iter);
 
@@ -3409,12 +3409,12 @@ done:
     if (tmp_gath_buf)
         H5MM_free(tmp_gath_buf);
     if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
     if (mem_iter)
         H5MM_free(mem_iter);
     if (dataspace)
         if (H5S_close(dataspace) < 0)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__filtered_collective_chunk_entry_io() */
