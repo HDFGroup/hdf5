@@ -4,7 +4,7 @@
 int main(int argc, char *argv[]) {
     uuid_t pool_uuid;
     char *pool_grp = NULL;
-    hid_t file = -1, dset = -1, fapl = -1;
+    hid_t file = -1, obj = -1, attr = -1, fapl = -1;
     int buf[4][6];
     int i, j;
     H5VL_daosm_snap_id_t snap_id;
@@ -15,8 +15,8 @@ int main(int argc, char *argv[]) {
     /* Seed random number generator */
     srand(time(NULL));
 
-    if(argc < 4 || argc > 5)
-        PRINTF_ERROR("argc must be 4 or 5\n");
+    if(argc < 6 || argc > 7)
+        PRINTF_ERROR("argc must be 6 or 7\n");
 
     /* Parse UUID */
     if(0 != uuid_parse(argv[1], pool_uuid))
@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
         ERROR;
 
     /* Open snapshot if specified */
-    if(argc == 5) {
-        snap_id = (H5VL_daosm_snap_id_t)atoi(argv[4]);
+    if(argc == 7) {
+        snap_id = (H5VL_daosm_snap_id_t)atoi(argv[6]);
         printf("Opening snapshot %llu\n", (long long unsigned)snap_id);
         if(H5Pset_daosm_snap_open(fapl, snap_id) < 0)
             ERROR;
@@ -40,11 +40,23 @@ int main(int argc, char *argv[]) {
     if((file = H5Fopen(argv[2], H5F_ACC_RDONLY, fapl)) < 0)
         ERROR;
 
-    /* Open dataset */
-    if((dset = H5Dopen2(file, argv[3], H5P_DEFAULT)) < 0)
+    /* Open object */
+    if(!strcmp(argv[3], "-d") || !strcmp(argv[3], "-D")) {
+        if((obj = H5Dopen2(file, argv[4], H5P_DEFAULT)) < 0)
+            ERROR;
+    }
+    else {
+        if(strcmp(argv[3], "-g") && strcmp(argv[3], "-G"))
+            PRINTF_ERROR("argv[3] must be -d, -D, -g, or -G\n");
+        if((obj = H5Gopen2(file, argv[4], H5P_DEFAULT)) < 0)
+            ERROR;
+    }
+
+    /* Open attribute */
+    if((attr = H5Aopen(obj, argv[5], H5P_DEFAULT)) < 0)
         ERROR;
 
-    printf("Reading dataset\n");
+    printf("Reading attribute\n");
 
     /* Initialize buffer */
     for(i = 0; i < 4; i++)
@@ -52,7 +64,7 @@ int main(int argc, char *argv[]) {
             buf[i][j] = -1;
 
     /* Read data */
-    if(H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+    if(H5Aread(attr, H5T_NATIVE_INT, buf) < 0)
         ERROR;
 
     /* Print buffer */
@@ -64,7 +76,9 @@ int main(int argc, char *argv[]) {
     }
 
     /* Close */
-    if(H5Dclose(dset) < 0)
+    if(H5Aclose(attr) < 0)
+        ERROR;
+    if(H5Oclose(obj) < 0)
         ERROR;
     if(H5Fclose(file) < 0)
         ERROR;
@@ -79,7 +93,8 @@ int main(int argc, char *argv[]) {
 
 error:
     H5E_BEGIN_TRY {
-        H5Dclose(dset);
+        H5Aclose(attr);
+        H5Oclose(obj);
         H5Fclose(file);
         H5Pclose(fapl);
     } H5E_END_TRY;

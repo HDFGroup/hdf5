@@ -81,10 +81,10 @@ static void *H5VL_daosm_dataset_create(void *_item,
 static void *H5VL_daosm_dataset_open(void *_item, H5VL_loc_params_t loc_params,
     const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_daosm_dataset_read(void *_dset, hid_t mem_type_id,
-    hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, void *buf,
+    hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, void *buf,
     void **req);
 static herr_t H5VL_daosm_dataset_write(void *_dset, hid_t mem_type_id,
-    hid_t mem_space_id, hid_t file_space_id, hid_t plist_id, const void *buf,
+    hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf,
     void **req);
 /*static herr_t H5VL_daosm_dataset_specific(void *_dset, H5VL_dataset_specific_t specific_type,
                                         hid_t dxpl_id, void **req, va_list arguments);*/
@@ -102,10 +102,10 @@ static void *H5VL_daosm_attribute_create(void *_obj,
     hid_t aapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_daosm_attribute_open(void *_obj, H5VL_loc_params_t loc_params,
     const char *name, hid_t aapl_id, hid_t dxpl_id, void **req);
-/*static herr_t H5VL_daosm_attribute_read(void *_attr, hid_t mem_type_id,
-    hid_t plist_id, void *buf, void **req);
+static herr_t H5VL_daosm_attribute_read(void *_attr, hid_t mem_type_id,
+    void *buf, hid_t dxpl_id, void **req);
 static herr_t H5VL_daosm_attribute_write(void *_attr, hid_t mem_type_id,
-    hid_t plist_id, const void *buf, void **req);*/
+    const void *buf, hid_t dxpl_id, void **req);
 static herr_t H5VL_daosm_attribute_close(void *_attr, hid_t dxpl_id,
     void **req);
 
@@ -155,8 +155,8 @@ static H5VL_class_t H5VL_daosm_g = {
     {                                           /* attribute_cls */
         H5VL_daosm_attribute_create,            /* create */
         H5VL_daosm_attribute_open,              /* open */
-        NULL,//H5VL_iod_attribute_read,                /* read */
-        NULL,//H5VL_iod_attribute_write,               /* write */
+        H5VL_daosm_attribute_read,              /* read */
+        H5VL_daosm_attribute_write,             /* write */
         NULL,//H5VL_iod_attribute_get,                 /* get */
         NULL,//H5VL_iod_attribute_specific,            /* specific */
         NULL,                                   /* optional */
@@ -2799,8 +2799,8 @@ done:
  */
 static herr_t
 H5VL_daosm_dataset_write(void *_dset, hid_t H5_ATTR_UNUSED mem_type_id,
-    hid_t H5_ATTR_UNUSED mem_space_id, hid_t H5_ATTR_UNUSED file_space_id,
-    hid_t H5_ATTR_UNUSED dxpl_id, const void *buf, void H5_ATTR_UNUSED **req)
+    hid_t mem_space_id, hid_t file_space_id, hid_t H5_ATTR_UNUSED dxpl_id,
+    const void *buf, void H5_ATTR_UNUSED **req)
 {
     H5VL_daosm_dset_t *dset = (H5VL_daosm_dset_t *)_dset;
     int ndims;
@@ -3416,6 +3416,194 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_attribute_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_attribute_read
+ *
+ * Purpose:     Reads raw data from an attribute into a buffer.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1, attribute not read.
+ *
+ * Programmer:  Neil Fortner
+ *              February, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_daosm_attribute_read(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
+    void *buf, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+{
+    H5VL_daosm_attr_t *attr = (H5VL_daosm_attr_t *)_attr;
+    int ndims;
+    hsize_t dim[H5S_MAX_RANK];
+    size_t akey_len;
+    daos_key_t dkey;
+    char *akey = NULL;
+    daos_vec_iod_t iod;
+    daos_recx_t recx;
+    daos_sg_list_t sgl;
+    daos_iov_t sg_iov;
+    char attr_key[] = H5VL_DAOSM_ATTR_KEY;
+    size_t type_size;
+    uint64_t chunk_size;
+    int ret;
+    int i;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get dataspace extent */
+    if((ndims = H5Sget_simple_extent_ndims(attr->space_id)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get number of dimensions")
+    if(ndims != H5Sget_simple_extent_dims(attr->space_id, dim, NULL))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get dimensions")
+
+    /* Get datatype size */
+    if((type_size = H5Tget_size(attr->type_id)) == 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get datatype size")
+
+    /* Calculate chunk size */
+    chunk_size = (uint64_t)1;
+    for(i = 0; i < ndims; i++)
+        chunk_size *= (uint64_t)dim[i];
+
+    /* Set up operation to read data */
+    /* Set up dkey */
+    daos_iov_set(&dkey, attr_key, (daos_size_t)(sizeof(attr_key) - 1));
+
+    /* Create akey string (prefix "V-") */
+    akey_len = HDstrlen(attr->name) + 2;
+    if(NULL == (akey = (char *)H5MM_malloc(akey_len + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for akey")
+    akey[0] = 'V';
+    akey[1] = '-';
+    (void)HDstrcpy(akey + 2, attr->name);
+
+    /* Set up recx */
+    recx.rx_rsize = (uint64_t)type_size;
+    recx.rx_idx = (uint64_t)0;
+    recx.rx_nr = chunk_size;
+
+    /* Set up iod */
+    HDmemset(&iod, 0, sizeof(iod));
+    daos_iov_set(&iod.vd_name, (void *)akey, (daos_size_t)akey_len);
+    daos_csum_set(&iod.vd_kcsum, NULL, 0);
+    iod.vd_nr = 1u;
+    iod.vd_recxs = &recx;
+
+    /* Set up sgl */
+    daos_iov_set(&sg_iov, (void *)buf, (daos_size_t)(chunk_size * (uint64_t)type_size));
+    sgl.sg_nr.num = 1;
+    sgl.sg_iovs = &sg_iov;
+
+    /* Read data from attribute */
+    if(0 != (ret = daos_obj_fetch(attr->parent->obj_oh, attr->item.file->epoch, &dkey, 1, &iod, &sgl, NULL /*maps*/, NULL /*event*/)))
+        HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data from attribute: %d", ret)
+
+done:
+    /* Free memory */
+    akey = (char *)H5MM_xfree(akey);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_attribute_read() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_attribute_write
+ *
+ * Purpose:     Writes raw data from a buffer into an attribute.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1, attribute not written.
+ *
+ * Programmer:  Neil Fortner
+ *              February, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_daosm_attribute_write(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
+    const void *buf, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+{
+    H5VL_daosm_attr_t *attr = (H5VL_daosm_attr_t *)_attr;
+    int ndims;
+    hsize_t dim[H5S_MAX_RANK];
+    size_t akey_len;
+    daos_key_t dkey;
+    char *akey = NULL;
+    daos_vec_iod_t iod;
+    daos_recx_t recx;
+    daos_sg_list_t sgl;
+    daos_iov_t sg_iov;
+    char attr_key[] = H5VL_DAOSM_ATTR_KEY;
+    size_t type_size;
+    uint64_t chunk_size;
+    int ret;
+    int i;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Check for write access */
+    if(!(attr->item.file->flags & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "no write intent on file")
+
+    /* Get dataspace extent */
+    if((ndims = H5Sget_simple_extent_ndims(attr->space_id)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get number of dimensions")
+    if(ndims != H5Sget_simple_extent_dims(attr->space_id, dim, NULL))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get dimensions")
+
+    /* Get datatype size */
+    if((type_size = H5Tget_size(attr->type_id)) == 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get datatype size")
+
+    /* Calculate chunk size */
+    chunk_size = (uint64_t)1;
+    for(i = 0; i < ndims; i++)
+        chunk_size *= (uint64_t)dim[i];
+
+    /* Set up operation to write data */
+    /* Set up dkey */
+    daos_iov_set(&dkey, attr_key, (daos_size_t)(sizeof(attr_key) - 1));
+
+    /* Create akey string (prefix "V-") */
+    akey_len = HDstrlen(attr->name) + 2;
+    if(NULL == (akey = (char *)H5MM_malloc(akey_len + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for akey")
+    akey[0] = 'V';
+    akey[1] = '-';
+    (void)HDstrcpy(akey + 2, attr->name);
+
+    /* Set up recx */
+    recx.rx_rsize = (uint64_t)type_size;
+    recx.rx_idx = (uint64_t)0;
+    recx.rx_nr = chunk_size;
+
+    /* Set up iod */
+    HDmemset(&iod, 0, sizeof(iod));
+    daos_iov_set(&iod.vd_name, (void *)akey, (daos_size_t)akey_len);
+    daos_csum_set(&iod.vd_kcsum, NULL, 0);
+    iod.vd_nr = 1u;
+    iod.vd_recxs = &recx;
+
+    /* Set up sgl */
+    daos_iov_set(&sg_iov, (void *)buf, (daos_size_t)(chunk_size * (uint64_t)type_size));
+    sgl.sg_nr.num = 1;
+    sgl.sg_iovs = &sg_iov;
+
+    /* Write data to attribute */
+    if(0 != (ret = daos_obj_update(attr->parent->obj_oh, attr->item.file->epoch, &dkey, 1, &iod, &sgl, NULL /*event*/)))
+        HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't write data to attribute: %d", ret)
+
+done:
+    /* Free memory */
+    akey = (char *)H5MM_xfree(akey);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_attribute_write() */
 
 
 /*-------------------------------------------------------------------------
