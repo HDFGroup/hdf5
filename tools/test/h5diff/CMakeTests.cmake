@@ -377,6 +377,10 @@
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (PH5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+      endif ()
+      set (last_test "PH5DIFF-${resultfile}")
     endif ()
   ENDMACRO ()
 
