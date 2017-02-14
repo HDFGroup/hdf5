@@ -114,9 +114,10 @@ include(GetPrerequisites)
 #
 
 # Start out with the generic MPI compiler names, as these are most commonly used.
-set(_MPI_C_COMPILER_NAMES                  mpicc    mpcc      mpicc_r mpcc_r)
+set(_MPI_C_COMPILER_NAMES                  mpicc    mpcc      mpicc_r mpcc_r  mpicc.bat)
 set(_MPI_CXX_COMPILER_NAMES                mpicxx   mpiCC     mpcxx   mpCC    mpic++   mpc++
-                                           mpicxx_r mpiCC_r   mpcxx_r mpCC_r  mpic++_r mpc++_r)
+                                           mpicxx_r mpiCC_r   mpcxx_r mpCC_r  mpic++_r mpc++_r
+                                           mpicxx.bat)
 set(_MPI_Fortran_COMPILER_NAMES            mpif95   mpif95_r  mpf95   mpf95_r
                                            mpif90   mpif90_r  mpf90   mpf90_r
                                            mpif77   mpif77_r  mpf77   mpf77_r)
@@ -128,9 +129,9 @@ set(_MPI_GNU_Fortran_COMPILER_NAMES        mpigfortran mpgfortran mpigfortran_r 
                                            mpig77 mpig77_r mpg77 mpg77_r)
 
 # Intel MPI compiler names
-set(_MPI_Intel_C_COMPILER_NAMES            mpiicc)
-set(_MPI_Intel_CXX_COMPILER_NAMES          mpiicpc  mpiicxx mpiic++ mpiiCC)
-set(_MPI_Intel_Fortran_COMPILER_NAMES      mpiifort mpiif95 mpiif90 mpiif77)
+set(_MPI_Intel_C_COMPILER_NAMES            mpiicc   mpiicc.bat)
+set(_MPI_Intel_CXX_COMPILER_NAMES          mpiicpc  mpiicxx mpiic++ mpiiCC  mpiicpc.bat)
+set(_MPI_Intel_Fortran_COMPILER_NAMES      mpiifort mpiif95 mpiif90 mpiif77 mpiifort.bat)
 
 # PGI compiler names
 set(_MPI_PGI_C_COMPILER_NAMES              mpipgcc mppgcc)
@@ -315,7 +316,7 @@ function (interrogate_mpi_compiler lang try_libs)
 
         foreach(FLAG ${MPI_ALL_COMPILE_FLAGS})
           if (MPI_COMPILE_FLAGS_WORK)
-            string(APPEND MPI_COMPILE_FLAGS_WORK " ${FLAG}")
+            set(MPI_COMPILE_FLAGS_WORK "${MPI_COMPILE_FLAGS_WORK} ${FLAG}")
           else()
             set(MPI_COMPILE_FLAGS_WORK ${FLAG})
           endif()
@@ -326,6 +327,8 @@ function (interrogate_mpi_compiler lang try_libs)
         foreach(IPATH ${MPI_ALL_INCLUDE_PATHS})
           string(REGEX REPLACE "^ ?-I" "" IPATH ${IPATH})
           string(REPLACE "//" "/" IPATH ${IPATH})
+          string(REPLACE "\"" "" IPATH ${IPATH})
+          file(TO_CMAKE_PATH "${IPATH}" IPATH)
           list(APPEND MPI_INCLUDE_PATH_WORK ${IPATH})
         endforeach()
 
@@ -364,7 +367,7 @@ function (interrogate_mpi_compiler lang try_libs)
         set(MPI_LINK_FLAGS_WORK)
         foreach(FLAG ${MPI_ALL_LINK_FLAGS})
           if (MPI_LINK_FLAGS_WORK)
-            string(APPEND MPI_LINK_FLAGS_WORK " ${FLAG}")
+            set(MPI_LINK_FLAGS_WORK "${MPI_LINK_FLAGS_WORK} ${FLAG}")
           else()
             set(MPI_LINK_FLAGS_WORK ${FLAG})
           endif()
@@ -386,8 +389,7 @@ function (interrogate_mpi_compiler lang try_libs)
         # in the showme list that can only be found in the implicit
         # link directories of the compiler.
         if (DEFINED CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES)
-          string(APPEND MPI_LINK_PATH
-            ";${CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES}")
+          set(MPI_LINK_PATH "${MPI_LINK_PATH};${CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES}")
         endif ()
 
         # Determine full path names for all of the libraries that one needs
@@ -466,7 +468,7 @@ function (interrogate_mpi_compiler lang try_libs)
         if (MPI_INCLUDE_PATH_WORK AND MPI_HEADER_PATH)
           list(APPEND MPI_INCLUDE_PATH_WORK ${MPI_HEADER_PATH})
         endif()
-        
+
         set(MPI_LIB "MPI_LIB-NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
         find_library(MPI_LIB
           NAMES         fmpi fmpich fmpich2 fmpich2g msmpifec msmpifmc
