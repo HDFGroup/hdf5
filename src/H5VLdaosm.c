@@ -779,11 +779,11 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't hold epoch: %d", ret)
 
         /* Create global metadata object */
-        if(0 != (ret = daos_obj_declare(file->coh, gmd_oid, 0, NULL /*oa*/, NULL /*event*/)))
+        if(0 != (ret = daos_obj_declare(file->coh, gmd_oid, file->epoch, NULL /*oa*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, NULL, "can't create global metadata object: %d", ret)
 
         /* Open global metadata object */
-        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, file->epoch, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
 
         /* Create root group */
@@ -894,7 +894,7 @@ H5VL_daosm_file_create(const char *name, unsigned flags, hid_t fcpl_id,
         /* Handle pool_info and container_info DSMINC */
 
         /* Open global metadata object */
-        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, file->epoch, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
     } /* end else */
 
@@ -1004,6 +1004,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
 
     if(file->my_rank == 0) {
         daos_epoch_t epoch;
+        daos_epoch_t held_epoch;
         daos_epoch_state_t epoch_state;
         daos_key_t dkey;
         daos_vec_iod_t iod;
@@ -1037,15 +1038,14 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
             /* Query the epoch */
             if(0 != (ret = daos_epoch_query(file->coh, &epoch_state, NULL /*event*/)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't query epoch: %d", ret)
+            epoch = epoch_state.es_hce;
 
             /* Hold the epoch if write access is requested */
             if(flags & H5F_ACC_RDWR) {
-                epoch = epoch_state.es_hce + (daos_epoch_t)1;
-                if(0 != (ret = daos_epoch_hold(file->coh, &epoch, NULL /*state*/, NULL /*event*/)))
+                /* Hold the next epoch */
+                held_epoch = epoch + (daos_epoch_t)1;
+                if(0 != (ret = daos_epoch_hold(file->coh, &held_epoch, NULL /*state*/, NULL /*event*/)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't hold epoch: %d", ret)
-
-                /* Read from the HCE */
-                epoch--;
             } /* end if */
         } /* end else */
 
@@ -1056,7 +1056,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         daos_obj_id_generate(&root_grp_oid, DAOS_OC_TINY_RW); //DSMINC
 
         /* Open global metadata object */
-        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, epoch, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
 
         /* Read max OID from gmd obj */
@@ -1086,7 +1086,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
 
         /* Set file's epoch */
         if(flags & H5F_ACC_RDWR)
-            file->epoch = epoch + 1;
+            file->epoch = held_epoch;
         else
             file->epoch = epoch;
 
@@ -1194,7 +1194,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
         /* Handle pool_info and container_info DSMINC */
 
         /* Open global metadata object */
-        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, 0, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
+        if(0 != (ret = daos_obj_open(file->coh, gmd_oid, file->epoch, DAOS_OO_RW, &file->glob_md_oh, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open global metadata object: %d", ret)
     } /* end else */
 
