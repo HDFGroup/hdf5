@@ -36,7 +36,10 @@
 
 hid_t H5VL_DAOSM_g = 0;
 
-/* Macros */
+/*
+ * Macros
+ */
+/* Constant Keys */
 #define H5VL_DAOSM_INT_MD_KEY "Internal Metadata"
 #define H5VL_DAOSM_MAX_OID_KEY "Max OID"
 #define H5VL_DAOSM_CPL_KEY "Creation Property List"
@@ -45,6 +48,9 @@ hid_t H5VL_DAOSM_g = 0;
 #define H5VL_DAOSM_SPACE_KEY "Dataspace"
 #define H5VL_DAOSM_ATTR_KEY "Attribute"
 #define H5VL_DAOSM_CHUNK_KEY 0u
+
+/* Stack allocation sizes */
+#define H5VL_DAOSM_LINK_VAL_BUF_SIZE 256
 #define H5VL_DAOSM_SEQ_LIST_LEN 128
 
 /* Prototypes */
@@ -115,9 +121,11 @@ static herr_t H5VL_daosm_file_flush(H5VL_daosm_file_t *file);
 static herr_t H5VL_daosm_file_close_helper(H5VL_daosm_file_t *file,
     hid_t dxpl_id, void **req);
 static herr_t H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name,
-    size_t name_len, daos_obj_id_t *oid);
+    size_t name_len, H5VL_daosm_link_val_t *val);
 static herr_t H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
-    size_t name_len, daos_obj_id_t oid);
+    size_t name_len, H5VL_daosm_link_val_t *val);
+static herr_t H5VL_daosm_link_follow(H5VL_daosm_group_t *grp, const char *name,
+    size_t name_len, hid_t dxpl_id, void **req, daos_obj_id_t *oid);
 static H5VL_daosm_group_t *H5VL_daosm_group_traverse(H5VL_daosm_item_t *item,
     const char *path, hid_t dxpl_id, void **req, const char **obj_name);
 static void *H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file,
@@ -197,7 +205,7 @@ static H5VL_class_t H5VL_daosm_g = {
         H5VL_daosm_group_close                  /* close */
     },
     {                                           /* link_cls */
-        NULL,//H5VL_iod_link_create,                   /* create */
+        NULL,//H5VL_daosm_link_create,                   /* create */
         NULL,//H5VL_iod_link_copy,                     /* copy */
         NULL,//H5VL_iod_link_move,                     /* move */
         NULL,//H5VL_iod_link_get,                      /* get */
@@ -1512,7 +1520,7 @@ done:
  */
 static herr_t
 H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
-    daos_obj_id_t *oid)
+    H5VL_daosm_link_val_t *val)
 {
     char const_link_key[] = H5VL_DAOSM_LINK_KEY;
     daos_key_t dkey;
@@ -1520,12 +1528,17 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
     daos_recx_t recx;
     daos_sg_list_t sgl;
     daos_iov_t sg_iov;
-    uint8_t oid_buf[24];
+    uint8_t *val_buf;
+    uint8_t val_buf_static[H5VL_DAOSM_LINK_VAL_BUF_SIZE];
+    uint8_t *val_buf_dyn = NULL;
     uint8_t *p;
     int ret;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
+ 
+    /* Use static link value buffer initially */
+    val_buf = val_buf_static;
 
     /* Set up dkey */
     /* For now always use dkey = const, akey = name. Add option to switch these
@@ -1533,7 +1546,7 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
     daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
 
     /* Set up recx */
-    recx.rx_rsize = (uint64_t)sizeof(daos_obj_id_t);
+    recx.rx_rsize = DAOS_REC_ANY;
     recx.rx_idx = (uint64_t)0;
     recx.rx_nr = (uint64_t)1;
 
@@ -1545,7 +1558,7 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
     iod.vd_recxs = &recx;
 
     /* Set up sgl */
-    daos_iov_set(&sg_iov, oid_buf, (daos_size_t)sizeof(oid_buf));
+    daos_iov_set(&sg_iov, val_buf, (daos_size_t)H5VL_DAOSM_LINK_VAL_BUF_SIZE);
     sgl.sg_nr.num = 1;
     sgl.sg_iovs = &sg_iov;
 
@@ -1553,18 +1566,73 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
     if(0 != (ret = daos_obj_fetch(grp->obj.obj_oh, grp->obj.item.file->epoch, &dkey, 1, &iod, &sgl, NULL /*maps*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link: %d", ret)
 
-    /* Decode target oid */
-    HDassert(sizeof(oid_buf) == sizeof(grp->obj.oid));
-    p = oid_buf;
-    UINT64DECODE(p, oid->lo)
-    UINT64DECODE(p, oid->mid)
-    UINT64DECODE(p, oid->hi)
-
     /* Check for no link found */
-    if(oid->lo == 0llu && oid->mid == 0llu && oid->hi == 0llu)
+    if(recx.rx_rsize == (uint64_t)0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "link not found")
 
+    /* Check if val_buf was large enough */
+    if(recx.rx_rsize > (uint64_t)H5VL_DAOSM_LINK_VAL_BUF_SIZE) {
+        /* Allocate new value buffer */
+        if(NULL == (val_buf_dyn = (uint8_t *)H5MM_malloc(recx.rx_rsize)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate link value buffer")
+
+        /* Point to new buffer */
+        val_buf = val_buf_dyn;
+        daos_iov_set(&sg_iov, val_buf, (daos_size_t)recx.rx_rsize);
+
+        /* Reissue read */
+        if(0 != (ret = daos_obj_fetch(grp->obj.obj_oh, grp->obj.item.file->epoch, &dkey, 1, &iod, &sgl, NULL /*maps */, NULL /*event*/)))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link: %d", ret)
+    } /* end if */
+
+    /* Decode link type */
+    p = val_buf;
+    val->type = (H5L_type_t)*p++;
+
+    /* Decode remainder of link value */
+    switch(val->type) {
+        case H5L_TYPE_HARD:
+            /* Decode oid */
+            UINT64DECODE(p, val->target.hard.lo)
+            UINT64DECODE(p, val->target.hard.mid)
+            UINT64DECODE(p, val->target.hard.hi)
+
+            break;
+
+        case H5L_TYPE_SOFT:
+            /* If we had to allocate a buffer to read from daos, it happens to
+             * be the exact size (len + 1) we need for the soft link value,
+             * take ownership of it and shift the value down one byte.
+             * Otherwise, allocate a new buffer. */
+            if(val_buf_dyn) {
+                val->target.soft = (char *)val_buf_dyn;
+                val_buf_dyn = NULL;
+                HDmemmove(val->target.soft,  val->target.soft + 1, recx.rx_rsize - 1);
+            } /* end if */
+            else {
+                if(NULL == (val->target.soft = (char *)H5MM_malloc(recx.rx_rsize)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate link value buffer")
+                HDmemcpy(val->target.soft, val_buf, recx.rx_rsize - 1);
+            } /* end else */
+
+            /* Add null terminator */
+            val->target.soft[recx.rx_rsize - 1] = '\0';
+
+            break;
+
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_EXTERNAL:
+        case H5L_TYPE_MAX:
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "invalid or unsupported link type")
+    } /* end switch */
+
 done:
+    if(val_buf_dyn) {
+        HDassert(ret_value == FAIL);
+        H5MM_free(val_buf_dyn);
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_link_read() */
 
@@ -1584,15 +1652,15 @@ done:
  */
 static herr_t
 H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
-    size_t name_len, daos_obj_id_t oid)
+    size_t name_len, H5VL_daosm_link_val_t *val)
 {
     char const_link_key[] = H5VL_DAOSM_LINK_KEY;
     daos_key_t dkey;
     daos_vec_iod_t iod;
     daos_recx_t recx;
     daos_sg_list_t sgl;
-    daos_iov_t sg_iov;
-    uint8_t oid_buf[24];
+    daos_iov_t sg_iov[2];
+    uint8_t iov_buf[25];
     uint8_t *p;
     int ret;
     herr_t ret_value = SUCCEED;
@@ -1607,9 +1675,52 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
     /* For now always use dkey = const, akey = name. Add option to switch these
      * DSMINC */
     daos_iov_set(&dkey, const_link_key, (daos_size_t)(sizeof(const_link_key) - 1));
+ 
+    /* Encode link type */
+    p = iov_buf;
+    *p++ = (uint8_t)val->type;
 
-    /* Set up recx */
-    recx.rx_rsize = (uint64_t)sizeof(daos_obj_id_t);
+    /* Encode type specific value information */
+    switch(val->type) {
+         case H5L_TYPE_HARD:
+            HDassert(sizeof(iov_buf) == sizeof(val->target.hard) + 1);
+
+            /* Encode oid */
+            UINT64ENCODE(p, val->target.hard.lo)
+            UINT64ENCODE(p, val->target.hard.mid)
+            UINT64ENCODE(p, val->target.hard.hi)
+
+            /* Set up type specific recx */
+            recx.rx_rsize = (uint64_t)25;
+
+            /* Set up type specific sgl */
+            daos_iov_set(&sg_iov[0], iov_buf, (daos_size_t)sizeof(iov_buf));
+            sgl.sg_nr.num = 1;
+
+            break;
+
+        case H5L_TYPE_SOFT:
+            /* Set up type specific recx.  Note that strlen adds a byte we don't
+             * need for the null terminator, but we need an extra byte for the
+             * link type (encoded above), so it works out to be correct. */
+            recx.rx_rsize = (uint64_t)HDstrlen(val->target.soft);
+
+            /* Set up type specific sgl.  We use two entries, the first for the
+             * link type, the second for the string. */
+            daos_iov_set(&sg_iov[0], iov_buf, (daos_size_t)1);
+            daos_iov_set(&sg_iov[1], val->target.soft, (daos_size_t)(recx.rx_rsize - (uint64_t)1));
+            sgl.sg_nr.num = 2;
+
+            break;
+
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_EXTERNAL:
+        case H5L_TYPE_MAX:
+        default:
+            HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "invalid or unsupported link type")
+    } /* end switch */
+
+    /* Set up general recx */
     recx.rx_idx = (uint64_t)0;
     recx.rx_nr = (uint64_t)1;
 
@@ -1620,17 +1731,8 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
     iod.vd_nr = 1u;
     iod.vd_recxs = &recx;
 
-    /* Encode group oid */
-    HDassert(sizeof(oid_buf) == sizeof(grp->obj.oid));
-    p = oid_buf;
-    UINT64ENCODE(p, oid.lo)
-    UINT64ENCODE(p, oid.mid)
-    UINT64ENCODE(p, oid.hi)
-
-    /* Set up sgl */
-    daos_iov_set(&sg_iov, oid_buf, (daos_size_t)sizeof(oid_buf));
-    sgl.sg_nr.num = 1;
-    sgl.sg_iovs = &sg_iov;
+    /* Set up general sgl */
+    sgl.sg_iovs = sg_iov;
 
     /* Write link */
     if(0 != (ret = daos_obj_update(grp->obj.obj_oh, grp->obj.item.file->epoch, &dkey, 1, &iod, &sgl, NULL /*event*/)))
@@ -1732,6 +1834,85 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_link_follow
+ *
+ * Purpose:     Follows the link in grp identified with name, and returns
+ *              in oid the oid of the target object.
+ *
+ * Return:      Success:        SUCCEED 
+ *              Failure:        FAIL
+ *
+ * Programmer:  Neil Fortner
+ *              January, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_daosm_link_follow(H5VL_daosm_group_t *grp, const char *name,
+    size_t name_len, hid_t dxpl_id, void **req, daos_obj_id_t *oid)
+{
+    H5VL_daosm_link_val_t link_val;
+    hbool_t link_val_alloc = FALSE;
+    H5VL_daosm_group_t *target_grp = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(grp);
+    HDassert(name);
+    HDassert(oid);
+
+    /* Read link to group */
+   if(H5VL_daosm_link_read(grp, name, name_len, &link_val) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't read link to group")
+
+    switch(link_val.type) {
+       case H5L_TYPE_HARD:
+            /* Simply return the read oid */
+            *oid = link_val.target.hard;
+
+            break;
+
+        case H5L_TYPE_SOFT:
+            {
+                const char *target_name = NULL;
+
+                link_val_alloc = TRUE;
+
+                /* Traverse the soft link path */
+                if(NULL == (target_grp = H5VL_daosm_group_traverse(&grp->obj.item, link_val.target.soft, dxpl_id, req, &target_name)))
+                    HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't traverse path")
+
+                /* Follow the last element in the path */
+                if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, oid) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't follow link to group")
+
+                break;
+            } /* end block */
+
+        case H5L_TYPE_ERROR:
+        case H5L_TYPE_EXTERNAL:
+        case H5L_TYPE_MAX:
+        default:
+           HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "invalid or unsupported link type")
+    } /* end switch */
+
+done:
+    /* Clean up */
+    if(link_val_alloc) {
+        HDassert(link_val.type == H5L_TYPE_SOFT);
+        H5MM_free(link_val.target.soft);
+    } /* end if */
+
+    if(target_grp)
+        if(H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close group")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_link_follow() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_daosm_group_traverse
  *
  * Purpose:     Given a path name and base object, returns the final group
@@ -1786,10 +1967,10 @@ H5VL_daosm_group_traverse(H5VL_daosm_item_t *item, const char *path,
 
     /* Traverse path */
     while(next_obj) {
-        /* Read link to group */
+        /* Follow link to next group in path */
         HDassert(next_obj > *obj_name);
-        if(H5VL_daosm_link_read(grp, *obj_name, (size_t)(next_obj - *obj_name), &oid) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't read link to group")
+        if(H5VL_daosm_link_follow(grp, *obj_name, (size_t)(next_obj - *obj_name), dxpl_id, req, &oid) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't follow link to group")
 
         /* Close previous group */
         if(H5VL_daosm_group_close(grp, dxpl_id, req) < 0)
@@ -1959,6 +2140,7 @@ H5VL_daosm_group_create(void *_item,
     H5VL_daosm_group_t *grp = NULL;
     H5VL_daosm_group_t *target_grp = NULL;
     const char *target_name = NULL;
+    H5VL_daosm_link_val_t link_val;
     void *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1976,7 +2158,9 @@ H5VL_daosm_group_create(void *_item,
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create group")
 
     /* Create link to group */
-    if(H5VL_daosm_link_write(target_grp, target_name, HDstrlen(target_name), grp->obj.oid) < 0)
+    link_val.type = H5L_TYPE_HARD;
+    link_val.target.hard = grp->obj.oid;
+    if(H5VL_daosm_link_write(target_grp, target_name, HDstrlen(target_name), &link_val) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create link to group")
 
     ret_value = (void *)grp;
@@ -2064,6 +2248,10 @@ H5VL_daosm_group_open_helper(H5VL_daosm_file_t *file, daos_obj_id_t oid,
     if(0 != (ret = daos_obj_fetch(grp->obj.obj_oh, file->epoch, &dkey, 1, &iod, NULL, NULL /*maps*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, NULL, "can't read metadata size from group: %d", ret)
 
+    /* Check for metadata not found */
+    if(recx.rx_rsize == (uint64_t)0)
+        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "internal metadata not found")
+
     /* Allocate buffer for GCPL */
     if(NULL == (gcpl_buf = H5MM_malloc(recx.rx_rsize)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for serialized gcpl")
@@ -2140,9 +2328,9 @@ H5VL_daosm_group_open(void *_item,
         target_grp = NULL;
     } /* end if */
     else {
-        /* Read link to group */
-        if(H5VL_daosm_link_read(target_grp, target_name, HDstrlen(target_name), &oid) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't read link to group")
+        /* Follow link to group */
+        if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &oid) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't follow link to group")
 
         /* Open group */
         if(NULL == (grp = (H5VL_daosm_group_t *)H5VL_daosm_group_open_helper(item->file, oid, gapl_id, dxpl_id, req)))
@@ -2233,6 +2421,7 @@ H5VL_daosm_dataset_create(void *_item,
     hid_t type_id, space_id;
     H5VL_daosm_group_t *target_grp = NULL;
     const char *target_name = NULL;
+    H5VL_daosm_link_val_t link_val;
     daos_key_t dkey;
     daos_vec_iod_t iod[3];
     daos_recx_t recx[3];
@@ -2295,7 +2484,9 @@ H5VL_daosm_dataset_create(void *_item,
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't write max OID")
 
     /* Create link to dataset */
-    if(H5VL_daosm_link_write(target_grp, target_name, HDstrlen(target_name), dset->obj.oid) < 0)
+    link_val.type = H5L_TYPE_HARD;
+    link_val.target.hard = dset->obj.oid;
+    if(H5VL_daosm_link_write(target_grp, target_name, HDstrlen(target_name), &link_val) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't create link to dataset")
 
     /* Open dataset */
@@ -2462,9 +2653,9 @@ H5VL_daosm_dataset_open(void *_item,
     dset->dcpl_id = FAIL;
     dset->dapl_id = FAIL;
 
-    /* Read link to dataset */
-    if(H5VL_daosm_link_read(target_grp, target_name, HDstrlen(target_name), &dset->obj.oid) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't read link to dataset")
+    /* Follow link to dataset */
+    if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, &dset->obj.oid) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, NULL, "can't follow link to dataset")
 
     /* Open dataset */
     if(0 != (ret = daos_obj_open(item->file->coh, dset->obj.oid, item->file->epoch, DAOS_OO_RW, &dset->obj.obj_oh, NULL /*event*/)))
@@ -2504,6 +2695,11 @@ H5VL_daosm_dataset_open(void *_item,
     /* Read internal metadata sizes from dataset */
     if(0 != (ret = daos_obj_fetch(dset->obj.obj_oh, item->file->epoch, &dkey, 3, iod, NULL, NULL /*maps*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDECODE, NULL, "can't read metadata sizes from dataset: %d", ret)
+
+    /* Check for metadata not found */
+    if((recx[0].rx_rsize == (uint64_t)0) || (recx[1].rx_rsize == (uint64_t)0)
+            || (recx[2].rx_rsize == (uint64_t)0))
+        HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "internal metadata not found")
 
     /* Allocate buffers for datatype, dataspace, and DCPL */
     if(NULL == (type_buf = H5MM_malloc(recx[0].rx_rsize)))

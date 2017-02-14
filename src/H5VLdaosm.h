@@ -108,6 +108,15 @@ typedef struct H5VL_daosm_attr_t {
     hid_t space_id;
 } H5VL_daosm_attr_t;
 
+/* The link value struct */
+typedef struct H5VL_daosm_link_val_t {
+    H5L_type_t type;
+    union {
+        daos_obj_id_t hard;
+        char *soft;
+    } target;
+} H5VL_daosm_link_val_t;
+
 extern hid_t H5VL_DAOSM_g;
 
 H5_DLL hid_t H5VL_daosm_init(void);
