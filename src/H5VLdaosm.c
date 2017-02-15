@@ -14,7 +14,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner <nfortne2@hdfgroup.gov>
+ * Programmer:  Neil Fortner <nfortne2@hdfgroup.org>
  *              September, 2016
  *
  * Purpose:	The DAOS-M VOL plugin where access is forwarded to the DAOS-M
@@ -69,6 +69,9 @@ static herr_t H5VL_daosm_file_specific(void *_item,
 static herr_t H5VL_daosm_file_close(void *_file, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
+static herr_t H5VL_daosm_link_create(H5VL_link_create_type_t create_type,
+    void *_item, H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t lapl_id,
+    hid_t dxpl_id, void **req);
 static herr_t H5VL_daosm_link_specific(void *_item,
     H5VL_loc_params_t loc_params, H5VL_link_specific_t specific_type,
     hid_t dxpl_id, void **req, va_list arguments);
@@ -205,7 +208,7 @@ static H5VL_class_t H5VL_daosm_g = {
         H5VL_daosm_group_close                  /* close */
     },
     {                                           /* link_cls */
-        NULL,//H5VL_daosm_link_create,                   /* create */
+        H5VL_daosm_link_create,                 /* create */
         NULL,//H5VL_iod_link_copy,                     /* copy */
         NULL,//H5VL_iod_link_move,                     /* move */
         NULL,//H5VL_iod_link_get,                      /* get */
@@ -1380,9 +1383,14 @@ H5VL_daosm_file_close_helper(H5VL_daosm_file_t *file, hid_t dxpl_id, void **req)
     if(file->comm || file->info)
         if(H5FD_mpi_comm_info_free(&file->comm, &file->info) < 0)
             HDONE_ERROR(H5E_INTERNAL, H5E_CANTFREE, FAIL, "Communicator/Info free failed")
-    if(file->fapl_id != FAIL && H5I_dec_ref(file->fapl_id) < 0)
+    /* Note: Use of H5I_dec_app_ref is a hack, using H5I_dec_ref doesn't reduce
+     * app reference count incremented by use of public API to create the ID,
+     * while use of H5Idec_ref clears the error stack.  In general we can't use
+     * public APIs in the "done" section or in close routines for this reason,
+     * until we implement a separate error stack for the VOL plugin */
+    if(file->fapl_id != FAIL && H5I_dec_app_ref(file->fapl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist")
-    if(file->fcpl_id != FAIL && H5I_dec_ref(file->fcpl_id) < 0)
+    if(file->fcpl_id != FAIL && H5I_dec_app_ref(file->fcpl_id) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist")
     if(HDmemcmp(&file->glob_md_oh, &hdl_inval, sizeof(hdl_inval)))
         if(0 != (ret = daos_obj_close(file->glob_md_oh, NULL /*event*/)))
@@ -1508,7 +1516,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL_daosm_link_read
  *
- * Purpose:     Reads the specified link from the given group
+ * Purpose:     Reads the specified link from the given group.  Note that
+ *              if the returned link is a soft link, val->target.soft must
+ *              eventually be freed.
  *
  * Return:      Success:        SUCCEED 
  *              Failure:        FAIL
@@ -1612,7 +1622,7 @@ H5VL_daosm_link_read(H5VL_daosm_group_t *grp, const char *name, size_t name_len,
             else {
                 if(NULL == (val->target.soft = (char *)H5MM_malloc(recx.rx_rsize)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate link value buffer")
-                HDmemcpy(val->target.soft, val_buf, recx.rx_rsize - 1);
+                HDmemcpy(val->target.soft, val_buf + 1, recx.rx_rsize - 1);
             } /* end else */
 
             /* Add null terminator */
@@ -1700,10 +1710,9 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
             break;
 
         case H5L_TYPE_SOFT:
-            /* Set up type specific recx.  Note that strlen adds a byte we don't
-             * need for the null terminator, but we need an extra byte for the
-             * link type (encoded above), so it works out to be correct. */
-            recx.rx_rsize = (uint64_t)HDstrlen(val->target.soft);
+            /* Set up type specific recx.  We need an extra byte for the link
+             * type (encoded above). */
+            recx.rx_rsize = (uint64_t)(HDstrlen(val->target.soft) + 1);
 
             /* Set up type specific sgl.  We use two entries, the first for the
              * link type, the second for the string. */
@@ -1741,6 +1750,75 @@ H5VL_daosm_link_write(H5VL_daosm_group_t *grp, const char *name,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_link_write() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_link_create
+ *
+ * Purpose:     Creates a hard/soft/UD/external links.
+ *              For now, only Soft Links are Supported.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              February, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_daosm_link_create(H5VL_link_create_type_t create_type, void *_item,
+    H5VL_loc_params_t loc_params, hid_t lcpl_id, hid_t H5_ATTR_UNUSED lapl_id,
+    hid_t dxpl_id, void **req)
+{
+    H5VL_daosm_item_t *item = (H5VL_daosm_item_t *)_item;
+    H5P_genplist_t *plist = NULL;                      /* Property list pointer */
+    H5VL_daosm_group_t *link_grp = NULL;
+    const char *link_name = NULL;
+    H5VL_daosm_link_val_t link_val;
+    herr_t ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get the plist structure */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(lcpl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+
+    /* Find target group */
+    HDassert(loc_params.type == H5VL_OBJECT_BY_NAME);
+    if(NULL == (link_grp = H5VL_daosm_group_traverse(item, loc_params.loc_data.loc_by_name.name, dxpl_id, req, &link_name)))
+        HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't traverse path")
+
+    switch(create_type) {
+        case H5VL_LINK_CREATE_HARD:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "hard link creation not supported")
+
+            break;
+
+        case H5VL_LINK_CREATE_SOFT:
+            /* Retrieve target name */
+            link_val.type = H5L_TYPE_SOFT;
+            if(H5P_get(plist, H5VL_PROP_LINK_TARGET_NAME, &link_val.target.soft) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for target name")
+
+            /* Create soft link */
+            if(H5VL_daosm_link_write(link_grp, link_name, HDstrlen(link_name), &link_val) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create soft link")
+
+            break;
+
+        case H5VL_LINK_CREATE_UD:
+            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "UD link creation not supported")
+        default:
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "invalid link creation call")
+    } /* end switch */
+
+done:
+    /* Close link group */
+    if(link_grp && H5VL_daosm_group_close(link_grp, dxpl_id, req) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "can't close group")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_link_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -1818,11 +1896,12 @@ H5VL_daosm_link_specific(void *_item, H5VL_loc_params_t loc_params,
 
                 break;
             } /* end block */
+
         case H5VL_LINK_DELETE:
         case H5VL_LINK_ITER:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unsupported specific operation")
         default:
-            HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid specific operation")
+            HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid specific operation")
     } /* end switch */
 
 done:
@@ -1883,9 +1962,15 @@ H5VL_daosm_link_follow(H5VL_daosm_group_t *grp, const char *name,
                 if(NULL == (target_grp = H5VL_daosm_group_traverse(&grp->obj.item, link_val.target.soft, dxpl_id, req, &target_name)))
                     HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "can't traverse path")
 
-                /* Follow the last element in the path */
-                if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, oid) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't follow link to group")
+                /* Check for no target_name, in this case just return
+                 * target_grp's oid */
+                if(target_name[0] == '\0'
+                        || (target_name[0] == '.' && target_name[1] == '\0'))
+                    *oid = target_grp->obj.oid;
+                else
+                    /* Follow the last element in the path */
+                    if(H5VL_daosm_link_follow(target_grp, target_name, HDstrlen(target_name), dxpl_id, req, oid) < 0)
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't follow link to group")
 
                 break;
             } /* end block */
@@ -2167,7 +2252,7 @@ H5VL_daosm_group_create(void *_item,
 
 done:
     /* Close target group */
-    if(target_grp != NULL && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
+    if(target_grp && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close group")
 
     /* If the operation is synchronous and it failed at the server, or it failed
@@ -2341,7 +2426,7 @@ H5VL_daosm_group_open(void *_item,
 
 done:
     /* Close target group */
-    if(target_grp != NULL && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
+    if(target_grp && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, NULL, "can't close group")
 
     /* If the operation is synchronous and it failed at the server, or it failed
@@ -2386,9 +2471,9 @@ H5VL_daosm_group_close(void *_grp, hid_t H5_ATTR_UNUSED dxpl_id,
         if(HDmemcmp(&grp->obj.obj_oh, &hdl_inval, sizeof(hdl_inval)))
             if(0 != (ret = daos_obj_close(grp->obj.obj_oh, NULL /*event*/)))
                 HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "can't close group DAOS object: %d", ret)
-        if(grp->gcpl_id != FAIL && H5I_dec_ref(grp->gcpl_id) < 0)
+        if(grp->gcpl_id != FAIL && H5I_dec_app_ref(grp->gcpl_id) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist")
-        if(grp->gapl_id != FAIL && H5I_dec_ref(grp->gapl_id) < 0)
+        if(grp->gapl_id != FAIL && H5I_dec_app_ref(grp->gapl_id) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "failed to close plist")
         grp = H5FL_FREE(H5VL_daosm_group_t, grp);
     } /* end if */
@@ -2583,7 +2668,7 @@ done:
     dcpl_buf = H5MM_xfree(dcpl_buf);
 
     /* Close target group */
-    if(target_grp != NULL && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
+    if(target_grp && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "can't close group")
 
     /* If the operation is synchronous and it failed at the server, or it failed
@@ -2747,7 +2832,7 @@ done:
     dcpl_buf = H5MM_xfree(dcpl_buf);
 
     /* Close target group */
-    if(target_grp != NULL && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
+    if(target_grp && H5VL_daosm_group_close(target_grp, dxpl_id, req) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "can't close group")
 
     /* If the operation is synchronous and it failed at the server, or it failed
@@ -3208,13 +3293,13 @@ H5VL_daosm_dataset_close(void *_dset, hid_t H5_ATTR_UNUSED dxpl_id,
         if(HDmemcmp(&dset->obj.obj_oh, &hdl_inval, sizeof(hdl_inval)))
             if(0 != (ret = daos_obj_close(dset->obj.obj_oh, NULL /*event*/)))
                 HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't close dataset DAOS object: %d", ret)
-        if(dset->type_id != FAIL && H5I_dec_ref(dset->type_id) < 0)
+        if(dset->type_id != FAIL && H5I_dec_app_ref(dset->type_id) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "failed to close datatype")
-        if(dset->space_id != FAIL && H5I_dec_ref(dset->space_id) < 0)
+        if(dset->space_id != FAIL && H5I_dec_app_ref(dset->space_id) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "failed to close dataspace")
-        if(dset->dcpl_id != FAIL && H5I_dec_ref(dset->dcpl_id) < 0)
+        if(dset->dcpl_id != FAIL && H5I_dec_app_ref(dset->dcpl_id) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "failed to close plist")
-        if(dset->dapl_id != FAIL && H5I_dec_ref(dset->dapl_id) < 0)
+        if(dset->dapl_id != FAIL && H5I_dec_app_ref(dset->dapl_id) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "failed to close plist")
         dset = H5FL_FREE(H5VL_daosm_dset_t, dset);
     } /* end if */
@@ -3831,9 +3916,9 @@ H5VL_daosm_attribute_close(void *_attr, hid_t dxpl_id, void **req)
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close parent object")
         if(attr->name)
             H5MM_free(attr->name);
-        if(attr->type_id != FAIL && H5I_dec_ref(attr->type_id) < 0)
+        if(attr->type_id != FAIL && H5I_dec_app_ref(attr->type_id) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "failed to close datatype")
-        if(attr->space_id != FAIL && H5I_dec_ref(attr->space_id) < 0)
+        if(attr->space_id != FAIL && H5I_dec_app_ref(attr->space_id) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "failed to close dataspace")
         attr = H5FL_FREE(H5VL_daosm_attr_t, attr);
     } /* end if */

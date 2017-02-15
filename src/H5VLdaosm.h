@@ -14,7 +14,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Neil Fortner <nfortne2@hdfgroup.gov>
+ * Programmer:  Neil Fortner <nfortne2@hdfgroup.org>
  *              September, 2016
  *
  * Purpose:	The private header file for the DAOS-M VOL plugin.
