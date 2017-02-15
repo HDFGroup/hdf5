@@ -332,7 +332,7 @@ H5F_file_space_type_t FileCreatPropList::getFileSpaceStrategy() const
    if (ret_value < 0)
    {
       throw PropListIException("FileCreatPropList::getFileSpaceStrategy",
-		"H5Pget_file_space for strategry failed");
+		"H5Pget_file_space for strategy failed");
    }
    return(strategy);
 }
