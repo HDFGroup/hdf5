@@ -65,6 +65,17 @@ class H5_DLLCPP FileCreatPropList : public PropList {
 	// indexing chunked datasets.
 	void setIstorek( unsigned ik ) const;
 
+	// Sets the strategy and the threshold value that the library will
+	// will employ in managing file space.
+	void setFileSpace(H5F_file_space_type_t strategy, hsize_t threshold) const;
+
+	// Returns the strategy that the library uses in managing file space.
+	H5F_file_space_type_t getFileSpaceStrategy() const;
+
+	// Returns the threshold value that the library uses in tracking free
+	// space sections.
+	hsize_t getFileSpaceThreshold() const;
+
 	///\brief Returns this class name.
 	virtual H5std_string fromClass () const { return("FileCreatPropList"); }
 
