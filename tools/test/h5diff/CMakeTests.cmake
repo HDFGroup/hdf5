@@ -370,13 +370,18 @@
               -D "TEST_ARGS:STRING=${ARGN}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/PAR/testfiles"
               -D "TEST_OUTPUT=${resultfile}.out"
-              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=${resultfile}.txt"
-#              -D "TEST_APPEND=EXIT CODE: [0-9]"
-#              -D "TEST_REF_FILTER=EXIT CODE: 0"
-              -D "TEST_SKIP_COMPARE=TRUE"
+              -D "TEST_APPEND=EXIT CODE:"
+              -D "TEST_REF_APPEND=EXIT CODE: [0-9]"
+              -D "TEST_REF_FILTER=EXIT CODE: 0"
+              -D "TEST_SORT_COMPARE=TRUE"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
+      if (NOT "${last_test}" STREQUAL "")
+        set_tests_properties (PH5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+      endif ()
+      set (last_test "PH5DIFF-${resultfile}")
     endif ()
   ENDMACRO ()
 

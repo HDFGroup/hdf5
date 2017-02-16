@@ -6305,6 +6305,13 @@ cache_image_api_error_check_3(void)
 
     if ( pass ) {
 
+        if ( H5Fclose(file_id) < 0  ) {
+
+            pass = FALSE;
+            failure_mssg = "H5Fclose() failed.\n";
+
+        }
+
         if ( HDremove(filename) < 0 ) {
 
             pass = FALSE;
