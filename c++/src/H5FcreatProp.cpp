@@ -298,14 +298,22 @@ unsigned FileCreatPropList::getIstorek() const
 // Function:	FileCreatPropList::setFileSpace
 ///\brief	Sets the strategy and the threshold value that the library
 ///		will employ in managing file space.
-///\param	ik - IN: Symbol table tree rank
-///\param	lk - IN: Symbol table node size
+///\param	strategy - IN: Strategy for file space management
+///\param	threshold - IN: Free-space section threshold. The library
+///		default is 1, which is to track all free-space sections.
 ///\exception	H5::PropListIException
 ///\par Description
 ///		If the given strategy is zero, the property will not be
 ///		changed and the existing strategy will be retained.
 ///		If the given threshold value is zero, the property will not be
 ///		changed and the existing threshold will be retained.
+///		Valid values of \a libver_low are as follows:
+///		\li \c H5F_FILE_SPACE_ALL   (Default)
+///		\li \c H5F_FILE_SPACE_ALL_PERSIST
+///		\li \c H5F_FILE_SPACE_AGGR_VFD
+///		\li \c H5F_FILE_SPACE_VFD
+///		For information, please see the C layer Reference Manual at:
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFileSpace
 // Programmer	Binh-Minh Ribler - Feb, 2017
 //--------------------------------------------------------------------------
 void FileCreatPropList::setFileSpace(H5F_file_space_type_t strategy, hsize_t threshold) const
