@@ -124,11 +124,7 @@ CHECKINSTALL()
 # Safety measure to avoid unintended checkins to other repositories.
 COMMITSNAPSHOT()
 {
-<<<<<<< HEAD
     echo "original hdf5 script committed code changes back into git."
-=======
-    echo "original hdf5 script checked code back into svn."
->>>>>>> f37f35245d10afc251aa2398b7cfe186ea927c78
 }
 
 DISPLAYUSAGE()
@@ -516,11 +512,7 @@ done
 #=============================
 if [ "$cmd" = "all" -o -n "$cmdcheckout" ]; then
     TIMESTAMP "checkout"
-<<<<<<< HEAD
     # ${BASEDIR}/bin is now updated from git by EveningMaint or DailyMaint
-=======
-    # ${BASEDIR}/bin is now updated from svn by EveningMaint or DailyMaint
->>>>>>> f37f35245d10afc251aa2398b7cfe186ea927c78
     # to avoid updating the scripts in ${BASEDIR}/bin while they are running.
 
     if [ -z "$AUTOGEN" ]; then
