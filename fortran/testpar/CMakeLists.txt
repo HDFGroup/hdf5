@@ -4,7 +4,7 @@ PROJECT (HDF5_FORTRAN_TESTPAR C CXX Fortran)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
+INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src ${MPI_Fortran_INCLUDE_PATH})
 
 #-----------------------------------------------------------------------------
 # Add Tests
@@ -22,7 +22,7 @@ target_link_libraries (parallel_test
     ${HDF5_F90_TEST_LIB_TARGET}
     ${HDF5_F90_LIB_TARGET}
     ${HDF5_LIB_TARGET}
-    ${MPI_Fortran_LIBRARIES}
+    ${LINK_Fortran_LIBS}
 )
 if (WIN32 AND MSVC)
   target_link_libraries (parallel_test "ws2_32.lib")

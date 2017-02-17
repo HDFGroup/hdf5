@@ -877,6 +877,15 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
       endif ()
     endif ()
 
+    # Parallel IO usage requires MPI to be Linked and Included
+    if (H5_HAVE_PARALLEL)
+      set (LINK_Fortran_LIBS ${LINK_LIBS} ${MPI_Fortran_LIBRARIES})
+      set (LINK_Fortran_SHARED_LIBS ${LINK_SHARED_LIBS} ${MPI_Fortran_LIBRARIES})
+      if (MPI_Fortran_LINK_FLAGS)
+        set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
+      endif ()
+    endif ()
+
     # -----------------------------------------------------------------------
     # wrapper script variables
     #
