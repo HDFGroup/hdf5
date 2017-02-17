@@ -1,7 +1,7 @@
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
 ### BUILD_GENERATOR required [Unix, VS2015, VS201564, VS2013, VS201364, VS2012, VS201264] ###
-### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf5.log          ###
+### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
 cmake_minimum_required(VERSION 3.2.2 FATAL_ERROR)
@@ -152,11 +152,27 @@ if(WIN32)
 ##  Set the following to unique id your computer  ##
   set(CTEST_SITE "WIN7${BUILD_GENERATOR}.XXXX")
 else()
+  set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
 ##  Set the following to unique id your computer  ##
   if(APPLE)
     set(CTEST_SITE "MAC.XXXX")
   else()
     set(CTEST_SITE "LINUX.XXXX")
+  endif()
+  if(APPLE)
+    execute_process(COMMAND xcrun --find cc OUTPUT_VARIABLE XCODE_CC OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND xcrun --find c++ OUTPUT_VARIABLE XCODE_CXX OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(ENV{CC} "${XCODE_CC}")
+    set(ENV{CXX} "${XCODE_CXX}")
+    set(CTEST_USE_LAUNCHERS        1)
+    set(RR_WARNINGS_COMMON "-Wno-format-nonliteral -Wno-cast-align -Wno-unused -Wno-unused-variable -Wno-unused-function -Wno-self-assign -Wno-unused-parameter -Wno-sign-compare")
+    set(RR_WARNINGS_C "${RR_WARNINGS_COMMON} -Wno-deprecated-declarations -Wno-uninitialized")
+    set(RR_WARNINGS_CXX "${RR_WARNINGS_COMMON} -Woverloaded-virtual -Wshadow -Wwrite-strings -Wc++11-compat")
+    set(RR_FLAGS_COMMON "-g -O0 -fstack-protector-all -D_FORTIFY_SOURCE=2")
+    set(RR_FLAGS_C "${RR_FLAGS_COMMON}")
+    set(RR_FLAGS_CXX "${RR_FLAGS_COMMON}")
+    set(ENV{CFLAGS} "${RR_WARNINGS_C} ${RR_FLAGS_C}")
+    set(ENV{CXXFLAGS} "${RR_WARNINGS_CXX} ${RR_FLAGS_CXX}")
   endif()
 endif()
 ###################################################################
@@ -178,14 +194,12 @@ set(MODEL "Experimental")
 #set(LOCAL_NO_PACKAGE "TRUE")
 #####       Following controls source update                  #####
 #set(LOCAL_UPDATE "TRUE")
-set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/trunk")
+set(REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
+set(REPOSITORY_BRANCH "develop")
+
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
 ###################################################################
-
-###################################################################
-####  Change default configuration of options in config/cmake/cacheinit.cmake file ###
-####  format: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")
 
 ###################################################################
 if(${STATICLIBRARIES})
@@ -195,26 +209,15 @@ if(${STATICLIBRARIES})
   set(SITE_BUILDNAME_SUFFIX "STATIC")
 endif()
 ###################################################################
-
-### uncomment/comment and change the following lines for other configuration options
-
-####      ext libraries       ####
-### ext libs from tgz
-set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=TGZ -DTGZPATH:PATH=${CTEST_SCRIPT_DIRECTORY}")
-### ext libs from svn
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=SVN")
-### ext libs on system
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib -DZLIB_INCLUDE_DIR:PATH=some_location/include")
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib -DSZIP_INCLUDE_DIR:PATH=some_location/include")
-### disable ext libs building
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF")
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
 ####      fortran       ####
 if(${FORTRANLIBRARIES})
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
 else()
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=OFF")
 endif()
 ####      java       ####
 if(${JAVALIBRARIES})
@@ -223,57 +226,53 @@ else()
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
 endif()
 
-### disable test program builds
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_TESTING:BOOL=OFF")
-
-### disable packaging
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_NO_PACKAGES:BOOL=ON")
-### Create install package with external libraries (szip, zlib, jpeg)
-set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
-
 ### change install prefix
-set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALLDIR}")
-set(BUILD_OPTIONS "${BUILD_OPTIONS} -DCTEST_CONFIGURATION_TYPE:STRING=$ENV{CMAKE_CONFIG_TYPE}")
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALLDIR}")
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCTEST_CONFIGURATION_TYPE:STRING=$ENV{CMAKE_CONFIG_TYPE}")
 
 ###################################################################
 
 if(WIN32)
+  set(BINFILEBASE "HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}")
+  include(${CTEST_SCRIPT_DIRECTORY}\\HDF5options.cmake)
   include(${CTEST_SCRIPT_DIRECTORY}\\CTestScript.cmake)
-  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.exe")
-    file(COPY "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.exe" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.exe")
+    file(COPY "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.exe" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
   endif()
-  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.msi")
-    file(COPY "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.msi" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.msi")
+    file(COPY "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.msi" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
   endif()
-  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.zip")
-    file(COPY "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.zip" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.zip")
+    file(COPY "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.zip" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
   endif()
 else()
+  set(BINFILEBASE "HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
+  include(${CTEST_SCRIPT_DIRECTORY}/HDF5options.cmake)
   include(${CTEST_SCRIPT_DIRECTORY}/CTestScript.cmake)
   if(APPLE)
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.dmg")
-      file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.dmg" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+    if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.dmg")
+      file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.dmg" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
     endif()
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.tar.gz")
-      file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+    if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.tar.gz")
+      file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
     endif()
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.sh")
-      file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+    if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.sh")
+      file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
     endif()
   else()
     if(CYGWIN)
-      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-CYGWIN.sh")
-        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-CYGWIN.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-CYGWIN.sh")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-CYGWIN.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
       endif()
-      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-CYGWIN.tar.gz")
-        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-CYGWIN.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-CYGWIN.tar.gz")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-CYGWIN.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
       endif()
     else()
-      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Linux.sh")
-        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Linux.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Linux.sh")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Linux.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
       endif()
-      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Linux.tar.gz")
-        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Linux.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Linux.tar.gz")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Linux.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
       endif()
     endif()
   endif()
