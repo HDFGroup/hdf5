@@ -411,6 +411,9 @@ static void test_file_size()
 
     // use C test utility routine to close property list.
     H5Pclose(fapl_id);
+    herr_t ret = H5Pclose(fapl_id);
+    if (ret < 0)
+	issue_fail_msg("test_file_size()", __LINE__, __FILE__, "H5Pclose failed");
 
 }   // test_file_size()
 
@@ -734,9 +737,7 @@ static void test_libver_bounds()
 /*-------------------------------------------------------------------------
  * Function:	test_commonfg
  *
- * Purpose:	Verify that a file created and modified with the
- *		specified libver bounds has the specified object header
- *		versions for the right objects.
+ * Purpose:	Verify that H5File works as a root group.
  *
  * Return:	None
  *
@@ -795,6 +796,77 @@ static void test_commonfg()
 
 } /* end test_commonfg() */
 
+const H5std_string	FILE7("tfile7.h5");
+/*-------------------------------------------------------------------------
+ * Function:	test_filespace_info
+ *
+ * Purpose:	Verify that setting and retrieving the file space strategy
+ *		and free space section threshold work correctly.
+ *
+ * Return:	None
+ *
+ * Programmer:	Binh-Minh Ribler
+ *		February, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_filespace_info()
+{
+    // Output message about test being performed
+    SUBTEST("File space information");
+
+    hid_t fapl_id = h5_fileaccess();	// in h5test.c, returns a file access template
+    hsize_t in_threshold = 2;	// Free space section threshold to set */
+    hsize_t out_threshold = 0;	// Free space section threshold to get */
+    // File space handling strategy
+    H5F_file_space_type_t in_strategy = H5F_FILE_SPACE_ALL;
+    // File space handling strategy
+    H5F_file_space_type_t out_strategy = H5F_FILE_SPACE_DEFAULT;
+
+    try {
+        // Use the file access template id to create a file access prop.
+        // list object to pass in H5File::H5File
+        FileAccPropList fapl(fapl_id);
+
+	/* Create file-creation proplist */
+	FileCreatPropList fcpl;
+
+	/* Set file space strategy and free space section threshold */
+	fcpl.setFileSpace(in_strategy, in_threshold);
+
+        // Create a file using default properties.
+	H5File file7(FILE7, H5F_ACC_TRUNC, fcpl);
+
+	/* Close the file */
+	file7.close();
+
+	/* Re-open the file */
+	file7.openFile(FILE7, H5F_ACC_RDWR, fapl);
+
+	/* Get the file's creation property */
+	FileCreatPropList fcpl2 = file7.getCreatePlist();
+
+	/* Get and verify the file space info from the creation property list */
+	out_strategy = fcpl2.getFileSpaceStrategy();
+	verify_val(static_cast<unsigned>(out_strategy), static_cast<unsigned>(in_strategy), "FileCreatPropList::getFileSpaceStrategy", __LINE__, __FILE__);
+
+	out_threshold = fcpl2.getFileSpaceThreshold();
+	verify_val(static_cast<unsigned>(out_threshold), static_cast<unsigned>(in_threshold), "FileCreatPropList::getFileSpaceThreshold", __LINE__, __FILE__);
+
+	PASSED();
+    }   // end of try block
+
+    catch (Exception& E)
+    {
+        issue_fail_msg("test_filespace_info()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+    // Close file access template.
+    herr_t ret = H5Pclose(fapl_id);
+    if (ret < 0)
+	issue_fail_msg("test_filespace_info()", __LINE__, __FILE__, "H5Pclose failed");
+
+}  /* test_filespace_info() */
+
 /*-------------------------------------------------------------------------
  * Function:    test_file
  *
@@ -821,7 +893,8 @@ void test_file()
     test_file_name();	// Test getting file's name
     test_file_attribute();	// Test file attribute feature
     test_libver_bounds();	// Test format version
-    test_commonfg();
+    test_commonfg();	// Test H5File as a root group
+    test_filespace_info(); // Test file space info
 }   // test_file()
 
 
@@ -849,4 +922,5 @@ void cleanup_file()
     HDremove(FILE4.c_str());
     HDremove(FILE5.c_str());
     HDremove(FILE6.c_str());
+    HDremove(FILE7.c_str());
 }   // cleanup_file

@@ -295,6 +295,77 @@ unsigned FileCreatPropList::getIstorek() const
 }
 
 //--------------------------------------------------------------------------
+// Function:	FileCreatPropList::setFileSpace
+///\brief	Sets the strategy and the threshold value that the library
+///		will employ in managing file space.
+///\param	strategy - IN: Strategy for file space management
+///\param	threshold - IN: Free-space section threshold. The library
+///		default is 1, which is to track all free-space sections.
+///\exception	H5::PropListIException
+///\par Description
+///		If the given strategy is zero, the property will not be
+///		changed and the existing strategy will be retained.
+///		If the given threshold value is zero, the property will not be
+///		changed and the existing threshold will be retained.
+///		Valid values of \a libver_low are as follows:
+///		\li \c H5F_FILE_SPACE_ALL   (Default)
+///		\li \c H5F_FILE_SPACE_ALL_PERSIST
+///		\li \c H5F_FILE_SPACE_AGGR_VFD
+///		\li \c H5F_FILE_SPACE_VFD
+///		For information, please see the C layer Reference Manual at:
+/// https://support.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetFileSpace
+// Programmer	Binh-Minh Ribler - Feb, 2017
+//--------------------------------------------------------------------------
+void FileCreatPropList::setFileSpace(H5F_file_space_type_t strategy, hsize_t threshold) const
+{
+   herr_t ret_value = H5Pset_file_space(id, strategy, threshold);
+   if( ret_value < 0 )
+   {
+      throw PropListIException("FileCreatPropList::setFileSpace",
+		"H5Pset_file_space failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileCreatPropList::getFileSpaceStrategy
+///\brief	Returns the strategy that the library uses in managing file space.
+///\return	The strategy value
+///\exception	H5::PropListIException
+// Programmer	Binh-Minh Ribler - Feb, 2017
+//--------------------------------------------------------------------------
+H5F_file_space_type_t FileCreatPropList::getFileSpaceStrategy() const
+{
+   H5F_file_space_type_t strategy = H5F_FILE_SPACE_ALL;
+   herr_t ret_value = H5Pget_file_space(id, &strategy, NULL);
+   if (ret_value < 0)
+   {
+      throw PropListIException("FileCreatPropList::getFileSpaceStrategy",
+		"H5Pget_file_space for strategy failed");
+   }
+   return(strategy);
+}
+
+//--------------------------------------------------------------------------
+// Function:	FileCreatPropList::getFileSpaceThreshold
+///\brief	Returns the threshold value that the library uses in tracking
+///		free space sections.
+///\return	The threshold value
+///\exception	H5::PropListIException
+// Programmer	Binh-Minh Ribler - Feb, 2017
+//--------------------------------------------------------------------------
+hsize_t FileCreatPropList::getFileSpaceThreshold() const
+{
+   hsize_t threshold = 0;
+   herr_t ret_value = H5Pget_file_space(id, NULL, &threshold);
+   if (ret_value < 0)
+   {
+      throw PropListIException("FileCreatPropList::getFileSpaceThreshold",
+		"H5Pget_file_space for threshold failed");
+   }
+   return(threshold);
+}
+
+//--------------------------------------------------------------------------
 // Function:	FileCreatPropList destructor
 ///\brief	Noop destructor.
 // Programmer	Binh-Minh Ribler - 2000
