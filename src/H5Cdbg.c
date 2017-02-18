@@ -105,7 +105,7 @@ H5C_dump_cache(H5C_t * cache_ptr, const char *  cache_name)
 
     /* First, create a skip list */
     if(NULL == (slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create skip list.")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create skip list")
 
     /* Next, scan the index, and insert all entries in the skip list.
      * Do this, as we want to display cache entries in increasing address
@@ -241,9 +241,9 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
                (int)(entry_ptr->is_dirty),
                entry_ptr->type->name);
 
-            HDfprintf(stdout, "		node_ptr = 0x%llx, item = 0x%llx\n",
+            HDfprintf(stdout, "		node_ptr = 0x%llx, item = %p\n",
                       (unsigned long long)node_ptr,
-                      (unsigned long long)H5SL_item(node_ptr));
+                      H5SL_item(node_ptr));
 
             /* increment node_ptr before we delete its target */
             node_ptr = H5SL_next(node_ptr);
@@ -286,7 +286,7 @@ H5C_set_prefix(H5C_t * cache_ptr, char * prefix)
 
     if((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC) ||
             (prefix == NULL) || (HDstrlen(prefix) >= H5C__PREFIX_LEN))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry.")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad param(s) on entry")
 
     HDstrncpy(&(cache_ptr->prefix[0]), prefix, (size_t)(H5C__PREFIX_LEN));
 
@@ -1118,28 +1118,28 @@ H5C_validate_index_list(H5C_t *cache_ptr)
 
     if(((cache_ptr->il_head == NULL) || (cache_ptr->il_tail == NULL))
             && (cache_ptr->il_head != cache_ptr->il_tail))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Index list pointer validation failed")
 
     if((cache_ptr->index_len == 1) && ((cache_ptr->il_head != cache_ptr->il_tail)
             || (cache_ptr->il_head == NULL) || (cache_ptr->il_head->size != cache_ptr->index_size)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Index list pointer sanity checks failed")
 
     if((cache_ptr->index_len >= 1)
             && ((cache_ptr->il_head == NULL)
                 || (cache_ptr->il_head->il_prev != NULL)
                 || (cache_ptr->il_tail == NULL)
                 || (cache_ptr->il_tail->il_next != NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Index list length sanity checks failed")
 
     entry_ptr = cache_ptr->il_head;
     while(entry_ptr != NULL) {
         if((entry_ptr != cache_ptr->il_head)
                 && ((entry_ptr->il_prev == NULL) || (entry_ptr->il_prev->il_next != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Index list pointers for entry are invalid")
 
         if((entry_ptr != cache_ptr->il_tail)
                 && ((entry_ptr->il_next == NULL) || (entry_ptr->il_next->il_prev != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Index list pointers for entry are invalid")
 
 	HDassert(entry_ptr->ring > 0);
 	HDassert(entry_ptr->ring < H5C_RING_NTYPES);
@@ -1167,7 +1167,7 @@ H5C_validate_index_list(H5C_t *cache_ptr)
             || (cache_ptr->clean_index_size != clean_size)
             || (cache_ptr->dirty_index_size != dirty_size)
             || (clean_size + dirty_size != size))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Index, clean and dirty sizes for cache are invalid")
 
     size = 0;
     clean_size = 0;
@@ -1181,7 +1181,7 @@ H5C_validate_index_list(H5C_t *cache_ptr)
     if((cache_ptr->index_size != size)
             || (cache_ptr->clean_index_size != clean_size)
             || (cache_ptr->dirty_index_size != dirty_size))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Index, clean and dirty sizes for cache are invalid")
 
 done:
     if(ret_value != SUCCEED)

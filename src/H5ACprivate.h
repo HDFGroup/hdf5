@@ -486,7 +486,7 @@ H5_DLL herr_t H5AC_dump_cache(const H5F_t *f);
 #ifndef NDEBUG
 H5_DLL herr_t H5AC_get_entry_ptr_from_addr(const H5F_t *f, haddr_t addr,
     void **entry_ptr_ptr);
-H5_DLL herr_t H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, 
+H5_DLL herr_t H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr,
     haddr_t child_addr, hbool_t *fd_exists_ptr);
 H5_DLL herr_t H5AC_verify_entry_type(const H5F_t *f, haddr_t addr,
     const H5AC_class_t *expected_type, hbool_t *in_cache_ptr,
