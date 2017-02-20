@@ -82,22 +82,22 @@ int setup_parameters(int argc, char * const argv[])
     /* use case defaults */
     HDmemset(&UC_opts, 0, sizeof(options_t));
     UC_opts.chunksize = Chunksize_DFT;
-    UC_opts.use_swmr = 1;	/* use swmr open */
+    UC_opts.use_swmr = TRUE;	/* use swmr open */
     UC_opts.iterations = 1;
     UC_opts.chunkplanes = 1;
 
     /* parse options */
-    if (parse_option(argc, argv) < 0){
+    if (parse_option(argc, argv) < 0)
 	return(-1);
-    }
+
     /* set chunk dims */
-    UC_opts.chunkdims[0] = (hsize_t)UC_opts.chunkplanes;
-    UC_opts.chunkdims[1] = UC_opts.chunkdims[2] = (hsize_t)UC_opts.chunksize;
+    UC_opts.chunkdims[0] = UC_opts.chunkplanes;
+    UC_opts.chunkdims[1] = UC_opts.chunkdims[2] = UC_opts.chunksize;
 
     /* set dataset initial and max dims */
     UC_opts.dims[0] = 0;
     UC_opts.max_dims[0] = H5S_UNLIMITED;
-    UC_opts.dims[1] = UC_opts.dims[2] = UC_opts.max_dims[1] = UC_opts.max_dims[2] = (hsize_t)UC_opts.chunksize;
+    UC_opts.dims[1] = UC_opts.dims[2] = UC_opts.max_dims[1] = UC_opts.max_dims[2] = UC_opts.chunksize;
 
     /* set nplanes */
     if (UC_opts.nplanes == 0)
@@ -125,7 +125,7 @@ main(int argc, char *argv[])
     int child_wait_option=0;
     int ret_value = 0;
     int child_ret_value;
-    hbool_t send_wait = 0;
+    hbool_t send_wait = FALSE;
 
     /* initialization */
     if (setup_parameters(argc, argv) < 0){
@@ -135,7 +135,7 @@ main(int argc, char *argv[])
     /* Determine the need to send/wait message file*/
     if(UC_opts.launch == UC_READWRITE) {
         HDunlink(WRITER_MESSAGE);
-        send_wait = 1;
+        send_wait = TRUE;
     }
 
     /* ==============================================================*/
@@ -157,12 +157,12 @@ main(int argc, char *argv[])
 
     if (UC_opts.launch==UC_READWRITE){
 	/* fork process */
-	if((childpid = fork()) < 0) {
-	    perror("fork");
+	if((childpid = HDfork()) < 0) {
+	    HDperror("fork");
 	    Hgoto_error(1);
 	};
     };
-    mypid = getpid();
+    mypid = HDgetpid();
 
     /* ============= */
     /* launch reader */
@@ -193,8 +193,8 @@ main(int argc, char *argv[])
     /* If readwrite, collect exit code of child process */
     /* ================================================ */
     if (UC_opts.launch == UC_READWRITE){
-	if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0){
-	    perror("waitpid");
+	if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0){
+	    HDperror("waitpid");
 	    Hgoto_error(1);
 	}
 	if (WIFEXITED(child_status)){

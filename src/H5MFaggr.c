@@ -232,9 +232,9 @@ haddr_t
 H5MF_aggr_alloc(H5F_t *f, hid_t dxpl_id, H5F_blk_aggr_t *aggr,
     H5F_blk_aggr_t *other_aggr, H5FD_mem_t type, hsize_t size)
 {
-    haddr_t	eoa_frag_addr = HADDR_UNDEF;    /* Address of fragment at EOA */
-    hsize_t	eoa_frag_size = 0;      /* Size of fragment at EOA */
-    haddr_t	eoa = HADDR_UNDEF;      /* Initial EOA for the file */
+    haddr_t     eoa_frag_addr = HADDR_UNDEF;    /* Address of fragment at EOA */
+    hsize_t     eoa_frag_size = 0;      	/* Size of fragment at EOA */
+    haddr_t	eoa = HADDR_UNDEF;      	/* Initial EOA for the file */
     haddr_t     ret_value = HADDR_UNDEF;        /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
@@ -543,7 +543,8 @@ H5MF_aggr_try_extend(H5F_t *f, hid_t dxpl_id, H5F_blk_aggr_t *aggr,
 		    } /* end else-if */
 		} /* end else */
 	    } /* end if */
-            else { /* The aggreator is not at end of file */
+            else {
+                /* The aggreator is not at end of file */
                 /* Check if aggregator has enough internal space to satisfy the extension. */
                 if(aggr->size >= extra_requested) {
                     /* Extend block into aggregator */

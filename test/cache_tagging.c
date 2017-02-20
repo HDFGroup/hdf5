@@ -953,9 +953,9 @@ check_dense_attribute_tags(void)
     int verbose = FALSE;     /* verbose file outout */
     int i = 0;               /* iterator */
     hid_t fapl = -1;         /* File access property list */
-    haddr_t d_tag = 0;      /* Dataset tag value */
-    haddr_t root_tag = 0;   /* Root group tag value */
-    char attrname[500];      /* Name of attribute */
+    haddr_t d_tag = 0;       /* Dataset tag value */
+    haddr_t root_tag = 0;    /* Root group tag value */
+    char attrname[500];	     /* Name of attribute */
 
     /* Testing Macro */
     TESTING("tag application during dense attribute manipulation");
@@ -1533,6 +1533,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     /* Close and Reopen the file and group */
     if ( H5Gclose(gid) < 0 ) TEST_ERROR;
     if ( H5Fclose(fid) < 0 ) TEST_ERROR;
+
     if ( (fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0 ) TEST_ERROR;
     if ( (gid = H5Gopen2(fid, GROUPNAME, H5P_DEFAULT)) < 0 ) TEST_ERROR;
 

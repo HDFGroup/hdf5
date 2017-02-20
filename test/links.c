@@ -820,7 +820,7 @@ long_links(hid_t fapl, hbool_t new_format)
 static int
 toomany(hid_t fapl, hbool_t new_format)
 {
-    hid_t		fid = (-1);     /* File ID */
+    hid_t		fid = (-1);     	/* File ID */
     hid_t	gid = (-1), gid2 = (-1);	/* Group IDs */
     char                objname[NAME_BUF_SIZE];         /* Object name */
     char		filename[NAME_BUF_SIZE];
@@ -2622,7 +2622,6 @@ external_link_toomany(hid_t fapl, hbool_t new_format)
 
     /* Close first file */
     if(H5Fclose(fid) < 0) TEST_ERROR
-
 
     PASSED();
     return 0;
