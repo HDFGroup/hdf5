@@ -1514,12 +1514,17 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
         for (i = 0; i < collective_chunk_list_num_entries; i++) {
             udata.chunk_block = collective_chunk_list[i].new_chunk;
             udata.common.scaled = collective_chunk_list[i].chunk_info.scaled;
+            udata.chunk_idx = collective_chunk_list[i].chunk_info.index;
+
+#ifdef PARALLEL_COMPRESS_DEBUG
+            HDfprintf(debug_file, "| Reinserting chunk at index %llu.\n", udata.chunk_idx);
+#endif
 
             if ((index_info.storage->ops->insert)(&index_info, &udata, io_info->dset) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk address into index")
 
 #ifdef PARALLEL_COMPRESS_DEBUG
-            HDfprintf(debug_file, "| Successfully inserted chunk at address %a into the chunk index.\n", udata.chunk_block.offset);
+            HDfprintf(debug_file, "| Successfully inserted chunk at address %a into the chunk index at index %llu.\n", udata.chunk_block.offset, udata.chunk_idx);
 #endif
         } /* end for */
 
@@ -2054,12 +2059,17 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
             for (j = 0; j < collective_chunk_list_num_entries; j++) {
                 udata.chunk_block = collective_chunk_list[j].new_chunk;
                 udata.common.scaled = collective_chunk_list[j].chunk_info.scaled;
+                udata.chunk_idx = collective_chunk_list[j].chunk_info.index;
+
+#ifdef PARALLEL_COMPRESS_DEBUG
+                HDfprintf(debug_file, "| Reinserting chunk at index %llu.\n", udata.chunk_idx);
+#endif
 
                 if ((index_info.storage->ops->insert)(&index_info, &udata, io_info->dset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert chunk address into index")
 
 #ifdef PARALLEL_COMPRESS_DEBUG
-                HDfprintf(debug_file, "| Successfully inserted chunk at address %a into the chunk index.\n", udata.chunk_block.offset);
+                HDfprintf(debug_file, "| Successfully inserted chunk at address %a into the chunk index at index %llu.\n", udata.chunk_block.offset, udata.chunk_idx);
 #endif
             } /* end for */
 
