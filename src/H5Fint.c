@@ -869,7 +869,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         } /* end if */
 
         /* With the shutdown modifications, the contents of the metadata cache
-         * should be clean at this point, with the possible exception of the 
+         * should be clean at this point, with the possible exception of the
          * the superblock and superblock extension.
          *
          * Verify this.
@@ -892,18 +892,21 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
              *      (assuming they are persistent).  In this case, closing the
              *      free space managers should have no effect on EOA.
              *
-             *                                          -- JRM 
+             *                                          -- JRM
              */
             if(H5F_ACC_RDWR & H5F_INTENT(f)) {
                 if(H5MF_close(f, dxpl_id) < 0)
                     /* Push error, but keep going*/
                     HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
 
-                /* at this point, only the superblock and superblock 
+                /* at this point, only the superblock and superblock
                  * extension should be dirty.
                  */
                 HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
 
+                /* Flush the file again (if requested), as shutting down the
+                 * free space manager may dirty some data structures again.
+                 */
                 if(flush) {
 		    /* Clear status_flags */
                     f->shared->sblock->status_flags &= (uint8_t)(~H5F_SUPER_WRITE_ACCESS);
@@ -918,7 +921,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                      * so that the eoa value corresponds to the end of the 
                      * space written to in the file.
                      *
-                     * At most, this should change the superblock or the 
+                     * At most, this should change the superblock or the
                      * superblock extension messages.
                      */
                     if(H5MF_free_aggrs(f, dxpl_id) < 0)
@@ -930,7 +933,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                         /* Push error, but keep going*/
                         HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
 
-                    /* at this point, only the superblock and superblock 
+                    /* at this point, only the superblock and superblock
                      * extension should be dirty.
                      */
                     HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
@@ -952,7 +955,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
             f->shared->sblock = NULL;
         } /* end if */
 
-        /* with the possible exception of the superblock and superblock 
+        /* with the possible exception of the superblock and superblock
          * extension, the metadata cache should be clean at this point.
          *
          * Verify this.

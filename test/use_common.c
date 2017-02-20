@@ -69,7 +69,7 @@ parse_option(int argc, char * const argv[])
 	    UC_opts.filename = optarg;
 	    break;
 	  case 'i':	/* iterations */
-	    if ((UC_opts.iterations = atoi(optarg)) <= 0){
+	    if ((UC_opts.iterations = HDatoi(optarg)) <= 0) {
 		fprintf(stderr, "bad iterations number %s, must be a positive integer\n", optarg);
 		usage(progname_g);
 		Hgoto_error(-1);
@@ -91,28 +91,28 @@ parse_option(int argc, char * const argv[])
 	    }
 	    break;
 	  case 'n':	/* number of planes to write/read */
-	    if ((UC_opts.nplanes = atoi(optarg)) <= 0){
+	    if ((UC_opts.nplanes = HDstrtoul(optarg, NULL, 0)) <= 0) {
 		fprintf(stderr, "bad number of planes %s, must be a positive integer\n", optarg);
 		usage(progname_g);
 		Hgoto_error(-1);
 	    };
 	    break;
 	  case 's':	/* use swmr file open mode */
-	    if ((UC_opts.use_swmr = atoi(optarg)) < 0){
+	    if ((UC_opts.use_swmr = HDatoi(optarg)) < 0) {
 		fprintf(stderr, "swmr value should be 0(no) or 1(yes)\n");
 		usage(progname_g);
 		Hgoto_error(-1);
 	    };
 	    break;
 	  case 'y':	/* Number of planes per chunk */
-	    if ((UC_opts.chunkplanes = atoi(optarg)) <= 0){
+	    if ((UC_opts.chunkplanes = HDstrtoul(optarg, NULL, 0)) <= 0) {
 		fprintf(stderr, "bad number of planes per chunk %s, must be a positive integer\n", optarg);
 		usage(progname_g);
 		Hgoto_error(-1);
 	    };
 	    break;
 	  case 'z':	/* size of chunk=(z,z) */
-	    if ((UC_opts.chunksize = atoi(optarg)) <= 0){
+	    if ((UC_opts.chunksize = HDstrtoull(optarg, NULL, 0)) <= 0) {
 		fprintf(stderr, "bad chunksize %s, must be a positive integer\n", optarg);
 		usage(progname_g);
 		Hgoto_error(-1);
@@ -361,7 +361,7 @@ int write_uc_file(hbool_t tosend)
 	bufptr = buffer;
 	for (j=0; j<dims[1]; j++)
 	    for (k=0; k<dims[2]; k++)
-		*bufptr++ = i;
+		*bufptr++ = (UC_CTYPE)i;
 
         /* Cork the dataset's metadata in the cache, if SWMR is enabled */
         if(UC_opts.use_swmr)

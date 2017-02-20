@@ -2440,9 +2440,9 @@ int
 main(void)
 {
     hid_t	fapl, fapl2, file;
-    int	nerrors = 0;
+    int		nerrors = 0;
     char	filename[1024];
-    unsigned new_format;
+    unsigned	new_format;
 
     /* Metadata cache parameters */
     int mdc_nelmts;

@@ -156,7 +156,7 @@ H5FL_DEFINE(H5C_cache_entry_t);
  *
  * Purpose:     Examine the metadata cache associated with the supplied 
  *              instance of H5F_t to determine whether the load of a 
- *              cache image has either been queued ir executed, and if 
+ *              cache image has either been queued or executed, and if 
  *              construction of a cache image has been requested.
  *
  *              This done, it set *load_ci_ptr to TRUE if a cache image
@@ -734,7 +734,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
             HDassert(found);
 
             if(H5C_create_flush_dependency(ds_entry_ptr, fd_children[i]) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Can't restore child flush dependency.")
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Can't restore child flush dependency")
 
             i++;
         } /* end while */
@@ -1070,7 +1070,7 @@ H5C__load_cache_image(H5F_t *f, hid_t dxpl_id)
     } /* end if */
 
     /* If directed, free the on disk metadata cache image */
-    if(cache_ptr->delete_image) { 
+    if(cache_ptr->delete_image) {
         if(H5F_super_ext_remove_msg(f, dxpl_id, H5O_MDCI_MSG_ID) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove metadata cache image message from superblock extension")
 
@@ -2166,7 +2166,7 @@ H5C__encode_cache_image_entry(H5F_t *f, H5C_t *cache_ptr, uint8_t **buf,
 
     /* Validate and encode dependency parent count */
     if(ie_ptr->fd_parent_count > H5C__MDCI_MAX_FD_PARENTS)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADRANGE, FAIL, "fd_parent_count out of rang.")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADRANGE, FAIL, "fd_parent_count out of range")
     UINT16ENCODE(p, (uint16_t)(ie_ptr->fd_parent_count));
 
     /* Encode index in LRU */
@@ -2425,10 +2425,10 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
      * for all entries that may appear in the cache image.
      */
     entry_ptr = cache_ptr->il_head;
-    while(entry_ptr != NULL ) {
+    while(entry_ptr != NULL) {
 	if(entry_ptr->include_in_image && entry_ptr->fd_child_count == 0 &&
                 entry_ptr->fd_parent_count > 0) {
-	    for(u = 0; u < entry_ptr->fd_parent_count; u++ ) {
+	    for(u = 0; u < entry_ptr->fd_parent_count; u++) {
 	        parent_ptr = entry_ptr->flush_dep_parent[u];
 
 	        HDassert(parent_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
@@ -3371,7 +3371,7 @@ H5C__serialize_cache(H5F_t *f, hid_t dxpl_id)
     if((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
             (H5C_validate_pinned_entry_list(cache_ptr) < 0) ||
             (H5C_validate_lru_list(cache_ptr) < 0))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry.\n")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
 #ifndef NDEBUG
@@ -3510,7 +3510,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5C__serialize_ring(H5F_t *f, hid_t    dxpl_id, H5C_ring_t ring)
+H5C__serialize_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring)
 {
     hbool_t		done = FALSE;
     H5C_t             * cache_ptr;
