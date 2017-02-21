@@ -530,12 +530,12 @@ for comp in $methods; do
             # Create doxygen C++ RM
 	    (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
 	    # Replace version of C++ RM with just-created version
-	    rm -rf $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
-	    mv c++/src/$CPPLUS_RM_NAME $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
+	    rm -rf $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME || exit 1
+	    mv c++/src/$CPPLUS_RM_NAME $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME || exit 1
             # Compress the docs and move them to the release area
-	    mv $tmpdir/${DOCVERSION} $tmpdir/${HDF5_VERS}_docs
-	    (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs)
-	    mv $tmpdir/${HDF5_VERS}_docs.tar $DEST
+	    mv $tmpdir/${DOCVERSION} $tmpdir/${HDF5_VERS}_docs || exit 1
+	    (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs) || exit 1
+	    mv $tmpdir/${HDF5_VERS}_docs.tar $DEST || exit 1
 	    ;;
 	*)
 	    echo "***Error*** Unknown method $comp"
