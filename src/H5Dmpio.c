@@ -2077,10 +2077,14 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
             HDfprintf(debug_file, "---------------------------------------\n");
 #endif
 
-            if (collective_chunk_list)
-                collective_chunk_list = (H5D_filtered_collective_io_info_t *) H5MM_free(collective_chunk_list);
-            if (has_chunk_selected_array)
-                has_chunk_selected_array = (hbool_t *) H5MM_free(has_chunk_selected_array);
+            if (collective_chunk_list){
+                H5MM_free(collective_chunk_list);
+                collective_chunk_list = NULL;
+            }
+            if (has_chunk_selected_array){
+                H5MM_free(has_chunk_selected_array);
+                has_chunk_selected_array = NULL;
+            }
         } /* end for */
 
         /* Free the MPI file and memory types, if they were derived */
@@ -2962,8 +2966,10 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
 #ifdef PARALLEL_COMPRESS_DEBUG
                 HDfprintf(debug_file, "| Mod. data sent.\n|\n");
 #endif
-                if (mod_data)
-                    mod_data = (unsigned char *) H5MM_free(mod_data);
+                if (mod_data) {
+                    H5MM_free(mod_data);
+                    mod_data = NULL;
+                }
                 if (mem_iter_init && H5S_SELECT_ITER_RELEASE(mem_iter) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
                 mem_iter_init = FALSE;
