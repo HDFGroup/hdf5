@@ -53,6 +53,22 @@ hid_t H5VL_DAOSM_g = 0;
 #define H5VL_DAOSM_LINK_VAL_BUF_SIZE 256
 #define H5VL_DAOSM_SEQ_LIST_LEN 128
 
+/* DAOSM-specific file access properties */
+typedef struct H5VL_daosm_fapl_t {
+    MPI_Comm            comm;           /*communicator                  */
+    MPI_Info            info;           /*file information              */
+    uuid_t              pool_uuid;      /*pool uuid                     */
+    char                *pool_grp;      /*pool group                    */
+} H5VL_daosm_fapl_t;
+
+/* Enum to indicate if the supplied read buffer can be used as a type conversion
+ * or background buffer */
+typedef enum {
+    H5VL_DAOSM_TCONV_REUSE_NONE,    /* Cannot reuse buffer */
+    H5VL_DAOSM_TCONV_REUSE_TCONV,   /* Use buffer as type conversion buffer */
+    H5VL_DAOSM_TCONV_REUSE_BKG      /* Use buffer as background buffer */
+} H5VL_daosm_tconv_reuse_t;
+
 /* Prototypes */
 static void *H5VL_daosm_fapl_copy(const void *_old_fa);
 static herr_t H5VL_daosm_fapl_free(void *_fa);
@@ -135,17 +151,14 @@ static void *H5VL_daosm_group_create_helper(H5VL_daosm_file_t *file,
     hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
 static void *H5VL_daosm_group_open_helper(H5VL_daosm_file_t *file,
     daos_obj_id_t oid, hid_t gapl_id, hid_t dxpl_id, void **req);
+static htri_t H5VL_daosm_need_bkg(hid_t src_type_id, hid_t dst_type_id,
+    hbool_t types_equal, hbool_t have_contig_dst_buf, size_t *dst_type_size);
+static herr_t H5VL_daosm_tconv_init(hid_t src_type_id, size_t *src_type_size,
+    hid_t dst_type_id, size_t *dst_type_size, size_t num_elem, void **tconv_buf,
+    void **bkg_buf, H5VL_daosm_tconv_reuse_t *reuse);
 static herr_t H5VL_daosm_sel_to_recx_iov(H5S_t *space, size_t type_size,
     void *buf, daos_recx_t **recxs, daos_iov_t **sg_iovs, size_t *list_nused);
 static herr_t H5VL_daosm_object_close(void *_obj, hid_t dxpl_id, void **req);
-
-/* DAOSM-specific file access properties */
-typedef struct H5VL_daosm_fapl_t {
-    MPI_Comm            comm;           /*communicator                  */
-    MPI_Info            info;           /*file information              */
-    uuid_t              pool_uuid;      /*pool uuid                     */
-    char                *pool_grp;      /*pool group                    */
-} H5VL_daosm_fapl_t;
 
 /* Free list definitions */
 H5FL_DEFINE(H5VL_daosm_file_t);
@@ -2483,6 +2496,297 @@ H5VL_daosm_group_close(void *_grp, hid_t H5_ATTR_UNUSED dxpl_id,
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_need_bkg
+ *
+ * Purpose:     Determine if a background buffer is needed for conversion.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              February, 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5VL_daosm_need_bkg(hid_t src_type_id, hid_t dst_type_id, hbool_t types_equal,
+    hbool_t have_contig_dst_buf, size_t *dst_type_size)
+{
+    hid_t memb_type_id = -1;
+    hid_t src_memb_type_id = -1;
+    char *memb_name = NULL;
+    size_t memb_size;
+    H5T_class_t tclass;
+    htri_t ret_value;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Get destination type size */
+    if((*dst_type_size = H5Tget_size(dst_type_id)) == 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get source type size")
+
+    /* Get datatype class */
+    if(H5T_NO_CLASS == (tclass = H5Tget_class(dst_type_id)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get type class")
+
+    switch(tclass) {
+        case H5T_INTEGER:
+        case H5T_FLOAT:
+        case H5T_TIME:
+        case H5T_STRING:
+        case H5T_BITFIELD:
+        case H5T_OPAQUE:
+        case H5T_ENUM:
+            /* No background buffer necessary */
+            ret_value = FALSE;
+
+            break;
+
+        case H5T_COMPOUND:
+            {
+                int nmemb;
+                size_t size_used = 0;
+                int src_i;
+                int i;
+
+                /* If we have a contiguous destination buffer and the types are not
+                 * equal, no reason not to use it for the background buffer (the
+                 * library will allocate one even if we don't care about its
+                 * contents so we may as well provide it), so no need to check
+                 * further */
+                if(!types_equal && have_contig_dst_buf)
+                    HGOTO_DONE(TRUE)
+
+                /* Get number of compound members */
+                if((nmemb = H5Tget_nmembers(dst_type_id)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get number of compound members")
+
+                /* Iterate over compound members */
+                for(i = 0; i < nmemb; i++) {
+                    /* Get member type */
+                    if((memb_type_id = H5Tget_member_type(dst_type_id, (unsigned)i)) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get compound member type")
+
+                    /* If the types are equal, only check for missing space,
+                     * otherwise must also check for a member in dst_type_id
+                     * having no match in src_type_id */
+                    if(types_equal) {
+                        /* Recursively check member type, this will fill in the
+                         * member size */
+                        if((ret_value = H5VL_daosm_need_bkg(-1, memb_type_id, types_equal, have_contig_dst_buf, &memb_size)) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't check if background buffer needed")
+                    } /* end if */
+                    else {
+                        /* Get member name */
+                        if(NULL == (memb_name = H5Tget_member_name(dst_type_id, (unsigned)i)))
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get compound member name")
+
+                        /* Check for matching name in source type */
+                        H5E_BEGIN_TRY {
+                            src_i = H5Tget_member_index(src_type_id, memb_name);
+                        } H5E_END_TRY
+
+                        /* Free memb_name */
+                        if(H5free_memory(memb_name) < 0)
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free member name")
+                        memb_name = NULL;
+
+                        /* If no match was found, this type is not being filled
+                         * in, so we must use a background buffer */
+                        if(src_i < 0) {
+                            if(H5Tclose(memb_type_id) < 0)
+                                HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close member type")
+                            memb_type_id = -1;
+                            HGOTO_DONE(TRUE)
+                        } /* end if */
+
+                        /* Open matching source type */
+                        if((src_memb_type_id = H5Tget_member_type(src_type_id, (unsigned)src_i)) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get compound member type")
+
+                        /* Recursively check member type, this will fill in the
+                         * member size */
+                        if((ret_value = H5VL_daosm_need_bkg(src_memb_type_id, memb_type_id, types_equal, have_contig_dst_buf, &memb_size)) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't check if background buffer needed")
+
+                        /* Close source member type */
+                        if(H5Tclose(src_memb_type_id) < 0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close member type")
+                        src_memb_type_id = -1;
+                    } /* end if */
+
+                    /* Close member type */
+                    if(H5Tclose(memb_type_id) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close member type")
+                    memb_type_id = -1;
+
+                    /* If a background buffer is needed for the member, it is
+                     * needed for the parent */
+                    if(ret_value)
+                        HGOTO_DONE(TRUE)
+
+                    /* Keep track of the size used in compound */
+                    size_used += memb_size;
+                } /* end for */
+
+                /* Check if all the space in the type is used.  If not, we must
+                 * use a background buffer */
+                HDassert(size_used <= *dst_type_size);
+                if(size_used != *dst_type_size)
+                    HGOTO_DONE(TRUE)
+
+                break;
+            } /* end block */
+
+        case H5T_ARRAY:
+            /* Get parent type */
+            if((memb_type_id = H5Tget_super(dst_type_id)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get array parent type")
+
+            /* Get source parent type, if appropriate */
+            if(src_type_id >= 0) {
+                if((src_memb_type_id = H5Tget_super(src_type_id)) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get array parent type")
+            } /* end if */
+            else
+                HDassert(types_equal);
+
+            /* Recursively check parent type */
+            if((ret_value = H5VL_daosm_need_bkg(src_memb_type_id, memb_type_id, types_equal, have_contig_dst_buf, &memb_size)) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't check if background buffer needed")
+
+            /* Close source parent type */
+            if(H5Tclose(src_memb_type_id) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close array parent type")
+            src_memb_type_id = -1;
+
+            /* Close parent type */
+            if(H5Tclose(memb_type_id) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, FAIL, "can't close array parent type")
+            memb_type_id = -1;
+
+            break;
+
+        case H5T_REFERENCE:
+        case H5T_VLEN:
+            /* Not yet supported */
+            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "reference and vlen types not supported")
+
+            break;
+
+        case H5T_NO_CLASS:
+        case H5T_NCLASSES:
+        default:
+            HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid type class")
+    } /* end switch */
+
+done:
+    /* Cleanup on failure */
+    if(ret_value < 0) {
+        if(memb_type_id >= 0)
+            if(H5I_dec_app_ref(memb_type_id) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "failed to close member type")
+        if(src_memb_type_id >= 0)
+            if(H5I_dec_app_ref(src_memb_type_id) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTDEC, FAIL, "failed to close source member type")
+        memb_name = (char *)H5MM_xfree(memb_name);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_need_bkg() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_daosm_tconv_init
+ *
+ * Purpose:     DSMINC
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              December, 2016
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_daosm_tconv_init(hid_t src_type_id, size_t *src_type_size,
+    hid_t dst_type_id, size_t *dst_type_size, size_t num_elem, void **tconv_buf,
+    void **bkg_buf, H5VL_daosm_tconv_reuse_t *reuse)
+{
+    htri_t need_bkg;
+    htri_t types_equal;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(src_type_size);
+    HDassert(dst_type_size);
+    HDassert(tconv_buf);
+    HDassert(!*tconv_buf);
+    HDassert(bkg_buf);
+    HDassert(!*bkg_buf);
+
+    /* Get source type size */
+    if((*src_type_size = H5Tget_size(src_type_id)) == 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get source type size")
+
+    /* Check if the types are equal */
+    if((types_equal = H5Tequal(src_type_id, dst_type_id)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOMPARE, FAIL, "can't check if types are equal")
+
+    /* Get destination type size */
+    if(types_equal)
+        *dst_type_size = *src_type_size;
+    else
+        if((*dst_type_size = H5Tget_size(dst_type_id)) == 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "can't get source type size")
+
+    /* Check if we need a background buffer */
+    if((need_bkg = H5VL_daosm_need_bkg(src_type_id, dst_type_id, types_equal, reuse != NULL, dst_type_size)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't check if background buffer needed")
+
+    /* Check if we need to perform type conversion */
+    if(!types_equal || need_bkg) {
+        /* Check for reusable destination buffer */
+        if(reuse) {
+            HDassert(*reuse = H5VL_DAOSM_TCONV_REUSE_NONE);
+
+            /* Use dest buffer for type conversion if it large enough, otherwise
+             * use it for the background buffer if one is needed. */
+            if(dst_type_size >= src_type_size)
+                *reuse = H5VL_DAOSM_TCONV_REUSE_TCONV;
+            else if(need_bkg)
+                *reuse = H5VL_DAOSM_TCONV_REUSE_BKG;
+        } /* end if */
+
+        /* Allocate conversion buffer if it is not being reused */
+        if(!reuse || (*reuse != H5VL_DAOSM_TCONV_REUSE_TCONV))
+            if(NULL == (*tconv_buf = H5MM_malloc(num_elem * (*src_type_size
+                    > *dst_type_size ? *src_type_size : *dst_type_size))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate type conversion buffer")
+
+        /* Allocate background buffer if one is needed and it is not being
+         * reused */
+        if(need_bkg && (!reuse || (*reuse != H5VL_DAOSM_TCONV_REUSE_BKG)))
+            if(NULL == (*bkg_buf = H5MM_malloc(num_elem * *dst_type_size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate background buffer")
+    } /* end if */
+
+done:
+    /* Cleanup on failure */
+    if(ret_value < 0) {
+        *tconv_buf = H5MM_xfree(*tconv_buf);
+        *bkg_buf = H5MM_xfree(*bkg_buf);
+        if(reuse)
+            *reuse = H5VL_DAOSM_TCONV_REUSE_NONE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_daosm_tconv_init() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_daosm_dataset_create
  *
  * Purpose:     Sends a request to DAOS-M to create a dataset
@@ -3713,8 +4017,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_daosm_attribute_read(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
-    void *buf, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+H5VL_daosm_attribute_read(void *_attr, hid_t mem_type_id, void *buf,
+    hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5VL_daosm_attr_t *attr = (H5VL_daosm_attr_t *)_attr;
     int ndims;
@@ -3727,8 +4031,12 @@ H5VL_daosm_attribute_read(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
     daos_sg_list_t sgl;
     daos_iov_t sg_iov;
     char attr_key[] = H5VL_DAOSM_ATTR_KEY;
-    size_t type_size;
-    uint64_t chunk_size;
+    size_t file_type_size;
+    size_t mem_type_size;
+    uint64_t attr_size;
+    void *tconv_buf = NULL;
+    void *bkg_buf = NULL;
+    H5VL_daosm_tconv_reuse_t reuse = H5VL_DAOSM_TCONV_REUSE_NONE;
     int ret;
     int i;
     herr_t ret_value = SUCCEED;
@@ -3741,14 +4049,24 @@ H5VL_daosm_attribute_read(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
     if(ndims != H5Sget_simple_extent_dims(attr->space_id, dim, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get dimensions")
 
-    /* Get datatype size */
-    if((type_size = H5Tget_size(attr->type_id)) == 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get datatype size")
-
-    /* Calculate chunk size */
-    chunk_size = (uint64_t)1;
+    /* Calculate attribute size */
+    attr_size = (uint64_t)1;
     for(i = 0; i < ndims; i++)
-        chunk_size *= (uint64_t)dim[i];
+        attr_size *= (uint64_t)dim[i];
+
+    /* Check for type conversion */
+    if(H5VL_daosm_tconv_init(attr->type_id, &file_type_size, mem_type_id, &mem_type_size, (size_t)attr_size, &tconv_buf, &bkg_buf, &reuse) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't initialize type conversion")
+
+    /* Reuse buffer as appropriate */
+    if(reuse == H5VL_DAOSM_TCONV_REUSE_TCONV)
+        tconv_buf = buf;
+    else if(reuse == H5VL_DAOSM_TCONV_REUSE_BKG)
+        bkg_buf = buf;
+
+    /* Fill background buffer if necessary */
+    if(bkg_buf && (bkg_buf != buf))
+        (void)HDmemcpy(bkg_buf, buf, (size_t)attr_size * mem_type_size);
 
     /* Set up operation to read data */
     /* Set up dkey */
@@ -3763,9 +4081,9 @@ H5VL_daosm_attribute_read(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
     (void)HDstrcpy(akey + 2, attr->name);
 
     /* Set up recx */
-    recx.rx_rsize = (uint64_t)type_size;
+    recx.rx_rsize = (uint64_t)file_type_size;
     recx.rx_idx = (uint64_t)0;
-    recx.rx_nr = chunk_size;
+    recx.rx_nr = attr_size;
 
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
@@ -3775,7 +4093,7 @@ H5VL_daosm_attribute_read(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
     iod.vd_recxs = &recx;
 
     /* Set up sgl */
-    daos_iov_set(&sg_iov, (void *)buf, (daos_size_t)(chunk_size * (uint64_t)type_size));
+    daos_iov_set(&sg_iov, tconv_buf ? tconv_buf : buf, (daos_size_t)(attr_size * (uint64_t)file_type_size));
     sgl.sg_nr.num = 1;
     sgl.sg_iovs = &sg_iov;
 
@@ -3783,9 +4101,24 @@ H5VL_daosm_attribute_read(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
     if(0 != (ret = daos_obj_fetch(attr->parent->obj_oh, attr->item.file->epoch, &dkey, 1, &iod, &sgl, NULL /*maps*/, NULL /*event*/)))
         HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data from attribute: %d", ret)
 
+    /* Perform type conversion if necessary */
+    if(tconv_buf) {
+        /* Type conversion */
+        if(H5Tconvert(attr->type_id, mem_type_id, attr_size, tconv_buf, bkg_buf, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL, "can't perform type conversion")
+
+        /* Copy to user's buffer if necessary */
+        if(buf != tconv_buf)
+            (void)HDmemcpy(buf, tconv_buf, (size_t)attr_size * mem_type_size);
+    } /* end if */
+
 done:
     /* Free memory */
     akey = (char *)H5MM_xfree(akey);
+    if(tconv_buf && (tconv_buf != buf))
+        H5MM_free(tconv_buf);
+    if(bkg_buf &&(bkg_buf != buf))
+        H5MM_free(buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_attribute_read() */
@@ -3819,8 +4152,11 @@ H5VL_daosm_attribute_write(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
     daos_sg_list_t sgl;
     daos_iov_t sg_iov;
     char attr_key[] = H5VL_DAOSM_ATTR_KEY;
-    size_t type_size;
-    uint64_t chunk_size;
+    size_t file_type_size;
+    size_t mem_type_size;
+    uint64_t attr_size;
+    void *tconv_buf = NULL;
+    void *bkg_buf = NULL;
     int ret;
     int i;
     herr_t ret_value = SUCCEED;
@@ -3837,14 +4173,14 @@ H5VL_daosm_attribute_write(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
     if(ndims != H5Sget_simple_extent_dims(attr->space_id, dim, NULL))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get dimensions")
 
-    /* Get datatype size */
-    if((type_size = H5Tget_size(attr->type_id)) == 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get datatype size")
-
-    /* Calculate chunk size */
-    chunk_size = (uint64_t)1;
+    /* Calculate attribute size */
+    attr_size = (uint64_t)1;
     for(i = 0; i < ndims; i++)
-        chunk_size *= (uint64_t)dim[i];
+        attr_size *= (uint64_t)dim[i];
+
+    /* Check for type conversion */
+    if(H5VL_daosm_tconv_init(mem_type_id, &mem_type_size, attr->type_id, &file_type_size, (size_t)attr_size, &tconv_buf, &bkg_buf, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't initialize type conversion")
 
     /* Set up operation to write data */
     /* Set up dkey */
@@ -3859,9 +4195,9 @@ H5VL_daosm_attribute_write(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
     (void)HDstrcpy(akey + 2, attr->name);
 
     /* Set up recx */
-    recx.rx_rsize = (uint64_t)type_size;
+    recx.rx_rsize = (uint64_t)file_type_size;
     recx.rx_idx = (uint64_t)0;
-    recx.rx_nr = chunk_size;
+    recx.rx_nr = attr_size;
 
     /* Set up iod */
     HDmemset(&iod, 0, sizeof(iod));
@@ -3870,10 +4206,34 @@ H5VL_daosm_attribute_write(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
     iod.vd_nr = 1u;
     iod.vd_recxs = &recx;
 
-    /* Set up sgl */
-    daos_iov_set(&sg_iov, (void *)buf, (daos_size_t)(chunk_size * (uint64_t)type_size));
+    /* Set up constant sgl info */
     sgl.sg_nr.num = 1;
     sgl.sg_iovs = &sg_iov;
+
+    /* Check for type conversion */
+    if(tconv_buf) {
+        /* Check for background buffer */
+        if(bkg_buf) {
+            /* Read data from attribute to background buffer */
+            daos_iov_set(&sg_iov, bkg_buf, (daos_size_t)(attr_size * (uint64_t)file_type_size));
+
+            if(0 != (ret = daos_obj_fetch(attr->parent->obj_oh, attr->item.file->epoch, &dkey, 1, &iod, &sgl, NULL /*maps*/, NULL /*event*/)))
+                HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't read data from attribute: %d", ret)
+        } /* end if */
+
+        /* Copy data to type conversion buffer */
+        (void)HDmemcpy(tconv_buf, buf, (size_t)attr_size * mem_type_size);
+
+        /* Perform type conversion */
+        if(H5Tconvert(mem_type_id, attr->type_id, attr_size, tconv_buf, bkg_buf, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTCONVERT, FAIL, "can't perform type conversion")
+
+        /* Set sgl to write from tconv_buf */
+        daos_iov_set(&sg_iov, tconv_buf, (daos_size_t)(attr_size * (uint64_t)file_type_size));
+    } /* end if */
+    else
+        /* Set sgl to write from buf */
+        daos_iov_set(&sg_iov, (void *)buf, (daos_size_t)(attr_size * (uint64_t)file_type_size));
 
     /* Write data to attribute */
     if(0 != (ret = daos_obj_update(attr->parent->obj_oh, attr->item.file->epoch, &dkey, 1, &iod, &sgl, NULL /*event*/)))
@@ -3882,6 +4242,8 @@ H5VL_daosm_attribute_write(void *_attr, hid_t H5_ATTR_UNUSED mem_type_id,
 done:
     /* Free memory */
     akey = (char *)H5MM_xfree(akey);
+    tconv_buf = H5MM_xfree(tconv_buf);
+    bkg_buf = H5MM_xfree(bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_daosm_attribute_write() */
@@ -3914,8 +4276,7 @@ H5VL_daosm_attribute_close(void *_attr, hid_t dxpl_id, void **req)
         /* Free attribute data structures */
         if(attr->parent && H5VL_daosm_object_close(attr->parent, dxpl_id, req))
             HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close parent object")
-        if(attr->name)
-            H5MM_free(attr->name);
+        H5MM_xfree(attr->name);
         if(attr->type_id != FAIL && H5I_dec_app_ref(attr->type_id) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "failed to close datatype")
         if(attr->space_id != FAIL && H5I_dec_app_ref(attr->space_id) < 0)
