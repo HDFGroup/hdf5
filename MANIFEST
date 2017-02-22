@@ -3173,7 +3173,7 @@
 ./java/src/Makefile.in
 ./java/src/jni/Makefile.in
 ./m4/libtool.m4
-./m4/lt~obsolete.m4jdk1.8.0_51
+./m4/lt~obsolete.m4
 ./m4/ltoptions.m4
 ./m4/ltsugar.m4
 ./m4/ltversion.m4
