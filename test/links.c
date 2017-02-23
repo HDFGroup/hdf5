@@ -21,18 +21,22 @@
  */
 
 /*
+ * This file needs to access private information from the H5FD package.
+ * This file also needs to access the file driver testing code.
+ */
+#define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
+#define H5FD_TESTING
+
+/*
  * This file needs to access private information from the H5G package.
  * This file also needs to access the group testing code.
  */
 #define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 #define H5G_TESTING
 
-#define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
-#define H5FD_TESTING
-
 #include "h5test.h"
 #include "H5srcdir.h"
-#include "H5FDpkg.h"            /* File drivers         */
+#include "H5FDpkg.h"            /* File drivers                         */
 #include "H5Gpkg.h"		/* Groups 				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
