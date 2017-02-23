@@ -333,7 +333,7 @@ struct mssg_t
     haddr_t	base_addr;
     unsigned	len;
     int		ver;
-    int		count;
+    unsigned	count;
     unsigned	magic;
 };
 
@@ -485,8 +485,8 @@ static hbool_t take_down_cache(hid_t fid, H5C_t * cache_ptr);
 static hbool_t verify_entry_reads(haddr_t addr, int expected_entry_reads);
 static hbool_t verify_entry_writes(haddr_t addr, int expected_entry_writes);
 static hbool_t verify_total_reads(int expected_total_reads);
-static hbool_t verify_total_writes(int expected_total_writes);
-static void verify_writes(int num_writes, haddr_t * written_entries_tbl);
+static hbool_t verify_total_writes(unsigned expected_total_writes);
+static void verify_writes(unsigned num_writes, haddr_t * written_entries_tbl);
 static void unlock_entry(H5F_t * file_ptr, int32_t type, unsigned int flags);
 static void unpin_entry(H5F_t * file_ptr, int32_t idx, hbool_t global,
                  hbool_t dirty, hbool_t via_unprotect);
@@ -1214,7 +1214,7 @@ setup_derived_types(void)
     int result;
     MPI_Datatype mpi_types[9] = {MPI_INT, MPI_INT, MPI_INT, MPI_LONG,
                                  HADDR_AS_MPI_TYPE, MPI_INT, MPI_INT,
-                                 MPI_INT, MPI_UNSIGNED};
+                                 MPI_UNSIGNED, MPI_UNSIGNED};
     int block_len[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
     MPI_Aint displs[9];
     struct mssg_t sample; /* used to compute displacements */
@@ -4334,15 +4334,13 @@ setup_cache_for_test(hid_t * fid_ptr,
  *
  *****************************************************************************/
 static void
-verify_writes(int num_writes,
-	      haddr_t * written_entries_tbl)
+verify_writes(unsigned num_writes, haddr_t *written_entries_tbl)
 {
     const hbool_t report = FALSE;
     hbool_t proceed = TRUE;
-    int i = 0;
+    unsigned u = 0;
 
     HDassert( world_mpi_rank != world_server_mpi_rank );
-    HDassert( num_writes >= 0 );
     HDassert( ( num_writes == 0 ) ||
               ( written_entries_tbl != NULL ) );
 
@@ -4362,15 +4360,12 @@ verify_writes(int num_writes,
         }
     }
 
-    if ( proceed ) {
-
+    if(proceed)
         proceed = verify_total_writes(num_writes);
-    }
 
-    while ( ( proceed ) && ( i < num_writes ) ) 
-    {
-        proceed = verify_entry_writes(written_entries_tbl[i], 1);
-        i++;
+    while(proceed && u < num_writes) {
+        proceed = verify_entry_writes(written_entries_tbl[u], 1);
+        u++;
     }
 
     /* barrier to ensure that all other processes have finished verifying
@@ -4399,12 +4394,12 @@ verify_writes(int num_writes,
 
         if ( proceed ) {
 
-            HDfprintf(stdout, "%d:%s: verified %d writes.\n",
+            HDfprintf(stdout, "%d:%s: verified %u writes.\n",
                       world_mpi_rank, FUNC, num_writes);
 
         } else {
 
-            HDfprintf(stdout, "%d:%s: FAILED to verify %d writes.\n",
+            HDfprintf(stdout, "%d:%s: FAILED to verify %u writes.\n",
                       world_mpi_rank, FUNC, num_writes);
 
         }
@@ -4929,10 +4924,10 @@ verify_total_reads(int expected_total_reads)
  *
  *****************************************************************************/
 static hbool_t
-verify_total_writes(int expected_total_writes)
+verify_total_writes(unsigned expected_total_writes)
 {
     hbool_t success = TRUE; /* will set to FALSE if appropriate. */
-    long reported_total_writes;
+    unsigned reported_total_writes;
     struct mssg_t mssg;
 
     if ( success ) {
@@ -4997,7 +4992,7 @@ verify_total_writes(int expected_total_writes)
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout, 
-                   "%d:%s: reported/expected total writes mismatch (%ld/%ld).\n",
+                   "%d:%s: reported/expected total writes mismatch (%u/%u).\n",
                    world_mpi_rank, FUNC, 
                    reported_total_writes, expected_total_writes);
             }
@@ -5319,7 +5314,7 @@ server_smoke_check(void)
 
         if ( success ) {
 
-            success = verify_total_writes(world_mpi_size - 1);
+            success = verify_total_writes((unsigned)(world_mpi_size - 1));
         }
 
         if ( success ) {
@@ -5423,7 +5418,7 @@ server_smoke_check(void)
 
         if ( success ) {
 
-            success = verify_total_writes(world_mpi_size - 1);
+            success = verify_total_writes((unsigned)(world_mpi_size - 1));
         }
 
         if ( success ) {
