@@ -347,7 +347,7 @@ hid_t PropList::getClass() const
 
 //--------------------------------------------------------------------------
 // Function:	PropList::propExist
-///\brief	Query the existance of a property in a property object.
+///\brief	Queries the existence of a property in a property object.
 ///\param	name - IN: Name of property to check for - \c char pointer
 ///\return	true if the property exists in the property object, and
 ///		false, otherwise.

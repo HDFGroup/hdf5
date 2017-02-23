@@ -352,6 +352,25 @@ FileAccPropList H5File::getAccessPlist() const
 }
 
 //--------------------------------------------------------------------------
+// Function:	H5File::getFileInfo
+///\brief	Retrieves the general information of this file.
+///
+///\exception	H5::FileIException
+///\par Description
+///		The retrieved information may include information about
+///		superblock extension, free space management, and shared object
+// Programmer   Binh-Minh Ribler - February 2017
+//--------------------------------------------------------------------------
+void H5File::getFileInfo(H5F_info2_t& file_info) const
+{
+   herr_t ret_value = H5Fget_info2(id, &file_info);
+   if (ret_value < 0)
+   {
+      throw FileIException("H5File::getFileInfo", "H5Fget_info2 failed");
+   }
+}
+
+//--------------------------------------------------------------------------
 // Function:	H5File::getFreeSpace
 ///\brief	Returns the amount of free space in the file.
 ///\return	Amount of free space

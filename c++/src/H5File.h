@@ -51,8 +51,8 @@ class H5_DLLCPP H5File : public Group {
 	// Gets the creation property list of this file.
 	FileCreatPropList getCreatePlist() const;
 
-	// Retrieves the file size of an opened file.
-	hsize_t getFileSize() const;
+	// Gets general information about this file.
+	void getFileInfo(H5F_info2_t& file_info) const;
 
 	// Returns the amount of free space in the file.
 	hssize_t getFreeSpace() const;
@@ -69,6 +69,9 @@ class H5_DLLCPP H5File : public Group {
 	void getVFDHandle(void **file_handle) const;
 	void getVFDHandle(const FileAccPropList& fapl, void **file_handle) const;
 	//void getVFDHandle(FileAccPropList& fapl, void **file_handle) const; // removed from 1.8.18 and 1.10.1
+
+	// Returns the file size of the HDF5 file.
+	hsize_t getFileSize() const;
 
 	// Determines if a file, specified by its name, is in HDF5 format
 	static bool isHdf5(const char* name );

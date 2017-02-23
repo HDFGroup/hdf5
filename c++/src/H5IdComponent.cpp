@@ -162,6 +162,72 @@ H5I_type_t IdComponent::getHDFObjType() const
 }
 
 //--------------------------------------------------------------------------
+// Function:	getNumMembers (static)
+///\brief	Returns the number of members of the given type.
+///\return	Number of members
+///\Description
+///		If there is no member of the given type, getNumMembers will
+///		return 0.  Valid types are:
+///		\li \c H5I_FILE (= 1)
+///		\li \c H5I_GROUP
+///		\li \c H5I_DATATYPE
+///		\li \c H5I_DATASPACE
+///		\li \c H5I_DATASET
+///		\li \c H5I_ATTR
+///		\li \c H5I_REFERENCE
+///		\li \c H5I_VFL
+///		\li \c H5I_GENPROP_CLS
+///		\li \c H5I_GENPROP_LST
+///		\li \c H5I_ERROR_CLASS
+///		\li \c H5I_ERROR_MSG
+///		\li \c H5I_ERROR_STACK
+// Programmer   Binh-Minh Ribler - Feb, 2017
+//--------------------------------------------------------------------------
+hsize_t IdComponent::getNumMembers(H5I_type_t type)
+{
+    hsize_t nmembers = 0;
+    herr_t ret_value = H5Inmembers(type, &nmembers);
+    if (ret_value < 0)
+	throw IdComponentException("getNumMembers", "H5Inmembers failed");
+    else
+	return(nmembers);
+}
+
+//--------------------------------------------------------------------------
+// Function:	typeExists (static)
+///\brief	Queries if a given type is currently registered with the
+///		library.
+///\return	true if the given type exists, and false, otherwise.
+///\Description
+///		Valid types are:
+///		\li \c H5I_FILE (= 1)
+///		\li \c H5I_GROUP
+///		\li \c H5I_DATATYPE
+///		\li \c H5I_DATASPACE
+///		\li \c H5I_DATASET
+///		\li \c H5I_ATTR
+///		\li \c H5I_REFERENCE
+///		\li \c H5I_VFL
+///		\li \c H5I_GENPROP_CLS
+///		\li \c H5I_GENPROP_LST
+///		\li \c H5I_ERROR_CLASS
+///		\li \c H5I_ERROR_MSG
+///		\li \c H5I_ERROR_STACK
+// Programmer   Binh-Minh Ribler - Feb, 2017
+//--------------------------------------------------------------------------
+bool IdComponent::typeExists(H5I_type_t type)
+{
+    // Call C function
+    htri_t ret_value = H5Itype_exists(type);
+    if (ret_value > 0)
+	return true;
+    else if (ret_value == 0)
+	return false;
+    else // Raise exception when H5Itype_exists returns a negative value
+	throw IdComponentException("typeExists", "H5Itype_exists failed");
+}
+
+//--------------------------------------------------------------------------
 // Function:	IdComponent::operator=
 ///\brief	Assignment operator.
 ///\param	rhs - IN: Reference to the existing object
