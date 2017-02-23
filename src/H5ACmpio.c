@@ -90,21 +90,21 @@ typedef struct H5AC_addr_list_ud_t
 /********************/
 
 static herr_t H5AC__broadcast_candidate_list(H5AC_t *cache_ptr,
-    int *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
+    unsigned *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
 static herr_t H5AC__broadcast_clean_list(H5AC_t *cache_ptr);
 static herr_t H5AC__construct_candidate_list(H5AC_t *cache_ptr,
     H5AC_aux_t *aux_ptr, int sync_point_op);
 static herr_t H5AC__copy_candidate_list_to_buffer(const H5AC_t *cache_ptr,
-    int *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
+    unsigned *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
 static herr_t H5AC__propagate_and_apply_candidate_list(H5F_t  *f, hid_t dxpl_id);
 static herr_t H5AC__propagate_flushed_and_still_clean_entries_list(H5F_t  *f,
     hid_t dxpl_id);
-static herr_t H5AC__receive_haddr_list(MPI_Comm mpi_comm, int *num_entries_ptr,
+static herr_t H5AC__receive_haddr_list(MPI_Comm mpi_comm, unsigned *num_entries_ptr,
     haddr_t **haddr_buf_ptr_ptr);
 static herr_t H5AC__receive_candidate_list(const H5AC_t *cache_ptr,
-    int *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
+    unsigned *num_entries_ptr, haddr_t **haddr_buf_ptr_ptr);
 static herr_t H5AC__receive_and_apply_clean_list(H5F_t *f, hid_t dxpl_id);
-static herr_t H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, int num_candidates,
+static herr_t H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, unsigned num_candidates,
     haddr_t *candidates_list_ptr);
 static herr_t H5AC__rsp__dist_md_write__flush(H5F_t *f, hid_t dxpl_id);
 static herr_t H5AC__rsp__dist_md_write__flush_to_min_clean(H5F_t *f, hid_t dxpl_id);
@@ -151,7 +151,7 @@ H5FL_DEFINE_STATIC(H5AC_slist_entry_t);
  */
 herr_t
 H5AC__set_sync_point_done_callback(H5C_t * cache_ptr,
-    void (* sync_point_done)(int num_writes, haddr_t * written_entries_tbl))
+    void (* sync_point_done)(unsigned num_writes, haddr_t * written_entries_tbl))
 {
     H5AC_aux_t * aux_ptr;
 
@@ -282,13 +282,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__broadcast_candidate_list(H5AC_t *cache_ptr, int *num_entries_ptr,
+H5AC__broadcast_candidate_list(H5AC_t *cache_ptr, unsigned *num_entries_ptr,
     haddr_t **haddr_buf_ptr_ptr)
 {
     H5AC_aux_t         * aux_ptr = NULL;
     haddr_t            * haddr_buf_ptr = NULL;
     int                  mpi_result;
-    int			 num_entries;
+    unsigned		 num_entries;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -310,13 +310,13 @@ H5AC__broadcast_candidate_list(H5AC_t *cache_ptr, int *num_entries_ptr,
      * receivers can set up buffers to receive them.  If there aren't
      * any, we are done.
      */
-    num_entries = (int)H5SL_count(aux_ptr->candidate_slist_ptr);
-    if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_INT, 0, aux_ptr->mpi_comm)))
+    num_entries = H5SL_count(aux_ptr->candidate_slist_ptr);
+    if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_UNSIGNED, 0, aux_ptr->mpi_comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
 
     if(num_entries > 0) {
-        size_t		 buf_size = 0;
-        int		 chk_num_entries = 0;
+        size_t		buf_size = 0;
+        unsigned        chk_num_entries = 0;
 
         /* convert the candidate list into the format we
          * are used to receiving from process 0, and also load it 
@@ -328,7 +328,7 @@ H5AC__broadcast_candidate_list(H5AC_t *cache_ptr, int *num_entries_ptr,
         HDassert(haddr_buf_ptr != NULL);
 
         /* Now broadcast the list of candidate entries */
-        buf_size = sizeof(haddr_t) * (size_t)num_entries;
+        buf_size = sizeof(haddr_t) * num_entries;
         if(MPI_SUCCESS != (mpi_result = MPI_Bcast((void *)haddr_buf_ptr, (int)buf_size, MPI_BYTE, 0, aux_ptr->mpi_comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
     } /* end if */
@@ -420,7 +420,7 @@ H5AC__broadcast_clean_list(H5AC_t * cache_ptr)
     haddr_t	       * addr_buf_ptr = NULL;
     H5AC_aux_t         * aux_ptr;
     int                  mpi_result;
-    int			 num_entries = 0;
+    unsigned		 num_entries = 0;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -437,8 +437,8 @@ H5AC__broadcast_clean_list(H5AC_t * cache_ptr)
      * receives can set up a buffer to receive them.  If there aren't
      * any, we are done.
      */
-    num_entries = (int)H5SL_count(aux_ptr->c_slist_ptr);
-    if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_INT, 0, aux_ptr->mpi_comm)))
+    num_entries = H5SL_count(aux_ptr->c_slist_ptr);
+    if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_UNSIGNED, 0, aux_ptr->mpi_comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
 
     if(num_entries > 0) {
@@ -446,7 +446,7 @@ H5AC__broadcast_clean_list(H5AC_t * cache_ptr)
         size_t		 buf_size;
 
         /* allocate a buffer to store the list of entry base addresses in */
-        buf_size = sizeof(haddr_t) * (size_t)num_entries;
+        buf_size = sizeof(haddr_t) * num_entries;
         if(NULL == (addr_buf_ptr = (haddr_t *)H5MM_malloc(buf_size)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for addr buffer")
 
@@ -610,14 +610,14 @@ H5AC__copy_candidate_list_to_buffer_cb(void *_item, void H5_ATTR_UNUSED *_key,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__copy_candidate_list_to_buffer(const H5AC_t *cache_ptr, int *num_entries_ptr,
+H5AC__copy_candidate_list_to_buffer(const H5AC_t *cache_ptr, unsigned *num_entries_ptr,
     haddr_t **haddr_buf_ptr_ptr)
 {
     H5AC_aux_t         * aux_ptr = NULL;
     H5AC_addr_list_ud_t  udata;
     haddr_t            * haddr_buf_ptr = NULL;
     size_t		 buf_size;
-    int			 num_entries = 0;
+    unsigned		 num_entries = 0;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -640,7 +640,7 @@ H5AC__copy_candidate_list_to_buffer(const H5AC_t *cache_ptr, int *num_entries_pt
     /* allocate a buffer(s) to store the list of candidate entry 
      * base addresses in 
      */
-    buf_size = sizeof(haddr_t) * (size_t)num_entries;
+    buf_size = sizeof(haddr_t) * num_entries;
     if(NULL == (haddr_buf_ptr = (haddr_t *)H5MM_malloc(buf_size)))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for haddr buffer")
 
@@ -1234,7 +1234,7 @@ H5AC__propagate_and_apply_candidate_list(H5F_t  *f, hid_t dxpl_id)
     H5AC_aux_t         * aux_ptr;
     haddr_t            * candidates_list_ptr = NULL;
     int		         mpi_result;
-    int	                 num_candidates = 0;
+    unsigned	         num_candidates = 0;
     herr_t               ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1448,12 +1448,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__receive_haddr_list(MPI_Comm mpi_comm, int *num_entries_ptr,
+H5AC__receive_haddr_list(MPI_Comm mpi_comm, unsigned *num_entries_ptr,
     haddr_t **haddr_buf_ptr_ptr)
 {
     haddr_t	       * haddr_buf_ptr = NULL;
     int                  mpi_result;
-    int			 num_entries;
+    unsigned		 num_entries;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1468,14 +1468,14 @@ H5AC__receive_haddr_list(MPI_Comm mpi_comm, int *num_entries_ptr,
      * can set up a buffer to receive them.  If there aren't
      * any, we are done.
      */
-    if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_INT, 0, mpi_comm)))
+    if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_UNSIGNED, 0, mpi_comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
 
     if(num_entries > 0) {
         size_t buf_size;
 
         /* allocate buffers to store the list of entry base addresses in */
-        buf_size = sizeof(haddr_t) * (size_t)num_entries;
+        buf_size = sizeof(haddr_t) * num_entries;
         if(NULL == (haddr_buf_ptr = (haddr_t *)H5MM_malloc(buf_size)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for haddr buffer")
 
@@ -1523,7 +1523,7 @@ H5AC__receive_and_apply_clean_list(H5F_t *f, hid_t dxpl_id)
     H5AC_t             * cache_ptr;
     H5AC_aux_t         * aux_ptr;
     haddr_t	       * haddr_buf_ptr = NULL;
-    int			 num_entries = 0;
+    unsigned		 num_entries = 0;
     herr_t               ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1582,7 +1582,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__receive_candidate_list(const H5AC_t *cache_ptr, int *num_entries_ptr,
+H5AC__receive_candidate_list(const H5AC_t *cache_ptr, unsigned *num_entries_ptr,
     haddr_t **haddr_buf_ptr_ptr)
 {
     H5AC_aux_t         * aux_ptr;
@@ -1667,7 +1667,7 @@ H5AC__rsp__dist_md_write__flush(H5F_t *f, hid_t dxpl_id)
     H5AC_aux_t * aux_ptr;
     haddr_t    * haddr_buf_ptr = NULL;
     int		 mpi_result;
-    int          num_entries = 0;
+    unsigned     num_entries = 0;
     herr_t	 ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_STATIC
@@ -2224,11 +2224,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, int num_candidates,
+H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, unsigned num_candidates,
     haddr_t *candidates_list_ptr)
 {
     H5AC_aux_t         * aux_ptr;
-    int                  i;
+    unsigned             u;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2249,12 +2249,12 @@ H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, int num_candidates,
      * cleaned list.  However, for this metadata write strategy, 
      * we just want to remove all references to the candidate entries.
      */
-    for(i = 0; i < num_candidates; i++) {
+    for(u = 0; u < num_candidates; u++) {
         H5AC_slist_entry_t * d_slist_entry_ptr;
         H5AC_slist_entry_t * c_slist_entry_ptr;
         haddr_t              addr;
 
-        addr = candidates_list_ptr[i];
+        addr = candidates_list_ptr[u];
 
         /* addr may be either on the dirtied list, or on the flushed 
          * and still clean list.  Remove it.

@@ -411,10 +411,9 @@ static void test_file_size()
     }
 
     // use C test utility routine to close property list.
-    H5Pclose(fapl_id);
     herr_t ret = H5Pclose(fapl_id);
     if (ret < 0)
-	issue_fail_msg("test_file_size()", __LINE__, __FILE__, "H5Pclose failed");
+        issue_fail_msg("test_file_size()", __LINE__, __FILE__, "H5Pclose failed");
 
 }   // test_file_size()
 

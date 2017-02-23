@@ -127,7 +127,7 @@ EOF
   exit 1;
 }
 
-# Parse arguments
+
 my ($verbose, $set, $inc, $file, $rc);
 my (@files) = ("H5public.h", "src/H5public.h", "../src/H5public.h");
 while ($_ = shift) {
@@ -160,9 +160,10 @@ die "mutually exclusive options given\n" if $set && $inc;
 
 # Determine file to use as H5public.h, README.txt,
 # release_docs/RELEASE.txt, configure.ac, windows/src/H5pubconf.h
-# and config/lt_vers.am. 
+# config/lt_vers.am and config/cmake/scripts/HDF5config.cmake. 
 # The README.txt, release_docs/RELEASE.txt, configure.ac, 
-# windows/src/H5pubconf.h, and config/lt_vers.am 
+# windows/src/H5pubconf.h, config/lt_vers.am and
+# config/cmake/scripts/HDF5config.cmake
 # files are always in the directory above H5public.h
 unless ($file) {
   for (@files) {
@@ -175,6 +176,10 @@ die "unable to read file: $file\n" unless -r $file;
 my $LT_VERS = $file;
 $LT_VERS =~ s/[^\/]*$/..\/config\/lt_vers.am/;
 die "unable to read file: $LT_VERS\n" unless -r $file;
+# config/cmake/scripts/HDF5config.cmake
+my $HDF5CONFIGCMAKE = $file;
+$HDF5CONFIGCMAKE =~ s/[^\/]*$/..\/config\/cmake\/scripts\/HDF5config.cmake/;
+die "unable to read file: $HDF5CONFIGCMAKE\n" unless -r $file;
 # README.txt
 my $README = $file;
 $README =~ s/[^\/]*$/..\/README.txt/;
@@ -239,7 +244,8 @@ if ($set) {
   $RELEASE = "";
   $CONFIGURE = "";
   $CPP_DOC_CONFIG = "";
-  $LT_VERS = "";        
+  $LT_VERS = "";       
+  $HDF5CONFIGCMAKE = "";
   @newver = @curver;
 }
 
@@ -321,20 +327,43 @@ if ($RELEASE) {
 # Update the c++/src/cpp_doc_config file
 if ($CPP_DOC_CONFIG) {
   my $data = read_file($CPP_DOC_CONFIG);
-  my $version_string = sprintf("\"%d.%d.%d%s %s\"",
+  my $sub_rel_ver_str = (
+     $newver[3] eq "" 
+     ? sprintf("%s", "") 
+     : sprintf("%s", "-".$newver[3].", currently under development")
+     );
+  my $version_string = sprintf("\"%d.%d.%d%s%s\"",
                                @newver[0,1,2],
-                               $newver[3] eq "" ? "" : "-".$newver[3],
-                               "currently under development");
-
+                               $sub_rel_ver_str);
   $data =~ s/PROJECT_NUMBER\s*=.*/PROJECT_NUMBER         = $version_string/;
 
   write_file($CPP_DOC_CONFIG, $data);  
 }
 
+# Update the config/cmake/scripts/HDF5config.cmake file
+if ($HDF5CONFIGCMAKE) {
+  my $data = read_file($HDF5CONFIGCMAKE);
+#  my $sub_rel_ver_str = "";
+  my $sub_rel_ver_str = (
+     $newver[3] eq "" 
+     ? sprintf("\"%s\"", "") 
+     : sprintf("\"%s\"", "-".$newver[3].", currently under development")
+     );
+  my $version_string = sprintf("\"%d.%d.%d\"", @newver[0,1,2]);
+
+  $data =~ s/set\(CTEST_SOURCE_VERSION .*\)/set\(CTEST_SOURCE_VERSION $version_string\)/;
+  $data =~ s/set\(CTEST_SOURCE_VERSEXT .*\)/set\(CTEST_SOURCE_VERSEXT $sub_rel_ver_str\)/;
+
+  write_file($HDF5CONFIGCMAKE, $data);  
+}
+
+
+
 # helper function to read the file for updating c++/src/cpp_doc_config file.
 # The version string in that file is not at the top, so the string replacement
 # is not for the first line, and reading/writing the entire file as one string
 # facilitates the substring replacement.
+#Presumably these will also work for resetting the version in HDF5config.cmake.
 sub read_file {
    my ($filename) = @_;
 
@@ -346,7 +375,8 @@ sub read_file {
     return $all;
 }
 
-# helper function to write the file for updating c++/src/cpp_doc_config file.
+# helper function to write the file for updating c++/src/cpp_doc_config 
+# and config/cmake/scripts/HDF5config.cmake files.
 sub write_file {
     my ($filename, $content) = @_;
 

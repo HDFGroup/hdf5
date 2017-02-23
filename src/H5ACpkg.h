@@ -404,7 +404,7 @@ typedef struct H5AC_aux_t
 
     void	(* write_done)(void);
 
-    void	(* sync_point_done)(int num_writes, 
+    void	(* sync_point_done)(unsigned num_writes, 
                                     haddr_t * written_entries_tbl);
 
     unsigned    p0_image_len;
@@ -430,7 +430,7 @@ H5_DLL herr_t H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr,
 H5_DLL herr_t H5AC__flush_entries(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5AC__run_sync_point(H5F_t *f, hid_t dxpl_id, int sync_point_op);
 H5_DLL herr_t H5AC__set_sync_point_done_callback(H5C_t *cache_ptr,
-    void (*sync_point_done)(int num_writes, haddr_t *written_entries_tbl));
+    void (*sync_point_done)(unsigned num_writes, haddr_t *written_entries_tbl));
 H5_DLL herr_t H5AC__set_write_done_callback(H5C_t * cache_ptr,
     void (* write_done)(void));
 #endif /* H5_HAVE_PARALLEL */

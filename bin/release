@@ -57,8 +57,13 @@ for compressing the resulting tar archive (if none are given then
 
     tar		-- use tar and don't do any compressing.
     gzip	-- use gzip with "-9" and append ".gz" to the output name.
+    cmake-tgz   -- create a tar file using the gzip default level with a build-unix.sh 
+                   command file and all other CMake files needed to build HDF5 source
+                   using CMake on unix machines.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
     zip		-- convert all text files to DOS style and form a zip file for Windows use.
+    cmake-zip   -- convert all text files to DOS style and create a zip file inluding cmake
+                   scripts and .bat files to build HDF5 source using CMake on Windows. 
     doc         -- produce the latest doc tree in addition to the archive.
 
 An md5 checksum is produced for each archive created and stored in the md5 file.
@@ -95,9 +100,9 @@ EOF
 # Modifications
 #
 # Steps:
-# 1. untar the tarball in a temporay directory;
+# 1. untar the tarball in a temporary directory;
 #    Note: do this in a temporary directory to avoid changing
-#    the original source directory which maybe around.
+#    the original source directory which may be around.
 # 2. convert all its text files to DOS (LF-CR) style;
 # 3. form a zip file which is usable by Windows users.
 #
@@ -114,7 +119,7 @@ tar2zip()
 	echo "usage: tar2zip <tarfilename> <zipfilename>"
 	return 1
     fi
-    ztmpdir=/tmp/tmpdir$$
+    ztmpdir=/tmp/ztmpdir$$
     mkdir -p $ztmpdir
     version=$1
     tarfile=$2
@@ -151,6 +156,175 @@ tar2zip()
 
     # cleanup
     rm -rf $ztmpdir
+}
+
+# Function name: tar2cmakezip
+# Convert the release tarball to a Windows zipball with files to run CMake build.
+#
+# Programmer: Larry Knox
+# Creation date: 2017-02-20
+#
+# Modifications
+#
+# Steps:
+# 1. untar the tarball in a temporary directory;
+#    Note: do this in a temporary directory to avoid changing
+#    the original source directory which may be around.
+# 2. add build-unix.sh script.
+# 3. add SZIP.tar.gz, ZLib.tar.gz and cmake files to top level directory.
+# 4. create gzipped tar file with these contents:
+#        build-unix.sh          script
+#        hdf5-<version>         source code directory extracted from tar file
+#        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
+#        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
+#        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
+#        SZip.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
+#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
+
+
+# Parameters:
+# $1 version
+# $2 release tarball
+# $3 output zipball file name
+#
+# Returns 0 if successful; 1 otherwise
+#
+ # need function to create another temporary directory, extract the
+            # $tmpdir/$HDF5_VERS.tar into it, add (create) build-unix.sh,
+            # CTestScript.cmake, HDF5config.cmake, SZIP.tar.gz and ZLib.tar.gz,
+             # and then tar.gz it.
+tar2cmakezip()
+{
+    if [ $# -ne 3 ]; then
+	echo "usage: tar2cmakezip <tarfilename> <tgzfilename>"
+	return 1
+    fi
+    cmziptmpdir=/tmp/cmziptmpdir$$
+    mkdir -p $cmziptmpdir
+    version=$1
+    tarfile=$2
+    zipfile=$3
+
+    # step 1: untar tarball in cmgztmpdir
+    (cd $cmziptmpdir; tar xf -) < $tarfile
+    # sanity check
+    if [ ! -d $cmziptmpdir/$version ]; then
+	echo "untar did not create $cmziptmpdir/$version source dir"
+	# cleanup
+	rm -rf $cmziptmpdir
+	return 1
+    fi
+
+    # step 2: add batch file for building CMake on window
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2012-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2012-64.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2013-64.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-32.bat $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/build-VS2015-64.bat $cmziptmpdir
+
+    # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
+    cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmziptmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpdir
+    cp $cmziptmpdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpdir
+    cp $cmziptmpdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpdir
+    cp $cmziptmpdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpdir
+
+    # step 4: convert text files
+    # There maybe a simpler way to do this.
+    # options used in unix2dos:
+    # -k   Keep the date stamp 
+    # -q   quiet mode
+    # grep redirect output to /dev/null because -q or -s are not portable.
+    find $cmziptmpdir/$version | \
+	while read inf; do \
+	    if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
+		unix2dos -q -k $inf; \
+	    fi\
+	done
+    # step 3: make zipball
+    # -9 maximum compression
+    # -y Store symbolic links as such in the zip archive
+    # -r recursive
+    # -q quiet
+    (cd $cmziptmpdir; zip -9 -y -r -q CMake-$version.zip *)
+    mv $cmziptmpdir/CMake-$version.zip $zipfile
+
+    # cleanup
+    rm -rf $cmziptmpdir
+}
+
+# Function name: tar2cmaketgz
+# Convert the release tarball to a Windows zipball with files to run CMake build.
+#
+# Programmer: Larry Knox
+# Creation date: 2017-02-20
+#
+# Modifications
+#
+# Steps:
+# 1. untar the tarball in a temporary directory;
+#    Note: do this in a temporary directory to avoid changing
+#    the original source directory which may be around.
+# 2. add build-unix.sh script.
+# 3. add SZIP.tar.gz, ZLib.tar.gz and cmake files to top level directory.
+# 4. create gzipped tar file with these contents:
+#        build-unix.sh          script
+#        hdf5-<version>         source code directory extracted from tar file
+#        CTestScript.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
+#        HDF5config.cmake       cmake file copied from <hdf5 source code>/config/cmake/scripts
+#        HDF5options.cmake      cmake file copied from <hdf5 source code>/config/cmake/scripts
+#        SZip.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
+#        ZLib.tar.gz            copied from /mnt/scr1/pre-release/hdf5/CMake
+
+
+# Parameters:
+# $1 version
+# $2 release tarball
+# $3 output zipball file name
+#
+# Returns 0 if successful; 1 otherwise
+#
+ # need function to create another temporary directory, extract the
+            # $tmpdir/$HDF5_VERS.tar into it, add (create) build-unix.sh,
+            # CTestScript.cmake, HDF5config.cmake, SZIP.tar.gz and ZLib.tar.gz,
+             # and then tar.gz it.
+tar2cmaketgz()
+{
+    if [ $# -ne 3 ]; then
+	echo "usage: tar2cmaketgz <tarfilename> <tgzfilename>"
+	return 1
+    fi
+    cmgztmpdir=/tmp/cmgztmpdir$$
+    mkdir -p $cmgztmpdir
+    version=$1
+    tarfile=$2
+    tgzfile=$3
+
+    # step 1: untar tarball in cmgztmpdir
+    (cd $cmgztmpdir; tar xf -) < $tarfile
+    # sanity check
+    if [ ! -d $cmgztmpdir/$version ]; then
+	echo "untar did not create $cmgztmpdir/$version source dir"
+	# cleanup
+	rm -rf $cmgztmpdir
+	return 1
+    fi
+
+
+    # step 2: add build-unix.sh script
+    (cd $cmgztmpdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=Unix -C Release -V -O hdf5.log" > build-unix.sh; chmod 755 build-unix.sh)
+
+    # step 3: add SZIP.tar.gz, ZLib.tar.gz and cmake files
+    cp /mnt/scr1/pre-release/hdf5/CMake/SZip.tar.gz $cmgztmpdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpdir
+    cp $cmgztmpdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpdir
+    cp $cmgztmpdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpdir
+    cp $cmgztmpdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpdir
+    tar czf $DEST/CMake-$HDF5_VERS.tar.gz -C $cmgztmpdir . || exit 1 
+                 
+    # cleanup
+    rm -rf $cmgztmpdir
 }
 
 # This command must be run at the top level of the hdf5 source directory.
@@ -256,6 +430,7 @@ if [ X$pmode = Xyes ]; then
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-of$today
     echo Private release of $VERS
+else
     bin/h5vers -s $VERS
 fi
 
@@ -325,6 +500,11 @@ for comp in $methods; do
 	    gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
 	    (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file) 
 	    ;;
+        cmake-tgz)
+	    test "$verbose" && echo "   Creating CMake tar.gz file..." 1>&2
+	    tar2cmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.tar.gz 1>&2
+	    (cd $DEST; md5sum CMake-$HDF5_VERS.tar.gz >> $MD5file) 
+            ;;
 	bzip2)
 	    test "$verbose" && echo "   Running bzip2..." 1>&2
 	    bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
@@ -335,6 +515,11 @@ for comp in $methods; do
 	    tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
 	    (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file) 
 	    ;;
+        cmake-zip)
+            test "$verbose" && echo "   Creating CMake-zip ball..." 1>&2
+            tar2cmakezip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.zip 1>&2
+            (cd $DEST; md5sum CMake-$HDF5_VERS.zip >> $MD5file)
+            ;;
 	doc)
             if [ "${DOCVERSION}" = "" ]; then
                 DOCVERSION=master
@@ -342,15 +527,15 @@ for comp in $methods; do
 	    test "$verbose" && echo "   Creating docs..." 1>&2
 	    # Check out docs from git repo
 	    (cd $tmpdir; git clone -q $DOC_URL ${DOCVERSION} > /dev/null) || exit 1
-	    # Create doxygen C++ RM
+            # Create doxygen C++ RM
 	    (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
 	    # Replace version of C++ RM with just-created version
-	    rm -rf $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
-	    mv c++/src/$CPPLUS_RM_NAME $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
-	    # Compress the docs and move them to the release area
-	    mv $tmpdir/${DOCVERSION} $tmpdir/${HDF5_VERS}_docs
-	    (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs)
-	    mv $tmpdir/${HDF5_VERS}_docs.tar $DEST
+	    rm -rf $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME || exit 1
+	    mv c++/src/$CPPLUS_RM_NAME $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME || exit 1
+            # Compress the docs and move them to the release area
+	    mv $tmpdir/${DOCVERSION} $tmpdir/${HDF5_VERS}_docs || exit 1
+	    (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs) || exit 1
+	    mv $tmpdir/${HDF5_VERS}_docs.tar $DEST || exit 1
 	    ;;
 	*)
 	    echo "***Error*** Unknown method $comp"
