@@ -48,6 +48,12 @@ class H5_DLLCPP IdComponent {
 	// Returns an HDF5 object type of this object.
 	H5I_type_t getHDFObjType() const;
 
+	// Returns the number of members in a type.
+	static hsize_t getNumMembers(H5I_type_t type);
+
+	// Determines if an type exists.
+	static bool typeExists(H5I_type_t type);
+
 	// Assignment operator.
 	IdComponent& operator=( const IdComponent& rhs );
 
