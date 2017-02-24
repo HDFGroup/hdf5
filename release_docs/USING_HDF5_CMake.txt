@@ -241,7 +241,7 @@ set (CTEST_DASHBOARD_ROOT ${CTEST_SCRIPT_DIRECTORY})
 #INSTALLDIR - HDF5 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF4Examples
-#STATIC_LIBRARIES - Default is YES
+#STATIC_ONLY - Default is YES
 #FORTRAN_LIBRARIES - Default is NO
 #JAVA_LIBRARIES - Default is NO
 ##NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac)
@@ -265,10 +265,10 @@ endif ()
 if (NOT DEFINED CTEST_SOURCE_NAME)
     set (CTEST_SOURCE_NAME "HDF5Examples")
 endif ()
-if (NOT DEFINED STATIC_LIBRARIES)
-    set (STATICLIBRARIES "YES")
+if (NOT DEFINED STATIC_ONLY)
+    set (STATICONLYLIBRARIES "YES")
 else ()
-    set (STATICLIBRARIES "NO")
+    set (STATICONLYLIBRARIES "NO")
 endif()
 if (NOT DEFINED FORTRAN_LIBRARIES)
     set (FORTRANLIBRARIES "NO")
@@ -290,7 +290,7 @@ endif ()
 #     Adjust the following SET Commands as needed
 ###############################################################################################################
 if (WIN32)
-  if (${STATICLIBRARIES})
+  if (${STATICONLYLIBRARIES})
     set (BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
   endif ()
   set (ENV{HDF5_DIR} "${INSTALLDIR}/cmake")
@@ -298,7 +298,7 @@ if (WIN32)
   set (CTEST_SOURCE_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_SOURCE_NAME}")
   set (CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}\\${CTEST_BINARY_NAME}")
 else (WIN32)
-  if (${STATICLIBRARIES})
+  if (${STATICONLYLIBRARIES})
     set (BUILD_OPTIONS "${BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF -DCMAKE_ANSI_CFLAGS:STRING=-fPIC")
   endif ()
   set (ENV{HDF5_DIR} "${INSTALLDIR}/share/cmake")
