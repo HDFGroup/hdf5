@@ -468,7 +468,7 @@ function (interrogate_mpi_compiler lang try_libs)
         set(MPI_HEADER_PATH "MPI_HEADER_PATH-NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
         find_path(MPI_HEADER_PATH mpifptr.h
           HINTS ${_MPI_BASE_DIR} ${_MPI_PREFIX_PATH}
-          PATH_SUFFIXES include include/${MS_MPI_ARCH_DIR} include/${MS_MPI_ARCH_DIR2} Inc Inc/${MS_MPI_ARCH_DIR} Inc/${MS_MPI_ARCH_DIR2})
+          PATH_SUFFIXES include Include include/${MS_MPI_ARCH_DIR} Include/${MS_MPI_ARCH_DIR2} Include/${MS_MPI_ARCH_DIR} include/${MS_MPI_ARCH_DIR2} Inc Inc/${MS_MPI_ARCH_DIR} Inc/${MS_MPI_ARCH_DIR2})
         if (MPI_INCLUDE_PATH_WORK AND MPI_HEADER_PATH)
           list(APPEND MPI_INCLUDE_PATH_WORK ${MPI_HEADER_PATH})
         endif()
