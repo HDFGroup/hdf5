@@ -51,7 +51,7 @@ The following files referenced below are available at the HDF web site:
     http://www.hdfgroup.org/HDF5/release/cmakebuild.html
 
 Single compressed file with all the files needed, including source:
-    hdf5-1.10.0-CMake.zip or hdf5-1.10.0-CMake.tar.gz
+    hdf5-1.10.X-CMake.zip or hdf5-1.10.X-CMake.tar.gz
 
 Individual files
 -----------------------------------------------
@@ -263,10 +263,10 @@ IV. Further considerations
 
       B. Use source packages from an SVN server by adding the following CMake
          options:
-            HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="SVN"
-            ZLIB_SVN_URL:STRING="http://some_location/zlib/trunk"
-            SZIP_SVN_URL:STRING="http://some_location/szip/trunk"
-         where "some_location" is the URL to the SVN repository. Also set
+            HDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
+            ZLIB_GIT_URL:STRING="http://some_location/zlib"
+            SZIP_GIT_URL:STRING="http://some_location/szip"
+         where "some_location" is the URL to the GIT repository. Also set
          CMAKE_BUILD_TYPE to the configuration type.
 
       C. Use source packages from a compressed file by adding the following
@@ -376,10 +376,10 @@ These five steps are described in detail below.
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
-            * Visual Studio 12 2013
-            * Visual Studio 12 2013 Win64
             * Visual Studio 11 2012
             * Visual Studio 11 2012 Win64
+            * Visual Studio 12 2013
+            * Visual Studio 12 2013 Win64
             * Visual Studio 14 2015
             * Visual Studio 14 2015 Win64
 
@@ -396,6 +396,7 @@ These five steps are described in detail below.
                 # EXTERNAL cache entries
                 ########################
                 set (CMAKE_INSTALL_FRAMEWORK_PREFIX "Library/Frameworks" CACHE STRING "Frameworks installation directory" FORCE)
+                set (HDF5_GENERATE_HEADERS ON CACHE BOOL "Rebuild Generated Files" FORCE)
                 set (HDF_PACKAGE_EXT "" CACHE STRING "Name of HDF package extension" FORCE)
                 set (HDF5_BUILD_FORTRAN ON CACHE BOOL "Build FORTRAN support" FORCE)
                 set (HDF5_BUILD_GENERATORS OFF CACHE BOOL "Build Test Generators" FORCE)
@@ -403,7 +404,7 @@ These five steps are described in detail below.
                 set (HDF5_ENABLE_SZIP_SUPPORT ON CACHE BOOL "Use SZip Filter" FORCE)
                 set (HDF5_ENABLE_SZIP_ENCODING ON CACHE BOOL "Use SZip Encoding" FORCE)
                 set (HDF5_ENABLE_HSIZET ON CACHE BOOL "Enable datasets larger than memory" FORCE)
-                set (HDF5_ENABLE_UNSUPPORTED OFF CACHE BOOL "Enable unsupported combinations of configuration options" FORCE)
+                set (ALLOW_UNSUPPORTED OFF CACHE BOOL "Enable unsupported combinations of configuration options" FORCE)
                 set (HDF5_ENABLE_DEPRECATED_SYMBOLS ON CACHE BOOL "Enable deprecated public API symbols" FORCE)
                 set (HDF5_ENABLE_DIRECT_VFD OFF CACHE BOOL "Build the Direct I/O Virtual File Driver" FORCE)
                 set (HDF5_ENABLE_PARALLEL OFF CACHE BOOL "Enable parallel build (requires MPI)" FORCE)
@@ -413,14 +414,16 @@ These five steps are described in detail below.
                 set (HDF5_ENABLE_USING_MEMCHECKER OFF CACHE BOOL "Indicate that a memory checker is used" FORCE)
                 set (HDF5_MEMORY_ALLOC_SANITY_CHECK OFF CACHE BOOL "Indicate that internal memory allocation sanity checks are enabled" FORCE)
                 set (HDF5_DISABLE_COMPILER_WARNINGS OFF CACHE BOOL "Disable compiler warnings" FORCE)
+                set (HDF5_ENABLE_ALL_WARNINGS ON CACHE BOOL "Enable all warnings" FORCE)
                 set (HDF5_USE_FOLDERS ON CACHE BOOL "Enable folder grouping of projects in IDEs." FORCE)
                 set (HDF5_USE_16_API_DEFAULT OFF CACHE BOOL "Use the HDF5 1.6.x API by default" FORCE)
+                set (HDF5_USE_18_API_DEFAULT OFF CACHE BOOL "Use the HDF5 1.8.x API by default" FORCE)
                 set (HDF5_ENABLE_THREADSAFE OFF CACHE BOOL "(WINDOWS)Enable Threadsafety" FORCE)
                 set (HDF_TEST_EXPRESS "2" CACHE STRING "Control testing framework (0-3)" FORCE)
                 set (HDF5_PACKAGE_EXTLIBS OFF CACHE BOOL "(WINDOWS)CPACK - include external libraries" FORCE)
                 set (HDF5_NO_PACKAGES OFF CACHE BOOL "CPACK - Disable packaging" FORCE)
-                set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO SVN TGZ)" FORCE)
-                set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO SVN TGZ)
+                set (HDF5_ALLOW_EXTERNAL_SUPPORT "NO" CACHE STRING "Allow External Library Building (NO GIT SVN TGZ)" FORCE)
+                set_property (CACHE HDF5_ALLOW_EXTERNAL_SUPPORT PROPERTY STRINGS NO GIT SVN TGZ)
                 set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
                 set (SZIP_TGZ_NAME "SZip.tar.gz" CACHE STRING "Use SZip from compressed file" FORCE)
                 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
@@ -477,15 +480,15 @@ These five steps are described in detail below.
            Release and build the solution.
 
       3.2.1  The external libraries (zlib and szip) can be configured
-           to allow building the libraries by downloading from an SVN repository.
+           to allow building the libraries by downloading from an GIT repository.
            The option is 'HDF5_ALLOW_EXTERNAL_SUPPORT'; by adding the following
            configuration option:
-               -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="SVN"
+               -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING="GIT"
 
-           The options to control the SVN URL (config/cmake/cacheinit.cmake file) are:
-               ZLIB_SVN_URL:STRING="http://${svn_url}/zlib/trunk"
-               SZIP_SVN_URL:STRING="http://${svn_url}/szip/trunk"
-           ${svn_url} should be changed to your location. Also define CMAKE_BUILD_TYPE
+           The options to control the GIT URL (config/cmake/cacheinit.cmake file) are:
+               ZLIB_GIT_URL:STRING="http://${git_url}/zlib"
+               SZIP_GIT_URL:STRING="http://${git_url}/szip"
+           ${git_url} should be changed to your location. Also define CMAKE_BUILD_TYPE
            to be the configuration type.
 
       3.2.2  Or the external libraries (zlib and szip) can be configured
@@ -525,8 +528,8 @@ These five steps are described in detail below.
 
       NOTE: See note 8 of this document for NSIS information.
             See note 9 of this document for WiX information.
-            Also, if you are using a Visual Studio Express version or do not
-            want to enable the packaging components, set HDF5_NO_PACKAGES
+            Also, if you are using a Visual Studio Express version or
+            want to disable the packaging components, set HDF5_NO_PACKAGES
             to ON (on the command line add -DHDF5_NO_PACKAGES:BOOL=ON)
 
    6. The files that support building HDF5 with CMake are all the files in the
@@ -563,7 +566,7 @@ The config/cmake/cacheinit.cmake file can override the following values.
 
 ---------------- General Build Options ---------------------
 BUILD_SHARED_LIBS  "Build Shared Libraries"    ON
-BUILD_STATIC_EXECS "Build Static Executabless" OFF
+BUILD_STATIC_EXECS "Build Static Executables"  OFF
 BUILD_TESTING      "Build HDF5 Unit Testing"   ON
 
 ---------------- HDF5 Build Options ---------------------
@@ -647,9 +650,9 @@ build and test process.
 VIII. Options for Platform Configuration Files
 ========================================================================
 
-Below is the HDF5config.cmake ctest script with extra comments.
+Below is the HDF5config.cmake and HDF5options.cmake ctest scripts.
 Execute:
-       ctest -S HDF5config.cmake,BUILD_GENERATOR=xxx -C Release -V -O hdf5.log
+       ctest -S HDF5config.cmake,BUILD_GENERATOR=xxx -C Release -VV -O hdf5.log
 The same scripts can be used on Linux, Mac OSX or a Windows machine by
 adding an option (${CTEST_SCRIPT_ARG}) to the platform configuration script.
 
@@ -657,7 +660,7 @@ adding an option (${CTEST_SCRIPT_ARG}) to the platform configuration script.
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
 ### BUILD_GENERATOR required [Unix, VS2015, VS201564, VS2013, VS201364, VS2012, VS201264] ###
-### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -V -O hdf5.log          ###
+### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201264 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
 cmake_minimum_required(VERSION 3.2.2 FATAL_ERROR)
@@ -677,22 +680,22 @@ cmake_minimum_required(VERSION 3.2.2 FATAL_ERROR)
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
-#     STATIC_LIBRARIES  -  Build/use static libraries
+#     STATIC_ONLY  -  Build/use static libraries
 #     FORTRAN_LIBRARIES -  Build/use fortran libraries
 #     JAVA_LIBRARIES -  Build/use java libraries
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
-set(CTEST_SOURCE_VERSION 1.10.0)
-set(CTEST_SOURCE_VERSEXT "-pre1")
+set(CTEST_SOURCE_VERSION 1.10.1)
+set(CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
 # handle input parameters to script.
 #BUILD_GENERATOR - which CMake generator to use, required
 #INSTALLDIR - HDF5-1.10.0 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
-#CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
-#STATIC_LIBRARIES - Default is YES
+#CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.1
+#STATIC_ONLY - Default is YES
 #FORTRAN_LIBRARIES - Default is NO
 #JAVA_LIBRARIES - Default is NO
 #NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
@@ -731,11 +734,16 @@ else()
   endif()
 endif()
 
+###################################################################
+### Following Line is one of [Release, RelWithDebInfo, Debug] #####
+set(CTEST_CONFIGURATION_TYPE "$ENV{CMAKE_CONFIG_TYPE}")
+###################################################################
+
 if(NOT DEFINED INSTALLDIR)
   if(WIN32)
-    set(INSTALLDIR "C:\\Program\ Files\\myhdf5")
+    set(INSTALLDIR "C:/Program Files/HDF_Group/HDF5/${CTEST_SOURCE_VERSION}")
   else()
-    set(INSTALLDIR "/usr/local/myhdf5")
+    set(INSTALLDIR "${CTEST_SCRIPT_DIRECTORY}/HDF_Group/HDF5/${CTEST_SOURCE_VERSION}")
   endif()
 endif()
 if(NOT DEFINED CTEST_CONFIGURATION_TYPE)
@@ -744,10 +752,10 @@ endif()
 if(NOT DEFINED CTEST_SOURCE_NAME)
     set(CTEST_SOURCE_NAME "hdf5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
 endif()
-if(NOT DEFINED STATIC_LIBRARIES)
-    set(STATICLIBRARIES "YES")
+if(NOT DEFINED STATIC_ONLY)
+    set(STATICONLYLIBRARIES "YES")
 else()
-    set(STATICLIBRARIES "NO")
+    set(STATICONLYLIBRARIES "NO")
 endif()
 if(NOT DEFINED FORTRAN_LIBRARIES)
     set(FORTRANLIBRARIES "NO")
@@ -803,11 +811,27 @@ if(WIN32)
 ##  Set the following to unique id your computer  ##
   set(CTEST_SITE "WIN7${BUILD_GENERATOR}.XXXX")
 else()
+  set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
 ##  Set the following to unique id your computer  ##
   if(APPLE)
     set(CTEST_SITE "MAC.XXXX")
   else()
     set(CTEST_SITE "LINUX.XXXX")
+  endif()
+  if(APPLE)
+    execute_process(COMMAND xcrun --find cc OUTPUT_VARIABLE XCODE_CC OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND xcrun --find c++ OUTPUT_VARIABLE XCODE_CXX OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(ENV{CC} "${XCODE_CC}")
+    set(ENV{CXX} "${XCODE_CXX}")
+    set(CTEST_USE_LAUNCHERS        1)
+    set(RR_WARNINGS_COMMON "-Wno-format-nonliteral -Wno-cast-align -Wno-unused -Wno-unused-variable -Wno-unused-function -Wno-self-assign -Wno-unused-parameter -Wno-sign-compare")
+    set(RR_WARNINGS_C "${RR_WARNINGS_COMMON} -Wno-deprecated-declarations -Wno-uninitialized")
+    set(RR_WARNINGS_CXX "${RR_WARNINGS_COMMON} -Woverloaded-virtual -Wshadow -Wwrite-strings -Wc++11-compat")
+    set(RR_FLAGS_COMMON "-g -O0 -fstack-protector-all -D_FORTIFY_SOURCE=2")
+    set(RR_FLAGS_C "${RR_FLAGS_COMMON}")
+    set(RR_FLAGS_CXX "${RR_FLAGS_COMMON}")
+    set(ENV{CFLAGS} "${RR_WARNINGS_C} ${RR_FLAGS_C}")
+    set(ENV{CXXFLAGS} "${RR_WARNINGS_CXX} ${RR_FLAGS_CXX}")
   endif()
 endif()
 ###################################################################
@@ -829,106 +853,128 @@ set(MODEL "Experimental")
 #set(LOCAL_NO_PACKAGE "TRUE")
 #####       Following controls source update                  #####
 #set(LOCAL_UPDATE "TRUE")
-set(REPOSITORY_URL "http://svn.hdfgroup.uiuc.edu/hdf5/trunk")
+set(REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
+set(REPOSITORY_BRANCH "develop")
+
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows
 #set(CTEST_USE_TAR_SOURCE "${CTEST_SOURCE_VERSION}")
 ###################################################################
 
 ###################################################################
-####  Change default configuration of options in config/cmake/cacheinit.cmake file ###
-####  format: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")
-
-###################################################################
-if(${STATICLIBRARIES})
+if(${STATICONLYLIBRARIES})
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
   #########       Following describes computer           ############
   ## following is optional to describe build                       ##
   set(SITE_BUILDNAME_SUFFIX "STATIC")
 endif()
 ###################################################################
-
-### uncomment/comment and change the following lines for other configuration options
-
-####      ext libraries       ####
-### ext libs from tgz
-set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=TGZ -DTGZPATH:PATH=${CTEST_SCRIPT_DIRECTORY}")
-### ext libs from svn
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=SVN")
-### ext libs on system
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib -DZLIB_INCLUDE_DIR:PATH=some_location/include")
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib -DSZIP_INCLUDE_DIR:PATH=some_location/include")
-### disable ext libs building
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF")
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
 ####      fortran       ####
 if(${FORTRANLIBRARIES})
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=ON")
+  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=ON")
 else()
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_FORTRAN:BOOL=OFF")
+  ### enable Fortran 2003 depends on HDF5_BUILD_FORTRAN
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_F2003:BOOL=OFF")
 endif()
 ####      java       ####
 if(${JAVALIBRARIES})
-  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_JAVA:BOOL=ON")
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=ON")
 else()
-  set(BUILD_OPTIONS "${BUILD_OPTIONS} -DHDF_BUILD_JAVA:BOOL=OFF")
+  set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_BUILD_JAVA:BOOL=OFF")
 endif()
-
-### disable test program builds
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_TESTING:BOOL=OFF")
-
-### disable packaging
-#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_NO_PACKAGES:BOOL=ON")
-### Create install package with external libraries (szip, zlib, jpeg)
-set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
 
 ### change install prefix
 set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_INSTALL_PREFIX:PATH=${INSTALLDIR}")
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCTEST_CONFIGURATION_TYPE:STRING=$ENV{CMAKE_CONFIG_TYPE}")
 
 ###################################################################
 
 if(WIN32)
+  set(BINFILEBASE "HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}")
+  include(${CTEST_SCRIPT_DIRECTORY}\\HDF5options.cmake)
   include(${CTEST_SCRIPT_DIRECTORY}\\CTestScript.cmake)
-  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.exe")
-    file(COPY "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.exe" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.exe")
+    file(COPY "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.exe" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
   endif()
-  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.msi")
-    file(COPY "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.msi" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.msi")
+    file(COPY "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.msi" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
   endif()
-  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.zip")
-    file(COPY "${CTEST_BINARY_DIRECTORY}\\HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-win${SITE_OS_BITS}.zip" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+  if(EXISTS "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.zip")
+    file(COPY "${CTEST_BINARY_DIRECTORY}\\${BINFILEBASE}.zip" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
   endif()
 else()
+  set(BINFILEBASE "HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
+  include(${CTEST_SCRIPT_DIRECTORY}/HDF5options.cmake)
   include(${CTEST_SCRIPT_DIRECTORY}/CTestScript.cmake)
   if(APPLE)
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.dmg")
-      file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.dmg" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+    if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.dmg")
+      file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.dmg" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
     endif()
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.tar.gz")
-      file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+    if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.tar.gz")
+      file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
     endif()
-    if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.sh")
-      file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Darwin.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+    if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.sh")
+      file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Darwin.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
     endif()
   else()
     if(CYGWIN)
-      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-CYGWIN.sh")
-        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-CYGWIN.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-CYGWIN.sh")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-CYGWIN.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
       endif()
-      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-CYGWIN.tar.gz")
-        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-CYGWIN.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-CYGWIN.tar.gz")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-CYGWIN.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
       endif()
     else()
-      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Linux.sh")
-        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Linux.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Linux.sh")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Linux.sh" DESTINATION ${CTEST_SCRIPT_DIRECTORY})
       endif()
-      if(EXISTS "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Linux.tar.gz")
-        file(COPY "${CTEST_BINARY_DIRECTORY}/HDF5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}-Linux.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
+      if(EXISTS "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Linux.tar.gz")
+        file(COPY "${CTEST_BINARY_DIRECTORY}/${BINFILEBASE}-Linux.tar.gz" DESTINATION  ${CTEST_SCRIPT_DIRECTORY})
       endif()
     endif()
   endif()
 endif()
 
+HDF5options.cmake:
+#############################################################################################
+####  Change default configuration of options in config/cmake/cacheinit.cmake file        ###
+####  format: set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DXXX:YY=ZZZZ")                 ###
+#############################################################################################
+
+### uncomment/comment and change the following lines for other configuration options
+
+#############################################################################################
+####      ext libraries       ####
+
+### ext libs from tgz
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=TGZ -DTGZPATH:PATH=${CTEST_SCRIPT_DIRECTORY}")
+### ext libs from git
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ALLOW_EXTERNAL_SUPPORT:STRING=GIT")
+### ext libs on system
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DZLIB_LIBRARY:FILEPATH=some_location/lib/zlib.lib -DZLIB_INCLUDE_DIR:PATH=some_location/include")
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DSZIP_LIBRARY:FILEPATH=some_location/lib/szlib.lib -DSZIP_INCLUDE_DIR:PATH=some_location/include")
+
+### disable ext zlib building
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_Z_LIB_SUPPORT:BOOL=OFF")
+### disable ext szip building
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_SUPPORT:BOOL=OFF")
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_ENABLE_SZIP_ENCODING:BOOL=OFF")
+
+#############################################################################################
+### disable test program builds
+
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_TESTING:BOOL=OFF")
+
+#############################################################################################
+### disable packaging
+
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_NO_PACKAGES:BOOL=ON")
+### Create install package with external libraries (szip, zlib, jpeg)
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
+
+#############################################################################################
 
 ========================================================================
 For further assistance, send email to help@hdfgroup.org

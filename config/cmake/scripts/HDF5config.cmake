@@ -21,13 +21,13 @@ cmake_minimum_required(VERSION 3.2.2 FATAL_ERROR)
 #     INSTALLDIR  -  root folder where hdf5 is installed
 #     CTEST_CONFIGURATION_TYPE  - Release, Debug, etc
 #     CTEST_SOURCE_NAME  -  source folder
-#     STATIC_LIBRARIES  -  Build/use static libraries
+#     STATIC_ONLY  -  Build/use static libraries
 #     FORTRAN_LIBRARIES -  Build/use fortran libraries
 #     JAVA_LIBRARIES -  Build/use java libraries
 #     NO_MAC_FORTRAN  - Yes to be SHARED on a Mac
 ##############################################################################
 
-set(CTEST_SOURCE_VERSION 1.10.0)
+set(CTEST_SOURCE_VERSION 1.10.1)
 set(CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
@@ -36,7 +36,7 @@ set(CTEST_SOURCE_VERSEXT "")
 #INSTALLDIR - HDF5-1.10.0 root folder
 #CTEST_CONFIGURATION_TYPE - Release, Debug, RelWithDebInfo
 #CTEST_SOURCE_NAME - name of source folder; HDF5-1.10.0
-#STATIC_LIBRARIES - Default is YES
+#STATIC_ONLY - Default is YES
 #FORTRAN_LIBRARIES - Default is NO
 #JAVA_LIBRARIES - Default is NO
 #NO_MAC_FORTRAN - set to TRUE to allow shared libs on a Mac
@@ -93,10 +93,10 @@ endif()
 if(NOT DEFINED CTEST_SOURCE_NAME)
     set(CTEST_SOURCE_NAME "hdf5-${CTEST_SOURCE_VERSION}${CTEST_SOURCE_VERSEXT}")
 endif()
-if(NOT DEFINED STATIC_LIBRARIES)
-    set(STATICLIBRARIES "YES")
+if(NOT DEFINED STATIC_ONLY)
+    set(STATICONLYLIBRARIES "YES")
 else()
-    set(STATICLIBRARIES "NO")
+    set(STATICONLYLIBRARIES "NO")
 endif()
 if(NOT DEFINED FORTRAN_LIBRARIES)
     set(FORTRANLIBRARIES "NO")
@@ -202,7 +202,7 @@ set(REPOSITORY_BRANCH "develop")
 ###################################################################
 
 ###################################################################
-if(${STATICLIBRARIES})
+if(${STATICONLYLIBRARIES})
   set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_SHARED_LIBS:BOOL=OFF")
   #########       Following describes computer           ############
   ## following is optional to describe build                       ##
