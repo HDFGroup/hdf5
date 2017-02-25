@@ -833,7 +833,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         if((H5F_ACC_RDWR & H5F_INTENT(f)) && flush)
             if(H5F__flush_phase1(f, dxpl_id) < 0)
                 /* Push error, but keep going*/
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+                HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 1)")
 
         /* Notify the metadata cache that the file is about to be closed.
          * This allows the cache to set up for creating a metadata cache 
@@ -849,8 +849,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
          */
         if((H5F_ACC_RDWR & H5F_INTENT(f)) && flush)
             if(H5F__flush_phase2(f, dxpl_id, TRUE) < 0)
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+                /* Push error, but keep going */
+                HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 2)")
 
         /* With the shutdown modifications, the contents of the metadata cache
          * should be clean at this point, with the possible exception of the 
@@ -1285,6 +1285,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     shared = file->shared;
     lf = shared->lf;
 
+    /* Get the file access property list, for future queries */
+    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1317,10 +1321,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         if(H5G_mkroot(file, dxpl_id, FALSE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
     } /* end if */
-
-    /* Get the file access property list, for future queries */
-    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
     /*
      * Decide the file close degree.  If it's the first time to open the
@@ -1529,7 +1529,7 @@ H5F__flush_phase2(H5F_t *f, hid_t dxpl_id, hbool_t closing)
     /* Flush file buffers to disk. */
     if(H5FD_flush(f->shared->lf, dxpl_id, closing) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
+        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "low level flush failed")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush_phase2() */
