@@ -1086,9 +1086,9 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
          */
         ring = H5C_RING_USER;
 	while(ring < H5C_RING_NTYPES) {
-	    /* only call the free space manager settle routines when close
-             * warning has been received, and then only when the index is 
-             * non-empty for that ring.
+
+            /* Only call the free space manager settle routines when close
+             * warning has been received.
              */
 	    if(cache_ptr->close_warning_received) {
 		switch(ring) {
@@ -1556,7 +1556,7 @@ H5C_insert_entry(H5F_t *             f,
 
         if(H5C__make_space_in_cache(f, dxpl_id, space_needed, write_permitted) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, "H5C__make_space_in_cache failed")
-    }
+    } /* end if */
 
     H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
 
@@ -2542,6 +2542,8 @@ H5C_protect(H5F_t *		f,
             HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't load entry")
 
         entry_ptr = (H5C_cache_entry_t *)thing;
+        cache_ptr->entries_loaded_counter++;
+
         entry_ptr->ring  = ring;
 #ifdef H5_HAVE_PARALLEL
         if(H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI) && entry_ptr->coll_access)
@@ -2632,7 +2634,7 @@ H5C_protect(H5F_t *		f,
 
             if(H5C__make_space_in_cache(f, dxpl_id, space_needed, write_permitted) < 0 )
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, "H5C__make_space_in_cache failed")
-        }
+        } /* end if */
 
         /* Insert the entry in the hash table.  It can't be dirty yet, so
          * we don't even check to see if it should go in the skip list.
@@ -2667,13 +2669,10 @@ H5C_protect(H5F_t *		f,
          */
         H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, NULL)
 
-        /* Update entries loaded in cache counter */
-        cache_ptr->entries_loaded_counter++;
-
         /* Record that the entry was loaded, to trigger a notify callback later */
         /* (After the entry is fully added to the cache) */
         was_loaded = TRUE;
-    }
+    } /* end else */
 
     HDassert(entry_ptr->addr == addr);
     HDassert(entry_ptr->type == type);
@@ -3490,22 +3489,19 @@ done:
  *
  * Function:    H5C_unsettle_entry_ring
  *
- * Purpose:     Advise the metadata cache that the specified entry's metadata
- *              cache manager ring is no longer settled (if it was on entry).
+ * Purpose:     Advise the metadata cache that the specified entry's free space
+ *              manager ring is no longer settled (if it was on entry).
  *
- *              If the target metadata cache manager ring is already
+ *              If the target free space manager ring is already
  *              unsettled, do nothing, and return SUCCEED.
  *
- *              If the target metadata cache manager ring is settled, and
+ *              If the target free space manager ring is settled, and
  *              we are not in the process of a file shutdown, mark
  *              the ring as unsettled, and return SUCCEED.
  *
- *              If the target metadata cache  manager is settled, and we
+ *              If the target free space manager is settled, and we
  *              are in the process of a file shutdown, post an error
  *              message, and return FAIL.
- *
- *		Note that this function simply passes the call on to
- *		the metadata cache proper, and returns the result.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -4565,19 +4561,6 @@ done:
  *
  * Programmer:  John Mainzer, 11/22/04
  *
- * Changes:	Modified function to detect deletions of entries
- *              during a scan of the LRU, and where appropriate,
- *              restart the scan to avoid proceeding with a next
- *              entry that is no longer in the cache.
- *
- *              Note the absence of checks after flushes of clean
- *              entries.  As a second entry can only be removed by
- *              by a call to the pre_serialize or serialize callback
- *              of the first, and as these callbacks will not be called
- *              on clean entries, no checks are needed.
- *
- *                                              JRM -- 4/6/15
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -4669,39 +4652,26 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
             }
 
-            if ( prev_ptr != NULL ) {
-
+            if(prev_ptr != NULL) {
 		if(corked)   /* dirty corked entry is skipped */
                     entry_ptr = prev_ptr;
-
-		else if ( ( restart_scan )
-                     ||
-                     ( prev_ptr->is_dirty != prev_is_dirty )
-                     ||
-                     ( prev_ptr->next != next_ptr )
-                     ||
-                     ( prev_ptr->is_protected )
-                     ||
-                     ( prev_ptr->is_pinned ) ) {
-
-                    /* something has happened to the LRU -- start over
+		else if(restart_scan || (prev_ptr->is_dirty != prev_is_dirty)
+                          || (prev_ptr->next != next_ptr)
+                          || (prev_ptr->is_protected)
+                          || (prev_ptr->is_pinned)) {
+                    /* Something has happened to the LRU -- start over
 		     * from the tail.
                      */
                     restart_scan = FALSE;
                     entry_ptr = cache_ptr->LRU_tail_ptr;
 
 		    H5C__UPDATE_STATS_FOR_LRU_SCAN_RESTART(cache_ptr)
-
-                } else {
-
+                } /* end else-if */
+                else
                     entry_ptr = prev_ptr;
-
-                }
-	    } else {
-
+	    } /* end if */
+            else
 		entry_ptr = NULL;
-
-	    }
         } /* end while */
 
         /* for now at least, don't bother to maintain the minimum clean size,
@@ -6929,38 +6899,6 @@ done:
  *
  * Programmer:  John Mainzer, 5/14/04
  *
- * Changes:     Modified function to skip over entries with the 
- *		flush_in_progress flag set.  If this is not done,
- *		an infinite recursion is possible if the cache is 
- *		full, and the pre-serialize or serialize routine 
- *		attempts to load another entry.
- *
- *		This error was exposed by a re-factor of the 
- *		H5C__flush_single_entry() routine.  However, it was 
- *		a potential bug from the moment that entries were 
- *		allowed to load other entries on flush.
- *
- *		In passing, note that the primary and secondary dxpls 
- *		mentioned in the comment above have been replaced by 
- *		a single dxpl at some point, and thus the discussion 
- *		above is somewhat obsolete.  Date of this change is 
- *		unkown.
- *
- *						JRM -- 12/26/14
- *
- *		Modified function to detect deletions of entries 
- *		during a scan of the LRU, and where appropriate, 
- *		restart the scan to avoid proceeding with a next 
- *		entry that is no longer in the cache.
- *
- *		Note the absence of checks after flushes of clean 
- *		entries.  As a second entry can only be removed by 
- *		by a call to the pre_serialize or serialize callback
- *		of the first, and as these callbacks will not be called
- *		on clean entries, no checks are needed.
- *
- *						JRM -- 4/6/15
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6993,20 +6931,14 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
     HDassert(cache_ptr->index_size == (cache_ptr->clean_index_size + cache_ptr->dirty_index_size));
 
     if ( write_permitted ) {
-
         restart_scan = FALSE;
         initial_list_len = cache_ptr->LRU_list_len;
         entry_ptr = cache_ptr->LRU_tail_ptr;
 
-	if ( cache_ptr->index_size >= cache_ptr->max_cache_size ) {
-
+	if(cache_ptr->index_size >= cache_ptr->max_cache_size)
 	   empty_space = 0;
-
-	} else {
-
+	else
 	   empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
-
-	}
 
         while ( ( ( (cache_ptr->index_size + space_needed)
                     >

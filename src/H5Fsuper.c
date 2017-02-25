@@ -240,7 +240,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5F__update_super_ext_driver_msg(H5F_t *f, hid_t dxpl_id)
 {
     H5F_super_t *sblock;        /* Pointer to the super block */

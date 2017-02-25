@@ -83,7 +83,7 @@
 #define H5C_IMAGE_ENTRY_T_BAD_MAGIC	0xBeefDead
 
 /* Maximum ring allowed in image */
-#define H5C_MAX_RING_IN_IMAGE   3
+#define H5C_MAX_RING_IN_IMAGE   H5C_RING_MDFSM
 
 
 /******************/
@@ -3115,6 +3115,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__reconstruct_cache_contents() */
 
+
 /*-------------------------------------------------------------------------
  * Function:    H5C__reconstruct_cache_entry()
  *
@@ -3903,7 +3904,7 @@ H5C__write_cache_image(H5F_t *f, hid_t dxpl_id, const H5C_t *cache_ptr)
 
 	/* Write the buffer (if serial access, or rank 0 for parallel access) */
 	if(H5F_block_write(f, H5FD_MEM_SUPER, cache_ptr->image_addr, cache_ptr->image_len, dxpl_id, cache_ptr->image_buffer) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write metadata cache image block to file.")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't write metadata cache image block to file")
 #ifdef H5_HAVE_PARALLEL
     } /* end if */
 } /* end block */

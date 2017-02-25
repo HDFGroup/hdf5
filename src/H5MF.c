@@ -1251,18 +1251,18 @@ done:
  * Purpose: 	Handle any tasks required before the metadata cache 
  *		can serialize or flush the raw data free space manager
  *		and any metadata free space managers that reside in the 
- *		raw data free space manager ring. 
+ *		raw data free space manager ring.
  *
  *		Specifically, any metadata managers that DON'T handle 
- *		space allocation for free space manager header or section 
- *		info will reside in the raw data free space manager ring.  
- *		As of this writing, the plan is to move to only two free space 
+ *		space allocation for free space manager header or section
+ *		info will reside in the raw data free space manager ring.
+ *		As of this writing, the plan is to move to only two free space
  *		managers, one for raw data and one for metadata -- which
  *		means that only the raw data free space manager will reside
  *		in the free space manager ring.  However, this has not been
  *		fully implemented yet, so this code must support the 
  *		possibilty of multiple metadata free space managers, at most
- *		two of which handle free space manager header or section info, 
+ *		two of which handle free space manager header or section info,
  *		and thus reside in the metadata free space manager ring.
  *
  *		At present, the task list is:
@@ -1271,20 +1271,20 @@ done:
  *
  *		    a) Free both aggregators.  Space not at EOA will be
  *		       added to the appropriate free space manager.
- *		    
+ *
  *		       The raw data aggregator should not be restarted 
  *		       after this point.  It is possible that the metadata
  *		       aggregator will be.
- *		    
+ *
  *		    b) Free all file space currently allocated to free
- *		       space managers.  
+ *		       space managers.
  *
  *		    c) Delete the free space manager superblock 
  *		       extension message if allocated.
  *
  *		   This done, reduce the EOA by moving it to just before
  *		   the last piece of free memory in the file.
- *		   
+ *
  *		2) Ensure that space is allocated for the free space
  *                 manager superblock extension message.  Must do this
  *                 now, before reallocating file space for free space 
@@ -1309,6 +1309,7 @@ done:
  *		   We will allocate space for free space managers involved
  *		   in the allocation of file space for free space managers
  *		   in H5MF_settle_meta_data_fsm()
+ *
  * Return:	SUCCEED/FAIL
  *
  * Programmer:  John Mainzer
@@ -1348,9 +1349,9 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
 
         /* a) Free the space in aggregators:
          *
-         * (for space not at EOF, it may be put into free space managers) 
+         * (for space not at EOF, it may be put into free space managers)
          *
-         * Do this now so that the raw data FSM (and any other FSM that isn't 
+         * Do this now so that the raw data FSM (and any other FSM that isn't
          * involved in space allocation for FSMs) will have no further activity.
          *
          * Note that while the raw data aggregator should not be restarted during
@@ -1371,23 +1372,23 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
 
         /* b) Free the file space (if any) allocated to each free space manager.
          *
-         * Do this to facilitate reduction of the size of the file to the 
-         * extent possible.  We will re-allocate space to free space managers 
+         * Do this to facilitate reduction of the size of the file to the
+         * extent possible.  We will re-allocate space to free space managers
          * that have free space to save after this reduction.
          *
          * In the case of the raw data free space manager, and any other free
          * space manager that does not allocate space for free space managers,
          * allocations should be complete at this point, as all raw data should
          * have space allocated and be flushed to file at this point.  Thus we
-         * can examine such free space managers and only re-allocate space for 
+         * can examine such free space managers and only re-allocate space for
          * them if they contain free space.  Do this later in this function after
          * the EOA has been reduced to the extent possible.
          *
-         * For free space managers that allocate file space for free space 
-         * managers (usually just a single metadata free space manager, but for 
-         * now at least, free space managers for different types of metadata 
+         * For free space managers that allocate file space for free space
+         * managers (usually just a single metadata free space manager, but for
+         * now at least, free space managers for different types of metadata
          * are possible), the matter is more ticklish due to the self-
-         * referential nature of the problem.  These FSMs are dealt with in 
+         * referential nature of the problem.  These FSMs are dealt with in
          * H5MF_settle_meta_data_fsm().
          */
         for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
@@ -1403,8 +1404,8 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
             if(!fsm_visited[fsm_type]) {
                 fsm_visited[fsm_type] = TRUE;
 
-                /* If there is no active FSM for this type, but such a FSM has 
-                 * space allocated in file, open it so that we can free its file 
+                /* If there is no active FSM for this type, but such a FSM has
+                 * space allocated in file, open it so that we can free its file
                  * space.
                  */
                 if(NULL == f->shared->fs_man[fsm_type]) {
@@ -1429,8 +1430,8 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
                     else
                         needed_ring = H5AC_RING_RDFSM;
                     if(needed_ring != curr_ring) {
-                        if(H5AC_set_ring(dxpl_id, needed_ring, &dxpl, &curr_ring)< 0)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set ring value.")
+                        if(H5AC_set_ring(dxpl_id, needed_ring, &dxpl, &curr_ring) < 0)
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set ring value")
                         curr_ring = needed_ring;
                     } /* end if */
 
@@ -1456,11 +1457,11 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
             } /* end if */
         } /* end for */
 
-        /* c) Delete the free space manager superblock extension message 
+        /* c) Delete the free space manager superblock extension message
          *    if allocated.
          *
          *    Must do this since the routine that writes / creates superblock
-         *    extension messages will choke if the target message is 
+         *    extension messages will choke if the target message is
          *    unexpectedly either absent or present.
          */
         if(H5F_addr_defined(f->shared->sblock->ext_addr))
@@ -1471,39 +1472,39 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
         if(H5MF__close_shrink_eoa(f, dxpl_id) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't shrink eoa")
 
-     
-        /* 2) Ensure that space is allocated for the free space manager superblock 
-         *    extension message.  Must do this now, before reallocating file space 
+
+        /* 2) Ensure that space is allocated for the free space manager superblock
+         *    extension message.  Must do this now, before reallocating file space
          *    for free space managers, as it is possible that this allocation may
-         *    grab the last section in a FSM -- making it unnecessary to 
+         *    grab the last section in a FSM -- making it unnecessary to
          *    re-allocate file space for it.
          *
          * Do this by writing a free space manager superblock extension message.
-         * 
-         * Since no free space manager has file space allocated for it, this 
+         *
+         * Since no free space manager has file space allocated for it, this
          * message must be invalid since we can't save addresses of FSMs when
          * those addresses are unknown.  This is OK -- we will write the correct
          * values to the message at free space manager shutdown.
          */
-        for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) 
-            fsinfo.fs_addr[type-1] = HADDR_UNDEF;
+        for(type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
+            fsinfo.fs_addr[type - 1] = HADDR_UNDEF;
         fsinfo.strategy = f->shared->fs_strategy;
         fsinfo.threshold = f->shared->fs_threshold;
         if(H5F_super_ext_write_msg(f, dxpl_id, H5O_FSINFO_ID, &fsinfo, TRUE, H5O_MSG_NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL, "error in writing fsinfo message to superblock extension")
 
 
         /* 3) Scan all free space managers not involved in allocating
          *    space for free space managers.  For each such free space
-         *    manager, test to see if it contains free space.  If 
+         *    manager, test to see if it contains free space.  If
          *    it does, allocate file space for its header and section
-         *    data.  If it contains no free space, leave it without 
-         *    allocated file space as there is no need to save it to 
+         *    data.  If it contains no free space, leave it without
+         *    allocated file space as there is no need to save it to
          *    file.
          *
          *    Note that all free space managers in this class should
-         *    see no further space allocations / deallocations as 
-         *    at this point, all raw data allocations should be 
+         *    see no further space allocations / deallocations as
+         *    at this point, all raw data allocations should be
          *    finalized, as should all metadata allocations not involving
          *    free space managers.
          *
@@ -1529,11 +1530,11 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
 
             if(needed_ring != curr_ring) {
                 if(H5AC_set_ring(dxpl_id, needed_ring, &dxpl, &curr_ring)< 0)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set ring value.")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "unable to set ring value")
                 curr_ring = needed_ring;
             } /* end if */
 
-            /* Since there can be a many-to-one mapping from memory types 
+            /* Since there can be a many-to-one mapping from memory types
              * to free space managers, ensure that we don't visit any FSM
              * more than once.
              */
@@ -1555,10 +1556,10 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
 
                         /* Query free space manager info for this type */
                         if(H5FS_stat_info(f, f->shared->fs_man[fsm_type], &fs_stat) < 0 )
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't get free-space info")
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get free-space info")
 
-                        /* If the free space manager contains section info, 
-                         * allocate space for the header and sinfo (note that 
+                        /* If the free space manager contains section info,
+                         * allocate space for the header and sinfo (note that
                          * space must not be allocated at present -- verify
                          * verify this with assertions).
                          */
@@ -1600,7 +1601,7 @@ H5MF_settle_raw_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
                 /* Close any opened FSMs */
                 if(fsm_opened[fsm_type]) {
                     if(H5MF__alloc_close(f, dxpl_id, fsm_type) < 0)
-                       HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't close file free space manager")
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't close file free space manager")
                     fsm_opened[fsm_type] = FALSE;
                 } /* end if */
             } /* end if */
@@ -1788,7 +1789,7 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
         } /* end if */
 #endif /* NDEBUG */
 
-        /* Free the space in the metadata aggregator.  Do this via the 
+        /* Free the space in the metadata aggregator.  Do this via the
          * H5MF_free_aggrs() call.  Note that the raw data aggregator must
          * have already been freed.  Sanity checks for this?
          */
@@ -1802,18 +1803,18 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
 
         /* ******************* PROBLEM: ********************
          *
-         * If the file has an alignement other than 1, and if 
-         * the EOA is not a multiple of this alignment, allocating sapce 
-         * for the section via the VFD info has the potential of generating 
-         * a fragment that will be added to the free space manager.  This 
+         * If the file has an alignement other than 1, and if
+         * the EOA is not a multiple of this alignment, allocating sapce
+         * for the section via the VFD info has the potential of generating
+         * a fragment that will be added to the free space manager.  This
          * of course undoes everything we have been doing here.
          *
-         * Need a way around this.  Obvious solution is to force the EOA to 
-         * be a multiple of the alignment.  
+         * Need a way around this.  Obvious solution is to force the EOA to
+         * be a multiple of the alignment.
          *
          * Fortunately, alignment is typically 1, so this is a non-issue in
-         * most cases.  In cases where the alignment is not 1, for now we 
-         * have decided to drop the fragment on the floor.  
+         * most cases.  In cases where the alignment is not 1, for now we
+         * have decided to drop the fragment on the floor.
          *
          * Eventually, we should fix this by modifying the on disk representations
          * of free space managers to allow for empty space, so as to bypass the
@@ -1823,30 +1824,30 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hid_t dxpl_id, hbool_t *fsm_settled)
         /* HDassert(f->shared->alignment == 1); */
 
 
-        /* The free space manager(s) that handle space allocations for free 
-         * space managers should be settled now, albeit without file space 
+        /* The free space manager(s) that handle space allocations for free
+         * space managers should be settled now, albeit without file space
          * allocated to them.  To avoid the possibility of changing the sizes
-         * of their section info blocks, allocate space for them now at the 
+         * of their section info blocks, allocate space for them now at the
          * end of file via H5FD_alloc().
          *
-         * In the past, this issue of allocating space without touching the 
-         * free space managers has been deal with by calling 
-         * H5MF_aggr_vfd_alloc(), which in turn calls H5MF_aggr_alloc().  
-         * This is problematic since (if I read the code correctly) it will 
-         * re-constitute the metadata aggregator, which will add any left 
-         * over space to one of the free space managers when freed.
+         * In the past, this issue of allocating space without touching the
+         * free space managers has been deal with by calling
+         * H5MF_aggr_vfd_alloc(), which in turn calls H5MF_aggr_alloc().
+         * This is problematic since (if I read the code correctly) it will
+         * re-constitute the metadata aggregator, which will add any leftover
+         * space to one of the free space managers when freed.
          *
          * This is a non-starter, since the entire objective is to settle the
          * free space managers.
          *
-         * Hence the decision to call H5FD_alloc() directly.  
-         * 
-         * As discussed in PROBLEM above, if f->shared->alignment is not 1, 
+         * Hence the decision to call H5FD_alloc() directly.
+         *
+         * As discussed in PROBLEM above, if f->shared->alignment is not 1,
          * this has the possibility of generating a fragment of file space
          * that would typically be inserted into one of the free space managers.
          *
          * This is isn't good, but due to schedule pressure, we will just drop
-         * the fragement on the floor for now.
+         * the fragment on the floor for now.
          */
         if(hdr_fspace)
             if(H5FS_alloc_vfd_alloc_hdr_and_section_info(f, dxpl_id, hdr_fspace,
