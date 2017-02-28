@@ -81,7 +81,7 @@ typedef struct H5AC_addr_list_ud_t
 {
     H5AC_aux_t    * aux_ptr;        /* 'Auxiliary' parallel cache info */
     haddr_t       * addr_buf_ptr;   /* Array to store addresses */
-    int             i;              /* Counter for position in array */
+    unsigned        u;              /* Counter for position in array */
 } H5AC_addr_list_ud_t;
 
 
@@ -310,13 +310,13 @@ H5AC__broadcast_candidate_list(H5AC_t *cache_ptr, unsigned *num_entries_ptr,
      * receivers can set up buffers to receive them.  If there aren't
      * any, we are done.
      */
-    num_entries = H5SL_count(aux_ptr->candidate_slist_ptr);
+    num_entries = (unsigned)H5SL_count(aux_ptr->candidate_slist_ptr);
     if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_UNSIGNED, 0, aux_ptr->mpi_comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
 
     if(num_entries > 0) {
-        size_t		buf_size = 0;
-        unsigned        chk_num_entries = 0;
+        size_t		 buf_size = 0;
+        unsigned	 chk_num_entries = 0;
 
         /* convert the candidate list into the format we
          * are used to receiving from process 0, and also load it 
@@ -378,8 +378,8 @@ H5AC__broadcast_clean_list_cb(void *_item, void H5_ATTR_UNUSED *_key,
 
     /* Store the entry's address in the buffer */
     addr = slist_entry_ptr->addr;
-    udata->addr_buf_ptr[udata->i] = addr;
-    udata->i++;
+    udata->addr_buf_ptr[udata->u] = addr;
+    udata->u++;
 
     /* now release the entry */
     slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
@@ -437,7 +437,7 @@ H5AC__broadcast_clean_list(H5AC_t * cache_ptr)
      * receives can set up a buffer to receive them.  If there aren't
      * any, we are done.
      */
-    num_entries = H5SL_count(aux_ptr->c_slist_ptr);
+    num_entries = (unsigned)H5SL_count(aux_ptr->c_slist_ptr);
     if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&num_entries, 1, MPI_UNSIGNED, 0, aux_ptr->mpi_comm)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
 
@@ -453,7 +453,7 @@ H5AC__broadcast_clean_list(H5AC_t * cache_ptr)
         /* Set up user data for callback */
         udata.aux_ptr = aux_ptr;
         udata.addr_buf_ptr = addr_buf_ptr;
-        udata.i = 0;
+        udata.u = 0;
 
         /* Free all the clean list entries, building the address list in the callback */
         /* (Callback also removes the matching entries from the dirtied list) */
@@ -568,8 +568,8 @@ H5AC__copy_candidate_list_to_buffer_cb(void *_item, void H5_ATTR_UNUSED *_key,
     HDassert(udata);
 
     /* Store the entry's address in the buffer */
-    udata->addr_buf_ptr[udata->i] = slist_entry_ptr->addr;
-    udata->i++;
+    udata->addr_buf_ptr[udata->u] = slist_entry_ptr->addr;
+    udata->u++;
 
     /* now release the entry */
     slist_entry_ptr = H5FL_FREE(H5AC_slist_entry_t, slist_entry_ptr);
@@ -635,7 +635,7 @@ H5AC__copy_candidate_list_to_buffer(const H5AC_t *cache_ptr, unsigned *num_entri
     HDassert(haddr_buf_ptr_ptr != NULL);
     HDassert(*haddr_buf_ptr_ptr == NULL);
 
-    num_entries = (int)H5SL_count(aux_ptr->candidate_slist_ptr);
+    num_entries = (unsigned)H5SL_count(aux_ptr->candidate_slist_ptr);
 
     /* allocate a buffer(s) to store the list of candidate entry 
      * base addresses in 
@@ -647,7 +647,7 @@ H5AC__copy_candidate_list_to_buffer(const H5AC_t *cache_ptr, unsigned *num_entri
     /* Set up user data for callback */
     udata.aux_ptr = aux_ptr;
     udata.addr_buf_ptr = haddr_buf_ptr;
-    udata.i = 0;
+    udata.u = 0;
 
     /* Free all the candidate list entries, building the address list in the callback */
     if(H5SL_free(aux_ptr->candidate_slist_ptr, H5AC__copy_candidate_list_to_buffer_cb, &udata) < 0)
@@ -1543,7 +1543,7 @@ H5AC__receive_and_apply_clean_list(H5F_t *f, hid_t dxpl_id)
 
     if(num_entries > 0)
         /* mark the indicated entries as clean */
-        if(H5C_mark_entries_as_clean(f, dxpl_id, (int32_t)num_entries, haddr_buf_ptr) < 0)
+        if(H5C_mark_entries_as_clean(f, dxpl_id, num_entries, haddr_buf_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't mark entries clean.")
 
     /* if it is defined, call the sync point done callback.  Note

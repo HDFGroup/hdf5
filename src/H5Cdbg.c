@@ -655,7 +655,7 @@ H5C_stats(H5C_t * cache_ptr,
               cache_ptr->prefix,
               cache_ptr->images_created,
               cache_ptr->images_loaded,
-              (long long)cache_ptr->last_image_size);
+              cache_ptr->last_image_size);
 
     HDfprintf(stdout,
 	      "%s  prefetches / dirty prefetches      = %lld / %lld\n",
@@ -905,7 +905,7 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED * cache_ptr)
 
     cache_ptr->images_created           = 0;
     cache_ptr->images_loaded            = 0;
-    cache_ptr->last_image_size          = (size_t)0;
+    cache_ptr->last_image_size          = (hsize_t)0;
 
     cache_ptr->prefetches               = 0;
     cache_ptr->dirty_prefetches			= 0;
