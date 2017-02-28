@@ -164,38 +164,13 @@ static herr_t H5C__collective_write(H5F_t *f, hid_t dxpl_id);
  * Programmer:  John Mainzer
  *              3/17/10
  *
- * Changes:     Ported code to detect next entry status changes as the 
- *              the result of a flush from the serial code in the scan of 
- *              the LRU.  Also added code to detect and adapt to the 
- *              removal from the cache of the next entry in the scan of 
- *		the LRU.
- *
- *		Note that at present, all of these changes should not 
- *		be required as the operations on entries as they are 
- *		flushed that can cause these condiditions are not premitted
- *		in the parallel case.  However, Quincey indicates that 
- *		this may change, and thus has requested the modification.
- *
- *		Note the assert(FALSE) in the if statement whose body 
- *		restarts the scan of the LRU.  As the body of the if 
- *		statement should be unreachable, it should never be 
- *		triggered until the constraints on the parallel case 
- *		are relaxed.  Please remove the assertion at that time.
- *
- *		Also added warning on the Pinned Entry List scan, as it
- *		is potentially subject to the same issue.  As there is 
- *		no cognate of this scan in the serial code, I don't have
- *		a fix to port to it.
- *
- *						JRM -- 4/10/19
- *		
  *-------------------------------------------------------------------------
  */
 herr_t
 H5C_apply_candidate_list(H5F_t * f,
                          hid_t dxpl_id,
                          H5C_t * cache_ptr,
-                         int num_candidates,
+                         unsigned num_candidates,
                          haddr_t * candidates_list_ptr,
                          int mpi_rank,
                          int mpi_size)
@@ -205,19 +180,19 @@ H5C_apply_candidate_list(H5F_t * f,
     int                 i;
     int			m;
     int			n;
-    int			first_entry_to_flush;
-    int			last_entry_to_flush;
-    int			entries_to_clear = 0;
-    int			entries_to_flush = 0;
-    int			entries_to_flush_or_clear_last = 0;
-    int			entries_to_flush_collectively = 0;
-    int			entries_cleared = 0;
-    int			entries_flushed = 0;
-    int			entries_delayed = 0;
-    int			entries_flushed_or_cleared_last = 0;
-    int			entries_flushed_collectively = 0;
-    int			entries_examined = 0;
-    int			initial_list_len;
+    unsigned		first_entry_to_flush;
+    unsigned		last_entry_to_flush;
+    unsigned		entries_to_clear = 0;
+    unsigned		entries_to_flush = 0;
+    unsigned		entries_to_flush_or_clear_last = 0;
+    unsigned		entries_to_flush_collectively = 0;
+    unsigned		entries_cleared = 0;
+    unsigned		entries_flushed = 0;
+    unsigned		entries_delayed = 0;
+    unsigned		entries_flushed_or_cleared_last = 0;
+    unsigned		entries_flushed_collectively = 0;
+    unsigned		entries_examined = 0;
+    unsigned		initial_list_len;
     int               * candidate_assignment_table = NULL;
     haddr_t		addr;
     H5C_cache_entry_t *	clear_ptr = NULL;
@@ -231,6 +206,7 @@ H5C_apply_candidate_list(H5F_t * f,
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
     char		tbl_buf[1024];
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
+    unsigned            u;
     herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -250,8 +226,8 @@ H5C_apply_candidate_list(H5F_t * f,
     HDmemset(tbl_buf, 0, sizeof(tbl_buf));
 
     sprintf(&(tbl_buf[0]), "candidate list = ");
-    for(i = 0; i < num_candidates; i++)
-        sprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " 0x%llx", (long long)(*(candidates_list_ptr + i)));
+    for(u = 0; u < num_candidates; u++)
+        sprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " 0x%llx", (long long)(*(candidates_list_ptr + u)));
     sprintf(&(tbl_buf[HDstrlen(tbl_buf)]), "\n");
 
     HDfprintf(stdout, "%s", tbl_buf);
@@ -321,18 +297,18 @@ H5C_apply_candidate_list(H5F_t * f,
     sprintf(&(tbl_buf[HDstrlen(tbl_buf)]), "\n");
     HDfprintf(stdout, "%s", tbl_buf);
 
-    HDfprintf(stdout, "%s:%d: flush entries [%d, %d].\n", 
+    HDfprintf(stdout, "%s:%d: flush entries [%u, %u].\n", 
               FUNC, mpi_rank, first_entry_to_flush, last_entry_to_flush);
 
     HDfprintf(stdout, "%s:%d: marking entries.\n", FUNC, mpi_rank);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
-    for(i = 0; i < num_candidates; i++) {
-        addr = candidates_list_ptr[i];
+    for(u = 0; u < num_candidates; u++) {
+        addr = candidates_list_ptr[u];
         HDassert(H5F_addr_defined(addr));
 
 #if H5C_DO_SANITY_CHECKS
-        if(i > 0) {
+        if(u > 0) {
             if(last_addr == addr)
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "duplicate entry in cleaned list")
             else if(last_addr > addr)
@@ -352,36 +328,37 @@ H5C_apply_candidate_list(H5F_t * f,
              * If we encounter one, scream and die.  If it becomes an
              * issue, we should be able to work around this. 
              */
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry is protected?!?!?.")
-            /* Determine whether the entry is to be cleared or flushed,
-             * and mark it accordingly.  We will scan the protected and 
-             * pinned list shortly, and clear or flush according to these
-             * markings.  
-             */
-            if(i >= first_entry_to_flush && i <= last_entry_to_flush) {
-                entries_to_flush++;
-                entry_ptr->flush_immediately = TRUE;
-            } /* end if */
-            else {
-                entries_to_clear++;
-                entry_ptr->clear_on_unprotect = TRUE;
-            } /* end else */
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry is protected?!?!?")
 
-            /* Entries marked as collectively accessed and are in the
-               candidate list to clear from the cache have to be
-               removed from the coll list. This is OK since the
-               candidate list is collective and uniform across all
-               ranks. */
-            if(entry_ptr->coll_access) {
-                entry_ptr->coll_access = FALSE;
-                H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
-            } /* end if */
+        /* Determine whether the entry is to be cleared or flushed,
+         * and mark it accordingly.  We will scan the protected and 
+         * pinned list shortly, and clear or flush according to these
+         * markings.  
+         */
+        if(u >= first_entry_to_flush && u <= last_entry_to_flush) {
+            entries_to_flush++;
+            entry_ptr->flush_immediately = TRUE;
+        } /* end if */
+        else {
+            entries_to_clear++;
+            entry_ptr->clear_on_unprotect = TRUE;
+        } /* end else */
+
+        /* Entries marked as collectively accessed and are in the
+           candidate list to clear from the cache have to be
+           removed from the coll list. This is OK since the
+           candidate list is collective and uniform across all
+           ranks. */
+        if(entry_ptr->coll_access) {
+            entry_ptr->coll_access = FALSE;
+            H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
+        } /* end if */
     } /* end for */
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    HDfprintf(stdout, "%s:%d: num candidates/to clear/to flush = %d/%d/%d.\n", 
-              FUNC, mpi_rank, (int)num_candidates, (int)entries_to_clear,
-              (int)entries_to_flush);
+    HDfprintf(stdout, "%s:%d: num candidates/to clear/to flush = %u/%u/%u.\n", 
+              FUNC, mpi_rank, num_candidates, entries_to_clear,
+              entries_to_flush);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
 
     /* We have now marked all the entries on the candidate list for 
@@ -580,7 +557,7 @@ H5C_apply_candidate_list(H5F_t * f,
     } /* end while */
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    HDfprintf(stdout, "%s:%d: entries examined/cleared/flushed = %d/%d/%d.\n",
+    HDfprintf(stdout, "%s:%d: entries examined/cleared/flushed = %u/%u/%u.\n",
               FUNC, mpi_rank, entries_examined,
               entries_cleared, entries_flushed);
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
@@ -707,7 +684,7 @@ H5C_apply_candidate_list(H5F_t * f,
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
     HDfprintf(stdout,
-              "%s:%d: pel entries examined/cleared/flushed = %d/%d/%d.\n",
+              "%s:%d: pel entries examined/cleared/flushed = %u/%u/%u.\n",
               FUNC, mpi_rank, entries_examined,
               entries_cleared, entries_flushed);
     HDfprintf(stdout, "%s:%d: done.\n", FUNC, mpi_rank);
@@ -768,7 +745,7 @@ H5C_apply_candidate_list(H5F_t * f,
            (entries_cleared != entries_to_clear) ||
            (entries_flushed_or_cleared_last != entries_to_flush_or_clear_last) ||
            (entries_flushed_collectively != entries_to_flush_collectively))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry count mismatch.")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry count mismatch")
 
 done:
     if(candidate_assignment_table != NULL)
@@ -943,7 +920,7 @@ H5C_construct_candidate_list__min_clean(H5C_t * cache_ptr)
 
     if(space_needed > 0) { /* we have work to do */
         H5C_cache_entry_t *entry_ptr;
-        int    nominated_entries_count = 0;
+        unsigned nominated_entries_count = 0;
         size_t nominated_entries_size = 0;
 
         HDassert( cache_ptr->slist_len > 0 );
@@ -1010,51 +987,28 @@ done:
  * Programmer:  John Mainzer
  *              7/5/05
  *
- * Changes:     Tidied up code, removeing some old commented out 
- *		code that had been left in pending success of the 
- *		new version.
- *
- *		Note that unlike H5C_apply_candidate_list(), 
- *		H5C_mark_entries_as_clean() makes all its calls to 
- *		H5C__flush_single_entry() with the 
- *		H5C__FLUSH_CLEAR_ONLY_FLAG set.  As a result, 
- *		the pre_serialize() and serialize calls are not made.
- *
- *		This then implies that (assuming such actions were 
- *		permitted in the parallel case) no loads, dirties, 
- *		resizes, or removals of other entries can occur as 
- *		a side effect of the flush.  Hence, there is no need
- *		for the checks for entry removal / status change 
- *		that I ported to H5C_apply_candidate_list().
- *
- *		However, if (in addition to allowing such operations
- *		in the parallel case), we allow such operations outside
- *		of the pre_serialize / serialize routines, this may 
- *		cease to be the case -- requiring a review of this 
- *		function.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5C_mark_entries_as_clean(H5F_t *  f,
                           hid_t     dxpl_id,
-                          int32_t   ce_array_len,
+                          unsigned  ce_array_len,
                           haddr_t * ce_array_ptr)
 {
     H5C_t *             cache_ptr;
-    int			entries_cleared;
-    int			entries_examined;
-    int                 i;
-    int			initial_list_len;
+    unsigned		entries_cleared;
+    unsigned		entries_examined;
+    unsigned		initial_list_len;
     haddr_t		addr;
 #if H5C_DO_SANITY_CHECKS
-    int			pinned_entries_marked = 0;
-    int			protected_entries_marked = 0;
-    int			other_entries_marked = 0;
+    unsigned		pinned_entries_marked = 0;
+    unsigned		protected_entries_marked = 0;
+    unsigned		other_entries_marked = 0;
     haddr_t		last_addr;
 #endif /* H5C_DO_SANITY_CHECKS */
     H5C_cache_entry_t *	clear_ptr = NULL;
     H5C_cache_entry_t *	entry_ptr = NULL;
+    unsigned            u;
     herr_t		ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1075,11 +1029,11 @@ H5C_mark_entries_as_clean(H5F_t *  f,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
-    for(i = 0; i < ce_array_len; i++) {
-        addr = ce_array_ptr[i];
+    for(u = 0; u < ce_array_len; u++) {
+        addr = ce_array_ptr[u];
 
 #if H5C_DO_SANITY_CHECKS
-        if(i == 0)
+        if(u == 0)
             last_addr = addr;
         else {
             if(last_addr == addr)
@@ -1103,17 +1057,17 @@ H5C_mark_entries_as_clean(H5F_t *  f,
         if(entry_ptr == NULL) {
 #if H5C_DO_SANITY_CHECKS
 	    HDfprintf(stdout,
-                  "H5C_mark_entries_as_clean: entry[%d] = %ld not in cache.\n",
-                      (int)i,
-                      (long)addr);
+                  "H5C_mark_entries_as_clean: entry[%u] = %a not in cache.\n",
+                      u,
+                      addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not in cache?!?!?")
         } /* end if */
         else if(!entry_ptr->is_dirty) {
 #if H5C_DO_SANITY_CHECKS
 	    HDfprintf(stdout,
-                      "H5C_mark_entries_as_clean: entry %ld is not dirty!?!\n",
-                      (long)addr);
+                      "H5C_mark_entries_as_clean: entry %a is not dirty!?!\n",
+                      addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not dirty?!?!?")
         } /* end else-if */
@@ -1224,17 +1178,17 @@ H5C_mark_entries_as_clean(H5F_t *  f,
               ( (ce_array_len - entries_cleared) <= cache_ptr->pl_len ) );
 
 #if H5C_DO_SANITY_CHECKS
-    i = 0;
+    u = 0;
     entry_ptr = cache_ptr->pl_head_ptr;
     while ( entry_ptr != NULL )
     {
         if ( entry_ptr->clear_on_unprotect ) {
 
-            i++;
+            u++;
         }
         entry_ptr = entry_ptr->next;
     }
-    HDassert( (entries_cleared + i) == ce_array_len );
+    HDassert( (entries_cleared + u) == ce_array_len );
 #endif /* H5C_DO_SANITY_CHECKS */
 
 done:
@@ -1266,7 +1220,7 @@ done:
 herr_t
 H5C_clear_coll_entries(H5C_t *cache_ptr, hbool_t partial)
 { 
-    int32_t		clear_cnt;
+    uint32_t		clear_cnt;
     H5C_cache_entry_t *	entry_ptr = NULL;
     herr_t              ret_value = SUCCEED;
 

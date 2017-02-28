@@ -1470,6 +1470,11 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->aux_next = NULL;
     entry_ptr->aux_prev = NULL;
 
+#ifdef H5_HAVE_PARALLEL
+    entry_ptr->coll_next = NULL;
+    entry_ptr->coll_prev = NULL;
+#endif /* H5_HAVE_PARALLEL */
+
     /* initialize cache image related fields */
     entry_ptr->include_in_image 		= FALSE;
     entry_ptr->lru_rank         		= 0;
@@ -1485,11 +1490,6 @@ H5C_insert_entry(H5F_t *             f,
 #ifndef NDEBUG  /* debugging field */
     entry_ptr->serialization_count		= 0;
 #endif /* NDEBUG */
-
-#ifdef H5_HAVE_PARALLEL
-    entry_ptr->coll_next = NULL;
-    entry_ptr->coll_prev = NULL;
-#endif /* H5_HAVE_PARALLEL */
 
     /* Apply tag to newly inserted entry */
     if(H5C__tag_entry(cache_ptr, entry_ptr, dxpl_id) < 0)

@@ -211,7 +211,7 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
     HDassert(calling_fcn != NULL);
 
     HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", calling_fcn);
-    HDfprintf(stdout, "	slist len = %d.\n", cache_ptr->slist_len);
+    HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
     HDfprintf(stdout, "	slist size = %lld.\n", (long long)(cache_ptr->slist_size));
 
     if(cache_ptr->slist_len > 0) {
@@ -651,11 +651,11 @@ H5C_stats(H5C_t * cache_ptr,
               (long long)(cache_ptr->index_scan_restarts));
 
     HDfprintf(stdout,
-	      "%s  cache image creations/loads/size   = %d / %d / %lld\n",
+	      "%s  cache image creations/loads/size   = %d / %d / %Hu\n",
               cache_ptr->prefix,
               cache_ptr->images_created,
               cache_ptr->images_loaded,
-              (long long)cache_ptr->last_image_size);
+              cache_ptr->last_image_size);
 
     HDfprintf(stdout,
 	      "%s  prefetches / dirty prefetches      = %lld / %lld\n",
@@ -905,7 +905,7 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED * cache_ptr)
 
     cache_ptr->images_created           = 0;
     cache_ptr->images_loaded            = 0;
-    cache_ptr->last_image_size          = (size_t)0;
+    cache_ptr->last_image_size          = (hsize_t)0;
 
     cache_ptr->prefetches               = 0;
     cache_ptr->dirty_prefetches			= 0;
