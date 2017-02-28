@@ -630,6 +630,9 @@ foreach (lang C CXX Fortran)
       try_regular_compiler(${lang} regular_compiler_worked)
     endif()
 
+    # add fortran mpi module path if ENV VAR exists
+    set (MPI_${lang}_INCLUDE_PATH "${MPI_${lang}_INCLUDE_PATH};$ENV{MPI_FORTRAN_MOD_DIR}")
+
     set(MPI_${lang}_FIND_QUIETLY ${MPI_FIND_QUIETLY})
     set(MPI_${lang}_FIND_REQUIRED ${MPI_FIND_REQUIRED})
     set(MPI_${lang}_FIND_VERSION ${MPI_FIND_VERSION})

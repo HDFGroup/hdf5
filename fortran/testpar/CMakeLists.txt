@@ -4,7 +4,7 @@ PROJECT (HDF5_FORTRAN_TESTPAR C CXX Fortran)
 #-----------------------------------------------------------------------------
 # Setup include Directories
 #-----------------------------------------------------------------------------
-INCLUDE_DIRECTORIES (${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src ${MPI_Fortran_INCLUDE_PATH})
+INCLUDE_DIRECTORIES (${MPI_Fortran_INCLUDE_PATH} ${HDF5_F90_BINARY_DIR} ${HDF5_F90_SRC_DIR}/src)
 
 #-----------------------------------------------------------------------------
 # Add Tests
