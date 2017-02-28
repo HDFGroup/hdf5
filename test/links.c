@@ -21,7 +21,7 @@
  */
 
 /*
- * This file needs to access private information from the H5G package.
+ * This file needs to access private information from the H5FD package.
  * This file also needs to access the group testing code.
  */
 #define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */

@@ -4339,8 +4339,7 @@ verify_writes(unsigned num_writes,
 {
     const hbool_t report = FALSE;
     hbool_t proceed = TRUE;
-    int i = 0;
-    unsigned u;
+    unsigned u = 0;
 
     HDassert( world_mpi_rank != world_server_mpi_rank );
     HDassert( ( num_writes == 0 ) ||
