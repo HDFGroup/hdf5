@@ -13697,7 +13697,7 @@ check_move_entry(void)
 {
     unsigned          u;
     H5F_t *      file_ptr = NULL;
-    struct move_entry_test_spec test_specs[4] =
+    struct move_entry_test_spec test_specs[8] =
     {
       {
         /* int     entry_type      = */ PICO_ENTRY_TYPE,
@@ -16779,6 +16779,7 @@ check_expunge_entry_errs(void)
  *
  *-------------------------------------------------------------------------
  */
+
 static unsigned
 check_move_entry_errs(void)
 {
@@ -16800,6 +16801,7 @@ check_move_entry_errs(void)
      */
 
     if(pass) {
+
         reset_entries();
 
         file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024));
@@ -16812,28 +16814,35 @@ check_move_entry_errs(void)
         entry_0_0_ptr = &((entries[0])[0]);
         entry_0_1_ptr = &((entries[0])[1]);
         entry_1_0_ptr = &((entries[1])[0]);
-    } /* end if */
+    }
 
     if(pass) {
-        result = H5C_move_entry(cache_ptr, types[0], entry_0_0_ptr->addr, entry_0_1_ptr->addr);
+
+        result = H5C_move_entry(cache_ptr, types[0],
+                                  entry_0_0_ptr->addr, entry_0_1_ptr->addr);
 
         if(result >= 0) {
+
             pass = FALSE;
             failure_mssg = "move to addr of same type succeeded.\n";
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     if(pass) {
-        result = H5C_move_entry(cache_ptr, types[0], entry_0_0_ptr->addr, entry_1_0_ptr->addr);
+
+        result = H5C_move_entry(cache_ptr, types[0],
+                                  entry_0_0_ptr->addr, entry_1_0_ptr->addr);
 
         if(result >= 0) {
+
             pass = FALSE;
             failure_mssg = "move to addr of different type succeeded.\n";
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     if(pass)
         takedown_cache(file_ptr, FALSE, FALSE);
+
 
     /* Allocate a cache, protect an entry R/O, and then call
      * H5C_move_entry() to move it -- this should fail.
@@ -16843,6 +16852,7 @@ check_move_entry_errs(void)
      */
 
     if(pass) {
+
         reset_entries();
 
         file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024));
@@ -16850,21 +16860,29 @@ check_move_entry_errs(void)
         cache_ptr = file_ptr->shared->cache;
 
         insert_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+
         protect_entry_ro(file_ptr, 0, 0);
 
         entry_ptr = &((entries[0])[0]);
-    } /* end if */
+
+    }
 
     if(pass) {
+
 	result = H5C_move_entry(cache_ptr, types[0], entry_ptr->header.addr, entry_ptr->header.addr + 10);
 
         if(result >= 0) {
+
             pass = FALSE;
-            failure_mssg = "Call to H5C_move_entry on a R/O protected entry succeeded.\n";
-        } /* end if */
-        else
+            failure_mssg =
+                "Call to H5C_move_entry on a R/O protected entry succeeded.\n";
+
+        } else {
+
             unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
-    } /* end if */
+
+	}
+    }
 
     if(pass)
         takedown_cache(file_ptr, FALSE, FALSE);
@@ -16874,7 +16892,8 @@ check_move_entry_errs(void)
     else {
         H5_FAILED()
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  FUNC, failure_mssg);
     } /* end else */
 
     return (unsigned)!pass;

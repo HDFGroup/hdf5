@@ -1661,8 +1661,8 @@ typedef struct H5C_cache_entry_t {
  *						JRM - 8/5/15
  *
  * magic:	Unsigned 32 bit integer that must always be set to
- *              H5C_IMAGE_ENTRY_T_MAGIC when the entry is valid.
- *              The field must be set to H5C_IMAGE_ENTRY_T_BAD_MAGIC
+ *              H5C__H5C_IMAGE_ENTRY_T_MAGIC when the entry is valid.
+ *              The field must be set to H5C__H5C_IMAGE__ENTRY_T_BAD_MAGIC
  *              just before the entry is freed.
  *
  * addr:	Base address of the cache entry on disk.
@@ -2279,7 +2279,7 @@ H5_DLL herr_t H5C_cache_image_status(H5F_t * f, hbool_t *load_ci_ptr,
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,
-    H5C_t *cache_ptr, unsigned num_candidates, haddr_t *candidates_list_ptr,
+    H5C_t *cache_ptr, int num_candidates, haddr_t *candidates_list_ptr,
     int mpi_rank, int mpi_size);
 H5_DLL herr_t H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr);

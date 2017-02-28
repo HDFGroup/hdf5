@@ -2314,12 +2314,19 @@ main(void)
         nerrs += 1;
     }
 
-    if(invalid_configs )
-        HDfree(invalid_configs);
+    if ( invalid_configs ) {
 
-    if(nerrs > 0)
+        HDfree(invalid_configs);
+    }
+
+    if ( nerrs > 0 ) {
+
         return EXIT_FAILURE;
-    else
+
+    } else {
+
         return EXIT_SUCCESS;
+    }
+
 } /* main() */
 
