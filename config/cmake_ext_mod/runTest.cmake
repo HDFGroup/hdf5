@@ -144,6 +144,13 @@ if (TEST_FILTER)
   file (WRITE ${TEST_FOLDER}/${TEST_OUTPUT} "${TEST_STREAM}")
 endif ()
 
+if (TEST_REF_FILTER)
+  #message (STATUS "TEST_REF_FILTER: ${TEST_APPEND}${TEST_REF_FILTER}")
+  file (READ ${TEST_FOLDER}/${TEST_REFERENCE} TEST_STREAM)
+  STRING(REGEX REPLACE "${TEST_REF_APPEND}" "${TEST_REF_FILTER}" TEST_STREAM "${TEST_STREAM}")
+  file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
+endif (TEST_REF_FILTER)
+
 # compare output files to references unless this must be skipped
 if (NOT TEST_SKIP_COMPARE)
   if (WIN32 AND NOT MINGW)
@@ -151,11 +158,22 @@ if (NOT TEST_SKIP_COMPARE)
     file (WRITE ${TEST_FOLDER}/${TEST_REFERENCE} "${TEST_STREAM}")
   endif ()
 
-  # now compare the output with the reference
-  execute_process (
-      COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
-      RESULT_VARIABLE TEST_RESULT
-  )
+  if (NOT TEST_SORT_COMPARE)
+    # now compare the output with the reference
+    execute_process (
+        COMMAND ${CMAKE_COMMAND} -E compare_files ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+        RESULT_VARIABLE TEST_RESULT
+    )
+  else ()
+    file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} v1)
+    file (STRINGS ${TEST_FOLDER}/${TEST_REFERENCE} v2)
+    list (SORT v1)
+    list (SORT v2)
+    if (NOT v1 STREQUAL v2)
+      set(TEST_RESULT 1)
+    endif ()
+  endif ()
+
   if (NOT ${TEST_RESULT} STREQUAL 0)
     set (TEST_RESULT 0)
     file (STRINGS ${TEST_FOLDER}/${TEST_OUTPUT} test_act)
