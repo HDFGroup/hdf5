@@ -120,11 +120,6 @@ static herr_t H5C__reconstruct_cache_contents(H5F_t *f, hid_t dxpl_id,
     H5C_t *cache_ptr);
 static H5C_cache_entry_t *H5C__reconstruct_cache_entry(const H5F_t *f,
     H5C_t *cache_ptr, const uint8_t **buf);
-static herr_t H5C__serialize_cache(H5F_t *f, hid_t dxpl_id);
-static herr_t H5C__serialize_ring(H5F_t *f, hid_t dxpl_id, 
-    H5C_ring_t ring);
-static herr_t H5C__serialize_single_entry(H5F_t *f, hid_t dxpl_id, 
-    H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr);
 static herr_t H5C__write_cache_image_superblock_msg(H5F_t *f, hid_t dxpl_id, 
     hbool_t create);
 static herr_t H5C__read_cache_image(H5F_t * f, hid_t dxpl_id, const H5C_t *cache_ptr);
@@ -1257,186 +1252,199 @@ H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id)
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    /* Create the cache image super block extension message.
-     * 
-     * Note that the base address and length of the metadata cache
-     * image are undefined at this point, and thus will have to be
-     * updated later.
-     *
-     * Create the super block extension message now so that space 
-     * is allocated for it (if necessary) before we allocate space
-     * for the cache image block.
-     *
-     * To simplify testing, do this only if the 
-     * H5C_CI__GEN_MDCI_SBE_MESG bit is set in 
-     * cache_ptr->image_ctl.flags.
+    /* If the file is opened and closed without any access to 
+     * any group or data set, it is possible that the cache image (if 
+     * it exists) has not been read yet.  Do this now if required.
      */
-    if(cache_ptr->image_ctl.flags & H5C_CI__GEN_MDCI_SBE_MESG)
-        if(H5C__write_cache_image_superblock_msg(f, dxpl_id, TRUE) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "creation of cache image SB mesg failed.")
+    if(cache_ptr->load_image) {
+        cache_ptr->load_image = FALSE;
+        if(H5C__load_cache_image(f, dxpl_id) < 0)
+	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "can't load cache image")
+    } /* end if */
 
-    /* Serialize the cache */
-    if(H5C__serialize_cache(f, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "serialization of the cache failed")
+    /* Generate the cache image, if requested */
+    if(cache_ptr->image_ctl.generate_image) {
+        /* Create the cache image super block extension message.
+         * 
+         * Note that the base address and length of the metadata cache
+         * image are undefined at this point, and thus will have to be
+         * updated later.
+         *
+         * Create the super block extension message now so that space 
+         * is allocated for it (if necessary) before we allocate space
+         * for the cache image block.
+         *
+         * To simplify testing, do this only if the 
+         * H5C_CI__GEN_MDCI_SBE_MESG bit is set in 
+         * cache_ptr->image_ctl.flags.
+         */
+        if(cache_ptr->image_ctl.flags & H5C_CI__GEN_MDCI_SBE_MESG)
+            if(H5C__write_cache_image_superblock_msg(f, dxpl_id, TRUE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "creation of cache image SB mesg failed.")
 
-    /* Scan the cache and record data needed to construct the 
-     * cache image.  In particular, for each entry we must record:
-     *
-     * 1) rank in LRU (if entry is in LRU)
-     *
-     * 2) Whether the entry is dirty prior to flush of 
-     *    cache just prior to close.
-     *
-     * 3) Addresses of flush dependency parents (if any).
-     *
-     * 4) Number of flush dependency children (if any).  
-     *
-     * In passing, also compute the size of the metadata cache 
-     * image.  With the recent modifications of the free space 
-     * manager code, this size should be correct.
-     */
-    if(H5C__prep_for_file_close__scan_entries(f, cache_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C__prep_for_file_close__scan_entries failed")
-    HDassert(HADDR_UNDEF == cache_ptr->image_addr);
+        /* Serialize the cache */
+        if(H5C__serialize_cache(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "serialization of the cache failed")
+
+        /* Scan the cache and record data needed to construct the 
+         * cache image.  In particular, for each entry we must record:
+         *
+         * 1) rank in LRU (if entry is in LRU)
+         *
+         * 2) Whether the entry is dirty prior to flush of 
+         *    cache just prior to close.
+         *
+         * 3) Addresses of flush dependency parents (if any).
+         *
+         * 4) Number of flush dependency children (if any).  
+         *
+         * In passing, also compute the size of the metadata cache 
+         * image.  With the recent modifications of the free space 
+         * manager code, this size should be correct.
+         */
+        if(H5C__prep_for_file_close__scan_entries(f, cache_ptr) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C__prep_for_file_close__scan_entries failed")
+        HDassert(HADDR_UNDEF == cache_ptr->image_addr);
 
 #ifdef H5_HAVE_PARALLEL
-    /* In the parallel case, overwrite the image_len with the 
-     * value computed by process 0.
-     */
-    if(cache_ptr->aux_ptr) { /* we have multiple processes */
-        int mpi_result;
-        unsigned p0_image_len;
-        H5AC_aux_t * aux_ptr;
+        /* In the parallel case, overwrite the image_len with the 
+         * value computed by process 0.
+         */
+        if(cache_ptr->aux_ptr) { /* we have multiple processes */
+            int mpi_result;
+            unsigned p0_image_len;
+            H5AC_aux_t * aux_ptr;
 
-        aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
-        if(aux_ptr->mpi_rank == 0) {
-            aux_ptr->p0_image_len = (unsigned)cache_ptr->image_data_len;
-            p0_image_len = aux_ptr->p0_image_len;
+            aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
+            if(aux_ptr->mpi_rank == 0) {
+                aux_ptr->p0_image_len = (unsigned)cache_ptr->image_data_len;
+                p0_image_len = aux_ptr->p0_image_len;
 
-            if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&p0_image_len, 1, MPI_UNSIGNED, 0, aux_ptr->mpi_comm)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
+                if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&p0_image_len, 1, MPI_UNSIGNED, 0, aux_ptr->mpi_comm)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
 
-            HDassert(p0_image_len == aux_ptr->p0_image_len);
+                HDassert(p0_image_len == aux_ptr->p0_image_len);
+            } /* end if */
+            else {
+                if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&p0_image_len, 1, MPI_UNSIGNED, 0, aux_ptr->mpi_comm)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
+                
+                aux_ptr->p0_image_len = p0_image_len;
+            } /* end else */
+
+            /* Allocate space for a cache image of size equal to that 
+             * computed by the process 0.  This may be different from 
+             * cache_ptr->image_data_len if mpi_rank != 0.  However, since
+             * cache image write is suppressed on all processes other than 
+             * process 0, this doesn't matter.
+             *
+             * Note that we allocate the cache image directly from the file 
+             * driver so as to avoid unsettling the free space managers.
+             */
+            if(HADDR_UNDEF == (cache_ptr->image_addr = H5FD_alloc(f->shared->lf, dxpl_id, H5FD_MEM_SUPER, f,
+                        (hsize_t)p0_image_len, &eoa_frag_addr, &eoa_frag_size)))
+                HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL, "can't allocate file space for metadata cache image")
         } /* end if */
-        else {
-            if(MPI_SUCCESS != (mpi_result = MPI_Bcast(&p0_image_len, 1, MPI_UNSIGNED, 0, aux_ptr->mpi_comm)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_result)
-            
-            aux_ptr->p0_image_len = p0_image_len;
-        } /* end else */
-
-        /* Allocate space for a cache image of size equal to that 
-         * computed by the process 0.  This may be different from 
-         * cache_ptr->image_data_len if mpi_rank != 0.  However, since
-         * cache image write is suppressed on all processes other than 
-         * process 0, this doesn't matter.
-         *
-         * Note that we allocate the cache image directly from the file 
-         * driver so as to avoid unsettling the free space managers.
-         */
-        if(HADDR_UNDEF == (cache_ptr->image_addr = H5FD_alloc(f->shared->lf, dxpl_id, H5FD_MEM_SUPER, f,
-                    (hsize_t)p0_image_len, &eoa_frag_addr, &eoa_frag_size)))
-            HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL, "can't allocate file space for metadata cache image")
-    } /* end if */
-    else
+        else
 #endif /* H5_HAVE_PARALLEL */
-        /* Allocate the cache image block.  Note that we allocate this 
-         * this space directly from the file driver so as to avoid 
-         * unsettling the free space managers.
+            /* Allocate the cache image block.  Note that we allocate this 
+             * this space directly from the file driver so as to avoid 
+             * unsettling the free space managers.
+             */
+            if(HADDR_UNDEF == (cache_ptr->image_addr = H5FD_alloc(f->shared->lf, dxpl_id, H5FD_MEM_SUPER, f,
+                        (hsize_t)(cache_ptr->image_data_len), &eoa_frag_addr, &eoa_frag_size)))
+                HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL, "can't allocate file space for metadata cache image")
+
+        /* For now, drop any fragment left over from the allocation of the
+         * image block on the ground.  A fragment should only be returned
+         * if the underlying file alignment is greater than 1.
+         *
+         * Clean this up eventually by extending the size of the cache
+         * image block to the next alignement boundary, and then setting
+         * the image_data_len to the actual size of the cache_image.
+         *
+         * On the off chance that there is some other way to get a 
+         * a fragment on a cache image allocation, leave the following
+         * assertion in the code so we will find out.
          */
-        if(HADDR_UNDEF == (cache_ptr->image_addr = H5FD_alloc(f->shared->lf, dxpl_id, H5FD_MEM_SUPER, f,
-                    (hsize_t)(cache_ptr->image_data_len), &eoa_frag_addr, &eoa_frag_size)))
-            HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL, "can't allocate file space for metadata cache image")
+        HDassert((eoa_frag_size == 0) || (f->shared->alignment != 1));
 
-    /* For now, drop any fragment left over from the allocation of the
-     * image block on the ground.  A fragment should only be returned
-     * if the underlying file alignment is greater than 1.
-     *
-     * Clean this up eventually by extending the size of the cache
-     * image block to the next alignement boundary, and then setting
-     * the image_data_len to the actual size of the cache_image.
-     *
-     * On the off chance that there is some other way to get a 
-     * a fragment on a cache image allocation, leave the following
-     * assertion in the code so we will find out.
-     */
-    HDassert((eoa_frag_size == 0) || (f->shared->alignment != 1));
+        /* Eventually it will be possible for the length of the cache image
+         * block on file to be greater than the size of the data it 
+         * contains.  However, for now they must be the same.  Set 
+         * cache_ptr->image_len accordingly.
+         */
+        cache_ptr->image_len = cache_ptr->image_data_len;
 
-    /* Eventually it will be possible for the length of the cache image
-     * block on file to be greater than the size of the data it 
-     * contains.  However, for now they must be the same.  Set 
-     * cache_ptr->image_len accordingly.
-     */
-    cache_ptr->image_len = cache_ptr->image_data_len;
-
-    /* update the metadata cache image superblock extension 
-     * message with the new cache image block base address and 
-     * length.
-     *
-     * to simplify testing, do this only if the 
-     * H5C_CI__GEN_MDC_IMAGE_BLK bit is set in 
-     * cache_ptr->image_ctl.flags.
-     */
-    if(cache_ptr->image_ctl.flags & H5C_CI__GEN_MDC_IMAGE_BLK)
-        if(H5C__write_cache_image_superblock_msg(f, dxpl_id, FALSE) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "update of cache image SB mesg failed.")
-
-    /* At this point:
-     *
-     *   1) space in the file for the metadata cache image
-     *      is allocated, 
-     *
-     *   2) the metadata cache image superblock extension 
-     *      message exists and (if so configured) contains 
-     *      the correct data,
-     *
-     *   3) All entries in the cache that will appear in the 
-     *      cache image are serialized with up to date images.
-     *
-     *      Since we just updated the cache image message,
-     *      the super block extension message is dirty.  However,
-     *      since the superblock and the superblock extension 
-     *      can't be included in the cache image, this is a non-
-     *      issue.
-     *
-     *   4) All entries in the cache that will be include in
-     *      the cache are marked as such, and we have a count
-     *      of same.
-     *
-     *   5) Flush dependency heights are calculated for all 
-     *      entries that will be included in the cache image.
-     *
-     * If there are any entries to be included in the metadata cache
-     * image, allocate, populate, and sort the image_entries array.  
-     *
-     * If the metadata cache image will be empty, delete the 
-     * metadata cache image superblock extension message, set 
-     * cache_ptr->image_ctl.generate_image to FALSE.  This will
-     * allow the file close to continue normally without the 
-     * unecessary generation of the metadata cache image.
-     */
-    if(cache_ptr->num_entries_in_image > 0) {
-        if(H5C__prep_for_file_close__setup_image_entries_array(cache_ptr) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINIT, FAIL, "can't setup image entries array.")
-
-        /* Sort the entries */
-        HDqsort(cache_ptr->image_entries, (size_t)cache_ptr->num_entries_in_image,
-                sizeof(H5C_image_entry_t), H5C__image_entry_cmp);
-    } /* end if */
-    else { /* cancel creation of metadata cache iamge */
-        HDassert(cache_ptr->image_entries == NULL);
-
-        /* To avoid breaking the control flow tests, only delete 
-         * the mdci superblock extension message if the 
-         * H5C_CI__GEN_MDC_IMAGE_BLK flag is set in 
+        /* update the metadata cache image superblock extension 
+         * message with the new cache image block base address and 
+         * length.
+         *
+         * to simplify testing, do this only if the 
+         * H5C_CI__GEN_MDC_IMAGE_BLK bit is set in 
          * cache_ptr->image_ctl.flags.
          */
         if(cache_ptr->image_ctl.flags & H5C_CI__GEN_MDC_IMAGE_BLK)
-            if(H5F_super_ext_remove_msg(f, dxpl_id, H5O_MDCI_MSG_ID) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove MDC image msg from superblock ext.")
+            if(H5C__write_cache_image_superblock_msg(f, dxpl_id, FALSE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "update of cache image SB mesg failed.")
 
-        cache_ptr->image_ctl.generate_image = FALSE;
-    } /* end else */
+        /* At this point:
+         *
+         *   1) space in the file for the metadata cache image
+         *      is allocated, 
+         *
+         *   2) the metadata cache image superblock extension 
+         *      message exists and (if so configured) contains 
+         *      the correct data,
+         *
+         *   3) All entries in the cache that will appear in the 
+         *      cache image are serialized with up to date images.
+         *
+         *      Since we just updated the cache image message,
+         *      the super block extension message is dirty.  However,
+         *      since the superblock and the superblock extension 
+         *      can't be included in the cache image, this is a non-
+         *      issue.
+         *
+         *   4) All entries in the cache that will be include in
+         *      the cache are marked as such, and we have a count
+         *      of same.
+         *
+         *   5) Flush dependency heights are calculated for all 
+         *      entries that will be included in the cache image.
+         *
+         * If there are any entries to be included in the metadata cache
+         * image, allocate, populate, and sort the image_entries array.  
+         *
+         * If the metadata cache image will be empty, delete the 
+         * metadata cache image superblock extension message, set 
+         * cache_ptr->image_ctl.generate_image to FALSE.  This will
+         * allow the file close to continue normally without the 
+         * unecessary generation of the metadata cache image.
+         */
+        if(cache_ptr->num_entries_in_image > 0) {
+            if(H5C__prep_for_file_close__setup_image_entries_array(cache_ptr) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTINIT, FAIL, "can't setup image entries array.")
+
+            /* Sort the entries */
+            HDqsort(cache_ptr->image_entries, (size_t)cache_ptr->num_entries_in_image,
+                    sizeof(H5C_image_entry_t), H5C__image_entry_cmp);
+        } /* end if */
+        else { /* cancel creation of metadata cache image */
+            HDassert(cache_ptr->image_entries == NULL);
+
+            /* To avoid breaking the control flow tests, only delete 
+             * the mdci superblock extension message if the 
+             * H5C_CI__GEN_MDC_IMAGE_BLK flag is set in 
+             * cache_ptr->image_ctl.flags.
+             */
+            if(cache_ptr->image_ctl.flags & H5C_CI__GEN_MDC_IMAGE_BLK)
+                if(H5F_super_ext_remove_msg(f, dxpl_id, H5O_MDCI_MSG_ID) < 0)
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTREMOVE, FAIL, "can't remove MDC image msg from superblock ext.")
+
+            cache_ptr->image_ctl.generate_image = FALSE;
+        } /* end else */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1706,7 +1714,7 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr,
     actual_header_len = (size_t)(p - *buf);
     expected_header_len = H5C__cache_image_block_header_size(f);
     if(actual_header_len != expected_header_len)
-        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad header image len.")
+        HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad header image len")
 
     /* Update buffer pointer */
     *buf = p;
@@ -2560,24 +2568,15 @@ H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr)
     HDassert(cache_ptr->image_entries == NULL);
 
     /* Allocate and initialize image_entries array */
-    if(NULL == (image_entries = (H5C_image_entry_t *)H5MM_malloc(sizeof(H5C_image_entry_t) * (size_t)(cache_ptr->num_entries_in_image + 1))))
+    if(NULL == (image_entries = (H5C_image_entry_t *)H5MM_calloc(sizeof(H5C_image_entry_t) * (size_t)(cache_ptr->num_entries_in_image + 1))))
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for image_entries")
 
+    /* Initialize (non-zero/NULL/FALSE) fields */
     for(u = 0; u <= cache_ptr->num_entries_in_image; u++) {
 	image_entries[u].magic                = H5C_IMAGE_ENTRY_T_MAGIC;
 	image_entries[u].addr                 = HADDR_UNDEF;
-	image_entries[u].size                 = 0;
         image_entries[u].ring		      = H5C_RING_UNDEFINED;
-        image_entries[u].age                  = 0;
 	image_entries[u].type_id              = -1;
-	image_entries[u].lru_rank             = 0;
-	image_entries[u].is_dirty             = FALSE; 
-	image_entries[u].image_fd_height      = 0;
-	image_entries[u].fd_parent_count      = 0;
-	image_entries[u].fd_parent_addrs      = NULL;
-	image_entries[u].fd_child_count       = 0;
-	image_entries[u].fd_dirty_child_count = 0;
-	image_entries[u].image_ptr            = NULL;
     } /* end for */
 
     /* Scan each entry on the index list and populate the image_entries array */
@@ -3146,6 +3145,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr,
     hbool_t		is_fd_child = FALSE;
 #endif /* NDEBUG */ /* only used in assertions */
     const uint8_t *	p;
+    hbool_t            file_is_rw;
     H5C_cache_entry_t *ret_value = NULL;        /* Return value */
 
     FUNC_ENTER_STATIC
@@ -3156,12 +3156,15 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr,
     HDassert(cache_ptr->num_entries_in_image > 0);
     HDassert(buf && *buf);
 
-    /* Get pointer to buffer */
-    p = *buf;
+    /* Key R/W access off of whether the image will be deleted */
+    file_is_rw = cache_ptr->delete_image;
 
     /* Allocate space for the prefetched cache entry */
     if(NULL == (pf_entry_ptr = H5FL_CALLOC(H5C_cache_entry_t)))
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for prefetched cache entry")
+
+    /* Get pointer to buffer */
+    p = *buf;
 
     /* Decode type id */
     pf_entry_ptr->prefetch_type_id = *p++;
@@ -3185,7 +3188,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr,
      * extension message and the cache image block will not be removed.
      * Hence no danger in this.
      */
-    pf_entry_ptr->is_dirty = (is_dirty && cache_ptr->delete_image);
+    pf_entry_ptr->is_dirty = (is_dirty && file_is_rw);
 
     /* Decode ring */
     pf_entry_ptr->ring = *p++;
@@ -3253,15 +3256,12 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr,
     HDmemcpy(pf_entry_ptr->image_ptr, p, pf_entry_ptr->size);
     p += pf_entry_ptr->size;
 
-
     /* Initialize the rest of the fields in the prefetched entry */
     /* (Only need to set non-zero/NULL/FALSE fields, due to calloc() above) */
     pf_entry_ptr->magic				= H5C__H5C_CACHE_ENTRY_T_MAGIC;
     pf_entry_ptr->cache_ptr 			= cache_ptr;
     pf_entry_ptr->image_up_to_date		= TRUE;
     pf_entry_ptr->type				= H5AC_PREFETCHED_ENTRY;
-
-    /* Initialize cache image related fields */
     pf_entry_ptr->prefetched			= TRUE;
 
     /* Sanity checks */
@@ -3278,529 +3278,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__reconstruct_cache_entry() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C__serialize_cache
- *
- * Purpose:	Serialize (i.e. construct an on disk image) for all entries 
- *		in the metadata cache including clean entries.  
- *
- *		Note that flush dependencies and "flush me last" flags
- *		must be observed in the serialization process.  
- *
- *		Note also that entries may be loaded, flushed, evicted,
- *		expunged, relocated, resized, or removed from the cache
- *		during this process, just as these actions may occur during
- *		a regular flush.
- *
- *		However, we are given that the cache will contain no protected
- *		entries on entry to this routine (although entries may be 
- *		briefly protected and then unprotected during the serialize 
- *		process).  
- *
- *		The objective of this routine is serialize all entries and 
- *		to force all entries into their actual locations on disk.  
- *
- *		The initial need for this routine is to settle all entries 
- *		in the cache prior to construction of the metadata cache 
- *		image so that the size of the cache image can be calculated.
- *		However, I gather that other uses for the routine are 
- *		under consideration.
- *
- * Return:      Non-negative on success/Negative on failure or if there was
- *		a request to flush all items and something was protected.
- *
- * Programmer:  John Mainzer
- *		7/22/15
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C__serialize_cache(H5F_t *f, hid_t dxpl_id)
-{
-#if H5C_DO_SANITY_CHECKS
-    int                 i;
-    uint32_t            index_len = 0;
-    size_t              index_size = (size_t)0;
-    size_t              clean_index_size = (size_t)0;
-    size_t              dirty_index_size = (size_t)0;
-    size_t              slist_size = (size_t)0;
-    uint32_t            slist_len = 0;
-#endif /* H5C_DO_SANITY_CHECKS */
-    H5C_ring_t          ring;
-    H5C_t             * cache_ptr;
-    herr_t              ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    cache_ptr = f->shared->cache;
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert(cache_ptr->slist_ptr);
-
-#if H5C_DO_SANITY_CHECKS
-    HDassert(cache_ptr->index_ring_len[H5C_RING_UNDEFINED] == 0);
-    HDassert(cache_ptr->index_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
-    HDassert(cache_ptr->clean_index_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
-    HDassert(cache_ptr->dirty_index_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
-    HDassert(cache_ptr->slist_ring_len[H5C_RING_UNDEFINED] == 0);
-    HDassert(cache_ptr->slist_ring_size[H5C_RING_UNDEFINED] == (size_t)0);
-
-    for(i = H5C_RING_USER; i < H5C_RING_NTYPES; i++) {
-        index_len += cache_ptr->index_ring_len[i];
-        index_size += cache_ptr->index_ring_size[i];
-        clean_index_size += cache_ptr->clean_index_ring_size[i];
-        dirty_index_size += cache_ptr->dirty_index_ring_size[i];
-
-        slist_len += cache_ptr->slist_ring_len[i];
-        slist_size += cache_ptr->slist_ring_size[i];
-    } /* end for */
-
-    HDassert(cache_ptr->index_len == index_len);
-    HDassert(cache_ptr->index_size == index_size);
-    HDassert(cache_ptr->clean_index_size == clean_index_size);
-    HDassert(cache_ptr->dirty_index_size == dirty_index_size);
-    HDassert(cache_ptr->slist_len == slist_len);
-    HDassert(cache_ptr->slist_size == slist_size);
-#endif /* H5C_DO_SANITY_CHECKS */
-
-#if H5C_DO_EXTREME_SANITY_CHECKS
-    if((H5C_validate_protected_entry_list(cache_ptr) < 0) ||
-            (H5C_validate_pinned_entry_list(cache_ptr) < 0) ||
-            (H5C_validate_lru_list(cache_ptr) < 0))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "an extreme sanity check failed on entry")
-#endif /* H5C_DO_EXTREME_SANITY_CHECKS */
-
-#ifndef NDEBUG
-    /* if this is a debug build, set the serialization_count field of 
-     * each entry in the cache to zero before we start the serialization.
-     * This allows us to detect the case in which any entry is serialized
-     * more than once (a performance issues), and more importantly, the 
-     * case is which any flush depencency parent is serializes more than
-     * once (a correctness issue).
-     */
-     {
-        H5C_cache_entry_t * scan_ptr = NULL;
-
-        scan_ptr = cache_ptr->il_head;
-        while(scan_ptr != NULL) {
-	    HDassert(scan_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-	    scan_ptr->serialization_count = 0;
-	    scan_ptr = scan_ptr->il_next;
-        } /* end while */
-     } /* end block */
-#endif /* NDEBUG */
-
-    /* set cache_ptr->serialization_in_progress to TRUE, and back 
-     * to FALSE at the end of the function.  Must maintain this flag
-     * to support H5C_get_serialization_in_progress(), which is in 
-     * turn required to support sanity checking in some cache 
-     * clients.
-     */
-    HDassert(!cache_ptr->serialization_in_progress);
-    cache_ptr->serialization_in_progress = TRUE;
-
-    /* Serialize each ring, starting from the outermost ring and
-     * working inward.
-     */
-    ring = H5C_RING_USER;
-    while(ring < H5C_RING_NTYPES) {
-	HDassert(cache_ptr->close_warning_received);
-        switch(ring) {
-            case H5C_RING_USER:
-                break;
-
-            case H5C_RING_RDFSM:
-                if(!cache_ptr->rdfsm_settled) {
-                    hbool_t fsm_settled = FALSE;        /* Whether the FSM was actually settled */
-
-                    /* Settle raw data FSM */
-                    if(H5MF_settle_raw_data_fsm(f, dxpl_id, &fsm_settled) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "RD FSM settle failed")
-
-                    /* Only set the flag if the FSM was actually settled */
-                    if(fsm_settled)
-                        cache_ptr->rdfsm_settled = TRUE;
-                } /* end if */
-                break;
-
-            case H5C_RING_MDFSM:
-                if(!cache_ptr->mdfsm_settled) {
-                    hbool_t fsm_settled = FALSE;        /* Whether the FSM was actually settled */
-
-                    /* Settle metadata FSM */
-                    if(H5MF_settle_meta_data_fsm(f, dxpl_id, &fsm_settled) < 0)
-                        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "MD FSM settle failed")
-
-                    /* Only set the flag if the FSM was actually settled */
-                    if(fsm_settled)
-                        cache_ptr->mdfsm_settled = TRUE;
-                } /* end if */
-                break;
-
-            case H5C_RING_SBE:
-            case H5C_RING_SB:
-                break;
-
-            default:
-                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Unknown ring?!?!")
-                break;
-        } /* end switch */
-
-        if(H5C__serialize_ring(f, dxpl_id, ring) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "serialize ring failed")
-
-        ring++;
-    } /* end while */
-
-#ifndef NDEBUG
-    /* Verify that no entry has been serialized more than once.
-     * FD parents with multiple serializations should have been caught
-     * elsewhere, so no specific check for them here.
-     */
-     {
-        H5C_cache_entry_t * scan_ptr = NULL;
-
-        scan_ptr = cache_ptr->il_head;
-        while(scan_ptr != NULL) {
-	    HDassert(scan_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-	    HDassert(scan_ptr->serialization_count <= 1);
-
-	    scan_ptr = scan_ptr->il_next;
-        } /* end while */
-     } /* end block */
-#endif /* NDEBUG */
-
-done:
-    cache_ptr->serialization_in_progress = FALSE;
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C__serialize_cache() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C__serialize_ring
- *
- * Purpose:     Serialize the entries contained in the specified cache and
- *              ring.  All entries in rings outside the specified ring
- *              must have been serialized on entry.
- *
- *              If the cache contains protected entries in the specified
- *              ring, the function will fail, as protected entries cannot
- *              be serialized.  However all unprotected entries in the 
- *		target ring should be serialized before the function 
- *		returns failure.
- *
- *              If flush dependencies appear in the target ring, the
- *              function makes repeated passes through the index list
- *		serializing entries in flush dependency order.
- *
- *		All entries outside the H5C_RING_SBE are marked for 
- *		inclusion in the cache image.  Entries in H5C_RING_SBE 
- *		and below are marked for exclusion from the image.
- *
- * Return:      Non-negative on success/Negative on failure or if there was
- *              a request to flush all items and something was protected.
- *
- * Programmer:  John Mainzer
- *              9/11/15
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C__serialize_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring)
-{
-    hbool_t		done = FALSE;
-    H5C_t             * cache_ptr;
-    H5C_cache_entry_t * entry_ptr;
-    herr_t              ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    cache_ptr = f->shared->cache;
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert(ring > H5C_RING_UNDEFINED);
-    HDassert(ring < H5C_RING_NTYPES);
-
-    HDassert(cache_ptr->serialization_in_progress);
-
-    /* The objective here is to serialize all entries in the cache ring
-     * in flush dependency order.
-     *
-     * The basic algorithm is to scan the cache index list looking for 
-     * unserialized entries that are either not in a flush dependency
-     * relationship, or which have no unserialized children.  Any such
-     * entry is serialized and its flush dependency parents (if any) are 
-     * informed -- allowing them to decrement their userialized child counts.
-     *
-     * However, this algorithm is complicated by the ability
-     * of client serialization callbacks to perform operations on 
-     * on the cache which can result in the insertion, deletion, 
-     * relocation, resize, dirty, flush, eviction, or removal (via the
-     * take ownership flag) of entries.  Changes in the flush dependency
-     * structure are also possible.
-     *
-     * On the other hand, the algorithm is simplified by the fact that 
-     * we are serializing, not flushing.  Thus, as long as all entries 
-     * are serialized correctly, it doesn't matter if we have to go back
-     * and serialize an entry a second time.
-     *
-     * These possible actions result in the following modfications to 
-     * tha basic algorithm:
-     *
-     * 1) In the event of an entry expunge, eviction or removal, we must 
-     *    restart the scan as it is possible that the next entry in our 
-     *    scan is no longer in the cache.  Were we to examine this entry,
-     *    we would be accessing deallocated memory.
-     *
-     * 2) A resize, dirty, or insertion of an entry may result in the 
-     *    the increment of a flush dependency parent's dirty and/or 
-     *    unserialized child count.  In the context of serializing the 
-     *    the cache, this is a non-issue, as even if we have already 
-     *    serialized the parent, it will be marked dirty and its image 
-     *    marked out of date if appropriate when the child is serialized.  
-     *    
-     *    However, this is a major issue for a flush, as were this to happen
-     *    in a flush, it would violate the invariant that the flush dependency
-     *    feature is intended to enforce.  As the metadata cache has no 
-     *    control over the behavior of cache clients, it has no way of 
-     *    preventing this behaviour.  However, it should detect it if at all
-     *    possible.  
-     *
-     *    Do this by maintaining a count of the number of times each entry is
-     *    serialized during a cache serialization.  If any flush dependency 
-     *    parent is serialized more than once, throw an assertion failure.
-     *
-     * 3) An entry relocation will typically change the location of the 
-     *    entry in the index list.  This shouldn't cause problems as we 
-     *    will scan the index list until we make a complete pass without 
-     *    finding anything to serialize -- making relocations of either 
-     *    the current or next entries irrelevant.
-     *
-     *    Note that since a relocation may result in our skipping part of 
-     *    the index list, we must always do at least one more pass through
-     *    the index list after an entry relocation.
-     *
-     * 4) Changes in the flush dependency structure are possible on 
-     *    entry insertion, load, expunge, evict, or remove.  Destruction
-     *    of a flush dependency has no effect, as it can only relax the 
-     *    flush dependencies.  Creation of a flush dependency can create
-     *    an unserialized child of a flush dependency parent where all 
-     *    flush dependency children were previously serialized.  Should
-     *    this child dirty the flush dependency parent when it is serialized,
-     *    the parent will be re-serialized.
-     *
-     *    Per the discussion of 2) above, this is a non issue for cache 
-     *    serialization, and a major problem for cache flush.  Using the
-     *    same detection mechanism, throw an assertion failure if this 
-     *    condition appears.  
-     *
-     * Observe that either eviction or removal of entries as a result of 
-     * a serialization is not a problem as long as the flush depencency 
-     * tree does not change beyond the removal of a leaf.
-     */
-    while(!done) {
-        /* Reset the counters so that we can detect insertions, loads,
-         * moves, and flush dependency height changes caused by the pre_serialize
-         * and serialize callbacks.
-         */
-        cache_ptr->entries_loaded_counter         = 0;
-        cache_ptr->entries_inserted_counter	  = 0;
-        cache_ptr->entries_relocated_counter      = 0;
-
-	done = TRUE; /* set to FALSE if any activity in inner loop */
-	entry_ptr = cache_ptr->il_head;
-	while(entry_ptr != NULL) {
-	    HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-
-	    /* Verify that either the entry is already serialized, or
-             * that it is assigned to either the target or an inner 
-             * ring.
-             */
-            HDassert((entry_ptr->ring >= ring) || (entry_ptr->image_up_to_date));
-
-	    /* Skip flush me last entries or inner ring entries */
-	    if(!entry_ptr->flush_me_last && entry_ptr->ring == ring) {
-
-		/* if we encounter an unserialized entry in the current
-                 * ring that is not marked flush me last, we are not done.
-                 */
-		if(!entry_ptr->image_up_to_date)
-		    done = FALSE;
-
-		/* Serialize the entry if its image is not up to date
-                 * and it has no unserialized flush dependency children.
-                 */
-		if(!entry_ptr->image_up_to_date && entry_ptr->flush_dep_nunser_children == 0) {
-		    HDassert(entry_ptr->serialization_count == 0);
-
-		    /* Serialize the entry */
-		    if(H5C__serialize_single_entry(f, dxpl_id, cache_ptr, entry_ptr) < 0)
-            	        HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "entry serialization failed")
-
-                    HDassert(entry_ptr->flush_dep_nunser_children == 0);
-		    HDassert(entry_ptr->serialization_count == 0);
-
-#ifndef NDEBUG
-                    /* Increment serialization counter (to detect multiple serializations) */
-		    entry_ptr->serialization_count++;
-#endif /* NDEBUG */
-                 } /* end if */
-            } /* end if */
-
-            /* Check for the cache being perturbed during the entry serialize */
-            if((cache_ptr->entries_loaded_counter > 0) ||
-                    (cache_ptr->entries_inserted_counter > 0) ||
-                    (cache_ptr->entries_relocated_counter > 0)) {
-
-#if H5C_COLLECT_CACHE_STATS
-                H5C__UPDATE_STATS_FOR_INDEX_SCAN_RESTART(cache_ptr);
-#endif /* H5C_COLLECT_CACHE_STATS */
-
-                /* Reset the counters */
-                cache_ptr->entries_loaded_counter         = 0;
-                cache_ptr->entries_inserted_counter	  = 0;
-                cache_ptr->entries_relocated_counter      = 0;
-
-                /* Restart scan */
-                entry_ptr = cache_ptr->il_head;
-            } /* end if */
-            else
-                /* Advance to next entry */
-	        entry_ptr = entry_ptr->il_next;
-	} /* while ( entry_ptr != NULL ) */
-    } /* while ( ! done ) */
-
-
-    /* Reset the counters so that we can detect insertions, loads,
-     * moves, and flush dependency height changes caused by the pre_serialize
-     * and serialize callbacks.
-     */
-    cache_ptr->entries_loaded_counter     = 0;
-    cache_ptr->entries_inserted_counter	  = 0;
-    cache_ptr->entries_relocated_counter  = 0;
-
-    /* At this point, all entries not marked "flush me last" and in
-     * the current ring or outside it should be serialized and have up 
-     * to date images.  Scan the index list again to serialize the 
-     * "flush me last" entries (if they are in the current ring) and to 
-     * verify that all other entries have up to date images.
-     */
-    entry_ptr = cache_ptr->il_head;
-    while(entry_ptr != NULL) {
-	HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    	HDassert(entry_ptr->ring > H5C_RING_UNDEFINED);
-        HDassert(entry_ptr->ring < H5C_RING_NTYPES);
-        HDassert((entry_ptr->ring >= ring) || (entry_ptr->image_up_to_date));
-
-	if(entry_ptr->ring == ring) {
-	    if(entry_ptr->flush_me_last) {
-		if(!entry_ptr->image_up_to_date) {
-		    HDassert(entry_ptr->serialization_count == 0);
-                    HDassert(entry_ptr->flush_dep_nunser_children == 0);
-
-	            /* Serialize the entry */
-	            if(H5C__serialize_single_entry(f, dxpl_id,  cache_ptr, entry_ptr) < 0)
-		        HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "entry serialization failed")
-
-                    /* Check for the cache changing */
-                    if((cache_ptr->entries_loaded_counter > 0) ||
-                            (cache_ptr->entries_inserted_counter > 0) ||
-                            (cache_ptr->entries_relocated_counter > 0))
-		        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "flush_me_last entry serialization triggered restart")
-
-                    HDassert(entry_ptr->flush_dep_nunser_children == 0);
-		    HDassert(entry_ptr->serialization_count == 0);
-#ifndef NDEBUG
-                    /* Increment serialization counter (to detect multiple serializations) */
-		    entry_ptr->serialization_count++;
-#endif /* NDEBUG */
-                } /* end if */
-            } /* end if */
-            else {
-	        HDassert(entry_ptr->image_up_to_date);
-		HDassert(entry_ptr->serialization_count <= 1);
-                HDassert(entry_ptr->flush_dep_nunser_children == 0);
-            }  /* end else */
-        } /* if ( entry_ptr->ring == ring ) */
-
-	entry_ptr = entry_ptr->il_next;
-    } /* while ( entry_ptr != NULL ) */
-
-done:
-    HDassert(cache_ptr->serialization_in_progress);
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C__serialize_ring() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C__serialize_single_entry
- *
- * Purpose:     Serialize the cache entry pointed to by the entry_ptr 
- *		parameter.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer, 7/24/15
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5C__serialize_single_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
-    H5C_cache_entry_t *entry_ptr)
-{
-    herr_t		ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_STATIC
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert(entry_ptr);
-    HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-    HDassert(!entry_ptr->prefetched);
-    HDassert(!entry_ptr->image_up_to_date);
-    HDassert(entry_ptr->is_dirty);
-    HDassert(!entry_ptr->is_protected);
-    HDassert(!entry_ptr->flush_in_progress);
-    HDassert(entry_ptr->type);
-
-    /* Set entry_ptr->flush_in_progress to TRUE so the the target entry
-     * will not be evicted out from under us.  Must set it back to FALSE
-     * when we are done.
-     */
-    entry_ptr->flush_in_progress = TRUE;
-
-    /* Allocate buffer for the entry image if required. */
-    if(NULL == entry_ptr->image_ptr) {
-        HDassert(entry_ptr->size > 0);
-        if(NULL == (entry_ptr->image_ptr = H5MM_malloc(entry_ptr->size + H5C_IMAGE_EXTRA_SPACE)) )
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "memory allocation failed for on disk image buffer")
-#if H5C_DO_MEMORY_SANITY_CHECKS
-        HDmemcpy(((uint8_t *)entry_ptr->image_ptr) + image_size, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
-#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
-    } /* end if */
-
-    /* Generate image for entry */
-    if(H5C__generate_image(f, cache_ptr, entry_ptr, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "Can't generate image for cache entry")
-
-    /* Reset the flush_in progress flag */
-    entry_ptr->flush_in_progress = FALSE;
-
-done:
-    HDassert((ret_value != SUCCEED) || (!entry_ptr->flush_in_progress));
-    HDassert((ret_value != SUCCEED) || (entry_ptr->image_up_to_date));
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C__serialize_single_entry() */
 
 
 /*-------------------------------------------------------------------------

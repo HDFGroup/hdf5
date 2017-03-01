@@ -117,10 +117,10 @@ static herr_t H5HF__cache_dblock_free_icr(void *thing);
 /* Debugging Function Prototypes */
 #ifndef NDEBUG
 static herr_t H5HF__cache_verify_hdr_descendants_clean(H5F_t *f, hid_t dxpl_id,
-    H5HF_hdr_t * hdr, hbool_t *fd_clean, hbool_t *clean);
+    H5HF_hdr_t *hdr, hbool_t *fd_clean, hbool_t *clean);
 static herr_t H5HF__cache_verify_iblock_descendants_clean(H5F_t *f, 
     hid_t dxpl_id, haddr_t fd_parent_addr, H5HF_indirect_t *iblock, 
-    unsigned *iblock_status, hbool_t * fd_clean, hbool_t *clean);
+    unsigned *iblock_status, hbool_t *fd_clean, hbool_t *clean);
 static herr_t H5HF__cache_verify_iblocks_dblocks_clean(H5F_t *f, 
     haddr_t fd_parent_addr, H5HF_indirect_t *iblock, hbool_t *fd_clean, 
     hbool_t *clean, hbool_t *has_dblocks);

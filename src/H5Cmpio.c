@@ -206,8 +206,8 @@ H5C_apply_candidate_list(H5F_t * f,
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
     char		tbl_buf[1024];
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
-    unsigned            u;
-    herr_t              ret_value = SUCCEED;      /* Return value */
+    unsigned            u;                      /* Local index variable */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -345,10 +345,11 @@ H5C_apply_candidate_list(H5F_t * f,
         } /* end else */
 
         /* Entries marked as collectively accessed and are in the
-           candidate list to clear from the cache have to be
-           removed from the coll list. This is OK since the
-           candidate list is collective and uniform across all
-           ranks. */
+         * candidate list to clear from the cache have to be
+         * removed from the coll list. This is OK since the
+         * candidate list is collective and uniform across all
+         * ranks. 
+         */
         if(entry_ptr->coll_access) {
             entry_ptr->coll_access = FALSE;
             H5C__REMOVE_FROM_COLL_LIST(cache_ptr, entry_ptr, FAIL)
@@ -806,7 +807,7 @@ H5C_construct_candidate_list__clean_cache(H5C_t * cache_ptr)
 
     if(space_needed > 0) { /* we have work to do */
         H5C_cache_entry_t *entry_ptr;
-        int     nominated_entries_count = 0;
+        unsigned nominated_entries_count = 0;
         size_t  nominated_entries_size = 0;
         haddr_t	nominated_addr;
 
