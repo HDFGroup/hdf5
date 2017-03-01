@@ -93,10 +93,6 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               ${testfile}
-              ${testfile}.new
-              ${testfile}.new.err
-              ${testfile}.out
-              ${testfile}.out.err
       )
       set_tests_properties (H5IMPORT-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
 
@@ -141,12 +137,6 @@
               -E remove
               d${testfile}
               d${testfile}.bin
-              d${testfile}.imp
-              d${testfile}.imp.err
-              d${testfile}.dmp
-              d${testfile}.dmp.err
-              d${testfile}.dff
-              d${testfile}.dff.err
       )
       set_tests_properties (H5IMPORT-DUMP-${testname}-clear-objects PROPERTIES DEPENDS H5IMPORT-h5importtest)
 
@@ -434,17 +424,17 @@
   ADD_H5_TEST (BINARY_F64 binfp64.bin testfiles/binfp64.conf binfp64.h5)
   if (NOT USE_FILTER_DEFLATE)
     ADD_H5_SKIP_DUMPTEST (BINARY_F64 "/fp/bin/64-bit" binfp64.h5 BINARY)
-  else (NOT USE_FILTER_DEFLATE)
+  else ()
     ADD_H5_DUMPTEST (BINARY_F64 "/fp/bin/64-bit" binfp64.h5 BINARY)
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
 
   # ----- TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed "
   ADD_H5_TEST (BINARY_I8 binin8.bin testfiles/binin8.conf binin8.h5)
   if (NOT USE_FILTER_DEFLATE)
     ADD_H5_SKIP_DUMPTEST (BINARY_I8 "/int/bin/8-bit" binin8.h5 BINARY)
-  else (NOT USE_FILTER_DEFLATE)
+  else ()
     ADD_H5_DUMPTEST (BINARY_I8 "/int/bin/8-bit" binin8.h5 BINARY)
-  endif (NOT USE_FILTER_DEFLATE)
+  endif ()
 
   # ----- TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended "
   ADD_H5_TEST (BINARY_I16 binin16.bin testfiles/binin16.conf binin16.h5)
