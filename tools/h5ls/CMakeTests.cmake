@@ -431,13 +431,6 @@
     ADD_H5_TEST (tdataregle 0 -v tdatareg.h5)
   endif ()
 
-# test for file with datasets that use Fixed Array chunk indices
-  if (USE_FILTER_DEFLATE)
-    # data read internal filters
-    ADD_H5_TEST (tdset_idx 0 -w80 -d tdset_idx.h5)
-  endif (USE_FILTER_DEFLATE)
-
-
 ##############################################################################
 ###    P L U G I N  T E S T S
 ##############################################################################
