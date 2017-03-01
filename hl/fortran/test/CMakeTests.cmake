@@ -32,7 +32,7 @@ set_tests_properties (HL_FORTRAN_f90_tstimage PROPERTIES DEPENDS HL_FORTRAN_test
 add_test (NAME HL_FORTRAN_f90_tsttable COMMAND $<TARGET_FILE:hl_f90_tsttable>)
 set_tests_properties (HL_FORTRAN_f90_tsttable PROPERTIES DEPENDS HL_FORTRAN_test-clear-objects)
 
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_test (
       NAME HL_FORTRAN_test-shared-clear-objects
       COMMAND    ${CMAKE_COMMAND}
