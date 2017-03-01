@@ -111,7 +111,7 @@
 ##############################################################################
 ##############################################################################
 
-  MACRO (ADD_H5_TEST resultfile resultcode)
+  macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
@@ -135,9 +135,9 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_UD_TEST testname resultcode resultfile)
+  macro (ADD_H5_UD_TEST testname resultcode resultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
@@ -162,7 +162,7 @@
       )
       set_tests_properties (H5LS_UD-${testname} PROPERTIES DEPENDS H5LS_UD-${testname}-clearall-objects)
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################
@@ -412,9 +412,9 @@
   # ( HDFFV-7838, )
   if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tattrreg_be 0 -w80 -v -d tattrreg.h5)
-  else (H5_WORDS_BIGENDIAN)
+  else ()
     ADD_H5_TEST (tattrreg_le 0 -w80 -v -d tattrreg.h5)
-  endif (H5_WORDS_BIGENDIAN)
+  endif ()
 
   # test for non-existing file
   ADD_H5_TEST (nosuchfile 1 nosuchfile.h5)
@@ -422,22 +422,22 @@
   # test for variable length data types in verbose mode
   if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tvldtypes2be 0 -v tvldtypes1.h5)
-  else (H5_WORDS_BIGENDIAN)
+  else ()
     ADD_H5_TEST (tvldtypes2le 0 -v tvldtypes1.h5)
-  endif (H5_WORDS_BIGENDIAN)
+  endif ()
 
   # test for dataset region references data types in verbose mode
   if (H5_WORDS_BIGENDIAN)
     ADD_H5_TEST (tdataregbe 0 -v tdatareg.h5)
-  else (H5_WORDS_BIGENDIAN)
+  else ()
     ADD_H5_TEST (tdataregle 0 -v tdatareg.h5)
-  endif (H5_WORDS_BIGENDIAN)
+  endif ()
 
 # test for file with datasets that use Fixed Array chunk indices
   if (USE_FILTER_DEFLATE)
     # data read internal filters
     ADD_H5_TEST (tdset_idx 0 -w80 -d tdset_idx.h5)
-  endif (USE_FILTER_DEFLATE)
+  endif ()
 
 
 ##############################################################################

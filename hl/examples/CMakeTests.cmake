@@ -12,7 +12,7 @@ set (HDF5_TEST_FILES
 
 foreach (h5_file ${HDF5_TEST_FILES})
   HDFTEST_COPY_FILE("${PROJECT_SOURCE_DIR}/${h5_file}" "${PROJECT_BINARY_DIR}/${h5_file}" "hl_ex_ex_ds1_files")
-endforeach (h5_file ${HDF5_TEST_FILES})
+endforeach ()
 add_custom_target(hl_ex_ex_ds1_files ALL COMMENT "Copying files needed by hl_ex_ex_ds1 tests" DEPENDS ${hl_ex_ex_ds1_files_list})
 
   # Remove any output file left over from previous test run

@@ -653,8 +653,6 @@ TOOLTEST h5diff_28.txt -v h5diff_types.h5 h5diff_types.h5 l1 l2
 TOOLTEST h5diff_30.txt -v h5diff_enum_invalid_values.h5 h5diff_enum_invalid_values.h5 dset1 dset2
 
 
-
-
 # ##############################################################################
 # # Dataset datatypes
 # ##############################################################################
@@ -761,8 +759,6 @@ TOOLTEST h5diff_618.txt -p 2 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4
 # 6.19: number smaller than smallest difference
 TOOLTEST h5diff_619.txt -p 0.005 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4
 
-
-
 # ##############################################################################
 # # -n
 # ##############################################################################
@@ -815,7 +811,6 @@ TOOLTEST h5diff_tmp2.txt tmpSingleSiteBethe.output.h5 tmpSingleSiteBethe.referen
 # ##################################################
 #  attrs with verbose option level
 # ##################################################
-
 TOOLTEST h5diff_700.txt -v1 h5diff_attr1.h5 h5diff_attr2.h5
 TOOLTEST h5diff_701.txt -v2 h5diff_attr1.h5 h5diff_attr2.h5
 TOOLTEST h5diff_702.txt --verbose=1 h5diff_attr1.h5 h5diff_attr2.h5
@@ -865,7 +860,6 @@ TOOLTEST h5diff_103.txt -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h
 
 # with --use-system-epsilon for float value
 TOOLTEST h5diff_104.txt -v --use-system-epsilon h5diff_basic1.h5 h5diff_basic1.h5 g1/fp1 g1/fp2
-
 
 # not comparable -c flag
 TOOLTEST h5diff_200.txt h5diff_basic2.h5 h5diff_basic2.h5 g2/dset1  g2/dset2
@@ -993,7 +987,6 @@ TOOLTEST h5diff_424.txt --follow-symlinks -v h5diff_ext2softlink_trg.h5 h5diff_e
 
 # extlink_to_softlink_to_dset1 vs extlink_to_softlink_to_dset2"
 TOOLTEST h5diff_425.txt --follow-symlinks -v h5diff_ext2softlink_src.h5 h5diff_ext2softlink_src.h5 /ext_link_to_slink1 /ext_link_to_slink2
-
 
 # ##############################################################################
 # # Dangling links compare (--follow-symlinks and --no-dangling-links)
@@ -1145,6 +1138,7 @@ TOOLTEST h5diff_540.txt -v compounds_array_vlen1.h5 compounds_array_vlen2.h5
 # ##############################################################################
 # # Test mutually exclusive options
 # ##############################################################################
+#
 # Test with -d , -p and --use-system-epsilon.
 TOOLTEST h5diff_640.txt -v -d 5 -p 0.05 --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
 TOOLTEST h5diff_641.txt -v -d 5 -p 0.05 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4

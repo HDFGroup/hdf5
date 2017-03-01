@@ -77,7 +77,7 @@
 ##############################################################################
 ##############################################################################
 
-  MACRO (ADD_H5_OUTPUT testname resultfile resultcode testfile)
+  macro (ADD_H5_OUTPUT testname resultfile resultcode testfile)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -124,9 +124,9 @@
           set (last_test "H5FC-${testname}-NA")
       endif ()
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST testname resultcode testfile)
+  macro (ADD_H5_TEST testname resultcode testfile)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -157,9 +157,9 @@
       set_tests_properties (H5FC-${testname} PROPERTIES DEPENDS "H5FC-${testname}-tmpfile")
       set (last_test "H5FC-${testname}")
      endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_CHECK_IDX dependtest testname)
+  macro (ADD_H5_CHECK_IDX dependtest testname)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -168,9 +168,9 @@
       )
       set_tests_properties (H5FC_CHECK_IDX-${testname} PROPERTIES DEPENDS "H5FC-${dependtest}")
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST_CHECK_IDX testname resultcode testfile)
+  macro (ADD_H5_TEST_CHECK_IDX testname resultcode testfile)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -206,9 +206,9 @@
       set_tests_properties (H5FC_CHECK_IDX-${testname} PROPERTIES DEPENDS "H5FC-${testname}")
       set (last_test "H5FC_CHECK_IDX-${testname}")
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_H5DUMP_CHECK testname)
+  macro (ADD_H5_H5DUMP_CHECK testname)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -251,7 +251,7 @@
       set_tests_properties (H5FC_CHECK_DUMP-${testname} PROPERTIES DEPENDS "H5FC-${testname}")
       set (last_test "H5FC_CHECK_DUMP-${testname}")
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################

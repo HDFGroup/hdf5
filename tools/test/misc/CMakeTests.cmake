@@ -69,7 +69,7 @@
 ##############################################################################
 ##############################################################################
 
-  MACRO (ADD_H5_TEST resultfile resultcode resultoption)
+  macro (ADD_H5_TEST resultfile resultcode resultoption)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5MKGRP-${resultfile}-clear-objects
@@ -89,7 +89,7 @@
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else ()
       set_tests_properties (H5MKGRP-${resultfile} PROPERTIES DEPENDS H5MKGRP-${resultfile}-clear-objects)
       add_test (
           NAME H5MKGRP-${resultfile}-h5ls
@@ -105,9 +105,9 @@
       )
       set_tests_properties (H5MKGRP-${resultfile}-h5ls PROPERTIES DEPENDS H5MKGRP-${resultfile})
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_CMP resultfile resultcode)
+  macro (ADD_H5_CMP resultfile resultcode)
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5MKGRP_CMP-${resultfile} COMMAND $<TARGET_FILE:h5mkgrp> ${ARGN})
     else ()
@@ -131,7 +131,7 @@
       )
       set_tests_properties (H5MKGRP_CMP-${resultfile} PROPERTIES DEPENDS H5MKGRP_CMP-${resultfile}-clear-objects)
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################
