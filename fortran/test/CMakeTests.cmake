@@ -27,7 +27,7 @@ add_test (NAME FORTRAN_fflush1 COMMAND $<TARGET_FILE:fflush1>)
 add_test (NAME FORTRAN_fflush2 COMMAND $<TARGET_FILE:fflush2>)
 set_tests_properties (FORTRAN_fflush2 PROPERTIES DEPENDS FORTRAN_fflush1)
 
-if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+if (BUILD_SHARED_LIBS AND TEST_SHARED_PROGRAMS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_test (NAME FORTRAN_testhdf5_fortran-shared COMMAND $<TARGET_FILE:testhdf5_fortran-shared>)
   set_tests_properties (FORTRAN_testhdf5_fortran-shared PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
   set_tests_properties (FORTRAN_testhdf5_fortran-shared PROPERTIES DEPENDS FORTRAN_testhdf5_fortran)

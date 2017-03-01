@@ -683,6 +683,9 @@ if (BUILD_TESTING)
   option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "0")
   mark_as_advanced (HDF_TEST_EXPRESS)
 
+  option (TEST_SHARED_PROGRAMS "Enable testing of Shared programs" OFF)
+  mark_as_advanced (TEST_SHARED_PROGRAMS)
+
   enable_testing ()
   include (CTest)
 
