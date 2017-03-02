@@ -4334,8 +4334,7 @@ setup_cache_for_test(hid_t * fid_ptr,
  *
  *****************************************************************************/
 static void
-verify_writes(unsigned num_writes,
-	      haddr_t * written_entries_tbl)
+verify_writes(unsigned num_writes, haddr_t *written_entries_tbl)
 {
     const hbool_t report = FALSE;
     hbool_t proceed = TRUE;
@@ -4361,13 +4360,10 @@ verify_writes(unsigned num_writes,
         }
     }
 
-    if ( proceed ) {
-
+    if(proceed)
         proceed = verify_total_writes(num_writes);
-    }
 
-    while ( ( proceed ) && ( u < num_writes ) ) 
-    {
+    while(proceed && u < num_writes) {
         proceed = verify_entry_writes(written_entries_tbl[u], 1);
         u++;
     }

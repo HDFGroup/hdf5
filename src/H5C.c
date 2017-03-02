@@ -1090,36 +1090,20 @@ H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags)
 			break;
 
 		    case H5C_RING_RDFSM:
-			if(!cache_ptr->rdfsm_settled) {
-                            hbool_t fsm_settled = FALSE;        /* Whether the FSM was actually settled */
-
-                            /* Settle raw data FSM */
-			    if(H5MF_settle_raw_data_fsm(f, dxpl_id, &fsm_settled) < 0)
+                        /* Settle raw data FSM */
+			if(!cache_ptr->rdfsm_settled)
+			    if(H5MF_settle_raw_data_fsm(f, dxpl_id, &cache_ptr->rdfsm_settled) < 0)
                                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "RD FSM settle failed")
-
-                            /* Only set the flag if the FSM was actually settled */
-                            if(fsm_settled)
-                                cache_ptr->rdfsm_settled = TRUE;
-                        } /* end if */
 			break;
 
 		    case H5C_RING_MDFSM:
-			if(!cache_ptr->mdfsm_settled) {
-                            hbool_t fsm_settled = FALSE;        /* Whether the FSM was actually settled */
-
-                            /* Settle metadata FSM */
-			    if(H5MF_settle_meta_data_fsm(f, dxpl_id, &fsm_settled) < 0)
+                        /* Settle metadata FSM */
+			if(!cache_ptr->mdfsm_settled)
+			    if(H5MF_settle_meta_data_fsm(f, dxpl_id, &cache_ptr->mdfsm_settled) < 0)
                                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "MD FSM settle failed")
-
-                            /* Only set the flag if the FSM was actually settled */
-                            if(fsm_settled)
-                                cache_ptr->mdfsm_settled = TRUE;
-                        } /* end if */
 			break;
 
 		    case H5C_RING_SBE:
-			break;
-
 		    case H5C_RING_SB:
 			break;
 
@@ -5538,8 +5522,8 @@ H5C_flush_invalidate_ring(H5F_t * f, hid_t dxpl_id, H5C_ring_t ring,
          */
 
         if(node_ptr == NULL) {
-            HDassert(cache_ptr->slist_len == (initial_slist_len + cache_ptr->slist_len_increase));
-            HDassert(cache_ptr->slist_size == (initial_slist_size + cache_ptr->slist_size_increase));
+            HDassert(cache_ptr->slist_len == (uint32_t)((int32_t)initial_slist_len + cache_ptr->slist_len_increase));
+            HDassert(cache_ptr->slist_size == (size_t)((ssize_t)initial_slist_size + cache_ptr->slist_size_increase));
         } /* end if */
 #endif /* H5C_DO_SANITY_CHECKS */
 
@@ -5946,8 +5930,8 @@ H5C_flush_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,  unsigned flags)
 
 #if H5C_DO_SANITY_CHECKS
         /* Verify that the slist size and length are as expected. */
-        HDassert((initial_slist_len + cache_ptr->slist_len_increase) == cache_ptr->slist_len);
-        HDassert((initial_slist_size + cache_ptr->slist_size_increase) == cache_ptr->slist_size);
+        HDassert((uint32_t)((int32_t)initial_slist_len + cache_ptr->slist_len_increase) == cache_ptr->slist_len);
+        HDassert((size_t)((ssize_t)initial_slist_size + cache_ptr->slist_size_increase) == cache_ptr->slist_size);
 #endif /* H5C_DO_SANITY_CHECKS */
     } /* while */
 
@@ -8124,31 +8108,17 @@ H5C__serialize_cache(H5F_t *f, hid_t dxpl_id)
                 break;
 
             case H5C_RING_RDFSM:
-                if(!cache_ptr->rdfsm_settled) {
-                    hbool_t fsm_settled = FALSE;        /* Whether the FSM was actually settled */
-
-                    /* Settle raw data FSM */
-                    if(H5MF_settle_raw_data_fsm(f, dxpl_id, &fsm_settled) < 0)
+                /* Settle raw data FSM */
+                if(!cache_ptr->rdfsm_settled)
+                    if(H5MF_settle_raw_data_fsm(f, dxpl_id, &cache_ptr->rdfsm_settled) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "RD FSM settle failed")
-
-                    /* Only set the flag if the FSM was actually settled */
-                    if(fsm_settled)
-                        cache_ptr->rdfsm_settled = TRUE;
-                } /* end if */
                 break;
 
             case H5C_RING_MDFSM:
-                if(!cache_ptr->mdfsm_settled) {
-                    hbool_t fsm_settled = FALSE;        /* Whether the FSM was actually settled */
-
-                    /* Settle metadata FSM */
-                    if(H5MF_settle_meta_data_fsm(f, dxpl_id, &fsm_settled) < 0)
+                /* Settle metadata FSM */
+                if(!cache_ptr->mdfsm_settled)
+                    if(H5MF_settle_meta_data_fsm(f, dxpl_id, &cache_ptr->mdfsm_settled) < 0)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "MD FSM settle failed")
-
-                    /* Only set the flag if the FSM was actually settled */
-                    if(fsm_settled)
-                        cache_ptr->mdfsm_settled = TRUE;
-                } /* end if */
                 break;
 
             case H5C_RING_SBE:
@@ -8161,7 +8131,7 @@ H5C__serialize_cache(H5F_t *f, hid_t dxpl_id)
         } /* end switch */
 
         if(H5C__serialize_ring(f, dxpl_id, ring) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "serialize ring failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "serialize ring failed")
 
         ring++;
     } /* end while */

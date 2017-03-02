@@ -33693,14 +33693,10 @@ check_metadata_cork(hbool_t fill_via_insertion)
 
     reset_entries();
 
-    if(fill_via_insertion) {
-
-        TESTING("to ensure cork/uncork metadata when inserting");
-
-    } else {
-
-        TESTING("to ensure cork/uncork metadata on protect/unprotect");
-    }
+    if(fill_via_insertion)
+        TESTING("to ensure cork/uncork metadata when inserting")
+    else
+        TESTING("to ensure cork/uncork metadata on protect/unprotect")
 
     if(show_progress) /* 0 */
          HDfprintf(stdout, "\n%s: check point %d -- pass %d\n",

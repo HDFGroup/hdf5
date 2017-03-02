@@ -1995,7 +1995,8 @@ test_fs_sect_shrink(hid_t fapl)
             (hsize_t)(TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
-    if (node_found) TEST_ERROR
+    if (node_found)
+        TEST_ERROR
 
     if(check_stats(f, frsp, &state))
         TEST_ERROR
@@ -2095,7 +2096,8 @@ test_fs_sect_shrink(hid_t fapl)
             (hsize_t)(TEST_SECT_SIZE50), (H5FS_section_info_t **)&node)) < 0)
 	FAIL_STACK_ERROR
 
-    if (node_found) TEST_ERROR
+    if (node_found)
+        TEST_ERROR
 
     /* section A should not be there in free-space */
     if((node_found = H5FS_sect_find(f, dxpl_id, frsp,
@@ -2238,8 +2240,8 @@ test_fs_sect_change_class(hid_t fapl)
         TEST_ERROR
 
     if (H5FS_sect_change_class(f, dxpl_id, frsp, (H5FS_section_info_t *)sect_node1,
-		    TEST_FSPACE_SECT_TYPE_NONE) < 0)
-	TEST_ERROR
+            TEST_FSPACE_SECT_TYPE_NONE) < 0)
+        TEST_ERROR
 
     state.serial_sect_count += 1;
     state.ghost_sect_count -=1;
