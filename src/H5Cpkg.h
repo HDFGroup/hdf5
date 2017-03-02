@@ -4675,8 +4675,8 @@ struct H5C_t {
     H5SL_t *                    slist_ptr;
     uint32_t                    num_last_entries;
 #if H5C_DO_SANITY_CHECKS
-    int64_t			slist_len_increase;
-    int64_t			slist_size_increase;
+    int32_t			slist_len_increase;
+    ssize_t			slist_size_increase;
 #endif /* H5C_DO_SANITY_CHECKS */
 
     /* Fields for maintaining list of tagged entries */
@@ -4872,7 +4872,7 @@ typedef int (*H5C_tag_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
 /* Package Private Prototypes */
 /******************************/
 H5_DLL herr_t H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5C__deserialize_prefetched_entry(H5F_t * f, hid_t dxpl_id,
+H5_DLL herr_t H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id,
     H5C_t * cache_ptr, H5C_cache_entry_t** entry_ptr_ptr, 
     const H5C_class_t * type, haddr_t addr, void * udata);
 
@@ -4888,6 +4888,7 @@ H5_DLL herr_t H5C__make_space_in_cache(H5F_t * f, hid_t dxpl_id,
 H5_DLL herr_t H5C__flush_marked_entries(H5F_t * f, hid_t dxpl_id);
 H5_DLL herr_t H5C__generate_image(H5F_t *f, H5C_t *cache_ptr,
     H5C_cache_entry_t *entry_ptr, hid_t dxpl_id);
+H5_DLL herr_t H5C__serialize_cache(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5C__iter_tagged_entries(H5C_t *cache, haddr_t tag, hbool_t match_global,
     H5C_tag_iter_cb_t cb, void *cb_ctx);
 

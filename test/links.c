@@ -22,7 +22,7 @@
 
 /*
  * This file needs to access private information from the H5FD package.
- * This file also needs to access the group testing code.
+ * This file also needs to access the file driver testing code.
  */
 #define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
 #define H5FD_TESTING

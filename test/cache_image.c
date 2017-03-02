@@ -6292,7 +6292,7 @@ cache_image_api_error_check_3(void)
             if ( H5Fstart_swmr_write(file_id) == SUCCEED ) {
 
                 pass = FALSE;
-                failure_mssg = "metadata cache image block loaded(1).";
+                failure_mssg = "SWMR start succeeded in file with cache image.";
             }
         } H5E_END_TRY;
     }

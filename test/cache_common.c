@@ -3235,8 +3235,8 @@ setup_cache(size_t max_cache_size,
 
             if(verbose)
                 HDfprintf(stdout, "%s: H5Fcreate() failed.\n", FUNC);
-        }
-    }
+        } /* end if */
+    } /* end if */
 
     if(show_progress) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
