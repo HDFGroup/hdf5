@@ -29,13 +29,13 @@ set (HL_REFERENCE_TEST_FILES
 # --------------------------------------------------------------------
 foreach (h5_file ${HL_REFERENCE_TEST_FILES})
   HDFTEST_COPY_FILE("${HDF5_HL_TEST_SOURCE_DIR}/${h5_file}" "${HDF5_HL_TEST_BINARY_DIR}/${h5_file}" "hl_test_files")
-endforeach (h5_file ${HL_REFERENCE_TEST_FILES})
+endforeach ()
 add_custom_target(hl_test_files ALL COMMENT "Copying files needed by hl_test tests" DEPENDS ${hl_test_files_list})
 
 # --------------------------------------------------------------------
 #  Macro used to add a unit test
 # --------------------------------------------------------------------
-MACRO (HL_ADD_TEST hl_name)
+macro (HL_ADD_TEST hl_name)
   if (HDF5_ENABLE_USING_MEMCHECKER)
     add_test (NAME HL_${hl_name} COMMAND $<TARGET_FILE:hl_${hl_name}>)
   else ()
@@ -56,7 +56,7 @@ MACRO (HL_ADD_TEST hl_name)
       WORKING_DIRECTORY ${HDF5_HL_TEST_BINARY_DIR}
     )
   endif ()
-ENDMACRO ()
+endmacro ()
 
 # Remove any output file left over from previous test run
 add_test (

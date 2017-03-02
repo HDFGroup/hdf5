@@ -36,7 +36,7 @@ if (HDF5_TEST_VFD)
     set (VFD_LIST ${VFD_LIST} direct)
   endif ()
 
-  MACRO (ADD_VFD_TEST vfdname resultcode)
+  macro (ADD_VFD_TEST vfdname resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       foreach (test ${H5P_VFD_TESTS})
         add_test (
@@ -52,7 +52,7 @@ if (HDF5_TEST_VFD)
         )
       endforeach ()
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
   # Run test with different Virtual File Driver
   foreach (vfd ${VFD_LIST})

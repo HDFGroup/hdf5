@@ -40,7 +40,7 @@
   # TEST_H5JAM_OUTPUT
   # For the purpose to verify only output & exitcode from h5jam
   #
-  MACRO (TEST_H5JAM_OUTPUT expectfile resultcode)
+  macro (TEST_H5JAM_OUTPUT expectfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5JAM-${expectfile} COMMAND $<TARGET_FILE:h5jam> ${ARGN})
@@ -60,13 +60,13 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
   # ============================================================
   # TEST_H5UNJAM_OUTPUT
   # For the purpose to verify only output & exitcode from h5unjam
   #
-  MACRO (TEST_H5UNJAM_OUTPUT expectfile resultcode)
+  macro (TEST_H5UNJAM_OUTPUT expectfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5JAM-UNJAM-${expectfile} COMMAND $<TARGET_FILE:h5unjam> ${ARGN})
@@ -86,9 +86,9 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (CHECKFILE testname testdepends expected actual)
+  macro (CHECKFILE testname testdepends expected actual)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -118,9 +118,9 @@
       )
       set_tests_properties (H5JAM-${testname}-CHECKFILE-H5DMP_CMP PROPERTIES DEPENDS H5JAM-${testname}-CHECKFILE-H5DMP)
     endif ()
-  ENDMACRO()
+  endmacro()
 
-  MACRO (UNJAMTEST testname setfile infile ufile chkfile outfile)
+  macro (UNJAMTEST testname setfile infile ufile chkfile outfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5JAM-${testname}-UNJAM-SETUP-clear-objects
@@ -213,9 +213,9 @@
 
       CHECKFILE (${testname} "H5JAM-${testname}-UNJAM-CHECK_NOUB" ${chkfile} ${outfile})
     endif ()
-  ENDMACRO()
+  endmacro()
 
-  MACRO (JAMTEST testname jamfile infile chkfile outfile)
+  macro (JAMTEST testname jamfile infile chkfile outfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5JAM-${testname}-clear-objects
@@ -256,9 +256,9 @@
       set_tests_properties (H5JAM-${testname}-CHECK_UB_1 PROPERTIES DEPENDS H5JAM-${testname}-CHECK_UB_1-clear-objects)
       CHECKFILE (${testname} "H5JAM-${testname}-CHECK_UB_1" ${chkfile} ${outfile})
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (JAMTEST_NONE testname jamfile infile setfile chkfile)
+  macro (JAMTEST_NONE testname jamfile infile setfile chkfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5JAM-${testname}_NONE-clear-objects
@@ -311,7 +311,7 @@
       set_tests_properties (H5JAM-${testname}_NONE-CHECK_UB_1 PROPERTIES DEPENDS H5JAM-${testname}_NONE-CHECK_UB_1-clear-objects)
       CHECKFILE (${testname} "H5JAM-${testname}_NONE-CHECK_UB_1" ${infile} ${chkfile})
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################

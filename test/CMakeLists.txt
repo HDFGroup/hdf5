@@ -283,7 +283,7 @@ set (H5_VDS_SWMR_TESTS
 
 foreach (test ${H5_VDS_SWMR_TESTS})
   ADD_H5_EXE(${test})
-endforeach (test ${H5_VDS_SWMR_TESTS})
+endforeach ()
 
 ##############################################################################
 ##############################################################################
@@ -309,7 +309,7 @@ if (BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (cache_image-shared SHARED " " " ")
   target_link_libraries (cache_image-shared ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   set_target_properties (cache_image-shared PROPERTIES FOLDER test)
-endif (BUILD_SHARED_LIBS)
+endif ()
 
 #-- Adding test for hyperslab
 add_executable (hyperslab ${HDF5_TEST_SOURCE_DIR}/hyperslab.c)

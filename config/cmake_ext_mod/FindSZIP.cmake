@@ -24,7 +24,7 @@
 # made to remove references to Qt and make this file more generally applicable
 #########################################################################
 
-MACRO (SZIP_ADJUST_LIB_VARS basename)
+macro (SZIP_ADJUST_LIB_VARS basename)
   if (${basename}_INCLUDE_DIR)
 
     # if only the release version was found, set the debug variable also to the release version
@@ -62,7 +62,7 @@ MACRO (SZIP_ADJUST_LIB_VARS basename)
 
   # Make variables changeble to the advanced user
   MARK_AS_ADVANCED (${basename}_LIBRARY ${basename}_LIBRARY_RELEASE ${basename}_LIBRARY_DEBUG ${basename}_INCLUDE_DIR )
-ENDMACRO ()
+endmacro ()
 
 
 # Look for the header file.
