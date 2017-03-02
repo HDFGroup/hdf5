@@ -39,6 +39,8 @@ H5DUMP=../h5dump/h5dump         # The h5dump tool name
 H5DUMP_BIN=`pwd`/$H5DUMP        # The path of the h5dump tool binary
 
 RM='rm -rf'
+CMP='cmp'
+DIFF='diff -c'
 GREP='grep'
 CP='cp'
 DIRNAME='dirname'
@@ -165,7 +167,7 @@ CLEAN_TESTFILES_AND_TESTDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=`$DIRNAME $tstfile`
+    SDIR=$SRC_H5REPACK_TESTFILES
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then

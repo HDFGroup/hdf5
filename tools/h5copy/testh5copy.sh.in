@@ -21,6 +21,10 @@
 
 srcdir=@srcdir@
 
+# Determine which filters are available
+USE_FILTER_SZIP="@USE_FILTER_SZIP@"
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+
 # source dirs
 SRC_TOOLS="$srcdir/.."
 SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
@@ -128,7 +132,7 @@ CLEAN_TESTFILES_AND_TESTDIR()
     # skip rm if srcdir is same as destdir
     # this occurs when build/test performed in source dir and
     # make cp fail
-    SDIR=`$DIRNAME $tstfile`
+    SDIR=$SRC_H5COPY_TESTFILES
     INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
     INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
     if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
@@ -487,7 +491,9 @@ COPY_OBJECTS()
     TOOLTEST -i $TESTFILE -o $TESTDIR/chunk.out.h5 -v -s chunk      -d chunk
     TOOLTEST -i $TESTFILE -o $TESTDIR/compact.out.h5 -v -s compact    -d compact
     TOOLTEST -i $TESTFILE -o $TESTDIR/compound.out.h5 -v -s compound   -d compound
+if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST -i $TESTFILE -o $TESTDIR/compressed.out.h5 -v -s compressed -d compressed
+fi
     TOOLTEST -i $TESTFILE -o $TESTDIR/named_vl.out.h5 -v -s named_vl   -d named_vl
     TOOLTEST -i $TESTFILE -o $TESTDIR/nested_vl.out.h5 -v -s nested_vl  -d nested_vl
     TOOLTEST -i $TESTFILE -o $TESTDIR/dset_attr.out.h5 -v -s /dset_attr  -d /dset_attr
@@ -499,16 +505,19 @@ COPY_OBJECTS()
     TOOLTEST -i $TESTFILE -o $TESTDIR/dsrename.out.h5 -v -s compound   -d rename
 
     echo "Test copying empty, 'full' & 'nested' groups"
+if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_empty.out.h5 -v -s grp_empty  -d grp_empty
+fi
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_dsets.out.h5 -v -s grp_dsets  -d grp_dsets
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_nested.out.h5 -v -s grp_nested -d grp_nested
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_attr.out.h5 -v -s grp_attr -d grp_attr
 
+if test $USE_FILTER_DEFLATE = "yes" ; then
     echo "Test copying dataset within group in source file to group in destination"
     TOOLTEST_PREFILL -i $TESTFILE -o $TESTDIR/simple_group.out.h5 grp_dsets grp_dsets /grp_dsets/simple /grp_dsets/simple_group
-
     echo "Test copying & renaming group"
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_rename.out.h5 -v -s grp_dsets  -d grp_rename
+fi
 
     echo "Test copying 'full' group hierarchy into group in destination file"
     TOOLTEST_PREFILL -i $TESTFILE -o $TESTDIR/grp_dsets_rename.out.h5 grp_dsets grp_rename grp_dsets /grp_rename/grp_dsets
@@ -517,8 +526,10 @@ COPY_OBJECTS()
     TOOLTEST -i $TESTFILE -o $TESTDIR/A_B1_simple.out.h5 -vp -s simple    -d /A/B1/simple
     TOOLTEST -i $TESTFILE -o $TESTDIR/A_B2_simple2.out.h5 -vp -s simple    -d /A/B2/simple2
     TOOLTEST -i $TESTFILE -o $TESTDIR/C_D_simple.out.h5 -vp -s /grp_dsets/simple    -d /C/D/simple
+if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST -i $TESTFILE -o $TESTDIR/E_F_grp_dsets.out.h5 -vp -s /grp_dsets -d /E/F/grp_dsets
     TOOLTEST -i $TESTFILE -o $TESTDIR/G_H_grp_nested.out.h5 -vp -s /grp_nested -d /G/H/grp_nested
+fi
 }
 
 # Copy references in various way.
@@ -579,8 +590,10 @@ TEST_MISC()
     TOOLTEST_FAIL h5copy_misc1.out -i $TESTFILE -o $TESTDIR/h5copy_misc1.out.h5 -v -s /simple  -d /g1/g2/simple
 
     echo "Test copying objects to the same file "
-    TOOLTEST_SAME -i $TESTFILE -o $TESTDIR/samefile1.out.h5 /simple /simple_cp 
+    TOOLTEST_SAME -i $TESTFILE -o $TESTDIR/samefile1.out.h5 /simple /simple_cp
+if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST_SAME -i $TESTFILE -o $TESTDIR/samefile2.out.h5 /grp_dsets /grp_dsets_cp
+fi
 }
 
 ##############################################################################

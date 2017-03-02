@@ -435,4 +435,3 @@
 ###    P L U G I N  T E S T S
 ##############################################################################
 ADD_H5_UD_TEST (h5ls_plugin_test 0 tudfilter -w80 -d tudfilter.h5)
-

@@ -120,12 +120,6 @@
       set (last_test "H5REPACK-${testname}")
     else ()
       add_test (
-          NAME H5REPACK-h5repack-${testname}-clear-objects
-          COMMAND    ${CMAKE_COMMAND}
-              -E remove h5repack-${testname}.out h5repack-${testname}.out.err
-      )
-      set_tests_properties (H5REPACK-h5repack-${testname}-clear-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-      add_test (
           NAME H5REPACK-h5repack-${testname}
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5repack>"
@@ -136,7 +130,6 @@
               -D "TEST_REFERENCE=h5repack-${testname}.txt"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-      set_tests_properties (H5REPACK-h5repack-${testname} PROPERTIES DEPENDS "H5REPACK-h5repack-${testname}-clear-objects")
     endif ()
   ENDMACRO ()
 
@@ -346,10 +339,6 @@
           COMMAND    ${CMAKE_COMMAND}
               -E remove
               testfiles/out-${testname}.${resultfile}
-              testfiles/${testname}.${resultfile}.out
-              testfiles/${testname}.${resultfile}.out.err
-              testfiles/${resultfile}-${testname}.out
-              testfiles/${resultfile}-${testname}.out.err
       )
       add_test (
           NAME H5REPACK_UD-${testname}
@@ -961,7 +950,10 @@
   ADD_H5_TEST (upgrade_layout "TEST" ${FILE14})
 
 # test for datum size > H5TOOLS_MALLOCSIZE
-  ADD_H5_TEST (gt_mallocsize "TEST" ${FILE1} -f GZIP=1)
+  if (NOT USE_FILTER_DEFLATE)
+    set (TESTTYPE "SKIP")
+  endif ()
+  ADD_H5_TEST (gt_mallocsize ${TESTTYPE} ${FILE1} -f GZIP=1)
 
 # Check repacking file with committed datatypes in odd configurations
   ADD_H5_TEST (committed_dt "TEST" ${FILE15})
@@ -997,12 +989,12 @@
   set (TESTRETVAL 255)
   if (WIN32)
     set (TESTRETVAL -1)
-  endif()
+  endif ()
   ADD_H5_CMP_TEST (plugin_zero "" "TEST" ${TESTRETVAL} h5repack_layout.h5 -v -f UD=250,0)
 
   if (HDF5_TEST_VFD)
     # Run test with different Virtual File Driver
     foreach (vfd ${VFD_LIST})
       ADD_VFD_TEST (${vfd} 0)
-    endforeach (vfd ${VFD_LIST})
+    endforeach ()
   endif ()
