@@ -1004,10 +1004,10 @@ ADD_H5_TEST (h5diff_59 0 -v ${FILE4} ${FILE4} dset11a dset11b)
 
 # Strings
 # ( HDFFV-10128 )
-ADD_H5_TEST (h5diff_60 0 -v ${STRINGS1} ${STRINGS2} string1 string1)
-ADD_H5_TEST (h5diff_61 0 -v ${STRINGS1} ${STRINGS2} string2 string2)
-ADD_H5_TEST (h5diff_62 0 -v ${STRINGS1} ${STRINGS2} string3 string3)
-ADD_H5_TEST (h5diff_63 0 -v ${STRINGS1} ${STRINGS2} string4 string4)
+ADD_H5_TEST (h5diff_60 1 -v ${STRINGS1} ${STRINGS2} string1 string1)
+ADD_H5_TEST (h5diff_61 1 -v ${STRINGS1} ${STRINGS2} string2 string2)
+ADD_H5_TEST (h5diff_62 1 -v ${STRINGS1} ${STRINGS2} string3 string3)
+ADD_H5_TEST (h5diff_63 1 -v ${STRINGS1} ${STRINGS2} string4 string4)
 
 # ##############################################################################
 # # Error messages
