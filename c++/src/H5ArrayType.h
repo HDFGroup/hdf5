@@ -27,39 +27,39 @@ namespace H5 {
 */
 class H5_DLLCPP ArrayType : public DataType {
    public:
-	// Constructor that creates a new array data type based on the
-	// specified base type.
-	ArrayType(const DataType& base_type, int ndims, const hsize_t* dims);
+        // Constructor that creates a new array data type based on the
+        // specified base type.
+        ArrayType(const DataType& base_type, int ndims, const hsize_t* dims);
 
-	// Assignment operator
-	ArrayType& operator=(const ArrayType& rhs);
+        // Assignment operator
+        ArrayType& operator=(const ArrayType& rhs);
 
-	// Constructors that open an array datatype, given a location.
-	ArrayType(const H5Location& loc, const char* name);
-	ArrayType(const H5Location& loc, const H5std_string& name);
+        // Constructors that open an array datatype, given a location.
+        ArrayType(const H5Location& loc, const char* name);
+        ArrayType(const H5Location& loc, const H5std_string& name);
 
-	// Returns the number of dimensions of this array datatype.
-	int getArrayNDims() const;
-	//int getArrayNDims(); // removed 1.8.18 and 1.10.1
+        // Returns the number of dimensions of this array datatype.
+        int getArrayNDims() const;
+        //int getArrayNDims(); // removed 1.8.18 and 1.10.1
 
-	// Returns the sizes of dimensions of this array datatype.
-	int getArrayDims(hsize_t* dims) const;
-	//int getArrayDims(hsize_t* dims); // removed 1.8.18 and 1.10.1
+        // Returns the sizes of dimensions of this array datatype.
+        int getArrayDims(hsize_t* dims) const;
+        //int getArrayDims(hsize_t* dims); // removed 1.8.18 and 1.10.1
 
-	///\brief Returns this class name.
-	virtual H5std_string fromClass () const { return("ArrayType"); }
+        ///\brief Returns this class name.
+        virtual H5std_string fromClass () const { return("ArrayType"); }
 
-	// Copy constructor: makes copy of the original object.
-	ArrayType( const ArrayType& original );
+        // Copy constructor: makes copy of the original object.
+        ArrayType(const ArrayType& original);
 
-	// Constructor that takes an existing id
-	ArrayType( const hid_t existing_id );
+        // Constructor that takes an existing id
+        ArrayType(const hid_t existing_id);
 
-	// Noop destructor
-	virtual ~ArrayType();
+        // Noop destructor
+        virtual ~ArrayType();
 
-	// Default constructor
-	ArrayType();
+        // Default constructor
+        ArrayType();
 };
 }
 #endif // __H5ArrayType_H
