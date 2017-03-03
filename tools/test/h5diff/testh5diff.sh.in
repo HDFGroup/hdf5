@@ -124,6 +124,8 @@ $SRC_H5DIFF_TESTFILES/tmptest.he5
 $SRC_H5DIFF_TESTFILES/tmptest2.he5
 $SRC_H5DIFF_TESTFILES/tmpSingleSiteBethe.reference.h5
 $SRC_H5DIFF_TESTFILES/tmpSingleSiteBethe.output.h5
+$SRC_H5DIFF_TESTFILES/diff_strings1.h5
+$SRC_H5DIFF_TESTFILES/diff_strings2.h5
 "
 
 LIST_HDF5_VDS_TEST_FILES="
@@ -282,6 +284,10 @@ $SRC_H5DIFF_TESTFILES/h5diff_517.txt
 $SRC_H5DIFF_TESTFILES/h5diff_518.txt
 $SRC_H5DIFF_TESTFILES/h5diff_530.txt
 $SRC_H5DIFF_TESTFILES/h5diff_540.txt
+$SRC_H5DIFF_TESTFILES/h5diff_60.txt
+$SRC_H5DIFF_TESTFILES/h5diff_61.txt
+$SRC_H5DIFF_TESTFILES/h5diff_62.txt
+$SRC_H5DIFF_TESTFILES/h5diff_63.txt
 $SRC_H5DIFF_TESTFILES/h5diff_600.txt
 $SRC_H5DIFF_TESTFILES/h5diff_601.txt
 $SRC_H5DIFF_TESTFILES/h5diff_603.txt
@@ -687,6 +693,13 @@ TOOLTEST h5diff_58.txt -v h5diff_dset1.h5 h5diff_dset2.h5 refreg
 # test for both dset and attr with same type but with different size
 # ( HDDFV-7942 )
 TOOLTEST h5diff_59.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset11a dset11b
+
+# Strings
+# ( HDFFV-10128 )
+TOOLTEST h5diff_60.txt -v diff_strings1 diff_strings2 string1 string1
+TOOLTEST h5diff_61.txt -v diff_strings1 diff_strings2 string2 string2
+TOOLTEST h5diff_62.txt -v diff_strings1 diff_strings2 string3 string3
+TOOLTEST h5diff_63.txt -v diff_strings1 diff_strings2 string4 string4
 
 # ##############################################################################
 # # Error messages
