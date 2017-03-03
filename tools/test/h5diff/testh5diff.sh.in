@@ -696,10 +696,10 @@ TOOLTEST h5diff_59.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset11a dset11b
 
 # Strings
 # ( HDFFV-10128 )
-TOOLTEST h5diff_60.txt -v diff_strings1 diff_strings2 string1 string1
-TOOLTEST h5diff_61.txt -v diff_strings1 diff_strings2 string2 string2
-TOOLTEST h5diff_62.txt -v diff_strings1 diff_strings2 string3 string3
-TOOLTEST h5diff_63.txt -v diff_strings1 diff_strings2 string4 string4
+TOOLTEST h5diff_60.txt -v diff_strings1.h5 diff_strings2.h5 string1 string1
+TOOLTEST h5diff_61.txt -v diff_strings1.h5 diff_strings2.h5 string2 string2
+TOOLTEST h5diff_62.txt -v diff_strings1.h5 diff_strings2.h5 string3 string3
+TOOLTEST h5diff_63.txt -v diff_strings1.h5 diff_strings2.h5 string4 string4
 
 # ##############################################################################
 # # Error messages
