@@ -2284,13 +2284,14 @@ H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,
 H5_DLL herr_t H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr);
 H5_DLL herr_t H5C_clear_coll_entries(H5C_t * cache_ptr, hbool_t partial);
-H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, int32_t ce_array_len,
+H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t *f, hid_t dxpl_id, unsigned ce_array_len,
     haddr_t *ce_array_ptr);
 #endif /* H5_HAVE_PARALLEL */
 
 #ifndef NDEBUG	/* debugging functions */
 H5_DLL hbool_t H5C_get_serialization_in_progress(const H5C_t *cache_ptr);
 H5_DLL hbool_t H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring);
+H5_DLL herr_t H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn);
 H5_DLL herr_t H5C_get_entry_ptr_from_addr(H5C_t *cache_ptr, haddr_t addr,
     void **entry_ptr_ptr);
 H5_DLL herr_t H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, 

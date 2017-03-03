@@ -10,7 +10,7 @@
 #-----------------------------------------------------------------------------
 # Option to Build with Static CRT libraries on Windows
 #-------------------------------------------------------------------------------
-MACRO (TARGET_STATIC_CRT_FLAGS)
+macro (TARGET_STATIC_CRT_FLAGS)
   if (MSVC AND NOT BUILD_SHARED_LIBS)
     foreach (flag_var
         CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
@@ -31,7 +31,7 @@ MACRO (TARGET_STATIC_CRT_FLAGS)
     set (WIN_COMPILE_FLAGS "")
     set (WIN_LINK_FLAGS "/NODEFAULTLIB:MSVCRT")
   endif ()
-ENDMACRO ()
+endmacro ()
 
 #-----------------------------------------------------------------------------
 option (BUILD_STATIC_CRT_LIBS "Build With Static CRT Libraries" OFF)

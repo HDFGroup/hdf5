@@ -18,7 +18,7 @@ ENABLE_LANGUAGE (Fortran)
 # The provided CMake Fortran macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
-MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
+macro (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
 #
 #  if (NOT DEFINED ${RUN_RESULT_VAR})
     message (STATUS "Detecting Fortran ${FUNCTION}")
@@ -66,14 +66,14 @@ MACRO (FORTRAN_RUN FUNCTION CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR RETURN)
       endif ()
     endif ()
 #  endif ()
-ENDMACRO ()
+endmacro ()
 
 # Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
-MACRO (READ_SOURCE START END RETURN)
+macro (READ_SOURCE START END RETURN)
   file (READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" CODE)
   string (REGEX MATCH "${START}[\\\t\\\n\\\r[].+]*${END}" CODE ${CODE})
   set (RETURN "${CODE}")
-ENDMACRO ()
+endmacro ()
 
 #-----------------------------------------------------------------------------
 #  Check to see C_LONG_DOUBLE is available
@@ -120,8 +120,8 @@ endif ()
 # Determine the available KINDs for REALs and INTEGERs
 #-----------------------------------------------------------------------------
 
-READ_SOURCE("PROGRAM FC_AVAIL_KINDS" "END PROGRAM FC_AVAIL_KINDS" CODE)
-FORTRAN_RUN("REAL and INTEGER KINDs"
+READ_SOURCE ("PROGRAM FC_AVAIL_KINDS" "END PROGRAM FC_AVAIL_KINDS" CODE)
+FORTRAN_RUN ("REAL and INTEGER KINDs"
   "${CODE}"
   XX
   YY
@@ -222,7 +222,7 @@ MATH (EXPR _LEN "${LEN_VAR}-1")
 list (GET VAR ${_LEN} max_real_fortran_kind)
 
 foreach (KIND ${VAR} )
-  set(PROG_SRC
+  set (PROG_SRC
     "
         PROGRAM main
         USE ISO_C_BINDING
@@ -232,7 +232,7 @@ foreach (KIND ${VAR} )
         END
      "
   )
-  FORTRAN_RUN("REAL KIND SIZEOF" ${PROG_SRC}
+  FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC}
   XX
   YY
   PROG_OUTPUT1
@@ -267,7 +267,7 @@ list (GET VAR ${_LEN} max_real_fortran_sizeof)
 #-----------------------------------------------------------------------------
 # Find sizeof of native kinds
 #-----------------------------------------------------------------------------
-FORTRAN_RUN("SIZEOF NATIVE KINDs"
+FORTRAN_RUN ("SIZEOF NATIVE KINDs"
   "
        PROGRAM main
           USE ISO_C_BINDING
@@ -319,7 +319,7 @@ if (NOT PAC_FORTRAN_NATIVE_INTEGER_KIND)
 endif ()
 if (NOT PAC_FORTRAN_NATIVE_REAL_KIND)
    message (FATAL_ERROR "Failed to find KIND of NATIVE REAL for Fortran")
-endif()
+endif ()
 if (NOT PAC_FORTRAN_NATIVE_DOUBLE_KIND)
    message (FATAL_ERROR "Failed to find KIND of NATIVE DOUBLE for Fortran")
 endif ()
@@ -360,7 +360,7 @@ ENABLE_LANGUAGE (C)
 # The provided CMake C macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
-MACRO (C_RUN FUNCTION CODE RETURN)
+macro (C_RUN FUNCTION CODE RETURN)
     message (STATUS "Detecting C ${FUNCTION}")
     if (CMAKE_REQUIRED_LIBRARIES)
       set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
@@ -405,7 +405,7 @@ MACRO (C_RUN FUNCTION CODE RETURN)
     else ()
         message (FATAL_ERROR "Compilation of C ${FUNCTION} - Failed")
     endif ()
-ENDMACRO ()
+endmacro ()
 
 set (PROG_SRC
     "
@@ -434,9 +434,9 @@ set (PROG_SRC
        return 1\\\;
    }
      "
-  )
+)
 
-C_RUN("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT)
+C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT)
 
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  long double decimal precision

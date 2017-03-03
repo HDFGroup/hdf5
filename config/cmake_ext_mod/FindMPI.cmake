@@ -315,6 +315,7 @@ function (interrogate_mpi_compiler lang try_libs)
         set(MPI_COMPILE_FLAGS_WORK)
 
         foreach(FLAG ${MPI_ALL_COMPILE_FLAGS})
+          string(REGEX REPLACE "^ " "" FLAG ${FLAG})
           if (MPI_COMPILE_FLAGS_WORK)
             set(MPI_COMPILE_FLAGS_WORK "${MPI_COMPILE_FLAGS_WORK} ${FLAG}")
           else()
@@ -324,6 +325,8 @@ function (interrogate_mpi_compiler lang try_libs)
 
         # Extract include paths from compile command line
         string(REGEX MATCHALL "(^| )-I([^\" ]+|\"[^\"]+\")" MPI_ALL_INCLUDE_PATHS "${MPI_COMPILE_CMDLINE}")
+        set(MPI_INCLUDE_PATH_WORK)
+
         foreach(IPATH ${MPI_ALL_INCLUDE_PATHS})
           string(REGEX REPLACE "^ ?-I" "" IPATH ${IPATH})
           string(REPLACE "//" "/" IPATH ${IPATH})
@@ -366,6 +369,7 @@ function (interrogate_mpi_compiler lang try_libs)
         string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker )([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE}")
         set(MPI_LINK_FLAGS_WORK)
         foreach(FLAG ${MPI_ALL_LINK_FLAGS})
+          string(REGEX REPLACE "^ " "" FLAG ${FLAG})
           if (MPI_LINK_FLAGS_WORK)
             set(MPI_LINK_FLAGS_WORK "${MPI_LINK_FLAGS_WORK} ${FLAG}")
           else()
@@ -464,10 +468,10 @@ function (interrogate_mpi_compiler lang try_libs)
         set(MPI_HEADER_PATH "MPI_HEADER_PATH-NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
         find_path(MPI_HEADER_PATH mpifptr.h
           HINTS ${_MPI_BASE_DIR} ${_MPI_PREFIX_PATH}
-          PATH_SUFFIXES include include/${MS_MPI_ARCH_DIR} include/${MS_MPI_ARCH_DIR2} Inc Inc/${MS_MPI_ARCH_DIR} Inc/${MS_MPI_ARCH_DIR2})
+          PATH_SUFFIXES include Include include/${MS_MPI_ARCH_DIR} Include/${MS_MPI_ARCH_DIR2} Include/${MS_MPI_ARCH_DIR} include/${MS_MPI_ARCH_DIR2} Inc Inc/${MS_MPI_ARCH_DIR} Inc/${MS_MPI_ARCH_DIR2})
         if (MPI_INCLUDE_PATH_WORK AND MPI_HEADER_PATH)
           list(APPEND MPI_INCLUDE_PATH_WORK ${MPI_HEADER_PATH})
-        endif()
+        endif ()
 
         set(MPI_LIB "MPI_LIB-NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
         find_library(MPI_LIB
@@ -476,8 +480,8 @@ function (interrogate_mpi_compiler lang try_libs)
           PATH_SUFFIXES lib lib/${MS_MPI_ARCH_DIR} Lib Lib/${MS_MPI_ARCH_DIR})
         if (MPI_LIBRARIES_WORK AND MPI_LIB)
           list(APPEND MPI_LIBRARIES_WORK ${MPI_LIB})
-        endif()
-      endif()
+        endif ()
+      endif ()
 
       if (NOT MPI_LIBRARIES_WORK)
         set(MPI_LIBRARIES_WORK "MPI_${lang}_LIBRARIES-NOTFOUND")
@@ -625,6 +629,9 @@ foreach (lang C CXX Fortran)
     if (NOT MPI_${lang}_LIBRARIES OR NOT MPI_${lang}_INCLUDE_PATH)
       try_regular_compiler(${lang} regular_compiler_worked)
     endif()
+
+    # add fortran mpi module path if ENV VAR exists
+    set (MPI_${lang}_INCLUDE_PATH "${MPI_${lang}_INCLUDE_PATH};$ENV{MPI_FORTRAN_MOD_DIR}")
 
     set(MPI_${lang}_FIND_QUIETLY ${MPI_FIND_QUIETLY})
     set(MPI_${lang}_FIND_REQUIRED ${MPI_FIND_REQUIRED})

@@ -1250,7 +1250,7 @@ function(create_javadoc _target)
             else ()
                 set(_overview ${_overview}:${_path})
             endif ()
-        endforeach()
+        endforeach ()
         set(_javadoc_options ${_javadoc_options} -overview ${_overview})
     endif ()
 

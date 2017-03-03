@@ -54,10 +54,6 @@
 /* Local Prototypes */
 /********************/
 
-#if 0 /* debugging routines */
-herr_t H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn);
-#endif /* debugging routines */
-
 
 /*********************/
 /* Package Variables */
@@ -195,7 +191,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if 0 /* debugging routine */
+#ifndef NDEBUG
 herr_t
 H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
 {
@@ -204,7 +200,7 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
     H5C_cache_entry_t * entry_ptr = NULL;
     H5SL_node_t *       node_ptr = NULL;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(cache_ptr != NULL);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -258,10 +254,9 @@ H5C_dump_cache_skip_list(H5C_t * cache_ptr, char * calling_fcn)
 
     HDfprintf(stdout, "\n\n");
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_dump_cache_skip_list() */
-#endif /* debugging routine */
+#endif /* NDEBUG */
 
 
 /*-------------------------------------------------------------------------
@@ -655,7 +650,7 @@ H5C_stats(H5C_t * cache_ptr,
               cache_ptr->prefix,
               cache_ptr->images_created,
               cache_ptr->images_loaded,
-              (long long)cache_ptr->last_image_size);
+              cache_ptr->last_image_size);
 
     HDfprintf(stdout,
 	      "%s  prefetches / dirty prefetches      = %lld / %lld\n",
@@ -905,7 +900,7 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED * cache_ptr)
 
     cache_ptr->images_created           = 0;
     cache_ptr->images_loaded            = 0;
-    cache_ptr->last_image_size          = (size_t)0;
+    cache_ptr->last_image_size          = (hsize_t)0;
 
     cache_ptr->prefetches               = 0;
     cache_ptr->dirty_prefetches			= 0;
@@ -1325,11 +1320,12 @@ H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring)
 
     while(ring <= inner_ring) {
 	if(cache_ptr->dirty_index_ring_size[ring] > 0)
-            ret_value = FALSE;
+            HGOTO_DONE(FALSE)
 
 	ring++;
     } /* end while */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_cache_is_clean() */
 #endif /* NDEBUG */

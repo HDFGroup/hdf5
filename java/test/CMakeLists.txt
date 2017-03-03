@@ -91,10 +91,10 @@ set (testfilter "OK (598 tests)")
 if (CMAKE_BUILD_TYPE MATCHES Debug)
   if (WIN32)
     set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_D;")
-  else()
+  else ()
     set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
-  endif()
-endif()
+  endif ()
+endif ()
 
 add_test (
   NAME JUnit-interface-clearall-objects

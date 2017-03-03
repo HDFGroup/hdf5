@@ -54,6 +54,6 @@ set (H5P_TESTS
 
 foreach (testp ${H5P_TESTS})
   ADD_H5P_EXE(${testp})
-endforeach (testp ${H5P_TESTS})
+endforeach ()
 
 include (CMakeTests.cmake)

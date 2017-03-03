@@ -7,9 +7,9 @@
 #-----------------------------------------------------------------------------
 # Option to Build with User Defined Values
 #-----------------------------------------------------------------------------
-MACRO (MACRO_USER_DEFINED_LIBS)
+macro (MACRO_USER_DEFINED_LIBS)
   set (USER_DEFINED_VALUE "FALSE")
-ENDMACRO ()
+endmacro ()
 
 #-------------------------------------------------------------------------------
 option (BUILD_USER_DEFINED_LIBS "Build With User Defined Values" OFF)
