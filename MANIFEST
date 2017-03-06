@@ -1806,6 +1806,10 @@
 ./tools/h5diff/testfiles/h5diff_57.txt
 ./tools/h5diff/testfiles/h5diff_58.txt
 ./tools/h5diff/testfiles/h5diff_59.txt
+./tools/h5diff/testfiles/h5diff_60.txt
+./tools/h5diff/testfiles/h5diff_61.txt
+./tools/h5diff/testfiles/h5diff_62.txt
+./tools/h5diff/testfiles/h5diff_63.txt
 ./tools/h5diff/testfiles/h5diff_600.txt
 ./tools/h5diff/testfiles/h5diff_601.txt
 ./tools/h5diff/testfiles/h5diff_603.txt
@@ -2009,6 +2013,8 @@
 ./tools/h5diff/testfiles/tudfilter2.h5
 ./tools/h5diff/testfiles/h5diff_ud.txt
 ./tools/h5diff/testfiles/h5diff_udfail.txt
+./tools/h5diff/testfiles/diff_strings1.h5
+./tools/h5diff/testfiles/diff_strings2.h5
 
 #test files for h5repack
 ./tools/h5repack/testfiles/README
