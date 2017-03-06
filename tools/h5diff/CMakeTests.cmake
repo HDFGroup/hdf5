@@ -52,6 +52,8 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/non_comparables2.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/tudfilter.h5
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/tudfilter2.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/diff_strings1.h5
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/diff_strings2.h5
   )
 
   set (LIST_OTHER_TEST_FILES
@@ -179,6 +181,10 @@
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_518.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_530.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_540.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_60.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_61.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_62.txt
+      ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_63.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_600.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_601.txt
       ${HDF5_TOOLS_H5DIFF_SOURCE_DIR}/testfiles/h5diff_603.txt
@@ -286,7 +292,7 @@
 ##############################################################################
 ##############################################################################
 
-  MACRO (ADD_H5_TEST resultfile resultcode)
+  macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DIFF-${resultfile} COMMAND $<TARGET_FILE:h5diff> ${ARGN})
@@ -314,9 +320,9 @@
     if (H5_HAVE_PARALLEL)
       ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_PH5_TEST resultfile resultcode)
+  macro (ADD_PH5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME PH5DIFF-${resultfile} COMMAND $<TARGET_FILE:ph5diff> ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} ${ARGN})
@@ -348,9 +354,9 @@
       endif ()
       set (last_test "PH5DIFF-${resultfile}")
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_UD_TEST testname resultcode resultfile)
+  macro (ADD_H5_UD_TEST testname resultcode resultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
@@ -393,7 +399,7 @@
       endif ()
       set_tests_properties (H5DIFF_UD-${testname} PROPERTIES DEPENDS H5DIFF_UD-${testname}-clearall-objects)
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################
@@ -450,6 +456,9 @@
   # attrs with verbose option level
   set (ATTR_VERBOSE_LEVEL_FILE1 h5diff_attr_v_level1.h5)
   set (ATTR_VERBOSE_LEVEL_FILE2 h5diff_attr_v_level2.h5)
+  # strings
+  set (STRINGS1 diff_strings1.h5)
+  set (STRINGS2 diff_strings2.h5)
 
   if (HDF5_ENABLE_USING_MEMCHECKER)
     # Remove any output file left over from previous test run
@@ -707,6 +716,14 @@
           h5diff_530.out.err
           h5diff_540.out
           h5diff_540.out.err
+          h5diff_60.out
+          h5diff_60.out.err
+          h5diff_61.out
+          h5diff_61.out.err
+          h5diff_62.out
+          h5diff_62.out.err
+          h5diff_63.out
+          h5diff_63.out.err
           h5diff_600.out
           h5diff_600.out.err
           h5diff_601.out
@@ -927,6 +944,13 @@ ADD_H5_TEST (h5diff_58 1 -v ${FILE7} ${FILE8} refreg)
 # ( HDDFV-7942 )
 ADD_H5_TEST (h5diff_59 0 -v ${FILE4} ${FILE4} dset11a dset11b)
 
+# Strings
+# ( HDFFV-10128 )
+ADD_H5_TEST (h5diff_60 1 -v ${STRINGS1} ${STRINGS2} string1 string1)
+ADD_H5_TEST (h5diff_61 1 -v ${STRINGS1} ${STRINGS2} string2 string2)
+ADD_H5_TEST (h5diff_62 1 -v ${STRINGS1} ${STRINGS2} string3 string3)
+ADD_H5_TEST (h5diff_63 1 -v ${STRINGS1} ${STRINGS2} string4 string4)
+
 # ##############################################################################
 # # Error messages
 # ##############################################################################
@@ -1089,8 +1113,7 @@ ADD_H5_TEST (h5diff_103 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/d1
 g1/d2)
 
 # with --use-system-epsilon for float value. expect less differences
-ADD_H5_TEST (h5diff_104 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp1
-g1/fp2)
+ADD_H5_TEST (h5diff_104 1 -v --use-system-epsilon ${FILE1} ${FILE1} g1/fp1 g1/fp2)
 
 # not comparable -c flag
 ADD_H5_TEST (h5diff_200 0 ${FILE2} ${FILE2} g2/dset1  g2/dset2)
@@ -1386,3 +1409,7 @@ ADD_H5_TEST (h5diff_646 1 -v --use-system-epsilon -p 0.05 ${FILE1} ${FILE2} /g1/
 ##############################################################################
 ADD_H5_UD_TEST (h5diff_plugin_test 0 h5diff_ud -v tudfilter.h5 tudfilter2.h5)
 ADD_H5_UD_TEST (h5diff_plugin_fail 2 h5diff_udfail -v tudfilter.h5 tudfilter2.h5)
+
+# ##############################################################################
+# # END
+# ##############################################################################

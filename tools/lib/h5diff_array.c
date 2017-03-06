@@ -544,7 +544,7 @@ hsize_t diff_array( void *_mem1,
  *  Recursively call this function for each element
  * H5T_STRING
  *  compare byte by byte in a cycle from 0 to type_size. this type_size is the
- *  value obtained by the get_size function but it is the string lenght for
+ *  value obtained by the get_size function but it is the string length for
  *  variable sized strings
  * H5T_OPAQUE
  *  compare byte by byte in a cycle from 0 to type_size
@@ -600,7 +600,7 @@ static hsize_t diff_datum(void       *_mem1,
 
     /* Fast comparison first for atomic type by memcmp().
      * It is OK not to list non-atomic type here because it will not be caught
-     * by the confition, but it gives more clarity for code planning
+     * by the condition, but it gives more clarity for code planning
      */
     if (type_class != H5T_REFERENCE &&
         type_class != H5T_COMPOUND &&
@@ -690,6 +690,10 @@ static hsize_t diff_datum(void       *_mem1,
              *       of length of strings.
              *       For now mimic the previous way.
              */
+            if(size1 != size2)
+            {
+                nfound++;
+            }
             if(size1 < size2)
             {
                 size = size1;
@@ -710,7 +714,7 @@ static hsize_t diff_datum(void       *_mem1,
 
                 pad = H5Tget_strpad(m_type);
 
-                for (u=0; u<size && (s[u] || pad!=H5T_STR_NULLTERM); u++)
+                for (u=0; u<size; u++)
                     nfound+=character_compare(
                         s1 + u,
                         s2 + u, /* offset */
