@@ -218,7 +218,7 @@ string (REGEX REPLACE "," ";" VAR "${pac_validRealKinds}")
 
 #find the maximum kind of the real
 list (LENGTH VAR LEN_VAR)
-MATH (EXPR _LEN "${LEN_VAR}-1")
+math (EXPR _LEN "${LEN_VAR}-1")
 list (GET VAR ${_LEN} max_real_fortran_kind)
 
 foreach (KIND ${VAR} )
@@ -261,7 +261,7 @@ set (PAC_FC_ALL_REAL_KINDS_SIZEOF "\{${pack_real_sizeof}\}")
 #find the maximum kind of the real
 string (REGEX REPLACE "," ";" VAR "${pack_real_sizeof}")
 list (LENGTH VAR LEN_VAR)
-MATH (EXPR _LEN "${LEN_VAR}-1")
+math (EXPR _LEN "${LEN_VAR}-1")
 list (GET VAR ${_LEN} max_real_fortran_sizeof)
 
 #-----------------------------------------------------------------------------
@@ -340,7 +340,7 @@ if (NOT(${SIZEOF___FLOAT128} EQUAL 0))
                                            !!! Fortran interfaces will not be generated for REAL(KIND=${max_real_fortran_kind}) !!!")
      string (REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS ${PAC_FC_ALL_REAL_KINDS})
      string (REGEX REPLACE ",[0-9]+}" "}" PAC_FC_ALL_REAL_KINDS_SIZEOF ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
-     MATH (EXPR NUM_RKIND "${NUM_RKIND} - 1")
+     math (EXPR NUM_RKIND "${NUM_RKIND} - 1")
    endif ()
 endif ()
 

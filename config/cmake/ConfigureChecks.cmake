@@ -158,10 +158,10 @@ endif ()
 
 CHECK_TYPE_SIZE("__float128" SIZEOF___FLOAT128)
 if (${HAVE_SIZEOF___FLOAT128})
-  SET (H5_HAVE_FLOAT128 1)
+  set (H5_HAVE_FLOAT128 1)
 else ()
-  SET (H5_HAVE_FLOAT128 0)
-  SET (SIZEOF___FLOAT128 0)
+  set (H5_HAVE_FLOAT128 0)
+  set (SIZEOF___FLOAT128 0)
 endif ()
 
 #-----------------------------------------------------------------------------

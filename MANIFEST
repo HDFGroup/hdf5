@@ -2155,6 +2155,10 @@
 ./tools/test/h5diff/testfiles/h5diff_57.txt
 ./tools/test/h5diff/testfiles/h5diff_58.txt
 ./tools/test/h5diff/testfiles/h5diff_59.txt
+./tools/test/h5diff/testfiles/h5diff_60.txt
+./tools/test/h5diff/testfiles/h5diff_61.txt
+./tools/test/h5diff/testfiles/h5diff_62.txt
+./tools/test/h5diff/testfiles/h5diff_63.txt
 ./tools/test/h5diff/testfiles/h5diff_600.txt
 ./tools/test/h5diff/testfiles/h5diff_601.txt
 ./tools/test/h5diff/testfiles/h5diff_603.txt
@@ -2361,6 +2365,8 @@
 ./tools/test/h5diff/testfiles/tudfilter2.h5
 ./tools/test/h5diff/testfiles/h5diff_ud.txt
 ./tools/test/h5diff/testfiles/h5diff_udfail.txt
+./tools/test/h5diff/testfiles/diff_strings1.h5
+./tools/test/h5diff/testfiles/diff_strings2.h5
 #vds
 ./tools/test/h5diff/testfiles/h5diff_v1.txt
 ./tools/test/h5diff/testfiles/h5diff_v2.txt
