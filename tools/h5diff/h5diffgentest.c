@@ -93,6 +93,9 @@ hsize_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 /* non-comparable dataset and attribute */
 #define NON_COMPARBLES1 "non_comparables1.h5"
 #define NON_COMPARBLES2 "non_comparables2.h5"
+/* string dataset and attribute */
+#define DIFF_STRINGS1 "diff_strings1.h5"
+#define DIFF_STRINGS2 "diff_strings2.h5"
 
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
@@ -157,6 +160,7 @@ static void test_comps_array_vlen (const char *fname, const char *dset, const ch
 static void test_comps_vlen_arry (const char *fname, const char *dset,const char *attr, int diff, int is_file_new);
 static void test_data_nocomparables (const char *fname, int diff);
 static void test_objs_nocomparables (const char *fname1, const char *fname2);
+static void test_objs_strings (const char *fname, const char *fname2);
 
 /* called by test_attributes() and test_datasets() */
 static void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
@@ -256,6 +260,9 @@ int main(void)
 
     /* common objects (same name) with different object types. HDFFV-7644 */
     test_objs_nocomparables(NON_COMPARBLES1, NON_COMPARBLES2);
+
+    /* string dataset and attribute. HDFFV-10028 */
+    test_objs_strings(DIFF_STRINGS1, DIFF_STRINGS2);
 
     return 0;
 }
@@ -5212,6 +5219,160 @@ out:
     if(tid2)
         H5Tclose(tid2);
 
+}
+
+static hid_t mkstr(int size, H5T_str_t pad) {
+    hid_t type;
+
+    if((type=H5Tcopy(H5T_C_S1)) < 0) return -1;
+    if(H5Tset_size(type, (size_t)size) < 0) return -1;
+    if(H5Tset_strpad(type, pad) < 0) return -1;
+
+    return type;
+}
+
+/*-------------------------------------------------------------------------
+* Function: test_objs_strings
+*
+* Purpose:
+*   Create test files with common objects (same name) but different string
+*   types.
+*   h5diff should show differences output from these common objects.
+*-------------------------------------------------------------------------*/
+static void test_objs_strings(const char *fname1, const char *fname2)
+{
+    herr_t  status = SUCCEED;
+    hid_t   fid1=0;
+    hid_t   fid2=0;
+    hid_t   dataset=0;
+    hid_t   space=0;
+    hid_t   f_type=0;
+    hid_t   m_type=0;
+    hsize_t dims1[] = {3, 4};
+    char string1A[12][3] = {"s1","s2","s3","s4","s5","s6","s","s","s9",
+            "s0","s1","s2"};
+    char string1B[12][3] = {"s1","s2","s3","s4","s","s","s7","s8","s9",
+            "s0","s1","s2"};
+
+    hsize_t dims2[]={20};
+    char string2A[20][10] = {"ab cd ef1", "ab cd ef2", "ab cd ef3", "ab cd ef4",
+            "ab cd ef5", "ab cd ef6", "ab cd ef7", "ab cd ef8",
+            "ab cd 9", "ab cd 0", "ab cd 1", "ab cd 2",
+            "ab cd ef3", "ab cd ef4", "ab cd ef5", "ab cd ef6",
+            "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
+    char string2B[20][10] = {"ab cd ef1", "ab cd ef2", "ab cd ef3", "ab cd ef4",
+            "ab cd ef5", "ab cd ef6", "ab cd ef7", "ab cd ef8",
+            "ab cd ef9", "ab cd ef0", "ab cd ef1", "ab cd ef2",
+            "ab cd 3", "ab cd 4", "ab cd 5", "ab cd 6",
+            "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
+
+    hsize_t dims3[] = {27};
+    char string3A[27][6] = {"abcd0", "abcd1", "abcd2", "abcd3",
+            "abcd4", "abcd5", "abcd6", "abcd7",
+            "abcd8", "abcd9", "abcd0", "abcd1",
+            "abd2", "abc3", "bcd4", "acd5",
+            "abcd6", "abcd7", "abcd8", "abcd9",
+            "abcd0", "abcd1", "abcd2", "abcd3",
+            "abc4", "abc5", "abc6"};
+    char string3B[27][6] = {"abcd0", "abcd1", "abcd2", "abcd3",
+            "abcd4", "abcd5", "abcd6", "abcd7",
+            "abcd8", "abcd9", "abcd0", "abcd1",
+            "abcd2", "abcd3", "abcd4", "abcd5",
+            "abd6", "abc7", "bcd8", "acd9",
+            "abcd0", "abcd1", "abcd2", "abcd3",
+            "abd4", "abd5", "abd6"};
+
+    hsize_t dims4[] = {3};
+    char string4A[3][21] = { "s1234567890123456789", "s1234567890123456789",
+            "s12345678901234567"};
+    char string4B[3][21] = { "s1234567890123456789", "s12345678901234567",
+            "s1234567890123456789"};
+
+    /*-----------------------------------------------------------------------
+     * Create file(s)
+     *------------------------------------------------------------------------*/
+     /* file1 */
+     fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+     if (fid1 < 0)
+     {
+         fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+         status = FAIL;
+         goto out;
+     }
+
+     /* file2 */
+     fid2 = H5Fcreate (fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+     if (fid2 < 0)
+     {
+         fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+         status = FAIL;
+         goto out;
+     }
+
+    /* string 1 : nullterm string */
+    space = H5Screate_simple(2, dims1, NULL);
+    f_type = mkstr(5, H5T_STR_NULLTERM);
+    m_type = mkstr(3, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string1", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string1A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string1", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string1B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* string 2 : space pad string */
+    space = H5Screate_simple(1, dims2, NULL);
+    f_type = mkstr(11, H5T_STR_SPACEPAD);
+    m_type = mkstr(10, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string2", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string2A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string2", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string2B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* string 3 : null pad string */
+    space = H5Screate_simple(1, dims3, NULL);
+    f_type = mkstr(8, H5T_STR_NULLPAD);
+    m_type = mkstr(6, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string3", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string3A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string3", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string3B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* string 4 : space pad long string */
+    space = H5Screate_simple(1, dims4, NULL);
+    f_type = mkstr(168, H5T_STR_SPACEPAD);
+    m_type = mkstr(21, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string4", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string4", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close IDs
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(fid2)
+        H5Fclose(fid2);
 }
 
 /*-------------------------------------------------------------------------
