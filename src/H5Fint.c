@@ -1312,7 +1312,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create/open root group")
     } /* end if */
     else if (1 == shared->nrefs) {
-
         /* Read the superblock if it hasn't been read before. */
         if(H5F__super_read(file, dxpl_id, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
@@ -1360,12 +1359,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
      */
     if(H5P_get(a_plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get evict on close value")
-
-    if(shared->nrefs == 1) {
+    if(shared->nrefs == 1)
         shared->evict_on_close = evict_on_close;
-    } else if(shared->nrefs > 1) {
+    else if(shared->nrefs > 1) {
         if(shared->evict_on_close != evict_on_close)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "file evict-on-close value doesn't match")
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "file evict-on-close value doesn't match")
     } /* end if */
 
     /* Formulate the absolute path for later search of target file for external links */
@@ -1405,7 +1403,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         else { /* H5F_ACC_RDONLY: check consistency of status_flags */
             /* Skip check of status_flags for file with < superblock version 3 */
             if(file->shared->sblock->super_vers >= HDF5_SUPERBLOCK_VERSION_3) {
-
                 if(H5F_INTENT(file) & H5F_ACC_SWMR_READ) { 
                     if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS && 
                             !(file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
@@ -1413,12 +1410,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                             (!(file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) && 
                             file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
                         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is not already open for SWMR writing")
-
                 } /* end if */
                 else if((file->shared->sblock->status_flags & H5F_SUPER_WRITE_ACCESS) ||
                         (file->shared->sblock->status_flags & H5F_SUPER_SWMR_WRITE_ACCESS))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for write (may use <h5clear file> to clear file consistency flags)")
-
             } /* version 3 superblock */
         } /* end else */
     } /* end if set_flag */
