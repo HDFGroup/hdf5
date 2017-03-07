@@ -32,55 +32,55 @@ class VarLenType;
 */
 class H5_DLLCPP CommonFG {
    public:
-	// Opens a generic named datatype in this location.
-	DataType openDataType(const char* name) const;
-	DataType openDataType(const H5std_string& name) const;
+        // Opens a generic named datatype in this location.
+        DataType openDataType(const char* name) const;
+        DataType openDataType(const H5std_string& name) const;
 
-	// Opens a named array datatype in this location.
-	ArrayType openArrayType(const char* name) const;
-	ArrayType openArrayType(const H5std_string& name) const;
+        // Opens a named array datatype in this location.
+        ArrayType openArrayType(const char* name) const;
+        ArrayType openArrayType(const H5std_string& name) const;
 
-	// Opens a named compound datatype in this location.
-	CompType openCompType(const char* name) const;
-	CompType openCompType(const H5std_string& name) const;
+        // Opens a named compound datatype in this location.
+        CompType openCompType(const char* name) const;
+        CompType openCompType(const H5std_string& name) const;
 
-	// Opens a named enumeration datatype in this location.
-	EnumType openEnumType(const char* name) const;
-	EnumType openEnumType(const H5std_string& name) const;
+        // Opens a named enumeration datatype in this location.
+        EnumType openEnumType(const char* name) const;
+        EnumType openEnumType(const H5std_string& name) const;
 
-	// Opens a named integer datatype in this location.
-	IntType openIntType(const char* name) const;
-	IntType openIntType(const H5std_string& name) const;
+        // Opens a named integer datatype in this location.
+        IntType openIntType(const char* name) const;
+        IntType openIntType(const H5std_string& name) const;
 
-	// Opens a named floating-point datatype in this location.
-	FloatType openFloatType(const char* name) const;
-	FloatType openFloatType(const H5std_string& name) const;
+        // Opens a named floating-point datatype in this location.
+        FloatType openFloatType(const char* name) const;
+        FloatType openFloatType(const H5std_string& name) const;
 
-	// Opens a named string datatype in this location.
-	StrType openStrType(const char* name) const;
-	StrType openStrType(const H5std_string& name) const;
+        // Opens a named string datatype in this location.
+        StrType openStrType(const char* name) const;
+        StrType openStrType(const H5std_string& name) const;
 
-	// Opens a named variable length datatype in this location.
-	VarLenType openVarLenType(const char* name) const;
-	VarLenType openVarLenType(const H5std_string& name) const;
+        // Opens a named variable length datatype in this location.
+        VarLenType openVarLenType(const char* name) const;
+        VarLenType openVarLenType(const H5std_string& name) const;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-	/// For subclasses, H5File and Group, to return the correct
-	/// object id, i.e. file or group id.
-	virtual hid_t getLocId() const = 0;
+        /// For subclasses, H5File and Group, to return the correct
+        /// object id, i.e. file or group id.
+        virtual hid_t getLocId() const = 0;
 
 
-	/// For subclasses, H5File and Group, to throw appropriate exception.
-	virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const = 0;
+        /// For subclasses, H5File and Group, to throw appropriate exception.
+        virtual void throwException(const H5std_string& func_name, const H5std_string& msg) const = 0;
 
-	// Default constructor.
-	CommonFG();
+        // Default constructor.
+        CommonFG();
 
-	// Noop destructor.
-	virtual ~CommonFG();
+        // Noop destructor.
+        virtual ~CommonFG();
 
     protected:
-	virtual void p_setId(const hid_t new_id) = 0;
+        virtual void p_setId(const hid_t new_id) = 0;
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

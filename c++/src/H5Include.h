@@ -33,10 +33,10 @@ const bool  true  = 1;
 // so re-define them here for now.
 
 /* Initial version of the object header format */
-#define H5O_VERSION_1	1
+#define H5O_VERSION_1    1
 
 /* Revised version - leaves out reserved bytes and alignment padding, and adds
  *      magic number as prefix and checksum as suffix for all chunks.
  */
-#define H5O_VERSION_2	2
+#define H5O_VERSION_2    2
 

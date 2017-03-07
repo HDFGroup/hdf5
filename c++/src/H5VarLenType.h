@@ -27,28 +27,28 @@ namespace H5 {
 */
 class H5_DLLCPP VarLenType : public DataType {
    public:
-	// Constructor that creates a variable-length datatype based
-	// on the specified base type.
-	VarLenType(const DataType* base_type);
+        // Constructor that creates a variable-length datatype based
+        // on the specified base type.
+        VarLenType(const DataType* base_type);
 
-	///\brief Returns this class name.
-	virtual H5std_string fromClass () const { return("VarLenType"); }
+        ///\brief Returns this class name.
+        virtual H5std_string fromClass () const { return("VarLenType"); }
 
-	// Copy constructor: makes copy of the original object.
-	VarLenType( const VarLenType& original );
+        // Copy constructor: makes copy of the original object.
+        VarLenType(const VarLenType& original);
 
-	// Constructor that takes an existing id
-	VarLenType( const hid_t existing_id );
+        // Constructor that takes an existing id
+        VarLenType(const hid_t existing_id);
 
-	// Constructors that open a variable-length datatype, given a location.
-	VarLenType(const H5Location& loc, const char* name);
-	VarLenType(const H5Location& loc, const H5std_string& name);
+        // Constructors that open a variable-length datatype, given a location.
+        VarLenType(const H5Location& loc, const char* name);
+        VarLenType(const H5Location& loc, const H5std_string& name);
 
-	// Noop destructor
-	virtual ~VarLenType();
+        // Noop destructor
+        virtual ~VarLenType();
 
-	// Default constructor
-	VarLenType();
+        // Default constructor
+        VarLenType();
 };
 }
 #endif // __H5VarLenType_H

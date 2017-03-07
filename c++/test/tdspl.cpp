@@ -16,7 +16,7 @@
 /*****************************************************************************
    FILE
    tdspl.cpp - HDF5 C++ testing the dataset memory and transfer property
-		list functionality
+               list functionality
 
  ***************************************************************************/
 #ifdef OLD_HEADER_FILENAME
@@ -45,70 +45,70 @@ static void test_transfplist()
 
     SUBTEST("DSetMemXferPropList::set/getDataTransform()");
     try {
-	// Create various data set prop lists and set data transform expression.
-	DSetMemXferPropList dxpl_c_to_f(c_to_f);
+        // Create various data set prop lists and set data transform expression.
+        DSetMemXferPropList dxpl_c_to_f(c_to_f);
 
-	DSetMemXferPropList dxpl_simple;
-	dxpl_simple.setDataTransform(simple);
+        DSetMemXferPropList dxpl_simple;
+        dxpl_simple.setDataTransform(simple);
 
-	DSetMemXferPropList dxpl_utrans_inv;
-	dxpl_utrans_inv.setDataTransform(utrans_inv);
+        DSetMemXferPropList dxpl_utrans_inv;
+        dxpl_utrans_inv.setDataTransform(utrans_inv);
 
-	//
-	// Make a copy of one of those prop lists then read the data transform
-	// expression and verify that it's the same as the original.
-	//
+        //
+        // Make a copy of one of those prop lists then read the data transform
+        // expression and verify that it's the same as the original.
+        //
 
-	// Copy the prop list.
-	DSetMemXferPropList dxpl_c_to_f_copy;
-	dxpl_c_to_f_copy.copy(dxpl_c_to_f);
+        // Copy the prop list.
+        DSetMemXferPropList dxpl_c_to_f_copy;
+        dxpl_c_to_f_copy.copy(dxpl_c_to_f);
 
-	// Find out the length of the transform expression, allocate the buffer
-	// for it, then read and verify the expression from the copied plist
-	ssize_t tran_len = dxpl_c_to_f_copy.getDataTransform(NULL);
-	char *c_to_f_read = (char *)HDmalloc(tran_len+1);
-	HDmemset(c_to_f_read, 0, tran_len+1);
-	dxpl_c_to_f_copy.getDataTransform(c_to_f_read, tran_len+1);
-	verify_val((const char*)c_to_f_read, (const char*)c_to_f,
-		"DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
-	HDfree(c_to_f_read);
+        // Find out the length of the transform expression, allocate the buffer
+        // for it, then read and verify the expression from the copied plist
+        ssize_t tran_len = dxpl_c_to_f_copy.getDataTransform(NULL);
+        char *c_to_f_read = (char *)HDmalloc(tran_len+1);
+        HDmemset(c_to_f_read, 0, tran_len+1);
+        dxpl_c_to_f_copy.getDataTransform(c_to_f_read, tran_len+1);
+        verify_val((const char*)c_to_f_read, (const char*)c_to_f,
+                "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+        HDfree(c_to_f_read);
 
-	//
-	// Read the expression of each of the prop lists and verify the read
-	// expression
-	//
+        //
+        // Read the expression of each of the prop lists and verify the read
+        // expression
+        //
 
-	// Get and verify the expression with:
-	// ssize_t getDataTransform(char* exp, const size_t buf_size [default=0])
-	tran_len =  dxpl_c_to_f.getDataTransform(NULL);
-	c_to_f_read = (char *)HDmalloc(tran_len+1);
-	HDmemset(c_to_f_read, 0, tran_len+1);
-	dxpl_c_to_f.getDataTransform(c_to_f_read, tran_len+1);
-	verify_val((const char*)c_to_f_read, (const char*)c_to_f,
-		"DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
-	HDfree(c_to_f_read);
+        // Get and verify the expression with:
+        // ssize_t getDataTransform(char* exp, const size_t buf_size [default=0])
+        tran_len =  dxpl_c_to_f.getDataTransform(NULL);
+        c_to_f_read = (char *)HDmalloc(tran_len+1);
+        HDmemset(c_to_f_read, 0, tran_len+1);
+        dxpl_c_to_f.getDataTransform(c_to_f_read, tran_len+1);
+        verify_val((const char*)c_to_f_read, (const char*)c_to_f,
+                "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+        HDfree(c_to_f_read);
 
-	// Get and verify the expression with:
-	// H5std_string DSetMemXferPropList::getDataTransform()
-	H5std_string simple_read = dxpl_simple.getDataTransform();
-	verify_val((const char*)simple_read.c_str(), (const char*)simple,
-		"DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+        // Get and verify the expression with:
+        // H5std_string DSetMemXferPropList::getDataTransform()
+        H5std_string simple_read = dxpl_simple.getDataTransform();
+        verify_val((const char*)simple_read.c_str(), (const char*)simple,
+                "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
 
-	// Get and verify the expression with:
-	// ssize_t getDataTransform(char* exp, const size_t buf_size)
-	tran_len = dxpl_utrans_inv.getDataTransform(NULL, 0);
-	char *utrans_inv_read = (char *)HDmalloc(tran_len+1);
-	HDmemset(utrans_inv_read, 0, tran_len+1);
-	dxpl_utrans_inv.getDataTransform(utrans_inv_read, tran_len+1);
-	verify_val((const char*)utrans_inv_read, (const char*)utrans_inv,
-		"DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
-	HDfree(utrans_inv_read);
+        // Get and verify the expression with:
+        // ssize_t getDataTransform(char* exp, const size_t buf_size)
+        tran_len = dxpl_utrans_inv.getDataTransform(NULL, 0);
+        char *utrans_inv_read = (char *)HDmalloc(tran_len+1);
+        HDmemset(utrans_inv_read, 0, tran_len+1);
+        dxpl_utrans_inv.getDataTransform(utrans_inv_read, tran_len+1);
+        verify_val((const char*)utrans_inv_read, (const char*)utrans_inv,
+                "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+        HDfree(utrans_inv_read);
 
-	PASSED();
+        PASSED();
     }
     catch (Exception& E)
     {
-	issue_fail_msg("test_transfplist", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_transfplist", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
 
