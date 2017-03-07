@@ -24,7 +24,7 @@
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     get_filename_component(fname "${listfiles}" NAME)
     HDFTEST_COPY_FILE("${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/${fname}" "h5copy_files")
-  endforeach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
+  endforeach ()
   add_custom_target(h5copy_files ALL COMMENT "Copying files needed by h5copy tests" DEPENDS ${h5copy_files_list})
 
 ##############################################################################
@@ -36,7 +36,7 @@
   #
   # Perform h5copy according to passing parmeters
   #
-  MACRO (ADD_H5_F_TEST testname resultcode infile fparam vparam sparam srcname dparam dstname)
+  macro (ADD_H5_F_TEST testname resultcode infile fparam vparam sparam srcname dparam dstname)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
@@ -70,9 +70,9 @@
         set_tests_properties (H5COPY_F-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST testname resultcode infile vparam sparam srcname dparam dstname)
+  macro (ADD_H5_TEST testname resultcode infile vparam sparam srcname dparam dstname)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
@@ -106,18 +106,18 @@
         set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_SKIP_H5_TEST testname skipresultfile)
+  macro (ADD_SKIP_H5_TEST testname skipresultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5COPY-${testname}-${skipresultfile}-SKIPPED
           COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${testname}-${skipresultfile} ${ARGN}"
       )
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST2 testname resultcode infile  psparam pdparam vparam sparam srcname dparam dstname)
+  macro (ADD_H5_TEST2 testname resultcode infile  psparam pdparam vparam sparam srcname dparam dstname)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
@@ -156,9 +156,9 @@
         set_tests_properties (H5COPY-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST_SAME testname resultcode pfile psparam pdparam vparam sparam srcname dparam dstname)
+  macro (ADD_H5_TEST_SAME testname resultcode pfile psparam pdparam vparam sparam srcname dparam dstname)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       # Remove any output file left over from previous test run
       add_test (
@@ -197,13 +197,13 @@
         set_tests_properties (H5COPY_SAME-${testname}-DIFF PROPERTIES WILL_FAIL "true")
       endif ()
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
   #
   # Similiar to ADD_H5_TEST macro. Compare to outputs from source & target
   # files instead of checking with h5ls.
   #
-  MACRO (ADD_H5_CMP_TEST testname resultcode infile vparam sparam srcname dparam dstname)
+  macro (ADD_H5_CMP_TEST testname resultcode infile vparam sparam srcname dparam dstname)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5COPY-CMP-${testname} COMMAND $<TARGET_FILE:h5copy> -i ./testfiles/${infile} -o ./testfiles/${testname}.out.h5 ${vparam} ${sparam} ${srcname} ${dparam} ${dstname} ${ARGN})
@@ -235,7 +235,7 @@
       )
       set_tests_properties (H5COPY-CMP-${testname} PROPERTIES DEPENDS H5COPY-CMP-${testname}-clear-objects)
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################
@@ -326,6 +326,7 @@
 
   ADD_H5_TEST (named_vl 0 ${HDF_FILE1}.h5 -v -s named_vl -d named_vl)
   ADD_H5_TEST (nested_vl 0 ${HDF_FILE1}.h5 -v -s nested_vl -d nested_vl)
+  ADD_H5_TEST (dset_attr 0 ${HDF_FILE1}.h5 -v -s dset_attr -d dset_attr)
 
   # "Test copying dataset within group in source file to root of destination"
   ADD_H5_TEST (simple_top 0 ${HDF_FILE1}.h5 -v -s grp_dsets/simple -d simple_top)
@@ -342,6 +343,7 @@
     ADD_H5_TEST (grp_dsets 2 ${HDF_FILE1}.h5 -v -s grp_dsets -d grp_dsets)
     ADD_H5_TEST (grp_nested 2 ${HDF_FILE1}.h5 -v -s grp_nested -d grp_nested)
   endif ()
+  ADD_H5_TEST (grp_attr 0 ${HDF_FILE1}.h5 -v -s grp_attr -d grp_attr)
 
   # "Test copying dataset within group in source file to group in destination"
   ADD_H5_TEST2 (simple_group 0 ${HDF_FILE1}.h5 grp_dsets grp_dsets -v -s /grp_dsets/simple -d /grp_dsets/simple_group)

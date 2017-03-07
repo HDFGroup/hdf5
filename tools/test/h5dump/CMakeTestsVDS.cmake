@@ -87,7 +87,7 @@
 ##############################################################################
 ##############################################################################
 
-  MACRO (ADD_H5_VDS_TEST resultfile resultcode)
+  macro (ADD_H5_VDS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
@@ -111,9 +111,9 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
-  MACRO (ADD_H5_VDS_LAYOUT resultfile resultcode)
+  macro (ADD_H5_VDS_LAYOUT resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> -p ${ARGN})
@@ -138,7 +138,7 @@
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
     endif ()
-  ENDMACRO ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################

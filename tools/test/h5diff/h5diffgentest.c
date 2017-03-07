@@ -24,9 +24,9 @@
  * size of that temporary buffer in bytes. For efficiency's sake, choose the
  * largest value suitable for your machine (for testing use a small value).
  */
-/* Maximum size used in a call to malloc for a dataset 
+/* Maximum size used in a call to malloc for a dataset
  * NOTE: this value should stay in sync with the value defined in the tools
- *       library file: h5tools_utils.h 
+ *       library file: h5tools_utils.h
  */
 size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 
@@ -95,6 +95,9 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 /* non-comparable dataset and attribute */
 #define NON_COMPARBLES1 "non_comparables1.h5"
 #define NON_COMPARBLES2 "non_comparables2.h5"
+/* string dataset and attribute */
+#define DIFF_STRINGS1 "diff_strings1.h5"
+#define DIFF_STRINGS2 "diff_strings2.h5"
 
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
@@ -159,6 +162,7 @@ static void test_comps_array_vlen (const char *fname, const char *dset, const ch
 static void test_comps_vlen_arry (const char *fname, const char *dset,const char *attr, int diff, int is_file_new);
 static void test_data_nocomparables (const char *fname, int diff);
 static void test_objs_nocomparables (const char *fname1, const char *fname2);
+static void test_objs_strings (const char *fname, const char *fname2);
 
 /* called by test_attributes() and test_datasets() */
 static void write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs);
@@ -214,11 +218,11 @@ int main(void)
     test_special_datasets(FILE19,0);
     test_special_datasets(FILE20,1);
 
-    /* 
+    /*
      * Generate 2 files: FILE21 with old format; FILE22 with new format
-     * 	Create 2 datasets in each file:
-     *  	One dataset: chunked layout, w/o filters, fixed dimension
-     *  	One dataset: chunked layout,  w/ filters, fixed dimension
+     *     Create 2 datasets in each file:
+     *      One dataset: chunked layout, w/o filters, fixed dimension
+     *      One dataset: chunked layout,  w/ filters, fixed dimension
      */
     gen_dataset_idx(FILE21, 0);
     gen_dataset_idx(FILE22, 1);
@@ -244,7 +248,7 @@ int main(void)
     test_enums(ENUM_INVALID_VALUES);
 
     /* -------------------------------------------------
-     * Create test files with dataset and attribute with container types 
+     * Create test files with dataset and attribute with container types
      * (array, vlen) with multiple nested compound types.
      */
     /* file1 */
@@ -259,8 +263,8 @@ int main(void)
     test_comps_vlen_arry(COMPS_COMPLEX2,"dset4", "attr4", 5, 0);
 
     /*-------------------------------------------------
-     * Create test files with non-comparable dataset and attributes with 
-     * comparable datasets and attributes.  All the comparables should display 
+     * Create test files with non-comparable dataset and attributes with
+     * comparable datasets and attributes.  All the comparables should display
      * differences.
      */
     test_data_nocomparables(NON_COMPARBLES1,0);
@@ -268,6 +272,9 @@ int main(void)
 
     /* common objects (same name) with different object types. HDFFV-7644 */
     test_objs_nocomparables(NON_COMPARBLES1, NON_COMPARBLES2);
+
+    /* string dataset and attribute. HDFFV-10028 */
+    test_objs_strings(DIFF_STRINGS1, DIFF_STRINGS2);
 
     return 0;
 }
@@ -2120,33 +2127,33 @@ out:
 * Function: gen_dataset_idx
 *
 * Purpose: Create a file with either the new or old format
-*	   Create two datasets in the file: 
-*		one dataset: fixed dimension, chunked layout, w/o filters
-*		one dataset: fixed dimension, chunked layout, w/ filters
+*       Create two datasets in the file:
+*        one dataset: fixed dimension, chunked layout, w/o filters
+*        one dataset: fixed dimension, chunked layout, w/ filters
 *
 *-------------------------------------------------------------------------
 */
 static
 int gen_dataset_idx(const char *file, int format)
 {
-    hid_t   fid;		/* file id */
-    hid_t   did, did2;		/* dataset id */
-    hid_t   sid;		/* space id */
-    hid_t   fapl;		/* file access property id */
-    hid_t   dcpl;		/* dataset creation property id */
-    hsize_t dims[1] = {10};	/* dataset dimension */
-    hsize_t c_dims[1] = {2};	/* chunk dimension */
-    herr_t  status;		/* return status */
-    int     buf[10];		/* data buffer */
-    int	    i;			/* local index variable */
+    hid_t   fid;        /* file id */
+    hid_t   did, did2;        /* dataset id */
+    hid_t   sid;        /* space id */
+    hid_t   fapl;        /* file access property id */
+    hid_t   dcpl;        /* dataset creation property id */
+    hsize_t dims[1] = {10};    /* dataset dimension */
+    hsize_t c_dims[1] = {2};    /* chunk dimension */
+    herr_t  status;        /* return status */
+    int     buf[10];        /* data buffer */
+    int        i;            /* local index variable */
 
     /* Get a copy of the file aaccess property */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
 
     /* Set the "use the latest format" bounds for creating objects in the file */
     if(format) {
-	status = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
-	assert(status >= 0);
+    status = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    assert(status >= 0);
     }
 
     /* Create a file  */
@@ -2155,7 +2162,7 @@ int gen_dataset_idx(const char *file, int format)
 
     /* Create data */
     for(i = 0; i < 10; i++)
-	buf[i] = i;
+    buf[i] = i;
 
     /* Set chunk */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
@@ -2165,7 +2172,7 @@ int gen_dataset_idx(const char *file, int format)
     /* Create a 1D dataset */
     sid = H5Screate_simple(1, dims, NULL);
     did  = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
-    
+
     /* Write to the dataset */
     status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
     assert(status >= 0);
@@ -4422,8 +4429,8 @@ out:
 
 /*-------------------------------------------------------------------------
 *
-* Purpose: 
-*   Create test files with dataset and attribute with container types 
+* Purpose:
+*   Create test files with dataset and attribute with container types
 *   (array, vlen) with multiple nested compound types.
 *
 * Function: test_comps_array()
@@ -4447,7 +4454,7 @@ out:
 static void test_comps_array (const char *fname, const char *dset, const char *attr,int diff, int is_file_new)
 {
     /* sub compound 2 */
-    typedef struct {        
+    typedef struct {
         int i2;
         float f2;
     } cmpd2_t;
@@ -4469,14 +4476,14 @@ static void test_comps_array (const char *fname, const char *dset, const char *a
     hid_t  tid_attr;
     hsize_t  sdims_dset[] = {SDIM_DSET};
     hsize_t  sdims_cmpd_arry[] = {SDIM_CMPD_ARRAY};
-    int     i,j;       
+    int     i,j;
     herr_t  ret;  /* Generic return value  */
 
     /* Initialize array data to write */
     for(i=0; i < SDIM_DSET; i++)
     {
         wdata[i].i1 = i;
-        for(j=0; j < SDIM_CMPD_ARRAY; j++) 
+        for(j=0; j < SDIM_CMPD_ARRAY; j++)
         {
             wdata[i].cmpd2[j].i2 = i * 10 + diff;
             wdata[i].cmpd2[j].f2 = (float)i * 10.5F + (float)diff;
@@ -4520,7 +4527,7 @@ static void test_comps_array (const char *fname, const char *dset, const char *a
 
 
     /* -------------------
-     * Create a dataset 
+     * Create a dataset
      */
     /* Create dataspace for datasets */
     sid_dset = H5Screate_simple(1, sdims_dset, NULL);
@@ -4562,18 +4569,18 @@ static void test_comps_array (const char *fname, const char *dset, const char *a
 static void test_comps_vlen (const char * fname, const char *dset, const char *attr, int diff, int is_file_new)
 {
     /* sub compound 2 */
-    typedef struct {       
+    typedef struct {
         int i2;
         float f2;
     } cmpd2_t;
 
     /* top compound 1 */
-    typedef struct { 
+    typedef struct {
         int i1;
         hvl_t vl;   /* VL information for compound2 */
     } cmpd1_t;
 
-    cmpd1_t wdata[SDIM_DSET];   /* Dataset for compound1 */ 
+    cmpd1_t wdata[SDIM_DSET];   /* Dataset for compound1 */
 
     hid_t  fid;  /* HDF5 File ID */
     hid_t  did_dset; /* dataset ID   */
@@ -4629,7 +4636,7 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
     assert(ret >= 0);
 
     /* -------------------------------
-     * Create dataset with compound1 
+     * Create dataset with compound1
      */
     /* Create dataspace for dataset */
     sid_dset = H5Screate_simple(1, sdims_dset, NULL);
@@ -4674,11 +4681,11 @@ static void test_comps_vlen (const char * fname, const char *dset, const char *a
 
 static void test_comps_array_vlen (const char * fname, const char *dset,const char *attr, int diff, int is_file_new)
 {
-    typedef struct {       
+    typedef struct {
         int i3;
         float f3;
     } cmpd3_t;
- 
+
     typedef struct {        /* Typedef for compound datatype */
         int i2;
         hvl_t vl;   /* VL information to write */
@@ -4817,19 +4824,19 @@ static void test_comps_array_vlen (const char * fname, const char *dset,const ch
 static void test_comps_vlen_arry (const char * fname, const char *dset, const char *attr, int diff, int is_file_new)
 {
     /* sub compound 3 */
-    typedef struct {       
+    typedef struct {
         int i3;
         float f3;
     } cmpd3_t;
 
     /* sub compound 2 */
-    typedef struct {       
+    typedef struct {
         int i2;
         cmpd3_t cmpd3[SDIM_CMPD_ARRAY];
     } cmpd2_t;
 
     /* top compound 1 */
-    typedef struct { 
+    typedef struct {
         int i1;
         hvl_t vl;   /* VL information for compound2 */
     } cmpd1_t;
@@ -4910,7 +4917,7 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
     assert(ret >= 0);
 
     /* -------------------------------
-     * Create dataset with compound1 
+     * Create dataset with compound1
      */
     /* Create dataspace for dataset */
     sid_dset = H5Screate_simple(1, sdims_dset, NULL);
@@ -4960,9 +4967,9 @@ static void test_comps_vlen_arry (const char * fname, const char *dset, const ch
 /*-------------------------------------------------------------------------
 * Function: test_data_nocomparables
 *
-* Purpose: 
-*   Create test files with non-comparable dataset and attributes with 
-*   comparable datasets and attributes.  All the comparables should display 
+* Purpose:
+*   Create test files with non-comparable dataset and attributes with
+*   comparable datasets and attributes.  All the comparables should display
 *   differences.
 *
 *-------------------------------------------------------------------------*/
@@ -5020,8 +5027,8 @@ static void test_data_nocomparables (const char * fname, int make_diffs)
         dset_data_ptr2=(int*)&data2;
         attr_data_ptr1=(int*)&data2;
 
-        /* ----------- 
-         * group2 
+        /* -----------
+         * group2
          */
         dset_data_ptr3=(int*)&data2;
         /* dset1/attr1 */
@@ -5143,10 +5150,10 @@ static void test_data_nocomparables (const char * fname, int make_diffs)
         goto out;
     }
 
-    
+
 
 out:
-    
+
     /*-----------------------------------------------------------------------
     * Close IDs
     *-----------------------------------------------------------------------*/
@@ -5171,9 +5178,9 @@ out:
 /*-------------------------------------------------------------------------
 * Function: test_objs_nocomparables
 *
-* Purpose: 
+* Purpose:
 *   Create test files with common objects (same name) but different object
-*   types. 
+*   types.
 *   h5diff should show non-comparable output from these common objects.
 *-------------------------------------------------------------------------*/
 static void test_objs_nocomparables(const char *fname1, const char *fname2)
@@ -5315,6 +5322,160 @@ out:
     if(tid2)
         H5Tclose(tid2);
 
+}
+
+static hid_t mkstr(int size, H5T_str_t pad) {
+    hid_t type;
+
+    if((type=H5Tcopy(H5T_C_S1)) < 0) return -1;
+    if(H5Tset_size(type, (size_t)size) < 0) return -1;
+    if(H5Tset_strpad(type, pad) < 0) return -1;
+
+    return type;
+}
+
+/*-------------------------------------------------------------------------
+* Function: test_objs_strings
+*
+* Purpose:
+*   Create test files with common objects (same name) but different string
+*   types.
+*   h5diff should show differences output from these common objects.
+*-------------------------------------------------------------------------*/
+static void test_objs_strings(const char *fname1, const char *fname2)
+{
+    herr_t  status = SUCCEED;
+    hid_t   fid1=0;
+    hid_t   fid2=0;
+    hid_t   dataset=0;
+    hid_t   space=0;
+    hid_t   f_type=0;
+    hid_t   m_type=0;
+    hsize_t dims1[] = {3, 4};
+    char string1A[12][3] = {"s1","s2","s3","s4","s5","s6","s","s","s9",
+            "s0","s1","s2"};
+    char string1B[12][3] = {"s1","s2","s3","s4","s","s","s7","s8","s9",
+            "s0","s1","s2"};
+
+    hsize_t dims2[]={20};
+    char string2A[20][10] = {"ab cd ef1", "ab cd ef2", "ab cd ef3", "ab cd ef4",
+            "ab cd ef5", "ab cd ef6", "ab cd ef7", "ab cd ef8",
+            "ab cd 9", "ab cd 0", "ab cd 1", "ab cd 2",
+            "ab cd ef3", "ab cd ef4", "ab cd ef5", "ab cd ef6",
+            "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
+    char string2B[20][10] = {"ab cd ef1", "ab cd ef2", "ab cd ef3", "ab cd ef4",
+            "ab cd ef5", "ab cd ef6", "ab cd ef7", "ab cd ef8",
+            "ab cd ef9", "ab cd ef0", "ab cd ef1", "ab cd ef2",
+            "ab cd 3", "ab cd 4", "ab cd 5", "ab cd 6",
+            "ab cd ef7", "ab cd ef8", "ab cd ef9", "ab cd ef0"};
+
+    hsize_t dims3[] = {27};
+    char string3A[27][6] = {"abcd0", "abcd1", "abcd2", "abcd3",
+            "abcd4", "abcd5", "abcd6", "abcd7",
+            "abcd8", "abcd9", "abcd0", "abcd1",
+            "abd2", "abc3", "bcd4", "acd5",
+            "abcd6", "abcd7", "abcd8", "abcd9",
+            "abcd0", "abcd1", "abcd2", "abcd3",
+            "abc4", "abc5", "abc6"};
+    char string3B[27][6] = {"abcd0", "abcd1", "abcd2", "abcd3",
+            "abcd4", "abcd5", "abcd6", "abcd7",
+            "abcd8", "abcd9", "abcd0", "abcd1",
+            "abcd2", "abcd3", "abcd4", "abcd5",
+            "abd6", "abc7", "bcd8", "acd9",
+            "abcd0", "abcd1", "abcd2", "abcd3",
+            "abd4", "abd5", "abd6"};
+
+    hsize_t dims4[] = {3};
+    char string4A[3][21] = { "s1234567890123456789", "s1234567890123456789",
+            "s12345678901234567"};
+    char string4B[3][21] = { "s1234567890123456789", "s12345678901234567",
+            "s1234567890123456789"};
+
+    /*-----------------------------------------------------------------------
+     * Create file(s)
+     *------------------------------------------------------------------------*/
+     /* file1 */
+     fid1 = H5Fcreate (fname1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+     if (fid1 < 0)
+     {
+         fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname1);
+         status = FAIL;
+         goto out;
+     }
+
+     /* file2 */
+     fid2 = H5Fcreate (fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+     if (fid2 < 0)
+     {
+         fprintf(stderr, "Error: %s> H5Fcreate failed.\n", fname2);
+         status = FAIL;
+         goto out;
+     }
+
+    /* string 1 : nullterm string */
+    space = H5Screate_simple(2, dims1, NULL);
+    f_type = mkstr(5, H5T_STR_NULLTERM);
+    m_type = mkstr(3, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string1", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string1A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string1", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string1B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* string 2 : space pad string */
+    space = H5Screate_simple(1, dims2, NULL);
+    f_type = mkstr(11, H5T_STR_SPACEPAD);
+    m_type = mkstr(10, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string2", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string2A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string2", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string2B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* string 3 : null pad string */
+    space = H5Screate_simple(1, dims3, NULL);
+    f_type = mkstr(8, H5T_STR_NULLPAD);
+    m_type = mkstr(6, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string3", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string3A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string3", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string3B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* string 4 : space pad long string */
+    space = H5Screate_simple(1, dims4, NULL);
+    f_type = mkstr(168, H5T_STR_SPACEPAD);
+    m_type = mkstr(21, H5T_STR_NULLTERM);
+    dataset = H5Dcreate2(fid1, "/string4", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4A);
+    H5Dclose(dataset);
+    dataset = H5Dcreate2(fid2, "/string4", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5Dwrite(dataset, m_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, string4B);
+    H5Tclose(m_type);
+    H5Tclose(f_type);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+out:
+    /*-----------------------------------------------------------------------
+    * Close IDs
+    *-----------------------------------------------------------------------*/
+    if(fid1)
+        H5Fclose(fid1);
+    if(fid2)
+        H5Fclose(fid2);
 }
 
 /*-------------------------------------------------------------------------

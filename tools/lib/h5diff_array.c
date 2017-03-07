@@ -130,7 +130,7 @@ typedef struct mcomp_t
 {
     unsigned        n;      /* number of members */
     hid_t           *ids;   /* member type id */
-    size_t          *offsets;   
+    size_t          *offsets;
     struct mcomp_t  **m;     /* members */
 }mcomp_t;
 
@@ -546,7 +546,7 @@ hsize_t diff_array( void *_mem1,
  *  Recursively call this function for each element
  * H5T_STRING
  *  compare byte by byte in a cycle from 0 to type_size. this type_size is the
- *  value obtained by the get_size function but it is the string lenght for
+ *  value obtained by the get_size function but it is the string length for
  *  variable sized strings
  * H5T_OPAQUE
  *  compare byte by byte in a cycle from 0 to type_size
@@ -602,7 +602,7 @@ static hsize_t diff_datum(void       *_mem1,
 
     /* Fast comparison first for atomic type by memcmp().
      * It is OK not to list non-atomic type here because it will not be caught
-     * by the confition, but it gives more clarity for code planning
+     * by the condition, but it gives more clarity for code planning
      */
     if (type_class != H5T_REFERENCE &&
         type_class != H5T_COMPOUND &&
@@ -692,6 +692,13 @@ static hsize_t diff_datum(void       *_mem1,
              *       of length of strings.
              *       For now mimic the previous way.
              */
+            h5diffdebug2("diff_datum string size:%d\n",size1);
+            h5diffdebug2("diff_datum string size:%d\n",size2);
+            if(size1 != size2)
+            {
+                h5difftrace("diff_datum string sizes\n");
+                nfound++;
+            }
             if(size1 < size2)
             {
                 size = size1;
@@ -712,7 +719,7 @@ static hsize_t diff_datum(void       *_mem1,
 
                 pad = H5Tget_strpad(m_type);
 
-                for (u=0; u<size && (s[u] || pad!=H5T_STR_NULLTERM); u++)
+                for (u=0; u<size; u++)
                     nfound+=character_compare(
                         s1 + u,
                         s2 + u, /* offset */
@@ -2792,7 +2799,7 @@ hsize_t character_compare(char *mem1,
 
     HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
     HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
-    h5difftrace("character_compare start\n");
+    h5diffdebug3("character_compare start %d=%d\n",temp1_uchar,temp2_uchar);
 
     if (temp1_uchar != temp2_uchar)
     {
@@ -5975,8 +5982,8 @@ static void get_member_types(hid_t tid, mcomp_t *members)
         hid_t base_tid = H5Tget_super(tid);
         get_member_types(base_tid, members);
         H5Tclose(base_tid);
-    } 
-    else if (tclass == H5T_COMPOUND) 
+    }
+    else if (tclass == H5T_COMPOUND)
     {
         int      nmembs;
 
@@ -5996,9 +6003,9 @@ static void get_member_types(hid_t tid, mcomp_t *members)
              members->m[u] = (mcomp_t *)HDmalloc(sizeof(mcomp_t));
              HDmemset(members->m[u], 0, sizeof(mcomp_t));
              get_member_types(members->ids[u], members->m[u]);
-        }  
+        }
     }
-     
+
    return;
 
 
