@@ -712,7 +712,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, void *mesg, unsigned id, hbool_t may_create)
+H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, unsigned id, void *mesg, hbool_t may_create)
 {
     hbool_t     ext_created = FALSE;   /* Whether superblock extension was created */
     hbool_t     ext_opened = FALSE;    /* Whether superblock extension was opened */
