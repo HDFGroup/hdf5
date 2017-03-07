@@ -2812,7 +2812,7 @@ test_basic_io(unsigned config, hid_t fapl)
 
     /* Write data directly to source dataset */
     if(H5Dwrite(srcdset[0], H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
-        TEST_ERROR 
+        TEST_ERROR
 
     /* Close srcdset and srcfile if config option specified */
     if(config & TEST_IO_CLOSE_SRC) {
@@ -7265,6 +7265,12 @@ test_printf(unsigned config, hid_t fapl)
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
+    /* Test H5Pget_virtual_printf_gap() */
+    if(H5Pget_virtual_printf_gap(dapl, &gap_size) < 0)
+        TEST_ERROR
+    if(gap_size != (hsize_t)2)
+        TEST_ERROR
+
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
         TEST_ERROR
@@ -7329,6 +7335,12 @@ test_printf(unsigned config, hid_t fapl)
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
         TEST_ERROR
 
+    /* Test H5Pget_virtual_printf_gap() */
+    if(H5Pget_virtual_printf_gap(dapl, &gap_size) < 0)
+        TEST_ERROR
+    if(gap_size != (hsize_t)3)
+        TEST_ERROR
+
     /* Get VDS space */
     if((filespace = H5Dget_space(vdset)) < 0)
         TEST_ERROR
@@ -7391,6 +7403,12 @@ test_printf(unsigned config, hid_t fapl)
             TEST_ERROR
     } /* end if */
     if((vdset = H5Dopen2(vfile, "v_dset", dapl)) < 0)
+        TEST_ERROR
+
+    /* Test H5Pget_virtual_printf_gap() */
+    if(H5Pget_virtual_printf_gap(dapl, &gap_size) < 0)
+        TEST_ERROR
+    if(gap_size != (hsize_t)4)
         TEST_ERROR
 
     /* Get VDS space */
@@ -11121,14 +11139,14 @@ error:
 static int
 test_dapl_values(hid_t fapl_id)
 {
-    hid_t	fid = -1;           /* file to write to                     */
-    hid_t	dcpl_id = -1;       /* dataset creation properties          */
-    hid_t	dapl_id1 = -1;      /* dataset access properties            */
-    hid_t	dapl_id2 = -1;      /* dataset access properties            */
-    hid_t	vds_sid = -1;       /* vds data space                       */
-    hid_t	src_sid = -1;       /* source data space                    */
-    hid_t	did1 = -1;          /* dataset                              */
-    hid_t	did2 = -1;          /* dataset                              */
+    hid_t    fid = -1;           /* file to write to                     */
+    hid_t    dcpl_id = -1;       /* dataset creation properties          */
+    hid_t    dapl_id1 = -1;      /* dataset access properties            */
+    hid_t    dapl_id2 = -1;      /* dataset access properties            */
+    hid_t    vds_sid = -1;       /* vds data space                       */
+    hid_t    src_sid = -1;       /* source data space                    */
+    hid_t    did1 = -1;          /* dataset                              */
+    hid_t    did2 = -1;          /* dataset                              */
     hsize_t start;              /* hyperslab start                      */
     hsize_t stride;             /* hyperslab count                      */
     hsize_t count;              /* hyperslab count                      */
@@ -11221,6 +11239,7 @@ test_dapl_values(hid_t fapl_id)
     if(H5Pget_virtual_printf_gap(dapl_id2, &gap_size) < 0)
         FAIL_STACK_ERROR
     if(gap_size != 123)
+        TEST_ERROR
 
     /* Close everything */
     if(H5Sclose(vds_sid) < 0) FAIL_STACK_ERROR
