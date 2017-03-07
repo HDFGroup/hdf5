@@ -27,36 +27,36 @@ namespace H5 {
 */
 class H5_DLLCPP IntType : public AtomType {
    public:
-	// Creates an integer type using a predefined type
-	IntType(const PredType& pred_type);
+        // Creates an integer type using a predefined type
+        IntType(const PredType& pred_type);
 
-	// Gets the integer datatype of the specified dataset
-	IntType(const DataSet& dataset);
+        // Gets the integer datatype of the specified dataset
+        IntType(const DataSet& dataset);
 
-	// Constructors that open an HDF5 integer datatype, given a location.
-	IntType(const H5Location& loc, const char* name);
-	IntType(const H5Location& loc, const H5std_string& name);
+        // Constructors that open an HDF5 integer datatype, given a location.
+        IntType(const H5Location& loc, const char* name);
+        IntType(const H5Location& loc, const H5std_string& name);
 
-	// Retrieves the sign type for an integer type
-	H5T_sign_t getSign() const;
+        // Retrieves the sign type for an integer type
+        H5T_sign_t getSign() const;
 
-	// Sets the sign proprety for an integer type.
-	void setSign( H5T_sign_t sign ) const;
+        // Sets the sign proprety for an integer type.
+        void setSign(H5T_sign_t sign) const;
 
-	///\brief Returns this class name.
-	virtual H5std_string fromClass () const { return("IntType"); }
+        ///\brief Returns this class name.
+        virtual H5std_string fromClass () const { return("IntType"); }
 
-	// Default constructor
-	IntType();
+        // Default constructor
+        IntType();
 
-	// Creates a integer datatype using an existing id
-	IntType(const hid_t existing_id);
+        // Creates a integer datatype using an existing id
+        IntType(const hid_t existing_id);
 
-	// Copy constructor: makes copy of IntType object
-	IntType(const IntType& original);
+        // Copy constructor: makes copy of IntType object
+        IntType(const IntType& original);
 
-	// Noop destructor.
-	virtual ~IntType();
+        // Noop destructor.
+        virtual ~IntType();
 };
 }
 #endif // __H5IntType_H

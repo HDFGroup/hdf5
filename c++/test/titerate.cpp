@@ -49,20 +49,20 @@ using namespace H5;
 //#define SPACE1_RANK     1
 //#define SPACE1_DIM1     4
 
-const H5std_string	FILE_ITERATE("titerate.h5");
-const H5std_string	GROUP1("Top Group");
-const H5std_string	GROUP1_PATH("/Top Group");
-const H5std_string	GROUP1_1("Sub-Group 1.1");
-const H5std_string	GROUP1_1_PATH("/Top Group/Sub-Group 1.1");
-const H5std_string	GROUP1_2("Sub-Group 1.2");
-const H5std_string	GROUP1_2_PATH("/Top Group/Sub-Group 1.2");
-const H5std_string	DSET_DEFAULT_NAME("default");
-const H5std_string	DSET_IN_FILE("Dataset in File");
-const H5std_string	DSET_IN_FILE_PATH("/Dataset in File");
-const H5std_string	DSET_IN_GRP1("Dataset in Group 1");
-const H5std_string	DSET_IN_GRP1_PATH("/Top Group/Dataset in Group 1");
-const H5std_string	DSET_IN_GRP1_2("Dataset in Group 1.2");
-const H5std_string	DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset in Group 1.2");
+const H5std_string        FILE_ITERATE("titerate.h5");
+const H5std_string        GROUP1("Top Group");
+const H5std_string        GROUP1_PATH("/Top Group");
+const H5std_string        GROUP1_1("Sub-Group 1.1");
+const H5std_string        GROUP1_1_PATH("/Top Group/Sub-Group 1.1");
+const H5std_string        GROUP1_2("Sub-Group 1.2");
+const H5std_string        GROUP1_2_PATH("/Top Group/Sub-Group 1.2");
+const H5std_string        DSET_DEFAULT_NAME("default");
+const H5std_string        DSET_IN_FILE("Dataset in File");
+const H5std_string        DSET_IN_FILE_PATH("/Dataset in File");
+const H5std_string        DSET_IN_GRP1("Dataset in Group 1");
+const H5std_string        DSET_IN_GRP1_PATH("/Top Group/Dataset in Group 1");
+const H5std_string        DSET_IN_GRP1_2("Dataset in Group 1.2");
+const H5std_string        DSET_IN_GRP1_2_PATH("/Top Group/Sub-Group 1.2/Dataset in Group 1.2");
 
 typedef enum {
     RET_ZERO,
@@ -127,15 +127,15 @@ liter_cb(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_
 } /* end liter_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_iter_group
+ * Function:    test_iter_group
  *
- * Purpose:	Tests group iteration
+ * Purpose      Tests group iteration
  *
- * Return:	Success: 0
- *		Failure: -1
+ * Return       Success: 0
+ *              Failure: -1
  *
- * Programmer:	Binh-Minh Ribler
- *		Friday, September 9, 2016
+ * Programmer   Binh-Minh Ribler
+ *              Friday, September 9, 2016
  *
  * Modifications:
  *
@@ -148,142 +148,142 @@ static void test_iter_group(FileAccPropList& fapl)
     char name[NAMELEN];     /* temporary name buffer */
     char *lnames[NDATASETS + 2];/* Names of the links created */
     iter_info info;         /* Custom iteration information */
-    herr_t ret;		    /* Generic return value */
+    herr_t ret;             /* Generic return value */
 
     /* Output message about test being performed */
     SUBTEST("Group Iteration");
 
     /* Create the test file with the datasets */
     try {
-	// Create file
-	H5File file(FILE_ITERATE, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+        // Create file
+        H5File file(FILE_ITERATE, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
-	/* Test iterating over empty group */
-	info.command = RET_ZERO;
-	idx = 0;
-	ret = H5Literate(file.getId(), H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
-	verify_val(ret, SUCCEED, "H5Literate", __LINE__, __FILE__);
+        /* Test iterating over empty group */
+        info.command = RET_ZERO;
+        idx = 0;
+        ret = H5Literate(file.getId(), H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
+        verify_val(ret, SUCCEED, "H5Literate", __LINE__, __FILE__);
 
-	DataType datatype(PredType::NATIVE_INT);
+        DataType datatype(PredType::NATIVE_INT);
 
-	// Create a scalar file space
-	DataSpace filespace;
+        // Create a scalar file space
+        DataSpace filespace;
 
-	for (i=0; i< NDATASETS; i++)
-	{
+        for (i=0; i< NDATASETS; i++)
+        {
         sprintf(name, "Dataset %d", i);
 
-	// Create a dataset in the file
-	DataSet dataset = file.createDataSet(name, datatype, filespace);
+        // Create a dataset in the file
+        DataSet dataset = file.createDataSet(name, datatype, filespace);
 
         /* Keep a copy of the dataset names */
         lnames[i] = HDstrdup(name);
         check_values(lnames[i], "HDstrdup returns NULL", __LINE__, __FILE__);
 
-	} /* end for */
+        } /* end for */
 
-	/* Create a group and named datatype under root group for testing */
-	Group grp(file.createGroup(GROUP1, 0));
-	lnames[NDATASETS] = HDstrdup("grp");
-	check_values(lnames[NDATASETS], "HDstrdup returns NULL", __LINE__, __FILE__);
+        /* Create a group and named datatype under root group for testing */
+        Group grp(file.createGroup(GROUP1, 0));
+        lnames[NDATASETS] = HDstrdup("grp");
+        check_values(lnames[NDATASETS], "HDstrdup returns NULL", __LINE__, __FILE__);
 
-	datatype.commit(file, "dtype");
-	lnames[NDATASETS + 1] = HDstrdup("dtype");
-	check_values(lnames[NDATASETS], "HDstrdup returns NULL", __LINE__, __FILE__);
+        datatype.commit(file, "dtype");
+        lnames[NDATASETS + 1] = HDstrdup("dtype");
+        check_values(lnames[NDATASETS], "HDstrdup returns NULL", __LINE__, __FILE__);
 
-	/* Sort the dataset names */
-	HDqsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
+        /* Sort the dataset names */
+        HDqsort(lnames, (size_t)(NDATASETS + 2), sizeof(char *), iter_strcmp);
 
 
-	/* Iterate through the datasets in the root group in various ways */
+        /* Iterate through the datasets in the root group in various ways */
 
-	// Open data file to read
-	file.openFile(FILE_ITERATE, H5F_ACC_RDONLY, fapl);
+        // Open data file to read
+        file.openFile(FILE_ITERATE, H5F_ACC_RDONLY, fapl);
 
-	// Open the root group
-	Group root_group(file.openGroup("/"));
+        // Open the root group
+        Group root_group(file.openGroup("/"));
 
-	// Get the number of object in the root group
-	hsize_t nobjs = root_group.getNumObjs();
-	verify_val(nobjs, (hsize_t)(NDATASETS + 2), "H5Gget_info", __LINE__, __FILE__);
+        // Get the number of object in the root group
+        hsize_t nobjs = root_group.getNumObjs();
+        verify_val(nobjs, (hsize_t)(NDATASETS + 2), "H5Gget_info", __LINE__, __FILE__);
 
-	H5std_string obj_name;
-	for (i = 0; i < nobjs; i++)
-	{
-	    //H5O_info_t oinfo;               /* Object info */
+        H5std_string obj_name;
+        for (i = 0; i < nobjs; i++)
+        {
+            //H5O_info_t oinfo;               /* Object info */
 
-	    obj_name = root_group.getObjnameByIdx(i);
+            obj_name = root_group.getObjnameByIdx(i);
         //ret = (herr_t)H5Lget_name_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
 
-	//oinfo = root_group.childObjType((hsize_t)i, H5_INDEX_NAME, H5_ITER_INC,  ".");
+        //oinfo = root_group.childObjType((hsize_t)i, H5_INDEX_NAME, H5_ITER_INC,  ".");
         //ret = H5Oget_info_by_idx(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo, H5P_DEFAULT);
-	} /* end for */
+        } /* end for */
 
-	// Attempted to iterate with invalid index, should fail
-	try {
-	    obj_name = root_group.getObjnameByIdx(NDATASETS + 3);
+        // Attempted to iterate with invalid index, should fail
+        try {
+            obj_name = root_group.getObjnameByIdx(NDATASETS + 3);
 
-	    // Should FAIL but didn't, so throw an invalid action exception
-	    throw InvalidActionException("Group::getObjnameByIdx", "Attempt to iterate with invalid index");
-	}
-	catch (GroupIException& invalid_action) // invalid index
-	{} // do nothing, exception expected
+            // Should FAIL but didn't, so throw an invalid action exception
+            throw InvalidActionException("Group::getObjnameByIdx", "Attempt to iterate with invalid index");
+        }
+        catch (GroupIException& invalid_action) // invalid index
+        {} // do nothing, exception expected
 
-	// Attempted to iterate with negative index, should fail
-	try {
-	    info.command = RET_ZERO;
-	    idx = (hsize_t)-1;
-	    obj_name = root_group.getObjnameByIdx(idx);
+        // Attempted to iterate with negative index, should fail
+        try {
+            info.command = RET_ZERO;
+            idx = (hsize_t)-1;
+            obj_name = root_group.getObjnameByIdx(idx);
 
-	    // Should FAIL but didn't, so throw an invalid action exception
-	    throw InvalidActionException("Group::getObjnameByIdx", "Attempt to iterate with negative index");
-	}
-	catch (FileIException& invalid_action) // invalid index
-	{} // do nothing, exception expected
-	catch (GroupIException& invalid_action) // invalid index
-	{} // do nothing, exception expected
+            // Should FAIL but didn't, so throw an invalid action exception
+            throw InvalidActionException("Group::getObjnameByIdx", "Attempt to iterate with negative index");
+        }
+        catch (FileIException& invalid_action) // invalid index
+        {} // do nothing, exception expected
+        catch (GroupIException& invalid_action) // invalid index
+        {} // do nothing, exception expected
 
-	/* Test skipping exactly as many entries as in the group */
-	try {
-	    info.command = RET_ZERO;
-	    idx = NDATASETS + 2;
-	    obj_name = root_group.getObjnameByIdx(idx);
+        /* Test skipping exactly as many entries as in the group */
+        try {
+            info.command = RET_ZERO;
+            idx = NDATASETS + 2;
+            obj_name = root_group.getObjnameByIdx(idx);
 
-	    // Should FAIL but didn't, so throw an invalid action exception
-	    throw InvalidActionException("Group::getObjnameByIdx", "Attempt to iterate with negative index");
-	}
-	catch (FileIException& invalid_action) // invalid index
-	{} // do nothing, exception expected
-	catch (GroupIException& invalid_action) // invalid index
-	{} // do nothing, exception expected
+            // Should FAIL but didn't, so throw an invalid action exception
+            throw InvalidActionException("Group::getObjnameByIdx", "Attempt to iterate with negative index");
+        }
+        catch (FileIException& invalid_action) // invalid index
+        {} // do nothing, exception expected
+        catch (GroupIException& invalid_action) // invalid index
+        {} // do nothing, exception expected
 
-	/* Test skipping more entries than are in the group */
-	try {
-	    info.command = RET_ZERO;
-	    idx = NDATASETS + 3;
-	    obj_name = root_group.getObjnameByIdx(idx);
+        /* Test skipping more entries than are in the group */
+        try {
+            info.command = RET_ZERO;
+            idx = NDATASETS + 3;
+            obj_name = root_group.getObjnameByIdx(idx);
 
-	    // Should FAIL but didn't, so throw an invalid action exception
-	    throw InvalidActionException("Group::getObjnameByIdx", "Attempt to iterate with negative index");
-	}
-	catch (FileIException& invalid_action) // invalid index
-	{} // do nothing, exception expected
-	catch (GroupIException& invalid_action) // invalid index
-	{} // do nothing, exception expected
+            // Should FAIL but didn't, so throw an invalid action exception
+            throw InvalidActionException("Group::getObjnameByIdx", "Attempt to iterate with negative index");
+        }
+        catch (FileIException& invalid_action) // invalid index
+        {} // do nothing, exception expected
+        catch (GroupIException& invalid_action) // invalid index
+        {} // do nothing, exception expected
 
-	/* Free the dataset names */
-	for(i = 0; i< (NDATASETS + 2); i++)
-	    HDfree(lnames[i]);
+        /* Free the dataset names */
+        for(i = 0; i< (NDATASETS + 2); i++)
+            HDfree(lnames[i]);
 
-	// Everything will be closed as they go out of scope
+        // Everything will be closed as they go out of scope
 
-	PASSED();
-    }	// try block
+        PASSED();
+    }        // try block
 
     // catch all other exceptions
     catch (Exception& E)
     {
-	issue_fail_msg("test_iter_group", __LINE__, __FILE__);
+        issue_fail_msg("test_iter_group", __LINE__, __FILE__);
     }
 
 #if 0
@@ -355,59 +355,59 @@ static void test_iter_group(FileAccPropList& fapl)
 /****************************************************************
 **
 **  printelems(): Open an attribute and verify that it has a 
-**		  the correct name
+**                the correct name
 **
 ****************************************************************/
-const H5std_string	FILE_NAME("titerate.h5");
-const H5std_string	GRP_NAME("/Group_A");
-const H5std_string	FDATASET_NAME( "file dset" );
-const H5std_string	GDATASET_NAME( "group dset" );
-const H5std_string	ATTR_NAME( "Units" );
-const H5std_string	FATTR_NAME( "F attr" );
-const H5std_string	GATTR_NAME( "G attr" );
-const int	DIM1 = 2;
+const H5std_string FILE_NAME("titerate.h5");
+const H5std_string GRP_NAME("/Group_A");
+const H5std_string FDATASET_NAME("file dset");
+const H5std_string GDATASET_NAME("group dset");
+const H5std_string ATTR_NAME("Units");
+const H5std_string FATTR_NAME("F attr");
+const H5std_string GATTR_NAME("G attr");
+const int DIM1 = 2;
 void printelems(const Group& group, const H5std_string& dsname, const H5std_string& atname)
 {
     try
     {
-	DataSet d1(group.openDataSet(dsname));
-	DataSpace s1 = d1.getSpace();
-	s1.close();
-	d1.close();
+        DataSet d1(group.openDataSet(dsname));
+        DataSpace s1 = d1.getSpace();
+        s1.close();
+        d1.close();
 
-	unsigned idx = 0;
-	Attribute a1(group.openAttribute(idx));
-	H5std_string aname = a1.getName();
+        unsigned idx = 0;
+        Attribute a1(group.openAttribute(idx));
+        H5std_string aname = a1.getName();
         verify_val(aname, atname, "printelems", __LINE__, __FILE__);
 
-	a1.close();
+        a1.close();
   }
    // catch failure caused by the DataSpace operations
    catch( DataSpaceIException error )
    {
-	error.printError();
+        error.printError();
    }
 
    // catch failure caused by the Group operations
    catch( GroupIException error )
    {
-	error.printError();
+        error.printError();
    }
 
    // catch failure caused by the DataSet operations
    catch( DataSetIException error )
    {
-	error.printError();
+        error.printError();
    }
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_HDFFV_9920
+ * Function:    test_HDFFV_9920
  *
- * Purpose:	Tests the fix for HDFFV-9920
+ * Purpose      Tests the fix for HDFFV-9920
  *
- * Programmer:	Binh-Minh Ribler
- *		Friday, September 9, 2016
+ * Programmer   Binh-Minh Ribler
+ *              Friday, September 9, 2016
  *
  * Modifications:
  *
@@ -420,74 +420,74 @@ static void test_HDFFV_9920()
    
    try
    {
-	// Create a new file and a group in it
-	H5File file( FILE_NAME, H5F_ACC_TRUNC );
+        // Create a new file and a group in it
+        H5File file( FILE_NAME, H5F_ACC_TRUNC );
 
-	Group gr1(file.createGroup(GRP_NAME));
+        Group gr1(file.createGroup(GRP_NAME));
 
-	// Create the data space for the attribute.
-	DataSpace dspace = DataSpace (1, dims );
+        // Create the data space for the attribute.
+        DataSpace dspace = DataSpace (1, dims );
 
-	DataSet fds = file.createDataSet(FDATASET_NAME, PredType::STD_I32BE, dspace);
-	DataSet gds = gr1.createDataSet(GDATASET_NAME, PredType::STD_I32BE, dspace);
+        DataSet fds = file.createDataSet(FDATASET_NAME, PredType::STD_I32BE, dspace);
+        DataSet gds = gr1.createDataSet(GDATASET_NAME, PredType::STD_I32BE, dspace);
 
-	// Create a file attribute and a group attribute. 
-	Attribute fa1 = file.createAttribute(FATTR_NAME, PredType::STD_I32BE, 
-	                                          dspace);
-	Attribute ga1 = gr1.createAttribute(GATTR_NAME, PredType::STD_I32BE, 
-	                                          dspace);
+        // Create a file attribute and a group attribute. 
+        Attribute fa1 = file.createAttribute(FATTR_NAME, PredType::STD_I32BE, 
+                                                  dspace);
+        Attribute ga1 = gr1.createAttribute(GATTR_NAME, PredType::STD_I32BE, 
+                                                  dspace);
      
-	// Write the attribute data. 
-	fa1.write( PredType::NATIVE_INT, attr_data);
-	ga1.write( PredType::NATIVE_INT, attr_data);
+        // Write the attribute data. 
+        fa1.write( PredType::NATIVE_INT, attr_data);
+        ga1.write( PredType::NATIVE_INT, attr_data);
 
-	fa1.close();
-	ga1.close();
-	fds.close();
-	gds.close();
+        fa1.close();
+        ga1.close();
+        fds.close();
+        gds.close();
 
-	// Verify the attributes have correct names.
-	printelems(file, FDATASET_NAME, FATTR_NAME);
-	printelems(gr1, GDATASET_NAME, GATTR_NAME);
+        // Verify the attributes have correct names.
+        printelems(file, FDATASET_NAME, FATTR_NAME);
+        printelems(gr1, GDATASET_NAME, GATTR_NAME);
 
    }  // end of try block
 
    // catch failure caused by the H5File operations
    catch( DataSpaceIException error )
    {
-	error.printError();
+        error.printError();
    }
 
    // catch failure caused by the H5File operations
    catch( AttributeIException error )
    {
-	error.printError();
+        error.printError();
    }
 
    // catch failure caused by the H5File operations
    catch( FileIException error )
    {
-	error.printError();
+        error.printError();
    }
 
    // catch failure caused by the DataSet operations
    catch( DataSetIException error )
    {
-	error.printError();
+        error.printError();
    }
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_iterate
+ * Function:    test_iterate
  *
- * Purpose:	Tests iterate functionality
+ * Purpose      Tests iterate functionality
  *
- * Return:	Success: 0
- *		Failure: -1
+ * Return       Success: 0
+ *              Failure: -1
  *
- * Programmer:	Binh-Minh Ribler
- *		Tuesday, September 6, 2016
+ * Programmer   Binh-Minh Ribler
+ *              Tuesday, September 6, 2016
  *
  * Modifications:
  *
@@ -503,20 +503,20 @@ void test_iterate()
     FileAccPropList fapl;
     fapl.setLibverBounds(H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
 
-    test_iter_group(fapl);	// Test iterating groups
-    test_HDFFV_9920();		// Test the fix of HDFFV-9920
-    //test_iter_attr(fapl);	// Test iterating attributes
+    test_iter_group(fapl);        // Test iterating groups
+    test_HDFFV_9920();        	// Test the fix of HDFFV-9920
+    //test_iter_attr(fapl);        // Test iterating attributes
 
 }   // test_iterate
 
 /*-------------------------------------------------------------------------
  * Function:    cleanup_iterate
  *
- * Purpose:     Cleanup temporary test files
+ * Purpose      Cleanup temporary test files
  *
- * Return:      none
+ * Return       none
  *
- * Programmer:  (use C version)
+ * Programmer   (use C version)
  *
  * Modifications:
  *

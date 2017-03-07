@@ -67,34 +67,34 @@
  * <br />
  */
 
-///	This example shows how to create datasets.
+///        This example shows how to create datasets.
 ///\par
 ///\example     create.cpp
 
 ///\par
-///	This example shows how to write datasets.
+///        This example shows how to write datasets.
 ///\example     writedata.cpp
 
 ///\par
-///	This example shows how to read datasets.
+///        This example shows how to read datasets.
 ///\example     readdata.cpp
 
 ///\par
-///	This example shows how to create a compound datatype,
-///	write an array which has the compound datatype to the file,
-///	and read back fields' subsets.
+///        This example shows how to create a compound datatype,
+///        write an array which has the compound datatype to the file,
+///        and read back fields' subsets.
 ///\example     compound.cpp
 
 ///\par
-///	This example shows how to work with extendible datasets.
+///        This example shows how to work with extendible datasets.
 ///\example     extend_ds.cpp
 
 ///\par
-///	This example shows how to read data from a chunked dataset.
+///        This example shows how to read data from a chunked dataset.
 ///\example     chunks.cpp
 
 ///\par
-///	This example shows how to work with groups.
+///        This example shows how to work with groups.
 ///\example     h5group.cpp
 
 #endif // __H5CppDoc_H
