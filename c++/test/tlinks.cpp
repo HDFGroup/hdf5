@@ -43,9 +43,9 @@ using namespace H5;
 //#define H5G_TESTING
 
 //#include "h5test.h"
-//#include "H5Gpkg.h"		/* Groups 				*/
-//#include "H5Iprivate.h"		/* IDs			  		*/
-//#include "H5Lprivate.h"         /* Links                                */
+//#include "H5Gpkg.h"     /* Groups */
+//#include "H5Iprivate.h" /* IDs */
+//#include "H5Lprivate.h" /* Links */
 
 /* File for external link test.  Created with gen_udlinks.c */
 #define LINKED_FILE  "be_extlink2.h5"
@@ -64,39 +64,39 @@ const char *FILENAME[] = {
     "links6",  /* 9 */
     "links7",  /* 10 */
     "links8",  /* 11 */
-    "extlinks0",	/* 12: main files */
-    "tmp/extlinks0",	/* 13: */
-    "extlinks1",	/* 14: target files */
-    "tmp/extlinks1",	/* 15: */
-    "extlinks2",	/* 16: */
-    "tmp/extlinks2",	/* 17: */
-    "extlinks3",	/* 18: */
-    "tmp/extlinks3",	/* 19: */
-    "extlinks4",	/* 20: */
-    "tmp/extlinks4",	/* 21: */
-    "extlinks5",	/* 22: */
-    "tmp/extlinks6",	/* 23: */
-    "extlinks7",	/* 24: */
-    "tmp/extlinks7",	/* 25: */
-    "tmp/extlinks8",	/* 26: */
-    "extlinks9",	/* 27: */
-    "tmp/extlinks9",	/* 28: */
-    "extlinks10",	/* 29: */ /* TESTS for windows */
-    "tmp/extlinks10",	/* 30: */
-    "tmp/extlinks11",	/* 31: */
-    "tmp/extlinks12",	/* 32: */
-    "extlinks13",	/* 33: */
-    "tmp/extlinks13",	/* 34: */
-    "tmp/extlinks14",	/* 35: */
-    "tmp/extlinks15",	/* 36: */
-    "extlinks16A",	/* 37: */ /* TESTS for H5P_set_elink_fapl */
-    "extlinks16B",	/* 38: */
-    "extlinks17",	/* 39: */
-    "extlinks18A",	/* 40: */
-    "extlinks18B",	/* 41: */
-    "extlinks19A",	/* 42: */
-    "extlinks19B",	/* 43: */
-    "extlinks20",	/* 44: */
+    "extlinks0",        /* 12: main files */
+    "tmp/extlinks0",    /* 13: */
+    "extlinks1",        /* 14: target files */
+    "tmp/extlinks1",    /* 15: */
+    "extlinks2",        /* 16: */
+    "tmp/extlinks2",    /* 17: */
+    "extlinks3",        /* 18: */
+    "tmp/extlinks3",    /* 19: */
+    "extlinks4",        /* 20: */
+    "tmp/extlinks4",    /* 21: */
+    "extlinks5",        /* 22: */
+    "tmp/extlinks6",    /* 23: */
+    "extlinks7",        /* 24: */
+    "tmp/extlinks7",    /* 25: */
+    "tmp/extlinks8",    /* 26: */
+    "extlinks9",        /* 27: */
+    "tmp/extlinks9",    /* 28: */
+    "extlinks10",       /* 29: */ /* TESTS for windows */
+    "tmp/extlinks10",   /* 30: */
+    "tmp/extlinks11",   /* 31: */
+    "tmp/extlinks12",   /* 32: */
+    "extlinks13",       /* 33: */
+    "tmp/extlinks13",   /* 34: */
+    "tmp/extlinks14",   /* 35: */
+    "tmp/extlinks15",   /* 36: */
+    "extlinks16A",      /* 37: */ /* TESTS for H5P_set_elink_fapl */
+    "extlinks16B",      /* 38: */
+    "extlinks17",       /* 39: */
+    "extlinks18A",      /* 40: */
+    "extlinks18B",      /* 41: */
+    "extlinks19A",      /* 42: */
+    "extlinks19B",      /* 43: */
+    "extlinks20",       /* 44: */
     NULL
 };
 
@@ -104,12 +104,12 @@ const char *FILENAME[] = {
 
 #define TMPDIR          "tmp"
 
-#define FAMILY_SIZE	1024
+#define FAMILY_SIZE     1024
 #define CORE_INCREMENT  1024
-#define NUM400		400
+#define NUM400          400
 
 /* do not do check_all_closed() for "ext*" files and "tmp/ext*" */
-#define EXTSTOP		12
+#define EXTSTOP         12
 
 #define LINK_BUF_SIZE   1024
 #define NAME_BUF_SIZE   1024
@@ -323,16 +323,16 @@ static const char *FILENAME[] = {
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_basic_links
+ * Function:    test_basic_links
  *
- * Purpose:	Test building a file with assorted links.
+ * Purpose      Test building a file with assorted links.
  *
- * Return:	Success:	0
+ * Return       Success: 0
  *
- *		Failure:	-1
+ *              Failure: -1
  *
- * Programmer:	Binh-Minh Ribler
- *		October 16, 2009
+ * Programmer   Binh-Minh Ribler
+ *              October 16, 2009
  *
  * Modifications:
  *
@@ -340,114 +340,114 @@ static const char *FILENAME[] = {
  */
 static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 {
-    hsize_t	        size[1] = {1};
-    char		filename[NAME_BUF_SIZE];
+    hsize_t size[1] = {1};
+    char    filename[NAME_BUF_SIZE];
 
     // Use the file access template id to create a file access prop. list.
     FileAccPropList fapl(fapl_id);
 
     try
     {
-	if(new_format)
-	    SUBTEST("Link creation (w/new group format)")
-	else
-	    SUBTEST("Link creation")
+        if(new_format)
+            SUBTEST("Link creation (w/new group format)")
+        else
+            SUBTEST("Link creation")
 
-	h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
-	H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
+        h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+        H5File file(filename, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
-	// Create simple dataspace
-	DataSpace scalar (1, size, size);
+        // Create simple dataspace
+        DataSpace scalar (1, size, size);
 
-	// Create a group then close it by letting the object go out of scope
-	{
-	    Group group(file.createGroup("grp1", 0));
-	}
+        // Create a group then close it by letting the object go out of scope
+        {
+            Group group(file.createGroup("grp1", 0));
+        }
 
-	// Create a dataset then close it by letting the object go out of scope
-	{
-	    DataSet dset1(file.createDataSet("dset1", PredType::NATIVE_INT, scalar));
-	}
+        // Create a dataset then close it by letting the object go out of scope
+        {
+            DataSet dset1(file.createDataSet("dset1", PredType::NATIVE_INT, scalar));
+        }
 
-	hid_t file_id = file.getId();
+        hid_t file_id = file.getId();
 
-	// Because these are not implemented in the C++ API yet, they are
-	// used so CommonFG::getLinkval can be tested.
-	// Create a hard link
-	if(H5Lcreate_hard(
-		file_id, "dset1", H5L_SAME_LOC, "grp1/hard1",
-		H5P_DEFAULT, H5P_DEFAULT) < 0)
-	    throw Exception("test_basic_links", "H5Lcreate_hard failed");
+        // Because these are not implemented in the C++ API yet, they are
+        // used so CommonFG::getLinkval can be tested.
+        // Create a hard link
+        if(H5Lcreate_hard(
+                file_id, "dset1", H5L_SAME_LOC, "grp1/hard1",
+                H5P_DEFAULT, H5P_DEFAULT) < 0)
+            throw Exception("test_basic_links", "H5Lcreate_hard failed");
 
-	// Create a symbolic link
-	if(H5Lcreate_soft(
-		"/dset1", file_id, "grp1/soft", H5P_DEFAULT, H5P_DEFAULT) < 0)
-	    throw Exception("test_basic_links", "H5Lcreate_soft failed");
+        // Create a symbolic link
+        if(H5Lcreate_soft(
+                "/dset1", file_id, "grp1/soft", H5P_DEFAULT, H5P_DEFAULT) < 0)
+            throw Exception("test_basic_links", "H5Lcreate_soft failed");
 
-	// Create a symbolic link to something that doesn't exist
-	if(H5Lcreate_soft(
-		"foobar", file_id, "grp1/dangle", H5P_DEFAULT, H5P_DEFAULT) < 0)
-	    throw Exception("test_basic_links", "H5Lcreate_soft failed");
+        // Create a symbolic link to something that doesn't exist
+        if(H5Lcreate_soft(
+                "foobar", file_id, "grp1/dangle", H5P_DEFAULT, H5P_DEFAULT) < 0)
+            throw Exception("test_basic_links", "H5Lcreate_soft failed");
 
-	// Create a recursive symbolic link
-	if(H5Lcreate_soft(
-		"/grp1/recursive", file_id, "/grp1/recursive",
-		H5P_DEFAULT, H5P_DEFAULT) < 0)
-	    throw Exception("test_basic_links", "H5Lcreate_soft failed");
+        // Create a recursive symbolic link
+        if(H5Lcreate_soft(
+                "/grp1/recursive", file_id, "/grp1/recursive",
+                H5P_DEFAULT, H5P_DEFAULT) < 0)
+            throw Exception("test_basic_links", "H5Lcreate_soft failed");
 
-	// Verify link values before closing the file
+        // Verify link values before closing the file
 
-	H5std_string softlink_val = file.getLinkval("grp1/soft");
-	verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__);
+        H5std_string softlink_val = file.getLinkval("grp1/soft");
+        verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__);
 
-	H5std_string dngllink_val = file.getLinkval("grp1/dangle");
-	verify_val(dngllink_val, "foobar", "H5File::getLinkval grp1/dangle", __LINE__, __FILE__);
+        H5std_string dngllink_val = file.getLinkval("grp1/dangle");
+        verify_val(dngllink_val, "foobar", "H5File::getLinkval grp1/dangle", __LINE__, __FILE__);
 
-	H5std_string reclink_val = file.getLinkval("grp1/recursive");
-	verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__);
+        H5std_string reclink_val = file.getLinkval("grp1/recursive");
+        verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__);
 
     } // end of try block
     catch (Exception& E)
     {
-	issue_fail_msg("test_basic_links()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_basic_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
     // Open the file and check on the links in it
     try
     {
-	// Open the file above
-	H5File file(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
+        // Open the file above
+        H5File file(filename, H5F_ACC_RDWR, FileCreatPropList::DEFAULT, fapl);
 
-	// Verify link existence
-	if(file.exists("dset1", LinkAccPropList::DEFAULT) != TRUE)
-	    throw InvalidActionException("H5File::exists", "dset1 doesn't exist");
-	if(file.exists("grp1/soft", LinkAccPropList::DEFAULT) != TRUE)
-	    throw InvalidActionException("H5File::exists", "grp1/soft doesn't exist");
+        // Verify link existence
+        if(file.exists("dset1", LinkAccPropList::DEFAULT) != TRUE)
+            throw InvalidActionException("H5File::exists", "dset1 doesn't exist");
+        if(file.exists("grp1/soft", LinkAccPropList::DEFAULT) != TRUE)
+            throw InvalidActionException("H5File::exists", "grp1/soft doesn't exist");
 
-	// Verify link values
-	H5std_string softlink_val = file.getLinkval("grp1/soft");
-	verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__);
+        // Verify link values
+        H5std_string softlink_val = file.getLinkval("grp1/soft");
+        verify_val(softlink_val, "/dset1", "H5File::getLinkval grp1/soft", __LINE__, __FILE__);
 
-	H5std_string reclink_val = file.getLinkval("grp1/recursive");
-	verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__);
+        H5std_string reclink_val = file.getLinkval("grp1/recursive");
+        verify_val(reclink_val, "/grp1/recursive", "H5File::getLinkval grp1/recursive", __LINE__, __FILE__);
 
-	PASSED();
+        PASSED();
     } // end of try block
     catch (Exception& E)
     {
-	issue_fail_msg("test_basic_links()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_basic_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
 
 
 /*-------------------------------------------------------------------------
- * Function:	test_links
+ * Function:    test_links
  *
- * Purpose:	Test links
+ * Purpose      Test links
  *
- * Return:	None
+ * Return       None
  *
- * Programmer:	Binh-Minh Ribler
+ * Programmer   Binh-Minh Ribler
  *              October 16, 2009
  *
  *-------------------------------------------------------------------------
@@ -455,7 +455,7 @@ static void test_basic_links(hid_t fapl_id, hbool_t new_format)
 extern "C"
 void test_links()
 {
-    hid_t	fapl_id, fapl2_id;    /* File access property lists */
+    hid_t        fapl_id, fapl2_id;    /* File access property lists */
     unsigned new_format;     /* Whether to use the new format or not */
     const char  *envval;
 
@@ -469,40 +469,40 @@ void test_links()
     MESSAGE(5, ("Testing Various Links\n"));
     try
     {
-	/* Copy the file access property list */
-	if((fapl2_id = H5Pcopy(fapl_id)) < 0)
-	    throw Exception("test_links", "H5Pcopy failed");
+        /* Copy the file access property list */
+        if((fapl2_id = H5Pcopy(fapl_id)) < 0)
+            throw Exception("test_links", "H5Pcopy failed");
 
-	/* Set the "use the latest version of the format" bounds for creating objects in the file */
-	if(H5Pset_libver_bounds(fapl2_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-	throw Exception("test_links", "H5Pset_libver_bounds failed");
+        /* Set the "use the latest version of the format" bounds for creating objects in the file */
+        if(H5Pset_libver_bounds(fapl2_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        throw Exception("test_links", "H5Pset_libver_bounds failed");
 
-	/* Loop over using new group format */
-	for(new_format = FALSE; new_format <= TRUE; new_format++)
-	{
-	    hid_t my_fapl_id;
+        /* Loop over using new group format */
+        for(new_format = FALSE; new_format <= TRUE; new_format++)
+        {
+            hid_t my_fapl_id;
 
-	    /* Check for FAPL to use */
-	    if(new_format)
-		my_fapl_id = fapl2_id;
-	    else
-		my_fapl_id = fapl_id;
+            /* Check for FAPL to use */
+            if(new_format)
+                my_fapl_id = fapl2_id;
+            else
+                my_fapl_id = fapl_id;
 
-	    /* General tests... (on both old & new format groups */
-	    // FileAccPropList may be passed in instead of fapl id
-	    test_basic_links(my_fapl_id, new_format);
+            /* General tests... (on both old & new format groups */
+            // FileAccPropList may be passed in instead of fapl id
+            test_basic_links(my_fapl_id, new_format);
 #if 0
 // these tests are from the C test links.c and left here for future
 // implementation of H5L API
-	nerrors += test_basic_links(fapl_id, new_format) < 0 ? 1 : 0;
-	nerrors += cklinks(my_fapl, new_format) < 0 ? 1 : 0;
-	nerrors += new_links(my_fapl, new_format) < 0 ? 1 : 0;
-	nerrors += ck_new_links(my_fapl, new_format) < 0 ? 1 : 0;
-	nerrors += long_links(my_fapl, new_format) < 0 ? 1 : 0;
-	nerrors += toomany(my_fapl, new_format) < 0 ? 1 : 0;
+        nerrors += test_basic_links(fapl_id, new_format) < 0 ? 1 : 0;
+        nerrors += cklinks(my_fapl, new_format) < 0 ? 1 : 0;
+        nerrors += new_links(my_fapl, new_format) < 0 ? 1 : 0;
+        nerrors += ck_new_links(my_fapl, new_format) < 0 ? 1 : 0;
+        nerrors += long_links(my_fapl, new_format) < 0 ? 1 : 0;
+        nerrors += toomany(my_fapl, new_format) < 0 ? 1 : 0;
 
-	/* Test new H5L link creation routine */
-	nerrors += test_lcpl(my_fapl, new_format);
+        /* Test new H5L link creation routine */
+        nerrors += test_lcpl(my_fapl, new_format);
         nerrors += test_move(my_fapl, new_format);
         nerrors += test_copy(my_fapl, new_format);
         nerrors += test_move_preserves(my_fapl, new_format);
@@ -579,7 +579,7 @@ void test_links()
         /* do not do this for files used by external link tests */
         nerrors += check_all_closed(my_fapl, new_format, EXTSTOP) < 0 ? 1 : 0;
 #endif // 0
-	} /* end for */
+        } /* end for */
 
 #if 0
     /* New group revision feature tests */
@@ -609,33 +609,33 @@ void test_links()
     nerrors += group_info_old(fapl) < 0 ? 1 : 0;
 
 #endif
-	/* Close 2nd FAPL */
-	H5Pclose(fapl2_id);
+        /* Close 2nd FAPL */
+        H5Pclose(fapl2_id);
 
-	h5_clean_files(FILENAME, fapl_id);
+        h5_clean_files(FILENAME, fapl_id);
 
-	/* Test that external links can be used after a library reset.  MUST be
-	* called last so the reset doesn't interfere with the property lists.  This
-	* routine will delete its own file. */
-	/* nerrors += external_reset_register() < 0 ? 1 : 0;
+        /* Test that external links can be used after a library reset.  MUST be
+        * called last so the reset doesn't interfere with the property lists.  This
+        * routine will delete its own file. */
+        /* nerrors += external_reset_register() < 0 ? 1 : 0;
  */
     }
     catch (Exception& E)
     {
-	issue_fail_msg("test_links()", __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_links()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
 }
 
 /*-------------------------------------------------------------------------
- * Function:	cleanup_links
+ * Function:    cleanup_links
  *
- * Purpose:	Cleanup temporary test files
+ * Purpose      Cleanup temporary test files
  *
- * Return:	none
+ * Return       none
  *
- * Programmer:	Binh-Minh Ribler
- *		October 16, 2009
+ * Programmer   Binh-Minh Ribler
+ *              October 16, 2009
  *
  * Modifications:
  *
