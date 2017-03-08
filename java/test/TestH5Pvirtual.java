@@ -220,6 +220,7 @@ public class TestH5Pvirtual {
                 try {H5.H5Dclose(H5did);} catch (Exception ex) {}
         }
         assertTrue("testH5Pget_virtual_count: "+num_map, num_map >= 0);
+        assertEquals(3, num_map);
     }
 
     @Test
@@ -406,7 +407,7 @@ public class TestH5Pvirtual {
         }
     }
 
-    @Ignore
+    @Test
     public void  testH5Pset_get_virtual_printf_gap() {
         long ret_val = -1;
         H5did = _createDataset(H5fid, H5dsid, "VDS", H5dcplid, H5dapl_id);
@@ -415,7 +416,7 @@ public class TestH5Pvirtual {
             assertTrue("H5Pget_virtual_printf_gap", ret_val >= 0);
             assertEquals(0, ret_val);
             H5.H5Pset_virtual_printf_gap(H5dapl_id, 2);
-            ret_val = H5.H5Pget_virtual_view(H5dapl_id);
+            ret_val = H5.H5Pget_virtual_printf_gap(H5dapl_id);
             assertTrue("H5Pget_virtual_printf_gap", ret_val >= 0);
             assertEquals(2, ret_val);
         }
