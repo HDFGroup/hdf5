@@ -1040,7 +1040,7 @@ H5VL_daosm_file_open(const char *name, unsigned flags, hid_t fapl_id,
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't connect to pool: %d", ret)
 
         /* Open the container */
-        if(0 != (ret = daos_cont_open(file->poh, file->uuid, DAOS_COO_RW, &file->coh, NULL /*&file->co_info*/, NULL /*event*/)))
+        if(0 != (ret = daos_cont_open(file->poh, file->uuid, flags & H5F_ACC_RDWR ? DAOS_COO_RW : DAOS_COO_RO, &file->coh, NULL /*&file->co_info*/, NULL /*event*/)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open container: %d", ret)
 
         /* If a snapshot was requested, use it as the epoch, otherwise query it
