@@ -81,9 +81,10 @@ int main(int argc, char *argv[]) {
     if(H5Dclose(ndset) < 0)
         ERROR;
     if(H5Fclose(file) < 0)
-    if(H5Fclose(file) < 0)
         ERROR;
     if(H5Fclose(nfile) < 0)
+        ERROR;
+    if(H5Sclose(space) < 0)
         ERROR;
     if(H5Pclose(fapl) < 0)
         ERROR;
@@ -102,6 +103,7 @@ error:
         H5Dclose(ndset);
         H5Fclose(file);
         H5Fclose(nfile);
+        H5Sclose(space);
         H5Pclose(fapl);
     } H5E_END_TRY;
 
