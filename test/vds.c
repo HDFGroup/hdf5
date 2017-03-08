@@ -11147,15 +11147,15 @@ test_dapl_values(hid_t fapl_id)
     hid_t    src_sid = -1;       /* source data space                    */
     hid_t    did1 = -1;          /* dataset                              */
     hid_t    did2 = -1;          /* dataset                              */
-    hsize_t start;              /* hyperslab start                      */
-    hsize_t stride;             /* hyperslab count                      */
-    hsize_t count;              /* hyperslab count                      */
-    hsize_t block;              /* hyperslab count                      */
-    hsize_t dims;               /* dataset size                         */
-    hsize_t max_dims;           /* dataset max size                     */
-    H5D_vds_view_t view;        /* view from dapl                       */
-    hsize_t gap_size;           /* gap size from dapl                   */
-    char    filename[1024];     /* file names                           */
+    hsize_t  start;              /* hyperslab start                      */
+    hsize_t  stride;             /* hyperslab count                      */
+    hsize_t  count;              /* hyperslab count                      */
+    hsize_t  block;              /* hyperslab count                      */
+    hsize_t  dims;               /* dataset size                         */
+    hsize_t  max_dims;           /* dataset max size                     */
+    H5D_vds_view_t  view;        /* view from dapl                       */
+    hsize_t  gap_size;           /* gap size from dapl                   */
+    char     filename[1024];     /* file names                           */
 
     TESTING("H5Dget_access_plist() returns dapl w/ correct values");
 
