@@ -1459,7 +1459,6 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->prefetched			= FALSE;
     entry_ptr->prefetch_type_id			= 0;
     entry_ptr->age				= 0;
-    entry_ptr->prefetched_dirty                 = FALSE;
 #ifndef NDEBUG  /* debugging field */
     entry_ptr->serialization_count		= 0;
 #endif /* NDEBUG */
