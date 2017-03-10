@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_F90_EXAMPLES C CXX Fortran)
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed
@@ -66,8 +66,8 @@ foreach (example ${examples})
         FOLDER examples/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
     )
-  endif ()
-endforeach ()
+  endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+endforeach (example ${examples})
 
 foreach (example ${F2003_examples})
   add_executable (f03_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
@@ -97,8 +97,8 @@ foreach (example ${F2003_examples})
         FOLDER examples/fortran03
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
     )
-  endif ()
-endforeach ()
+  endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+endforeach (example ${F2003_examples})
 
 if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   add_executable (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
@@ -130,9 +130,9 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
         FOLDER examples/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
     )
-  endif ()
-endif ()
+  endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+endif (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
 
 if (BUILD_TESTING)
   include (CMakeTests.cmake)
-endif ()
+endif (BUILD_TESTING)

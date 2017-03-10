@@ -530,7 +530,6 @@ JUnit version 4.11
 .testH5Pvirtual_storage
 .testH5Pget_selection_source_dataset
 .testH5Pget_source_filename
-.testH5Pset_get_virtual_printf_gap
 .testH5Pget_virtual_count
 .testH5Pset_get_virtual_view
 .testH5Pget_mapping_parameters
@@ -638,7 +637,7 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (636 tests)
+OK (635 tests)
 
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Fopen(): can't set access and transfer property lists

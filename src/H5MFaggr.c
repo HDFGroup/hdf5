@@ -116,15 +116,15 @@ HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_typ
 
     /* Get the EOA for the file -- need for sanity check below */
     if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, alloc_type)))
-       HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "Unable to get eoa")
+       HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, HADDR_UNDEF, "Unable to get eoa")
 
     /* Check for overlap into temporary allocation space */
     if(H5F_addr_gt((eoa + size), f->shared->tmp_addr))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "hdr file space alloc will overlap into 'temporary' file space")
+        HGOTO_ERROR(H5E_FSPACE, H5E_BADRANGE, HADDR_UNDEF, "hdr file space alloc will overlap into 'temporary' file space")
 
     /* Allocate space for the header */
     if(HADDR_UNDEF == (ret_value = H5FD_alloc(f->shared->lf, dxpl_id, alloc_type, f, size, &eoa_frag_addr, &eoa_frag_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate file space for hdr")
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate file space for hdr")
 
     /* Sanity check for overlapping into file's temporary allocation space */
     HDassert(H5F_addr_le((ret_value + size), f->shared->tmp_addr));
@@ -232,9 +232,9 @@ haddr_t
 H5MF_aggr_alloc(H5F_t *f, hid_t dxpl_id, H5F_blk_aggr_t *aggr,
     H5F_blk_aggr_t *other_aggr, H5FD_mem_t type, hsize_t size)
 {
-    haddr_t     eoa_frag_addr = HADDR_UNDEF;    /* Address of fragment at EOA */
-    hsize_t     eoa_frag_size = 0;      	/* Size of fragment at EOA */
-    haddr_t	eoa = HADDR_UNDEF;      	/* Initial EOA for the file */
+    haddr_t	eoa_frag_addr = HADDR_UNDEF;    /* Address of fragment at EOA */
+    hsize_t	eoa_frag_size = 0;      /* Size of fragment at EOA */
+    haddr_t	eoa = HADDR_UNDEF;      /* Initial EOA for the file */
     haddr_t     ret_value = HADDR_UNDEF;        /* Return value */
 
     FUNC_ENTER_NOAPI(HADDR_UNDEF)
@@ -543,8 +543,7 @@ H5MF_aggr_try_extend(H5F_t *f, hid_t dxpl_id, H5F_blk_aggr_t *aggr,
 		    } /* end else-if */
 		} /* end else */
 	    } /* end if */
-            else {
-                /* The aggreator is not at end of file */
+            else { /* The aggreator is not at end of file */
                 /* Check if aggregator has enough internal space to satisfy the extension. */
                 if(aggr->size >= extra_requested) {
                     /* Extend block into aggregator */

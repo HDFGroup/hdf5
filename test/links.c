@@ -21,22 +21,18 @@
  */
 
 /*
- * This file needs to access private information from the H5FD package.
- * This file also needs to access the file driver testing code.
- */
-#define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
-#define H5FD_TESTING
-
-/*
  * This file needs to access private information from the H5G package.
  * This file also needs to access the group testing code.
  */
 #define H5G_FRIEND		/*suppress error about including H5Gpkg	  */
 #define H5G_TESTING
 
+#define H5FD_FRIEND		/*suppress error about including H5FDpkg	  */
+#define H5FD_TESTING
+
 #include "h5test.h"
 #include "H5srcdir.h"
-#include "H5FDpkg.h"            /* File drivers                         */
+#include "H5FDpkg.h"            /* File drivers         */
 #include "H5Gpkg.h"		/* Groups 				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Lprivate.h"         /* Links                                */
@@ -824,7 +820,7 @@ long_links(hid_t fapl, hbool_t new_format)
 static int
 toomany(hid_t fapl, hbool_t new_format)
 {
-    hid_t		fid = (-1);     	/* File ID */
+    hid_t		fid = (-1);     /* File ID */
     hid_t	gid = (-1), gid2 = (-1);	/* Group IDs */
     char                objname[NAME_BUF_SIZE];         /* Object name */
     char		filename[NAME_BUF_SIZE];
@@ -2626,6 +2622,7 @@ external_link_toomany(hid_t fapl, hbool_t new_format)
 
     /* Close first file */
     if(H5Fclose(fid) < 0) TEST_ERROR
+
 
     PASSED();
     return 0;

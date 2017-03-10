@@ -64,11 +64,11 @@
 
   foreach (ddl_file ${HDF5_REFERENCE_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${ddl_file}" "${PROJECT_BINARY_DIR}/testfiles/${ddl_file}" "h5fc_files")
-  endforeach ()
+  endforeach (ddl_file ${HDF5_REFERENCE_FILES})
 
   foreach (h5_file ${HDF5_REFERENCE_TEST_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${h5_file}" "${PROJECT_BINARY_DIR}/testfiles/${h5_file}" "h5fc_files")
-  endforeach ()
+  endforeach (h5_file ${HDF5_REFERENCE_TEST_FILES})
   add_custom_target(h5fc_files ALL COMMENT "Copying files needed by h5fc tests" DEPENDS ${h5fc_files_list})
 
 ##############################################################################
@@ -77,7 +77,7 @@
 ##############################################################################
 ##############################################################################
 
-  macro (ADD_H5_OUTPUT testname resultfile resultcode testfile)
+  MACRO (ADD_H5_OUTPUT testname resultfile resultcode testfile)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -87,7 +87,7 @@
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+      endif (NOT "${last_test}" STREQUAL "")
       if (NOT "${testfile}" STREQUAL "")
           add_test (
               NAME H5FC-${testname}-${testfile}-tmpfile
@@ -108,7 +108,7 @@
           )
           set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES DEPENDS "H5FC-${testname}-${testfile}-tmpfile")
           set (last_test "H5FC-${testname}-${testfile}")
-      else ()
+      else (NOT "${testfile}" STREQUAL "")
           add_test (
               NAME H5FC-${testname}-NA
               COMMAND "${CMAKE_COMMAND}"
@@ -122,11 +122,11 @@
           )
           set_tests_properties (H5FC-${testname}-NA PROPERTIES DEPENDS "H5FC-${testname}-clear-objects")
           set (last_test "H5FC-${testname}-NA")
-      endif ()
-    endif ()
-  endmacro ()
+      endif (NOT "${testfile}" STREQUAL "")
+    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (ADD_H5_OUTPUT)
 
-  macro (ADD_H5_TEST testname resultcode testfile)
+  MACRO (ADD_H5_TEST testname resultcode testfile)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -136,7 +136,7 @@
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+      endif (NOT "${last_test}" STREQUAL "")
       add_test (
           NAME H5FC-${testname}-tmpfile
           COMMAND    ${CMAKE_COMMAND}
@@ -156,10 +156,10 @@
       )
       set_tests_properties (H5FC-${testname} PROPERTIES DEPENDS "H5FC-${testname}-tmpfile")
       set (last_test "H5FC-${testname}")
-     endif ()
-  endmacro ()
+     endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (ADD_H5_TEST)
 
-  macro (ADD_H5_CHECK_IDX dependtest testname)
+  MACRO (ADD_H5_CHECK_IDX dependtest testname)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -167,10 +167,10 @@
           COMMAND "$<TARGET_FILE:h5fc_chk_idx>" "./testfiles/tmp.h5" "${ARGN}"
       )
       set_tests_properties (H5FC_CHECK_IDX-${testname} PROPERTIES DEPENDS "H5FC-${dependtest}")
-    endif ()
-  endmacro ()
+    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (ADD_H5_CHECK_IDX)
 
-  macro (ADD_H5_TEST_CHECK_IDX testname resultcode testfile)
+  MACRO (ADD_H5_TEST_CHECK_IDX testname resultcode testfile)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -180,7 +180,7 @@
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+      endif (NOT "${last_test}" STREQUAL "")
       add_test (
           NAME H5FC-${testname}-tmpfile
           COMMAND    ${CMAKE_COMMAND}
@@ -205,10 +205,10 @@
       )
       set_tests_properties (H5FC_CHECK_IDX-${testname} PROPERTIES DEPENDS "H5FC-${testname}")
       set (last_test "H5FC_CHECK_IDX-${testname}")
-    endif ()
-  endmacro ()
+    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (ADD_H5_TEST_CHECK_IDX)
 
-  macro (ADD_H5_H5DUMP_CHECK testname)
+  MACRO (ADD_H5_H5DUMP_CHECK testname)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -218,7 +218,7 @@
       )
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5FC-${testname}-clear-objects PROPERTIES DEPENDS ${last_test})
-      endif ()
+      endif (NOT "${last_test}" STREQUAL "")
       add_test (
           NAME H5FC-${testname}-tmpfile
           COMMAND    ${CMAKE_COMMAND}
@@ -250,8 +250,8 @@
       )
       set_tests_properties (H5FC_CHECK_DUMP-${testname} PROPERTIES DEPENDS "H5FC-${testname}")
       set (last_test "H5FC_CHECK_DUMP-${testname}")
-    endif ()
-  endmacro ()
+    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (ADD_H5_H5DUMP_CHECK)
 
 ##############################################################################
 ##############################################################################
@@ -324,9 +324,9 @@
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (H5FC-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
+    endif (NOT "${last_test}" STREQUAL "")
     set (last_test "H5FC-clearall-objects")
-  endif ()
+  endif (HDF5_ENABLE_USING_MEMCHECKER)
 
 # h5format_convert --help
 # h5format_convert (no options)

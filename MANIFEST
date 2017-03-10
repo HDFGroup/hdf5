@@ -504,12 +504,10 @@
 ./src/H5C.c
 ./src/H5Cdbg.c
 ./src/H5Cepoch.c
-./src/H5Cimage.c
 ./src/H5Clog.c
 ./src/H5Cmodule.h
 ./src/H5Cmpio.c
 ./src/H5Cpkg.h
-./src/H5Cprefetched.c
 ./src/H5Cprivate.h
 ./src/H5Cpublic.h
 ./src/H5Cquery.c
@@ -739,7 +737,6 @@
 ./src/H5Obogus.c
 ./src/H5Obtreek.c
 ./src/H5Ocache.c
-./src/H5Ocache_image.c
 ./src/H5Ochunk.c
 ./src/H5Ocont.c
 ./src/H5Ocopy.c
@@ -884,20 +881,13 @@
 ./src/libhdf5.settings.in
 ./src/H5win32defs.h
 
-./test/AtomicWriterReader.txt
 ./test/COPYING
 ./test/H5srcdir.h
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
-./test/POSIX_Order_Write_Test_Report.docx
-./test/POSIX_Order_Write_Test_Report.pdf
-./test/SWMR_POSIX_Order_UG.txt
-./test/SWMR_UseCase_UG.txt
 ./test/accum.c
 ./test/accum_swmr_reader.c
 ./test/app_ref.c
-./test/atomic_reader.c
-./test/atomic_writer.c
 ./test/bad_compound.h5
 ./test/be_data.h5
 ./test/be_extlink1.h5
@@ -911,7 +901,6 @@
 ./test/cache_api.c
 ./test/cache_common.c
 ./test/cache_common.h
-./test/cache_image.c
 ./test/cache_logging.c
 ./test/cache_tagging.c
 ./test/cmpd_dset.c
@@ -957,8 +946,6 @@
 ./test/flush1.c
 ./test/flush2.c
 ./test/flushrefresh.c
-./test/genall5.c
-./test/genall5.h
 ./test/gen_bad_ohdr.c
 ./test/gen_bad_compound.c
 ./test/gen_bogus.c
@@ -966,7 +953,6 @@
 ./test/gen_deflate.c
 ./test/gen_file_image.c
 ./test/gen_filespace.c
-./test/gen_idx.c
 ./test/gen_mergemsg.c
 ./test/gen_new_array.c
 ./test/gen_new_fill.c
@@ -1015,18 +1001,7 @@
 ./test/specmetaread.h5
 ./test/stab.c
 ./test/swmr.c
-./test/swmr_addrem_writer.c
 ./test/swmr_check_compat_vfd.c
-./test/swmr_common.c
-./test/swmr_common.h
-./test/swmr_generator.c
-./test/swmr_reader.c
-./test/swmr_remove_reader.c
-./test/swmr_remove_writer.c
-./test/swmr_sparse_reader.c
-./test/swmr_sparse_writer.c
-./test/swmr_start_write.c
-./test/swmr_writer.c
 ./test/tarray.c
 ./test/tarrold.h5
 ./test/tattr.c
@@ -1045,10 +1020,7 @@
 ./test/testhdf5.h
 ./test/testlibinfo.sh.in
 ./test/test_plugin.sh.in
-./test/test_usecases.sh.in
 ./test/testmeta.c
-./test/testswmr.sh.in
-./test/testvdsswmr.sh.in
 ./test/tfile.c
 ./test/tgenprop.c
 ./test/th5o.c
@@ -1079,24 +1051,14 @@
 ./test/tunicode.c
 ./test/tvlstr.c
 ./test/tvltypes.c
-./test/twriteorder.c
 ./test/unlink.c
 ./test/unregister.c
-./test/use_append_chunk.c
-./test/use_append_mchunks.c
-./test/use_common.c
-./test/use_disable_mdc_flushes.c
-./test/use.h
 ./test/vfd.c
 ./test/test_filters_le.h5
 ./test/test_filters_be.h5
 ./test/gen_filters.c
 ./test/chunk_info.c
 ./test/vds.c
-./test/vds_swmr.h
-./test/vds_swmr_gen.c
-./test/vds_swmr_reader.c
-./test/vds_swmr_writer.c
 
 ./test/testfiles/err_compat_1
 ./test/testfiles/err_compat_2
@@ -1239,9 +1201,7 @@
 ./tools/src/h5dump/h5dump_xml.c
 ./tools/src/h5dump/h5dump_xml.h
 ./tools/test/h5dump/Makefile.am
-./tools/test/h5dump/dynlib_dump.c
 ./tools/test/h5dump/h5dumpgentest.c
-./tools/test/h5dump/h5dump_plugin.sh.in
 ./tools/test/h5dump/testh5dump.sh.in
 ./tools/test/h5dump/testh5dumppbits.sh.in
 ./tools/test/h5dump/testh5dumpxml.sh.in
@@ -1313,9 +1273,7 @@
 ./tools/src/h5diff/h5diff_main.c
 ./tools/src/h5diff/ph5diff_main.c
 ./tools/test/h5diff/Makefile.am
-./tools/test/h5diff/dynlib_diff.c
 ./tools/test/h5diff/h5diffgentest.c
-./tools/test/h5diff/h5diff_plugin.sh.in
 ./tools/test/h5diff/testh5diff.sh.in
 ./tools/test/h5diff/testph5diff.sh.in
 
@@ -1396,8 +1354,6 @@
 ./tools/src/h5ls/Makefile.am
 ./tools/src/h5ls/h5ls.c
 ./tools/test/h5ls/Makefile.am
-./tools/test/h5ls/dynlib_ls.c
-./tools/test/h5ls/h5ls_plugin.sh.in
 ./tools/test/h5ls/testh5ls.sh.in
 ./tools/test/h5ls/testh5lsvds.sh.in
 
@@ -1782,9 +1738,6 @@
 ./tools/testfiles/tstring2.ddl
 ./tools/testfiles/tstringe.ddl
 ./tools/testfiles/tszip.ddl
-./tools/testfiles/tudfilter.ddl
-./tools/testfiles/tudfilter.h5
-./tools/testfiles/tudfilter.ls
 ./tools/testfiles/tudlink.h5
 ./tools/testfiles/tudlink.h5.xml
 ./tools/testfiles/tudlink-1.ddl
@@ -2155,10 +2108,6 @@
 ./tools/test/h5diff/testfiles/h5diff_57.txt
 ./tools/test/h5diff/testfiles/h5diff_58.txt
 ./tools/test/h5diff/testfiles/h5diff_59.txt
-./tools/test/h5diff/testfiles/h5diff_60.txt
-./tools/test/h5diff/testfiles/h5diff_61.txt
-./tools/test/h5diff/testfiles/h5diff_62.txt
-./tools/test/h5diff/testfiles/h5diff_63.txt
 ./tools/test/h5diff/testfiles/h5diff_600.txt
 ./tools/test/h5diff/testfiles/h5diff_601.txt
 ./tools/test/h5diff/testfiles/h5diff_603.txt
@@ -2361,12 +2310,6 @@
 ./tools/test/h5diff/testfiles/tmptest.he5
 ./tools/test/h5diff/testfiles/h5diff_tmp2.txt
 ./tools/test/h5diff/testfiles/tmpSingleSiteBethe.output.h5
-./tools/test/h5diff/testfiles/tudfilter.h5
-./tools/test/h5diff/testfiles/tudfilter2.h5
-./tools/test/h5diff/testfiles/h5diff_ud.txt
-./tools/test/h5diff/testfiles/h5diff_udfail.txt
-./tools/test/h5diff/testfiles/diff_strings1.h5
-./tools/test/h5diff/testfiles/diff_strings2.h5
 #vds
 ./tools/test/h5diff/testfiles/h5diff_v1.txt
 ./tools/test/h5diff/testfiles/h5diff_v2.txt
@@ -3024,6 +2967,7 @@
 ./config/cmake_ext_mod/HDFUseFortran.cmake
 ./config/cmake_ext_mod/NSIS.InstallOptions.ini.in
 ./config/cmake_ext_mod/NSIS.template.in
+./config/cmake_ext_mod/prunTest.cmake
 ./config/cmake_ext_mod/runTest.cmake
 ./config/cmake_ext_mod/version.plist.in
 
@@ -3131,7 +3075,6 @@
 # CMake-specific User Scripts
 ./config/cmake/scripts/CTestScript.cmake
 ./config/cmake/scripts/HDF5config.cmake
-./config/cmake/scripts/HDF5options.cmake
 
 # Files generated by autogen
 ./aclocal.m4

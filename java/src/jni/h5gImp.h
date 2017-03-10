@@ -102,7 +102,7 @@ Java_hdf_hdf5lib_H5_H5Gget_1info_1by_1idx
  * Method:    H5Gflush
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL
+JNIEXPORT void JNICALL 
 Java_hdf_hdf5lib_H5_H5Gflush
   (JNIEnv*, jclass, jlong);
 
@@ -111,7 +111,7 @@ Java_hdf_hdf5lib_H5_H5Gflush
  * Method:    H5Grefresh
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL
+JNIEXPORT void JNICALL 
 Java_hdf_hdf5lib_H5_H5Grefresh
   (JNIEnv*, jclass, jlong);
 

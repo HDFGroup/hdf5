@@ -130,7 +130,6 @@ CLEANFILES = classhdf5_java.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/callbacks/*.
 clean:
 	rm -rf $(JAVAROOT)/*
 	rm -f $(jarfile)
-	rm -rf javadoc
 	rm -f classhdf5_java.stamp
 
 

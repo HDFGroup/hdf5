@@ -37,7 +37,7 @@ AC_CONFIG_MACRO_DIR([m4])
 ## AM_INIT_AUTOMAKE takes a list of options that should be applied to
 ## every Makefile.am when automake is run.
 AM_INIT_AUTOMAKE([foreign subdir-objects])
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])]) # use silent rules where available - automake 1.11
+AM_SILENT_RULES([yes])
 
 ## AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
 ## for Makefiles, configure, src/H5config.h, etc. If AM_MAINTAINER_MODE
@@ -3359,14 +3359,11 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/Makefile
                  test/testcheck_version.sh
                  test/testerror.sh
-                 test/testflushrefresh.sh
+		 test/testflushrefresh.sh
                  test/H5srcdir_str.h
                  test/testlibinfo.sh
                  test/testlinks_env.sh
-                 test/testswmr.sh
                  test/test_plugin.sh
-                 test/test_usecases.sh
-                 test/testvdsswmr.sh
                  testpar/Makefile
                  tools/Makefile
                  tools/lib/Makefile
@@ -3383,19 +3380,16 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/src/h5stat/Makefile
                  tools/test/Makefile
                  tools/test/h5dump/Makefile
-                 tools/test/h5dump/h5dump_plugin.sh
                  tools/test/h5dump/testh5dump.sh
                  tools/test/h5dump/testh5dumppbits.sh
                  tools/test/h5dump/testh5dumpvds.sh
                  tools/test/h5dump/testh5dumpxml.sh
                  tools/test/h5ls/Makefile
-                 tools/test/h5ls/h5ls_plugin.sh
                  tools/test/h5ls/testh5ls.sh
                  tools/test/h5ls/testh5lsvds.sh
                  tools/test/h5import/Makefile
                  tools/test/h5import/h5importtestutil.sh
                  tools/test/h5diff/Makefile
-                 tools/test/h5diff/h5diff_plugin.sh
                  tools/test/h5diff/testh5diff.sh
                  tools/test/h5diff/testph5diff.sh
                  tools/src/h5format_convert/Makefile
@@ -3409,7 +3403,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/test/h5copy/Makefile
                  tools/test/h5copy/testh5copy.sh
                  tools/test/misc/Makefile
-                 tools/test/misc/testh5clear.sh
+		 tools/test/misc/testh5clear.sh
                  tools/test/misc/testh5mkgrp.sh
                  tools/test/misc/testh5repart.sh
                  tools/test/misc/vds/Makefile
@@ -3457,7 +3451,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/tools/Makefile
                  hl/tools/gif2h5/Makefile
                  hl/tools/gif2h5/h52giftest.sh
-                 hl/tools/h5watch/Makefile
+		 hl/tools/h5watch/Makefile
                  hl/tools/h5watch/testh5watch.sh
                  hl/examples/Makefile
                  hl/examples/run-hlc-ex.sh

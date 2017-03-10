@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_HL_SRC)
 
 #-----------------------------------------------------------------------------
@@ -53,7 +53,7 @@ if (BUILD_SHARED_LIBS)
   )
   set_global_variable (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_HL_LIBSH_TARGET}")
   set (install_targets ${install_targets} ${HDF5_HL_LIBSH_TARGET})
-endif ()
+endif (BUILD_SHARED_LIBS)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
@@ -73,8 +73,7 @@ install (
 if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_HL_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} hllibraries)
-  endif ()
-  INSTALL_TARGET_PDB (${HDF5_HL_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} hllibraries)
+  endif (BUILD_SHARED_LIBS)
 
   install (
       TARGETS
@@ -87,4 +86,4 @@ if (HDF5_EXPORTED_TARGETS)
       FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT hllibraries
       INCLUDES DESTINATION include
   )
-endif ()
+endif (HDF5_EXPORTED_TARGETS)

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_TOOLS_SRC_H5FC)
 
 #-----------------------------------------------------------------------------
@@ -27,14 +27,13 @@ set (H5_DEP_EXECUTABLES h5format_convert)
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
-if (HDF5_EXPORTED_TARGETS)
-  INSTALL_PROGRAM_PDB (h5format_convert ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 
-  install (
-      TARGETS
-          h5format_convert
-      EXPORT
-          ${HDF5_EXPORTED_TARGETS}
-      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
-  )
-endif ()
+#INSTALL_PROGRAM_PDB (h5format_convert ${HDF5_INSTALL_BIN_DIR} toolsapplications)
+
+install (
+    TARGETS
+        h5format_convert
+    EXPORT
+        ${HDF5_EXPORTED_TARGETS}
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
+)

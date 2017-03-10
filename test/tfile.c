@@ -103,14 +103,14 @@
 #define USERBLOCK_SIZE      ((hsize_t) 512)
 
 /* Declarations for test_filespace_*() */
-#define FILENAME_LEN        1024                        /* length of file name */
+#define FILENAME_LEN    	1024		/* length of file name */
 #define CORE_INCREMENT  	1024		/* core file */
 #define FAMILY_SIZE     	1024		/* family file */
-#define DSETNAME            "dset"                      /* Name of dataset */
-#define NELMTS(X)           (sizeof(X)/sizeof(X[0]))    /* # of elements */
-#define READ_OLD_BUFSIZE    1024                        /* Buffer for holding file data */
-#define FILE5               "tfile5.h5"                 /* Test file */
-#define TEST_THRESHOLD10    10                          /* Free space section threshold */
+#define DSETNAME 		"dset"		/* Name of dataset */
+#define NELMTS(X)               (sizeof(X)/sizeof(X[0]))	/* # of elements */
+#define READ_OLD_BUFSIZE	1024		/* Buffer for holding file data */
+#define FILE5			"tfile5.h5"	/* Test file */
+#define TEST_THRESHOLD10        10		/* Free space section threshold */
 
 /* Declaration for test_libver_macros2() */
 #define FILE6			"tfile6.h5"	/* Test file */
@@ -120,8 +120,7 @@
 #define NGROUPS			2
 #define NDSETS			4
 
-/* Files created under 1.6 branch and 1.8 branch--used in test_filespace_compatible() */
-const char *OLD_FILENAME[] = {  
+const char *OLD_FILENAME[] = {  /* Files created under 1.6 branch and 1.8 branch */
     "filespace_1_6.h5",	/* 1.6 HDF5 file */
     "filespace_1_8.h5"	/* 1.8 HDF5 file */
 };
@@ -889,8 +888,9 @@ test_file_close(void)
             ret = H5Gclose(group_id3);
             CHECK(ret, FAIL, "H5Gclose");
 	    break;
-        case H5F_CLOSE_DEFAULT:
-        default:
+
+    case H5F_CLOSE_DEFAULT:
+    default:
             CHECK(fc_degree, H5F_CLOSE_DEFAULT, "H5Pget_fclose_degree");
             break;
     }
@@ -3605,36 +3605,36 @@ static void
 test_filespace_compatible(void)
 {
     int fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
-    hid_t	fid = -1;		/* File id */
-    hid_t       did = -1;		/* Dataset id */
-    hid_t	fcpl;			/* File creation property list template */
-    int         check[100]; 		/* Temporary buffer for verifying dataset data */
-    int         rdbuf[100];		/* Temporary buffer for reading in dataset data */
+    hid_t	fid;	/* File id */
+    hid_t	fcpl;	/* File creation property list template */
+    hid_t       did;	/* Dataset id */
+    int         check[100]; 	/* Temporary buffer for verifying dataset data */
+    int         rdbuf[100];	/* Temporary buffer for reading in dataset data */
     uint8_t     buf[READ_OLD_BUFSIZE];	/* temporary buffer for reading */
-    ssize_t 	nread;  		/* Number of bytes read in */
-    unsigned    i, j;			/* Local index variable */
-    hssize_t	free_space;		/* Amount of free-space in the file */
-    hsize_t	threshold;		/* Free-space section threshold */
+    ssize_t 	nread;  	/* Number of bytes read in */
+    unsigned    i, j;		    /* Local index variable */
+    hssize_t	free_space;	    /* Amount of free space in the file */
+    hsize_t	threshold;	    /* Free space section threshold */
     H5F_file_space_type_t strategy; /* File space handling strategy */
-    herr_t	ret;			/* Return value */
+    herr_t	ret;		    /* Return value */
 
     /* Output message about test being performed */
-    MESSAGE(5, ("File space compatibility testing for 1.6 and 1.8 files\n"));
+    MESSAGE(5, ("Testing File space compatibility for 1.6 and 1.8 files\n"));
 
     for(j = 0; j < NELMTS(OLD_FILENAME); j++) {
         const char *filename = H5_get_srcdir_filename(OLD_FILENAME[j]); /* Corrected test file name */
 
-        /* Open and copy the test file into a temporary file */
+	/* Copy old file into test file */
 	fd_old = HDopen(filename, O_RDONLY, 0666);
 	CHECK(fd_old, FAIL, "HDopen");
 	fd_new = HDopen(FILE5, O_RDWR|O_CREAT|O_TRUNC, 0666);
 	CHECK(fd_new, FAIL, "HDopen");
 
 	/* Copy data */
-        while((nread = HDread(fd_old, buf, (size_t)READ_OLD_BUFSIZE)) > 0) {
-            ssize_t write_err = HDwrite(fd_new, buf, (size_t)nread);
-            CHECK(write_err, -1, "HDwrite");
-        } /* end while */
+	while((nread = HDread(fd_old, buf, (size_t)READ_OLD_BUFSIZE)) > 0) {
+        ssize_t write_err = HDwrite(fd_new, buf, (size_t)nread);
+        CHECK(write_err, -1, "HDwrite");
+    } /* end while */
 
 	/* Close the files */
 	ret = HDclose(fd_old);
@@ -3642,7 +3642,7 @@ test_filespace_compatible(void)
 	ret = HDclose(fd_new);
 	CHECK(ret, FAIL, "HDclose");
 
-        /* Open the temporary test file */
+	/* Open the test file */
 	fid = H5Fopen(FILE5, H5F_ACC_RDWR, H5P_DEFAULT);
 	CHECK(fid, FAIL, "H5Fopen");
 
@@ -3651,11 +3651,10 @@ test_filespace_compatible(void)
 	CHECK(free_space, FAIL, "H5Fget_freespace");
 	VERIFY(free_space, (hssize_t)0, "H5Fget_freespace");
 
-        /* Get the file's file creation property list */
-        fcpl = H5Fget_create_plist(fid);
-        CHECK(fcpl, FAIL, "H5Fget_create_plist");
-
+	/* Get the file's file creation property list */
 	/* Retrieve the file space handling strategy and threshold */
+	fcpl = H5Fget_create_plist(fid);
+	CHECK(fcpl, FAIL, "H5Fget_create_plist");
 	ret = H5Pget_file_space(fcpl, &strategy, &threshold);
 	CHECK(ret, FAIL, "H5Pget_file_space");
 
@@ -3686,13 +3685,13 @@ test_filespace_compatible(void)
 	ret = H5Ldelete(fid, DSETNAME, H5P_DEFAULT);
 	CHECK(ret, FAIL, "H5Ldelete");
 
-        /* Close the plist */
-        ret = H5Pclose(fcpl);
-        CHECK(ret, FAIL, "H5Pclose");
+    /* Close the plist */
+    ret = H5Pclose(fcpl);
+    CHECK(ret, FAIL, "H5Pclose");
 
-        /* Close the file */
-        ret = H5Fclose(fid);
-        CHECK(ret, FAIL, "H5Fclose");
+    /* Close the file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
 
 	/* Re-Open the file */
 	fid = H5Fopen(FILE5, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -4091,37 +4090,37 @@ test_file(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File I/O\n"));
 
-    test_file_create();                         /* Test file creation(also creation templates)*/
-    test_file_open();                           /* Test file opening */
-    test_file_reopen();                         /* Test file reopening */
-    test_file_close();                          /* Test file close behavior */
-    test_get_file_id();                         /* Test H5Iget_file_id */
-    test_get_obj_ids();                         /* Test H5Fget_obj_ids for Jira Issue 8528 */
-    test_file_perm();                           /* Test file access permissions */
-    test_file_perm2();                          /* Test file access permission again */
+    test_file_create();         /* Test file creation(also creation templates)*/
+    test_file_open();           /* Test file opening */
+    test_file_reopen();         /* Test file reopening */
+    test_file_close();          /* Test file close behavior */
+    test_get_file_id();         /* Test H5Iget_file_id */
+    test_get_obj_ids();         /* Test H5Fget_obj_ids for Jira Issue 8528 */
+    test_file_perm();           /* Test file access permissions */
+    test_file_perm2();          /* Test file access permission again */
     test_file_freespace();      /* Test file free space information */
-    test_file_ishdf5();                         /* Test detecting HDF5 files correctly */
-    test_file_open_dot();                       /* Test opening objects with "." for a name */
-    test_file_open_overlap();                   /* Test opening files in an overlapping manner */
-    test_file_getname();                        /* Test basic H5Fget_name() functionality */
-    test_file_double_root_open();               /* Test opening root group from two files works properly */
-    test_file_double_group_open();              /* Test opening same group from two files works properly */
-    test_file_double_dataset_open();            /* Test opening same dataset from two files works properly */
-    test_file_double_datatype_open();           /* Test opening same named datatype from two files works properly */
+    test_file_ishdf5();         /* Test detecting HDF5 files correctly */
+    test_file_open_dot();       /* Test opening objects with "." for a name */
+    test_file_open_overlap();   /* Test opening files in an overlapping manner */
+    test_file_getname();        /* Test basic H5Fget_name() functionality */
+    test_file_double_root_open();       /* Test opening root group from two files works properly */
+    test_file_double_group_open();      /* Test opening same group from two files works properly */
+    test_file_double_dataset_open();    /* Test opening same dataset from two files works properly */
+    test_file_double_datatype_open();   /* Test opening same named datatype from two files works properly */
     test_file_double_file_dataset_open(TRUE);
     test_file_double_file_dataset_open(FALSE);
-    test_userblock_file_size();                 /* Tests that files created with a userblock have the correct size */
-    test_cached_stab_info();                    /* Tests that files are created with cached stab info in the superblock */
-    test_rw_noupdate();                         /* Test to ensure that RW permissions don't write the file unless dirtied */
-    test_userblock_alignment();                 /* Tests that files created with a userblock and alignment interact properly */
+    test_userblock_file_size(); /* Tests that files created with a userblock have the correct size */
+    test_cached_stab_info();    /* Tests that files are created with cached stab info in the superblock */
+    test_rw_noupdate();         /* Test to ensure that RW permissions don't write the file unless dirtied */
+    test_userblock_alignment(); /* Tests that files created with a userblock and alignment interact properly */
     test_filespace_sects();     /* Test file free space section information */
     test_filespace_info();	/* Test file creation public routines:H5Pget/set_file_space */
-    test_filespace_compatible();                /* Test compatibility for file space management */
-    test_libver_bounds();                       /* Test compatibility for file space management */
-    test_libver_macros();                       /* Test the macros for library version comparison */
-    test_libver_macros2();                      /* Test the macros for library version comparison */
+    test_filespace_compatible();/* Test compatibility for file space management */
+    test_libver_bounds();       /* Test compatibility for file space management */
+    test_libver_macros();       /* Test the macros for library version comparison */
+    test_libver_macros2();      /* Test the macros for library version comparison */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    test_deprec();                              /* Test deprecated routines */
+    test_deprec();              /* Test deprecated routines */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 } /* test_file() */
 

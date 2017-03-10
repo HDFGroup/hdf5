@@ -613,7 +613,7 @@ Java_hdf_hdf5lib_H5_H5Tconvert
  * Method:    H5Tflush
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL
+JNIEXPORT void JNICALL 
 Java_hdf_hdf5lib_H5_H5Tflush
   (JNIEnv*, jclass, jlong);
 
@@ -622,7 +622,7 @@ Java_hdf_hdf5lib_H5_H5Tflush
  * Method:    H5Trefresh
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL
+JNIEXPORT void JNICALL 
 Java_hdf_hdf5lib_H5_H5Trefresh
   (JNIEnv*, jclass, jlong);
 

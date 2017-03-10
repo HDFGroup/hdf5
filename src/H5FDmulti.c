@@ -1151,18 +1151,14 @@ H5FD_multi_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     ALL_MEMBERS(mt) {
         out_mt = mt;
-	if(f1->memb[mt] && f2->memb[mt])
-            break;
-	if(!cmp) {
-	    if(f1->memb[mt])
-                cmp = -1;
-	    else if(f2->memb[mt])
-                cmp = 1;
+	if (f1->memb[mt] && f2->memb[mt]) break;
+	if (!cmp) {
+	    if (f1->memb[mt]) cmp = -1;
+	    else if (f2->memb[mt]) cmp = 1;
 	}
     } END_MEMBERS;
     assert(cmp || out_mt<H5FD_MEM_NTYPES);
-    if(out_mt>=H5FD_MEM_NTYPES)
-        return cmp;
+    if (out_mt>=H5FD_MEM_NTYPES) return cmp;
 
     return H5FDcmp(f1->memb[out_mt], f2->memb[out_mt]);
 }

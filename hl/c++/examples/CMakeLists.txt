@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_HL_CPP_EXAMPLES)
 
 #-----------------------------------------------------------------------------
@@ -23,4 +23,4 @@ set_target_properties (ptExampleFL PROPERTIES FOLDER examples/hl/cpp)
 
 if (BUILD_TESTING)
   include (CMakeTests.cmake)
-endif ()
+endif (BUILD_TESTING)

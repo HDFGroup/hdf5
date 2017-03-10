@@ -24,7 +24,7 @@
 # made to remove references to Qt and make this file more generally applicable
 #########################################################################
 
-macro (SZIP_ADJUST_LIB_VARS basename)
+MACRO (SZIP_ADJUST_LIB_VARS basename)
   if (${basename}_INCLUDE_DIR)
 
     # if only the release version was found, set the debug variable also to the release version
@@ -32,37 +32,38 @@ macro (SZIP_ADJUST_LIB_VARS basename)
       set (${basename}_LIBRARY_DEBUG ${${basename}_LIBRARY_RELEASE})
       set (${basename}_LIBRARY       ${${basename}_LIBRARY_RELEASE})
       set (${basename}_LIBRARIES     ${${basename}_LIBRARY_RELEASE})
-    endif ()
+    endif (${basename}_LIBRARY_RELEASE AND NOT ${basename}_LIBRARY_DEBUG)
 
     # if only the debug version was found, set the release variable also to the debug version
     if (${basename}_LIBRARY_DEBUG AND NOT ${basename}_LIBRARY_RELEASE)
       set (${basename}_LIBRARY_RELEASE ${${basename}_LIBRARY_DEBUG})
       set (${basename}_LIBRARY         ${${basename}_LIBRARY_DEBUG})
       set (${basename}_LIBRARIES       ${${basename}_LIBRARY_DEBUG})
-    endif ()
+    endif (${basename}_LIBRARY_DEBUG AND NOT ${basename}_LIBRARY_RELEASE)
     if (${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE)
       # if the generator supports configuration types then set
       # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
       if (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
         set (${basename}_LIBRARY       optimized ${${basename}_LIBRARY_RELEASE} debug ${${basename}_LIBRARY_DEBUG})
-      else ()
+      else (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
         # if there are no configuration types and CMAKE_BUILD_TYPE has no value
         # then just use the release libraries
         set (${basename}_LIBRARY       ${${basename}_LIBRARY_RELEASE} )
-      endif ()
+      endif (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
       set (${basename}_LIBRARIES       optimized ${${basename}_LIBRARY_RELEASE} debug ${${basename}_LIBRARY_DEBUG})
-    endif ()
+    endif (${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE)
 
     set (${basename}_LIBRARY ${${basename}_LIBRARY} CACHE FILEPATH "The ${basename} library")
 
     if (${basename}_LIBRARY)
       set (${basename}_FOUND 1)
-    endif ()
-  endif ()
+    endif (${basename}_LIBRARY)
+
+  endif (${basename}_INCLUDE_DIR )
 
   # Make variables changeble to the advanced user
   MARK_AS_ADVANCED (${basename}_LIBRARY ${basename}_LIBRARY_RELEASE ${basename}_LIBRARY_DEBUG ${basename}_INCLUDE_DIR )
-endmacro ()
+ENDMACRO (SZIP_ADJUST_LIB_VARS)
 
 
 # Look for the header file.
@@ -92,10 +93,10 @@ FIND_PATH (SZIP_INCLUDE_DIR
 if (WIN32)
     set (SZIP_SEARCH_DEBUG_NAMES "sz_d;libsz_d")
     set (SZIP_SEARCH_RELEASE_NAMES "sz;libsz;libszip")
-else ()
+else (WIN32)
     set (SZIP_SEARCH_DEBUG_NAMES "sz_d")
     set (SZIP_SEARCH_RELEASE_NAMES "sz;szip")
-endif ()
+endif (WIN32)
 
 # Look for the library.
 FIND_LIBRARY (SZIP_LIBRARY_DEBUG
@@ -119,15 +120,16 @@ if (SZIP_INCLUDE_DIR AND SZIP_LIBRARY)
   if (SZIP_LIBRARY_DEBUG)
     get_filename_component (SZIP_LIBRARY_PATH ${SZIP_LIBRARY_DEBUG} PATH)
     set (SZIP_LIB_DIR  ${SZIP_LIBRARY_PATH})
-  elseif ()
+  elseif (SZIP_LIBRARY_RELEASE)
     get_filename_component (SZIP_LIBRARY_PATH ${SZIP_LIBRARY_RELEASE} PATH)
     set (SZIP_LIB_DIR  ${SZIP_LIBRARY_PATH})
-  endif ()
-else ()
+  endif (SZIP_LIBRARY_DEBUG)
+
+else (SZIP_INCLUDE_DIR AND SZIP_LIBRARY)
   set (SZIP_FOUND 0)
   set (SZIP_LIBRARIES)
   set (SZIP_INCLUDE_DIRS)
-endif ()
+endif (SZIP_INCLUDE_DIR AND SZIP_LIBRARY)
 
 # Report the results.
 if (NOT SZIP_FOUND)
@@ -136,12 +138,12 @@ if (NOT SZIP_FOUND)
   )
   if (NOT SZIP_FIND_QUIETLY)
     message (STATUS "${SZIP_DIR_MESSAGE}")
-  else ()
+  else (NOT SZIP_FIND_QUIETLY)
     if (SZIP_FIND_REQUIRED)
       message (FATAL_ERROR "SZip was NOT found and is Required by this project")
-    endif ()
-  endif ()
-endif ()
+    endif (SZIP_FIND_REQUIRED)
+  endif (NOT SZIP_FIND_QUIETLY)
+endif (NOT SZIP_FOUND)
 
 if (SZIP_FOUND)
   include (CheckSymbolExists)
@@ -159,7 +161,7 @@ if (SZIP_FOUND)
   set (CMAKE_REQUIRED_FLAGS    ${CMAKE_REQUIRED_FLAGS_SAVE})
   #
   #############################################
-endif ()
+endif (SZIP_FOUND)
 
 if (FIND_SZIP_DEBUG)
   message (STATUS "SZIP_INCLUDE_DIR: ${SZIP_INCLUDE_DIR}")
@@ -167,4 +169,4 @@ if (FIND_SZIP_DEBUG)
   message (STATUS "SZIP_LIBRARY_DEBUG: ${SZIP_LIBRARY_DEBUG}")
   message (STATUS "SZIP_LIBRARY_RELEASE: ${SZIP_LIBRARY_RELEASE}")
   message (STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-endif ()
+endif (FIND_SZIP_DEBUG)

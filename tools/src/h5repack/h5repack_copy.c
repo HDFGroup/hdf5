@@ -84,18 +84,28 @@ static herr_t walk_error_callback(H5_ATTR_UNUSED unsigned n, const H5E_error2_t 
  *
  * Date: October, 23, 2003
  *
+ * Modification:
+ *   Peter Cao, June 13, 2007
+ *   Add "-L, --latest" and other options to pack a file with the latest file format
+ *
+ *   Peter Cao, September 25, 2007
+ *   Copy user block when repacking a file
+ *
+ *   Pedro Vicente, August 20, 2008
+ *   Add a user block to file if requested
+ *
  *-------------------------------------------------------------------------
  */
 
 int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
 {
-    int   	  ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
-    hid_t         fidin;
-    hid_t         fidout = -1;
-    trav_table_t  *travt = NULL;
-    hsize_t       ub_size = 0;        	/* size of user block */
-    hid_t         fcpl = H5P_DEFAULT; 	/* file creation property list ID */
-    hid_t         fapl = H5P_DEFAULT; 	/* file access property list ID */
+    int   ret_value = 0; /*no need to LEAVE() on ERROR: HERR_INIT(int, SUCCEED) */
+    hid_t fidin;
+    hid_t fidout = -1;
+    trav_table_t *travt = NULL;
+    hsize_t ub_size = 0; /* size of user block */
+    hid_t fcpl = H5P_DEFAULT; /* file creation property list ID */
+    hid_t fapl = H5P_DEFAULT; /* file access property list ID */
 
     /*-------------------------------------------------------------------------
      * open input file

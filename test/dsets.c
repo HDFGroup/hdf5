@@ -507,7 +507,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
 
     TESTING("simple I/O");
 
-    /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
+    /* Can't run this test with multi-file VFDs */
     if(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
@@ -645,7 +645,7 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl)
 
     TESTING("dataset offset with user block");
 
-    /* Can't run this test with multi-file VFDs because of HDopen/read/seek the file directly */
+    /* Can't run this test with multi-file VFDs */
     if(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
@@ -1984,11 +1984,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         }
     }
 
-    /* Get the storage size of the dataset */
-    if((*dset_size=H5Dget_storage_size(dataset))==0) goto error;
-
     PASSED();
 
+    /* Get the storage size of the dataset */
+    if((*dset_size=H5Dget_storage_size(dataset))==0) goto error;
     /* Clean up objects used for this test */
     if(H5Dclose (dataset) < 0) goto error;
     if(H5Sclose (sid) < 0) goto error;
@@ -2933,7 +2932,6 @@ test_nbit_int(hid_t file)
     PASSED();
 
     return 0;
-
 error:
     return -1;
 }

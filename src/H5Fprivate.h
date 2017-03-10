@@ -317,7 +317,6 @@
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (((F)->shared->grp_btree_shared = (RC)) ? SUCCEED : FAIL)
 #define H5F_USE_TMP_SPACE(F)    ((F)->shared->use_tmp_space)
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->tmp_addr, (ADDR)))
-#define H5F_SET_LATEST_FLAGS(F, FL)  ((F)->shared->latest_flags = (FL))
 #ifdef H5_HAVE_PARALLEL
 #define H5F_COLL_MD_READ(F)     ((F)->coll_md_read)
 #endif /* H5_HAVE_PARALLEL */
@@ -368,7 +367,6 @@
 #define H5F_SET_GRP_BTREE_SHARED(F, RC) (H5F_set_grp_btree_shared((F), (RC)))
 #define H5F_USE_TMP_SPACE(F)    (H5F_use_tmp_space(F))
 #define H5F_IS_TMP_ADDR(F, ADDR) (H5F_is_tmp_addr((F), (ADDR)))
-#define H5F_SET_LATEST_FLAGS(F, FL)  (H5F_set_latest_flags((F), (FL)))
 #ifdef H5_HAVE_PARALLEL
 #define H5F_COLL_MD_READ(F)     (H5F_coll_md_read(F))
 #endif /* H5_HAVE_PARALLEL */
@@ -483,7 +481,6 @@
 #define H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME        "evict_on_close_flag" /* Whether or not the metadata cache will evict objects on close */
 #define H5F_ACS_CORE_WRITE_TRACKING_PAGE_SIZE_NAME "core_write_tracking_page_size" /* The page size in kiB when core VFD write tracking is enabled */
 #define H5F_ACS_COLL_MD_WRITE_FLAG_NAME         "collective_metadata_write" /* property indicating whether metadata writes are done collectively or not */
-#define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME "mdc_initCacheImageCfg" /* Initial metadata cache image creation configuration */
 
 /* ======================== File Mount properties ====================*/
 #define H5F_MNT_SYM_LOCAL_NAME 		"local"                 /* Whether absolute symlinks local to file. */
@@ -703,7 +700,6 @@ H5_DLL struct H5UC_t *H5F_grp_btree_shared(const H5F_t *f);
 H5_DLL herr_t H5F_set_grp_btree_shared(H5F_t *f, struct H5UC_t *rc);
 H5_DLL hbool_t H5F_use_tmp_space(const H5F_t *f);
 H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
-H5_DLL herr_t H5F_set_latest_flags(H5F_t *f, unsigned flags);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL H5P_coll_md_read_flag_t H5F_coll_md_read(const H5F_t *f);
 H5_DLL void H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t flag);

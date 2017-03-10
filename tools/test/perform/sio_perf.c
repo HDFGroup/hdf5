@@ -100,7 +100,11 @@ static const char  *progname = "h5perf_serial";
  * It seems that only the options that accept additional information
  * such as dataset size (-e) require the colon next to it.
  */
+#if 1
 static const char *s_opts = "a:A:B:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:v:wx:X:";
+#else
+static const char *s_opts = "a:A:bB:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:wx:X:";
+#endif  /* 1 */
 static struct long_options l_opts[] = {
     { "align", require_arg, 'a' },
     { "alig", require_arg, 'a' },

@@ -20,6 +20,9 @@
  *		with the cache implemented in H5C.c
  */
 
+#include "h5test.h"
+#include "H5Iprivate.h"
+#include "H5ACprivate.h"
 #include "cache_common.h"
 
 /* extern declarations */
@@ -2314,12 +2317,19 @@ main(void)
         nerrs += 1;
     }
 
-    if(invalid_configs)
-        HDfree(invalid_configs);
+    if ( invalid_configs ) {
 
-    if(nerrs > 0)
+        HDfree(invalid_configs);
+    }
+
+    if ( nerrs > 0 ) {
+
         return EXIT_FAILURE;
-    else
+
+    } else {
+
         return EXIT_SUCCESS;
+    }
+
 } /* main() */
 

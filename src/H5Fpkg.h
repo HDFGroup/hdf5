@@ -287,12 +287,6 @@ struct H5F_file_t {
                                 /* metadata cache.  This structure is   */
                                 /* fixed at creation time and should    */
                                 /* not change thereafter.               */
-    H5AC_cache_image_config_t 
-		mdc_initCacheImageCfg;  /* initial configuration for the */
-                                        /* generate metadata cache image on     */
-                                        /* close option.  This structure is     */
-                                        /* fixed at creation time and should    */
-                                        /* not change thereafter.               */
     hbool_t     use_mdc_logging; /* Set when metadata logging is desired */
     hbool_t     start_mdc_log_on_access; /* set when mdc logging should  */
                                 /* begin on file access/create          */
@@ -375,6 +369,9 @@ H5FL_EXTERN(H5F_t);
 /* Declare a free list to manage the H5F_file_t struct */
 H5FL_EXTERN(H5F_file_t);
 
+H5_DLLVAR const H5AC_class_t H5AC_SUPERBLOCK[1];
+H5_DLLVAR const H5AC_class_t H5AC_DRVRINFO[1];
+
 
 /******************************/
 /* Package Private Prototypes */
@@ -403,8 +400,7 @@ H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
 
 /* Superblock extension related routines */
 H5_DLL herr_t H5F_super_ext_open(H5F_t *f, haddr_t ext_addr, H5O_loc_t *ext_ptr);
-H5_DLL herr_t H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, unsigned id,
-    void *mesg, hbool_t may_create, unsigned mesg_flags);
+H5_DLL herr_t H5F_super_ext_write_msg(H5F_t *f, hid_t dxpl_id, unsigned id, void *mesg, hbool_t may_create);
 H5_DLL herr_t H5F_super_ext_remove_msg(H5F_t *f, hid_t dxpl_id, unsigned id);
 H5_DLL herr_t H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hid_t dxpl_id,
     hbool_t was_created);

@@ -22,7 +22,7 @@ I. Preconditions
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
       web site. The HDF5 1.10.x product requires a minimum CMake version
-      of 3.2.2.
+      of 3.1.0.
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
@@ -52,7 +52,7 @@ Default installation process:
            with the CTEST_CONFIGURATION_TYPE script option. Note that this must
            be the same as the value used with the -C command line option.
        The default build configuration is defined to build and use static libraries.
-           Shared libraries can be used with the STATIC_ONLY script option set to "NO".
+           Shared libraries can be used with the STATIC_LIBRARIES script option set to "NO".
        Other options can be changed by editing the HDF5_Examples.cmake file.
 
        If the defaults are okay, execute from this directory:

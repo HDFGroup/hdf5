@@ -49,7 +49,7 @@
   foreach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
     get_filename_component(fname "${listfiles}" NAME)
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/vds/${listfiles}" "${PROJECT_BINARY_DIR}/testfiles/vds/${fname}" "h5ls_vds_files")
-  endforeach ()
+  endforeach (listfiles ${LIST_HDF5_TEST_FILES} ${LIST_OTHER_TEST_FILES})
   add_custom_target(h5ls_vds_files ALL COMMENT "Copying files needed by h5ls_vds tests" DEPENDS ${h5ls_vds_files_list})
 
 ##############################################################################
@@ -58,7 +58,7 @@
 ##############################################################################
 ##############################################################################
 
-  macro (ADD_H5_VDS_TEST resultfile resultcode)
+  MACRO (ADD_H5_VDS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS-${resultfile} COMMAND $<TARGET_FILE:h5ls> ${ARGN})
@@ -69,7 +69,7 @@
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5LS-${resultfile} PROPERTIES DEPENDS ${last_test})
       endif ()
-    else ()
+    else (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5LS-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -81,8 +81,8 @@
               -D "TEST_REFERENCE=${resultfile}.ls"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-    endif ()
-  endmacro ()
+    endif (HDF5_ENABLE_USING_MEMCHECKER)
+  ENDMACRO (ADD_H5_VDS_TEST file)
 
 ##############################################################################
 ##############################################################################
@@ -124,9 +124,9 @@
     set_tests_properties (H5LS_VDS-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (H5LS_VDS-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif ()
+    endif (NOT "${last_test}" STREQUAL "")
     set (last_test "H5LS_VDS-clearall-objects")
-  endif ()
+  endif (HDF5_ENABLE_USING_MEMCHECKER)
 
   ADD_H5_VDS_TEST (tvds-1 0 -w80 -v -S 1_vds.h5)
   ADD_H5_VDS_TEST (tvds-2 0 -w80 -v -S 2_vds.h5)

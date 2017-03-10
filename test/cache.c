@@ -19,6 +19,9 @@
  *		This file contains tests for the cache implemented in
  *		H5C.c
  */
+#include "h5test.h"
+#include "H5Iprivate.h"
+#include "H5ACprivate.h"
 #include "cache_common.h"
 
 
@@ -115,12 +118,12 @@ static void check_flush_cache__multi_entry(H5F_t * file_ptr);
 static void check_flush_cache__multi_entry_test(H5F_t * file_ptr,
                                           int test_num,
                                           unsigned int flush_flags,
-                                          unsigned int spec_size,
+                                          int spec_size,
                                           struct flush_cache_test_spec spec[]);
 static void check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
                                         int test_num,
                                         unsigned int flush_flags,
-                                        unsigned int spec_size,
+                                        int spec_size,
                                         struct pe_flush_cache_test_spec spec[]);
 static void check_flush_cache__single_entry(H5F_t * file_ptr);
 static void check_flush_cache__single_entry_test(H5F_t * file_ptr,
@@ -152,9 +155,9 @@ static void check_flush_cache__flush_op_test(H5F_t * file_ptr,
                                         unsigned int flush_flags,
                                         int spec_size,
                                         const struct fo_flush_cache_test_spec spec[],
-				        unsigned init_expected_index_len,
+				        int init_expected_index_len,
 				        size_t init_expected_index_size,
-				        unsigned expected_index_len,
+				        int expected_index_len,
 				        size_t expected_index_size,
 					int check_size,
                                         struct fo_flush_entry_check check[]);
@@ -3309,7 +3312,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                         = 1;
         unsigned int flush_flags             = H5C__NO_FLAGS_SET;
-        unsigned int spec_size               = 8;
+        int spec_size                        = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3403,7 +3406,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                         = 2;
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG;
-        unsigned int spec_size               = 8;
+        int spec_size                        = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3497,7 +3500,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                         = 3;
         unsigned int flush_flags             = H5C__FLUSH_CLEAR_ONLY_FLAG;
-        unsigned int spec_size               = 8;
+        int spec_size                        = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3591,7 +3594,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                         = 4;
         unsigned int flush_flags             = H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int spec_size               = 8;
+        int spec_size                        = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3686,7 +3689,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         int test_num                         = 5;
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG |
                                                H5C__FLUSH_CLEAR_ONLY_FLAG;
-        unsigned int spec_size               = 8;
+        int spec_size                        = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3781,7 +3784,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         int test_num                         = 6;
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG |
                                                H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int spec_size               = 8;
+        int spec_size                        = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3876,7 +3879,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         int test_num                         = 7;
         unsigned int flush_flags             = H5C__FLUSH_CLEAR_ONLY_FLAG |
                                                H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int spec_size               = 8;
+        int spec_size                        = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -3972,7 +3975,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         unsigned int flush_flags             = H5C__FLUSH_INVALIDATE_FLAG |
                                                H5C__FLUSH_CLEAR_ONLY_FLAG |
                                                H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int spec_size               = 8;
+        int spec_size                        = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -4070,7 +4073,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
                                                ~(H5C__FLUSH_INVALIDATE_FLAG |
                                                 H5C__FLUSH_CLEAR_ONLY_FLAG |
                                                 H5C__FLUSH_MARKED_ENTRIES_FLAG);
-        unsigned int spec_size               = 8;
+        int spec_size                        = 8;
         struct flush_cache_test_spec spec[8] =
         {
           {
@@ -4169,7 +4172,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                            = 1;
         unsigned int flush_flags                = H5C__NO_FLAGS_SET;
-        unsigned int spec_size               = 8;
+        int spec_size                           = 8;
         struct pe_flush_cache_test_spec spec[8] =
         {
           {
@@ -4315,7 +4318,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
     {
         int test_num                            = 2;
         unsigned int flush_flags                = H5C__FLUSH_INVALIDATE_FLAG;
-        unsigned int spec_size               = 8;
+        int spec_size                           = 8;
         struct pe_flush_cache_test_spec spec[8] =
         {
           {
@@ -4445,7 +4448,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         int test_num                            = 3;
         unsigned int flush_flags                = H5C__FLUSH_INVALIDATE_FLAG |
                                                   H5C__FLUSH_CLEAR_ONLY_FLAG;
-        unsigned int spec_size               = 8;
+        int spec_size                           = 8;
         struct pe_flush_cache_test_spec spec[8] =
         {
           {
@@ -4567,7 +4570,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         int test_num                            = 4;
         unsigned int flush_flags                = H5C__FLUSH_INVALIDATE_FLAG |
                                                  H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int spec_size               = 8;
+        int spec_size                           = 8;
         struct pe_flush_cache_test_spec spec[8] =
         {
           {
@@ -4698,7 +4701,7 @@ check_flush_cache__multi_entry(H5F_t * file_ptr)
         unsigned int flush_flags                = H5C__FLUSH_INVALIDATE_FLAG |
                                                   H5C__FLUSH_CLEAR_ONLY_FLAG |
                                                  H5C__FLUSH_MARKED_ENTRIES_FLAG;
-        unsigned int spec_size               = 8;
+        int spec_size                           = 8;
         struct pe_flush_cache_test_spec spec[8] =
         {
           {
@@ -4842,13 +4845,13 @@ static void
 check_flush_cache__multi_entry_test(H5F_t * file_ptr,
                                     int test_num,
                                     unsigned int flush_flags,
-                                    unsigned int spec_size,
+                                    int spec_size,
                                     struct flush_cache_test_spec spec[])
 {
     H5C_t * cache_ptr = file_ptr->shared->cache;
     static char    msg[128];
     herr_t	   result;
-    unsigned       u;
+    int            i;
     size_t	   total_entry_size = 0;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -4887,43 +4890,43 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
         failure_mssg = msg;
     }
 
-    u = 0;
-    while(pass && (u < spec_size))
+    i = 0;
+    while(pass && (i < spec_size))
     {
-        if(((unsigned)spec[u].entry_num != u) ||
-             (spec[u].entry_type < 0) ||
-             (spec[u].entry_type >= NUMBER_OF_ENTRY_TYPES) ||
-             (spec[u].entry_index < 0) ||
-             (spec[u].entry_index > max_indices[spec[u].entry_type])) {
+        if((spec[i].entry_num != i) ||
+             (spec[i].entry_type < 0) ||
+             (spec[i].entry_type >= NUMBER_OF_ENTRY_TYPES) ||
+             (spec[i].entry_index < 0) ||
+             (spec[i].entry_index > max_indices[spec[i].entry_type])) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-                       "bad data in spec[%u] on entry to multi entry test #%d.",
-                       u, test_num);
+                       "bad data in spec[%d] on entry to multi entry test #%d.",
+                       i, test_num);
             failure_mssg = msg;
         }
-        u++;
+        i++;
     }
 
-    u = 0;
-    while(pass && (u < spec_size))
+    i = 0;
+    while(pass && (i < spec_size))
     {
-        if(spec[u].insert_flag) {
+        if(spec[i].insert_flag) {
 
-            insert_entry(file_ptr, spec[u].entry_type, spec[u].entry_index,
-                    spec[u].flags);
+            insert_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
+                    spec[i].flags);
 
         } else {
 
-            protect_entry(file_ptr, spec[u].entry_type, spec[u].entry_index);
+            protect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index);
 
-            unprotect_entry(file_ptr, spec[u].entry_type, spec[u].entry_index,
-                    spec[u].flags);
+            unprotect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
+                    spec[i].flags);
         }
 
-        total_entry_size += entry_sizes[spec[u].entry_type];
+        total_entry_size += entry_sizes[spec[i].entry_type];
 
-        u++;
+        i++;
     }
 
     if(pass) {
@@ -4940,36 +4943,36 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
         }
     }
 
-    u = 0;
-    while(pass && (u < spec_size))
+    i = 0;
+    while(pass && (i < spec_size))
     {
-        base_addr = entries[spec[u].entry_type];
-        entry_ptr = &(base_addr[spec[u].entry_index]);
+        base_addr = entries[spec[i].entry_type];
+        entry_ptr = &(base_addr[spec[i].entry_index]);
 
-        if((entry_ptr->deserialized != spec[u].expected_deserialized) ||
-             (entry_ptr->serialized != spec[u].expected_serialized) ||
-             (entry_ptr->destroyed != spec[u].expected_destroyed)) {
+        if((entry_ptr->deserialized != spec[i].expected_deserialized) ||
+             (entry_ptr->serialized != spec[i].expected_serialized) ||
+             (entry_ptr->destroyed != spec[i].expected_destroyed)) {
 
 #if 0 /* This is useful debugging code.  Lets keep it around. */
 
             HDfprintf(stdout,
               "deslzd = %d(%d), slzd = %d(%d), dest = %d(%d)\n",
               (int)(entry_ptr->deserialized),
-              (int)(spec[u].expected_deserialized),
+              (int)(spec[i].expected_deserialized),
               (int)(entry_ptr->serialized),
-              (int)(spec[u].expected_serialized),
+              (int)(spec[i].expected_serialized),
               (int)(entry_ptr->destroyed),
-              (int)(spec[u].expected_destroyed));
+              (int)(spec[i].expected_destroyed));
 
 #endif
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-                "Bad status on entry %u after flush in multi entry test #%d.",
-                u, test_num);
+                "Bad status on entry %d after flush in multi entry test #%d.",
+                i, test_num);
             failure_mssg = msg;
         }
-        u++;
+        i++;
     }
 
     if(pass) {
@@ -5024,17 +5027,17 @@ check_flush_cache__multi_entry_test(H5F_t * file_ptr,
         }
     }
 
-    u = 0;
-    while(pass && (u < spec_size))
+    i = 0;
+    while(pass && (i < spec_size))
     {
-        base_addr = entries[spec[u].entry_type];
-        entry_ptr = &(base_addr[spec[u].entry_index]);
+        base_addr = entries[spec[i].entry_type];
+        entry_ptr = &(base_addr[spec[i].entry_index]);
 
         entry_ptr->deserialized = FALSE;
         entry_ptr->serialized   = FALSE;
         entry_ptr->destroyed    = FALSE;
 
-        u++;
+        i++;
     }
 
     return;
@@ -5061,13 +5064,13 @@ static void
 check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
                                        int test_num,
                                        unsigned int flush_flags,
-                                       unsigned int spec_size,
+                                       int spec_size,
                                        struct pe_flush_cache_test_spec spec[])
 {
     H5C_t *cache_ptr = file_ptr->shared->cache;
     static char    msg[128];
     herr_t	   result;
-    unsigned       u;
+    int            i;
     int            j;
     size_t	   total_entry_size = 0;
     test_entry_t * base_addr;
@@ -5107,54 +5110,54 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
         failure_mssg = msg;
     }
 
-    u = 0;
-    while(pass && (u < spec_size))
+    i = 0;
+    while(pass && (i < spec_size))
     {
-        if(((unsigned)spec[u].entry_num != u) ||
-             (spec[u].entry_type < 0) ||
-             (spec[u].entry_type >= NUMBER_OF_ENTRY_TYPES) ||
-             (spec[u].entry_index < 0) ||
-             (spec[u].entry_index > max_indices[spec[u].entry_type]) ||
-	     (spec[u].num_pins < 0) ||
-	     (spec[u].num_pins > MAX_PINS)) {
+        if((spec[i].entry_num != i) ||
+             (spec[i].entry_type < 0) ||
+             (spec[i].entry_type >= NUMBER_OF_ENTRY_TYPES) ||
+             (spec[i].entry_index < 0) ||
+             (spec[i].entry_index > max_indices[spec[i].entry_type]) ||
+	     (spec[i].num_pins < 0) ||
+	     (spec[i].num_pins > MAX_PINS)) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-                    "bad data in spec[%u] on entry to pe multi entry test #%d.",
-                    u, test_num);
+                    "bad data in spec[%d] on entry to pe multi entry test #%d.",
+                    i, test_num);
             failure_mssg = msg;
         }
-        u++;
+        i++;
     }
 
-    u = 0;
-    while(pass && (u < spec_size))
+    i = 0;
+    while(pass && (i < spec_size))
     {
-        if(spec[u].insert_flag) {
+        if(spec[i].insert_flag) {
 
-            insert_entry(file_ptr, spec[u].entry_type, spec[u].entry_index,
-                    spec[u].flags);
+            insert_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
+                    spec[i].flags);
 
         } else {
 
-            protect_entry(file_ptr, spec[u].entry_type, spec[u].entry_index);
+            protect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index);
 
-            unprotect_entry(file_ptr, spec[u].entry_type, spec[u].entry_index,
-                    spec[u].flags);
+            unprotect_entry(file_ptr, spec[i].entry_type, spec[i].entry_index,
+                    spec[i].flags);
         }
 
-        total_entry_size += entry_sizes[spec[u].entry_type];
+        total_entry_size += entry_sizes[spec[i].entry_type];
 
-	for (j = 0; j < spec[u].num_pins; j++)
+	for (j = 0; j < spec[i].num_pins; j++)
 	{
             create_pinned_entry_dependency(file_ptr,
-		                           spec[u].entry_type,
-					   spec[u].entry_index,
-					   spec[u].pin_type[j],
-					   spec[u].pin_idx[j]);
+		                           spec[i].entry_type,
+					   spec[i].entry_index,
+					   spec[i].pin_type[j],
+					   spec[i].pin_idx[j]);
 	}
 
-        u++;
+        i++;
     }
 
     if(pass) {
@@ -5171,36 +5174,36 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
         }
     }
 
-    u = 0;
-    while(pass && (u < spec_size))
+    i = 0;
+    while(pass && (i < spec_size))
     {
-        base_addr = entries[spec[u].entry_type];
-        entry_ptr = &(base_addr[spec[u].entry_index]);
+        base_addr = entries[spec[i].entry_type];
+        entry_ptr = &(base_addr[spec[i].entry_index]);
 
-        if((entry_ptr->deserialized != spec[u].expected_deserialized) ||
-             (entry_ptr->serialized != spec[u].expected_serialized) ||
-             (entry_ptr->destroyed != spec[u].expected_destroyed)) {
+        if((entry_ptr->deserialized != spec[i].expected_deserialized) ||
+             (entry_ptr->serialized != spec[i].expected_serialized) ||
+             (entry_ptr->destroyed != spec[i].expected_destroyed)) {
 
 #if 0 /* This is useful debugging code.  Lets keep it around. */
 
             HDfprintf(stdout,
               "desrlzd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
               (int)(entry_ptr->deserialized),
-              (int)(spec[u].expected_deserialized),
+              (int)(spec[i].expected_deserialized),
               (int)(entry_ptr->serialized),
-              (int)(spec[u].expected_serialized),
+              (int)(spec[i].expected_serialized),
               (int)(entry_ptr->destroyed),
-              (int)(spec[u].expected_destroyed));
+              (int)(spec[i].expected_destroyed));
 
 #endif
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
-               "Bad status on entry %u after flush in pe multi entry test #%d.",
-               u, test_num);
+               "Bad status on entry %d after flush in pe multi entry test #%d.",
+               i, test_num);
             failure_mssg = msg;
         }
-        u++;
+        i++;
     }
 
     if(pass) {
@@ -5255,17 +5258,17 @@ check_flush_cache__pe_multi_entry_test(H5F_t * file_ptr,
         }
     }
 
-    u = 0;
-    while(pass && (u < spec_size))
+    i = 0;
+    while(pass && (i < spec_size))
     {
-        base_addr = entries[spec[u].entry_type];
-        entry_ptr = &(base_addr[spec[u].entry_index]);
+        base_addr = entries[spec[i].entry_type];
+        entry_ptr = &(base_addr[spec[i].entry_index]);
 
         entry_ptr->deserialized = FALSE;
         entry_ptr->serialized   = FALSE;
         entry_ptr->destroyed    = FALSE;
 
-        u++;
+        i++;
     }
 
     return;
@@ -5320,9 +5323,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 1;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 2;
-	unsigned init_expected_index_len	= 2;
+	int init_expected_index_len	= 2;
 	size_t init_expected_index_size	= 2 * PICO_ENTRY_SIZE;
-	unsigned expected_index_len		= 2;
+	int expected_index_len		= 2;
 	size_t expected_index_size	= 2 * PICO_ENTRY_SIZE;
 	struct fo_flush_cache_test_spec spec[2] =
 	{
@@ -5427,9 +5430,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 2;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 2;
-	unsigned init_expected_index_len	= 2;
+	int init_expected_index_len	= 2;
 	size_t init_expected_index_size	= 2 * PICO_ENTRY_SIZE;
-	unsigned expected_index_len		= 0;
+	int expected_index_len		= 0;
 	size_t expected_index_size	= 0;
 	struct fo_flush_cache_test_spec spec[2] =
 	{
@@ -5531,9 +5534,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 3;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
-	unsigned expected_index_len		= 1;
+	int expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -5609,9 +5612,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 4;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
-	unsigned expected_index_len		= 0;
+	int expected_index_len		= 0;
 	size_t expected_index_size	= 0;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -5694,9 +5697,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 5; /* and 6 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE;
-	unsigned expected_index_len		= 1;
+	int expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -5811,9 +5814,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 7; /* and 8 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE;
-	unsigned expected_index_len		= 1;
+	int expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -5924,9 +5927,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 9; /* and 10 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
-	unsigned expected_index_len		= 1;
+	int expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -6035,9 +6038,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 11; /* and 12 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
-	unsigned expected_index_len		= 1;
+	int expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -6149,9 +6152,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 13;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * PICO_ENTRY_SIZE;
-	unsigned expected_index_len		= 3;
+	int expected_index_len		= 3;
 	size_t expected_index_size	= 3 * PICO_ENTRY_SIZE;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -6245,9 +6248,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 14;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * PICO_ENTRY_SIZE;
-	unsigned expected_index_len		= 0;
+	int expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -6338,9 +6341,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 15;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	unsigned expected_index_len		= 3;
+	int expected_index_len		= 3;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2);
@@ -6435,9 +6438,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 16;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	unsigned expected_index_len		= 0;
+	int expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
 	struct fo_flush_cache_test_spec spec[1] =
 	{
@@ -6528,9 +6531,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 17; /* and 18 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	unsigned expected_index_len		= 3;
+	int expected_index_len		= 3;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2);
@@ -6655,9 +6658,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 19; /* and 20 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 1;
-	unsigned init_expected_index_len	= 1;
+	int init_expected_index_len	= 1;
 	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
-	unsigned expected_index_len		= 3;
+	int expected_index_len		= 3;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2);
@@ -6793,9 +6796,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 21;
 	unsigned int flush_flags	= H5C__FLUSH_MARKED_ENTRIES_FLAG;
 	int spec_size			= 4;
-	unsigned init_expected_index_len	= 4;
+	int init_expected_index_len	= 4;
 	size_t init_expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) + (2 * PICO_ENTRY_SIZE);
-	unsigned expected_index_len		= 6;
+	int expected_index_len		= 6;
 	size_t expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) +
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2) +
@@ -7004,9 +7007,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 22;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 6;
-	unsigned init_expected_index_len	= 6;
+	int init_expected_index_len	= 6;
 	size_t init_expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
-	unsigned expected_index_len		= 10;
+	int expected_index_len		= 10;
 	size_t expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) +
 		                          (2 * (VARIABLE_ENTRY_SIZE / 4)) +
 					  (2 * (VARIABLE_ENTRY_SIZE / 2)) +
@@ -7273,9 +7276,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 23;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 6;
-	unsigned init_expected_index_len	= 6;
+	int init_expected_index_len	= 6;
 	size_t init_expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
-	unsigned expected_index_len		= 0;
+	int expected_index_len		= 0;
 	size_t expected_index_size	= 0;
 	struct fo_flush_cache_test_spec spec[6] =
 	{
@@ -7535,9 +7538,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 24;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 3;
-	unsigned init_expected_index_len	= 3;
+	int init_expected_index_len	= 3;
 	size_t init_expected_index_size	= 3 * PICO_ENTRY_SIZE;
-	unsigned expected_index_len		= 3;
+	int expected_index_len		= 3;
 	size_t expected_index_size	= 3 * PICO_ENTRY_SIZE;
 	struct fo_flush_cache_test_spec spec[3] =
 	{
@@ -7668,9 +7671,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 25;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 3;
-	unsigned init_expected_index_len	= 3;
+	int init_expected_index_len	= 3;
 	size_t init_expected_index_size	= 3 * PICO_ENTRY_SIZE;
-	unsigned expected_index_len		= 0;
+	int expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
 	struct fo_flush_cache_test_spec spec[3] =
 	{
@@ -7871,9 +7874,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 26;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 10;
-	unsigned init_expected_index_len	= 10;
+	int init_expected_index_len	= 10;
 	size_t init_expected_index_size	= 10 * VARIABLE_ENTRY_SIZE;
-	unsigned expected_index_len		= 13;
+	int expected_index_len		= 13;
 	size_t expected_index_size	= 9 * VARIABLE_ENTRY_SIZE;
 	struct fo_flush_cache_test_spec spec[10] =
 	{
@@ -8305,9 +8308,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 27;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 10;
-	unsigned init_expected_index_len	= 10;
+	int init_expected_index_len	= 10;
 	size_t init_expected_index_size	= 10 * VARIABLE_ENTRY_SIZE;
-	unsigned expected_index_len		= 0;
+	int expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
 	struct fo_flush_cache_test_spec spec[10] =
 	{
@@ -8664,9 +8667,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 28;
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
 	int spec_size			= 5;
-	unsigned init_expected_index_len	= 5;
+	int init_expected_index_len	= 5;
 	size_t init_expected_index_size	= 3 * VARIABLE_ENTRY_SIZE;
-	unsigned expected_index_len		= 5;
+	int expected_index_len		= 5;
 	size_t expected_index_size	= 4 * VARIABLE_ENTRY_SIZE;
 	struct fo_flush_cache_test_spec spec[5] =
 	{
@@ -8856,9 +8859,9 @@ check_flush_cache__flush_ops(H5F_t * file_ptr)
         int test_num			= 29;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
 	int spec_size			= 5;
-	unsigned init_expected_index_len	= 5;
+	int init_expected_index_len	= 5;
 	size_t init_expected_index_size	= 3 * VARIABLE_ENTRY_SIZE;
-	unsigned expected_index_len		= 0;
+	int expected_index_len		= 0;
 	size_t expected_index_size	= 0;
 	struct fo_flush_cache_test_spec spec[5] =
 	{
@@ -9067,9 +9070,9 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
                                  unsigned int flush_flags,
                                  int spec_size,
                                  const struct fo_flush_cache_test_spec spec[],
-				 unsigned init_expected_index_len,
+				 int init_expected_index_len,
 				 size_t init_expected_index_size,
-				 unsigned expected_index_len,
+				 int expected_index_len,
 				 size_t expected_index_size,
 				 int check_size,
 				 struct fo_flush_entry_check check[])
@@ -13697,7 +13700,7 @@ check_move_entry(void)
 {
     unsigned          u;
     H5F_t *      file_ptr = NULL;
-    struct move_entry_test_spec test_specs[4] =
+    struct move_entry_test_spec test_specs[8] =
     {
       {
         /* int     entry_type      = */ PICO_ENTRY_TYPE,
@@ -15898,6 +15901,7 @@ check_destroy_pinned_err(void)
      * should fail.  Unpin the entry and flush destroy again -- should
      * succeed.
      */
+
     if(pass) {
 
         reset_entries();
@@ -15908,7 +15912,7 @@ check_destroy_pinned_err(void)
         protect_entry(file_ptr, 0, 0);
 	unprotect_entry(file_ptr, 0, 0, H5C__PIN_ENTRY_FLAG);
 
-        if(H5C_prep_for_file_close(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0) {
+        if(H5C_prep_for_file_close(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0 ) {
             pass = FALSE;
             failure_mssg = "unexpected failure of prep for file close.\n";
         } /* end if */
@@ -15924,8 +15928,9 @@ check_destroy_pinned_err(void)
                 pass = FALSE;
                 failure_mssg = "destroy failed after unpin.\n";
             } /* end if */
-            else
+	    else {
                 file_ptr->shared->cache = NULL;
+	    } /* end else */
         } /* end else */
 
         if(saved_cache != NULL) {
@@ -15987,16 +15992,16 @@ check_destroy_protected_err(void)
         file_ptr = setup_cache((size_t)(2 * 1024),
                                 (size_t)(1 * 1024));
 
-        /* Note: normally this call would go just before the series of
-         * flushes prior to file close -- in particular, all entries
+        /* Note: normally this call would go just before the series of 
+         * flushes prior to file close -- in particular, all entries 
          * should be unprotected when this call is made.
          *
          * Thus H5C_prep_for_file_close() contains an assert to verify
-         * this.  Since this assert would be triggered by the condition
+         * this.  Since this assert would be triggered by the condition 
          * we are trying to test, put the call to H5C_prep_for_file_close()
          * prior to the final protect call.
          */
-        if(H5C_prep_for_file_close(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0) {
+        if(H5C_prep_for_file_close(file_ptr, H5P_DATASET_XFER_DEFAULT) < 0 ) {
             pass = FALSE;
             failure_mssg = "unexpected failure of prep for file close.\n";
         } /* end if */
@@ -16088,7 +16093,7 @@ check_duplicate_insert_err(void)
             entry_ptr = &(base_addr[0]);
 
             result = H5C_insert_entry(file_ptr, H5AC_ind_read_dxpl_id,
-                                      types[0], entry_ptr->addr,
+                                      &(types[0]), entry_ptr->addr,
                                       (void *)entry_ptr, H5C__NO_FLAGS_SET);
 
             if(result >= 0) {
@@ -16456,7 +16461,7 @@ check_double_protect_err(void)
     if(pass) {
 
         cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
-			               types[0], entry_ptr->addr,
+			               &(types[0]), entry_ptr->addr,
 				       &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(cache_entry_ptr != NULL) {
@@ -16700,7 +16705,7 @@ check_expunge_entry_errs(void)
     if(pass) {
 
 	result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
-                types[0], entry_ptr->addr, H5C__NO_FLAGS_SET);
+                &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(result > 0) {
 
@@ -16718,7 +16723,7 @@ check_expunge_entry_errs(void)
     if(pass) {
 
 	result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
-                types[0], entry_ptr->addr, H5C__NO_FLAGS_SET);
+                &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(result > 0) {
 
@@ -16736,7 +16741,7 @@ check_expunge_entry_errs(void)
     if(pass) {
 
 	result = H5C_expunge_entry(file_ptr, H5AC_ind_read_dxpl_id,
-                types[0], entry_ptr->addr, H5C__NO_FLAGS_SET);
+                &(types[0]), entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(result < 0) {
 
@@ -16779,6 +16784,7 @@ check_expunge_entry_errs(void)
  *
  *-------------------------------------------------------------------------
  */
+
 static unsigned
 check_move_entry_errs(void)
 {
@@ -16800,6 +16806,7 @@ check_move_entry_errs(void)
      */
 
     if(pass) {
+
         reset_entries();
 
         file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024));
@@ -16812,28 +16819,35 @@ check_move_entry_errs(void)
         entry_0_0_ptr = &((entries[0])[0]);
         entry_0_1_ptr = &((entries[0])[1]);
         entry_1_0_ptr = &((entries[1])[0]);
-    } /* end if */
+    }
 
     if(pass) {
-        result = H5C_move_entry(cache_ptr, types[0], entry_0_0_ptr->addr, entry_0_1_ptr->addr);
+
+        result = H5C_move_entry(cache_ptr, &(types[0]),
+                                  entry_0_0_ptr->addr, entry_0_1_ptr->addr);
 
         if(result >= 0) {
+
             pass = FALSE;
             failure_mssg = "move to addr of same type succeeded.\n";
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     if(pass) {
-        result = H5C_move_entry(cache_ptr, types[0], entry_0_0_ptr->addr, entry_1_0_ptr->addr);
+
+        result = H5C_move_entry(cache_ptr, &(types[0]),
+                                  entry_0_0_ptr->addr, entry_1_0_ptr->addr);
 
         if(result >= 0) {
+
             pass = FALSE;
             failure_mssg = "move to addr of different type succeeded.\n";
-        } /* end if */
-    } /* end if */
+        }
+    }
 
     if(pass)
         takedown_cache(file_ptr, FALSE, FALSE);
+
 
     /* Allocate a cache, protect an entry R/O, and then call
      * H5C_move_entry() to move it -- this should fail.
@@ -16843,6 +16857,7 @@ check_move_entry_errs(void)
      */
 
     if(pass) {
+
         reset_entries();
 
         file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024));
@@ -16850,21 +16865,29 @@ check_move_entry_errs(void)
         cache_ptr = file_ptr->shared->cache;
 
         insert_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
+
         protect_entry_ro(file_ptr, 0, 0);
 
         entry_ptr = &((entries[0])[0]);
-    } /* end if */
+
+    }
 
     if(pass) {
-	result = H5C_move_entry(cache_ptr, types[0], entry_ptr->header.addr, entry_ptr->header.addr + 10);
+
+	result = H5C_move_entry(cache_ptr, &(types[0]), entry_ptr->header.addr, entry_ptr->header.addr + 10);
 
         if(result >= 0) {
+
             pass = FALSE;
-            failure_mssg = "Call to H5C_move_entry on a R/O protected entry succeeded.\n";
-        } /* end if */
-        else
+            failure_mssg =
+                "Call to H5C_move_entry on a R/O protected entry succeeded.\n";
+
+        } else {
+
             unprotect_entry(file_ptr, 0, 0, H5C__NO_FLAGS_SET);
-    } /* end if */
+
+	}
+    }
 
     if(pass)
         takedown_cache(file_ptr, FALSE, FALSE);
@@ -16874,7 +16897,8 @@ check_move_entry_errs(void)
     else {
         H5_FAILED()
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n",
+                  FUNC, failure_mssg);
     } /* end else */
 
     return (unsigned)!pass;
@@ -17155,7 +17179,7 @@ check_protect_ro_rw_err(void)
     if(pass) {
 
         thing_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
-			         types[0], entry_ptr->addr,
+			         &(types[0]), entry_ptr->addr,
 				 &entry_ptr->addr, H5C__NO_FLAGS_SET);
 
         if(thing_ptr != NULL) {
@@ -17248,13 +17272,13 @@ check_protect_retries(void)
         entry_ptr->verify_ct = 0;
 
 	cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
-                types[type], entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
+                &(types[type]), entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
 
 	if((cache_entry_ptr != (void *)entry_ptr) ||
              (!(entry_ptr->header.is_protected)) ||
              (!(entry_ptr->header.is_read_only)) ||
              (entry_ptr->header.ro_ref_count <= 0) ||
-             (entry_ptr->header.type != types[type]) ||
+             (entry_ptr->header.type != &(types[type])) ||
              (entry_ptr->size != entry_ptr->header.size) ||
              (entry_ptr->addr != entry_ptr->header.addr) ||
 	     (entry_ptr->verify_ct != entry_ptr->max_verify_ct))  {
@@ -17293,7 +17317,7 @@ check_protect_retries(void)
         entry_ptr->verify_ct = 0;
 
 	cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(file_ptr, H5AC_ind_read_dxpl_id,
-                types[type], entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
+                &(types[type]), entry_ptr->addr, &entry_ptr->addr, H5C__READ_ONLY_FLAG);
 
 	/* H5C_protect() should fail after all retries fail */
 	if(cache_entry_ptr != NULL)
@@ -27409,7 +27433,7 @@ check_auto_cache_resize_aux_fcns(void)
     size_t max_size;
     size_t min_clean_size;
     size_t cur_size;
-    uint32_t cur_num_entries;
+    int32_t cur_num_entries;
     H5C_auto_size_ctl_t auto_size_ctl =
     {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
@@ -28133,7 +28157,8 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     }
 
     if(show_progress) /* 0 */
-         HDfprintf(stdout, "\n%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+         HDfprintf(stdout, "\n%s: check point %d -- pass %d\n",
+                   FUNC, checkpoint++, pass);
 
     if(pass) {
 
@@ -33693,10 +33718,14 @@ check_metadata_cork(hbool_t fill_via_insertion)
 
     reset_entries();
 
-    if(fill_via_insertion)
-        TESTING("to ensure cork/uncork metadata when inserting")
-    else
-        TESTING("to ensure cork/uncork metadata on protect/unprotect")
+    if(fill_via_insertion) {
+
+        TESTING("to ensure cork/uncork metadata when inserting");
+
+    } else {
+
+        TESTING("to ensure cork/uncork metadata on protect/unprotect");
+    }
 
     if(show_progress) /* 0 */
          HDfprintf(stdout, "\n%s: check point %d -- pass %d\n",
@@ -34551,7 +34580,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t * file_ptr)
 /*-------------------------------------------------------------------------
  * Function:	cedds__H5C_make_space_in_cache()
  *
- * Purpose:	Verify that H5C__make_space_in_cache() can handle the 
+ * Purpose:	Verify that H5C_make_space_in_cache() can handle the 
  *		removal from the cache of the next item in its reverse scan
  *		of the LRU list.  
  *
@@ -34561,7 +34590,7 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t * file_ptr)
  *		load an additional entry, triggering the flush of the last
  *		item, and thereby the deletion of the second to last item.
  *
- *		H5C__make_space_in_cache() should detect this deletion, and 
+ *		H5C_make_space_in_cache() should detect this deletion, and 
  *		restart its scan of the LRU from the tail, instead of 
  *		examining the now deleted next item up on the LRU.
  *
@@ -34639,7 +34668,7 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
          if(cache_ptr == NULL) {
 
             pass = FALSE;
-            failure_mssg = "cache_ptr NULL on entry to cedds for H5C__make_space_in_cache() test.";
+            failure_mssg = "cache_ptr NULL on entry to cedds for H5C_make_space_in_cache() test.";
         }
         else if((cache_ptr->index_len != 0) ||
                   (cache_ptr->index_size != 0)) {
@@ -34779,7 +34808,7 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
          * and HET 0, 2, and 3 will be evicted to make room for the new 
          * monster entry (MET, 31).
          *
-         * Verify this.  If H5C__make_space_in_cache() chokes, failure will
+         * Verify this.  If H5C_make_space_in_cache() chokes, failure will
          * be detected in protect_entry().  Thus end the "if(pass)" clause
          * there so the error message will not be overwritten.
          */
@@ -34942,7 +34971,7 @@ cedds__H5C_make_space_in_cache(H5F_t * file_ptr)
  *		access the first item in the LRU repeatedly until the 
  *		item, and thereby the deletion of the second to last item.
  *
- *		H5C__make_space_in_cache() should detect this deletion, and 
+ *		H5C_make_space_in_cache() should detect this deletion, and 
  *		restart its scan of the LRU from the tail, instead of 
  *		examining the now deleted next item up on the LRU.
  *

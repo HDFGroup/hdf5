@@ -92,7 +92,8 @@ static herr_t H5C__epoch_marker_fsf_size(const void H5_ATTR_UNUSED * thing,
 /*******************/
 
 
-const H5AC_class_t H5AC_EPOCH_MARKER[1] = {{
+const H5C_class_t H5C__epoch_marker_class =
+{
     /* id               = */ H5AC_EPOCH_MARKER_ID,
     /* name             = */ "epoch marker",
     /* mem_type         = */ H5FD_MEM_DEFAULT, /* value doesn't matter */
@@ -107,7 +108,7 @@ const H5AC_class_t H5AC_EPOCH_MARKER[1] = {{
     /* notify           = */ H5C__epoch_marker_notify,
     /* free_icr         = */ H5C__epoch_marker_free_icr,
     /* fsf_size         = */ H5C__epoch_marker_fsf_size,
-}};
+};
 
 
 /***************************************************************************

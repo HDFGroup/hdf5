@@ -246,7 +246,6 @@ H5_DLL herr_t H5Fstart_swmr_write(hid_t file_id);
 H5_DLL ssize_t H5Fget_free_sections(hid_t file_id, H5F_mem_t type,
     size_t nsects, H5F_sect_info_t *sect_info/*out*/);
 H5_DLL herr_t H5Fclear_elink_file_cache(hid_t file_id);
-H5_DLL herr_t H5Fset_latest_format(hid_t file_id, hbool_t latest_format);
 H5_DLL herr_t H5Fstart_mdc_logging(hid_t file_id);
 H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
 H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id,

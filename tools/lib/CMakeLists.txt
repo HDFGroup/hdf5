@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_TOOLS_LIB)
 
 #-----------------------------------------------------------------------------
@@ -63,7 +63,7 @@ if (BUILD_SHARED_LIBS)
   )
   #set_property (TARGET ${HDF5_TOOLS_LIBSH_TARGET} APPEND PROPERTY COMPILE_DEFINITIONS H5DIFF_DEBUG)
   set (install_targets ${install_targets} ${HDF5_TOOLS_LIBSH_TARGET})
-endif ()
+endif (BUILD_SHARED_LIBS)
 
 ##############################################################################
 ##############################################################################
@@ -89,8 +89,7 @@ install (
 if (HDF5_EXPORTED_TARGETS)
   if (BUILD_SHARED_LIBS)
     INSTALL_TARGET_PDB (${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_INSTALL_BIN_DIR} toolslibraries)
-  endif ()
-  INSTALL_TARGET_PDB (${HDF5_TOOLS_LIB_TARGET} ${HDF5_INSTALL_BIN_DIR} toolslibraries)
+  endif (BUILD_SHARED_LIBS)
 
   install (
       TARGETS
@@ -103,4 +102,4 @@ if (HDF5_EXPORTED_TARGETS)
       FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT toolslibraries
       INCLUDES DESTINATION include
   )
-endif ()
+endif (HDF5_EXPORTED_TARGETS)

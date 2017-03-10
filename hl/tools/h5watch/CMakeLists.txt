@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2.2)
+cmake_minimum_required (VERSION 3.1.0)
 PROJECT (HDF5_HL_TOOLS_H5WATCH)
 
 #-----------------------------------------------------------------------------
@@ -49,17 +49,13 @@ if (BUILD_TESTING)
   set_target_properties (h5watchgentest PROPERTIES FOLDER generator/tools/hl)
 
   include (CMakeTests.cmake)
-endif ()
+endif (BUILD_TESTING)
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
-if (HDF5_EXPORTED_TARGETS)
-  install (
-      TARGETS
-          h5watch
-      EXPORT
-          ${HDF5_EXPORTED_TARGETS}
-      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hltoolsapplications
-  )
-endif ()
+install (
+    TARGETS
+        h5watch
+    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hltoolsapplications
+)
