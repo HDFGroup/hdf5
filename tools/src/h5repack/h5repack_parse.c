@@ -47,9 +47,9 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
     int         k, l, p, q, end_obj = -1, no_param = 0;
     unsigned    j, n;
     char        sobj[MAX_NC_NAME];
-    char        scomp[10];
-    char        stype[6];
-    char        smask[3];
+    char        scomp[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    char        stype[6] = {0, 0, 0, 0, 0, 0};
+    char        smask[3] = {0, 0, 0};
     obj_list_t* obj_list = NULL;
     unsigned    pixels_per_block;
 
@@ -396,6 +396,7 @@ obj_list_t* parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
                 error_msg("invalid filter type in <%s>\n", str);
                 HDexit(EXIT_FAILURE);
             }
+            break;
         }
     } /*i*/
 

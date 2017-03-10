@@ -69,7 +69,7 @@ static h5tool_format_t         xml_dataformat = {
     "",             /*cmpd_pre */
     "",             /*cmpd_suf */
     "",             /*cmpd_end */
-    "",             /*cmpd_listv */
+    NULL,           /*cmpd_listv */
 
     " ",            /*vlen_sep */
     " ",            /*vlen_pre */

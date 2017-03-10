@@ -43,7 +43,7 @@ SRC_TOOLS="$srcdir/../.."
 
 SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
 
-TESTDIR=./testfiles
+TESTDIR=./testrepart
 test -d $TESTDIR || mkdir -p $TESTDIR
 
 #

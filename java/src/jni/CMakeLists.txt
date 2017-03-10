@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_JAVA_JNI C CXX)
 
 set (HDF5_JAVA_JNI_CSRCS
@@ -67,8 +67,8 @@ if (WIN32)
         COMMENT "Copying ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${HDF5_JAVA_JNI_DLL_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
     )
     add_dependencies (HDF5_JAVA_JNI-Test-Copy ${HDF5_JAVA_JNI_LIB_TARGET})
-  endif (BUILD_TESTING)
-endif (WIN32)
+  endif ()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Add Target(s) to CMake Install for import into other projects
@@ -79,11 +79,11 @@ if (HDF5_EXPORTED_TARGETS)
       TARGETS
           ${HDF5_JAVA_JNI_LIB_TARGET}
       EXPORT
-          ${HDF5_JAVA_EXPORTED_TARGETS}
+          ${HDF5_EXPORTED_TARGETS}
       LIBRARY DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
       ARCHIVE DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
       RUNTIME DESTINATION ${HDF5_INSTALL_LIB_DIR} COMPONENT libraries
       FRAMEWORK DESTINATION ${HDF5_INSTALL_FWRK_DIR} COMPONENT libraries
       INCLUDES DESTINATION include
   )
-endif (HDF5_EXPORTED_TARGETS)
+endif ()

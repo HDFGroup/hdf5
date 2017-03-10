@@ -153,6 +153,14 @@ CLEAN_DATAFILES_AND_BLDDIR()
 {
         $RM $BLDDIR/examples.groups.H5Ex_G_*.txt
         $RM $BLDDIR/H5Ex_G_*.out
+        $RM $BLDDIR/H5Ex_G_*.h5
+        SDIR=`$DIRNAME $tstfile`
+        INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+        INODE_DDIR=`$LS -i -d $BLDDIR | $AWK -F' ' '{print $1}'`
+        if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then            SDIR=`$DIRNAME $tstfile`
+            $RM $BLDDIR/h5ex_g_iterate.h5
+            $RM $BLDDIR/h5ex_g_visit.h5
+        fi  
 }
 
 COPY_REFFILES="$LIST_REF_FILES"

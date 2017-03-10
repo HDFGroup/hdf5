@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_TOOLS_SRC_H5IMPORT)
 
 #-----------------------------------------------------------------------------
@@ -28,13 +28,14 @@ set (H5_DEP_EXECUTABLES h5import)
 #-----------------------------------------------------------------------------
 # Rules for Installation of tools using make Install target
 #-----------------------------------------------------------------------------
+if (HDF5_EXPORTED_TARGETS)
+  INSTALL_PROGRAM_PDB (h5import ${HDF5_INSTALL_BIN_DIR} toolsapplications)
 
-#INSTALL_PROGRAM_PDB (h5import ${HDF5_INSTALL_BIN_DIR} toolsapplications)
-
-install (
-    TARGETS
-        h5import
-    EXPORT
-        ${HDF5_EXPORTED_TARGETS}
-    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
-)
+  install (
+      TARGETS
+          h5import
+      EXPORT
+          ${HDF5_EXPORTED_TARGETS}
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT toolsapplications
+  )
+endif ()

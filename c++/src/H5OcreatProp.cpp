@@ -75,49 +75,49 @@ void ObjCreatPropList::deleteConstants()
 }
 
 //--------------------------------------------------------------------------
-// Purpose:	Constant for default property
+// Purpose:     Constant for default property
 //--------------------------------------------------------------------------
 const ObjCreatPropList& ObjCreatPropList::DEFAULT = *getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
-// Function:	Default Constructor
-///\brief	Creates a file access property list
-// Programmer:	Binh-Minh Ribler - 2000
+// Function:    Default Constructor
+///\brief       Creates a file access property list
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 ObjCreatPropList::ObjCreatPropList() : PropList(H5P_OBJECT_CREATE) {}
 
 //--------------------------------------------------------------------------
-// Function:	ObjCreatPropList copy constructor
-///\brief	Copy Constructor: makes a copy of the original
-///\param	original - IN: ObjCreatPropList instance to copy
-// Programmer:	Binh-Minh Ribler - 2000
+// Function:    ObjCreatPropList copy constructor
+///\brief       Copy Constructor: makes a copy of the original
+///\param       original - IN: ObjCreatPropList instance to copy
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 ObjCreatPropList::ObjCreatPropList(const ObjCreatPropList& original) : PropList(original) {}
 
 //--------------------------------------------------------------------------
-// Function:	ObjCreatPropList overloaded constructor
-///\brief	Creates a file access property list using the id of an
-///		existing one.
-// Programmer:  Binh-Minh Ribler - 2000
+// Function:    ObjCreatPropList overloaded constructor
+///\brief       Creates a file access property list using the id of an
+///             existing one.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 ObjCreatPropList::ObjCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 
 //--------------------------------------------------------------------------
-// Function:	ObjCreatPropList::setAttrPhaseChange
-///\brief	Sets attribute storage phase change thresholds.
-///\param	max_compact - IN: Maximum number of attributes to be stored in
-///				  compact storage.  Default to 8
-///\param	min_dense   - IN: Minimum number of attributes to be stored in
-///				  dense storage.  Default to 6
-///\exception	H5::PropListIException
+// Function:    ObjCreatPropList::setAttrPhaseChange
+///\brief       Sets attribute storage phase change thresholds.
+///\param       max_compact - IN: Maximum number of attributes to be stored in
+///                               compact storage.  Default to 8
+///\param       min_dense   - IN: Minimum number of attributes to be stored in
+///                               dense storage.  Default to 6
+///\exception   H5::PropListIException
 ///\par Description
-///		If \c max_compact is set to 0, dense storage will be used.
-///		For more detail about on attribute storage, please refer to the
-///		C layer Reference Manual at:
+///             If \c max_compact is set to 0, dense storage will be used.
+///             For more detail about on attribute storage, please refer to the
+///             C layer Reference Manual at:
 /// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetAttrPhaseChange
-// Programmer:  Binh-Minh Ribler - September 2015
+// Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void ObjCreatPropList::setAttrPhaseChange(unsigned max_compact, unsigned min_dense) const
 {
@@ -129,19 +129,19 @@ void ObjCreatPropList::setAttrPhaseChange(unsigned max_compact, unsigned min_den
 }
 
 //--------------------------------------------------------------------------
-// Function:	ObjCreatPropList::getAttrPhaseChange
-///\brief	Gets attribute storage phase change thresholds.
-///\param	max_compact - OUT: Maximum number of attributes to be stored in
-///				  compact storage.
-///\param	min_dense   - OUT: Minimum number of attributes to be stored in
-///				  dense storage.
-///\exception	H5::PropListIException
+// Function:    ObjCreatPropList::getAttrPhaseChange
+///\brief       Gets attribute storage phase change thresholds.
+///\param       max_compact - OUT: Maximum number of attributes to be stored in
+///                               compact storage.
+///\param       min_dense   - OUT: Minimum number of attributes to be stored in
+///                               dense storage.
+///\exception   H5::PropListIException
 ///\par Description
-///		If \c max_compact is set to 0, dense storage will be used.
-///		For more detail about on attribute storage, please refer to the
-///		C layer Reference Manual at:
+///             If \c max_compact is set to 0, dense storage will be used.
+///             For more detail about on attribute storage, please refer to the
+///             C layer Reference Manual at:
 /// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetAttrPhaseChange
-// Programmer:  Binh-Minh Ribler - September 2015
+// Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void ObjCreatPropList::getAttrPhaseChange(unsigned& max_compact, unsigned& min_dense) const
 {
@@ -154,23 +154,23 @@ void ObjCreatPropList::getAttrPhaseChange(unsigned& max_compact, unsigned& min_d
 }
 
 //--------------------------------------------------------------------------
-// Function:	ObjCreatPropList::setAttrCrtOrder
-///\brief	Sets tracking and indexing of attribute creation order.
-///\param	crt_order_flags  - IN: Flags specifying whether to track and
-///			index attribute creation order.  Default: No flag set
-///\exception	H5::PropListIException
+// Function:    ObjCreatPropList::setAttrCrtOrder
+///\brief       Sets tracking and indexing of attribute creation order.
+///\param       crt_order_flags  - IN: Flags specifying whether to track and
+///                     index attribute creation order.  Default: No flag set
+///\exception   H5::PropListIException
 ///\par Description
-///		Valid flags are:
-///		\li \c H5P_CRT_ORDER_TRACKED - Attribute creation order is tracked
-///		\li \c H5P_CRT_ORDER_INDEXED - Attribute creation order is
-///				 indexed (requires H5P_CRT_ORDER_TRACKED).
-///		When no flag is set, attribute creation order is neither
-///		tracked not indexed.  Note that HDF5 currently provides no
-///		mechanism to turn on attribute creation order tracking at object
-///		creation time and to build the index later.
-///		The C layer Reference Manual at can be found at:
+///             Valid flags are:
+///             \li \c H5P_CRT_ORDER_TRACKED - Attribute creation order is tracked
+///             \li \c H5P_CRT_ORDER_INDEXED - Attribute creation order is
+///                              indexed (requires H5P_CRT_ORDER_TRACKED).
+///             When no flag is set, attribute creation order is neither
+///             tracked not indexed.  Note that HDF5 currently provides no
+///             mechanism to turn on attribute creation order tracking at object
+///             creation time and to build the index later.
+///             The C layer Reference Manual at can be found at:
 /// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-SetAttrCreationOrder
-// Programmer:  Binh-Minh Ribler - September 2015
+// Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 void ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
 {
@@ -182,18 +182,18 @@ void ObjCreatPropList::setAttrCrtOrder(unsigned crt_order_flags) const
 }
 
 //--------------------------------------------------------------------------
-// Function:	ObjCreatPropList::getAttrCrtOrder
-///\brief	Gets tracking and indexing settings for attribute
-///		creation order.
-///\param	crt_order_flags - OUT: Flags specifying whether to track and
-///					index attribute creation order
-///\exception	H5::PropListIException
+// Function:    ObjCreatPropList::getAttrCrtOrder
+///\brief       Gets tracking and indexing settings for attribute
+///             creation order.
+///\param       crt_order_flags - OUT: Flags specifying whether to track and
+///                                    index attribute creation order
+///\exception   H5::PropListIException
 ///\par Description
-///		When no flag is set, i.e. crt_order_flags = 0, attribute
-///		creation order is neither tracked not indexed.
-///		The C layer Reference Manual at can be found at:
+///             When no flag is set, i.e. crt_order_flags = 0, attribute
+///             creation order is neither tracked not indexed.
+///             The C layer Reference Manual at can be found at:
 /// https://www.hdfgroup.org/HDF5/doc/RM/RM_H5P.html#Property-GetAttrCreationOrder
-// Programmer:  Binh-Minh Ribler - September 2015
+// Programmer   Binh-Minh Ribler - September 2015
 //--------------------------------------------------------------------------
 unsigned ObjCreatPropList::getAttrCrtOrder() const
 {
@@ -208,9 +208,9 @@ unsigned ObjCreatPropList::getAttrCrtOrder() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	ObjCreatPropList destructor
-///\brief	Noop destructor
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    ObjCreatPropList destructor
+///\brief       Noop destructor
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 ObjCreatPropList::~ObjCreatPropList() {}
 

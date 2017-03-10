@@ -508,6 +508,67 @@ typedef struct H5AC_cache_config_t
 } H5AC_cache_config_t;
 
 
+/****************************************************************************
+ *
+ * structure H5AC_cache_image_config_t
+ *
+ * H5AC_cache_image_ctl_t is a public structure intended for use in public 
+ * APIs.  At least in its initial incarnation, it is a copy of struct
+ * H5C_cache_image_ctl_t.
+ *
+ * The fields of the structure are discussed individually below:
+ *
+ * version: Integer field containing the version number of this version
+ *      of the H5C_image_ctl_t structure.  Any instance of
+ *      H5C_image_ctl_t passed to the cache must have a known
+ *      version number, or an error will be flagged.
+ *
+ * generate_image:  Boolean flag indicating whether a cache image should
+ *      be created on file close.
+ *
+ * save_resize_status:	Boolean flag indicating whether the cache image 
+ *	should include the adaptive cache resize configuration and status.
+ *	Note that this field is ignored at present.
+ *
+ * entry_ageout:	Integer field indicating the maximum number of 
+ *	times a prefetched entry can appear in subsequent cache images.
+ *	This field exists to allow the user to avoid the buildup of 
+ *	infrequently used entries in long sequences of cache images.
+ *
+ *	The value of this field must lie in the range
+ *	H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE (-1) to 
+ *	H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX (100).
+ *
+ *	H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE means that no limit 
+ *	is imposed on number of times a prefeteched entry can appear
+ *	in subsequent cache images.
+ *
+ *	A value of 0 prevents prefetched entries from being included 
+ *	in cache images.
+ *
+ *	Positive integers restrict prefetched entries to the specified
+ *	number of appearances.
+ *
+ *	Note that the number of subsequent cache images that a prefetched
+ *	entry has appeared in is tracked in an 8 bit field.  Thus, while
+ *	H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX can be increased from its 
+ *	current value, any value in excess of 255 will be the functional 
+ *	equivalent of H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE.
+ *
+ ****************************************************************************/
+
+#define H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION 	1
+
+#define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE	-1
+#define H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX	100
+
+typedef struct H5AC_cache_image_config_t {
+    int32_t                             version;
+    hbool_t                             generate_image;
+    hbool_t                             save_resize_status;
+    int32_t                             entry_ageout;
+} H5AC_cache_image_config_t;
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_TEST_PAR)
 
 #-----------------------------------------------------------------------------
@@ -54,6 +54,6 @@ set (H5P_TESTS
 
 foreach (testp ${H5P_TESTS})
   ADD_H5P_EXE(${testp})
-endforeach (testp ${H5P_TESTS})
+endforeach ()
 
 include (CMakeTests.cmake)

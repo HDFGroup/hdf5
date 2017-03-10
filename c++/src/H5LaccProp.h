@@ -30,24 +30,24 @@ namespace H5 {
 */
 class H5_DLLCPP LinkAccPropList : public PropList {
    public:
-	///\brief Default file access property list.
-	static const LinkAccPropList& DEFAULT;
+        ///\brief Default file access property list.
+        static const LinkAccPropList& DEFAULT;
 
-	// Creates a file access property list.
-	LinkAccPropList();
+        // Creates a file access property list.
+        LinkAccPropList();
 
-	///\brief Returns this class name.
-	virtual H5std_string fromClass () const { return("LinkAccPropList"); }
+        ///\brief Returns this class name.
+        virtual H5std_string fromClass () const { return("LinkAccPropList"); }
 
-	// Copy constructor: creates a copy of a LinkAccPropList object.
-	LinkAccPropList( const LinkAccPropList& original );
+        // Copy constructor: creates a copy of a LinkAccPropList object.
+        LinkAccPropList(const LinkAccPropList& original);
 
-	// Creates a copy of an existing file access property list
-	// using the property list id.
-	LinkAccPropList (const hid_t plist_id);
+        // Creates a copy of an existing file access property list
+        // using the property list id.
+        LinkAccPropList (const hid_t plist_id);
 
-	// Noop destructor
-	virtual ~LinkAccPropList();
+        // Noop destructor
+        virtual ~LinkAccPropList();
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

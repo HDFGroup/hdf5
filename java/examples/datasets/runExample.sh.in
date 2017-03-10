@@ -161,6 +161,8 @@ CLEAN_DATAFILES_AND_BLDDIR()
 {
         $RM $BLDDIR/examples.datasets.H5Ex_D_*.txt
         $RM $BLDDIR/H5Ex_D_*.out
+        $RM $BLDDIR/H5Ex_D_*.h5
+        $RM $BLDDIR/H5Ex_D_External.data
 }
 
 # Print a line-line message left justified in a field of 70 characters

@@ -97,7 +97,6 @@ const char *H5REPACK_FILENAMES[] = {
 /* Name of tool */
 #define PROGRAMNAME "h5repacktst"
 
-
 #define DIM1    40
 #define DIM2    20
 #define CDIM1   DIM1/2
@@ -192,7 +191,7 @@ int main (void)
     puts("Testing h5repack:");
 
     /* make the test files */
-    TESTING("    generating datasets");
+    TESTING("    generating files for testing");
     if (make_testfiles() < 0)
         GOERROR;
     PASSED();

@@ -353,7 +353,7 @@ Java_hdf_hdf5lib_H5_H5Diterate
  * Method:    H5Dflush
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL 
+JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Dflush
   (JNIEnv*, jclass, jlong);
 
@@ -362,7 +362,7 @@ Java_hdf_hdf5lib_H5_H5Dflush
  * Method:    H5Drefresh
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL 
+JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Drefresh
   (JNIEnv*, jclass, jlong);
 

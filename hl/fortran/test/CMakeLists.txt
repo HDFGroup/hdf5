@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_HL_FORTRAN_TESTS C CXX Fortran)
 
 #-----------------------------------------------------------------------------
@@ -25,7 +25,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
         FOLDER test/hl/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+endif ()
 
 #-- Adding test for hl_f90_tstlite
 add_executable (hl_f90_tstlite tstlite.F90)
@@ -46,7 +46,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
         FOLDER test/hl/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+endif ()
 
 #-- Adding test for hl_f90_tstimage
 add_executable (hl_f90_tstimage tstimage.F90)
@@ -67,7 +67,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
         FOLDER test/hl/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+endif ()
 
 #-- Adding test for hl_f90_tsttable
 add_executable (hl_f90_tsttable tsttable.F90)
@@ -88,6 +88,6 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
         FOLDER test/hl/fortran
         Fortran_MODULE_DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
   )
-endif (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
+endif ()
 
 include (CMakeTests.cmake)

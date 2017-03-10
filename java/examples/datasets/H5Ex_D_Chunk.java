@@ -44,7 +44,7 @@ public class H5Ex_D_Chunk {
 
     // Values for the status of space allocation
     enum H5D_layout {
-        H5D_LAYOUT_ERROR(-1), H5D_COMPACT(0), H5D_CONTIGUOUS(1), H5D_CHUNKED(2), H5D_NLAYOUTS(3);
+        H5D_LAYOUT_ERROR(-1), H5D_COMPACT(0), H5D_CONTIGUOUS(1), H5D_CHUNKED(2), H5D_VIRTUAL(3), H5D_NLAYOUTS(4);
         private static final Map<Integer, H5D_layout> lookup = new HashMap<Integer, H5D_layout>();
 
         static {
@@ -249,6 +249,9 @@ public class H5Ex_D_Chunk {
                     break;
                 case H5D_CHUNKED:
                     System.out.println("H5D_CHUNKED");
+                    break;
+                case H5D_VIRTUAL:
+                    System.out.println("H5D_VIRTUAL");
                     break;
                 case H5D_LAYOUT_ERROR:
                     break;

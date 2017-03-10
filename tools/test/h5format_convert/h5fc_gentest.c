@@ -44,8 +44,6 @@ const char *FILENAME[] = {
 
 #define GROUP			"GROUP"
 
-#define DSET_BT1		"DSET_BT1"
-#define DSET_NDATA_BT1		"DSET_NDATA_BT1"
 #define DSET_COMPACT		"DSET_COMPACT"
 #define DSET_CONTIGUOUS		"DSET_CONTIGUOUS"
 
@@ -770,6 +768,7 @@ error:
         H5Dclose(did2);
         H5Gclose(gid);
         H5Fclose(fid);
+        H5Pclose(fapl);
         H5Pclose(fcpl);
     } H5E_END_TRY;
 

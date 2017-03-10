@@ -117,6 +117,11 @@ main(void)
         0.2f,
         (256 * 2048),
         H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
+    H5AC_cache_image_config_t my_cache_image_config = {
+	H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION,
+	TRUE,
+        FALSE,
+	-1};
 
     if(VERBOSE_MED)
 	printf("Encode/Decode DCPLs\n");
@@ -454,6 +459,8 @@ main(void)
     if((H5Pset_multi_type(fapl, H5FD_MEM_GHEAP)) < 0)
         FAIL_STACK_ERROR
     if((H5Pset_mdc_config(fapl, &my_cache_config)) < 0)
+        FAIL_STACK_ERROR
+    if((H5Pset_mdc_image_config(fapl, &my_cache_image_config)) < 0)
         FAIL_STACK_ERROR
     if((H5Pset_core_write_tracking(fapl, TRUE, 1024 * 1024)) < 0)
         FAIL_STACK_ERROR
