@@ -131,7 +131,7 @@ H5C_get_cache_size(H5C_t * cache_ptr,
                    size_t * max_size_ptr,
                    size_t * min_clean_size_ptr,
                    size_t * cur_size_ptr,
-                   int32_t * cur_num_entries_ptr)
+                   uint32_t * cur_num_entries_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -444,7 +444,8 @@ H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring)
 
     /* Locate the entry at the address */
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
-    HDassert(entry_ptr);
+    if(entry_ptr == NULL)
+        HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't find entry in index")
 
     /* Return the ring value */
     *ring = entry_ptr->ring;

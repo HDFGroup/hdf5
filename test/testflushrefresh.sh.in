@@ -118,7 +118,7 @@ until [ $verification_done -eq 1 ]; do
 
   # Check to see if we timed out looking for the signal before continuing.
   if [ $timedout -gt 0 ]; then
-    echo timed out waiting for signal from test program.
+    echo "timed out waiting for signal from test program (flush)."
     break
   fi
 
@@ -158,7 +158,7 @@ if [ $timedout -eq 0 ]; then
 
     # Check to see if we timed out looking for the signal before continuing.
     if [ $timedout -gt 0 ]; then
-      echo timed out waiting for signal from test program.
+      echo "timed out waiting for signal from test program (refresh)."
       break
     fi
 

@@ -256,8 +256,6 @@ H5FL_ARR_EXTERN(H5SM_index_header_t);
 H5FL_EXTERN(H5SM_list_t);
 H5FL_ARR_EXTERN(H5SM_sohm_t);
 
-H5_DLLVAR const H5AC_class_t H5AC_SOHM_TABLE[1];
-H5_DLLVAR const H5AC_class_t H5AC_SOHM_LIST[1];
 H5_DLLVAR const H5B2_class_t H5SM_INDEX[1];
 
 /****************************/

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDFJAVA_EXAMPLES_INTRO Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
@@ -20,16 +20,16 @@ set (HDF_JAVA_EXAMPLES
 
 if (WIN32)
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ";")
-else (WIN32)
+else ()
   set (CMAKE_JAVA_INCLUDE_FLAG_SEP ":")
-endif (WIN32)
+endif ()
 
 set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_JARS}")
 
 set (CMAKE_JAVA_CLASSPATH ".")
 foreach (CMAKE_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
   set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${CMAKE_INCLUDE_PATH}")
-endforeach (CMAKE_INCLUDE_PATH)
+endforeach ()
 
 foreach (example ${HDF_JAVA_EXAMPLES})
   file (WRITE ${PROJECT_BINARY_DIR}/${example}_Manifest.txt
@@ -41,14 +41,14 @@ foreach (example ${HDF_JAVA_EXAMPLES})
 #  install_jar (${example} ${HJAVA_INSTALL_DATA_DIR}/examples examples)
   get_target_property (${example}_CLASSPATH ${example} CLASSDIR)
   add_dependencies (${example} ${HDF5_JAVA_HDF5_LIB_TARGET})
-endforeach (example ${HDF_JAVA_EXAMPLES})
+endforeach ()
 
 set (CMAKE_JAVA_INCLUDE_PATH "${HDF5_JAVA_JARS};${HDF5_JAVA_LOGGING_JAR};${HDF5_JAVA_LOGGING_NOP_JAR}")
 
 set (CMAKE_JAVA_CLASSPATH ".")
 foreach (HDFJAVA_JAR ${CMAKE_JAVA_INCLUDE_PATH})
   set (CMAKE_JAVA_CLASSPATH "${CMAKE_JAVA_CLASSPATH}${CMAKE_JAVA_INCLUDE_FLAG_SEP}${HDFJAVA_JAR}")
-endforeach (HDFJAVA_JAR)
+endforeach ()
 
 foreach (example ${HDF_JAVA_OBJECT_EXAMPLES})
   file (WRITE ${PROJECT_BINARY_DIR}/${example}_Manifest.txt
@@ -60,16 +60,16 @@ foreach (example ${HDF_JAVA_OBJECT_EXAMPLES})
 #  install_jar (${example} ${HJAVA_INSTALL_DATA_DIR}/examples examples)
   get_target_property (${example}_CLASSPATH ${example} CLASSDIR)
   add_dependencies (${example} ${HDFJAVA_H5_LIB_TARGET})
-endforeach (example ${HDF_JAVA_OBJECT_EXAMPLES})
+endforeach ()
 
 MACRO (ADD_H5_TEST resultfile resultcode)
   if (CMAKE_BUILD_TYPE MATCHES Debug)
     if (WIN32)
       set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_D;")
-    else()
+    else ()
       set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=hdf5_java_debug;")
-    endif()
-  endif(CMAKE_BUILD_TYPE MATCHES Debug)
+    endif ()
+  endif ()
   add_test (
       NAME JAVA_intro-${resultfile}
       COMMAND "${CMAKE_COMMAND}"
@@ -86,9 +86,9 @@ MACRO (ADD_H5_TEST resultfile resultcode)
   )
   if (NOT "${last_test}" STREQUAL "")
     set_tests_properties (JAVA_intro-${resultfile} PROPERTIES DEPENDS ${last_test})
-  endif (NOT "${last_test}" STREQUAL "")
+  endif ()
   set (last_test "JAVA_intro-${resultfile}")
-ENDMACRO (ADD_H5_TEST file)
+ENDMACRO ()
 
 if (BUILD_TESTING)
 
@@ -101,7 +101,7 @@ if (BUILD_TESTING)
     )
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (JAVA_intro-${example}-clear-objects PROPERTIES DEPENDS ${last_test})
-    endif (NOT "${last_test}" STREQUAL "")
+    endif ()
     add_test (
         NAME JAVA_intro-${example}-copy-objects
         COMMAND    ${CMAKE_COMMAND}
@@ -112,6 +112,6 @@ if (BUILD_TESTING)
     set_tests_properties (JAVA_intro-${example}-copy-objects PROPERTIES DEPENDS JAVA_intro-${example}-clear-objects)
     set (last_test "JAVA_intro-${example}-copy-objects")
     ADD_H5_TEST (${example} 0)
-  endforeach (example ${HDF_JAVA_EXAMPLES})
+  endforeach ()
 
-endif (BUILD_TESTING)
+endif ()

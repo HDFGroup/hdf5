@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_HL_EXAMPLES )
 
 #-----------------------------------------------------------------------------
@@ -32,10 +32,10 @@ foreach (example ${examples})
   TARGET_C_PROPERTIES (hl_ex_${example} STATIC " " " ")
   target_link_libraries (hl_ex_${example} ${HDF5_HL_LIB_TARGET} ${HDF5_LIB_TARGET})
   set_target_properties (hl_ex_${example} PROPERTIES FOLDER examples/hl)
-endforeach (example ${examples})
+endforeach ()
 
 if (BUILD_TESTING)
 
   include (CMakeTests.cmake)
 
-endif (BUILD_TESTING)
+endif ()

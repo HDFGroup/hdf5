@@ -37,22 +37,22 @@ int check_values (hsize_t i, hsize_t j, int apoint, int acheck);
 void check_values(const char *value, const char* msg, int line, const char* file_name);
 int test_report (int, const H5std_string&);
 void issue_fail_msg(const char* where, int line, const char* file_name,
-		    const char* message="");
+                    const char* message="");
 void issue_fail_msg(const char* where, int line, const char* file_name,
-		    const char* func_name, const char* message);
+                    const char* func_name, const char* message);
 
 class InvalidActionException : public Exception {
    public:
-	InvalidActionException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
-	InvalidActionException();
-	virtual ~InvalidActionException() throw();
+        InvalidActionException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
+        InvalidActionException();
+        virtual ~InvalidActionException() throw();
 };
 
 class TestFailedException : public Exception {
    public:
-	TestFailedException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
-	TestFailedException();
-	virtual ~TestFailedException() throw();
+        TestFailedException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
+        TestFailedException();
+        virtual ~TestFailedException() throw();
 };
 
 // Overloaded/Template functions to verify values and display proper info
@@ -65,18 +65,18 @@ template <class Type1, class Type2>
 {
     if (GetTestVerbosity()>=VERBO_HI)
     {
-	cerr << endl;
+        cerr << endl;
         cerr << "   Call to routine: " << where << " at line " << line
-	     << " in " << file_name <<  " had value " << x << endl;
+             << " in " << file_name <<  " had value " << x << endl;
     }
     if (x != value)
     {
-	cerr << endl;
+        cerr << endl;
         cerr << "*** UNEXPECTED VALUE from " << where << " should be "
-	     << value << ", but is " << x << " at line " << line
-	     << " in " << file_name << endl;
-	IncTestNumErrs();
-	throw TestFailedException(where, "");
+             << value << ", but is " << x << " at line " << line
+             << " in " << file_name << endl;
+        IncTestNumErrs();
+        throw TestFailedException(where, "");
     }
 }
 
@@ -85,12 +85,12 @@ template <class Type1, class Type2>
 {
     if (x != value)
     {
-	cerr << endl;
+        cerr << endl;
         cerr << "*** UNEXPECTED VALUE: " << file_name << ":line " << line
-	     << ": " << msg << " different: " << x << ", should be " << value
-	     << endl;
-	IncTestNumErrs();
-	throw TestFailedException(file_name, msg);
+             << ": " << msg << " different: " << x << ", should be " << value
+             << endl;
+        IncTestNumErrs();
+        throw TestFailedException(file_name, msg);
     }
 }
 
@@ -99,17 +99,17 @@ template <class Type1, class Type2>
 {
     if (GetTestVerbosity()>=VERBO_HI)
     {
-	cerr << endl;
+        cerr << endl;
         cerr << "   Call to routine: " << where << " at line " << line
-	     << " in " << file_name <<  " had value " << x << endl;
+             << " in " << file_name <<  " had value " << x << endl;
     }
     if (x == value)
     {
-	cerr << endl;
+        cerr << endl;
         cerr << "*** UNEXPECTED VALUE from " << where << " should not be "
-	     << value << " at line " << line << " in " << file_name << endl;
-	IncTestNumErrs();
-	throw TestFailedException(where, "");
+             << value << " at line " << line << " in " << file_name << endl;
+        IncTestNumErrs();
+        throw TestFailedException(where, "");
     }
 }
 
@@ -118,10 +118,10 @@ template <class Type1, class Type2>
 {
     if (x == value)
     {
-	cerr << endl;
+        cerr << endl;
         cerr << "*** Function " << msg << " FAILED at line " << line << endl;
-	IncTestNumErrs();
-	throw TestFailedException(file_name, msg);
+        IncTestNumErrs();
+        throw TestFailedException(file_name, msg);
     }
 }
 
@@ -130,12 +130,12 @@ template <class Type1, class Type2>
 {
     if (x == value)
     {
-	cerr << endl;
-	cerr << "*** UNEXPECTED FLOAT VALUE: " << file_name << ":line " << line
-	     << ": " << msg << " different: " << x << ", should be " << value
-	     << " (epsilon=" << epsilon << ")" << endl;
-	IncTestNumErrs();
-	throw TestFailedException(file_name, msg);
+        cerr << endl;
+        cerr << "*** UNEXPECTED FLOAT VALUE: " << file_name << ":line " << line
+             << ": " << msg << " different: " << x << ", should be " << value
+             << " (epsilon=" << epsilon << ")" << endl;
+        IncTestNumErrs();
+        throw TestFailedException(file_name, msg);
     }
 }
 

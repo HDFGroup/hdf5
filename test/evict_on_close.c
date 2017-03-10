@@ -600,7 +600,7 @@ check_group_layout(hid_t fid, const char *group_name)
     hid_t   gid1 = -1, gid2 = -1;           /* group IDs                    */
     H5G_t   *grp_ptr = NULL;                /* ptr to internal group struct */
     haddr_t tag1, tag2;                     /* MD cache tags for groups     */
-    int32_t before, during, after;          /* cache sizes                  */
+    uint32_t before, during, after;         /* cache sizes                  */
     int i;                                  /* iterator                     */
 
     /* NOTE: The TESTING() macro is called in main() */
@@ -616,7 +616,7 @@ check_group_layout(hid_t fid, const char *group_name)
     HDprintf("\nCACHE BEFORE GROUP OPEN:\n");
     if(H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
-    HDprintf("NUMBER OF CACHE ENTRIES: %d\n", before);
+    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", before);
 #endif
 
     /* Open the main group and get its tag */
@@ -658,7 +658,7 @@ check_group_layout(hid_t fid, const char *group_name)
     if(H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
     HDprintf("MAIN GROUP TAG: %#X\n", tag1);
-    HDprintf("NUMBER OF CACHE ENTRIES: %d\n", during);
+    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", during);
 #endif
 
     /* Close the main group */
@@ -672,7 +672,7 @@ check_group_layout(hid_t fid, const char *group_name)
     HDprintf("\nCACHE AFTER CLOSING GROUPS:\n");
     if(H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
-    HDprintf("NUMBER OF CACHE ENTRIES: %d\n", after);
+    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", after);
 #endif
 
     /* Ensure that the cache does not contain entries with the tag */
@@ -718,7 +718,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     H5D_t   *dset_ptr = NULL;               /* ptr to internal dset struct  */
     haddr_t tag;                            /* MD cache tag for dataset     */
     int     *data = NULL;                   /* buffer for fake data         */
-    int32_t before, during, after;          /* cache sizes                  */
+    uint32_t before, during, after;         /* cache sizes                  */
 
     /* NOTE: The TESTING() macro is called in main() */
 
@@ -737,7 +737,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     HDprintf("\nCACHE BEFORE DATASET OPEN:\n");
     if(H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
-    HDprintf("NUMBER OF CACHE ENTRIES: %d\n", before);
+    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", before);
 #endif
 
     /* Open dataset and get the metadata tag */
@@ -761,7 +761,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     if(H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
     HDprintf("TAG: %#X\n", tag);
-    HDprintf("NUMBER OF CACHE ENTRIES: %d\n", during);
+    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", during);
 #endif
 
     /* Close the dataset */
@@ -775,7 +775,7 @@ check_dset_scheme(hid_t fid, const char *dset_name)
     HDprintf("\nCACHE AFTER DATASET CLOSE:\n");
     if(H5AC_dump_cache(file_ptr) < 0)
         TEST_ERROR;
-    HDprintf("NUMBER OF CACHE ENTRIES: %d\n", after);
+    HDprintf("NUMBER OF CACHE ENTRIES: %u\n", after);
 #endif
 
     /* Ensure that the cache does not contain entries with the tag */

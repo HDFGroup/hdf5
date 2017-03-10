@@ -27,8 +27,24 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 TEST_SCRIPT=testh5ls.sh testh5lsvds.sh
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=../../src/h5ls/h5ls$(EXEEXT)
+if HAVE_SHARED_CONDITIONAL
+if USE_PLUGINS_CONDITIONAL
+   TEST_SCRIPT += h5ls_plugin.sh
+endif
+endif
 
 # All programs depend on the hdf5 and h5tools libraries
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+
+if HAVE_SHARED_CONDITIONAL
+  # Build it as shared library if configure is enabled for shared library.
+  lib_LTLIBRARIES=libdynlibls.la
+  libdynlibls_la_SOURCES=dynlib_ls.c
+
+install-exec-hook:
+	$(RM) $(DESTDIR)$(libdir)/*dynlib*
+endif
+
+DISTCLEANFILES=h5ls_plugin.sh
 
 include $(top_srcdir)/config/conclude.am

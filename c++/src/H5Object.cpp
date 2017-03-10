@@ -15,7 +15,7 @@
 
 #include <string>
 
-#include "H5private.h"		// for HDmemset
+#include "H5private.h"        // for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -46,25 +46,25 @@ namespace H5 {
 extern "C" herr_t userAttrOpWrpr(hid_t loc_id, const char *attr_name,
     const H5A_info_t *ainfo, void *op_data)
 {
-   H5std_string s_attr_name = H5std_string( attr_name );
+   H5std_string s_attr_name = H5std_string(attr_name);
    UserData4Aiterate* myData = reinterpret_cast<UserData4Aiterate *> (op_data);
-   myData->op( *myData->location, s_attr_name, myData->opData );
+   myData->op(*myData->location, s_attr_name, myData->opData);
    return 0;
 }
 #endif
 
 //--------------------------------------------------------------------------
-// Function:	H5Object default constructor (protected)
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object default constructor (protected)
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Object::H5Object() : H5Location() {}
 
 //--------------------------------------------------------------------------
-// Function:	H5Object overloaded constructor (protected)
-// Purpose	Creates an H5Object object using the id of an existing HDF5
-// 		object.
-// Parameters	object_id - IN: Id of an existing HDF5 object
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object overloaded constructor (protected)
+// Purpose      Creates an H5Object object using the id of an existing HDF5
+//              object.
+// Parameters   object_id - IN: Id of an existing HDF5 object
+// Programmer   Binh-Minh Ribler - 2000
 // *** Deprecation warning ***
 // This constructor is no longer appropriate because the data member "id" had
 // been moved to the sub-classes.  It will be removed in 1.10 release.  If its
@@ -75,11 +75,11 @@ H5Object::H5Object() : H5Location() {}
 //H5Object::H5Object(const hid_t object_id) : H5Location() {}
 
 //--------------------------------------------------------------------------
-// Function:	H5Object copy constructor
-///\brief	Copy constructor: makes a copy of the original H5Object
-///		instance.
-///\param	original - IN: H5Object instance to copy
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object copy constructor
+///\brief       Copy constructor: makes a copy of the original H5Object
+///             instance.
+///\param       original - IN: H5Object instance to copy
+// Programmer   Binh-Minh Ribler - 2000
 // *** Deprecation warning ***
 // This constructor is no longer appropriate because the data member "id" had
 // been moved to the sub-classes.  It is removed from 1.8.15 because it is
@@ -103,158 +103,157 @@ void f_Attribute_setId(Attribute* attr, hid_t new_id)
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::createAttribute
-///\brief	Creates an attribute for a group, dataset, or named datatype.
-///\param	name - IN: Name of the attribute
-///\param	data_type - IN: Datatype for the attribute
-///\param	data_space - IN: Dataspace for the attribute - only simple
-///		dataspaces are allowed at this time
-///\param	create_plist - IN: Creation property list - default to
-///		PropList::DEFAULT
-///\return	Attribute instance
-///\exception	H5::AttributeIException
+// Function:    H5Object::createAttribute
+///\brief       Creates an attribute for a group, dataset, or named datatype.
+///\param       name - IN: Name of the attribute
+///\param       data_type - IN: Datatype for the attribute
+///\param       data_space - IN: Dataspace for the attribute - only simple
+///             dataspaces are allowed at this time
+///\param       create_plist - IN: Creation property list - default to
+///             PropList::DEFAULT
+///\return      Attribute instance
+///\exception   H5::AttributeIException
 ///\par Description
-///		The attribute name specified in \a name must be unique.
-///		Attempting to create an attribute with the same name as an
-///		existing attribute will raise an exception, leaving the
-///		pre-existing attribute intact. To overwrite an existing
-///		attribute with a new attribute of the same name, first
-///		delete the existing one with \c H5Object::removeAttr, then
-///		recreate it with this function.
-// Programmer	Binh-Minh Ribler - 2000
+///             The attribute name specified in \a name must be unique.
+///             Attempting to create an attribute with the same name as an
+///             existing attribute will raise an exception, leaving the
+///             pre-existing attribute intact. To overwrite an existing
+///             attribute with a new attribute of the same name, first
+///             delete the existing one with \c H5Object::removeAttr, then
+///             recreate it with this function.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Object::createAttribute( const char* name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
+Attribute H5Object::createAttribute(const char* name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist) const
 {
-   hid_t type_id = data_type.getId();
-   hid_t space_id = data_space.getId();
-   hid_t plist_id = create_plist.getId();
-   hid_t attr_id = H5Acreate2(getId(), name, type_id, space_id, plist_id, H5P_DEFAULT );
+    hid_t type_id = data_type.getId();
+    hid_t space_id = data_space.getId();
+    hid_t plist_id = create_plist.getId();
+    hid_t attr_id = H5Acreate2(getId(), name, type_id, space_id, plist_id, H5P_DEFAULT);
 
-   // If the attribute id is valid, create and return the Attribute object
-   if( attr_id > 0 )
-   {
-	Attribute attr;
-	f_Attribute_setId(&attr, attr_id);
-	return( attr );
-   }
-   else
-      throw AttributeIException(inMemFunc("createAttribute"), "H5Acreate2 failed");
+    // If the attribute id is valid, create and return the Attribute object
+    if (attr_id > 0)
+    {
+        Attribute attr;
+        f_Attribute_setId(&attr, attr_id);
+        return(attr);
+    }
+    else
+        throw AttributeIException(inMemFunc("createAttribute"), "H5Acreate2 failed");
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::createAttribute
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes
-///		a reference to an \c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object::createAttribute
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Object::createAttribute( const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
+Attribute H5Object::createAttribute(const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist) const
 {
-   return( createAttribute( name.c_str(), data_type, data_space, create_plist ));
+    return(createAttribute( name.c_str(), data_type, data_space, create_plist));
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::openAttribute
-///\brief	Opens an attribute given its name.
-///\param	name - IN: Name of the attribute
-///\return	Attribute instance
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object::openAttribute
+///\brief       Opens an attribute given its name.
+///\param       name - IN: Name of the attribute
+///\return      Attribute instance
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Object::openAttribute( const char* name ) const
+Attribute H5Object::openAttribute(const char* name) const
 {
-   hid_t attr_id = H5Aopen(getId(), name, H5P_DEFAULT);
-   if( attr_id > 0 )
-   {
-	Attribute attr;
-	f_Attribute_setId(&attr, attr_id);
-	return( attr );
-   }
-   else
-   {
-      throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen failed");
-   }
+    hid_t attr_id = H5Aopen(getId(), name, H5P_DEFAULT);
+    if (attr_id > 0)
+    {
+        Attribute attr;
+        f_Attribute_setId(&attr, attr_id);
+        return(attr);
+    }
+    else
+    {
+        throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen failed");
+    }
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::openAttribute
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes
-///		a reference to an \c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object::openAttribute
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Object::openAttribute( const H5std_string& name ) const
+Attribute H5Object::openAttribute(const H5std_string& name) const
 {
-   return( openAttribute( name.c_str()) );
+    return(openAttribute( name.c_str()));
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::openAttribute
-///\brief	Opens an attribute given its index.
-///\param	idx - IN: Index of the attribute, a 0-based, non-negative integer
-///\return	Attribute instance
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object::openAttribute
+///\brief       Opens an attribute given its index.
+///\param       idx - IN: Index of the attribute, a 0-based, non-negative integer
+///\return      Attribute instance
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute H5Object::openAttribute( const unsigned int idx ) const
+Attribute H5Object::openAttribute(const unsigned int idx) const
 {
-   hid_t attr_id = H5Aopen_by_idx(getId(), ".", H5_INDEX_CRT_ORDER,
-		H5_ITER_INC, static_cast<hsize_t>(idx), H5P_DEFAULT, H5P_DEFAULT);
-   if( attr_id > 0 )
-   {
-	Attribute attr;
-	f_Attribute_setId(&attr, attr_id);
-	return(attr);
-   }
-   else
-   {
-	throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_by_idx failed");
-   }
+    hid_t attr_id = H5Aopen_by_idx(getId(), ".", H5_INDEX_CRT_ORDER,
+              H5_ITER_INC, static_cast<hsize_t>(idx), H5P_DEFAULT, H5P_DEFAULT);
+    if (attr_id > 0)
+    {
+        Attribute attr;
+        f_Attribute_setId(&attr, attr_id);
+        return(attr);
+    }
+    else
+    {
+        throw AttributeIException(inMemFunc("openAttribute"), "H5Aopen_by_idx failed");
+    }
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::iterateAttrs
-///\brief	Iterates a user's function over all the attributes of an H5
-///		object, which may be a group, dataset or named datatype.
-///\param	user_op - IN: User's function to operate on each attribute
-///\param	_idx - IN/OUT: Starting (IN) and ending (OUT) attribute indices
-///\param	op_data - IN: User's data to pass to user's operator function
-///\return	Returned value of the last operator if it was non-zero, or
-///		zero if all attributes were processed
-///\exception	H5::AttributeIException
+// Function:    H5Object::iterateAttrs
+///\brief       Iterates a user's function over all the attributes of an H5
+///             object, which may be a group, dataset or named datatype.
+///\param       user_op - IN: User's function to operate on each attribute
+///\param       _idx - IN/OUT: Starting (IN) and ending (OUT) attribute indices
+///\param       op_data - IN: User's data to pass to user's operator function
+///\return      Returned value of the last operator if it was non-zero, or
+///             zero if all attributes were processed
+///\exception   H5::AttributeIException
 ///\par Description
-///		The signature of user_op is
-///		void (*)(H5::H5Location&, H5std_string, void*).
-///		For information, please refer to the C layer Reference Manual
-///		at:
+///             The signature of user_op is
+///             void (*)(H5::H5Location&, H5std_string, void*).
+///             For information, please refer to the C layer Reference Manual
+///             at:
 /// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5A.html#Annot-Iterate
-// Programmer	Binh-Minh Ribler - 2000
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-int H5Object::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_data )
+int H5Object::iterateAttrs(attr_operator_t user_op, unsigned *_idx, void *op_data)
 {
-   // store the user's function and data
-   UserData4Aiterate* userData = new UserData4Aiterate;
-   userData->opData = op_data;
-   userData->op = user_op;
-   userData->location = this;
+    // store the user's function and data
+    UserData4Aiterate* userData = new UserData4Aiterate;
+    userData->opData = op_data;
+    userData->op = user_op;
+    userData->location = this;
 
-   // call the C library routine H5Aiterate2 to iterate the attributes
-   hsize_t idx = _idx ? static_cast<hsize_t>(*_idx) : 0;
-   int ret_value = H5Aiterate2(getId(), H5_INDEX_NAME, H5_ITER_INC, &idx,
-			userAttrOpWrpr, reinterpret_cast<void *>(userData));
+    // call the C library routine H5Aiterate2 to iterate the attributes
+    hsize_t idx = _idx ? static_cast<hsize_t>(*_idx) : 0;
+    int ret_value = H5Aiterate2(getId(), H5_INDEX_NAME, H5_ITER_INC, &idx,
+                         userAttrOpWrpr, reinterpret_cast<void *>(userData));
 
-   // release memory
-   delete userData;
+    // release memory
+    delete userData;
 
-   if( ret_value >= 0 ) {
-      /* Pass back update index value to calling code */
-      if (_idx)
-	 *_idx = static_cast<unsigned>(idx);
-
-      return( ret_value );
-   }
-   else  // raise exception when H5Aiterate returns a negative value
-      throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate2 failed");
+    if (ret_value >= 0) {
+        /* Pass back update index value to calling code */
+        if (_idx)
+            *_idx = static_cast<unsigned>(idx);
+        return(ret_value);
+    }
+    else  // raise exception when H5Aiterate returns a negative value
+        throw AttributeIException(inMemFunc("iterateAttrs"), "H5Aiterate2 failed");
 }
 
 //--------------------------------------------------------------------------
@@ -291,106 +290,106 @@ unsigned H5Object::objVersion() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::getNumAttrs
-///\brief	Returns the number of attributes attached to this HDF5 object.
-///\return	Number of attributes
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object::getNumAttrs
+///\brief       Returns the number of attributes attached to this HDF5 object.
+///\return      Number of attributes
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Object::getNumAttrs() const
 {
-   H5O_info_t oinfo;    /* Object info */
+    H5O_info_t oinfo;    /* Object info */
 
-   if(H5Oget_info(getId(), &oinfo) < 0)
-      throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
-   else
-      return(static_cast<int>(oinfo.num_attrs));
+    if(H5Oget_info(getId(), &oinfo) < 0)
+        throw AttributeIException(inMemFunc("getNumAttrs"), "H5Oget_info failed");
+    else
+        return(static_cast<int>(oinfo.num_attrs));
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::attrExists
-///\brief	Checks whether the named attribute exists at this location.
-///\param	name - IN: Name of the attribute to be queried
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - 2013
+// Function:    H5Object::attrExists
+///\brief       Checks whether the named attribute exists at this location.
+///\param       name - IN: Name of the attribute to be queried
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2013
 //--------------------------------------------------------------------------
 bool H5Object::attrExists(const char* name) const
 {
-   // Call C routine H5Aexists to determine whether an attribute exists
-   // at this location, which could be specified by a file, group, dataset,
-   // or named datatype.
-   herr_t ret_value = H5Aexists(getId(), name);
-   if( ret_value > 0 )
-      return true;
-   else if(ret_value == 0)
-      return false;
-   else // Raise exception when H5Aexists returns a negative value
-      throw AttributeIException(inMemFunc("attrExists"), "H5Aexists failed");
+    // Call C routine H5Aexists to determine whether an attribute exists
+    // at this location, which could be specified by a file, group, dataset,
+    // or named datatype.
+    herr_t ret_value = H5Aexists(getId(), name);
+    if (ret_value > 0)
+        return true;
+    else if(ret_value == 0)
+        return false;
+    else // Raise exception when H5Aexists returns a negative value
+        throw AttributeIException(inMemFunc("attrExists"), "H5Aexists failed");
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::attrExists
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes
-///		a reference to an \c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object::attrExists
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 bool H5Object::attrExists(const H5std_string& name) const
 {
-   return(attrExists(name.c_str()));
+    return(attrExists(name.c_str()));
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::removeAttr
-///\brief	Removes the named attribute from this object.
-///\param	name - IN: Name of the attribute to be removed
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object::removeAttr
+///\brief       Removes the named attribute from this object.
+///\param       name - IN: Name of the attribute to be removed
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5Object::removeAttr( const char* name ) const
+void H5Object::removeAttr(const char* name) const
 {
-   herr_t ret_value = H5Adelete(getId(), name);
-   if( ret_value < 0 )
-      throw AttributeIException(inMemFunc("removeAttr"), "H5Adelete failed");
+    herr_t ret_value = H5Adelete(getId(), name);
+    if (ret_value < 0)
+        throw AttributeIException(inMemFunc("removeAttr"), "H5Adelete failed");
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::removeAttr
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes
-///		a reference to an \c H5std_string for \a name.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object::removeAttr
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for \a name.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5Object::removeAttr( const H5std_string& name ) const
+void H5Object::removeAttr(const H5std_string& name) const
 {
-   removeAttr( name.c_str() );
+    removeAttr(name.c_str());
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::renameAttr
-///\brief	Renames the named attribute from this object.
-///\param	oldname - IN: Name of the attribute to be renamed
-///\param	newname - IN: New name ame of the attribute
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - Mar, 2005
+// Function:    H5Object::renameAttr
+///\brief       Renames the named attribute from this object.
+///\param       oldname - IN: Name of the attribute to be renamed
+///\param       newname - IN: New name ame of the attribute
+///\exception   H5::AttributeIException
+// Programmer   Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
 void H5Object::renameAttr(const char* oldname, const char* newname) const
 {
-   herr_t ret_value = H5Arename(getId(), oldname, newname);
-   if (ret_value < 0)
-      throw AttributeIException(inMemFunc("renameAttr"), "H5Arename failed");
+    herr_t ret_value = H5Arename(getId(), oldname, newname);
+    if (ret_value < 0)
+        throw AttributeIException(inMemFunc("renameAttr"), "H5Arename failed");
 }
 
 //--------------------------------------------------------------------------
-// Function:	H5Object::renameAttr
-///\brief	This is an overloaded member function, provided for convenience.
-///		It differs from the above function in that it takes
-///		a reference to an \c H5std_string for the names.
-// Programmer	Binh-Minh Ribler - Mar, 2005
+// Function:    H5Object::renameAttr
+///\brief       This is an overloaded member function, provided for convenience.
+///             It differs from the above function in that it takes
+///             a reference to an \c H5std_string for the names.
+// Programmer   Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
 void H5Object::renameAttr(const H5std_string& oldname, const H5std_string& newname) const
 {
-   renameAttr (oldname.c_str(), newname.c_str());
+    renameAttr (oldname.c_str(), newname.c_str());
 }
 //--------------------------------------------------------------------------
 // Function:    getObjName
@@ -405,11 +404,11 @@ ssize_t H5Object::getObjName(char *obj_name, size_t buf_size) const
 
     // If H5Iget_name returns a negative value, raise an exception
     if (name_size < 0)
-    {
+     {
         throw Exception(inMemFunc("getObjName"), "H5Iget_name failed");
     }
     else if (name_size == 0)
-    {
+     {
         throw Exception(inMemFunc("getObjName"), "Object must have a name, but name length is 0");
     }
     // Return length of the name
@@ -433,16 +432,16 @@ H5std_string H5Object::getObjName() const
 
     // If H5Iget_name failed, throw exception
     if (name_size < 0)
-    {
+     {
         throw Exception(inMemFunc("getObjName"), "H5Iget_name failed");
     }
     else if (name_size == 0)
-    {
+     {
         throw Exception(inMemFunc("getObjName"), "Object must have a name, but name length is 0");
     }
     // Object's name exists, retrieve it
     else if (name_size > 0)
-    {
+     {
         char* name_C = new char[name_size+1];  // temporary C-string
         HDmemset(name_C, 0, name_size+1); // clear buffer
 
@@ -478,13 +477,13 @@ ssize_t H5Object::getObjName(H5std_string& obj_name, size_t len) const
 
     // If no length is provided, get the entire object name
     if (len == 0)
-    {
+     {
         obj_name = getObjName();
         name_size = obj_name.length();
     }
     // If length is provided, get that number of characters in name
     else
-    {
+     {
         char* name_C = new char[len+1];  // temporary C-string
         HDmemset(name_C, 0, len+1); // clear buffer
 
@@ -505,9 +504,9 @@ ssize_t H5Object::getObjName(H5std_string& obj_name, size_t len) const
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
-// Function:	H5Object destructor
-///\brief	Noop destructor.
-// Programmer	Binh-Minh Ribler - 2000
+// Function:    H5Object destructor
+///\brief       Noop destructor.
+// Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5Object::~H5Object() {}
 #endif // DOXYGEN_SHOULD_SKIP_THIS

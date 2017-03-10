@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_TOOLS_TEST_MISC)
 
 #-----------------------------------------------------------------------------
@@ -19,7 +19,7 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
 
     add_subdirectory (${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/vds)
 
-  endif (HDF5_BUILD_GENERATORS)
+  endif ()
 
   add_executable (h5repart_test ${HDF5_TOOLS_TEST_MISC_SOURCE_DIR}/repart_test.c)
   TARGET_NAMING (h5repart_test STATIC)

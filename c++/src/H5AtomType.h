@@ -30,53 +30,53 @@ namespace H5 {
 */
 class H5_DLLCPP AtomType : public DataType {
    public:
-	// Returns the byte order of an atomic datatype.
-	H5T_order_t getOrder() const;
-	H5T_order_t getOrder( H5std_string& order_string ) const;
+        // Returns the byte order of an atomic datatype.
+        H5T_order_t getOrder() const;
+        H5T_order_t getOrder(H5std_string& order_string) const;
 
-	// Sets the byte ordering of an atomic datatype.
-	void setOrder( H5T_order_t order ) const;
+        // Sets the byte ordering of an atomic datatype.
+        void setOrder(H5T_order_t order) const;
 
-	// Retrieves the bit offset of the first significant bit.
-	// 12/05/00 - changed return type to int from size_t - C API
-	int getOffset() const;
+        // Retrieves the bit offset of the first significant bit.
+        // 12/05/00 - changed return type to int from size_t - C API
+        int getOffset() const;
 
-	// Sets the bit offset of the first significant bit.
-	void setOffset( size_t offset ) const;
+        // Sets the bit offset of the first significant bit.
+        void setOffset(size_t offset) const;
 
-	// Retrieves the padding type of the least and most-significant bit padding.
-	void getPad( H5T_pad_t& lsb, H5T_pad_t& msb ) const;
+        // Retrieves the padding type of the least and most-significant bit padding.
+        void getPad(H5T_pad_t& lsb, H5T_pad_t& msb) const;
 
-	// Sets the least and most-significant bits padding types
-	void setPad( H5T_pad_t lsb, H5T_pad_t msb ) const;
+        // Sets the least and most-significant bits padding types
+        void setPad(H5T_pad_t lsb, H5T_pad_t msb) const;
 
-	// Returns the precision of an atomic datatype.
-	size_t getPrecision() const;
+        // Returns the precision of an atomic datatype.
+        size_t getPrecision() const;
 
-	// Sets the precision of an atomic datatype.
-	void setPrecision( size_t precision ) const;
+        // Sets the precision of an atomic datatype.
+        void setPrecision(size_t precision) const;
 
-	// Sets the total size for an atomic datatype.
-	void setSize( size_t size ) const;
+        // Sets the total size for an atomic datatype.
+        void setSize(size_t size) const;
 
-	///\brief Returns this class name.
-	virtual H5std_string fromClass () const { return("AtomType"); }
+        ///\brief Returns this class name.
+        virtual H5std_string fromClass () const { return("AtomType"); }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Copy constructor - makes copy of the original object
-	AtomType( const AtomType& original );
+        // Copy constructor - makes copy of the original object
+        AtomType(const AtomType& original);
 
-	// Noop destructor
-	virtual ~AtomType();
+        // Noop destructor
+        virtual ~AtomType();
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-	// Default constructor
-	AtomType();
+        // Default constructor
+        AtomType();
 
-	// Constructor that takes an existing id
-	AtomType( const hid_t existing_id );
+        // Constructor that takes an existing id
+        AtomType(const hid_t existing_id);
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 };
 }

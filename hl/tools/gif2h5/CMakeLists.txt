@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_HL_TOOLS_GIF2H5)
 
 #-----------------------------------------------------------------------------
@@ -50,19 +50,21 @@ if (BUILD_TESTING)
       set_target_properties (hl_h52gifgentest PROPERTIES FOLDER generator/tools/hl)
 
 #      add_test (NAME hl_h52gifgentest COMMAND $<TARGET_FILE:hl_h52gifgentest>)
-  endif (HDF5_BUILD_GENERATORS)
+  endif ()
 
   include (CMakeTests.cmake)
-endif (BUILD_TESTING)
+endif ()
 
 #-----------------------------------------------------------------------------
 # Add file(s) to CMake Install
 #-----------------------------------------------------------------------------
-install (
-    TARGETS
-        gif2h5
-        h52gif
-    EXPORT
-        ${HDF5_EXPORTED_TARGETS}
-    RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hltoolsapplications
-)
+if (HDF5_EXPORTED_TARGETS)
+  install (
+      TARGETS
+          gif2h5
+          h52gif
+      EXPORT
+          ${HDF5_EXPORTED_TARGETS}
+      RUNTIME DESTINATION ${HDF5_INSTALL_BIN_DIR} COMPONENT hltoolsapplications
+  )
+endif ()

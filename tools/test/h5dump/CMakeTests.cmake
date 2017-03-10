@@ -166,6 +166,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tstring2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tstringe.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tszip.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tudfilter.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tudlink-1.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tudlink-2.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tuserfilter.ddl
@@ -291,6 +292,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tstr.h5
       ${HDF5_TOOLS_DIR}/testfiles/tstr2.h5
       ${HDF5_TOOLS_DIR}/testfiles/tstr3.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tudfilter.h5
       ${HDF5_TOOLS_DIR}/testfiles/tudlink.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes1.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvldtypes2.h5
@@ -381,16 +383,16 @@
 ##############################################################################
 ##############################################################################
 
-  MACRO (ADD_HELP_TEST testname resultcode)
+  macro (ADD_HELP_TEST testname resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${testname} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
       set_tests_properties (H5DUMP-${testname} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5DUMP-${testname} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
+      endif ()
       set (last_test "H5DUMP-${testname}")
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+    else ()
       add_test (
           NAME H5DUMP-h5dump-${testname}
           COMMAND "${CMAKE_COMMAND}"
@@ -402,34 +404,34 @@
               -D "TEST_REFERENCE=h5dump-${testname}.txt"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_HELP_TEST)
+    endif ()
+  endmacro ()
 
-  MACRO (ADD_SKIP_H5_TEST skipresultfile skipresultcode testtype)
+  macro (ADD_SKIP_H5_TEST skipresultfile skipresultcode testtype)
     if (${testtype} STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
             NAME H5DUMP-${skipresultfile}-SKIPPED
             COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${skipresultfile} ${ARGN}"
         )
-      endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    else (${testtype} STREQUAL "SKIP")
+      endif ()
+    else ()
       ADD_H5_TEST (${skipresultfile} ${skipresultcode} ${ARGN})
-    endif (${testtype} STREQUAL "SKIP")
-  ENDMACRO (ADD_SKIP_H5_TEST)
+    endif ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST resultfile resultcode)
+  macro (ADD_H5_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif (NOT ${resultcode} STREQUAL "0")
+      endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+      endif ()
+    else ()
       add_test (
           NAME H5DUMP-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -448,21 +450,21 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS "H5DUMP-${resultfile}-clear-objects")
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_TEST file)
+    endif ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST_N resultfile resultcode)
+  macro (ADD_H5_TEST_N resultfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-N-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN})
       set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif (NOT ${resultcode} STREQUAL "0")
+      endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+      endif ()
+    else ()
       add_test (
           NAME H5DUMP-N-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -481,21 +483,21 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES DEPENDS "H5DUMP-N-${resultfile}-clear-objects")
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_TEST_N file)
+    endif ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST_EXPORT resultfile targetfile resultcode)
+  macro (ADD_H5_TEST_EXPORT resultfile targetfile resultcode)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> ${ARGN} ${resultfile}.txt ${targetfile})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif (NOT ${resultcode} STREQUAL "0")
+      endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+      endif ()
+    else ()
       add_test (
           NAME H5DUMP-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -521,21 +523,21 @@
       )
       set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-${resultfile}-output-cmp PROPERTIES DEPENDS H5DUMP-${resultfile})
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_TEST_EXPORT file)
+    endif ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST_EXPORT_DDL resultfile targetfile resultcode ddlfile)
+  macro (ADD_H5_TEST_EXPORT_DDL resultfile targetfile resultcode ddlfile)
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND $<TARGET_FILE:h5dump> --ddl=${ddlfile}.txt ${ARGN} ${resultfile}.txt ${targetfile})
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       if (NOT ${resultcode} STREQUAL "0")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES WILL_FAIL "true")
-      endif (NOT ${resultcode} STREQUAL "0")
+      endif ()
       if (NOT "${last_test}" STREQUAL "")
         set_tests_properties (H5DUMP-${resultfile} PROPERTIES DEPENDS ${last_test})
-      endif (NOT "${last_test}" STREQUAL "")
-    else (HDF5_ENABLE_USING_MEMCHECKER)
+      endif ()
+    else ()
       add_test (
           NAME H5DUMP-${resultfile}-clear-objects
           COMMAND    ${CMAKE_COMMAND}
@@ -568,10 +570,10 @@
       )
       set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-${resultfile}-output-cmp-ddl PROPERTIES DEPENDS H5DUMP-${resultfile}-output-cmp)
-    endif (HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_TEST_EXPORT_DDL file)
+    endif ()
+  endmacro ()
 
-  MACRO (ADD_H5_EXPORT_TEST resultfile targetfile resultcode)
+  macro (ADD_H5_EXPORT_TEST resultfile targetfile resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5DUMP-output-${resultfile}-clear-objects
@@ -592,10 +594,10 @@
       )
       set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-output-cmp-${resultfile} PROPERTIES DEPENDS H5DUMP-output-${resultfile})
-    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_EXPORT_TEST file)
+    endif ()
+  endmacro ()
 
-  MACRO (ADD_H5_MASK_TEST resultfile resultcode)
+  macro (ADD_H5_MASK_TEST resultfile resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5DUMP-${resultfile}
@@ -609,10 +611,10 @@
               -D "TEST_MASK_ERROR=true"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_MASK_TEST file)
+    endif ()
+  endmacro ()
 
-  MACRO (ADD_H5ERR_MASK_TEST resultfile resultcode)
+  macro (ADD_H5ERR_MASK_TEST resultfile resultcode)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5DUMP-${resultfile}
@@ -627,10 +629,10 @@
               -D "TEST_MASK_ERROR=true"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5ERR_MASK_TEST file)
+    endif ()
+  endmacro ()
 
-  MACRO (ADD_H5ERR_MASK_ENV_TEST resultfile resultcode envvar envval)
+  macro (ADD_H5ERR_MASK_ENV_TEST resultfile resultcode envvar envval)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5DUMP-${resultfile}
@@ -647,10 +649,10 @@
               -D "TEST_ENV_VALUE:STRING=${envval}"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
-    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5ERR_MASK_ENV_TEST)
+    endif ()
+  endmacro ()
 
-  MACRO (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
+  macro (ADD_H5_TEST_IMPORT conffile resultfile testfile resultcode)
     # If using memchecker add tests without using scripts
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
@@ -677,12 +679,39 @@
       add_test (NAME H5DUMP-IMPORT-h5diff-${resultfile} COMMAND h5diff ${testfile} ${resultfile}.h5 /integer /integer)
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
       set_tests_properties (H5DUMP-IMPORT-h5diff-${resultfile} PROPERTIES DEPENDS H5DUMP-IMPORT-h5import-${resultfile})
-    endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
-  ENDMACRO (ADD_H5_TEST_IMPORT file)
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_UD_TEST testname resultcode resultfile)
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+      # Remove any output file left over from previous test run
+      add_test (
+          NAME H5DUMP_UD-${testname}-clearall-objects
+          COMMAND    ${CMAKE_COMMAND}
+              -E remove
+              testfiles/std/${resultfile}.out
+              testfiles/std/${resultfile}.out.err
+      )
+      add_test (
+          NAME H5DUMP_UD-${testname}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5dump>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles/std"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.ddl"
+              -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
+              -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5DUMP_UD-${testname} PROPERTIES DEPENDS H5DUMP_UD-${testname}-clearall-objects)
+    endif ()
+  endmacro ()
 
 ##############################################################################
 ##############################################################################
-###           T H E   T E S T S                                          HDF5_ENABLE_USING_MEMCHECKER  ###
+###           T H E   T E S T S                                            ###
 ##############################################################################
 ##############################################################################
 
@@ -1038,9 +1067,9 @@
     set_tests_properties (H5DUMP-clearall-objects PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std")
     if (NOT "${last_test}" STREQUAL "")
       set_tests_properties (H5DUMP-clearall-objects PROPERTIES DEPENDS ${last_test})
-    endif (NOT "${last_test}" STREQUAL "")
+    endif ()
     set (last_test "H5DUMP-clearall-objects")
-  endif (HDF5_ENABLE_USING_MEMCHECKER)
+  endif ()
 
   ADD_HELP_TEST(help 0 -h)
 
@@ -1321,11 +1350,11 @@
 # detect whether the encoder is present.
   if (H5_HAVE_FILTER_DEFLATE)
     set (USE_FILTER_DEFLATE "true")
-  endif (H5_HAVE_FILTER_DEFLATE)
+  endif ()
 
   if (H5_HAVE_FILTER_SZIP)
     set (USE_FILTER_SZIP "true")
-  endif (H5_HAVE_FILTER_SZIP)
+  endif ()
 
   if (USE_FILTER_DEFLATE)
     # data read internal filters
@@ -1333,8 +1362,8 @@
     if (HDF5_ENABLE_SZIP_SUPPORT)
       # data read all filters
       ADD_H5_TEST (treadfilter 0 --enable-error-stack -d all -d szip tfilters.h5)
-    endif (HDF5_ENABLE_SZIP_SUPPORT)
-  endif (USE_FILTER_DEFLATE)
+    endif ()
+  endif ()
 
   # test for displaying objects with very long names
   ADD_H5_TEST (tlonglinks 0 --enable-error-stack tlonglinks.h5)
@@ -1369,14 +1398,14 @@
 
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
     ADD_H5_TEST (tbin2 0 --enable-error-stack -b BE -d float -o tbin2.bin tbinary.h5)
-  endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  endif ()
 
   # the NATIVE test can be validated with h5import/h5diff
   ADD_H5_TEST_IMPORT (tbin3 out3D tbinary.h5 0 --enable-error-stack -d integer -b NATIVE)
 
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
     ADD_H5_TEST (tbin4 0 --enable-error-stack -d double -b FILE -o tbin4.bin tbinary.h5)
-  endif (NOT HDF5_ENABLE_USING_MEMCHECKER)
+  endif ()
 
   # test for dataset region references
   ADD_H5_TEST (tdatareg 0 --enable-error-stack tdatareg.h5)
@@ -1421,3 +1450,8 @@
 
   # test for non-existing file
   ADD_H5_TEST (non_existing 1 --enable-error-stack tgroup.h5 non_existing.h5)
+
+##############################################################################
+###    P L U G I N  T E S T S
+##############################################################################
+ADD_H5_UD_TEST (h5dump_plugin_test 0 tudfilter --enable-error-stack tudfilter.h5)

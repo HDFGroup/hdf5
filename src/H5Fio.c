@@ -302,7 +302,7 @@ H5F__evict_cache_entries(H5F_t *f, hid_t dxpl_id)
 #ifndef NDEBUG
 {
     unsigned status = 0;
-    int32_t    cur_num_entries;
+    uint32_t cur_num_entries;
 
     /* Retrieve status of the superblock */
     if(H5AC_get_entry_status(f, (haddr_t)0, &status) < 0)

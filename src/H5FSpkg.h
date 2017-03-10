@@ -199,12 +199,6 @@ struct H5FS_t {
 /* Package Private Variables */
 /*****************************/
 
-/* H5FS header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FSPACE_HDR[1];
-
-/* H5FS section info inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FSPACE_SINFO[1];
-
 /* Declare a free list to manage the H5FS_node_t struct */
 H5FL_EXTERN(H5FS_node_t);
 

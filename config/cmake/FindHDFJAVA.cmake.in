@@ -4,18 +4,18 @@
 
 #
 # Find the HDFJAVA includes and get all installed hdf-java library settings from
-# HDFJAVA-config.cmake file : Requires a CMake compatible hdf-java-@HDFJAVA_PACKAGE_VERSION@ or later 
+# HDFJAVA-config.cmake file : Requires a CMake compatible hdf-java-@HDFJAVA_PACKAGE_VERSION@ or later
 # for this feature to work. The following vars are set if hdf-java is found.
 #
 # HDFJAVA_FOUND               - True if found, otherwise all other vars are undefined
 # HDFJAVA_VERSION_STRING      - full version (e.g. @HDFJAVA_PACKAGE_VERSION@)
 # HDFJAVA_VERSION_MAJOR       - major part of version (e.g. @HDFJAVA_PACKAGE_VERSION_MAJOR@)
 # HDFJAVA_VERSION_MINOR       - minor part (e.g. @HDFJAVA_PACKAGE_VERSION_MINOR@)
-# 
+#
 # Target names that are valid (depending on enabled options)
 # will be the following
 #
-# 
+#
 # To aid in finding HDFJAVA as part of a subproject set
 # HDFJAVA_ROOT_DIR_HINT to the location where @HDFJAVA_PACKAGE@@HDF_PACKAGE_EXT@-config.cmake lies
 
@@ -60,9 +60,9 @@ if (HDFJAVA_ROOT_DIR)
   set (HDFJAVA_FOUND "YES")
   INCLUDE (${HDFJAVA_ROOT_DIR}/@HDFJAVA_PACKAGE@@HDF_PACKAGE_EXT@-config.cmake)
   set (HDFJAVA_LIBRARIES "${HDFJAVA_LIBRARY}")
-  set (HDFJAVA_INCLUDE_DIRS 
+  set (HDFJAVA_INCLUDE_DIRS
         ${HDFJAVA_LIBRARY}/jarhdf-@HDFJAVA_PACKAGE_VERSION@.jar
         ${HDFJAVA_LIBRARY}/jarhdf5-@HDFJAVA_PACKAGE_VERSION@.jar
   )
-  
-endif (HDFJAVA_ROOT_DIR)
+
+endif ()

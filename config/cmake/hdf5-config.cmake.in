@@ -50,7 +50,7 @@ if (${HDF5_PACKAGE_NAME}_BUILD_JAVA)
   )
   set (${HDF5_PACKAGE_NAME}_JAVA_LIBRARY "@PACKAGE_CURRENT_BUILD_DIR@/lib")
   set (${HDF5_PACKAGE_NAME}_JAVA_LIBRARIES "${${HDF5_PACKAGE_NAME}_JAVA_LIBRARY}")
-endif()
+endif ()
 
 #-----------------------------------------------------------------------------
 # Directories

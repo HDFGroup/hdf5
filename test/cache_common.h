@@ -553,11 +553,10 @@ H5TEST_DLLVAR const int32_t max_indices[NUMBER_OF_ENTRY_TYPES];
 H5TEST_DLLVAR const size_t entry_sizes[NUMBER_OF_ENTRY_TYPES];
 H5TEST_DLLVAR const haddr_t base_addrs[NUMBER_OF_ENTRY_TYPES];
 H5TEST_DLLVAR const haddr_t alt_base_addrs[NUMBER_OF_ENTRY_TYPES];
-H5TEST_DLLVAR const char * entry_type_names[NUMBER_OF_ENTRY_TYPES];
 
 /* callback table extern */
 
-H5TEST_DLLVAR const H5C_class_t types[NUMBER_OF_ENTRY_TYPES];
+H5TEST_DLLVAR const H5C_class_t *types[NUMBER_OF_ENTRY_TYPES];
 
 
 #ifdef __cplusplus

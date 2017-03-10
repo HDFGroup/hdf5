@@ -307,15 +307,6 @@ typedef struct H5B2_node_info_test_t {
 /* Package Private Variables */
 /*****************************/
 
-/* H5B2 header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_BT2_HDR[1];
-
-/* H5B2 internal node inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_BT2_INT[1];
-
-/* H5B2 leaf node inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_BT2_LEAF[1];
-
 /* Declare a free list to manage the H5B2_internal_t struct */
 H5FL_EXTERN(H5B2_internal_t);
 

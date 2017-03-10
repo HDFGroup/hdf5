@@ -378,21 +378,6 @@ typedef struct H5EA__ctx_cb_t {
 /* Package Private Variables */
 /*****************************/
 
-/* H5EA header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_EARRAY_HDR[1];
-
-/* H5EA index block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_EARRAY_IBLOCK[1];
-
-/* H5EA index block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_EARRAY_SBLOCK[1];
-
-/* H5EA data block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_EARRAY_DBLOCK[1];
-
-/* H5EA data block page inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1];
-
 /* Internal extensible array testing class */
 H5_DLLVAR const H5EA_class_t H5EA_CLS_TEST[1];
 

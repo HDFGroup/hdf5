@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.1.0)
+cmake_minimum_required (VERSION 3.2.2)
 PROJECT (HDF5_TOOLS_TEST_H5FC)
 
 #-----------------------------------------------------------------------------
@@ -23,6 +23,6 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
     set_target_properties (h5fc_gentest PROPERTIES FOLDER generator/tools)
 
     #add_test (NAME h5fc_gentest COMMAND $<TARGET_FILE:h5fc_gentest>)
-  endif (HDF5_BUILD_GENERATORS)
+  endif ()
 
   include (CMakeTests.cmake)

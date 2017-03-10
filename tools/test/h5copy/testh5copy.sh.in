@@ -21,6 +21,10 @@
 
 srcdir=@srcdir@
 
+# Determine which filters are available
+USE_FILTER_SZIP="@USE_FILTER_SZIP@"
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+
 # source dirs
 SRC_TOOLS="$srcdir/../.."
 SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
@@ -78,7 +82,7 @@ AWK='awk'
 
 nerrors=0
 verbose=yes
-h5haveexitcode=yes	    # default is yes
+h5haveexitcode=yes        # default is yes
 
 TESTDIR=./testfiles
 test -d $TESTDIR || mkdir $TESTDIR
@@ -111,10 +115,10 @@ COPY_TESTFILES_TO_TESTDIR()
             INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
             INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
             if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
-    	        $CP -f $tstfile $TESTDIR
+                $CP -f $tstfile $TESTDIR
                 if [ $? -ne 0 ]; then
                     echo "Error: FAILED to copy $tstfile ."
-                
+
                     # Comment out this to CREATE expected file
                     exit $EXIT_FAILURE
                 fi
@@ -139,13 +143,13 @@ CLEAN_TESTFILES_AND_TESTDIR()
 
 # Print a "SKIP" message
 SKIP() {
-	 TESTING $H5COPY $@
-	  echo  " -SKIP-"
+    TESTING $H5COPY $@
+    echo  " -SKIP-"
 }
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
-TESTING() 
+TESTING()
 {
     SPACES="                                                               "
     echo "Testing $* $SPACES" |cut -c1-70 |tr -d '\012'
@@ -154,7 +158,7 @@ TESTING()
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Verifying".
 #
-VERIFY() 
+VERIFY()
 {
     SPACES="                                                               "
     echo "Verifying h5diff output $* $SPACES" | cut -c1-70 | tr -d '\012'
@@ -163,7 +167,7 @@ VERIFY()
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Verifying".
 #
-VERIFY_OUTPUT() 
+VERIFY_OUTPUT()
 {
     SPACES="                                                               "
     echo "Verifying output files $* $SPACES" | cut -c1-70 | tr -d '\012'
@@ -182,7 +186,7 @@ VERIFY_OUTPUT()
 # $4 is output file
 # $* everything else arguments for h5copy.
 
-TOOLTEST() 
+TOOLTEST()
 {
     actualout="$TESTDIR/tooltest.actualout"
     actualerr="$TESTDIR/tooltest.actualerr"
@@ -199,7 +203,7 @@ TOOLTEST()
     fi
     if [ "$3" = -o ]; then
         outputfile=$4
-    else 
+    else
         if [ "$1" = -f ]; then
             outputfile=$6
         else
@@ -207,7 +211,7 @@ TOOLTEST()
         fi
         runh5diff=no
     fi
-  
+
     TESTING $H5COPY $@
     (
         echo "#############################"
@@ -223,7 +227,7 @@ TOOLTEST()
         nerrors="`expr $nerrors + 1`"
     else
         echo " PASSED"
-    
+
         if [ $runh5diff != no ]; then
             H5DIFFTEST $inputfile $outputfile $7 $9
         fi
@@ -236,7 +240,7 @@ TOOLTEST()
 }
 
 # TOOLTEST back-to-back
-TOOLTEST_PREFILL() 
+TOOLTEST_PREFILL()
 {
     actualout="$TESTDIR/tooltest.actualout"
     actualerr="$TESTDIR/tooltest.actualerr"
@@ -248,21 +252,21 @@ TOOLTEST_PREFILL()
     fi
     if [ "$3" = -o ]; then
         outputfile=$4
-    else 
+    else
         runh5diff=no
     fi
-    
+
     grp_name=$5
     grp_name2=$6
     obj_name=$7
     obj_name2=$8
-  
+
     TESTING $H5COPY $@
     (
         echo "#############################"
         echo " output for '$H5COPY $@'"
         echo "#############################"
-        $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $grp_name -d $grp_name2 
+        $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $grp_name -d $grp_name2
     ) > $actualout 2> $actualerr
     RET=$?
     if [ $RET != 0 ]; then
@@ -276,7 +280,7 @@ TOOLTEST_PREFILL()
             echo "#############################"
             echo " output for '$H5COPY $@'"
             echo "#############################"
-            $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $obj_name -d $obj_name2 
+            $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $obj_name -d $obj_name2
         ) > $actualout 2> $actualerr
         RET=$?
         if [ $RET != 0 ]; then
@@ -286,11 +290,11 @@ TOOLTEST_PREFILL()
             nerrors="`expr $nerrors + 1`"
         else
             echo " PASSED"
-    
+
             if [ $runh5diff != no ]; then
                 H5DIFFTEST $inputfile $outputfile $obj_name $obj_name2
             fi
-        
+
             # Clean up output file
             if test -z "$HDF5_NOCLEANUP"; then
                 rm -f $actualout $actualerr $outputfile
@@ -300,7 +304,7 @@ TOOLTEST_PREFILL()
 }
 
 # TOOLTEST back-to-back
-TOOLTEST_SAME() 
+TOOLTEST_SAME()
 {
     actualout="$TESTDIR/tooltest.actualout"
     actualerr="$TESTDIR/tooltest.actualerr"
@@ -312,19 +316,19 @@ TOOLTEST_SAME()
     fi
     if [ "$3" = -o ]; then
         outputfile=$4
-    else 
+    else
         runh5diff=no
     fi
-    
+
     grp_name=$5
     grp_name2=$6
-  
+
     TESTING $H5COPY $@
     (
         echo "#############################"
         echo " output for '$H5COPY $@'"
         echo "#############################"
-        $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $grp_name -d $grp_name 
+        $RUNSERIAL $H5COPY_BIN  -i $inputfile -o $outputfile -v -s $grp_name -d $grp_name
     ) > $actualout 2> $actualerr
     RET=$?
     if [ $RET != 0 ]; then
@@ -338,7 +342,7 @@ TOOLTEST_SAME()
             echo "#############################"
             echo " output for '$H5COPY $@'"
             echo "#############################"
-            $RUNSERIAL $H5COPY_BIN  -i $outputfile -o $outputfile -v -s $grp_name -d $grp_name2 
+            $RUNSERIAL $H5COPY_BIN  -i $outputfile -o $outputfile -v -s $grp_name -d $grp_name2
         ) > $actualout 2> $actualerr
         RET=$?
         if [ $RET != 0 ]; then
@@ -348,11 +352,11 @@ TOOLTEST_SAME()
             nerrors="`expr $nerrors + 1`"
         else
             echo " PASSED"
-    
+
             if [ $runh5diff != no ]; then
                 H5DIFFTEST $outputfile $outputfile $grp_name $grp_name2
             fi
-        
+
             # Clean up output file
             if test -z "$HDF5_NOCLEANUP"; then
                 rm -f $actualout $actualerr $outputfile
@@ -389,7 +393,7 @@ CMP_OUTPUT()
     fi
 }
 
-TOOLTEST_FAIL() 
+TOOLTEST_FAIL()
 {
     expectout="$TESTDIR/$1"
     actualout="$TESTDIR/$1.actualout"
@@ -433,7 +437,7 @@ TOOLTEST_FAIL()
         cat $actualout
         nerrors="`expr $nerrors + 1`"
     fi
-   
+
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
@@ -444,10 +448,10 @@ TOOLTEST_FAIL()
 
 # Call the h5diff tool
 #
-H5DIFFTEST() 
+H5DIFFTEST()
 {
     VERIFY  $@
-    $RUNSERIAL $H5DIFF_BIN -q "$@" 
+    $RUNSERIAL $H5DIFF_BIN -q "$@"
     RET=$?
     if [ $RET != 0 ] ; then
         echo "*FAILED*"
@@ -459,10 +463,10 @@ H5DIFFTEST()
 
 # Call the h5diff tool with a call that is expected to fail
 #
-H5DIFFTEST_FAIL() 
+H5DIFFTEST_FAIL()
 {
     VERIFY  $@
-    $RUNSERIAL $H5DIFF_BIN -q "$@" 
+    $RUNSERIAL $H5DIFF_BIN -q "$@"
     RET=$?
 
     if [ $h5haveexitcode = 'yes' -a $RET != 1 ] ; then
@@ -478,7 +482,7 @@ H5DIFFTEST_FAIL()
 #
 # Assumed arguments:
 # <none>
-COPY_OBJECTS() 
+COPY_OBJECTS()
 {
     TESTFILE="$TESTDIR/h5copytst.h5"
 
@@ -487,7 +491,9 @@ COPY_OBJECTS()
     TOOLTEST -i $TESTFILE -o $TESTDIR/chunk.out.h5 -v -s chunk      -d chunk
     TOOLTEST -i $TESTFILE -o $TESTDIR/compact.out.h5 -v -s compact    -d compact
     TOOLTEST -i $TESTFILE -o $TESTDIR/compound.out.h5 -v -s compound   -d compound
+if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST -i $TESTFILE -o $TESTDIR/compressed.out.h5 -v -s compressed -d compressed
+fi
     TOOLTEST -i $TESTFILE -o $TESTDIR/named_vl.out.h5 -v -s named_vl   -d named_vl
     TOOLTEST -i $TESTFILE -o $TESTDIR/nested_vl.out.h5 -v -s nested_vl  -d nested_vl
     TOOLTEST -i $TESTFILE -o $TESTDIR/dset_attr.out.h5 -v -s /dset_attr  -d /dset_attr
@@ -499,16 +505,19 @@ COPY_OBJECTS()
     TOOLTEST -i $TESTFILE -o $TESTDIR/dsrename.out.h5 -v -s compound   -d rename
 
     echo "Test copying empty, 'full' & 'nested' groups"
+if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_empty.out.h5 -v -s grp_empty  -d grp_empty
+fi
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_dsets.out.h5 -v -s grp_dsets  -d grp_dsets
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_nested.out.h5 -v -s grp_nested -d grp_nested
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_attr.out.h5 -v -s grp_attr -d grp_attr
 
+if test $USE_FILTER_DEFLATE = "yes" ; then
     echo "Test copying dataset within group in source file to group in destination"
     TOOLTEST_PREFILL -i $TESTFILE -o $TESTDIR/simple_group.out.h5 grp_dsets grp_dsets /grp_dsets/simple /grp_dsets/simple_group
-
     echo "Test copying & renaming group"
     TOOLTEST -i $TESTFILE -o $TESTDIR/grp_rename.out.h5 -v -s grp_dsets  -d grp_rename
+fi
 
     echo "Test copying 'full' group hierarchy into group in destination file"
     TOOLTEST_PREFILL -i $TESTFILE -o $TESTDIR/grp_dsets_rename.out.h5 grp_dsets grp_rename grp_dsets /grp_rename/grp_dsets
@@ -517,15 +526,17 @@ COPY_OBJECTS()
     TOOLTEST -i $TESTFILE -o $TESTDIR/A_B1_simple.out.h5 -vp -s simple    -d /A/B1/simple
     TOOLTEST -i $TESTFILE -o $TESTDIR/A_B2_simple2.out.h5 -vp -s simple    -d /A/B2/simple2
     TOOLTEST -i $TESTFILE -o $TESTDIR/C_D_simple.out.h5 -vp -s /grp_dsets/simple    -d /C/D/simple
+if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST -i $TESTFILE -o $TESTDIR/E_F_grp_dsets.out.h5 -vp -s /grp_dsets -d /E/F/grp_dsets
     TOOLTEST -i $TESTFILE -o $TESTDIR/G_H_grp_nested.out.h5 -vp -s /grp_nested -d /G/H/grp_nested
+fi
 }
 
 # Copy references in various way.
 #
 # Assumed arguments:
 # <none>
-COPY_REFERENCES() 
+COPY_REFERENCES()
 {
     TESTFILE="$TESTDIR/h5copy_ref.h5"
 
@@ -538,7 +549,7 @@ COPY_REFERENCES()
 #
 # Assumed arguments:
 # <none>
-COPY_EXT_LINKS() 
+COPY_EXT_LINKS()
 {
     TESTFILE="$TESTDIR/h5copy_extlinks_src.h5"
 
@@ -571,7 +582,7 @@ COPY_EXT_LINKS()
 #
 # Assumed arguments:
 # <none>
-TEST_MISC() 
+TEST_MISC()
 {
     TESTFILE="$TESTDIR/h5copytst.h5"
 
@@ -579,8 +590,10 @@ TEST_MISC()
     TOOLTEST_FAIL h5copy_misc1.out -i $TESTFILE -o $TESTDIR/h5copy_misc1.out.h5 -v -s /simple  -d /g1/g2/simple
 
     echo "Test copying objects to the same file "
-    TOOLTEST_SAME -i $TESTFILE -o $TESTDIR/samefile1.out.h5 /simple /simple_cp 
+    TOOLTEST_SAME -i $TESTFILE -o $TESTDIR/samefile1.out.h5 /simple /simple_cp
+if test $USE_FILTER_DEFLATE = "yes" ; then
     TOOLTEST_SAME -i $TESTFILE -o $TESTDIR/samefile2.out.h5 /grp_dsets /grp_dsets_cp
+fi
 }
 
 ##############################################################################
@@ -590,7 +603,7 @@ TEST_MISC()
 COPY_TESTFILES_TO_TESTDIR
 
 # Start tests
-COPY_OBJECTS 
+COPY_OBJECTS
 COPY_REFERENCES
 COPY_EXT_LINKS
 TEST_MISC

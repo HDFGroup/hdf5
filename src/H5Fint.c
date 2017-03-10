@@ -188,6 +188,8 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
     if(H5P_set(new_plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
 #endif /* H5_HAVE_PARALLEL */
+    if(H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set initial metadata cache resize config.")
 
     /* Prepare the driver property */
     driver_prop.driver_id = f->shared->lf->driver_id;
@@ -667,6 +669,8 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &(f->coll_md_write)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get collective metadata write flag")
 #endif /* H5_HAVE_PARALLEL */
+        if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, &(f->shared->mdc_initCacheImageCfg)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config")
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
@@ -750,7 +754,7 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
          * The cache might be created with a different number of elements and
          * the access property list should be updated to reflect that.
          */
-        if(H5AC_create(f, &(f->shared->mdc_initCacheCfg)) < 0)
+        if(H5AC_create(f, &(f->shared->mdc_initCacheCfg), &(f->shared->mdc_initCacheImageCfg)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create metadata cache")
 
         /* Create the file's "open object" information */
@@ -829,7 +833,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         if((H5F_ACC_RDWR & H5F_INTENT(f)) && flush)
             if(H5F__flush_phase1(f, dxpl_id) < 0)
                 /* Push error, but keep going*/
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+                HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 1)")
 
         /* Notify the metadata cache that the file is about to be closed.
          * This allows the cache to set up for creating a metadata cache 
@@ -845,8 +849,8 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
          */
         if((H5F_ACC_RDWR & H5F_INTENT(f)) && flush)
             if(H5F__flush_phase2(f, dxpl_id, TRUE) < 0)
-                /* Push error, but keep going*/
-                HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+                /* Push error, but keep going */
+                HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cached data (phase 2)")
 
         /* With the shutdown modifications, the contents of the metadata cache
          * should be clean at this point, with the possible exception of the 
@@ -865,7 +869,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
         } /* end if */
 
         /* With the shutdown modifications, the contents of the metadata cache
-         * should be clean at this point, with the possible exception of the 
+         * should be clean at this point, with the possible exception of the
          * the superblock and superblock extension.
          *
          * Verify this.
@@ -888,18 +892,21 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
              *      (assuming they are persistent).  In this case, closing the
              *      free space managers should have no effect on EOA.
              *
-             *                                          -- JRM 
+             *                                          -- JRM
              */
             if(H5F_ACC_RDWR & H5F_INTENT(f)) {
                 if(H5MF_close(f, dxpl_id) < 0)
                     /* Push error, but keep going*/
                     HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
 
-                /* at this point, only the superblock and superblock 
+                /* at this point, only the superblock and superblock
                  * extension should be dirty.
                  */
                 HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
 
+                /* Flush the file again (if requested), as shutting down the
+                 * free space manager may dirty some data structures again.
+                 */
                 if(flush) {
 		    /* Clear status_flags */
                     f->shared->sblock->status_flags &= (uint8_t)(~H5F_SUPER_WRITE_ACCESS);
@@ -914,7 +921,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                      * so that the eoa value corresponds to the end of the 
                      * space written to in the file.
                      *
-                     * At most, this should change the superblock or the 
+                     * At most, this should change the superblock or the
                      * superblock extension messages.
                      */
                     if(H5MF_free_aggrs(f, dxpl_id) < 0)
@@ -926,7 +933,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
                         /* Push error, but keep going*/
                         HDONE_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
 
-                    /* at this point, only the superblock and superblock 
+                    /* at this point, only the superblock and superblock
                      * extension should be dirty.
                      */
                     HDassert(H5AC_cache_is_clean(f, H5AC_RING_MDFSM));
@@ -948,7 +955,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
             f->shared->sblock = NULL;
         } /* end if */
 
-        /* with the possible exception of the superblock and superblock 
+        /* with the possible exception of the superblock and superblock
          * extension, the metadata cache should be clean at this point.
          *
          * Verify this.
@@ -1278,6 +1285,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     shared = file->shared;
     lf = shared->lf;
 
+    /* Get the file access property list, for future queries */
+    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
+
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1310,10 +1321,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         if(H5G_mkroot(file, dxpl_id, FALSE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to read root group")
     } /* end if */
-
-    /* Get the file access property list, for future queries */
-    if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
     /*
      * Decide the file close degree.  If it's the first time to open the
@@ -1522,7 +1529,7 @@ H5F__flush_phase2(H5F_t *f, hid_t dxpl_id, hbool_t closing)
     /* Flush file buffers to disk. */
     if(H5FD_flush(f->shared->lf, dxpl_id, closing) < 0)
         /* Push error, but keep going*/
-        HDONE_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level flush failed")
+        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "low level flush failed")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__flush_phase2() */
@@ -2670,4 +2677,34 @@ H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t cmr)
     FUNC_LEAVE_NOAPI_VOID
 } /* H5F_set_coll_md_read() */
 #endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5F_set_latest_flags
+ *
+ * Purpose:     Set the latest_flags field with a new value.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              4/26/16
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_set_latest_flags(H5F_t *f, unsigned flags)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(0 == ((~flags) & H5F_LATEST_ALL_FLAGS));
+
+    f->shared->latest_flags = flags;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5F_set_latest_flags() */
 

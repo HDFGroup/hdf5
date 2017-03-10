@@ -249,15 +249,6 @@ typedef struct H5FA_dblk_page_cache_ud_t {
 /* Package Private Variables */
 /*****************************/
 
-/* H5FA header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FARRAY_HDR[1];
-
-/* H5FA data block inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FARRAY_DBLOCK[1];
-
-/* H5FA data block page inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1];
-
 /* Internal fixed array testing class */
 H5_DLLVAR const H5FA_class_t H5FA_CLS_TEST[1];
 
