@@ -501,7 +501,7 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
     /* Turn on metadata cache logging, if being used */
     if(H5F_USE_MDC_LOGGING(f)) {
         if(H5C_set_up_logging(f->shared->cache, H5F_MDC_LOG_LOCATION(f), H5F_START_MDC_LOG_ON_ACCESS(f)) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "mdc logging setup failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINIT, FAIL, "mdc logging setup failed")
 
         /* Write the log header regardless of current logging status */
         if(H5AC__write_create_cache_log_msg(f->shared->cache) < 0)
@@ -510,9 +510,9 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
 
     /* Set the cache parameters */
     if(H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "auto resize configuration failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "auto resize configuration failed")
 
-    /* don't need to get the current H5C image config here since the
+    /* Don't need to get the current H5C image config here since the
      * cache has just been created, and thus f->shared->cache->image_ctl 
      * must still set to its initial value (H5C__DEFAULT_CACHE_IMAGE_CTL).  
      * Note that this not true as soon as control returns to the application
@@ -522,9 +522,8 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
     int_ci_config.generate_image     = image_config_ptr->generate_image;
     int_ci_config.save_resize_status = image_config_ptr->save_resize_status;
     int_ci_config.entry_ageout       = image_config_ptr->entry_ageout;
-
     if(H5C_set_cache_image_config(f, f->shared->cache, &int_ci_config) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "auto resize configuration failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "auto resize configuration failed")
 
 done:
 #ifdef H5_HAVE_PARALLEL

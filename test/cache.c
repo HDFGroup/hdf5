@@ -9825,7 +9825,6 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	}
     }
 
-
     if(pass) {
 
 	/* Now load a large entry.  This should result in the eviction
@@ -10550,7 +10549,9 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
             expected[i].is_dirty = TRUE;
 	}
 
-        /* update MET 0 to set its in cache flag, and reset the its destroyed flag */
+        /* update MET 0 to set its in cache flag, and reset 
+         * its destroyed flag 
+         */
         expected[10].in_cache     = TRUE;
 
         /* pass through non variable entries will flush VET 8, and evict VET 9.

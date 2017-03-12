@@ -4500,11 +4500,21 @@ typedef struct H5C_tag_info_t {
  * total_entries_skipped_in_msic: Number of clean entries skipped while
  *              enforcing the min_clean_fraction in H5C__make_space_in_cache().
  *
+ * total_dirty_pf_entries_skipped_in_msic: Number of dirty prefetched entries
+ *              skipped in H5C__make_space_in_cache().  Note that this can 
+ *              only occur when a file is opened R/O with a cache image
+ *              containing dirty entries.
+ *
  * total_entries_scanned_in_msic: Number of clean entries skipped while
  *              enforcing the min_clean_fraction in H5C__make_space_in_cache().
  *
  * max_entries_skipped_in_msic: Maximum number of clean entries skipped
  *              in any one call to H5C__make_space_in_cache().
+ *
+ * max_dirty_pf_entries_skipped_in_msic: Maximum number of dirty prefetched
+ *              entries skipped in any one call to H5C__make_space_in_cache().
+ *              Note that this can only occur when the file is opened 
+ *              R/O with a cache image containing dirty entries.
  *
  * max_entries_scanned_in_msic: Maximum number of entries scanned over
  *              in any one call to H5C__make_space_in_cache().
@@ -4822,8 +4832,10 @@ struct H5C_t {
     /* Fields for tracking 'make space in cache' (msic) operations */
     int64_t                     calls_to_msic;
     int64_t                     total_entries_skipped_in_msic;
+    int64_t                     total_dirty_pf_entries_skipped_in_msic;
     int64_t                     total_entries_scanned_in_msic;
     int32_t                     max_entries_skipped_in_msic;
+    int32_t                     max_dirty_pf_entries_skipped_in_msic;
     int32_t                     max_entries_scanned_in_msic;
     int64_t                     entries_scanned_to_make_space;
  

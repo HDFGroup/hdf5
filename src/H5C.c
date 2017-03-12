@@ -1459,6 +1459,7 @@ H5C_insert_entry(H5F_t *             f,
     entry_ptr->prefetched			= FALSE;
     entry_ptr->prefetch_type_id			= 0;
     entry_ptr->age				= 0;
+    entry_ptr->prefetched_dirty                 = FALSE;
 #ifndef NDEBUG  /* debugging field */
     entry_ptr->serialization_count		= 0;
 #endif /* NDEBUG */
@@ -4584,7 +4585,7 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                 ( (entry_ptr->type)->id != H5AC_EPOCH_MARKER_ID ) &&
                 ( bytes_evicted < eviction_size_limit ) )
         {
-	    hbool_t		corked = FALSE;
+            hbool_t skipping_entry = FALSE;
 
             HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert( ! (entry_ptr->is_protected) );
@@ -4598,9 +4599,11 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                 prev_is_dirty = prev_ptr->is_dirty;
 
             if(entry_ptr->is_dirty ) {
+                HDassert(!entry_ptr->prefetched_dirty);
+
                 /* dirty corked entry is skipped */
                 if(entry_ptr->tag_info && entry_ptr->tag_info->corked)
-                    corked = TRUE;
+                    skipping_entry = TRUE;
                 else {
                     /* reset entries_removed_counter and
                      * last_entry_removed_ptr prior to the call to
@@ -4620,16 +4623,22 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
                         restart_scan = TRUE;
                 } /* end else */
             } /* end if */
-            else {
+            else if(!entry_ptr->prefetched_dirty) {
 
                 bytes_evicted += entry_ptr->size;
 
                 if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0 )
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush entry")
-            }
+            } /* end else-if */
+            else {
+                HDassert(!entry_ptr->is_dirty);
+                HDassert(entry_ptr->prefetched_dirty);
+
+                skipping_entry = TRUE;
+            } /* end else */
 
             if(prev_ptr != NULL) {
-		if(corked)   /* dirty corked entry is skipped */
+                if(skipping_entry)
                     entry_ptr = prev_ptr;
 		else if(restart_scan || (prev_ptr->is_dirty != prev_is_dirty)
                           || (prev_ptr->next != next_ptr)
@@ -4689,10 +4698,10 @@ H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t * f,
 
             prev_ptr = entry_ptr->prev;
 
-            if(!(entry_ptr->is_dirty)) {
+            if(!(entry_ptr->is_dirty) && !(entry_ptr->prefetched_dirty))
                 if(H5C__flush_single_entry(f, dxpl_id, entry_ptr, H5C__FLUSH_INVALIDATE_FLAG | H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush clean entry")
-            } /* end if */
+
             /* just skip the entry if it is dirty, as we can't do
              * anything with it now since we can't write.
 	     *
@@ -6827,6 +6836,7 @@ H5C_load_entry(H5F_t *              f,
     entry->prefetched                   = FALSE;
     entry->prefetch_type_id             = 0;
     entry->age                          = 0;
+    entry->prefetched_dirty             = FALSE;
 #ifndef NDEBUG  /* debugging field */
     entry->serialization_count          = 0;
 #endif /* NDEBUG */
@@ -6888,6 +6898,7 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
     H5C_t *		cache_ptr = f->shared->cache;
 #if H5C_COLLECT_CACHE_STATS
     int32_t             clean_entries_skipped = 0;
+    int32_t             dirty_pf_entries_skipped = 0;
     int32_t             total_entries_scanned = 0;
 #endif /* H5C_COLLECT_CACHE_STATS */
     uint32_t		entries_examined = 0;
@@ -6956,7 +6967,8 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
                 didnt_flush_entry = TRUE;
 
 	    } else if ( ( (entry_ptr->type)->id != H5AC_EPOCH_MARKER_ID ) &&
-                 ( ! entry_ptr->flush_in_progress ) ) {
+                        ( ! entry_ptr->flush_in_progress ) &&
+                        ( ! entry_ptr->prefetched_dirty ) ) {
 
                 didnt_flush_entry = FALSE;
 
@@ -7015,10 +7027,16 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
 
             } else {
 
-                /* Skip epoch markers and entries that are in the process
-                 * of being flushed.
+                /* Skip epoch markers, entries that are in the process
+                 * of being flushed, and entries marked as prefetched_dirty
+                 * (occurs in the R/O case only).
                  */
                 didnt_flush_entry = TRUE;
+
+#if H5C_COLLECT_CACHE_STATS
+                if(entry_ptr->prefetched_dirty)
+                    dirty_pf_entries_skipped++;
+#endif /* H5C_COLLECT_CACHE_STATS */
             }
 
 	    if ( prev_ptr != NULL ) {
@@ -7083,12 +7101,16 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
         cache_ptr->calls_to_msic++;
 
         cache_ptr->total_entries_skipped_in_msic += clean_entries_skipped;
+        cache_ptr->total_dirty_pf_entries_skipped_in_msic += dirty_pf_entries_skipped;
         cache_ptr->total_entries_scanned_in_msic += total_entries_scanned;
 
         if ( clean_entries_skipped > cache_ptr->max_entries_skipped_in_msic ) {
 
             cache_ptr->max_entries_skipped_in_msic = clean_entries_skipped;
         }
+
+        if(dirty_pf_entries_skipped > cache_ptr->max_dirty_pf_entries_skipped_in_msic)
+            cache_ptr->max_dirty_pf_entries_skipped_in_msic = dirty_pf_entries_skipped;
 
         if ( total_entries_scanned > cache_ptr->max_entries_scanned_in_msic ) {
 

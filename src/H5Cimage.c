@@ -636,6 +636,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id, H5C_t *cache_ptr,
     ds_entry_ptr->prefetched	            	= FALSE;
     ds_entry_ptr->prefetch_type_id          	= 0;
     ds_entry_ptr->age		          	= 0;
+    ds_entry_ptr->prefetched_dirty              = pf_entry_ptr->prefetched_dirty;
 #ifndef NDEBUG  /* debugging field */
     ds_entry_ptr->serialization_count           = 0;
 #endif /* NDEBUG */
@@ -3317,6 +3318,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr,
     pf_entry_ptr->image_up_to_date		= TRUE;
     pf_entry_ptr->type				= H5AC_PREFETCHED_ENTRY;
     pf_entry_ptr->prefetched			= TRUE;
+    pf_entry_ptr->prefetched_dirty              = is_dirty && (!file_is_rw);
 
     /* Sanity checks */
     HDassert(pf_entry_ptr->size > 0 && pf_entry_ptr->size < H5C_MAX_ENTRY_SIZE);

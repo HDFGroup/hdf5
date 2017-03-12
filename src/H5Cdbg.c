@@ -70,6 +70,7 @@
 /*******************/
 
 
+#ifndef NDEBUG
 
 /*-------------------------------------------------------------------------
  * Function:    H5C_dump_cache
@@ -175,6 +176,85 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_dump_cache() */
+#endif /* NDEBUG */
+
+#ifndef NDEBUG
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_dump_cache_LRU
+ *
+ * Purpose:     Print a summary of the contents of the metadata cache 
+ *              LRU for debugging purposes.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              10/10/10
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
+{
+    H5C_cache_entry_t * entry_ptr;
+    int                 i = 0;
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Sanity check */
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_name != NULL );
+
+    HDfprintf(stdout, "\n\nDump of metadata cache LRU \"%s\"\n", cache_name);
+    HDfprintf(stdout, "LRU len = %d, LRU size = %d\n", 
+              cache_ptr->LRU_list_len, (int)(cache_ptr->LRU_list_size));
+    HDfprintf(stdout, "index_size = %d, max_cache_size = %d, delta = %d\n\n", 
+              (int)(cache_ptr->index_size), (int)(cache_ptr->max_cache_size),
+              (int)(cache_ptr->max_cache_size) - (int)(cache_ptr->index_size));
+
+    /* Print header */
+    HDfprintf(stdout, "Entry ");
+    HDfprintf(stdout, "|       Address      ");
+    HDfprintf(stdout, "|         Tag        ");
+    HDfprintf(stdout, "|  Size ");
+    HDfprintf(stdout, "| Ring ");
+    HDfprintf(stdout, "|              Type              ");
+    HDfprintf(stdout, "| Dirty");
+    HDfprintf(stdout, "\n");
+
+    HDfprintf(stdout, "----------------------------------------------------------------------------------------------------------------\n");
+
+    entry_ptr = cache_ptr->LRU_head_ptr;
+    while(entry_ptr != NULL) {
+        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+
+        /* Print entry */
+        HDfprintf(stdout, "%s%5d ", cache_ptr->prefix, i);
+        HDfprintf(stdout, "  0x%16llx ", (long long)(entry_ptr->addr));
+
+        if(NULL == entry_ptr->tag_info)
+            HDfprintf(stdout, "    %16s ", "N/A");
+        else
+            HDfprintf(stdout, "  0x%16llx ", 
+                      (long long)(entry_ptr->tag_info->tag));
+
+        HDfprintf(stdout, "  %5lld ", (long long)(entry_ptr->size));
+        HDfprintf(stdout, "    %d  ", (int)(entry_ptr->ring));
+        HDfprintf(stdout, "  %2d %-32s ", (int)(entry_ptr->type->id), 
+                  (entry_ptr->type->name));
+        HDfprintf(stdout, " %d", (int)(entry_ptr->is_dirty));
+        HDfprintf(stdout, "\n");
+
+        i++;
+        entry_ptr = entry_ptr->next;
+    } /* end while */
+
+    HDfprintf(stdout, "----------------------------------------------------------------------------------------------------------------\n");
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* H5C_dump_cache_LRU() */
+#endif /* NDEBUG */
 
 
 /*-------------------------------------------------------------------------
@@ -385,6 +465,7 @@ H5C_stats(H5C_t * cache_ptr,
     double	average_successful_search_depth = 0.0f;
     double	average_failed_search_depth = 0.0f;
     double      average_entries_skipped_per_calls_to_msic = 0.0f;
+    double      average_dirty_pf_entries_skipped_per_call_to_msic = 0.0f;
     double      average_entries_scanned_per_calls_to_msic = 0.0f;
 #endif /* H5C_COLLECT_CACHE_STATS */
     herr_t	ret_value = SUCCEED;   /* Return value */
@@ -618,6 +699,17 @@ H5C_stats(H5C_t * cache_ptr,
               cache_ptr->prefix,
               (double)average_entries_skipped_per_calls_to_msic,
               (long)(cache_ptr->max_entries_skipped_in_msic));
+
+    if(cache_ptr->calls_to_msic > 0)
+        average_dirty_pf_entries_skipped_per_call_to_msic =
+            (((double)(cache_ptr->total_dirty_pf_entries_skipped_in_msic)) /
+            ((double)(cache_ptr->calls_to_msic)));
+
+    HDfprintf(stdout, 
+              "%s  MSIC: Average/max dirty pf entries skipped  = %lf / %ld\n",
+              cache_ptr->prefix,
+              average_dirty_pf_entries_skipped_per_call_to_msic,
+              (long)(cache_ptr->max_dirty_pf_entries_skipped_in_msic));
 
     if(cache_ptr->calls_to_msic > 0)
         average_entries_scanned_per_calls_to_msic =
@@ -887,12 +979,14 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED * cache_ptr)
     cache_ptr->max_pel_len			= 0;
     cache_ptr->max_pel_size			= (size_t)0;
 
-    cache_ptr->calls_to_msic                    = 0;
-    cache_ptr->total_entries_skipped_in_msic    = 0;
-    cache_ptr->total_entries_scanned_in_msic    = 0;
-    cache_ptr->max_entries_skipped_in_msic      = 0;
-    cache_ptr->max_entries_scanned_in_msic      = 0;
-    cache_ptr->entries_scanned_to_make_space    = 0;
+    cache_ptr->calls_to_msic                          = 0;
+    cache_ptr->total_entries_skipped_in_msic          = 0;
+    cache_ptr->total_dirty_pf_entries_skipped_in_msic = 0;
+    cache_ptr->total_entries_scanned_in_msic          = 0;
+    cache_ptr->max_entries_skipped_in_msic            = 0;
+    cache_ptr->max_dirty_pf_entries_skipped_in_msic   = 0;
+    cache_ptr->max_entries_scanned_in_msic            = 0;
+    cache_ptr->entries_scanned_to_make_space          = 0;
 
     cache_ptr->slist_scan_restarts		= 0;
     cache_ptr->LRU_scan_restarts		= 0;
