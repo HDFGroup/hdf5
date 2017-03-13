@@ -645,7 +645,7 @@ herr_t
 H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, hid_t dxpl_id, haddr_t addr,
     hsize_t size)
 {
-    H5F_io_info_t fio_info;             /* I/O info for operation */
+    H5F_io_info2_t fio_info;            /* I/O info for operation */
     H5MF_free_section_t *node = NULL;   /* Free space section pointer */
     H5MF_sect_ud_t udata;               /* User data for callback */
     H5P_genplist_t *dxpl = NULL;        /* DXPL for setting ring */
@@ -688,8 +688,18 @@ HDfprintf(stderr, "%s: fs_type = %u\n", FUNC, (unsigned)fs_type);
 
     /* Set up I/O info for operation */
     fio_info.f = f;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    if(H5FD_MEM_DRAW == alloc_type) {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end if */
+    else {
+        if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+        if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    } /* end else */
 
     /* Check if the space to free intersects with the file's metadata accumulator */
     if(H5F__accum_free(&fio_info, alloc_type, addr, size) < 0)

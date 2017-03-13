@@ -93,18 +93,19 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_locate_signature(H5FD_t *file,
-#ifndef H5_DEBUG_BUILD
-const
-#endif /* H5_DEBUG_BUILD */
-H5P_genplist_t *dxpl, haddr_t *sig_addr)
+H5FD_locate_signature(H5FD_io_info_t *fdio_info, haddr_t *sig_addr)
 {
+    H5FD_t         *file;
     haddr_t         addr, eoa, eof;
     uint8_t         buf[H5F_SIGNATURE_LEN];
     unsigned        n, maxpow;
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    HDassert(fdio_info);
+    file = fdio_info->file;
+    HDassert(file);
 
     /* Find the least N such that 2^N is larger than the file size */
     eof = H5FD_get_eof(file, H5FD_MEM_SUPER);
@@ -124,7 +125,7 @@ H5P_genplist_t *dxpl, haddr_t *sig_addr)
         addr = (8 == n) ? 0 : (haddr_t)1 << n;
         if(H5FD_set_eoa(file, H5FD_MEM_SUPER, addr + H5F_SIGNATURE_LEN) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to set EOA value for file signature")
-        if(H5FD_read(file, dxpl, H5FD_MEM_SUPER, addr, (size_t)H5F_SIGNATURE_LEN, buf) < 0)
+        if(H5FD_read(fdio_info, H5FD_MEM_SUPER, addr, (size_t)H5F_SIGNATURE_LEN, buf) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to read file signature")
         if(!HDmemcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN))
             break;
@@ -162,21 +163,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_read(H5FD_t *file,
-#ifndef H5_DEBUG_BUILD
-const
-#endif /* H5_DEBUG_BUILD */
-H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
+H5FD_read(H5FD_io_info_t *fdio_info, H5FD_mem_t type, haddr_t addr,
     size_t size, void *buf/*out*/)
 {
+    H5FD_t      *file;
+    H5P_genplist_t *io_dxpl;
     haddr_t     eoa = HADDR_UNDEF;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    HDassert(fdio_info);
+    file = fdio_info->file;
     HDassert(file && file->cls);
-    HDassert(TRUE == H5P_class_isa(H5P_CLASS(dxpl), H5P_CLS_DATASET_XFER_g));
+    HDassert(TRUE == H5P_class_isa(H5P_CLASS(fdio_info->meta_dxpl), H5P_CLS_DATASET_XFER_g));
+    HDassert(TRUE == H5P_class_isa(H5P_CLASS(fdio_info->raw_dxpl), H5P_CLS_DATASET_XFER_g));
     HDassert(buf);
+
+    /* Set up proper DXPL for I/O */
+    if(H5FD_MEM_DRAW == type)
+        io_dxpl = fdio_info->raw_dxpl;
+    else
+        io_dxpl = fdio_info->meta_dxpl;
 
     /* Sanity check the dxpl type against the mem type */
 #ifdef H5_DEBUG_BUILD
@@ -184,7 +192,7 @@ H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
         H5FD_dxpl_type_t dxpl_type;    /* Property indicating the type of the internal dxpl */
 
         /* get the dxpl type */
-        if(H5P_get(dxpl, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+        if(H5P_get(io_dxpl, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't retrieve dxpl type")
 
         /* we shouldn't be here if the dxpl is labeled with NO I/O */
@@ -219,7 +227,7 @@ H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %llu, size = %llu, eoa = %llu", (unsigned long long)(addr + file->base_addr), (unsigned long long)size, (unsigned long long)eoa)
 
     /* Dispatch to driver */
-    if((file->cls->read)(file, type, H5P_PLIST_ID(dxpl), addr + file->base_addr, size, buf) < 0)
+    if((file->cls->read)(file, type, H5P_PLIST_ID(io_dxpl), addr + file->base_addr, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
 
 done:
@@ -241,21 +249,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write(H5FD_t *file,
-#ifndef H5_DEBUG_BUILD
-const
-#endif /* H5_DEBUG_BUILD */
-H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
+H5FD_write(const H5FD_io_info_t *fdio_info, H5FD_mem_t type, haddr_t addr,
     size_t size, const void *buf)
 {
+    H5FD_t      *file;
+    H5P_genplist_t *io_dxpl;
     haddr_t     eoa = HADDR_UNDEF;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    HDassert(fdio_info);
+    file = fdio_info->file;
     HDassert(file && file->cls);
-    HDassert(TRUE == H5P_class_isa(H5P_CLASS(dxpl), H5P_CLS_DATASET_XFER_g));
+    HDassert(TRUE == H5P_class_isa(H5P_CLASS(fdio_info->meta_dxpl), H5P_CLS_DATASET_XFER_g));
+    HDassert(TRUE == H5P_class_isa(H5P_CLASS(fdio_info->raw_dxpl), H5P_CLS_DATASET_XFER_g));
     HDassert(buf);
+
+    /* Set up proper DXPL for I/O */
+    if(H5FD_MEM_DRAW == type)
+        io_dxpl = fdio_info->raw_dxpl;
+    else
+        io_dxpl = fdio_info->meta_dxpl;
 
     /* Sanity check the dxpl type against the mem type */
 #ifdef H5_DEBUG_BUILD
@@ -263,7 +278,7 @@ H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
         H5FD_dxpl_type_t dxpl_type;    /* Property indicating the type of the internal dxpl */
 
         /* get the dxpl type */
-        if(H5P_get(dxpl, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
+        if(H5P_get(io_dxpl, H5FD_DXPL_TYPE_NAME, &dxpl_type) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't retrieve dxpl type")
 
         /* we shouldn't be here if the dxpl is labeled with NO I/O */
@@ -291,7 +306,7 @@ H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr,
                     (unsigned long long)(addr+ file->base_addr), (unsigned long long)size, (unsigned long long)eoa)
 
     /* Dispatch to driver */
-    if((file->cls->write)(file, type, H5P_PLIST_ID(dxpl), addr + file->base_addr, size, buf) < 0)
+    if((file->cls->write)(file, type, H5P_PLIST_ID(io_dxpl), addr + file->base_addr, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
 
 done:

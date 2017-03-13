@@ -383,11 +383,12 @@ H5FL_EXTERN(H5F_file_t);
 /* General routines */
 H5F_t *H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, H5FD_t *lf);
-herr_t H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush);
-H5_DLL herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing);
-H5_DLL htri_t H5F_is_hdf5(const char *name, hid_t dxpl_id);
+herr_t H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush);
+H5_DLL herr_t H5F__flush(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closing);
+H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t meta_dxpl_id, hid_t raw_dxpl_id);
 H5_DLL herr_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref, size_t *obj_id_count_ptr);
-H5_DLL ssize_t H5F_get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len, hid_t dxpl_id);
+H5_DLL ssize_t H5F_get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len,
+    hid_t meta_dxpl_id, hid_t raw_dxpl_id);
 H5_DLL herr_t H5F_close(H5F_t *f);
 
 /* File mount related routines */
@@ -397,7 +398,8 @@ H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nop
 
 /* Superblock related routines */
 H5_DLL herr_t H5F__super_init(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read);
+H5_DLL herr_t H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id,
+    hbool_t initial_read);
 H5_DLL herr_t H5F__super_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_size, hsize_t *super_ext_size);
 H5_DLL herr_t H5F__super_free(H5F_super_t *sblock);
 
@@ -410,14 +412,14 @@ H5_DLL herr_t H5F_super_ext_close(H5F_t *f, H5O_loc_t *ext_ptr, hid_t dxpl_id,
     hbool_t was_created);
 
 /* Metadata accumulator routines */
-H5_DLL herr_t H5F__accum_read(const H5F_io_info_t *fio_info, H5FD_mem_t type,
+H5_DLL herr_t H5F__accum_read(const H5F_io_info2_t *fio_info, H5FD_mem_t type,
     haddr_t addr, size_t size, void *buf);
-H5_DLL herr_t H5F__accum_write(const H5F_io_info_t *fio_info, H5FD_mem_t type,
+H5_DLL herr_t H5F__accum_write(const H5F_io_info2_t *fio_info, H5FD_mem_t type,
     haddr_t addr, size_t size, const void *buf);
-H5_DLL herr_t H5F__accum_free(const H5F_io_info_t *fio_info, H5FD_mem_t type,
+H5_DLL herr_t H5F__accum_free(const H5F_io_info2_t *fio_info, H5FD_mem_t type,
     haddr_t addr, hsize_t size);
-H5_DLL herr_t H5F__accum_flush(const H5F_io_info_t *fio_info);
-H5_DLL herr_t H5F__accum_reset(const H5F_io_info_t *fio_info, hbool_t flush);
+H5_DLL herr_t H5F__accum_flush(const H5F_io_info2_t *fio_info);
+H5_DLL herr_t H5F__accum_reset(const H5F_io_info2_t *fio_info, hbool_t flush);
 
 /* Shared file list related routines */
 H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);

@@ -406,7 +406,7 @@ H5Fis_hdf5(const char *name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* call the private is_HDF5 function */
-    if((ret_value = H5F_is_hdf5(name, H5AC_ind_read_dxpl_id)) < 0)
+    if((ret_value = H5F__is_hdf5(name, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable open file")
 
 done:
@@ -535,7 +535,7 @@ done:
  * Modifications:
  *	  	Robb Matzke, 1997-07-18
  *		File struct creation and destruction is through H5F_new() and
- *		H5F_dest(). Reading the root symbol table entry is done with
+ *		H5F__dest(). Reading the root symbol table entry is done with
  *		H5G_decode().
  *
  *  		Robb Matzke, 1997-09-23
@@ -713,12 +713,12 @@ H5Fflush(hid_t object_id, H5F_scope_t scope)
         /* Flush other files, depending on scope */
         if(H5F_SCOPE_GLOBAL == scope) {
             /* Call the flush routine for mounted file hierarchies */
-            if(H5F_flush_mounts(f, H5AC_ind_read_dxpl_id) < 0)
+            if(H5F_flush_mounts(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
         } /* end if */
         else {
             /* Call the flush routine, for this file */
-            if(H5F_flush(f, H5AC_ind_read_dxpl_id, FALSE) < 0)
+            if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
         } /* end else */
     } /* end if */
@@ -773,7 +773,7 @@ H5Fclose(hid_t file_id)
         if((nref = H5I_get_ref(file_id, FALSE)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count")
         if(nref == 1)
-            if(H5F_flush(f, H5AC_ind_read_dxpl_id, FALSE) < 0)
+            if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
@@ -838,7 +838,7 @@ H5Freopen(hid_t file_id)
 
 done:
     if(ret_value < 0 && new_file)
-        if(H5F_dest(new_file, H5AC_ind_read_dxpl_id, FALSE) < 0)
+        if(H5F__dest(new_file, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
     FUNC_LEAVE_API(ret_value)
@@ -1042,7 +1042,7 @@ H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* call private get_file_image function */
-    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len, H5AC_ind_read_dxpl_id)) < 0)
+    if((ret_value = H5F_get_file_image(file, buf_ptr, buf_len, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file image")
 
 done:
@@ -1619,7 +1619,7 @@ H5Fstart_swmr_write(hid_t file_id)
     H5G_name_t *obj_paths=NULL;	/* Group hierarchy path */
     size_t u;               	/* Local index variable */
     hbool_t setup = FALSE;	/* Boolean flag to indicate whether SWMR setting is enabled */
-    H5F_io_info_t fio_info;    	/* I/O info for operation */
+    H5F_io_info2_t fio_info;    /* I/O info for operation */
     herr_t ret_value = SUCCEED;	/* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1650,7 +1650,7 @@ H5Fstart_swmr_write(hid_t file_id)
         HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, FAIL, "can't have both SWMR and MDC cache image")
 
     /* Flush data buffers */
-    if(H5F_flush(file, H5AC_ind_read_dxpl_id, FALSE) < 0)
+    if(H5F__flush(file, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
     /* Get the # of opened named datatypes and attributes */
@@ -1704,7 +1704,9 @@ H5Fstart_swmr_write(hid_t file_id)
 
     /* Set up I/O info for operation */
     fio_info.f = file;
-    if(NULL == (fio_info.dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+    if(NULL == (fio_info.meta_dxpl = (H5P_genplist_t *)H5I_object(H5AC_ind_read_dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+    if(NULL == (fio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(H5AC_rawdata_dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Flush and reset the accumulator */
@@ -1923,7 +1925,7 @@ H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
     latest_flags = H5F_USE_LATEST_FLAGS(f, H5F_LATEST_ALL_FLAGS);
     if(latest_format != (H5F_LATEST_ALL_FLAGS == latest_flags)) {
         /* Call the flush routine, for this file */
-        if(H5F_flush(f, H5AC_ind_read_dxpl_id, FALSE) < 0)
+        if(H5F__flush(f, H5AC_ind_read_dxpl_id, H5AC_rawdata_dxpl_id, FALSE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file's cached information")
 
         /* Toggle the 'latest format' flag */
