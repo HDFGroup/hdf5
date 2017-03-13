@@ -386,6 +386,7 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->cache_full			= FALSE;
     cache_ptr->size_decreased			= FALSE;
     cache_ptr->resize_in_progress		= FALSE;
+    cache_ptr->msic_in_progress			= FALSE;
 
     (cache_ptr->resize_ctl).version		= H5C__CURR_AUTO_SIZE_CTL_VER;
     (cache_ptr->resize_ctl).rpt_fcn		= NULL;
@@ -6904,6 +6905,7 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
     uint32_t		entries_examined = 0;
     uint32_t		initial_list_len;
     size_t		empty_space;
+    hbool_t             reentrant_call = FALSE;
     hbool_t		prev_is_dirty = FALSE;
     hbool_t             didnt_flush_entry = FALSE;
     hbool_t		restart_scan;
@@ -6920,6 +6922,18 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->index_size == (cache_ptr->clean_index_size + cache_ptr->dirty_index_size));
+
+    /* check to see if cache_ptr->msic_in_progress is TRUE.  If it, this
+     * is a re-entrant call via a client callback called in the make 
+     * space in cache process.  To avoid an infinite recursion, set 
+     * reentrant_call to TRUE, and goto done.
+     */
+    if(cache_ptr->msic_in_progress) {
+        reentrant_call = TRUE;
+        HGOTO_DONE(SUCCEED);
+    } /* end if */
+
+    cache_ptr->msic_in_progress = TRUE;
 
     if ( write_permitted ) {
         restart_scan = FALSE;
@@ -7180,6 +7194,12 @@ H5C__make_space_in_cache(H5F_t *f, hid_t dxpl_id, size_t space_needed,
     }
 
 done:
+    /* Sanity checks */
+    HDassert(cache_ptr->msic_in_progress);
+    if(!reentrant_call)
+        cache_ptr->msic_in_progress = FALSE;
+    HDassert((!reentrant_call) || (cache_ptr->msic_in_progress));
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__make_space_in_cache() */
 

@@ -10369,14 +10369,28 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
          * However, (VET 9)'s serialize function needs to modify (VET, 8), 
          * which is currently not in cache.  Thus it calls H5C_protect(VET, 8)
 	 * to gain access to it.  H5C_protect(VET, 8) loads (VET, 8), and
-	 * then attempts to evict entries to make space for it.  While (VET, 9)
-	 * is still at the bottom of the LRU, it is marked flush in progress
-         * and this is skipped.  Thus the next entries on the LRU are (MET, 0) 
-         * thru (MET, 30) and (LET, 0) thru (LET, 10) -- all of which are dirty, 
+	 * then attempts to evict entries to make space for it.  
+         *
+         * However, H5C_make_space_in_cache() now exits without taking
+         * any action on re-entrant calls.  Thus H5C_protect(VET, 8) simply
+         * loads the entry into the cache -- resulting in a cache that is
+         * 10 KB oversize.  The subsequent unprotect puts (VET, 8) at the 
+         * head of the LRU and marks it dirty.
+         *
+         * After (VET, 9) is serialized, it is flushed, and moved to the 
+         * head of the LRU.
+         *
+         * At this point, the H5C_make_space_in_cache() call made by 
+         * H5C_protect(LET, 11) now has 14 KB of space to make.
+         *
+         * The next entries on the LRU are (MET, 0) thru (MET, 30),
+         * (LET, 0) thru (LET, 10), and (VET, 8) -- all of which are dirty, 
          * and are therefore flushed and moved to the head of the LRU list.
          *
          * The next entry on the bottom of the LRU list is (VET, 0), which
-	 * is clean, and is therefore evicted to make space for (VET, 8).
+	 * is clean, and is therefore evicted, leaving H5C_make_space_in_cache()
+         * with 4 KB of space to create.
+         *
 	 * This space is sufficient, so H5C_protect(VET, 8) inserts
 	 * (VET, 8) into the cache's index, marks it as protected, and
 	 * returns to the serialize function for (VET, 9).
@@ -10385,22 +10399,10 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
          * calls H5C_unprotect(VET, 8), which markes (VET, 8) as dirty and
          * unprotected, and places it at the head of the LRU.
          *
-         * The serialize function for (VET, 9) then returns, and (VET, 9) is
-         * is written to disk, marked clean, and moved to the head of the LRU.
+         * (VET, 0) is the next item on the LRU -- it is clean and is therefore
+         * evicted -- leaving 6 KB of free space after (LET, 11) is inserted
+         * into the cache.
          *
-         * At this point, the cache is still full (since (VET, 8) took the
-	 * space created by the eviction of (VET, 0)). Thus
-	 * H5C_protect(LET, 11) continues to look for space.  While
-	 * (MET, 0) was the next item on the LRU list when it called the
-	 * serialize function for (VET, 9), the function notices that the
-	 * LRU has been modified, and restarts its search for candidates
-	 * for eviction at the bottom of the LRU.
-	 *
-	 * (MET, 0) is now at the bottom of the LRU, and is clean.  Thus
-	 * it is evicted.  This makes sufficient space for (LET, 11), so
-	 * H5C_protect(LET, 11) inserts it into the cache, marks it as
-	 * protected, and returns.
-	 *
 	 * H5C_unprotect(LET, 11) marks (LET, 11) as unprotected, and then
 	 * returns as well.
 	 *
@@ -10426,9 +10428,9 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	 *
 	 * (VET, 7)	N	 5 KB	N	N	-	-
 	 *
-	 * (VET, 8)	Y	10 KB	Y	N	-	-
+	 * (VET, 8)	Y	10 KB	N	N	-	-
 	 *
-	 * (VET, 9)	Y	10 KB	N	N	-	-
+	 * (VET, 9)	N	10 KB	N	N	-	-
 	 *
 	 * Start by updating the expected table for the expected changes in
 	 * entry status:
@@ -10447,25 +10449,22 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	expected[0].serialized   = TRUE;
 	expected[0].destroyed    = TRUE;
 	expected[8].in_cache	 = TRUE;
-	expected[8].is_dirty     = TRUE;
+	expected[8].is_dirty     = FALSE;
 	expected[8].deserialized = TRUE;
-	expected[8].serialized   = FALSE;
+	expected[8].serialized   = TRUE;
 	expected[8].destroyed    = FALSE;
-	expected[9].in_cache     = TRUE;
+	expected[9].in_cache     = FALSE;
 	expected[9].is_dirty     = FALSE;
 	expected[9].serialized   = TRUE;
-	expected[9].destroyed    = FALSE;
+	expected[9].destroyed    = TRUE;
 
-	expected[10].in_cache     = FALSE;
+	expected[10].in_cache     = TRUE;
 	expected[10].is_dirty     = FALSE;
 	expected[10].serialized   = TRUE;
-	expected[10].destroyed    = TRUE;
+	expected[10].destroyed    = FALSE;
 
         num_large_entries = 12;
 
-	/* a newly loaded entry is not inserted in the cache until after
-	 * space has been made for it.  Thus (LET, 11) will not be flushed.
-	 */
 	for (i = num_variable_entries;
 	      i < num_variable_entries + num_monster_entries + num_large_entries - 1;
 	      i++)
@@ -10483,10 +10482,10 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
         /* verify cache size  */
 	if((cache_ptr->index_len != 44) ||
              (cache_ptr->index_size != (2 * 1024 * 1024) -
-                                        (2 * VARIABLE_ENTRY_SIZE) -
-                                        (10 * LARGE_ENTRY_SIZE)) ||
-	     (cache_ptr->index_size != ((2 * VARIABLE_ENTRY_SIZE) +
-					 (30 * MONSTER_ENTRY_SIZE) +
+                                        (2 * 1024) -
+                                        (1 * LARGE_ENTRY_SIZE)) ||
+	     (cache_ptr->index_size != ((1 * VARIABLE_ENTRY_SIZE) +
+					 (31 * MONSTER_ENTRY_SIZE) +
 					 (12 * LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
@@ -10496,15 +10495,27 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	/* verify entry status */
 	verify_entry_status(cache_ptr,
 			    9,
-                            (num_variable_entries + num_monster_entries + num_large_entries),
+                            (num_variable_entries + num_monster_entries + 
+                             num_large_entries),
 			    expected);
     }
 
     if(pass) {
 
-        /* protect and unprotect VET 8 to move it to the top of the LRU */
+        /* protect and unprotect VET 9 to evict MET 0 */
+        protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 9);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 9, H5C__NO_FLAGS_SET);
+
+        /* protect and unprotect VET 8 to dirty it and move it to the 
+         * top of the LRU.  Since we are dirtying it again, reset its 
+         * serialized flag.
+         */
+        base_addr = entries[VARIABLE_ENTRY_TYPE];
+        entry_ptr = &(base_addr[8]);
+        entry_ptr->serialized = FALSE;
+
         protect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 8);
-        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 8, H5C__NO_FLAGS_SET);
+        unprotect_entry(file_ptr, VARIABLE_ENTRY_TYPE, 8, H5C__DIRTIED_FLAG);
 
 
         /* Again, touch all the non VARIABLE_ENTRY_TYPE entries in the
@@ -10516,7 +10527,13 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 
         /* skip MET 0 in first pass so that we evict VET 9 when we 
          * reload MET 0 
+         *
+         * Since we are reloading MET 0, reset its destroyed flag.
          */
+        base_addr = entries[MONSTER_ENTRY_TYPE];
+        entry_ptr = &(base_addr[0]);
+        entry_ptr->destroyed = FALSE;
+
 	for (i = 1; i < num_monster_entries; i++)
 	{
 	    protect_entry(file_ptr, MONSTER_ENTRY_TYPE, i);
@@ -10720,8 +10737,8 @@ check_flush_cache__flush_op_eviction_test(H5F_t * file_ptr)
 	if((cache_ptr->insertions[VARIABLE_ENTRY_TYPE] != 0) ||
              (cache_ptr->pinned_insertions[VARIABLE_ENTRY_TYPE] != 0) ||
              (cache_ptr->clears[VARIABLE_ENTRY_TYPE] != 0) ||
-             (cache_ptr->flushes[VARIABLE_ENTRY_TYPE] != 8) ||
-             (cache_ptr->evictions[VARIABLE_ENTRY_TYPE] != 11) ||
+             (cache_ptr->flushes[VARIABLE_ENTRY_TYPE] != 9) ||
+             (cache_ptr->evictions[VARIABLE_ENTRY_TYPE] != 12) ||
              (cache_ptr->take_ownerships[VARIABLE_ENTRY_TYPE] != 0) ||
              (cache_ptr->moves[VARIABLE_ENTRY_TYPE] != 1) ||
              (cache_ptr->entry_flush_moves[VARIABLE_ENTRY_TYPE] != 0) ||

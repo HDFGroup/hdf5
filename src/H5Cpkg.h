@@ -4104,6 +4104,23 @@ typedef struct H5C_tag_info_t {
  *		of changes to the file driver info superblock extension
  *		management code needed to support rings.
  *
+ * msic_in_progress: As the metadata cache has become re-entrant, and as
+ *              the free space manager code has become more tightly 
+ *              integrated with the metadata cache, it is possible that 
+ *              a call to H5C_insert_entry() may trigger a call to 
+ *              H5C_make_space_in_cache(), which, via H5C__flush_single_entry()
+ *              and client callbacks, may trigger an infinite regression
+ *              of calls to H5C_make_space_in_cache().
+ *
+ *              The msic_in_progress boolean flag is used to detect this,
+ *              and prevent the infinite regression that would otherwise
+ *              occur.
+ *
+ *              Note that this is issue is not hypothetical -- this field 
+ *              was added 2/16/17 to address this issue when it was 
+ *              exposed by modifications to test/fheap.c to cause it to 
+ *              use paged allocation.
+ *
  * resize_ctl:	Instance of H5C_auto_size_ctl_t containing configuration
  * 		data for automatic cache resizing.
  *
@@ -4743,6 +4760,7 @@ struct H5C_t {
     hbool_t			cache_full;
     hbool_t			size_decreased;
     hbool_t			resize_in_progress;
+    hbool_t			msic_in_progress;
     H5C_auto_size_ctl_t		resize_ctl;
 
     /* Fields for epoch markers used in automatic cache size adjustment */
