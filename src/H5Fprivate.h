@@ -628,11 +628,19 @@ typedef struct H5F_object_flush_t {
     void *udata;                /* User data */
 } H5F_object_flush_t;
 
-/* I/O Info for an operation */
+/* I/O Info for an operation (old) */
 typedef struct H5F_io_info_t {
     const H5F_t *f;                     /* File object */
     const struct H5P_genplist_t *dxpl;         /* DXPL object */
 } H5F_io_info_t;
+
+/* I/O Info for an operation */
+/* (Migrate toward this one, so that both raw data & metadata DXPLs are available) */
+typedef struct H5F_io_info2_t {
+    const H5F_t *f;                             /* File object */
+    const struct H5P_genplist_t *meta_dxpl;     /* Metadata DXPL object */
+    const struct H5P_genplist_t *raw_dxpl;      /* Raw data DXPL object */
+} H5F_io_info2_t;
 
 /* Concise info about a block of bytes in a file */
 typedef struct H5F_block_t {
@@ -723,7 +731,7 @@ H5_DLL herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_hand
 H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
 H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
 H5_DLL herr_t H5F_traverse_mount(struct H5O_loc_t *oloc/*in,out*/);
-H5_DLL herr_t H5F_flush_mounts(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F_flush_mounts(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id);
 
 /* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,

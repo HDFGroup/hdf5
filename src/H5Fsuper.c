@@ -320,13 +320,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
+H5F__super_read(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t initial_read)
 {
     H5P_genplist_t     *dxpl = NULL;        /* DXPL object */
     H5AC_ring_t         ring, orig_ring = H5AC_RING_INV;
     H5F_super_t *       sblock = NULL;      /* Superblock structure */
     H5F_superblock_cache_ud_t udata;        /* User data for cache callbacks */
     H5P_genplist_t     *c_plist;            /* File creation property list  */
+    H5FD_io_info_t      fdio_info;          /* File driver I/O info */
     unsigned            sblock_flags = H5AC__NO_FLAGS_SET;       /* flags used in superblock unprotect call      */
     haddr_t             super_addr;         /* Absolute address of superblock */
     haddr_t             eof;                /* End of file address */
@@ -334,7 +335,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
     hbool_t 		skip_eof_check = FALSE; /* Whether to skip checking the EOF value */
     herr_t              ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
+    FUNC_ENTER_PACKAGE_TAG(meta_dxpl_id, H5AC__SUPERBLOCK_TAG, FAIL)
 
     /* initialize the drvinfo to NULL -- we will overwrite this if there
      * is a driver information block 
@@ -342,13 +343,19 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
     f->shared->drvinfo = NULL;
 
     /* Get the DXPL plist object for DXPL ID */
-    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(dxpl_id)))
+    if(NULL == (dxpl = (H5P_genplist_t *)H5I_object(meta_dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
     if((H5P_get(dxpl, H5AC_RING_NAME, &orig_ring)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get property value");
 
+    /* Set up file driver I/O info */
+    fdio_info.file = f->shared->lf;
+    fdio_info.meta_dxpl = dxpl;
+    if(NULL == (fdio_info.raw_dxpl = (H5P_genplist_t *)H5I_object(raw_dxpl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
+
     /* Find the superblock */
-    if(H5FD_locate_signature(f->shared->lf, dxpl, &super_addr) < 0)
+    if(H5FD_locate_signature(&fdio_info, &super_addr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to locate file signature")
     if(HADDR_UNDEF == super_addr)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "file signature not found")
@@ -396,7 +403,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set property value");
 
     /* Look up the superblock */
-    if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, &udata, rw_flags)))
+    if(NULL == (sblock = (H5F_super_t *)H5AC_protect(f, meta_dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, &udata, rw_flags)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "unable to load superblock")
 
     if(H5F_INTENT(f) & H5F_ACC_SWMR_WRITE)
@@ -556,7 +563,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "set end of space allocation request failed")
 
         /* Look up the driver info block */
-        if(NULL == (drvinfo = (H5O_drvinfo_t *)H5AC_protect(f, dxpl_id, H5AC_DRVRINFO, sblock->driver_addr, &drvrinfo_udata, rw_flags)))
+        if(NULL == (drvinfo = (H5O_drvinfo_t *)H5AC_protect(f, meta_dxpl_id, H5AC_DRVRINFO, sblock->driver_addr, &drvrinfo_udata, rw_flags)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTPROTECT, FAIL, "unable to load driver info block")
 
         /* Loading the driver info block is enough to set up the right info */
@@ -571,7 +578,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
         drvinfo_flags |= H5AC__PIN_ENTRY_FLAG;
 
         /* Release the driver info block */
-        if(H5AC_unprotect(f, dxpl_id, H5AC_DRVRINFO, sblock->driver_addr, drvinfo, drvinfo_flags) < 0)
+        if(H5AC_unprotect(f, meta_dxpl_id, H5AC_DRVRINFO, sblock->driver_addr, drvinfo, drvinfo_flags) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTUNPROTECT, FAIL, "unable to release driver info block")
 
         /* save a pointer to the driver information cache entry */
@@ -612,14 +619,14 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENOBJ, FAIL, "unable to open file's superblock extension")
 
         /* Check for the extension having a 'driver info' message */
-        if((status = H5O_msg_exists(&ext_loc, H5O_DRVINFO_ID, dxpl_id)) < 0)
+        if((status = H5O_msg_exists(&ext_loc, H5O_DRVINFO_ID, meta_dxpl_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_EXISTS, FAIL, "unable to read object header")
         if(status) {
             /* Check for ignoring the driver info for this file */
             if(!udata.ignore_drvrinfo) {
 
                 /* Retrieve the 'driver info' structure */
-                if(NULL == H5O_msg_read(&ext_loc, H5O_DRVINFO_ID, &drvinfo, dxpl_id))
+                if(NULL == H5O_msg_read(&ext_loc, H5O_DRVINFO_ID, &drvinfo, meta_dxpl_id))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver info message not present")
 
                 /* Validate and decode driver information */
@@ -637,15 +644,15 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
         } /* end if */
 
         /* Read in the shared OH message information if there is any */
-        if(H5SM_get_info(&ext_loc, c_plist, dxpl_id) < 0)
+        if(H5SM_get_info(&ext_loc, c_plist, meta_dxpl_id) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to read SOHM table information")
 
         /* Check for the extension having a 'v1 B-tree "K"' message */
-        if((status = H5O_msg_exists(&ext_loc, H5O_BTREEK_ID, dxpl_id)) < 0)
+        if((status = H5O_msg_exists(&ext_loc, H5O_BTREEK_ID, meta_dxpl_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_EXISTS, FAIL, "unable to read object header")
         if(status) {
             /* Retrieve the 'v1 B-tree "K"' structure */
-            if(NULL == H5O_msg_read(&ext_loc, H5O_BTREEK_ID, &btreek, dxpl_id))
+            if(NULL == H5O_msg_read(&ext_loc, H5O_BTREEK_ID, &btreek, meta_dxpl_id))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "v1 B-tree 'K' info message not present")
 
             /* Set non-default v1 B-tree 'K' value info from file */
@@ -661,13 +668,13 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
         } /* end if */
 
         /* Check for the extension having a 'free-space manager info' message */
-        if((status = H5O_msg_exists(&ext_loc, H5O_FSINFO_ID, dxpl_id)) < 0)
+        if((status = H5O_msg_exists(&ext_loc, H5O_FSINFO_ID, meta_dxpl_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_EXISTS, FAIL, "unable to read object header")
         if(status) {
             H5O_fsinfo_t fsinfo;    /* Free-space manager info message from superblock extension */
 
             /* Retrieve the 'free-space manager info' structure */
-	    if(NULL == H5O_msg_read(&ext_loc, H5O_FSINFO_ID, &fsinfo, dxpl_id))
+	    if(NULL == H5O_msg_read(&ext_loc, H5O_FSINFO_ID, &fsinfo, meta_dxpl_id))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get free-space manager info message")
 
             /* Check for non-default info */
@@ -693,7 +700,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
         } /* end if */
 
 	/* Check for the extension having a 'metadata cache image' message */
-        if((status = H5O_msg_exists(&ext_loc, H5O_MDCI_MSG_ID, dxpl_id)) < 0)
+        if((status = H5O_msg_exists(&ext_loc, H5O_MDCI_MSG_ID, meta_dxpl_id)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_EXISTS, FAIL, "unable to read object header")
         if(status) {
             hbool_t 	rw = ((rw_flags & H5AC__READ_ONLY_FLAG) == 0);
@@ -712,7 +719,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
              */
 
             /* Retrieve the 'metadata cache image message' structure */
-	    if(NULL == H5O_msg_read(&ext_loc, H5O_MDCI_MSG_ID, &mdci_msg, dxpl_id))
+	    if(NULL == H5O_msg_read(&ext_loc, H5O_MDCI_MSG_ID, &mdci_msg, meta_dxpl_id))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get metadata cache image message")
 
             /* Indicate to the cache that there's an image to load on first protect call */
@@ -721,7 +728,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
         } /* end if */
 
         /* Close superblock extension */
-        if(H5F_super_ext_close(f, &ext_loc, dxpl_id, FALSE) < 0)
+        if(H5F_super_ext_close(f, &ext_loc, meta_dxpl_id, FALSE) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close file's superblock extension")
     } /* end if */
 
@@ -765,7 +772,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
 		HDassert(f->shared->sblock == NULL);
 		f->shared->sblock = sblock;
 #endif /* JRM */
-		if(H5F_super_ext_write_msg(f, dxpl_id, H5O_DRVINFO_ID, &drvinfo, FALSE, H5O_MSG_NO_FLAGS_SET) < 0)
+		if(H5F_super_ext_write_msg(f, meta_dxpl_id, H5O_DRVINFO_ID, &drvinfo, FALSE, H5O_MSG_NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "error in writing message to superblock extension")
 
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
@@ -777,7 +784,7 @@ H5F__super_read(H5F_t *f, hid_t dxpl_id, hbool_t initial_read)
         /* Check for eliminating the driver info block */
         else if(H5F_HAS_FEATURE(f, H5FD_FEAT_IGNORE_DRVRINFO)) {
             /* Remove the driver info message from the superblock extension */
-            if(H5F_super_ext_remove_msg(f, dxpl_id, H5O_DRVINFO_ID) < 0)
+            if(H5F_super_ext_remove_msg(f, meta_dxpl_id, H5O_DRVINFO_ID) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "error in removing message from superblock extension")
 
             /* Check if the superblock extension was removed */
@@ -795,7 +802,7 @@ done:
         HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set property value")
 
     /* Release the superblock */
-    if(sblock && H5AC_unprotect(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, sblock, sblock_flags) < 0)
+    if(sblock && H5AC_unprotect(f, meta_dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, sblock, sblock_flags) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTUNPROTECT, FAIL, "unable to close superblock")
 
     /* If we have failed, make sure no entries are left in the 
@@ -808,7 +815,7 @@ done:
                 HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin driver info")
 
             /* Evict the driver info block from the cache */
-            if(H5AC_expunge_entry(f, dxpl_id, H5AC_DRVRINFO, sblock->driver_addr, H5AC__NO_FLAGS_SET) < 0)
+            if(H5AC_expunge_entry(f, meta_dxpl_id, H5AC_DRVRINFO, sblock->driver_addr, H5AC__NO_FLAGS_SET) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge driver info block")
         } /* end if */
 
@@ -819,7 +826,7 @@ done:
                 HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin superblock")
 
             /* Evict the superblock from the cache */
-            if(H5AC_expunge_entry(f, dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, H5AC__NO_FLAGS_SET) < 0)
+            if(H5AC_expunge_entry(f, meta_dxpl_id, H5AC_SUPERBLOCK, (haddr_t)0, H5AC__NO_FLAGS_SET) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge superblock")
         } /* end if */
     } /* end if */
