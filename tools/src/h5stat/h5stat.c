@@ -40,11 +40,11 @@
 
 /* File space management strategies: see H5Fpublic.h for declarations */
 const char *FS_STRATEGY_NAME[] = {
+    "H5F_FSPACE_STRATEGY_FSM_AGGR",
+    "H5F_FSPACE_STRATEGY_PAGE",
+    "H5F_FSPACE_STRATEGY_AGGR",
+    "H5F_FSPACE_STRATEGY_NONE",
     "unknown",
-    "H5F_FILE_SPACE_ALL_PERSIST",
-    "H5F_FILE_SPACE_ALL",
-    "H5F_FILE_SPACE_AGGR_VFD",
-    "H5F_FILE_SPACE_VFD",
     NULL
 };
 
@@ -106,10 +106,12 @@ typedef struct iter_t {
     hsize_t super_size;                 /* superblock size */
     hsize_t super_ext_size;             /* superblock extension size */
     hsize_t ublk_size;                  /* user block size (if exists) */
-    H5F_file_space_type_t fs_strategy;  /* File space management strategy */
+    H5F_fspace_strategy_t fs_strategy;  /* File space management strategy */
+    hbool_t fs_persist;               	/* Free-space persist or not */
     hsize_t fs_threshold;               /* Free-space section threshold */
-    hsize_t free_space;                 /* amount of freespace in the file */
-    hsize_t free_hdr;                   /* size of free space manager metadata in the file */
+    hsize_t fsp_size;               	/* File space page size */
+    hsize_t free_space;                 /* Amount of freespace in the file */
+    hsize_t free_hdr;                   /* Size of free space manager metadata in the file */
     unsigned long num_small_sects[SIZE_SMALL_SECTS];   /* Size of small free-space sections */
     unsigned sect_nbins;                /* Number of bins for free-space section sizes */
     unsigned long *sect_bins;           /* Pointer to array of bins for free-space section sizes */
@@ -1501,6 +1503,7 @@ print_freespace_info(const iter_t *iter)
     unsigned long total;        /* Total count for various statistics */
     unsigned u;                 /* Local index variable */
 
+    HDfprintf(stdout, "Free-space persist: %s\n", iter->fs_persist ? "TRUE" : "FALSE");
     HDfprintf(stdout, "Free-space section threshold: %Hu bytes\n", iter->fs_threshold);
     printf("Small size free-space sections (< %u bytes):\n", (unsigned)SIZE_SMALL_SECTS);
     total = 0;
@@ -1551,6 +1554,7 @@ print_storage_summary(const iter_t *iter)
     double  percent = 0.0f;
 
     HDfprintf(stdout, "File space management strategy: %s\n", FS_STRATEGY_NAME[iter->fs_strategy]);
+    HDfprintf(stdout, "File space page size: %Hu bytes\n", iter->fsp_size);
     printf("Summary of file space information:\n");
     total_meta =
             iter->super_size + iter->super_ext_size + iter->ublk_size +
@@ -1772,9 +1776,12 @@ main(int argc, const char *argv[])
         if(H5Pget_userblock(fcpl, &iter.ublk_size) < 0)
             warn_msg("Unable to retrieve userblock size\n");
 
-        if(H5Pget_file_space(fcpl, &iter.fs_strategy, &iter.fs_threshold) < 0)
+        if(H5Pget_file_space_strategy(fcpl, &iter.fs_strategy, &iter.fs_persist, &iter.fs_threshold) < 0)
             warn_msg("Unable to retrieve file space information\n");
-        HDassert(iter.fs_strategy != 0 && iter.fs_strategy < H5F_FILE_SPACE_NTYPES);
+        HDassert(iter.fs_strategy >= 0 && iter.fs_strategy < H5F_FSPACE_STRATEGY_NTYPES);
+
+        if(H5Pget_file_space_page_size(fcpl, &iter.fsp_size) < 0)
+            warn_msg("Unable to retrieve file space page size\n");
 
         /* get information for free-space sections */
         if(freespace_stats(fid, &iter) < 0)

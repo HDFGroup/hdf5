@@ -182,6 +182,14 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         efc_size = H5F_efc_max_nfiles(f->shared->efc);
     if(H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set elink file cache size")
+    if(f->shared->page_buf != NULL) {
+        if(H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &(f->shared->page_buf->max_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set page buffer size")
+        if(H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &(f->shared->page_buf->min_meta_perc)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set minimum metadata fraction of page buffer")
+        if(H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &(f->shared->page_buf->min_raw_perc)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set minimum raw data fraction of page buffer")
+    } /* end if */
 #ifdef H5_HAVE_PARALLEL
     if(H5P_set(new_plist, H5_COLL_MD_READ_FLAG_NAME, &(f->coll_md_read)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set collective metadata read flag")
@@ -597,10 +605,25 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         f->shared->flags = flags;
         f->shared->sohm_addr = HADDR_UNDEF;
         f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
-        for(u = 0; u < NELMTS(f->shared->fs_addr); u++)
-            f->shared->fs_addr[u] = HADDR_UNDEF;
         f->shared->accum.loc = HADDR_UNDEF;
         f->shared->lf = lf;
+
+        /* Initialization for handling file space */
+        for(u = 0; u < NELMTS(f->shared->fs_addr); u++) {
+            f->shared->fs_state[u] = H5F_FS_STATE_CLOSED;
+            f->shared->fs_addr[u] = HADDR_UNDEF;
+            f->shared->fs_man[u] = NULL;
+        } /* end for */
+        f->shared->first_alloc_dealloc = FALSE;
+        f->shared->eoa_pre_fsm_fsalloc = HADDR_UNDEF;
+        f->shared->eoa_post_fsm_fsalloc = HADDR_UNDEF;
+        f->shared->eoa_post_mdci_fsalloc = HADDR_UNDEF;
+
+        /* Initialization for handling file space (for paged aggregation) */
+        f->shared->pgend_meta_thres = H5F_FILE_SPACE_PGEND_META_THRES;
+
+        /* intialize point of no return */
+        f->shared->point_of_no_return = FALSE;
 
         /*
          * Copy the file creation and file access property lists into the
@@ -621,8 +644,19 @@ H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t
         HDassert(f->shared->sohm_nindexes < 255);
         if(H5P_get(plist, H5F_CRT_FILE_SPACE_STRATEGY_NAME, &f->shared->fs_strategy) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space strategy")
+        if(H5P_get(plist, H5F_CRT_FREE_SPACE_PERSIST_NAME, &f->shared->fs_persist) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space persisting status")
         if(H5P_get(plist, H5F_CRT_FREE_SPACE_THRESHOLD_NAME, &f->shared->fs_threshold) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get free-space section threshold")
+        if(H5P_get(plist, H5F_CRT_FILE_SPACE_PAGE_SIZE_NAME, &f->shared->fs_page_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get file space page size")
+        HDassert(f->shared->fs_page_size >= H5F_FILE_SPACE_PAGE_SIZE_MIN);
+
+        /* Temporary for multi/split drivers: fail file creation 
+             when persisting free-space or using paged aggregation strategy */
+        if(H5F_HAS_FEATURE(f, H5FD_FEAT_PAGED_AGGR))
+            if(f->shared->fs_strategy == H5F_FSPACE_STRATEGY_PAGE || f->shared->fs_persist)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't open with this strategy or persistent fs")
 
         /* Get the FAPL values to cache */
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -972,6 +1006,11 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
 
+        /* Shutdown the page buffer cache */
+        if(H5PB_dest(f) < 0)
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing page buffer cache")
+
         /* Clean up the metadata cache log location string */
         if(f->shared->mdc_log_location)
             f->shared->mdc_log_location = (char *)H5MM_xfree(f->shared->mdc_log_location);
@@ -1142,6 +1181,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     H5P_genplist_t     *a_plist;            /*file access property list     */
     H5F_close_degree_t  fc_degree;          /*file close degree             */
     hid_t               raw_dxpl_id = H5AC_rawdata_dxpl_id;    /* Raw data dxpl used by library        */
+    size_t              page_buf_size;
+    unsigned            page_buf_min_meta_perc;
+    unsigned            page_buf_min_raw_perc;
     hbool_t             set_flag = FALSE;   /*set the status_flags in the superblock */
     hbool_t             clear = FALSE;      /*clear the status_flags 	    */
     hbool_t             evict_on_close;     /* evict on close value from plist  */
@@ -1292,6 +1334,25 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if(NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
+    /* Check if page buffering is enabled */
+    if(H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get page buffer size")
+    if(page_buf_size) {
+#ifdef H5_HAVE_PARALLEL
+        /* Collective metadata writes are not supported with page buffering */
+        if(file->coll_md_write)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "collective metadata writes are not supported with page buffering")
+
+        /* Temporary: fail file create when page buffering feature is enabled for parallel */
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "page buffering is disabled for parallel")
+#endif /* H5_HAVE_PARALLEL */
+        /* Query for other page buffer cache properties */
+        if(H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &page_buf_min_meta_perc) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get minimum metadata fraction of page buffer")
+        if(H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &page_buf_min_raw_perc) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get minimum raw data fraction of page buffer")
+    } /* end if */
+
     /*
      * Read or write the file superblock, depending on whether the file is
      * empty or not.
@@ -1301,6 +1362,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
          * We've just opened a fresh new file (or truncated one). We need
          * to create & write the superblock.
          */
+
+        /* Create the page buffer before initializing the superblock */
+        if(page_buf_size)
+            if(H5PB_create(file, page_buf_size, page_buf_min_meta_perc, page_buf_min_raw_perc) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create page buffer")
 
         /* Initialize information about the superblock and allocate space for it */
         /* (Writes superblock extension messages, if there are any) */
@@ -1318,6 +1384,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         /* Read the superblock if it hasn't been read before. */
         if(H5F__super_read(file, meta_dxpl_id, raw_dxpl_id, TRUE) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, NULL, "unable to read superblock")
+
+        /* Create the page buffer before initializing the superblock */
+        if(page_buf_size)
+            if(H5PB_create(file, page_buf_size, page_buf_min_meta_perc, page_buf_min_raw_perc) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create page buffer")
 
         /* Open the root group */
         if(H5G_mkroot(file, meta_dxpl_id, FALSE) < 0)
@@ -1526,6 +1597,11 @@ H5F__flush_phase2(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t closi
     if(H5F__accum_flush(&fio_info) < 0)
         /* Push error, but keep going*/
         HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
+
+    /* Flush the page buffer */
+    if(H5PB_flush(&fio_info) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "page buffer flush failed")
 
     /* Flush file buffers to disk. */
     if(H5FD_flush(f->shared->lf, meta_dxpl_id, closing) < 0)
@@ -2651,6 +2727,38 @@ H5F__set_eoa(const H5F_t *f, H5F_mem_t type, haddr_t addr)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_eoa() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F__set_paged_aggr
+ *
+ * Purpose:	Quick and dirty routine to set the file's paged_aggr mode
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ *		June 19, 2015
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__set_paged_aggr(const H5F_t *f, hbool_t paged)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Dispatch to driver */
+    if(H5FD_set_paged_aggr(f->shared->lf, paged) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "driver set paged aggr mode failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__set_paged_aggr() */
 
 #ifdef H5_HAVE_PARALLEL
 

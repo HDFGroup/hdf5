@@ -96,6 +96,14 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
     hsize_t       ub_size = 0;        	/* size of user block */
     hid_t         fcpl = H5P_DEFAULT; 	/* file creation property list ID */
     hid_t         fapl = H5P_DEFAULT; 	/* file access property list ID */
+    H5F_fspace_strategy_t set_strategy;	/* Strategy to be set in outupt file */
+    hbool_t	  set_persist;		/* Persist free-space status to be set in output file */
+    hsize_t	  set_threshold;	/* Free-space section threshold to be set in output file */
+    hsize_t	  set_pagesize;		/* File space page size to be set in output file */
+    H5F_fspace_strategy_t in_strategy;	/* Strategy from input file */
+    hbool_t	  in_persist;		/* Persist free-space status from input file */
+    hsize_t	  in_threshold;		/* Free-space section threshold from input file */
+    hsize_t	  in_pagesize;		/* File space page size from input file */
 
     /*-------------------------------------------------------------------------
      * open input file
@@ -106,7 +114,7 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
     }
 
-    /* get user block size and file space strategy/threshold */
+    /* get user block size and file space strategy/persist/threshold */
     {
         hid_t fcpl_in; /* file creation property list ID for input file */
 
@@ -120,19 +128,17 @@ int copy_objects(const char* fnamein, const char* fnameout, pack_opt_t *options)
             HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
         }
 
-        if (!options->fs_strategy) {
-            if (H5Pget_file_space(fcpl_in, &options->fs_strategy, NULL) < 0) {
-                error_msg("failed to retrieve file space strategy\n");
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
-            }
+	/* If the -S option is not set, get "strategy" from the input file */
+	if(H5Pget_file_space_strategy(fcpl_in, &in_strategy, &in_persist, &in_threshold) < 0) {
+	    error_msg("failed to retrieve file space strategy\n");
+            HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
         }
 
-        if (!options->fs_threshold) {
-            if (H5Pget_file_space(fcpl_in, NULL, &options->fs_threshold) < 0) {
-                error_msg("failed to retrieve file space threshold\n");
-                HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
-            }
-        }
+	/* If the -G option is not set, get "pagesize" from the input file */
+	if(H5Pget_file_space_page_size(fcpl_in, &in_pagesize) < 0) {
+	    error_msg("failed to retrieve file space threshold\n");
+	    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+	}
 
         if (H5Pclose(fcpl_in) < 0) {
             error_msg("failed to close property list\n");
@@ -291,9 +297,9 @@ print_user_block(fnamein, fidin);
     }
 
     /*-------------------------------------------------------------------------
-     * set free-space strategy options
-     *-------------------------------------------------------------------------
-     */
+    * Set file space information
+    *-------------------------------------------------------------------------
+    */
 
     /* either use the FCPL already created or create a new one */
     if (fcpl == H5P_DEFAULT) {
@@ -304,11 +310,43 @@ print_user_block(fnamein, fidin);
         }
     }
 
-    /* set file space strategy and free space threshold */
-    if (H5Pset_file_space(fcpl, options->fs_strategy, options->fs_threshold) < 0) {
-        error_msg("failed to set file space strategy & threshold \n");
+    /* Set file space info to those from input file */
+    set_strategy = in_strategy;
+    set_persist = in_persist;
+    set_threshold = in_threshold;
+    set_pagesize = in_pagesize;
+
+    if(options->fs_strategy == (H5F_fspace_strategy_t)-1) /* A default strategy is specified by user */
+        set_strategy = FS_STRATEGY_DEF;
+    else if(options->fs_strategy != (H5F_fspace_strategy_t)0) /* Set strategy as specified by user */
+        set_strategy = options->fs_strategy;
+
+    if(options->fs_persist == -1) /* A default "persist" is specified by user */
+        set_persist = FS_PERSIST_DEF;
+    else if(options->fs_persist != 0) /* Set "persist" as specified by user */
+        set_persist = (hbool_t)options->fs_persist;
+    
+    if(options->fs_threshold == -1) /* A "0" threshold is specified by user */
+        set_threshold = (hsize_t)0;
+    else if(options->fs_threshold != 0) /* Set threshold as specified by user */
+        set_threshold = (hsize_t)options->fs_threshold;
+
+    /* Set file space information as specified */
+    if(H5Pset_file_space_strategy(fcpl, set_strategy, set_persist, set_threshold) < 0) {
+	error_msg("failed to set file space strategy\n");
         HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
     }
+
+    if(options->fs_pagesize == -1) /* A "0" file space page size is specified by user */
+        set_pagesize = (hsize_t)0;
+    else if(options->fs_pagesize != 0) /* Set file space page size as specified by user */
+        set_pagesize = (hsize_t)options->fs_pagesize;
+
+    if(set_pagesize != FS_PAGESIZE_DEF) /* Set non-default file space page size as specified */
+        if(H5Pset_file_space_page_size(fcpl, set_pagesize) < 0) {
+            error_msg("failed to set file space page size\n");
+	    HGOTO_ERROR(FAIL, H5E_tools_min_id_g, "H5Pclose failed");
+        }
 
     /*-------------------------------------------------------------------------
      * create the output file

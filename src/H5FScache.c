@@ -37,6 +37,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"        /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Fprivate.h"		/* File          			*/
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5VMprivate.h"	/* Vectors and arrays 			*/
@@ -296,7 +297,7 @@ H5FS__cache_hdr_deserialize(const void *_image, size_t len, void *_udata,
     /* # of section classes */
     /* (only check if we actually have some classes) */
     UINT16DECODE(image, nclasses);
-    if(fspace->nclasses > 0 && fspace->nclasses != nclasses)
+    if(fspace->nclasses > 0 && nclasses > fspace->nclasses)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "section class count mismatch")
 
     /* Shrink percent */
@@ -596,9 +597,11 @@ H5FS__cache_hdr_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
          * real file space lest the header be written to file with 
          * a nonsense section info address.
          */
-        HDassert(fspace->serial_sect_count > 0);
-        HDassert(fspace->sect_size > 0);
-        HDassert(fspace->alloc_sect_size == (size_t)fspace->sect_size);
+        if(!H5F_POINT_OF_NO_RETURN(f)) {
+            HDassert(fspace->serial_sect_count > 0);
+            HDassert(fspace->sect_size > 0);
+            HDassert(fspace->alloc_sect_size == (size_t)fspace->sect_size);
+        } /* end if */
 
         if(H5F_IS_TMP_ADDR(f, fspace->sect_addr)) {
             unsigned sect_status = 0;
@@ -702,10 +705,12 @@ H5FS__cache_hdr_serialize(const H5F_t *f, void *_image, size_t len,
      * The following asserts are a cursory check on this.
      */
     HDassert((! H5F_addr_defined(fspace->sect_addr)) || (! H5F_IS_TMP_ADDR(f, fspace->sect_addr)));
-    HDassert((! H5F_addr_defined(fspace->sect_addr)) || 
-             ((fspace->serial_sect_count > 0) && 
-              (fspace->sect_size > 0) && 
-              (fspace->alloc_sect_size == (size_t)fspace->sect_size)));
+
+    if(!H5F_POINT_OF_NO_RETURN(f))
+        HDassert((! H5F_addr_defined(fspace->sect_addr)) || 
+                 ((fspace->serial_sect_count > 0) && 
+                  (fspace->sect_size > 0) && 
+                  (fspace->alloc_sect_size == (size_t)fspace->sect_size)));
 
     /* Magic number */
     HDmemcpy(image, H5FS_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -1061,7 +1066,7 @@ H5FS__cache_sinfo_deserialize(const void *_image, size_t len, void *_udata,
 
                 /* Insert section in free space manager, unless requested not to */
                 if(!(des_flags & H5FS_DESERIALIZE_NO_ADD))
-                    if(H5FS_sect_add(udata->f, udata->dxpl_id, udata->fspace, new_sect, H5FS_ADD_DESERIALIZING, NULL) < 0)
+                    if(H5FS_sect_add(udata->f, udata->dxpl_id, udata->fspace, new_sect, H5FS_ADD_DESERIALIZING, udata) < 0)
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTINSERT, NULL, "can't add section to free space manager")
             } /* end for */
         } while(image < (((const uint8_t *)_image + old_sect_size) - H5FS_SIZEOF_CHKSUM));
@@ -1177,8 +1182,9 @@ H5FS__cache_sinfo_pre_serialize(H5F_t *f, hid_t dxpl_id, void *_thing,
     HDassert(new_len);
     HDassert(flags);
 
-    /* we shouldn't be called if the section info is empty */
-    HDassert(fspace->serial_sect_count > 0);
+    /* we shouldn't be called if the section info is empty, unless we hit the point of no return. */
+    if(!H5F_POINT_OF_NO_RETURN(f))
+        HDassert(fspace->serial_sect_count > 0);
 
     sinfo_addr = addr; /* this will change if we relocate the section data */
 

@@ -39,6 +39,7 @@
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5PBprivate.h"	/* Page Buffer				*/
 
 
 /****************/
@@ -129,9 +130,9 @@ H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
     } /* end else */
 
-    /* Pass through metadata accumulator layer */
-    if(H5F__accum_read(&fio_info, map_type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through metadata accumulator failed")
+    /* Pass through page buffer layer */
+    if(H5PB_read(&fio_info, map_type, addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read through page buffer failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -191,9 +192,9 @@ H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
     } /* end else */
 
-    /* Pass through metadata accumulator layer */
-    if(H5F__accum_write(&fio_info, map_type, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through metadata accumulator failed")
+    /* Pass through page buffer layer */
+    if(H5PB_write(&fio_info, map_type, addr, size, buf) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "write through page buffer failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

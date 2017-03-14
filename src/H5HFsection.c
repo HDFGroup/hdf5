@@ -85,14 +85,14 @@ static herr_t H5HF_sect_single_full_dblock(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *sect);
 
 /* 'single' section callbacks */
-static herr_t H5HF_sect_single_add(H5FS_section_info_t *sect, unsigned *flags,
+static herr_t H5HF_sect_single_add(H5FS_section_info_t **sect, unsigned *flags,
     void *udata);
 static H5FS_section_info_t *H5HF_sect_single_deserialize(const H5FS_section_class_t *cls,
     hid_t dxpl_id, const uint8_t *buf, haddr_t sect_addr, hsize_t sect_size,
     unsigned *des_flags);
 static htri_t H5HF_sect_single_can_merge(const H5FS_section_info_t *sect1,
     const H5FS_section_info_t *sect2, void *udata);
-static herr_t H5HF_sect_single_merge(H5FS_section_info_t *sect1,
+static herr_t H5HF_sect_single_merge(H5FS_section_info_t **sect1,
     H5FS_section_info_t *sect2, void *udata);
 static htri_t H5HF_sect_single_can_shrink(const H5FS_section_info_t *sect,
     void *udata);
@@ -121,7 +121,7 @@ static H5FS_section_info_t *H5HF_sect_row_deserialize(const H5FS_section_class_t
     unsigned *des_flags);
 static htri_t H5HF_sect_row_can_merge(const H5FS_section_info_t *sect1,
     const H5FS_section_info_t *sect2, void *udata);
-static herr_t H5HF_sect_row_merge(H5FS_section_info_t *sect1,
+static herr_t H5HF_sect_row_merge(H5FS_section_info_t **sect1,
     H5FS_section_info_t *sect2, void *udata);
 static htri_t H5HF_sect_row_can_shrink(const H5FS_section_info_t *sect,
     void *udata);
@@ -811,7 +811,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_single_add(H5FS_section_info_t *_sect, unsigned *flags, void *_udata)
+H5HF_sect_single_add(H5FS_section_info_t **_sect, unsigned *flags, void *_udata)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -821,7 +821,7 @@ H5HF_sect_single_add(H5FS_section_info_t *_sect, unsigned *flags, void *_udata)
      *  have already been checked when it was first added
      */
     if(!(*flags & H5FS_ADD_DESERIALIZING)) {
-        H5HF_free_section_t *sect = (H5HF_free_section_t *)_sect;   /* Fractal heap free section */
+        H5HF_free_section_t **sect = (H5HF_free_section_t **)_sect;   /* Fractal heap free section */
         H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */
         H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
         hid_t dxpl_id = udata->dxpl_id;     /* DXPL ID for operation */
@@ -832,14 +832,14 @@ H5HF_sect_single_add(H5FS_section_info_t *_sect, unsigned *flags, void *_udata)
 
         /* Check if single section covers entire direct block it's in */
         /* (converts to row section possibly) */
-        if(H5HF_sect_single_full_dblock(hdr, dxpl_id, sect) < 0)
+        if(H5HF_sect_single_full_dblock(hdr, dxpl_id, (*sect)) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCONVERT, FAIL, "can't check/convert single section")
 
         /* Set the "returned space" flag if the single section was changed
          *      into a row section, so the "merging & shrinking" algorithm
          *      gets executed in the free space manager
          */
-        if(sect->sect_info.type != H5HF_FSPACE_SECT_SINGLE)
+        if((*sect)->sect_info.type != H5HF_FSPACE_SECT_SINGLE)
             *flags |= H5FS_ADD_RETURNED_SPACE;
     } /* end if */
 
@@ -949,10 +949,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_single_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
+H5HF_sect_single_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
     void *_udata)
 {
-    H5HF_free_section_t *sect1 = (H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
+    H5HF_free_section_t **sect1 = (H5HF_free_section_t **)_sect1;   /* Fractal heap free section */
     H5HF_free_section_t *sect2 = (H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
     H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
@@ -963,26 +963,26 @@ H5HF_sect_single_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
 
     /* Check arguments. */
     HDassert(sect1);
-    HDassert(sect1->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
+    HDassert((*sect1)->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
     HDassert(sect2);
     HDassert(sect2->sect_info.type == H5HF_FSPACE_SECT_SINGLE);
-    HDassert(H5F_addr_eq(sect1->sect_info.addr + sect1->sect_info.size, sect2->sect_info.addr));
+    HDassert(H5F_addr_eq((*sect1)->sect_info.addr + (*sect1)->sect_info.size, sect2->sect_info.addr));
 
     /* Add second section's size to first section */
-    sect1->sect_info.size += sect2->sect_info.size;
+    (*sect1)->sect_info.size += sect2->sect_info.size;
 
     /* Get rid of second section */
     if(H5HF_sect_single_free((H5FS_section_info_t *)sect2) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't free section node")
 
     /* Check to see if we should revive first section */
-    if(sect1->sect_info.state != H5FS_SECT_LIVE)
-        if(H5HF_sect_single_revive(hdr, dxpl_id, sect1) < 0)
+    if((*sect1)->sect_info.state != H5FS_SECT_LIVE)
+        if(H5HF_sect_single_revive(hdr, dxpl_id, (*sect1)) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
 
     /* Check if single section covers entire direct block it's in */
     /* (converts to row section possibly) */
-    if(H5HF_sect_single_full_dblock(hdr, dxpl_id, sect1) < 0)
+    if(H5HF_sect_single_full_dblock(hdr, dxpl_id, (*sect1)) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCONVERT, FAIL, "can't check/convert single section")
 
 done:
@@ -1771,10 +1771,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5HF_sect_row_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
+H5HF_sect_row_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2,
     void *_udata)
 {
-    H5HF_free_section_t *sect1 = (H5HF_free_section_t *)_sect1;   /* Fractal heap free section */
+    H5HF_free_section_t **sect1 = (H5HF_free_section_t **)_sect1;   /* Fractal heap free section */
     H5HF_free_section_t *sect2 = (H5HF_free_section_t *)_sect2;   /* Fractal heap free section */
     H5HF_sect_add_ud_t *udata = (H5HF_sect_add_ud_t *)_udata;   /* User callback data */
     H5HF_hdr_t *hdr = udata->hdr;       /* Fractal heap header */
@@ -1785,7 +1785,7 @@ H5HF_sect_row_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
 
     /* Check arguments. */
     HDassert(sect1);
-    HDassert(sect1->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW);
+    HDassert((*sect1)->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW);
     HDassert(sect2);
     HDassert(sect2->sect_info.type == H5HF_FSPACE_SECT_FIRST_ROW);
 
@@ -1802,8 +1802,8 @@ H5HF_sect_row_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
     } /* end if */
     else {
         /* Check to see if we should revive first section */
-        if(sect1->sect_info.state != H5FS_SECT_LIVE)
-            if(H5HF_sect_row_revive(hdr, dxpl_id, sect1) < 0)
+        if((*sect1)->sect_info.state != H5FS_SECT_LIVE)
+            if(H5HF_sect_row_revive(hdr, dxpl_id, (*sect1)) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
 
         /* Check to see if we should revive second section */
@@ -1812,7 +1812,7 @@ H5HF_sect_row_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't revive single free section")
 
         /* Merge rows' underlying indirect sections together */
-        if(H5HF_sect_indirect_merge_row(hdr, dxpl_id, sect1, sect2) < 0)
+        if(H5HF_sect_indirect_merge_row(hdr, dxpl_id, (*sect1), sect2) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTMERGE, FAIL, "can't merge underlying indirect sections")
     } /* end else */
 

@@ -11102,6 +11102,8 @@ corder_delete(hid_t fapl)
     for(reopen_file = FALSE; reopen_file <= TRUE; reopen_file++) {
         /* Create file */
         h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+	/* Creating file with latest format will enable paged aggregation with persistent fs */
         if((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
         /* Close file */
