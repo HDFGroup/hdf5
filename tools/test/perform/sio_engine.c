@@ -1064,6 +1064,7 @@ done:
 do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
 {
     int ret_code = SUCCESS;
+    hid_t fcpl;
 
     switch (param->io_type) {
     case POSIXIO:
@@ -1088,9 +1089,17 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             GOTOERROR(FAIL);
         }
 
+        fcpl = H5Pcreate(H5P_FILE_CREATE);
+        if(param->page_size) {
+            H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1);
+            H5Pset_file_space_page_size(fcpl, param->page_size);
+            if(param->page_buffer_size)
+                H5Pset_page_buffer_size(fapl, param->page_buffer_size, 0, 0);
+        }
+
         /* create the parallel file */
         if (flags & (SIO_CREATE | SIO_WRITE)) {
-            fd->h5fd = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+            fd->h5fd = H5Fcreate(fname, H5F_ACC_TRUNC, fcpl, fapl);
         } else {
             fd->h5fd = H5Fopen(fname, H5F_ACC_RDONLY, fapl);
         }

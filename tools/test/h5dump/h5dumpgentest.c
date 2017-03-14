@@ -289,8 +289,9 @@ typedef struct s1_t {
 #define F64_DIM1            (F64_ARRAY_BUF_LEN / sizeof(int) + 1)
 
 /* File 65 macros */
-#define STRATEGY  H5F_FILE_SPACE_AGGR_VFD  /* File space handling strategy */
-#define THRESHOLD10   10          /* Free space section threshold */
+#define STRATEGY  H5F_FSPACE_STRATEGY_NONE 	/* File space handling strategy */
+#define THRESHOLD10   		10   		/* Free-space section threshold */
+#define FSPACE_PAGE_SIZE     	8192 		/* File space page size */
 
 /* "FILE66" macros and for FILE69 */
 #define F66_XDIM        8
@@ -7042,8 +7043,9 @@ gent_extlinks(void)
 /*-------------------------------------------------------------------------
  * Function:    gent_fs_strategy_threshold
  *
- * Purpose:     Generate a file with non-default file space strategy and
- *    non-default free-space section threshold.
+ * Purpose:     Generate a file with non-default file space strategy,
+ *    		non-default free-space section threshold,
+ *		non-default file space page size.
  *-------------------------------------------------------------------------
  */
 static void
@@ -7056,7 +7058,8 @@ gent_fs_strategy_threshold(void)
     fcpl = H5Pcreate(H5P_FILE_CREATE);
 
     /* Set file space information */
-    H5Pset_file_space(fcpl, STRATEGY, (hsize_t)THRESHOLD10);
+    H5Pset_file_space_strategy(fcpl, STRATEGY, TRUE, (hsize_t)THRESHOLD10);
+    H5Pset_file_space_page_size(fcpl, (hsize_t)FSPACE_PAGE_SIZE);
 
     /* Create the file with the specified strategy and threshold */
     fid = H5Fcreate(FILE65, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);

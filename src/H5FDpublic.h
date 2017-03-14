@@ -239,6 +239,19 @@ typedef enum H5F_mem_t	H5FD_mem_t;
      * driver supports the single-writer/multiple-readers I/O pattern.
      */
 #define H5FD_FEAT_SUPPORTS_SWMR_IO      0x00001000
+    /*
+     * Defining H5FD_FEAT_USE_ALLOC_SIZE for a VFL driver
+     * means that the library will just pass the allocation size to the
+     * the driver's allocation callback which will eventually handle alignment.
+     * This is specifically used for the multi/split driver.
+     */
+#define H5FD_FEAT_USE_ALLOC_SIZE	0x00002000
+    /*
+     * Defining H5FD_FEAT_PAGED_AGGR for a VFL driver
+     * means that the driver needs special file space mapping for paged aggregation.
+     * This is specifically used for the multi/split driver.
+     */
+#define H5FD_FEAT_PAGED_AGGR		0x00004000
 
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;
@@ -307,6 +320,7 @@ struct H5FD_t {
     /* Space allocation management fields */
     hsize_t             threshold;      /* Threshold for alignment  */
     hsize_t             alignment;      /* Allocation alignment     */
+    hbool_t             paged_aggr;     /* Paged aggregation for file space is enabled or not */
 };
 
 /* Define enum for the source of file image callbacks */

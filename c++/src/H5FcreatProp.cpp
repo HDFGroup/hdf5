@@ -294,6 +294,7 @@ unsigned FileCreatPropList::getIstorek() const
     return(ik);
 }
 
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList::setFileSpace
 ///\brief       Sets the strategy and the threshold value that the library
@@ -364,6 +365,7 @@ hsize_t FileCreatPropList::getFileSpaceThreshold() const
     }
     return(threshold);
 }
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
 // Function:    FileCreatPropList destructor

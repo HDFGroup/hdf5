@@ -147,6 +147,40 @@ H5FL_DEFINE(H5C_cache_entry_t);
 
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_cache_image_pending()
+ *
+ * Purpose:     Tests to see if the load of a metadata cache image 
+ *              load is pending (i.e. will be executed on the next 
+ *              protect or insert)
+ *
+ *              Returns TRUE if a cache image load is pending, and FALSE
+ *              if not.  Throws an assertion failure on error.
+ *
+ * Return:      TRUE if a cache image load is pending, and FALSE otherwise.
+ *
+ * Programmer:  John Mainzer, 6/18/16
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5C_cache_image_pending(const H5C_t *cache_ptr)
+{
+    hbool_t             ret_value = TRUE;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Sanity checks */
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    ret_value = (cache_ptr->load_image && !cache_ptr->image_loaded);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_cache_image_pending() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_cache_image_status()
  *
  * Purpose:     Examine the metadata cache associated with the supplied 
@@ -832,6 +866,54 @@ H5C__free_image_entries_array(H5C_t * cache_ptr)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_force_cache_image_load()
+ *
+ * Purpose:     On rare occasions, it is necessary to run 
+ *		H5MF_tidy_self_referential_fsm_hack() prior to the first
+ *              metadata cache access.  This is a problem as if there is a 
+ *              cache image at the end of the file, that routine will 
+ *              discard it.
+ *
+ *              We solve this issue by calling this function, which will
+ *		load the cache image and then call 
+ *              H5MF_tidy_self_referential_fsm_hack() to discard it.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              1/11/17
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_force_cache_image_load(H5F_t *f, hid_t dxpl_id)
+{
+    H5C_t *cache_ptr;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    cache_ptr = f->shared->cache;
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->load_image);
+
+    /* Load the cache image, if requested */
+    if(cache_ptr->load_image) {
+        cache_ptr->load_image = FALSE;
+        if(H5C__load_cache_image(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "can't load cache image")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_force_cache_image_load() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_get_cache_image_config
  *
  * Purpose:     Copy the current configuration for cache image generation
@@ -1239,7 +1321,7 @@ H5C__image_entry_cmp(const void *_entry1, const void *_entry2)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id)
+H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id, hbool_t *image_generated)
 {
     H5C_t *     cache_ptr = NULL;
     haddr_t     eoa_frag_addr = HADDR_UNDEF;
@@ -1255,6 +1337,7 @@ H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id)
     cache_ptr = f->shared->cache;
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(image_generated);
 
     /* If the file is opened and closed without any access to 
      * any group or data set, it is possible that the cache image (if 
@@ -1379,6 +1462,15 @@ H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id)
                         (hsize_t)(cache_ptr->image_data_len), &eoa_frag_addr, &eoa_frag_size)))
                 HGOTO_ERROR(H5E_CACHE, H5E_NOSPACE, FAIL, "can't allocate file space for metadata cache image")
 
+        /* Make note of the eoa after allocation of the cache image
+         * block.  This value is used for sanity checking when we
+         * shutdown the self referential free space managers after
+         * we destroy the metadata cache.
+         */
+        HDassert(HADDR_UNDEF == f->shared->eoa_post_mdci_fsalloc);
+        if(HADDR_UNDEF == (f->shared->eoa_post_mdci_fsalloc = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)) )
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+
         /* For now, drop any fragment left over from the allocation of the
          * image block on the ground.  A fragment should only be returned
          * if the underlying file alignment is greater than 1.
@@ -1468,6 +1560,9 @@ H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id)
 
             cache_ptr->image_ctl.generate_image = FALSE;
         } /* end else */
+
+        /* Indicate that a cache image was generated */
+        *image_generated = TRUE;
     } /* end if */
 
 done:

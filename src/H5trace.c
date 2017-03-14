@@ -895,32 +895,28 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 fprintf(out, "NULL");
                         } /* end if */
                         else {
-                            H5F_file_space_type_t fs_type = (H5F_file_space_type_t)va_arg(ap, int);
+                            H5F_fspace_strategy_t fs_strategy = (H5F_fspace_strategy_t)va_arg(ap, int);
 
-                            switch(fs_type) {
-                                case H5F_FILE_SPACE_DEFAULT:
-                                    fprintf(out, "H5F_FILE_SPACE_DEFAULT");
+                            switch(fs_strategy) {
+                                case H5F_FSPACE_STRATEGY_FSM_AGGR:
+                                    fprintf(out, "H5F_FSPACE_STRATEGY_FSM_AGGR");
                                     break;
 
-                                case H5F_FILE_SPACE_ALL_PERSIST:
-                                    fprintf(out, "H5F_FILE_SPACE_ALL_PERSIST");
+                                case H5F_FSPACE_STRATEGY_PAGE:
+                                    fprintf(out, "H5F_FSPACE_STRATEGY_PAGE");
                                     break;
 
-                                case H5F_FILE_SPACE_ALL:
-                                    fprintf(out, "H5F_FILE_SPACE_ALL");
+                                case H5F_FSPACE_STRATEGY_AGGR:
+                                    fprintf(out, "H5F_FSPACE_STRATEGY_AGGR");
                                     break;
 
-                                case H5F_FILE_SPACE_AGGR_VFD:
-                                    fprintf(out, "H5F_FILE_SPACE_AGGR_VFD");
+                                case H5F_FSPACE_STRATEGY_NONE:
+                                    fprintf(out, "H5F_FSPACE_STRATEGY_NONE");
                                     break;
 
-                                case H5F_FILE_SPACE_VFD:
-                                    fprintf(out, "H5F_FILE_SPACE_VFD");
-                                    break;
-
-                                case H5F_FILE_SPACE_NTYPES:
+                                case H5F_FSPACE_STRATEGY_NTYPES:
                                 default:
-                                    fprintf(out, "%ld", (long)fs_type);
+                                    fprintf(out, "%ld", (long)fs_strategy);
                                     break;
                             } /* end switch */
                         } /* end else */
@@ -1001,6 +997,15 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                     break;
                             } /* end switch */
                         } /* end else */
+                        break;
+
+                    case 't':
+                        if(ptr) {
+                            if(vp)
+                                fprintf(out, "0x%lx", (unsigned long)vp);
+                            else
+                                fprintf(out, "NULL");
+                        } /* end if */
                         break;
 
                     case 'v':

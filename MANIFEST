@@ -579,6 +579,7 @@
 ./src/H5Fmpi.c
 ./src/H5Fquery.c
 ./src/H5Fsfile.c
+./src/H5Fspace.c
 ./src/H5Fsuper.c
 ./src/H5Fsuper_cache.c
 ./src/H5Fpkg.h
@@ -793,6 +794,10 @@
 ./src/H5Ppublic.h
 ./src/H5Pstrcpl.c
 ./src/H5Ptest.c
+./src/H5PB.c
+./src/H5PBmodule.h
+./src/H5PBpkg.h
+./src/H5PBprivate.h
 ./src/H5PL.c
 ./src/H5PLmodule.h
 ./src/H5PLprivate.h
@@ -895,6 +900,7 @@
 ./test/SWMR_UseCase_UG.txt
 ./test/accum.c
 ./test/accum_swmr_reader.c
+./test/aggr.h5
 ./test/app_ref.c
 ./test/atomic_reader.c
 ./test/atomic_writer.c
@@ -957,6 +963,8 @@
 ./test/flush1.c
 ./test/flush2.c
 ./test/flushrefresh.c
+./test/fsm_aggr_nopersist.h5
+./test/fsm_aggr_persist.h5
 ./test/genall5.c
 ./test/genall5.h
 ./test/gen_bad_ohdr.c
@@ -966,7 +974,6 @@
 ./test/gen_deflate.c
 ./test/gen_file_image.c
 ./test/gen_filespace.c
-./test/gen_idx.c
 ./test/gen_mergemsg.c
 ./test/gen_new_array.c
 ./test/gen_new_fill.c
@@ -986,6 +993,12 @@
 ./test/getname.c
 ./test/gheap.c
 ./test/group_old.h5
+./test/h5fc_ext1_f.h5
+./test/h5fc_ext1_i.h5
+./test/h5fc_ext2_if.h5
+./test/h5fc_ext2_sf.h5
+./test/h5fc_ext3_isf.h5
+./test/h5fc_ext_none.h5
 ./test/h5test.c
 ./test/h5test.h
 ./test/hyperslab.c
@@ -1002,9 +1015,13 @@
 ./test/multi_file_v16-r.h5
 ./test/multi_file_v16-s.h5
 ./test/noencoder.h5
+./test/none.h5
 ./test/ntypes.c
 ./test/ohdr.c
 ./test/objcopy.c
+./test/page_buffer.c
+./test/paged_nopersist.h5
+./test/paged_persist.h5
 ./test/plugin.c
 ./test/reserved.c
 ./test/pool.c
@@ -1203,6 +1220,7 @@
 ./testpar/COPYING
 ./testpar/Makefile.am
 ./testpar/t_cache.c
+./testpar/t_cache_image.c
 ./testpar/t_chunk_alloc.c
 ./testpar/t_coll_chunk.c
 ./testpar/t_dset.c
@@ -1448,6 +1466,14 @@
 ./tools/test/misc/testh5mkgrp.sh.in
 ./tools/test/misc/testh5repart.sh.in
 ./tools/test/misc/talign.c
+./tools/test/misc/testfiles/h5clear_missing_file.ddl
+./tools/test/misc/testfiles/h5clear_no_mdc_image.ddl
+./tools/test/misc/testfiles/h5clear_open_fail.ddl
+./tools/test/misc/testfiles/h5clear_usage.ddl
+./tools/test/misc/testfiles/mod_h5clear_mdc_image.h5
+./tools/test/misc/testfiles/orig_h5clear_sec2_v0.h5
+./tools/test/misc/testfiles/orig_h5clear_sec2_v2.h5
+./tools/test/misc/testfiles/orig_h5clear_sec2_v3.h5
 ./tools/test/misc/testfiles/h5mkgrp_help.txt
 ./tools/test/misc/testfiles/h5mkgrp_version.txt.in
 ./tools/test/misc/h5perf_gentest.c
@@ -1637,7 +1663,6 @@
 ./tools/testfiles/tdset.h5
 ./tools/testfiles/tdset2.h5
 ./tools/testfiles/tdset_idx.ls
-./tools/testfiles/tdset_idx.ddl
 ./tools/testfiles/tdset_idx.h5
 ./tools/testfiles/tempty.ddl
 ./tools/testfiles/tempty.h5
@@ -2270,7 +2295,6 @@
 ./tools/test/h5diff/testfiles/h5diff_457.txt
 ./tools/test/h5diff/testfiles/h5diff_458.txt
 ./tools/test/h5diff/testfiles/h5diff_459.txt
-./tools/test/h5diff/testfiles/h5diff_idx.txt
 ./tools/test/h5diff/testfiles/h5diff_465.txt
 ./tools/test/h5diff/testfiles/h5diff_466.txt
 ./tools/test/h5diff/testfiles/h5diff_467.txt
@@ -2319,8 +2343,6 @@
 ./tools/test/h5diff/testfiles/h5diff_basic2.h5
 ./tools/test/h5diff/testfiles/h5diff_dset1.h5
 ./tools/test/h5diff/testfiles/h5diff_dset2.h5
-./tools/test/h5diff/testfiles/h5diff_dset_idx1.h5
-./tools/test/h5diff/testfiles/h5diff_dset_idx2.h5
 ./tools/test/h5diff/testfiles/h5diff_dtypes.h5
 ./tools/test/h5diff/testfiles/h5diff_empty.h5
 ./tools/test/h5diff/testfiles/h5diff_hyper1.h5
@@ -3123,7 +3145,9 @@
 ./tools/test/h5stat/CMakeTests.cmake
 ./tools/src/misc/CMakeLists.txt
 ./tools/test/misc/CMakeLists.txt
-./tools/test/misc/CMakeTests.cmake
+./tools/test/misc/CMakeTestsClear.cmake
+./tools/test/misc/CMakeTestsMkgrp.cmake
+./tools/test/misc/CMakeTestsRepart.cmake
 ./tools/test/misc/vds/CMakeLists.txt
 ./tools/test/perform/CMakeLists.txt
 ./tools/test/perform/CMakeTests.cmake

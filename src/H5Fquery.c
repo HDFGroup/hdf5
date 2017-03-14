@@ -1235,3 +1235,150 @@ H5F_mdc_log_location(const H5F_t *f)
     FUNC_LEAVE_NOAPI(f->shared->mdc_log_location)
 } /* end H5F_mdc_log_location() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_alignment
+ *
+ * Purpose:	Retrieve the 'alignment' for the file.
+ *
+ * Return:	Success:	Non-negative, the 'alignment'
+ *
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Vailin Choi; Dec 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5F_get_alignment(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->alignment)
+} /* end H5F_get_alignment() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_threshold
+ *
+ * Purpose:	Retrieve the 'threshold' for alignment in the file.
+ *
+ * Return:	Success:	Non-negative, the 'threshold'
+ *
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Vailin Choi; Dec 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5F_get_threshold(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->threshold)
+} /* end H5F_get_threshold() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_pgend_meta_thres
+ *
+ * Purpose:	Retrieve the 'page end meta threshold size' for the file.
+ *
+ * Return:	Success:	Non-negative, the 'pgend_meta_thres'
+ *
+ * 		Failure:	(can't happen)
+ *
+ * Programmer:	Vailin Choi; Dec 2012
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5F_get_pgend_meta_thres(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->pgend_meta_thres)
+} /* end H5F_get_pgend_meta_thres() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_point_of_no_return
+ *
+ * Purpose:	Retrieve the 'point of no return' value for the file.
+ *
+ * Return:	Success:	Non-negative, the 'point_of_no_return'
+ * 		Failure:	(can't happen)
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_point_of_no_return(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->point_of_no_return)
+} /* end H5F_get_point_of_no_return() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_first_alloc_dealloc
+ *
+ * Purpose:	Retrieve the 'first alloc / dealloc' value for the file.
+ *
+ * Return:	Success:	Non-negative, the 'first_alloc_dealloc'
+ * 		Failure:	(can't happen)
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_first_alloc_dealloc(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->first_alloc_dealloc)
+} /* end H5F_get_first_alloc_dealloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_eoa_pre_fsm_fsalloc
+ *
+ * Purpose:	Retrieve the 'EOA pre-FSM fsalloc' value for the file.
+ *
+ * Return:	Success:	Non-negative, the 'EOA pre-FSM fsalloc'
+ * 		Failure:	(can't happen)
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5F_get_eoa_pre_fsm_fsalloc(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(f);
+    HDassert(f->shared);
+
+    FUNC_LEAVE_NOAPI(f->shared->eoa_pre_fsm_fsalloc)
+} /* end H5F_get_eoa_pre_fsm_fsalloc() */
+

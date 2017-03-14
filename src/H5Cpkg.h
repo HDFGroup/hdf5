@@ -4901,7 +4901,8 @@ typedef int (*H5C_tag_iter_cb_t)(H5C_cache_entry_t *entry, void *ctx);
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5C__prep_image_for_file_close(H5F_t *f, hid_t dxpl_id,
+    hbool_t *image_generated);
 H5_DLL herr_t H5C__deserialize_prefetched_entry(H5F_t *f, hid_t dxpl_id,
     H5C_t * cache_ptr, H5C_cache_entry_t** entry_ptr_ptr, 
     const H5C_class_t * type, haddr_t addr, void * udata);

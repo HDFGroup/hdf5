@@ -791,7 +791,7 @@ H5C_mark_entries_as_clean(H5F_t *  f,
             entries_cleared++;
 
             if(H5C__flush_single_entry(f, dxpl_id, clear_ptr,
-                    (H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG)) < 0)
+                    (H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG | H5C__UPDATE_PAGE_BUFFER_FLAG)) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear entry")
         } /* end if */
         else
@@ -821,7 +821,7 @@ H5C_mark_entries_as_clean(H5F_t *  f,
                 progress = TRUE;
 
                 if(H5C__flush_single_entry(f, dxpl_id, clear_ptr, 
-                        (H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG)) < 0)
+                        (H5C__FLUSH_CLEAR_ONLY_FLAG | H5C__GENERATE_IMAGE_FLAG | H5C__UPDATE_PAGE_BUFFER_FLAG)) < 0)
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear entry")
             } /* end if */
             else
@@ -1242,7 +1242,8 @@ H5C__flush_candidates_in_ring(H5F_t *f, hid_t dxpl_id, H5C_ring_t ring,
     unsigned  init_index_len;
 #endif /* H5C_DO_SANITY_CHECKS */
     unsigned  clear_flags = H5C__FLUSH_CLEAR_ONLY_FLAG |
-                            H5C__GENERATE_IMAGE_FLAG;
+                            H5C__GENERATE_IMAGE_FLAG |
+                            H5C__UPDATE_PAGE_BUFFER_FLAG;
     unsigned  flush_flags = H5C__NO_FLAGS_SET;
     unsigned  op_flags;
     H5C_cache_entry_t *op_ptr;

@@ -91,12 +91,14 @@ Attribute bins:
 	# of objects with 10 - 99 attributes: 3
 	Total # of objects with attributes: 5
 	Max. # of attributes to objects: 25
+Free-space persist: FALSE
 Free-space section threshold: 1 bytes
 Small size free-space sections (< 10 bytes):
 	Total # of small size sections: 0
 Free-space section bins:
 	Total # of sections: 0
-File space management strategy: H5F_FILE_SPACE_ALL
+File space management strategy: H5F_FSPACE_STRATEGY_FSM_AGGR
+File space page size: 4096 bytes
 Summary of file space information:
   File metadata: 16128 bytes
   Raw data: 0 bytes

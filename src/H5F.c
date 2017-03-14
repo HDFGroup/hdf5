@@ -1975,7 +1975,9 @@ H5Fformat_convert(hid_t fid)
 
         /* Check for persistent freespace manager, which needs to be downgraded */
         if(!(f->shared->fs_strategy == H5F_FILE_SPACE_STRATEGY_DEF &&
-                f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF)) {
+             f->shared->fs_persist == H5F_FREE_SPACE_PERSIST_DEF &&
+             f->shared->fs_threshold == H5F_FREE_SPACE_THRESHOLD_DEF &&
+             f->shared->fs_page_size == H5F_FILE_SPACE_PAGE_SIZE_DEF)) {
             /* Check to remove free-space manager info message from superblock extension */
             if(H5F_addr_defined(f->shared->sblock->ext_addr))
                 if(H5F_super_ext_remove_msg(f, H5AC_ind_read_dxpl_id, H5O_FSINFO_ID) < 0)
@@ -1987,7 +1989,9 @@ H5Fformat_convert(hid_t fid)
 
             /* Set non-persistent freespace manager */
             f->shared->fs_strategy = H5F_FILE_SPACE_STRATEGY_DEF;
+            f->shared->fs_persist = H5F_FREE_SPACE_PERSIST_DEF;
             f->shared->fs_threshold = H5F_FREE_SPACE_THRESHOLD_DEF;
+            f->shared->fs_page_size = H5F_FILE_SPACE_PAGE_SIZE_DEF;
 
             /* Indicate that the superblock should be marked dirty */
             mark_dirty = TRUE;
@@ -2005,4 +2009,80 @@ H5Fformat_convert(hid_t fid)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fformat_convert() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Freset_page_buffering_stats
+ *
+ * Purpose:     Resets statistics for the page buffer layer.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Freset_page_buffering_stats(hid_t file_id)
+{
+    H5F_t   *file;                      /* File to reset stats on */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object(file_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+    if(NULL == file->shared->page_buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "page buffering not enabled on file")
+
+    /* Reset the statistics */
+    if(H5PB_reset_stats(file->shared->page_buf) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't reset stats for page buffering")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+}   /* H5Freset_page_buffering_stats() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_page_buffering_stats
+ *
+ * Purpose:     Retrieves statistics for the page buffer layer.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Mohamad Chaarawi
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2], unsigned hits[2],
+    unsigned misses[2], unsigned evictions[2], unsigned bypasses[2])
+{
+    H5F_t      *file;                   /* File object for file ID */
+    herr_t     ret_value = SUCCEED;     /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "i*Iu*Iu*Iu*Iu*Iu", file_id, accesses, hits, misses, evictions,
+             bypasses);
+
+    /* Check args */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    if(NULL == file->shared->page_buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "page buffering not enabled on file")
+    if(NULL == accesses || NULL == hits || NULL == misses || NULL == evictions || NULL == bypasses)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL input parameters for stats")
+
+    /* Get the statistics */
+    if(H5PB_get_stats(file->shared->page_buf, accesses, hits, misses, evictions, bypasses) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stats for page buffering")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fget_page_buffering_stats() */
 

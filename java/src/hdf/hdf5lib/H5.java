@@ -5356,39 +5356,24 @@ public class H5 implements java.io.Serializable {
             throws HDF5LibraryException, IllegalArgumentException;
 
     /**
-     * H5Pset_file_space sets the file space management strategy for the file associated with fcpl_id to strategy.
+     * H5Pset_file_space_strategy sets the file space management strategy for the file associated with fcpl_id to strategy.
      * There are four strategies that applications can select and they are described in the Parameters section.
      *
      * @param fcpl_id
      *            IN: File creation property list identifier
      * @param strategy
      *            IN: The strategy for file space management.
-     *                Passing a value of zero (0) indicates that the value of strategy is not to be modified.
-     *                H5F_FILE_SPACE_ALL_PERSIST
-     *                        With this strategy, the free-space managers track the free space that results from the
-     *                        manipulation of HDF5 objects in the HDF5 file. The free space information is saved when the
-     *                        file is closed, and reloaded when the file is reopened. When space is needed for file metadata
-     *                        or raw data, the HDF5 library first requests space from the library's free-space managers.
-     *                        If the request is not satisfied, the library requests space from the aggregators. If the request
-     *                        is still not satisfied, the library requests space from the virtual file driver. That is, the
-     *                        library will use all of the mechanisms for allocating space.
-     *                H5F_FILE_SPACE_ALL     (Default file space management strategy)
-     *                        With this strategy, the free-space managers track the free space that results from the manipulation
-     *                        of HDF5 objects in the HDF5 file. The free space information is NOT saved when the file is closed
-     *                        and the free space that exists upon file closing becomes unaccounted space in the file.
-     *                        Like the previous strategy, the library will try all of the mechanisms for allocating space. When
-     *                        space is needed for file metadata or raw data, the library first requests space from the free-space
-     *                        managers. If the request is not satisfied, the library requests space from the aggregators. If the
-     *                        request is still not satisfied, the library requests space from the virtual file driver.
-     *                H5F_FILE_SPACE_AGGR_VFD
-     *                        With this strategy, the library does not track free space that results from the manipulation of HDF5
-     *                        obejcts in the HDF5 file and the free space becomes unaccounted space in the file.
-     *                        When space is needed for file metadata or raw data, the library first requests space from the
-     *                        aggregators. If the request is not satisfied, the library requests space from the virtual file driver.
-     *                H5F_FILE_SPACE_VFD
-     *                        With this strategy, the library does not track free space that results from the manipulation of HDF5
-     *                        obejcts in the HDF5 file and the free space becomes unaccounted space in the file.
-     *                        When space is needed for file metadata or raw data, the library requests space from the virtual file driver.
+     *                H5F_FSPACE_STRATEGY_FSM_AGGR
+     *                        Mechanisms: free-space managers, aggregators, and virtual file drivers
+     *                        This is the library default when not set.
+     *                H5F_FSPACE_STRATEGY_PAGE
+     *                        Mechanisms: free-space managers with embedded paged aggregation and virtual file drivers
+     *                H5F_FSPACE_STRATEGY_AGGR
+     *                        Mechanisms: aggregators and virtual file drivers
+     *                H5F_FSPACE_STRATEGY_NONE
+     *                        Mechanisms: virtual file drivers
+     * @param persist
+     *            IN: True to persist free-space.
      * @param threshold
      *            IN: The free-space section threshold. The library default is 1, which is to track all free-space sections.
      *                Passing a value of zero (0) indicates that the value of threshold is not to be modified.
@@ -5399,18 +5384,20 @@ public class H5 implements java.io.Serializable {
      *                - Invalid values of max_list and min_btree.
      *
      **/
-    public synchronized static native void H5Pset_file_space(long fcpl_id, int strategy, long threshold)
+    public synchronized static native void H5Pset_file_space_strategy(long fcpl_id, int strategy, boolean persist, long threshold)
             throws HDF5LibraryException, IllegalArgumentException;
 
     /**
-     * H5Pget_file_space provides the means for applications to manage the HDF5 file's file space for their specific needs.
+     * H5Pget_file_space_strategy provides the means for applications to manage the HDF5 file's file space strategy for their specific needs.
      *
      * @param fcpl_id
      *            IN: File creation property list identifier
-     * @param strategy
-     *            IN/OUT: The current file space management strategy in use for the file. NULL, strategy not queried.
+     * @param persist
+     *            IN/OUT: The current free-space persistence. NULL, persist not queried.
      * @param threshold
      *            IN/OUT: The current free-space section threshold. NULL, threshold not queried.
+     *
+     * @return the current free-space strategy.
      *
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
@@ -5418,8 +5405,78 @@ public class H5 implements java.io.Serializable {
      *                - Invalid values of max_list and min_btree.
      *
      **/
-    public synchronized static native void H5Pget_file_space(long fcpl_id, int[] strategy, long[] threshold)
+    public synchronized static native int H5Pget_file_space_strategy(long fcpl_id, boolean[] persist, long[] threshold)
             throws HDF5LibraryException, IllegalArgumentException;
+
+    /**
+     * H5Pget_file_space_strategy_persist provides the means for applications to manage the HDF5 file's file space strategy for their specific needs.
+     *
+     * @param fcpl_id
+     *            IN: File creation property list identifier
+     *
+     * @return the current free-space persistence.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception IllegalArgumentException
+     *                - Invalid values of max_list and min_btree.
+     *
+     **/
+    public synchronized static native boolean H5Pget_file_space_strategy_persist(long fcpl_id)
+            throws HDF5LibraryException, IllegalArgumentException;
+
+    /**
+     * H5Pget_file_space_strategy_threshold provides the means for applications to manage the HDF5 file's file space strategy for their specific needs.
+     *
+     * @param fcpl_id
+     *            IN: File creation property list identifier
+     *
+     * @return the current free-space section threshold.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     * @exception IllegalArgumentException
+     *                - Invalid values of max_list and min_btree.
+     *
+     **/
+   public synchronized static native long H5Pget_file_space_strategy_threshold(long fcpl_id)
+            throws HDF5LibraryException, IllegalArgumentException;
+
+   /**
+    * H5Pset_file_space_page_size retrieves the file space page size for aggregating small metadata or raw data.
+    *
+    * @param fcpl_id
+    *            IN: File creation property list identifier
+    * @param page_size
+    *            IN: the file space page size.
+    *
+    *
+    * @exception HDF5LibraryException
+    *                - Error from the HDF-5 Library.
+    * @exception IllegalArgumentException
+    *                - Invalid values of max_list and min_btree.
+    *
+    **/
+  public synchronized static native void H5Pset_file_space_page_size(long fcpl_id, long page_size)
+           throws HDF5LibraryException, IllegalArgumentException;
+
+   /**
+    * H5Pget_file_space_page_size Sets the file space page size for paged aggregation.
+    *
+    * @param fcpl_id
+    *            IN: File creation property list identifier
+    *
+    * @return the current file space page size.
+    *
+    * @exception HDF5LibraryException
+    *                - Error from the HDF-5 Library.
+    * @exception IllegalArgumentException
+    *                - Invalid values of max_list and min_btree.
+    *
+    **/
+  public synchronized static native long H5Pget_file_space_page_size(long fcpl_id)
+           throws HDF5LibraryException, IllegalArgumentException;
+
 
     // File access property list (FAPL) routines
 

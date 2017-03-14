@@ -732,7 +732,8 @@ herr_t
 H5C_prep_for_file_close(H5F_t *f, hid_t dxpl_id)
 {
     H5C_t *     cache_ptr;
-    herr_t	ret_value = SUCCEED;      /* Return value */
+    hbool_t     image_generated = FALSE;        /* Whether a cache image was generated */
+    herr_t	ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -756,9 +757,48 @@ H5C_prep_for_file_close(H5F_t *f, hid_t dxpl_id)
     HDassert(cache_ptr->pl_len == 0);
 
     /* Prepare cache image */
-    if(H5C__prep_image_for_file_close(f, dxpl_id) < 0)
+    if(H5C__prep_image_for_file_close(f, dxpl_id, &image_generated) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create cache image")
 
+#ifdef H5_HAVE_PARALLEL
+    if(!image_generated && cache_ptr->aux_ptr != NULL && f->shared->fs_persist) {
+        /* If persistent free space managers are enabled, flushing the
+         * metadata cache may result in the deletion, insertion, and/or
+         * dirtying of entries.
+         *
+         * This is a problem in PHDF5, as it breaks two invariants of
+         * our management of the metadata cache across all processes:
+         *
+         * 1) Entries will not be dirtied, deleted, inserted, or moved
+         *    during flush in the parallel case.
+         *
+         * 2) All processes contain the same set of dirty metadata
+         *    entries on entry to a sync point.
+         *
+         * To solve this problem for the persistent free space managers,
+         * serialize the metadata cache on all processes prior to the
+         * first sync point on file shutdown.  The shutdown warning is
+         * a convenient location for this call.
+         *
+         * This is sufficient since:
+         *
+         * 1) FSM settle routines are only invoked on file close.  Since
+         *    serialization make the same settle calls as flush on file
+         *    close, and since the close warning is issued after all
+         *    non FSM related space allocations and just before the
+         *    first sync point on close, this call will leave the caches
+         *    in a consistant state across the processes if they were
+         *    consistant before.
+         *
+         * 2) Since the FSM settle routines are only invoked once during
+         *    file close, invoking them now will prevent their invocation
+         *    during a flush, and thus avoid any resulting entrie dirties,
+         *    deletions, insertion, or moves during the flush.
+         */
+        if(H5C__serialize_cache(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSERIALIZE, FAIL, "serialization of the cache failed")
+    } /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3537,6 +3577,73 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_unsettle_ring()
+ *
+ * Purpose:     Advise the metadata cache that the specified free space
+ *              manager ring is no longer settled (if it was on entry).
+ *
+ *              If the target free space manager ring is already
+ *              unsettled, do nothing, and return SUCCEED.
+ *
+ *              If the target free space manager ring is settled, and
+ *              we are not in the process of a file shutdown, mark
+ *              the ring as unsettled, and return SUCCEED.
+ *
+ *              If the target free space manager is settled, and we
+ *              are in the process of a file shutdown, post an error
+ *              message, and return FAIL.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              10/15/16
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_unsettle_ring(H5F_t * f, H5C_ring_t ring)
+{
+    H5C_t *             cache_ptr;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+    HDassert((H5C_RING_RDFSM == ring) || (H5C_RING_MDFSM == ring));
+    cache_ptr = f->shared->cache;
+    HDassert(H5C__H5C_T_MAGIC == cache_ptr->magic);
+
+    switch(ring) {
+        case H5C_RING_RDFSM:
+            if(cache_ptr->rdfsm_settled) {
+                if(cache_ptr->close_warning_received)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected rdfsm ring unsettle")
+                cache_ptr->rdfsm_settled = FALSE;
+            } /* end if */
+            break;
+
+        case H5C_RING_MDFSM:
+            if(cache_ptr->mdfsm_settled) {
+                if(cache_ptr->close_warning_received)
+                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unexpected mdfsm ring unsettle")
+                cache_ptr->mdfsm_settled = FALSE;
+            } /* end if */
+            break;
+
+	default:
+	    HDassert(FALSE); /* this should be un-reachable */
+	    break;
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_unsettle_ring() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_validate_resize_config()
  *
  * Purpose:	Run a sanity check on the specified sections of the
@@ -6007,6 +6114,7 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
     hbool_t		write_entry;		/* internal flag */
     hbool_t		destroy_entry;		/* internal flag */
     hbool_t		generate_image;		/* internal flag */
+    hbool_t		update_page_buffer;	/* internal flag */
     hbool_t		was_dirty;
     hbool_t		suppress_image_entry_writes = FALSE;
     hbool_t		suppress_image_entry_frees = FALSE;
@@ -6032,6 +6140,7 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
     del_from_slist_on_destroy = ((flags & H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG) != 0);
     during_flush           = ((flags & H5C__DURING_FLUSH_FLAG) != 0);
     generate_image         = ((flags & H5C__GENERATE_IMAGE_FLAG) != 0);
+    update_page_buffer     = ((flags & H5C__UPDATE_PAGE_BUFFER_FLAG) != 0);
 
     /* Set the flag for destroying the entry, based on the 'take ownership'
      * and 'destroy' flags
@@ -6446,6 +6555,19 @@ H5C__flush_single_entry(H5F_t *f, hid_t dxpl_id, H5C_cache_entry_t *entry_ptr,
             entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_BAD_MAGIC;
         } /* end else */
     } /* if (destroy) */
+
+    /* Check if we have to update the page buffer with cleared entries 
+     * so it doesn't go out of date 
+     */
+    if(update_page_buffer) {
+        /* Sanity check */
+        HDassert(!destroy);
+        HDassert(entry_ptr->image_ptr);
+
+        if(f->shared->page_buf && f->shared->page_buf->page_size >= entry_ptr->size)
+            if(H5PB_update_entry(f->shared->page_buf, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) > 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Failed to update PB with metadata cache")
+    } /* end if */
 
     if(cache_ptr->log_flush)
         if((cache_ptr->log_flush)(cache_ptr, entry_addr, was_dirty, flags) < 0)

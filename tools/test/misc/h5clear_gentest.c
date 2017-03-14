@@ -25,6 +25,103 @@ const char *FILENAME[] = {
 
 #define KB 		1024U
 
+#define CACHE_IMAGE_FILE    "h5clear_mdc_image.h5"
+#define DSET                "DSET"
+
+/*-------------------------------------------------------------------------
+ * Function:	gen_cache_image_file
+ *
+ * Purpose:	    To create a file with cache image feature enabled.
+ *
+ * Return:      Success:	0
+ *              Failure:	1
+ *
+ * Programmer:	Vailin Choi; March 2017
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+gen_cache_image_file(const char *fname)
+{
+    hid_t fid = -1;                 /* File ID */
+    hid_t did = -1, sid = -1;       /* Dataset ID, dataspace ID */
+    hid_t fapl = -1;                /* File access property list */
+    hid_t dcpl = -1;                /* Dataset creation property list */
+    hsize_t dims[2];                /* Dimension sizes */
+    hsize_t chunks[2];              /* Chunked dimension sizes */
+    int buf[50][100];               /* Buffer for data to write */
+    int i, j;                       /* Local index variables */
+    H5AC_cache_image_config_t cache_image_config =  /* Cache image input configuration */
+                            { H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION,
+                              TRUE, FALSE,
+                              H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
+
+    /* Create a copy of file access property list */
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        goto error;
+
+    /* Enable latest format in fapl */
+    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        goto error;
+
+    /* Enable metadata cache image in fapl */
+    if(H5Pset_mdc_image_config(fapl, &cache_image_config) < 0)
+        goto error;
+
+    /* Create the file */
+    if((fid = H5Fcreate(fname, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+
+    /* Create dataspace */
+    dims[0] = 50;
+    dims[1] = 100;
+    if((sid = H5Screate_simple(2, dims, NULL)) < 0)
+        goto error;
+
+    /* Initialize buffer for writing to dataset */
+    for(i = 0; i < 50; i++)
+        for(j = 0; j < 100; j++)
+            buf[i][j] = i * j;
+
+    /* Set up to create a chunked dataset */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        goto error;
+    chunks[0] = 5;
+    chunks[1] = 10;
+    if(H5Pset_chunk(dcpl, 2, chunks) < 0)
+        goto error;
+    if((did = H5Dcreate2(fid, DSET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        goto error;
+
+    /* Write to the dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        goto error;
+
+    /* Closing */
+    if(H5Dclose(did) < 0)
+        goto error;
+    if(H5Pclose(dcpl) < 0)
+        goto error;
+    if(H5Pclose(fapl) < 0)
+        goto error;
+    if(H5Sclose(sid) < 0)
+        goto error;
+    if(H5Fclose(fid) < 0)
+        goto error;
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Fclose(fid);
+        H5Pclose(fapl);
+        H5Pclose(dcpl);
+    } H5E_END_TRY;
+    return 1;
+}
+
 /*-------------------------------------------------------------------------
  * Function:	main
  *
@@ -59,6 +156,14 @@ main(void)
     hid_t fapl, new_fapl;	/* File access property lists */
     char fname[512];		/* File name */
     unsigned new_format;		/* To use latest library format or not */
+
+    /* Generate a file with cache image feature enabled */
+    if(gen_cache_image_file(CACHE_IMAGE_FILE) < 0)
+        goto error;
+
+    /* 
+     * Generate files with invalid status_flags 
+     */
 
     /* Create a copy of the file access property list */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)

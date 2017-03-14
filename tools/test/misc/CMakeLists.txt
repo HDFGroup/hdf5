@@ -39,4 +39,6 @@ INCLUDE_DIRECTORIES (${HDF5_TOOLS_DIR}/lib)
   target_link_libraries (clear_open_chk ${HDF5_LIB_TARGET} ${HDF5_TOOLS_LIB_TARGET})
   set_target_properties (clear_open_chk PROPERTIES FOLDER tools)
 
-  include (CMakeTests.cmake)
+  include (CMakeTestsRepart.cmake)
+  include (CMakeTestsClear.cmake)
+  include (CMakeTestsMkgrp.cmake)

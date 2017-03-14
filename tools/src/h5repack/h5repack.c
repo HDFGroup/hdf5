@@ -78,8 +78,7 @@ int h5repack(const char* infile, const char* outfile, pack_opt_t *options) {
  *-------------------------------------------------------------------------
  */
 int
-h5repack_init(pack_opt_t *options, int verbose, hbool_t latest,
-    H5F_file_space_type_t strategy, hsize_t threshold)
+h5repack_init(pack_opt_t *options, int verbose, hbool_t latest)
 {
     int k, n;
 
@@ -95,9 +94,6 @@ h5repack_init(pack_opt_t *options, int verbose, hbool_t latest,
         for (k = 0; k < CD_VALUES; k++)
             options->filter_g[n].cd_values[k] = 0;
     }
-
-	options->fs_strategy = strategy;
-	options->fs_threshold = threshold;
 
     return (options_table_init(&(options->op_tbl)));
 }

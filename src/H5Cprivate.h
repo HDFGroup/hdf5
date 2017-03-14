@@ -185,6 +185,7 @@
  *      H5C__TAKE_OWNERSHIP_FLAG
  *      H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG
  *      H5C__GENERATE_IMAGE_FLAG
+ *      H5C__UPDATE_PAGE_BUFFER_FLAG
  */
 #define H5C__NO_FLAGS_SET			0x00000
 #define H5C__SET_FLUSH_MARKER_FLAG		0x00001
@@ -205,6 +206,7 @@
 #define H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG     0x08000
 #define H5C__DURING_FLUSH_FLAG                  0x10000 /* Set when the entire cache is being flushed */
 #define H5C__GENERATE_IMAGE_FLAG                0x20000 /* Set during parallel I/O */
+#define H5C__UPDATE_PAGE_BUFFER_FLAG            0x40000 /* Set during parallel I/O */
 
 /* Debugging/sanity checking/statistics settings */
 #ifndef NDEBUG
@@ -2249,6 +2251,7 @@ H5_DLL herr_t H5C_expunge_entry(H5F_t *f, hid_t dxpl_id,
     const H5C_class_t *type, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5C_flush_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag); 
+H5_DLL herr_t H5C_force_cache_image_load(H5F_t * f, hid_t dxpl_id);
 H5_DLL herr_t H5C_evict_tagged_entries(H5F_t * f, hid_t dxpl_id, haddr_t tag, hbool_t match_global);
 H5_DLL herr_t H5C_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
 H5_DLL herr_t H5C_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
@@ -2313,9 +2316,11 @@ H5_DLL herr_t H5C_retag_entries(H5C_t * cache_ptr, haddr_t src_tag, haddr_t dest
 H5_DLL herr_t H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked);
 H5_DLL herr_t H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring);
 H5_DLL herr_t H5C_unsettle_entry_ring(void *thing);
+H5_DLL herr_t H5C_unsettle_ring(H5F_t * f, H5C_ring_t ring);
 H5_DLL herr_t H5C_remove_entry(void *thing);
 H5_DLL herr_t H5C_cache_image_status(H5F_t * f, hbool_t *load_ci_ptr, 
     hbool_t *write_ci_ptr);
+H5_DLL hbool_t H5C_cache_image_pending(const H5C_t *cache_ptr);
 
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5C_apply_candidate_list(H5F_t *f, hid_t dxpl_id,

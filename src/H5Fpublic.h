@@ -182,6 +182,17 @@ typedef enum H5F_libver_t {
 } H5F_libver_t;
 
 /* File space handling strategy */
+typedef enum H5F_fspace_strategy_t {
+    H5F_FSPACE_STRATEGY_FSM_AGGR = 0,   /* Mechanisms: free-space managers, aggregators, and virtual file drivers */
+                                        /* This is the library default when not set */
+    H5F_FSPACE_STRATEGY_PAGE = 1,   /* Mechanisms: free-space managers with embedded paged aggregation and virtual file drivers */
+    H5F_FSPACE_STRATEGY_AGGR = 2,   /* Mechanisms: aggregators and virtual file drivers */
+    H5F_FSPACE_STRATEGY_NONE = 3,   /* Mechanisms: virtual file drivers */
+    H5F_FSPACE_STRATEGY_NTYPES      /* must be last */
+} H5F_fspace_strategy_t;
+
+/* Deprecated: File space handling strategy for release 1.10.0 */
+/* They are mapped to H5F_fspace_strategy_t as defined above from release 1.10.1 onwards */
 typedef enum H5F_file_space_type_t {
     H5F_FILE_SPACE_DEFAULT = 0,     /* Default (or current) free space strategy setting */
     H5F_FILE_SPACE_ALL_PERSIST = 1, /* Persistent free space managers, aggregators, virtual file driver */
@@ -253,6 +264,10 @@ H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id,
                                         /*OUT*/ hbool_t *is_enabled,
                                         /*OUT*/ hbool_t *is_currently_logging);
 H5_DLL herr_t H5Fformat_convert(hid_t fid);
+H5_DLL herr_t H5Freset_page_buffering_stats(hid_t file_id);
+H5_DLL herr_t H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2],
+    unsigned hits[2], unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
+
 #ifdef H5_HAVE_PARALLEL
 H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
 H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);

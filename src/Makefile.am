@@ -60,7 +60,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5F.c H5Fint.c H5Faccum.c H5Fcwfs.c \
         H5Fdbg.c H5Fdeprec.c H5Fefc.c H5Ffake.c H5Fio.c \
         H5Fmount.c H5Fquery.c \
-        H5Fsfile.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
+        H5Fsfile.c H5Fspace.c H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
         H5FA.c H5FAcache.c H5FAdbg.c H5FAdblock.c H5FAdblkpage.c H5FAhdr.c \
         H5FAint.c H5FAstat.c H5FAtest.c \
         H5FD.c H5FDcore.c  \
@@ -98,6 +98,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Pfapl.c H5Pfcpl.c H5Pfmpl.c \
         H5Pgcpl.c H5Pint.c \
         H5Plapl.c H5Plcpl.c H5Pocpl.c H5Pocpypl.c H5Pstrcpl.c H5Ptest.c \
+        H5PB.c \
         H5PL.c \
         H5R.c H5Rdeprec.c \
         H5UC.c \
