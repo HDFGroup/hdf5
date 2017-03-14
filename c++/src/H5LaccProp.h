@@ -46,6 +46,13 @@ class H5_DLLCPP LinkAccPropList : public PropList {
         // using the property list id.
         LinkAccPropList (const hid_t plist_id);
 
+        // Sets the number of soft or user-defined links that can be
+        // traversed before a failure occurs.
+        void setNumLinks(size_t nlinks) const;
+
+        // Gets the number of soft or user-defined link traversals allowed
+        size_t getNumLinks() const;
+
         // Noop destructor
         virtual ~LinkAccPropList();
 

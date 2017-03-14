@@ -1148,6 +1148,87 @@ test_types(H5File& file)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_virtual
+ *
+ * Purpose:     Tests fixed, unlimited, and printf selections in the same
+ *              VDS
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              Friday, March 10, 2017
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+const int RANK = 2;
+static herr_t
+test_virtual()
+{
+    SUBTEST("DSetCreatPropList::setVirtual");
+
+    try {
+        // Create DCPLs
+        DSetCreatPropList dcpl;
+        DSetCreatPropList srcdcpl;
+
+        // Set fill value
+        char *fill = NULL;
+        dcpl.setFillValue(PredType::NATIVE_INT, &fill);
+
+        // Set chunk dimensions
+        hsize_t cdims[RANK];
+        cdims[0] = 2;
+        cdims[1] = 2;
+        srcdcpl.setChunk(RANK, cdims);
+
+        // Create memory space
+        hsize_t mdims[RANK];
+        mdims[0] = 10;
+        mdims[1] = 10;
+        DataSpace memspace(RANK, mdims);
+
+        // Get the current layout, should be default, H5D_CONTIGUOUS
+        H5D_layout_t layout = dcpl.getLayout();
+        verify_val(layout, H5D_CONTIGUOUS, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+
+        // Create fixed mapping
+        hsize_t dims[RANK];
+        dims[0] = 6;
+        dims[1] = 6;
+        DataSpace vspace(RANK, dims, mdims);
+
+        hsize_t start[RANK];       // Hyperslab start
+        hsize_t count[RANK];       // Hyperslab count
+        start[0] = start[1] = 3;
+        count[0] = count[1] = 3;
+        vspace.selectHyperslab(H5S_SELECT_SET, count, start);
+
+        DataSpace srcspace(RANK, count);
+
+        H5std_string src_file = "src_file_map.h5";
+        H5std_string src_dset = "src_dset_fixed";
+        dcpl.setVirtual(vspace, src_file, src_dset, srcspace);
+
+        // Get and verify the new layout
+        layout = dcpl.getLayout();
+        verify_val(layout, H5D_VIRTUAL, "DSetCreatPropList::getLayout", __LINE__, __FILE__);
+
+        PASSED();
+        return 0;
+    } // end top try block
+
+    catch (Exception& E)
+    {
+        return -1;
+    }
+} // test_virtual
+
+
+/*-------------------------------------------------------------------------
  * Function:    test_dset
  *
  * Purpose      Tests the dataset interface (H5D)
@@ -1195,6 +1276,7 @@ void test_dset()
         nerrors += test_nbit_compression(file) < 0 ? 1:0;
         nerrors += test_multiopen (file) < 0 ? 1:0;
         nerrors += test_types(file) < 0 ? 1:0;
+        nerrors += test_virtual() < 0 ? 1:0;
 
         // Close group "emit diagnostics".
         grp.close();

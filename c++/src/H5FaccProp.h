@@ -117,6 +117,12 @@ class H5_DLLCPP FileAccPropList : public PropList {
         // Returns the degree for the file close behavior.
         H5F_close_degree_t getFcloseDegree() const;
 
+        // Sets file access property list to use the H5FD_DIRECT driver.
+        void setFileAccDirect(size_t boundary, size_t block_size, size_t cbuf_size) const;
+
+        // Retrieves information about the direct file access property list.
+        void getFileAccDirect(size_t &boundary, size_t &block_size, size_t &cbuf_size) const;
+
         // Sets garbage collecting references flag.
         void setGcReferences(unsigned gc_ref = 0) const;
 
