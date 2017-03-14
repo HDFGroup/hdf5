@@ -190,14 +190,23 @@ H5VL_term_package(void)
 static herr_t
 H5VL_free_cls(H5VL_class_t *cls)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(cls);
 
+    /* XXX: Need to retrieve the VOL termination property list for the
+     * terminate operation - JTH
+     */
+    if (cls->terminate && cls->terminate(H5P_DEFAULT) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL plugin did not terminate cleanly")
+
     H5MM_free(cls);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_free_cls() */
 
 
