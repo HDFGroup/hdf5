@@ -10,7 +10,6 @@ int main(int argc, char *argv[]) {
     H5VL_daosm_snap_id_t snap_id;
 
     (void)MPI_Init(&argc, &argv);
-    (void)daos_init();
 
     /* Seed random number generator */
     srand(time(NULL));
@@ -22,10 +21,14 @@ int main(int argc, char *argv[]) {
     if(0 != uuid_parse(argv[1], pool_uuid))
         ERROR;
 
+    /* Initialize VOL */
+    if(H5VLdaosm_init(MPI_COMM_WORLD, pool_uuid, pool_grp) < 0)
+        ERROR;
+
     /* Set up FAPL */
     if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         ERROR;
-    if(H5Pset_fapl_daosm(fapl, MPI_COMM_WORLD, MPI_INFO_NULL, pool_uuid, pool_grp) < 0)
+    if(H5Pset_fapl_daosm(fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
         ERROR;
 
     /* Open snapshot if specified */
@@ -71,9 +74,11 @@ int main(int argc, char *argv[]) {
     if(H5Pclose(fapl) < 0)
         ERROR;
 
+    if(H5VLdaosm_term() < 0)
+        ERROR;
+
     printf("Success\n");
 
-    (void)daos_fini();
     (void)MPI_Finalize();
     return 0;
 
@@ -82,9 +87,9 @@ error:
         H5Dclose(dset);
         H5Fclose(file);
         H5Pclose(fapl);
+        H5VLdaosm_term();
     } H5E_END_TRY;
 
-    (void)daos_fini();
     (void)MPI_Finalize();
     return 1;
 }

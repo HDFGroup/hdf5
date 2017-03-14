@@ -31,10 +31,8 @@
 
 #include "daos.h"
 
-#define H5VL_DAOSM	(H5VL_daosm_init())
 #define HDF5_VOL_DAOSM_VERSION_1	1	/* Version number of IOD VOL plugin */
-#else
-#define H5VL_DAOSM	(-1)
+
 #endif
 
 #ifdef __cplusplus
@@ -64,7 +62,6 @@ typedef struct H5VL_daosm_obj_t {
 /* The file struct */
 typedef struct H5VL_daosm_file_t {
     H5VL_daosm_item_t item; /* Must be first */
-    daos_handle_t poh;
     daos_handle_t coh;
     daos_epoch_t epoch;
     int snap_epoch;
@@ -119,7 +116,7 @@ typedef struct H5VL_daosm_link_val_t {
 
 extern hid_t H5VL_DAOSM_g;
 
-H5_DLL hid_t H5VL_daosm_init(void);
+H5_DLL herr_t H5VL_daosm_init(void);
 
 #endif /* H5_HAVE_EFF */
 

@@ -41,8 +41,10 @@ extern "C" {
 
 typedef uint64_t H5VL_daosm_snap_id_t;
 
-H5_DLL herr_t H5Pset_fapl_daosm(hid_t fapl_id, MPI_Comm comm, MPI_Info info,
-    uuid_t pool_uuid, char *pool_grp);
+H5_DLL herr_t H5VLdaosm_init(MPI_Comm pool_comm, uuid_t pool_uuid,
+    char *pool_grp);
+H5_DLL herr_t H5VLdaosm_term(void);
+H5_DLL herr_t H5Pset_fapl_daosm(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
 H5_DLL herr_t H5VLdaosm_snap_create(hid_t loc_id,
     H5VL_daosm_snap_id_t *snap_id);
 H5_DLL herr_t H5Pset_daosm_snap_open(hid_t fapl_id,
