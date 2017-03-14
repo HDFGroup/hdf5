@@ -139,6 +139,15 @@ int main( void )
     unsigned new_format;         /* Whether to use the latest file format */
     unsigned chunk_cache;        /* Whether to enable chunk caching */
     int	  nerrors = 0;
+    const char  *env_h5_drvr;	/* File Driver value from environment */
+    hbool_t contig_addr_vfd;    /* Whether VFD used has a contigous address space */
+
+
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if(env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+    /* Current VFD that does not support contigous address space */
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
 
     /* Initialize random number seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -194,12 +203,15 @@ int main( void )
                         H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
             /* Tests which use chunked datasets */
-            nerrors += do_ranks( my_fapl, new_format ) < 0 ? 1 : 0;
+	    if(!new_format || (new_format && contig_addr_vfd))
+		nerrors += do_ranks( my_fapl, new_format ) < 0 ? 1 : 0;
         } /* end for */
 
         /* Tests which do not use chunked datasets */
-        nerrors += test_external( fapl ) < 0 ? 1 : 0;
-        nerrors += do_layouts( fapl ) < 0 ? 1 : 0;
+	if(!new_format || (new_format && contig_addr_vfd)) {
+	    nerrors += test_external( fapl ) < 0 ? 1 : 0;
+	    nerrors += do_layouts( fapl ) < 0 ? 1 : 0;
+	}
     } /* end for */
 
     /* Close 2nd FAPL */

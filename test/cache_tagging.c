@@ -1514,6 +1514,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     haddr_t g_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
+    hbool_t persistant_fsms = FALSE;
 
     /* Testing Macro */
     TESTING("tag application during attribute renaming");
@@ -1521,6 +1522,10 @@ check_attribute_rename_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* check to see if the FCPL specified persistant free space managers */
+    if(H5Pget_file_space_strategy(fcpl, NULL, &persistant_fsms, NULL) < 0)
+        TEST_ERROR;
 
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
@@ -1612,9 +1617,18 @@ check_attribute_rename_tags(hid_t fcpl, int type)
 	 * 3 calls to verify_tag() for verifying free space: 
 	 *   one freespace header tag for H5FD_MEM_DRAW manager, 
 	 *   one freespace header tag for H5FD_MEM_SUPER manager 
+	 *   one freespace section info tag for H5FD_MEM_SUPER manager 
          */
         if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
-        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
+
+        /* If the free space managers are persistant, the
+         * H5MF_tidy_self_referential_fsm_hack() must have been run.
+         * Since this function floats all self referential free space
+         * managers, the H5FD_MEM_SUPER FSM will not be in the metadata
+         * cache.
+         */
+        if(!persistant_fsms && verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0) TEST_ERROR;
+        if(!persistant_fsms && verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0) TEST_ERROR;
 
         /* verify btree header and leaf node belonging to group */
         if ( verify_tag(fid, H5AC_BT2_HDR_ID, g_tag) < 0 ) TEST_ERROR;
@@ -1679,6 +1693,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     haddr_t g_tag = 0;
     hsize_t dims1[2] = {DIMS, DIMS}; /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
+    hbool_t persistant_fsms = FALSE;
 
     /* Testing Macro */
     TESTING("tag application during attribute delete");
@@ -1686,6 +1701,10 @@ check_attribute_delete_tags(hid_t fcpl, int type)
     /* ===== */
     /* Setup */
     /* ===== */
+
+    /* check to see if the FCPL specified persistant free space managers */
+    if ( H5Pget_file_space_strategy(fcpl, NULL, &persistant_fsms, NULL) < 0 )
+        TEST_ERROR;
 
     /* Allocate array */
     if ( (NULL == (data = (int *)HDcalloc(DIMS * DIMS, sizeof(int)))) ) TEST_ERROR;
@@ -1752,12 +1771,26 @@ check_attribute_delete_tags(hid_t fcpl, int type)
         if ( verify_tag(fid, H5AC_SOHM_TABLE_ID, H5AC__SOHM_TAG) < 0 ) TEST_ERROR;
 
         /* 
-	 * 2 calls to verify_tag() for verifying free space: 
-	 *   one freespace header tag for H5FD_MEM_DRAW manager,
-	 *   one freespace header tag for H5FD_MEM_SUPER manager 
-	 */
-        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
-        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) TEST_ERROR;
+         * 2 calls to verify_tag() for verifying free space: 
+         *   one freespace header tag for free-space header,
+         *   one freespace header tag for free-space section info
+         */
+        if ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) 
+            TEST_ERROR;
+        if ( verify_tag(fid, H5AC_FSPACE_SINFO_ID, H5AC__FREESPACE_TAG) < 0 ) 
+            TEST_ERROR;
+
+#if 0
+        /* If the free space managers are persistant, the 
+         * H5MF_tidy_self_referential_fsm_hack() must have been run.
+         * Since this function floats all self referential free space 
+         * managers, the H5FD_MEM_SUPER FSM will not be in the metadata 
+         * cache.
+         */
+        if ( ( ! persistant_fsms ) && 
+             ( verify_tag(fid, H5AC_FSPACE_HDR_ID, H5AC__FREESPACE_TAG) < 0 ) )
+            TEST_ERROR;
+#endif
 
     } /* end if */
 
@@ -3699,7 +3732,7 @@ main(void)
     fcpl_shmesg_all = H5Pcreate(H5P_FILE_CREATE);
     H5Pset_shared_mesg_nindexes(fcpl_shmesg_all, 1);
     H5Pset_shared_mesg_index(fcpl_shmesg_all, 0, H5O_SHMESG_ALL_FLAG, 20);
-    H5Pset_file_space(fcpl_shmesg_all, H5F_FILE_SPACE_ALL_PERSIST, (hsize_t)0);
+    H5Pset_file_space_strategy(fcpl_shmesg_all, H5F_FSPACE_STRATEGY_FSM_AGGR, TRUE, (hsize_t)0);
 
     /* ========= */
     /* Run Tests */

@@ -451,6 +451,8 @@ H5_DLL herr_t H5AC_validate_config(H5AC_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, 
     hsize_t len, hbool_t rw);
 H5_DLL herr_t H5AC_validate_cache_image_config(H5AC_cache_image_config_t *config_ptr);
+H5_DLL hbool_t H5AC_cache_image_pending(const H5F_t *f);
+H5_DLL herr_t H5AC_force_cache_image_load(H5F_t * f, hid_t dxpl_id);
 
 /* Tag & Ring routines */
 H5_DLL herr_t H5AC_tag(hid_t dxpl_id, haddr_t metadata_tag, haddr_t *prev_tag);
@@ -464,6 +466,7 @@ H5_DLL herr_t H5AC_set_ring(hid_t dxpl_id, H5AC_ring_t ring, H5P_genplist_t **dx
     H5AC_ring_t *orig_ring);
 H5_DLL herr_t H5AC_reset_ring(H5P_genplist_t *dxpl, H5AC_ring_t orig_ring);
 H5_DLL herr_t H5AC_unsettle_entry_ring(void *entry);
+H5_DLL herr_t H5AC_unsettle_ring(H5F_t * f, H5AC_ring_t ring);
 H5_DLL herr_t H5AC_expunge_tag_type_metadata(H5F_t *f, hid_t dxpl_id, haddr_t tag, int type_id, unsigned flags);
 H5_DLL herr_t H5AC_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
 

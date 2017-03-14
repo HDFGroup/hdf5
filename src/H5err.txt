@@ -77,6 +77,7 @@ MAJOR, H5E_SOHM, Shared Object Header Messages
 MAJOR, H5E_EARRAY, Extensible Array
 MAJOR, H5E_FARRAY, Fixed Array
 MAJOR, H5E_PLUGIN, Plugin for dynamically loaded library
+MAJOR, H5E_PAGEBUF, Page Buffering
 MAJOR, H5E_NONE_MAJOR, No error
 
 # Sections (for grouping minor errors)

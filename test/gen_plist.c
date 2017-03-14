@@ -403,6 +403,12 @@ main(void)
     if((ret = H5Pset_sizes(fcpl1, 8, 4) < 0))
          assert(ret > 0);
 
+    if((ret = H5Pset_file_space_strategy(fcpl1, H5F_FSPACE_STRATEGY_PAGE, TRUE, (hsize_t)1)) < 0)
+         assert(ret > 0);
+
+    if((ret = H5Pset_file_space_page_size(fcpl1, (hsize_t)4096)) < 0)
+         assert(ret > 0);
+
     if((ret = encode_plist(fcpl1, little_endian, word_length, "testfiles/plist_files/fcpl_")) < 0)
         assert(ret > 0);
 

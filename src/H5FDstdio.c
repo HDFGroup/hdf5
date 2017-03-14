@@ -601,13 +601,6 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
     /* Compute the address for the block to allocate */
     addr = file->eoa;
 
-    /* Check if we need to align this block */
-    if(size >= file->pub.threshold) {
-        /* Check for an already aligned block */
-        if((addr % file->pub.alignment) != 0)
-            addr = ((addr / file->pub.alignment) + 1) * file->pub.alignment;
-    } /* end if */
-
     file->eoa = addr + size;
 
     return addr;

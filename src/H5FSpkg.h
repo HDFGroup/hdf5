@@ -187,8 +187,9 @@ struct H5FS_t {
                                 /* must be either H5C__NO_FLAGS_SET (i.e r/w)  */
 				/* or H5AC__READ_ONLY_FLAG (i.e. r/o).         */
     size_t max_cls_serial_size; /* Max. additional size of serialized form of section */
-    hsize_t    threshold;      	/* Threshold for alignment              */
     hsize_t    alignment;      	/* Alignment                            */
+    hsize_t    align_thres;     /* Threshold for alignment              */
+
 
 /* Memory data structures (not stored directly) */
     H5FS_section_class_t *sect_cls; /* Array of section classes for this free list */

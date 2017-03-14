@@ -33,7 +33,7 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:S:T:E";
+static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:S:P:T:G:E";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -55,7 +55,9 @@ static struct long_options l_opts[] = {
     { "infile", require_arg, 'i' },   /* -i for backward compability */
     { "outfile", require_arg, 'o' },  /* -o for backward compability */
     { "fs_strategy", require_arg, 'S' },
+    { "fs_persist", require_arg, 'P' },
     { "fs_threshold", require_arg, 'T' },
+    { "fs_pagesize", require_arg, 'G' },
     { "enable-error-stack", no_arg, 'E' },
     { NULL, 0, '\0' }
 };
@@ -92,8 +94,10 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
     PRINTVALSTREAM(rawoutstream, "   -f FILT, --filter=FILT  Filter type\n");
     PRINTVALSTREAM(rawoutstream, "   -l LAYT, --layout=LAYT  Layout type\n");
-    PRINTVALSTREAM(rawoutstream, "   -S FS_STRGY, --fs_strategy=FS_STRGY  File space management strategy\n");
-    PRINTVALSTREAM(rawoutstream, "   -T FS_THRD, --fs_threshold=FS_THRD   Free-space section threshold\n");
+    PRINTVALSTREAM(rawoutstream, "   -S FS_STRATEGY, --fs_strategy=FS_STRATEGY  File space management strategy for H5Pset_file_space_strategy\n");
+    PRINTVALSTREAM(rawoutstream, "   -P FS_PERSIST, --fs_persist=FS_PERSIST  Persisting or not persisting free-space for H5Pset_file_space_strategy\n");
+    PRINTVALSTREAM(rawoutstream, "   -T FS_THRESHOLD, --fs_threshold=FS_THRESHOLD   Free-space section threshold for H5Pset_file_space_strategy\n");
+    PRINTVALSTREAM(rawoutstream, "   -G FS_PAGESIZE, --fs_pagesize=FS_PAGESIZE   File space page size for H5Pset_file_space_page_size\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    M - is an integer greater than 1, size of dataset in bytes (default is 0) \n");
     PRINTVALSTREAM(rawoutstream, "    E - is a filename.\n");
@@ -109,18 +113,27 @@ static void usage(const char *prog) {
     PRINTVALSTREAM(rawoutstream, "     --enable-error-stack Prints messages from the HDF5 error stack as they\n");
     PRINTVALSTREAM(rawoutstream, "                          occur.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "    FS_STRGY is the file space management strategy to use for the output file.\n");
-    PRINTVALSTREAM(rawoutstream, "             It is a string as listed below:\n");
-    PRINTVALSTREAM(rawoutstream, "        ALL_PERSIST - Use persistent free-space managers, aggregators and virtual file driver\n");
-    PRINTVALSTREAM(rawoutstream, "                      for file space allocation\n");
-    PRINTVALSTREAM(rawoutstream, "        ALL - Use non-persistent free-space managers, aggregators and virtual file driver\n");
-    PRINTVALSTREAM(rawoutstream, "              for file space allocation\n");
-    PRINTVALSTREAM(rawoutstream, "        AGGR_VFD - Use aggregators and virtual file driver for file space allocation\n");
-    PRINTVALSTREAM(rawoutstream, "        VFD - Use virtual file driver for file space allocation\n");
+    PRINTVALSTREAM(rawoutstream, "    FS_STRATEGY is a string indicating the file space strategy used:\n");
+    PRINTVALSTREAM(rawoutstream, "        FSM_AGGR:\n");
+    PRINTVALSTREAM(rawoutstream, "               The mechanisms used in managing file space are free-space managers, aggregators and virtual file driver.\n");
+    PRINTVALSTREAM(rawoutstream, "        PAGE:\n");
+    PRINTVALSTREAM(rawoutstream, "               The mechanisms used in managing file space are free-space managers with embedded paged aggregation and virtual file driver.\n");
+    PRINTVALSTREAM(rawoutstream, "        AGGR:\n");
+    PRINTVALSTREAM(rawoutstream, "               The mechanisms used in managing file space are aggregators and virtual file driver.\n");
+    PRINTVALSTREAM(rawoutstream, "        NONE:\n");
+    PRINTVALSTREAM(rawoutstream, "               The mechanisms used in managing file space are virtual file driver.\n");
+    PRINTVALSTREAM(rawoutstream, "        The default strategy when not set is FSM_AGGR without persisting free-space.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "    FS_THRD is the free-space section threshold to use for the output file.\n");
-    PRINTVALSTREAM(rawoutstream, "            It is the minimum size (in bytes) of free-space sections to be tracked\n");
-    PRINTVALSTREAM(rawoutstream, "            by the the library's free-space managers.\n");
+    PRINTVALSTREAM(rawoutstream, "    FS_PERSIST is 1 to persisting free-space or 0 to not persisting free-space.\n");
+    PRINTVALSTREAM(rawoutstream, "      The default when not set is not persisting free-space.\n");
+    PRINTVALSTREAM(rawoutstream, "      The value is ignored for AGGR and NONE strategies.\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "    FS_THRESHOLD is the minimum size (in bytes) of free-space sections to be tracked by the library.\n");
+    PRINTVALSTREAM(rawoutstream, "      The default when not set is 1.\n");
+    PRINTVALSTREAM(rawoutstream, "      The value is ignored for AGGR and NONE strategies.\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream, "    FS_PAGESIZE is the size (in bytes) >=512 that is used by the library when the file space strategy PAGE is used.\n");
+    PRINTVALSTREAM(rawoutstream, "      The default when not set is 4096.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    FILT - is a string with the format:\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -521,25 +534,45 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                     char strategy[MAX_NC_NAME];
 
                     HDstrcpy(strategy, opt_arg);
-                    if(!HDstrcmp(strategy, "ALL_PERSIST"))
-                        options->fs_strategy = H5F_FILE_SPACE_ALL_PERSIST;
-                    else if(!HDstrcmp(strategy, "ALL"))
-                        options->fs_strategy = H5F_FILE_SPACE_ALL;
-                    else if(!HDstrcmp(strategy, "AGGR_VFD"))
-                        options->fs_strategy = H5F_FILE_SPACE_AGGR_VFD;
-                    else if(!HDstrcmp(strategy, "VFD"))
-                        options->fs_strategy = H5F_FILE_SPACE_VFD;
+                    if(!HDstrcmp(strategy, "FSM_AGGR"))
+                        options->fs_strategy = H5F_FSPACE_STRATEGY_FSM_AGGR;
+                    else if(!HDstrcmp(strategy, "PAGE"))
+                        options->fs_strategy = H5F_FSPACE_STRATEGY_PAGE;
+                    else if(!HDstrcmp(strategy, "AGGR"))
+                        options->fs_strategy = H5F_FSPACE_STRATEGY_AGGR;
+                    else if(!HDstrcmp(strategy, "NONE"))
+                        options->fs_strategy = H5F_FSPACE_STRATEGY_NONE;
                     else {
                         error_msg("invalid file space management strategy\n", opt_arg);
                         h5tools_setstatus(EXIT_FAILURE);
                         ret_value = -1;
                         goto done;
                     }
+                    if(options->fs_strategy == (H5F_fspace_strategy_t)0)
+                        /* To distinguish the "specified" zero value */
+                        options->fs_strategy = (H5F_fspace_strategy_t)-1;
                 }
                 break;
 
+            case 'P':
+                options->fs_persist = HDatoi( opt_arg );
+                if(options->fs_persist == 0)
+                    /* To distinguish the "specified" zero value */
+                    options->fs_persist = -1;
+                break;
+
             case 'T':
-                options->fs_threshold = (hsize_t) HDatol( opt_arg );
+                options->fs_threshold = HDatol( opt_arg );
+                if(options->fs_threshold == 0)
+                    /* To distinguish the "specified" zero value */
+                    options->fs_threshold = -1;
+                break;
+
+            case 'G':
+                options->fs_pagesize = HDatoll( opt_arg );
+                if(options->fs_pagesize == 0)
+                    /* To distinguish the "specified" zero value */
+                   options->fs_pagesize = -1;	
                 break;
 
 	    case 'E':
@@ -611,7 +644,7 @@ int main(int argc, const char **argv)
     }
 
     /* initialize options  */
-    h5repack_init(&options, 0, FALSE, H5F_FILE_SPACE_DEFAULT, (hsize_t) 0);
+    h5repack_init(&options, 0, FALSE);
 
     if (parse_command_line(argc, argv, &options) < 0)
         goto done;

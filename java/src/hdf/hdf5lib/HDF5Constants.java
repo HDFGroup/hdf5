@@ -219,12 +219,12 @@ public class HDF5Constants {
     public static final int H5F_SCOPE_GLOBAL = H5F_SCOPE_GLOBAL();
     public static final int H5F_SCOPE_LOCAL = H5F_SCOPE_LOCAL();
     public static final int H5F_UNLIMITED = H5F_UNLIMITED();
-    public static final int H5F_FILE_SPACE_DEFAULT = H5F_FILE_SPACE_DEFAULT();
-    public static final int H5F_FILE_SPACE_ALL_PERSIST = H5F_FILE_SPACE_ALL_PERSIST();
-    public static final int H5F_FILE_SPACE_ALL = H5F_FILE_SPACE_ALL();
-    public static final int H5F_FILE_SPACE_AGGR_VFD = H5F_FILE_SPACE_AGGR_VFD();
-    public static final int H5F_FILE_SPACE_VFD = H5F_FILE_SPACE_VFD();
-    public static final int H5F_FILE_SPACE_NTYPES = H5F_FILE_SPACE_NTYPES();
+
+    public static final int H5F_FSPACE_STRATEGY_FSM_AGGR = H5F_FSPACE_STRATEGY_FSM_AGGR();
+    public static final int H5F_FSPACE_STRATEGY_AGGR = H5F_FSPACE_STRATEGY_AGGR();
+    public static final int H5F_FSPACE_STRATEGY_PAGE = H5F_FSPACE_STRATEGY_PAGE();
+    public static final int H5F_FSPACE_STRATEGY_NONE = H5F_FSPACE_STRATEGY_NONE();
+    public static final int H5F_FSPACE_STRATEGY_NTYPES = H5F_FSPACE_STRATEGY_NTYPES();
 
     public static final long H5FD_CORE = H5FD_CORE();
     public static final long H5FD_DIRECT = H5FD_DIRECT();
@@ -1024,17 +1024,15 @@ public class HDF5Constants {
 
     private static native final int H5F_UNLIMITED();
 
-    private static native final int H5F_FILE_SPACE_DEFAULT();
+    private static native final int H5F_FSPACE_STRATEGY_FSM_AGGR();
 
-    private static native final int H5F_FILE_SPACE_ALL_PERSIST();
+    private static native final int H5F_FSPACE_STRATEGY_AGGR();
 
-    private static native final int H5F_FILE_SPACE_ALL();
+    private static native final int H5F_FSPACE_STRATEGY_PAGE();
 
-    private static native final int H5F_FILE_SPACE_AGGR_VFD();
+    private static native final int H5F_FSPACE_STRATEGY_NONE();
 
-    private static native final int H5F_FILE_SPACE_VFD();
-
-    private static native final int H5F_FILE_SPACE_NTYPES();
+    private static native final int H5F_FSPACE_STRATEGY_NTYPES();
 
     private static native final long H5FD_CORE();
 

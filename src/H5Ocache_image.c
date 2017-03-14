@@ -33,6 +33,7 @@
 
 #include "H5private.h"          /* Generic Functions                     */
 #include "H5Eprivate.h"         /* Error handling                        */
+#include "H5Fprivate.h"		/* Files				*/
 #include "H5FLprivate.h"        /* Free Lists                            */
 #include "H5Opkg.h"             /* Object headers                        */
 #include "H5MFprivate.h"        /* File space management                 */
@@ -290,9 +291,50 @@ H5O__mdci_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
     HDassert(mesg);
 
     /* Free file space for cache image */
-    if(H5F_addr_defined(mesg->addr))
-        if(H5MF_xfree(f, H5FD_MEM_SUPER, dxpl_id, mesg->addr, mesg->size) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free file space for cache image block")
+    if(H5F_addr_defined(mesg->addr)) {
+        /* The space for the cache image block was allocated directly
+         * from the VFD layer at the end of file.  As this was the
+         * last file space allocation before shutdown, the cache image
+         * should still be the last item in the file.
+         *
+         * If the hack to work around the self referential free space
+         * manager issue is in use, file space for the non-empty self
+         * referential free space managers was also allocated from VFD
+         * layer at the end of file.  Since these allocations directly
+         * preceeded the cache image allocation they should be directly
+         * adjacent to the cache image block at the end of file.
+         *
+         * In this case, just call H5MF_tidy_self_referential_fsm_hack().
+         *
+         * That routine will float the self referential free space
+         * managers, and reduce the eoa to its value just prior to
+         * allocation of space for same.  Since the cache image appears
+         * just after the self referential free space managers, this
+         * will release the file space for the cache image as well.
+         *
+         * Note that in this case, there must not have been any file
+         * space allocations / deallocations prior to the free of the
+         * cache image.  Verify this to the extent possible.
+         *
+         * If the hack to work around the persistant self referential
+         * free space manager issue is NOT in use, just call H5MF_xfree()
+         * to release the cache iamge.  In principle, we should be able
+         * to just reduce the EOA to the base address of the cache
+         * image block, as there shouldn't be any file space allocation
+         * before the first metadata cache access.  However, given
+         * time constraints, I don't want to go there now.
+         */
+        if(H5F_FIRST_ALLOC_DEALLOC(f)) {
+            HDassert(HADDR_UNDEF !=H5F_EOA_PRE_FSM_FSALLOC(f));
+            HDassert(H5F_addr_ge(mesg->addr, H5F_EOA_PRE_FSM_FSALLOC(f)));
+            if(H5MF_tidy_self_referential_fsm_hack(f, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "tidy of self referential fsm hack failed")
+        } /* end if */
+        else {
+            if(H5MF_xfree(f, H5FD_MEM_SUPER, dxpl_id, mesg->addr, mesg->size) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free file space for cache image block")
+        } /* end else */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

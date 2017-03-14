@@ -934,13 +934,7 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hsi
     /* Compute the address for the block to allocate */
     addr = file->eoa;
 
-    /* Check if we need to align this block */
-    if(size >= file->pub.threshold) {
-        /* Check for an already aligned block */
-        if(addr % file->pub.alignment != 0)
-            addr = ((addr / file->pub.alignment) + 1) * file->pub.alignment;
-    } /* end if */
-
+    /* Extend the end-of-allocated space address */
     file->eoa = addr + size;
 
     /* Retain the (first) flavor of the information written to the file */
