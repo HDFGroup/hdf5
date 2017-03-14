@@ -8,7 +8,7 @@ if (WIN32)
   find_program (NSIS_EXECUTABLE NSIS.exe PATHS "$ENV{ProgramFiles}\\NSIS" "$ENV{ProgramFiles${PF_ENV_EXT}}\\NSIS")
   if(NOT CPACK_WIX_ROOT)
     file(TO_CMAKE_PATH "$ENV{WIX}" CPACK_WIX_ROOT)
-  endif()
+  endif ()
   find_program (WIX_EXECUTABLE candle  PATHS "${CPACK_WIX_ROOT}/bin")
 endif ()
 
@@ -156,13 +156,25 @@ if (HDF5_PACK_EXAMPLES)
       USE_SOURCE_PERMISSIONS
       COMPONENT hdfdocuments
     )
-    install (
-        FILES
-            ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.txt
-        DESTINATION ${HDF5_INSTALL_DATA_DIR}
-        COMPONENT hdfdocuments
-    )
   endif ()
+  install (
+      FILES
+          ${HDF5_SOURCE_DIR}/release_docs/USING_CMake_Examples.txt
+      DESTINATION ${HDF5_INSTALL_DATA_DIR}
+      COMPONENT hdfdocuments
+  )
+  install (
+      FILES
+          ${HDF_RESOURCES_DIR}/CTestScript.cmake
+      DESTINATION ${HDF5_INSTALL_DATA_DIR}
+      COMPONENT hdfdocuments
+  )
+  install (
+      FILES
+          ${HDF_RESOURCES_DIR}/HDF5_Examples_options.cmake
+      DESTINATION ${HDF5_INSTALL_DATA_DIR}
+      COMPONENT hdfdocuments
+  )
 endif ()
 
 #-----------------------------------------------------------------------------
