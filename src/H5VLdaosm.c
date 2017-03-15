@@ -310,12 +310,12 @@ H5VLdaosm_init(MPI_Comm pool_comm, uuid_t pool_uuid, char *pool_grp)
 
     FUNC_ENTER_API(FAIL)
 
+    /* Check if already initialized */
+    if(H5VL_DAOSM_g >= 0)
+        HGOTO_DONE(SUCCEED)
+
     /* Initialize daos */
     (void)daos_init();
-
-    /* Register the DAOS-M VOL, if it isn't already */
-    if(H5VL_daosm_init() < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize FF DAOS-M VOL plugin")
 
     /* Obtain the process rank and size from the communicator attached to the
      * fapl ID */
@@ -415,6 +415,10 @@ H5VLdaosm_init(MPI_Comm pool_comm, uuid_t pool_uuid, char *pool_grp)
         if(0 != (ret = daos_pool_global2local(glob, &H5VL_daosm_poh_g)))
             HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, FAIL, "can't get local pool handle: %d", ret)
     } /* end else */
+
+    /* Register the DAOS-M VOL, if it isn't already */
+    if(H5VL_daosm_init() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize FF DAOS-M VOL plugin")
 
 done:
     H5MM_xfree(gh_buf_dyn);
