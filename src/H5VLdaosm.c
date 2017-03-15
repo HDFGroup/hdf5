@@ -514,18 +514,22 @@ H5VL__daosm_term(void)
 
     FUNC_ENTER_STATIC
 
-    /* Disconnect from pool */
-    if(!daos_handle_is_inval(H5VL_daosm_poh_g)) {
-        if(0 != (ret = daos_pool_disconnect(H5VL_daosm_poh_g, NULL /*event*/)))
-            HGOTO_ERROR(H5E_VOL, H5E_CLOSEERROR, FAIL, "can't disconnect from pool: %d", ret)
-        H5VL_daosm_poh_g = DAOS_HDL_INVAL;
+    if(H5VL_DAOSM_g >= 0) {
+        /* Disconnect from pool */
+        if(!daos_handle_is_inval(H5VL_daosm_poh_g)) {
+            if(0 != (ret = daos_pool_disconnect(H5VL_daosm_poh_g, NULL /*event*/)))
+                HGOTO_ERROR(H5E_VOL, H5E_CLOSEERROR, FAIL, "can't disconnect from pool: %d", ret)
+            H5VL_daosm_poh_g = DAOS_HDL_INVAL;
+        } /* end if */
+
+        /* Terminate DAOS */
+        (void)daos_fini();
+
+        /* Unregister VOL plugin */
+        if(H5Idec_ref(H5VL_DAOSM_g) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CLOSEERROR, FAIL, "can't unregister DAOS-M VOL plugin")
+        H5VL_DAOSM_g = -1;
     } /* end if */
-
-    /* Terminate DAOS */
-    (void)daos_fini();
-
-    /* Reset VOL ID */
-    H5VL_DAOSM_g = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
