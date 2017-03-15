@@ -4465,10 +4465,8 @@ test_filespace_1_10_0_compatible(void)
     MESSAGE(5, ("File space compatibility testing for 1.10.0 files\n"));
 
     for(j = 0; j < NELMTS(OLD_1_10_0_FILENAME); j++) {
-        const char *filename = H5_get_srcdir_filename(OLD_1_10_0_FILENAME[j]); /* Corrected test file name */
-
         /* Make a copy of the test file */
-        status = h5_make_local_copy(filename, FILE5);
+        status = h5_make_local_copy(OLD_1_10_0_FILENAME[j], FILE5);
 	CHECK(status, FAIL, "h5_make_local_copy");
 
         /* Open the temporary test file */
@@ -4779,10 +4777,8 @@ test_filespace_round_compatible(void)
     MESSAGE(5, ("File space compatibility testing for files from trunk to 1_8 to trunk\n"));
 
     for(j = 0; j < NELMTS(FSPACE_FILENAMES); j++) {
-        const char *filename = H5_get_srcdir_filename(FSPACE_FILENAMES[j]);
-
         /* Make a copy of the test file */
-        status = h5_make_local_copy(filename, FILE5);
+        status = h5_make_local_copy(FSPACE_FILENAMES[j], FILE5);
 	CHECK(status, FAIL, "h5_make_local_copy");
 
 	/* Open the temporary test file */
