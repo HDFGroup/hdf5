@@ -71,6 +71,7 @@ typedef enum {
 /* Prototypes */
 static void *H5VL_daosm_fapl_copy(const void *_old_fa);
 static herr_t H5VL_daosm_fapl_free(void *_fa);
+static herr_t H5VL_daosm_term(hid_t vtpl_id);
 
 /* File callbacks */
 static void *H5VL_daosm_file_create(const char *name, unsigned flags,
@@ -134,7 +135,6 @@ static herr_t H5VL_daosm_attribute_close(void *_attr, hid_t dxpl_id,
     void **req);
 
 /* Helper routines */
-static herr_t H5VL__daosm_term(void);
 static herr_t H5VL_daosm_write_max_oid(H5VL_daosm_file_t *file);
 static herr_t H5VL_daosm_file_flush(H5VL_daosm_file_t *file);
 static herr_t H5VL_daosm_file_close_helper(H5VL_daosm_file_t *file,
@@ -172,7 +172,7 @@ static H5VL_class_t H5VL_daosm_g = {
     H5_VOL_DAOSM,                               /* Plugin value */
     "daos_m",                                   /* name */
     NULL,                                       /* initialize */
-    NULL,                                       /* terminate */
+    H5VL_daosm_term,                            /* terminate */
     sizeof(H5VL_daosm_fapl_t),                  /*fapl_size */
     H5VL_daosm_fapl_copy,                       /*fapl_copy */
     H5VL_daosm_fapl_free,                       /*fapl_free */
@@ -489,7 +489,7 @@ H5VLdaosm_term(void)
     FUNC_ENTER_API(FAIL)
 
     /* Terminate the plugin */
-    if(H5VL__daosm_term() < 0)
+    if(H5VL_daosm_term(-1) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CLOSEERROR, FAIL, "can't close DAOS-< VOL plugin")
 
 done:
@@ -498,7 +498,7 @@ done:
 
 
 /*---------------------------------------------------------------------------
- * Function:    H5VL__daosm_term
+ * Function:    H5VL_daosm_term
  *
  * Purpose:     Shut down the DAOS-M VOL
  *
@@ -507,12 +507,12 @@ done:
  *---------------------------------------------------------------------------
  */
 static herr_t
-H5VL__daosm_term(void)
+H5VL_daosm_term(hid_t H5_ATTR_UNUSED vtpl_id)
 {
     int ret;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI_NOINIT
 
     if(H5VL_DAOSM_g >= 0) {
         /* Disconnect from pool */
@@ -525,15 +525,14 @@ H5VL__daosm_term(void)
         /* Terminate DAOS */
         (void)daos_fini();
 
-        /* Unregister VOL plugin */
-        if(H5Idec_ref(H5VL_DAOSM_g) < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CLOSEERROR, FAIL, "can't unregister DAOS-M VOL plugin")
+        /* "Forget" plugin id.  This should normally be called by the library
+         * when it is closing the id, so no need to close it here. */
         H5VL_DAOSM_g = -1;
     } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__daosm_term() */
+} /* end H5VL_daosm_term() */
 
 
 /*-------------------------------------------------------------------------

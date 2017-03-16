@@ -95,9 +95,6 @@ int main(int argc, char *argv[]) {
     free(nbuf);
     nbuf = NULL;
 
-    if(H5VLdaosm_term() < 0)
-        ERROR;
-
     printf("Success\n");
 
     (void)MPI_Finalize();
@@ -110,7 +107,6 @@ error:
         H5Fclose(file);
         H5Fclose(nfile);
         H5Pclose(fapl);
-        H5VLdaosm_term();
     } H5E_END_TRY;
 
     free(buf);

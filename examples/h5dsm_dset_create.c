@@ -57,9 +57,6 @@ int main(int argc, char *argv[]) {
     if(H5Pclose(fapl) < 0)
         ERROR;
 
-    if(H5VLdaosm_term() < 0)
-        ERROR;
-
     printf("Success\n");
 
     (void)MPI_Finalize();
@@ -71,7 +68,6 @@ error:
         H5Fclose(file);
         H5Sclose(space);
         H5Pclose(fapl);
-        H5VLdaosm_term();
     } H5E_END_TRY;
 
     (void)MPI_Finalize();

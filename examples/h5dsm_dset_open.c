@@ -108,9 +108,6 @@ int main(int argc, char *argv[]) {
     if(H5Pclose(def_dapl) < 0)
         ERROR;
 
-    if(H5VLdaosm_term() < 0)
-        ERROR;
-
     printf("Success\n");
 
     (void)MPI_Finalize();
@@ -127,7 +124,6 @@ error:
         H5Pclose(dapl);
         H5Pclose(def_dcpl);
         H5Pclose(def_dapl);
-        H5VLdaosm_term();
     } H5E_END_TRY;
 
     (void)MPI_Finalize();
