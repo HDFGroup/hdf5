@@ -744,6 +744,31 @@ bool DataType::isVariableStr() const
 }
 
 //--------------------------------------------------------------------------
+// Function:    DataType::getCreatePlist
+///\brief       Returns a copy of the property list, which is for datatype
+///             creation.
+///\return      A property list object
+///\exception   H5::DataTypeIException
+// Programmer   Binh-Minh Ribler - March, 2017
+// Description
+//              Currently, there is no datatype creation property list class
+//              in the C++ API because there is no associated functionality.
+//--------------------------------------------------------------------------
+PropList DataType::getCreatePlist() const
+{
+    hid_t create_plist_id = H5Tget_create_plist(id);
+    if (create_plist_id < 0)
+    {
+        throw DataTypeIException(inMemFunc("getCreatePlist"),
+            "H5Tget_create_plist returns negative value");
+    }
+    // create and return the DSetCreatPropList object
+    PropList create_plist;
+    f_PropList_setId(&create_plist, create_plist_id);
+    return(create_plist);
+}
+
+//--------------------------------------------------------------------------
 // Function:    DataType::getId
 ///\brief       Get the id of this datatype
 ///\return      Datatype identifier

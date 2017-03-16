@@ -32,6 +32,7 @@ using namespace H5;
 #include "h5cpputil.h"  // C++ utilility header file
 
 const H5std_string        FILE_OBJECTS("tobjects.h5");
+const H5std_string        FILE_OBJHDR("tobject_header.h5");
 const H5std_string        GROUP1("Top Group");
 const H5std_string        GROUP1_PATH("/Top Group");
 const H5std_string        GROUP1_1("Sub-Group 1.1");
@@ -395,7 +396,126 @@ static void test_get_objtype()
         issue_fail_msg("test_get_objtype", __LINE__, __FILE__);
     }
 }   // test_get_objtype
+
+/*-------------------------------------------------------------------------
+ * Function:    test_open_object_header
+ *
+ * Purpose      Test Group::getObjId function.
+ *
+ * Return       None
+ *
+ * Programmer   Binh-Minh Ribler (use C version)
+ *              March, 2017
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5std_string GROUPNAME("group");
+const H5std_string DTYPENAME("group/datatype");
+const H5std_string DTYPENAME_INGRP("datatype");
+const H5std_string DSETNAME("dataset");
+#define RANK 2
+#define DIM0 5
+#define DIM1 10
+static void test_open_object_header()
+{
+    hsize_t     dims[2];
+    H5G_info_t  ginfo;                      /* Group info struct */
 
+    // Output message about test being performed
+    SUBTEST("Group::getObjId");
+
+    try {
+        // Create file FILE1
+        H5File file1(FILE_OBJHDR, H5F_ACC_TRUNC);
+        /* Create a group, dataset, and committed datatype within the file */
+
+        // Create a group in the root group
+        Group grp(file1.createGroup(GROUPNAME));
+        grp.close();
+
+        // Commit the type inside the file
+        IntType dtype(PredType::NATIVE_INT);
+        dtype.commit(file1, DTYPENAME);
+        dtype.close();
+
+        // Create a new dataset
+        dims[0] = DIM0;
+        dims[1] = DIM1;
+        DataSpace dspace(RANK, dims);
+        DataSet dset(file1.createDataSet(DSETNAME, PredType::NATIVE_INT, dspace));
+
+        // Close dataset and dataspace
+        dset.close();
+        dspace.close();
+
+        // Now make sure that getObjId can open all three types of objects
+        hid_t obj_grp = file1.getObjId(GROUPNAME);
+        hid_t obj_dtype = file1.getObjId(DTYPENAME);
+        hid_t obj_dset = file1.getObjId(DSETNAME);
+
+        // Make sure that each is the right kind of ID
+        H5I_type_t id_type = IdComponent::getHDFObjType(obj_grp);
+        verify_val(id_type, H5I_GROUP, "H5Iget_type for group ID", __LINE__, __FILE__);
+        id_type = IdComponent::getHDFObjType(obj_dtype);
+        verify_val(id_type, H5I_DATATYPE, "H5Iget_type for datatype ID", __LINE__, __FILE__);
+        id_type = IdComponent::getHDFObjType(obj_dset);
+        verify_val(id_type, H5I_DATASET, "H5Iget_type for dataset ID", __LINE__, __FILE__);
+
+        /* Do something more complex with each of the IDs to make sure */
+
+        Group grp2(obj_grp);
+        hsize_t num_objs = grp2.getNumObjs();
+        verify_val(num_objs, 1, "H5Gget_info", __LINE__, __FILE__);
+        // There should be one object, the datatype
+
+        // Close datatype object opened from the file
+        file1.closeObjId(obj_dtype);
+
+        dset.setId(obj_dset);
+        dspace = dset.getSpace();
+        bool is_simple = dspace.isSimple();
+        dspace.close();
+
+        // Open datatype object from the group
+        obj_dtype = grp2.getObjId(DTYPENAME_INGRP);
+
+        dtype.setId(obj_dtype);
+        H5T_class_t type_class = dtype.getClass();
+        verify_val(type_class, H5T_INTEGER, "H5Tget_class", __LINE__, __FILE__);
+        dtype.close();
+
+        // Close datatype object
+        grp2.closeObjId(obj_dtype);
+
+        // Close the group object
+        file1.closeObjId(obj_grp);
+
+        // Try doing something with group, the ID should still work
+        num_objs = grp2.getNumObjs();
+        verify_val(num_objs, 1, "H5Gget_info", __LINE__, __FILE__);
+
+        // Close the cloned group
+        grp2.close();
+
+        PASSED();
+    }   // end of try block
+    // catch invalid action exception
+    catch (InvalidActionException& E)
+    {
+        cerr << " in InvalidActionException" << endl;
+        cerr << " *FAILED*" << endl;
+        cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
+    }
+    // catch all other exceptions
+    catch (Exception& E)
+    {
+        cerr << " in Exception" << endl;
+        issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
+    }
+} /* test_open_object_header() */
+
 /*-------------------------------------------------------------------------
  * Function:    test_objects
  *
@@ -421,6 +541,7 @@ void test_object()
     test_existance();      // Test check for object existance
     test_get_objname_ontypes();        // Test get object name from types
     test_get_objtype();    // Test get object type
+    test_open_object_header();    // Test object header functions (H5O)
 
 }   // test_objects
 
