@@ -569,7 +569,7 @@ int parse_command_line(int argc, const char **argv, pack_opt_t* options)
                 break;
 
             case 'G':
-                options->fs_pagesize = HDatoll( opt_arg );
+                options->fs_pagesize = HDstrtoll(opt_arg, NULL, 0);
                 if(options->fs_pagesize == 0)
                     /* To distinguish the "specified" zero value */
                    options->fs_pagesize = -1;	
