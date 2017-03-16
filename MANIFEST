@@ -3153,6 +3153,8 @@
 ./tools/test/perform/CMakeTests.cmake
 
 # CMake-specific User Scripts
+./config/cmake/CTestScript.cmake
+./config/cmake/HDF5_Examples_options.cmake
 ./config/cmake/scripts/CTestScript.cmake
 ./config/cmake/scripts/HDF5config.cmake
 ./config/cmake/scripts/HDF5options.cmake
