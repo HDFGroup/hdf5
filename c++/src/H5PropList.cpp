@@ -581,7 +581,7 @@ void PropList::setProperty(const char* name, const void* value) const
 
 //--------------------------------------------------------------------------
 // Function:    PropList::setProperty
-///\brief       Deprecated dues to missing const in prototype. (1.10.1)
+///\brief       Deprecated due to missing const in prototype. (1.10.1)
 // Programmer:  Binh-Minh Ribler - March, 2017
 // Modification
 //              Planned for removal. -BMR, 2017/03/17 1.10.1
@@ -631,7 +631,7 @@ void PropList::setProperty(const char* name, const H5std_string& strg) const
 
 //--------------------------------------------------------------------------
 // Function:    PropList::setProperty
-///\brief       Deprecated dues to missing const in prototype. (1.10.1)
+///\brief       Deprecated due to missing const in prototype. (1.10.1)
 // Programmer:  Binh-Minh Ribler - March, 2017
 // Modification
 //              Planned for removal. -BMR, 2017/03/17 1.10.1
@@ -657,7 +657,7 @@ void PropList::setProperty(const H5std_string& name, const void* value) const
 
 //--------------------------------------------------------------------------
 // Function:    PropList::setProperty
-///\brief       Deprecated dues to missing const in prototype. (1.10.1)
+///\brief       Deprecated due to missing const in prototype. (1.10.1)
 // Programmer:  Binh-Minh Ribler - March, 2017
 // Modification
 //              Planned for removal. -BMR, 2017/03/17 1.10.1
@@ -683,7 +683,7 @@ void PropList::setProperty(const H5std_string& name, const H5std_string& strg) c
 
 //--------------------------------------------------------------------------
 // Function:    PropList::setProperty
-///\brief       Deprecated dues to missing const in prototype. (1.10.1)
+///\brief       Deprecated due to missing const in prototype. (1.10.1)
 // Programmer:  Binh-Minh Ribler - March, 2017
 // Modification
 //              Planned for removal. -BMR, 2017/03/17 1.10.1
