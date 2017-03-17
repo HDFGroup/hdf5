@@ -25,11 +25,7 @@
 #include "cache_common.h"
 #include "genall5.h"
 
-#if 1
 #define TEST_FILES_TO_CONSTRUCT 2
-#else
-#define TEST_FILES_TO_CONSTRUCT 1
-#endif
 #define CHUNK_SIZE              10
 #define DSET_SIZE               (40 * CHUNK_SIZE)
 #define MAX_NUM_DSETS           256

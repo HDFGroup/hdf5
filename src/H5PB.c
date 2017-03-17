@@ -477,13 +477,16 @@ H5PB__dest_cb(void *item, void H5_ATTR_UNUSED *key, void *_op_data)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PB_dest(H5F_t *f, const H5F_io_info2_t *fio_info)
+H5PB_dest(const H5F_io_info2_t *fio_info)
 {
     herr_t  ret_value = SUCCEED;        /* Return value */
+    H5F_t  *f;                          /* file pointer */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
+    HDassert(fio_info);
+    f = fio_info->f;
     HDassert(f);
 
     /* flush and destroy the page buffer, if it exists */

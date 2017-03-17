@@ -1014,7 +1014,7 @@ H5F__dest(H5F_t *f, hid_t meta_dxpl_id, hid_t raw_dxpl_id, hbool_t flush)
             HDONE_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
         /* Shutdown the page buffer cache */
-        if(H5PB_dest(f, &fio_info) < 0)
+        if(H5PB_dest(&fio_info) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing page buffer cache")
 
