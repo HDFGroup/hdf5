@@ -131,7 +131,7 @@ class H5_DLLCPP H5Object : public H5Location {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-}; /* end class H5Object */
+}; // end of H5Object
+} // namespace H5
 
-}
 #endif // __H5Object_H

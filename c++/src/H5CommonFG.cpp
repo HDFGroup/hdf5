@@ -381,4 +381,4 @@ void f_DataSet_setId(DataSet* dset, hid_t new_id)
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-}
+} // end namespace

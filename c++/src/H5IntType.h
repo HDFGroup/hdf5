@@ -57,6 +57,8 @@ class H5_DLLCPP IntType : public AtomType {
 
         // Noop destructor.
         virtual ~IntType();
-};
-}
+
+}; // end of IntType
+} // namespace H5
+
 #endif // __H5IntType_H

@@ -861,4 +861,5 @@ DataType::~DataType()
         cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;
     }
 }
+
 } // end namespace

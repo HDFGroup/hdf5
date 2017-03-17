@@ -69,6 +69,8 @@ class H5_DLLCPP StrType : public AtomType {
 
         // Noop destructor.
         virtual ~StrType();
-};
-}
+
+}; // end of StrType
+} // namespace H5
+
 #endif // __H5StrType_H

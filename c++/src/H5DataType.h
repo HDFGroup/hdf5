@@ -155,6 +155,8 @@ class H5_DLLCPP DataType : public H5Object {
         friend void f_DataType_setId(DataType* dtype, hid_t new_id);
 
         void p_commit(hid_t loc_id, const char* name);
-};
-}
+
+}; // end of DataType
+} // namespace H5
+
 #endif // __H5DataType_H

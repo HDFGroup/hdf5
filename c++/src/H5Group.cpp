@@ -113,14 +113,15 @@ void Group::closeObjId(hid_t obj_id) const
 
 //--------------------------------------------------------------------------
 // Function:    Group::getLocId
-// Purpose:	    Get the id of this group
+// Purpose:     Get the id of this group
 // Programmer   Binh-Minh Ribler - 2000
 // Description
 //              This function is a redefinition of CommonFG::getLocId.  It
 //              is used by CommonFG member functions to get the file id.
 // Deprecated:
-//	After HDFFV-9920, the Group's methods can use getId() and getLocId()
-//	is kept for backward compatibility.  Aug 18, 2016 -BMR
+//      Aug 18, 2016 -BMR
+//              After HDFFV-9920, the Group's methods can use getId() and
+//              getLocId() is kept for backward compatibility.
 //--------------------------------------------------------------------------
 hid_t Group::getLocId() const
 {
@@ -227,13 +228,13 @@ void Group::close()
 {
     if (p_valid_id(id))
     {
-	herr_t ret_value = H5Gclose(id);
-	if (ret_value < 0)
-	{
-	    throwException("Group::close", "H5Gclose failed");
-	}
-	// reset the id
-	id = H5I_INVALID_HID;
+        herr_t ret_value = H5Gclose(id);
+        if (ret_value < 0)
+        {
+            throwException("Group::close", "H5Gclose failed");
+        }
+        // reset the id
+        id = H5I_INVALID_HID;
     }
 }
 
@@ -270,10 +271,10 @@ void Group::throwException(const H5std_string& func_name, const H5std_string& ms
 Group::~Group()
 {
     try {
-	close();
+        close();
     }
     catch (Exception& close_error) {
-	cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
+        cerr << "Group::~Group - " << close_error.getDetailMsg() << endl;
     }
 }
 

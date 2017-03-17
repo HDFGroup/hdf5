@@ -91,6 +91,8 @@ class H5_DLLCPP AbstractDs {
    private:
         // This member function is implemented by DataSet and Attribute - pure virtual.
         virtual hid_t p_get_type() const = 0;
-};
-}
+
+}; // end of AbstractDs
+} // namespace H5
+
 #endif // __AbstractDs_H
