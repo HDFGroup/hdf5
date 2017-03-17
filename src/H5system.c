@@ -32,10 +32,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
-#include "H5Eprivate.h"		/* Error handling		  	*/
-#include "H5Fprivate.h"		/* File access				*/
-#include "H5MMprivate.h"	/* Memory management			*/
+#include "H5private.h"        /* Generic Functions            */
+#include "H5Eprivate.h"        /* Error handling              */
+#include "H5Fprivate.h"        /* File access                */
+#include "H5MMprivate.h"    /* Memory management            */
 
 
 /****************/
@@ -474,6 +474,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
  *
  *-------------------------------------------------------------------------
  */
+#ifndef HDstrtoll
 int64_t
 HDstrtoll(const char *s, const char **rest, int base)
 {
@@ -549,7 +550,7 @@ HDstrtoll(const char *s, const char **rest, int base)
         *rest = s;
     return acc;
 } /* end HDstrtoll() */
-
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:  HDrand/HDsrand
@@ -604,7 +605,7 @@ void HDsrand(unsigned int seed)
 #ifdef H5_HAVE_FCNTL
 int
 Pflock(int fd, int operation) {
-    
+
     struct flock    flk;
 
     /* Set the lock type */
@@ -649,18 +650,18 @@ Nflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation) {
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5_make_time
+ * Function:    H5_make_time
  *
- * Purpose:	Portability routine to abstract converting a 'tm' struct into
- *		a time_t value.
+ * Purpose:    Portability routine to abstract converting a 'tm' struct into
+ *        a time_t value.
  *
- * Note:	This is a little problematic because mktime() operates on
- *		local times.  We convert to local time and then figure out the
- *		adjustment based on the local time zone and daylight savings
- *		setting.
+ * Note:    This is a little problematic because mktime() operates on
+ *        local times.  We convert to local time and then figure out the
+ *        adjustment based on the local time zone and daylight savings
+ *        setting.
  *
- * Return:	Success:  The value of timezone
- *		Failure:  -1
+ * Return:    Success:  The value of timezone
+ *        Failure:  -1
  *
  * Programmer:  Quincey Koziol
  *              November 18, 2015
@@ -1138,7 +1139,7 @@ H5_combine_path(const char* path1, const char* path2, char **full_name /*out*/)
         if(NULL == (*full_name = (char *)H5MM_strdup(path2)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-    } /* end if */ 
+    } /* end if */
     else if(H5_CHECK_ABS_PATH(path2)) {
 
         /* On windows path2 is a path absolute name */

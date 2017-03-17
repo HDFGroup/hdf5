@@ -6,6 +6,10 @@
 ### uncomment/comment and change the following lines for other configuration options
 
 #############################################################################################
+####      alternate toolsets       ####
+#set(CMAKE_GENERATOR_TOOLSET "Intel C++ Compiler 17.0")
+
+#############################################################################################
 ####      ext libraries       ####
 
 ### ext libs from tgz
