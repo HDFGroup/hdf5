@@ -123,6 +123,6 @@ class H5_DLLCPP IdComponent {
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end class IdComponent
+} // namespace H5
 
-}
 #endif // __IdComponent_H

@@ -162,6 +162,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
-};
-}
+}; // end of FileAccPropList
+} // namespace H5
+
 #endif // __H5FileAccPropList_H

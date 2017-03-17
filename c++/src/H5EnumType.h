@@ -78,6 +78,8 @@ class H5_DLLCPP EnumType : public DataType {
         EnumType(const EnumType& original);
 
         virtual ~EnumType();
-};
-}
+
+}; // end of EnumType
+} // namespace H5
+
 #endif // __H5EnumType_H

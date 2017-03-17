@@ -84,7 +84,8 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
    private:
         hid_t id;    // HDF5 group id
-};
 
-}
+}; // end of Group
+} // namespace H5
+
 #endif // __Group_H

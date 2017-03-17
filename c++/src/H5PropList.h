@@ -135,7 +135,8 @@ class H5_DLLCPP PropList : public IdComponent {
         friend void f_PropList_setId(PropList* plist, hid_t new_id);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
-};
 
-}
+}; // end of PropList
+} // namespace H5
+
 #endif  // __H5PropList_H

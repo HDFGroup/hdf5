@@ -17,7 +17,6 @@
 #ifndef __H5File_H
 #define __H5File_H
 
-
 namespace H5 {
 
 /*! \class H5File
@@ -123,7 +122,8 @@ class H5_DLLCPP H5File : public Group {
         // constructors taking a string or a char*
         void p_get_file(const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist);
 
-};
-}
+}; // end of H5File
+} // namespace H5
+
 #endif // __H5File_H
 
