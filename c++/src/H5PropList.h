@@ -78,8 +78,13 @@ class H5_DLLCPP PropList : public IdComponent {
         H5std_string getProperty(const H5std_string& name) const;
 
         // Set a property's value in a property list.
-        void setProperty(const char* name, void* value) const;
         void setProperty(const char* name, const char* charptr) const;
+        void setProperty(const char* name, const void* value) const;
+        void setProperty(const char* name, const H5std_string& strg) const;
+        void setProperty(const H5std_string& name, const void* value) const;
+        void setProperty(const H5std_string& name, const H5std_string& strg) const;
+        // Deprecated after 1.10.1, missing const
+        void setProperty(const char* name, void* value) const;
         void setProperty(const char* name, H5std_string& strg) const;
         void setProperty(const H5std_string& name, void* value) const;
         void setProperty(const H5std_string& name, H5std_string& strg) const;
