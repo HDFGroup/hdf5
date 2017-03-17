@@ -565,7 +565,26 @@ size_t PropList::getNumProps() const
 ///\param       name  - IN: Name of property to set - \c char pointer
 ///\param       value - IN: Void pointer to the value for the property
 ///\exception   H5::PropListIException
+// Description
+//              Revision svn r29815 changed 'value' to const, hence, deprecated
+//              the non-const setProperty.
 // Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::setProperty(const char* name, const void* value) const
+{
+    herr_t ret_value = H5Pset(id, name, value);
+    if (ret_value < 0)
+    {
+        throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    PropList::setProperty
+///\brief       Deprecated due to missing const in prototype. (1.10.1)
+// Programmer:  Binh-Minh Ribler - March, 2017
+// Modification
+//              Planned for removal. -BMR, 2017/03/17 1.10.1
 //--------------------------------------------------------------------------
 void PropList::setProperty(const char* name, void* value) const
 {
@@ -575,6 +594,7 @@ void PropList::setProperty(const char* name, void* value) const
         throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
     }
 }
+
 //--------------------------------------------------------------------------
 // Function:    PropList::setProperty
 ///\brief       This is an overloaded member function, provided for convenience.
@@ -582,11 +602,14 @@ void PropList::setProperty(const char* name, void* value) const
 ///             accepts.
 ///\param       name    - IN: Name of property to set - \c char pointer
 ///\param       charptr - IN: Char pointer to the value for the property
+// Description
+//              Revision svn r29815 changed 'value' to const, hence, deprecated
+//              the non-const setProperty.
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 void PropList::setProperty(const char* name, const char* charptr) const
 {
-    herr_t ret_value = H5Pset(id, name, (void*)charptr);
+    herr_t ret_value = H5Pset(id, name, (const void*)charptr);
     if (ret_value < 0)
     {
         throw PropListIException(inMemFunc("setProperty"), "H5Pset failed");
@@ -600,6 +623,18 @@ void PropList::setProperty(const char* name, const char* charptr) const
 ///\param       name - IN: Name of property to set - \c char pointer
 ///\param       strg - IN: Value for the property is a \c H5std_string
 // Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::setProperty(const char* name, const H5std_string& strg) const
+{
+    setProperty(name, strg.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    PropList::setProperty
+///\brief       Deprecated due to missing const in prototype. (1.10.1)
+// Programmer:  Binh-Minh Ribler - March, 2017
+// Modification
+//              Planned for removal. -BMR, 2017/03/17 1.10.1
 //--------------------------------------------------------------------------
 void PropList::setProperty(const char* name, H5std_string& strg) const
 {
@@ -615,6 +650,18 @@ void PropList::setProperty(const char* name, H5std_string& strg) const
 ///\param       value - IN: Void pointer to the value for the property
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
+void PropList::setProperty(const H5std_string& name, const void* value) const
+{
+    setProperty(name.c_str(), value);
+}
+
+//--------------------------------------------------------------------------
+// Function:    PropList::setProperty
+///\brief       Deprecated due to missing const in prototype. (1.10.1)
+// Programmer:  Binh-Minh Ribler - March, 2017
+// Modification
+//              Planned for removal. -BMR, 2017/03/17 1.10.1
+//--------------------------------------------------------------------------
 void PropList::setProperty(const H5std_string& name, void* value) const
 {
     setProperty(name.c_str(), value);
@@ -628,6 +675,18 @@ void PropList::setProperty(const H5std_string& name, void* value) const
 ///\param       name - IN: Name of property to set - \c H5std_string
 ///\param       strg - IN: Value for the property is a \c H5std_string
 // Programmer:  Binh-Minh Ribler - April, 2004
+//--------------------------------------------------------------------------
+void PropList::setProperty(const H5std_string& name, const H5std_string& strg) const
+{
+    setProperty(name.c_str(), strg.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    PropList::setProperty
+///\brief       Deprecated due to missing const in prototype. (1.10.1)
+// Programmer:  Binh-Minh Ribler - March, 2017
+// Modification
+//              Planned for removal. -BMR, 2017/03/17 1.10.1
 //--------------------------------------------------------------------------
 void PropList::setProperty(const H5std_string& name, H5std_string& strg) const
 {
